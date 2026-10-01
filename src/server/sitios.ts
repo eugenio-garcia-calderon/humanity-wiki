@@ -31,6 +31,8 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import { sql } from 'drizzle-orm';
 import fs from 'node:fs';
 import path from 'node:path';
+import { resolverDominio } from './dominios';
+import { cabeceraEnHtml } from './cabeceraSitio';
 
 const DOMINIO = 'humanity.wiki';
 const RESERVADOS = new Set(['www', 'api', 'admin', 'app', 'mail', 'ftp', 'cdn', 'static', 'assets']);
@@ -166,6 +168,62 @@ function imagenDe(config: any): string | null {
   return bloques.find((b: any) => b?.tipo === 'imagen' && b.url)?.url || null;
 }
 
+/**
+ * Una página publicada tal como la pinta el navegador: lo que contesta
+ * `/api/sitio/pagina/:id`, o `null` si no se puede ver. Suelta (2026-10-01)
+ * porque el HTML de la visita la deja escrita dentro (`precargado.ts`).
+ */
+async function paginaPublica(db: any, id: string) {
+  const w = await datosPagina(db, id);
+  if (!w || !(await paginaVisible(db, w.id))) return null;
+  const pr = await db.execute(sql`
+    SELECT p.id, p.title, p.slug, p.publico, u.handle
+    FROM bd_filas f
+    JOIN knowledge_windows p ON p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+      AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+    JOIN users u ON u.id = p.creator_user_id
+    WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL
+    ORDER BY p.publico DESC, p.created_at LIMIT 1
+  `);
+  let p = pr.rows[0] as any;
+  if (!p) {
+    const sr = await db.execute(sql`
+      SELECT p.id, p.title, p.slug, p.publico, u.handle FROM knowledge_windows p
+      JOIN users u ON u.id = p.creator_user_id
+      WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+        AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
+      ORDER BY p.publico DESC, p.created_at LIMIT 1
+    `);
+    p = sr.rows[0] as any;
+  }
+  return {
+    id: w.id, titulo: w.title, config: w.config,
+    // Una subpágina que no se publicó por su cuenta se indexa si su madre
+    // se indexa: lo decide quien publicó el sitio.
+    indexable: w.publico ? !!w.indexable : true,
+    created_at: w.created_at, updated_at: w.updated_at,
+    autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
+    padre: p ? { id: p.id, titulo: p.title, slug: p.publico ? p.slug : null, handle: p.handle } : null,
+  };
+}
+
+/** Lo que `vite.config.ts` dejó dicho que necesita la web de un dominio
+ *  propio, para anunciarlo con `modulepreload`. Se lee una vez. */
+let precargaDominio: string[] | null = null;
+function trozosDominio(): string[] {
+  if (precargaDominio === null) {
+    try {
+      precargaDominio = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'dist', 'precarga.json'), 'utf8')).dominio || [];
+    } catch { precargaDominio = []; }
+  }
+  return precargaDominio!;
+}
+
+/** JSON que se puede meter en un `<script>` sin que un `</script>` escrito en
+ *  una página lo cierre antes de tiempo. */
+const jsonEnScript = (x: unknown) => JSON.stringify(x)
+  .replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+
 // ── LAS RUTAS ───────────────────────────────────────────────────────────────
 
 export function registrarSitios(app: Express, db: any) {
@@ -176,39 +234,9 @@ export function registrarSitios(app: Express, db: any) {
    */
   app.get('/api/sitio/pagina/:id', async (req: Request, res: Response) => {
     try {
-      const w = await datosPagina(db, req.params.id);
-      if (!w || !(await paginaVisible(db, w.id))) {
-        return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
-      }
-      const pr = await db.execute(sql`
-        SELECT p.id, p.title, p.slug, p.publico, u.handle
-        FROM bd_filas f
-        JOIN knowledge_windows p ON p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-          AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
-        JOIN users u ON u.id = p.creator_user_id
-        WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL
-        ORDER BY p.publico DESC, p.created_at LIMIT 1
-      `);
-      let p = pr.rows[0] as any;
-      if (!p) {
-        const sr = await db.execute(sql`
-          SELECT p.id, p.title, p.slug, p.publico, u.handle FROM knowledge_windows p
-          JOIN users u ON u.id = p.creator_user_id
-          WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-            AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
-          ORDER BY p.publico DESC, p.created_at LIMIT 1
-        `);
-        p = sr.rows[0] as any;
-      }
-      res.json({
-        id: w.id, titulo: w.title, config: w.config,
-        // Una subpágina que no se publicó por su cuenta se indexa si su madre
-        // se indexa: lo decide quien publicó el sitio.
-        indexable: w.publico ? !!w.indexable : true,
-        created_at: w.created_at, updated_at: w.updated_at,
-        autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
-        padre: p ? { id: p.id, titulo: p.title, slug: p.publico ? p.slug : null, handle: p.handle } : null,
-      });
+      const p = await paginaPublica(db, req.params.id);
+      if (!p) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
+      res.json(p);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -302,12 +330,16 @@ export function registrarSitios(app: Express, db: any) {
     try {
       if (process.env.NODE_ENV !== 'production') return next();
       if (!String(req.headers.accept || '').includes('text/html')) return next();
+      const s = sitioDe(req);
       const w = await paginaDeLaDireccion(req);
-      if (!w) return next();
+      // En un dominio propio se reescribe SIEMPRE, haya página o no: aunque
+      // apunte a un espacio entero, lo que el navegador va a preguntar ya se
+      // sabe aquí (ver más abajo).
+      if (!w && s.forma !== 'dominio') return next();
       if (plantilla === null) plantilla = fs.existsSync(indice) ? fs.readFileSync(indice, 'utf8') : '';
       if (!plantilla) return next();
+      if (!w) return res.type('html').set('Cache-Control', 'no-cache').send(await rapido(plantilla, req, s, null));
 
-      const s = sitioDe(req);
       const propio = s.forma !== 'casa';
       const titulo = String(w.title || '').trim() || 'Sin título';
       const desc = descripcionDe(w.config);
@@ -340,12 +372,69 @@ export function registrarSitios(app: Express, db: any) {
           : `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${icono}</text></svg>`)}`;
         html = html.replace(/<link[^>]+rel="icon"[^>]*>/g, '').replace('</head>', `    <link rel="icon" href="${esc(href)}">\n  </head>`);
       }
+      html = await rapido(html, req, s, w);
       res.type('html').set('Cache-Control', 'no-cache').send(html);
     } catch (e) {
       console.error('sitios: vista previa', e);
       next();
     }
   });
+
+  /**
+   * QUE EL TÍTULO SALGA EN MENOS DE UN SEGUNDO (2026-10-01).
+   *
+   * Eugenio: «el dominio propio tarda muchísimo en mostrar la primera imagen
+   * o el primer título». Medido en luzhumanidad.com: 2,5 s, y no por el DNS
+   * ni por la conexión (0,25 s hasta el HTML), sino por CINCO viajes en fila
+   * que el navegador hacía después: la plataforma entera, «¿a qué apunta este
+   * dominio?», la pantalla, «dame la página» y por fin la imagen.
+   *
+   * Aquí, que todo eso ya se sabe, se escribe dentro del HTML:
+   *
+   *   1. Las respuestas (`window.__SITIO__`, que lee `utils/precargado.ts`):
+   *      el navegador no vuelve a preguntar.
+   *   2. La cabecera ya dibujada dentro de `#root`: título e imagen se pintan
+   *      con el HTML, antes de que llegue ningún JavaScript.
+   *   3. Los trozos de JavaScript de la web del dominio, anunciados para que
+   *      bajen todos a la vez; y fuera los de la plataforma, que aquí no se
+   *      usan.
+   */
+  async function rapido(html: string, req: Request, s: Sitio, w: any | null): Promise<string> {
+    const esSub = /^\/p\/[^/]+\/?$/.test(req.path) || /\/@[^/]+\/p\/[^/]+\/?$/.test(req.path);
+    if (s.forma !== 'dominio' && !esSub) return html;
+
+    // Las dos preguntas a la vez: cada una es un viaje a la base de datos y
+    // el HTML no sale hasta que acaban.
+    const [resuelto, publica] = await Promise.all([
+      s.forma === 'dominio' ? resolverDominio(db, s.host) : null,
+      w ? paginaPublica(db, w.id) : null,
+    ]);
+    const pre: { resolver?: any; paginas?: Record<string, any> } = {};
+    if (resuelto) pre.resolver = { host: s.host, ...resuelto };
+
+    // La página sólo se manda si es la que se va a pintar: la del dominio
+    // (cuando apunta a una página) o la subpágina de la dirección.
+    const pinta = esSub || (resuelto?.status === 200 && resuelto.body?.tipo !== 'espacio' && resuelto.body?.id === publica?.id);
+    const pagina = pinta ? publica : null;
+    if (pagina) pre.paginas = { [pagina.id]: pagina };
+
+    // La cabecera, sólo en un dominio propio: en la plataforma la página va
+    // dentro de su armazón, y pintarla suelta daría un salto al arrancar.
+    let cabecera = '';
+    if (pagina && s.forma === 'dominio') {
+      try { cabecera = cabeceraEnHtml(pagina, String(req.headers['user-agent'] || '')); }
+      catch (e) { console.error('sitios: cabecera', e); }
+    }
+
+    if (s.forma === 'dominio') {
+      html = html.replace(/\s*<link[^>]*data-app="casa"[^>]*>/g, '');
+      const trozos = trozosDominio().map(f => `<link rel="modulepreload" crossorigin href="${f}">`).join('\n    ');
+      if (trozos) html = html.replace('</head>', `    ${trozos}\n  </head>`);
+    }
+    return html
+      .replace('</head>', `    <script>window.__SITIO__=${jsonEnScript(pre)}</script>\n  </head>`)
+      .replace('<div id="root"></div>', `<div id="root">${cabecera}</div>`);
+  }
 
   /** Qué página publicada hay en esta dirección, si hay alguna. */
   async function paginaDeLaDireccion(req: Request): Promise<any | null> {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PortadaEspacio from './PortadaEspacio';
 import Cesta from '../components/knowledge/Cesta';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
+import { paginaPrecargada } from '../utils/precargado';
 
 // ============================================================================
 // LO QUE SE VE EN UN DOMINIO PROPIO — `lamieldelasierra.com` (2026-08-22)
@@ -30,11 +31,14 @@ export type Resuelto = {
 };
 
 export default function PaginaDeDominio({ host, resuelto }: { host: string; resuelto: Resuelto }) {
-  const [pagina, setPagina] = useState<DatosPagina | null>(null);
+  // Lo normal es que venga dentro del HTML: ver `precargado.ts`.
+  const [pagina, setPagina] = useState<DatosPagina | null>(
+    () => resuelto.estado === 'pagina' ? paginaPrecargada(resuelto.datos?.id) : null);
   const [fallo, setFallo] = useState(false);
 
   useEffect(() => {
     if (resuelto.estado !== 'pagina' || !resuelto.datos?.id) return;
+    if (pagina?.id === resuelto.datos.id) return;
     let vivo = true;
     fetch(`/api/sitio/pagina/${encodeURIComponent(resuelto.datos.id)}`)
       .then(async r => { if (!vivo) return; if (!r.ok) { setFallo(true); return; } setPagina(await r.json()); })

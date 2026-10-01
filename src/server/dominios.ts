@@ -142,75 +142,8 @@ export function registerDominiosRoutes(app: Express, db: any) {
    */
   app.get('/api/dominios/resolver', async (req: Request, res: Response) => {
     try {
-      const d = normalizarDominio(req.query.host ?? req.query.domain);
-      if (!d) return res.status(404).json({ error: 'Dominio no válido.' });
-
-      const dom = (await db.execute(sql`
-        SELECT dp.entidad_tipo, dp.entidad_id, dp.estado, u.handle
-        FROM dominios_paginas dp
-        JOIN users u ON u.id = dp.propietario_user_id
-        WHERE dp.dominio = ${d} AND dp.estado IN ('pendiente', 'activo')
-      `)).rows[0] as any;
-      if (!dom) return res.status(404).json({ error: 'Ese dominio no apunta a nada aquí.' });
-
-      // La primera vez que se sirve de verdad se anota. Es lo que distingue
-      // «configurado» de «funcionando», y sin ello la pantalla de ajustes
-      // diría «activo» de algo que nadie ha conseguido abrir nunca.
-      if (dom.estado !== 'activo') {
-        await db.execute(sql`
-          UPDATE dominios_paginas
-          SET estado = 'activo', activo_desde = COALESCE(activo_desde, now()),
-              ultimo_error = NULL, updated_at = now()
-          WHERE dominio = ${d}
-        `);
-      }
-
-      if (!dom.entidad_id) {
-        return res.json({ tipo: 'espacio', handle: dom.handle });
-      }
-
-      // ── UN DOMINIO PUEDE APUNTAR A CUALQUIER COSA COMPARTIBLE (2026-08-25) ─
-      // Aquí había una consulta a `knowledge_windows` escrita a mano, y por eso
-      // un dominio sólo podía servir una página. Ahora se mira el tipo que
-      // guarda la fila y se pregunta a la tabla que le toque, según el registro
-      // de `compartir.ts`. Añadir mapas a lo compartible no vuelve a tocar esto.
-      const c = compartiblePorTipo(dom.entidad_tipo);
-      if (!c) {
-        return res.status(404).json({ error: 'Este dominio apunta a algo que ya no se puede compartir.' });
-      }
-
-      const p = (await db.execute(sql`
-        SELECT e.${sql.raw(c.col.id)}::text AS id,
-               e.${sql.raw(c.col.titulo)}::text AS titulo,
-               e.${sql.raw(c.col.slug)}::text AS slug,
-               u.handle, u.display_name, u.name, u.avatar_url
-        FROM ${sql.raw(c.tabla)} e
-        JOIN users u ON u.id = e.${sql.raw(c.col.duenyo)}
-        WHERE e.${sql.raw(c.col.id)} = ${dom.entidad_id}
-          AND e.${sql.raw(c.col.publico)} = true
-          ${c.col.archivado ? sql.raw(`AND e.${c.col.archivado} IS NULL`) : sql``}
-          ${c.col.borrado ? sql.raw(`AND e.${c.col.borrado} IS NULL`) : sql``}
-      `)).rows[0] as any;
-
-      // El dominio existe pero lo que servía se despublicó. No es lo mismo que
-      // un dominio que no apunta a nada, y quien lo abre merece saber cuál de
-      // las dos cosas pasa.
-      if (!p) {
-        return res.status(404).json({
-          error: `Este dominio apunta a ${/a$/.test(c.nombre) ? 'una ' + c.nombre : 'un ' + c.nombre} que ya no está ${/a$/.test(c.nombre) ? 'publicada' : 'publicado'}.`,
-          tipo: 'despublicada',
-        });
-      }
-
-      res.json({
-        tipo: c.tipo,
-        id: p.id, titulo: p.titulo, slug: p.slug,
-        // La dirección larga viaja con la respuesta: quien llega por un dominio
-        // propio puede así ir a la misma cosa dentro de la plataforma sin que
-        // la pantalla tenga que saber cómo se arma cada URL.
-        ruta: `/@${p.handle}/${p.slug}`,
-        autor: { handle: p.handle, nombre: p.display_name || p.name, avatar: p.avatar_url },
-      });
+      const r = await resolverDominio(db, req.query.host ?? req.query.domain);
+      res.status(r.status).json(r.body);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -657,4 +590,83 @@ export async function comprobarConexion(dominio: string, { solicitar = false } =
     resumen: bloqueante ? bloqueante.detalle : 'Conectado correctamente.',
     pasos,
   };
+}
+
+/**
+ * A qué apunta un dominio propio: lo que contesta `/api/dominios/resolver`.
+ *
+ * Suelto (2026-10-01) porque lo usan dos: esa ruta, y el HTML de la visita
+ * (`sitios.ts`), que lo deja escrito dentro de la página para que el
+ * navegador no tenga que preguntarlo — un viaje menos antes del título.
+ */
+export async function resolverDominio(db: any, host: unknown): Promise<{ status: number; body: any }> {
+  const d = normalizarDominio(host);
+  if (!d) return { status: 404, body: { error: 'Dominio no válido.' } };
+
+  const dom = (await db.execute(sql`
+    SELECT dp.entidad_tipo, dp.entidad_id, dp.estado, u.handle
+    FROM dominios_paginas dp
+    JOIN users u ON u.id = dp.propietario_user_id
+    WHERE dp.dominio = ${d} AND dp.estado IN ('pendiente', 'activo')
+  `)).rows[0] as any;
+  if (!dom) return { status: 404, body: { error: 'Ese dominio no apunta a nada aquí.' } };
+
+  // La primera vez que se sirve de verdad se anota. Es lo que distingue
+  // «configurado» de «funcionando», y sin ello la pantalla de ajustes
+  // diría «activo» de algo que nadie ha conseguido abrir nunca.
+  if (dom.estado !== 'activo') {
+    await db.execute(sql`
+      UPDATE dominios_paginas
+      SET estado = 'activo', activo_desde = COALESCE(activo_desde, now()),
+          ultimo_error = NULL, updated_at = now()
+      WHERE dominio = ${d}
+    `);
+  }
+
+  if (!dom.entidad_id) {
+    return { status: 200, body: { tipo: 'espacio', handle: dom.handle } };
+  }
+
+  // ── UN DOMINIO PUEDE APUNTAR A CUALQUIER COSA COMPARTIBLE (2026-08-25) ─
+  // Aquí había una consulta a `knowledge_windows` escrita a mano, y por eso
+  // un dominio sólo podía servir una página. Ahora se mira el tipo que
+  // guarda la fila y se pregunta a la tabla que le toque, según el registro
+  // de `compartir.ts`. Añadir mapas a lo compartible no vuelve a tocar esto.
+  const c = compartiblePorTipo(dom.entidad_tipo);
+  if (!c) {
+    return { status: 404, body: { error: 'Este dominio apunta a algo que ya no se puede compartir.' } };
+  }
+
+  const p = (await db.execute(sql`
+    SELECT e.${sql.raw(c.col.id)}::text AS id,
+           e.${sql.raw(c.col.titulo)}::text AS titulo,
+           e.${sql.raw(c.col.slug)}::text AS slug,
+           u.handle, u.display_name, u.name, u.avatar_url
+    FROM ${sql.raw(c.tabla)} e
+    JOIN users u ON u.id = e.${sql.raw(c.col.duenyo)}
+    WHERE e.${sql.raw(c.col.id)} = ${dom.entidad_id}
+      AND e.${sql.raw(c.col.publico)} = true
+      ${c.col.archivado ? sql.raw(`AND e.${c.col.archivado} IS NULL`) : sql``}
+      ${c.col.borrado ? sql.raw(`AND e.${c.col.borrado} IS NULL`) : sql``}
+  `)).rows[0] as any;
+
+  // El dominio existe pero lo que servía se despublicó. No es lo mismo que
+  // un dominio que no apunta a nada, y quien lo abre merece saber cuál de
+  // las dos cosas pasa.
+  if (!p) {
+    return { status: 404, body: {
+      error: `Este dominio apunta a ${/a$/.test(c.nombre) ? 'una ' + c.nombre : 'un ' + c.nombre} que ya no está ${/a$/.test(c.nombre) ? 'publicada' : 'publicado'}.`,
+      tipo: 'despublicada',
+    } };
+  }
+
+  return { status: 200, body: {
+    tipo: c.tipo,
+    id: p.id, titulo: p.titulo, slug: p.slug,
+    // La dirección larga viaja con la respuesta: quien llega por un dominio
+    // propio puede así ir a la misma cosa dentro de la plataforma sin que
+    // la pantalla tenga que saber cómo se arma cada URL.
+    ruta: `/@${p.handle}/${p.slug}`,
+    autor: { handle: p.handle, nombre: p.display_name || p.name, avatar: p.avatar_url },
+  } };
 }

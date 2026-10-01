@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import { useSitio } from './ContextoSitio';
-import { cn } from '../../utils/cn';
 import { useEsMovil } from '../../hooks/useEsMovil';
-import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../knowledge/CabeceraPagina';
+import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -21,16 +20,8 @@ import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../know
 //   · el ancho completo.
 // Una página publicada es una web: la firma es una decisión, no un sello.
 
-export type DatosPagina = {
-  id: string;
-  titulo: string;
-  config: any;
-  indexable?: boolean | null;
-  created_at?: string;
-  updated_at?: string;
-  autor?: { handle?: string; nombre?: string; avatar?: string | null };
-  padre?: { id: string; titulo: string; slug: string | null; handle: string } | null;
-};
+export type { DatosPagina } from './CabeceraLectura';
+import type { DatosPagina } from './CabeceraLectura';
 
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
@@ -45,11 +36,8 @@ export default function VistaPagina({ pagina, propio, pie }: {
   const sitio = useSitio();
   const cfg = pagina.config || {};
   const bloques = cfg.bloques || cfg.blocks || [];
-  const mostrarAutor = cfg.mostrarAutor === true;
-  const mostrarFecha = cfg.mostrarFecha === true;
   const icono: string | null = cfg.icono || null;
   const esMovil = useEsMovil();
-  const lado = ladoIcono(cfg.cabecera, esMovil);
 
   // El título de la pestaña, la orden a los buscadores y el icono. El servidor
   // ya los escribe en el HTML para quien no ejecuta JavaScript; esto los
@@ -86,57 +74,18 @@ export default function VistaPagina({ pagina, propio, pie }: {
     : null;
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-6 sm:pt-12', cfg.anchoCompleto ? 'max-w-6xl' : 'max-w-3xl')}>
-        {aPadre && (
-          <Link to={aPadre} className="inline-flex items-center gap-1 mb-4 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" /> {padre!.titulo || 'Volver'}
-          </Link>
-        )}
-        <article>
-          {/* La misma cabecera que el editor: imagen arriba, debajo o a un
-              lado, con el tamaño que eligió el autor. */}
-          <header className="mb-8">
-            <LayoutCabecera
-              cabecera={cfg.cabecera}
-              imagen={cfg.portada ? <img src={cfg.portada} alt="" className="rounded-2xl" /> : null}
-              cuerpo={<>
-                <FilaTitulo cabecera={cfg.cabecera} icono={icono ? (
-                  <div>
-                    {esUrl(icono)
-                      ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
-                      : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>}
-                  </div>
-                ) : null}>
-                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words">
-                  {pagina.titulo || 'Sin título'}
-                </h1>
-                {/* Si está escrita, se publica. */}
-                {cfg.subtitulo && (
-                  <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line break-words"
-                    style={{ fontSize: letraDescripcion(cfg.cabecera, esMovil) }}>
-                    {cfg.subtitulo}
-                  </p>
-                )}
-                </FilaTitulo>
-                {(mostrarAutor || mostrarFecha) && (
-                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
-                    {mostrarAutor && pagina.autor?.avatar && (
-                      <img src={pagina.autor.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
-                    )}
-                    {mostrarAutor && pagina.autor?.nombre && <span>de <b className="text-slate-600">{pagina.autor.nombre}</b></span>}
-                    {mostrarAutor && mostrarFecha && <span>·</span>}
-                    {mostrarFecha && <span>{new Date(pagina.updated_at || pagina.created_at || Date.now()).toLocaleDateString('es-ES')}</span>}
-                  </div>
-                )}
-              </>}
-            />
-          </header>
-          <BloquesLectura bloques={bloques} comentable={pagina.id} />
-        </article>
-        {pie}
-      </div>
-    </div>
+    <MarcoLectura>
+      {aPadre && (
+        <Link to={aPadre} className="inline-flex items-center gap-1 mb-4 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" /> {padre!.titulo || 'Volver'}
+        </Link>
+      )}
+      <article>
+        <CabeceraLectura pagina={pagina} esMovil={esMovil} />
+        <BloquesLectura bloques={bloques} comentable={pagina.id} />
+      </article>
+      {pie}
+    </MarcoLectura>
   );
 }
 

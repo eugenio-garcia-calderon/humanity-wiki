@@ -1,11 +1,72 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, type Plugin} from 'vite';
+
+// ============================================================================
+// QUÉ TROZOS HAY QUE ANUNCIAR EN EL HTML (2026-10-01)
+// ============================================================================
+// `main.tsx` elige entre dos aplicaciones —la plataforma o la web de un
+// dominio propio— y cada una llega en su trozo, para que quien abre
+// `luzhumanidad.com` no se baje la plataforma entera. El precio de partirlas
+// es un viaje más: el navegador no sabe que necesita `App` hasta que ha bajado
+// y ejecutado `main`. Se paga con `<link rel="modulepreload">`, que le dice
+// desde el HTML qué bajar a la vez.
+//
+//   · La plataforma: los enlaces van escritos en `index.html` con
+//     `data-app="casa"`. El servidor los quita cuando sirve un dominio propio.
+//   · El dominio propio: la lista va a `dist/precarga.json` y la añade el
+//     servidor (`sitios.ts`) al HTML que sirve en un dominio propio.
+function trozosDe(bundle: Record<string, any>, modulo: string): string[] {
+  const porNombre = bundle;
+  // En `transformIndexHtml` Vite entrega los trozos sin `facadeModuleId`:
+  // se reconoce entonces por ser una entrada dinámica que contiene el módulo.
+  const raiz = Object.values(bundle).find((c: any) => c.type === 'chunk'
+    && (c.facadeModuleId ? c.facadeModuleId.endsWith(modulo)
+      : c.isDynamicEntry && c.moduleIds?.some((m: string) => m.endsWith(modulo)))) as any;
+  if (!raiz) return [];
+  // Lo que ya importa la entrada ya lo anuncia Vite: no repetirlo.
+  const entrada = Object.values(bundle).find((c: any) => c.type === 'chunk' && c.isEntry) as any;
+  const yaEsta = new Set<string>([entrada?.fileName, ...(entrada?.imports || [])]);
+  const vistos = new Set<string>();
+  const pila = [raiz.fileName];
+  while (pila.length) {
+    const f = pila.pop()!;
+    if (vistos.has(f) || yaEsta.has(f)) continue;
+    vistos.add(f);
+    pila.push(...(porNombre[f]?.imports || []));
+  }
+  return [...vistos];
+}
+
+function precargas(): Plugin {
+  return {
+    name: 'precargas',
+    apply: 'build',
+    enforce: 'post',
+    // `order: 'post'`: sólo después de que Vite haya escrito los trozos
+    // existe `ctx.bundle`.
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, ctx) {
+        if (!ctx.bundle) return html;
+        const enlaces = trozosDe(ctx.bundle, '/src/App.tsx')
+          .map(f => `<link rel="modulepreload" crossorigin href="/${f}" data-app="casa">`).join('\n    ');
+        return html.replace('</head>', `    ${enlaces}\n  </head>`);
+      },
+    },
+    generateBundle(_, bundle) {
+      this.emitFile({
+        type: 'asset', fileName: 'precarga.json',
+        source: JSON.stringify({ dominio: trozosDe(bundle, '/src/AplicacionDeDominio.tsx').map(f => '/' + f) }),
+      });
+    },
+  };
+}
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), precargas()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
