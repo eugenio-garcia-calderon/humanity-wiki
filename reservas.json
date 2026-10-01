@@ -1,3 +1,58 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/main.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/AplicacionDeDominio.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/pages/PaginaDeDominio.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/dominios.ts",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "deploy/Caddyfile",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "vite.config.ts",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/sitio/VistaPagina.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:25:15.558Z"
+    }
+  ]
 }
