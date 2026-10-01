@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog8-pizarra",
-      "ruta": "src/components/knowledge/AddWindowPanel.tsx",
-      "motivo": "Pizarra estilo Miro (prog8-pizarra)",
-      "desde": "2026-10-01T12:31:25.941Z"
-    },
-    {
-      "agente": "prog8-pizarra",
       "ruta": "src/components/knowledge/BarraLienzo.tsx",
       "motivo": "Textos de navegación Miro (prog8-pizarra)",
       "desde": "2026-10-01T12:32:52.884Z"
