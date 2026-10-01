@@ -10,11 +10,12 @@ import { cn } from '../../utils/cn';
 // Aquí está lo que se toca todo el rato en un mural: con qué gesto trabaja el
 // ratón, deshacer, la rejilla y el zoom, más la chuleta de atajos.
 //
-// EL MODO es el cambio de fondo. En React Flow, arrastrar con el botón
-// izquierdo sobre el vacío MUEVE el lienzo; en Miro DIBUJA UN RECTÁNGULO DE
-// SELECCIÓN, y el lienzo se mueve con la barra espaciadora, la rueda o el
-// botón central. Quien edita empieza en modo selección —es lo que espera— y
-// quien solo mira, en modo mano, que es lo único que puede hacer.
+// EL MODO es el cambio de fondo. Con la MANO, arrastrar el fondo mueve la
+// vista; con «Marcar», dibuja un rectángulo de selección. Desde el
+// 2026-10-01 todo el mundo empieza con la mano (Eugenio: «no puedo pinchar en
+// un punto y moverme a la izquierda o la derecha»). Mayús + arrastrar marca
+// con cualquiera de las dos; en el trackpad, dos dedos mueven y pellizcar
+// acerca.
 
 export type ModoLienzo = 'seleccion' | 'mano';
 
@@ -45,9 +46,11 @@ const ATAJOS: Array<{ grupo: string; filas: Array<[string, string]> }> = [
   {
     grupo: 'Moverse',
     filas: [
-      ['Espacio + arrastrar', 'Mover el lienzo'],
-      ['Rueda / dos dedos', 'Mover el lienzo'],
-      ['⌘/Ctrl + rueda', 'Acercar y alejar'],
+      ['Arrastrar el fondo', 'Mover el lienzo (con la mano)'],
+      ['Dos dedos en el trackpad', 'Mover el lienzo'],
+      ['Pellizcar / ⌘ + rueda', 'Acercar y alejar'],
+      ['Espacio + arrastrar', 'Mover el lienzo con cualquier herramienta'],
+      ['⌘/Ctrl + +  /  −', 'Acercar / alejar'],
       ['⌘/Ctrl + 0', 'Zoom al 100 %'],
       ['⌘/Ctrl + 1', 'Encajar todo en pantalla'],
     ],
@@ -55,7 +58,8 @@ const ATAJOS: Array<{ grupo: string; filas: Array<[string, string]> }> = [
   {
     grupo: 'Marcar',
     filas: [
-      ['Arrastrar sobre el vacío', 'Marcar por rectángulo'],
+      ['Mayús + arrastrar', 'Marcar por rectángulo'],
+      ['Arrastrar (con «Marcar»)', 'Marcar por rectángulo'],
       ['Mayús + clic', 'Añadir o quitar de la selección'],
       ['⌘/Ctrl + A', 'Marcar todo'],
       ['Esc', 'Desmarcar'],
@@ -88,14 +92,14 @@ export default function BarraLienzo(p: BarraLienzoProps) {
           <>
             <button
               onClick={() => p.onModo('seleccion')}
-              title="Marcar — arrastra sobre el vacío para marcar por rectángulo"
+              title="Marcar — arrastra sobre el vacío para marcar por rectángulo (o Mayús + arrastrar)"
               className={cn(btn, p.modo === 'seleccion' && '!bg-slate-900 !text-white')}
             >
               <MousePointer2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => p.onModo('mano')}
-              title="Mover el lienzo (o mantén el espacio pulsado)"
+              title="Mano — arrastra el fondo para moverte (también dos dedos en el trackpad)"
               className={cn(btn, p.modo === 'mano' && '!bg-slate-900 !text-white')}
             >
               <Hand className="w-4 h-4" />

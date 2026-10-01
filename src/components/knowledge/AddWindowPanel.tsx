@@ -27,7 +27,7 @@ const KINDS: Array<{ kind: string; label: string }> = [
 
 const RELATIONS = ['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza'];
 
-export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind, from }: {
+export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind, from, limpia = false }: {
   graphId: string;
   onClose: () => void;
   onAdded: () => void;
@@ -36,6 +36,9 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind,
   /** Si llega, la ventana nueva se conecta a ESA ventana en vez de al centro
    *  — es el «+» que sale al pasar el ratón por un nodo del lienzo. */
   from?: { id: string; title: string; pos?: { x: number; y: number } } | null;
+  /** Pizarra limpia (la de una página, 2026-10-01): no hay tarjeta central,
+   *  así que lo nuevo NO se enlaza a ella salvo que se pida. */
+  limpia?: boolean;
 }) {
   const { user } = useAuth();
   const [kind, setKind] = useState(initialKind || 'publicacion');
@@ -46,7 +49,7 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind,
   const [wikiPage, setWikiPage] = useState('');
   const [relation, setRelation] = useState('contexto');
   const [edgeLabel, setEdgeLabel] = useState('');
-  const [connectCenter, setConnectCenter] = useState(true);
+  const [connectCenter, setConnectCenter] = useState(!(limpia && !from));
   const [myPubs, setMyPubs] = useState<any[]>([]);
   const [selectedPub, setSelectedPub] = useState<any>(null);
   const [graphs, setGraphs] = useState<any[]>([]);
