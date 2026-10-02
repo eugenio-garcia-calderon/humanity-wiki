@@ -1,28 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-ialocal",
-      "ruta": "src/server/bd.ts",
-      "motivo": "IA local para rellenar bases de datos (prog8-ialocal)",
-      "desde": "2026-10-02T13:58:51.810Z"
-    },
-    {
-      "agente": "prog8-ialocal",
-      "ruta": "docker-compose.prod.yml",
-      "motivo": "IA local para rellenar bases de datos (prog8-ialocal)",
-      "desde": "2026-10-02T13:58:51.810Z"
-    },
-    {
-      "agente": "prog8-ialocal",
-      "ruta": "src/server/rellenarPorChat.ts",
-      "motivo": "IA local para rellenar bases de datos (prog8-ialocal)",
-      "desde": "2026-10-02T13:58:51.810Z"
-    },
-    {
-      "agente": "prog8-ialocal",
-      "ruta": "src/server/iaLocal.ts",
-      "motivo": "IA local para rellenar bases de datos (prog8-ialocal)",
-      "desde": "2026-10-02T13:58:51.810Z"
-    }
-  ]
+  "reservas": []
 }
