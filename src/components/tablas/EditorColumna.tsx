@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Plus, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, AlertTriangle, Check, Image as ImageIcon, AlignLeft, Database } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -86,19 +86,29 @@ const OPERACIONES = [
   { id: 'o_alguno', label: '¿Alguna cumple?' },
 ];
 
-export default function EditorColumna({ tablaId, columna, columnas, onCerrar, onHecho, tipoInicial }: {
+/** Lo que de la otra base de datos no se puede enseñar en una ficha: lo que
+ *  apunta a su vez a otra cosa, los archivos y lo que se calcula. */
+const NO_SE_MUESTRA = new Set(['relacion', 'persona', 'proyecto', 'publicacion', 'imagen', 'video', 'documento', 'formula', 'condicional', 'agregado']);
+
+export default function EditorColumna({ tablaId, columna, columnas, onCerrar, onHecho, tipoInicial, tablasPagina = [] }: {
   tablaId: string;
   /** Si viene, se edita; si no, se crea. */
   columna?: any;
   /** Las que ya hay: hacen falta para las fórmulas y los resúmenes. */
   columnas: any[];
   onCerrar: () => void;
-  onHecho: () => void;
+  /** Con el id de la columna, si es nueva. */
+  onHecho: (idNueva?: string) => void;
+  /** Las otras bases de datos de la misma página: salen las primeras al
+   *  enlazar (2026-10-02). */
+  tablasPagina?: string[];
   /** Al crear, con qué tipo se abre (p. ej. `relacion` desde «Enlazar con
    *  otra base de datos»). */
   tipoInicial?: string;
 }) {
   const editando = !!columna;
+  // El diálogo de «Enlazar con otra base de datos», o editar un enlace.
+  const soloEnlace = (columna?.tipo || tipoInicial) === 'relacion';
   const [nombre, setNombre] = useState(columna?.nombre || '');
   const [tipo, setTipo] = useState(columna?.tipo || tipoInicial || 'texto');
   const [opciones, setOpciones] = useState<Array<{ id?: string; label: string }>>(columna?.opciones || []);
@@ -128,6 +138,38 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
 
   const relaciones = columnas.filter(c => c.tipo === 'relacion');
 
+  // ── ENLAZAR CON OTRA BASE DE DATOS (2026-10-02) ─────────────────────────
+  // Eugenio: «un selector de las bases de datos disponibles empezando por las
+  // que están en esa misma página, que coja por defecto el nombre de esa
+  // conexión —que luego puedes modificar— y que te permita seleccionar las
+  // variables que quieres mostrar como enlazadas, por ejemplo una imagen o un
+  // texto».
+  const [nombreAuto, setNombreAuto] = useState<string | null>(null);
+  const [columnasDestino, setColumnasDestino] = useState<any[] | null>(null);
+  const destino = tipo === 'relacion' ? config.tabla_destino : null;
+  useEffect(() => {
+    if (!destino) { setColumnasDestino(null); return; }
+    fetch(`/api/bd/tablas/${destino}`, { credentials: 'include' })
+      // Sin su columna de nombre: el nombre sale siempre, ofrecerlo otra vez
+      // sería un interruptor que no cambia nada.
+      .then(r => r.json()).then(j => setColumnasDestino((j.columnas || []).filter((c: any) => c.id !== j.columna_titulo)))
+      .catch(() => setColumnasDestino([]));
+  }, [destino]);
+  const elegirDestino = (t: any) => {
+    // «Admite varios» nace encendido: un proyecto suele tocar varias áreas, y
+    // con uno solo el segundo enlace fallaba sin que se entendiera por qué.
+    setConfig((c: any) => ({ ...c, tabla_destino: t.id, varios: c.varios ?? true, mostrar: c.tabla_destino === t.id ? c.mostrar : ['imagen'] }));
+    // El nombre sigue al de la base de datos mientras nadie lo haya escrito a mano.
+    if (!nombre.trim() || nombre === nombreAuto) { setNombre(t.titulo); setNombreAuto(t.titulo); }
+  };
+  const mostrar: string[] = Array.isArray(config.mostrar) ? config.mostrar : [];
+  const alternarMostrar = (k: string) =>
+    setConfig((c: any) => { const m: string[] = Array.isArray(c.mostrar) ? c.mostrar : []; return { ...c, mostrar: m.includes(k) ? m.filter(x => x !== k) : [...m, k] }; });
+  const candidatas = tablas.filter(t => t.id !== tablaId);
+  const enPagina = candidatas.filter(t => tablasPagina.includes(t.id))
+    .sort((a, b) => tablasPagina.indexOf(a.id) - tablasPagina.indexOf(b.id));
+  const otras = candidatas.filter(t => !tablasPagina.includes(t.id));
+
   const guardar = async () => {
     setGuardando(true); setFallo(null);
     const cuerpo: any = { nombre, tipo, config };
@@ -143,7 +185,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
     // cálculo circular, columna que no existe— y ese texto es el que se enseña.
     // Traducirlo aquí a «no se pudo guardar» sería tirar la única pista útil.
     if (!r.ok) { setFallo(j.error || 'No se pudo guardar.'); return; }
-    onHecho(); onCerrar();
+    onHecho(editando ? undefined : j.id); onCerrar();
   };
 
   const borrar = async () => {
@@ -156,22 +198,28 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
       onClick={onCerrar}>
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-100">
-          <h2 className="text-sm font-black text-slate-800">{editando ? 'Editar la columna' : 'Nueva columna'}</h2>
+          <h2 className="text-sm font-black text-slate-800">
+            {tipo === 'relacion' ? (editando ? 'Editar el enlace' : 'Enlazar con otra base de datos') : editando ? 'Editar la propiedad' : 'Nueva propiedad'}
+          </h2>
           <button onClick={onCerrar} aria-label="Cerrar" className="w-11 h-11 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
-          <label className="block">
+        {/* EN UN ENLACE, PRIMERO LA BASE DE DATOS (2026-10-02): de ella sale el
+            nombre, así que va arriba; y la lista de tipos sobra, porque ya se
+            sabe que es un enlace. `order` y no mover bloques de sitio: el
+            resto del editor sigue igual. */}
+        <div className="p-4 flex flex-col gap-4">
+          <label className={cn('block', soloEnlace && 'order-2')}>
             <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Nombre</span>
             <input value={nombre} onChange={e => setNombre(e.target.value)} autoFocus
-              placeholder="Coste unitario"
+              placeholder={tipo === 'relacion' ? 'Nombre del enlace' : 'Coste unitario'}
               /* 16 px: por debajo, Safari de iOS hace zoom al enfocar. */
               className="mt-1 w-full h-11 px-3 border border-slate-200 rounded-xl text-base sm:text-sm outline-none focus:border-emerald-400" />
           </label>
 
-          {editando ? (
+          {soloEnlace ? null : editando ? (
             <p className="text-[11px] text-slate-400 leading-relaxed">
               El tipo no se puede cambiar. Habría que decidir qué pasa con las celdas que no se
               puedan convertir, y hacerlo por las bravas perdería datos en silencio.
@@ -229,26 +277,77 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
 
           {/* ── ¿UNO O VARIOS? ────────────────────────────────────────────── */}
           {VARIOS.has(tipo) && (
-            <label className="flex items-center gap-2">
+            <label className={cn('flex items-center gap-2', soloEnlace && 'order-4')}>
               <input type="checkbox" checked={!!config.varios}
                 onChange={e => setConfig((c: any) => ({ ...c, varios: e.target.checked }))} />
               <span className="text-xs font-bold text-slate-600">Admite varios</span>
             </label>
           )}
 
-          {/* ── RELACIÓN: a qué tabla ─────────────────────────────────────── */}
+          {/* ── RELACIÓN: con qué base de datos, y qué se ve de ella ──────── */}
           {tipo === 'relacion' && (
-            <label className="block">
-              <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Enlaza con</span>
-              <select value={config.tabla_destino || ''}
-                onChange={e => setConfig((c: any) => ({ ...c, tabla_destino: e.target.value }))}
-                className="mt-1 w-full h-11 px-2 border border-slate-200 rounded-xl text-sm">
-                <option value="">Elige una tabla…</option>
-                {tablas.map(t => <option key={t.id} value={t.id}>{t.titulo}</option>)}
-              </select>
-            </label>
+            <div className={cn('space-y-4', soloEnlace && 'order-1')}>
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Enlaza con</span>
+                {editando ? (
+                  // La base de datos de un enlace ya creado no se cambia: sus
+                  // filas apuntan a las de ésa, y cambiarla las dejaría colgando.
+                  <p className="mt-1 flex items-center gap-2 h-11 px-3 rounded-xl bg-slate-50 text-sm font-bold text-slate-700">
+                    <Database className="w-4 h-4 text-slate-400" />
+                    {tablas.find(t => t.id === config.tabla_destino)?.titulo || 'Otra base de datos'}
+                  </p>
+                ) : (
+                  <div className="mt-1 max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-1.5 space-y-2">
+                    {[['En esta página', enPagina], ['Otras bases de datos', otras]].map(([titulo, lista]: any) => lista.length > 0 && (
+                      <div key={titulo}>
+                        <p className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-300">{titulo}</p>
+                        {lista.map((t: any) => (
+                          <button key={t.id} onClick={() => elegirDestino(t)}
+                            className={cn('w-full flex items-center gap-2 px-2 h-11 rounded-lg text-left transition-colors',
+                              config.tabla_destino === t.id ? 'bg-emerald-50 text-emerald-800' : 'hover:bg-slate-50 text-slate-700')}>
+                            <Database className="w-4 h-4 shrink-0 opacity-50" />
+                            <span className="flex-1 truncate text-xs font-bold">{t.titulo || 'Sin título'}</span>
+                            <span className="text-[10px] text-slate-400">{t.filas} {Number(t.filas) === 1 ? 'elemento' : 'elementos'}</span>
+                            {config.tabla_destino === t.id && <Check className="w-4 h-4 shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                    {!candidatas.length && <p className="px-2 py-3 text-xs text-slate-400">No hay otras bases de datos todavía.</p>}
+                  </div>
+                )}
+              </div>
+
+            </div>
           )}
 
+          {tipo === 'relacion' && config.tabla_destino && (
+                <div className={cn(soloEnlace && 'order-3')}>
+                  <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Qué se ve del elemento enlazado</span>
+                  <p className="text-[11px] text-slate-400">Además de su nombre, que sale siempre.</p>
+                  <div className="mt-1 border border-slate-200 rounded-xl p-1.5">
+                    {[
+                      { id: 'imagen', nombre: 'Imagen', icono: <ImageIcon className="w-3.5 h-3.5" /> },
+                      { id: 'texto', nombre: 'Texto (su descripción o el principio)', icono: <AlignLeft className="w-3.5 h-3.5" /> },
+                      ...(columnasDestino || []).filter(c => !NO_SE_MUESTRA.has(c.tipo)).map(c => ({ id: c.id, nombre: c.nombre, icono: null as any })),
+                    ].map(op => {
+                      const puesta = mostrar.includes(op.id);
+                      return (
+                        <button key={op.id} onClick={() => alternarMostrar(op.id)}
+                          className="w-full flex items-center gap-2 px-2 h-10 rounded-lg text-left text-xs font-bold text-slate-600 hover:bg-slate-50">
+                          <span className={cn('w-4 h-4 rounded border grid place-items-center shrink-0',
+                            puesta ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300')}>
+                            {puesta && <Check className="w-3 h-3" />}
+                          </span>
+                          {op.icono && <span className="text-slate-400">{op.icono}</span>}
+                          <span className="flex-1 truncate">{op.nombre}</span>
+                        </button>
+                      );
+                    })}
+                    {columnasDestino === null && <p className="px-2 py-2 text-[11px] text-slate-400">Cargando sus campos…</p>}
+                  </div>
+                </div>
+              )}
           {/* ── FÓRMULA ───────────────────────────────────────────────────── */}
           {tipo === 'formula' && (
             <label className="block">
@@ -371,7 +470,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
           )}
 
           {fallo && (
-            <div className="flex items-start gap-2 p-2.5 bg-rose-50 rounded-xl text-rose-700">
+            <div className={cn('flex items-start gap-2 p-2.5 bg-rose-50 rounded-xl text-rose-700', soloEnlace && 'order-5')}>
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <p className="text-xs font-bold">{fallo}</p>
             </div>
@@ -384,10 +483,10 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <Trash2 className="w-4 h-4" /> Quitar columna
             </button>
           ) : <span />}
-          <button onClick={guardar} disabled={guardando || !nombre.trim()}
+          <button onClick={guardar} disabled={guardando || !nombre.trim() || (tipo === 'relacion' && !config.tabla_destino)}
             className="inline-flex items-center gap-1.5 h-11 px-4 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-40 hover:bg-slate-800">
             {guardando && <Loader2 className="w-4 h-4 animate-spin" />}
-            {editando ? 'Guardar' : 'Crear columna'}
+            {editando ? 'Guardar' : tipo === 'relacion' ? 'Crear el enlace' : 'Crear columna'}
           </button>
         </div>
       </div>
