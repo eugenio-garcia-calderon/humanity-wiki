@@ -8169,3 +8169,8 @@ taking the page down.
 - `subirArchivo` prepara las imágenes antes de subir (`utils/prepararImagen.ts`): HEIC/HEIF → JPG con `heic-to` (~3 MB, cargado sólo si se elige un HEIC); por encima de 3 MB pregunta «Comprimir la imagen» o «Elegir otro archivo» (`ui/DialogoImagenGrande.tsx`); comprimir = 2000 px de lado y JPG (WebP si hay transparencia). Iconos y logotipos se reducen solos a 512 px. GIF y SVG no se tocan. Los 14 selectores de imagen aceptan `.heic,.heif`, y el icono del editor ya enseña el error si lo hay.
 - Probado en local: HEIC como icono → JPG de 512 px y 124 KB en 3 s; JPG de 8,5 MB → pregunta → comprimido en 1 s.
 - Eugenio: «el título de cada tarjeta centrado, al igual que la descripción» y «permite ocultar el título de la página y el de la base de datos de cara al público». Tarjetas de galería en una página: título, descripción y enlaces centrados. Título de la página: «Ocultar título» junto al autor y en Ajustes (`config.ocultarTitulo`; queda para buscadores y lectores de pantalla). Título de la base de datos: botón en su cabecera (`tituloOculto` del bloque); quien edita lo ve atenuado.
+
+### 2026-10-02 — «Recolocar» la imagen de una tarjeta de galería funciona (prog8)
+- Eugenio: «la función de recolocar y arrastrar la imagen en la galería no funciona».
+- Causa: dentro del marco de la tarjeta (una rejilla), `h-full` no se resolvía; la imagen salía con su alto natural y el marco la recortaba por `overflow`. `object-position` no tenía nada que mover, y el centro de la imagen quedaba fuera de la parte visible, donde ningún arrastre llegaba. Ahora la imagen ocupa el marco (`absolute inset-0`) y se recorta con `object-cover`.
+- Probado en local: arrastrar mueve el encuadre (50 % → 17,7 %) y «Guardar posición» lo guarda.
