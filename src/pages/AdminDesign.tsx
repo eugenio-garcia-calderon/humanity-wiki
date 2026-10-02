@@ -73,7 +73,7 @@ export default function AdminDesign() {
             
             <input 
               type="file" 
-              accept="image/*"
+              accept="image/*,.heic,.heif"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={(e) => {
                 if (e.target.files?.[0]) {
@@ -121,7 +121,7 @@ export default function AdminDesign() {
                   
                   <input 
                     type="file" 
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={(e) => {
                       if (e.target.files?.[0]) {

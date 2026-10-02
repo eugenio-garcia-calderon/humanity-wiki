@@ -63,7 +63,7 @@ export default function SelectorDeIcono({ valor, onElegir, alto = 'max-h-40' }: 
     if (!f) return;
     setSubiendo(true); setError(null);
     try {
-      const sub = await subirArchivo(f);
+      const sub = await subirArchivo(f, undefined, undefined, { maxLado: 512 });
       if (sub.error) { setError(sub.error); return; }
       onElegir(sub.url);
     } catch {
@@ -78,7 +78,7 @@ export default function SelectorDeIcono({ valor, onElegir, alto = 'max-h-40' }: 
         {/* UNA IMAGEN TUYA como icono, no solo iconos de trazo. Se guarda en la
             misma columna: un icono que empieza por «/» es una dirección y
             cualquier otra cosa es un nombre de icono. */}
-        <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+        <input ref={fotoRef} type="file" accept="image/*,.heic,.heif" className="hidden"
           onChange={e => { subirImagen(e.target.files?.[0]); e.target.value = ''; }} />
         <button type="button" onClick={() => fotoRef.current?.click()} disabled={subiendo}
           className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-slate-200 text-[10px] font-bold text-slate-500 hover:border-emerald-300 hover:text-emerald-700 disabled:opacity-40 transition-colors">

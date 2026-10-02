@@ -334,7 +334,7 @@ export default function PersonaPublica() {
           )}
           {editandoPerfil && (
             <>
-              <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+              <input ref={fotoRef} type="file" accept="image/*,.heic,.heif" className="hidden"
                 onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
               <button
                 onClick={() => fotoRef.current?.click()}

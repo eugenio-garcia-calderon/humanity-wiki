@@ -421,14 +421,14 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
                   <label className="mt-2 min-h-[44px] flex items-center justify-center gap-2 px-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 cursor-pointer hover:border-emerald-300 hover:text-emerald-700 transition-colors">
                     <ImageIcon className="w-4 h-4" />
                     Elegir del carrete
-                    <input type="file" accept="image/*" className="hidden"
+                    <input type="file" accept="image/*,.heic,.heif" className="hidden"
                       onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirCaptura(f, 'imagen'); }} />
                   </label>
                   <p className="mt-2 text-[11px] text-slate-400">
                     Después te preguntamos dónde guardarla.
                   </p>
                   <input
-                    ref={entradaFoto} type="file" accept="image/*" capture="environment" className="hidden"
+                    ref={entradaFoto} type="file" accept="image/*,.heic,.heif" capture="environment" className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirParaEditar(f); }}
                   />
                   <input

@@ -17,6 +17,9 @@ import type { Cabecera } from './CabeceraPagina';
 
 export type Ajustes = {
   mostrarAutor?: boolean;
+  /** El título no se enseña en la página publicada (2026-10-02). Sigue en la
+   *  pestaña, en Google y para los lectores de pantalla. */
+  ocultarTitulo?: boolean;
   mostrarFecha?: boolean;
   /** Ya no se usa: desde el 2026-10-02 todas las páginas son de ancho
    *  completo, sin opción (Eugenio). Se conserva para leer las que lo tenían. */
@@ -38,7 +41,7 @@ export type Ajustes = {
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCerrar }: {
   ajustes: Ajustes;
@@ -75,6 +78,8 @@ export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCe
           <p className="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Cómo se ve publicada</p>
           <Interruptor etiqueta="Mostrar el autor" ayuda="Tu nombre y tu foto bajo el título."
             valor={!!ajustes.mostrarAutor} onCambio={v => pon({ mostrarAutor: v })} />
+          <Interruptor etiqueta="Mostrar el título" ayuda="Apágalo si la portada o el logotipo ya dicen cómo se llama."
+            valor={!ajustes.ocultarTitulo} onCambio={v => pon({ ocultarTitulo: v ? undefined : true })} />
           {/* La fecha ya no se publica (2026-10-02, Eugenio: «quita la fecha
               que está debajo del icono»): sin interruptor que no haría nada. */}
         </section>
@@ -96,7 +101,7 @@ export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCe
               <label className="inline-flex items-center gap-1.5 h-11 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:border-slate-300 cursor-pointer">
                 {subiendo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
                 {ajustes.imagenCompartir ? 'Cambiar' : 'Elegir imagen'}
-                <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && subir(e.target.files[0])} />
+                <input type="file" accept="image/*,.heic,.heif" className="hidden" onChange={e => e.target.files?.[0] && subir(e.target.files[0])} />
               </label>
               {ajustes.imagenCompartir && (
                 <button onClick={() => pon({ imagenCompartir: undefined })}

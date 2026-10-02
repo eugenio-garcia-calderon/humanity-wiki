@@ -153,8 +153,11 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <FileText className="w-8 h-8 text-slate-200" />
                 )}
               </div>
-              <div className="px-0.5 pt-2.5 pb-1 space-y-1">
-                <p className={cn('flex items-center gap-1.5 text-sm font-bold min-w-0', claseTitulo || 'text-slate-800')}>
+              {/* CENTRADOS EN UNA PÁGINA (2026-10-02, Eugenio: «el título de cada
+                  tarjeta centrado, al igual que la descripción, y no a la
+                  izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
+              <div className={cn('px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
+                <p className={cn('flex items-center gap-1.5 text-sm font-bold min-w-0', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                   {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                     : icono ? (esUrl(icono)
                       ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
@@ -178,12 +181,12 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                     if (lista.length && Array.isArray(c.config?.mostrar) && c.config.mostrar.length) {
                       return (
                         <div key={c.id} className="pt-1 space-y-1.5">
-                          {lista.map((a: any) => <Enlazado key={a.id} a={a} />)}
+                          {lista.map((a: any) => <div key={a.id}><Enlazado a={a} /></div>)}
                         </div>
                       );
                     }
                     return lista.length ? (
-                      <div key={c.id} className="flex flex-wrap items-center gap-1 pt-0.5">
+                      <div key={c.id} className={cn('flex flex-wrap items-center gap-1 pt-0.5', centrada && 'justify-center')}>
                         {lista.map((a: any) => <FichaRelacion key={a.id} a={a} />)}
                       </div>
                     ) : null;
@@ -309,7 +312,9 @@ function Enlazado({ a }: { a: any }) {
       </span>
     </>
   );
-  const clase = 'flex items-start gap-2 p-1.5 -mx-1.5 rounded-lg text-left transition-colors';
+  // `inline-flex`: dentro de una tarjeta centrada, la ficha va al centro y su
+  // texto sigue alineado a su imagen.
+  const clase = 'inline-flex max-w-full items-start gap-2 p-1.5 rounded-lg text-left align-top transition-colors';
   if (!pagina || a.existe === false) return <div className={clase}>{dentro}</div>;
   return (
     <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} onClick={e => e.stopPropagation()}

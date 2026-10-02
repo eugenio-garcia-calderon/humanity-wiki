@@ -146,7 +146,7 @@ export function CapturaCamara({ onCaptura, onCerrar, camaraInicial = "environmen
       <input
         ref={entrada}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         capture={cara}
         className="hidden"
         onChange={(e) => {

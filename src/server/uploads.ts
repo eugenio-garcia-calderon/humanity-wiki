@@ -217,6 +217,12 @@ export function registerUploadRoutes(app: Express, _db: any) {
         // escucha, no nosotros. Se corta en el punto y coma. (2026-08-22)
         const tipo = String(req.query.type || '').toLowerCase().split(';')[0].trim();
         const ext = TIPOS[tipo];
+        // Las fotos HEIC del iPhone se convierten a JPG en el navegador antes
+        // de llegar aquí (`utils/prepararImagen.ts`). Si una llega tal cual es
+        // que viene de una pantalla vieja en caché: se dice qué hacer.
+        if (/^image\/hei[cf]$/.test(tipo)) {
+          return res.status(400).json({ error: 'Las fotos HEIC del iPhone se convierten solas al subirlas. Recarga la página y vuelve a intentarlo.' });
+        }
         if (!ext) {
           return res.status(400).json({
             error: `Formato no admitido. Se aceptan imágenes (PNG, JPG, WebP, GIF, AVIF, SVG), vídeo (MP4, WebM, MOV, M4V, OGV), documentos (PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX) y audio (MP3, M4A, OGG, WAV, AAC, FLAC).`,

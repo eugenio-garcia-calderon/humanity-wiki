@@ -48,12 +48,23 @@ export type ResultadoSubida =
  * en vez de inventarse un `image/png`.
  */
 export async function subirArchivo(
-  dato: File | Blob | ArrayBuffer,
+  datoOriginal: File | Blob | ArrayBuffer,
   tipo?: string,
   /** 0–1 según avanza la subida (2026-10-01). Eugenio: con una imagen pesada
    *  «parece que no está haciendo nada» y uno cancela o sale antes de tiempo. */
   alProgreso?: (fraccion: number) => void,
+  /** `maxLado`: una imagen que nunca se verá grande (un icono, un logotipo)
+   *  se reduce a esto sin preguntar. */
+  opciones?: { maxLado?: number },
 ): Promise<ResultadoSubida> {
+  // LAS IMÁGENES SE PREPARAN ANTES (2026-10-02): HEIC a JPG, y si pesa mucho
+  // se pregunta si comprimirla o elegir otra. Ver `prepararImagen.ts`.
+  let dato: File | Blob | ArrayBuffer = datoOriginal;
+  if (typeof File !== 'undefined' && datoOriginal instanceof File && !tipo) {
+    const preparado = await prepararParaSubir(datoOriginal, opciones?.maxLado);
+    if ('error' in preparado) return { error: preparado.error };
+    dato = preparado.archivo;
+  }
   const suTipo = tipo
     || (typeof File !== 'undefined' && dato instanceof File && dato.type)
     || (typeof Blob !== 'undefined' && dato instanceof Blob && dato.type)
@@ -98,4 +109,31 @@ export async function subirArchivo(
   } catch {
     return { error: 'No se ha podido subir el archivo: se ha cortado la conexión. Tu página sigue igual; vuelve a intentarlo.' };
   }
+}
+
+/** HEIC → JPG, reducir si hace falta y, si sigue pesando mucho, preguntar. */
+async function prepararParaSubir(f: File, maxLado?: number): Promise<{ archivo: File } | { error: string }> {
+  const { esHeic, esImagenTratable, heicAJpg, comprimirImagen, LIMITE_IMAGEN } = await import('./prepararImagen');
+  let actual = f;
+  for (let vueltas = 0; vueltas < 5; vueltas++) {
+    if (esHeic(actual)) {
+      try { actual = await heicAJpg(actual); }
+      catch { return { error: 'No he podido leer esa foto HEIC. Prueba a exportarla como JPG desde Fotos, o elige otra.' }; }
+    }
+    if (!esImagenTratable(actual)) return { archivo: actual };
+    if (maxLado) {
+      try { actual = await comprimirImagen(actual, maxLado, 0.9); } catch { /* se sube tal cual */ }
+    }
+    if (actual.size <= LIMITE_IMAGEN) return { archivo: actual };
+    const { preguntarImagenGrande } = await import('../components/ui/DialogoImagenGrande');
+    const e = await preguntarImagenGrande(actual);
+    if (e.tipo === 'cancelar') return { error: 'No se ha subido: la imagen pesaba demasiado.' };
+    if (e.tipo === 'otro') { actual = e.archivo; continue; }
+    try {
+      let c = await comprimirImagen(actual, 2000, 0.82);
+      if (c.size > LIMITE_IMAGEN) c = await comprimirImagen(c, 1400, 0.72);
+      return { archivo: c };
+    } catch { return { error: 'No he podido comprimir esa imagen. Elige otra.' }; }
+  }
+  return { archivo: actual };
 }

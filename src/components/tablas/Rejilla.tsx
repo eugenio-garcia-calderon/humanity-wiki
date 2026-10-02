@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -40,7 +40,7 @@ const LETRA_TITULO: Record<TamanoGaleria, string> = {
   pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles, tablasPagina }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -64,6 +64,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Las demás bases de datos de la misma página, para enlazar con ellas
    *  primero (2026-10-02). */
   tablasPagina?: string[];
+  /** Ocultar el título al público (2026-10-02, Eugenio). Quien edita lo sigue
+   *  viendo, atenuado y con el aviso. */
+  tituloOculto?: boolean;
+  onCambiarTituloOculto?: (v: boolean) => void;
   /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
   visibles?: string[];
   onCambiarVisibles?: (ids: string[]) => void;
@@ -192,6 +196,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           centrado y la galería centrada, no esquinada a la izquierda»). El
           título va solo en su línea; los mandos del editor, debajo y también
           al centro. */}
+      {/* Oculto y sin nada más que enseñar (quien lee no tiene mandos): ni la
+          fila del título se pinta, para que no quede un hueco encima. */}
+      {!(limpia && tituloOculto && !editable) && (
       <div className={limpia
         ? 'flex flex-wrap items-center justify-center gap-2 pb-4 min-h-9'
         : cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
@@ -199,7 +206,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         {/* El nombre se cambia pinchando en él (2026-09-30, Eugenio: «permite
             cambiar el nombre de la base de datos»). Enter o salir guarda;
             Escape deja el de antes. */}
-        <div className={limpia ? 'basis-full flex justify-center min-w-0' : 'contents'}>
+        <div className={cn(limpia ? 'basis-full flex items-center justify-center gap-1 min-w-0' : 'contents', limpia && tituloOculto && 'opacity-40')}>
         {editable && nombre !== null ? (
           <input autoFocus value={nombre} maxLength={200} aria-label="Nombre de la base de datos"
             onChange={e => setNombre(e.target.value)}
@@ -218,6 +225,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           <p className={cn('font-black truncate', limpia ? LETRA_TITULO[tamanoTitulo] : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
         )}
         </div>
+        {/* Ocultar el título al publicar (2026-10-02, Eugenio). */}
+        {limpia && editable && onCambiarTituloOculto && (
+          <button onClick={() => onCambiarTituloOculto(!tituloOculto)}
+            title={tituloOculto ? 'El título no se ve en la página publicada. Pulsa para mostrarlo.' : 'Ocultar el título en la página publicada'}
+            className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md border text-[11px] font-bold shrink-0',
+              tituloOculto ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300')}>
+            {tituloOculto ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{tituloOculto ? 'Título oculto al publicar' : 'Ocultar título'}</span>
+          </button>
+        )}
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
         {!limpia && <span className="text-[11px] text-slate-400">
           {/* Si hay filtro puesto se dice: sin este número, una tabla filtrada y
@@ -328,6 +345,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           ))}
         </div>}
       </div>
+      )}
 
       {datos.ciclo?.length && (
         <div className="flex items-start gap-2 px-3 py-2 bg-rose-50 border-b border-rose-100 text-rose-700">

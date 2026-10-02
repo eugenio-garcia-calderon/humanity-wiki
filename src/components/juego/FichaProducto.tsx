@@ -206,7 +206,7 @@ export default function FichaProducto({ producto, puedeEditar, onCerrar, onGuard
         {editando && (
           <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 border-b border-slate-100 bg-slate-50">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-1">Añadir</span>
-            <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+            <input ref={fotoRef} type="file" accept="image/*,.heic,.heif" className="hidden"
               onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
             <Button variant="ghost" className={btn} onClick={() => anadir({ tipo: 'texto', texto: '' })}>
               <StickyNote className="w-3.5 h-3.5 mr-1 inline" />Texto

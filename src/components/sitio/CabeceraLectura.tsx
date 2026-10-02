@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { cn } from '../../utils/cn';
 import { MarcoSitio, type Rutas } from './MenuSitio';
 import { completarSitio } from './sitioWeb';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../knowledge/CabeceraPagina';
@@ -67,7 +68,10 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
                 : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>}
             </div>
           ) : null}>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words">
+          {/* OCULTO AL PÚBLICO SI SE PIDE (2026-10-02, Eugenio: «permite ocultar
+              el título de la página»). Se queda para los lectores de pantalla y
+              los buscadores (`sr-only`): una página sin título no se entiende. */}
+          <h1 className={cn('text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words', cfg.ocultarTitulo && 'sr-only')}>
             {pagina.titulo || 'Sin título'}
           </h1>
           {/* Si está escrita, se publica. */}
