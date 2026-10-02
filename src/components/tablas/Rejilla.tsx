@@ -35,7 +35,12 @@ type Fila = {
 
 export type FormaVista = 'galeria' | 'tabla';
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, visibles, onCambiarVisibles }: {
+/** La letra del título en galería, según el tamaño elegido. */
+const LETRA_TITULO: Record<TamanoGaleria, string> = {
+  pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
+};
+
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -51,6 +56,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Tamaño de las tarjetas de la galería, y quién lo guarda (el editor). */
   tamano?: TamanoGaleria;
   onCambiarTamano?: (t: TamanoGaleria) => void;
+  /** El tamaño del título (2026-10-02, Eugenio: «permite cambiar el tamaño
+   *  del título de la base de datos»). Sólo en galería, que es donde el
+   *  título hace de encabezado. */
+  tamanoTitulo?: TamanoGaleria;
+  onCambiarTamanoTitulo?: (t: TamanoGaleria) => void;
   /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
   visibles?: string[];
   onCambiarVisibles?: (ids: string[]) => void;
@@ -195,14 +205,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               if (e.key === 'Enter') e.currentTarget.blur();
               if (e.key === 'Escape') { setNombre(null); setFalloNombre(null); }
             }}
-            className={cn('min-w-0 flex-1 max-w-xs px-1.5 -mx-1.5 rounded border border-slate-300 bg-white font-black outline-none focus:border-emerald-400', limpia ? 'h-9 text-lg' : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))} />
+            className={cn('min-w-0 flex-1 max-w-xs px-1.5 -mx-1.5 rounded border border-slate-300 bg-white font-black outline-none focus:border-emerald-400', limpia ? cn('min-h-9', LETRA_TITULO[tamanoTitulo]) : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))} />
         ) : editable ? (
           <button onClick={() => setNombre(datos.tabla.titulo || '')} title="Cambiar el nombre"
-            className={cn('min-w-0 px-1.5 -mx-1.5 rounded font-black truncate hover:bg-slate-100 transition-colors', limpia ? 'h-9 text-lg' : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>
+            className={cn('min-w-0 px-1.5 -mx-1.5 rounded font-black truncate hover:bg-slate-100 transition-colors', limpia ? cn('min-h-9', LETRA_TITULO[tamanoTitulo]) : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>
             {datos.tabla.titulo}
           </button>
         ) : (
-          <p className={cn('font-black truncate', limpia ? 'text-lg' : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
+          <p className={cn('font-black truncate', limpia ? LETRA_TITULO[tamanoTitulo] : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
         )}
         </div>
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
@@ -257,6 +267,19 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           </div>
         )}
         {/* Tamaño de las tarjetas: sólo en galería y sólo para quien edita. */}
+        {vista === 'galeria' && onCambiarTamanoTitulo && (
+          <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0">
+            <span className="hidden sm:inline">Título</span>
+            <select value={tamanoTitulo} onChange={e => onCambiarTamanoTitulo(e.target.value as TamanoGaleria)}
+              aria-label="Tamaño del título"
+              className="h-8 rounded-md border border-slate-200 bg-white px-1.5 text-[11px] font-bold text-slate-600 outline-none focus:border-emerald-400">
+              <option value="pequeno">Pequeño</option>
+              <option value="mediano">Mediano</option>
+              <option value="grande">Grande</option>
+              <option value="muy-grande">Muy grande</option>
+            </select>
+          </label>
+        )}
         {vista === 'galeria' && onCambiarTamano && (
           <label className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0', !limpia && !onCambiarVisibles && 'ml-auto')}>
             <span className="hidden sm:inline">Tamaño</span>

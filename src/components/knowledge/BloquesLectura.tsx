@@ -130,7 +130,11 @@ export default function BloquesLectura({ bloques, comentable }: { bloques: any[]
         {dentro}
       </div>
     );
-    return comentable && b?.id
+    // SIN COMENTARIOS EN LAS BASES DE DATOS (2026-10-02, Eugenio: «aparece un
+    // icono de comentario en el lateral derecho de cada base de datos; no
+    // sirve de nada y al pulsarlo da error»). Una galería no es un texto que
+    // se discuta: cada tarjeta es una página, y ésa ya tiene los suyos.
+    return comentable && b?.id && b.tipo !== 'basedatos'
       ? <ConComentarios key={b.id} paginaId={comentable} bloqueId={String(b.id)}>{caja}</ConComentarios>
       : <div key={b?.id || i}>{caja}</div>;
   };
@@ -314,7 +318,7 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} visibles={b.propsGaleria} /> : null;
+        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} visibles={b.propsGaleria} /> : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────

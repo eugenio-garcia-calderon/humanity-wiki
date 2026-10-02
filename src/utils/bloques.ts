@@ -115,6 +115,8 @@ export interface Bloque {
   /** `basedatos` en galería: el tamaño de las tarjetas (2026-10-01, como
    *  Notion). Sin valor, mediano. */
   tamanoGaleria?: TamanoGaleria;
+  /** El tamaño del título de la base de datos (2026-10-02). */
+  tamanoTitulo?: TamanoGaleria;
   /** `basedatos` en galería: qué columnas se ven en las tarjetas (ids, en
    *  orden). Sin valor, las tres primeras. */
   propsGaleria?: string[];

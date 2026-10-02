@@ -33,10 +33,12 @@ export type Ajustes = {
   /** Ya no se usa (2026-10-01: si está escrita, es pública). Se lee para
    *  poder borrarlo de las páginas que lo tenían. */
   subtituloOculto?: boolean;
+  /** El menú y el pie de la web (2026-10-02). Ver `sitio/sitioWeb.ts`. */
+  sitio?: any;
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCerrar }: {
   ajustes: Ajustes;

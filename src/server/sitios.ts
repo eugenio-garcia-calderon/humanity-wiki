@@ -69,6 +69,39 @@ const subirDesdePagina = (id: string) => sql`
   ) AS visible
 `;
 
+/**
+ * EL MENÚ Y EL PIE DE ESTA PÁGINA (2026-10-02): los de la página más cercana
+ * por encima —ella incluida— que los tenga en `config.sitio`. Se sube por el
+ * mismo camino que la visibilidad, así que una subpágina de una galería
+ * hereda el menú de la página que la enseña: uno para toda la web.
+ */
+export async function sitioDePagina(db: any, id: string) {
+  const r = await db.execute(sql`
+    WITH RECURSIVE sube(id, n) AS (
+      SELECT ${id}::text, 0
+      UNION
+      SELECT madre.id, s.n + 1 FROM sube s
+      CROSS JOIN LATERAL (
+        SELECT w.id FROM bd_filas f
+        JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+          AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+        WHERE f.pagina_id = s.id AND f.deleted_at IS NULL
+        UNION
+        SELECT w.id FROM knowledge_windows w
+        WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+          AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
+      ) madre
+      WHERE s.n < ${PROFUNDIDAD}
+    )
+    SELECT w.id, w.title, w.config->'sitio' AS sitio, w.config->>'icono' AS icono
+    FROM sube s JOIN knowledge_windows w ON w.id = s.id
+    WHERE w.config ? 'sitio' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+    ORDER BY s.n LIMIT 1
+  `);
+  const w = r.rows[0] as any;
+  return w ? { config: w.sitio, raizId: w.id, titulo: w.title, icono: w.icono || null } : null;
+}
+
 /** ¿Puede verla cualquiera? Publicada ella, o alguna página por encima. */
 export async function paginaVisible(db: any, id: string): Promise<boolean> {
   const r = await db.execute(subirDesdePagina(id));
@@ -176,6 +209,7 @@ function imagenDe(config: any): string | null {
 async function paginaPublica(db: any, id: string) {
   const w = await datosPagina(db, id);
   if (!w || !(await paginaVisible(db, w.id))) return null;
+  const sitio = await sitioDePagina(db, w.id);
   const pr = await db.execute(sql`
     SELECT p.id, p.title, p.slug, p.publico, u.handle
     FROM bd_filas f
@@ -204,6 +238,7 @@ async function paginaPublica(db: any, id: string) {
     created_at: w.created_at, updated_at: w.updated_at,
     autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
     padre: p ? { id: p.id, titulo: p.title, slug: p.publico ? p.slug : null, handle: p.handle } : null,
+    sitio,
   };
 }
 
@@ -422,7 +457,7 @@ export function registrarSitios(app: Express, db: any) {
     // dentro de su armazón, y pintarla suelta daría un salto al arrancar.
     let cabecera = '';
     if (pagina && s.forma === 'dominio') {
-      try { cabecera = cabeceraEnHtml(pagina, String(req.headers['user-agent'] || '')); }
+      try { cabecera = cabeceraEnHtml(pagina, String(req.headers['user-agent'] || ''), resuelto?.body?.id); }
       catch (e) { console.error('sitios: cabecera', e); }
     }
 

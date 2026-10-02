@@ -34,6 +34,7 @@ import { normalizarTelefono } from '../utils/telefono.js';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
+import { sitioDePagina } from './sitios';
 
 /** El alfabeto de un subdominio: minúsculas, números y guiones interiores. */
 const FORMATO_HANDLE = /^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])$/;
@@ -2680,6 +2681,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         indexable: w.indexable,
         autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
         created_at: w.created_at, updated_at: w.updated_at,
+        // El menú y el pie del sitio (2026-10-02), igual que en `sitios.ts`.
+        sitio: await sitioDePagina(db, w.id),
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
