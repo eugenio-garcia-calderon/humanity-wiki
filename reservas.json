@@ -7,30 +7,6 @@
       "desde": "2026-10-02T13:49:50.886Z"
     },
     {
-      "agente": "prog8-pizarra",
-      "ruta": "src/server/bd.ts",
-      "motivo": "IA local para rellenar bases de datos",
-      "desde": "2026-10-02T13:51:44.901Z"
-    },
-    {
-      "agente": "prog8-pizarra",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "IA local para rellenar bases de datos",
-      "desde": "2026-10-02T13:51:44.901Z"
-    },
-    {
-      "agente": "prog8-pizarra",
-      "ruta": "docker-compose.prod.yml",
-      "motivo": "IA local para rellenar bases de datos",
-      "desde": "2026-10-02T13:51:44.901Z"
-    },
-    {
-      "agente": "prog8-pizarra",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "IA local para rellenar bases de datos",
-      "desde": "2026-10-02T13:51:44.901Z"
-    },
-    {
       "agente": "prog8-rapido",
       "ruta": "src/server/voz.ts",
       "motivo": "",
