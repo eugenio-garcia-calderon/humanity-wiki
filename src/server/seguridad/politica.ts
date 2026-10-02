@@ -331,6 +331,7 @@ const SIN_REVISAR: Entrada[] = [
   { m: 'POST', ruta: '/api/voz/sesion', guardia: { tipo: 'sesion' } },
   { m: 'POST', ruta: '/api/voz/sesion/:id/audio', guardia: { tipo: 'sesion' } },
   { m: 'POST', ruta: '/api/voz/sesion/:id/fin', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/voz/sesion/:id/diag', guardia: { tipo: 'sesion' } },
 ];
 
 export const POLITICA: Entrada[] = [...REVISADAS, ...SIN_REVISAR];
