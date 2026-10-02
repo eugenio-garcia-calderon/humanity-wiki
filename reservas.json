@@ -23,6 +23,54 @@
       "ruta": "src/server/iaLocal.ts",
       "motivo": "IA local para rellenar bases de datos (prog8-ialocal)",
       "desde": "2026-10-02T13:58:51.810Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/republicar.ts",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/index.css",
+      "motivo": "",
+      "desde": "2026-10-02T14:16:07.678Z"
     }
   ]
 }
