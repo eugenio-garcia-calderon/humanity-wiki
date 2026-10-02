@@ -8181,3 +8181,17 @@ taking the page down.
 - Ahora el navegador graba con el micrófono elegido (`getUserMedia`), sube PCM de 16 kHz en trozos de 250 ms y `server/voz.ts` lo pasa a `gemini-3.5-transcribe-live`; el texto vuelve por SSE. El servidor reconstruye un único texto de la sesión porque el transcriptor alterna entre mandar todo lo dicho o sólo la última frase, y pega frases sin espacio. Sin sesión o sin presupuesto se usa el reconocimiento del navegador si existe, y los fallos se dicen encima del botón.
 - `BotonMicrofono.tsx`: azul con pulso mientras escucha; la pestañita lista los micrófonos y recuerda el elegido en ese navegador. Montado en `modulos.ts` (con permiso de la sesión que tenía la reserva).
 - Probado en local con Chrome y un micrófono simulado: el texto aparece palabra a palabra cada ~0,4 s, sin duplicados.
+
+## 2026-10-02 — Free AI to fill databases by chat, running on our own server (prog8)
+
+With a page open in the editor, the chat first asks `/api/datos-chat/entender`.
+If the sentence is a data request (add or edit an entry in one of the page's
+databases), it answers with a proposal card — fields, values and anything that
+cannot be saved — and «Guardar» writes it through the grid's own validation.
+No paid model is called; the card says «Entendido sin IA» or «IA de la casa ·
+X s · gratis». Form-like sentences are parsed by rules; free-form ones by
+Qwen2.5-1.5B on llama.cpp (new `llm` service in `docker-compose.prod.yml`,
+model downloaded once into the `llm_models` volume). Tested locally end to end:
+rules and model paths, edit, a tampered proposal rejected, no session rejected,
+the gallery refreshing after save, and no `/api/ai/chat` call in the network
+log. Design and limits: `03_DECISIONS.md`.

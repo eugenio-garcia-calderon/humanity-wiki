@@ -562,3 +562,42 @@ forces it.
 pages (0132), and the originals were left in place: tasks still live in
 `roadmap_items` and show in `/tareas`. Nothing was deleted, so the rescue can be
 redone or improved later without data loss.
+
+## 2026-10-02 — Filling databases by chat with a model on our own server (recipes, not prompts)
+
+**Context.** Eugenio: filling a site's databases by talking to the chat must cost
+nothing — no credits on any external AI — and the AI should only *understand*
+the request; *how* to do it must be preprogrammed.
+
+**Architecture (`src/server/rellenarPorChat.ts`, `src/server/iaLocal.ts`).**
+
+| Layer | What it does | Model? |
+|---|---|---|
+| Gate | Is this about data? (data verb, a table name or one of its words, or an existing entry + a column) | No |
+| Rules | Form-like sentences: «añade a Productos: Miel, precio 12 €», «cambia el precio de Miel a 14» | No |
+| Local model | Free-form sentences → slots of a recipe, output forced into a JSON schema whose enums are the page's real table and column names | Qwen2.5-1.5B on llama.cpp, in our container |
+| Guard | Drops any value the person did not say (measured: the model invents prices and categories), recovers original casing, converts spoken dates, turns «add» of an existing name into «edit» | No |
+| Typing | Every value through the grid's own `tipar`; select options matched by label | No |
+| Proposal | Shown as a card; nothing is written until «Guardar» | — |
+| Save | Re-validates everything server-side, then `bdInterno.crearFila` + `bdInterno.escribirCeldas` — the same permission and validation path as the grid | No |
+
+Recipes today: `anadir_entrada`, `editar_entrada`. Adding one = a case in
+`construirPropuesta` + `guardar` and its name in the schema enum.
+
+**Why not let the model write.** House rule: a bug that depends on the model
+behaving is postponed, not fixed. A 1.5B model misreads; here a misread is a
+card the person discards.
+
+**Why this model.** 2 vCPU / 3.8 GB shared with the site. Qwen2.5-1.5B-Instruct
+Q4_K_M: ~1.1 GB, Apache-2.0, good Spanish, 2–4 s per request on a laptop.
+Container capped at 1.5 CPU / 1.8 GB, one request at a time, queue of 2, 15
+requests per person per minute. The 3B would be better at understanding but
+its licence is not Apache and it would not leave room on this machine.
+
+**Never silently paid.** If the local model is down or busy the chat says so and
+offers «Pedírselo a la IA de pago»; it never falls through to a paid model by
+itself.
+
+**`bd.ts` change.** The body of `PUT /api/bd/filas/:id` became
+`escribirCeldas()` (exposed on `bdInterno`), unchanged in behaviour, so the
+chat and the grid share one write path.

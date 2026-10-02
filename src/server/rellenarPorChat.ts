@@ -101,6 +101,26 @@ function aparece(textoNorm: string, nombre: string): number {
   return -1;
 }
 
+/** ¿Se nombra la tabla? Su nombre entero, o alguna palabra con contenido de
+ *  él: «AI - Productos» se nombra diciendo «un producto». */
+function mencionaTabla(textoNorm: string, titulo: string): boolean {
+  return finDeMencion(textoNorm, titulo) >= 0;
+}
+
+/** Dónde ACABA la mención de la tabla en el texto (para recortar lo que viene
+ *  detrás), o -1. Sirve igual para el nombre entero que para una palabra. */
+function finDeMencion(textoNorm: string, titulo: string): number {
+  for (const nombre of [titulo, ...norm(titulo).split(/[^a-z0-9]+/).filter(p => p.length >= 4)]) {
+    const i = aparece(textoNorm, nombre);
+    if (i < 0) continue;
+    const base = norm(nombre);
+    const largo = textoNorm.slice(i).startsWith(base) ? base.length : singular(base).length;
+    const extra = textoNorm.slice(i + largo).match(/^(es|s)/)?.[0].length || 0;
+    return i + largo + extra;
+  }
+  return -1;
+}
+
 /** El texto normalizado y, para cada posición, dónde estaba en el original —
  *  así los VALORES se recortan del original y conservan tildes y mayúsculas. */
 function conMapa(original: string) {
@@ -140,11 +160,12 @@ function porReglas(texto: string, tablas: Tabla[]): Huecos | null {
     const i = aparece(n, tb.titulo);
     if (i >= 0 && (!tabla || norm(tb.titulo).length > norm(tabla.titulo).length)) {
       tabla = tb;
-      const resto = n.slice(i);
-      const m = /^[a-z0-9 ]*?(?=[:,]|$)/.exec(resto);
-      finTabla = i + norm(tb.titulo).length + (resto.slice(norm(tb.titulo).length).match(/^(es|s)/)?.[0].length || 0);
-      void m;
+      finTabla = finDeMencion(n, tb.titulo);
     }
+  }
+  if (!tabla) {
+    const nombradas = tablas.filter(tb => mencionaTabla(n, tb.titulo));
+    if (nombradas.length === 1) { tabla = nombradas[0]; finTabla = finDeMencion(n, tabla.titulo); }
   }
   if (!tabla && tablas.length === 1) tabla = tablas[0];
   if (!tabla) return null;
@@ -391,7 +412,11 @@ function construirPropuesta(h: Huecos, tablas: Tabla[]): Resultado {
  *  CPU del servidor por nada. */
 const pareceDeDatos = (texto: string, tablas: Tabla[]) => {
   const n = norm(texto);
-  return VERBO_ANADIR.test(n) || VERBO_EDITAR.test(n) || tablas.some(t => aparece(n, t.titulo) >= 0);
+  return VERBO_ANADIR.test(n) || VERBO_EDITAR.test(n) || tablas.some(t =>
+    mencionaTabla(n, t.titulo)
+    // «la mermelada de higo ya no está disponible»: ni verbo ni tabla, pero
+    // nombra una entrada que existe y una de sus columnas.
+    || (t.filas.some(f => norm(f.titulo).length >= 3 && n.includes(norm(f.titulo))) && t.columnas.some(c => aparece(n, c.nombre) >= 0)));
 };
 
 // Freno por persona: el modelo es gratis para ella, pero no para la máquina.
