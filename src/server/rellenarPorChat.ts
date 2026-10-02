@@ -213,7 +213,9 @@ function porReglas(texto: string, tablas: Tabla[]): Huecos | null {
 
 async function porModelo(texto: string, tablas: Tabla[]): Promise<{ huecos: Huecos | null; ms: number }> {
   const nombresTablas = tablas.map(t => t.titulo);
-  const nombresCols = [...new Set(tablas.flatMap(t => t.columnas.filter(c => RELLENABLES.has(c.tipo)).map(c => c.nombre)))];
+  // The name column is never offered: the name travels in «entrada», and the
+  // model kept repeating it inside «campos» anyway — ~15 tokens, ~2 s each time.
+  const nombresCols = [...new Set(tablas.flatMap(t => t.columnas.filter(c => RELLENABLES.has(c.tipo) && c.id !== t.colTitulo).map(c => c.nombre)))];
   // ── THE GRAMMAR: COMPACT JSON, ONLY REAL NAMES ─────────────────────────
   // Measured on the production CPU (2026-10-02): 6.9 tokens/s. The schema-
   // based grammar let the model indent its JSON, ~40 % of the tokens. This
