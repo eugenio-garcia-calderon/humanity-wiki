@@ -214,23 +214,23 @@ function porReglas(texto: string, tablas: Tabla[]): Huecos | null {
 async function porModelo(texto: string, tablas: Tabla[]): Promise<{ huecos: Huecos | null; ms: number }> {
   const nombresTablas = tablas.map(t => t.titulo);
   const nombresCols = [...new Set(tablas.flatMap(t => t.columnas.filter(c => RELLENABLES.has(c.tipo)).map(c => c.nombre)))];
-  const esquema = {
-    type: 'object',
-    required: ['receta', 'tabla', 'entrada', 'campos'],
-    properties: {
-      receta: { type: 'string', enum: ['anadir_entrada', 'editar_entrada', 'ninguna'] },
-      tabla: { type: 'string', enum: nombresTablas },
-      entrada: { type: 'string', maxLength: 120 },
-      campos: {
-        type: 'array', maxItems: 12,
-        items: { type: 'object', required: ['columna', 'valor'], properties: {
-          columna: { type: 'string', enum: nombresCols.length ? nombresCols : ['-'] },
-          valor: { type: 'string', maxLength: 300 },
-        } },
-      },
-      texto: { type: 'string', maxLength: 1500 },
-    },
-  };
+  // ── THE GRAMMAR: COMPACT JSON, ONLY REAL NAMES ─────────────────────────
+  // Measured on the production CPU (2026-10-02): 6.9 tokens/s. The schema-
+  // based grammar let the model indent its JSON, ~40 % of the tokens. This
+  // grammar has no whitespace at all, and its table and column names are the
+  // page's real ones, so it cannot invent either.
+  const lit = (v: string) => JSON.stringify(JSON.stringify(v));
+  const alternativa = (xs: string[]) => (xs.length ? xs : ['-']).map(lit).join(' | ');
+  const gramatica = [
+    'root ::= "{\\"receta\\":" receta ",\\"tabla\\":" tabla ",\\"entrada\\":" cad ",\\"campos\\":[" campos "]}"',
+    'campos ::= "" | campo ("," campo){0,11}',
+    'campo ::= "{\\"columna\\":" columna ",\\"valor\\":" cad "}"',
+    `receta ::= ${alternativa(['anadir_entrada', 'editar_entrada', 'ninguna'])}`,
+    `tabla ::= ${alternativa(nombresTablas)}`,
+    `columna ::= ${alternativa(nombresCols)}`,
+    'cad ::= "\\"" car{0,160} "\\""',
+    'car ::= [^"\\\\\\x7F\\x00-\\x1F] | "\\\\" ["\\\\/bfnrt]',
+  ].join('\n');
   const descripcion = tablas.map(t => {
     const cols = t.columnas.filter(c => RELLENABLES.has(c.tipo)).map(c => {
       const ops = (c.tipo === 'seleccion' || c.tipo === 'seleccion_multiple') && Array.isArray(c.opciones) && c.opciones.length
@@ -240,6 +240,17 @@ async function porModelo(texto: string, tablas: Tabla[]): Promise<{ huecos: Huec
     const ej = t.filas.slice(0, 15).map(f => f.titulo).filter(Boolean);
     return `- Tabla «${t.titulo}». Columnas: ${cols.join(', ')}.${ej.length ? ` Entradas que ya existen: ${ej.join(', ')}.` : ''}`;
   }).join('\n');
+  // Two examples IN THE COMPACT FORMAT, built from this page's real names:
+  // without them the model, denied its usual indentation, closed «campos»
+  // empty every time and read small talk as data (measured 2026-10-02).
+  const t0 = tablas[0];
+  const c0 = t0.columnas.find(c => c.id !== t0.colTitulo && RELLENABLES.has(c.tipo));
+  const ej = (frase: string, json: object) => `«${frase}» → ${JSON.stringify(json)}`;
+  const ejemplos = [
+    ej(`añade a ${t0.titulo}: Ejemplo uno${c0 ? `, ${c0.nombre.toLowerCase()} ${c0.tipo === 'casilla' ? 'sí' : c0.tipo === 'fecha' ? '1 de marzo' : '5'}` : ''}`,
+      { receta: 'anadir_entrada', tabla: t0.titulo, entrada: 'Ejemplo uno', campos: c0 ? [{ columna: c0.nombre, valor: c0.tipo === 'casilla' ? 'sí' : c0.tipo === 'fecha' ? '1 de marzo' : '5' }] : [] }),
+    ej('hola, ¿qué tal estás?', { receta: 'ninguna', tabla: t0.titulo, entrada: '', campos: [] }),
+  ].join('\n');
   const sistema = `Conviertes una petición en español en un JSON para rellenar bases de datos. No contestas nada más.
 Bases de datos de la página:
 ${descripcion}
@@ -248,9 +259,12 @@ Recetas:
 - anadir_entrada: crear una entrada nueva. "entrada" = su nombre. "campos" = los demás datos que diga, cada uno con su columna.
 - editar_entrada: cambiar datos de una entrada que ya existe. "entrada" = cuál (su nombre). "campos" = lo que cambia.
 - ninguna: si no pide añadir ni cambiar datos de una tabla.
-Copia los valores tal como los dice la persona. No inventes datos que no haya dicho. "texto" solo si da una descripción larga.`;
+Copia los valores tal como los dice la persona. No inventes datos que no haya dicho. No repitas el nombre dentro de "campos".
+
+Ejemplos:
+${ejemplos}`;
   let respuesta;
-  try { respuesta = await pedirJsonLocal({ sistema, usuario: texto, esquema, maxTokens: 350 }); }
+  try { respuesta = await pedirJsonLocal({ sistema, usuario: texto, gramatica, maxTokens: 300 }); }
   catch (e) { if (e instanceof IaLocalIlegible) return { huecos: null, ms: 0 }; throw e; }
   const { json, ms } = respuesta;
   if (!json || json.receta === 'ninguna' || !json.tabla) return { huecos: null, ms };
