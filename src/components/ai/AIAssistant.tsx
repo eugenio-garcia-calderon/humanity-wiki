@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
+import BotonMicrofono from './BotonMicrofono';
 import ResizeHandle from '../ui/ResizeHandle';
 import { cn } from '../../utils/cn';
 import { areasQueEncajan as areasDe, AREA_POR_ID } from '../../utils/objetivos';
@@ -854,7 +855,7 @@ export default function AIAssistant({ modo = 'panel' }: {
   };
   // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
   const dictationBase = useRef('');
-  const { listening, supported: voiceSupported, toggle: toggleVoice } = useVoiceDictation((crudo, isFinal) => {
+  const { listening, supported: voiceSupported, toggle: toggleVoice, error: errorVoz, microfonos, microfono, setMicrofono, cargarMicrofonos } = useVoiceDictation((crudo, isFinal) => {
     // Chrome empieza cada frase nueva con un espacio: sin quitarlo, salían
     // dos entre frase y frase.
     const text = crudo.replace(/^\s+/, '');
@@ -2402,15 +2403,11 @@ export default function AIAssistant({ modo = 'panel' }: {
                 <Plus className="w-4 h-4" />
               </button>
               {voiceSupported && (
-                <button
-                  onClick={handleMicClick}
-                  title={listening ? 'Detener el dictado' : 'Dictar por voz'}
-                  aria-label={listening ? 'Detener el dictado' : 'Dictar por voz'}
-                  className={cn('w-8 h-8 grid place-items-center rounded-lg transition-colors',
-                    listening ? 'bg-red-50 text-red-600 animate-pulse' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}
-                >
-                  {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                </button>
+                // Azul mientras escucha y con la pestañita del micrófono
+                // (2026-10-02). Ver `BotonMicrofono.tsx` y `useVoiceDictation.ts`.
+                <BotonMicrofono escuchando={listening} onPulsar={handleMicClick}
+                  microfonos={microfonos} microfono={microfono} onElegir={setMicrofono}
+                  onAbrirLista={cargarMicrofonos} error={errorVoz} />
               )}
 
               {/* EL MODELO, ABAJO Y CON SU NOMBRE (2026-08-20, petición de
