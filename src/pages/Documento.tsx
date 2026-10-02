@@ -1594,6 +1594,7 @@ function EditorPagina() {
         }
         return (
           <Rejilla key={`${tablaId}:${versionDatos}`} tablaId={tablaId} editable={editable} alto={520}
+            tablasPagina={bloques.filter(x => x.tipo === 'basedatos' && (x as any).tabla_id && (x as any).tabla_id !== tablaId).map(x => (x as any).tabla_id)}
             vista={b.vistaBd || 'galeria'}
             color={b.color}
             tamano={b.tamanoGaleria || 'mediano'}

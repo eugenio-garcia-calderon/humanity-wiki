@@ -358,6 +358,42 @@ export function registerBdRoutes(app: Express, db: any) {
           };
       });
 
+      // LO QUE SE VE DEL ELEMENTO ENLAZADO (2026-10-02, Eugenio: «que te
+      // permita seleccionar las variables que quieres mostrar como enlazadas,
+      // por ejemplo una imagen o un texto, de esa otra base de datos»). Una
+      // relación con `config.mostrar` lleva, en cada apuntado, `muestra`: la
+      // imagen y el texto de su página y los campos elegidos. Sólo si quien
+      // mira puede leer la otra tabla: enlazar no abre lo que esa tabla
+      // esconde.
+      for (const c of columnas as any[]) {
+        const mostrar: string[] = Array.isArray(c.config?.mostrar) ? c.config.mostrar : [];
+        const destino = c.config?.tabla_destino;
+        if (c.tipo !== 'relacion' || !mostrar.length || !destino) continue;
+        const ids = [...new Set(preparadas.flatMap(f => (f.apuntados[c.id] || []).filter(a => a.clase === 'fila').map(a => a.id)))];
+        if (!ids.length) continue;
+        if ('error' in (await puedeConTabla(req, destino, false))) continue;
+        const otras = await db.execute(sql`
+          SELECT id, valores, pagina_id FROM bd_filas
+          WHERE id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND deleted_at IS NULL
+        `);
+        const colsDestino = (await columnasDe(destino)).filter((x: any) => mostrar.includes(x.id));
+        const tarjetasOtras = await tarjetasDe((otras.rows as any[]).map(o => o.pagina_id).filter(Boolean));
+        const porId = new Map<string, any>();
+        for (const o of otras.rows as any[]) {
+          const t = o.pagina_id ? tarjetasOtras[o.pagina_id] : null;
+          const celdas = celdasDe(o.valores || {}, colsDestino);
+          porId.set(o.id, {
+            imagen: mostrar.includes('imagen') ? t?.imagen || null : undefined,
+            texto: mostrar.includes('texto') ? (t?.descripcion || t?.resumen || null) : undefined,
+            campos: colsDestino.map((x: any) => ({ id: x.id, nombre: x.nombre, tipo: x.tipo, opciones: x.opciones, config: x.config, celda: celdas[x.id] })),
+          });
+        }
+        for (const f of preparadas) for (const a of f.apuntados[c.id] || []) {
+          const m = porId.get(a.id);
+          if (m) (a as any).muestra = m;
+        }
+      }
+
       // LAS COLUMNAS CALCULADAS, EN ORDEN. Se hace aquí, con la tabla entera
       // delante, y no celda a celda: un agregado necesita mirar la otra tabla
       // completa, así que fila a fila serían tantas consultas como filas. Y el

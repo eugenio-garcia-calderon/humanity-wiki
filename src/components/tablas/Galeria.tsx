@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Plus, Move } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
 import { FichaRelacion } from './Relacion';
@@ -172,6 +172,16 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   // enlazada: «Movilidad» en la tarjeta del coche volador.
                   if (c.tipo === 'relacion') {
                     const lista = f.apuntados?.[c.id] || [];
+                    // Con «qué se ve» elegido, cada enlazado sale con su imagen,
+                    // su texto y sus campos (2026-10-02). Sin elegir, las fichas
+                    // de siempre.
+                    if (lista.length && Array.isArray(c.config?.mostrar) && c.config.mostrar.length) {
+                      return (
+                        <div key={c.id} className="pt-1 space-y-1.5">
+                          {lista.map((a: any) => <Enlazado key={a.id} a={a} />)}
+                        </div>
+                      );
+                    }
                     return lista.length ? (
                       <div key={c.id} className="flex flex-wrap items-center gap-1 pt-0.5">
                         {lista.map((a: any) => <FichaRelacion key={a.id} a={a} />)}
@@ -276,3 +286,35 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
   );
 }
 
+/**
+ * Un elemento de otra base de datos dentro de la tarjeta, con lo que se haya
+ * elegido enseñar de él: su imagen, su texto y sus campos. Lleva a su página.
+ */
+function Enlazado({ a }: { a: any }) {
+  const sitio = useSitio();
+  const m = a.muestra || {};
+  const campos = (m.campos || [])
+    .map((x: any) => ({ nombre: x.nombre, v: formatear(x.celda ?? { estado: 'vacia' }, x) }))
+    .filter((x: any) => x.v);
+  const pagina = a.extra?.pagina_id as string | undefined;
+  const dentro = (
+    <>
+      {m.imagen && <img src={m.imagen} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
+      <span className="min-w-0 flex-1">
+        <span className="block text-xs font-bold text-slate-700 truncate">{a.etiqueta || 'Sin título'}</span>
+        {m.texto && <span className="block text-[11px] text-slate-500 leading-snug line-clamp-2">{m.texto}</span>}
+        {campos.map((x: any) => (
+          <span key={x.nombre} className="block text-[11px] text-slate-500 truncate"><span className="text-slate-400">{x.nombre}: </span>{x.v}</span>
+        ))}
+      </span>
+    </>
+  );
+  const clase = 'flex items-start gap-2 p-1.5 -mx-1.5 rounded-lg text-left transition-colors';
+  if (!pagina || a.existe === false) return <div className={clase}>{dentro}</div>;
+  return (
+    <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} onClick={e => e.stopPropagation()}
+      className={cn(clase, 'hover:bg-slate-50')}>
+      {dentro}
+    </Link>
+  );
+}

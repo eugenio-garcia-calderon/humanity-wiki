@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check, Link2 } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -40,7 +40,7 @@ const LETRA_TITULO: Record<TamanoGaleria, string> = {
   pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles, tablasPagina }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -61,6 +61,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
    *  título hace de encabezado. */
   tamanoTitulo?: TamanoGaleria;
   onCambiarTamanoTitulo?: (t: TamanoGaleria) => void;
+  /** Las demás bases de datos de la misma página, para enlazar con ellas
+   *  primero (2026-10-02). */
+  tablasPagina?: string[];
   /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
   visibles?: string[];
   onCambiarVisibles?: (ids: string[]) => void;
@@ -259,9 +262,29 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                       </span>
                       <span className="flex-1 truncate">{c.nombre}</span>
                       {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
+                      {editable && (
+                        <span role="button" tabIndex={0} title="Editar la propiedad" aria-label={`Editar ${c.nombre}`}
+                          onClick={e => { e.stopPropagation(); setMenuProps(false); setEditorColumna(c); }}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setMenuProps(false); setEditorColumna(c); } }}
+                          className="w-7 h-7 -mr-1 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
+                          <Pencil className="w-3 h-3" />
+                        </span>
+                      )}
                     </button>
                   );
                 })}
+                {/* NUEVA PROPIEDAD DESDE LA GALERÍA (2026-10-02, Eugenio: «en la
+                    vista de galería no se puede agregar una nueva propiedad; solo
+                    desde la vista de tabla dándole al más»). Es el mismo editor
+                    que el «+» de la tabla, y la propiedad nueva sale ya marcada
+                    para verse en las tarjetas: si no, parecería que no ha pasado
+                    nada. */}
+                {editable && (
+                  <button onClick={() => { setMenuProps(false); setEditorColumna('nueva'); }}
+                    className="mt-1 w-full flex items-center gap-2 px-2 h-9 rounded-md border-t border-slate-100 text-xs font-bold text-emerald-700 hover:bg-emerald-50">
+                    <Plus className="w-3.5 h-3.5" /> Nueva propiedad
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -423,8 +446,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           columna={editorColumna === 'nueva' || editorColumna === 'nueva-relacion' ? undefined : editorColumna}
           tipoInicial={editorColumna === 'nueva-relacion' ? 'relacion' : undefined}
           columnas={columnas}
+          tablasPagina={tablasPagina}
           onCerrar={() => setEditorColumna(null)}
-          onHecho={cargar}
+          onHecho={idNueva => {
+            cargar();
+            // Creada desde la galería, se ve en las tarjetas desde ya.
+            if (idNueva && vista === 'galeria' && onCambiarVisibles) {
+              const actuales = visibles ?? columnas.filter(x => x.id !== datos?.columna_titulo).slice(0, 3).map(x => x.id);
+              onCambiarVisibles([...actuales, idNueva]);
+            }
+          }}
         />
       )}
 

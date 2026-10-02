@@ -8156,3 +8156,9 @@ taking the page down.
 - Lo pendiente del editor se guarda antes de que la IA lea, y la página y sus bases de datos se recargan solas cuando la IA cambia algo.
 - Voz: el dictado ya escribía en vivo; ahora no se pierde lo que se está diciendo cuando una frase se cierra en el mismo evento, ni sale un espacio doble entre frases.
 - Probado en local con la IA de verdad: entrada «Agua» con imagen generada, entrada «Sol» con imagen adjunta, y un título y un párrafo añadidos a la página, que aparecieron en el editor sin recargar. Dictado probado con un reconocimiento de voz simulado (no hay micrófono en la prueba automática).
+
+### 2026-10-02 — Galería: nueva propiedad, y enlazar bases de datos eligiendo qué se ve (prog8)
+- Eugenio: «en la vista de galería no se puede agregar una nueva propiedad, solo desde la vista de tabla dándole al más» y «al conectar con una base de datos, un selector de las disponibles empezando por las de esa misma página, que coja por defecto su nombre (que luego puedes modificar) y que permita seleccionar las variables que quieres mostrar como enlazadas, por ejemplo una imagen o un texto».
+- Menú «Propiedades» de la galería: «Nueva propiedad» (el mismo editor que el «+» de la tabla) y un lápiz para editar cada una. La propiedad creada desde la galería sale ya marcada para verse en las tarjetas.
+- «Enlazar con otra base de datos»: primero la base de datos —las de la misma página arriba—, el nombre se rellena con el suyo mientras no se escriba otro, y después «Qué se ve del elemento enlazado»: imagen, texto (descripción o principio) y sus campos. «Admite varios» nace encendido.
+- La relación guarda `config.mostrar`; `GET /api/bd/tablas/:id` añade `muestra` a cada elemento enlazado, sólo si quien mira puede leer la otra tabla. La tarjeta lo pinta como mini-ficha con imagen, texto y campos.
