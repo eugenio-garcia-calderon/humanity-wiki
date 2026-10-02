@@ -326,6 +326,11 @@ const SIN_REVISAR: Entrada[] = [
   { m: 'POST', ruta: '/api/needs', guardia: { tipo: 'nivel', minimo: 2 } },
   { m: 'POST', ruta: '/api/spotify/desconectar', guardia: { tipo: 'sesion' } },
   { m: 'POST', ruta: '/api/youtube/desconectar', guardia: { tipo: 'sesion' } },
+  // Dictado por voz (2026-10-02): cada sesión es de quien la abrió, y eso lo
+  // comprueba la ruta.
+  { m: 'POST', ruta: '/api/voz/sesion', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/voz/sesion/:id/audio', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/voz/sesion/:id/fin', guardia: { tipo: 'sesion' } },
 ];
 
 export const POLITICA: Entrada[] = [...REVISADAS, ...SIN_REVISAR];

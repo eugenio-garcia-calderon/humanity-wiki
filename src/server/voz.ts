@@ -51,11 +51,25 @@ type Sesion = {
   /** Lo ya cerrado, y lo cerrado más lo que se está diciendo. */
   cerrado: string;
   enCurso: string;
+  /** Para el registro: qué ha pasado en esta sesión. */
+  bytes: number;
+  trozos: number;
+  textos: number;
+  conexiones: number;
   creada: number;
   cerrada: boolean;
 };
 
 const sesiones = new Map<string, Sesion>();
+
+const CABECERAS_SSE = {
+  'Content-Type': 'text/event-stream',
+  'Cache-Control': 'no-cache, no-transform',
+  Connection: 'keep-alive',
+  // Sin esto, un proxy por medio puede juntar los trozos y el texto llegaría
+  // a golpes en vez de palabra a palabra.
+  'X-Accel-Buffering': 'no',
+};
 
 function emitir(s: Sesion, tipo: string, datos: any) {
   const linea = `event: ${tipo}\ndata: ${JSON.stringify(datos)}\n\n`;
@@ -68,6 +82,10 @@ function emitir(s: Sesion, tipo: string, datos: any) {
 function cerrar(s: Sesion, motivo?: string) {
   if (s.cerrada) return;
   s.cerrada = true;
+  // UNA LÍNEA POR DICTADO (2026-10-02). Sin ella, «no funciona» no se podía
+  // localizar: no se sabía si había llegado audio, si el transcriptor había
+  // contestado ni si alguien escuchaba el canal del texto.
+  console.log(`[voz] ${s.id}: ${Math.round(s.bytes / 1024)} KB en ${s.trozos} trozos, ${s.textos} textos, ${s.conexiones} conexiones al canal (${s.oyentes.size} abiertas), ${Math.round((Date.now() - s.creada) / 1000)} s${motivo ? `, ${motivo}` : ''}`);
   if (motivo) emitir(s, 'error', { mensaje: motivo });
   emitir(s, 'fin', {});
   for (const r of s.oyentes) r.end();
@@ -98,7 +116,7 @@ export function registrarVoz(app: Express, db: any) {
 
       const id = `VOZ${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
       const ws = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${process.env.GEMINI_API_KEY}`);
-      const s: Sesion = { id, userId: req.user.id, ws, listo: false, pendiente: [], oyentes: new Set(), historial: [], cerrado: '', enCurso: '', ultimoAudio: Date.now(), creada: Date.now(), cerrada: false };
+      const s: Sesion = { id, userId: req.user.id, ws, listo: false, pendiente: [], oyentes: new Set(), historial: [], cerrado: '', enCurso: '', bytes: 0, trozos: 0, textos: 0, conexiones: 0, ultimoAudio: Date.now(), creada: Date.now(), cerrada: false };
       sesiones.set(id, s);
 
       ws.on('open', () => ws.send(JSON.stringify({ setup: { model: `models/${MODELO}`, inputAudioTranscription: {} } })));
@@ -121,31 +139,43 @@ export function registrarVoz(app: Express, db: any) {
         // y al navegador sólo le llega ése, entero, cada vez.
         const enCurso = sc.interimInputTranscription?.text;
         const cerrado = sc.inputTranscription?.text;
+        if (enCurso || cerrado) s.textos++;
         if (enCurso) { s.enCurso = unir(s.cerrado, enCurso); emitir(s, 'texto', { texto: s.enCurso }); }
         if (cerrado) { s.cerrado = unir(s.cerrado, cerrado); s.enCurso = s.cerrado; emitir(s, 'texto', { texto: s.cerrado }); }
       });
-      ws.on('close', () => cerrar(s));
+      ws.on('close', (codigo, razon) => cerrar(s, codigo !== 1000 ? `el transcriptor cerró (${codigo} ${String(razon).slice(0, 120)})` : undefined));
       ws.on('error', e => { console.error('[voz] transcriptor:', e.message); cerrar(s, 'Se ha cortado la conexión con el dictado.'); });
 
       res.json({ id });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * PRUEBA DEL CANAL (2026-10-02). Cinco mensajes, uno cada 300 ms, sin
+   * sesión ni coste: sirve para comprobar desde fuera que el texto atraviesa
+   * Cloudflare y Caddy palabra a palabra y no de golpe al final.
+   */
+  app.get('/api/voz/prueba-canal', (req: Request, res: Response) => {
+    res.writeHead(200, CABECERAS_SSE);
+    res.write(': ok\n\n');
+    let n = 0;
+    const t = setInterval(() => {
+      n++;
+      res.write(`event: texto\ndata: ${JSON.stringify({ texto: `prueba ${n}`, t: Date.now() })}\n\n`);
+      if (n >= 5) { clearInterval(t); res.write('event: fin\ndata: {}\n\n'); res.end(); }
+    }, 300);
+    req.on('close', () => clearInterval(t));
+  });
+
   /** El texto, según llega. */
   app.get('/api/voz/sesion/:id/eventos', (req: Request, res: Response) => {
     const s = sesiones.get(req.params.id);
     if (!s || !req.user || s.userId !== req.user.id) return res.status(404).json({ error: 'Ese dictado ya no está abierto.' });
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      // Sin esto, un proxy por medio puede juntar los trozos y el texto
-      // llegaría a golpes en vez de palabra a palabra.
-      'X-Accel-Buffering': 'no',
-    });
+    res.writeHead(200, CABECERAS_SSE);
     res.write(': ok\n\n');
     for (const l of s.historial) res.write(l);
     s.oyentes.add(res);
+    s.conexiones++;
     req.on('close', () => s.oyentes.delete(res));
   });
 
@@ -156,6 +186,7 @@ export function registrarVoz(app: Express, db: any) {
     const b = req.body as Buffer;
     if (!Buffer.isBuffer(b) || !b.length) return res.status(400).json({ error: 'Audio vacío.' });
     s.ultimoAudio = Date.now();
+    s.bytes += b.length; s.trozos++;
     if (s.listo) enviarAudio(s, b); else s.pendiente.push(b);
     res.status(204).end();
   });
