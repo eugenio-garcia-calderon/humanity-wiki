@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm';
 import { bdInterno } from './bd';
 import { tipar, type Tipo } from './bd/tipos';
 import { puedeEditarPagina } from './ai/paginaIA';
-import { pedirJsonLocal, iaLocalLista, IaLocalNoDisponible, IaLocalOcupada } from './iaLocal';
+import { pedirJsonLocal, iaLocalLista, IaLocalNoDisponible, IaLocalOcupada, IaLocalIlegible } from './iaLocal';
 
 // ============================================================================
 // RELLENAR BASES DE DATOS HABLANDO, SIN GASTAR IA DE PAGO (2026-10-02)
@@ -228,18 +228,61 @@ Recetas:
 - editar_entrada: cambiar datos de una entrada que ya existe. "entrada" = cuál (su nombre). "campos" = lo que cambia.
 - ninguna: si no pide añadir ni cambiar datos de una tabla.
 Copia los valores tal como los dice la persona. No inventes datos que no haya dicho. "texto" solo si da una descripción larga.`;
-  const { json, ms } = await pedirJsonLocal({ sistema, usuario: texto, esquema, maxTokens: 350 });
+  let respuesta;
+  try { respuesta = await pedirJsonLocal({ sistema, usuario: texto, esquema, maxTokens: 350 }); }
+  catch (e) { if (e instanceof IaLocalIlegible) return { huecos: null, ms: 0 }; throw e; }
+  const { json, ms } = respuesta;
   if (!json || json.receta === 'ninguna' || !json.tabla) return { huecos: null, ms };
+
+  // ── LO QUE NO SE HA DICHO, NO SE GUARDA ─────────────────────────────────
+  // Measured on 2026-10-02: asked for «Pan de centeno», the 1.5B model filled
+  // price 1.50 €, category «Salados» and «disponible: sí» — none of it said.
+  // That is not fixable by prompting a small model; it is fixed here: a value
+  // survives only if the person actually said it. A checkbox survives only if
+  // its column was named.
+  const tn = norm(texto);
+  const tabla = tablas.find(t => norm(t.titulo) === norm(json.tabla));
+  const campos = (Array.isArray(json.campos) ? json.campos : [])
+    .map((c: any) => ({ columna: String(c.columna), valor: String(c.valor ?? '') }))
+    .filter((c: { columna: string; valor: string }) => {
+      const col = tabla?.columnas.find(x => norm(x.nombre) === norm(c.columna));
+      if (col?.tipo === 'casilla') return aparece(tn, col.nombre) >= 0 && (!/^no$/i.test(c.valor.trim()) || /(^|[^a-z])no([^a-z]|$)/.test(tn));
+      return dicho(c.valor, tn);
+    });
+  let entrada = comoLoDijo(corto(String(json.entrada || ''), 120), texto);
+  if (entrada && !dicho(entrada, tn)) entrada = '';
+  for (const c of campos) c.valor = comoLoDijo(c.valor, texto);
+  let receta = json.receta as Huecos['receta'];
+  // «Añadir» algo que ya existe con ese nombre es, casi siempre, cambiarlo.
+  if (receta === 'anadir_entrada' && tabla?.filas.some(f => norm(f.titulo) === norm(entrada))) receta = 'editar_entrada';
   return {
     ms,
     huecos: {
-      receta: json.receta,
-      tabla: String(json.tabla),
-      entrada: corto(json.entrada, 120),
-      campos: Array.isArray(json.campos) ? json.campos.map((c: any) => ({ columna: String(c.columna), valor: String(c.valor ?? '') })) : [],
-      texto: json.texto ? String(json.texto).slice(0, 1500) : undefined,
+      receta, tabla: String(json.tabla), entrada, campos,
+      texto: json.texto && dicho(json.texto, tn) ? String(json.texto).slice(0, 1500) : undefined,
     },
   };
+}
+
+/** El valor con las mayúsculas y tildes con que lo escribió la persona, si
+ *  aparece tal cual en su frase («queso_curado» → «Queso curado»). */
+function comoLoDijo(valor: string, original: string): string {
+  const v = norm(valor.replace(/_/g, ' '));
+  if (!v) return valor;
+  const { n, mapa } = conMapa(original);
+  const i = n.indexOf(v);
+  return i >= 0 ? original.slice(mapa[i], mapa[i + v.length]) : valor.replace(/_/g, ' ');
+}
+
+const VACIAS = new Set(['de', 'del', 'la', 'el', 'los', 'las', 'un', 'una', 'y', 'en', 'a', 'con', 'por', 'para', 'que']);
+/** ¿Lo ha dicho la persona? Cada palabra con contenido del valor tiene que
+ *  aparecer en la frase (sin tildes ni mayúsculas). */
+function dicho(valor: string, textoNorm: string): boolean {
+  const v = norm(valor).replace(/_/g, ' ');
+  if (!v) return false;
+  if (textoNorm.includes(v)) return true;
+  const palabras = v.split(/[^a-z0-9]+/).filter(p => p && !VACIAS.has(p) && !/^(euros?|eur)$/.test(p));
+  return palabras.length > 0 && palabras.every(p => new RegExp(`(^|[^a-z0-9])${p}([^a-z0-9]|$)`).test(textoNorm));
 }
 
 // ── DE HUECOS A PROPUESTA: CÓDIGO NORMAL ────────────────────────────────────
@@ -264,6 +307,7 @@ function prepararValor(c: Columna, valor: string): { bruto?: any; error?: string
     return { bruto: c.tipo === 'seleccion' ? ids[0] : ids };
   }
   if (c.tipo === 'numero' || c.tipo === 'valoracion') return { bruto: v.replace(/[^\d,.\-]/g, '') || v };
+  if (c.tipo === 'fecha') return { bruto: fechaHablada(v) ?? v };
   return { bruto: v };
 }
 
@@ -276,6 +320,27 @@ const mostrar = (c: Columna, valor: any): string => {
   if (c.tipo === 'moneda') return `${valor} ${(c.config || {}).moneda || '€'}`;
   return String(valor);
 };
+
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+/** «15 de noviembre», «15 de noviembre de 2026», «hoy», «mañana» → AAAA-MM-DD.
+ *  Sin año: el de este año, o el próximo si esa fecha ya ha pasado. `null`
+ *  si no es una fecha dicha así, y entonces la juzga `tipar` tal cual. */
+function fechaHablada(v: string): string | null {
+  const n = norm(v); const hoy = new Date();
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  if (n === 'hoy') return iso(hoy);
+  if (n === 'manana') return iso(new Date(hoy.getTime() + 864e5));
+  if (n === 'pasado manana') return iso(new Date(hoy.getTime() + 2 * 864e5));
+  const m = /^(?:el\s+)?(\d{1,2})\s+de\s+([a-z]+)(?:\s+(?:de|del)\s+(\d{4}))?$/.exec(n);
+  if (!m) return null;
+  const mes = MESES.indexOf(m[2] === 'setiembre' ? 'septiembre' : m[2]);
+  if (mes < 0) return null;
+  let anyo = m[3] ? Number(m[3]) : hoy.getFullYear();
+  let d = new Date(anyo, mes, Number(m[1]));
+  if (d.getMonth() !== mes) return null;
+  if (!m[3] && d < new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())) d = new Date(++anyo, mes, Number(m[1]));
+  return iso(d);
+}
 
 export type Propuesta = {
   receta: 'anadir_entrada' | 'editar_entrada';

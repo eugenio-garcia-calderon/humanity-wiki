@@ -29,6 +29,8 @@ const MAX_EN_COLA = 2;
 
 export class IaLocalNoDisponible extends Error {}
 export class IaLocalOcupada extends Error {}
+/** Answered, but not valid JSON: treat as «not understood», not as «down». */
+export class IaLocalIlegible extends Error {}
 
 async function turno<T>(fn: () => Promise<T>): Promise<T> {
   if (enCurso >= 1) {
@@ -79,6 +81,6 @@ export async function pedirJsonLocal(opts: {
     const j: any = await r.json();
     const texto = j?.choices?.[0]?.message?.content ?? '';
     try { return { json: JSON.parse(texto), ms: Date.now() - t0 }; }
-    catch { throw new IaLocalNoDisponible('La IA gratuita ha devuelto algo que no se entiende.'); }
+    catch { throw new IaLocalIlegible('La IA gratuita ha devuelto algo que no se entiende.'); }
   });
 }
