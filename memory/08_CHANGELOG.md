@@ -8216,3 +8216,20 @@ reach the model and answer instantly.
 - `/paginas`: vista de tabla por defecto (título, carpeta editable desde la fila, estado, bloques, última edición; ordenable por columna), con la de carpetas a un clic (`humanity:paginas-vista`).
 - IA: la lista de conversaciones del panel derecho nace abierta y se recuerda (`humanity:ia-chats-abiertos`); `ai:abrir` empieza siempre un chat nuevo.
 - Editor de páginas: fuera la barra flotante «Añadir» y su reserva de 64 px; añadir sigue con el «+» de cada línea, «/» y «Añadir un bloque».
+
+## 2026-10-02 — Cover and icon: paste, drag or upload; dates can be just a year (prog8)
+
+- **«Añadir portada», «Cambiar» and «Añadir icono» (and clicking the icon)** open
+  one dialog, `src/components/ui/SoltarImagen.tsx`, OneDrive-style: paste with
+  Ctrl/⌘+V anywhere while it is open, or the «Pegar del portapapeles» button;
+  drag an image anywhere onto the dialog; or the big «Subir archivo» button. The
+  icon dialog keeps the emoji row on top. Rendered in a portal, and it stops
+  paste/drag propagation: before that, one paste or drop also became an image
+  block in the page, because the editor listens to both (measured, fixed). Says
+  so when the clipboard holds text or the file is not an image. On touch screens
+  the box offers the button and pasting instead of dragging.
+- **Date columns accept a year or a month**: «2026», «07/2026», «2026-07» as well
+  as full dates. Stored as ISO prefixes ("2026", "2026-07") so they sort and
+  display as before («2026», «07/2026»). The cell editor shows the accepted forms;
+  `DIAS()` counts a partial date from its first day; the free chat AI also
+  understands «noviembre de 2026».

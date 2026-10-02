@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { subirArchivo } from '../utils/subir';
+import SoltarImagen from '../components/ui/SoltarImagen';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
   ChevronRight, Info,
   LayoutTemplate, LayoutGrid,
-  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
+  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
   PanelTop, Bookmark, Link2, Play,
 } from 'lucide-react';
@@ -203,10 +204,9 @@ function EditorPagina() {
   const [disenoAbierto, setDisenoAbierto] = useState(false);
   /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
   const [focoDescripcion, setFocoDescripcion] = useState(false);
-  const iconoFileRef = useRef<HTMLInputElement>(null);
-  const [subiendoIcono, setSubiendoIcono] = useState(false);
-  const [falloIcono, setFalloIcono] = useState<string | null>(null);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
+  // El diálogo de pegar / arrastrar / subir la portada (2026-10-02).
+  const [eligiendoPortada, setEligiendoPortada] = useState(false);
   // ══ ARRASTRAR BLOQUES CON EL PUNTERO (2026-09-30) ══════════════════════
   // Antes era el arrastrar-y-soltar nativo del navegador, y sobre bloques
   // editables el navegador intenta soltar TEXTO dentro del bloque de debajo:
@@ -2390,11 +2390,10 @@ function EditorPagina() {
               <img src={portada} alt="" className="w-full h-56 object-cover rounded-2xl" />
               {editable && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
-                  <label className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600 cursor-pointer">
+                  <button onClick={() => setEligiendoPortada(true)}
+                    className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     Cambiar
-                    <input type="file" accept="image/*,.heic,.heif" className="hidden"
-                      onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
-                  </label>
+                  </button>
                   <button onClick={() => { setPortada(null); programarGuardado(); }}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     Quitar
@@ -2412,48 +2411,52 @@ function EditorPagina() {
                     <Smile className="w-3.5 h-3.5" /> Añadir icono
                   </button>
                 )}
+                {/* EL ICONO: UN EMOJI, O UNA IMAGEN PEGADA, ARRASTRADA O SUBIDA
+                    (2026-10-02). Antes era una fila de emojis y un botón
+                    pequeño «Imagen»; ahora es el mismo diálogo que la portada. */}
                 {eligiendoIcono && (
-                  <div className="flex items-center gap-1 flex-wrap">
-                  <>
-                    {EMOJIS_ICONO.map(e => (
-                      <button key={e} onClick={() => { setIcono(e); setEligiendoIcono(false); programarGuardado(); }}
-                        className="text-lg hover:scale-125 transition-transform">{e}</button>
-                    ))}
-                    {/* …o una imagen tuya, por la misma ruta de subida que
-                        usa todo lo demás. */}
-                    <input ref={iconoFileRef} type="file" accept="image/*,.heic,.heif" className="hidden"
-                      onChange={async e => {
-                        const f = e.target.files?.[0];
-                        e.target.value = '';
-                        if (!f) return;
-                        setSubiendoIcono(true); setFalloIcono(null);
-                        try {
-                          // Un icono se ve a 128 px como mucho: 512 sobra
-                          // incluso en pantallas retina, y pesa diez veces menos.
-                          const sub = await subirArchivo(f, undefined, undefined, { maxLado: 512 });
-                          if (sub.url) { setIcono(sub.url); setEligiendoIcono(false); programarGuardado(); }
-                          // ANTES SE CALLABA (2026-10-02): un HEIC rechazado no
-                          // hacía nada y parecía que el botón no funcionaba.
-                          else setFalloIcono(sub.error || 'No se ha podido subir la imagen.');
-                        } finally { setSubiendoIcono(false); }
-                      }} />
-                    <button onClick={() => iconoFileRef.current?.click()} disabled={subiendoIcono}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-slate-200 text-[10px] font-bold text-slate-500 hover:border-emerald-300 hover:text-emerald-700 disabled:opacity-40 ml-1">
-                      {subiendoIcono ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
-                      Imagen
-                    </button>
-                    <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
-                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 ml-1">Quitar</button>
-                    {falloIcono && <span role="alert" className="basis-full text-[11px] font-bold text-rose-600">{falloIcono}</span>}
-                  </>
-                  </div>
+                  <SoltarImagen
+                    titulo={icono ? 'Cambiar el icono' : 'Añadir icono'}
+                    onCerrar={() => setEligiendoIcono(false)}
+                    onArchivo={async f => {
+                      // Un icono se ve a 128 px como mucho: 512 sobra incluso
+                      // en pantallas retina, y pesa diez veces menos.
+                      const sub = await subirArchivo(f, undefined, undefined, { maxLado: 512 });
+                      if (!sub.url) return sub.error || 'No se ha podido subir la imagen.';
+                      setIcono(sub.url); programarGuardado();
+                    }}
+                    pie={icono ? (
+                      <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
+                        className="w-full text-center text-xs font-bold text-slate-400 hover:text-rose-500">Quitar el icono</button>
+                    ) : null}
+                  >
+                    <div>
+                      <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Un emoji</p>
+                      <div className="flex flex-wrap gap-1">
+                        {EMOJIS_ICONO.map(e => (
+                          <button key={e} onClick={() => { setIcono(e); setEligiendoIcono(false); programarGuardado(); }}
+                            aria-label={`Usar ${e} como icono`}
+                            className="grid h-10 w-10 place-items-center rounded-xl text-xl hover:bg-slate-100">{e}</button>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">O una imagen tuya</p>
+                    </div>
+                  </SoltarImagen>
+                )}
+                {eligiendoPortada && (
+                  <SoltarImagen
+                    titulo={portada ? 'Cambiar la portada' : 'Añadir portada'}
+                    onCerrar={() => setEligiendoPortada(false)}
+                    // Se cierra en cuanto hay archivo: la portada enseña su
+                    // propia barra de subida en la página, con la foto ya puesta.
+                    onArchivo={f => { subirPortada(f); }}
+                  />
                 )}
                 {!portada && !eligiendoIcono && (
-                  <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
+                  <button onClick={() => setEligiendoPortada(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
                     <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
-                    <input type="file" accept="image/*,.heic,.heif" className="hidden"
-                      onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
-                  </label>
+                  </button>
                 )}
                 {ajustes.subtitulo === undefined && !eligiendoIcono && (
                   <button onClick={() => { setAjustes(a => ({ ...a, subtitulo: '' })); setFocoDescripcion(true); }}

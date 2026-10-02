@@ -368,6 +368,13 @@ function fechaHablada(v: string): string | null {
   if (n === 'hoy') return iso(hoy);
   if (n === 'manana') return iso(new Date(hoy.getTime() + 864e5));
   if (n === 'pasado manana') return iso(new Date(hoy.getTime() + 2 * 864e5));
+  // Only month and year («noviembre de 2026») → "2026-11": a date can be
+  // partial since 2026-10-02 (`aFecha` in bd/tipos.ts).
+  const mesAnyo = /^(?:en\s+)?([a-z]+)\s+(?:de|del)\s+(\d{4})$/.exec(n);
+  if (mesAnyo) {
+    const i = MESES.indexOf(mesAnyo[1] === 'setiembre' ? 'septiembre' : mesAnyo[1]);
+    if (i >= 0) return `${mesAnyo[2]}-${String(i + 1).padStart(2, '0')}`;
+  }
   const m = /^(?:el\s+)?(\d{1,2})\s+de\s+([a-z]+)(?:\s+(?:de|del)\s+(\d{4}))?$/.exec(n);
   if (!m) return null;
   const mes = MESES.indexOf(m[2] === 'setiembre' ? 'septiembre' : m[2]);

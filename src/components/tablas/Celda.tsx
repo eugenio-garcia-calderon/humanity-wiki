@@ -264,6 +264,8 @@ export default function CeldaTabla({
           // enfocar el campo y deja la tabla descolocada.
           className="w-full px-2 py-1.5 text-base sm:text-sm outline-none border-2 border-emerald-400 rounded-md bg-white"
           value={borrador}
+          // A date can be just the year (2026-10-02): say so where it is typed.
+          placeholder={columna.tipo === 'fecha' ? '14/07/2026, 07/2026 o 2026' : undefined}
           onChange={e => setBorrador(e.target.value)}
           onBlur={() => guardar(borrador)}
           onKeyDown={e => {
@@ -309,6 +311,8 @@ export default function CeldaTabla({
 function valorParaEditar(c: Celda, col: Columna): string {
   if (c.estado !== 'ok') return '';
   if (col.tipo === 'porcentaje') return String(Number(c.valor) * 100);
+  // As it is read (14/07/2026, 07/2026, 2026), not as it is stored.
+  if (col.tipo === 'fecha') return String(c.valor).split('-').reverse().join('/');
   if (col.tipo === 'duracion') {
     const s = Number(c.valor);
     return `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
