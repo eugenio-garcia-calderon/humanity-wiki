@@ -334,3 +334,6 @@ and only for top-level blocks (a database inside `columnas` or `desplegable`
 is not found). Fine at today's few thousand pages; the right shape is a
 `tabla_en_pagina(tabla_id, pagina_id)` link written on save. Cost: ~2 h now,
 plus a backfill later.
+
+## Dictation cost is not counted (2026-10-02, prog8)
+`server/voz.ts` checks `hayPresupuesto` before opening a session, but does not add the transcription cost to `ai_usage_charges`, so dictating never moves the spending counter. Same gap as image generation (see the note in `assistant.ts`). Bounded today by one session per person, 5 minutes max and 20 s of silence closing it. Fix: charge per audio second when the session closes (16 kHz PCM → seconds = bytes / 32000).

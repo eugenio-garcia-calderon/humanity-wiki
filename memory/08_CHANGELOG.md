@@ -8174,3 +8174,10 @@ taking the page down.
 - Eugenio: «la función de recolocar y arrastrar la imagen en la galería no funciona».
 - Causa: dentro del marco de la tarjeta (una rejilla), `h-full` no se resolvía; la imagen salía con su alto natural y el marco la recortaba por `overflow`. `object-position` no tenía nada que mover, y el centro de la imagen quedaba fuera de la parte visible, donde ningún arrastre llegaba. Ahora la imagen ocupa el marco (`absolute inset-0`) y se recorta con `object-cover`.
 - Probado en local: arrastrar mueve el encuadre (50 % → 17,7 %) y «Guardar posición» lo guarda.
+
+### 2026-10-02 — Dictado por voz en tiempo real, botón azul y elección de micrófono (prog8)
+- Eugenio: «el voice to text no funciona en el botón de IA ni en el chat. Que aparezca, como en Claude, el texto según se pronuncia, que el micrófono se ponga azulito al pulsarlo y una pestañita para elegir el micrófono».
+- Causa: el dictado era el reconocimiento del navegador (Web Speech): no existe en Firefox, falla en la app instalada del iPhone, no deja elegir micrófono y callaba al fallar.
+- Ahora el navegador graba con el micrófono elegido (`getUserMedia`), sube PCM de 16 kHz en trozos de 250 ms y `server/voz.ts` lo pasa a `gemini-3.5-transcribe-live`; el texto vuelve por SSE. El servidor reconstruye un único texto de la sesión porque el transcriptor alterna entre mandar todo lo dicho o sólo la última frase, y pega frases sin espacio. Sin sesión o sin presupuesto se usa el reconocimiento del navegador si existe, y los fallos se dicen encima del botón.
+- `BotonMicrofono.tsx`: azul con pulso mientras escucha; la pestañita lista los micrófonos y recuerda el elegido en ese navegador. Montado en `modulos.ts` (con permiso de la sesión que tenía la reserva).
+- Probado en local con Chrome y un micrófono simulado: el texto aparece palabra a palabra cada ~0,4 s, sin duplicados.
