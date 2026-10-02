@@ -701,7 +701,16 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  Con uno solo, mover el ratón por encima sin querer dejaría la lista
    *  abierta comiéndose el chat, o pinchar no serviría de nada porque se
    *  cerraría al apartar el ratón. */
-  const [historialFijo, setHistorialFijo] = useState(false);
+  // LA LISTA DE CHATS, ABIERTA POR DEFECTO Y RECORDADA (2026-10-02, Eugenio:
+  // «el lateral derecho lo dejamos para la IA, con un menú colapsable de los
+  // chats que uno tiene con ella»).
+  const [historialFijo, setHistorialFijoState] = useState<boolean>(() => {
+    try { return localStorage.getItem('humanity:ia-chats-abiertos') !== '0'; } catch { return true; }
+  });
+  const setHistorialFijo = (v: boolean) => {
+    setHistorialFijoState(v);
+    try { localStorage.setItem('humanity:ia-chats-abiertos', v ? '1' : '0'); } catch { /* sin almacenamiento */ }
+  };
   const [historialAsomado, setHistorialAsomado] = useState(false);
   const [modelosAbierto, setModelosAbierto] = useState(false);
   /** El último intento que se rompió antes de llegar al modelo. Va en el
@@ -908,7 +917,10 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Abrir desde fuera SIN escribir nada. Lo usa el botón de la barra en el
   // teléfono (B91): el mismo asistente, otra puerta de entrada.
   useEffect(() => {
-    const abrir = () => { setOpen(true); setPanelMuelle('chat'); };
+    // CADA PULSACIÓN DEL BOTÓN DE LA IA, UN CHAT NUEVO (2026-10-02, Eugenio).
+    // Los anteriores siguen en la lista de la izquierda del panel. Si el que
+    // hay está vacío no se toca: sería tirar uno para abrir otro igual.
+    const abrir = () => { newConversation(); setOpen(true); setPanelMuelle('chat'); };
     window.addEventListener('ai:abrir', abrir);
     return () => window.removeEventListener('ai:abrir', abrir);
   }, []);
