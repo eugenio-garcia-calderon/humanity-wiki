@@ -62,6 +62,8 @@ export type { Celda } from './bd/celdas';
 export const bdInterno: {
   crearFila?: (req: Pick<Request, 'user'>, tablaId: string, titulo: unknown)
     => Promise<{ id: string; pagina_id: string } | { error: string; codigo: number }>;
+  escribirCeldas?: (req: Pick<Request, 'user'>, filaId: string, celdas: Record<string, unknown>)
+    => Promise<{ codigo: number; cuerpo: any }>;
 } = {};
 
 export function registerBdRoutes(app: Express, db: any) {
@@ -884,122 +886,134 @@ export function registerBdRoutes(app: Express, db: any) {
    * escribe media fila. Y se responde qué celda falló y por qué, en vez de un
    * «error al guardar» que obliga a adivinar cuál de las diez era.
    */
+  /**
+   * Write cells of a row — the body of `PUT /api/bd/filas/:id`, as a function
+   * (2026-10-02) so the chat (`rellenarPorChat.ts`) writes with exactly the
+   * same permissions and validation as the grid. Returns status + body.
+   */
+  const escribirCeldas = async (req: Pick<Request, 'user'>, filaId: string, entrantesCrudos: Record<string, unknown>)
+    : Promise<{ codigo: number; cuerpo: any }> => {
+    const f = await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${filaId} AND deleted_at IS NULL`);
+    const fila = f.rows[0] as any;
+    if (!fila) return { codigo: 404, cuerpo: { error: 'Esa fila no existe.' } };
+    const permiso = await puedeConTabla(req as Request, fila.tabla_id, true);
+    if ('error' in permiso) return { codigo: permiso.codigo, cuerpo: { error: permiso.error } };
+
+    const entrantes = entrantesCrudos || {};
+    const columnas = await columnasDe(fila.tabla_id);
+    const porId = new Map(columnas.map(c => [c.id, c]));
+
+    const valores = { ...(fila.valores || {}) };
+    const fallos: Array<{ columna: string; error: string }> = [];
+
+    // Los enlaces se aplican DESPUÉS de validar todo, por lo mismo que las
+    // celdas normales: si algo no vale, no se escribe media fila.
+    const enlacesPendientes: Array<{ colId: string; clase: any; destinos: string[] }> = [];
+    const ficherosPendientes: Array<{ colId: string; ids: string[] }> = [];
+
+    for (const [colId, bruto] of Object.entries(entrantes)) {
+      const col = porId.get(colId);
+      if (!col) { fallos.push({ columna: colId, error: 'Esa columna no existe en la tabla.' }); continue; }
+
+      // ¿Es una columna que APUNTA? Entonces no va al jsonb: va a `bd_enlaces`.
+      const clase = CLASE_DE_TIPO[col.tipo];
+      if (clase) {
+        const lista = bruto === null || bruto === undefined || bruto === ''
+          ? []
+          : (Array.isArray(bruto) ? bruto : [bruto]).map(String);
+        const varios = !!(col.config || {}).varios;
+        if (!varios && lista.length > 1) {
+          fallos.push({ columna: colId, error: 'Esta columna admite un solo elemento.' });
+          continue;
+        }
+        // Se COMPRUEBA aquí y se ESCRIBE después de que todo haya validado.
+        const comp = await comprobarEnlaces(db, clase, lista);
+        if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+        enlacesPendientes.push({ colId, clase, destinos: lista });
+        continue;
+      }
+
+      // ¿Es una columna de FICHEROS? Entonces tampoco va al jsonb.
+      const claseFich = CLASE_FICHERO[col.tipo];
+      if (claseFich) {
+        const lista = bruto === null || bruto === undefined || bruto === ''
+          ? []
+          : (Array.isArray(bruto) ? bruto : [bruto]).map(String);
+        if (!(col.config || {}).varios && lista.length > 1) {
+          fallos.push({ columna: colId, error: 'Esta columna admite un solo archivo.' });
+          continue;
+        }
+        const comp = await comprobarFicheros(db, claseFich, lista, req.user!.id, (req.user!.roleLevel ?? 0) >= 4);
+        if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+        ficherosPendientes.push({ colId, ids: lista });
+        continue;
+      }
+
+      const r = tipar(col.tipo as Tipo, bruto, col.opciones || [], col.config || {});
+      // `'error' in r` en vez de `!r.ok`: este proyecto no compila con
+      // `strict`, y sin él TypeScript no estrecha la unión por el campo
+      // discriminante. Con la comprobación de presencia funciona igual en
+      // los dos modos.
+      if ('error' in r) { fallos.push({ columna: colId, error: r.error }); continue; }
+      if (r.valor === undefined) delete valores[colId];   // vaciar ≠ guardar cero
+      else valores[colId] = r.valor;
+    }
+
+    // NADA se escribe si algo falla: ni celdas ni enlaces. Media fila guardada
+    // es peor que una escritura rechazada, porque nadie sabe qué mitad entró.
+    if (fallos.length) return { codigo: 400, cuerpo: { error: 'Hay celdas que no se pueden guardar.', fallos } };
+
+    for (const p of ficherosPendientes) {
+      await guardarFicheros(db, { columnaId: p.colId, filaId: fila.id, archivoIds: p.ids });
+    }
+    for (const p of enlacesPendientes) {
+      await guardarEnlaces(db, {
+        columnaId: p.colId, filaId: fila.id, clase: p.clase, destinos: p.destinos, actor: req.user!.id,
+      });
+    }
+
+    // El historial se engancha al módulo que ya existe (`historial.ts`) en vez
+    // de escribir una segunda forma de guardarlo. Se agrupa porque la rejilla
+    // guarda al salir de cada celda y una instantánea por tecleo no sirve de
+    // nada. Y nunca revienta el guardado: si falla el historial, el usuario
+    // ya ha escrito su dato.
+    await registrarHistorial(db, {
+      entidad: 'bd_fila', tabla: 'bd_filas', id: fila.id, operacion: 'update',
+      previo: fila, actor: req.user!.id, agrupar: true,
+    });
+
+    await db.execute(sql`
+      UPDATE bd_filas SET valores = ${JSON.stringify(valores)}::jsonb, updated_by = ${req.user!.id}, updated_at = now()
+      WHERE id = ${filaId}
+    `);
+    // El nombre de la fila es el título de su página: se escriben juntos.
+    if (fila.pagina_id) {
+      const colTitulo = await columnaTitulo(fila.tabla_id);
+      if (colTitulo && colTitulo in entrantes) {
+        await db.execute(sql`
+          UPDATE knowledge_windows SET title = ${String(valores[colTitulo] ?? '') || 'Sin título'}, updated_at = now()
+          WHERE id = ${fila.pagina_id}
+        `);
+      }
+    }
+    const trasEscribir = celdasDe(valores, columnas);
+    const enlacesAhora = await enlacesDe(db, [fila.id]);
+    for (const c of columnas) {
+      if (CLASE_DE_TIPO[c.tipo]) trasEscribir[c.id] = celdaDeEnlaces((enlacesAhora[fila.id] || {})[c.id]);
+    }
+    const fichAhora = await ficherosDe(db, [fila.id]);
+    for (const c of columnas) {
+      if (CLASE_FICHERO[c.tipo]) trasEscribir[c.id] = celdaDeFicheros((fichAhora[fila.id] || {})[c.id]);
+    }
+    return { codigo: 200, cuerpo: { celdas: trasEscribir, apuntados: enlacesAhora[fila.id] || {}, archivos: fichAhora[fila.id] || {} } };
+  };
+  bdInterno.escribirCeldas = escribirCeldas;
+
   app.put('/api/bd/filas/:id', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
-      const f = await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
-      const fila = f.rows[0] as any;
-      if (!fila) return res.status(404).json({ error: 'Esa fila no existe.' });
-      const permiso = await puedeConTabla(req, fila.tabla_id, true);
-      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
-
-      const entrantes = (req.body || {}).celdas || {};
-      const columnas = await columnasDe(fila.tabla_id);
-      const porId = new Map(columnas.map(c => [c.id, c]));
-
-      const valores = { ...(fila.valores || {}) };
-      const fallos: Array<{ columna: string; error: string }> = [];
-
-      // Los enlaces se aplican DESPUÉS de validar todo, por lo mismo que las
-      // celdas normales: si algo no vale, no se escribe media fila.
-      const enlacesPendientes: Array<{ colId: string; clase: any; destinos: string[] }> = [];
-      const ficherosPendientes: Array<{ colId: string; ids: string[] }> = [];
-
-      for (const [colId, bruto] of Object.entries(entrantes)) {
-        const col = porId.get(colId);
-        if (!col) { fallos.push({ columna: colId, error: 'Esa columna no existe en la tabla.' }); continue; }
-
-        // ¿Es una columna que APUNTA? Entonces no va al jsonb: va a `bd_enlaces`.
-        const clase = CLASE_DE_TIPO[col.tipo];
-        if (clase) {
-          const lista = bruto === null || bruto === undefined || bruto === ''
-            ? []
-            : (Array.isArray(bruto) ? bruto : [bruto]).map(String);
-          const varios = !!(col.config || {}).varios;
-          if (!varios && lista.length > 1) {
-            fallos.push({ columna: colId, error: 'Esta columna admite un solo elemento.' });
-            continue;
-          }
-          // Se COMPRUEBA aquí y se ESCRIBE después de que todo haya validado.
-          const comp = await comprobarEnlaces(db, clase, lista);
-          if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
-          enlacesPendientes.push({ colId, clase, destinos: lista });
-          continue;
-        }
-
-        // ¿Es una columna de FICHEROS? Entonces tampoco va al jsonb.
-        const claseFich = CLASE_FICHERO[col.tipo];
-        if (claseFich) {
-          const lista = bruto === null || bruto === undefined || bruto === ''
-            ? []
-            : (Array.isArray(bruto) ? bruto : [bruto]).map(String);
-          if (!(col.config || {}).varios && lista.length > 1) {
-            fallos.push({ columna: colId, error: 'Esta columna admite un solo archivo.' });
-            continue;
-          }
-          const comp = await comprobarFicheros(db, claseFich, lista, req.user!.id, (req.user!.roleLevel ?? 0) >= 4);
-          if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
-          ficherosPendientes.push({ colId, ids: lista });
-          continue;
-        }
-
-        const r = tipar(col.tipo as Tipo, bruto, col.opciones || [], col.config || {});
-        // `'error' in r` en vez de `!r.ok`: este proyecto no compila con
-        // `strict`, y sin él TypeScript no estrecha la unión por el campo
-        // discriminante. Con la comprobación de presencia funciona igual en
-        // los dos modos.
-        if ('error' in r) { fallos.push({ columna: colId, error: r.error }); continue; }
-        if (r.valor === undefined) delete valores[colId];   // vaciar ≠ guardar cero
-        else valores[colId] = r.valor;
-      }
-
-      // NADA se escribe si algo falla: ni celdas ni enlaces. Media fila guardada
-      // es peor que una escritura rechazada, porque nadie sabe qué mitad entró.
-      if (fallos.length) return res.status(400).json({ error: 'Hay celdas que no se pueden guardar.', fallos });
-
-      for (const p of ficherosPendientes) {
-        await guardarFicheros(db, { columnaId: p.colId, filaId: fila.id, archivoIds: p.ids });
-      }
-      for (const p of enlacesPendientes) {
-        await guardarEnlaces(db, {
-          columnaId: p.colId, filaId: fila.id, clase: p.clase, destinos: p.destinos, actor: req.user!.id,
-        });
-      }
-
-      // El historial se engancha al módulo que ya existe (`historial.ts`) en vez
-      // de escribir una segunda forma de guardarlo. Se agrupa porque la rejilla
-      // guarda al salir de cada celda y una instantánea por tecleo no sirve de
-      // nada. Y nunca revienta el guardado: si falla el historial, el usuario
-      // ya ha escrito su dato.
-      await registrarHistorial(db, {
-        entidad: 'bd_fila', tabla: 'bd_filas', id: fila.id, operacion: 'update',
-        previo: fila, actor: req.user!.id, agrupar: true,
-      });
-
-      await db.execute(sql`
-        UPDATE bd_filas SET valores = ${JSON.stringify(valores)}::jsonb, updated_by = ${req.user!.id}, updated_at = now()
-        WHERE id = ${req.params.id}
-      `);
-      // El nombre de la fila es el título de su página: se escriben juntos.
-      if (fila.pagina_id) {
-        const colTitulo = await columnaTitulo(fila.tabla_id);
-        if (colTitulo && colTitulo in entrantes) {
-          await db.execute(sql`
-            UPDATE knowledge_windows SET title = ${String(valores[colTitulo] ?? '') || 'Sin título'}, updated_at = now()
-            WHERE id = ${fila.pagina_id}
-          `);
-        }
-      }
-      const trasEscribir = celdasDe(valores, columnas);
-      const enlacesAhora = await enlacesDe(db, [fila.id]);
-      for (const c of columnas) {
-        if (CLASE_DE_TIPO[c.tipo]) trasEscribir[c.id] = celdaDeEnlaces((enlacesAhora[fila.id] || {})[c.id]);
-      }
-      const fichAhora = await ficherosDe(db, [fila.id]);
-      for (const c of columnas) {
-        if (CLASE_FICHERO[c.tipo]) trasEscribir[c.id] = celdaDeFicheros((fichAhora[fila.id] || {})[c.id]);
-      }
-      res.json({ celdas: trasEscribir, apuntados: enlacesAhora[fila.id] || {}, archivos: fichAhora[fila.id] || {} });
+      const r = await escribirCeldas(req, req.params.id, (req.body || {}).celdas || {});
+      res.status(r.codigo).json(r.cuerpo);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
