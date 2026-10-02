@@ -387,7 +387,10 @@ function funcion(nombre: string, args: Nodo[], ctx: Contexto): Celda {
       // Días entre dos fechas. Si falta cualquiera de las dos, vacío: la
       // alternativa sería contar los días desde el año cero.
       if (cs.length < 2 || cs[0].estado !== 'ok' || cs[1].estado !== 'ok') return VACIA;
-      const a = Date.parse(`${txt(cs[0])}T00:00:00Z`), b = Date.parse(`${txt(cs[1])}T00:00:00Z`);
+      // A date may be only a year or a month (2026-10-02): count it from its
+      // first day, the same way «2026» sorts before «2026-03».
+      const completa = (f: string) => (/^\d{4}$/.test(f) ? `${f}-01-01` : /^\d{4}-\d{2}$/.test(f) ? `${f}-01` : f);
+      const a = Date.parse(`${completa(txt(cs[0]))}T00:00:00Z`), b = Date.parse(`${completa(txt(cs[1]))}T00:00:00Z`);
       if (Number.isNaN(a) || Number.isNaN(b)) return error('DIAS necesita dos fechas.');
       return valor(Math.round((a - b) / 86400000));
     }

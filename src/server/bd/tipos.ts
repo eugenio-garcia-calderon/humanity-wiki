@@ -80,8 +80,28 @@ function aNumero(bruto: any): number | null {
  *  Una fecha de vencimiento no tiene hora, y arrastrar zona horaria hace que la
  *  misma fecha se vea distinta según quién la mire — el fallo clásico de que un
  *  plazo del día 14 aparezca como día 13 a las 23:00 para media oficina. */
+/**
+ * A date, or PART of one (2026-10-02, Eugenio: «que la propiedad fecha
+ * permita poner solo el año»). Three precisions, stored as ISO prefixes so
+ * they still sort as text and read the same everywhere:
+ *   «2026»                    → "2026"
+ *   «07/2026», «2026-07»      → "2026-07"
+ *   «14/07/2026», «2026-07-14» → "2026-07-14"
+ * A year is a year, not «1 January»: storing a fake day would show a date
+ * nobody wrote.
+ */
 function aFecha(bruto: any): string | null {
   const t = String(bruto).trim();
+  const anyo = /^(\d{4})$/.exec(t);
+  if (anyo) return Number(anyo[1]) >= 1 ? anyo[1] : null;
+  // Year and month: «2026-07» or «07/2026».
+  const mi = /^(\d{4})-(\d{1,2})$/.exec(t);
+  const me = /^(\d{1,2})\/(\d{4})$/.exec(t);
+  if (mi || me) {
+    const a = mi ? mi[1] : me![2];
+    const n = Number(mi ? mi[2] : me![1]);
+    return n >= 1 && n <= 12 ? `${a}-${String(n).padStart(2, '0')}` : null;
+  }
   const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
   if (iso) {
     const d = new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`);
@@ -183,7 +203,7 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
 
     case 'fecha': {
       const f = aFecha(bruto);
-      if (f === null) return mal('La fecha tiene que ser AAAA-MM-DD o DD/MM/AAAA.');
+      if (f === null) return mal('Escribe la fecha como 14/07/2026, 07/2026 o solo el año: 2026.');
       return ok(f);
     }
 
