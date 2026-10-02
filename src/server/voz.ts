@@ -218,6 +218,14 @@ export function registrarVoz(app: Express, db: any) {
     res.status(204).end();
   });
 
+  /** Lo que el navegador abrió de verdad (2026-10-02): una línea al registro. */
+  app.post('/api/voz/sesion/:id/diag', (req: Request, res: Response) => {
+    const s = sesiones.get(req.params.id);
+    if (!s || s.userId !== quien(req)) return res.status(204).end();
+    console.log(`[voz] ${s.id} diag ${JSON.stringify(req.body || {}).slice(0, 700)}`);
+    res.status(204).end();
+  });
+
   /** Dejar de dictar: se avisa del final del audio para que cierre la frase. */
   app.post('/api/voz/sesion/:id/fin', (req: Request, res: Response) => {
     const s = sesiones.get(req.params.id);

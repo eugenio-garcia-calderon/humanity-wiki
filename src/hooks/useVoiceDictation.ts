@@ -144,6 +144,20 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     // como respuesta al clic. Parado, no entrega ni una muestra y el dictado
     // se queda en blanco sin decir nada. Se crea aquí, antes de cualquier
     // espera, y se despierta en el acto.
+    // ── LAS FORMAS DE ABRIR EL MICRÓFONO, EN ORDEN (2026-10-02) ────────────
+    // Medido en producción: en el Chrome de Eugenio llegaban 21 s de audio EN
+    // SILENCIO TOTAL del mismo micrófono que en otro Chrome del mismo Mac sonaba
+    // bien. Si la primera forma calla, se prueba la siguiente sola, sin que la
+    // persona tenga que saber nada de esto:
+    //   1. el micrófono elegido, con el procesado de voz del navegador;
+    //   2. el elegido SIN procesado (si otra aplicación —una llamada, otro
+    //      dictado— tiene el procesado de voz del sistema, el navegador puede
+    //      recibir silencio);
+    //   3. y 4. el micrófono del sistema, sin y con procesado.
+    const proc = (si: boolean) => ({ echoCancellation: si, noiseSuppression: si, autoGainControl: si });
+    const FORMAS: MediaTrackConstraints[] = microfono
+      ? [{ deviceId: { ideal: microfono }, ...proc(true) }, { deviceId: { ideal: microfono }, ...proc(false) }, proc(false), proc(true)]
+      : [proc(true), proc(false)];
     let ctx: AudioContext;
     try { ctx = new AudioContext(); ctx.resume().catch(() => {}); }
     catch { setListening(false); if (!conNavegador()) setError('Este navegador no permite grabar audio.'); return; }
@@ -153,9 +167,7 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     // 1. El micrófono, el elegido si sigue conectado.
     let stream: MediaStream;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { ...(microfono ? { deviceId: { ideal: microfono } } : {}), echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      });
+      stream = await navigator.mediaDevices.getUserMedia({ audio: FORMAS[0] });
     } catch (e: any) {
       setListening(false);
       soltarCtx();
@@ -208,13 +220,48 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     const url = URL.createObjectURL(new Blob([CODIGO_CAPTURA], { type: 'application/javascript' }));
     await ctx.audioWorklet.addModule(url);
     URL.revokeObjectURL(url);
-    const fuente = ctx.createMediaStreamSource(stream);
+    let fuente = ctx.createMediaStreamSource(stream);
     const nodo = new AudioWorkletNode(ctx, 'captura-voz');
     let trozos: Float32Array[] = [];
     nodo.port.onmessage = e => { trozos.push(e.data as Float32Array); };
     fuente.connect(nodo);
     let cola: Promise<unknown> = Promise.resolve();
     let grabado = 0, maximo = 0, avisadoMudo = false;
+    let forma = 0, grabadoForma = 0, maximoForma = 0, cambiando = false, sonoYa = false;
+
+    /** Lo que de verdad se ha abierto, al registro del servidor: sin esto, «no
+     *  me escucha» en el ordenador de otra persona no se puede localizar. */
+    const diagnostico = (motivo: string) => {
+      const t = stream.getAudioTracks()[0];
+      const ajustes: any = t?.getSettings?.() || {};
+      fetch(`/api/voz/sesion/${id}/diag`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          motivo, forma, de: FORMAS.length, micro: t?.label, mudo: t?.muted, activo: t?.enabled, estado: t?.readyState,
+          ajustes: { deviceId: String(ajustes.deviceId || '').slice(0, 10), sampleRate: ajustes.sampleRate, echoCancellation: ajustes.echoCancellation, noiseSuppression: ajustes.noiseSuppression, autoGainControl: ajustes.autoGainControl, voiceIsolation: ajustes.voiceIsolation },
+          audio: { estado: ctx.state, frecuencia: ctx.sampleRate }, maximo: +maximoForma.toFixed(5), segundos: +grabadoForma.toFixed(1),
+          navegador: navigator.userAgent.slice(0, 160),
+        }),
+      }).catch(() => null);
+    };
+
+    /** La siguiente forma de abrir el micrófono, sin cortar el dictado. */
+    const siguienteForma = async () => {
+      if (cambiando || forma + 1 >= FORMAS.length) return false;
+      cambiando = true;
+      diagnostico('silencio');
+      forma++;
+      try {
+        const nuevo = await navigator.mediaDevices.getUserMedia({ audio: FORMAS[forma] });
+        fuente.disconnect();
+        stream.getTracks().forEach(t => t.stop());
+        stream = nuevo;
+        fuente = ctx.createMediaStreamSource(stream);
+        fuente.connect(nodo);
+      } catch { /* esa forma no vale: la siguiente vuelta prueba otra */ }
+      grabadoForma = 0; maximoForma = 0; cambiando = false;
+      return true;
+    };
     const vaciar = () => {
       if (!trozos.length) return;
       const largo = trozos.reduce((n, t) => n + t.length, 0);
@@ -226,12 +273,21 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
       const rms = Math.sqrt(suma / Math.max(1, junto.length));
       setNivel(Math.min(1, rms * 6));
       grabado += junto.length / ctx.sampleRate;
+      grabadoForma += junto.length / ctx.sampleRate;
       if (rms > maximo) maximo = rms;
+      if (rms > maximoForma) maximoForma = rms;
+      if (!sonoYa && maximoForma >= 0.003) { sonoYa = true; diagnostico('suena'); }
+      // SILENCIO DIGITAL —ceros exactos— durante 1,5 s: el micrófono llega roto
+      // por esta vía, y se prueba la siguiente. No vale un silencio normal:
+      // una habitación callada nunca da cero exacto, así que quien tarda en
+      // empezar a hablar no ve cambiar su micrófono.
+      if (!sonoYa && grabadoForma > 1.5 && maximoForma < 1e-5 && forma + 1 < FORMAS.length) { siguienteForma(); }
       // ¿MUDO? Tres segundos sin que llegue nada que suene: el micrófono
       // elegido no es el que se usa, o el sistema no le deja a este navegador.
       // Se dice UNA vez, con qué hacer, en vez de esperar en blanco.
-      if (!avisadoMudo && grabado > 3 && maximo < 0.003) {
+      if (!avisadoMudo && grabado > 3 && maximo < 0.003 && forma + 1 >= FORMAS.length && grabadoForma > 1.5) {
         avisadoMudo = true;
+        diagnostico('mudo en todas las formas');
         setError('No me llega sonido del micrófono. Si tienes varios, elige otro en la flechita de al lado; si no, revisa que el sistema deje a este navegador usar el micrófono.');
       }
       const cuerpo = aPcm16(junto, ctx.sampleRate);
@@ -243,6 +299,7 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
 
     parar.current = () => {
       clearInterval(reloj);
+      if (!sonoYa) diagnostico('parado sin sonido');
       vaciar();
       fuente.disconnect(); nodo.disconnect();
       stream.getTracks().forEach(t => t.stop());
