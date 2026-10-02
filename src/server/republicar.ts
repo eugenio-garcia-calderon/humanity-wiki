@@ -181,6 +181,89 @@ function desescapar(s: string): string {
 
 const recortar = (s: string, n: number) => (s.length > n ? s.slice(0, n).trimEnd() + '…' : s);
 
+type Leido = { fuente: any; insertable: boolean; icono: string | null } | { error: string };
+
+/** Lee la cabeza de una página de fuera: su título, descripción e imagen.
+ *  La dirección ya tiene que haber pasado por `puedeSalirAhi`. */
+async function leerPagina(url: URL): Promise<Leido> {
+  try {
+    // Un límite de tiempo y otro de tamaño: sin ellos, una página que no
+    // termina nunca deja la petición colgada, y una de 200 MB se traga la
+    // memoria del servidor. 8 s y 512 KB — las etiquetas van en la cabeza
+    // del documento, así que con el principio basta.
+    const corte = AbortSignal.timeout(8000);
+    const r = await fetch(url.toString(), {
+      signal: corte,
+      redirect: 'follow',
+      headers: {
+        // Sin esto muchos sitios devuelven una página vacía o un aviso de
+        // robot. Se dice quién es de verdad: no se disfraza de nadie.
+        'user-agent': 'humanity.wiki/1.0 (+https://humanity.wiki) previsualizador de enlaces',
+        'accept': 'text/html,application/xhtml+xml',
+        'accept-language': 'es,en;q=0.8',
+      },
+    });
+    if (!r.ok) return { error: `Esa página ha contestado ${r.status}.` };
+
+    const tipo = r.headers.get('content-type') || '';
+    if (!/text\/html|application\/xhtml/.test(tipo)) {
+      return { error: 'Esa dirección no es una página web.' };
+    }
+
+    const trozos: string[] = [];
+    let bytes = 0;
+    const lector = (r.body as any)?.getReader?.();
+    if (lector) {
+      const dec = new TextDecoder();
+      while (bytes < 512 * 1024) {
+        const { done, value } = await lector.read();
+        if (done) break;
+        bytes += value.length;
+        trozos.push(dec.decode(value, { stream: true }));
+        // En cuanto se acaba la cabeza del documento no hace falta más.
+        if (trozos.join('').includes('</head>')) break;
+      }
+      try { await lector.cancel(); } catch { /* ya cerrado */ }
+    } else {
+      trozos.push((await r.text()).slice(0, 512 * 1024));
+    }
+    const html = trozos.join('');
+
+    const fuente = {
+      red: redDe(url.toString()),
+      url: url.toString(),
+      titulo: meta(html, 'og:title', 'twitter:title')
+        || recortar(desescapar(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() || ''), 300)
+        || null,
+      texto: meta(html, 'og:description', 'twitter:description', 'description'),
+      imagen: meta(html, 'og:image', 'twitter:image'),
+      // De quién es. En X y Mastodon el autor va en el propio camino de la
+      // dirección; donde no, se usa el nombre del sitio, que es lo que se
+      // puede afirmar sin inventar.
+      autor: meta(html, 'og:site_name') || autorDelCamino(url) || null,
+      // CUÁNDO SE VIO, y no «cuándo se publicó»: de una página de fuera no
+      // sabemos lo segundo. Decir la fecha equivocada es peor que no decirla.
+      visto_el: new Date().toISOString(),
+    };
+
+    if (!fuente.titulo && !fuente.texto) {
+      return { error: 'De esa página no se ha podido leer nada que enseñar.' };
+    }
+    // ¿Se deja meter dentro de otra página? Si dice que no por cualquiera
+    // de las dos vías, no.
+    const xfo = (r.headers.get('x-frame-options') || '').toLowerCase();
+    const csp = (r.headers.get('content-security-policy') || '').toLowerCase();
+    const ancestros = csp.match(/frame-ancestors([^;]*)/)?.[1]?.trim() || '';
+    const insertable = !/deny|sameorigin/.test(xfo) && !(ancestros && !/(^|\s)\*(\s|$)/.test(ancestros));
+    const icono = html.match(/<link[^>]+rel\s*=\s*["'](?:shortcut )?icon["'][^>]*>/i)?.[0]?.match(/href\s*=\s*["']([^"']+)["']/i)?.[1] || null;
+    return { fuente, insertable, icono };
+  } catch (e: any) {
+    const porTiempo = e?.name === 'TimeoutError' || e?.name === 'AbortError';
+    return { error: porTiempo ? 'Esa página ha tardado demasiado en contestar.' : 'No se ha podido leer esa página.' };
+  }
+
+}
+
 export function registrarRepublicar(app: Express, db: any) {
   /**
    * LA PREVIA DE UN ENLACE DE FUERA — `GET /api/republicar/previa?url=`
@@ -206,76 +289,42 @@ export function registrarRepublicar(app: Express, db: any) {
     const motivo = await puedeSalirAhi(url);
     if (motivo) return res.status(400).json({ error: motivo });
 
-    try {
-      // Un límite de tiempo y otro de tamaño: sin ellos, una página que no
-      // termina nunca deja la petición colgada, y una de 200 MB se traga la
-      // memoria del servidor. 8 s y 512 KB — las etiquetas van en la cabeza
-      // del documento, así que con el principio basta.
-      const corte = AbortSignal.timeout(8000);
-      const r = await fetch(url.toString(), {
-        signal: corte,
-        redirect: 'follow',
-        headers: {
-          // Sin esto muchos sitios devuelven una página vacía o un aviso de
-          // robot. Se dice quién es de verdad: no se disfraza de nadie.
-          'user-agent': 'humanity.wiki/1.0 (+https://humanity.wiki) previsualizador de enlaces',
-          'accept': 'text/html,application/xhtml+xml',
-          'accept-language': 'es,en;q=0.8',
-        },
-      });
-      if (!r.ok) return res.status(400).json({ error: `Esa página ha contestado ${r.status}.` });
+    const leido = await leerPagina(url);
+    if ('error' in leido) return res.status(400).json({ error: leido.error });
+    res.json({ fuente: leido.fuente });
+  });
 
-      const tipo = r.headers.get('content-type') || '';
-      if (!/text\/html|application\/xhtml/.test(tipo)) {
-        return res.status(400).json({ error: 'Esa dirección no es una página web.' });
-      }
-
-      const trozos: string[] = [];
-      let bytes = 0;
-      const lector = (r.body as any)?.getReader?.();
-      if (lector) {
-        const dec = new TextDecoder();
-        while (bytes < 512 * 1024) {
-          const { done, value } = await lector.read();
-          if (done) break;
-          bytes += value.length;
-          trozos.push(dec.decode(value, { stream: true }));
-          // En cuanto se acaba la cabeza del documento no hace falta más.
-          if (trozos.join('').includes('</head>')) break;
-        }
-        try { await lector.cancel(); } catch { /* ya cerrado */ }
-      } else {
-        trozos.push((await r.text()).slice(0, 512 * 1024));
-      }
-      const html = trozos.join('');
-
-      const fuente = {
-        red: redDe(url.toString()),
-        url: url.toString(),
-        titulo: meta(html, 'og:title', 'twitter:title')
-          || recortar(desescapar(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() || ''), 300)
-          || null,
-        texto: meta(html, 'og:description', 'twitter:description', 'description'),
-        imagen: meta(html, 'og:image', 'twitter:image'),
-        // De quién es. En X y Mastodon el autor va en el propio camino de la
-        // dirección; donde no, se usa el nombre del sitio, que es lo que se
-        // puede afirmar sin inventar.
-        autor: meta(html, 'og:site_name') || autorDelCamino(url) || null,
-        // CUÁNDO SE VIO, y no «cuándo se publicó»: de una página de fuera no
-        // sabemos lo segundo. Decir la fecha equivocada es peor que no decirla.
-        visto_el: new Date().toISOString(),
-      };
-
-      if (!fuente.titulo && !fuente.texto) {
-        return res.status(400).json({ error: 'De esa página no se ha podido leer nada que enseñar.' });
-      }
-      res.json({ fuente });
-    } catch (e: any) {
-      const porTiempo = e?.name === 'TimeoutError' || e?.name === 'AbortError';
-      res.status(400).json({
-        error: porTiempo ? 'Esa página ha tardado demasiado en contestar.' : 'No se ha podido leer esa página.',
-      });
-    }
+  /**
+   * LA PREVIA DE UN ENLACE PEGADO EN EL CREADOR DE PÁGINAS (2026-10-02)
+   * `GET /api/enlaces/previa?url=` — Eugenio: «al pegar un enlace, poder
+   * escoger si se embebe la web, si se hace una tarjeta con imagen, título y
+   * descripción, o si se pega el enlace normal, como hace Notion».
+   *
+   * Es la misma lectura que la de republicar (mismas puertas contra la red
+   * interna, mismos límites de tiempo y tamaño), más dos cosas que la tarjeta
+   * necesita: la imagen y el icono con dirección completa, y si la web se
+   * deja meter dentro de otra (`insertable`): muchas lo prohíben con
+   * `X-Frame-Options` o `frame-ancestors`, y ofrecer «insertar» para que
+   * luego salga un recuadro gris sería prometer lo que no va a pasar.
+   */
+  app.get('/api/enlaces/previa', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    const leida = comoDireccion(String(req.query.url || '').trim());
+    if (leida.error || !leida.url) return res.status(400).json({ error: leida.error || 'Falta la dirección.' });
+    const motivo = await puedeSalirAhi(leida.url);
+    if (motivo) return res.status(400).json({ error: motivo });
+    const leido = await leerPagina(leida.url);
+    if ('error' in leido) return res.status(400).json({ error: leido.error });
+    const abs = (u: string | null) => { if (!u) return null; try { return new URL(u, leido.fuente.url).toString(); } catch { return null; } };
+    res.json({
+      url: leido.fuente.url,
+      titulo: leido.fuente.titulo,
+      descripcion: leido.fuente.texto,
+      imagen: abs(leido.fuente.imagen),
+      sitio: leido.fuente.autor || new URL(leido.fuente.url).hostname.replace(/^www\./, ''),
+      icono: abs(leido.icono) || new URL('/favicon.ico', leido.fuente.url).toString(),
+      insertable: leido.insertable,
+    });
   });
 
   /**

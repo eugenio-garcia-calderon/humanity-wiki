@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Plus, Move } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
@@ -168,7 +169,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
                 {f.pagina?.descripcion && (
-                  <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line">{f.pagina.descripcion}</p>
+                  <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line"><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.map(c => {
                   // Una relación se enseña como fichas que llevan a la página
