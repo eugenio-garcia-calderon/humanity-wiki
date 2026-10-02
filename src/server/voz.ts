@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response } from 'express';
 import WebSocket from 'ws';
+import fs from 'node:fs';
 import { hayPresupuesto } from './ai/tope.js';
 
 // ============================================================================
@@ -62,6 +63,27 @@ type Sesion = {
 
 const sesiones = new Map<string, Sesion>();
 
+/**
+ * LA LLAVE DE PRUEBA (2026-10-02). Para comprobar el dictado EN PRODUCCIÓN de
+ * punta a punta —Cloudflare, Caddy, el transcriptor— sin entrar con la cuenta
+ * de nadie. Sólo existe mientras haya un fichero en el servidor
+ * (`/tmp/voz-prueba.llave`) que se crea por SSH antes de la prueba y se borra
+ * al acabar; sólo abre las rutas de VOZ, y sólo durante una hora desde que se
+ * creó. Sin el fichero, esto no hace nada.
+ */
+const FICHERO_LLAVE = '/tmp/voz-prueba.llave';
+function quien(req: Request): string | null {
+  if (req.user?.id) return req.user.id;
+  const dada = String(req.headers['x-voz-prueba'] || '');
+  if (!dada) return null;
+  try {
+    const st = fs.statSync(FICHERO_LLAVE);
+    if (Date.now() - st.mtimeMs > 3600_000) return null;
+    const llave = fs.readFileSync(FICHERO_LLAVE, 'utf8').trim();
+    return llave.length >= 32 && dada === llave ? 'PRUEBA_VOZ' : null;
+  } catch { return null; }
+}
+
 const CABECERAS_SSE = {
   'Content-Type': 'text/event-stream',
   'Cache-Control': 'no-cache, no-transform',
@@ -106,17 +128,18 @@ export function registrarVoz(app: Express, db: any) {
   /** Empezar a dictar: abre la conexión con el transcriptor. */
   app.post('/api/voz/sesion', async (req: Request, res: Response) => {
     try {
-      if (!req.user) return res.status(401).json({ error: 'Inicia sesión para dictar por voz.' });
+      const yo = quien(req);
+      if (!yo) return res.status(401).json({ error: 'Inicia sesión para dictar por voz.' });
       if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'El dictado no está configurado en este servidor.' });
       const presupuesto = await hayPresupuesto(db);
       if (!presupuesto.ok) return res.status(429).json({ error: presupuesto.mensaje });
       // Una por persona: la anterior se cierra (otra pestaña, o un doble clic).
-      for (const s of sesiones.values()) if (s.userId === req.user.id) cerrar(s);
+      for (const s of sesiones.values()) if (s.userId === yo) cerrar(s);
       if (sesiones.size >= SESIONES_MAX) return res.status(503).json({ error: 'Ahora mismo hay demasiada gente dictando. Prueba en un momento.' });
 
       const id = `VOZ${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
       const ws = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${process.env.GEMINI_API_KEY}`);
-      const s: Sesion = { id, userId: req.user.id, ws, listo: false, pendiente: [], oyentes: new Set(), historial: [], cerrado: '', enCurso: '', bytes: 0, trozos: 0, textos: 0, conexiones: 0, ultimoAudio: Date.now(), creada: Date.now(), cerrada: false };
+      const s: Sesion = { id, userId: yo, ws, listo: false, pendiente: [], oyentes: new Set(), historial: [], cerrado: '', enCurso: '', bytes: 0, trozos: 0, textos: 0, conexiones: 0, ultimoAudio: Date.now(), creada: Date.now(), cerrada: false };
       sesiones.set(id, s);
 
       ws.on('open', () => ws.send(JSON.stringify({ setup: { model: `models/${MODELO}`, inputAudioTranscription: {} } })));
@@ -170,7 +193,7 @@ export function registrarVoz(app: Express, db: any) {
   /** El texto, según llega. */
   app.get('/api/voz/sesion/:id/eventos', (req: Request, res: Response) => {
     const s = sesiones.get(req.params.id);
-    if (!s || !req.user || s.userId !== req.user.id) return res.status(404).json({ error: 'Ese dictado ya no está abierto.' });
+    if (!s || s.userId !== quien(req)) return res.status(404).json({ error: 'Ese dictado ya no está abierto.' });
     res.writeHead(200, CABECERAS_SSE);
     res.write(': ok\n\n');
     for (const l of s.historial) res.write(l);
@@ -182,7 +205,7 @@ export function registrarVoz(app: Express, db: any) {
   /** Un trozo de audio: PCM de 16 bits, 16 kHz, mono. */
   app.post('/api/voz/sesion/:id/audio', express.raw({ type: 'application/octet-stream', limit: '256kb' }), (req: Request, res: Response) => {
     const s = sesiones.get(req.params.id);
-    if (!s || !req.user || s.userId !== req.user.id) return res.status(404).json({ error: 'Ese dictado ya no está abierto.' });
+    if (!s || s.userId !== quien(req)) return res.status(404).json({ error: 'Ese dictado ya no está abierto.' });
     const b = req.body as Buffer;
     if (!Buffer.isBuffer(b) || !b.length) return res.status(400).json({ error: 'Audio vacío.' });
     s.ultimoAudio = Date.now();
@@ -194,7 +217,7 @@ export function registrarVoz(app: Express, db: any) {
   /** Dejar de dictar: se avisa del final del audio para que cierre la frase. */
   app.post('/api/voz/sesion/:id/fin', (req: Request, res: Response) => {
     const s = sesiones.get(req.params.id);
-    if (!s || !req.user || s.userId !== req.user.id) return res.status(204).end();
+    if (!s || s.userId !== quien(req)) return res.status(204).end();
     try { if (s.listo) s.ws.send(JSON.stringify({ realtimeInput: { audioStreamEnd: true } })); } catch { /* ya cerrado */ }
     // Se le da un momento para devolver la última frase cerrada.
     setTimeout(() => cerrar(s), 2500);
