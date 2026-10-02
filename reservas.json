@@ -65,6 +65,30 @@
       "ruta": "src/components/knowledge/CabeceraPagina.tsx",
       "motivo": "",
       "desde": "2026-10-02T12:18:42.230Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/bd.ts",
+      "motivo": "",
+      "desde": "2026-10-02T12:52:24.760Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/ai/assistant.ts",
+      "motivo": "",
+      "desde": "2026-10-02T12:52:24.760Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T12:52:24.760Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/ai/paginaIA.ts",
+      "motivo": "",
+      "desde": "2026-10-02T12:52:24.760Z"
     }
   ]
 }
