@@ -41,6 +41,12 @@
       "ruta": "src/server/cabeceraSitio.tsx",
       "motivo": "",
       "desde": "2026-10-02T12:07:57.385Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "",
+      "desde": "2026-10-02T12:12:18.812Z"
     }
   ]
 }
