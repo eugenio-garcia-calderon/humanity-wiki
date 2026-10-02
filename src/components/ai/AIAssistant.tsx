@@ -82,6 +82,16 @@ interface Message {
   resultados?: ResultadoBusqueda[];
   /** El texto original, para poder preguntárselo a la IA de todos modos. */
   reintentarIA?: string;
+  /** RELLENAR UNA BASE DE DATOS CON LA IA DE LA CASA (2026-10-02): lo que se
+   *  propone guardar y en qué va. Nada se escribe hasta pulsar «Guardar». */
+  datosLocal?: {
+    id: string; pagina_id: string; propuesta: any; origen: 'reglas' | 'modelo'; ms?: number;
+    estado: 'pendiente' | 'guardando' | 'guardado' | 'descartado' | 'error'; error?: string; url?: string | null;
+  };
+  /** La IA de la casa necesita saber algo («¿en qué base de datos?»). */
+  preguntaLocal?: { texto: string; opciones: Array<{ label: string; tabla_id?: string }> };
+  /** La IA de la casa no ha podido: el texto, por si se quiere pagar la otra. */
+  alternativaPago?: string;
   /** Se buscó primero, no había nada, y por eso contesta la IA. Se enseña:
    *  que una respuesta cueste dinero no puede ser una sorpresa. */
   buscadoAntes?: string;
@@ -1315,6 +1325,66 @@ export default function AIAssistant({ modo = 'panel' }: {
     </div>
   ) : null;
 
+  /** Pregunta a la IA de la casa. `true` si ella se ha hecho cargo del mensaje. */
+  const intentarIaLocal = async (text: string, tablaId?: string): Promise<boolean> => {
+    const pagina = paginaEditor.current;
+    if (!pagina) return false;
+    let j: any;
+    try {
+      const r = await fetch('/api/datos-chat/entender', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pagina_id: pagina, texto: text, tabla_id: tablaId }),
+      });
+      if (!r.ok) return false;
+      j = await r.json();
+    } catch { return false; }
+    if (j?.tipo === 'propuesta') {
+      marcarQuienContesto('plataforma', 0);
+      setMessages(m => [...m, {
+        role: 'assistant',
+        content: `Esto es lo que voy a guardar en «${j.propuesta.tabla}». Revísalo y pulsa Guardar.`,
+        datosLocal: { id: `DL${Date.now().toString(36)}`, pagina_id: pagina, propuesta: j.propuesta, origen: j.origen, ms: j.ms, estado: 'pendiente' },
+      }]);
+      return true;
+    }
+    if (j?.tipo === 'pregunta') {
+      setMessages(m => [...m, { role: 'assistant', content: j.texto, preguntaLocal: { texto: text, opciones: j.opciones || [] } }]);
+      return true;
+    }
+    if (j?.tipo === 'no_disponible') {
+      // Se dice, y NO se pasa sola a la IA de pago: si la gratuita no puede, que
+      // cueste dinero tiene que decidirlo la persona, no el programa.
+      setMessages(m => [...m, { role: 'assistant', content: `${j.motivo || 'La IA gratuita no está disponible.'} No se ha guardado nada.`, alternativaPago: text }]);
+      return true;
+    }
+    return false;
+  };
+
+  const cambiarDatosLocal = (id: string, cambio: Partial<NonNullable<Message['datosLocal']>>) =>
+    setMessages(m => m.map(x => (x.datosLocal?.id === id ? { ...x, datosLocal: { ...x.datosLocal!, ...cambio } } : x)));
+
+  const guardarDatosLocal = async (d: NonNullable<Message['datosLocal']>) => {
+    cambiarDatosLocal(d.id, { estado: 'guardando', error: undefined });
+    try {
+      const r = await fetch('/api/datos-chat/guardar', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pagina_id: d.pagina_id, propuesta: d.propuesta }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) {
+        const detalle = Array.isArray(j.fallos) ? ` ${j.fallos.map((f: any) => `${f.columna}: ${f.error}`).join(' · ')}` : '';
+        cambiarDatosLocal(d.id, { estado: 'error', error: `${j.error || 'No se ha podido guardar.'}${detalle}` });
+        return;
+      }
+      cambiarDatosLocal(d.id, { estado: 'guardado', url: j.creado?.url ?? null });
+      // La tabla del editor se vuelve a leer sola: el mismo aviso que usan las
+      // acciones de la IA de pago.
+      window.dispatchEvent(new CustomEvent('humanity:contenido-cambiado', { detail: { tabla_id: d.propuesta.tabla_id } }));
+    } catch {
+      cambiarDatosLocal(d.id, { estado: 'error', error: 'No hay conexión con el servidor.' });
+    }
+  };
+
   const send = async (overrideText?: string) => {
     const text = (typeof overrideText === 'string' ? overrideText : input).trim();
     if (!text || busy) return;
@@ -1360,6 +1430,17 @@ export default function AIAssistant({ modo = 'panel' }: {
       //    Contestar «no hay resultados» a quien preguntaba algo es un
       //    callejón sin salida: el usuario reescribe la frase y acaba
       //    costando más que haber preguntado a la primera.
+      // ══ RELLENAR DATOS, PRIMERO CON LA IA DE LA CASA (2026-10-02) ══════════
+      // Eugenio: «que cuando se pida al chat nutrir una base de datos concreta,
+      // el modelo sea uno que corra en nuestro propio servidor, sin gastar
+      // ningún crédito». Con una página abierta en el editor, la frase se
+      // pregunta antes a `/api/datos-chat/entender`. Si es una petición de
+      // datos, contesta ella con una propuesta y aquí termina: no se llama a
+      // ningún modelo de pago. Si no lo es, sigue el camino de siempre.
+      if (paginaEditor.current && user && !pendingAttachment && !/\(respóndeme tú\)$/.test(text)) {
+        if (await intentarIaLocal(text)) { setBusy(false); return; }
+      }
+
       const intencion = queHacer(text, modoEntrada, !!pendingAttachment);
       if (intencion.que === 'buscar') {
         const termino = intencion.termino;
@@ -1876,6 +1957,90 @@ export default function AIAssistant({ modo = 'panel' }: {
                         Preguntárselo a la IA
                       </button>
                     </div>
+                  )}
+
+                  {/* LA PROPUESTA DE LA IA DE LA CASA. Se enseña campo a campo
+                      lo que se va a escribir, y lo que NO se va a poder, antes
+                      de escribir nada: un modelo pequeño se equivoca a veces,
+                      y aquí equivocarse es una tarjeta que se descarta, nunca
+                      una fila mal puesta en la web de alguien. */}
+                  {m.datosLocal && (() => {
+                    const d = m.datosLocal; const p = d.propuesta || {};
+                    return (
+                      <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5 text-[12px]">
+                        <p className="font-black text-slate-800">
+                          {p.receta === 'editar_entrada' ? `Cambiar «${p.entrada}»` : `Nueva entrada: «${p.entrada}»`}
+                        </p>
+                        {!!p.campos?.length && (
+                          <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
+                            {p.campos.flatMap((c: any) => [
+                              <dt key={`k${c.columna_id}`} className="text-slate-500">{c.columna}</dt>,
+                              <dd key={`v${c.columna_id}`} className="break-words font-bold text-slate-700">{c.mostrar}</dd>,
+                            ])}
+                          </dl>
+                        )}
+                        {p.texto && <p className="mt-1 line-clamp-3 text-slate-600">{p.texto}</p>}
+                        {!!p.fallos?.length && (
+                          <ul className="mt-1.5 space-y-0.5 text-[11px] text-rose-700">
+                            {p.fallos.map((f: any, i: number) => <li key={i}>No se guardará «{f.columna}»: {f.error}</li>)}
+                          </ul>
+                        )}
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {d.estado === 'pendiente' || d.estado === 'error' ? (
+                            <>
+                              <button onClick={() => guardarDatosLocal(d)}
+                                className="inline-flex h-9 items-center gap-1 rounded-lg bg-emerald-600 px-3 text-[11px] font-black text-white hover:bg-emerald-700">
+                                <Check className="h-3.5 w-3.5" /> Guardar
+                              </button>
+                              <button onClick={() => cambiarDatosLocal(d.id, { estado: 'descartado' })}
+                                className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-[11px] font-bold text-slate-500 hover:bg-white">
+                                <Ban className="h-3.5 w-3.5" /> Descartar
+                              </button>
+                            </>
+                          ) : d.estado === 'guardando' ? (
+                            <span className="text-[11px] font-bold text-slate-500">Guardando…</span>
+                          ) : d.estado === 'guardado' ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700">
+                              <Check className="h-3.5 w-3.5" /> Guardado
+                              {d.url && <a href={d.url} className="ml-1 underline">abrir la entrada</a>}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-slate-400">Descartado: no se ha guardado nada.</span>
+                          )}
+                          <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-slate-400">
+                            <Cpu className="h-3 w-3" />
+                            {d.origen === 'reglas' ? 'Entendido sin IA' : `IA de la casa${d.ms ? ` · ${(d.ms / 1000).toFixed(1)} s` : ''}`} · gratis
+                          </span>
+                        </div>
+                        {d.estado === 'error' && d.error && <p className="mt-1 text-[11px] font-bold text-rose-700">{d.error}</p>}
+                      </div>
+                    );
+                  })()}
+
+                  {m.preguntaLocal && !!m.preguntaLocal.opciones.length && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {m.preguntaLocal.opciones.map((o, i) => o.tabla_id ? (
+                        <button key={i} disabled={busy}
+                          onClick={async () => {
+                            setMessages(x => [...x, { role: 'user', content: `En «${o.label}»` }]);
+                            setBusy(true);
+                            try { if (!(await intentarIaLocal(m.preguntaLocal!.texto, o.tabla_id))) setMessages(x => [...x, { role: 'assistant', content: 'No lo he entendido. Prueba a decirlo de otra forma.' }]); }
+                            finally { setBusy(false); }
+                          }}
+                          className="rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50 disabled:opacity-50">
+                          {o.label}
+                        </button>
+                      ) : (
+                        <span key={i} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] text-slate-600">{o.label}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {m.alternativaPago && (
+                    <button onClick={() => send(`${m.alternativaPago} (respóndeme tú)`)}
+                      className="mt-2 text-[10px] font-black text-emerald-700 hover:underline">
+                      Pedírselo a la IA de pago
+                    </button>
                   )}
 
                   {!!m.creado?.length && (

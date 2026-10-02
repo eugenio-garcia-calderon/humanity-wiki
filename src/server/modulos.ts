@@ -86,6 +86,7 @@ import { registerContactosGoogleRoutes } from './contactosGoogle.js';
 import { registerCalendarioGoogleRoutes } from './calendarioGoogle.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
+import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
 
 /**
  * Un módulo de la API.
@@ -178,6 +179,8 @@ export const MODULOS: Modulo[] = [
   // certificado, así que si este módulo no monta, nadie puede estrenar un
   // dominio nuevo — pero los que ya tienen certificado siguen funcionando.
   { nombre: 'dominios', montar: (app, db) => registerDominiosRoutes(app, db) },
+  // Rellenar bases de datos hablando, con la IA de la casa (sin coste).
+  { nombre: 'datos-chat', montar: (app, db) => registerRellenarPorChatRoutes(app, db) },
   // Los sitios publicados: subpáginas visibles por herencia, la vista previa
   // al compartir escrita en el HTML, y robots/sitemap de cada dominio. Tiene
   // que ir antes que el comodín de la aplicación (que está en `server.ts`,

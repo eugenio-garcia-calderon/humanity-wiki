@@ -95,6 +95,36 @@ services:
       timeout: 5s
       retries: 3
 
+  # LA IA DE LA CASA (2026-10-02). Eugenio: «que el modelo corra en nuestro
+  # propio servidor, sin gastar ningún crédito de ninguna IA externa», para
+  # rellenar bases de datos hablando con el chat (`src/server/rellenarPorChat.ts`).
+  #
+  # llama.cpp con Qwen2.5-1.5B-Instruct (licencia Apache-2.0), cuantizado a
+  # ~1 GB. `-hf` lo descarga del repositorio oficial de Qwen la PRIMERA vez y lo
+  # guarda en el volumen `llm_models`; los siguientes arranques no descargan.
+  #
+  # TECHOS, Y POR QUÉ ESTOS. La máquina tiene 2 vCPU y 3,8 GB para todo:
+  #   · `cpus: 1.5` — mientras piensa (unos segundos por petición) deja medio
+  #     núcleo a la web; sin techo se comería los dos y la web iría a tirones.
+  #   · `mem_limit: 1800m` — el modelo usa ~1,3 GB. Si algo se desboca, muere
+  #     este contenedor, no la base de datos.
+  #   · `--parallel 1` — una petición a la vez; la cola vive en `iaLocal.ts`.
+  # Sin `ports:`: sólo `app` lo ve, por la red interna. Nadie de fuera puede
+  # usarlo como un ChatGPT gratis.
+  # `app` NO depende de él: si el modelo no arranca, la web sigue y el chat dice
+  # «la IA gratuita no está disponible».
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    restart: unless-stopped
+    command: ["-hf", "Qwen/Qwen2.5-1.5B-Instruct-GGUF:Q4_K_M", "--host", "0.0.0.0", "--port", "8080",
+              "-c", "4096", "-t", "2", "--parallel", "1"]
+    environment:
+      LLAMA_CACHE: /models
+    volumes:
+      - llm_models:/models
+    mem_limit: 1800m
+    cpus: 1.5
+
   # Copias de seguridad de la base de datos (2026-08-22). Un volcado al día,
   # comprobado, en un volumen del servidor — que es lo que la copia de disco de
   # Hetzner se lleva luego fuera de la máquina. Cómo restaurarlo y por qué está
@@ -207,3 +237,6 @@ volumes:
   uploads:
   caddy_data:
   caddy_config:
+  # El modelo de la IA de la casa (~1 GB). En un volumen para no descargarlo en
+  # cada despliegue.
+  llm_models:

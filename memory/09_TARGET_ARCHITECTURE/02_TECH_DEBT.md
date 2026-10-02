@@ -337,3 +337,13 @@ plus a backfill later.
 
 ## Dictation cost is not counted (2026-10-02, prog8)
 `server/voz.ts` checks `hayPresupuesto` before opening a session, but does not add the transcription cost to `ai_usage_charges`, so dictating never moves the spending counter. Same gap as image generation (see the note in `assistant.ts`). Bounded today by one session per person, 5 minutes max and 20 s of silence closing it. Fix: charge per audio second when the session closes (16 kHz PCM → seconds = bytes / 32000).
+
+## Chat data entry: what the free path does not do yet (2026-10-02)
+
+`rellenarPorChat.ts` covers adding and editing one entry with plain values.
+Not yet: several entries in one sentence, images (an attached photo still goes
+to the paid path), link/file/person columns, deleting entries, and databases
+inside subpages (only `basedatos` blocks of the open page). The rules parser is
+heuristic Spanish; every miss falls to the local model, so the cost of a gap is
+seconds of CPU, not a wrong row. Measure the hit rate from real use before
+adding more rules.
