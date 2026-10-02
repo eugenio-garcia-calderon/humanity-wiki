@@ -874,7 +874,7 @@ export default function AIAssistant({ modo = 'panel' }: {
   };
   // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
   const dictationBase = useRef('');
-  const { listening, supported: voiceSupported, toggle: toggleVoice, error: errorVoz, microfonos, microfono, setMicrofono, cargarMicrofonos } = useVoiceDictation((crudo, isFinal) => {
+  const { listening, supported: voiceSupported, toggle: toggleVoice, error: errorVoz, nivel: nivelVoz, microfonos, microfono, setMicrofono, cargarMicrofonos } = useVoiceDictation((crudo, isFinal) => {
     // Chrome empieza cada frase nueva con un espacio: sin quitarlo, salían
     // dos entre frase y frase.
     const text = crudo.replace(/^\s+/, '');
@@ -973,6 +973,11 @@ export default function AIAssistant({ modo = 'panel' }: {
   useEffect(() => {
     setSugerenciasOcultas(false);
     setSugerenciaActiva(-1);
+    // DICTANDO NO SE BUSCA (2026-10-02). Cada palabra dictada cambia el texto,
+    // y cada cambio lanzaba una búsqueda: en tres segundos de voz el servidor
+    // frenaba al buscador por exceso de peticiones (429) y el desplegable
+    // tapaba lo que se estaba escribiendo.
+    if (listening) { setSugerencias([]); setBuscandoSugerencias(false); return; }
     const intencion = queHacer(input, modoEntrada, !!attachment);
     if (intencion.que !== 'buscar' || intencion.termino.length < 2) {
       setSugerencias([]);
@@ -1015,7 +1020,7 @@ export default function AIAssistant({ modo = 'panel' }: {
         .finally(() => { if (!ctrl.signal.aborted) setBuscandoSugerencias(false); });
     }, 220);
     return () => { if (resolveTimer.current) clearTimeout(resolveTimer.current); };
-  }, [input, modoEntrada, attachment]);
+  }, [input, modoEntrada, attachment, listening]);
 
   /** Estado visual actual, tomado de la URL: es lo que ve el usuario ahora. */
   // QUÉ ESTÁS MIRANDO (Eugenio, 2026-08-20: «que la IA vea en la página que
@@ -2584,7 +2589,7 @@ export default function AIAssistant({ modo = 'panel' }: {
                 // (2026-10-02). Ver `BotonMicrofono.tsx` y `useVoiceDictation.ts`.
                 <BotonMicrofono escuchando={listening} onPulsar={handleMicClick}
                   microfonos={microfonos} microfono={microfono} onElegir={setMicrofono}
-                  onAbrirLista={cargarMicrofonos} error={errorVoz} />
+                  onAbrirLista={cargarMicrofonos} error={errorVoz} nivel={nivelVoz} />
               )}
 
               {/* EL MODELO, ABAJO Y CON SU NOMBRE (2026-08-20, petición de

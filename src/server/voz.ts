@@ -103,6 +103,10 @@ function emitir(s: Sesion, tipo: string, datos: any) {
 
 function cerrar(s: Sesion, motivo?: string) {
   if (s.cerrada) return;
+  // Más de tres segundos de audio y ni una palabra: se dice, no se calla.
+  if (!motivo && s.bytes > 3 * 32000 && s.textos === 0) {
+    motivo = 'No he entendido nada. ¿Está bien elegido el micrófono? Prueba a hablar más cerca o a elegir otro en la flechita.';
+  }
   s.cerrada = true;
   // UNA LÍNEA POR DICTADO (2026-10-02). Sin ella, «no funciona» no se podía
   // localizar: no se sabía si había llegado audio, si el transcriptor había

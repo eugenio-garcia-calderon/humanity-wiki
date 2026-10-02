@@ -8233,3 +8233,10 @@ reach the model and answer instantly.
   display as before («2026», «07/2026»). The cell editor shows the accepted forms;
   `DIAS()` counts a partial date from its first day; the free chat AI also
   understands «noviembre de 2026».
+
+### 2026-10-02 — Dictado: arreglo de raíz y prueba de punta a punta en producción (prog8)
+- Eugenio: «no funciona el voice to text del chat de IA; segunda vez que se falla. Que se escriba según hablas, y crea un loop con un agente que le meta una voz y vea si se transcribe antes de darlo por resuelto».
+- Comprobado por tramos en producción: el audio llegaba al servidor; el transcriptor transcribe desde Helsinki; el canal SSE atraviesa Cloudflare y Caddy mensaje a mensaje (`/api/voz/prueba-canal`); y con Chrome y micrófono simulado, la cadena entera transcribe en directo (llave de prueba `/tmp/voz-prueba.llave`, ver `server/voz.ts`).
+- Lo que fallaba en navegadores reales: el `AudioContext` se creaba después de esperar al permiso y a la conexión; Safari (y Chrome a veces) lo deja parado y no entrega ni una muestra, sin aviso. Ahora se crea y despierta en el mismo clic. Probado emulando un contexto que nace parado.
+- Nunca más en blanco: el botón enseña el volumen (halo azul que sigue a la voz); si en 3 s no llega sonido avisa de elegir otro micrófono o revisar el permiso del sistema; si el servidor no entiende nada lo dice; si el canal se cae, también. Mientras se dicta el chat ya no lanza una búsqueda por palabra (provocaba 429).
+- Rutas de voz declaradas en `seguridad/politica.ts`; una línea de registro por dictado (`[voz] … KB en N trozos, M textos, conexiones…`).
