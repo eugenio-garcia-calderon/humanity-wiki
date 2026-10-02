@@ -23,36 +23,6 @@
       "ruta": "src/server/iaLocal.ts",
       "motivo": "IA local para rellenar bases de datos (prog8-ialocal)",
       "desde": "2026-10-02T13:58:51.810Z"
-    },
-    {
-      "agente": "prog8-rapido",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "",
-      "desde": "2026-10-02T14:39:11.042Z"
-    },
-    {
-      "agente": "prog8-rapido",
-      "ruta": "src/components/navegacion/Rail.tsx",
-      "motivo": "",
-      "desde": "2026-10-02T14:39:11.042Z"
-    },
-    {
-      "agente": "prog8-rapido",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "",
-      "desde": "2026-10-02T14:39:11.042Z"
-    },
-    {
-      "agente": "prog8-rapido",
-      "ruta": "src/pages/Paginas.tsx",
-      "motivo": "",
-      "desde": "2026-10-02T14:39:11.042Z"
-    },
-    {
-      "agente": "prog8-rapido",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "",
-      "desde": "2026-10-02T14:39:11.042Z"
     }
   ]
 }
