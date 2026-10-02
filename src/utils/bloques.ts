@@ -315,3 +315,12 @@ export function tituloDeBloques(bloques: Bloque[], porDefecto = 'Documento sin t
   const primero = bloques.find(b => b.texto?.trim());
   return primero ? primero.texto!.trim().slice(0, 120) : porDefecto;
 }
+
+/**
+ * EL AIRE ALREDEDOR DE UNA BASE DE DATOS (2026-10-02, Eugenio: «que el hueco
+ * entre bases de datos sea mayor, para que a nivel estético quede bien»).
+ * Los bloques van separados 8–10 px, que para dos párrafos está bien y para
+ * dos galerías seguidas las pega. Una sola clase para el editor y la página
+ * publicada: si se separan, lo que se ve al escribir deja de ser lo que sale.
+ */
+export const AIRE_BASE_DATOS = 'py-5 sm:py-8';

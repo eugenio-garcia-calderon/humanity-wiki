@@ -73,8 +73,8 @@ export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCe
           <p className="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Cómo se ve publicada</p>
           <Interruptor etiqueta="Mostrar el autor" ayuda="Tu nombre y tu foto bajo el título."
             valor={!!ajustes.mostrarAutor} onCambio={v => pon({ mostrarAutor: v })} />
-          <Interruptor etiqueta="Mostrar la fecha" ayuda="La fecha de la última edición."
-            valor={!!ajustes.mostrarFecha} onCambio={v => pon({ mostrarFecha: v })} />
+          {/* La fecha ya no se publica (2026-10-02, Eugenio: «quita la fecha
+              que está debajo del icono»): sin interruptor que no haría nada. */}
         </section>
 
         <section className="space-y-3">
