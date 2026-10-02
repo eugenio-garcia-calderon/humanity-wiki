@@ -29,6 +29,42 @@
       "ruta": "src/server/uploads.ts",
       "motivo": "",
       "desde": "2026-10-02T13:29:25.688Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T13:34:26.315Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T13:34:26.315Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T13:34:26.315Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T13:34:26.315Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/knowledge/AjustesPagina.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T13:34:26.315Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "",
+      "desde": "2026-10-02T13:34:26.315Z"
     }
   ]
 }
