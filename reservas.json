@@ -50,12 +50,6 @@
     },
     {
       "agente": "prog8-rapido",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "",
-      "desde": "2026-10-02T14:16:07.678Z"
-    },
-    {
-      "agente": "prog8-rapido",
       "ruta": "src/components/sitio/CabeceraLectura.tsx",
       "motivo": "",
       "desde": "2026-10-02T14:16:07.678Z"
