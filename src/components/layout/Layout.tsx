@@ -6,7 +6,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Folder, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
- PanelLeftOpen, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
+ PanelLeftOpen, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -29,6 +29,7 @@ import AvatarRail from '../navegacion/AvatarRail';
 import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
+import HojaExplorar from '../navegacion/HojaExplorar';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
 import BotonCalendario from '../navegacion/BotonCalendario';
 import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
@@ -131,7 +132,26 @@ export default function Layout() {
    */
   const { estado: proyectos, recargar: recargarProyectos } = useProyectos(!!user);
   const listaProyectos = Array.isArray(proyectos) ? proyectos : [];
-  const itemsProyectos = comoItems(listaProyectos);
+  // TUS PÁGINAS SUELTAS, DEBAJO DE LAS CARPETAS (2026-10-02). El menú de la
+  // izquierda es «donde están todas las páginas del usuario» (Eugenio): una
+  // página que no está en ninguna carpeta no salía en ninguna parte. Se piden
+  // al entrar y cada vez que se vuelve a la pestaña.
+  const [paginasSueltas, setPaginasSueltas] = useState<Herramienta[]>([]);
+  useEffect(() => {
+    if (!user) { setPaginasSueltas([]); return; }
+    let vivo = true;
+    const pedir = () => fetch('/api/paginas', { credentials: 'include' }).then(r => r.json()).then(d => {
+      if (!vivo) return;
+      const sueltas = (Array.isArray(d?.proyectos) ? d.proyectos : []).find((g: any) => g.sueltas)?.paginas || [];
+      setPaginasSueltas(sueltas.slice(0, 30).map((pg: any) => ({
+        clave: `pagina-${pg.id}`, nombre: pg.titulo || 'Sin título', icono: FileText, ruta: `/paginas/${pg.id}`,
+      })));
+    }).catch(() => {});
+    pedir();
+    window.addEventListener('focus', pedir);
+    return () => { vivo = false; window.removeEventListener('focus', pedir); };
+  }, [user]);
+  const itemsProyectos = [...comoItems(listaProyectos), ...paginasSueltas];
   const proyectosDe = (clave: string) => listaProyectos.find(p => `proyecto-${p.id}` === clave);
   const [proyectoAbierto, setProyectoAbierto] = useState<ReturnType<typeof proyectosDe>>(undefined);
   /** Qué objetivo tiene el panel abierto en el lado de Explorar. */
@@ -284,6 +304,16 @@ export default function Layout() {
    * favorito es decir «esto lo quiero a mano», y si se quedara donde estaba,
    * la estrella no habría hecho nada visible.
    */
+  /** Tus páginas, plegadas del todo a la izquierda (2026-10-02). */
+  const [paginasPlegado, setPaginasPlegadoState] = useState<boolean>(() => {
+    try { return localStorage.getItem('humanity:paginas-plegado') === '1'; } catch { return false; }
+  });
+  const setPaginasPlegado = (v: boolean | ((x: boolean) => boolean)) => setPaginasPlegadoState(x => {
+    const n = typeof v === 'function' ? v(x) : v;
+    try { localStorage.setItem('humanity:paginas-plegado', n ? '1' : '0'); } catch { /* sin almacenamiento */ }
+    return n;
+  });
+
   const temasDelMenu = useMemo(() => {
     const pos = (clave: string, i: number) => prefsTemas[clave]?.orden ?? i;
     return OBJETIVOS_RAIL
@@ -688,66 +718,34 @@ export default function Layout() {
             · pulsando su círculo de abajo → se queda abierto y EMPUJA;
             · con la chincheta → igual, y además se recuerda entre visitas.
           El botón de plegar deshace las dos últimas. */}
-      {!esMovil && (
+      {/* ══ TUS PÁGINAS, A LA IZQUIERDA (2026-10-02) ══════════════════════
+          Eugenio: «el menú de la derecha pasa a estar en la izquierda, y el de
+          la izquierda oculto, que solo se abra al darle a Explorar. Y que ese
+          menú izquierdo, donde están las páginas del usuario, se pueda
+          colapsar del todo con un botón como el de Claude».
+          Abierto, a lo ancho; plegado, no ocupa nada. Se recuerda entre visitas
+          (`humanity:paginas-plegado`). Lo común —los temas— se abre por abajo
+          desde «Explorar» (`HojaExplorar`); la derecha queda para la IA. */}
+      {!esMovil && user && !paginasPlegado && (
         <div className="flex h-full shrink-0" {...gestoDelMenu}>
           <Rail
-            siempreAbierto={circulo === 'explorar'}
+            siempreAbierto
             claro
-            titulo="Explorar"
-            items={temasDelMenu}
-            personal={user ? {
-              esFavorito: c => !!prefsTemas[c]?.favorito,
-              estaOculto: c => !!prefsTemas[c]?.oculto,
-              marcarFavorito: (c, v) => guardarPref(c, { favorito: v }),
-              ocultar: c => guardarPref(c, { oculto: true }),
-              reordenar: reordenarTemas,
-              ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
-              mostrar: c => guardarPref(c, { oculto: false }),
-              onPersonalizar: () => { navigate('/preferencias'); setCirculo(null); },
-              onNuevoTema: () => setNuevoTema(true),
-            } : undefined}
-            ramas={{
-              de: c => ramas[c] ?? [],
-              hay: c => (cuantasRamas[c] ?? 0) > 0,
-              abierto: c => !!ramasAbiertas[c],
-              alternar: alternarRama,
-              // El «+» sólo para administración. Crear un subtema lo permite
-              // `POST /api/temas` a cualquiera con sesión (decisión de Eugenio
-              // en 0120), pero **crearlo desde el menú de todos** es otra cosa:
-              // ahí lo que se toca es la navegación común, y eso es de nivel 4.
-              onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
+            titulo="Mis páginas"
+            items={itemsProyectos}
+            cabeza={<AvatarRail desplegado />}
+            abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
+            onElegir={h => navigate(h.ruta)}
+            onAbrirSubmenu={h => {
+              const p = proyectosDe(h.clave);
+              setProyectoAbierto(a => (a?.id === p?.id ? null : p ?? null));
             }}
-            abierta={objetivoAbierto}
-            /*
-             * EL NOMBRE LLEVA A LA PÁGINA DEL TEMA (2026-08-25, prog8).
-             *
-             * Llevaba a `/explorar?objetivo=O008`, y esa página contestaba
-             * «Ninguna publicación habla de movilidad todavía» **teniendo 64
-             * publicaciones y 31 subtemas** colgando de ese mismo objetivo. El
-             * gesto natural —pulsar el tema— decía que no había nada, y lo que
-             * sí funcionaba pedía acertarle a una flecha gris de catorce
-             * píxeles que además compartía fila con otra flecha distinta.
-             *
-             * Eugenio lo dijo así: «haz que al pulsar Movilidad te lleve a la
-             * página de movilidad con todos los subtemas y con los mejores
-             * contenidos de Internet, estadísticas, y retos de la humanidad».
-             *
-             * `/temas/O008` es la misma pantalla que `/temas/ST_MEL`: un
-             * objetivo y un subtema contestan a la misma pregunta —«¿qué hay
-             * de esto?»— y tener dos pantallas para eso sería mantener dos
-             * cosas que enseñan lo mismo.
-             */
-            onElegir={h => navigate(`/temas/${encodeURIComponent(h.clave)}`)}
-            // LA FLECHA ABRE SU PANEL — indicadores y marcadores— y no toca la
-            // pantalla de detrás. Mirar lo que hay dentro de un tema y decidir
-            // pasarte a él son dos cosas, y ahora tienen dos sitios donde
-            // pulsar.
-            onAbrirSubmenu={h => setObjetivoAbierto(a => (a === h.clave ? null : h.clave))}
-            onPlegar={() => { setCirculo(null); setPorRoce(false); setObjetivoAbierto(null); }}
-            onInicio={() => { navigate('/'); setObjetivoAbierto(null); setCirculo(null); }}
+            onPlegar={() => { setPaginasPlegado(true); setProyectoAbierto(null); }}
+            onInicio={() => { navigate('/'); setProyectoAbierto(null); setCirculo(null); }}
+            pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
           />
-          {objetivoAbierto && (
-            <PanelExplorar objetivoId={objetivoAbierto} onCerrar={() => setObjetivoAbierto(null)} />
+          {proyectoAbierto && (
+            <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
           )}
         </div>
       )}
@@ -895,29 +893,38 @@ export default function Layout() {
             La brújula y no la casa: una casa es «inicio», que es otro sitio
             —el logo de al lado ya lleva ahí—. Explorar es buscar sin saber
             todavía qué. */}
-        {user && (
+        {/* ══ PLEGAR TUS PÁGINAS Y «MIS PÁGINAS», ARRIBA A LA IZQUIERDA (2026-10-02)
+            Eugenio: «el botón de mis páginas, arriba a la izquierda, que te
+            lleve a una página con todas tus páginas en formato tabla», y «un
+            botón como el de Claude, como una ventanita, que colapse o expanda
+            el menú izquierdo». El primero pliega; el segundo lleva a la tabla. */}
+        {/* Como en Claude: abierto, el botón de plegar vive dentro del menú;
+            plegado, aparece aquí para volver a abrirlo. */}
+        {user && (esMovil || paginasPlegado) && (
           <button
-            /* ══ PULSAR OTRA VEZ LO CIERRA (2026-08-25) ══════════════════
-               Eugenio: «si pulso en mis proyectos y se expande el menú, y
-               vuelvo a pulsar en mis proyectos, se debería contraer».
-
-               Y vale para los dos rótulos, porque son la misma idea. Un botón
-               que abre y no cierra obliga a buscar OTRO botón para deshacer lo
-               que acabas de hacer — que es justo lo que él ha pedido quitar. */
             onClick={() => {
               setPorRoce(false);
-              if (circulo === 'explorar') { setCirculo(null); return; }
-              setCirculo('explorar');
-              navigate('/preferencias');
+              if (esMovil) { setCirculo(c => (c === 'organizar' ? null : 'organizar')); return; }
+              setPaginasPlegado(v => !v);
             }}
-            title="Explorar los catorce temas"
+            title={paginasPlegado || esMovil ? 'Mostrar tus páginas' : 'Ocultar tus páginas'}
+            aria-label={paginasPlegado || esMovil ? 'Mostrar tus páginas' : 'Ocultar tus páginas'}
+            aria-expanded={esMovil ? circulo === 'organizar' : !paginasPlegado}
+            className="shrink-0 w-9 h-9 grid place-items-center self-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            {paginasPlegado || esMovil ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+          </button>
+        )}
+        {user && (
+          <button
+            onClick={() => { setPorRoce(false); setCirculo(null); navigate('/paginas'); }}
+            title="Todas tus páginas"
             className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
-              circulo === 'explorar' || location.pathname === '/preferencias'
+              location.pathname === '/paginas'
                 ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
                 : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
-            <Compass className="h-4 w-4 shrink-0" />
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar páginas</span>
+            <FileText className="h-4 w-4 shrink-0" />
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
           </button>
         )}
 
@@ -952,7 +959,10 @@ export default function Layout() {
 
             Ahora la condición dice lo que de verdad importa: enséñalo salvo que
             el menú lateral lo esté enseñando él. */}
-        {!menuPuesto && (
+        {/* 2026-10-02: en el ordenador el raíl de la izquierda es el de tus
+            páginas y lleva su propio logo; si está plegado, o no hay sesión, el
+            logo va aquí. */}
+        {(esMovil ? !menuPuesto : (paginasPlegado || !user)) && (
           <button
             /* IR AL INICIO ES LAS DOS COSAS (2026-08-22). Navegar no basta: las
                ventanas del escritorio se pintan encima y no se enteran de que la
@@ -1187,11 +1197,14 @@ export default function Layout() {
             Es la segunda vez hoy que quitar `user &&` de un sitio deja el fallo
             en otro que asumía lo mismo. Los otros dos de esta misma barra están
             justo debajo. */}
-        {!menuPuesto && (
+        {/* Sólo en el móvil (2026-10-02): abre el cajón de herramientas. En el
+            ordenador ya no hay menú de herramientas a la izquierda —están en la
+            barra de abajo— y el botón de al lado pliega tus páginas. */}
+        {esMovil && !menuPuesto && (
           <button
             onClick={ponerMenu}
-            title="Ver el menú"
-            aria-label="Ver el menú"
+            title="Herramientas"
+            aria-label="Herramientas"
             aria-expanded={false}
             // SIN FONDO NEGRO (2026-08-22, hormiguero: «el icono del menú no
             // debería tener fondo negro»). Era la pastilla más oscura de toda
@@ -1212,7 +1225,7 @@ export default function Layout() {
                 exactamente el mismo dibujo que lo esconde, girado. Los dos
                 botones son las dos mitades de un mismo gesto y ahora se
                 parecen entre sí, que es lo que enseña que lo son. */}
-            <PanelLeftOpen className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
+            <LayoutGrid className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
           </button>
         )}
 
@@ -1460,29 +1473,20 @@ export default function Layout() {
         {/* EL MISMO REMATE, POR EL OTRO LADO. Fija el raíl de la derecha y
             lleva a tus proyectos, con el mismo par de gestos que «Explorar»:
             las dos esquinas se comportan igual porque son la misma idea. */}
-        {user && (
-          <button
-            /* EN EL MÓVIL ABRE EL CAJÓN Y NO NAVEGA. En un ordenador el raíl
-               se queda a un lado y la página cambia detrás: las dos cosas se
-               ven. En un teléfono el cajón ocupa la pantalla, así que navegar
-               además dejaría el cajón abierto sobre otra página — y al cerrarlo
-               aparecerías en un sitio al que no habías pedido ir. */
-            onClick={() => {
-              setPorRoce(false);
-              if (circulo === 'organizar') { setCirculo(null); return; }
-              setCirculo('organizar');
-              if (!esMovil) navigate('/carpetas');
-            }}
-            title="Tus carpetas"
-            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
-              circulo === 'organizar' || location.pathname.startsWith('/carpetas')
-                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
-                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
-          >
-            <FolderKanban className="h-4 w-4 shrink-0" />
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
-          </button>
-        )}
+        {/* «EXPLORAR», ARRIBA A LA DERECHA (2026-10-02). Abre por abajo los
+            temas de la humanidad (`HojaExplorar`); pulsarlo otra vez lo cierra. */}
+        <button
+          onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
+          title="Explorar los temas"
+          aria-expanded={circulo === 'explorar'}
+          className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
+            circulo === 'explorar'
+              ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+              : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+        >
+          <Compass className="h-4 w-4 shrink-0" />
+          <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
+        </button>
 
         {!user && !cargandoSesion && (
           <Link to="/login"
@@ -1589,32 +1593,7 @@ export default function Layout() {
           Las herramientas que vivían aquí se han bajado al raíl inferior. La
           regla que ordena ahora las tres barras: izquierda **de qué habla**,
           abajo **con qué se hace**, derecha **qué tienes**. */}
-      {!esMovil && (
-        <div className="flex h-full shrink-0" {...gestoDelMenu}>
-          {proyectoAbierto && (
-            <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
-          )}
-          <Rail
-            siempreAbierto={circulo === 'organizar'}
-            claro
-            ladoDerecho
-            titulo="Organizar"
-            items={itemsProyectos}
-            cabeza={<AvatarRail desplegado />}
-            abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
-            // El icono lleva al proyecto; la flecha enseña lo que hay dentro
-            // sin sacarte de donde estás.
-            onElegir={h => navigate(h.ruta)}
-            onAbrirSubmenu={h => {
-              const p = proyectosDe(h.clave);
-              setProyectoAbierto(a => (a?.id === p?.id ? null : p ?? null));
-            }}
-            onPlegar={() => { setCirculo(null); setPorRoce(false); setProyectoAbierto(null); }}
-            onInicio={() => { navigate('/'); setProyectoAbierto(null); setCirculo(null); }}
-            pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
-          />
-        </div>
-      )}
+      {/* El raíl de la derecha («Organizar») se ha ido a la izquierda (2026-10-02): ver arriba. */}
 
       {/* En móvil «Organizar» ocupa la pantalla: a 375 px un raíl y un panel
           uno al lado del otro no dejan nada para el contenido. */}
@@ -1638,16 +1617,16 @@ export default function Layout() {
           Y entra deslizándose desde su lado: un cajón que aparece por un borde
           y se va por el otro cuenta mal de dónde ha salido. */}
       {circulo === 'organizar' && esMovil && (
-        <div className="fixed inset-0 z-[9997] flex bg-white">
+        // Por la izquierda, como en el ordenador (2026-10-02): tus páginas viven ahí.
+        <div className="fixed inset-0 z-[9997] flex flex-row-reverse bg-white">
           <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
-          <div className="flex animate-in slide-in-from-right duration-200">
+          <div className="flex animate-in slide-in-from-left duration-200">
             {proyectoAbierto
               ? <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
               : <Rail
                   siempreAbierto
                   claro
-                  ladoDerecho
-                  titulo="Organizar"
+                  titulo="Mis páginas"
                   items={itemsProyectos}
                   cabeza={<AvatarRail desplegado />}
                   abierta={null}
@@ -1809,41 +1788,12 @@ export default function Layout() {
       {/* Y en móvil, «Explorar» también ocupa media pantalla — pero encima del
           contenido, no al lado: a 375 px una columna del 50 % dejaría al
           contenido 187 px, que no es una pantalla, es una rendija. */}
-      {esMovil && circulo === 'explorar' && (
-        <div className="fixed inset-0 z-[9997] flex bg-white">
-          {objetivoAbierto
-            ? <PanelExplorar objetivoId={objetivoAbierto} onCerrar={() => setObjetivoAbierto(null)} />
-            : <Rail
-                siempreAbierto
-                claro
-                titulo="Explorar"
-                items={OBJETIVOS_RAIL}
-                // EL ÁRBOL TAMBIÉN EN EL MÓVIL (prog8, 2026-08-25). Aquí no va
-                // `personal` —favoritos y reordenar son de escritorio— pero los
-                // subtemas sí: no son un gusto de nadie, son a dónde se va. Sin
-                // esto, en un teléfono el menú se queda en los catorce y las
-                // 1.100 ramas no existen.
-                ramas={{
-                  de: c => ramas[c] ?? [],
-                  hay: c => (cuantasRamas[c] ?? 0) > 0,
-                  abierto: c => !!ramasAbiertas[c],
-                  alternar: alternarRama,
-                  onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
-                }}
-                abierta={null}
-                // EL MISMO DESTINO QUE EN ESCRITORIO, y aquí falló por segunda
-                // vez lo mismo: `Layout.tsx` monta CINCO raíles y arreglé uno.
-                // Ya me pasó esta misma tarde con el árbol de subtemas, lo
-                // escribí en el commit —contar los caminos antes de dar algo
-                // por comprobado— y volví a contarlos mal. Lo que lo destapó no
-                // fue leer: fue abrir producción y ver que seguía yendo a
-                // `/explorar`.
-                onElegir={h => { navigate(`/temas/${encodeURIComponent(h.clave)}`); setCirculo(null); }}
-                onAbrirSubmenu={h => setObjetivoAbierto(h.clave)}
-                onInicio={() => { navigate('/'); setCirculo(null); }}
-              />}
-          <div onClick={() => { setObjetivoAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
-        </div>
+      {/* EXPLORAR SUBE DESDE ABAJO, en el ordenador y en el móvil (2026-10-02). */}
+      {circulo === 'explorar' && (
+        <HojaExplorar temas={temasDelMenu}
+          onElegir={c => { navigate(`/temas/${encodeURIComponent(c)}`); setCirculo(null); }}
+          onCerrar={() => setCirculo(null)}
+          onPersonalizar={user ? () => { navigate('/preferencias'); setCirculo(null); } : undefined} />
       )}
     </div>
   );

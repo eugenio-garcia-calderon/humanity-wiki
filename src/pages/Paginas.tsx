@@ -19,7 +19,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FileText, Plus, Search, Loader2, Lock, Globe, FolderKanban,
-  ChevronDown, ChevronRight, X,
+  ChevronDown, ChevronRight, X, Table2, LayoutGrid, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
@@ -57,6 +57,15 @@ export default function Paginas() {
   /** Qué página se está arrastrando y sobre qué proyecto está encima. */
   const arrastrando = useRef<string | null>(null);
   const [encima, setEncima] = useState<string | null>(null);
+  // LA TABLA, POR DEFECTO (2026-10-02, Eugenio: «el botón de mis páginas te
+  // lleva a una página donde están todas tus páginas en formato tabla, para
+  // verlas e interactuar con ellas»). Las carpetas con fichas siguen a un
+  // clic; lo elegido se recuerda en este navegador.
+  const [vista, setVistaState] = useState<'tabla' | 'carpetas'>(() => {
+    try { return localStorage.getItem('humanity:paginas-vista') === 'carpetas' ? 'carpetas' : 'tabla'; } catch { return 'tabla'; }
+  });
+  const setVista = (v: 'tabla' | 'carpetas') => { setVistaState(v); try { localStorage.setItem('humanity:paginas-vista', v); } catch { /* */ } };
+  const [orden, setOrden] = useState<{ por: 'titulo' | 'carpeta' | 'fecha' | 'estado'; asc: boolean }>({ por: 'fecha', asc: false });
 
   const cargar = () => {
     fetch('/api/paginas', { credentials: 'include' })
@@ -143,6 +152,29 @@ export default function Paginas() {
     if (!r?.ok) { setError('No se ha podido mover la página.'); cargar(); }
   };
 
+  /** Mover desde la tabla: lo mismo que soltarla sobre otra carpeta. */
+  const moverA = (paginaId: string, destinoId: string) => {
+    const destino = grupos.find(g => g.id === destinoId);
+    if (!destino) return;
+    arrastrando.current = paginaId;
+    soltarEn(destino);
+  };
+
+  /** Todas las páginas en una lista, con su carpeta, ya ordenadas. */
+  const filas = useMemo(() => {
+    const todas = visibles.flatMap(g => g.paginas.map(p => ({ ...p, grupo: g })));
+    const val = (x: typeof todas[number]) =>
+      orden.por === 'titulo' ? x.titulo.toLowerCase()
+        : orden.por === 'carpeta' ? (x.grupo.sueltas ? '' : x.grupo.titulo.toLowerCase())
+        : orden.por === 'estado' ? (x.publica ? 1 : 0)
+        : (x.fecha ? new Date(x.fecha).getTime() : 0);
+    return todas.sort((a, b) => {
+      const va = val(a), vb = val(b);
+      const c = va < vb ? -1 : va > vb ? 1 : 0;
+      return orden.asc ? c : -c;
+    });
+  }, [visibles, orden]);
+
   if (!user) {
     return (
       <div className="max-w-7xl mx-auto w-full py-20 text-center">
@@ -166,6 +198,16 @@ export default function Paginas() {
         )}
 
         <div className="flex-1 min-w-[8rem]" />
+
+        <div className="flex gap-0.5 p-0.5 rounded-lg bg-slate-100" role="tablist" aria-label="Cómo verlas">
+          {([['tabla', 'Tabla', Table2], ['carpetas', 'Carpetas', LayoutGrid]] as const).map(([v, l, I]) => (
+            <button key={v} role="tab" aria-selected={vista === v} onClick={() => setVista(v)}
+              className={cn('inline-flex items-center gap-1 h-8 px-2.5 rounded-md text-[11px] font-bold transition-colors',
+                vista === v ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+              <I className="w-3.5 h-3.5" /> {l}
+            </button>
+          ))}
+        </div>
 
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 focus-within:border-emerald-300">
           <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -206,6 +248,9 @@ export default function Paginas() {
             </button>
           )}
         </div>
+      ) : vista === 'tabla' ? (
+        <TablaPaginas filas={filas} grupos={grupos} orden={orden} onOrden={setOrden}
+          onAbrir={id => navigate(`/paginas/${id}`)} onMover={moverA} />
       ) : (
         <div className="space-y-4">
           {visibles.map(g => {
@@ -298,7 +343,7 @@ export default function Paginas() {
       )}
 
       <p className="mt-4 text-[11px] text-slate-400">
-        Arrastra una página sobre otro proyecto para moverla. Dentro de cada página, el «+»
+        {vista === 'tabla' ? 'Cambia la carpeta de una página desde su fila, y ordena por cualquier columna pulsando su nombre.' : 'Arrastra una página sobre otro proyecto para moverla.'} Dentro de cada página, el «+»
         de cada línea añade títulos, imágenes y tablas, y el tirador ⋮⋮ reordena los bloques.
       </p>
 
@@ -339,6 +384,75 @@ export default function Paginas() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+type Fila = Pagina & { grupo: GrupoProyecto };
+type Orden = { por: 'titulo' | 'carpeta' | 'fecha' | 'estado'; asc: boolean };
+
+/** Todas las páginas como una base de datos: una fila cada una. */
+function TablaPaginas({ filas, grupos, orden, onOrden, onAbrir, onMover }: {
+  filas: Fila[]; grupos: GrupoProyecto[]; orden: Orden; onOrden: (o: Orden) => void;
+  onAbrir: (id: string) => void; onMover: (paginaId: string, grupoId: string) => void;
+}) {
+  const cabecera = (por: Orden['por'], texto: string, clase = '') => (
+    <th className={cn('px-3 py-2 text-left text-[10px] font-black uppercase tracking-wide text-slate-400 whitespace-nowrap', clase)}>
+      <button onClick={() => onOrden({ por, asc: orden.por === por ? !orden.asc : por !== 'fecha' })}
+        className="inline-flex items-center gap-1 hover:text-slate-700">
+        {texto}
+        {orden.por === por && (orden.asc ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+      </button>
+    </th>
+  );
+  const carpetas = grupos.filter(g => !g.sueltas);
+  const sueltas = grupos.find(g => g.sueltas);
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-slate-50/70 border-b border-slate-100">
+          <tr>
+            {cabecera('titulo', 'Página')}
+            {cabecera('carpeta', 'Carpeta', 'hidden sm:table-cell')}
+            {cabecera('estado', 'Estado', 'hidden md:table-cell')}
+            <th className="hidden lg:table-cell px-3 py-2 text-left text-[10px] font-black uppercase tracking-wide text-slate-400">Bloques</th>
+            {cabecera('fecha', 'Última edición', 'hidden sm:table-cell')}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {filas.map(p => (
+            <tr key={p.id} className="group hover:bg-slate-50/70">
+              <td className="px-3 py-2 min-w-[14rem] w-[45%]">
+                <button onClick={() => onAbrir(p.id)} className="flex items-center gap-2.5 min-w-0 w-full text-left">
+                  {p.imagen
+                    ? <img src={p.imagen} alt="" loading="lazy" className="w-8 h-8 rounded-md object-cover shrink-0 bg-slate-100" />
+                    : <span className="w-8 h-8 rounded-md bg-slate-100 grid place-items-center shrink-0"><FileText className="w-4 h-4 text-slate-400" /></span>}
+                  <span className="min-w-0 max-w-[28rem]">
+                    <span className="block font-bold text-slate-800 truncate group-hover:text-emerald-700">{p.titulo || 'Sin título'}</span>
+                    {p.adelanto && <span className="block text-[11px] text-slate-400 truncate">{p.adelanto}</span>}
+                  </span>
+                </button>
+              </td>
+              <td className="hidden sm:table-cell px-3 py-2">
+                <select value={p.grupo.id} onChange={e => onMover(p.id, e.target.value)} aria-label="Carpeta"
+                  className="max-w-[12rem] h-8 rounded-md border border-transparent hover:border-slate-200 bg-transparent px-1.5 text-xs font-bold text-slate-600 outline-none focus:border-emerald-400">
+                  {sueltas && <option value={sueltas.id}>Sin carpeta</option>}
+                  {carpetas.map(g => <option key={g.id} value={g.id}>{g.titulo}</option>)}
+                </select>
+              </td>
+              <td className="hidden md:table-cell px-3 py-2">
+                {p.publica
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold"><Globe className="w-3 h-3" /> Publicada</span>
+                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold"><Lock className="w-3 h-3" /> Privada</span>}
+              </td>
+              <td className="hidden lg:table-cell px-3 py-2 text-xs text-slate-500">{p.bloques}</td>
+              <td className="hidden sm:table-cell px-3 py-2 text-xs text-slate-500 whitespace-nowrap">
+                {p.fecha ? new Date(p.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
