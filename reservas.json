@@ -89,6 +89,12 @@
       "ruta": "src/server/ai/paginaIA.ts",
       "motivo": "",
       "desde": "2026-10-02T12:52:24.760Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/hooks/useVoiceDictation.ts",
+      "motivo": "",
+      "desde": "2026-10-02T12:55:48.468Z"
     }
   ]
 }
