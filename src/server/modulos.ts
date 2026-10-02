@@ -32,6 +32,7 @@
 // condición para que la lista funcione. Y el cronómetro de la medición se monta
 // aún antes, porque mide el tiempo que espera quien pide.
 import type { Express } from 'express';
+import { registrarVoz } from './voz.js';
 
 import { registrarGuardia } from './seguridad/guardia.js';
 import { registrarSelladoAutomatico } from './seguridad/selladoAutomatico.js';
@@ -292,6 +293,12 @@ export const MODULOS: Modulo[] = [
     nota: 'El único de los tres de Google que NO guarda copia: un calendario cambia '
         + 'mientras lo miras, y una cita vieja te presenta a la hora que no es. El '
         + 'porqué está escrito en la cabecera del módulo.',
+  },
+  {
+    nombre: 'voz',
+    montar: (app, db) => registrarVoz(app, db),
+    nota: 'Dictado en tiempo real (2026-10-02): el audio entra por HTTP en trozos y '
+        + 'el texto sale por SSE; el websocket sólo existe hacia el transcriptor.',
   },
 ];
 
