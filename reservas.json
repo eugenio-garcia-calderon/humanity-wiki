@@ -23,6 +23,18 @@
       "ruta": "src/pages/Documento.tsx",
       "motivo": "",
       "desde": "2026-10-02T11:56:30.634Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/knowledge/AjustesPagina.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T11:57:50.702Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T11:57:50.702Z"
     }
   ]
 }
