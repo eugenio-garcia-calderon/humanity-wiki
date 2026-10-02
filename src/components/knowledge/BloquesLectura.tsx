@@ -3,6 +3,7 @@ import { enFilas, AIRE_BASE_DATOS } from '../../utils/bloques';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
+import { TarjetaMarcador, WebInsertada } from './BloqueEnlace';
 import BloquePizarra from './BloquePizarra';
 import EntityComments from './EntityComments';
 import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
@@ -304,6 +305,12 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
         </div>
       );
     }
+
+    // Un enlace pegado como tarjeta, o la web dentro de la página (2026-10-02).
+    case 'marcador':
+      return b.url ? <TarjetaMarcador b={b} /> : null;
+    case 'web':
+      return b.url ? <WebInsertada b={b} /> : null;
 
     case 'pizarra':
       // La misma pizarra, sin poder editarla (el servidor sólo deja a su autor).

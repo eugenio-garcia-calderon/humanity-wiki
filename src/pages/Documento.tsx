@@ -8,7 +8,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop,
+  PanelTop, Bookmark, Link2, Play,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -20,6 +20,8 @@ import CreadorMenu from '../components/knowledge/CreadorMenu';
 import MenuBloque from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
+import { TarjetaMarcador, WebInsertada, leerEnlace } from '../components/knowledge/BloqueEnlace';
+import { repintar, ponerCursor } from '../utils/marcadoVivo';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
@@ -81,6 +83,10 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'subpagina', label: 'Página', icon: FileText },
   // La pizarra de «Esquemas», dentro de la página (2026-10-01).
   { tipo: 'pizarra', label: 'Pizarra', icon: PenTool },
+  // Un enlace como tarjeta, o la web dentro de la página (2026-10-02). Se
+  // llega aquí también pegando un enlace: ver `alPegar`.
+  { tipo: 'marcador', label: 'Marcador web', icon: Bookmark },
+  { tipo: 'web', label: 'Web insertada', icon: Globe },
   { tipo: 'separador', label: 'Separador', icon: Minus },
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
@@ -486,7 +492,7 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
@@ -513,7 +519,7 @@ function EditorPagina() {
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla') textosRef.current[nuevo.id] = '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web') textosRef.current[nuevo.id] = '';
     setBloques(bs => {
       const i = tras ? finDeFila(bs, bs.findIndex(b => b.id === tras)) : -1;
       const copia = [...bs];
@@ -1175,6 +1181,96 @@ function EditorPagina() {
   /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
    *  markdown de siempre — pegar una lista pega una lista de verdad. Y desde
    *  2026-08-19, pegar una imagen, un vídeo o un PDF crea su bloque. */
+  // ── EL MENÚ DE «¿QUÉ HAGO CON ESTE ENLACE?» (2026-10-02) ────────────────
+  const [menuEnlace, setMenuEnlace] = useState<{
+    bloqueId: string; url: string; x: number; y: number;
+    video: { medio: 'youtube' | 'vimeo'; id: string } | null;
+    /** ¿La web se deja meter en otra? `null` mientras se comprueba. */
+    insertable: boolean | null;
+    elegido: number;
+  } | null>(null);
+  /** Lo leído de cada enlace pegado, para no pedirlo dos veces. */
+  const lecturasEnlace = useRef<Record<string, Promise<Awaited<ReturnType<typeof leerEnlace>>>>>({});
+  const [leyendoEnlace, setLeyendoEnlace] = useState<string[]>([]);
+
+  const abrirMenuEnlace = (bloqueId: string, url: string) => {
+    const sel = window.getSelection();
+    const r = sel?.rangeCount ? sel.getRangeAt(0).getBoundingClientRect() : null;
+    const caja = document.querySelector(`[data-bloque="${bloqueId}"]`)?.getBoundingClientRect();
+    const x = Math.min((r && r.left) || caja?.left || 100, window.innerWidth - 300);
+    const y = ((r && r.bottom) || caja?.bottom || 100) + 6;
+    const yt = idYoutube(url), vm = idVimeo(url);
+    const video = yt ? { medio: 'youtube' as const, id: yt } : vm ? { medio: 'vimeo' as const, id: vm } : null;
+    setMenuEnlace({ bloqueId, url, x, y, video, insertable: video ? true : null, elegido: 0 });
+    if (!video) {
+      const p = lecturasEnlace.current[url] ||= leerEnlace(url);
+      p.then(l => setMenuEnlace(m => m && m.url === url ? { ...m, insertable: l ? l.insertable : false } : m));
+    }
+  };
+
+  /** Rellena un marcador con lo que se lea de su web. */
+  const completarMarcador = (bid: string, url: string) => {
+    setLeyendoEnlace(l => [...l, bid]);
+    const p = lecturasEnlace.current[url] ||= leerEnlace(url);
+    p.then(l => {
+      setLeyendoEnlace(x => x.filter(i => i !== bid));
+      if (!l) return;
+      setBloques(bs => bs.map(x => x.id === bid ? { ...x, ...l.campos } : x));
+      programarGuardado();
+    });
+  };
+
+  /** 0 = dejar como enlace · 1 = marcador · 2 = insertar. */
+  const elegirEnlace = (op: number) => {
+    const m = menuEnlace;
+    setMenuEnlace(null);
+    if (!m || op === 0) return;
+    if (op === 2 && m.insertable === false) return;
+    const b = bloquesRef.current.find(x => x.id === m.bloqueId);
+    if (!b) return;
+    // El enlace sale del texto: ahora es otro bloque.
+    const actual = textosRef.current[b.id] ?? b.texto ?? '';
+    const i = actual.lastIndexOf(m.url);
+    const resto = i >= 0 ? (actual.slice(0, i) + actual.slice(i + m.url.length)).replace(/\s+$/, '') : actual;
+    const nuevo: Bloque = op === 1
+      ? { id: nuevoIdBloque(), tipo: 'marcador', url: m.url }
+      : m.video
+        ? { id: nuevoIdBloque(), tipo: 'medio', medio: m.video.medio, medioId: m.video.id } as Bloque
+        : { id: nuevoIdBloque(), tipo: 'web', url: m.url, alto: 480 };
+    if (!resto.trim()) {
+      insertarBloques(b, [nuevo], true);
+    } else {
+      textosRef.current[b.id] = resto;
+      setBloques(bs => bs.map(x => x.id === b.id ? { ...x, texto: resto } : x));
+      setBloqueActivo(null);
+      insertarBloques({ ...b, texto: resto }, [nuevo], false);
+    }
+    if (nuevo.tipo === 'marcador' || nuevo.tipo === 'web') completarMarcador(nuevo.id, m.url);
+  };
+
+  // Teclado del menú: flechas, Intro y Escape. Cualquier otra tecla lo cierra
+  // y sigue escribiendo, como en Notion.
+  useEffect(() => {
+    if (!menuEnlace) return;
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault(); e.stopPropagation();
+        setMenuEnlace(m => m && ({ ...m, elegido: (m.elegido + (e.key === 'ArrowDown' ? 1 : 2)) % 3 }));
+      } else if (e.key === 'Enter') {
+        e.preventDefault(); e.stopPropagation();
+        elegirEnlace(menuEnlace.elegido);
+      } else if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation(); setMenuEnlace(null);
+      } else if (!['Shift', 'Meta', 'Control', 'Alt'].includes(e.key)) {
+        setMenuEnlace(null);
+      }
+    };
+    const fuera = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest?.('[data-menu-enlace]')) setMenuEnlace(null); };
+    window.addEventListener('keydown', tecla, true);
+    window.addEventListener('mousedown', fuera, true);
+    return () => { window.removeEventListener('keydown', tecla, true); window.removeEventListener('mousedown', fuera, true); };
+  });
+
   const alPegar = (b: Bloque, e: React.ClipboardEvent<HTMLDivElement>) => {
     const texto = e.clipboardData.getData('text/plain');
 
@@ -1183,8 +1279,23 @@ function EditorPagina() {
     // .mp4, un .pdf): eso se incrusta. Un enlace normal sigue siendo un enlace.
     const dt = e.clipboardData;
     const url = texto.trim();
-    const enlaceDeMedio = /^https?:\/\/\S+$/i.test(url) &&
-      (!!idYoutube(url) || !!idVimeo(url) || /\.(png|jpe?g|webp|gif|avif|mp4|webm|mov|m4v|ogv|mp3|m4a|ogg|wav|aac|flac|pdf)(\?|#|$)/i.test(url));
+    const esEnlace = /^https?:\/\/\S+$/i.test(url);
+    // Un archivo enlazado directamente (una foto, un PDF) se sigue incrustando
+    // solo: ahí no hay nada que elegir.
+    const enlaceDeMedio = esEnlace && /\.(png|jpe?g|webp|gif|avif|mp4|webm|mov|m4v|ogv|mp3|m4a|ogg|wav|aac|flac|pdf)(\?|#|$)/i.test(url);
+
+    // ── UN ENLACE: SE PEGA, Y SE PREGUNTA QUÉ HACER CON ÉL (2026-10-02) ────
+    // Como Notion: el enlace entra como texto y aparece un menú con «dejarlo
+    // así», «marcador» (tarjeta con imagen, título y descripción) e «insertar»
+    // (la web o el vídeo dentro de la página). Se pega a mano como texto
+    // plano: el pegado del navegador, con HTML, metería un enlace con otro
+    // texto y la dirección se perdería.
+    if (esEnlace && !enlaceDeMedio && b.tipo !== 'codigo' && !dt.files?.length) {
+      e.preventDefault();
+      document.execCommand('insertText', false, url);
+      abrirMenuEnlace(b.id, url);
+      return;
+    }
 
     if (dt.files?.length || dt.getData('text/html') || enlaceDeMedio) {
       const vacio = !(e.currentTarget.textContent || '').trim();
@@ -1303,10 +1414,12 @@ function EditorPagina() {
       el.focus();
       const rango = document.createRange();
       if (posicionCaret.current !== null && el.firstChild) {
-        const nodo = el.firstChild;
-        const max = nodo.textContent?.length ?? 0;
-        rango.setStart(nodo, Math.min(posicionCaret.current, max));
-        rango.collapse(true);
+        // Con el formato a la vista el texto ya no es un solo nodo: se cuenta
+        // en caracteres a través de las etiquetas.
+        ponerCursor(el, posicionCaret.current);
+        posicionCaret.current = null;
+        setFocoId(null);
+        return;
       } else if (posicionCaret.current !== null) {
         rango.selectNodeContents(el);
         rango.collapse(true);
@@ -1410,6 +1523,23 @@ function EditorPagina() {
     const cuerpo = (() => {
       if (b.tipo === 'separador') return <hr className="border-slate-200 my-2" />;
       if (b.tipo === 'subpagina') return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
+      // ── MARCADOR Y WEB INSERTADA (2026-10-02) ───────────────────────────
+      if (b.tipo === 'marcador' || b.tipo === 'web') {
+        if (!b.url) {
+          return editable ? (
+            <EntradaEnlace tipo={b.tipo}
+              onListo={url => {
+                setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url, alto: b.tipo === 'web' ? 480 : undefined } : x));
+                completarMarcador(b.id, url);
+                programarGuardado();
+              }} />
+          ) : null;
+        }
+        return b.tipo === 'marcador'
+          ? <TarjetaMarcador b={b} cargando={leyendoEnlace.includes(b.id)} />
+          : <WebInsertada b={b} onAlto={editable ? alto => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, alto } : x)); programarGuardado(); } : undefined} />;
+      }
+
       if (b.tipo === 'pizarra') {
         return b.entityId ? (
           <BloquePizarra id={b.entityId} titulo={b.pubTitulo} vista={b.vista} editable={editable}
@@ -1756,7 +1886,7 @@ function EditorPagina() {
       /** El cuerpo del bloque. Cuando se está editando NO lleva hijos de
        *  React (ver `BloqueEditable`); cuando solo se lee, sí. */
       const cuerpo = (extra?: string) => esActivo
-        ? <BloqueEditable key={`${b.id}-edit`} inicial={texto} {...comun} className={cn(comun.className, extra)} />
+        ? <BloqueEditable key={`${b.id}-edit`} inicial={texto} vivo={b.tipo !== 'codigo'} {...comun} className={cn(comun.className, extra)} />
         : <div key={`${b.id}-ver`} {...comun} className={cn(comun.className, extra)}><Inline texto={texto} /></div>;
 
       if (b.tipo === 'cita') {
@@ -2391,7 +2521,7 @@ function EditorPagina() {
           />
         ) : ajustes.subtitulo ? (
           <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line" style={{ fontSize: letraDescripcion(ajustes.cabecera, esMovil) }}>
-            {ajustes.subtitulo}
+            <Inline texto={ajustes.subtitulo} />
           </p>
         ) : null)}
             </FilaTitulo>
@@ -2448,6 +2578,42 @@ function EditorPagina() {
             className="fixed right-4 bottom-24 sm:right-6 sm:bottom-8 z-[9991] inline-flex items-center gap-2 h-12 pl-3.5 pr-4 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 transition-colors">
             <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">IA</span>
           </button>
+        )}
+        {/* ¿QUÉ HAGO CON ESTE ENLACE? (2026-10-02, como Notion) */}
+        {menuEnlace && (
+          <div data-menu-enlace role="menu" aria-label="Qué hacer con el enlace"
+            style={{ left: Math.max(8, menuEnlace.x), top: Math.min(menuEnlace.y, window.innerHeight - 200) }}
+            className="fixed z-[9995] w-72 bg-white border border-slate-200 rounded-xl shadow-2xl p-1">
+            <p className="px-2 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Pegar como</p>
+            {[
+              { icono: Link2, nombre: 'Enlace', ayuda: 'Se queda en el texto, como un enlace' },
+              { icono: Bookmark, nombre: 'Marcador', ayuda: 'Tarjeta con imagen, título y descripción' },
+              menuEnlace.video
+                ? { icono: Play, nombre: 'Insertar el vídeo', ayuda: 'Se reproduce dentro de la página' }
+                : {
+                  icono: Globe, nombre: 'Insertar la web',
+                  ayuda: menuEnlace.insertable === null ? 'Comprobando si se deja…'
+                    : menuEnlace.insertable ? 'La web se ve dentro de la página' : 'Esta web no deja que la metan en otra',
+                },
+            ].map((op, i) => {
+              const bloqueada = i === 2 && menuEnlace.insertable === false;
+              return (
+                <button key={op.nombre} type="button" role="menuitem" disabled={bloqueada}
+                  onMouseEnter={() => setMenuEnlace(m => m && ({ ...m, elegido: i }))}
+                  onClick={() => elegirEnlace(i)}
+                  className={cn('w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left',
+                    menuEnlace.elegido === i && !bloqueada ? 'bg-slate-100' : '', bloqueada && 'opacity-50 cursor-not-allowed')}>
+                  <span className="w-8 h-8 grid place-items-center rounded-md border border-slate-200 bg-white shrink-0 text-slate-600">
+                    {i === 2 && menuEnlace.insertable === null ? <Loader2 className="w-4 h-4 animate-spin" /> : <op.icono className="w-4 h-4" />}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold text-slate-800">{op.nombre}</span>
+                    <span className="block text-[11px] text-slate-400 truncate">{op.ayuda}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         )}
         {menuSitioAbierto && (
           <CreadorMenu sitio={ajustes.sitio} titulo={titulo} icono={icono}
@@ -2751,17 +2917,31 @@ function EditorPagina() {
  * El componente se monta de nuevo cada vez que activas otro bloque, así que
  * siempre arranca con el texto correcto.
  */
-function BloqueEditable({ inicial, ...props }: { inicial: string } & React.HTMLAttributes<HTMLDivElement>) {
+function BloqueEditable({ inicial, vivo = true, onInput, ...props }: { inicial: string; vivo?: boolean } & React.HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLDivElement>(null);
+  const pintado = useRef<string | null>(null);
   // El texto se pone UNA vez, al montar, y a mano. A partir de ahí React ni lo
   // sabe ni le importa: para él este div está vacío.
   useEffect(() => {
-    if (ref.current) ref.current.textContent = inicial;
+    if (!ref.current) return;
+    ref.current.textContent = inicial;
+    // Con el formato a la vista desde el primer momento (`marcadoVivo.ts`).
+    if (vivo) pintado.current = repintar(ref.current, null);
     // Sin `inicial` en las dependencias A PROPÓSITO: si volviera a entrar
     // mientras escribes, te machacaría lo tecleado y te movería el cursor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return <div ref={ref} {...props} />;
+  return (
+    <div ref={ref} {...props}
+      onInput={e => {
+        onInput?.(e);
+        // LA NEGRITA, AL MOMENTO (2026-10-02). Después de que el editor haya
+        // leído el texto, y nunca a mitad de una tilde (`isComposing`): partir
+        // una composición deja la letra a medias.
+        if (vivo && ref.current && !(e.nativeEvent as InputEvent).isComposing) pintado.current = repintar(ref.current, pintado.current);
+      }}
+      onCompositionEnd={e => { props.onCompositionEnd?.(e); if (vivo && ref.current) pintado.current = repintar(ref.current, pintado.current); }} />
+  );
 }
 
 /**
@@ -2917,3 +3097,24 @@ function SubiendoImagen({ vista, fraccion, texto }: { vista: string | null; frac
   );
 }
 
+/** Un marcador o una web recién creados desde «/»: se les pega la dirección. */
+function EntradaEnlace({ tipo, onListo }: { tipo: 'marcador' | 'web'; onListo: (url: string) => void }) {
+  const [v, setV] = useState('');
+  const [fallo, setFallo] = useState(false);
+  const enviar = () => {
+    const url = /^https?:\/\//i.test(v.trim()) ? v.trim() : v.trim() ? `https://${v.trim()}` : '';
+    try { if (!url) throw 0; new URL(url); onListo(url); } catch { setFallo(true); }
+  };
+  return (
+    <div className="flex items-center gap-2 p-2 rounded-xl border border-dashed border-slate-300 bg-slate-50">
+      {tipo === 'marcador' ? <Bookmark className="w-4 h-4 text-slate-400 shrink-0" /> : <Globe className="w-4 h-4 text-slate-400 shrink-0" />}
+      <input autoFocus value={v} onChange={e => { setV(e.target.value); setFallo(false); }}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); enviar(); } }}
+        placeholder={tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : 'Pega el enlace de la web que quieres insertar…'}
+        className={cn('flex-1 min-w-0 h-9 px-2 rounded-lg border bg-white text-sm outline-none', fallo ? 'border-rose-300' : 'border-slate-200 focus:border-emerald-400')} />
+      <button type="button" onClick={enviar} className="h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
+        {tipo === 'marcador' ? 'Crear marcador' : 'Insertar'}
+      </button>
+    </div>
+  );
+}

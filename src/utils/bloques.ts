@@ -46,7 +46,12 @@ export type TipoBloque =
   | 'subpagina'
   // 2026-10-01. Una pizarra estilo Miro (la de «Esquemas»), incrustada o como
   // enlace. `entityId` es la pizarra; `vista` dice cuál de las dos formas.
-  | 'pizarra';
+  | 'pizarra'
+  // 2026-10-02 (Eugenio: «al pegar un enlace, escoger si se embebe la web, si
+  // se hace una tarjeta con imagen, título y descripción, o si se pega normal,
+  // como Notion»). `marcador` es la tarjeta; `web`, la página dentro de la
+  // página. Los dos guardan `url`; el marcador, además, lo que se leyó de ella.
+  | 'marcador' | 'web';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
@@ -67,6 +72,16 @@ export interface Bloque {
   /** Imagen y medio. */
   url?: string;
   pie?: string;
+  /** Marcador (2026-10-02): lo que se leyó de la web al pegarla. Se guarda
+   *  y no se vuelve a pedir en cada visita: la página publicada no debe
+   *  depender de que otra web conteste. */
+  enlaceTitulo?: string;
+  enlaceDescripcion?: string;
+  enlaceImagen?: string;
+  enlaceSitio?: string;
+  enlaceIcono?: string;
+  /** Web insertada: su alto en píxeles. */
+  alto?: number;
   /** Solo medio: qué es y, si es de una plataforma, su identificador. */
   medio?: ClaseMedio;
   medioId?: string;
@@ -291,6 +306,8 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       case 'separador': salida.push('---'); break;
       case 'codigo': salida.push('```' + (b.lenguaje || '') + '\n' + (b.texto || '') + '\n```'); break;
       case 'imagen': salida.push(`![${b.pie || ''}](${b.url || ''})`); break;
+      case 'marcador': salida.push(`[${b.enlaceTitulo || b.url || ''}](${b.url || ''})`); break;
+      case 'web': salida.push(b.url || ''); break;
       // Markdown no sabe de vídeo ni de PDF: un enlace es lo más fiel que se
       // puede exportar. El tipo real no se pierde — los bloques se guardan como
       // JSON, y el markdown solo es la descarga.
