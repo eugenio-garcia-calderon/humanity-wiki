@@ -61,6 +61,9 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Cuánto suena el micrófono ahora mismo, de 0 a 1 (2026-10-02): el botón
+   *  lo enseña, y así se ve al momento si llega sonido. */
+  const [nivel, setNivel] = useState(0);
   const [microfonos, setMicrofonos] = useState<Microfono[]>([]);
   const [microfono, setMicrofonoState] = useState<string>(() => {
     try { return localStorage.getItem(CLAVE_MICRO) || ''; } catch { return ''; }
@@ -135,6 +138,16 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     // Azul desde el primer instante: el permiso y la conexión tardan un poco,
     // y un botón que no reacciona hace pulsarlo otra vez.
     setListening(true);
+    // ── EL AUDIO SE PREPARA EN EL MISMO CLIC (2026-10-02) ───────────────────
+    // Safari (y a veces Chrome) deja PARADO un AudioContext que se crea después
+    // de esperar a algo —el permiso del micrófono, la conexión—: ya no cuenta
+    // como respuesta al clic. Parado, no entrega ni una muestra y el dictado
+    // se queda en blanco sin decir nada. Se crea aquí, antes de cualquier
+    // espera, y se despierta en el acto.
+    let ctx: AudioContext;
+    try { ctx = new AudioContext(); ctx.resume().catch(() => {}); }
+    catch { setListening(false); if (!conNavegador()) setError('Este navegador no permite grabar audio.'); return; }
+    const soltarCtx = () => { ctx.close().catch(() => {}); };
     const mio = ++intento.current;
     const vigente = () => mio === intento.current;
     // 1. El micrófono, el elegido si sigue conectado.
@@ -145,19 +158,21 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
       });
     } catch (e: any) {
       setListening(false);
+      soltarCtx();
       setError(e?.name === 'NotAllowedError'
         ? 'No hay permiso para el micrófono. Actívalo en el candado de la barra de direcciones.'
         : 'No encuentro ningún micrófono.');
       return;
     }
     cargarMicrofonos(); // con permiso ya hay nombres
-    if (!vigente()) { stream.getTracks().forEach(t => t.stop()); return; }
+    if (!vigente()) { stream.getTracks().forEach(t => t.stop()); soltarCtx(); return; }
 
     // 2. La sesión en el servidor. Si no puede, el reconocimiento del navegador.
     const r = await fetch('/api/voz/sesion', { method: 'POST', credentials: 'include' }).catch(() => null);
     const j = r ? await r.json().catch(() => ({})) : {};
     if (!r?.ok || !j.id) {
       stream.getTracks().forEach(t => t.stop());
+      soltarCtx();
       setListening(false);
       if (!conNavegador()) setError(j.error || 'No se ha podido empezar el dictado.');
       return;
@@ -165,6 +180,7 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     const id: string = j.id;
     if (!vigente()) {
       stream.getTracks().forEach(t => t.stop());
+      soltarCtx();
       fetch(`/api/voz/sesion/${id}/fin`, { method: 'POST', credentials: 'include' }).catch(() => null);
       return;
     }
@@ -184,8 +200,11 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
       try { const d = JSON.parse(e.data); if (d?.mensaje) setError(d.mensaje); } catch { /* error de red del propio EventSource */ }
     });
 
+    // Si el canal del texto se cae del todo, se dice.
+    eventos.onerror = () => { if (eventos.readyState === EventSource.CLOSED && vigente()) setError('Se ha cortado la conexión del dictado. Vuelve a pulsar el micrófono.'); };
+
     // 4. El audio, en trozos de 250 ms y en orden.
-    const ctx = new AudioContext();
+    if (ctx.state !== 'running') await ctx.resume().catch(() => {});
     const url = URL.createObjectURL(new Blob([CODIGO_CAPTURA], { type: 'application/javascript' }));
     await ctx.audioWorklet.addModule(url);
     URL.revokeObjectURL(url);
@@ -195,12 +214,26 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     nodo.port.onmessage = e => { trozos.push(e.data as Float32Array); };
     fuente.connect(nodo);
     let cola: Promise<unknown> = Promise.resolve();
+    let grabado = 0, maximo = 0, avisadoMudo = false;
     const vaciar = () => {
       if (!trozos.length) return;
       const largo = trozos.reduce((n, t) => n + t.length, 0);
       const junto = new Float32Array(largo);
       let o = 0; for (const t of trozos) { junto.set(t, o); o += t.length; }
       trozos = [];
+      // Cuánto suena, para el botón y para saber si el micrófono está mudo.
+      let suma = 0; for (let i = 0; i < junto.length; i++) suma += junto[i] * junto[i];
+      const rms = Math.sqrt(suma / Math.max(1, junto.length));
+      setNivel(Math.min(1, rms * 6));
+      grabado += junto.length / ctx.sampleRate;
+      if (rms > maximo) maximo = rms;
+      // ¿MUDO? Tres segundos sin que llegue nada que suene: el micrófono
+      // elegido no es el que se usa, o el sistema no le deja a este navegador.
+      // Se dice UNA vez, con qué hacer, en vez de esperar en blanco.
+      if (!avisadoMudo && grabado > 3 && maximo < 0.003) {
+        avisadoMudo = true;
+        setError('No me llega sonido del micrófono. Si tienes varios, elige otro en la flechita de al lado; si no, revisa que el sistema deje a este navegador usar el micrófono.');
+      }
       const cuerpo = aPcm16(junto, ctx.sampleRate);
       cola = cola.then(() => fetch(`/api/voz/sesion/${id}/audio`, {
         method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/octet-stream' }, body: cuerpo,
@@ -213,7 +246,8 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
       vaciar();
       fuente.disconnect(); nodo.disconnect();
       stream.getTracks().forEach(t => t.stop());
-      ctx.close().catch(() => {});
+      soltarCtx();
+      setNivel(0);
       // Se avisa del final cuando ya ha salido todo el audio, y se deja el
       // canal abierto un momento para recibir la última frase cerrada.
       cola.then(() => fetch(`/api/voz/sesion/${id}/fin`, { method: 'POST', credentials: 'include' }).catch(() => null));
@@ -236,5 +270,5 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
 
   const toggle = () => (listening ? stop() : start());
 
-  return { listening, supported, toggle, error, microfonos, microfono, setMicrofono, cargarMicrofonos };
+  return { listening, supported, toggle, error, nivel, microfonos, microfono, setMicrofono, cargarMicrofonos };
 }

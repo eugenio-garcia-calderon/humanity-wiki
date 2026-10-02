@@ -14,7 +14,7 @@ import type { Microfono } from '../../hooks/useVoiceDictation';
 // pestañita al lado abre la lista de micrófonos; el elegido se recuerda en
 // este navegador. Si algo falla, se dice aquí mismo, encima del botón.
 
-export default function BotonMicrofono({ escuchando, onPulsar, microfonos, microfono, onElegir, onAbrirLista, error }: {
+export default function BotonMicrofono({ escuchando, onPulsar, microfonos, microfono, onElegir, onAbrirLista, error, nivel = 0 }: {
   escuchando: boolean;
   onPulsar: () => void;
   microfonos: Microfono[];
@@ -22,6 +22,8 @@ export default function BotonMicrofono({ escuchando, onPulsar, microfonos, micro
   onElegir: (id: string) => void;
   onAbrirLista: () => void;
   error?: string | null;
+  /** Cuánto suena ahora, 0–1: el halo crece con la voz, como en Claude. */
+  nivel?: number;
 }) {
   const [abierta, setAbierta] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -52,7 +54,12 @@ export default function BotonMicrofono({ escuchando, onPulsar, microfonos, micro
         aria-pressed={escuchando}
         className={cn('relative w-8 h-8 grid place-items-center rounded-full transition-colors',
           escuchando ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/40' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}>
-        {escuchando && <span className="absolute inset-0 rounded-full bg-blue-400/50 animate-ping" aria-hidden />}
+        {/* EL HALO SIGUE A LA VOZ (2026-10-02): si no se mueve al hablar, el
+            micrófono no está captando nada, y se ve antes de esperar al texto. */}
+        {escuchando && (
+          <span aria-hidden className="absolute inset-0 rounded-full bg-blue-400/40 transition-transform duration-150"
+            style={{ transform: `scale(${1 + Math.min(0.9, nivel * 1.8)})` }} />
+        )}
         <Mic className="relative w-4 h-4" />
       </button>
       <button type="button" onClick={() => { if (!abierta) onAbrirLista(); setAbierta(a => !a); }}
