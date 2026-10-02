@@ -29,6 +29,24 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "IA local para rellenar bases de datos",
       "desde": "2026-10-02T13:51:44.901Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/voz.ts",
+      "motivo": "",
+      "desde": "2026-10-02T13:56:48.309Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/hooks/useVoiceDictation.ts",
+      "motivo": "",
+      "desde": "2026-10-02T13:56:48.309Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/ai/BotonMicrofono.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T13:56:48.309Z"
     }
   ]
 }
