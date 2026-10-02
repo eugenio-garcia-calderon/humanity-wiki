@@ -132,7 +132,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
               className="group text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl">
-              <div className="aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
+              <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
                     recolocable={editable && !sitio && !!f.pagina_id}
@@ -238,7 +238,12 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
   const parar = (e: React.SyntheticEvent) => e.stopPropagation();
 
   return (
-    <div className={cn('relative w-full h-full', modo && 'cursor-move touch-none')}
+    // `absolute inset-0` Y NO `w-full h-full` (2026-10-02). Dentro de la rejilla
+    // del marco, `h-full` no se resolvía: la imagen salía con su alto natural,
+    // el marco la recortaba por `overflow` y `object-position` no tenía nada
+    // que mover —por eso «Recolocar» no hacía nada, y además el centro de la
+    // imagen quedaba fuera de la parte visible, donde no se podía arrastrar.
+    <div className={cn('absolute inset-0', modo && 'cursor-move touch-none')}
       onClick={modo ? parar : undefined}
       onPointerDown={modo ? e => {
         e.stopPropagation();
