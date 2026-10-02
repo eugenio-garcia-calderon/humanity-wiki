@@ -1,3 +1,28 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T11:56:30.634Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T11:56:30.634Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T11:56:30.634Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "",
+      "desde": "2026-10-02T11:56:30.634Z"
+    }
+  ]
 }
