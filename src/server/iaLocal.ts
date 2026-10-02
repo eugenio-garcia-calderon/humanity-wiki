@@ -55,7 +55,7 @@ export async function iaLocalLista(): Promise<boolean> {
  * debe dar la misma propuesta, o nadie podría fiarse de lo que va a guardar.
  */
 export async function pedirJsonLocal(opts: {
-  sistema: string; usuario: string; esquema: object; maxTokens?: number;
+  sistema: string; usuario: string; esquema?: object; gramatica?: string; maxTokens?: number;
 }): Promise<{ json: any; ms: number }> {
   return turno(async () => {
     const t0 = Date.now();
@@ -69,7 +69,11 @@ export async function pedirJsonLocal(opts: {
           messages: [{ role: 'system', content: opts.sistema }, { role: 'user', content: opts.usuario }],
           temperature: 0,
           max_tokens: opts.maxTokens ?? 300,
-          response_format: { type: 'json_schema', json_schema: { name: 'propuesta', schema: opts.esquema } },
+          // A hand-written GBNF grammar beats a JSON schema here: the schema's
+          // grammar allows whitespace and the model fills it with indentation,
+          // and on two CPU cores every token is ~0.15 s.
+          ...(opts.gramatica ? { grammar: opts.gramatica }
+            : { response_format: { type: 'json_schema', json_schema: { name: 'propuesta', schema: opts.esquema } } }),
         }),
       });
     } catch (e: any) {

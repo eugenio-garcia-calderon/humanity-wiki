@@ -8196,6 +8196,13 @@ rules and model paths, edit, a tampered proposal rejected, no session rejected,
 the gallery refreshing after save, and no `/api/ai/chat` call in the network
 log. Design and limits: `03_DECISIONS.md`.
 
+**Same day, after measuring production:** the first version took 19–26 s per
+free-form sentence on the server CPU (6.9 tokens/s), most of it spent writing
+indented JSON. The model is now constrained by a hand-built GBNF grammar with
+no whitespace and two examples in that compact form, built from the page's
+real names: about half the tokens, 8 of 9 test sentences right (the 0.5B model
+was tried and rejected: 2 of 9 wrong, mangled names). Form-like sentences never
+reach the model and answer instantly.
 ### 2026-10-02 — Negrita al escribir y «¿qué hago con este enlace?» como Notion (prog8)
 - Eugenio: «que `**palabra**` se ponga en negrita en cualquier texto de los creadores de páginas». Ya se guardaba y se veía en los bloques que no se editaban; en el que tiene el cursor salían los asteriscos en plano. Ahora el bloque activo se pinta según se escribe (`utils/marcadoVivo.ts`): negrita, cursiva y código, con las marcas en gris claro; el texto guardado sigue siendo el mismo markdown y el cursor se recoloca por caracteres. La descripción de la página y la de las tarjetas de galería también lo entienden.
 - Eugenio: «al pegar un enlace, escoger si se embebe la web, si se hace una vista con imagen, título y descripción, o si se pega normal, como Notion». Al pegar un enlace sale un menú (flechas, Intro, Esc): «Enlace», «Marcador» (tarjeta con imagen, título, descripción, icono y dirección) e «Insertar la web» o «Insertar el vídeo». Si la web prohíbe que la metan en otra (`X-Frame-Options`/`frame-ancestors`) la opción sale bloqueada y lo dice. Si el enlace iba en medio de un texto, el texto se queda y el bloque nuevo va detrás.
