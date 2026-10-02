@@ -668,7 +668,7 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
               {/* `capture="environment"` abre la cámara del sistema en un móvil,
                   con la trasera; en un ordenador el atributo se ignora y sale el
                   diálogo de ficheros, que allí es lo correcto. */}
-              <input ref={archivo} type="file" accept="image/*" capture="environment" className="hidden"
+              <input ref={archivo} type="file" accept="image/*,.heic,.heif" capture="environment" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) subirMedio(f); e.target.value = ''; }} />
               <input ref={archivoVideo} type="file" accept="video/*" capture="environment" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) subirMedio(f); e.target.value = ''; }} />

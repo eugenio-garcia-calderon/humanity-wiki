@@ -406,10 +406,10 @@ function ElegirLogo({ valor, onCambio, ayuda }: { valor?: string; onCambio: (v?:
         <label className="inline-flex items-center gap-1.5 h-11 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:border-slate-300 cursor-pointer">
           {subiendo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
           {valor ? 'Cambiar' : 'Subir logotipo'}
-          <input type="file" accept="image/*" className="hidden" onChange={async e => {
+          <input type="file" accept="image/*,.heic,.heif" className="hidden" onChange={async e => {
             const f = e.target.files?.[0]; if (!f) return;
             setSubiendo(true); setFallo(null);
-            const r = await subirArchivo(f);
+            const r = await subirArchivo(f, undefined, undefined, { maxLado: 512 });
             setSubiendo(false);
             if (r.error) setFallo(r.error); else onCambio(r.url);
           }} />

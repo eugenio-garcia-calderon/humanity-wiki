@@ -3033,7 +3033,7 @@ export default function JuegoVital() {
             )}
             <Button onClick={() => navigate(`/carpetas/${panel.slug}`)} className="w-full mt-3">Abrir el proyecto</Button>
             <input
-              ref={portadaProyRef} type="file" accept="image/*" className="hidden"
+              ref={portadaProyRef} type="file" accept="image/*,.heic,.heif" className="hidden"
               onChange={e => { subirPortadaProyecto(e.target.files?.[0]); e.target.value = ''; }}
             />
             <Button
@@ -3305,7 +3305,7 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
             className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300"
           />
 
-          <input ref={fileRef} type="file" accept="image/*" className="hidden"
+          <input ref={fileRef} type="file" accept="image/*,.heic,.heif" className="hidden"
             onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
           <button
             onClick={() => fileRef.current?.click()}
@@ -3664,7 +3664,7 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
             {agente.tipo === 'proyecto' && (
               <>
                 <input
-                  ref={portadaRef} type="file" accept="image/*" className="hidden"
+                  ref={portadaRef} type="file" accept="image/*,.heic,.heif" className="hidden"
                   onChange={e => { ponerPortada(e.target.files?.[0]); e.target.value = ''; }}
                 />
                 <Button
@@ -4067,7 +4067,7 @@ function FichaTarea({ tarea, proyectos, proyectoActual, grupos, onCerrar, onGuar
 
           {/* Añadir al lienzo */}
           <div className="ml-auto flex items-center gap-1.5">
-            <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+            <input ref={fotoRef} type="file" accept="image/*,.heic,.heif" className="hidden"
               onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
             <Button variant="ghost" className="text-[11px] px-2 py-1 border border-slate-200" onClick={() => anadir({ tipo: 'texto', texto: '' })}>
               <StickyNote className="w-3.5 h-3.5 mr-1 inline" />Nota

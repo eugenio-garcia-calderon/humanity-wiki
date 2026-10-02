@@ -200,6 +200,7 @@ function EditorPagina() {
   const [focoDescripcion, setFocoDescripcion] = useState(false);
   const iconoFileRef = useRef<HTMLInputElement>(null);
   const [subiendoIcono, setSubiendoIcono] = useState(false);
+  const [falloIcono, setFalloIcono] = useState<string | null>(null);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
   // ══ ARRASTRAR BLOQUES CON EL PUNTERO (2026-09-30) ══════════════════════
   // Antes era el arrastrar-y-soltar nativo del navegador, y sobre bloques
@@ -1455,7 +1456,7 @@ function EditorPagina() {
         ) : editable ? (
           <label className="flex items-center gap-2 px-4 py-6 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-colors">
             <ImageIcon className="w-4 h-4" /> Elegir una imagen…
-            <input type="file" accept="image/*" className="hidden"
+            <input type="file" accept="image/*,.heic,.heif" className="hidden"
               onChange={e => e.target.files?.[0] && subirImagen(b, e.target.files[0])} />
           </label>
         ) : null;
@@ -1602,6 +1603,8 @@ function EditorPagina() {
             onCambiarVisibles={editable ? ids => { b.propsGaleria = ids; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamano={editable ? t => { b.tamanoGaleria = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tamanoTitulo={b.tamanoTitulo || 'mediano'}
+            tituloOculto={!!b.tituloOculto}
+            onCambiarTituloOculto={editable ? v => { b.tituloOculto = v || undefined; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamanoTitulo={editable ? t => { b.tamanoTitulo = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarVista={editable ? v => { b.vistaBd = v; setBloques(bs => [...bs]); programarGuardado(); } : undefined} />
         );
@@ -2270,7 +2273,7 @@ function EditorPagina() {
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
                   <label className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600 cursor-pointer">
                     Cambiar
-                    <input type="file" accept="image/*" className="hidden"
+                    <input type="file" accept="image/*,.heic,.heif" className="hidden"
                       onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
                   </label>
                   <button onClick={() => { setPortada(null); programarGuardado(); }}
@@ -2299,15 +2302,20 @@ function EditorPagina() {
                     ))}
                     {/* …o una imagen tuya, por la misma ruta de subida que
                         usa todo lo demás. */}
-                    <input ref={iconoFileRef} type="file" accept="image/*" className="hidden"
+                    <input ref={iconoFileRef} type="file" accept="image/*,.heic,.heif" className="hidden"
                       onChange={async e => {
                         const f = e.target.files?.[0];
                         e.target.value = '';
                         if (!f) return;
-                        setSubiendoIcono(true);
+                        setSubiendoIcono(true); setFalloIcono(null);
                         try {
-                          const sub = await subirArchivo(f);
+                          // Un icono se ve a 128 px como mucho: 512 sobra
+                          // incluso en pantallas retina, y pesa diez veces menos.
+                          const sub = await subirArchivo(f, undefined, undefined, { maxLado: 512 });
                           if (sub.url) { setIcono(sub.url); setEligiendoIcono(false); programarGuardado(); }
+                          // ANTES SE CALLABA (2026-10-02): un HEIC rechazado no
+                          // hacía nada y parecía que el botón no funcionaba.
+                          else setFalloIcono(sub.error || 'No se ha podido subir la imagen.');
                         } finally { setSubiendoIcono(false); }
                       }} />
                     <button onClick={() => iconoFileRef.current?.click()} disabled={subiendoIcono}
@@ -2317,13 +2325,14 @@ function EditorPagina() {
                     </button>
                     <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
                       className="text-[10px] font-bold text-slate-400 hover:text-rose-500 ml-1">Quitar</button>
+                    {falloIcono && <span role="alert" className="basis-full text-[11px] font-bold text-rose-600">{falloIcono}</span>}
                   </>
                   </div>
                 )}
                 {!portada && !eligiendoIcono && (
                   <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
                     <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
-                    <input type="file" accept="image/*" className="hidden"
+                    <input type="file" accept="image/*,.heic,.heif" className="hidden"
                       onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
                   </label>
                 )}
@@ -2397,6 +2406,13 @@ function EditorPagina() {
               {ajustes.mostrarAutor ? <><EyeOff className="w-3 h-3" /> Ocultar nombre</> : <><Eye className="w-3 h-3" /> Mostrar nombre</>}
             </button>
             {!ajustes.mostrarAutor && <span className="text-[11px] text-slate-300 group-hover:hidden">oculto al publicar</span>}
+            {/* EL TÍTULO TAMBIÉN SE PUEDE OCULTAR AL PÚBLICO (2026-10-02). Aquí,
+                junto al autor, porque es la misma decisión: qué se ve arriba. */}
+            <button onClick={() => { setAjustes(a => ({ ...a, ocultarTitulo: a.ocultarTitulo ? undefined : true })); programarGuardado(); }}
+              className={cn('inline-flex items-center gap-1 h-7 px-2 rounded-md text-[11px] font-bold hover:text-slate-700 hover:bg-slate-50 transition-opacity',
+                ajustes.ocultarTitulo ? 'text-amber-600' : 'text-slate-400 opacity-0 group-hover:opacity-100 focus:opacity-100')}>
+              {ajustes.ocultarTitulo ? <><EyeOff className="w-3 h-3" /> Título oculto al publicar</> : <><EyeOff className="w-3 h-3" /> Ocultar título</>}
+            </button>
           </p>
         ) : ajustes.mostrarAutor ? (
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>

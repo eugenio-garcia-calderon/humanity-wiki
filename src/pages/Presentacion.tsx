@@ -402,7 +402,7 @@ export default function Presentacion() {
           </button>
           <label className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors">
             <ImageIcon className="w-3.5 h-3.5" /> Imagen
-            <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && subirImagen(e.target.files[0])} />
+            <input type="file" accept="image/*,.heic,.heif" className="hidden" onChange={e => e.target.files?.[0] && subirImagen(e.target.files[0])} />
           </label>
           <button onClick={() => anadirElemento({ id: nuevoId('E'), tipo: 'forma', forma: 'rect', x: 330, y: 190, w: 300, h: 160, relleno: '#10b981' })}
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors">

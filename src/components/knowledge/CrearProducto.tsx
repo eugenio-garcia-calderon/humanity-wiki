@@ -310,7 +310,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
 
           <Campo etiqueta="Fotos" ayuda="Sube una del móvil, o pega la dirección de una imagen">
             <label className={`mb-2 flex items-center justify-center gap-2 h-12 rounded-xl border border-dashed text-sm cursor-pointer ${subiendoFoto ? 'border-slate-200 text-slate-400' : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'}`}>
-              <input type="file" accept="image/*" className="hidden" disabled={subiendoFoto || fotos.length >= 8}
+              <input type="file" accept="image/*,.heic,.heif" className="hidden" disabled={subiendoFoto || fotos.length >= 8}
                 onChange={e => { const f = e.target.files?.[0]; if (f) subirFoto(f); e.target.value = ''; }} />
               {subiendoFoto ? <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo la foto…</> : <><Plus className="w-4 h-4" /> Subir una foto</>}
             </label>
