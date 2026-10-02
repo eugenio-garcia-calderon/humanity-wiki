@@ -59,3 +59,9 @@ html, body { overscroll-behavior-x: none; }
   @keyframes tic-circulo { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
   @keyframes tic-trazo   { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
 }
+
+/* EL FORMATO, MIENTRAS SE ESCRIBE (2026-10-02, `utils/marcadoVivo.ts`).
+   Los asteriscos siguen en el texto —son el markdown que se guarda— pero en
+   gris claro y sin negrita, para que se lea la palabra y no la marca. */
+.md-marca { color: rgb(203 213 225); font-weight: 400; font-style: normal; }
+.md-codigo { padding: 0 0.25rem; border-radius: 0.25rem; background: rgb(241 245 249); font-family: ui-monospace, monospace; font-size: 0.9em; }

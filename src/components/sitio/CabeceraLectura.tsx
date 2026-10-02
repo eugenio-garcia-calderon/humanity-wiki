@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { cn } from '../../utils/cn';
 import { MarcoSitio, type Rutas } from './MenuSitio';
 import { completarSitio } from './sitioWeb';
@@ -78,7 +79,7 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
           {cfg.subtitulo && (
             <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line break-words"
               style={{ fontSize: letraDescripcion(cfg.cabecera, esMovil) }}>
-              {cfg.subtitulo}
+              <TextoEnriquecido texto={cfg.subtitulo} />
             </p>
           )}
           </FilaTitulo>
