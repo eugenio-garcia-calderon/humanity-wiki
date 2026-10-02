@@ -299,6 +299,18 @@ function EditorPagina() {
     if (!esNuevo && id) { setCargando(true); cargar(id); }
   }, [esNuevo, id, cargar]);
 
+  // ── LA IA SABE QUÉ PÁGINA ESTÁS EDITANDO (2026-10-02) ───────────────────
+  // Se anuncia al chat (`AIAssistant` la manda al servidor, que la lee con
+  // sus permisos) y se escucha lo que la IA cambie, para enseñarlo sin
+  // recargar. `versionDatos` remonta las bases de datos de la página cuando
+  // la IA les añade una entrada.
+  const [versionDatos, setVersionDatos] = useState(0);
+  useEffect(() => {
+    if (esNuevo || !id || !puedoEditar) return;
+    window.dispatchEvent(new CustomEvent('humanity:pagina-abierta', { detail: { id } }));
+    return () => { window.dispatchEvent(new CustomEvent('humanity:pagina-abierta', { detail: { id: null } })); };
+  }, [esNuevo, id, puedoEditar]);
+
   // La dirección publicada se pregunta a quien arma las direcciones
   // (`compartir.ts`), para que el botón y la caja de compartir digan lo mismo.
   // Se vuelve a preguntar al cambiar la visibilidad: publicar asigna el nombre.
@@ -428,6 +440,27 @@ function EditorPagina() {
     clearTimeout(timerGuardado.current);
     timerGuardado.current = setTimeout(() => guardarAhora(), 1200);
   }, [guardarAhora]);
+
+  // Antes de que la IA lea la página, lo pendiente se guarda; y cuando la IA
+  // la cambia, se vuelve a leer (lo pendiente ya está guardado, así que no se
+  // pierde nada de lo escrito).
+  useEffect(() => {
+    const alLeer = () => {
+      if (hayPendiente.current) { clearTimeout(timerGuardado.current); guardarAhora(); }
+    };
+    const alCambiar = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (!docId.current) return;
+      if (d.entityId === docId.current) { clearTimeout(timerGuardado.current); cargar(docId.current); }
+      if (d.tabla_id && bloquesRef.current.some(b => (b as any).tabla_id === d.tabla_id)) setVersionDatos(v => v + 1);
+    };
+    window.addEventListener('humanity:ia-va-a-leer', alLeer);
+    window.addEventListener('humanity:contenido-cambiado', alCambiar);
+    return () => {
+      window.removeEventListener('humanity:ia-va-a-leer', alLeer);
+      window.removeEventListener('humanity:contenido-cambiado', alCambiar);
+    };
+  }, [guardarAhora, cargar]);
 
   // Al irse de la página (p. ej. a una tarjeta de su galería) lo que quedaba
   // por guardar se guarda YA, en vez de tirarse con el temporizador.
@@ -1560,7 +1593,7 @@ function EditorPagina() {
           );
         }
         return (
-          <Rejilla tablaId={tablaId} editable={editable} alto={520}
+          <Rejilla key={`${tablaId}:${versionDatos}`} tablaId={tablaId} editable={editable} alto={520}
             vista={b.vistaBd || 'galeria'}
             color={b.color}
             tamano={b.tamanoGaleria || 'mediano'}
@@ -2385,6 +2418,20 @@ function EditorPagina() {
           </div>
         )}
 
+        {/* EL BOTÓN DE LA IA, FLOTANDO (2026-10-02, Eugenio: «un botón flotante
+            en la herramienta de creación de páginas que abra el chat con la IA,
+            y que se le pueda pedir que agregue contenido a la página»). Abre el
+            mismo chat de siempre —con su voz y sus adjuntos—; lo que lo hace
+            distinto es que el chat ya sabe qué página es (ver
+            `humanity:pagina-abierta` arriba). Sólo para quien puede editarla:
+            a quien sólo lee, la IA no podría añadirle nada. */}
+        {editable && (
+          <button onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
+            title="Pedirle a la IA que añada contenido a esta página" aria-label="Abrir la IA"
+            className="fixed right-4 bottom-24 sm:right-6 sm:bottom-8 z-[9991] inline-flex items-center gap-2 h-12 pl-3.5 pr-4 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 transition-colors">
+            <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">IA</span>
+          </button>
+        )}
         {menuSitioAbierto && (
           <CreadorMenu sitio={ajustes.sitio} titulo={titulo} icono={icono}
             opciones={{

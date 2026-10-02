@@ -11,6 +11,7 @@ import { ROLE } from '../auth.js';
 import { GRUPOS, ESTADOS, PRIORIDADES } from '../roadmap.js';
 import { autoOrganizarCarpetas } from '../knowledge.js';
 import { guardarArchivo } from '../uploads.js';
+import { paginaParaIA, ejecutarAccionPagina } from './paginaIA';
 import { peorOrigen, ETIQUETA_ORIGEN, type OrigenDelDato } from '../../utils/origenDelDato.js';
 import { getObjectivesForTerritory } from '../../utils/puntuacionesDeObjetivo.js';
 import { slugify } from '../../utils/slugify.js';
@@ -116,6 +117,11 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // 10». Nivel 1 como todo lo que es TUYO y solo tuyo — un evento en tu
   // calendario no toca el conocimiento común de nadie.
   CREATE_EVENTO: { minLevel: ROLE.USER, entity: 'eventos', description: 'Apuntar un evento en tu calendario' },
+  // 2026-10-02: la IA dentro del editor de páginas. Ver `paginaIA.ts`. Nivel 1
+  // porque sólo tocan páginas y tablas que la persona ya puede editar; el
+  // permiso se vuelve a mirar al ejecutar.
+  ANADIR_A_PAGINA: { minLevel: ROLE.USER, entity: 'knowledge_windows', description: 'Añadir contenido a esta página' },
+  CREATE_FILA:     { minLevel: ROLE.USER, entity: 'bd_filas', description: 'Añadir una entrada a una base de datos' },
 };
 
 /**
@@ -642,8 +648,12 @@ ${origenEnPantalla ? `DE DÓNDE SALEN LAS CIFRAS DE «${origenEnPantalla.nombre}
     ? ' No consta la fuente: no supongas que es buena.'
     : ''}
 ` : ''}
-ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
-${JSON.stringify({ ...(ctx || {}), mio: undefined, suyo: undefined }, null, 2)}
+${ctx?.paginaAbierta ? `${ctx.paginaAbierta}
+
+` : ''}${ctx?.adjuntoUrl ? `LA IMAGEN QUE HA ADJUNTADO EN ESTE MENSAJE YA ESTÁ GUARDADA en ${ctx.adjuntoUrl}. Si te pide ponerla en la página o en una entrada, usa "imagen": "adjunto" (o esa dirección).
+
+` : ''}ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
+${JSON.stringify({ ...(ctx || {}), mio: undefined, suyo: undefined, paginaAbierta: undefined, adjuntoUrl: undefined }, null, 2)}
 ${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
 
 MODO DE EDICIÓN: ${editMode}
@@ -1299,7 +1309,22 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // De dónde salen las cifras del territorio que tiene abierto. Se mira
       // en la base de datos, no en lo que mande el navegador.
       const origenEnPantalla = await origenDeLoQueMira(contextoSano);
-      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[], origenEnPantalla);
+      // LA PÁGINA QUE TIENE ABIERTA EN EL EDITOR (2026-10-02). El id sale de
+      // la ruta (`/paginas/KW…`), y lo que hay dentro se lee de la base de
+      // datos con sus permisos: nunca se fía de lo que describa el navegador.
+      const idEditor = String((contextoSano as any)?.paginaEditor || '')
+        || /^\/paginas\/([A-Za-z0-9_-]+)/.exec(String((contextoSano as any)?.route || ''))?.[1];
+      const paginaAbierta = idEditor && req.user
+        ? await paginaParaIA(db, req.user.id, req.user.roleLevel ?? 0, idEditor).catch(e => { console.error('[IA] página abierta:', e); return null; })
+        : null;
+      // La imagen adjunta se GUARDA si puede acabar en una página: sin
+      // dirección propia, «ponla en la entrada» no tendría nada que poner.
+      let adjuntoUrl: string | null = null;
+      if (paginaAbierta && attachment?.data && /^image\//.test(String(attachment.media_type || ''))) {
+        try { adjuntoUrl = guardarArchivo(String(attachment.media_type), Buffer.from(String(attachment.data), 'base64')).url; }
+        catch (e) { console.error('[IA] no se pudo guardar el adjunto:', e); }
+      }
+      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo, paginaAbierta, adjuntoUrl }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[], origenEnPantalla);
       const result = await provider.complete({
         system: prompt.variable,
         // La parte estable viaja aparte para que el proveedor la marque como
@@ -1361,6 +1386,11 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         for (const a of actions) {
           const spec = ACTION_CATALOG[a?.type];
           if (!spec) continue;
+          // «La imagen que te he pasado» pasa a ser su dirección guardada.
+          if (adjuntoUrl && a.params) {
+            if (a.params.imagen === 'adjunto') a.params.imagen = adjuntoUrl;
+            if (Array.isArray(a.params.bloques)) for (const b of a.params.bloques) if (b?.url === 'adjunto') b.url = adjuntoUrl;
+          }
           const level = req.user?.roleLevel ?? 0;
           const allowed = level >= spec.minLevel;
           const insert = await db.execute(sql`
@@ -1648,8 +1678,25 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
   });
 
   /** Ejecuta una acción validada. Único punto donde la IA acaba escribiendo. */
+  /** Una imagen hecha por la IA para una página, con el mismo tope de gasto
+   *  que `/api/ai/generar-imagen`. Devuelve su dirección en `/uploads`. */
+  const imagenParaPagina = async (descripcion: string, actorId: string): Promise<string> => {
+    const presupuesto = await hayPresupuesto(db);
+    if (!presupuesto.ok) throw new Error(presupuesto.mensaje);
+    const imagen = await generarImagenNanoBanana(descripcion);
+    const guardada = guardarArchivo(imagen.mimeType, Buffer.from(imagen.base64, 'base64'));
+    db.execute(sql`
+      INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents)
+      VALUES (${actorId}, 'imagen', ${process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image'}, 0, 0, 0, 0, 0)
+    `).catch((e: any) => console.error('ai charge error:', e));
+    return guardada.url;
+  };
+
   const executeAction = async (type: string, params: any, actorId: string, actorLevel: number = 0): Promise<any> => {
     try {
+      // Las de la página abierta viven en `paginaIA.ts`.
+      const dePagina = await ejecutarAccionPagina(db, type, params || {}, actorId, actorLevel, d => imagenParaPagina(d, actorId));
+      if (dePagina) return dePagina;
       switch (type) {
         case 'CREATE_PUBLICATION': {
           const id = newId('PUB');

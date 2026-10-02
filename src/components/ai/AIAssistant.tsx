@@ -743,6 +743,16 @@ export default function AIAssistant({ modo = 'panel' }: {
   // agente con el que se habla; cada agente tiene su propio hilo, así que al
   // cambiar de interlocutor se cambia de conversación.
   const [juegoCtx, setJuegoCtx] = useState<any>(null);
+
+  // LA PÁGINA ABIERTA EN EL EDITOR (2026-10-02). El editor la anuncia con
+  // `humanity:pagina-abierta` (id, o null al salir). Va aparte de la ruta
+  // porque con ventanas el editor puede estar abierto encima de otra cosa.
+  const paginaEditor = useRef<string | null>(null);
+  useEffect(() => {
+    const alAbrir = (e: Event) => { paginaEditor.current = (e as CustomEvent).detail?.id ?? null; };
+    window.addEventListener('humanity:pagina-abierta', alAbrir);
+    return () => window.removeEventListener('humanity:pagina-abierta', alAbrir);
+  }, []);
   useEffect(() => {
     const alContexto = (e: Event) => {
       const d = (e as CustomEvent).detail || null;
@@ -844,7 +854,10 @@ export default function AIAssistant({ modo = 'panel' }: {
   };
   // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
   const dictationBase = useRef('');
-  const { listening, supported: voiceSupported, toggle: toggleVoice } = useVoiceDictation((text, isFinal) => {
+  const { listening, supported: voiceSupported, toggle: toggleVoice } = useVoiceDictation((crudo, isFinal) => {
+    // Chrome empieza cada frase nueva con un espacio: sin quitarlo, salían
+    // dos entre frase y frase.
+    const text = crudo.replace(/^\s+/, '');
     const sep = dictationBase.current && !dictationBase.current.endsWith(' ') ? ' ' : '';
     setInput(dictationBase.current + sep + text);
     if (isFinal) dictationBase.current = dictationBase.current + sep + text;
@@ -1092,6 +1105,7 @@ export default function AIAssistant({ modo = 'panel' }: {
     // página nos manda el estado del mundo y con quién está hablando. Sin
     // esto el modelo respondía como el asistente genérico de la plataforma.
     juego: juegoCtx || undefined,
+    paginaEditor: paginaEditor.current || undefined,
   });
 
   /**
@@ -1459,6 +1473,10 @@ export default function AIAssistant({ modo = 'panel' }: {
       // buscador primero, unas líneas más arriba, y ése sí se ejecuta.
 
       marcarQuienContesto('modelo');
+      // Lo que el editor tenga sin guardar, se guarda YA: la IA va a leer la
+      // página del servidor, y si añade algo, el siguiente guardado del
+      // editor no debe llevarse por delante lo que ella puso.
+      if (paginaEditor.current) window.dispatchEvent(new CustomEvent('humanity:ia-va-a-leer'));
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1576,6 +1594,8 @@ export default function AIAssistant({ modo = 'panel' }: {
         body: JSON.stringify({ decision }),
       });
       const json = await res.json();
+      // Si ha tocado una página o una tabla, quien la tenga abierta la recarga.
+      if (json?.ok) window.dispatchEvent(new CustomEvent('humanity:contenido-cambiado', { detail: json }));
       setMessages(m => m.map((msg, i) => (msgIndex === -1 ? i !== m.length - 1 : i !== msgIndex) ? msg : {
         ...msg,
         actions: (msg.actions || []).map((a: any) =>

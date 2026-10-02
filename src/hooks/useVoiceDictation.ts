@@ -44,8 +44,12 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
         if (e.results[i].isFinal) finalText += chunk;
         else interimText += chunk;
       }
+      // Las dos, y en este orden (2026-10-02): cuando una frase se cierra y
+      // la siguiente ya ha empezado, llegan en el mismo evento. Antes sólo se
+      // pasaba la cerrada y lo que se estaba diciendo desaparecía del cuadro
+      // hasta la palabra siguiente: el texto no «se iba escribiendo».
       if (finalText) onResult(finalText, true);
-      else if (interimText) onResult(interimText, false);
+      if (interimText) onResult(interimText, false);
     };
     recognition.onerror = () => setListening(false);
     recognition.onend = () => setListening(false);

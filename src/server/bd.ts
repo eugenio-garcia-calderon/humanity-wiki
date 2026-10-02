@@ -54,6 +54,16 @@ export type { Celda } from './bd/celdas';
 
 // ── RUTAS ───────────────────────────────────────────────────────────────────
 
+/**
+ * Lo que otros módulos del servidor pueden hacer con las tablas sin pasar por
+ * HTTP (2026-10-02: la IA del editor de páginas). Lo rellena
+ * `registerBdRoutes`, que es donde viven los permisos.
+ */
+export const bdInterno: {
+  crearFila?: (req: Pick<Request, 'user'>, tablaId: string, titulo: unknown)
+    => Promise<{ id: string; pagina_id: string } | { error: string; codigo: number }>;
+} = {};
+
 export function registerBdRoutes(app: Express, db: any) {
   /** Toda ruta de escritura comprueba el rol. Saltarse esto ya dejó un agujero
    *  abierto en producción una vez (`CLAUDE.md`, prohibición 3). */
@@ -752,24 +762,33 @@ export function registerBdRoutes(app: Express, db: any) {
 
   // ── LAS FILAS ─────────────────────────────────────────────────────────────
 
+  /** Una fila nueva, con su página. La usan esta ruta y la IA (`bdInterno`),
+   *  para que las dos pasen por el mismo permiso. */
+  const crearFila = async (req: Pick<Request, 'user'>, tablaId: string, tituloCrudo: unknown)
+    : Promise<{ id: string; pagina_id: string } | { error: string; codigo: number }> => {
+    const permiso = await puedeConTabla(req as Request, tablaId, true);
+    if ('error' in permiso) return permiso;
+    const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_filas WHERE tabla_id = ${tablaId}`);
+    const id = nid('BDF');
+    // Se puede nacer ya con nombre (el «+ Nuevo» de la galería lo pide).
+    const titulo = String(tituloCrudo || '').replace(/\s+/g, ' ').trim().slice(0, 2000);
+    const colTitulo = titulo ? await columnaTitulo(tablaId) : null;
+    const valores = colTitulo ? { [colTitulo]: titulo } : {};
+    await db.execute(sql`
+      INSERT INTO bd_filas (id, tabla_id, valores, orden, created_by, updated_by)
+      VALUES (${id}, ${tablaId}, ${JSON.stringify(valores)}::jsonb, ${Number((ultima.rows[0] as any).m) + 1}, ${req.user!.id}, ${req.user!.id})
+    `);
+    const pagina_id = await crearPaginaDeFila(id, permiso.tabla, titulo, req.user!.id);
+    return { id, pagina_id };
+  };
+  bdInterno.crearFila = crearFila;
+
   app.post('/api/bd/tablas/:id/filas', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
-      const permiso = await puedeConTabla(req, req.params.id, true);
-      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
-
-      const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_filas WHERE tabla_id = ${req.params.id}`);
-      const id = nid('BDF');
-      // Se puede nacer ya con nombre (el «+ Nuevo» de la galería lo pide).
-      const titulo = String((req.body || {}).titulo || '').replace(/\s+/g, ' ').trim().slice(0, 2000);
-      const colTitulo = titulo ? await columnaTitulo(req.params.id) : null;
-      const valores = colTitulo ? { [colTitulo]: titulo } : {};
-      await db.execute(sql`
-        INSERT INTO bd_filas (id, tabla_id, valores, orden, created_by, updated_by)
-        VALUES (${id}, ${req.params.id}, ${JSON.stringify(valores)}::jsonb, ${Number((ultima.rows[0] as any).m) + 1}, ${req.user!.id}, ${req.user!.id})
-      `);
-      const pagina_id = await crearPaginaDeFila(id, permiso.tabla, titulo, req.user!.id);
-      res.json({ id, pagina_id });
+      const r = await crearFila(req, req.params.id, (req.body || {}).titulo);
+      if ('error' in r) return res.status(r.codigo).json({ error: r.error });
+      res.json(r);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
