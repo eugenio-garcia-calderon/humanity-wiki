@@ -8140,3 +8140,11 @@ taking the page down.
 - `AIRE_BASE_DATOS` (`utils/bloques.ts`): el mismo margen arriba y abajo para el bloque de base de datos en el editor y en la página publicada.
 - Galería en bloque de página: `auto-fit` + ancho máximo + `justify-content: center` (antes `auto-fill` dejaba columnas vacías a la derecha). Título solo en su línea, centrado; los mandos del editor debajo.
 - La fecha ya no se publica y se quita su interruptor de «Ajustes de la página».
+
+### 2026-10-02 — Creador de menú y pie de página para las webs publicadas (prog8)
+- Eugenio: «un creador de menú sofisticado pero simple [...] y un footer, homogéneos en toda la web, con la política de privacidad y el aviso legal que exige la UE, el contacto, el logotipo y el nombre».
+- Botón «Menú y pie» en la barra del editor de páginas → `CreadorMenu.tsx`: menú arriba o lateral, tres rayas (nunca / en el teléfono / siempre), alineación, tamaño, fijo al bajar, colores con paletas, logotipo y nombre, enlaces con icono en forma de texto o de botón (inicio, contacto, sección de la página, subpágina, texto legal o cualquier dirección). Pie con logotipo, nombre, descripción, contacto, enlaces, © y textos legales. Vista previa en vivo en escritorio y teléfono con el mismo componente que se publica.
+- Se guarda en `config.sitio` de la página; el servidor manda a cada página el de la más cercana por encima que lo tenga (`sitioDePagina`), así es uno para toda la web.
+- `MenuSitio.tsx` no usa ganchos: las tres rayas son `<details>` y los textos legales ventanas `:target`, así que el servidor los pinta dentro del HTML con la cabecera (medido: cero desplazamiento al arrancar).
+- Textos legales (aviso legal LSSI art. 10, privacidad RGPD art. 13, cookies) como plantillas orientativas que se rellenan con los datos del titular; lo que falta sale entre corchetes. La de cookies dice que la web no instala ninguna: medido el 2026-10-02 en luzhumanidad.com (0 cookies, 0 localStorage).
+- En la página publicada: sin botón de comentarios en los bloques de base de datos (daba error); icono, título y descripción centrados; tamaño del título de la base de datos elegible en el editor («Título»).

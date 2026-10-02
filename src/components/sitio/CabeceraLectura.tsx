@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { MarcoSitio, type Rutas } from './MenuSitio';
+import { completarSitio } from './sitioWeb';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../knowledge/CabeceraPagina';
 
 // ============================================================================
@@ -17,13 +19,28 @@ import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../know
 // SIEMPRE DE ANCHO COMPLETO (2026-10-01, Eugenio, por medio de prog8-pizarra):
 // ya no es una opción de la página. `cfg.anchoCompleto` se ignora; el
 // interruptor de «Ajustes de la página» se quita en el editor.
-export function MarcoLectura({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-white">
+// CON SU MENÚ Y SU PIE (2026-10-02): `pagina.sitio` es el de la página raíz
+// del sitio, que el servidor manda con cada página para que el menú sea el
+// mismo en todas. Ver `sitioWeb.ts`.
+export function MarcoLectura({ pagina, rutas, children }: {
+  pagina?: DatosPagina | null; rutas?: Rutas; children: ReactNode;
+}) {
+  const s = pagina?.sitio;
+  const sitio = s?.config ? completarSitio(s.config) : null;
+  const conMarco = !!sitio && (sitio.menu.activo || sitio.pie.activo);
+  const cuerpo = (
+    <div className={conMarco ? 'bg-white' : 'min-h-screen bg-white'}>
       <div className="mx-auto px-5 sm:px-8 pb-16 pt-6 sm:pt-12 max-w-6xl">
         {children}
       </div>
     </div>
+  );
+  if (!conMarco) return cuerpo;
+  return (
+    <MarcoSitio sitio={sitio} rutas={rutas || { enlacePagina: id => `/p/${id}`, raizId: s!.raizId }}
+      logo={s!.icono} nombre={s!.titulo}>
+      {cuerpo}
+    </MarcoSitio>
   );
 }
 
@@ -37,12 +54,13 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
     // lado, con el tamaño que eligió el autor.
     <header className="mb-8">
       <LayoutCabecera
+        centrado
         cabecera={cfg.cabecera}
         // `fetchPriority`: es lo primero que se ve, que no espere detrás
         // de los iconos y las imágenes de más abajo.
         imagen={cfg.portada ? <img src={cfg.portada} alt="" fetchPriority="high" className="rounded-2xl" /> : null}
         cuerpo={<>
-          <FilaTitulo cabecera={cfg.cabecera} icono={icono ? (
+          <FilaTitulo centrado cabecera={cfg.cabecera} icono={icono ? (
             <div>
               {esUrl(icono)
                 ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
@@ -64,7 +82,7 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
               está debajo del icono»). `cfg.mostrarFecha`, que tienen algunas
               páginas viejas, se ignora. */}
           {mostrarAutor && (
-            <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+            <div className="mt-2 flex items-center justify-center gap-2 text-xs text-slate-400">
               {pagina.autor?.avatar && (
                 <img src={pagina.autor.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
               )}
@@ -86,6 +104,9 @@ export type DatosPagina = {
   updated_at?: string;
   autor?: { handle?: string; nombre?: string; avatar?: string | null };
   padre?: { id: string; titulo: string; slug: string | null; handle: string } | null;
+  /** El menú y el pie del sitio, de la página más cercana por encima que los
+   *  tenga (ella misma incluida). Lo pone el servidor. */
+  sitio?: { config: any; raizId: string; titulo: string; icono: string | null } | null;
 };
 
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);

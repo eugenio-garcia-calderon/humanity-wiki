@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import { sitioConAnfitrion } from '../components/sitio/ContextoSitio';
 import { MarcoLectura, CabeceraLectura, type DatosPagina } from '../components/sitio/CabeceraLectura';
 
 // ============================================================================
@@ -20,10 +21,11 @@ import { MarcoLectura, CabeceraLectura, type DatosPagina } from '../components/s
 // que dice ser. Si se equivoca, el icono sale unos píxeles más grande o más
 // pequeño durante ese medio segundo, nada más.
 
-export function cabeceraEnHtml(pagina: DatosPagina, userAgent: string): string {
+export function cabeceraEnHtml(pagina: DatosPagina, userAgent: string, raizDominio?: string | null): string {
   const esMovil = /Mobi|Android|iPhone|iPad/i.test(userAgent || '');
   return renderToStaticMarkup(
-    <MarcoLectura>
+    // El menú y el pie también (2026-10-02): salen con el título, sin salto.
+    <MarcoLectura pagina={pagina} rutas={pagina.sitio ? { ...sitioConAnfitrion(raizDominio), raizId: pagina.sitio.raizId } : undefined}>
       <article>
         <CabeceraLectura pagina={pagina} esMovil={esMovil} />
       </article>

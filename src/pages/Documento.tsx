@@ -8,6 +8,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
+  PanelTop,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -15,6 +16,7 @@ import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
+import CreadorMenu from '../components/knowledge/CreadorMenu';
 import MenuBloque from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
@@ -191,6 +193,7 @@ function EditorPagina() {
   /** Ajustes de publicación (autor, fecha, ancho, descripción, imagen). */
   const [ajustes, setAjustes] = useState<Ajustes>({});
   const [ajustesAbierto, setAjustesAbierto] = useState(false);
+  const [menuSitioAbierto, setMenuSitioAbierto] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
   /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
@@ -1564,6 +1567,8 @@ function EditorPagina() {
             visibles={b.propsGaleria}
             onCambiarVisibles={editable ? ids => { b.propsGaleria = ids; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamano={editable ? t => { b.tamanoGaleria = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
+            tamanoTitulo={b.tamanoTitulo || 'mediano'}
+            onCambiarTamanoTitulo={editable ? t => { b.tamanoTitulo = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarVista={editable ? v => { b.vistaBd = v; setBloques(bs => [...bs]); programarGuardado(); } : undefined} />
         );
       }
@@ -2128,6 +2133,20 @@ function EditorPagina() {
               a alguien es lo que se quiere hacer nueve de cada diez veces, y
               hasta hoy no existía el botón — solo un icono de descarga que
               nadie asocia con compartir. */}
+          {/* EL MENÚ Y EL PIE DE LA WEB (2026-10-02). Con su nombre y no
+              escondido en los ajustes: es lo que convierte una página en una web. */}
+          {editable && (
+            <button onClick={() => setMenuSitioAbierto(true)} title="Menú y pie de página de la web"
+              className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
+              <PanelTop className="w-4 h-4" /> Menú y pie
+            </button>
+          )}
+          {editable && (
+            <button onClick={() => setMenuSitioAbierto(true)} title="Menú y pie de página de la web" aria-label="Menú y pie de página de la web"
+              className="sm:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+              <PanelTop className="w-4 h-4" />
+            </button>
+          )}
           {editable && (
             <button onClick={() => setAjustesAbierto(true)} title="Ajustes de la página" aria-label="Ajustes de la página"
               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
@@ -2366,6 +2385,17 @@ function EditorPagina() {
           </div>
         )}
 
+        {menuSitioAbierto && (
+          <CreadorMenu sitio={ajustes.sitio} titulo={titulo} icono={icono}
+            opciones={{
+              secciones: bloques.filter(b => ['titulo1', 'titulo2', 'titulo3'].includes(b.tipo) && (b as any).texto?.trim())
+                .map(b => ({ id: b.id, titulo: String((b as any).texto).replace(/[*_`#]/g, '').trim().slice(0, 60) })),
+              paginas: bloques.filter(b => b.tipo === 'subpagina' && (b as any).entityId)
+                .map(b => ({ id: (b as any).entityId, titulo: (b as any).pubTitulo || 'Subpágina' })),
+            }}
+            onCambio={sitio => { setAjustes(a => ({ ...a, sitio })); programarGuardado(); }}
+            onCerrar={() => setMenuSitioAbierto(false)} />
+        )}
         {ajustesAbierto && (
           <AjustesPagina ajustes={ajustes} portada={portada} titulo={titulo}
             onCambio={a => { setAjustes(a); programarGuardado(); }}

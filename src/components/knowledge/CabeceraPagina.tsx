@@ -45,13 +45,27 @@ export type Cabecera = {
  * forma de Notion. En un teléfono también va al lado: es más corto en alto,
  * que es lo que falta en una pantalla vertical.
  */
-export function FilaTitulo({ cabecera, icono, children }: {
+export function FilaTitulo({ cabecera, icono, children, centrado }: {
   cabecera?: Cabecera;
   icono: ReactNode | null;
   children: ReactNode;
+  /** Icono, título y descripción al centro de la página (2026-10-02,
+   *  Eugenio: «que estén centradas en la página, no en un lateral
+   *  izquierdo»). Lo usa la página publicada. */
+  centrado?: boolean;
 }) {
-  if (!icono) return <div>{children}</div>;
-  if (cabecera?.iconoPos === 'encima') return <div><div className="mb-2">{icono}</div>{children}</div>;
+  if (!icono) return <div className={centrado ? 'text-center' : undefined}>{children}</div>;
+  if (cabecera?.iconoPos === 'encima') {
+    return <div className={centrado ? 'text-center' : undefined}><div className={cn('mb-2', centrado && 'flex justify-center')}>{icono}</div>{children}</div>;
+  }
+  if (centrado) {
+    return (
+      <div className="flex items-center justify-center gap-3 sm:gap-4 text-center">
+        <div className="shrink-0">{icono}</div>
+        <div className="min-w-0">{children}</div>
+      </div>
+    );
+  }
   return (
     <div className="flex items-start gap-3 sm:gap-4">
       <div className="shrink-0">{icono}</div>
@@ -85,7 +99,9 @@ const altoDe = (t: number) => Math.round(120 + ((t - 20) / 60) * 360);
  * Coloca la imagen y el cuerpo (icono + título + lo demás) según la
  * disposición elegida. No sabe qué hay dentro: eso lo pone quien la usa.
  */
-export function LayoutCabecera({ cabecera, imagen, cuerpo }: {
+export function LayoutCabecera({ cabecera, imagen, cuerpo, centrado }: {
+  /** La imagen de arriba o de abajo, al centro (página publicada). */
+  centrado?: boolean;
   cabecera?: Cabecera;
   /** La imagen ya pintada, o `null` si la página no tiene. */
   imagen: ReactNode | null;
@@ -118,7 +134,7 @@ export function LayoutCabecera({ cabecera, imagen, cuerpo }: {
       // cuadradito se ajuste al tamaño de la imagen para que no salga
       // cortada»). La barra fija el alto MÁXIMO; el ancho sale solo de la
       // proporción de la imagen, así que nunca se recorta ni se deforma.
-      className={cn('[&_img]:w-auto [&_img]:max-w-full [&_img]:h-auto [&_img]:object-contain',
+      className={cn(centrado && 'flex justify-center', '[&_img]:w-auto [&_img]:max-w-full [&_img]:h-auto [&_img]:object-contain',
         '[&_img]:max-h-[calc(var(--alto)*0.8)] sm:[&_img]:max-h-[var(--alto)]')}>
       {imagen}
     </div>

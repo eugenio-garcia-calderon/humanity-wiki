@@ -1,5 +1,5 @@
-import { useEffect, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, type MouseEvent, type ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import { useSitio } from './ContextoSitio';
@@ -73,8 +73,26 @@ export default function VistaPagina({ pagina, propio, pie }: {
     ? (padre.slug ? (sitio.raizId === padre.id ? '/' : sitio.enlaceSlug(padre.slug, padre.handle)) : sitio.enlacePagina(padre.id))
     : null;
 
+  // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
+  // —el servidor también los pinta—, así que aquí se cogen los que van a
+  // otra página del mismo sitio y se abren con el enrutador. Y se cierran las
+  // tres rayas, que si no seguirían abiertas en la página nueva.
+  const navegar = useNavigate();
+  const alPinchar = (e: MouseEvent) => {
+    const a = (e.target as HTMLElement).closest?.('a[data-interno]') as HTMLAnchorElement | null;
+    a?.closest('details')?.removeAttribute('open');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const href = a.getAttribute('href') || '';
+    if (!href.startsWith('/')) return;
+    e.preventDefault();
+    navegar(href);
+    window.scrollTo(0, 0);
+  };
+  const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, raizId: pagina.sitio.raizId } : undefined;
+
   return (
-    <MarcoLectura>
+    <div onClickCapture={alPinchar}>
+    <MarcoLectura pagina={pagina} rutas={rutas}>
       {aPadre && (
         <Link to={aPadre} className="inline-flex items-center gap-1 mb-4 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> {padre!.titulo || 'Volver'}
@@ -86,6 +104,7 @@ export default function VistaPagina({ pagina, propio, pie }: {
       </article>
       {pie}
     </MarcoLectura>
+    </div>
   );
 }
 
