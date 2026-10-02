@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { enFilas } from '../../utils/bloques';
+import { enFilas, AIRE_BASE_DATOS } from '../../utils/bloques';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
@@ -126,7 +126,7 @@ export default function BloquesLectura({ bloques, comentable }: { bloques: any[]
     const color = propio ? '' : claseColor(b?.color);
     const caja = (
       <div id={b?.id ? `b-${b.id}` : undefined}
-        className={cn(color, !propio && b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
+        className={cn(color, b?.tipo === 'basedatos' && AIRE_BASE_DATOS, !propio && b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
         {dentro}
       </div>
     );

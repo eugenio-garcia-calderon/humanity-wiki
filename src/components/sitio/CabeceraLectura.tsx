@@ -30,7 +30,6 @@ export function MarcoLectura({ children }: { children: ReactNode }) {
 export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMovil: boolean }) {
   const cfg = pagina.config || {};
   const mostrarAutor = cfg.mostrarAutor === true;
-  const mostrarFecha = cfg.mostrarFecha === true;
   const icono: string | null = cfg.icono || null;
   const lado = ladoIcono(cfg.cabecera, esMovil);
   return (
@@ -61,14 +60,15 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
             </p>
           )}
           </FilaTitulo>
-          {(mostrarAutor || mostrarFecha) && (
+          {/* LA FECHA YA NO SE PUBLICA (2026-10-02, Eugenio: «quita la fecha que
+              está debajo del icono»). `cfg.mostrarFecha`, que tienen algunas
+              páginas viejas, se ignora. */}
+          {mostrarAutor && (
             <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
-              {mostrarAutor && pagina.autor?.avatar && (
+              {pagina.autor?.avatar && (
                 <img src={pagina.autor.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
               )}
-              {mostrarAutor && pagina.autor?.nombre && <span>de <b className="text-slate-600">{pagina.autor.nombre}</b></span>}
-              {mostrarAutor && mostrarFecha && <span>·</span>}
-              {mostrarFecha && <span>{new Date(pagina.updated_at || pagina.created_at || Date.now()).toLocaleDateString('es-ES')}</span>}
+              {pagina.autor?.nombre && <span>de <b className="text-slate-600">{pagina.autor.nombre}</b></span>}
             </div>
           )}
         </>}

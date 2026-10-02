@@ -40,7 +40,7 @@ const PROPIEDADES = 3;
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false }: {
   tablaId: string;
   columnas: Columna[];
   filas: Fila[];
@@ -56,6 +56,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   visibles?: string[];
   /** Sin el relleno de alrededor: la galería limpia de una página. */
   sinMargen?: boolean;
+  /** Las tarjetas al centro, no pegadas a la izquierda (bloque de página). */
+  centrada?: boolean;
 }) {
   const navigate = useNavigate();
   // En una página publicada, la tarjeta abre la subpágina DENTRO del sitio
@@ -108,7 +110,13 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           tarjeta y la rejilla mete las que quepan: así el mismo «grande» son
           tres por fila en un escritorio ancho y una en un teléfono, sin un
           ajuste distinto para cada pantalla. */}
-      <div className="grid gap-x-4 gap-y-5" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
+      {/* CENTRADA (2026-10-02): con `auto-fill` y `1fr` sobraban columnas
+          vacías a la derecha y dos tarjetas quedaban pegadas a la izquierda.
+          Con `auto-fit` las columnas vacías desaparecen, cada tarjeta crece
+          como mucho un 50 % y lo que sobra se reparte a los dos lados. */}
+      <div className="grid gap-x-4 gap-y-5" style={centrada
+        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
+        : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
         {filas.map(f => {
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';

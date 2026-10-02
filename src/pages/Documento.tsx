@@ -26,6 +26,7 @@ import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown, enFilas,
+  AIRE_BASE_DATOS,
 } from '../utils/bloques';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
@@ -1841,6 +1842,7 @@ function EditorPagina() {
           destino?.id === b.id && destino.lado === 'izquierda' && 'shadow-[-4px_0_0_0_theme(colors.emerald.400)]',
           destino?.id === b.id && destino.lado === 'derecha' && 'shadow-[4px_0_0_0_theme(colors.emerald.400)]',
           arrastrando === b.id && 'opacity-40',
+          b.tipo === 'basedatos' && AIRE_BASE_DATOS,
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && claseColor(b.color),
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
           seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60')}

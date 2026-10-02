@@ -175,13 +175,18 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     <div className={limpia
       ? cn(tono.fondo && `${tono.fondo} rounded-2xl p-4`)
       : cn('border border-slate-200 rounded-xl overflow-hidden', tono.fondo || 'bg-white')}>
+      {/* CENTRADA (2026-10-02, Eugenio: «el título de la base de datos
+          centrado y la galería centrada, no esquinada a la izquierda»). El
+          título va solo en su línea; los mandos del editor, debajo y también
+          al centro. */}
       <div className={limpia
-        ? 'flex items-center gap-2 pb-3 min-h-9'
+        ? 'flex flex-wrap items-center justify-center gap-2 pb-4 min-h-9'
         : cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
         {!limpia && <Table2 className="w-4 h-4 text-slate-400 shrink-0" />}
         {/* El nombre se cambia pinchando en él (2026-09-30, Eugenio: «permite
             cambiar el nombre de la base de datos»). Enter o salir guarda;
             Escape deja el de antes. */}
+        <div className={limpia ? 'basis-full flex justify-center min-w-0' : 'contents'}>
         {editable && nombre !== null ? (
           <input autoFocus value={nombre} maxLength={200} aria-label="Nombre de la base de datos"
             onChange={e => setNombre(e.target.value)}
@@ -199,6 +204,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         ) : (
           <p className={cn('font-black truncate', limpia ? 'text-lg' : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
         )}
+        </div>
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
         {!limpia && <span className="text-[11px] text-slate-400">
           {/* Si hay filtro puesto se dice: sin este número, una tabla filtrada y
@@ -215,7 +221,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         {editable && vista === 'galeria' && (
           <button onClick={() => setEditorColumna('nueva-relacion')}
             title="Enlazar los elementos de esta base de datos con los de otra"
-            className="ml-auto inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300 shrink-0">
+            className={cn(!limpia && 'ml-auto', 'inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300 shrink-0')}>
             <Link2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Enlazar con otra base de datos</span>
           </button>
         )}
@@ -252,7 +258,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         )}
         {/* Tamaño de las tarjetas: sólo en galería y sólo para quien edita. */}
         {vista === 'galeria' && onCambiarTamano && (
-          <label className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0', !onCambiarVisibles && 'ml-auto')}>
+          <label className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0', !limpia && !onCambiarVisibles && 'ml-auto')}>
             <span className="hidden sm:inline">Tamaño</span>
             <select value={tamano} onChange={e => onCambiarTamano(e.target.value as TamanoGaleria)}
               aria-label="Tamaño de las tarjetas"
@@ -266,7 +272,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         )}
         {/* Galería/Tabla sólo para quien edita: en la web publicada la vista
             la decide el autor y el visitante no necesita el interruptor. */}
-        {editable && <div className={cn('flex items-center gap-0.5 shrink-0', !(vista === 'galeria' && onCambiarTamano) && 'ml-auto')} role="tablist">
+        {editable && <div className={cn('flex items-center gap-0.5 shrink-0', !limpia && 'ml-auto')} role="tablist">
           {([['galeria', 'Galería', LayoutGrid], ['tabla', 'Tabla', Table2]] as const).map(([v, label, Icono]) => (
             <button key={v} role="tab" aria-selected={vista === v} onClick={() => cambiarVista(v)}
               className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-bold transition-colors',
@@ -291,7 +297,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
-          <Galeria tablaId={tablaId} columnas={columnas} filas={filas} sinMargen
+          <Galeria tablaId={tablaId} columnas={columnas} filas={filas} sinMargen centrada
             columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar}
             claseTitulo={tono.texto} tamano={tamano} visibles={visibles} />
         </div>

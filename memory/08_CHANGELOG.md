@@ -8134,3 +8134,9 @@ taking the page down.
 - Caddy: los `/assets/*` de los dominios propios y subdominios salían con `max-age=0` (la regla del año sólo estaba en `humanity.wiki`). Ya no.
 - Páginas publicadas siempre a ancho completo (petición de Eugenio vía prog8-pizarra).
 - Los picos de 5–10 s medidos ese día coincidían con despliegues: Caddy hace esperar hasta 20 s mientras se cambia el contenedor.
+
+### 2026-10-02 — Bases de datos centradas y con aire; sin fecha publicada (prog8)
+- Eugenio: «que el hueco entre bases de datos sea mayor», «el título de la base de datos centrado y la galería centrada, no esquinada a la izquierda» y «quita la fecha que está debajo del icono cuando se publica la página».
+- `AIRE_BASE_DATOS` (`utils/bloques.ts`): el mismo margen arriba y abajo para el bloque de base de datos en el editor y en la página publicada.
+- Galería en bloque de página: `auto-fit` + ancho máximo + `justify-content: center` (antes `auto-fill` dejaba columnas vacías a la derecha). Título solo en su línea, centrado; los mandos del editor debajo.
+- La fecha ya no se publica y se quita su interruptor de «Ajustes de la página».
