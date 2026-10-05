@@ -232,7 +232,7 @@ export default function Tablero({
         </div>
       )}
       {carriles.map(carril => {
-        const grupos = agruparFilas(carril ? carril.filas : locales, col, cfg);
+        const grupos = agruparFilas(carril ? carril.filas : locales, col, cfg, { sinSiempre: true });
         const visibles = grupos.filter(g => !ocultos.has(g.clave));
         const escondidos = grupos.filter(g => ocultos.has(g.clave));
         const claveCarril = carril ? `c:${carril.clave}` : '';

@@ -44,6 +44,7 @@ import { compilar } from './bd/formulas';
 import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
+import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
  *  misma tabla: cambiar de forma no toca ni una fila. */
@@ -312,9 +313,13 @@ export function registerBdRoutes(app: Express, db: any) {
       const permiso = await puedeConTabla(req, req.params.id, false);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
 
+      // Las filas que se repiten «en calendario» y ya tocaban, antes de leer:
+      // quien abre la tabla el lunes tiene que ver la tarea del lunes.
+      try { await ponerAlDia(req.params.id); } catch (e: any) { console.error('[bd] recurrencias:', e?.message || e); }
+
       const columnas = await columnasDe(req.params.id);
       const f = await db.execute(sql`
-        SELECT id, valores, pagina_id, orden, created_at, updated_at
+        SELECT id, valores, pagina_id, orden, recurrencia, created_at, updated_at
         FROM bd_filas
         WHERE tabla_id = ${req.params.id} AND archived_at IS NULL AND deleted_at IS NULL
         ORDER BY orden, created_at
@@ -362,6 +367,7 @@ export function registerBdRoutes(app: Express, db: any) {
             pagina_id: fila.pagina_id,
             pagina: fila.pagina_id ? tarjetas[fila.pagina_id] || null : null,
             orden: fila.orden,
+            recurrencia: fila.recurrencia || null,
             celdas,
             archivos,
             // Los nombres de lo apuntado, aparte: la celda guarda identificadores
@@ -786,7 +792,10 @@ export function registerBdRoutes(app: Express, db: any) {
           -- Las marcas de las dos caras no se pierden al editar el resto.
           config   = COALESCE(${d.config ? JSON.stringify({ ...d.config,
                        ...(col.config?.inversa_de ? { inversa_de: col.config.inversa_de, tabla_destino: col.config.tabla_destino } : {}),
-                       ...(col.config?.reciproca_id ? { reciproca_id: col.config.reciproca_id, tabla_destino: col.config.tabla_destino } : {}) }) : null}::jsonb, config),
+                       ...(col.config?.reciproca_id ? { reciproca_id: col.config.reciproca_id, tabla_destino: col.config.tabla_destino } : {}),
+                       // El papel de madre/hijos y de dependencia tampoco: sin él la
+                       // tabla dejaría de anidar en cuanto se editara la columna.
+                       ...(col.config?.rol ? { rol: col.config.rol, tabla_destino: col.config.tabla_destino } : {}) }) : null}::jsonb, config),
           orden    = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
           updated_at = now()
         WHERE id = ${req.params.id}
@@ -857,6 +866,183 @@ export function registerBdRoutes(app: Express, db: any) {
       if (col.config?.reciproca_id) await db.execute(sql`UPDATE bd_columnas SET archived_at = now() WHERE id = ${col.config.reciproca_id}`);
       if (col.config?.inversa_de) await db.execute(sql`UPDATE bd_columnas SET config = config - 'reciproca_id' WHERE id = ${col.config.inversa_de}`);
       res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ── SUBELEMENTOS Y DEPENDENCIAS (2026-10-05, carril «bd») ─────────────────
+  // Las dos son RELACIONES DE LA TABLA CONSIGO MISMA, con su cara de vuelta:
+  //
+  //   subelementos   «Elemento madre» (una sola) ↔ «Subelementos» (varios)
+  //   dependencias   «Bloqueada por» (varias)    ↔ «Bloquea» (varias)
+  //
+  // No hay una tabla de jerarquía aparte: así un subelemento es una fila como
+  // las demás —se filtra, se ordena, se agrupa, tiene su página— y la jerarquía
+  // no puede contradecir a lo que enseña la columna. `config.rol` es lo que le
+  // dice al cliente que anide o que dibuje flechas.
+  const FUNCIONES: Record<string, { ida: string; vuelta: string; rolIda: string; rolVuelta: string; variosIda: boolean }> = {
+    subelementos: { ida: 'Elemento madre', vuelta: 'Subelementos', rolIda: 'madre', rolVuelta: 'hijos', variosIda: false },
+    dependencias: { ida: 'Bloqueada por', vuelta: 'Bloquea', rolIda: 'bloqueada_por', rolVuelta: 'bloquea', variosIda: true },
+  };
+  app.post('/api/bd/tablas/:id/funciones', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, req.params.id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const f = FUNCIONES[String(req.body?.funcion)];
+      if (!f) return res.status(400).json({ error: 'Las funciones que hay: subelementos, dependencias.' });
+      const cols = await columnasDe(req.params.id);
+      const ya = cols.find((c: any) => c.config?.rol === f.rolIda);
+      if (ya) return res.json({ ida: ya.id, vuelta: ya.config?.reciproca_id || null, ya: true });
+      const libre = (base: string) => { let n = base; for (let i = 2; cols.some((c: any) => String(c.nombre).toLowerCase() === n.toLowerCase()); i++) n = `${base} ${i}`; return n; };
+      const ida = nid('BDC'), vuelta = nid('BDC');
+      const ultima = Number(((await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_columnas WHERE tabla_id = ${req.params.id}`)).rows[0] as any).m);
+      await db.execute(sql`
+        INSERT INTO bd_columnas (id, tabla_id, nombre, tipo, opciones, config, orden) VALUES
+          (${ida}, ${req.params.id}, ${libre(f.ida)}, 'relacion', '[]'::jsonb,
+           ${JSON.stringify({ tabla_destino: req.params.id, varios: f.variosIda, rol: f.rolIda, reciproca_id: vuelta })}::jsonb, ${ultima + 1}),
+          (${vuelta}, ${req.params.id}, ${libre(f.vuelta)}, 'relacion', '[]'::jsonb,
+           ${JSON.stringify({ tabla_destino: req.params.id, varios: true, rol: f.rolVuelta, inversa_de: ida })}::jsonb, ${ultima + 2})
+      `);
+      res.json({ ida, vuelta });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Los antepasados de una fila por la columna «Elemento madre», del más
+   *  cercano al más lejano. Con tope: un círculo que se hubiera colado no
+   *  puede dejar esto dando vueltas. */
+  const antepasados = async (colMadre: string, filaId: string): Promise<string[]> => {
+    const r = await db.execute(sql`
+      WITH RECURSIVE sube(id, nivel) AS (
+        SELECT destino_id, 1 FROM bd_enlaces WHERE columna_id = ${colMadre} AND fila_origen = ${filaId} AND clase = 'fila'
+        UNION
+        SELECT e.destino_id, s.nivel + 1 FROM bd_enlaces e JOIN sube s ON e.fila_origen = s.id
+        WHERE e.columna_id = ${colMadre} AND e.clase = 'fila' AND s.nivel < 60
+      ) SELECT id FROM sube ORDER BY nivel
+    `);
+    return (r.rows as any[]).map(x => x.id);
+  };
+
+  // ── FILAS QUE SE REPITEN ──────────────────────────────────────────────────
+  // Ver `bd/recurrencia.ts` para el porqué de los dos modos.
+
+  /**
+   * Crea la copia de una fila: sus valores (con los cambios de `cambios`), sus
+   * enlaces y el contenido de su página. Es lo que hace nacer «la siguiente»
+   * de una tarea que se repite. Devuelve el id de la nueva.
+   */
+  const copiarFila = async (origen: any, cambios: Record<string, any>, recurrencia: Recurrencia | null, actor: string): Promise<string> => {
+    const id = nid('BDF');
+    const valores = { ...(origen.valores || {}) };
+    for (const [k, v] of Object.entries(cambios)) { if (v === undefined || v === null) delete valores[k]; else valores[k] = v; }
+    await db.execute(sql`UPDATE bd_filas SET orden = orden + 1 WHERE tabla_id = ${origen.tabla_id} AND orden > ${origen.orden}`);
+    await db.execute(sql`
+      INSERT INTO bd_filas (id, tabla_id, valores, orden, recurrencia, created_by, updated_by)
+      VALUES (${id}, ${origen.tabla_id}, ${JSON.stringify(valores)}::jsonb, ${Number(origen.orden) + 1},
+              ${recurrencia ? JSON.stringify(recurrencia) : null}::jsonb, ${actor}, ${actor})
+    `);
+    // Los enlaces de las columnas de IDA (las de vuelta se leen solas). La
+    // madre se conserva: la siguiente de una subtarea sigue bajo la misma tarea.
+    await db.execute(sql`
+      INSERT INTO bd_enlaces (id, columna_id, fila_origen, clase, destino_id, orden, created_by)
+      SELECT 'BDE' || upper(substr(md5(random()::text || e.id), 1, 14)), e.columna_id, ${id}, e.clase, e.destino_id, e.orden, ${actor}
+      FROM bd_enlaces e WHERE e.fila_origen = ${origen.id}
+      ON CONFLICT DO NOTHING
+    `);
+    // La página, con su contenido: la lista de comprobación de «Revisar la
+    // caldera» tiene que venir con la tarea, no empezar en blanco cada mes.
+    const t = await db.execute(sql`SELECT t.*, p.publico AS proyecto_publico FROM bd_tablas t LEFT JOIN proyectos p ON p.id = t.proyecto_id WHERE t.id = ${origen.tabla_id}`);
+    const colTitulo = await columnaTitulo(origen.tabla_id);
+    const pagina = await crearPaginaDeFila(id, t.rows[0], colTitulo ? String(valores[colTitulo] ?? '') : '', actor);
+    if (origen.pagina_id) {
+      await db.execute(sql`
+        UPDATE knowledge_windows SET config = (SELECT config FROM knowledge_windows WHERE id = ${origen.pagina_id})
+        WHERE id = ${pagina} AND EXISTS (SELECT 1 FROM knowledge_windows WHERE id = ${origen.pagina_id} AND deleted_at IS NULL)
+      `);
+    }
+    return id;
+  };
+
+  /**
+   * Pone al día las plantillas «en calendario» de una tabla (o de todas): por
+   * cada una cuya `proxima` ya ha llegado, crea la copia y avanza la fecha.
+   *
+   * LA FECHA SE RECLAMA ANTES DE COPIAR, con un UPDATE condicionado al valor
+   * viejo. Dos lecturas a la vez de la misma tabla (dos pestañas, el reloj y
+   * una persona) intentan avanzarla; solo una lo consigue y solo esa copia.
+   * Sin esto, cada carrera dejaba una tarea repetida.
+   */
+  const ponerAlDia = async (tablaId?: string) => {
+    const hoy = hoyIso();
+    const r = await db.execute(sql`
+      SELECT f.*, t.creador_user_id AS tabla_creador FROM bd_filas f JOIN bd_tablas t ON t.id = f.tabla_id
+      WHERE f.recurrencia IS NOT NULL AND f.deleted_at IS NULL AND f.archived_at IS NULL
+        AND t.deleted_at IS NULL AND t.archived_at IS NULL
+        AND f.recurrencia->>'modo' = 'calendario' AND f.recurrencia->>'proxima' <= ${hoy}
+        AND (${tablaId || null}::text IS NULL OR f.tabla_id = ${tablaId || null})
+      LIMIT 200
+    `);
+    for (const plantilla of r.rows as any[]) {
+      let rec: Recurrencia = plantilla.recurrencia;
+      // Como mucho 12 de golpe: una plantilla olvidada un año no puede llenar
+      // la tabla de 365 copias el día que alguien la abre.
+      for (let n = 0; n < 12 && rec.proxima && rec.proxima <= hoy; n++) {
+        const toca = rec.proxima;
+        const siguiente = sumarPeriodo(toca, rec.cada, rec.unidad, rec.ancla);
+        const gana = await db.execute(sql`
+          UPDATE bd_filas SET recurrencia = jsonb_set(recurrencia, '{proxima}', to_jsonb(${siguiente}::text))
+          WHERE id = ${plantilla.id} AND recurrencia->>'proxima' = ${toca} RETURNING id
+        `);
+        if (!gana.rows.length) break;
+        const cambios: Record<string, any> = {};
+        if (rec.columna_fecha) cambios[rec.columna_fecha] = toca;
+        if (rec.columna_hecho) cambios[rec.columna_hecho] = undefined;
+        await copiarFila(plantilla, cambios, null, plantilla.created_by || plantilla.tabla_creador || 'sistema');
+        rec = { ...rec, proxima: siguiente };
+      }
+    }
+  };
+  // Cada hora, por si nadie abre la tabla: la tarea del lunes tiene que estar
+  // ahí el lunes aunque se mire desde el tablero de otra página.
+  const reloj = setInterval(() => { ponerAlDia().catch((e: any) => console.error('[bd] recurrencias:', e?.message || e)); }, 60 * 60 * 1000);
+  (reloj as any).unref?.();
+
+  /** Poner, cambiar o quitar (`null`) la repetición de una fila. */
+  app.put('/api/bd/filas/:id/recurrencia', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa fila no existe.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      if (req.body?.recurrencia === null) {
+        await db.execute(sql`UPDATE bd_filas SET recurrencia = NULL, updated_at = now() WHERE id = ${fila.id}`);
+        return res.json({ recurrencia: null });
+      }
+      const r = validarRecurrencia(req.body?.recurrencia);
+      if ('error' in r) return res.status(400).json({ error: r.error });
+      const cols = await columnasDe(fila.tabla_id);
+      for (const k of ['columna_fecha', 'columna_hecho'] as const) {
+        if (r[k] && !cols.some((c: any) => c.id === r[k])) return res.status(400).json({ error: 'Esa propiedad no está en la tabla.' });
+      }
+      if (r.columna_fecha && cols.find((c: any) => c.id === r.columna_fecha)?.tipo !== 'fecha') return res.status(400).json({ error: 'La fecha que avanza tiene que ser una propiedad de fecha.' });
+      if (r.columna_hecho && !['casilla', 'seleccion'].includes(cols.find((c: any) => c.id === r.columna_hecho)?.tipo)) return res.status(400).json({ error: '«Hecho» tiene que ser una casilla o una selección.' });
+      if (r.modo === 'calendario') {
+        // La primera copia: el siguiente periodo desde la fecha de la fila, o
+        // desde hoy si no tiene. Nunca en el pasado: si no, al guardar
+        // saldrían de golpe las copias de todos los periodos ya pasados.
+        const base = r.columna_fecha && /^\d{4}-\d{2}-\d{2}$/.test(String(fila.valores?.[r.columna_fecha] || '')) ? fila.valores[r.columna_fecha] : hoyIso();
+        r.ancla = Number(String(base).slice(8, 10)) || null;
+        let p = r.proxima && r.proxima >= hoyIso() ? r.proxima : sumarPeriodo(base, r.cada, r.unidad, r.ancla);
+        while (p < hoyIso()) p = sumarPeriodo(p, r.cada, r.unidad, r.ancla);
+        r.proxima = p;
+      } else {
+        r.proxima = null;
+        const f0 = r.columna_fecha ? String(fila.valores?.[r.columna_fecha] || '') : '';
+        r.ancla = /^\d{4}-\d{2}-\d{2}$/.test(f0) ? Number(f0.slice(8, 10)) : null;
+      }
+      await db.execute(sql`UPDATE bd_filas SET recurrencia = ${JSON.stringify(r)}::jsonb, updated_at = now() WHERE id = ${fila.id}`);
+      res.json({ recurrencia: r });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -1181,6 +1367,26 @@ export function registerBdRoutes(app: Express, db: any) {
         // Se COMPRUEBA aquí y se ESCRIBE después de que todo haya validado.
         const comp = await comprobarEnlaces(db, clase, lista);
         if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+        // UNA FILA NO PUEDE SER SU PROPIA MADRE, NI BLOQUEARSE A SÍ MISMA, NI
+        // QUEDAR DEBAJO DE UNA DE SUS HIJAS: el árbol daría vueltas y la tabla
+        // anidada no tendría por dónde empezar a pintarse.
+        if (col.config?.rol && col.config?.tabla_destino === fila.tabla_id && lista.includes(fila.id)) {
+          fallos.push({ columna: colId, error: 'Una fila no puede enlazarse consigo misma aquí.' });
+          continue;
+        }
+        if (col.config?.rol === 'madre' && lista[0]) {
+          if ((await antepasados(col.id, lista[0])).includes(fila.id)) {
+            fallos.push({ columna: colId, error: 'Esa fila está debajo de ésta: ponerla de madre crearía un círculo.' });
+            continue;
+          }
+        }
+        if (col.config?.rol === 'hijos' && col.config?.inversa_de && lista.length) {
+          const mios = await antepasados(col.config.inversa_de, fila.id);
+          if (lista.some(x => mios.includes(x))) {
+            fallos.push({ columna: colId, error: 'Una de esas filas está por encima de ésta: no puede ser también su subelemento.' });
+            continue;
+          }
+        }
         // La cara de vuelta escribe en los enlaces de su gemela.
         if (col.config?.inversa_de) { inversosPendientes.push({ columnaOrigen: col.config.inversa_de, origenes: lista }); continue; }
         enlacesPendientes.push({ colId, clase, destinos: lista });
@@ -1221,6 +1427,16 @@ export function registerBdRoutes(app: Express, db: any) {
       await guardarFicheros(db, { columnaId: p.colId, filaId: fila.id, archivoIds: p.ids });
     }
     for (const p of inversosPendientes) {
+      // SI LA IDA ADMITE UN SOLO ELEMENTO, poner a X como subelemento de ésta
+      // le QUITA la madre que tuviera. Sin esto, escribir desde la cara de
+      // vuelta dejaba a X con dos madres en una columna de una sola.
+      const ida = await db.execute(sql`SELECT config FROM bd_columnas WHERE id = ${p.columnaOrigen}`);
+      if (!(ida.rows[0] as any)?.config?.varios && p.origenes.length) {
+        await db.execute(sql`
+          DELETE FROM bd_enlaces WHERE columna_id = ${p.columnaOrigen} AND destino_id <> ${fila.id}
+            AND fila_origen = ANY(string_to_array(${p.origenes.join(',')}, ','))
+        `);
+      }
       await guardarInversos(db, { columnaOrigen: p.columnaOrigen, filaId: fila.id, origenes: p.origenes, actor: req.user!.id });
     }
     for (const p of enlacesPendientes) {
@@ -1243,6 +1459,28 @@ export function registerBdRoutes(app: Express, db: any) {
       UPDATE bd_filas SET valores = ${JSON.stringify(valores)}::jsonb, updated_by = ${req.user!.id}, updated_at = now()
       WHERE id = ${filaId}
     `);
+    // ── ¿SE ACABA DE COMPLETAR UNA FILA QUE SE REPITE? ──────────────────────
+    // Entonces nace la siguiente, con la fecha avanzada y sin marcar, y la
+    // repetición pasa a ella: la completada queda como historia.
+    const rec: Recurrencia | null = fila.recurrencia;
+    if (rec?.modo === 'al_completar' && rec.columna_hecho && rec.columna_hecho in entrantes) {
+      const colHecho = porId.get(rec.columna_hecho);
+      const antes = diceHecho((fila.valores || {})[rec.columna_hecho], colHecho || { tipo: '' }, rec);
+      const ahora = diceHecho(valores[rec.columna_hecho], colHecho || { tipo: '' }, rec);
+      if (colHecho && !antes && ahora) {
+        // Se reclama quitándole la repetición: dos clics seguidos no crean dos.
+        const gana = await db.execute(sql`UPDATE bd_filas SET recurrencia = NULL WHERE id = ${fila.id} AND recurrencia IS NOT NULL RETURNING id`);
+        if (gana.rows.length) {
+          const cambios: Record<string, any> = { [rec.columna_hecho]: undefined };
+          if (rec.columna_fecha) {
+            const actual = String(valores[rec.columna_fecha] ?? '');
+            cambios[rec.columna_fecha] = sumarPeriodo(/^\d{4}-\d{2}-\d{2}$/.test(actual) ? actual : hoyIso(), rec.cada, rec.unidad, rec.ancla);
+          }
+          await copiarFila({ ...fila, valores }, cambios, rec, req.user!.id);
+        }
+      }
+    }
+
     // El nombre de la fila es el título de su página: se escriben juntos.
     if (fila.pagina_id) {
       const colTitulo = await columnaTitulo(fila.tabla_id);
