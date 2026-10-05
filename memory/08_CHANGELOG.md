@@ -8329,3 +8329,17 @@ páginas, personas…; y un botón de contenido universal con lo público».
   needing Enter, raw markdown in excerpts, chip overflow, keyboard focus lost
   on hover-only buttons and after «Ver más», low-contrast labels, chip counts
   not matching the filter, stale link to a foreign sub-topic.
+
+### 2026-10-05 — Page editor: a visual block picker
+- Eugenio asked for a more visual «+» selector, with bigger icons and text, separating sophisticated tools from the basics.
+- New `src/components/knowledge/SelectorBloques.tsx`, with a search box on top (accent-insensitive, arrows + Enter):
+  - **Básicos**: large tiles with a coloured icon (Texto, Titular, Imagen, Vídeo, Archivo, Página web).
+  - **Herramientas**: cards with a one-line description (Base de datos, Pizarra, Mapa, Página, Web insertada, Publicación).
+  - **Tienda**: shop blocks.
+  - **Formato de texto**: chips.
+  - Footer: «Mejorar con IA» / «Eliminar bloque».
+- Desktop: the selector floats in a portal (the editor box was clipping it). Mobile: a bottom sheet.
+- `TIPOS_MENU` is still the single catalogue, now carrying `grupo`, `desc` and `color`. Two new shortcuts:
+  - **Vídeo**: a link block that turns YouTube/Vimeo links into a player, or uploads a file.
+  - **Mapa**: the publication search filtered to maps, with a link to create one.
+- A YouTube or Vimeo link pasted into «Web insertada» now becomes a player too. The «/» bar got the same coloured icons and descriptions.
