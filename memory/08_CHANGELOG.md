@@ -8494,3 +8494,8 @@ en mis páginas como proyecto pendiente».
 - **Bloque «Botón»** con panel de configuración (texto, acción, estilo): *insertar bloques* (copia su plantilla —lo que lleva dentro— debajo), *crear una página* (dentro de ésta, con la plantilla como contenido y título con `{fecha}`), *añadir una fila* a una base de datos de la página, o *abrir un enlace*. Al leer sólo se enseña el de enlace; la plantilla nunca.
 - `madresValidas` (`permisos.ts`) mira también las subpáginas anidadas en desplegables.
 - «Añadir un bloque» del pie añade arriba del todo, no dentro del último desplegable.
+
+### 2026-10-06 — Creador de productos: variantes claras, sin puntos y fotos pegando o arrastrando (prog8)
+- **Variantes** (`EditorVariantes`, que usa también Comercio): una fila por variante a todo el ancho, con cabecera (Nombre · Precio € · Stock), campos de 16 px, el SKU detrás de «Añadir SKU» y atajos de un toque (Tallas S–XL, 36–44, Colores). Con variantes con nombre se oculta «Cuántos tienes»: el servidor suma el stock de las variantes y lo ignoraba igual.
+- **Cobrar en puntos, retirado del creador** de momento (Eugenio). Los productos nuevos se crean con `acepta_puntos: false`. El servidor, la caja y el interruptor por producto de Comercio no cambian.
+- **Fotos** con `SoltarImagen`, el diálogo de la portada: pegar, arrastrar o elegir archivo. Precio y envío comparten fila; IVA, variantes y «borrador» tienen la suya.
