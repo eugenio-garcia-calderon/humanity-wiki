@@ -113,6 +113,42 @@
       "ruta": "src/components/sitio/BarraMiembro.tsx",
       "motivo": "carril acceso: miembros en sitios publicados",
       "desde": "2026-10-05T18:23:03.276Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/edicionPaginas.ts",
+      "motivo": "editorA PR2: títulos plegables, migas, botón",
+      "desde": "2026-10-05T18:28:49.027Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "editorA PR2: títulos plegables, migas, botón",
+      "desde": "2026-10-05T18:28:49.027Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/permisos.ts",
+      "motivo": "editorA PR2: títulos plegables, migas, botón",
+      "desde": "2026-10-05T18:28:49.027Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BloquesExtra.tsx",
+      "motivo": "editorA PR2: títulos plegables, migas, botón",
+      "desde": "2026-10-05T18:28:49.027Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/sitio/VistaPagina.tsx",
+      "motivo": "editorA PR2: títulos plegables, migas, botón",
+      "desde": "2026-10-05T18:28:49.027Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "editorA PR2: títulos plegables, migas, botón",
+      "desde": "2026-10-05T18:28:49.027Z"
     }
   ]
 }
