@@ -135,7 +135,7 @@ export const PERSONALES_MUDADAS: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'humanity.wiki', claro = false, onAbrirSubmenu, onPlegar,
-  personal, ramas, pie, cabeza,
+  personal, ramas, pie, cabeza, junto,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -228,6 +228,10 @@ export default function Rail({
    * fuera por lo mismo que `pie`: el raíl no debe saber qué está pintando.
    */
   cabeza?: any;
+  /** Lo que va EN LA FILA DE ARRIBA, junto al botón de plegar (2026-10-05):
+   *  la marca en el de la izquierda, «Explorar» en el de la derecha. La fila
+   *  se parte en dos si lo de dentro necesita otra línea (un desplegable). */
+  junto?: any;
   onAbrirSubmenu?: (h: Herramienta) => void;
   /**
    * PLEGARSE (2026-08-24). Eugenio: «permite que ambos menús, el de la derecha
@@ -792,7 +796,10 @@ export default function Rail({
           !anclado && encima && 'shadow-2xl shadow-black/40',
         )}
       >
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 flex-wrap items-center gap-1">
+          {/* En el de la derecha va ANTES: el botón de plegar queda pegado al
+              borde de la pantalla, que es por donde se va el menú. */}
+          {ladoDerecho && desplegado && junto}
           {/* ══ EL BOTÓN DE INICIO SE HA IDO DE AQUÍ (2026-08-25) ═══════════
               Eugenio: «hay botones, uno a la izquierda de explorar y otro a la
               derecha de mis proyectos, que si los pulsas no hacen nada. Que
@@ -864,6 +871,7 @@ export default function Rail({
               {ladoDerecho ? <PanelRightClose className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
           )}
+          {!ladoDerecho && desplegado && junto}
         </div>
 
         <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />

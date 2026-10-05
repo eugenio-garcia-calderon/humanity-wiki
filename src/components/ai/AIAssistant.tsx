@@ -2883,13 +2883,14 @@ export default function AIAssistant({ modo = 'panel' }: {
                 // CLASE y no por estilo en línea: mezclar los dos aquí hizo
                 // que el `bottom` de la línea no llegara a aplicarse y el
                 // panel se comiera la barra. Un solo mecanismo por propiedad.
-                ? 'inset-x-0 top-0 bottom-11 shadow-2xl'
+                // Sin barra de abajo desde el 2026-10-05: el panel llega al borde.
+                ? 'inset-x-0 top-0 bottom-0 shadow-2xl'
                 // Ordenador: columna a la derecha, del alto entero.
                 // Ordenador: columna a la derecha. También se para en la
                 // barra: es la misma de siempre, va por encima (z mayor), y un
                 // panel que le pasara por debajo escondería sus botones justo
                 // en la esquina donde caen.
-                : 'top-0 right-0 bottom-11 border-l border-slate-200 shadow-2xl')}
+                : 'top-0 right-0 bottom-0 border-l border-slate-200 shadow-2xl')}
           // `--hueco-temas`: el menú de temas de la derecha (Layout), cuando está abierto.
           style={esMovil ? undefined : { width: `${anchoLateral}px`, right: 'var(--hueco-temas, 0px)' }}
         >

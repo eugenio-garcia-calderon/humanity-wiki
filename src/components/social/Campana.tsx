@@ -100,13 +100,19 @@ const destinoDe = (a: Aviso): string | null => {
   return null;
 };
 
-export default function Campana({ compacto }: { compacto?: boolean }) {
+/**
+ * `enMenu` (2026-10-05): la campana vive dentro del menú izquierdo, como una
+ * fila más. Su lista se abre A LA DERECHA del menú y `fixed`: dentro del menú
+ * se cortaría, porque el menú tiene su propio scroll.
+ */
+export default function Campana({ compacto, enMenu = false }: { compacto?: boolean; enMenu?: boolean }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [abierta, setAbierta] = useState(false);
   const [sinLeer, setSinLeer] = useState(0);
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const caja = useRef<HTMLDivElement>(null);
+  const [donde, setDonde] = useState<{ left: number; top: number } | null>(null);
 
   // El número, cada minuto. No cada segundo: un aviso que tarda medio minuto
   // en aparecer no le arruina el día a nadie, y una petición por segundo por
@@ -156,6 +162,29 @@ export default function Campana({ compacto }: { compacto?: boolean }) {
 
   return (
     <div className="relative shrink-0" ref={caja}>
+      {enMenu ? (
+        <button
+          onClick={e => {
+            e.stopPropagation();
+            const r = e.currentTarget.getBoundingClientRect();
+            setDonde({ left: r.right + 8, top: Math.max(8, Math.min(r.top, window.innerHeight - 440)) });
+            setAbierta(v => !v);
+          }}
+          title={sinLeer ? `${sinLeer} sin leer` : 'Notificaciones'}
+          aria-label={sinLeer ? `Notificaciones, ${sinLeer} sin leer` : 'Notificaciones'}
+          aria-expanded={abierta}
+          className={cn('mb-1 flex h-9 w-full items-center gap-3 rounded-xl px-[10px] text-left text-[12px] font-black transition-colors',
+            abierta ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900')}
+        >
+          <Bell className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1 truncate">Notificaciones</span>
+          {sinLeer > 0 && (
+            <span className="grid h-5 min-w-[20px] shrink-0 place-items-center rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
+              {sinLeer > 9 ? '9+' : sinLeer}
+            </span>
+          )}
+        </button>
+      ) : (
       <button
         onClick={e => { e.stopPropagation(); setAbierta(v => !v); }}
         title={sinLeer ? `${sinLeer} sin leer` : 'Notificaciones'}
@@ -171,11 +200,15 @@ export default function Campana({ compacto }: { compacto?: boolean }) {
           </span>
         )}
       </button>
+      )}
 
       {abierta && (
         <div
           onClick={e => e.stopPropagation()}
-          className={cn(
+          style={enMenu && donde ? { left: donde.left, top: donde.top } : undefined}
+          className={enMenu
+            ? 'fixed z-[9999] w-[19rem] max-h-[26rem] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-left-1 duration-150'
+            : cn(
             'overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150',
             // ══ EN EL MÓVIL, CENTRADA Y FIJA ═══════════════════════════════
             // (2026-08-22, hormiguero: «la ventanita que se abre de
