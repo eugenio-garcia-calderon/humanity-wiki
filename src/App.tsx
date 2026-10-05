@@ -458,7 +458,6 @@ export default function App() {
                 <Route path="admin/design" element={<AdminDesign />} />
                 <Route path="admin/usuarios" element={<AdminUsuarios />} />
                 <Route path="sobre-red-humana" element={<AboutRoot />} />
-                <Route path="sobre-red-humana/puntuacion-territorios" element={<AboutScoring />} />
                 <Route path="hazte-socio" element={<HazteSocio />} />
                 <Route path="socio-confirmacion" element={<SocioConfirmacion />} />
 
