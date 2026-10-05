@@ -1,3 +1,40 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-ialocal",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "menú de temas a la derecha y feed por tema (prog8-ialocal)",
+      "desde": "2026-10-05T14:52:57.687Z"
+    },
+    {
+      "agente": "prog8-ialocal",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "menú de temas a la derecha y feed por tema (prog8-ialocal)",
+      "desde": "2026-10-05T14:52:57.687Z"
+    },
+    {
+      "agente": "prog8-ialocal",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "menú de temas a la derecha y feed por tema (prog8-ialocal)",
+      "desde": "2026-10-05T14:52:57.687Z"
+    },
+    {
+      "agente": "prog8-ialocal",
+      "ruta": "src/utils/objetivos.ts",
+      "motivo": "menú de temas a la derecha y feed por tema (prog8-ialocal)",
+      "desde": "2026-10-05T14:52:57.687Z"
+    },
+    {
+      "agente": "prog8-ialocal",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "menú de temas a la derecha y feed por tema (prog8-ialocal)",
+      "desde": "2026-10-05T14:52:57.687Z"
+    },
+    {
+      "agente": "prog8-ialocal",
+      "ruta": "src/App.tsx",
+      "motivo": "menú de temas a la derecha y feed por tema (prog8-ialocal)",
+      "desde": "2026-10-05T14:52:57.687Z"
+    }
+  ]
 }
