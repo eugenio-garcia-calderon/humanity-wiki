@@ -17,6 +17,54 @@
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "editorA: deshacer/rehacer, anidar, desplegables, sincronizados, botón, presencia",
       "desde": "2026-10-05T17:57:40.524Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "drizzle/0134_bd_vistas_config.sql",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/server/bd.ts",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/server/bd/vistas.ts",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/BarraVista.tsx",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/vistaUtil.ts",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/pages/Tablas.tsx",
+      "motivo": "carril bd: filtros/orden/agrupar y vistas nuevas",
+      "desde": "2026-10-05T17:58:52.131Z"
     }
   ]
 }
