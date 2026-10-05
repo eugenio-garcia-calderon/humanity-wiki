@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "Árbol de páginas en acordeón y arrastrar en el menú izquierdo",
+      "desde": "2026-10-05T16:23:06.877Z"
+    }
+  ]
 }
