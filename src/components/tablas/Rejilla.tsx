@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff } from 'lucide-react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -10,6 +10,16 @@ import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { cn } from '../../utils/cn';
 import { tonoDe } from '../../utils/coloresBloque';
+import BarraVista from './BarraVista';
+import Tablero from './Tablero';
+import Lista from './Lista';
+import Calendario from './Calendario';
+import LineaTiempo from './LineaTiempo';
+import { NuevoElemento } from './Tarjetas';
+import {
+  FORMAS, APUNTAN, agruparFilas, normalizarVista, vistaVirtual, valorAlMover,
+  type Fila, type Forma, type Grupo, type Vista,
+} from './vistaUtil';
 
 // ============================================================================
 // TABLAS · LA REJILLA
@@ -25,16 +35,14 @@ import { tonoDe } from '../../utils/coloresBloque';
 // sus campos en vertical. Es la misma decisión que con el escritorio de
 // ventanas: en un teléfono no se traduce, se sustituye.
 
-type Fila = {
-  id: string;
-  pagina_id?: string | null;
-  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null; encuadre?: { x: number; y: number } | null } | null;
-  celdas: Record<string, Celda>;
-  apuntados?: Record<string, any[]>;
-  archivos?: Record<string, any[]>;
-};
-
+/** Lo que guarda quien la incrusta: una forma (`galeria`, `tabla`… la vista
+ *  «de siempre», sin guardar) o `vista:<id>`, una vista guardada de la tabla
+ *  (2026-10-05). Va en el mismo campo del bloque (`vistaBd`) para que las
+ *  páginas que ya existían sigan abriendo igual sin migrar nada. */
 export type FormaVista = 'galeria' | 'tabla';
+
+/** Colores para las columnas nuevas del tablero, en el orden en que salen. */
+const PALETA = ['#64748b', '#d97706', '#16a34a', '#2563eb', '#9333ea', '#db2777', '#0891b2', '#dc2626'];
 
 /** La letra del título en galería, según el tamaño elegido. */
 const LETRA_TITULO: Record<TamanoGaleria, string> = {
@@ -48,7 +56,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   alto?: number;
   /** Galería o tabla (2026-09-30). Sin valor, tabla: es lo que se veía hasta
    *  hoy en la herramienta «Tablas». El bloque de página pasa `galeria`. */
-  vista?: FormaVista;
+  vista?: FormaVista | string;
   /** Quien la incrusta guarda la elección; si no se pasa, cambiar de vista
    *  vale solo para quien mira y no se recuerda. */
   onCambiarVista?: (v: FormaVista) => void;
@@ -78,9 +86,29 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const esMovil = useEsMovil();
   const navigate = useNavigate();
   const sitio = useSitio();
-  const [vista, setVista] = useState<FormaVista>(vistaInicial || 'tabla');
-  useEffect(() => { if (vistaInicial) setVista(vistaInicial); }, [vistaInicial]);
-  const cambiarVista = (v: FormaVista) => { setVista(v); onCambiarVista?.(v); };
+  // ══ LAS VISTAS GUARDADAS (2026-10-05, carril «bd») ══════════════════════
+  // `seleccion` es lo que eligió quien la incrusta: una forma suelta o
+  // `vista:<id>`. Las vistas de verdad viven en `bd_vistas` y se piden aparte.
+  const [seleccion, setSeleccion] = useState<string>(vistaInicial || 'tabla');
+  useEffect(() => { if (vistaInicial) setSeleccion(vistaInicial); }, [vistaInicial]);
+  const [vistas, setVistas] = useState<Vista[] | null>(null);
+  const elegir = (sel: string) => {
+    setSeleccion(sel);
+    // El tipo del bloque todavía dice «galeria | tabla»; por dentro se guarda
+    // cualquier texto, y `vista:<id>` es lo que abre la vista guardada.
+    onCambiarVista?.(sel as FormaVista);
+  };
+  const activa: Vista = useMemo(() => {
+    const id = seleccion.startsWith('vista:') ? seleccion.slice(6) : null;
+    const lista = vistas || [];
+    const porId = id ? lista.find(v => v.id === id) : null;
+    if (porId) return porId;
+    const forma = (FORMAS.some(f => f.forma === seleccion) ? seleccion : 'tabla') as Forma;
+    // Un bloque que dice «galería» abre la primera vista guardada de galería:
+    // así una página antigua sigue viéndose igual cuando la tabla ya tiene vistas.
+    return (!id && lista.find(v => v.forma === forma)) || vistaVirtual(id ? 'tabla' : forma);
+  }, [seleccion, vistas]);
+  const vista = activa.forma;
   const [datos, setDatos] = useState<{
     tabla: any; columnas: Columna[]; filas: Fila[]; ciclo?: string[]; total?: number; mostradas?: number;
     columna_titulo?: string | null;
@@ -90,19 +118,126 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
+  const [plegados, setPlegados] = useState<Set<string>>(new Set());
+  const [falloVista, setFalloVista] = useState<string | null>(null);
 
+  const cargarVistas = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/bd/tablas/${tablaId}/vistas`, { credentials: 'include' });
+      setVistas(r.ok ? (await r.json()).map(normalizarVista) : []);
+    } catch { setVistas([]); }
+  }, [tablaId]);
+  useEffect(() => { cargarVistas(); }, [cargarVistas]);
+
+  // Cada carga lleva su número: si el filtro cambia dos veces seguidas, la
+  // respuesta lenta de la primera no puede pisar a la segunda.
+  const turno = useRef(0);
   const cargar = useCallback(async () => {
+    if (vistas === null) return;
+    const mio = ++turno.current;
     setFallo(null);
     try {
-      const r = await fetch(`/api/bd/tablas/${tablaId}`, { credentials: 'include' });
+      const r = await fetch(`/api/bd/tablas/${tablaId}${activa.id ? `?vista=${encodeURIComponent(activa.id)}` : ''}`, { credentials: 'include' });
       const j = await r.json();
+      if (mio !== turno.current) return;
       if (!r.ok) { setFallo(j.error || 'No se pudo cargar la tabla.'); setDatos(null); }
       else setDatos(j);
-    } catch (e: any) { setFallo(e.message); }
-    setCargando(false);
-  }, [tablaId]);
+    } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
+    if (mio === turno.current) setCargando(false);
+  }, [tablaId, activa.id, vistas === null]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { cargar(); }, [cargar]);
+
+  /**
+   * CAMBIAR LA VISTA ACTIVA (filtro, orden, grupos, ajustes de su forma).
+   *
+   * Se aplica en pantalla al momento y se guarda en el servidor. La vista «de
+   * siempre» (sin guardar) se GUARDA al primer cambio: así filtrar una tabla
+   * que nunca tuvo vistas no pide crear una antes, que es lo que haría
+   * cualquiera en Notion.
+   */
+  const cambiarVista = async (parcial: Partial<Vista>) => {
+    if (!editable) return;
+    setFalloVista(null);
+    if (!activa.id) {
+      const r = await fetch(`/api/bd/tablas/${tablaId}/vistas`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...activa, ...parcial, id: undefined }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { setFalloVista(j.error || 'No se pudo guardar la vista.'); return; }
+      await cargarVistas();
+      elegir(`vista:${j.id}`);
+      return;
+    }
+    setVistas(vs => (vs || []).map(v => v.id === activa.id ? { ...v, ...parcial } : v));
+    const r = await fetch(`/api/bd/vistas/${activa.id}`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(parcial),
+    });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); setFalloVista(j.error || 'No se pudo guardar la vista.'); cargarVistas(); return; }
+    // Solo lo que cambia lo que se ve vuelve a pedir la tabla: esconder un
+    // grupo o cambiar la escala se pinta aquí mismo.
+    if ('filtros' in parcial || 'orden_por' in parcial) cargar();
+  };
+
+  /** Una vista nueva. Si la tabla aún no tenía ninguna, se guarda también la
+   *  «de siempre», para que no desaparezca la pestaña que se estaba mirando. */
+  const crearVista = async (forma: Forma) => {
+    setFalloVista(null);
+    if (!activa.id) {
+      await fetch(`/api/bd/tablas/${tablaId}/vistas`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: activa.nombre, forma: activa.forma }),
+      });
+    }
+    const nombre = FORMAS.find(f => f.forma === forma)?.label || 'Vista';
+    // Lo que cada forma necesita para no nacer vacía: el tablero, una
+    // propiedad por la que hacer columnas.
+    const porTablero = forma === 'tablero' ? datos?.columnas.find(c => ['seleccion', 'persona', 'seleccion_multiple', 'casilla'].includes(c.tipo))?.id : null;
+    const r = await fetch(`/api/bd/tablas/${tablaId}/vistas`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, forma, agrupar_por: porTablero || null }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setFalloVista(j.error || 'No se pudo crear la vista.'); return; }
+    await cargarVistas();
+    elegir(`vista:${j.id}`);
+  };
+
+  const renombrarVista = async (v: Vista, nombre: string) => {
+    if (!v.id) { await cambiarVista({ nombre }); return; }
+    setVistas(vs => (vs || []).map(x => x.id === v.id ? { ...x, nombre } : x));
+    await fetch(`/api/bd/vistas/${v.id}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre }) });
+  };
+  const duplicarVista = async (v: Vista) => {
+    if (!v.id) { await crearVista(v.forma); return; }
+    const r = await fetch(`/api/bd/vistas/${v.id}/duplicar`, { method: 'POST', credentials: 'include' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setFalloVista(j.error || 'No se pudo duplicar.'); return; }
+    await cargarVistas();
+    elegir(`vista:${j.id}`);
+  };
+  const borrarVista = async (v: Vista) => {
+    if (!v.id) return;
+    if (!window.confirm(`¿Quitar la vista «${v.nombre}»? Las filas no se tocan.`)) return;
+    const r = await fetch(`/api/bd/vistas/${v.id}`, { method: 'DELETE', credentials: 'include' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setFalloVista(j.error || 'No se pudo quitar.'); return; }
+    const resto = (vistas || []).filter(x => x.id !== v.id);
+    setVistas(resto);
+    elegir(resto[0]?.id ? `vista:${resto[0].id}` : 'tabla');
+  };
+
+  /** Personas y filas enlazadas que se han visto, para elegirlas en un filtro.
+   *  Se acumulan: al filtrar desaparecen filas, y con ellas lo que apuntaban. */
+  const conocidos = useRef<Record<string, Map<string, string>>>({});
+  useEffect(() => {
+    for (const f of datos?.filas || []) for (const [col, lista] of Object.entries(f.apuntados || {})) {
+      const m = (conocidos.current[col] ||= new Map());
+      for (const a of lista as any[]) if (a?.id) m.set(a.id, a.etiqueta || 'Sin nombre');
+    }
+  }, [datos]);
   // LAS DOS CARAS A LA VEZ (2026-10-05): enlazar algo aquí cambia lo que
   // enseña la otra base de datos. Si está en la misma página, se recarga sola.
   const avisarCambio = () => window.dispatchEvent(new CustomEvent('bd:cambio', { detail: { desde: tablaId } }));
@@ -142,6 +277,63 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const anadirFila = async () => {
     await fetch(`/api/bd/tablas/${tablaId}/filas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     cargar();
+  };
+
+  /** Varias celdas de una vez (tablero, calendario, línea de tiempo). */
+  const guardarCeldas = async (filaId: string, celdas: Record<string, any>): Promise<{ error?: string } | void> => {
+    const r = await fetch(`/api/bd/filas/${filaId}`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ celdas }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { error: (j.fallos || [])[0]?.error || j.error || 'No se pudo guardar.' };
+    await cargar();
+    if (Object.keys(celdas).some(k => datos?.columnas.find(c => c.id === k)?.tipo === 'relacion')) avisarCambio();
+  };
+  const moverFila = async (filaId: string, antesDe: string | null) => {
+    await fetch(`/api/bd/filas/${filaId}/mover`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ antes_de: antesDe }),
+    });
+    await cargar();
+  };
+  /** Una fila que nace con nombre y con valores (la columna del tablero, el
+   *  día del calendario, el grupo donde se pulsó «+ Nuevo»). */
+  const crearCon = async (titulo: string, celdas: Record<string, any>) => {
+    const r = await fetch(`/api/bd/tablas/${tablaId}/filas`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo, celdas }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) setFalloVista(j.error || 'No se pudo crear.');
+    else if (j.aviso) setFalloVista(j.aviso);
+    await cargar();
+  };
+  /** «Estado» con tres opciones, para el tablero de una tabla que no tiene
+   *  ninguna propiedad por la que hacer columnas. */
+  const crearEstado = async () => {
+    const usados = new Set((datos?.columnas || []).map(c => c.nombre.toLowerCase()));
+    let nombre = 'Estado';
+    for (let n = 2; usados.has(nombre.toLowerCase()); n++) nombre = `Estado ${n}`;
+    const r = await fetch(`/api/bd/tablas/${tablaId}/columnas`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, tipo: 'seleccion', opciones: [
+        { label: 'Por hacer', color: PALETA[0] }, { label: 'En curso', color: PALETA[1] }, { label: 'Hecho', color: PALETA[2] },
+      ] }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setFalloVista(j.error || 'No se pudo crear la propiedad.'); return; }
+    await cambiarVista({ agrupar_por: j.id });
+    await cargar();
+  };
+  const anadirOpcion = async (col: Columna, etiqueta: string) => {
+    const opciones = [...(col.opciones || []), { label: etiqueta, color: PALETA[(col.opciones || []).length % PALETA.length] }];
+    const r = await fetch(`/api/bd/columnas/${col.id}`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ opciones }),
+    });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); setFalloVista(j.error || 'No se pudo añadir.'); }
+    await cargar();
   };
 
   /** El nombre mientras se edita; `null` cuando no se está editando. */
@@ -190,6 +382,52 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   if (!datos) return null;
 
   const { columnas, filas } = datos;
+  // Las columnas que se ven en ESTA vista. El nombre de la fila nunca se
+  // esconde: sin él, una fila de la tabla no se sabe qué es.
+  const ocultas = new Set(activa.ocultas.filter(id => id !== datos.columna_titulo));
+  const columnasVista = columnas.filter(c => !ocultas.has(c.id));
+  const colAgr = columnas.find(c => c.id === activa.agrupar_por) || null;
+  const colSub = colAgr ? columnas.find(c => c.id === activa.config.subagrupar_por && c.id !== colAgr.id) || null : null;
+  const gruposOcultos = new Set(activa.config.grupos_ocultos || []);
+
+  /**
+   * Pinta una lista de filas partida en grupos y subgrupos. Lo usan la tabla
+   * (con filas de `<table>`), las fichas del móvil y la galería, para que los
+   * tres agrupen igual. `cabecera` pinta el título de cada grupo; `pie`, el
+   * «+ Nuevo» que crea una fila ya dentro del grupo.
+   */
+  const porGrupos = (
+    lista: Fila[],
+    pintar: (fs: Fila[]) => ReactNode,
+    cabecera: (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => ReactNode,
+    pie?: (celdas: Record<string, any>) => ReactNode,
+    nivel = 0, padre: Grupo | null = null, celdasPadre: Record<string, any> = {},
+  ): ReactNode => {
+    const col = nivel === 0 ? colAgr : nivel === 1 ? colSub : null;
+    if (!col) return <>{pintar(lista)}{pie?.(celdasPadre)}</>;
+    const grupos = agruparFilas(lista, col, nivel === 0 ? activa.config : { ...activa.config, ocultar_vacios: true })
+      .filter(g => nivel > 0 || !gruposOcultos.has(g.clave));
+    return grupos.map(g => {
+      const clave = `${padre?.clave ?? ''}>${g.clave}:${nivel}`;
+      const plegado = plegados.has(clave);
+      const alternar = () => setPlegados(p => { const n = new Set(p); if (n.has(clave)) n.delete(clave); else n.add(clave); return n; });
+      const celdas = { ...celdasPadre, ...(g.vacio ? {} : { [col.id]: valorAlMover({ id: '', celdas: {} }, col, null, g) }) };
+      return (
+        <Fragment key={clave}>
+          {cabecera(g, nivel, plegado, alternar)}
+          {!plegado && porGrupos(g.filas, pintar, cabecera, pie, nivel + 1, g, celdas)}
+        </Fragment>
+      );
+    });
+  };
+  const etiquetaGrupo = (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => (
+    <button onClick={alternar} className={cn('flex items-center gap-1.5 h-9 text-xs font-black text-slate-600', nivel ? 'pl-6' : 'pl-2')}>
+      {plegado ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+      <span className={cn('px-1.5 py-0.5 rounded-md', g.vacio && 'text-slate-400')} style={g.color ? { backgroundColor: g.color + '33', color: g.color } : undefined}>{g.etiqueta}</span>
+      <span className="font-bold text-slate-400">{g.filas.length}</span>
+    </button>
+  );
+  const abrirComoFila = (f: Fila) => abrirPagina(f);
 
   // ══ LA GALERÍA, LIMPIA (2026-10-01) ════════════════════════════════════
   // Eugenio: «sin esas líneas que envuelven el contenido en rectángulos; sólo
@@ -352,18 +590,29 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             </select>
           </label>
         )}
-        {/* Galería/Tabla sólo para quien edita: en la web publicada la vista
-            la decide el autor y el visitante no necesita el interruptor. */}
-        {editable && <div className={cn('flex items-center gap-0.5 shrink-0', !limpia && 'ml-auto')} role="tablist">
-          {([['galeria', 'Galería', LayoutGrid], ['tabla', 'Tabla', Table2]] as const).map(([v, label, Icono]) => (
-            <button key={v} role="tab" aria-selected={vista === v} onClick={() => cambiarVista(v)}
-              className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-bold transition-colors',
-                vista === v ? 'bg-white text-slate-800 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-700')}>
-              <Icono className="w-3.5 h-3.5" /> {label}
-            </button>
-          ))}
-        </div>}
       </div>
+      )}
+
+      {/* LAS VISTAS Y SUS MANDOS (2026-10-05). Las pestañas sustituyen al
+          interruptor Galería/Tabla, y «Filtrar · Ordenar · Agrupar» se
+          guardan en la vista. Solo para quien edita: en la web publicada la
+          vista la decide el autor y el visitante no necesita mandos. */}
+      {editable && vistas && (
+        <div className={limpia ? 'pb-3' : cn('px-2 py-1.5 border-b border-slate-100', tono.fondo ? 'bg-white/30' : 'bg-white')}>
+          <BarraVista vistas={vistas} activa={activa} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null}
+            editable={editable} conocidos={conocidos.current} centrada={limpia}
+            gruposConocidos={colAgr ? agruparFilas(filas, colAgr, { ...activa.config, ocultar_vacios: false }).map(g => ({ clave: g.clave, etiqueta: g.etiqueta })) : []}
+            onElegir={v => elegir(v.id ? `vista:${v.id}` : v.forma)}
+            onCrear={crearVista} onCambiar={cambiarVista}
+            onRenombrar={renombrarVista} onDuplicar={duplicarVista} onBorrar={borrarVista}
+            ajustes={vista === 'tablero' ? (
+              <label className="flex items-center gap-2 px-1 h-9 text-xs font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={!!activa.config.portada} onChange={e => cambiarVista({ config: { ...activa.config, portada: e.target.checked } })} />
+                Enseñar la imagen de la página en cada tarjeta
+              </label>
+            ) : undefined} />
+          {falloVista && <p className="pt-1 text-[11px] font-bold text-rose-600">{falloVista}</p>}
+        </div>
       )}
 
       {datos.ciclo?.length && (
@@ -376,19 +625,35 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </div>
       )}
 
-      {vista === 'galeria' ? (
+      {vista === 'tablero' ? (
+        <Tablero columnas={columnas} filas={filas} vista={activa} columnaTitulo={datos.columna_titulo ?? null} editable={editable}
+          onGuardar={guardarCeldas} onMover={moverFila} onCrear={crearCon} onAbrir={abrirComoFila}
+          onCambiarVista={cambiarVista} onCrearEstado={crearEstado} onAnadirOpcion={anadirOpcion} />
+      ) : vista === 'lista' ? (
+        <Lista columnas={columnas} filas={filas} vista={activa} columnaTitulo={datos.columna_titulo ?? null} editable={editable}
+          onAbrir={abrirComoFila} onCrear={crearCon} />
+      ) : vista === 'calendario' ? (
+        <Calendario columnas={columnas} filas={filas} vista={activa} columnaTitulo={datos.columna_titulo ?? null} editable={editable}
+          onGuardar={guardarCeldas} onCrear={crearCon} onAbrir={abrirComoFila} onCambiarVista={cambiarVista} />
+      ) : vista === 'linea' ? (
+        <LineaTiempo columnas={columnas} filas={filas} vista={activa} columnaTitulo={datos.columna_titulo ?? null} editable={editable}
+          onGuardar={guardarCeldas} onAbrir={abrirComoFila} onCambiarVista={cambiarVista} />
+      ) : vista === 'galeria' ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
-          <Galeria tablaId={tablaId} columnas={columnas} filas={filas} sinMargen centrada
-            columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar}
-            claseTitulo={tono.texto} tamano={tamano} visibles={visibles} />
+          {porGrupos(filas, fs => (
+            <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
+              columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
+              claseTitulo={tono.texto} tamano={tamano} visibles={visibles} />
+          ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
+          colAgr && editable ? celdas => <div className="max-w-xs"><NuevoElemento onCrear={t => crearCon(t, celdas)} /></div> : undefined)}
         </div>
       ) : esMovil ? (
         <div className="divide-y divide-slate-100" style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
-          {filas.map(f => (
+          {porGrupos(filas, fs => fs.map(f => (
             <div key={f.id} className="p-3 space-y-1.5">
-              {columnas.map(c => (
+              {columnasVista.map(c => (
                 <div key={c.id} className="flex items-start gap-2">
                   <span className="w-28 shrink-0 pt-1.5 text-[11px] font-black uppercase tracking-wide text-slate-400 truncate">{c.nombre}</span>
                   <div className="flex-1 min-w-0">
@@ -409,7 +674,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                 </button>
               )}
             </div>
-          ))}
+          )), (g, nivel, plegado, alternar) => <div className="bg-slate-50/70">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
+          colAgr && editable ? celdas => <NuevoElemento onCrear={t => crearCon(t, celdas)} /> : undefined)}
         </div>
       ) : (
         /* ── ESCRITORIO: REJILLA ────────────────────────────────────────── */
@@ -417,7 +683,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 z-10 bg-slate-50">
               <tr>
-                {columnas.map(c => (
+                {columnasVista.map(c => (
                   <th key={c.id} className="border-b border-r border-slate-200 px-2 py-2 text-left min-w-[9rem]">
                     <button
                       onClick={() => editable && setEditorColumna(c)}
@@ -440,9 +706,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               </tr>
             </thead>
             <tbody>
-              {filas.map(f => (
+              {porGrupos(filas, fs => fs.map(f => (
                 <tr key={f.id} className="hover:bg-slate-50/40">
-                  {columnas.map((c, ci) => (
+                  {columnasVista.map((c, ci) => (
                     <td key={c.id} className="group/celda relative border-b border-r border-slate-100 p-0 align-top">
                       {ci === 0 && (
                         <button onClick={() => abrirPagina(f)} title="Abrir la página de esta fila"
@@ -464,7 +730,17 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                     </td>
                   )}
                 </tr>
-              ))}
+              )), (g, nivel, plegado, alternar) => (
+                <tr key={`g-${g.clave}-${nivel}`} className="bg-slate-50/70">
+                  <td colSpan={columnasVista.length + (editable ? 1 : 0)} className="border-b border-slate-200 p-0">{etiquetaGrupo(g, nivel, plegado, alternar)}</td>
+                </tr>
+              ), colAgr && editable ? celdas => (
+                <tr>
+                  <td colSpan={columnasVista.length + (editable ? 1 : 0)} className="border-b border-slate-100 p-0.5">
+                    <NuevoElemento onCrear={t => crearCon(t, celdas)} className="rounded-none" />
+                  </td>
+                </tr>
+              ) : undefined)}
             </tbody>
           </table>
         </div>
