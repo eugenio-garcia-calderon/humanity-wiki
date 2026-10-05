@@ -215,6 +215,24 @@
       "ruta": "src/utils/avisoPaginas.ts",
       "motivo": "editorA: aviso de sincronizado entre pestañas",
       "desde": "2026-10-05T23:20:37.372Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "carril acceso: comentarios en sitios",
+      "desde": "2026-10-05T23:23:05.622Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/PaginaDeDominio.tsx",
+      "motivo": "carril acceso: comentarios en sitios",
+      "desde": "2026-10-05T23:23:05.622Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/PaginaPublica.tsx",
+      "motivo": "carril acceso: comentarios en sitios",
+      "desde": "2026-10-05T23:23:05.622Z"
     }
   ]
 }
