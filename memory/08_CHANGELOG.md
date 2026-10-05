@@ -8411,3 +8411,15 @@ en mis páginas como proyecto pendiente».
   marked `config.rescate = 'tokenomics-2026-10-05'`. Extracted from the
   rendered page in a local browser, staged in the local DB, then inserted in
   one transaction.
+
+## 2026-10-05 — Notifications inside the profile; right menu without its own header (prog8)
+
+- **Notificaciones** is now the first row of your profile dropdown
+  (`AvatarRail`), no longer a row of its own in the left menu. With the
+  dropdown closed, the avatar carries the unread count (polled every minute).
+- **Right menu**: «Explorar» stays in the top bar in both states and toggles
+  the menu (open icon / fold icon) — it no longer drops into the menu, which
+  starts below the bar. `Rail` gains `sinFilaSuperior`: no top row, no divider.
+  The menu opens straight on the Mi contenido / Todo switch (the «Temas»
+  label is gone), then «Ver todos los temas» (opens the 15-theme sheet; it
+  replaces «Personalizar»). «Nuevo tema» removed from this menu.

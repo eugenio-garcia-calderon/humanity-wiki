@@ -25,7 +25,6 @@ export default function FiltroAmbito({ ambito, onCambiar, conSesion }: {
 }) {
   return (
     <div className="mb-1 shrink-0 border-b border-slate-200 pb-2">
-      <p className="px-1 pb-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Temas</p>
       <div role="tablist" aria-label="Qué contenido ver" className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
         {([['mio', 'Mi contenido', Lock], ['todos', 'Todo', Globe]] as const).map(([k, etiqueta, I]) => (
           <button key={k} role="tab" aria-selected={ambito === k}

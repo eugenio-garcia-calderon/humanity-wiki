@@ -135,7 +135,7 @@ export const PERSONALES_MUDADAS: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'humanity.wiki', claro = false, onAbrirSubmenu, onPlegar,
-  personal, ramas, pie, cabeza, junto,
+  personal, ramas, pie, cabeza, junto, sinFilaSuperior = false,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -232,6 +232,9 @@ export default function Rail({
    *  la marca en el de la izquierda, «Explorar» en el de la derecha. La fila
    *  se parte en dos si lo de dentro necesita otra línea (un desplegable). */
   junto?: any;
+  /** Sin la fila de arriba ni su raya (2026-10-05): el menú de temas se
+   *  abre y se pliega desde «Explorar» en la barra, que se queda arriba. */
+  sinFilaSuperior?: boolean;
   onAbrirSubmenu?: (h: Herramienta) => void;
   /**
    * PLEGARSE (2026-08-24). Eugenio: «permite que ambos menús, el de la derecha
@@ -796,6 +799,7 @@ export default function Rail({
           !anclado && encima && 'shadow-2xl shadow-black/40',
         )}
       >
+        {!sinFilaSuperior && (<>
         <div className="flex shrink-0 flex-wrap items-center gap-1">
           {/* Lo de `junto` va primero en los dos lados (2026-10-05): en el de
               la izquierda el logo queda en la esquina, donde está en la barra
@@ -876,6 +880,7 @@ export default function Rail({
         </div>
 
         <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />
+        </>)}
 
         {/* ── PERSONALIZAR, ARRIBA DEL TODO (2026-08-25) ───────────────────
             Eugenio: «en el menú de la izquierda tiene que haber un botón arriba

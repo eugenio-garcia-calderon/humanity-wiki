@@ -6,7 +6,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Folder, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
- PanelLeftOpen, PanelRightOpen, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
+ PanelLeftOpen, PanelRightOpen, PanelRightClose, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
 import PieLegal, { ALTO_PIE } from './PieLegal';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -787,7 +787,7 @@ export default function Layout() {
             // `relative -top-1`: el mismo píxel que el logo de la barra
             // (medido: 4 px más abajo sin esto).
             junto={<Logo className="relative -top-1 mr-auto" onClick={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} />}
-            cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
+            cabeza={<><AvatarRail desplegado /><TodasMisPaginas /></>}
             abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
             onElegir={h => navigate(h.ruta)}
             onAbrirSubmenu={h => {
@@ -1398,21 +1398,21 @@ export default function Layout() {
             Explorar y el botón de descolapsar». Con el menú abierto no se ve:
             «Explorar» está entonces dentro del menú, junto a su botón de
             plegar. En el teléfono no hay menú derecho: abre la hoja de temas. */}
-        {(esMovil || temasPlegado) && (
-          <button
-            onClick={() => {
-              setPorRoce(false);
-              if (esMovil) { setCirculo(c => (c === 'explorar' ? null : 'explorar')); return; }
-              setTemasPlegado(false);
-            }}
-            title={esMovil ? 'Explorar los temas' : 'Abrir el menú de temas'}
-            aria-label={esMovil ? 'Explorar los temas' : 'Abrir el menú de temas'}
-            aria-expanded={esMovil ? circulo === 'explorar' : false}
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
-            {esMovil ? <Compass className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
-          </button>
-        )}
+        <button
+          onClick={() => {
+            setPorRoce(false);
+            if (esMovil) { setCirculo(c => (c === 'explorar' ? null : 'explorar')); return; }
+            setTemasPlegado(!temasPlegado);
+          }}
+          title={esMovil ? 'Explorar los temas' : temasPlegado ? 'Abrir el menú de temas' : 'Plegar el menú de temas'}
+          aria-label={esMovil ? 'Explorar los temas' : temasPlegado ? 'Abrir el menú de temas' : 'Plegar el menú de temas'}
+          aria-expanded={esMovil ? circulo === 'explorar' : !temasPlegado}
+          className={cn('ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 transition-colors hover:bg-slate-100 hover:text-slate-900',
+            !esMovil && !temasPlegado ? 'text-slate-900' : 'text-slate-600')}>
+          {!esMovil && <Compass className="h-4 w-4" />}
+          <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
+          {esMovil ? <Compass className="h-5 w-5" /> : temasPlegado ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
+        </button>
 
         {!user && !cargandoSesion && (
           <Link to="/login"
@@ -1471,17 +1471,28 @@ export default function Layout() {
               claro
               titulo="Temas"
               items={temasDelMenu}
-              junto={(
-                <button
-                  onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
-                  title="Explorar los temas"
-                  aria-expanded={circulo === 'explorar'}
-                  className={cn('inline-flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-lg px-2 text-[13px] font-black transition-colors',
-                    circulo === 'explorar' ? 'bg-slate-900 text-white' : 'text-slate-800 hover:bg-slate-100')}>
-                  <Compass className="h-4 w-4 shrink-0" /> <span className="truncate">Explorar</span>
-                </button>
+              // «EXPLORAR» SE QUEDA ARRIBA (2026-10-05). Eugenio: «que el texto de
+              // explorar, cuando se despliega, no baje a su menú, sino que se quede
+              // en la parte de arriba; más elegante, y libera espacio». El menú
+              // empieza debajo de la barra, así que no tiene fila propia: lo abre
+              // y lo pliega el «Explorar» de la barra, que no se mueve.
+              sinFilaSuperior
+              cabeza={(
+                <>
+                  <FiltroAmbito ambito={ambitoTemas} onCambiar={setAmbitoTemas} conSesion={!!user} />
+                  {/* «Ver todos los temas» en lugar de «Personalizar», y sin
+                      «Nuevo tema» (2026-10-05): abre la hoja con los quince. */}
+                  <button
+                    onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
+                    aria-expanded={circulo === 'explorar'}
+                    className={cn('mb-1 flex h-9 w-full shrink-0 items-center gap-3 rounded-xl px-[10px] text-[12px] font-bold transition-colors',
+                      circulo === 'explorar' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+                  >
+                    <LayoutGrid className="h-4 w-4 shrink-0" />
+                    <span className="truncate">Ver todos los temas</span>
+                  </button>
+                </>
               )}
-              cabeza={<FiltroAmbito ambito={ambitoTemas} onCambiar={setAmbitoTemas} conSesion={!!user} />}
               personal={user ? {
                 esFavorito: c => !!prefsTemas[c]?.favorito,
                 estaOculto: c => !!prefsTemas[c]?.oculto,
@@ -1490,8 +1501,6 @@ export default function Layout() {
                 reordenar: reordenarTemas,
                 ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
                 mostrar: c => guardarPref(c, { oculto: false }),
-                onPersonalizar: () => navigate('/preferencias'),
-                onNuevoTema: () => setNuevoTema(true),
               } : undefined}
               ramas={{
                 de: c => ramas[c] ?? [],
@@ -1505,7 +1514,6 @@ export default function Layout() {
               }}
               abierta={temaActivo}
               onElegir={h => navigate(`/temas/${encodeURIComponent(h.clave)}/contenido?ambito=${ambitoTemas}`)}
-              onPlegar={() => setTemasPlegado(true)}
               onInicio={() => navigate('/')}
             />
           </div>
@@ -1603,7 +1611,7 @@ export default function Layout() {
                   titulo="Mis páginas"
                   items={itemsProyectos}
                   junto={<Logo className="mr-auto" onClick={() => { navigate('/'); setCirculo(null); }} />}
-                  cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
+                  cabeza={<><AvatarRail desplegado /><TodasMisPaginas /></>}
                   abierta={null}
                   // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
                   // que no hay ningún gesto intermedio entre mirar y abrir. El
