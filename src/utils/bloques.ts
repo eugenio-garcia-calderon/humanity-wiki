@@ -185,7 +185,20 @@ export interface Bloque {
   plegable?: boolean;
   /** `boton`: qué hace al pulsarlo. Su texto es `texto`. */
   boton?: AccionBoton;
+  /** ══ LA IMAGEN, COMO EN POWERPOINT (2026-10-06) ═══════════════════════
+   *  Ver `ImagenBloque.tsx`. `anchoImagen` es el % de su columna (no `ancho`, que
+   *  ya usó la maqueta de columnas); `relacion`, el
+   *  alto/ancho si se ha estirado; `recorte`, la parte que se ve (fracciones
+   *  de la imagen original: recortar no toca el archivo); `natural`, sus
+   *  píxeles reales. El peso de la imagen va en `medioBytes`. */
+  anchoImagen?: number;
+  relacion?: number;
+  recorte?: Recorte;
+  natural?: [number, number];
 }
+
+/** La parte de una imagen que se enseña: x, y, ancho y alto de 0 a 1. */
+export interface Recorte { x: number; y: number; w: number; h: number }
 
 // ── EL ÁRBOL Y LA LISTA PLANA (2026-10-05) ───────────────────────────────
 // Ver el comentario de `bloques` en la interfaz. Las cuatro funciones son

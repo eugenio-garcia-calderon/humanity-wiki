@@ -31,6 +31,7 @@ import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
+import { ImagenEditable, ImagenVista } from '../components/knowledge/ImagenBloque';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown, enFilas,
   AIRE_BASE_DATOS, aplanar, aArbol, normalizarNiveles, finSubarbol, esPlegable, esContenedor,
@@ -2062,7 +2063,8 @@ function EditorPagina() {
   const subirImagen = async (b: Bloque, archivo: File) => {
     const sub = await conProgreso(b.id, archivo);
     if (sub.error) { fallar(sub.error); return; }
-    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url: sub.url } : x));
+    // Con su peso, para avisar si pasa de 1,5 MB (ver `ImagenBloque.tsx`).
+    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url: sub.url, medioBytes: sub.bytes || undefined } : x));
     programarGuardado();
   };
 
@@ -2201,19 +2203,28 @@ function EditorPagina() {
             </button>
           );
         }
+        // LA IMAGEN COMO EN POWERPOINT (2026-10-06): asas de tamaño, modo
+        // recortar, pie editable y el peso con «Comprimir». Ver `ImagenBloque.tsx`.
         return b.url ? (
-          <figure className="group/img relative">
-            <img src={b.url} alt={b.pie || ''} className="rounded-xl max-w-full border border-slate-100" />
-            {editable && (
-              <button
-                onClick={e => { e.stopPropagation(); setImagenEditando(b.id); }}
-                className="absolute top-2 right-2 px-2.5 py-1 bg-white/90 border border-slate-200 rounded-lg text-[10px] font-black text-slate-700 opacity-0 group-hover/img:opacity-100 transition-opacity shadow-sm"
-              >
-                Editar imagen
-              </button>
-            )}
-            {b.pie && <figcaption className="text-xs text-slate-400 mt-1">{b.pie}</figcaption>}
-          </figure>
+          editable ? (
+            <ImagenEditable b={b}
+              onCambio={campos => { setBloques(bs => bs.map(x => (x.id === b.id ? { ...x, ...campos } : x))); programarGuardado(); }}
+              onNatural={n => {
+                // Medir la imagen no es algo que se deshaga ni que obligue a guardar.
+                sinRegistrar.current = true;
+                setBloques(bs => bs.map(x => (x.id === b.id ? { ...x, natural: n } : x)));
+              }}
+              onEditar={() => setImagenEditando(b.id)}
+              subirComprimida={async f => {
+                const sub = await subirArchivo(f, f.type);
+                return sub.error || !sub.url ? { error: sub.error || 'No se ha podido subir.' } : { url: sub.url, bytes: sub.bytes };
+              }} />
+          ) : (
+            <figure>
+              <ImagenVista b={b} />
+              {b.pie && <figcaption className="text-xs text-slate-400 mt-1 text-center">{b.pie}</figcaption>}
+            </figure>
+          )
         ) : subidas[b.id] ? (
           <SubiendoImagen vista={subidas[b.id].vista} fraccion={subidas[b.id].fraccion} texto="Subiendo la imagen" />
         ) : editable ? (
@@ -3485,7 +3496,8 @@ function EditorPagina() {
           <EditorImagen
             src={b.url}
             onGuardar={url => {
-              setBloques(bs => bs.map(x => x.id === imagenEditando ? { ...x, url } : x));
+              // Es otra imagen: su recorte, sus medidas y su peso ya no valen.
+              setBloques(bs => bs.map(x => x.id === imagenEditando ? { ...x, url, recorte: undefined, natural: undefined, medioBytes: undefined, relacion: undefined } : x));
               setImagenEditando(null);
               programarGuardado();
             }}
