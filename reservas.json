@@ -101,6 +101,42 @@
       "ruta": "src/server/bloquesSql.ts",
       "motivo": "editorA PR1",
       "desde": "2026-10-05T18:21:09.992Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "drizzle/0136_sitios_miembros.sql",
+      "motivo": "carril acceso: miembros en sitios publicados",
+      "desde": "2026-10-05T18:23:03.276Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/miembros.ts",
+      "motivo": "carril acceso: miembros en sitios publicados",
+      "desde": "2026-10-05T18:23:03.276Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/peticionActual.ts",
+      "motivo": "carril acceso: miembros en sitios publicados",
+      "desde": "2026-10-05T18:23:03.276Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/MiembrosSitio.tsx",
+      "motivo": "carril acceso: miembros en sitios publicados",
+      "desde": "2026-10-05T18:23:03.276Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/sitio/MuroMiembros.tsx",
+      "motivo": "carril acceso: miembros en sitios publicados",
+      "desde": "2026-10-05T18:23:03.276Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/sitio/BarraMiembro.tsx",
+      "motivo": "carril acceso: miembros en sitios publicados",
+      "desde": "2026-10-05T18:23:03.276Z"
     }
   ]
 }
