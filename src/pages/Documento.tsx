@@ -830,6 +830,23 @@ function EditorPagina() {
     return () => window.removeEventListener('keydown', tecla);
   });
 
+  // MOVIDA DESDE EL MENÚ (2026-10-05, `ArbolPaginas.tsx`). El servidor ya ha
+  // cambiado los bloques; aquí se pone igual lo que hay en pantalla, porque el
+  // próximo autoguardado escribiría la copia de antes y desharía el cambio.
+  useEffect(() => {
+    const oir = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (!d.id || d.id === docId.current) return;
+      setBloques(bs => {
+        const sin = bs.filter(b => !(b.tipo === 'subpagina' && b.entityId === d.id));
+        if (d.dentro_de === docId.current) return [...sin, { id: nuevoIdBloque(), tipo: 'subpagina', entityId: d.id, pubTitulo: d.titulo || 'Sin título' } as Bloque];
+        return sin.length === bs.length ? bs : sin;
+      });
+    };
+    window.addEventListener('humanity:pagina-movida', oir);
+    return () => window.removeEventListener('humanity:pagina-movida', oir);
+  }, []);
+
   // -- Fase 2: buscador de publicaciones para embeber -------------------------
   useEffect(() => {
     if (buscadorPub === null) return;

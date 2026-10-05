@@ -27,7 +27,8 @@ import { type Circulo } from '../navegacion/TresCirculos';
 import AvatarRail from '../navegacion/AvatarRail';
 import TodasMisPaginas, { MarcaCabecera } from '../navegacion/MarcaRail';
 import FiltroAmbito, { leerAmbito, type Ambito } from '../navegacion/FiltroAmbito';
-import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
+import { useProyectos, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
+import ArbolPaginas from '../navegacion/ArbolPaginas';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import HojaExplorar from '../navegacion/HojaExplorar';
@@ -133,26 +134,10 @@ export default function Layout() {
    */
   const { estado: proyectos, recargar: recargarProyectos } = useProyectos(!!user);
   const listaProyectos = Array.isArray(proyectos) ? proyectos : [];
-  // TUS PÁGINAS SUELTAS, DEBAJO DE LAS CARPETAS (2026-10-02). El menú de la
-  // izquierda es «donde están todas las páginas del usuario» (Eugenio): una
-  // página que no está en ninguna carpeta no salía en ninguna parte. Se piden
-  // al entrar y cada vez que se vuelve a la pestaña.
-  const [paginasSueltas, setPaginasSueltas] = useState<Herramienta[]>([]);
-  useEffect(() => {
-    if (!user) { setPaginasSueltas([]); return; }
-    let vivo = true;
-    const pedir = () => fetch('/api/paginas', { credentials: 'include' }).then(r => r.json()).then(d => {
-      if (!vivo) return;
-      const sueltas = (Array.isArray(d?.proyectos) ? d.proyectos : []).find((g: any) => g.sueltas)?.paginas || [];
-      setPaginasSueltas(sueltas.slice(0, 30).map((pg: any) => ({
-        clave: `pagina-${pg.id}`, nombre: pg.titulo || 'Sin título', icono: FileText, ruta: `/paginas/${pg.id}`,
-      })));
-    }).catch(() => {});
-    pedir();
-    window.addEventListener('focus', pedir);
-    return () => { vivo = false; window.removeEventListener('focus', pedir); };
-  }, [user]);
-  const itemsProyectos = [...comoItems(listaProyectos), ...paginasSueltas];
+  // TUS PÁGINAS, EN ÁRBOL (2026-10-05): carpetas y páginas las pinta
+  // `ArbolPaginas` —acordeón sin fondo y arrastrar una dentro de otra—, en el
+  // hueco del pie del raíl. Antes eran entradas del raíl y una carpeta abría
+  // otro panel al lado (`PanelProyecto`), que es lo que Eugenio pidió quitar.
   const proyectosDe = (clave: string) => listaProyectos.find(p => `proyecto-${p.id}` === clave);
   const [proyectoAbierto, setProyectoAbierto] = useState<ReturnType<typeof proyectosDe>>(undefined);
   /** Qué objetivo tiene el panel abierto en el lado de Explorar. */
@@ -784,7 +769,7 @@ export default function Layout() {
             siempreAbierto
             claro
             titulo="Mis páginas"
-            items={itemsProyectos}
+            items={[]}
             // 2026-10-05: la marca, en la fila de arriba junto a plegar; y debajo
             // tu perfil, tus avisos y «Todas mis páginas», en ese orden.
             junto={<MarcaCabecera onIrAlInicio={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} />}
@@ -797,7 +782,7 @@ export default function Layout() {
             }}
             onPlegar={() => { setPaginasPlegado(true); setProyectoAbierto(null); }}
             onInicio={() => { navigate('/'); setProyectoAbierto(null); setCirculo(null); }}
-            pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
+            pie={<><ArbolPaginas /><PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} /></>}
           />
           {proyectoAbierto && (
             <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
@@ -1718,7 +1703,7 @@ export default function Layout() {
                   siempreAbierto
                   claro
                   titulo="Mis páginas"
-                  items={itemsProyectos}
+                  items={[]}
                   junto={<MarcaCabecera onIrAlInicio={() => { navigate('/'); setCirculo(null); }} />}
                   cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
                   abierta={null}
@@ -1729,7 +1714,7 @@ export default function Layout() {
                   onElegir={h => { navigate(h.ruta); setCirculo(null); }}
                   onAbrirSubmenu={h => setProyectoAbierto(proyectosDe(h.clave) ?? null)}
                   onInicio={() => { navigate('/'); setCirculo(null); }}
-                  pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
+                  pie={<><ArbolPaginas onIr={() => setCirculo(null)} /><PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} /></>}
                 />}
           </div>
         </div>

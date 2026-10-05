@@ -461,6 +461,163 @@ export function registerDocumentosRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  // ══ EL ÁRBOL DE TUS PÁGINAS, PARA EL MENÚ DE LA IZQUIERDA (2026-10-05) ══
+  // Eugenio: «que al desplegar una página se abra en acordeón debajo de su
+  // título, como en Notion, y si dentro hay otra página con páginas, que se
+  // pueda volver a abrir, de forma indefinida». Y: «arrastrar una página sobre
+  // otra la mete dentro».
+  //
+  // «Dentro» ya tenía un significado en esta casa y no se inventa otro: una
+  // página está dentro de otra cuando la madre tiene un bloque «Página»
+  // (`subpagina`) que apunta a ella. Las bases de datos de una página también
+  // cuelgan de ella, con sus filas (cada fila es una página) debajo.
+
+  /** Tus páginas y carpetas, ya en árbol. */
+  app.get('/api/paginas/arbol', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión para ver tus páginas.' });
+      const yo = req.user.id;
+      const r = await db.execute(sql`
+        SELECT w.id, w.title, w.config->>'icono' AS icono, w.config->'bloques' AS bloques, w.proyecto_id, w.updated_at, w.created_at
+        FROM knowledge_windows w
+        WHERE w.kind = 'pagina' AND w.creator_user_id = ${yo} AND w.archived_at IS NULL AND w.deleted_at IS NULL
+        ORDER BY w.created_at
+      `);
+      const paginas = r.rows as any[];
+      const mias = new Set(paginas.map(p => p.id));
+      const nodos: Record<string, { id: string; tipo: 'pagina' | 'bd' | 'fila'; titulo: string; icono: string | null; hijas: string[] }> = {};
+      const conPadre = new Set<string>();
+      const tablas = new Map<string, string>(); // tabla → página que la contiene
+      for (const p of paginas) {
+        nodos[p.id] = { id: p.id, tipo: 'pagina', titulo: p.title || 'Sin título', icono: p.icono || null, hijas: [] };
+      }
+      for (const p of paginas) {
+        const bloques: any[] = Array.isArray(p.bloques) ? p.bloques : [];
+        for (const b of bloques) {
+          if (b?.tipo === 'subpagina' && b.entityId && mias.has(b.entityId) && b.entityId !== p.id && !conPadre.has(b.entityId)) {
+            nodos[p.id].hijas.push(b.entityId);
+            conPadre.add(b.entityId);
+          } else if (b?.tipo === 'basedatos' && b.tabla_id && !tablas.has(b.tabla_id)) {
+            tablas.set(b.tabla_id, p.id);
+          }
+        }
+      }
+      if (tablas.size) {
+        const ids = [...tablas.keys()];
+        const t = await db.execute(sql`
+          SELECT t.id, t.titulo, t.icono FROM bd_tablas t
+          WHERE t.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND t.archived_at IS NULL AND t.deleted_at IS NULL
+        `);
+        const f = await db.execute(sql`
+          SELECT tabla_id, pagina_id FROM bd_filas
+          WHERE tabla_id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND pagina_id IS NOT NULL
+            AND archived_at IS NULL AND deleted_at IS NULL
+          ORDER BY orden, created_at
+        `);
+        const filasDe = new Map<string, string[]>();
+        for (const x of f.rows as any[]) (filasDe.get(x.tabla_id) || filasDe.set(x.tabla_id, []).get(x.tabla_id)!).push(x.pagina_id);
+        for (const x of t.rows as any[]) {
+          const nid = `bd:${x.id}`;
+          const filas = (filasDe.get(x.id) || []).filter(id => nodos[id] && !conPadre.has(id));
+          for (const id of filas) { conPadre.add(id); nodos[id].tipo = 'fila'; }
+          nodos[nid] = { id: nid, tipo: 'bd', titulo: x.titulo || 'Base de datos', icono: x.icono || null, hijas: filas };
+          nodos[tablas.get(x.id)!].hijas.push(nid);
+        }
+      }
+      // Las filas de bases de datos que no están en ninguna página tuya
+      // tampoco se sueltan en la raíz: son de su base de datos.
+      const filasSueltas = await db.execute(sql`
+        SELECT pagina_id FROM bd_filas WHERE pagina_id IS NOT NULL AND deleted_at IS NULL
+          AND pagina_id IN (SELECT id FROM knowledge_windows WHERE kind = 'pagina' AND creator_user_id = ${yo} AND deleted_at IS NULL)
+      `);
+      for (const x of filasSueltas.rows as any[]) if (!conPadre.has(x.pagina_id) && nodos[x.pagina_id]) { conPadre.add(x.pagina_id); delete nodos[x.pagina_id]; }
+
+      const carpetasR = await db.execute(sql`
+        SELECT id, titulo, slug, icono FROM proyectos
+        WHERE creador_user_id = ${yo} AND archived_at IS NULL AND deleted_at IS NULL ORDER BY titulo
+      `);
+      const carpetas = (carpetasR.rows as any[]).map(c => ({ id: c.id, titulo: c.titulo, slug: c.slug, icono: c.icono, paginas: [] as string[] }));
+      const porCarpeta = new Map(carpetas.map(c => [c.id, c]));
+      const raiz: string[] = [];
+      // Las de arriba, de la más reciente a la más vieja, como estaban.
+      for (const p of [...paginas].sort((a, b) => +new Date(b.updated_at || b.created_at) - +new Date(a.updated_at || a.created_at))) {
+        if (conPadre.has(p.id) || !nodos[p.id]) continue;
+        const c = p.proyecto_id && porCarpeta.get(p.proyecto_id);
+        if (c) c.paginas.push(p.id); else raiz.push(p.id);
+      }
+      res.json({ carpetas, raiz, nodos });
+    } catch (e: any) { console.error('arbol paginas:', e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Meter una página dentro de otra (`dentro_de`), o sacarla a una carpeta
+   *  o a la raíz (`dentro_de: null`, `carpeta_id` o null). */
+  app.post('/api/paginas/:id/mover', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const yo = req.user.id;
+      const esAdmin = (req.user.roleLevel ?? 0) >= ROLE.ADMIN;
+      const id = req.params.id;
+      const dentroDe: string | null = req.body?.dentro_de ? String(req.body.dentro_de) : null;
+      const pag = (await db.execute(sql`
+        SELECT id, title, creator_user_id FROM knowledge_windows WHERE id = ${id} AND kind = 'pagina' AND archived_at IS NULL AND deleted_at IS NULL
+      `)).rows[0] as any;
+      if (!pag) return res.status(404).json({ error: 'Esa página no existe.' });
+      if (pag.creator_user_id !== yo && !esAdmin) return res.status(403).json({ error: 'Esa página no es tuya.' });
+      const esFila = (await db.execute(sql`SELECT 1 FROM bd_filas WHERE pagina_id = ${id} AND deleted_at IS NULL LIMIT 1`)).rows.length > 0;
+      if (esFila) return res.status(400).json({ error: 'Es un elemento de una base de datos: vive en su base de datos.' });
+
+      if (dentroDe) {
+        if (dentroDe === id) return res.status(400).json({ error: 'Una página no puede ir dentro de sí misma.' });
+        const madre = (await db.execute(sql`
+          SELECT id, creator_user_id FROM knowledge_windows WHERE id = ${dentroDe} AND kind = 'pagina' AND archived_at IS NULL AND deleted_at IS NULL
+        `)).rows[0] as any;
+        if (!madre) return res.status(404).json({ error: 'La página de destino no existe.' });
+        if (madre.creator_user_id !== yo && !esAdmin) return res.status(403).json({ error: 'La página de destino no es tuya.' });
+        // Ni dentro de una de sus propias hijas: se haría un círculo.
+        const descendientes = (await db.execute(sql`
+          WITH RECURSIVE baja(id) AS (
+            SELECT ${id}::text
+            UNION
+            SELECT blq->>'entityId' FROM baja
+            JOIN knowledge_windows w ON w.id = baja.id
+            CROSS JOIN LATERAL jsonb_array_elements(COALESCE(w.config->'bloques', '[]'::jsonb)) blq
+            WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
+          ) SELECT id FROM baja
+        `)).rows.map((x: any) => x.id);
+        if (descendientes.includes(dentroDe)) return res.status(400).json({ error: 'No se puede meter una página dentro de una de las suyas.' });
+      }
+
+      await db.transaction(async (tx: any) => {
+        // 1. Fuera de donde estuviera.
+        await tx.execute(sql`
+          UPDATE knowledge_windows w SET
+            config = jsonb_set(w.config, '{bloques}', COALESCE((
+              SELECT jsonb_agg(blq ORDER BY o) FROM jsonb_array_elements(w.config->'bloques') WITH ORDINALITY AS e(blq, o)
+              WHERE NOT (blq->>'tipo' = 'subpagina' AND blq->>'entityId' = ${id})
+            ), '[]'::jsonb)),
+            updated_at = now(), updated_by = ${yo}
+          WHERE w.kind = 'pagina' AND w.id <> ${dentroDe || ''}
+            AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
+        `);
+        if (dentroDe) {
+          // 2. Al final de la nueva madre, si no estaba ya.
+          const bloque = { id: `B${Date.now().toString(36)}${Math.floor(Math.random() * 46656).toString(36)}`, tipo: 'subpagina', entityId: id, pubTitulo: pag.title || 'Sin título' };
+          await tx.execute(sql`
+            UPDATE knowledge_windows SET
+              config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', COALESCE(config->'bloques', '[]'::jsonb) || ${JSON.stringify([bloque])}::jsonb),
+              updated_at = now(), updated_by = ${yo}
+            WHERE id = ${dentroDe}
+              AND NOT COALESCE(config->'bloques', '[]'::jsonb) @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
+          `);
+        } else if (req.body && 'carpeta_id' in req.body) {
+          const destino = await proyectoTuyo(req, req.body.carpeta_id);
+          await tx.execute(sql`UPDATE knowledge_windows SET proyecto_id = ${destino}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+        }
+      });
+      res.json({ ok: true });
+    } catch (e: any) { console.error('mover pagina:', e); res.status(500).json({ error: e.message }); }
+  });
+
   /**
    * THE PAGES OF A FOLDER — `GET /api/proyectos/:id/paginas` (2026-09-30)
    *

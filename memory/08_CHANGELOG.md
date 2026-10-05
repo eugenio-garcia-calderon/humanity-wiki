@@ -8369,3 +8369,20 @@ estrecho, sin el interruptor de IA y con «Buscar contenido…».
   - **Vídeo**: a link block that turns YouTube/Vimeo links into a player, or uploads a file.
   - **Mapa**: the publication search filtered to maps, with a link to create one.
 - A YouTube or Vimeo link pasted into «Web insertada» now becomes a player too. The «/» bar got the same coloured icons and descriptions.
+
+### 2026-10-05 — Left menu: your pages as a Notion-style tree, with drag to nest
+- Eugenio asked for two things in the left menu:
+  - expanding a page should open an accordion under its title, with no depth limit, instead of a side panel;
+  - dragging a page onto another should put it inside.
+- New `GET /api/paginas/arbol`: folders, top-level pages, and a node map.
+  - A page's children are its `subpagina` blocks plus its database blocks.
+  - Each database node holds its row pages.
+  - Row pages and sub-pages no longer appear loose at the top.
+- New `POST /api/paginas/:id/mover` with `{dentro_de}` or `{dentro_de: null, carpeta_id}`.
+  - It removes the `subpagina` block from the old parent and appends one to the new parent, in one transaction.
+  - It refuses to move a page into itself or into one of its own descendants (recursive CTE), and refuses to move database rows.
+- New `src/components/navegacion/ArbolPaginas.tsx`, rendered in the rail's `pie` slot. The rail gets `items={[]}`; folders no longer open `PanelProyecto` next to it.
+  - Chevrons open accordions to any depth, with a branch line; the open state is kept in `humanity:arbol-abiertos`.
+  - Native drag and drop: drop on a page to nest it, on a folder to move it there, or on «fuera de todo» to take it out.
+- An open editor syncs its blocks on `humanity:pagina-movida`, so the next autosave does not undo the move.
+- Verified locally: dragging «Hija» onto «Madre» nested it, the editor of «Madre» showed the new block, and a cycle was refused.
