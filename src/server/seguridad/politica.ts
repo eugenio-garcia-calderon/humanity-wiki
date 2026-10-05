@@ -194,6 +194,8 @@ const SIN_REVISAR: Entrada[] = [
   { m: 'PUT', ruta: '/api/bd/columnas/:id', guardia: { tipo: 'propietario', minimo: 4 },
     nota: 'cambiar el tipo de una columna reinterpreta todo lo guardado en ella' },
   { m: 'DELETE', ruta: '/api/bd/columnas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  // Que una relación se vea también en la otra base de datos (2026-10-05).
+  { m: 'POST', ruta: '/api/bd/columnas/:id/reciproca', guardia: { tipo: 'propietario', minimo: 4 } },
   { m: 'POST', ruta: '/api/bd/tablas/:id/vistas', guardia: { tipo: 'propietario', minimo: 4 },
     nota: 'una vista no cambia datos: basta con poder ver la tabla' },
   { m: 'POST', ruta: '/api/bd/tablas/:id/filas', guardia: { tipo: 'propietario', minimo: 4 } },
@@ -206,6 +208,8 @@ const SIN_REVISAR: Entrada[] = [
   { m: 'POST', ruta: '/api/ai/documento', guardia: { tipo: 'nivel', minimo: 1 } },
   { m: 'POST', ruta: '/api/documentos', guardia: { tipo: 'nivel', minimo: 1 } },
   { m: 'PUT', ruta: '/api/paginas/:id/proyecto', guardia: { tipo: 'propietario', minimo: 4 } },
+  // Meter una página dentro de otra desde el menú izquierdo (2026-10-05).
+  { m: 'POST', ruta: '/api/paginas/:id/mover', guardia: { tipo: 'propietario', minimo: 4 } },
   { m: 'POST', ruta: '/api/presentaciones', guardia: { tipo: 'nivel', minimo: 1 } },
   { m: 'POST', ruta: '/api/ai/presentacion', guardia: { tipo: 'nivel', minimo: 1 } },
   { m: 'POST', ruta: '/api/ventanas', guardia: { tipo: 'nivel', minimo: 1 } },
