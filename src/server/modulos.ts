@@ -63,6 +63,7 @@ import { registrarFuente } from './fuente.js';
 import { registrarTemas } from './temas.js';
 import { registrarTronco } from './tronco.js';
 import { registrarAgregador } from './agregador.js';
+import { registrarFeedTema } from './feedTema.js';
 import { registrarRamas } from './ramas.js';
 import { registrarGaleria } from './galeria.js';
 import { registrarCompartir } from './compartir.js';
@@ -204,6 +205,8 @@ export const MODULOS: Modulo[] = [
   // `/api/agregador/…` y no de `/api/temas/…` a propósito — `/api/temas/:objetivo`
   // es un comodín de un segmento y cualquier ruta nueva ahí se le puede colar.
   { nombre: 'agregador', montar: (app, db) => registrarAgregador(app, db) },
+  // El feed de un tema: lo tuyo o lo público de todos sobre «movilidad» (2026-10-05).
+  { nombre: 'feed-tema', montar: (app, db) => registrarFeedTema(app, db) },
   // Las ramas de un proyecto. Cuelgan de `/api/proyectos/:id/ramas`, que es
   // una ruta más específica que cualquiera de las de `proyectos`, así que el
   // orden entre las dos da igual — pero se monta después por costumbre: lo

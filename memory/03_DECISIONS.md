@@ -601,3 +601,29 @@ itself.
 **`bd.ts` change.** The body of `PUT /api/bd/filas/:id` became
 `escribirCeldas()` (exposed on `bdInterno`), unchanged in behaviour, so the
 chat and the grid share one write path.
+
+## 2026-10-05 — A feed per theme without a theme column: keywords with the badge on
+
+**Context.** No table ties a page, a row or a folder to one of the 15 themes
+(`objetivos.ts` says so; `subtema_contenido` exists but almost nothing uses
+it). Eugenio wanted a landing with everything about a theme, mine and public.
+
+**Options.** (a) Add `objetivo_id` to every content table and ask people to
+classify; (b) classify with the local AI at write time; (c) search by
+keywords at read time, and show which signal each card came from.
+
+**Chosen: (c), with (a)'s existing links honoured first.** Classified items
+(`subtema_contenido`, `publication_links`) come first and say «Del tema»;
+everything else says «Por palabras». Nobody is told that a keyword match is a
+classification — that was the rule written in `objetivos.ts` on 2026-08-21.
+
+**What it cost to get the keywords right** (three rounds): sub-topic names
+looked like free vocabulary and were not — «público», «personas», «carga»,
+«crisis» pulled posts from other themes. Kept: the theme's hand-picked stems
+(title: one; body: two, three in long texts) and sub-topic names as whole
+phrases. Dropped: single sub-topic words. Recall is lower; precision was the
+complaint every round.
+
+**Next step when it hurts:** (b). The free local model (`iaLocal.ts`) could
+tag pages on save into `subtema_contenido`, turning «Por palabras» into «Del
+tema» over time without a schema change.

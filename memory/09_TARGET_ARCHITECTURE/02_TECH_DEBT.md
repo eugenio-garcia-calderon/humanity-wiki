@@ -347,3 +347,13 @@ inside subpages (only `basedatos` blocks of the open page). The rules parser is
 heuristic Spanish; every miss falls to the local model, so the cost of a gap is
 seconds of CPU, not a wrong row. Measure the hit rate from real use before
 adding more rules.
+
+## Theme feed: counts from two sources, people by profile only (2026-10-05)
+
+`GET /api/feed-tema` and the menu count a branch the same way now, but
+`/api/agregador/temas/cuantos` and the old wheel (`/temas/:id`) count
+differently (external items, all states). One count function for all three
+would end the «64 / 62 / 57» question. People in `todos` are only users whose
+profile lists the theme; `game_agents` cannot be linked to a theme at all. The
+wheel page has no link back to the feed. Duplicate-looking cards (two folders
+named «Inversiones») cannot be told apart without a path or a date.

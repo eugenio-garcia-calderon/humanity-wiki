@@ -2890,7 +2890,8 @@ export default function AIAssistant({ modo = 'panel' }: {
                 // panel que le pasara por debajo escondería sus botones justo
                 // en la esquina donde caen.
                 : 'top-0 right-0 bottom-11 border-l border-slate-200 shadow-2xl')}
-          style={esMovil ? undefined : { width: `${anchoLateral}px` }}
+          // `--hueco-temas`: el menú de temas de la derecha (Layout), cuando está abierto.
+          style={esMovil ? undefined : { width: `${anchoLateral}px`, right: 'var(--hueco-temas, 0px)' }}
         >
           {/* EL BORDE IZQUIERDO SE ARRASTRA. Los tres botones de arriba son
               para elegir rápido; esto es para afinar. 6 px de ancho, que es lo

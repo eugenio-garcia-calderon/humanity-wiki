@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import {
   Home, FolderKanban, Folder, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
@@ -295,6 +295,9 @@ export default function Rail({
   ramas?: {
     /** El árbol de un tema, plano y con `padre_id`: quien lo pinta lo monta. */
     de: (clave: string) => Array<{ id: string; padre_id: string | null; nombre: string; cosas: number }>;
+    /** Where a subtopic's name leads. Default `/temas/<id>`; the themes rail
+     *  sends it to the theme's feed filtered by that subtopic (2026-10-05). */
+    ruta?: (subtema: { id: string; nombre: string }, clave: string) => string;
     /** Si ese tema tiene ramas, **antes** de haberlas pedido. Sin esto la
      *  flecha no se podría dibujar hasta después de pulsarla. */
     hay: (clave: string) => boolean;
@@ -428,6 +431,13 @@ export default function Rail({
    * niveles: el árbol no tiene límite de profundidad, pero un menú de 224 px
    * sí, y a partir de ahí sangrar más sólo estrecha el nombre.
    */
+  const aqui = useLocation();
+  const esDestinoActual = (destino: string) => {
+    const [ruta, busq = ''] = destino.split('?');
+    if (ruta !== aqui.pathname) return false;
+    const quiero = new URLSearchParams(busq); const hay = new URLSearchParams(aqui.search);
+    return [...quiero.entries()].every(([k, v]) => k === 'ambito' || hay.get(k) === v) && (!!quiero.get('subtema') || !hay.get('subtema'));
+  };
   const ramaDe = (clave: string) => {
     if (!ramas || !desplegado || !ramas.abierto(clave)) return null;
     const todos = ramas.de(clave);
@@ -471,7 +481,7 @@ export default function Rail({
                 aria-expanded={abierta}
                 style={{ marginLeft: 6 + Math.min(nivel, 3) * 11 }}
                 className={cn('grid h-6 w-5 shrink-0 place-items-center rounded transition-colors',
-                  claro ? 'text-slate-300 hover:text-slate-700' : 'text-slate-600 hover:text-white')}
+                  claro ? 'text-slate-400 hover:text-slate-700' : 'text-slate-600 hover:text-white')}
               >
                 {abierta ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               </button>
@@ -479,12 +489,15 @@ export default function Rail({
               <span aria-hidden style={{ marginLeft: 6 + Math.min(nivel, 3) * 11 }} className="h-6 w-5 shrink-0" />
             )}
 
-            <NavLink
-              to={`/temas/${t.id}`}
+            <Link
+              to={ramas.ruta ? ramas.ruta(t, clave) : `/temas/${t.id}`}
               title={`${t.nombre} — ${t.cosas} ${t.cosas === 1 ? 'cosa' : 'cosas'}`}
-              className={({ isActive }) => cn(
+              // Active only when THIS subtopic is the one in the URL: the
+              // route is the same for all nine, only `?subtema=` differs.
+              aria-current={esDestinoActual(ramas.ruta ? ramas.ruta(t, clave) : `/temas/${t.id}`) ? 'page' : undefined}
+              className={cn(
                 'flex min-w-0 flex-1 items-center gap-2 rounded-lg py-1.5 pl-1 pr-2 text-[12px] transition-colors',
-                isActive
+                esDestinoActual(ramas.ruta ? ramas.ruta(t, clave) : `/temas/${t.id}`)
                   ? (claro ? 'bg-emerald-50 font-bold text-emerald-800' : 'bg-slate-800 font-bold text-emerald-300')
                   : (claro ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' : 'text-slate-500 hover:bg-slate-800/70 hover:text-white'),
               )}
@@ -494,9 +507,9 @@ export default function Rail({
                   lee como «esto está vacío», y hay ramas que sólo tienen cosas
                   en sus hijas. */}
               {t.cosas > 0 && (
-                <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-300">{t.cosas}</span>
+                <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-400">{t.cosas}</span>
               )}
-            </NavLink>
+            </Link>
 
             {/* ── AÑADIR UN TEMA AQUÍ DENTRO ─────────────────────────────
                 Eugenio: «haz que un administrador pueda añadir temas a ese
@@ -508,8 +521,8 @@ export default function Rail({
                 onClick={e => { e.preventDefault(); e.stopPropagation(); ramas.onAnadir!(t.id); }}
                 title={`Añadir un tema dentro de ${t.nombre}`}
                 aria-label={`Añadir un tema dentro de ${t.nombre}`}
-                className={cn('grid h-6 w-5 shrink-0 place-items-center rounded opacity-0 transition-all group-hover/rama:opacity-100',
-                  claro ? 'text-slate-300 hover:text-emerald-600' : 'text-slate-600 hover:text-emerald-400')}
+                className={cn('grid h-6 w-5 shrink-0 place-items-center rounded opacity-0 focus-visible:opacity-100 transition-all group-hover/rama:opacity-100',
+                  claro ? 'text-slate-400 hover:text-emerald-600' : 'text-slate-600 hover:text-emerald-400')}
               >
                 <Plus className="h-3 w-3" />
               </button>
@@ -620,8 +633,9 @@ export default function Rail({
               quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
               final de la animación en vez de acompañarla. */}
           <span className={cn(
-            'overflow-hidden whitespace-nowrap text-left text-[13px] font-bold transition-all duration-200',
-            desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
+            // `truncate` (2026-10-05): «ALIMENTACI» was cut dead; now it ends in «…».
+            'min-w-0 truncate text-left text-[13px] font-bold transition-all duration-200',
+            desplegado ? 'flex-1 opacity-100' : 'w-0 opacity-0',
           )}>
             {h.nombre}
           </span>
@@ -647,7 +661,7 @@ export default function Rail({
             aria-label={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
             aria-expanded={ramas!.abierto(h.clave)}
             className={cn('grid h-7 w-5 shrink-0 place-items-center rounded-lg transition-colors',
-              claro ? 'text-slate-300 hover:text-slate-700' : 'text-slate-500 hover:text-white')}
+              claro ? 'text-slate-400 hover:text-slate-700' : 'text-slate-500 hover:text-white')}
           >
             {ramas!.abierto(h.clave)
               ? <ChevronDown className="h-3.5 w-3.5" />
@@ -663,9 +677,11 @@ export default function Rail({
               aria-label={personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Marcar como favorito'}
               aria-pressed={personal!.esFavorito(h.clave)}
               className={cn('grid h-7 w-6 shrink-0 place-items-center rounded-lg transition-all',
+                // Hidden, not transparent (2026-10-05): a transparent icon
+                // still takes 24 px, and with four of them the name had 79 px.
                 personal!.esFavorito(h.clave)
                   ? 'text-amber-400'
-                  : 'text-slate-300 opacity-0 hover:text-amber-400 group-hover/fila:opacity-100')}
+                  : 'w-0 overflow-hidden opacity-0 text-slate-400 hover:text-amber-400 group-hover/fila:w-6 group-hover/fila:opacity-100 focus:w-6 focus:opacity-100')}
             >
               <Star className="h-3.5 w-3.5" fill={personal!.esFavorito(h.clave) ? 'currentColor' : 'none'} />
             </button>
@@ -676,8 +692,8 @@ export default function Rail({
                 title="Más"
                 aria-label={`Más sobre ${h.nombre}`}
                 aria-expanded={menuDe === h.clave}
-                className={cn('grid h-7 w-5 place-items-center rounded-lg text-slate-300 transition-all hover:text-slate-600',
-                  menuDe === h.clave ? 'opacity-100 text-slate-600' : 'opacity-0 group-hover/fila:opacity-100')}
+                className={cn('grid h-7 place-items-center rounded-lg text-slate-400 transition-all hover:text-slate-600',
+                  menuDe === h.clave ? 'w-5 text-slate-600' : 'w-0 overflow-hidden opacity-0 group-hover/fila:w-5 group-hover/fila:opacity-100 focus:w-5 focus:opacity-100')}
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </button>
@@ -713,7 +729,7 @@ export default function Rail({
               <span
                 aria-hidden
                 title="Arrastra para ordenar"
-                className="grid h-7 w-4 shrink-0 cursor-grab place-items-center text-slate-200 opacity-0 transition-opacity group-hover/fila:opacity-100"
+                className="hidden h-7 w-4 shrink-0 cursor-grab place-items-center text-slate-200 transition-opacity group-hover/fila:grid"
               >
                 <GripVertical className="h-3.5 w-3.5" />
               </span>
@@ -1070,7 +1086,7 @@ export function HojaPanel({ a, children, icono: Icono, insignia }: {
       {Icono && <Icono className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
       <span className="min-w-0 flex-1 truncate">{children}</span>
       {insignia !== undefined && insignia !== '' && (
-        <span className="shrink-0 text-[10px] font-bold text-slate-300">{insignia}</span>
+        <span className="shrink-0 text-[10px] font-bold text-slate-400">{insignia}</span>
       )}
     </NavLink>
   );

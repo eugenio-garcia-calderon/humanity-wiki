@@ -18,6 +18,7 @@ import {
   Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles,
 } from 'lucide-react';
 import { OBJECTIVE_ID_BY_KEY } from './objectiveIds';
+import { TEMAS_SERVIDOR } from './palabrasObjetivos';
 
 export interface Objetivo {
   id: string;
@@ -77,21 +78,22 @@ const HEX: Record<string, string> = {
  *  debería caer nada — y si cae, se ve gris en vez de desaparecer. */
 export const hexDelColor = (clase?: string): string => (clase && HEX[clase]) || '#94a3b8';
 
+// Las palabras viven en `palabrasObjetivos.ts`, que también lee el servidor.
 export const OBJETIVOS: Objetivo[] = [
-  { id: 'O001', titulo: 'AGUA',         icono: Droplets, color: 'text-blue-500',       palabras: ['agua', 'hidric', 'riego', 'acuifer', 'potable', 'saneamiento', 'sequia', 'rio', 'embalse'] },
-  { id: 'O002', titulo: 'ALIMENTACIÓN', icono: Wheat, color: 'text-amber-500',          palabras: ['aliment', 'comida', 'nutricion', 'cultivo', 'agricultura', 'huerto', 'cosecha', 'hambre'] },
-  { id: 'O003', titulo: 'VIVIENDA',     icono: HomeIcon, color: 'text-indigo-500',       palabras: ['vivienda', 'casa', 'hogar', 'alquiler', 'construccion', 'habitab', 'alojamiento'] },
-  { id: 'O004', titulo: 'SALUD',        icono: HeartPulse, color: 'text-rose-500',     palabras: ['salud', 'medic', 'sanitar', 'hospital', 'enfermedad', 'bienestar', 'farmac'] },
-  { id: 'O005', titulo: 'CONVIVENCIA',  icono: Users, color: 'text-purple-500',          palabras: ['convivencia', 'comunidad', 'vecin', 'paz', 'conflicto', 'seguridad', 'cohesion'] },
-  { id: 'O006', titulo: 'ECOSISTEMAS',  icono: TreePine, color: 'text-emerald-500',       palabras: ['ecosistema', 'bosque', 'biodiversidad', 'fauna', 'flora', 'natural', 'conservacion', 'incendio'] },
-  { id: 'O007', titulo: 'EDUCACIÓN',    icono: GraduationCap, color: 'text-sky-500',  palabras: ['educacion', 'escuela', 'aprendizaje', 'formacion', 'curso', 'alumn', 'ensenanza'] },
-  { id: 'O008', titulo: 'MOVILIDAD',    icono: Car, color: 'text-orange-500',            palabras: ['movilidad', 'transporte', 'coche', 'bici', 'camion', 'tren', 'viaje', 'carretera'] },
-  { id: 'O009', titulo: 'ENERGÍA',      icono: Zap, color: 'text-yellow-500',            palabras: ['energia', 'solar', 'electric', 'bateria', 'fotovoltaic', 'eolic', 'combustible', 'renovable'] },
-  { id: 'O010', titulo: 'TECNOLOGÍA',   icono: Cpu, color: 'text-cyan-500',            palabras: ['tecnolog', 'software', 'digital', 'datos', 'internet', 'robot', 'inteligencia artificial'] },
-  { id: 'O011', titulo: 'EMPLEO',       icono: Briefcase, color: 'text-lime-500',      palabras: ['empleo', 'trabajo', 'salario', 'laboral', 'oficio', 'contrat'] },
-  { id: 'O012', titulo: 'GOBERNANZA',   icono: Landmark, color: 'text-fuchsia-500',       palabras: ['gobernanza', 'gobierno', 'politic', 'ley', 'norma', 'participacion', 'democra', 'institucion'] },
-  { id: 'O013', titulo: 'ECONOMÍA',     icono: Coins, color: 'text-violet-500',          palabras: ['economia', 'dinero', 'inversion', 'financ', 'coste', 'precio', 'mercado', 'presupuesto'] },
-  { id: 'O014', titulo: 'CULTURA',      icono: Palette, color: 'text-pink-500',        palabras: ['cultura', 'arte', 'musica', 'patrimonio', 'literatura', 'cine', 'tradicion'] },
+  { id: 'O001', titulo: 'AGUA',         icono: Droplets, color: 'text-blue-500',       palabras: TEMAS_SERVIDOR.O001.palabras },
+  { id: 'O002', titulo: 'ALIMENTACIÓN', icono: Wheat, color: 'text-amber-500',          palabras: TEMAS_SERVIDOR.O002.palabras },
+  { id: 'O003', titulo: 'VIVIENDA',     icono: HomeIcon, color: 'text-indigo-500',       palabras: TEMAS_SERVIDOR.O003.palabras },
+  { id: 'O004', titulo: 'SALUD',        icono: HeartPulse, color: 'text-rose-500',     palabras: TEMAS_SERVIDOR.O004.palabras },
+  { id: 'O005', titulo: 'CONVIVENCIA',  icono: Users, color: 'text-purple-500',          palabras: TEMAS_SERVIDOR.O005.palabras },
+  { id: 'O006', titulo: 'ECOSISTEMAS',  icono: TreePine, color: 'text-emerald-500',       palabras: TEMAS_SERVIDOR.O006.palabras },
+  { id: 'O007', titulo: 'EDUCACIÓN',    icono: GraduationCap, color: 'text-sky-500',  palabras: TEMAS_SERVIDOR.O007.palabras },
+  { id: 'O008', titulo: 'MOVILIDAD',    icono: Car, color: 'text-orange-500',            palabras: TEMAS_SERVIDOR.O008.palabras },
+  { id: 'O009', titulo: 'ENERGÍA',      icono: Zap, color: 'text-yellow-500',            palabras: TEMAS_SERVIDOR.O009.palabras },
+  { id: 'O010', titulo: 'TECNOLOGÍA',   icono: Cpu, color: 'text-cyan-500',            palabras: TEMAS_SERVIDOR.O010.palabras },
+  { id: 'O011', titulo: 'EMPLEO',       icono: Briefcase, color: 'text-lime-500',      palabras: TEMAS_SERVIDOR.O011.palabras },
+  { id: 'O012', titulo: 'GOBERNANZA',   icono: Landmark, color: 'text-fuchsia-500',       palabras: TEMAS_SERVIDOR.O012.palabras },
+  { id: 'O013', titulo: 'ECONOMÍA',     icono: Coins, color: 'text-violet-500',          palabras: TEMAS_SERVIDOR.O013.palabras },
+  { id: 'O014', titulo: 'CULTURA',      icono: Palette, color: 'text-pink-500',        palabras: TEMAS_SERVIDOR.O014.palabras },
   /*
    * EL QUINCE (2026-08-25). Eugenio: «de paso añade espiritualidad como tema
    * principal dentro de los 14 objetivos, es el número 15».
@@ -106,8 +108,7 @@ export const OBJETIVOS: Objetivo[] = [
    * habla la gente cuando habla de esto, y no de una sola de las tres.
    */
   { id: 'O015', titulo: 'ESPIRITUALIDAD', icono: Sparkles, color: 'text-teal-500',
-    palabras: ['espiritual', 'meditacion', 'contemplat', 'religion', 'religios', 'fe ', 'sentido de la vida',
-               'conciencia', 'mindfulness', 'sagrado', 'ritual', 'oracion', 'yoga', 'duelo', 'proposito'] },
+    palabras: TEMAS_SERVIDOR.O015.palabras },
 ];
 
 /** Sin tildes y en minúsculas. Mismo criterio que en `iconoDeNombre`: dos
