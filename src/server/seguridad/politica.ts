@@ -210,6 +210,7 @@ const SIN_REVISAR: Entrada[] = [
   { m: 'PUT', ruta: '/api/paginas/:id/proyecto', guardia: { tipo: 'propietario', minimo: 4 } },
   // Meter una página dentro de otra desde el menú izquierdo (2026-10-05).
   { m: 'POST', ruta: '/api/paginas/:id/mover', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/paginas/:id/traer', guardia: { tipo: 'propietario', minimo: 4 } },
   { m: 'POST', ruta: '/api/presentaciones', guardia: { tipo: 'nivel', minimo: 1 } },
   { m: 'POST', ruta: '/api/ai/presentacion', guardia: { tipo: 'nivel', minimo: 1 } },
   { m: 'POST', ruta: '/api/ventanas', guardia: { tipo: 'nivel', minimo: 1 } },

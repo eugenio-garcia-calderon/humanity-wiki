@@ -656,6 +656,52 @@ export function registerDocumentosRoutes(app: Express, db: any) {
     } catch (e: any) { console.error('mover pagina:', e); res.status(500).json({ error: e.message }); }
   });
 
+  /** Llevar un bloque de una página a otra (2026-10-05): una base de datos
+   *  arrastrada en el menú, o un bloque —imagen, texto, tabla…— arrastrado
+   *  desde el editor hasta una página del menú. `bloque_id` o `tabla_id` dicen
+   *  cuál. Las páginas no viajan por aquí: eso es `/mover`, que vigila los
+   *  círculos. */
+  app.post('/api/paginas/:id/traer', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const yo = req.user.id;
+      const esAdmin = (req.user.roleLevel ?? 0) >= ROLE.ADMIN;
+      const destino = req.params.id;
+      const desde = String(req.body?.desde || '');
+      const bloqueId = req.body?.bloque_id ? String(req.body.bloque_id) : null;
+      const tablaId = req.body?.tabla_id ? String(req.body.tabla_id) : null;
+      if (!desde || (!bloqueId && !tablaId)) return res.status(400).json({ error: 'Falta qué bloque y de dónde.' });
+      if (desde === destino) return res.json({ ok: true, igual: true });
+      const dos = (await db.execute(sql`
+        SELECT id, creator_user_id, config->'bloques' AS bloques FROM knowledge_windows
+        WHERE id IN (${desde}, ${destino}) AND kind = 'pagina' AND archived_at IS NULL AND deleted_at IS NULL
+      `)).rows as any[];
+      const origen = dos.find(x => x.id === desde), meta = dos.find(x => x.id === destino);
+      if (!origen || !meta) return res.status(404).json({ error: 'Una de las dos páginas no existe.' });
+      if (!esAdmin && (origen.creator_user_id !== yo || meta.creator_user_id !== yo)) return res.status(403).json({ error: 'Sólo puedes mover entre páginas tuyas.' });
+      const lista: any[] = Array.isArray(origen.bloques) ? origen.bloques : [];
+      const i = lista.findIndex(b => (bloqueId && b?.id === bloqueId) || (tablaId && b?.tipo === 'basedatos' && b?.tabla_id === tablaId));
+      if (i < 0) return res.status(404).json({ error: 'Ese bloque ya no está en su página.' });
+      const bloque = { ...lista[i] };
+      if (bloque.tipo === 'subpagina') return res.status(400).json({ error: 'Las páginas se mueven con /mover.' });
+      // Fuera de su fila de columnas: en la otra página va solo, a lo ancho.
+      delete bloque.grupo; delete bloque.ancho;
+      const quedan = lista.filter((_, j) => j !== i);
+      await db.transaction(async (tx: any) => {
+        await tx.execute(sql`
+          UPDATE knowledge_windows SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', ${JSON.stringify(quedan)}::jsonb),
+            updated_at = now(), updated_by = ${yo} WHERE id = ${desde}
+        `);
+        await tx.execute(sql`
+          UPDATE knowledge_windows SET
+            config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', COALESCE(config->'bloques', '[]'::jsonb) || ${JSON.stringify([bloque])}::jsonb),
+            updated_at = now(), updated_by = ${yo} WHERE id = ${destino}
+        `);
+      });
+      res.json({ ok: true, bloque });
+    } catch (e: any) { console.error('traer bloque:', e); res.status(500).json({ error: e.message }); }
+  });
+
   /**
    * THE PAGES OF A FOLDER — `GET /api/proyectos/:id/paginas` (2026-09-30)
    *
