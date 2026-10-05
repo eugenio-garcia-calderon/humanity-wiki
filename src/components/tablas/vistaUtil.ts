@@ -56,6 +56,8 @@ export type ConfigVista = {
   fecha_columna?: string | null;
   fecha_fin_columna?: string | null;
   escala?: 'dia' | 'semana' | 'mes';
+  /** Tabla: los subelementos se pintan debajo de su madre (sí, si no se dice). */
+  anidar?: boolean;
   /** Tablero: la imagen de la página en la tarjeta. */
   portada?: boolean;
   /** Gráfico (ver `Grafico.tsx`). */
@@ -99,6 +101,7 @@ export const FORMAS: Array<{ forma: Forma; label: string; desc: string }> = [
   { forma: 'lista', label: 'Lista', desc: 'Una línea por elemento' },
   { forma: 'calendario', label: 'Calendario', desc: 'Por una fecha, mes a mes' },
   { forma: 'linea', label: 'Línea de tiempo', desc: 'Barras de inicio a fin' },
+  { forma: 'grafico', label: 'Gráfico', desc: 'Barras, líneas o circular' },
 ];
 
 export const nombreForma = (f: string) => FORMAS.find(x => x.forma === f)?.label || 'Tabla';
@@ -245,7 +248,7 @@ function clavesDe(f: Fila, col: Columna, cfg: ConfigVista): Array<{ clave: strin
  * igual (un tablero sin la columna «Hecho» vacía no sirve para arrastrar a
  * ella), salvo que la vista pida esconder los vacíos. «Sin …» va al final.
  */
-export function agruparFilas(filas: Fila[], col: Columna, cfg: ConfigVista = {}, opciones: { conVacios?: boolean } = {}): Grupo[] {
+export function agruparFilas(filas: Fila[], col: Columna, cfg: ConfigVista = {}, opciones: { conVacios?: boolean; sinSiempre?: boolean } = {}): Grupo[] {
   const mapa = new Map<string, Grupo>();
   const conVacios = opciones.conVacios ?? !cfg.ocultar_vacios;
   if (conVacios && (col.tipo === 'seleccion' || col.tipo === 'seleccion_multiple')) {
@@ -270,7 +273,8 @@ export function agruparFilas(filas: Fila[], col: Columna, cfg: ConfigVista = {},
   if (!(col.tipo === 'seleccion' || col.tipo === 'seleccion_multiple' || col.tipo === 'casilla')) {
     grupos.sort((a, b) => a.clave.localeCompare(b.clave, 'es', { numeric: true }));
   }
-  if (sin.filas.length || conVacios) grupos.push(sin);
+  // «Sin …» vacío solo donde sirve para soltar algo en él (el tablero).
+  if (sin.filas.length || (conVacios && opciones.sinSiempre)) grupos.push(sin);
   if (cfg.ocultar_vacios) grupos = grupos.filter(g => g.filas.length);
   return grupos;
 }
