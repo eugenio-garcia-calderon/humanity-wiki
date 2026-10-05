@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/components/navegacion/ArbolPaginas.tsx",
+      "motivo": "Arrastrar bloques y bases de datos al menú izquierdo (prog8 voz)",
+      "desde": "2026-10-05T17:22:53.089Z"
+    }
+  ]
 }
