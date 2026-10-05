@@ -8427,3 +8427,15 @@ en mis páginas como proyecto pendiente».
   - Native drag and drop: drop on a page to nest it, on a folder to move it there, or on «fuera de todo» to take it out.
 - An open editor syncs its blocks on `humanity:pagina-movida`, so the next autosave does not undo the move.
 - Verified locally: dragging «Hija» onto «Madre» nested it, the editor of «Madre» showed the new block, and a cycle was refused.
+
+## 2026-10-05 — Notifications inside the profile; right menu without its own header (prog8)
+
+- **Notificaciones** is now the first row of your profile dropdown
+  (`AvatarRail`), no longer a row of its own in the left menu. With the
+  dropdown closed, the avatar carries the unread count (polled every minute).
+- **Right menu**: «Explorar» stays in the top bar in both states and toggles
+  the menu (open icon / fold icon) — it no longer drops into the menu, which
+  starts below the bar. `Rail` gains `sinFilaSuperior`: no top row, no divider.
+  The menu opens straight on the Mi contenido / Todo switch (the «Temas»
+  label is gone), then «Ver todos los temas» (opens the 15-theme sheet; it
+  replaces «Personalizar»). «Nuevo tema» removed from this menu.

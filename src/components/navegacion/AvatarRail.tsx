@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   User, MessageSquare, Phone, CalendarDays, Trash2, LayoutGrid,
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
+import Campana from '../social/Campana';
 
 /*
  * TU FOTO, ARRIBA DEL RAÍL DE LA DERECHA (2026-08-25, agente de APP/UX)
@@ -36,6 +37,20 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
   const navegar = useNavigate();
   const location = useLocation();
   const [abierto, setAbierto] = useState(false);
+  // ══ LAS NOTIFICACIONES, DENTRO DE TU PERFIL (2026-10-05) ══════════════
+  // Eugenio: «pon las notificaciones dentro del perfil del usuario». La
+  // campana es la primera fila del desplegable de tu foto. Para que un aviso
+  // nuevo no quede escondido con el desplegable cerrado, la foto lleva el
+  // número de no leídos (se pregunta cada minuto, como hacía la campana).
+  const [sinLeer, setSinLeer] = useState(0);
+  useEffect(() => {
+    if (!user) { setSinLeer(0); return; }
+    const pedir = () => fetch('/api/notifications/sin-leer', { credentials: 'include' })
+      .then(r => r.json()).then(j => setSinLeer(j?.n || 0)).catch(() => {});
+    pedir();
+    const t = setInterval(pedir, 60000);
+    return () => clearInterval(t);
+  }, [user, abierto]);
 
   if (!user) return null;
 
@@ -78,11 +93,19 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
         className={cn('mb-1 flex h-11 items-center gap-2 rounded-xl px-1.5 transition-colors hover:bg-slate-100',
           desplegado ? 'w-full' : 'w-10 justify-center')}
       >
-        {user.avatarUrl
-          ? <img src={user.avatarUrl} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover" />
-          : <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-slate-200 text-[11px] font-black text-slate-500">
-              {(user.displayName || user.email || '?').trim().charAt(0).toUpperCase()}
-            </span>}
+        <span className="relative shrink-0">
+          {user.avatarUrl
+            ? <img src={user.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+            : <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-200 text-[11px] font-black text-slate-500">
+                {(user.displayName || user.email || '?').trim().charAt(0).toUpperCase()}
+              </span>}
+          {sinLeer > 0 && !abierto && (
+            <span aria-label={`${sinLeer} notificaciones sin leer`}
+              className="absolute -right-1 -top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white">
+              {sinLeer > 9 ? '9+' : sinLeer}
+            </span>
+          )}
+        </span>
         {/* El nombre sólo cuando la columna está desplegada, como el resto del
             raíl: en reposo esto son iconos, y una cara ya dice de quién es. */}
         {desplegado && (
@@ -94,6 +117,8 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
           </>
         )}
       </button>
+
+      {abierto && <Campana enMenu />}
 
       {abierto && DEBAJO.map(e => {
         const aqui = location.pathname === e.ruta.split('?')[0];
