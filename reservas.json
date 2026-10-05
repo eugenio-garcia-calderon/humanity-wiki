@@ -149,6 +149,66 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "editorA PR2: títulos plegables, migas, botón",
       "desde": "2026-10-05T18:28:49.027Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/dominios.ts",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/compartir.ts",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/auth.ts",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/PaginaDeDominio.tsx",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/pages/PaginaPublica.tsx",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/App.tsx",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/knowledge/DialogoCompartir.tsx",
+      "motivo": "carril acceso: miembros en sitios (lectura y muro)",
+      "desde": "2026-10-05T18:31:21.575Z"
     }
   ]
 }
