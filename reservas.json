@@ -1,3 +1,22 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "editorA: deshacer/rehacer, anidar, desplegables, sincronizados, botón, presencia",
+      "desde": "2026-10-05T17:57:40.524Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "editorA: deshacer/rehacer, anidar, desplegables, sincronizados, botón, presencia",
+      "desde": "2026-10-05T17:57:40.524Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "editorA: deshacer/rehacer, anidar, desplegables, sincronizados, botón, presencia",
+      "desde": "2026-10-05T17:57:40.524Z"
+    }
+  ]
 }
