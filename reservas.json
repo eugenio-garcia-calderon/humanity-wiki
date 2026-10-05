@@ -197,6 +197,12 @@
       "ruta": "src/server/permisos.ts",
       "motivo": "carril acceso: categoría editar de miembros",
       "desde": "2026-10-05T23:02:00.119Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "drizzle/0137_bd_tablas_diseno.sql",
+      "motivo": "carril bd: diseño de la página de la fila",
+      "desde": "2026-10-05T23:02:55.317Z"
     }
   ]
 }
