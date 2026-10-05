@@ -67,36 +67,6 @@
       "desde": "2026-10-05T17:58:52.131Z"
     },
     {
-      "agente": "prog8-acceso",
-      "ruta": "drizzle/0135_permisos_finos.sql",
-      "motivo": "carril acceso: permisos finos por página (#12)",
-      "desde": "2026-10-05T18:01:15.735Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/permisos.ts",
-      "motivo": "carril acceso: permisos finos por página (#12)",
-      "desde": "2026-10-05T18:01:15.735Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/acceso/PersonasConAcceso.tsx",
-      "motivo": "carril acceso: permisos finos por página (#12)",
-      "desde": "2026-10-05T18:01:15.735Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/knowledge/DialogoCompartir.tsx",
-      "motivo": "carril acceso: permisos finos por página (#12)",
-      "desde": "2026-10-05T18:01:15.735Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/ai/paginaIA.ts",
-      "motivo": "carril acceso: permisos finos por página (#12)",
-      "desde": "2026-10-05T18:01:15.735Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "src/components/knowledge/MenuBloque.tsx",
       "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
@@ -119,72 +89,6 @@
       "ruta": "src/server/buscador.ts",
       "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
       "desde": "2026-10-05T18:04:57.602Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/correo.ts",
-      "motivo": "carril acceso: permisos finos (#12)",
-      "desde": "2026-10-05T18:05:31.143Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "carril acceso: permisos finos (#12)",
-      "desde": "2026-10-05T18:05:31.143Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/auth.ts",
-      "motivo": "carril acceso: permisos finos (#12)",
-      "desde": "2026-10-05T18:05:31.143Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/avisos.ts",
-      "motivo": "carril acceso: permisos finos (#12)",
-      "desde": "2026-10-05T18:05:31.143Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/knowledge.ts",
-      "motivo": "carril acceso: permisos finos (#12)",
-      "desde": "2026-10-05T18:05:31.143Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/social/Campana.tsx",
-      "motivo": "carril acceso: permisos finos (#12)",
-      "desde": "2026-10-05T18:05:31.143Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/navegacion/ArbolPaginas.tsx",
-      "motivo": "carril acceso: compartidas conmigo",
-      "desde": "2026-10-05T18:10:52.185Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/acceso/CompartidasConmigo.tsx",
-      "motivo": "carril acceso: compartidas conmigo",
-      "desde": "2026-10-05T18:10:52.185Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "carril acceso: changelog y política",
-      "desde": "2026-10-05T18:14:39.943Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/seguridad/politica.ts",
-      "motivo": "carril acceso: changelog y política",
-      "desde": "2026-10-05T18:14:39.943Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/seguridad/clasificacion.ts",
-      "motivo": "carril acceso: changelog y política",
-      "desde": "2026-10-05T18:14:39.943Z"
     }
   ]
 }
