@@ -119,6 +119,42 @@
       "ruta": "src/server/buscador.ts",
       "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
       "desde": "2026-10-05T18:04:57.602Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/correo.ts",
+      "motivo": "carril acceso: permisos finos (#12)",
+      "desde": "2026-10-05T18:05:31.143Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "carril acceso: permisos finos (#12)",
+      "desde": "2026-10-05T18:05:31.143Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/auth.ts",
+      "motivo": "carril acceso: permisos finos (#12)",
+      "desde": "2026-10-05T18:05:31.143Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/avisos.ts",
+      "motivo": "carril acceso: permisos finos (#12)",
+      "desde": "2026-10-05T18:05:31.143Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/knowledge.ts",
+      "motivo": "carril acceso: permisos finos (#12)",
+      "desde": "2026-10-05T18:05:31.143Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/social/Campana.tsx",
+      "motivo": "carril acceso: permisos finos (#12)",
+      "desde": "2026-10-05T18:05:31.143Z"
     }
   ]
 }
