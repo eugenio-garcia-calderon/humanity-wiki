@@ -113,6 +113,12 @@
       "ruta": "src/utils/diferencias.ts",
       "motivo": "carril acceso: comentarios (#11) e historial (#8)",
       "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "drizzle/0138_comentarios_pagina.sql",
+      "motivo": "carril acceso: comentarios",
+      "desde": "2026-10-05T23:14:23.125Z"
     }
   ]
 }
