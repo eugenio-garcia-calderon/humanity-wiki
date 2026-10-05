@@ -167,6 +167,24 @@
       "ruta": "src/components/acceso/CompartidasConmigo.tsx",
       "motivo": "carril acceso: compartidas conmigo",
       "desde": "2026-10-05T18:10:52.185Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "carril acceso: changelog y política",
+      "desde": "2026-10-05T18:14:39.943Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/seguridad/politica.ts",
+      "motivo": "carril acceso: changelog y política",
+      "desde": "2026-10-05T18:14:39.943Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/seguridad/clasificacion.ts",
+      "motivo": "carril acceso: changelog y política",
+      "desde": "2026-10-05T18:14:39.943Z"
     }
   ]
 }
