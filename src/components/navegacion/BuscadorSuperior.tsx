@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import CajaBusqueda from '../buscador/CajaBusqueda';
 
@@ -42,7 +41,9 @@ import CajaBusqueda from '../buscador/CajaBusqueda';
 
 export default function BuscadorSuperior({ compacto = false }: { compacto?: boolean }) {
   const navegar = useNavigate();
-  const [conIA, setConIA] = useState(false);
+  // Sin interruptor de IA (2026-10-05): preguntar a la IA se hace con el
+  // botón flotante del chat, abajo a la derecha.
+  const conIA = false;
 
   return (
     // ══ CENTRADA EN LA PANTALLA, NO EN EL HUECO QUE SOBRA ═══════════════════
@@ -63,8 +64,10 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
     // los iconos a la derecha era esta caja al crecer. Desde 1280 lo hace el
     // hueco vacío de `Layout.tsx`, que recupera su `flex-1` justo a esa
     // anchura. Si no, los iconos se vendrían al centro con la caja encima.
-    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5
-      xl:absolute xl:left-1/2 xl:w-[34.5rem] xl:-translate-x-1/2 xl:flex-none">
+    // Un 20 % más estrecha (2026-10-05): 34,5 → 27,6 rem, y con tope también
+    // por debajo de `xl`, donde antes se estiraba todo lo que hubiera libre.
+    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 lg:max-w-[27.6rem]
+      xl:absolute xl:left-1/2 xl:w-[27.6rem] xl:-translate-x-1/2 xl:flex-none">
       {/* ══ EN UNA PANTALLA MUY ESTRECHA, UN BOTÓN Y NO UNA CAJA ══════════
           Medido a 320 px: la caja quedaba en 18 px de ancho **con 116 px de
           botones dentro**, y el campo de escribir medía **0**. O sea que el
@@ -105,7 +108,7 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
       <CajaBusqueda
         pastilla
         compacto={compacto}
-        placeholder={conIA ? 'Pregúntale a la IA…' : 'Buscar páginas…'}
+        placeholder="Buscar contenido…"
         className={cn('hidden lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
         // CON EL INTERRUPTOR ENCENDIDO, BUSCAR ES PREGUNTAR. Las sugerencias de
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
@@ -121,37 +124,6 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
         alPegarFichero={conIA ? (f => window.dispatchEvent(new CustomEvent('ai:adjuntar', { detail: f }))) : undefined}
         derecha={
           <>
-            {/* EL INTERRUPTOR, DENTRO DE LA CAJA. Fuera sería un ajuste de la
-                página; dentro es una propiedad de lo que estás escribiendo, que
-                es lo que de verdad es. */}
-            <button
-              type="button"
-              onClick={() => setConIA(v => !v)}
-              title={conIA ? 'Buscando con IA — cuesta puntos' : 'Búsqueda con IA'}
-              aria-label="Búsqueda con IA"
-              aria-pressed={conIA}
-              className={cn(
-                'mr-1 flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 transition-colors',
-                conIA ? 'bg-violet-100 text-violet-700' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600',
-              )}
-            >
-              <Sparkles className="h-3.5 w-3.5 shrink-0" />
-              <span className="hidden text-[11px] font-black xl:inline">IA</span>
-              {/* La pastilla del interruptor: dice si está encendido sin tener
-                  que interpretar un color.
-
-                  SÓLO DESDE `xl`. Medido: la pastilla y su palabra cuestan 34 px
-                  de los 218 que tiene la caja en un portátil de 1024, y ahí esos
-                  34 son la mitad del sitio donde se escribe. Por debajo queda la
-                  estrella sola, que ya cambia de color al encenderse — se pierde
-                  el matiz de «esto es un interruptor», no el de si está puesto. */}
-              <span className={cn('relative hidden h-3.5 w-6 shrink-0 rounded-full transition-colors xl:block',
-                conIA ? 'bg-violet-600' : 'bg-slate-300')}>
-                <span className={cn('absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white transition-all',
-                  conIA ? 'left-3' : 'left-0.5')} />
-              </span>
-            </button>
-
             <button
               type="submit"
               title="Buscar"

@@ -357,3 +357,12 @@ would end the «64 / 62 / 57» question. People in `todos` are only users whose
 profile lists the theme; `game_agents` cannot be linked to a theme at all. The
 wheel page has no link back to the feed. Duplicate-looking cards (two folders
 named «Inversiones») cannot be told apart without a path or a date.
+
+## Bottom bar unmounted, not deleted (2026-10-05)
+
+`RailInferior.tsx`, its rising panel (`panelAbierto`) and the «+» create sheet
+(`HojaCrear`, `circulo === 'crear'`) are no longer reachable from the global
+layout: Eugenio asked for only the floating AI button. Creating now goes
+through the left menu (Nueva carpeta, Todas mis páginas → Nueva página) and
+each tool's own page. If nobody misses the bar in a few weeks, delete the
+component and the dead state in `Layout.tsx` (~200 lines).

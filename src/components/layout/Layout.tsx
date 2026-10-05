@@ -24,9 +24,8 @@ import Panel, { EstilosPanel } from '../navegacion/Panel';
  * la idea de «hay un menú abierto».
  */
 import { type Circulo } from '../navegacion/TresCirculos';
-import RailInferior from '../navegacion/RailInferior';
 import AvatarRail from '../navegacion/AvatarRail';
-import MarcaRail from '../navegacion/MarcaRail';
+import TodasMisPaginas, { MarcaCabecera } from '../navegacion/MarcaRail';
 import FiltroAmbito, { leerAmbito, type Ambito } from '../navegacion/FiltroAmbito';
 import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
@@ -337,6 +336,8 @@ export default function Layout() {
   // El panel de la IA se pega al borde derecho: con el menú de temas abierto
   // se corre a su izquierda, para no taparlo.
   const temasVisible = !esMovil && !temasPlegado;
+  // Lo que ocupa el menú izquierdo, para que el Feedback flotante no caiga
+  // encima de él (se define abajo, donde ya se sabe si está plegado).
   // The theme you are looking at, so the menu can say so.
   const temaActivo = /^\/temas\/(O\d{3})(\/|$)/.exec(location.pathname)?.[1] ?? null;
   const subtemaActivo = new URLSearchParams(location.search).get('subtema');
@@ -358,6 +359,12 @@ export default function Layout() {
     try { localStorage.setItem('humanity:paginas-plegado', n ? '1' : '0'); } catch { /* sin almacenamiento */ }
     return n;
   });
+  // El ancho del menú izquierdo, publicado para el Feedback flotante.
+  useEffect(() => {
+    const abierto = !esMovil && !!user && !paginasPlegado;
+    document.documentElement.style.setProperty('--hueco-paginas', abierto ? '256px' : '0px');
+    return () => { document.documentElement.style.setProperty('--hueco-paginas', '0px'); };
+  }, [esMovil, user, paginasPlegado]);
 
   const temasDelMenu = useMemo(() => {
     const pos = (clave: string, i: number) => prefsTemas[clave]?.orden ?? i;
@@ -778,7 +785,10 @@ export default function Layout() {
             claro
             titulo="Mis páginas"
             items={itemsProyectos}
-            cabeza={<><MarcaRail onIrAlInicio={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} /><AvatarRail desplegado /></>}
+            // 2026-10-05: la marca, en la fila de arriba junto a plegar; y debajo
+            // tu perfil, tus avisos y «Todas mis páginas», en ese orden.
+            junto={<MarcaCabecera onIrAlInicio={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} />}
+            cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
             abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
             onElegir={h => navigate(h.ruta)}
             onAbrirSubmenu={h => {
@@ -955,8 +965,11 @@ export default function Layout() {
             title={paginasPlegado || esMovil ? 'Mostrar tus páginas' : 'Ocultar tus páginas'}
             aria-label={paginasPlegado || esMovil ? 'Mostrar tus páginas' : 'Ocultar tus páginas'}
             aria-expanded={esMovil ? circulo === 'organizar' : !paginasPlegado}
-            className="shrink-0 w-9 h-9 grid place-items-center self-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            // «Mis páginas» junto al icono (2026-10-05): que se entienda que
+            // pulsando ahí se abre el menú de la izquierda.
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
             {paginasPlegado || esMovil ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
           </button>
         )}
         {/* «Mis páginas» ya no está aquí (2026-10-05): vive dentro del menú
@@ -1031,7 +1044,9 @@ export default function Layout() {
             EN MÓVIL SÓLO EL LOGO: a 375 px la barra lleva ya el buscador, y el
             nombre volvería a chocar. El desplegable sigue abriéndose desde el
             logo, así que no se pierde ninguna página. */}
-        {(esMovil || paginasPlegado || !user) && (
+        {/* Sólo sin sesión (2026-10-05): con sesión la marca vive en la fila
+            de arriba del menú izquierdo y se ve al abrirlo. */}
+        {!user && (
         <div className="relative shrink-0" ref={infoRef}>
           {/* Se calcula una vez porque lo miran dos sitios: el fondo del botón
               y el tono del verde. Dos copias de la misma condición son dos
@@ -1458,22 +1473,9 @@ export default function Layout() {
             Se queda **la campana**, que él no nombró y que es lo único que
             avisa: esconder un aviso detrás de un clic es dejar de avisar. */}
 
-        <Campana compacto={compacto} />
-        {/* ══ FEEDBACK, A LA VISTA (2026-10-05) ═══════════════════════════
-            Eugenio: «pon el botón de feedback arriba en el menú a la derecha,
-            que sea visible, y sácalo del desplegable de humanity.wiki». Ámbar
-            como siempre: es lo que se busca en un momento malo. */}
-        <button
-          onClick={() => navigate('/hormiguero')}
-          title="Feedback: cuéntanos qué falla o qué falta"
-          aria-label="Feedback"
-          className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 text-xs font-black text-amber-800 transition-colors hover:bg-amber-100',
-            compacto ? 'h-7' : 'h-9',
-            location.pathname === '/hormiguero' && 'bg-amber-200')}
-        >
-          <IconoFeedback className="h-4 w-4 shrink-0" />
-          <span className="hidden sm:inline">Feedback</span>
-        </button>
+        {/* La campana y el Feedback se han ido de aquí (2026-10-05): la campana
+            vive en el menú izquierdo y el Feedback es un botón flotante abajo a
+            la izquierda. */}
 
 
         {/* ══ «MIS PROYECTOS», FIJO ARRIBA A LA DERECHA (2026-08-25) ══════
@@ -1508,28 +1510,26 @@ export default function Layout() {
             las dos esquinas se comportan igual porque son la misma idea. */}
         {/* «EXPLORAR», ARRIBA A LA DERECHA (2026-10-02). Abre por abajo los
             temas de la humanidad (`HojaExplorar`); pulsarlo otra vez lo cierra. */}
-        {!esMovil && temasPlegado && (
+        {/* ══ «EXPLORAR», QUE ABRE EL MENÚ DE LA DERECHA (2026-10-05) ════════
+            Eugenio: «en vez de poner Temas y el botón de descolapsar, pon
+            Explorar y el botón de descolapsar». Con el menú abierto no se ve:
+            «Explorar» está entonces dentro del menú, junto a su botón de
+            plegar. En el teléfono no hay menú derecho: abre la hoja de temas. */}
+        {(esMovil || temasPlegado) && (
           <button
-            onClick={() => setTemasPlegado(false)}
-            title="Mostrar el menú de temas"
-            aria-label="Mostrar el menú de temas"
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
-            <PanelRightOpen className="w-5 h-5" />
-            <span className="hidden text-[13px] font-black sm:inline">Temas</span>
+            onClick={() => {
+              setPorRoce(false);
+              if (esMovil) { setCirculo(c => (c === 'explorar' ? null : 'explorar')); return; }
+              setTemasPlegado(false);
+            }}
+            title={esMovil ? 'Explorar los temas' : 'Abrir el menú de temas'}
+            aria-label={esMovil ? 'Explorar los temas' : 'Abrir el menú de temas'}
+            aria-expanded={esMovil ? circulo === 'explorar' : false}
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
+            {esMovil ? <Compass className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
           </button>
         )}
-        <button
-          onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
-          title="Explorar los temas"
-          aria-expanded={circulo === 'explorar'}
-          className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
-            circulo === 'explorar'
-              ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
-              : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
-        >
-          <Compass className="h-4 w-4 shrink-0" />
-          <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
-        </button>
 
         {!user && !cargandoSesion && (
           <Link to="/login"
@@ -1588,6 +1588,16 @@ export default function Layout() {
               claro
               titulo="Temas"
               items={temasDelMenu}
+              junto={(
+                <button
+                  onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
+                  title="Explorar los temas"
+                  aria-expanded={circulo === 'explorar'}
+                  className={cn('inline-flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-lg px-2 text-[13px] font-black transition-colors',
+                    circulo === 'explorar' ? 'bg-slate-900 text-white' : 'text-slate-800 hover:bg-slate-100')}>
+                  <Compass className="h-4 w-4 shrink-0" /> <span className="truncate">Explorar</span>
+                </button>
+              )}
               cabeza={<FiltroAmbito ambito={ambitoTemas} onCambiar={setAmbitoTemas} conSesion={!!user} />}
               personal={user ? {
                 esFavorito: c => !!prefsTemas[c]?.favorito,
@@ -1709,7 +1719,8 @@ export default function Layout() {
                   claro
                   titulo="Mis páginas"
                   items={itemsProyectos}
-                  cabeza={<><MarcaRail onIrAlInicio={() => { navigate('/'); setCirculo(null); }} /><AvatarRail desplegado /></>}
+                  junto={<MarcaCabecera onIrAlInicio={() => { navigate('/'); setCirculo(null); }} />}
+                  cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
                   abierta={null}
                   // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
                   // que no hay ningún gesto intermedio entre mirar y abrir. El
@@ -1815,16 +1826,37 @@ export default function Layout() {
           la suya —con los bloques que se pueden AÑADIR, no con las páginas a
           las que se puede IR—. Dos barras a la vez serían dos filas de iconos
           compitiendo por el mismo pulgar. */}
-      {!/^\/paginas\/[^/]+/.test(location.pathname) && (
-      <div ref={cajaCirculos}>
-        <RailInferior
-          abierta={panelAbierto?.clave ?? null}
-          onElegir={h => { navigate(h.ruta); setPanelAbierto(null); }}
-          onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
-          onPasarPorEncima={() => setPorRoce(false)}
-          onIA={() => window.dispatchEvent(new Event('ai:abrir'))}
-        />
-      </div>
+      {/* ══ SIN BARRA DE ABAJO: DOS BOTONES FLOTANTES (2026-10-05) ════════
+          Eugenio: «quita la barra de creación de abajo y deja solo el botón de
+          IA abajo a la derecha, como un botón flotante para abrir el chat; y el
+          feedback flotante abajo a la izquierda, simétrico». Cada uno se aparta
+          de su menú lateral cuando está abierto (`--hueco-paginas`,
+          `--hueco-temas`). En el editor de páginas el de la IA no se pinta: el
+          editor ya lleva el suyo, que abre la IA sabiendo qué página tienes
+          abierta. */}
+      <div ref={cajaCirculos} />
+      <button
+        onClick={() => navigate('/hormiguero')}
+        title="Feedback: cuéntanos qué falla o qué falta"
+        aria-label="Feedback"
+        style={{ left: 'calc(var(--hueco-paginas, 0px) + 16px)', bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+        className={cn('fixed z-[9990] inline-flex h-12 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 text-sm font-black text-amber-800 shadow-lg transition-colors hover:bg-amber-100',
+          location.pathname === '/hormiguero' && 'bg-amber-200')}
+      >
+        <IconoFeedback className="h-5 w-5 shrink-0" />
+        <span className="hidden sm:inline">Feedback</span>
+      </button>
+      {!/^\/paginas\/[^/]+/.test(location.pathname) && !isIAPage && (
+        <button
+          onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
+          title="Hablar con la IA"
+          aria-label="Abrir el chat de la IA"
+          style={{ right: 'calc(var(--hueco-temas, 0px) + 16px)', bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+          className="fixed z-[9990] inline-flex h-12 items-center gap-2 rounded-full bg-violet-600 px-4 text-sm font-black text-white shadow-lg shadow-violet-600/30 transition-colors hover:bg-violet-700"
+        >
+          <Sparkles className="h-5 w-5 shrink-0" />
+          <span className="hidden sm:inline">IA</span>
+        </button>
       )}
 
       {/* ══ EL PANEL SUBE DESDE ABAJO (2026-08-25) ═════════════════════════
