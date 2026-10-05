@@ -209,6 +209,12 @@
       "ruta": "src/components/tablas/GaleriaCarrusel.tsx",
       "motivo": "galería en carrusel con ver todo",
       "desde": "2026-10-05T23:20:00.669Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/avisoPaginas.ts",
+      "motivo": "editorA: aviso de sincronizado entre pestañas",
+      "desde": "2026-10-05T23:20:37.372Z"
     }
   ]
 }
