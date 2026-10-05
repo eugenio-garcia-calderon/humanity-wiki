@@ -95,6 +95,30 @@
       "ruta": "src/server/ai/paginaIA.ts",
       "motivo": "carril acceso: permisos finos por página (#12)",
       "desde": "2026-10-05T18:01:15.735Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/MenuBloque.tsx",
+      "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
+      "desde": "2026-10-05T18:04:57.602Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/documentos.ts",
+      "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
+      "desde": "2026-10-05T18:04:57.602Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
+      "desde": "2026-10-05T18:04:57.602Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/buscador.ts",
+      "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
+      "desde": "2026-10-05T18:04:57.602Z"
     }
   ]
 }
