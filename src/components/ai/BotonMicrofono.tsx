@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mic, ChevronDown, Check } from 'lucide-react';
+import { Mic, ChevronDown, Check, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Microfono } from '../../hooks/useVoiceDictation';
 
@@ -14,7 +14,7 @@ import type { Microfono } from '../../hooks/useVoiceDictation';
 // pestañita al lado abre la lista de micrófonos; el elegido se recuerda en
 // este navegador. Si algo falla, se dice aquí mismo, encima del botón.
 
-export default function BotonMicrofono({ escuchando, onPulsar, microfonos, microfono, onElegir, onAbrirLista, error, nivel = 0 }: {
+export default function BotonMicrofono({ escuchando, onPulsar, microfonos, microfono, onElegir, onAbrirLista, error, nivel = 0, numero }: {
   escuchando: boolean;
   onPulsar: () => void;
   microfonos: Microfono[];
@@ -24,6 +24,8 @@ export default function BotonMicrofono({ escuchando, onPulsar, microfonos, micro
   error?: string | null;
   /** Cuánto suena ahora, 0–1: el halo crece con la voz, como en Claude. */
   nivel?: number;
+  /** Mientras se prueban los tres métodos (2026-10-05): el número del botón. */
+  numero?: number;
 }) {
   const [abierta, setAbierta] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -61,6 +63,7 @@ export default function BotonMicrofono({ escuchando, onPulsar, microfonos, micro
             style={{ transform: `scale(${1 + Math.min(0.9, nivel * 1.8)})` }} />
         )}
         <Mic className="relative w-4 h-4" />
+        {numero && <Numero n={numero} />}
       </button>
       <button type="button" onClick={() => { if (!abierta) onAbrirLista(); setAbierta(a => !a); }}
         title="Elegir el micrófono" aria-label="Elegir el micrófono" aria-expanded={abierta}
@@ -89,6 +92,48 @@ export default function BotonMicrofono({ escuchando, onPulsar, microfonos, micro
       )}
 
       {aviso && !abierta && (
+        <div role="alert" className="absolute left-0 bottom-full mb-1 z-40 w-64 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-700 shadow-lg">
+          {aviso}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Numero({ n }: { n: number }) {
+  return (
+    <span aria-hidden className="absolute -top-0.5 -right-0.5 min-w-3.5 h-3.5 px-0.5 grid place-items-center rounded-full bg-slate-700 text-white text-[9px] font-black leading-none">{n}</span>
+  );
+}
+
+/**
+ * LOS BOTONES 2 Y 3 (2026-10-05). Otro método de dictado cada uno, para que
+ * Eugenio pruebe y se quede con el que funcione. Sin lista de micrófonos: el
+ * 2 usa el que elige Chrome y el 3 el elegido en la flechita del 1.
+ */
+export function BotonVozAlternativo({ numero, titulo, escuchando, procesando, onPulsar, error }: {
+  numero: number; titulo: string; escuchando: boolean; procesando?: boolean; onPulsar: () => void; error?: string | null;
+}) {
+  const [aviso, setAviso] = useState<string | null>(null);
+  useEffect(() => {
+    if (!error) return;
+    setAviso(error);
+    const t = setTimeout(() => setAviso(null), 8000);
+    return () => clearTimeout(t);
+  }, [error]);
+  return (
+    <div className="relative flex items-center">
+      <button type="button" onClick={onPulsar} disabled={procesando}
+        title={procesando ? 'Transcribiendo…' : escuchando ? `Detener (${titulo})` : `Dictar — ${titulo}`}
+        aria-label={escuchando ? `Detener el dictado ${numero}` : `Dictar por voz, método ${numero}`}
+        aria-pressed={escuchando}
+        className={cn('relative w-8 h-8 grid place-items-center rounded-full transition-colors',
+          escuchando ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/40 animate-pulse'
+          : procesando ? 'bg-blue-50 text-blue-500' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}>
+        {procesando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="relative w-4 h-4" />}
+        <Numero n={numero} />
+      </button>
+      {aviso && (
         <div role="alert" className="absolute left-0 bottom-full mb-1 z-40 w-64 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-700 shadow-lg">
           {aviso}
         </div>
