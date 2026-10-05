@@ -8444,3 +8444,18 @@ en mis páginas como proyecto pendiente».
 - **Lo de arriba del menú son carpetas** («Aldea Regenerativa», «Meta Vida»…) y no se podían arrastrar. Ahora una carpeta se suelta dentro de otra y se anidan sin límite (`proyectos.padre_id`, migración `0133_carpetas_anidadas.sql`; `POST /api/carpetas/:id/mover`, que impide los círculos). La zona «Soltar aquí para sacarla fuera de todo» también saca una carpeta arriba.
 - **Arrastre que fallaba al soltar rápido**: las filas sólo aceptaban en `dragover`; quien soltaba nada más entrar en una fila no generaba ninguno y el navegador daba el arrastre por fallido. Ahora se acepta ya en `dragenter`. Probado con el ratón: página de arriba dentro de otra página de arriba, y página dentro de carpeta.
 - **Clic derecho → Borrar**, como en Notion. Una página va a la papelera (15 días) con todas las que lleva dentro y el aviso trae «Deshacer»; una carpeta se archiva tras preguntar, y lo de dentro sale fuera sin borrarse.
+
+### 2026-10-05 — Left menu: drag databases and editor blocks onto pages, checked by a bot
+- Eugenio asked to drag pages, images and databases in the left menu, so they land in the page you drop them on.
+- In the menu tree (`ArbolPaginas.tsx`):
+  - database nodes can be dragged onto any page, using the new `POST /api/paginas/:id/traer` with `{desde, tabla_id}`;
+  - database row pages accept drops too.
+- From the editor, a block dragged by its handle and released over a page in the menu moves to that page.
+  - This covers image, text, database and any other block. Tree rows carry `data-arbol-destino`, and the hovered page lights up via `humanity:bloque-sobre`.
+  - Pending edits are saved first. The server moves the block (`/traer` with `{desde, bloque_id}`) and the editor drops it locally without re-saving.
+  - A sub-page block moves its page through `/mover`, which stays cycle-safe.
+  - A «Llevado a «X»» notice confirms the move.
+- Moves are announced on `window` and to other tabs (`src/utils/avisoPaginas.ts`, `BroadcastChannel`). A page open elsewhere updates its blocks, so its autosave no longer undoes the move.
+- Test bot `bot-arrastre.cjs` (Playwright with real mouse drags, server-side checks), run twice:
+  - iteration 1: 15/15 passed. Its review led to the confirmation notice and the cross-tab fix.
+  - iteration 2: 20/20 passed. It added folders, two tabs, dropping a page onto itself, and the notice.

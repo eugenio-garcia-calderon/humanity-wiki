@@ -42,6 +42,7 @@ import {
   PreviaPagina, PreviaArchivos, PreviaTabla, PreviaPublicaciones, PreviaComercio,
 } from '../components/bienvenida/previas';
 import { abrirLateral } from '../components/ventanas/bus';
+import { avisarMovimiento } from '../utils/avisoPaginas';
 import { cn } from '../utils/cn';
 import CrearProducto from '../components/knowledge/CrearProducto';
 // La tabla de estilos de los bloques vive en el LECTOR, y el editor la
@@ -720,9 +721,18 @@ function EditorPagina() {
     e.preventDefault();
     const x0 = e.clientX, y0 = e.clientY;
     let movido = false;
+    /** La página del menú izquierdo que hay debajo, si la hay (2026-10-05). */
+    let aPagina: string | null = null;
     /** Dónde caería el bloque si se soltara en (x, y). */
     const calcular = (x: number, y: number) => {
-      const caja = (document.elementFromPoint(x, y) as HTMLElement | null)?.closest<HTMLElement>('[data-bloque-caja]');
+      const debajo = document.elementFromPoint(x, y) as HTMLElement | null;
+      // SOBRE UNA PÁGINA DEL MENÚ: el bloque irá a esa página. El menú se
+      // entera por un aviso, porque este arrastre es del puntero y no del
+      // navegador, y él solo no lo vería.
+      const enMenu = debajo?.closest<HTMLElement>('[data-arbol-destino]')?.dataset.arbolDestino || null;
+      if (enMenu !== aPagina) { aPagina = enMenu; window.dispatchEvent(new CustomEvent('humanity:bloque-sobre', { detail: { pagina: enMenu } })); }
+      if (enMenu) { destinoRef.current = null; setDestino(null); return; }
+      const caja = debajo?.closest<HTMLElement>('[data-bloque-caja]');
       if (!caja) return;   // en el hueco entre dos bloques se queda el último destino
       const tid = caja.dataset.bloqueCaja!;
       if (tid === bid) { destinoRef.current = null; setDestino(null); return; }
@@ -749,7 +759,9 @@ function EditorPagina() {
       if (movido && (ev.clientX || ev.clientY)) calcular(ev.clientX, ev.clientY);
       window.removeEventListener('pointerup', alSoltar);
       document.body.style.userSelect = '';
+      if (aPagina) window.dispatchEvent(new CustomEvent('humanity:bloque-sobre', { detail: { pagina: null } }));
       if (!movido) setMenuAsa(m => (m === bid ? null : bid));
+      else if (aPagina) llevarAPagina(bid, aPagina);
       else if (destinoRef.current) mover(bid, destinoRef.current);
       destinoRef.current = null;
       setDestino(null);
@@ -757,6 +769,37 @@ function EditorPagina() {
     };
     window.addEventListener('pointermove', alMover);
     window.addEventListener('pointerup', alSoltar);
+  };
+
+  /**
+   * UN BLOQUE A OTRA PÁGINA, SOLTÁNDOLO EN EL MENÚ (2026-10-05). Eugenio:
+   * «arrastrar una imagen, una base de datos… y que se meta en la página donde
+   * la sueltas». Lo pendiente se guarda antes, para que el servidor tenga el
+   * bloque tal como está en pantalla; luego el servidor lo saca de aquí y lo
+   * pone al final de la otra, y aquí se quita sin volver a guardar. Una
+   * subpágina no es un bloque cualquiera: es mover esa página (`/mover`, que
+   * no deja hacer círculos).
+   */
+  const llevarAPagina = async (bid: string, pid: string) => {
+    if (!docId.current || pid === docId.current) return;
+    const b = bloquesRef.current.find(x => x.id === bid);
+    if (!b) return;
+    clearTimeout(timerGuardado.current);
+    await guardarAhora();
+    const subpagina = b.tipo === 'subpagina' && b.entityId;
+    const r = await fetch(subpagina ? `/api/paginas/${b.entityId}/mover` : `/api/paginas/${pid}/traer`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subpagina ? { dentro_de: pid } : { desde: docId.current, bloque_id: bid }),
+    }).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!r?.ok) { fallar(j.error || 'No se ha podido llevar a esa página.'); return; }
+    setBloques(bs => bs.filter(x => x.id !== bid));
+    // Con el bloque, para que la página de destino, si está abierta en otra
+    // pestaña, lo ponga en su pantalla y no lo borre al guardar.
+    const destinoNombre = document.querySelector(`[data-arbol-destino="${pid}"]`)?.textContent?.replace('Meter dentro', '').trim() || 'la otra página';
+    if (subpagina) avisarMovimiento('humanity:pagina-movida', { id: b.entityId, titulo: b.pubTitulo, dentro_de: pid });
+    avisarMovimiento('humanity:bloque-movido', { desde: docId.current, a: pid, bloque: subpagina ? undefined : j.bloque, desdeEditor: true, destinoNombre });
+    window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
   };
 
   /** Subir archivos desde el «+»: el mismo camino que pegarlos o soltarlos. */
@@ -844,7 +887,16 @@ function EditorPagina() {
       });
     };
     window.addEventListener('humanity:pagina-movida', oir);
-    return () => window.removeEventListener('humanity:pagina-movida', oir);
+    // Una base de datos llevada desde el menú (2026-10-05): sale de aquí, o
+    // llega aquí, y la pantalla se pone igual sin volver a guardar.
+    const bloque = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (!d.bloque || !docId.current) return;
+      if (d.desde === docId.current) setBloques(bs => bs.filter(b => b.id !== d.bloque.id));
+      if (d.a === docId.current) setBloques(bs => (bs.some(b => b.id === d.bloque.id) ? bs : [...bs, d.bloque]));
+    };
+    window.addEventListener('humanity:bloque-movido', bloque);
+    return () => { window.removeEventListener('humanity:pagina-movida', oir); window.removeEventListener('humanity:bloque-movido', bloque); };
   }, []);
 
   // -- Fase 2: buscador de publicaciones para embeber -------------------------

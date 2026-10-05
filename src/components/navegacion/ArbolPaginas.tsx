@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronRight, FileText, FolderKanban, Boxes, Loader2, Trash2 } from 'lucide-react';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
+import { avisarMovimiento } from '../../utils/avisoPaginas';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -81,6 +82,23 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
   // Al entrar en otra página se refresca: puede ser nueva, o haberse renombrado.
   useEffect(() => { pedir(); }, [aqui, pedir]);
 
+  // UN BLOQUE DEL EDITOR PASANDO POR ENCIMA (2026-10-05): el editor arrastra
+  // con el puntero, no con el arrastre del navegador, así que avisa por aquí
+  // de qué página tiene debajo; aquí se ilumina, y al soltarlo se refresca.
+  useEffect(() => {
+    const oir = (e: Event) => setSobre((e as CustomEvent).detail?.pagina || null);
+    const movido = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (d.a) alternar(d.a, true);
+      // Desde el editor no se ve a dónde ha ido: se dice.
+      if (d.desdeEditor) setAviso({ texto: `Llevado a «${d.destinoNombre}».` });
+      pedir();
+    };
+    window.addEventListener('humanity:bloque-sobre', oir);
+    window.addEventListener('humanity:bloque-movido', movido);
+    return () => { window.removeEventListener('humanity:bloque-sobre', oir); window.removeEventListener('humanity:bloque-movido', movido); };
+  }, [pedir]);
+
   useEffect(() => {
     if (!aviso) return;
     const t = setTimeout(() => setAviso(null), aviso.deshacer ? 8000 : 5000);
@@ -123,7 +141,27 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
   /** ¿Está `id` dentro de `de` (o es él)? Para no soltar una página en sus hijas. */
   const dentroDe = (id: string, de: string): boolean => id === de || (nodos[de]?.hijas || []).some(h => dentroDe(id, h));
 
+  /** La página de la que cuelga un nodo (para una base de datos, la suya). */
+  const padreDe = (id: string) => Object.values(nodos).find(n => n.hijas.includes(id))?.id || null;
+
   const mover = async (id: string, destino: { pagina?: string; carpeta?: string | null }) => {
+    // UNA BASE DE DATOS NO ES UNA PÁGINA (2026-10-05): viaja como bloque, de
+    // su página a la otra (`/traer`), con todo lo que tiene dentro.
+    if (nodos[id]?.tipo === 'bd') {
+      if (!destino.pagina) { setAviso({ texto: 'Una base de datos tiene que ir dentro de una página.', error: true }); return; }
+      const desde = padreDe(id);
+      if (!desde || desde === destino.pagina) return;
+      const r = await fetch(`/api/paginas/${destino.pagina}/traer`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ desde, tabla_id: id.slice(3) }),
+      }).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : {};
+      if (!r?.ok) { setAviso({ texto: j.error || 'No se ha podido mover.', error: true }); return; }
+      alternar(destino.pagina, true);
+      pedir();
+      avisarMovimiento('humanity:bloque-movido', { desde, a: destino.pagina, bloque: j.bloque });
+      return;
+    }
     const cuerpo = destino.pagina ? { dentro_de: destino.pagina } : { dentro_de: null, carpeta_id: destino.carpeta ?? null };
     const r = await fetch(`/api/paginas/${id}/mover`, {
       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo),
@@ -135,7 +173,7 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     pedir();
     // La página de destino, si está abierta, se vuelve a leer: si no, al
     // guardar lo que tiene en pantalla se llevaría por delante el bloque nuevo.
-    window.dispatchEvent(new CustomEvent('humanity:pagina-movida', { detail: { id, titulo: nodos[id]?.titulo, dentro_de: destino.pagina || null } }));
+    avisarMovimiento('humanity:pagina-movida', { id, titulo: nodos[id]?.titulo, dentro_de: destino.pagina || null });
   };
 
   const esCarpeta = (k: string) => k.startsWith('carpeta:');
@@ -228,8 +266,11 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     const abierta = abiertos.has(n.id);
     const ruta = n.tipo === 'bd' ? null : `/paginas/${n.id}`;
     const activa = ruta === aqui;
-    const movible = n.tipo === 'pagina';
-    const aceptaDentro = n.tipo === 'pagina';
+    // Se arrastran páginas y bases de datos (2026-10-05); los elementos de una
+    // base de datos viven en ella. Se suelta dentro de cualquier página,
+    // también la de un elemento.
+    const movible = n.tipo === 'pagina' || n.tipo === 'bd';
+    const aceptaDentro = n.tipo === 'pagina' || n.tipo === 'fila';
     const resaltada = sobre === n.id;
     const sangria = 4 + Math.min(nivel, 6) * 14;
     const contenido = (
@@ -241,11 +282,13 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     return (
       <div key={n.id}>
         <div
-          {...(aceptaDentro ? zona(n.id, k => !esCarpeta(k) && !dentroDe(n.id, k), id => mover(id, { pagina: n.id })) : {})}
+          {...(aceptaDentro ? zona(n.id, k => !esCarpeta(k) && !dentroDe(n.id, k) && padreDe(k) !== n.id, id => mover(id, { pagina: n.id })) : {})}
+          // El editor busca esta marca para soltar un bloque aquí (ver `Documento.tsx`).
+          data-arbol-destino={aceptaDentro ? n.id : undefined}
           draggable={movible}
           onDragStart={movible ? empezar(n.id) : undefined}
           onDragEnd={terminar}
-          onContextMenu={movible ? abrirMenu('pagina', n.id, n.titulo) : undefined}
+          onContextMenu={n.tipo === 'pagina' ? abrirMenu('pagina', n.id, n.titulo) : undefined}
           className={cn('group/arbol relative flex items-center rounded-lg transition-colors',
             resaltada ? 'bg-emerald-50 ring-2 ring-emerald-400' : activa ? 'bg-slate-100' : 'hover:bg-slate-50')}>
           <button type="button"
