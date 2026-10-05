@@ -1,28 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "drizzle/0133_carpetas_anidadas.sql",
-      "motivo": "carpetas dentro de carpetas y borrar con clic derecho en el menú",
-      "desde": "2026-10-05T16:55:24.836Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/navegacion/ArbolPaginas.tsx",
-      "motivo": "carpetas dentro de carpetas y borrar con clic derecho en el menú",
-      "desde": "2026-10-05T16:55:24.836Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/documentos.ts",
-      "motivo": "carpetas dentro de carpetas y borrar con clic derecho en el menú",
-      "desde": "2026-10-05T16:55:24.836Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada del changelog",
-      "desde": "2026-10-05T17:04:46.757Z"
-    }
-  ]
+  "reservas": []
 }
