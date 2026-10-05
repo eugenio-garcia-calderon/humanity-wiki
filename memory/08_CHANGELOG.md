@@ -8439,3 +8439,8 @@ en mis páginas como proyecto pendiente».
   The menu opens straight on the Mi contenido / Todo switch (the «Temas»
   label is gone), then «Ver todos los temas» (opens the 15-theme sheet; it
   replaces «Personalizar»). «Nuevo tema» removed from this menu.
+
+### 2026-10-05 — Menú de páginas: carpetas dentro de carpetas, arrastre fiable y borrar con clic derecho (prog8)
+- **Lo de arriba del menú son carpetas** («Aldea Regenerativa», «Meta Vida»…) y no se podían arrastrar. Ahora una carpeta se suelta dentro de otra y se anidan sin límite (`proyectos.padre_id`, migración `0133_carpetas_anidadas.sql`; `POST /api/carpetas/:id/mover`, que impide los círculos). La zona «Soltar aquí para sacarla fuera de todo» también saca una carpeta arriba.
+- **Arrastre que fallaba al soltar rápido**: las filas sólo aceptaban en `dragover`; quien soltaba nada más entrar en una fila no generaba ninguno y el navegador daba el arrastre por fallido. Ahora se acepta ya en `dragenter`. Probado con el ratón: página de arriba dentro de otra página de arriba, y página dentro de carpeta.
+- **Clic derecho → Borrar**, como en Notion. Una página va a la papelera (15 días) con todas las que lleva dentro y el aviso trae «Deshacer»; una carpeta se archiva tras preguntar, y lo de dentro sale fuera sin borrarse.

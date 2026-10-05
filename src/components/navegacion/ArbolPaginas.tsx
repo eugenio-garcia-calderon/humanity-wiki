@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight, FileText, FolderKanban, Boxes, Loader2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ChevronRight, FileText, FolderKanban, Boxes, Loader2, Trash2 } from 'lucide-react';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
 import { cn } from '../../utils/cn';
 
@@ -20,9 +21,21 @@ import { cn } from '../../utils/cn';
 // Lo abierto se recuerda en este navegador. Arrastrar usa el del propio
 // navegador, como el resto de menús de la casa: soltar sobre una página la
 // mete dentro; sobre una carpeta, la saca a esa carpeta.
+//
+// LAS CARPETAS TAMBIÉN SE ARRASTRAN (2026-10-05, 2.ª vuelta). Eugenio: «sólo
+// funcionan las páginas que están dentro de las páginas, pero no la página
+// general, meterla dentro de otra página general». Lo de arriba del todo en
+// su menú son carpetas («Aldea Regenerativa», «Meta Vida»…), que se pintan
+// igual que una página y no se podían mover. Ahora una carpeta se suelta
+// dentro de otra (`padre_id`, migración 0133) y se anidan sin límite.
+//
+// CLIC DERECHO → BORRAR, como en Notion. Una página va a la papelera (15 días)
+// con todas las que lleva dentro, y el aviso trae «Deshacer». Una carpeta se
+// archiva y lo de dentro sale fuera, sin borrarse: eso se pregunta antes.
 
 type Nodo = { id: string; tipo: 'pagina' | 'bd' | 'fila'; titulo: string; icono: string | null; hijas: string[] };
-type Arbol = { carpetas: Array<{ id: string; titulo: string; slug: string; icono: string | null; paginas: string[] }>; raiz: string[]; nodos: Record<string, Nodo> };
+type Carpeta = { id: string; titulo: string; slug: string; icono: string | null; padre_id: string | null; paginas: string[] };
+type Arbol = { carpetas: Carpeta[]; raiz: string[]; nodos: Record<string, Nodo> };
 
 const CLAVE_ABIERTOS = 'humanity:arbol-abiertos';
 const leerAbiertos = (): Set<string> => {
@@ -41,8 +54,13 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
   const [arbol, setArbol] = useState<Arbol | 'fallo' | null>(null);
   const [abiertos, setAbiertos] = useState<Set<string>>(leerAbiertos);
   const [sobre, setSobre] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; error?: boolean; deshacer?: () => void } | null>(null);
+  /** El menú del clic derecho: dónde se abrió y sobre qué. */
+  const [menu, setMenu] = useState<{ x: number; y: number; tipo: 'pagina' | 'carpeta'; id: string; titulo: string } | null>(null);
+  const navigate = useNavigate();
+  const cajaMenu = useRef<HTMLDivElement | null>(null);
   const [arrastrando, setArrastrando] = useState(false);
+  /** Lo que se arrastra: el id de una página, o `carpeta:<id>`. */
   const arrastrada = useRef<string | null>(null);
   const aqui = useLocation().pathname;
 
@@ -65,9 +83,27 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
 
   useEffect(() => {
     if (!aviso) return;
-    const t = setTimeout(() => setAviso(null), 5000);
+    const t = setTimeout(() => setAviso(null), aviso.deshacer ? 8000 : 5000);
     return () => clearTimeout(t);
   }, [aviso]);
+
+  // El menú del clic derecho se cierra al pulsar fuera, con Escape o al
+  // desplazar: quedarse flotando sobre otra cosa sería borrar a ciegas.
+  useEffect(() => {
+    if (!menu) return;
+    // Lo que pasa DENTRO del menú no lo cierra: si no, pulsar «Borrar» lo
+    // cerraría antes de que llegara el clic.
+    const cerrar = (e?: Event) => { if (e?.target instanceof Node && cajaMenu.current?.contains(e.target)) return; setMenu(null); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(null); };
+    window.addEventListener('pointerdown', cerrar);
+    window.addEventListener('keydown', tecla);
+    window.addEventListener('scroll', cerrar, true);
+    window.addEventListener('resize', cerrar);
+    return () => {
+      window.removeEventListener('pointerdown', cerrar); window.removeEventListener('keydown', tecla);
+      window.removeEventListener('scroll', cerrar, true); window.removeEventListener('resize', cerrar);
+    };
+  }, [menu]);
 
   const alternar = (id: string, abrir?: boolean) => setAbiertos(s => {
     const n = new Set(s);
@@ -93,7 +129,7 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo),
     }).catch(() => null);
     const j = r ? await r.json().catch(() => ({})) : {};
-    if (!r?.ok) { setAviso(j.error || 'No se ha podido mover.'); return; }
+    if (!r?.ok) { setAviso({ texto: j.error || 'No se ha podido mover.', error: true }); return; }
     if (destino.pagina) alternar(destino.pagina, true);
     if (destino.carpeta) alternar(`carpeta:${destino.carpeta}`, true);
     pedir();
@@ -102,22 +138,90 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     window.dispatchEvent(new CustomEvent('humanity:pagina-movida', { detail: { id, titulo: nodos[id]?.titulo, dentro_de: destino.pagina || null } }));
   };
 
-  /** Lo que hace falta para que una fila acepte que le suelten una página. */
-  const zona = (clave: string, puede: (id: string) => boolean, soltar: (id: string) => void) => ({
-    onDragOver: (e: React.DragEvent) => {
+  const esCarpeta = (k: string) => k.startsWith('carpeta:');
+  const sinPrefijo = (k: string) => k.slice('carpeta:'.length);
+  const hijasDe = (padre: string | null) => arbol.carpetas.filter(c => c.padre_id === padre);
+  /** ¿Está la carpeta `id` dentro de `de` (o es ella)? Para no hacer círculos. */
+  const carpetaDentro = (id: string, de: string): boolean => id === de || hijasDe(de).some(h => carpetaDentro(id, h.id));
+
+  const moverCarpeta = async (id: string, dentroDe: string | null) => {
+    const r = await fetch(`/api/carpetas/${id}/mover`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dentro_de: dentroDe }),
+    }).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!r?.ok) { setAviso({ texto: j.error || 'No se ha podido mover la carpeta.', error: true }); return; }
+    if (dentroDe) alternar(`carpeta:${dentroDe}`, true);
+    pedir();
+    window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+  };
+
+  /** Una página y todas las que cuelgan de ella: a la papelera van juntas. */
+  const conDescendientes = (id: string): string[] =>
+    [id, ...(nodos[id]?.hijas || []).flatMap(h => (nodos[h]?.tipo === 'pagina' ? conDescendientes(h) : []))];
+
+  const borrar = async (m: NonNullable<typeof menu>) => {
+    setMenu(null);
+    if (m.tipo === 'carpeta') {
+      if (!window.confirm(`¿Borrar la carpeta «${m.titulo}»?\n\nLo que hay dentro no se borra: saldrá fuera de la carpeta.`)) return;
+      const r = await fetch(`/api/proyectos/${m.id}`, { method: 'DELETE', credentials: 'include' }).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : {};
+      if (!r?.ok) { setAviso({ texto: j.error || 'No se ha podido borrar la carpeta.', error: true }); return; }
+      setAviso({ texto: `Carpeta «${m.titulo}» borrada.` });
+      if (aqui === `/carpetas/${arbol.carpetas.find(c => c.id === m.id)?.slug}`) navigate('/paginas');
+    } else {
+      const ids = conDescendientes(m.id);
+      const rs = await Promise.all(ids.map(id => fetch(`/api/windows/${id}/papelera`, { method: 'POST', credentials: 'include' }).catch(() => null)));
+      if (!rs[0]?.ok) { setAviso({ texto: 'No se ha podido borrar la página.', error: true }); return; }
+      const restaurar = async () => {
+        setAviso(null);
+        await Promise.all(ids.map(id => fetch(`/api/windows/${id}/restaurar`, { method: 'POST', credentials: 'include' }).catch(() => null)));
+        pedir();
+        window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+      };
+      setAviso({ texto: `«${m.titulo}»${ids.length > 1 ? ` y ${ids.length - 1} más` : ''} en la papelera.`, deshacer: restaurar });
+      if (ids.some(id => aqui === `/paginas/${id}`)) navigate('/paginas');
+    }
+    pedir();
+    window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+  };
+
+  const abrirMenu = (tipo: 'pagina' | 'carpeta', id: string, titulo: string) => (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    setMenu({ x: e.clientX, y: e.clientY, tipo, id, titulo });
+  };
+
+  const empezar = (clave: string) => (e: React.DragEvent) => {
+    e.stopPropagation();
+    arrastrada.current = clave;
+    setArrastrando(true);
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', clave); } catch { /* Firefox */ }
+  };
+  const terminar = () => { arrastrada.current = null; setSobre(null); setArrastrando(false); };
+
+  /** Lo que hace falta para que una fila acepte que le suelten algo. */
+  const zona = (clave: string, puede: (id: string) => boolean, soltar: (id: string) => void) => {
+    // Hay que aceptar ya al ENTRAR, no sólo al pasar por encima: quien suelta
+    // nada más llegar a la fila no da tiempo a un `dragover`, y sin aceptar
+    // el navegador da el arrastre por fallido y no suelta nada.
+    const aceptar = (e: React.DragEvent) => {
       const id = arrastrada.current;
       if (!id || !puede(id)) return;
-      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move';
       if (sobre !== clave) setSobre(clave);
-    },
+    };
+    return {
+    onDragEnter: aceptar,
+    onDragOver: aceptar,
     onDragLeave: (e: React.DragEvent) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setSobre(s => (s === clave ? null : s)); },
     onDrop: (e: React.DragEvent) => {
-      e.preventDefault();
+      e.preventDefault(); e.stopPropagation();
       const id = arrastrada.current;
       setSobre(null); arrastrada.current = null; setArrastrando(false);
       if (id && puede(id)) soltar(id);
     },
-  });
+    };
+  };
 
   const fila = (n: Nodo, nivel: number): any => {
     const tiene = n.hijas.length > 0;
@@ -137,15 +241,11 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     return (
       <div key={n.id}>
         <div
-          {...(aceptaDentro ? zona(n.id, id => !dentroDe(n.id, id), id => mover(id, { pagina: n.id })) : {})}
+          {...(aceptaDentro ? zona(n.id, k => !esCarpeta(k) && !dentroDe(n.id, k), id => mover(id, { pagina: n.id })) : {})}
           draggable={movible}
-          onDragStart={movible ? e => {
-            arrastrada.current = n.id;
-            setArrastrando(true);
-            e.dataTransfer.effectAllowed = 'move';
-            try { e.dataTransfer.setData('text/plain', n.id); } catch { /* Firefox */ }
-          } : undefined}
-          onDragEnd={() => { arrastrada.current = null; setSobre(null); setArrastrando(false); }}
+          onDragStart={movible ? empezar(n.id) : undefined}
+          onDragEnd={terminar}
+          onContextMenu={movible ? abrirMenu('pagina', n.id, n.titulo) : undefined}
           className={cn('group/arbol relative flex items-center rounded-lg transition-colors',
             resaltada ? 'bg-emerald-50 ring-2 ring-emerald-400' : activa ? 'bg-slate-100' : 'hover:bg-slate-50')}>
           <button type="button"
@@ -183,48 +283,75 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     );
   };
 
+  const carpetaFila = (c: Carpeta, nivel: number): any => {
+    const clave = `carpeta:${c.id}`;
+    const abierta = abiertos.has(clave);
+    const ruta = `/carpetas/${c.slug}`;
+    const subcarpetas = hijasDe(c.id);
+    const sangria = 4 + Math.min(nivel, 6) * 14;
+    return (
+      <div key={c.id}>
+        <div {...zona(clave, k => !esCarpeta(k) || !carpetaDentro(c.id, sinPrefijo(k)), k => (esCarpeta(k) ? moverCarpeta(sinPrefijo(k), c.id) : mover(k, { carpeta: c.id })))}
+          draggable
+          onDragStart={empezar(clave)}
+          onDragEnd={terminar}
+          onContextMenu={abrirMenu('carpeta', c.id, c.titulo)}
+          className={cn('group/arbol relative flex items-center rounded-lg transition-colors',
+            sobre === clave ? 'bg-emerald-50 ring-2 ring-emerald-400' : aqui === ruta ? 'bg-slate-100' : 'hover:bg-slate-50')}>
+          <button type="button" onClick={() => alternar(clave)} style={{ marginLeft: sangria }}
+            aria-label={abierta ? `Cerrar ${c.titulo}` : `Ver las páginas de ${c.titulo}`} aria-expanded={abierta}
+            className="grid h-7 w-5 shrink-0 place-items-center rounded text-slate-400 hover:bg-slate-200 hover:text-slate-700">
+            <ChevronRight className={cn('h-3.5 w-3.5 transition-transform duration-150', abierta && 'rotate-90')} />
+          </button>
+          <Link to={ruta} onClick={onIr} draggable={false} title={c.titulo}
+            className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pl-1 pr-2 text-[13px] font-bold text-slate-700 hover:text-slate-900">
+            <IconoNodo carpeta={c.icono} />
+            <span className="min-w-0 flex-1 truncate">{c.titulo}</span>
+          </Link>
+          {sobre === clave && <span className="pointer-events-none absolute right-2 text-[10px] font-black text-emerald-700">Meter dentro</span>}
+        </div>
+        {abierta && (
+          <div className="relative">
+            <span aria-hidden className="absolute bottom-1 top-0 w-px bg-slate-200" style={{ left: sangria + 10 }} />
+            {subcarpetas.map(h => carpetaFila(h, nivel + 1))}
+            {c.paginas.map(id => nodos[id] && fila(nodos[id], nivel + 1))}
+            {!subcarpetas.length && !c.paginas.length && <p className="py-1 text-[11px] text-slate-400" style={{ paddingLeft: sangria + 36 }}>Vacía. Arrastra aquí una página.</p>}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-px py-1">
-      {arbol.carpetas.map(c => {
-        const clave = `carpeta:${c.id}`;
-        const abierta = abiertos.has(clave);
-        const ruta = `/carpetas/${c.slug}`;
-        return (
-          <div key={c.id}>
-            <div {...zona(clave, () => true, id => mover(id, { carpeta: c.id }))}
-              className={cn('group/arbol relative flex items-center rounded-lg transition-colors',
-                sobre === clave ? 'bg-emerald-50 ring-2 ring-emerald-400' : aqui === ruta ? 'bg-slate-100' : 'hover:bg-slate-50')}>
-              <button type="button" onClick={() => alternar(clave)} style={{ marginLeft: 4 }}
-                aria-label={abierta ? `Cerrar ${c.titulo}` : `Ver las páginas de ${c.titulo}`} aria-expanded={abierta}
-                className="grid h-7 w-5 shrink-0 place-items-center rounded text-slate-400 hover:bg-slate-200 hover:text-slate-700">
-                <ChevronRight className={cn('h-3.5 w-3.5 transition-transform duration-150', abierta && 'rotate-90')} />
-              </button>
-              <Link to={ruta} onClick={onIr} title={c.titulo}
-                className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pl-1 pr-2 text-[13px] font-bold text-slate-700 hover:text-slate-900">
-                <IconoNodo carpeta={c.icono} />
-                <span className="min-w-0 flex-1 truncate">{c.titulo}</span>
-              </Link>
-              {sobre === clave && <span className="pointer-events-none absolute right-2 text-[10px] font-black text-emerald-700">Mover aquí</span>}
-            </div>
-            {abierta && (
-              <div className="relative">
-                <span aria-hidden className="absolute bottom-1 top-0 w-px bg-slate-200" style={{ left: 14 }} />
-                {c.paginas.length
-                  ? c.paginas.map(id => nodos[id] && fila(nodos[id], 1))
-                  : <p className="py-1 pl-10 text-[11px] text-slate-400">Vacía. Arrastra aquí una página.</p>}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {hijasDe(null).map(c => carpetaFila(c, 0))}
       {arbol.raiz.map(id => nodos[id] && fila(nodos[id], 0))}
       {/* Soltar aquí saca una página de donde estuviera, a la raíz. */}
-      {arrastrando && <div {...zona('raiz', () => true, id => mover(id, { carpeta: null }))}
+      {arrastrando && <div {...zona('raiz', () => true, k => (esCarpeta(k) ? moverCarpeta(sinPrefijo(k), null) : mover(k, { carpeta: null })))}
         className={cn('mx-1 mt-1 rounded-lg border border-dashed px-2 py-1.5 text-center text-[11px] font-bold transition-all',
           sobre === 'raiz' ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-slate-300 text-slate-400')}>
         Soltar aquí para sacarla fuera de todo
       </div>}
-      {aviso && <p role="alert" className="mx-1 rounded-lg bg-rose-50 px-2 py-1.5 text-[11px] font-bold text-rose-700">{aviso}</p>}
+      {aviso && (
+        <p role={aviso.error ? 'alert' : 'status'} className={cn('mx-1 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-bold',
+          aviso.error ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-700')}>
+          <span className="min-w-0 flex-1">{aviso.texto}</span>
+          {aviso.deshacer && <button type="button" onClick={aviso.deshacer} className="shrink-0 rounded px-1.5 py-0.5 font-black text-emerald-700 hover:bg-white">Deshacer</button>}
+        </p>
+      )}
+      {menu && createPortal(
+        <div role="menu" ref={cajaMenu} aria-label={`Opciones de ${menu.titulo}`}
+          onContextMenu={e => e.preventDefault()}
+          style={{ left: Math.min(menu.x, window.innerWidth - 216), top: Math.min(menu.y, window.innerHeight - 64) }}
+          className="fixed z-[200] w-52 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
+          <p className="truncate px-2.5 pb-1 pt-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">{menu.titulo}</p>
+          <button type="button" role="menuitem" ref={el => el?.focus({ preventScroll: true })} onClick={() => borrar(menu)}
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-semibold text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:outline-none">
+            <Trash2 className="h-4 w-4" /> Borrar
+          </button>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
