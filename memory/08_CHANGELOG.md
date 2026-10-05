@@ -8329,3 +8329,30 @@ páginas, personas…; y un botón de contenido universal con lo público».
   needing Enter, raw markdown in excerpts, chip overflow, keyboard focus lost
   on hover-only buttons and after «Ver más», low-contrast labels, chip counts
   not matching the filter, stale link to a foreign sub-topic.
+
+## 2026-10-05 — Clean top bar: menus hold everything, two floating buttons (prog8)
+
+Eugenio: perfil por encima de «Todas mis páginas»; humanity.wiki en el hueco de
+arriba del menú izquierdo, a la derecha del botón de plegar, y fuera de la
+barra; «Explorar» dentro del menú derecho junto a su botón de plegar; en la
+barra, «Mis páginas» y «Explorar» como botones que abren cada menú; sin barra
+de abajo, sólo la IA flotante abajo a la derecha y el Feedback flotante abajo a
+la izquierda; las notificaciones al menú izquierdo; buscador un 20 % más
+estrecho, sin el interruptor de IA y con «Buscar contenido…».
+
+- `Rail` gains `junto`: content in its top row next to the fold button (left:
+  after it; right: before it, so the fold button stays on the screen edge).
+  `MarcaRail.tsx` now exports `MarcaCabecera` (brand + accordion, in that row)
+  and `TodasMisPaginas`. Left rail order: brand row · profile · Notificaciones
+  · Todas mis páginas · folders and pages.
+- `Campana enMenu`: a full-width row with its unread badge; the list opens
+  `fixed` to the right of the rail, because the rail scrolls and would clip it.
+- Top bar: «Mis páginas» + icon (left) when the left menu is folded; «Explorar»
+  + icon (right) when the right menu is folded — on phones it opens the theme
+  sheet. Brand only for visitors. No bell, no Feedback pill, no Explorar tab.
+- `RailInferior` (the bottom creation bar) is no longer mounted. Floating
+  Feedback (bottom-left, offset by `--hueco-paginas`) and IA (bottom-right,
+  offset by `--hueco-temas`; hidden in the page editor, which has its own). The
+  AI panel now reaches the bottom edge (`bottom-0`).
+- `BuscadorSuperior`: 27.6 rem (was 34.5), capped below `xl` too, no IA toggle,
+  placeholder «Buscar contenido…».
