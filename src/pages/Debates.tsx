@@ -84,10 +84,7 @@ export default function Debates() {
             <div>
               <h1 className="text-2xl font-black text-slate-900 leading-tight">Debates</h1>
               <p className="text-sm text-slate-500">
-                Una afirmación, sus razones a favor y en contra, y las fuentes de cada una.{' '}
-                <Link to="/veracidad" className="font-bold text-purple-700 hover:underline inline-flex items-center gap-0.5">
-                  Cómo funciona <ArrowUpRight className="w-3 h-3" />
-                </Link>
+                Una afirmación, sus razones a favor y en contra, y las fuentes de cada una.
               </p>
             </div>
           </div>

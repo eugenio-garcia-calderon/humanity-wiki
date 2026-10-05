@@ -8369,3 +8369,30 @@ estrecho, sin el interruptor de IA y con «Buscar contenido…».
   - **Vídeo**: a link block that turns YouTube/Vimeo links into a player, or uploads a file.
   - **Mapa**: the publication search filtered to maps, with a link to create one.
 - A YouTube or Vimeo link pasted into «Web insertada» now becomes a player too. The «/» bar got the same coloured icons and descriptions.
+
+## 2026-10-05 — YouTube-style logo, no brand dropdown, legal footer; info pages retired (prog8)
+
+Eugenio: «el logo como YouTube: a la izquierda, y al desplegar el menú se
+mantiene en su sitio; sólo botón de inicio, sin desplegable; Humanity con H y
+Wiki con W. Las páginas del desplegable, fuera, salvo avisos legales y Sobre
+Humanity Wiki, que van a un footer en todas las páginas. Tokenomics, guárdala
+en mis páginas como proyecto pendiente».
+
+- `navegacion/Logo.tsx`: «Humanity.Wiki», home only. Drawn in the top bar when
+  the left menu is folded (or absent) and in the left menu's top row when it is
+  open — measured on the same pixel in both states (x 8, y 20). `Rail` now puts
+  `junto` first on both sides. The brand dropdown and its state are gone.
+- `layout/PieLegal.tsx`: a fixed 24 px footer between the side menus on every
+  page — Sobre Humanity.Wiki · Avisos legales · Privacidad. `<main>` reserves
+  its height; the floating IA and Feedback buttons sit above it.
+- `paginasInfo.ts` keeps only Sobre, Avisos legales, Privacidad, Borrar cuenta
+  and Administración. No longer mounted: Veracidad, Tokenomics, Puntuación de
+  territorios, Cómo van las herramientas, Servidores, Seguridad, Usabilidad
+  (their components stay in the repo). Their URLs now show the platform's «Aquí
+  no hay nada». Links to them removed from Debates, Avisos legales and Sobre.
+- **Production data:** the Tokenomics page (main view, white paper and task
+  list, 158 blocks) was copied as a PRIVATE page into a new PRIVATE folder
+  «Proyectos pendientes» of `eugenio@lighthumanity.org` (U_ADMIN_EUGENIO),
+  marked `config.rescate = 'tokenomics-2026-10-05'`. Extracted from the
+  rendered page in a local browser, staged in the local DB, then inserted in
+  one transaction.

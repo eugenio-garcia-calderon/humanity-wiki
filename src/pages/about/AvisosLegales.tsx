@@ -123,7 +123,6 @@ function Terminos() {
       ))}
       <p className="text-xs text-slate-400 pt-4 border-t border-slate-100">
         Ver también: <Link to="/avisos-legales?vista=privacidad" className="underline">política de privacidad</Link> ·{' '}
-        <Link to="/tokenomics" className="underline">tokenomics: el punto</Link> ·{' '}
         <Link to="/borrar-cuenta" className="underline">borrar tu cuenta</Link>
       </p>
     </div>
