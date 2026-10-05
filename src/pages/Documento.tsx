@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { subirArchivo } from '../utils/subir';
 import SoltarImagen from '../components/ui/SoltarImagen';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -9,8 +10,9 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play,
+  PanelTop, Bookmark, Link2, Play, Map as MapIcon,
 } from 'lucide-react';
+import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
 import Rejilla from '../components/tablas/Rejilla';
@@ -64,50 +66,51 @@ import Adjuntos from '../components/archivo/Adjuntos';
 // rompería el cursor. El estado solo guarda la ESTRUCTURA (qué bloques hay y
 // de qué tipo); el autoguardado serializa estructura + refs.
 
-const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
-  { tipo: 'parrafo', label: 'Texto', icon: Type },
-  { tipo: 'titulo1', label: 'Título 1', icon: Heading1 },
-  { tipo: 'titulo2', label: 'Título 2', icon: Heading2 },
-  { tipo: 'titulo3', label: 'Título 3', icon: Heading3 },
-  { tipo: 'lista', label: 'Lista', icon: List },
-  { tipo: 'numerada', label: 'Lista numerada', icon: ListOrdered },
-  { tipo: 'tarea', label: 'Casilla', icon: CheckSquare },
-  { tipo: 'cita', label: 'Cita', icon: Quote },
-  // Los tres de Notion que faltaban (2026-08-23). Van aquí arriba, entre los
-  // de texto, porque es lo que son: formas de escribir, no cosas que se
-  // embeben.
-  { tipo: 'desplegable', label: 'Desplegable', icon: ChevronRight },
-  { tipo: 'aviso', label: 'Aviso', icon: Info },
-  { tipo: 'indice', label: 'Índice', icon: List },
-  // Una página dentro de ésta (2026-09-30): «todo son páginas dentro de
-  // páginas, como hace Notion».
-  { tipo: 'subpagina', label: 'Página', icon: FileText },
+// EL SELECTOR CON GRUPOS (2026-10-05): cada bloque dice a qué altura del
+// selector va (`grupo`), una línea de qué hace (`desc`) y su color. El orden
+// dentro de cada grupo es el orden en que se ve. Ver `SelectorBloques.tsx`.
+// `video` y `mapa` no son tipos de bloque: son atajos —un vídeo acaba en un
+// bloque `medio`, un mapa en un `publicacion`— y los resuelve `insertar`.
+type TipoMenu = TipoBloque | 'video' | 'mapa';
+const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloque['grupo']; desc?: string; color?: string; claves?: string }[] = [
+  // ── Básicos ──
+  { tipo: 'parrafo', label: 'Texto', icon: Type, grupo: 'basico', color: 'bg-slate-100 text-slate-700', claves: 'parrafo escribir' },
+  { tipo: 'titulo1', label: 'Titular', icon: Heading1, grupo: 'basico', color: 'bg-slate-900 text-white', claves: 'titulo 1 encabezado' },
+  { tipo: 'imagen', label: 'Imagen', icon: ImageIcon, grupo: 'basico', color: 'bg-sky-100 text-sky-600', claves: 'foto' },
+  { tipo: 'video', label: 'Vídeo', icon: Play, grupo: 'basico', color: 'bg-rose-100 text-rose-600', claves: 'youtube vimeo' },
+  // Subir un archivo cualquiera (2026-09-30), desde el «+».
+  { tipo: 'medio', label: 'Archivo', icon: Paperclip, grupo: 'basico', color: 'bg-amber-100 text-amber-700', claves: 'pdf subir documento' },
+  // Un enlace como tarjeta (2026-10-02). Se llega también pegando un enlace.
+  { tipo: 'marcador', label: 'Página web', icon: Bookmark, grupo: 'basico', color: 'bg-emerald-100 text-emerald-700', claves: 'enlace link marcador' },
+  // ── Herramientas ──
+  // La buena: columnas con tipo, fórmulas y relaciones.
+  { tipo: 'basedatos', label: 'Base de datos', icon: Boxes, grupo: 'herramienta', color: 'bg-violet-100 text-violet-700', desc: 'Tabla, galería o tablero con columnas', claves: 'tabla galeria' },
   // La pizarra de «Esquemas», dentro de la página (2026-10-01).
-  { tipo: 'pizarra', label: 'Pizarra', icon: PenTool },
-  // Un enlace como tarjeta, o la web dentro de la página (2026-10-02). Se
-  // llega aquí también pegando un enlace: ver `alPegar`.
-  { tipo: 'marcador', label: 'Marcador web', icon: Bookmark },
-  { tipo: 'web', label: 'Web insertada', icon: Globe },
-  { tipo: 'separador', label: 'Separador', icon: Minus },
-  { tipo: 'codigo', label: 'Código', icon: Code2 },
-  { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
-  // Subir un archivo cualquiera (2026-09-30). Sustituye a la sección fija de
-  // «Archivos» del pie: Eugenio, «si alguien quiere subir un archivo, lo sube
-  // desde el botón de +».
-  { tipo: 'medio', label: 'Archivo', icon: Paperclip },
-  // La primera es la buena: columnas con tipo, fórmulas y relaciones. La de
-  // texto se queda debajo y dice lo que es, para quien solo quiera una rejilla
-  // de texto en un documento.
-  { tipo: 'basedatos', label: 'Base de datos', icon: Boxes },
-  { tipo: 'tabla', label: 'Tabla de texto', icon: Table2 },
-  { tipo: 'publicacion', label: 'Publicación', icon: Boxes },
-  { tipo: 'producto', label: 'Producto', icon: Store },
-  // LOS BLOQUES DE TIENDA (fase 2 de Comercio). Existían y se podían pintar
-  // desde el 2026-08-22, pero no había forma de ponerlos: sólo entraban
-  // escribiendo el JSON a mano. Un bloque que sólo sabe crear quien conoce la
-  // base de datos no existe para quien usa la aplicación.
-  { tipo: 'portada', label: 'Portada de tienda', icon: LayoutTemplate },
-  { tipo: 'rejilla', label: 'Rejilla de productos', icon: LayoutGrid },
+  { tipo: 'pizarra', label: 'Pizarra', icon: PenTool, grupo: 'herramienta', color: 'bg-orange-100 text-orange-600', desc: 'Lienzo libre para dibujar y unir ideas', claves: 'esquema lienzo dibujo' },
+  { tipo: 'mapa', label: 'Mapa', icon: MapIcon, grupo: 'herramienta', color: 'bg-teal-100 text-teal-700', desc: 'Inserta uno de tus mapas', claves: 'territorio' },
+  // Una página dentro de ésta (2026-09-30), como en Notion.
+  { tipo: 'subpagina', label: 'Página', icon: FileText, grupo: 'herramienta', color: 'bg-slate-100 text-slate-700', desc: 'Una página nueva dentro de esta', claves: 'subpagina' },
+  { tipo: 'web', label: 'Web insertada', icon: Globe, grupo: 'herramienta', color: 'bg-emerald-100 text-emerald-700', desc: 'Otra web entera, dentro de la página', claves: 'iframe embed' },
+  { tipo: 'publicacion', label: 'Publicación', icon: LayoutTemplate, grupo: 'herramienta', color: 'bg-indigo-100 text-indigo-700', desc: 'Algo ya publicado en la plataforma', claves: 'embeber' },
+  // ── Tienda (fase 2 de Comercio) ──
+  { tipo: 'producto', label: 'Producto', icon: Store, grupo: 'tienda', color: 'bg-lime-100 text-lime-700', desc: 'Un producto con su precio' },
+  { tipo: 'portada', label: 'Portada de tienda', icon: LayoutTemplate, grupo: 'tienda', color: 'bg-lime-100 text-lime-700', desc: 'La cabecera de tu tienda' },
+  { tipo: 'rejilla', label: 'Rejilla de productos', icon: LayoutGrid, grupo: 'tienda', color: 'bg-lime-100 text-lime-700', desc: 'Varios productos en cuadrícula' },
+  // ── Formato de texto ──
+  { tipo: 'titulo2', label: 'Título 2', icon: Heading2, grupo: 'formato' },
+  { tipo: 'titulo3', label: 'Título 3', icon: Heading3, grupo: 'formato' },
+  { tipo: 'lista', label: 'Lista', icon: List, grupo: 'formato' },
+  { tipo: 'numerada', label: 'Numerada', icon: ListOrdered, grupo: 'formato', claves: 'lista numerada' },
+  { tipo: 'tarea', label: 'Casilla', icon: CheckSquare, grupo: 'formato', claves: 'tarea check' },
+  { tipo: 'cita', label: 'Cita', icon: Quote, grupo: 'formato' },
+  { tipo: 'desplegable', label: 'Desplegable', icon: ChevronRight, grupo: 'formato', claves: 'toggle' },
+  { tipo: 'aviso', label: 'Aviso', icon: Info, grupo: 'formato', claves: 'callout' },
+  { tipo: 'indice', label: 'Índice', icon: List, grupo: 'formato' },
+  { tipo: 'codigo', label: 'Código', icon: Code2, grupo: 'formato' },
+  { tipo: 'separador', label: 'Separador', icon: Minus, grupo: 'formato', claves: 'linea' },
+  // La de texto se queda, y dice lo que es, para quien solo quiera una
+  // rejilla de texto en un documento.
+  { tipo: 'tabla', label: 'Tabla de texto', icon: Table2, grupo: 'formato' },
 ];
 
 /*
@@ -166,6 +169,10 @@ function EditorPagina() {
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null); // id del bloque cuyo + está abierto
   /** El buscador está buscando PRODUCTOS, no publicaciones. */
   const [buscaProducto, setBuscaProducto] = useState(false);
+  /** El buscador abierto desde «Mapa» (2026-10-05): sólo enseña mapas. */
+  const [soloMapas, setSoloMapas] = useState(false);
+  /** Bloques de web nacidos de «Vídeo»: piden un enlace de vídeo, no de web. */
+  const videosPendientes = useRef(new Set<string>());
 
   // EL MENÚ DE LA BARRA «/» (2026-08-20, petición de Eugenio: «el shortcut de
   // "/" para añadir cosas, como en Notion […] y como hace este propio chat de
@@ -485,19 +492,32 @@ function EditorPagina() {
   /** Aplica lo elegido en la barra «/». El bloque estaba vacío salvo por lo
    *  que has tecleado tras la barra, así que se CONVIERTE en vez de crear uno
    *  nuevo — que es lo que hace Notion y lo que espera cualquiera. */
-  const elegirDeLaBarra = (b: Bloque, tipo: TipoBloque) => {
+  const elegirDeLaBarra = (b: Bloque, tipo: TipoMenu) => {
     setBarra(null);
     const el = document.querySelector(`[data-bloque="${b.id}"]`) as HTMLElement | null;
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
-    if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
+    if (tipo === 'publicacion' || tipo === 'producto' || tipo === 'video' || tipo === 'mapa') { insertar(b.id, tipo); return; }
     if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
   };
 
-  const insertar = (tras: string | null, tipo: TipoBloque) => {
+  const insertar = (tras: string | null, tipoMenu: TipoMenu) => {
+    // Un vídeo es un bloque de web que espera su enlace: si es de YouTube o
+    // Vimeo pasa a reproductor (ver `alPonerEnlace`), y si no, sale a subirlo.
+    const esVideo = tipoMenu === 'video';
+    if (tipoMenu === 'mapa') {
+      setMenuAbierto(null);
+      setBuscaProducto(false);
+      setSoloMapas(true);
+      setBuscadorPub(tras ?? '');
+      setBusquedaPub('');
+      setResultadosPub([]);
+      return;
+    }
+    const tipo: TipoBloque = esVideo ? 'web' : tipoMenu as TipoBloque;
     if (tipo === 'subpagina') { crearSubpagina(tras); return; }
     if (tipo === 'pizarra') { crearPizarra(tras); return; }
     if (tipo === 'medio') {
@@ -510,6 +530,7 @@ function EditorPagina() {
     // publicación embeber, en el buscador.
     if (tipo === 'publicacion' || tipo === 'producto') {
       setMenuAbierto(null);
+      setSoloMapas(false);
       setBuscaProducto(tipo === 'producto');
       setBuscadorPub(tras ?? '');
       setBusquedaPub('');
@@ -517,6 +538,7 @@ function EditorPagina() {
       return;
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
+    if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
     if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web') textosRef.current[nuevo.id] = '';
     setBloques(bs => {
@@ -820,14 +842,14 @@ function EditorPagina() {
         .then(j => {
           const lista = Array.isArray(j) ? j : (j?.products || j?.items || []);
           setResultadosPub(lista
-            .filter((x: any) => x.id !== docId.current)
+            .filter((x: any) => x.id !== docId.current && (!soloMapas || x.tipo === 'mapa'))
             .map((x: any) => buscaProducto ? { ...x, tipo: 'producto', titulo: x.name || x.nombre } : x)
             .slice(0, 12));
         })
         .catch(() => setResultadosPub([]));
     }, 250);
     return () => clearTimeout(t);
-  }, [buscadorPub, busquedaPub]);
+  }, [buscadorPub, busquedaPub, soloMapas]);
 
   const embeber = (pub: any) => {
     const rutaDe: Record<string, string> = { lienzo: '/esquemas/', mapa: '/mapas/', proyecto: '/carpetas/' };
@@ -1516,8 +1538,26 @@ function EditorPagina() {
       if (b.tipo === 'marcador' || b.tipo === 'web') {
         if (!b.url) {
           return editable ? (
-            <EntradaEnlace tipo={b.tipo}
+            <EntradaEnlace tipo={b.tipo === 'web' && videosPendientes.current.has(b.id) ? 'video' : b.tipo}
+              onSubir={() => {
+                // Subir un vídeo: el hueco se va y entra el de archivo.
+                const i = bloques.findIndex(x => x.id === b.id);
+                const antes = i > 0 ? bloques[i - 1].id : null;
+                videosPendientes.current.delete(b.id);
+                setBloques(bs => bs.filter(x => x.id !== b.id));
+                insertar(antes, 'medio');
+              }}
               onListo={url => {
+                // Un enlace de YouTube o Vimeo se ve como reproductor, venga
+                // de «Vídeo» o de «Web insertada»: su web entera no se deja
+                // meter en un recuadro.
+                const yt = idYoutube(url), vm = idVimeo(url);
+                videosPendientes.current.delete(b.id);
+                if (yt || vm) {
+                  setBloques(bs => bs.map(x => x.id === b.id ? { id: x.id, tipo: 'medio', medio: yt ? 'youtube' : 'vimeo', medioId: (yt || vm)! } as Bloque : x));
+                  programarGuardado();
+                  return;
+                }
                 setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url, alto: b.tipo === 'web' ? 480 : undefined } : x));
                 completarMarcador(b.id, url);
                 programarGuardado();
@@ -2160,7 +2200,7 @@ function EditorPagina() {
         {cuerpo}
         {/* LA BARRA «/» — las opciones, filtrándose según escribes. */}
         {barra?.bloque === b.id && (
-          <div className="absolute left-0 top-full z-40 mt-1 w-64 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+          <div className="absolute left-0 top-full z-40 mt-1 w-72 max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1"
             onMouseDown={e => e.preventDefault()}>
             {opcionesBarra.length === 0 ? (
               <p className="px-3 py-2 text-xs text-slate-400 italic">Nada que empiece por «{barra.texto}».</p>
@@ -2173,35 +2213,31 @@ function EditorPagina() {
                   i === Math.min(barra.elegido, opcionesBarra.length - 1)
                     ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50')}
               >
-                <t.icon className="w-3.5 h-3.5 text-slate-400 shrink-0" /> {t.label}
+                <span className={cn('w-7 h-7 grid place-items-center rounded-lg shrink-0', t.color || 'bg-slate-100 text-slate-500')}><t.icon className="w-4 h-4" /></span>
+                <span className="min-w-0"><span className="block text-[13px]">{t.label}</span>{t.desc && <span className="block text-[11px] font-medium text-slate-400 truncate">{t.desc}</span>}</span>
               </button>
             ))}
           </div>
         )}
 
         {menuAbierto === b.id && (
-          <div className="absolute left-0 top-full z-30 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 grid grid-cols-2 gap-0.5 w-72"
-            onClick={e => e.stopPropagation()}>
-            {TIPOS_MENU.map(t => (
-              <button key={t.tipo} onClick={() => insertar(b.id, t.tipo)}
-                className={cn('flex items-center gap-2 px-2.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors',
-                  esMovil ? 'h-11' : 'py-1.5')}>
-                <t.icon className="w-3.5 h-3.5 text-slate-400" /> {t.label}
-              </button>
-            ))}
-            {esBloqueTexto && (
-              <button onClick={() => iaMejorar(b)}
-                className={cn('col-span-2 flex items-center gap-2 px-2.5 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 text-left transition-colors',
-                  esMovil ? 'h-11' : 'py-1.5')}>
-                <Wand2 className="w-3.5 h-3.5" /> Mejorar este texto con IA
-              </button>
-            )}
-            <button onClick={() => { eliminar(b.id); setMenuAbierto(null); }}
-              className={cn('col-span-2 flex items-center gap-2 px-2.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 text-left transition-colors',
-                esMovil ? 'h-11' : 'py-1.5')}>
-              <Trash2 className="w-3.5 h-3.5" /> Eliminar este bloque
-            </button>
-          </div>
+          // EL SELECTOR NUEVO (2026-10-05): ver `SelectorBloques.tsx`. En el
+          // móvil, hoja desde abajo con fondo; en el ordenador, bajo la línea.
+          (() => {
+            const selector = (
+              <SelectorBloques movil={esMovil} opciones={TIPOS_MENU}
+                onElegir={t => insertar(b.id, t as TipoMenu)}
+                extra={{
+                  mejorar: esBloqueTexto ? () => iaMejorar(b) : undefined,
+                  eliminar: () => { eliminar(b.id); setMenuAbierto(null); },
+                }} />
+            );
+            return esMovil ? createPortal(
+              <div onClick={e => e.stopPropagation()} className="fixed inset-0 z-[60] flex items-end bg-slate-900/30">
+                <button aria-label="Cerrar" className="absolute inset-0" onClick={() => setMenuAbierto(null)} />
+                <div className="relative w-full">{selector}</div>
+              </div>, document.body) : <Flotante>{selector}</Flotante>;
+          })()
         )}
       </div>
     );
@@ -2778,7 +2814,7 @@ function EditorPagina() {
               <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 autoFocus value={busquedaPub} onChange={e => setBusquedaPub(e.target.value)}
-                placeholder={buscaProducto ? 'Busca el producto que quieres insertar…' : 'Busca la publicación que quieres insertar…'}
+                placeholder={buscaProducto ? 'Busca el producto que quieres insertar…' : soloMapas ? 'Busca el mapa que quieres insertar…' : 'Busca la publicación que quieres insertar…'}
                 className="flex-1 text-sm outline-none"
               />
               <button onClick={() => setBuscadorPub(null)} className="p-1 text-slate-400 hover:text-slate-700">
@@ -2806,7 +2842,8 @@ function EditorPagina() {
             <div className="max-h-80 overflow-y-auto p-1.5">
               {!resultadosPub.length ? (
                 <p className="text-xs text-slate-400 text-center py-8">
-                  {busquedaPub ? 'Nada con ese nombre.'
+                  {soloMapas && !busquedaPub ? <>Todavía no hay mapas que insertar. <Link to="/mapas" className="font-bold text-emerald-600 hover:underline">Crea uno en Mapas</Link>.</>
+                    : busquedaPub ? 'Nada con ese nombre.'
                     : buscaProducto ? 'Busca entre tus productos, o crea uno arriba.'
                     : 'Escribe para buscar entre las publicaciones.'}
                 </p>
@@ -3042,23 +3079,29 @@ function SubiendoImagen({ vista, fraccion, texto }: { vista: string | null; frac
 }
 
 /** Un marcador o una web recién creados desde «/»: se les pega la dirección. */
-function EntradaEnlace({ tipo, onListo }: { tipo: 'marcador' | 'web'; onListo: (url: string) => void }) {
+function EntradaEnlace({ tipo, onListo, onSubir }: { tipo: 'marcador' | 'web' | 'video'; onListo: (url: string) => void; onSubir?: () => void }) {
   const [v, setV] = useState('');
   const [fallo, setFallo] = useState(false);
   const enviar = () => {
     const url = /^https?:\/\//i.test(v.trim()) ? v.trim() : v.trim() ? `https://${v.trim()}` : '';
     try { if (!url) throw 0; new URL(url); onListo(url); } catch { setFallo(true); }
   };
+  const Icono = tipo === 'marcador' ? Bookmark : tipo === 'video' ? Play : Globe;
   return (
-    <div className="flex items-center gap-2 p-2 rounded-xl border border-dashed border-slate-300 bg-slate-50">
-      {tipo === 'marcador' ? <Bookmark className="w-4 h-4 text-slate-400 shrink-0" /> : <Globe className="w-4 h-4 text-slate-400 shrink-0" />}
+    <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl border border-dashed border-slate-300 bg-slate-50">
+      <Icono className="w-4 h-4 text-slate-400 shrink-0" />
       <input autoFocus value={v} onChange={e => { setV(e.target.value); setFallo(false); }}
         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); enviar(); } }}
-        placeholder={tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : 'Pega el enlace de la web que quieres insertar…'}
-        className={cn('flex-1 min-w-0 h-9 px-2 rounded-lg border bg-white text-sm outline-none', fallo ? 'border-rose-300' : 'border-slate-200 focus:border-emerald-400')} />
+        placeholder={tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : tipo === 'video' ? 'Pega el enlace de YouTube o Vimeo…' : 'Pega el enlace de la web que quieres insertar…'}
+        className={cn('flex-1 min-w-[10rem] h-9 px-2 rounded-lg border bg-white text-sm outline-none', fallo ? 'border-rose-300' : 'border-slate-200 focus:border-emerald-400')} />
       <button type="button" onClick={enviar} className="h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
         {tipo === 'marcador' ? 'Crear marcador' : 'Insertar'}
       </button>
+      {tipo === 'video' && onSubir && (
+        <button type="button" onClick={onSubir} className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-100">
+          o sube un vídeo
+        </button>
+      )}
     </div>
   );
 }
