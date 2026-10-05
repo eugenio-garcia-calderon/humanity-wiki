@@ -137,6 +137,30 @@
       "ruta": "src/components/knowledge/EditorVariantes.tsx",
       "motivo": "Variantes más claras, quitar cobro en puntos y foto con pegar/arrastrar en el creador de productos",
       "desde": "2026-10-05T22:56:04.529Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/ImagenBloque.tsx",
+      "motivo": "editorA: imágenes estilo PowerPoint",
+      "desde": "2026-10-05T22:57:06.298Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "editorA: imágenes estilo PowerPoint",
+      "desde": "2026-10-05T22:57:06.298Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "editorA: imágenes estilo PowerPoint",
+      "desde": "2026-10-05T22:57:06.298Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "editorA: imágenes estilo PowerPoint",
+      "desde": "2026-10-05T22:57:06.298Z"
     }
   ]
 }
