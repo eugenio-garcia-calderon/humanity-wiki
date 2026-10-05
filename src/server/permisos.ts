@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { avisar } from './avisos.js';
 import { enviarCorreo, hayCorreo } from './correo.js';
 import { bloquesDe } from './bloquesSql.js';
+import { sitioYRegla, permisosDe } from './miembros.js';
 
 // ============================================================================
 // PERMISOS FINOS POR PÁGINA (2026-10-05, carril «acceso», #12)
@@ -142,6 +143,23 @@ export async function rolEnPagina(db: any, quien: Quien, paginaId: string): Prom
     if (rango(aqui) > rango(rol)) {
       rol = aqui;
       heredadoDe = Number(f.n) > 0 ? { id: f.id, titulo: f.title || 'Sin título' } : null;
+    }
+  }
+  // MIEMBROS DE UN SITIO CON CATEGORÍA «EDITAR» O «TODO» (carril acceso):
+  // editan, con su misma cuenta, las páginas del sitio que su categoría ve.
+  if (rango(rol) < RANGO.editar) {
+    const sr = await sitioYRegla(db, paginaId);
+    if (sr) {
+      const m = (await db.execute(sql`
+        SELECT m.categoria_id, c.permisos FROM sitio_miembros m JOIN sitio_categorias c ON c.id = m.categoria_id
+        WHERE m.raiz_id = ${sr.sitio.raiz} AND m.user_id = ${quien.id} AND m.estado = 'activo'
+      `)).rows[0] as any;
+      const p = permisosDe(m?.permisos);
+      const cats = sr.regla?.categorias || [];
+      if (m && p.ver && p.editar && (!cats.length || cats.includes(m.categoria_id))) {
+        rol = 'editar';
+        heredadoDe = null;
+      }
     }
   }
   return { rol, heredadoDe, ...fuera };

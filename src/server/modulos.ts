@@ -77,6 +77,8 @@ import { registerGastoRoutes } from './gasto.js';
 import { registerDocumentosRoutes } from './documentos.js';
 import { registrarEdicionPaginas } from './edicionPaginas.js';
 import { registrarPermisos } from './permisos.js';
+import { registrarPeticionActual } from './peticionActual.js';
+import { registrarMiembros } from './miembros.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
@@ -153,6 +155,21 @@ export const MODULOS: Modulo[] = [
 
   // Grafo de conocimiento, red social y mercado (fases 3-5). Van después de la
   // autenticación porque dependen de `req.user` para los niveles de rol.
+  {
+    nombre: 'peticion-actual',
+    montar: app => registrarPeticionActual(app),
+    nota: 'ANTES de cualquier ruta: deja la petición a mano para quien no la recibe '
+        + '(`tablaVisible`, que `bd.ts` llama sin ella). Un módulo montado antes no la tendría.',
+  },
+  {
+    nombre: 'miembros',
+    montar: (app, db) => registrarMiembros(app, db),
+    nota: 'Miembros de los sitios publicados (carril acceso). ANTES de social, knowledge, publicar '
+        + 'y stripe, y aquí el orden es comportamiento: instala `identidadDeSitio`, que convierte la '
+        + 'sesión de un sitio en `req.user` para una lista cerrada de rutas (comentar, favoritos, '
+        + 'comprar). Montado después, esas rutas ya habrían contestado «inicia sesión».',
+  },
+
   { nombre: 'graph', montar: (app, db) => registerGraphRoutes(app, db) },
   { nombre: 'social', montar: (app, db) => registerSocialRoutes(app, db) },
 

@@ -156,6 +156,20 @@ export function registrarCompartir(app: Express, db: any) {
         const r = await db.execute(seleccionDe(c, sql`u.handle = ${handle} AND lower(e.${sql.raw(c.col.slug)}) = ${slug}`));
         for (const f of r.rows) encontrados.push(comoSeDevuelve(f));
       }
+      // UN SITIO SOLO PARA MIEMBROS (2026-10-05, carril acceso): su raíz no
+      // es pública, pero su dirección lleva a su muro. Sólo id y título.
+      if (!encontrados.length) {
+        const m = (await db.execute(sql`
+          SELECT w.id, w.title, w.slug, u.handle, u.display_name, u.name, u.avatar_url
+          FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+          JOIN sitio_config sc ON sc.raiz_id = w.id AND sc.activo
+          WHERE u.handle = ${handle} AND lower(w.slug) = ${slug} AND w.kind = 'pagina'
+            AND w.deleted_at IS NULL AND w.archived_at IS NULL
+            AND EXISTS (SELECT 1 FROM sitio_restricciones r WHERE r.pagina_id = w.id AND r.bloque_id = '')
+        `)).rows[0] as any;
+        if (m) return res.json({ tipo: 'pagina', id: m.id, titulo: m.title, slug: m.slug, restringida: true,
+          autor: { handle: m.handle, nombre: m.display_name || m.name, avatar: m.avatar_url }, otros: [] });
+      }
       if (!encontrados.length) {
         return res.status(404).json({ error: 'Aquí no hay nada publicado con esa dirección.' });
       }

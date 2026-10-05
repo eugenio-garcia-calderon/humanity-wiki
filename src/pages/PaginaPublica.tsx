@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import Cesta from '../components/knowledge/Cesta';
+import MuroMiembros, { type Muro } from '../components/sitio/MuroMiembros';
+import BarraMiembro from '../components/sitio/BarraMiembro';
 import VistaPagina, { Cargando, SinPagina } from '../components/sitio/VistaPagina';
 import { ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 
@@ -54,6 +56,10 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
   const [pagina, setPagina] = useState<any>(null);
   /** Si lo que hay en esta dirección no es una página, a dónde se va. */
   const [otroSitio, setOtroSitio] = useState<string | null>(null);
+  /** Sitio con miembros (2026-10-05): el muro, si no se puede ver. */
+  const [muro, setMuro] = useState<Muro | null>(null);
+  const [vuelta, setVuelta] = useState(0);
+  const recargar = () => setVuelta(v => v + 1);
 
   useEffect(() => {
     // Sin arroba no es una dirección de persona: es cualquier otra cosa que no
@@ -81,18 +87,31 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
         if (!r.ok) { setEstado('fallo'); return; }
         const j = await r.json();
         if (j.tipo && j.tipo !== 'pagina') { setOtroSitio(rutaDe(j)); return; }
+        // UNA PÁGINA «SOLO MIEMBROS» (2026-10-05): no es pública, así que el
+        // resolvedor de páginas publicadas no la da. Se pide a la puerta de
+        // los sitios, que mira la sesión del miembro o devuelve el muro.
+        if (j.restringida) {
+          const r3 = await fetch(`/api/sitio/pagina/${encodeURIComponent(j.id)}`, { credentials: 'include' });
+          if (!vivo) return;
+          const p = await r3.json().catch(() => ({}));
+          if ((r3.status === 401 || r3.status === 403) && p.muro) { setMuro(p.muro); setPagina(null); setEstado('ok'); return; }
+          if (!r3.ok) { setEstado(r3.status === 404 ? 'no-existe' : 'fallo'); return; }
+          setMuro(null); setPagina(p); setEstado('ok');
+          return;
+        }
         // Una página necesita su `config` para pintarse, y el resolvedor común
         // no la trae: devuelve lo que TODO lo compartible tiene en común. Se
         // pide aparte al de siempre, que sigue siendo quien sabe de páginas.
         const r2 = await fetch(`/api/publicar/resolver/${encodeURIComponent(handle)}/${encodeURIComponent(slug || '')}`);
         if (!vivo) return;
         if (!r2.ok) { setEstado(r2.status === 404 ? 'no-existe' : 'fallo'); return; }
+        setMuro(null);
         setPagina(await r2.json());
         setEstado('ok');
       })
       .catch(() => vivo && setEstado('fallo'));
     return () => { vivo = false; };
-  }, [handle, slug]);
+  }, [handle, slug, vuelta]);
 
   // A dónde va lo que no es una página. `replace` para que el botón de atrás
   // devuelva a donde estaba quien pulsó el enlace, y no a esta pantalla
@@ -118,8 +137,11 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
     );
   }
 
+  if (muro) return <MuroMiembros muro={muro} paginaId={muro.sitio.raiz} onDentro={recargar} />;
+
   return (
     <ProveedorSitio sitio={sitio}>
+      {pagina?.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
       <VistaPagina pagina={pagina} propio={propio} pie={<>
         {!propio && (
           <footer className="mt-10 pt-4 border-t border-slate-100">
