@@ -6,7 +6,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Folder, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
- PanelLeftOpen, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
+ PanelLeftOpen, PanelRightOpen, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -27,6 +27,7 @@ import { type Circulo } from '../navegacion/TresCirculos';
 import RailInferior from '../navegacion/RailInferior';
 import AvatarRail from '../navegacion/AvatarRail';
 import MarcaRail from '../navegacion/MarcaRail';
+import FiltroAmbito, { leerAmbito, type Ambito } from '../navegacion/FiltroAmbito';
 import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
@@ -306,6 +307,49 @@ export default function Layout() {
    * la estrella no habría hecho nada visible.
    */
   /** Tus páginas, plegadas del todo a la izquierda (2026-10-02). */
+  // ══ EL MENÚ DE TEMAS, A LA DERECHA (2026-10-05) ═══════════════════════
+  // Eugenio: «en la parte derecha, un menú desplegable idéntico al de la
+  // izquierda, pero con los 14 temas; arriba un filtro mío / todo». Plegable y
+  // recordado como el de la izquierda; el ámbito se comparte con la página
+  // del tema a través de `humanity:temas-ambito`.
+  const [temasPlegado, setTemasPlegadoState] = useState<boolean>(() => {
+    try { return localStorage.getItem('humanity:temas-plegado') === '1'; } catch { return false; }
+  });
+  const setTemasPlegado = (v: boolean) => {
+    setTemasPlegadoState(v);
+    try { localStorage.setItem('humanity:temas-plegado', v ? '1' : '0'); } catch { /* sin almacenamiento */ }
+  };
+  const [ambitoTemas, setAmbitoTemasState] = useState<Ambito>(() => leerAmbito(false));
+  useEffect(() => { setAmbitoTemasState(leerAmbito(!!user)); }, [user]);
+  const setAmbitoTemas = (a: Ambito) => {
+    setAmbitoTemasState(a);
+    try { localStorage.setItem('humanity:temas-ambito', a); } catch { /* sin almacenamiento */ }
+    // Si estás viendo un tema, el cambio se aplica ahí mismo.
+    const m = /^\/temas\/(O\d{3})\/contenido$/.exec(location.pathname);
+    if (m) navigate(`/temas/${m[1]}/contenido?ambito=${a}`, { replace: true });
+  };
+  // La página del tema avisa cuando el ámbito cambia desde ella.
+  useEffect(() => {
+    const al = (e: Event) => { const a = (e as CustomEvent).detail; if (a === 'mio' || a === 'todos') setAmbitoTemasState(a); };
+    window.addEventListener('humanity:temas-ambito', al);
+    return () => window.removeEventListener('humanity:temas-ambito', al);
+  }, []);
+  // El panel de la IA se pega al borde derecho: con el menú de temas abierto
+  // se corre a su izquierda, para no taparlo.
+  const temasVisible = !esMovil && !temasPlegado;
+  // The theme you are looking at, so the menu can say so.
+  const temaActivo = /^\/temas\/(O\d{3})(\/|$)/.exec(location.pathname)?.[1] ?? null;
+  const subtemaActivo = new URLSearchParams(location.search).get('subtema');
+  // Landing on a subtopic (a shared link): its theme opens in the menu so
+  // the marked subtopic can be seen.
+  useEffect(() => {
+    if (temaActivo && subtemaActivo && !ramasAbiertas[temaActivo]) alternarRama(temaActivo);
+  }, [temaActivo, subtemaActivo]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    document.documentElement.style.setProperty('--hueco-temas', temasVisible ? '256px' : '0px');
+    return () => { document.documentElement.style.setProperty('--hueco-temas', '0px'); };
+  }, [temasVisible]);
+
   const [paginasPlegado, setPaginasPlegadoState] = useState<boolean>(() => {
     try { return localStorage.getItem('humanity:paginas-plegado') === '1'; } catch { return false; }
   });
@@ -1464,6 +1508,16 @@ export default function Layout() {
             las dos esquinas se comportan igual porque son la misma idea. */}
         {/* «EXPLORAR», ARRIBA A LA DERECHA (2026-10-02). Abre por abajo los
             temas de la humanidad (`HojaExplorar`); pulsarlo otra vez lo cierra. */}
+        {!esMovil && temasPlegado && (
+          <button
+            onClick={() => setTemasPlegado(false)}
+            title="Mostrar el menú de temas"
+            aria-label="Mostrar el menú de temas"
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <PanelRightOpen className="w-5 h-5" />
+            <span className="hidden text-[13px] font-black sm:inline">Temas</span>
+          </button>
+        )}
         <button
           onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
           title="Explorar los temas"
@@ -1526,6 +1580,44 @@ export default function Layout() {
             propia: no es una ventana del escritorio (no se arrastra, no se
             minimiza, no se guarda de un día para otro) y no debe heredar el
             recorte de la página. Lo abre cualquier sitio con `abrirLateral`. */}
+        {temasVisible && (
+          <div className="flex h-full shrink-0">
+            <Rail
+              ladoDerecho
+              siempreAbierto
+              claro
+              titulo="Temas"
+              items={temasDelMenu}
+              cabeza={<FiltroAmbito ambito={ambitoTemas} onCambiar={setAmbitoTemas} conSesion={!!user} />}
+              personal={user ? {
+                esFavorito: c => !!prefsTemas[c]?.favorito,
+                estaOculto: c => !!prefsTemas[c]?.oculto,
+                marcarFavorito: (c, v) => guardarPref(c, { favorito: v }),
+                ocultar: c => guardarPref(c, { oculto: true }),
+                reordenar: reordenarTemas,
+                ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
+                mostrar: c => guardarPref(c, { oculto: false }),
+                onPersonalizar: () => navigate('/preferencias'),
+                onNuevoTema: () => setNuevoTema(true),
+              } : undefined}
+              ramas={{
+                de: c => ramas[c] ?? [],
+                hay: c => (cuantasRamas[c] ?? 0) > 0,
+                abierto: c => !!ramasAbiertas[c],
+                alternar: alternarRama,
+                onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
+                // A subtopic opens the theme's feed narrowed to it — same page,
+                // same scope — instead of the old wheel page.
+                ruta: (t, clave) => `/temas/${clave}/contenido?ambito=${ambitoTemas}&subtema=${encodeURIComponent(t.id)}`,
+              }}
+              abierta={temaActivo}
+              onElegir={h => navigate(`/temas/${encodeURIComponent(h.clave)}/contenido?ambito=${ambitoTemas}`)}
+              onPlegar={() => setTemasPlegado(true)}
+              onInicio={() => navigate('/')}
+            />
+          </div>
+        )}
+
         <VentanaLateral />
 
         {/* UN SOLO ASISTENTE, EL MISMO EN TODAS LAS HERRAMIENTAS. En la
@@ -1780,7 +1872,9 @@ export default function Layout() {
       {/* EXPLORAR SUBE DESDE ABAJO, en el ordenador y en el móvil (2026-10-02). */}
       {circulo === 'explorar' && (
         <HojaExplorar temas={temasDelMenu}
-          onElegir={c => { navigate(`/temas/${encodeURIComponent(c)}`); setCirculo(null); }}
+          // The sheet lands on the theme's feed too (2026-10-05): on a phone
+          // there is no right-hand menu, and this is how you reach it.
+          onElegir={c => { navigate(`/temas/${encodeURIComponent(c)}/contenido?ambito=${ambitoTemas}`); setCirculo(null); }}
           onCerrar={() => setCirculo(null)}
           onPersonalizar={user ? () => { navigate('/preferencias'); setCirculo(null); } : undefined} />
       )}

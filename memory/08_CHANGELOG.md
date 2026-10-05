@@ -8292,3 +8292,40 @@ y el botón de feedback arriba a la derecha, visible».
   no session, or mobile), and the name is now visible on mobile too since the
   logo was the home key there.
 - Feedback: out of the brand dropdown, into an amber pill right of the bell.
+
+## 2026-10-05 — Right-hand «Temas» menu and a feed per theme, mine or everyone's (prog8)
+
+Eugenio: «en la parte derecha un menú idéntico al de la izquierda con los 14
+temas y un filtro arriba, mi contenido o todo el contenido; al pinchar un tema,
+una landing de todo lo que tienes sobre movilidad, ordenado por bases de datos,
+páginas, personas…; y un botón de contenido universal con lo público».
+
+- **Right rail** (`Layout.tsx`, same `Rail` as the left): the 15 themes with
+  favourites, hiding, reordering and sub-topic branches; `FiltroAmbito.tsx` on
+  top (Mi contenido / Todo). Collapsible and remembered
+  (`humanity:temas-plegado`); a «Temas» button in the bar reopens it. The AI
+  panel shifts left by `--hueco-temas` so they do not overlap. The bottom
+  «Explorar» sheet lands on the same feed, which is how phones reach it.
+- **`/temas/:id/contenido?ambito=mio|todos&q=&subtema=`** (`pages/FeedTema.tsx`)
+  on **`GET /api/feed-tema/:id`** (`server/feedTema.ts`): sections — páginas,
+  entradas de bases de datos, publicaciones, carpetas, esquemas y mapas,
+  personas (your world's people / users who list the theme), de fuera — each
+  with a total and «Ver más». Cards say «Del tema» (classified through
+  `subtema_contenido` or `publication_links`) or «Por palabras». `mio` includes
+  private things and needs a session; `todos` is public-only and honours
+  blocks. Search as you type; sub-topic chips narrow to a branch (children
+  included). The scope is shared between menu and page via
+  `humanity:temas-ambito`.
+- **How «talks about» is decided** (three review rounds): the theme's curated
+  stems (`utils/palabrasObjetivos.ts`, now shared with the server) match
+  titles, and bodies only with two distinct stems (three in long texts);
+  whole sub-topic phrases match titles; single sub-topic words were dropped
+  after dragging a migration post into Movilidad and a fires page into
+  Economía. Measured on local data: Movilidad, Agua and Salud clean; two
+  arguable cases remain (a camper van in both Vivienda and Movilidad).
+- **Three UX review rounds by an agent driving the browser** fixed: truncated
+  theme names, no current-theme highlight, sub-topics opening the wheel
+  instead of the feed, broken count sentences, confusing «Ver más», search
+  needing Enter, raw markdown in excerpts, chip overflow, keyboard focus lost
+  on hover-only buttons and after «Ver más», low-contrast labels, chip counts
+  not matching the filter, stale link to a foreign sub-topic.
