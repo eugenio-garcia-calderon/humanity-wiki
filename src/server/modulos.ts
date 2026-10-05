@@ -75,6 +75,7 @@ import { registerStripeRoutes } from './stripe.js';
 import { registerPuntosRoutes } from './puntos.js';
 import { registerGastoRoutes } from './gasto.js';
 import { registerDocumentosRoutes } from './documentos.js';
+import { registrarEdicionPaginas } from './edicionPaginas.js';
 import { registrarPermisos } from './permisos.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
@@ -240,6 +241,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'puntos', montar: (app, db) => registerPuntosRoutes(app, db) },
   { nombre: 'gasto', montar: (app, db) => registerGastoRoutes(app, db) },
   { nombre: 'documentos', montar: (app, db) => registerDocumentosRoutes(app, db) },
+  { nombre: 'edicionPaginas', montar: (app, db) => registrarEdicionPaginas(app, db) },
   {
     nombre: 'permisos',
     montar: (app, db) => registrarPermisos(app, db),

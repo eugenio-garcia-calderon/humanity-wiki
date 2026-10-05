@@ -51,7 +51,24 @@ export type TipoBloque =
   // se hace una tarjeta con imagen, título y descripción, o si se pega normal,
   // como Notion»). `marcador` es la tarjeta; `web`, la página dentro de la
   // página. Los dos guardan `url`; el marcador, además, lo que se leyó de ella.
-  | 'marcador' | 'web';
+  | 'marcador' | 'web'
+  // 2026-10-05 (carril editorA, «al nivel de Notion»). `migas` es la ruta de
+  // páginas madre (no guarda nada: se pregunta al pintar). `boton` hace algo
+  // al pulsarlo (ver `AccionBoton`); su plantilla son sus `bloques` hijos.
+  | 'migas' | 'boton';
+
+/** Lo que hace un bloque `boton` (2026-10-05, como los botones de Notion). */
+export interface AccionBoton {
+  /** `plantilla` copia sus bloques hijos debajo; `pagina` crea una página
+   *  dentro de ésta (con la plantilla como contenido); `fila` añade una fila
+   *  a una base de datos de la página; `enlace` abre una dirección. */
+  tipo: 'plantilla' | 'pagina' | 'fila' | 'enlace';
+  url?: string;
+  tabla_id?: string;
+  /** Título de la página o la fila nueva; admite «{fecha}». */
+  titulo?: string;
+  estilo?: 'oscuro' | 'claro';
+}
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
@@ -166,6 +183,8 @@ export interface Bloque {
    *  «toggle headings» de Notion). Sólo en `titulo1`–`titulo3`; lo de dentro
    *  son sus `bloques`, igual que en un desplegable. */
   plegable?: boolean;
+  /** `boton`: qué hace al pulsarlo. Su texto es `texto`. */
+  boton?: AccionBoton;
 }
 
 // ── EL ÁRBOL Y LA LISTA PLANA (2026-10-05) ───────────────────────────────
@@ -175,6 +194,10 @@ export interface Bloque {
 /** Los bloques que se pueden abrir y cerrar con su flecha. */
 export const esPlegable = (b: Pick<Bloque, 'tipo' | 'plegable'>) =>
   b.tipo === 'desplegable' || (!!b.plegable && /^titulo[123]$/.test(b.tipo));
+
+/** Los que llevan bloques DENTRO que en el editor se abren y se cierran: los
+ *  plegables y el botón (cuyos hijos son su plantilla). */
+export const esContenedor = (b: Pick<Bloque, 'tipo' | 'plegable'>) => esPlegable(b) || b.tipo === 'boton';
 
 /** Árbol → lista plana con `nivel`. Lo que se abre en el editor. */
 export function aplanar(arbol: Bloque[] | undefined, nivel = 0, out: Bloque[] = []): Bloque[] {
