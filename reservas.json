@@ -71,6 +71,54 @@
       "ruta": "drizzle/0137_bd_tablas_diseno.sql",
       "motivo": "carril bd: diseño de la página de la fila",
       "desde": "2026-10-05T23:02:55.317Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "drizzle/0137_comentarios_pagina.sql",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/comentarios.ts",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/versiones.ts",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/acceso/HerramientasPagina.tsx",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/acceso/PanelComentarios.tsx",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/acceso/PanelVersiones.tsx",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/acceso/ComentarSeleccion.tsx",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/utils/diferencias.ts",
+      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
+      "desde": "2026-10-05T23:13:55.772Z"
     }
   ]
 }
