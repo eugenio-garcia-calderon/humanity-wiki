@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { pizarraVisible } from './sitios';
 import { registrarHistorial } from './historial';
+import { puedeEditarPagina, quienDe } from './permisos.js';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
@@ -1774,12 +1775,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         // editor que tira su trabajo al guardar — la promesa rota en el peor
         // momento posible. La misma tabla que abre la pantalla abre el guardado:
         // una sola verdad sobre quién edita.
-        const acceso = await db.execute(sql`
-          SELECT 1 FROM accesos_entidad
-          WHERE entidad_tipo = 'pagina' AND entidad_id = ${req.params.id}
-            AND user_id = ${req.user!.id} AND rol = 'edicion'
-        `);
-        if (!acceso.rows.length) {
+        //
+        // Desde 2026-10-05 (#12) la pregunta la contesta `permisos.ts`: el rol
+        // puede venir de la persona, de un equipo suyo o heredado de la madre.
+        if (!(await puedeEditarPagina(db, quienDe(req), String(req.params.id)))) {
           return res.status(403).json({ error: 'Solo el creador, un administrador o alguien con acceso de edición pueden editarla.' });
         }
       }

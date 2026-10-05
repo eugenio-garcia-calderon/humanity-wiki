@@ -6,6 +6,7 @@ import {
   type Bloque, markdownABloques, bloquesAMarkdown, tituloDeBloques, tokenizarInline,
 } from '../utils/bloques.js';
 import { ROLE } from './auth.js';
+import { rolEnPagina, capacidades, quienDe } from './permisos.js';
 import { hayPresupuesto, apuntarGasto } from './ai/tope.js';
 
 // ============================================================================
@@ -39,7 +40,10 @@ async function cargarDocumento(db: any, req: Request, res: Response, id: string,
   if (!w || w.deleted_at || w.kind !== 'pagina') { res.status(404).json({ error: 'No existe.' }); return null; }
   const esAutor = !!req.user && req.user.id === w.creator_user_id;
   const esAdmin = ((req.user?.roleLevel ?? 0) >= 4);
-  if (paraEditar ? !(esAutor || esAdmin) : (!w.publico && !esAutor && !esAdmin)) {
+  // Leer (exportar a PDF, Word…) lo puede quien la ve: también quien tiene un
+  // rol en ella (#12), no sólo su autor.
+  const puedeVer = w.publico || esAutor || esAdmin || capacidades(await rolEnPagina(db, quienDe(req), w.id)).ver;
+  if (paraEditar ? !(esAutor || esAdmin) : !puedeVer) {
     res.status(403).json({ error: paraEditar ? 'Solo el autor puede hacerlo.' : 'Este documento es privado.' });
     return null;
   }
@@ -73,15 +77,6 @@ export function registerDocumentosRoutes(app: Express, db: any) {
    * administrador. Quien tiene `edicion` edita el contenido, no el acceso.
    * `requireLevel` como toda ruta de escritura (norma de la casa desde PR #25).
    */
-  const soloElAutor = async (req: Request, res: Response): Promise<boolean> => {
-    const w = await db.execute(sql`SELECT creator_user_id FROM knowledge_windows WHERE id = ${req.params.id} AND archived_at IS NULL`);
-    if (!w.rows.length) { res.status(404).json({ error: 'Esa página no existe.' }); return false; }
-    const esAutor = !!req.user && req.user.id === (w.rows[0] as any).creator_user_id;
-    const esAdmin = (req.user?.roleLevel ?? 0) >= 4;
-    if (!esAutor && !esAdmin) { res.status(403).json({ error: 'Solo quien creó la página gestiona su acceso.' }); return false; }
-    return true;
-  };
-
   /**
    * Buscar a quién dar acceso. Se busca por nombre o por correo, pero el correo
    * NO viaja en la respuesta: sirve para encontrar a alguien que conoces, no
@@ -105,53 +100,8 @@ export function registerDocumentosRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.get('/api/accesos/pagina/:id', async (req: Request, res: Response) => {
-    try {
-      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
-      if (!(await soloElAutor(req, res))) return;
-      const r = await db.execute(sql`
-        SELECT a.user_id, a.rol, a.created_at,
-               COALESCE(u.display_name, u.name, u.email) AS nombre, u.avatar_url
-        FROM accesos_entidad a JOIN users u ON u.id = a.user_id
-        WHERE a.entidad_tipo = 'pagina' AND a.entidad_id = ${req.params.id}
-        ORDER BY a.created_at
-      `);
-      res.json({ accesos: r.rows });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
-  });
-
-  app.post('/api/accesos/pagina/:id', async (req: Request, res: Response) => {
-    try {
-      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
-      if (!(await soloElAutor(req, res))) return;
-      const { user_id, rol } = req.body || {};
-      if (!user_id || !['lectura', 'edicion'].includes(rol)) {
-        return res.status(400).json({ error: 'Hace falta la persona y un rol: lectura o edicion.' });
-      }
-      const existe = await db.execute(sql`SELECT id FROM users WHERE id = ${user_id} AND archived_at IS NULL`);
-      if (!existe.rows.length) return res.status(404).json({ error: 'Esa persona no existe.' });
-      // Repetir a alguien con otro rol es CAMBIARLE el rol, no un error: es lo
-      // que intenta quien pulsa «edición» sobre alguien que ya tenía lectura.
-      await db.execute(sql`
-        INSERT INTO accesos_entidad (entidad_tipo, entidad_id, user_id, rol, otorgado_por)
-        VALUES ('pagina', ${req.params.id}, ${user_id}, ${rol}, ${req.user.id})
-        ON CONFLICT (entidad_tipo, entidad_id, user_id) DO UPDATE SET rol = EXCLUDED.rol
-      `);
-      res.json({ ok: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
-  });
-
-  app.delete('/api/accesos/pagina/:id/:userId', async (req: Request, res: Response) => {
-    try {
-      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
-      if (!(await soloElAutor(req, res))) return;
-      await db.execute(sql`
-        DELETE FROM accesos_entidad
-        WHERE entidad_tipo = 'pagina' AND entidad_id = ${req.params.id} AND user_id = ${req.params.userId}
-      `);
-      res.json({ ok: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
-  });
+  // Dar, cambiar y quitar el acceso de una página vive desde 2026-10-05 en
+  // `permisos.ts` (roles finos, equipos, invitaciones y herencia, #12).
 
   /**
    * GET /api/windows/:id — una ventana suelta, con permisos resueltos.
@@ -179,15 +129,14 @@ export function registerDocumentosRoutes(app: Express, db: any) {
        * gestiona la lista sigue siendo el autor o un administrador — dar
        * edición no es nombrar dueño.
        */
-      let rolAcceso: string | null = null;
-      if (req.user && !esAutor && !esAdmin) {
-        const a = await db.execute(sql`
-          SELECT rol FROM accesos_entidad
-          WHERE entidad_tipo = 'pagina' AND entidad_id = ${w.id} AND user_id = ${req.user.id}
-        `);
-        rolAcceso = (a.rows[0] as any)?.rol ?? null;
-      }
-      if (!w.publico && !esAutor && !esAdmin && !rolAcceso) {
+      // Desde 2026-10-05 (#12) el rol lo resuelve `permisos.ts`: persona,
+      // equipo o heredado de la página madre.
+      // Las ventanas que no son páginas no tienen roles: su autor y nada más.
+      const acceso = await rolEnPagina(db, quienDe(req), w.id);
+      const c = capacidades(acceso);
+      const dueno = esAutor || esAdmin;
+      const puede = { ver: c.ver || dueno || !!w.publico, comentar: c.comentar || dueno, editar: c.editar || dueno, gestionar: c.gestionar || dueno };
+      if (!puede.ver) {
         return res.status(403).json({ error: 'Este documento es privado.' });
       }
       const autor = await db.execute(sql`SELECT COALESCE(display_name, name, email) AS nombre FROM users WHERE id = ${w.creator_user_id}`);
@@ -217,7 +166,11 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         const m = sp.rows[0] as any;
         if (m) fila_de = { tabla_titulo: null, padre: { id: m.id, titulo: m.title } };
       }
-      res.json({ ...w, fila_de, autor_nombre: (autor.rows[0] as any)?.nombre || null, puedo_editar: esAutor || esAdmin || rolAcceso === 'edicion' });
+      res.json({
+        ...w, fila_de, autor_nombre: (autor.rows[0] as any)?.nombre || null,
+        puedo_editar: puede.editar, puedo_comentar: puede.comentar, puedo_gestionar: puede.gestionar,
+        mi_rol: acceso.rol, rol_heredado_de: acceso.heredadoDe,
+      });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

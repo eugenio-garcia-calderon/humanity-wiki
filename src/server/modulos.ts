@@ -75,6 +75,7 @@ import { registerStripeRoutes } from './stripe.js';
 import { registerPuntosRoutes } from './puntos.js';
 import { registerGastoRoutes } from './gasto.js';
 import { registerDocumentosRoutes } from './documentos.js';
+import { registrarPermisos } from './permisos.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
@@ -239,6 +240,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'puntos', montar: (app, db) => registerPuntosRoutes(app, db) },
   { nombre: 'gasto', montar: (app, db) => registerGastoRoutes(app, db) },
   { nombre: 'documentos', montar: (app, db) => registerDocumentosRoutes(app, db) },
+  {
+    nombre: 'permisos',
+    montar: (app, db) => registrarPermisos(app, db),
+    nota: 'Quién puede qué en una página: roles, equipos, invitaciones y herencia (#12). '
+        + 'Sólo rutas bajo `/api/permisos/…` y `/api/equipos/…`; el sitio en la lista da igual.',
+  },
   { nombre: 'menu', montar: (app, db) => registerMenuRoutes(app, db) },
   { nombre: 'mensajes', montar: (app, db) => registerMensajesRoutes(app, db) },
   { nombre: 'calendario', montar: (app, db) => registerCalendarioRoutes(app, db) },
