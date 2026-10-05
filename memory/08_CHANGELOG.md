@@ -8275,3 +8275,20 @@ reach the model and answer instantly.
   - If the opened mic is virtual (Zoom, Teams, BlackHole, Krisp…), it switches to a physical one at once.
   - The mic that produces sound is saved, and the user is told the mic was changed.
 - Verified locally by forcing the Zoom device: the session moved to «Micrófono del MacBook Pro» (forma 1). Real speech could not be checked here because the Mac's speaker volume was at 6%.
+## 2026-10-05 — Top bar cleared: brand and «Todas mis páginas» move into the left menu; Feedback visible (prog8)
+
+Eugenio: «el botón de mis páginas incrustado en el menú desplegable de la
+izquierda, llamado Todas mis páginas; el botón de humanity.wiki con su
+desplegable también dentro del menú izquierdo; el icono del logo, fuera;
+y el botón de feedback arriba a la derecha, visible».
+
+- `src/components/navegacion/MarcaRail.tsx` (new): at the top of the left rail,
+  «humanity.wiki» (the name goes home, its chevron opens the information pages
+  as an in-place accordion — a floating panel would be clipped by the rail's
+  scroll) and «Todas mis páginas» (→ `/paginas`), which heads the list of
+  folders and pages already under it. Used on desktop and in the mobile drawer.
+- Top bar: «Mis páginas» and the logo button are gone. The brand name with its
+  dropdown stays in the bar only when the left menu is not showing it (folded,
+  no session, or mobile), and the name is now visible on mobile too since the
+  logo was the home key there.
+- Feedback: out of the brand dropdown, into an amber pill right of the bell.

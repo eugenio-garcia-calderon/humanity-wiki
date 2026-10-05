@@ -26,6 +26,7 @@ import Panel, { EstilosPanel } from '../navegacion/Panel';
 import { type Circulo } from '../navegacion/TresCirculos';
 import RailInferior from '../navegacion/RailInferior';
 import AvatarRail from '../navegacion/AvatarRail';
+import MarcaRail from '../navegacion/MarcaRail';
 import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
@@ -733,7 +734,7 @@ export default function Layout() {
             claro
             titulo="Mis páginas"
             items={itemsProyectos}
-            cabeza={<AvatarRail desplegado />}
+            cabeza={<><MarcaRail onIrAlInicio={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} /><AvatarRail desplegado /></>}
             abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
             onElegir={h => navigate(h.ruta)}
             onAbrirSubmenu={h => {
@@ -914,19 +915,8 @@ export default function Layout() {
             {paginasPlegado || esMovil ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
           </button>
         )}
-        {user && (
-          <button
-            onClick={() => { setPorRoce(false); setCirculo(null); navigate('/paginas'); }}
-            title="Todas tus páginas"
-            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
-              location.pathname === '/paginas'
-                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
-                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
-          >
-            <FileText className="h-4 w-4 shrink-0" />
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
-          </button>
-        )}
+        {/* «Mis páginas» ya no está aquí (2026-10-05): vive dentro del menú
+            izquierdo como «Todas mis páginas» (`MarcaRail`). */}
 
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
             Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
@@ -962,23 +952,11 @@ export default function Layout() {
         {/* 2026-10-02: en el ordenador el raíl de la izquierda es el de tus
             páginas y lleva su propio logo; si está plegado, o no hay sesión, el
             logo va aquí. */}
-        {(esMovil ? !menuPuesto : (paginasPlegado || !user)) && (
-          <button
-            /* IR AL INICIO ES LAS DOS COSAS (2026-08-22). Navegar no basta: las
-               ventanas del escritorio se pintan encima y no se enteran de que la
-               ruta ha cambiado, así que pulsabas el logo y no pasaba nada
-               visible. Se apartan, no se cierran: siguen arriba a un clic. */
-            onClick={() => { minimizarTodas(); navigate('/'); }}
-            title="humanity.wiki — ir al inicio"
-            aria-label="humanity.wiki — ir al inicio"
-            className="shrink-0 w-7 h-7 rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-          >
-            {/* EL LOGO DE VERDAD (2026-08-22, Eugenio lo mandó). Antes era un
-                globo genérico de la librería de iconos, que es lo que se pone
-                cuando no hay marca. Ahora hay marca. */}
-            <img src="/logo.svg" alt="" className="w-full h-full" />
-          </button>
-        )}
+        {/* EL LOGO SE HA IDO (2026-10-05). Eugenio: «el icono del logo
+            elimínalo, solo permite ir al inicio; que si la gente pincha en
+            humanity.wiki vaya a la página de inicio». El nombre hace de
+            inicio: en el menú izquierdo (`MarcaRail`) y, cuando ese menú no
+            está a la vista, aquí abajo. */}
 
         {/* ══ EL NOMBRE, CENTRADO (2026-08-23) ════════════════════════════
             Eugenio, 2026-08-26: el nombre vuelve a ser humanity.wiki, y «la
@@ -1009,6 +987,7 @@ export default function Layout() {
             EN MÓVIL SÓLO EL LOGO: a 375 px la barra lleva ya el buscador, y el
             nombre volvería a chocar. El desplegable sigue abriéndose desde el
             logo, así que no se pierde ninguna página. */}
+        {(esMovil || paginasPlegado || !user) && (
         <div className="relative shrink-0" ref={infoRef}>
           {/* Se calcula una vez porque lo miran dos sitios: el fondo del botón
               y el tono del verde. Dos copias de la misma condición son dos
@@ -1064,7 +1043,7 @@ export default function Layout() {
             <button
               onClick={() => { setInfoAbierta(false); navigate('/'); }}
               title="Ir al inicio"
-              className={cn('hidden h-full items-center rounded-l-lg pl-2 pr-1 transition-colors sm:flex',
+              className={cn('flex h-full items-center rounded-l-lg pl-2 pr-1 transition-colors',
                 nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
             >
               <span className="whitespace-nowrap text-sm font-black tracking-tight">
@@ -1117,12 +1096,6 @@ export default function Layout() {
                   una página que leer, sino algo que escribir. Conserva su ámbar
                   —el mismo que tenía abajo— porque sigue siendo lo que se busca
                   en un momento malo, y encontrarlo rápido es media función. */}
-              <button
-                onClick={() => { setInfoAbierta(false); navigate('/hormiguero'); }}
-                className="mb-1 flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-xs font-black text-amber-700 hover:bg-amber-50"
-              >
-                <IconoFeedback className="h-3.5 w-3.5 shrink-0" /> Feedback
-              </button>
 
               {PAGINAS_INFO.filter(op => op.enMenu !== false).map(op => (
                 <button key={op.ruta}
@@ -1134,6 +1107,7 @@ export default function Layout() {
             </div>
           )}
         </div>
+        )}
 
         <span
           aria-hidden
@@ -1441,6 +1415,21 @@ export default function Layout() {
             avisa: esconder un aviso detrás de un clic es dejar de avisar. */}
 
         <Campana compacto={compacto} />
+        {/* ══ FEEDBACK, A LA VISTA (2026-10-05) ═══════════════════════════
+            Eugenio: «pon el botón de feedback arriba en el menú a la derecha,
+            que sea visible, y sácalo del desplegable de humanity.wiki». Ámbar
+            como siempre: es lo que se busca en un momento malo. */}
+        <button
+          onClick={() => navigate('/hormiguero')}
+          title="Feedback: cuéntanos qué falla o qué falta"
+          aria-label="Feedback"
+          className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 text-xs font-black text-amber-800 transition-colors hover:bg-amber-100',
+            compacto ? 'h-7' : 'h-9',
+            location.pathname === '/hormiguero' && 'bg-amber-200')}
+        >
+          <IconoFeedback className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">Feedback</span>
+        </button>
 
 
         {/* ══ «MIS PROYECTOS», FIJO ARRIBA A LA DERECHA (2026-08-25) ══════
@@ -1628,7 +1617,7 @@ export default function Layout() {
                   claro
                   titulo="Mis páginas"
                   items={itemsProyectos}
-                  cabeza={<AvatarRail desplegado />}
+                  cabeza={<><MarcaRail onIrAlInicio={() => { navigate('/'); setCirculo(null); }} /><AvatarRail desplegado /></>}
                   abierta={null}
                   // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
                   // que no hay ningún gesto intermedio entre mirar y abrir. El
