@@ -9,6 +9,7 @@ import {
 import { bloquesDe } from './bloquesSql.js';
 import { ROLE } from './auth.js';
 import { rolEnPagina, capacidades, quienDe } from './permisos.js';
+import { filtrarParaLector } from './miembros.js';
 import { hayPresupuesto, apuntarGasto } from './ai/tope.js';
 
 // ============================================================================
@@ -168,6 +169,9 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         const m = sp.rows[0] as any;
         if (m) fila_de = { tabla_titulo: null, padre: { id: m.id, titulo: m.title } };
       }
+      // Quien no la edita no recibe los bloques «solo miembros» que su
+      // categoría no ve (carril acceso, `miembros.ts`).
+      if (!puede.editar && w.kind === 'pagina') w.config = (await filtrarParaLector(db, req, w.id, w.config)).config;
       res.json({
         ...w, fila_de, autor_nombre: (autor.rows[0] as any)?.nombre || null,
         puedo_editar: puede.editar, puedo_comentar: puede.comentar, puedo_gestionar: puede.gestionar,

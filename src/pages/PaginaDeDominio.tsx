@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
 import PortadaEspacio from './PortadaEspacio';
 import Cesta from '../components/knowledge/Cesta';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
 import { paginaPrecargada } from '../utils/precargado';
+import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros';
+import BarraMiembro from '../components/sitio/BarraMiembro';
 
 // ============================================================================
 // LO QUE SE VE EN UN DOMINIO PROPIO — `lamieldelasierra.com` (2026-08-22)
@@ -31,25 +32,17 @@ export type Resuelto = {
 };
 
 export default function PaginaDeDominio({ host, resuelto }: { host: string; resuelto: Resuelto }) {
-  // Lo normal es que venga dentro del HTML: ver `precargado.ts`.
-  const [pagina, setPagina] = useState<DatosPagina | null>(
-    () => resuelto.estado === 'pagina' ? paginaPrecargada(resuelto.datos?.id) : null);
-  const [fallo, setFallo] = useState(false);
-
-  useEffect(() => {
-    if (resuelto.estado !== 'pagina' || !resuelto.datos?.id) return;
-    if (pagina?.id === resuelto.datos.id) return;
-    let vivo = true;
-    fetch(`/api/sitio/pagina/${encodeURIComponent(resuelto.datos.id)}`)
-      .then(async r => { if (!vivo) return; if (!r.ok) { setFallo(true); return; } setPagina(await r.json()); })
-      .catch(() => vivo && setFallo(true));
-    return () => { vivo = false; };
-  }, [resuelto]);
+  // Lo normal es que venga dentro del HTML: ver `precargado.ts`. Con miembros
+  // (2026-10-05), `useLecturaSitio` la vuelve a pedir con la sesión y trae el
+  // muro si la raíz es «solo miembros».
+  const id = resuelto.estado === 'pagina' ? resuelto.datos?.id : undefined;
+  const { pagina, muro, estado, recargar } = useLecturaSitio(id, id ? paginaPrecargada(id) : null);
 
   if (resuelto.estado === 'espacio' && resuelto.datos?.handle) {
     return <PortadaEspacio handle={resuelto.datos.handle} />;
   }
 
+  const fallo = resuelto.estado === 'pagina' && (estado === 'fallo' || estado === 'no');
   if (resuelto.estado !== 'pagina' || fallo) {
     const e = fallo ? 'fallo' : resuelto.estado;
     return (
@@ -68,12 +61,16 @@ export default function PaginaDeDominio({ host, resuelto }: { host: string; resu
     );
   }
 
+  if (muro) return <MuroMiembros muro={muro} paginaId={id} onDentro={recargar} />;
   if (!pagina) return <Cargando />;
 
   return (
-    <VistaPagina pagina={pagina} propio
-      // Si la página vende algo, la cesta va igual: el dominio cambia la
-      // dirección, no lo que la página es.
-      pie={resuelto.datos?.autor?.handle ? <Cesta tienda={resuelto.datos.autor.handle} /> : null} />
+    <>
+      <VistaPagina pagina={pagina} propio
+        // Si la página vende algo, la cesta va igual: el dominio cambia la
+        // dirección, no lo que la página es.
+        pie={resuelto.datos?.autor?.handle ? <Cesta tienda={resuelto.datos.autor.handle} /> : null} />
+      {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
+    </>
   );
 }

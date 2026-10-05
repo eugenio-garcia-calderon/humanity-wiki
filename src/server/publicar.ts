@@ -34,6 +34,7 @@ import { normalizarTelefono } from '../utils/telefono.js';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
+import { filtrarParaLector } from './miembros.js';
 import { sitioDePagina } from './sitios';
 
 /** El alfabeto de un subdominio: minúsculas, números y guiones interiores. */
@@ -2676,13 +2677,18 @@ export function registerPublicarRoutes(app: Express, db: any) {
       `);
       const w = r.rows[0] as any;
       if (!w) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
+      // Sin los bloques y secciones de miembros que quien llama no ve
+      // (2026-10-05, carril acceso, `miembros.ts`).
+      const { config, ocultos, raiz } = await filtrarParaLector(db, req, w.id, w.config);
+      if (ocultos) res.set('Cache-Control', 'private, no-store');
       res.json({
-        id: w.id, titulo: w.title, tipo: w.kind, config: w.config,
+        id: w.id, titulo: w.title, tipo: w.kind, config,
         indexable: w.indexable,
         autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
         created_at: w.created_at, updated_at: w.updated_at,
         // El menú y el pie del sitio (2026-10-02), igual que en `sitios.ts`.
         sitio: await sitioDePagina(db, w.id),
+        miembros: raiz ? { raiz, ocultos } : null,
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });

@@ -653,6 +653,26 @@ export async function resolverDominio(db: any, host: unknown): Promise<{ status:
   // El dominio existe pero lo que servía se despublicó. No es lo mismo que
   // un dominio que no apunta a nada, y quien lo abre merece saber cuál de
   // las dos cosas pasa.
+  // UN SITIO SOLO PARA MIEMBROS (2026-10-05, carril acceso): la raíz no es
+  // pública a propósito (una página restringida nunca lo es), pero el dominio
+  // sí lleva a ella: a su muro de «entra o regístrate». Se dice qué página es
+  // y su título, nada de su contenido; el contenido lo pide el navegador a
+  // `/api/sitio/pagina/:id` con la sesión del miembro.
+  if (!p && c.tipo === 'pagina') {
+    const m = (await db.execute(sql`
+      SELECT w.id, w.title, w.slug, u.handle, u.display_name, u.name, u.avatar_url
+      FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+      JOIN sitio_config sc ON sc.raiz_id = w.id AND sc.activo
+      WHERE w.id = ${dom.entidad_id} AND w.deleted_at IS NULL AND w.archived_at IS NULL
+        AND EXISTS (SELECT 1 FROM sitio_restricciones r WHERE r.pagina_id = w.id AND r.bloque_id = '')
+    `)).rows[0] as any;
+    if (m) return { status: 200, body: {
+      tipo: 'pagina', id: m.id, titulo: m.title, slug: m.slug, restringida: true,
+      ruta: `/@${m.handle}/${m.slug}`,
+      autor: { handle: m.handle, nombre: m.display_name || m.name, avatar: m.avatar_url },
+    } };
+  }
+
   if (!p) {
     return { status: 404, body: {
       error: `Este dominio apunta a ${/a$/.test(c.nombre) ? 'una ' + c.nombre : 'un ' + c.nombre} que ya no está ${/a$/.test(c.nombre) ? 'publicada' : 'publicado'}.`,

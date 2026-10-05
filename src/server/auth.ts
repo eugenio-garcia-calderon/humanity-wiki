@@ -178,6 +178,10 @@ declare global {
   }
 }
 
+/** Una fila de `users` como `req.user`. Exportada para `miembros.ts`, que
+ *  la necesita para la identidad acotada de los sitios con miembros. */
+export const filaAUsuario = (r: any): AuthUser => rowToUser(r);
+
 function rowToUser(r: any): AuthUser {
   const level = Number(r.role_level ?? 1);
   return {

@@ -188,6 +188,27 @@ const REVISADAS: Entrada[] = [
   { m: 'DELETE', ruta: '/api/equipos/:id', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo; archiva, no borra' },
   { m: 'PUT', ruta: '/api/equipos/:id/miembros', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo' },
   { m: 'DELETE', ruta: '/api/equipos/:id/miembros/:userId', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo, o salirse uno mismo' },
+
+  // ── MIEMBROS DE LOS SITIOS PUBLICADOS (carril acceso, 2026-10-05) ─────────
+  // Las del panel exigen sesión de la plataforma y administrar la página raíz
+  // (lo mira `miembros.ts`). Las del visitante son públicas a propósito: son
+  // la propia puerta del sitio, con el guardián de intentos delante.
+  { m: 'PUT', ruta: '/api/sitio-miembros/:raiz/config', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/categorias', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'PUT', ruta: '/api/sitio-miembros/:raiz/categorias/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'DELETE', ruta: '/api/sitio-miembros/:raiz/categorias/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'PUT', ruta: '/api/sitio-miembros/:raiz/miembros/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'DELETE', ruta: '/api/sitio-miembros/:raiz/miembros/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/invitar', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz; 500 como mucho' },
+  { m: 'PUT', ruta: '/api/sitio-miembros/:raiz/restricciones', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/registro', guardia: { tipo: 'publica', porque: 'alta de un visitante en el sitio; guardián de intentos' } },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/entrar', guardia: { tipo: 'publica', porque: 'inicio de sesión en el sitio; guardián de intentos' } },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/enlace', guardia: { tipo: 'publica', porque: 'pedir enlace mágico; respuesta igual exista o no el correo' } },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/enlace/canjear', guardia: { tipo: 'publica', porque: 'testigo de un solo uso, con caducidad y ligado al anfitrión' } },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/salir', guardia: { tipo: 'publica', porque: 'cerrar la propia sesión del sitio' } },
+  { m: 'POST', ruta: '/api/sitio-miembros/:raiz/pedir-acceso', guardia: { tipo: 'publica', porque: 'exige sesión de miembro del sitio, no de la plataforma' } },
+  { m: 'PUT', ruta: '/api/sitio-miembros/:raiz/guardados/:pagina', guardia: { tipo: 'publica', porque: 'exige sesión de miembro con permiso «guardar»' } },
+  { m: 'DELETE', ruta: '/api/sitio-miembros/:raiz/guardados/:pagina', guardia: { tipo: 'publica', porque: 'exige sesión de miembro del sitio' } },
 ];
 
 /** Generadas del análisis del código, SIN revisar por una persona.
