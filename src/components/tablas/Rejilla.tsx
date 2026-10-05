@@ -1,5 +1,5 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -10,12 +10,15 @@ import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { cn } from '../../utils/cn';
 import { tonoDe } from '../../utils/coloresBloque';
-import BarraVista from './BarraVista';
+import BarraVista, { Desplegable } from './BarraVista';
+import EditorRecurrencia from './EditorRecurrencia';
 import Tablero from './Tablero';
 import Lista from './Lista';
 import Calendario from './Calendario';
 import LineaTiempo from './LineaTiempo';
-import { NuevoElemento } from './Tarjetas';
+import { NuevoElemento, MarcaRecurrente } from './Tarjetas';
+// recharts pesa: solo se baja cuando hay un gráfico en pantalla.
+const Grafico = lazy(() => import('./Grafico'));
 import {
   FORMAS, APUNTAN, agruparFilas, normalizarVista, vistaVirtual, valorAlMover,
   type Fila, type Forma, type Grupo, type Vista,
@@ -119,6 +122,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
   const [plegados, setPlegados] = useState<Set<string>>(new Set());
+  /** Las filas madre desplegadas (sus subelementos se ven debajo). */
+  const [abiertas, setAbiertas] = useState<Set<string>>(new Set());
+  /** La fila cuyo panel de «Repetir…» está abierto. */
+  const [repitiendo, setRepitiendo] = useState<string | null>(null);
   const [falloVista, setFalloVista] = useState<string | null>(null);
 
   const cargarVistas = useCallback(async () => {
@@ -326,6 +333,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     await cambiarVista({ agrupar_por: j.id });
     await cargar();
   };
+  /** Subelementos o dependencias: crea sus dos columnas (ver `bd.ts`). */
+  const activarFuncion = async (funcion: 'subelementos' | 'dependencias') => {
+    const r = await fetch(`/api/bd/tablas/${tablaId}/funciones`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ funcion }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) setFalloVista(j.error || 'No se pudo activar.');
+    await cargar();
+  };
   const anadirOpcion = async (col: Columna, etiqueta: string) => {
     const opciones = [...(col.opciones || []), { label: etiqueta, color: PALETA[(col.opciones || []).length % PALETA.length] }];
     const r = await fetch(`/api/bd/columnas/${col.id}`, {
@@ -389,6 +406,17 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const colAgr = columnas.find(c => c.id === activa.agrupar_por) || null;
   const colSub = colAgr ? columnas.find(c => c.id === activa.config.subagrupar_por && c.id !== colAgr.id) || null : null;
   const gruposOcultos = new Set(activa.config.grupos_ocultos || []);
+  // ── SUBELEMENTOS Y DEPENDENCIAS (2026-10-05) ───────────────────────────
+  const colMadre = columnas.find(c => c.config?.rol === 'madre') || null;
+  const colBloqueada = columnas.find(c => c.config?.rol === 'bloqueada_por') || null;
+  // Se anidan en la tabla sin agrupar. Agrupada, cada fila va a su grupo: una
+  // hija en «Hecho» y su madre en «En curso» no pueden estar a la vez debajo
+  // una de otra y cada una en su columna.
+  const anidar = !!colMadre && activa.config.anidar !== false && !colAgr;
+  const madreDe = (f: Fila): string | null => colMadre ? (f.apuntados?.[colMadre.id] || [])[0]?.id || null : null;
+  const dependencias = colBloqueada
+    ? filas.flatMap(f => (f.apuntados?.[colBloqueada.id] || []).map((a: any) => ({ de: a.id as string, a: f.id })))
+    : [];
 
   /**
    * Pinta una lista de filas partida en grupos y subgrupos. Lo usan la tabla
@@ -428,6 +456,97 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     </button>
   );
   const abrirComoFila = (f: Fila) => abrirPagina(f);
+
+  /** Una fila de la rejilla. `nivel` es la profundidad del subelemento. */
+  const filaTabla = (f: Fila, nivel = 0, hijos = 0): ReactNode => {
+    const abierta = abiertas.has(f.id);
+    const alternar = () => setAbiertas(s => { const n = new Set(s); if (n.has(f.id)) n.delete(f.id); else n.add(f.id); return n; });
+    return (
+      <tr key={f.id} className="hover:bg-slate-50/40">
+        {columnasVista.map((c, ci) => (
+          <td key={c.id} className="group/celda relative border-b border-r border-slate-100 p-0 align-top">
+            {ci === 0 && (
+              <span className="absolute right-1 top-1 z-[1] flex items-center gap-0.5 opacity-0 group-hover/celda:opacity-100 focus-within:opacity-100 transition-opacity">
+                {editable && colMadre && (
+                  <button onClick={async () => { await crearCon('', { [colMadre.id]: f.id }); setAbiertas(s => new Set(s).add(f.id)); }}
+                    title="Añadir un subelemento" aria-label="Añadir un subelemento"
+                    className="inline-flex items-center h-6 px-1 rounded border border-slate-200 bg-white text-slate-500 hover:text-emerald-600">
+                    <CornerDownRight className="w-3 h-3" />
+                  </button>
+                )}
+                <button onClick={() => abrirPagina(f)} title="Abrir la página de esta fila"
+                  className="inline-flex items-center gap-0.5 h-6 px-1.5 rounded border border-slate-200 bg-white text-[10px] font-black uppercase tracking-wide text-slate-500 hover:text-emerald-600">
+                  <ArrowUpRight className="w-3 h-3" /> Abrir
+                </button>
+              </span>
+            )}
+            {ci === 0 && (anidar || f.recurrencia) ? (
+              <div className="flex items-start" style={{ paddingLeft: nivel * 18 }}>
+                {anidar && (hijos > 0 ? (
+                  <button onClick={alternar} aria-expanded={abierta} title={abierta ? 'Plegar los subelementos' : `Ver ${hijos} ${hijos === 1 ? 'subelemento' : 'subelementos'}`}
+                    className="shrink-0 mt-1.5 ml-0.5 h-6 px-0.5 inline-flex items-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                    {abierta ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                    <span className="text-[10px] font-bold">{hijos}</span>
+                  </button>
+                ) : <span className="shrink-0 w-5" />)}
+                <div className="flex-1 min-w-0">
+                  <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
+                    apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                    editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
+                </div>
+                {f.recurrencia && <span className="shrink-0 mt-2.5 mr-1"><MarcaRecurrente fila={f} /></span>}
+              </div>
+            ) : (
+              <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
+                apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
+            )}
+          </td>
+        ))}
+        {editable && (
+          <td className="border-b border-slate-100 text-center w-16 whitespace-nowrap">
+            <span className="relative inline-block">
+              <button onClick={() => setRepitiendo(repitiendo === f.id ? null : f.id)} title={f.recurrencia ? 'Se repite: cambiar' : 'Repetir esta fila'}
+                aria-label="Repetir esta fila"
+                className={cn('p-1.5 transition-colors', f.recurrencia ? 'text-violet-500' : 'text-slate-300 hover:text-violet-600')}>
+                <Repeat className="w-3.5 h-3.5" />
+              </button>
+              <Desplegable abierto={repitiendo === f.id} onCerrar={() => setRepitiendo(null)} ancho="w-80" derecha>
+                <EditorRecurrencia fila={f} columnas={columnas} onHecho={() => { setRepitiendo(null); cargar(); }} />
+              </Desplegable>
+            </span>
+            <button onClick={() => borrarFila(f.id)} title="Borrar la fila"
+              className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </td>
+        )}
+      </tr>
+    );
+  };
+
+  /**
+   * Las filas de la rejilla, con los subelementos debajo de su madre si la
+   * tabla los tiene. Una hija cuya madre no pasa el filtro sube a la raíz:
+   * esconderla porque su madre no se ve sería esconder una fila que SÍ cumple
+   * el filtro.
+   */
+  const pintarFilasTabla = (fs: Fila[]): ReactNode => {
+    if (!anidar) return fs.map(f => filaTabla(f));
+    const ids = new Set(fs.map(f => f.id));
+    const hijosDe = new Map<string, Fila[]>();
+    for (const f of fs) { const m = madreDe(f); if (m && ids.has(m)) { if (!hijosDe.has(m)) hijosDe.set(m, []); hijosDe.get(m)!.push(f); } }
+    const pintadas = new Set<string>();
+    const rama = (f: Fila, nivel: number): ReactNode[] => {
+      if (pintadas.has(f.id) || nivel > 30) return [];
+      pintadas.add(f.id);
+      const hijos = hijosDe.get(f.id) || [];
+      const out: ReactNode[] = [filaTabla(f, nivel, hijos.length)];
+      if (abiertas.has(f.id)) for (const h of hijos) out.push(...rama(h, nivel + 1));
+      return out;
+    };
+    return fs.filter(f => { const m = madreDe(f); return !m || !ids.has(m); }).flatMap(f => rama(f, 0));
+  };
 
   // ══ LA GALERÍA, LIMPIA (2026-10-01) ════════════════════════════════════
   // Eugenio: «sin esas líneas que envuelven el contenido en rectángulos; sólo
@@ -605,7 +724,31 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             onElegir={v => elegir(v.id ? `vista:${v.id}` : v.forma)}
             onCrear={crearVista} onCambiar={cambiarVista}
             onRenombrar={renombrarVista} onDuplicar={duplicarVista} onBorrar={borrarVista}
-            ajustes={vista === 'tablero' ? (
+            ajustes={vista === 'tabla' ? (
+              <div className="space-y-1">
+                <p className="px-1 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Funciones de la tabla</p>
+                {colMadre ? (
+                  <label className="flex items-center gap-2 px-1 h-9 text-xs font-bold text-slate-600 cursor-pointer">
+                    <input type="checkbox" checked={activa.config.anidar !== false} onChange={e => cambiarVista({ config: { ...activa.config, anidar: e.target.checked } })} />
+                    Subelementos debajo de su madre{colAgr ? ' (sin agrupar)' : ''}
+                  </label>
+                ) : (
+                  <button onClick={() => activarFuncion('subelementos')} className="w-full flex items-start gap-2 px-1.5 py-2 rounded-md text-left hover:bg-slate-50">
+                    <GitBranch className="w-4 h-4 mt-0.5 text-slate-500 shrink-0" />
+                    <span><span className="block text-xs font-bold text-slate-700">Activar subelementos</span>
+                      <span className="block text-[11px] text-slate-400">Filas dentro de filas: una tarea y sus pasos.</span></span>
+                  </button>
+                )}
+                {!colBloqueada && (
+                  <button onClick={() => activarFuncion('dependencias')} className="w-full flex items-start gap-2 px-1.5 py-2 rounded-md text-left hover:bg-slate-50">
+                    <LinkIcon className="w-4 h-4 mt-0.5 text-slate-500 shrink-0" />
+                    <span><span className="block text-xs font-bold text-slate-700">Activar dependencias</span>
+                      <span className="block text-[11px] text-slate-400">«Bloqueada por» y «Bloquea», con flechas en la línea de tiempo.</span></span>
+                  </button>
+                )}
+                {colBloqueada && <p className="px-1.5 py-1 text-[11px] text-slate-400">Dependencias activas: columnas «{colBloqueada.nombre}» y su cara de vuelta.</p>}
+              </div>
+            ) : vista === 'tablero' ? (
               <label className="flex items-center gap-2 px-1 h-9 text-xs font-bold text-slate-600 cursor-pointer">
                 <input type="checkbox" checked={!!activa.config.portada} onChange={e => cambiarVista({ config: { ...activa.config, portada: e.target.checked } })} />
                 Enseñar la imagen de la página en cada tarjeta
@@ -637,7 +780,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           onGuardar={guardarCeldas} onCrear={crearCon} onAbrir={abrirComoFila} onCambiarVista={cambiarVista} />
       ) : vista === 'linea' ? (
         <LineaTiempo columnas={columnas} filas={filas} vista={activa} columnaTitulo={datos.columna_titulo ?? null} editable={editable}
-          onGuardar={guardarCeldas} onAbrir={abrirComoFila} onCambiarVista={cambiarVista} />
+          onGuardar={guardarCeldas} onAbrir={abrirComoFila} onCambiarVista={cambiarVista} dependencias={dependencias} />
+      ) : vista === 'grafico' ? (
+        <Suspense fallback={<div className="flex items-center gap-2 p-6 text-slate-400 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Preparando el gráfico…</div>}>
+          <Grafico columnas={columnas} filas={filas} vista={activa} editable={editable} onCambiarVista={cambiarVista} />
+        </Suspense>
       ) : vista === 'galeria' ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
@@ -706,31 +853,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               </tr>
             </thead>
             <tbody>
-              {porGrupos(filas, fs => fs.map(f => (
-                <tr key={f.id} className="hover:bg-slate-50/40">
-                  {columnasVista.map((c, ci) => (
-                    <td key={c.id} className="group/celda relative border-b border-r border-slate-100 p-0 align-top">
-                      {ci === 0 && (
-                        <button onClick={() => abrirPagina(f)} title="Abrir la página de esta fila"
-                          className="absolute right-1 top-1 z-[1] inline-flex items-center gap-0.5 h-6 px-1.5 rounded border border-slate-200 bg-white text-[10px] font-black uppercase tracking-wide text-slate-500 opacity-0 group-hover/celda:opacity-100 focus:opacity-100 hover:text-emerald-600 transition-opacity">
-                          <ArrowUpRight className="w-3 h-3" /> Abrir
-                        </button>
-                      )}
-                      <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
-                        apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
-                        editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
-                    </td>
-                  ))}
-                  {editable && (
-                    <td className="border-b border-slate-100 text-center w-11">
-                      <button onClick={() => borrarFila(f.id)} title="Borrar la fila"
-                        className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              )), (g, nivel, plegado, alternar) => (
+              {porGrupos(filas, fs => pintarFilasTabla(fs), (g, nivel, plegado, alternar) => (
                 <tr key={`g-${g.clave}-${nivel}`} className="bg-slate-50/70">
                   <td colSpan={columnasVista.length + (editable ? 1 : 0)} className="border-b border-slate-200 p-0">{etiquetaGrupo(g, nivel, plegado, alternar)}</td>
                 </tr>
