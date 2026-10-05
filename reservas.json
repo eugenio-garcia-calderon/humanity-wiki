@@ -191,6 +191,12 @@
       "ruta": "src/components/tablas/MenuPropiedad.tsx",
       "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
       "desde": "2026-10-05T22:58:57.037Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/permisos.ts",
+      "motivo": "carril acceso: categoría editar de miembros",
+      "desde": "2026-10-05T23:02:00.119Z"
     }
   ]
 }
