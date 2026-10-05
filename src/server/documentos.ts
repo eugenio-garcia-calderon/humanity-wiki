@@ -533,10 +533,13 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       for (const x of filasSueltas.rows as any[]) if (!conPadre.has(x.pagina_id) && nodos[x.pagina_id]) { conPadre.add(x.pagina_id); delete nodos[x.pagina_id]; }
 
       const carpetasR = await db.execute(sql`
-        SELECT id, titulo, slug, icono FROM proyectos
+        SELECT id, titulo, slug, icono, padre_id FROM proyectos
         WHERE creador_user_id = ${yo} AND archived_at IS NULL AND deleted_at IS NULL ORDER BY titulo
       `);
-      const carpetas = (carpetasR.rows as any[]).map(c => ({ id: c.id, titulo: c.titulo, slug: c.slug, icono: c.icono, paginas: [] as string[] }));
+      // `padre_id`: la carpeta en la que está (0133). Una madre que ya no se ve
+      // —archivada, o de otra persona— cuenta como ninguna: la hija sale arriba.
+      const vivas = new Set((carpetasR.rows as any[]).map(c => c.id));
+      const carpetas = (carpetasR.rows as any[]).map(c => ({ id: c.id, titulo: c.titulo, slug: c.slug, icono: c.icono, padre_id: c.padre_id && vivas.has(c.padre_id) ? c.padre_id : null, paginas: [] as string[] }));
       const porCarpeta = new Map(carpetas.map(c => [c.id, c]));
       const raiz: string[] = [];
       // Las de arriba, de la más reciente a la más vieja, como estaban.
@@ -547,6 +550,41 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       }
       res.json({ carpetas, raiz, nodos });
     } catch (e: any) { console.error('arbol paginas:', e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Meter una carpeta dentro de otra (`dentro_de`), o sacarla arriba del
+   *  todo (`dentro_de: null`). Sólo entre carpetas tuyas, y nunca dentro de
+   *  una de sus propias hijas: se haría un círculo y desaparecerían las dos. */
+  app.post('/api/carpetas/:id/mover', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const yo = req.user.id;
+      const esAdmin = (req.user.roleLevel ?? 0) >= ROLE.ADMIN;
+      const id = req.params.id;
+      const dentroDe: string | null = req.body?.dentro_de ? String(req.body.dentro_de) : null;
+      const leer = async (cual: string) => (await db.execute(sql`
+        SELECT id, creador_user_id FROM proyectos WHERE id = ${cual} AND archived_at IS NULL AND deleted_at IS NULL
+      `)).rows[0] as any;
+      const c = await leer(id);
+      if (!c) return res.status(404).json({ error: 'Esa carpeta no existe.' });
+      if (c.creador_user_id !== yo && !esAdmin) return res.status(403).json({ error: 'Esa carpeta no es tuya.' });
+      if (dentroDe) {
+        if (dentroDe === id) return res.status(400).json({ error: 'Una carpeta no puede ir dentro de sí misma.' });
+        const madre = await leer(dentroDe);
+        if (!madre) return res.status(404).json({ error: 'La carpeta de destino no existe.' });
+        if (madre.creador_user_id !== yo && !esAdmin) return res.status(403).json({ error: 'La carpeta de destino no es tuya.' });
+        const bajo = (await db.execute(sql`
+          WITH RECURSIVE baja(id) AS (
+            SELECT ${id}::text
+            UNION
+            SELECT p.id FROM proyectos p JOIN baja ON p.padre_id = baja.id
+          ) SELECT id FROM baja
+        `)).rows.map((x: any) => x.id);
+        if (bajo.includes(dentroDe)) return res.status(400).json({ error: 'No se puede meter una carpeta dentro de una de las suyas.' });
+      }
+      await db.execute(sql`UPDATE proyectos SET padre_id = ${dentroDe}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+      res.json({ ok: true });
+    } catch (e: any) { console.error('mover carpeta:', e); res.status(500).json({ error: e.message }); }
   });
 
   /** Meter una página dentro de otra (`dentro_de`), o sacarla a una carpeta
