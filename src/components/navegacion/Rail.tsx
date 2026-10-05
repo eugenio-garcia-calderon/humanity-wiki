@@ -797,9 +797,11 @@ export default function Rail({
         )}
       >
         <div className="flex shrink-0 flex-wrap items-center gap-1">
-          {/* En el de la derecha va ANTES: el botón de plegar queda pegado al
-              borde de la pantalla, que es por donde se va el menú. */}
-          {ladoDerecho && desplegado && junto}
+          {/* Lo de `junto` va primero en los dos lados (2026-10-05): en el de
+              la izquierda el logo queda en la esquina, donde está en la barra
+              cuando el menú está plegado — como YouTube —; en el de la derecha
+              el botón de plegar queda pegado al borde. */}
+          {desplegado && junto}
           {/* ══ EL BOTÓN DE INICIO SE HA IDO DE AQUÍ (2026-08-25) ═══════════
               Eugenio: «hay botones, uno a la izquierda de explorar y otro a la
               derecha de mis proyectos, que si los pulsas no hacen nada. Que
@@ -871,7 +873,6 @@ export default function Rail({
               {ladoDerecho ? <PanelRightClose className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
           )}
-          {!ladoDerecho && desplegado && junto}
         </div>
 
         <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />

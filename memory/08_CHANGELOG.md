@@ -8370,6 +8370,47 @@ estrecho, sin el interruptor de IA y con «Buscar contenido…».
   - **Mapa**: the publication search filtered to maps, with a link to create one.
 - A YouTube or Vimeo link pasted into «Web insertada» now becomes a player too. The «/» bar got the same coloured icons and descriptions.
 
+### 2026-10-05 — Databases: two-way relations, visible on both sides
+- Eugenio asked to see which databases are connected, in both of them, like Notion, with a visual picker for what shows from the other one.
+- A relation A→B can now have a **twin column** in B (`config.inversa_de` = A's column; A's carries `config.reciproca_id`).
+  - The twin stores nothing. It reads and writes the same `bd_enlaces` rows seen backwards (`enlacesInversos` / `guardarInversos` in `bd/enlaces.ts`), so the two sides can never disagree.
+  - Archiving the relation archives the twin. Archiving only the twin keeps the relation one-sided.
+  - `PUT /api/bd/columnas/:id` keeps the twin markers.
+- `POST /api/bd/tablas/:id/columnas` with `config.reciproca` creates the twin, if the user can edit the other table. The link dialog has «Mostrar también en «X»», on by default.
+- `POST /api/bd/columnas/:id/reciproca` makes an existing one-sided relation two-way.
+- `GET /api/bd/tablas/:id` returns `conexiones`: each connected table that the viewer can read, its direction, and the local column.
+- New `src/components/tablas/ConexionesBD.tsx`: chips in the database header (⇄ both sides, → only from here, ← only from there).
+  - Clicking a chip opens a panel with toggle tiles for what shows from the other database (image, text, each field).
+  - The panel has a button to make the link two-way.
+  - Shown to editors only.
+- Databases on the same page reload each other when a link changes (`bd:cambio` event).
+- Verified locally end to end: a link from A shows in B, a link written from B appears in A, and both headers show «⇄».
+## 2026-10-05 — YouTube-style logo, no brand dropdown, legal footer; info pages retired (prog8)
+
+Eugenio: «el logo como YouTube: a la izquierda, y al desplegar el menú se
+mantiene en su sitio; sólo botón de inicio, sin desplegable; Humanity con H y
+Wiki con W. Las páginas del desplegable, fuera, salvo avisos legales y Sobre
+Humanity Wiki, que van a un footer en todas las páginas. Tokenomics, guárdala
+en mis páginas como proyecto pendiente».
+
+- `navegacion/Logo.tsx`: «Humanity.Wiki», home only. Drawn in the top bar when
+  the left menu is folded (or absent) and in the left menu's top row when it is
+  open — measured on the same pixel in both states (x 8, y 20). `Rail` now puts
+  `junto` first on both sides. The brand dropdown and its state are gone.
+- `layout/PieLegal.tsx`: a fixed 24 px footer between the side menus on every
+  page — Sobre Humanity.Wiki · Avisos legales · Privacidad. `<main>` reserves
+  its height; the floating IA and Feedback buttons sit above it.
+- `paginasInfo.ts` keeps only Sobre, Avisos legales, Privacidad, Borrar cuenta
+  and Administración. No longer mounted: Veracidad, Tokenomics, Puntuación de
+  territorios, Cómo van las herramientas, Servidores, Seguridad, Usabilidad
+  (their components stay in the repo). Their URLs now show the platform's «Aquí
+  no hay nada». Links to them removed from Debates, Avisos legales and Sobre.
+- **Production data:** the Tokenomics page (main view, white paper and task
+  list, 158 blocks) was copied as a PRIVATE page into a new PRIVATE folder
+  «Proyectos pendientes» of `eugenio@lighthumanity.org` (U_ADMIN_EUGENIO),
+  marked `config.rescate = 'tokenomics-2026-10-05'`. Extracted from the
+  rendered page in a local browser, staged in the local DB, then inserted in
+  one transaction.
 ### 2026-10-05 — Left menu: your pages as a Notion-style tree, with drag to nest
 - Eugenio asked for two things in the left menu:
   - expanding a page should open an accordion under its title, with no depth limit, instead of a side panel;

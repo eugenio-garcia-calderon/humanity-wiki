@@ -7,7 +7,7 @@ import {
   Compass, Menu, X, FolderKanban, Folder, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
  PanelLeftOpen, PanelRightOpen, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
-import { PAGINAS_INFO } from '../../paginasInfo';
+import PieLegal, { ALTO_PIE } from './PieLegal';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import VentanaLateral from '../ventanas/VentanaLateral';
@@ -25,7 +25,8 @@ import Panel, { EstilosPanel } from '../navegacion/Panel';
  */
 import { type Circulo } from '../navegacion/TresCirculos';
 import AvatarRail from '../navegacion/AvatarRail';
-import TodasMisPaginas, { MarcaCabecera } from '../navegacion/MarcaRail';
+import TodasMisPaginas from '../navegacion/MarcaRail';
+import Logo from '../navegacion/Logo';
 import FiltroAmbito, { leerAmbito, type Ambito } from '../navegacion/FiltroAmbito';
 import { useProyectos, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import ArbolPaginas from '../navegacion/ArbolPaginas';
@@ -489,12 +490,9 @@ export default function Layout() {
   const cuentaRef = useRef<HTMLDivElement>(null);
   /** El menú de información (i): las páginas que explican la plataforma.
    *  Sus entradas salen de `src/paginasInfo.ts`, no de aquí. */
-  const [infoAbierta, setInfoAbierta] = useState(false);
   /** El botón del nombre se pinta en negro cuando su menú está abierto o estás
    *  en una de sus páginas. Lo miran dos sitios —el fondo y el tono del verde
    *  de «Conocimiento»—, así que se decide aquí una vez. */
-  const nombreEnNegro = infoAbierta || PAGINAS_INFO.some(p => location.pathname.startsWith(`/${p.ruta}`));
-  const infoRef = useRef<HTMLDivElement>(null);
   const [confirmarCerrarTodas, setConfirmarCerrarTodas] = useState(false);
   /** Cuántas notas del hormiguero necesitan algo de una persona. Solo el
    *  número, como la campana: pedir el tablero entero para pintar un punto es
@@ -508,7 +506,6 @@ export default function Layout() {
     return () => clearInterval(t);
   }, [location.pathname]);
   useCerrarAlPulsarFuera(cuentaRef, cuentaAbierta, () => setCuentaAbierta(false));
-  useCerrarAlPulsarFuera(infoRef, infoAbierta, () => setInfoAbierta(false));
   useEffect(() => {
     const f = (e: Event) => setVentanasAbiertas([...((e as CustomEvent).detail as VentanaEstado[])]);
     window.addEventListener('humanity:ventanas', f);
@@ -772,7 +769,9 @@ export default function Layout() {
             items={[]}
             // 2026-10-05: la marca, en la fila de arriba junto a plegar; y debajo
             // tu perfil, tus avisos y «Todas mis páginas», en ese orden.
-            junto={<MarcaCabecera onIrAlInicio={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} />}
+            // `relative -top-1`: el mismo píxel que el logo de la barra
+            // (medido: 4 px más abajo sin esto).
+            junto={<Logo className="relative -top-1 mr-auto" onClick={() => { minimizarTodas(); navigate('/'); setProyectoAbierto(null); setCirculo(null); }} />}
             cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
             abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
             onElegir={h => navigate(h.ruta)}
@@ -940,6 +939,11 @@ export default function Layout() {
             el menú izquierdo». El primero pliega; el segundo lleva a la tabla. */}
         {/* Como en Claude: abierto, el botón de plegar vive dentro del menú;
             plegado, aparece aquí para volver a abrirlo. */}
+        {/* EL LOGO, EN LA ESQUINA (2026-10-05). En el mismo sitio que ocupa
+            dentro del menú izquierdo abierto: al abrirlo no salta. */}
+        {(!user || esMovil || paginasPlegado) && (
+          <Logo onClick={() => { minimizarTodas(); navigate('/'); setCirculo(null); }} />
+        )}
         {user && (esMovil || paginasPlegado) && (
           <button
             onClick={() => {
@@ -1029,129 +1033,8 @@ export default function Layout() {
             EN MÓVIL SÓLO EL LOGO: a 375 px la barra lleva ya el buscador, y el
             nombre volvería a chocar. El desplegable sigue abriéndose desde el
             logo, así que no se pierde ninguna página. */}
-        {/* Sólo sin sesión (2026-10-05): con sesión la marca vive en la fila
-            de arriba del menú izquierdo y se ve al abrirlo. */}
-        {!user && (
-        <div className="relative shrink-0" ref={infoRef}>
-          {/* Se calcula una vez porque lo miran dos sitios: el fondo del botón
-              y el tono del verde. Dos copias de la misma condición son dos
-              sitios donde se olvida una página nueva. */}
-          {/* EL DISPARADOR YA NO ES UNA «i» (2026-08-24). Eugenio: «el botón
-              de "i" ponlo como si fuese un desplegable del nombre de la
-              plataforma, que se vea como una pestaña, y el "i" ya desaparece».
-
-              Es mejor sitio del que tenía: estas páginas cuentan QUÉ ES esto,
-              así que colgarlas del nombre las convierte en «sobre nosotros»,
-              que es lo que la gente ya sabe buscar. **Una «i» suelta no dice de
-              qué informa.**
-
-              En un móvil sólo se ve la flecha, pegada al logo: a 375 px la
-              barra ya lleva el buscador y el nombre entero no cabe. Ninguna
-              página se pierde — se abre igual. */}
-          {/* DOS BOTONES DENTRO DE UNA PASTILLA (2026-08-24). Eugenio: «el
-              logo de humanity.wiki debe actuar como botón de regresar a
-              INICIO "/", y sólo cuando se pinche en la flecha desplegable de su
-              derecha se abrirá el menú».
-
-              Se ven como una sola pieza —el fondo y el redondeo los pone esta
-              caja, no cada botón— y hacen dos cosas distintas. Que el nombre de
-              un sitio lleve a su inicio es lo que hace todo el mundo desde hace
-              treinta años; que además abriera un menú era lo raro, y se notaba:
-              ir al inicio pidiendo el nombre te dejaba en la misma página con
-              un panel abierto encima.
-
-              La flecha se queda con el menú, que es lo que una flecha hacia
-              abajo anuncia. En móvil el nombre no se pinta —no cabe— y sólo
-              está la flecha: al inicio se va por el logo de al lado, que es
-              donde se busca en un teléfono. */}
-          <div
-            className={cn('flex shrink-0 items-center rounded-lg transition-colors',
-              compacto ? 'h-7' : 'h-9',
-              nombreEnNegro ? 'bg-slate-900 text-white' : 'text-slate-800')}
-          >
-            {/* EL NOMBRE, EN LA BARRA (2026-08-26). Eugenio: «vuelve a poner
-                humanity wiki como nombre del proyecto».
-
-                Aquí va el nombre a secas, sin la frase: la barra identifica,
-                no explica. «La red de conocimiento» vive en la portada, que es
-                donde alguien que aún no sabe qué es esto está mirando.
-
-                El verde es el `emerald-600` de la portada, que es donde ya
-                significa algo —lo lleva el botón de entrar y los datos que sí
-                están medidos—; un verde parecido pero distinto sería empezar
-                el segundo verde de la marca. Va sólo en `.wiki`: «humanity» es
-                la palabra y el dominio es lo que la convierte en nombre.
-                Cuando el botón está abierto o estás en una de sus páginas el
-                fondo es negro, y ahí el verde oscuro no se leería: sube a
-                `emerald-400`. */}
-            <button
-              onClick={() => { setInfoAbierta(false); navigate('/'); }}
-              title="Ir al inicio"
-              className={cn('flex h-full items-center rounded-l-lg pl-2 pr-1 transition-colors',
-                nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
-            >
-              <span className="whitespace-nowrap text-sm font-black tracking-tight">
-                humanity
-                <span className={cn(nombreEnNegro ? 'text-emerald-400' : 'text-emerald-600')}>
-                  .wiki
-                </span>
-              </span>
-            </button>
-            <button
-              onClick={() => setInfoAbierta(o => !o)}
-              title="Sobre humanity.wiki"
-              aria-label="Sobre humanity.wiki"
-              aria-expanded={infoAbierta}
-              className={cn('flex h-full items-center rounded-lg px-1.5 transition-colors sm:rounded-l-none',
-                nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
-            >
-              <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', infoAbierta && 'rotate-180')} />
-            </button>
-          </div>
-          {infoAbierta && (
-            /* SE ABRE HACIA LA DERECHA, PORQUE EL BOTÓN ESTÁ A LA IZQUIERDA
-               (2026-08-24). Eugenio: «arregla este desplegable, no se ve bien
-               el contenido».
-
-               Colgaba de `right-0`, o sea con su borde derecho pegado al del
-               botón: de ahí para la izquierda hay 224 px de panel y sólo 16 px
-               de pantalla, así que la mitad de cada título quedaba cortada
-               fuera del navegador. Esa alineación era correcta cuando el
-               nombre vivía en la derecha de la barra; al mudarse a la
-               izquierda dejó de serlo, y nada la avisó porque el panel seguía
-               abriéndose.
-
-               Abajo de `sm` sigue anclado a la pantalla y no al botón: a 375 px
-               ni a un lado ni al otro cabe un panel de 224 px sin salirse. */
-            <div className="fixed inset-x-2 top-14 sm:absolute sm:inset-x-auto sm:top-11 sm:left-0 sm:w-56 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-              <p className="px-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Información</p>
-              {/* LAS ENTRADAS SALEN DE LA LISTA (2026-08-22): la misma
-                  `src/paginasInfo.ts` que monta las rutas en App.tsx. Cinco
-                  programadores necesitaban una entrada aquí la misma tarde;
-                  con la lista, añadir una página es una línea al final de un
-                  fichero que nadie más está editando, y no un cambio en estas
-                  veinte. El marco, el tamaño y el ajuste al móvil de abajo se
-                  quedan como estaban. */}
-              {/* ══ FEEDBACK, AQUÍ (2026-08-25) ═════════════════════════════
-                  Eugenio: «pon el botón de feedback y el de "i" en el menú
-                  desplegable de humanity.wiki y sácalos del menú inferior».
-
-                  Va el primero y separado: es lo único de esta lista que no es
-                  una página que leer, sino algo que escribir. Conserva su ámbar
-                  —el mismo que tenía abajo— porque sigue siendo lo que se busca
-                  en un momento malo, y encontrarlo rápido es media función. */}
-
-              {PAGINAS_INFO.filter(op => op.enMenu !== false).map(op => (
-                <button key={op.ruta}
-                  onClick={() => { setInfoAbierta(false); navigate(`/${op.ruta}`); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
-                  <op.icono className="w-3.5 h-3.5 text-slate-400" /> {op.titulo}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        )}
+        {/* El desplegable de la marca se ha ido (2026-10-05): sus páginas, las
+            que quedan, están en el pie (`PieLegal`). */}
 
         <span
           aria-hidden
@@ -1543,7 +1426,7 @@ export default function Layout() {
               cuando el chat está cerrado, así que en reposo no cuesta nada. */}
           <main
             key={updateCounter}
-            style={{ paddingBottom: 'var(--hueco-muelle, 0px)', paddingRight: 'var(--hueco-lateral, 0px)' }}
+            style={{ paddingBottom: `calc(var(--hueco-muelle, 0px) + ${ALTO_PIE}px)`, paddingRight: 'var(--hueco-lateral, 0px)' }}
             className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${fullBleed ? '' : 'p-4 sm:p-8'}`}
           >
             <div className={fullBleed ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
@@ -1704,7 +1587,7 @@ export default function Layout() {
                   claro
                   titulo="Mis páginas"
                   items={[]}
-                  junto={<MarcaCabecera onIrAlInicio={() => { navigate('/'); setCirculo(null); }} />}
+                  junto={<Logo className="mr-auto" onClick={() => { navigate('/'); setCirculo(null); }} />}
                   cabeza={<><AvatarRail desplegado /><Campana enMenu /><TodasMisPaginas /></>}
                   abierta={null}
                   // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
@@ -1820,11 +1703,12 @@ export default function Layout() {
           editor ya lleva el suyo, que abre la IA sabiendo qué página tienes
           abierta. */}
       <div ref={cajaCirculos} />
+      <PieLegal />
       <button
         onClick={() => navigate('/hormiguero')}
         title="Feedback: cuéntanos qué falla o qué falta"
         aria-label="Feedback"
-        style={{ left: 'calc(var(--hueco-paginas, 0px) + 16px)', bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+        style={{ left: 'calc(var(--hueco-paginas, 0px) + 16px)', bottom: `calc(${ALTO_PIE + 12}px + env(safe-area-inset-bottom))` }}
         className={cn('fixed z-[9990] inline-flex h-12 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 text-sm font-black text-amber-800 shadow-lg transition-colors hover:bg-amber-100',
           location.pathname === '/hormiguero' && 'bg-amber-200')}
       >
@@ -1836,7 +1720,7 @@ export default function Layout() {
           onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
           title="Hablar con la IA"
           aria-label="Abrir el chat de la IA"
-          style={{ right: 'calc(var(--hueco-temas, 0px) + 16px)', bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+          style={{ right: 'calc(var(--hueco-temas, 0px) + 16px)', bottom: `calc(${ALTO_PIE + 12}px + env(safe-area-inset-bottom))` }}
           className="fixed z-[9990] inline-flex h-12 items-center gap-2 rounded-full bg-violet-600 px-4 text-sm font-black text-white shadow-lg shadow-violet-600/30 transition-colors hover:bg-violet-700"
         >
           <Sparkles className="h-5 w-5 shrink-0" />

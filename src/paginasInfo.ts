@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins, Lock, Gavel, SlidersHorizontal } from 'lucide-react';
+import { Globe, type LucideIcon, UserX, Lock, Gavel, SlidersHorizontal } from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -44,48 +44,15 @@ export interface PaginaInfo {
   enMenu?: boolean;
 }
 
+// 2026-10-05 — Eugenio: «todas las páginas del desplegable de Humanity Wiki
+// elimínalas, ya no son útiles; salvo los avisos legales y Sobre Humanity
+// Wiki, que van en el footer». Veracidad, tokenomics, puntuación de
+// territorios, herramientas, servidores, seguridad y usabilidad dejan de
+// montarse (sus componentes siguen en el repositorio; tokenomics se guardó como
+// página privada de Eugenio, «Proyectos pendientes»). Las rutas que citan las
+// tiendas de aplicaciones (`/privacidad`, `/borrar-cuenta`) siguen vivas.
 export const PAGINAS_INFO: PaginaInfo[] = [
-  { ruta: 'veracidad', titulo: 'Veracidad', icono: Scale,
-    componente: lazy(() => import('./pages/Veracidad')) },
   { ruta: 'sobre-red-humana', titulo: 'Sobre Humanity.wiki', icono: Globe },
-  { ruta: 'sobre-red-humana/puntuacion-territorios', titulo: 'Puntuación de territorios', icono: BadgeCheck },
-  // Tokenomics: qué es el punto, qué compra, de dónde sale su valor y qué NO
-  // es — y, colgados como vistas (`?vista=libro-blanco`, `?vista=tareas`), el
-  // borrador del libro blanco y la lista de tareas hasta el token (Eugenio,
-  // 2026-08-22: «plasmar de forma pública en una página de información sobre
-  // los tokenomics»). Una sola entrada: los dos documentos no merecen línea
-  // de menú propia.
-  { ruta: 'tokenomics', titulo: 'Tokenomics: el punto', icono: Coins,
-    componente: lazy(() => import('./pages/about/Tokenomics')) },
-  // Qué hace cada herramienta y QUÉ LE FALTA, con las cifras leídas de la base
-  // de datos al abrirla. Va aquí porque explica la plataforma, no porque sea
-  // una herramienta más (Eugenio, 2026-08-22: «que esa página sea el dashboard
-  // de información y seguimiento de cómo avanzan las herramientas»).
-  { ruta: 'herramientas', titulo: 'Cómo van las herramientas', icono: Wrench,
-    componente: lazy(() => import('./pages/EstadoHerramientas')) },
-
-  // Servidores: dónde vive esto, qué cuesta de verdad y qué queda por hacer.
-  // El coste sale de `/api/gasto`, que ya era público — la página no abre nada
-  // nuevo, lo enseña (2026-08-22, Eugenio: «de forma transparente a nivel de
-  // coste»).
-  { ruta: 'sobre-red-humana/servidores', titulo: 'Servidores', icono: Server,
-    componente: lazy(() => import('./pages/about/Servidores')) },
-
-  // Seguridad: EL TABLERO NO SE VE SIN PERMISO, y el candado está en el
-  // servidor, no aquí. Aparecer en este menú solo pone el enlace a la vista;
-  // quien no sea del equipo abre la página y encuentra un aviso, no la lista.
-  // Está en el menú a propósito: que exista un sitio donde se trabaja esto es
-  // parte de lo que se cuenta, aunque el contenido no lo sea.
-  { ruta: 'seguridad', titulo: 'Seguridad', icono: ShieldAlert,
-    componente: lazy(() => import('./pages/Seguridad')) },
-
-  // Usabilidad: los principios que sigue la interfaz y el plan para mejorarla,
-  // cada uno con el fallo real que lo puso ahí (2026-08-22, Eugenio: «mete
-  // todos los principios y planes para mejorar la usabilidad de la
-  // plataforma»). Va en este menú porque explica cómo se decide lo que ves, que
-  // es tan parte de la plataforma como lo que hace.
-  { ruta: 'usabilidad', titulo: 'Usabilidad', icono: Hand,
-    componente: lazy(() => import('./pages/Usabilidad')) },
 
   // Cómo borrar tu cuenta. LA EXIGE GOOGLE PLAY: una dirección pública,
   // alcanzable sin la aplicación y sin sesión, que explique el borrado. Sin

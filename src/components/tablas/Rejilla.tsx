@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
 import { useSitio } from '../sitio/ContextoSitio';
+import ConexionesBD, { type Conexion } from './ConexionesBD';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
@@ -83,6 +84,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [datos, setDatos] = useState<{
     tabla: any; columnas: Columna[]; filas: Fila[]; ciclo?: string[]; total?: number; mostradas?: number;
     columna_titulo?: string | null;
+    conexiones?: Conexion[];
   } | null>(null);
   const [cargando, setCargando] = useState(true);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -101,6 +103,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   }, [tablaId]);
 
   useEffect(() => { cargar(); }, [cargar]);
+  // LAS DOS CARAS A LA VEZ (2026-10-05): enlazar algo aquí cambia lo que
+  // enseña la otra base de datos. Si está en la misma página, se recarga sola.
+  const avisarCambio = () => window.dispatchEvent(new CustomEvent('bd:cambio', { detail: { desde: tablaId } }));
+  useEffect(() => {
+    const oir = (e: Event) => { if ((e as CustomEvent).detail?.desde !== tablaId) cargar(); };
+    window.addEventListener('bd:cambio', oir);
+    return () => window.removeEventListener('bd:cambio', oir);
+  }, [cargar, tablaId]);
 
   /**
    * Guarda una celda.
@@ -126,6 +136,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       return { error: suyo?.error || j.error || 'No se pudo guardar.' };
     }
     await cargar();
+    if (columnas.find(c => c.id === columnaId)?.tipo === 'relacion') avisarCambio();
   };
 
   const anadirFila = async () => {
@@ -243,6 +254,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             ? `${datos.mostradas} de ${datos.total} filas`
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
         </span>}
+        {/* LAS BASES DE DATOS CONECTADAS (2026-10-05): ver `ConexionesBD.tsx`.
+            Sólo para quien edita: en la página publicada lo enlazado ya se ve
+            en las tarjetas. */}
+        {editable && !!datos.conexiones?.length && (
+          <div className={cn(limpia && 'basis-full flex justify-center')}>
+            <ConexionesBD conexiones={datos.conexiones} columnas={columnas} editable={editable} onCambio={() => { cargar(); avisarCambio(); }} />
+          </div>
+        )}
         {/* Las dos vistas, como las pestañas de Notion. */}
         {/* ENLAZAR CON OTRA BASE DE DATOS, A LA VISTA (2026-10-02). Eugenio
             no encontraba cómo relacionar bases de datos: sólo se podía
@@ -468,6 +487,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           onCerrar={() => setEditorColumna(null)}
           onHecho={idNueva => {
             cargar();
+            avisarCambio();
             // Creada desde la galería, se ve en las tarjetas desde ya.
             if (idNueva && vista === 'galeria' && onCambiarVisibles) {
               const actuales = visibles ?? columnas.filter(x => x.id !== datos?.columna_titulo).slice(0, 3).map(x => x.id);
