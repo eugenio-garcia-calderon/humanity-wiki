@@ -19,24 +19,6 @@
       "desde": "2026-10-05T22:57:06.298Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "editorA: imágenes estilo PowerPoint",
-      "desde": "2026-10-05T22:57:06.298Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/utils/bloques.ts",
-      "motivo": "editorA: imágenes estilo PowerPoint",
-      "desde": "2026-10-05T22:57:06.298Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/BloquesLectura.tsx",
-      "motivo": "editorA: imágenes estilo PowerPoint",
-      "desde": "2026-10-05T22:57:06.298Z"
-    },
-    {
       "agente": "prog8-bd",
       "ruta": "src/components/tablas/PropiedadesFila.tsx",
       "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
@@ -179,6 +161,42 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "carril acceso: comentarios e historial",
       "desde": "2026-10-05T23:16:43.915Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "drizzle/0139_bloques_sincronizados.sql",
+      "motivo": "editorA: bloques sincronizados (#22)",
+      "desde": "2026-10-05T23:18:35.388Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/edicionPaginas.ts",
+      "motivo": "editorA: bloques sincronizados (#22)",
+      "desde": "2026-10-05T23:18:35.388Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "editorA: bloques sincronizados (#22)",
+      "desde": "2026-10-05T23:18:35.388Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "editorA: bloques sincronizados (#22)",
+      "desde": "2026-10-05T23:18:35.388Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "editorA: bloques sincronizados (#22)",
+      "desde": "2026-10-05T23:18:35.388Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BloquesExtra.tsx",
+      "motivo": "editorA: bloques sincronizados (#22)",
+      "desde": "2026-10-05T23:18:35.388Z"
     }
   ]
 }
