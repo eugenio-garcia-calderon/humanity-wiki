@@ -197,6 +197,18 @@
       "ruta": "src/components/knowledge/BloquesExtra.tsx",
       "motivo": "editorA: bloques sincronizados (#22)",
       "desde": "2026-10-05T23:18:35.388Z"
+    },
+    {
+      "agente": "prog8-carrusel",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "galería en carrusel con ver todo",
+      "desde": "2026-10-05T23:20:00.669Z"
+    },
+    {
+      "agente": "prog8-carrusel",
+      "ruta": "src/components/tablas/GaleriaCarrusel.tsx",
+      "motivo": "galería en carrusel con ver todo",
+      "desde": "2026-10-05T23:20:00.669Z"
     }
   ]
 }
