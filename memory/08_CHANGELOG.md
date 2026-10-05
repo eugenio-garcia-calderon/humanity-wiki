@@ -8264,3 +8264,14 @@ reach the model and answer instantly.
   3. Record with `MediaRecorder` (no AudioContext), upload the clip on stop to the new `POST /api/voz/grabacion`, and get the text back (Gemini Flash, about 4 s). Not live, but it is the path with the fewest parts.
 - Each method logs `[voz] informe {...}` / `[voz] grabación: …` to the app log, so a failure can be located without a report.
 - Verified locally with the real MacBook mic + `say`: all three transcribed. Once Eugenio picks one, the other two buttons and their hooks are removed (`src/hooks/useDictadoAlternativo.ts`).
+
+### 2026-10-05 — Dictation: the real cause on Chrome desktop was Zoom's virtual mic
+- Eugenio picked button 1: it works on Chrome mobile and Firefox desktop, but not on Chrome desktop. Buttons 2 and 3 removed, along with `/api/voz/grabacion` and `/api/voz/informe`.
+- The production log showed the cause. Chrome on his Mac was opening «ZoomAudioDevice (Virtual)», which only carries sound inside a Zoom call.
+  - All four fallback forms opened that same device. Without a `deviceId`, Chrome uses the mic chosen in its own settings; Firefox uses the system one.
+  - The same cause explains the «digital silence» of 2026-10-02.
+- `useVoiceDictation` now handles it:
+  - After opening the first mic, it lists the other real mics, physical and built-in first, and tries each one by exact id.
+  - If the opened mic is virtual (Zoom, Teams, BlackHole, Krisp…), it switches to a physical one at once.
+  - The mic that produces sound is saved, and the user is told the mic was changed.
+- Verified locally by forcing the Zoom device: the session moved to «Micrófono del MacBook Pro» (forma 1). Real speech could not be checked here because the Mac's speaker volume was at 6%.

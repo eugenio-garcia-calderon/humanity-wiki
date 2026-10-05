@@ -1,7 +1,7 @@
 import express, { type Express, type Request, type Response } from 'express';
 import WebSocket from 'ws';
 import fs from 'node:fs';
-import { hayPresupuesto, apuntarGasto } from './ai/tope.js';
+import { hayPresupuesto } from './ai/tope.js';
 
 // ============================================================================
 // DICTADO POR VOZ EN TIEMPO REAL (2026-10-02)
@@ -223,59 +223,6 @@ export function registrarVoz(app: Express, db: any) {
     const s = sesiones.get(req.params.id);
     if (!s || s.userId !== quien(req)) return res.status(204).end();
     console.log(`[voz] ${s.id} diag ${JSON.stringify(req.body || {}).slice(0, 700)}`);
-    res.status(204).end();
-  });
-
-  // ── LOS TRES BOTONES (2026-10-05) ─────────────────────────────────────────
-  // Eugenio, a la cuarta: «haz diferentes soluciones y yo pruebo cuál
-  // funciona». El 1 es este dictado en directo; el 2, el del propio Chrome;
-  // el 3 graba entero y lo transcribe aquí al soltar. Cada uno deja una línea
-  // `[voz] informe` al registro, así se sabe cuál falló y por qué aunque nadie
-  // lo cuente.
-
-  /** Botón 3: una grabación entera (webm/opus o mp4), transcrita de una vez. */
-  app.post('/api/voz/grabacion', express.raw({ type: () => true, limit: '20mb' }), async (req: Request, res: Response) => {
-    try {
-      const yo = quien(req);
-      if (!yo) return res.status(401).json({ error: 'Inicia sesión para dictar por voz.' });
-      if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'El dictado no está configurado en este servidor.' });
-      const b = req.body as Buffer;
-      if (!Buffer.isBuffer(b) || b.length < 500) return res.status(400).json({ error: 'La grabación ha llegado vacía.' });
-      const presupuesto = await hayPresupuesto(db);
-      if (!presupuesto.ok) return res.status(429).json({ error: presupuesto.mensaje });
-      // Sin el «;codecs=…»: Gemini quiere el tipo pelado.
-      const tipo = String(req.headers['content-type'] || 'audio/webm').split(';')[0].trim();
-      const empezo = Date.now();
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [
-            { inlineData: { mimeType: tipo, data: b.toString('base64') } },
-            { text: 'Transcribe literalmente lo que se dice en este audio, en el idioma en que se habla, con la puntuación normal. Devuelve SOLO el texto, sin comillas ni comentarios. Si no se oye ninguna voz, devuelve exactamente: [silencio]' },
-          ] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 4096 },
-        }),
-      });
-      if (!r.ok) {
-        const detalle = (await r.text().catch(() => '')).slice(0, 200);
-        console.error(`[voz] grabación: el transcriptor respondió ${r.status} ${detalle}`);
-        return res.status(502).json({ error: 'El transcriptor no ha podido con esta grabación. Prueba otra vez.' });
-      }
-      const j: any = await r.json();
-      let texto = (j.candidates?.[0]?.content?.parts || []).map((p: any) => p.text || '').join('').trim();
-      const silencio = /^\[?silencio\]?\.?$/i.test(texto);
-      if (silencio) texto = '';
-      // Gemini Flash: 30 céntimos el millón de entrada, 250 el de salida.
-      apuntarGasto(((j.usageMetadata?.promptTokenCount || 0) * 30 + (j.usageMetadata?.candidatesTokenCount || 0) * 250) / 1_000_000);
-      console.log(`[voz] grabación: ${Math.round(b.length / 1024)} KB ${tipo}, ${texto.length} letras${silencio ? ' (silencio)' : ''}, ${Date.now() - empezo} ms`);
-      res.json({ texto, silencio });
-    } catch (e: any) { console.error('[voz] grabación:', e.message); res.status(500).json({ error: 'No se ha podido transcribir.' }); }
-  });
-
-  /** Cómo le fue a cada botón, una línea al registro. */
-  app.post('/api/voz/informe', (req: Request, res: Response) => {
-    const yo = quien(req);
-    if (yo) console.log(`[voz] informe ${JSON.stringify(req.body || {}).slice(0, 700)}`);
     res.status(204).end();
   });
 
