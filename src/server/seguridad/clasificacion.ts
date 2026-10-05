@@ -79,6 +79,14 @@ export const CLASIFICACION: Clase[] = [
   c('equipos', 'MEDIA', 'MEDIA', 'MEDIA', 'MEDIA', 'los equipos a los que se da acceso de una vez'),
   c('equipo_miembros', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'quién está en un equipo: entrar es ver todo lo que el equipo ve'),
   c('invitaciones_acceso', 'ALTA', 'ALTA', 'ALTA', 'MEDIA', 'correos invitados a una página: guarda el correo de quien aún no tiene cuenta'),
+  // Sitios con miembros (carril acceso, 0136).
+  c('sitio_config', 'ALTA', 'BAJA', 'MEDIA', 'ALTA', 'si un sitio admite registros y cómo: cambiarlo abre o cierra la puerta'),
+  c('sitio_categorias', 'ALTA', 'BAJA', 'MEDIA', 'ALTA', 'qué puede cada categoría de miembros'),
+  c('sitio_miembros', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'quién es miembro de qué sitio, con su correo y su estado'),
+  c('sitio_sesiones', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'una fila aquí es entrar en un sitio como ese miembro'),
+  c('sitio_enlaces', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un enlace mágico vivo abre el sitio como esa persona'),
+  c('sitio_restricciones', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'qué ve cada categoría: una fila de menos abre contenido privado'),
+  c('sitio_guardados', 'BAJA', 'MEDIA', 'BAJA', 'BAJA', 'lo que cada miembro guarda del sitio'),
 
   // ── DINERO ────────────────────────────────────────────────────────────────
   c('transactions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'movimientos de dinero real'),

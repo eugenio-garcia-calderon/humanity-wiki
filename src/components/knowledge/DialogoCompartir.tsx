@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import DominioPropio from './DominioPropio';
 import PersonasConAcceso from '../acceso/PersonasConAcceso';
+import TarjetaMiembros from '../acceso/TarjetaMiembros';
 import {
   X, Globe, Lock, Copy, Check, Loader2, AlertTriangle, ExternalLink,
   FileText, Image as ImageIcon, FileType,
@@ -277,6 +278,9 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
               invitaciones por correo y herencia de la madre. Ver
               `components/acceso/PersonasConAcceso.tsx`. */}
           <PersonasConAcceso paginaId={paginaId} />
+
+          {/* ── MIEMBROS REGISTRADOS (al estilo Softr, carril acceso) ── */}
+          <TarjetaMiembros paginaId={paginaId} onIr={onCerrar} />
 
           {/* ── EL NOMBRE DEL ESPACIO ─────────────────────────────────────── */}
           {!estado.handle && (

@@ -34,6 +34,9 @@ import path from 'node:path';
 import { resolverDominio } from './dominios';
 import { cabeceraEnHtml } from './cabeceraSitio';
 import { bloquesDe } from './bloquesSql';
+import { madresValidas, rolEnPagina, capacidades, quienDe } from './permisos.js';
+import { accesoMiembro, filtrarBloques, muroDe } from './miembros.js';
+import { peticionActual } from './peticionActual.js';
 
 const DOMINIO = 'humanity.wiki';
 const RESERVADOS = new Set(['www', 'api', 'admin', 'app', 'mail', 'ftp', 'cdn', 'static', 'assets']);
@@ -44,25 +47,29 @@ const PROFUNDIDAD = 8;
 
 // ── 1. VISIBILIDAD HEREDADA ─────────────────────────────────────────────────
 
-/** Las páginas desde las que se sube: la propia página. */
+/**
+ * Las páginas desde las que se sube: la propia página y sus madres.
+ *
+ * DOS CORRECCIONES (2026-10-05, carril acceso):
+ *  · Se sube sólo por MADRES VÁLIDAS (`permisos.ts`). Antes cualquiera podía
+ *    poner en SU página pública un bloque «Página» con el id de la página
+ *    privada de otra persona, y esa página ajena pasaba a verse en
+ *    `/api/sitio/pagina/:id`. Ahora el eslabón exige que la madre sea de la
+ *    misma dueña (o la base de datos, de la dueña de la madre).
+ *  · No se sube desde una página «solo miembros» (`sitio_restricciones`): lo
+ *    que cuelga de ella es de los miembros, y que su abuela sea pública no lo
+ *    hace público. Una restringida nunca es pública (disparador de 0136).
+ */
 const subirDesdePagina = (id: string) => sql`
   WITH RECURSIVE sube(id, n) AS (
     SELECT ${id}::text, 0
     UNION
     SELECT madre.id, s.n + 1 FROM sube s
-    CROSS JOIN LATERAL (
-      -- Madre por base de datos: la página que contiene la tabla de su fila.
-      SELECT w.id FROM bd_filas f
-      JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-        AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
-      WHERE f.pagina_id = s.id AND f.deleted_at IS NULL
-      UNION
-      -- Madre por bloque «Página» (2026-09-30): la que la enlaza.
-      SELECT w.id FROM knowledge_windows w
-      WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-        AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
-    ) madre
+    CROSS JOIN LATERAL (${madresValidas(sql`s.id`)}) madre
     WHERE s.n < ${PROFUNDIDAD}
+      -- Con el registro desactivado también: lo restringido queda para el
+      -- equipo, no se abre de golpe al mundo por apagar un interruptor.
+      AND NOT EXISTS (SELECT 1 FROM sitio_restricciones r WHERE r.pagina_id = s.id AND r.bloque_id = '')
   )
   SELECT EXISTS (
     SELECT 1 FROM sube s JOIN knowledge_windows w ON w.id = s.id
@@ -82,16 +89,7 @@ export async function sitioDePagina(db: any, id: string) {
       SELECT ${id}::text, 0
       UNION
       SELECT madre.id, s.n + 1 FROM sube s
-      CROSS JOIN LATERAL (
-        SELECT w.id FROM bd_filas f
-        JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-          AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
-        WHERE f.pagina_id = s.id AND f.deleted_at IS NULL
-        UNION
-        SELECT w.id FROM knowledge_windows w
-        WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-          AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
-      ) madre
+      CROSS JOIN LATERAL (${madresValidas(sql`s.id`)}) madre
       WHERE s.n < ${PROFUNDIDAD}
     )
     SELECT w.id, w.title, w.config->'sitio' AS sitio, w.config->>'icono' AS icono
@@ -118,8 +116,23 @@ export async function tablaVisible(db: any, tablaId: string): Promise<boolean> {
       AND ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tabla_id', ${tablaId}::text))
     LIMIT 20
   `);
-  for (const p of r.rows as any[]) if (await paginaVisible(db, p.id)) return true;
+  for (const p of r.rows as any[]) if (await paginaVisible(db, p.id) || await laVeQuienPregunta(db, p.id)) return true;
   return false;
+}
+
+/**
+ * ¿Ve esta página QUIEN HACE LA PETICIÓN, aunque no la vea cualquiera?
+ * (2026-10-05, carril acceso). Por un rol en ella (compartida con él, #12) o
+ * por ser miembro de su sitio con permiso. La petición no llega por
+ * parámetro: `bd.ts` llama a `tablaVisible` sin ella, y por eso se toma de
+ * `peticionActual()` (ver ese fichero).
+ */
+async function laVeQuienPregunta(db: any, paginaId: string): Promise<boolean> {
+  const req = peticionActual();
+  if (!req) return false;
+  if (req.user && capacidades(await rolEnPagina(db, quienDe(req), paginaId)).ver) return true;
+  const a = await accesoMiembro(db, req, paginaId);
+  return !!a && a.permitido && (a.restringida || a.esEquipo);
 }
 
 /** ¿Puede ver cualquiera esta pizarra? Sí si está metida (bloque
@@ -131,7 +144,7 @@ export async function pizarraVisible(db: any, graphId: string): Promise<boolean>
       AND ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tipo', 'pizarra', 'entityId', ${graphId}::text))
     LIMIT 20
   `);
-  for (const p of r.rows as any[]) if (await paginaVisible(db, p.id)) return true;
+  for (const p of r.rows as any[]) if (await paginaVisible(db, p.id) || await laVeQuienPregunta(db, p.id)) return true;
   return false;
 }
 
@@ -207,9 +220,22 @@ function imagenDe(config: any): string | null {
  * `/api/sitio/pagina/:id`, o `null` si no se puede ver. Suelta (2026-10-01)
  * porque el HTML de la visita la deja escrita dentro (`precargado.ts`).
  */
-async function paginaPublica(db: any, id: string) {
+async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
   const w = await datosPagina(db, id);
-  if (!w || !(await paginaVisible(db, w.id))) return null;
+  if (!w) return null;
+  // MIEMBROS (2026-10-05, carril acceso). Sin `req` —el HTML del servidor— se
+  // mira como un anónimo: el HTML no lee cookies, nunca lleva lo de miembros.
+  const acceso = await accesoMiembro(db, req, w.id);
+  const publica = await paginaVisible(db, w.id);
+  const porMiembro = !!acceso && acceso.permitido && (acceso.restringida || acceso.esEquipo);
+  if (!publica && !porMiembro) {
+    // Una página restringida de un sitio con miembros: no es «no existe», es
+    // «entra». El muro lleva sólo la marca del sitio, nada de la página.
+    if (acceso && acceso.restringida && !acceso.permitido) return { muro: await muroDe(db, acceso) };
+    return null;
+  }
+  const { config, ocultos } = await filtrarBloques(db, w.id, w.config, acceso);
+  w.config = config;
   const sitio = await sitioDePagina(db, w.id);
   const pr = await db.execute(sql`
     SELECT p.id, p.title, p.slug, p.publico, u.handle
@@ -240,6 +266,9 @@ async function paginaPublica(db: any, id: string) {
     autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
     padre: p ? { id: p.id, titulo: p.title, slug: p.publico ? p.slug : null, handle: p.handle } : null,
     sitio,
+    // El sitio con miembros al que pertenece, para la barra de «Entrar» y
+    // para que el navegador vuelva a pedirla con su sesión si viene del HTML.
+    miembros: acceso ? { raiz: acceso.sitio.raiz, ocultos } : null,
   };
 }
 
@@ -270,8 +299,11 @@ export function registrarSitios(app: Express, db: any) {
    */
   app.get('/api/sitio/pagina/:id', async (req: Request, res: Response) => {
     try {
-      const p = await paginaPublica(db, req.params.id);
+      const p = await paginaPublica(db, req.params.id, req);
       if (!p) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
+      // Lo que depende de la sesión no se guarda en ninguna caché compartida.
+      res.set('Cache-Control', 'private, no-store');
+      if (p.muro) return res.status(p.muro.motivo === 'entrar' ? 401 : 403).json({ error: 'Esta página es solo para miembros.', muro: p.muro });
       res.json(p);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -378,6 +410,8 @@ export function registrarSitios(app: Express, db: any) {
 
       const propio = s.forma !== 'casa';
       const titulo = String(w.title || '').trim() || 'Sin título';
+      // Sin los bloques de miembros: el HTML lo lee cualquiera (y Google).
+      w.config = (await filtrarBloques(db, w.id, w.config, null)).config;
       const desc = descripcionDe(w.config);
       const img = imagenDe(w.config);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;

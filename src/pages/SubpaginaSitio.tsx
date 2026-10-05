@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { paginaPrecargada } from '../utils/precargado';
+import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros';
+import BarraMiembro from '../components/sitio/BarraMiembro';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -18,28 +19,13 @@ import { paginaPrecargada } from '../utils/precargado';
 export default function SubpaginaSitio({ propio }: { propio: boolean }) {
   const { id } = useParams();
   const sitio = useSitio();
-  // Al entrar directamente por `/p/:id`, la página ya viene en el HTML.
-  const [pagina, setPagina] = useState<DatosPagina | null>(() => paginaPrecargada(id));
-  const [estado, setEstado] = useState<'cargando' | 'ok' | 'no' | 'fallo'>(pagina ? 'ok' : 'cargando');
-
-  useEffect(() => {
-    if (pagina?.id === id) return;
-    let vivo = true;
-    setEstado('cargando');
-    fetch(`/api/sitio/pagina/${encodeURIComponent(id || '')}`)
-      .then(async r => {
-        if (!vivo) return;
-        if (r.status === 404) { setEstado('no'); return; }
-        if (!r.ok) { setEstado('fallo'); return; }
-        setPagina(await r.json());
-        setEstado('ok');
-        window.scrollTo(0, 0);
-      })
-      .catch(() => vivo && setEstado('fallo'));
-    return () => { vivo = false; };
-  }, [id]);
+  // Al entrar directamente por `/p/:id`, la página ya viene en el HTML. Si es
+  // de un sitio con miembros, se vuelve a pedir con la sesión (ver
+  // `useLecturaSitio`), y si es «solo miembros» llega el muro.
+  const { pagina, muro, estado, recargar } = useLecturaSitio(id, paginaPrecargada(id) as DatosPagina | null);
 
   if (estado === 'cargando') return <Cargando />;
+  if (muro) return <MuroMiembros muro={muro} paginaId={id} onDentro={recargar} />;
   if (estado !== 'ok' || !pagina) {
     return (
       <SinPagina
@@ -49,7 +35,10 @@ export default function SubpaginaSitio({ propio }: { propio: boolean }) {
       />
     );
   }
-  return <VistaPagina pagina={pagina} propio={propio} />;
+  return <>
+    <VistaPagina pagina={pagina} propio={propio} />
+    {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
+  </>;
 }
 
 /** Por subdominio: `quien.humanity.wiki/p/:id`. */
