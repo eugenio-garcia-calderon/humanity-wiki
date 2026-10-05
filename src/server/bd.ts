@@ -43,7 +43,11 @@ import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/c
 import { compilar } from './bd/formulas';
 import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
-import { filtrar, ordenarFilas, agrupar, OPERADORES, type Filtro, type Orden } from './bd/vistas';
+import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
+
+/** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
+ *  misma tabla: cambiar de forma no toca ni una fila. */
+const FORMAS = ['tabla', 'galeria', 'tablero', 'lista', 'calendario', 'linea', 'grafico', 'formulario'] as const;
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -425,8 +429,13 @@ export function registerBdRoutes(app: Express, db: any) {
         `);
         vista = v.rows[0] || null;
       }
-      const filtros: Filtro[] = vista?.filtros || (req.query.filtros ? JSON.parse(String(req.query.filtros)) : []);
-      const ordenPor: Orden[] = vista?.orden_por || (req.query.orden ? JSON.parse(String(req.query.orden)) : []);
+      // Un filtro llegado por la URL que no se entiende NO tumba la lectura:
+      // se ignora. Quien pide la tabla tiene que poder verla aunque el enlace
+      // que siguió llevara un filtro mal escrito.
+      const deUrl = (q: unknown) => { try { return q ? JSON.parse(String(q)) : null; } catch { return null; } };
+      let filtros: Filtros = vista?.filtros || deUrl(req.query.filtros) || [];
+      if (!filtroValido(filtros)) filtros = [];
+      const ordenPor: Orden[] = vista?.orden_por || deUrl(req.query.orden) || [];
       visibles = ordenarFilas(filtrar(visibles, filtros), ordenPor);
 
       const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);
@@ -475,7 +484,11 @@ export function registerBdRoutes(app: Express, db: any) {
         },
         columnas,
         columna_titulo: colTitulo,
-        ...(vista ? { vista: { id: vista.id, nombre: vista.nombre, ocultas: vista.ocultas } } : {}),
+        ...(vista ? { vista: {
+          id: vista.id, nombre: vista.nombre, forma: vista.forma, ocultas: vista.ocultas,
+          filtros: vista.filtros, orden_por: vista.orden_por, agrupar_por: vista.agrupar_por,
+          config: vista.config || {}, usuario_id: vista.usuario_id,
+        } } : {}),
         // Se dice CUÁNTAS había antes de filtrar. Sin ese número, una vista con
         // un filtro puesto y otra sin él se ven igual de completas y nadie sabe
         // que está mirando un trozo.
@@ -848,6 +861,73 @@ export function registerBdRoutes(app: Express, db: any) {
   });
 
   // ── LAS VISTAS ────────────────────────────────────────────────────────────
+  // (2026-10-05, carril «bd») Hasta hoy existían en la base de datos y nadie
+  // las usaba: el servidor sabía filtrar y ordenar, pero ningún botón se lo
+  // pedía. Ahora la barra de la vista las crea, las cambia y las quita.
+  //
+  // UNA VISTA COMPARTIDA (`usuario_id` nulo) ES DE LA TABLA: la ve todo el
+  // mundo, también quien lee la página publicada, así que solo la toca quien
+  // puede escribir en la tabla. Una vista personal la toca solo su dueño.
+
+  /** Limpia y valida lo que llega para una vista. Devuelve el motivo del fallo
+   *  o los campos ya limpios (solo los que han llegado). */
+  const limpiarVista = (d: any): { error: string } | Record<string, any> => {
+    const out: Record<string, any> = {};
+    if (d.nombre !== undefined) {
+      const n = String(d.nombre || '').trim().slice(0, 120);
+      if (!n) return { error: 'La vista necesita un nombre.' };
+      out.nombre = n;
+    }
+    if (d.forma !== undefined) {
+      if (!FORMAS.includes(d.forma)) return { error: `Forma no válida. Las que hay: ${FORMAS.join(', ')}.` };
+      out.forma = d.forma;
+    }
+    if (d.filtros !== undefined) {
+      // Los filtros se validan al guardarlos. Un operador inventado guardado
+      // aquí no fallaría al escribir, fallaría al mirar la tabla — y entonces
+      // nadie sabría de dónde vino.
+      const f = d.filtros ?? [];
+      if (!filtroValido(f)) return { error: 'El filtro no tiene una forma válida.' };
+      for (const r of reglasDe(f)) {
+        if (!OPERADORES.includes(r?.operador as any)) {
+          return { error: `Filtro no válido: «${r?.operador}». Los que hay: ${OPERADORES.join(', ')}.` };
+        }
+      }
+      out.filtros = f;
+    }
+    if (d.orden_por !== undefined) {
+      const o = Array.isArray(d.orden_por) ? d.orden_por.slice(0, 10) : [];
+      out.orden_por = o.filter((x: any) => x && typeof x.columna_id === 'string')
+        .map((x: any) => ({ columna_id: x.columna_id, direccion: x.direccion === 'desc' ? 'desc' : 'asc' }));
+    }
+    if (d.ocultas !== undefined) out.ocultas = Array.isArray(d.ocultas) ? d.ocultas.map(String).slice(0, 500) : [];
+    if (d.agrupar_por !== undefined) out.agrupar_por = d.agrupar_por ? String(d.agrupar_por) : null;
+    if (d.config !== undefined) {
+      const c = d.config && typeof d.config === 'object' && !Array.isArray(d.config) ? d.config : {};
+      // Un tope de tamaño: la configuración de una vista son unas decenas de
+      // ajustes, no un sitio donde guardar cualquier cosa.
+      if (JSON.stringify(c).length > 50000) return { error: 'La configuración de la vista es demasiado grande.' };
+      out.config = c;
+    }
+    if (d.orden !== undefined && Number.isFinite(Number(d.orden))) out.orden = Math.round(Number(d.orden));
+    return out;
+  };
+
+  /** La vista, si quien pide puede tocarla. */
+  const puedeConVista = async (req: Request, vistaId: string): Promise<{ vista: any } | { error: string; codigo: number }> => {
+    const r = await db.execute(sql`SELECT * FROM bd_vistas WHERE id = ${vistaId} AND archived_at IS NULL`);
+    const v = r.rows[0] as any;
+    if (!v) return { error: 'Esa vista no existe.', codigo: 404 };
+    if (v.usuario_id) {
+      if (v.usuario_id !== req.user?.id) return { error: 'Esa vista es personal de otra persona.', codigo: 403 };
+      const lee = await puedeConTabla(req, v.tabla_id, false);
+      if ('error' in lee) return lee;
+      return { vista: v };
+    }
+    const p = await puedeConTabla(req, v.tabla_id, true);
+    if ('error' in p) return { error: 'Solo quien puede escribir en la tabla cambia sus vistas compartidas.', codigo: p.codigo === 404 ? 404 : 403 };
+    return { vista: v };
+  };
 
   app.get('/api/bd/tablas/:id/vistas', async (req: Request, res: Response) => {
     try {
@@ -856,7 +936,7 @@ export function registerBdRoutes(app: Express, db: any) {
       // Las de la tabla (`usuario_id` nulo) y las MÍAS. Las de otros no: una
       // vista personal es de quien la hizo.
       const r = await db.execute(sql`
-        SELECT id, nombre, forma, orden_por, filtros, ocultas, agrupar_por, usuario_id, orden
+        SELECT id, nombre, forma, orden_por, filtros, ocultas, agrupar_por, config, usuario_id, orden
         FROM bd_vistas
         WHERE tabla_id = ${req.params.id} AND archived_at IS NULL
           AND (usuario_id IS NULL OR usuario_id = ${req.user?.id || null})
@@ -869,30 +949,94 @@ export function registerBdRoutes(app: Express, db: any) {
   app.post('/api/bd/tablas/:id/vistas', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
-      const permiso = await puedeConTabla(req, req.params.id, false);
-      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
       const d = req.body || {};
-      if (!d.nombre || !String(d.nombre).trim()) return res.status(400).json({ error: 'La vista necesita un nombre.' });
-
-      // Los filtros se validan al guardarlos. Un operador inventado guardado
-      // aquí no fallaría al escribir, fallaría al mirar la tabla — y entonces
-      // nadie sabría de dónde vino.
-      const filtros = Array.isArray(d.filtros) ? d.filtros : [];
-      for (const f of filtros) {
-        if (!OPERADORES.includes(f?.operador)) {
-          return res.status(400).json({ error: `Filtro no válido: «${f?.operador}». Los que hay: ${OPERADORES.join(', ')}.` });
-        }
-      }
+      // Compartida (la de la tabla) por defecto si quien la crea puede escribir
+      // en la tabla; si solo puede leerla, la vista es suya y de nadie más.
+      const escribe = await puedeConTabla(req, req.params.id, true);
+      const compartida = d.compartida === false ? false : !('error' in escribe);
+      const permiso = compartida ? escribe : await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      if (d.nombre === undefined) d.nombre = '';
+      const limpio = limpiarVista(d);
+      if ('error' in limpio) return res.status(400).json({ error: limpio.error });
 
       const id = nid('BDV');
+      const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_vistas WHERE tabla_id = ${req.params.id} AND archived_at IS NULL`);
       await db.execute(sql`
-        INSERT INTO bd_vistas (id, tabla_id, nombre, usuario_id, forma, orden_por, filtros, ocultas, agrupar_por)
-        VALUES (${id}, ${req.params.id}, ${String(d.nombre).trim().slice(0, 120)},
-                ${d.compartida ? null : req.user!.id}, ${String(d.forma || 'tabla')},
-                ${JSON.stringify(d.orden_por || [])}::jsonb, ${JSON.stringify(filtros)}::jsonb,
-                ${JSON.stringify(d.ocultas || [])}::jsonb, ${d.agrupar_por || null})
+        INSERT INTO bd_vistas (id, tabla_id, nombre, usuario_id, forma, orden_por, filtros, ocultas, agrupar_por, config, orden)
+        VALUES (${id}, ${req.params.id}, ${limpio.nombre},
+                ${compartida ? null : req.user!.id}, ${limpio.forma || 'tabla'},
+                ${JSON.stringify(limpio.orden_por || [])}::jsonb, ${JSON.stringify(limpio.filtros || [])}::jsonb,
+                ${JSON.stringify(limpio.ocultas || [])}::jsonb, ${limpio.agrupar_por || null},
+                ${JSON.stringify(limpio.config || {})}::jsonb, ${Number((ultima.rows[0] as any).m) + 1})
+      `);
+      res.json({ id, compartida });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Cambiar una vista: solo los campos que lleguen. Es lo que guarda cada
+   *  clic en «Filtrar», «Ordenar» o «Agrupar». */
+  app.put('/api/bd/vistas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const p = await puedeConVista(req, req.params.id);
+      if ('error' in p) return res.status(p.codigo).json({ error: p.error });
+      const c = limpiarVista(req.body || {});
+      if ('error' in c) return res.status(400).json({ error: c.error });
+      const j = (v: any) => v === undefined ? null : JSON.stringify(v);
+      await db.execute(sql`
+        UPDATE bd_vistas SET
+          nombre      = COALESCE(${c.nombre ?? null}, nombre),
+          forma       = COALESCE(${c.forma ?? null}, forma),
+          filtros     = COALESCE(${j(c.filtros)}::jsonb, filtros),
+          orden_por   = COALESCE(${j(c.orden_por)}::jsonb, orden_por),
+          ocultas     = COALESCE(${j(c.ocultas)}::jsonb, ocultas),
+          config      = COALESCE(${j(c.config)}::jsonb, config),
+          -- «Sin agrupar» es un valor (null), distinto de «no lo toques».
+          agrupar_por = CASE WHEN ${'agrupar_por' in c} THEN ${c.agrupar_por ?? null} ELSE agrupar_por END,
+          orden       = COALESCE(${c.orden ?? null}, orden),
+          updated_at  = now()
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Duplicar una vista: el atajo de Notion para «la misma, con otro filtro». */
+  app.post('/api/bd/vistas/:id/duplicar', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const p = await puedeConVista(req, req.params.id);
+      if ('error' in p) return res.status(p.codigo).json({ error: p.error });
+      const v = p.vista;
+      const id = nid('BDV');
+      await db.execute(sql`
+        INSERT INTO bd_vistas (id, tabla_id, nombre, usuario_id, forma, orden_por, filtros, ocultas, agrupar_por, config, orden)
+        SELECT ${id}, tabla_id, left(nombre || ' (copia)', 120), usuario_id, forma, orden_por, filtros, ocultas, agrupar_por,
+               -- Un formulario duplicado nace CERRADO: abrir un segundo enlace
+               -- público sin que nadie lo haya decidido sería publicar por descuido.
+               CASE WHEN forma = 'formulario' THEN jsonb_set(config, '{formulario,publico}', 'false'::jsonb, true) ELSE config END,
+               orden + 1
+        FROM bd_vistas WHERE id = ${v.id}
       `);
       res.json({ id });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quitar una vista. Se archiva: una página que la enseñaba dice que ya no
+   *  está, en vez de romperse. La última vista de una tabla no se quita —
+   *  una tabla sin ninguna forma de mirarla no se puede ni abrir. */
+  app.delete('/api/bd/vistas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const p = await puedeConVista(req, req.params.id);
+      if ('error' in p) return res.status(p.codigo).json({ error: p.error });
+      const n = await db.execute(sql`SELECT count(*)::int AS n FROM bd_vistas WHERE tabla_id = ${p.vista.tabla_id} AND archived_at IS NULL AND usuario_id IS NULL`);
+      if (!p.vista.usuario_id && Number((n.rows[0] as any).n) <= 1) {
+        return res.status(400).json({ error: 'Es la única vista de la tabla: crea otra antes de quitar ésta.' });
+      }
+      await db.execute(sql`UPDATE bd_vistas SET archived_at = now() WHERE id = ${req.params.id}`);
+      res.json({ ok: true });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -924,6 +1068,15 @@ export function registerBdRoutes(app: Express, db: any) {
       if (!exigeSesion(req, res)) return;
       const r = await crearFila(req, req.params.id, (req.body || {}).titulo);
       if ('error' in r) return res.status(r.codigo).json({ error: r.error });
+      // NACER YA CON VALORES (2026-10-05): el «+» de una columna del tablero
+      // crea la tarjeta en ESA columna, y el del calendario en ESE día. Se
+      // escriben con la misma función que la rejilla: mismos permisos y misma
+      // validación. Si algún valor no vale, la fila queda creada y se dice.
+      const celdas = (req.body || {}).celdas;
+      if (celdas && typeof celdas === 'object' && Object.keys(celdas).length) {
+        const w = await escribirCeldas(req, r.id, celdas);
+        if (w.codigo !== 200) return res.json({ ...r, aviso: w.cuerpo?.error, fallos: w.cuerpo?.fallos });
+      }
       res.json(r);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -1118,6 +1271,38 @@ export function registerBdRoutes(app: Express, db: any) {
       if (!exigeSesion(req, res)) return;
       const r = await escribirCeldas(req, req.params.id, (req.body || {}).celdas || {});
       res.status(r.codigo).json(r.cuerpo);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** ══ MOVER UNA FILA (2026-10-05) ════════════════════════════════════════
+   *  Para el tablero y la tabla: arrastrar una tarjeta entre otras dos. El
+   *  cuerpo es `{ antes_de: <id> | null }` — null la manda al final.
+   *
+   *  SE RENUMERA LA TABLA ENTERA EN UNA SOLA CONSULTA, y no solo las filas
+   *  visibles: con un filtro puesto el cliente no ve todas, y numerar solo las
+   *  que ve chocaría con las escondidas. 5.000 filas son un único UPDATE. */
+  app.put('/api/bd/filas/:id/mover', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT tabla_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa fila no existe.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const antes = req.body?.antes_de ? String(req.body.antes_de) : null;
+      const todas = (await db.execute(sql`
+        SELECT id FROM bd_filas WHERE tabla_id = ${fila.tabla_id} AND deleted_at IS NULL AND archived_at IS NULL
+        ORDER BY orden, created_at
+      `)).rows.map((x: any) => x.id as string).filter(id => id !== req.params.id);
+      const pos = antes ? todas.indexOf(antes) : -1;
+      if (antes && pos < 0) return res.status(400).json({ error: 'La fila de referencia no está en esta tabla.' });
+      todas.splice(pos < 0 ? todas.length : pos, 0, req.params.id);
+      await db.execute(sql`
+        UPDATE bd_filas f SET orden = x.o::int - 1
+        FROM jsonb_array_elements_text(${JSON.stringify(todas)}::jsonb) WITH ORDINALITY AS x(id, o)
+        WHERE f.id = x.id AND f.tabla_id = ${fila.tabla_id}
+      `);
+      res.json({ ok: true });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
