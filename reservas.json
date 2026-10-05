@@ -155,6 +155,30 @@
       "ruta": "src/components/tablas/Celda.tsx",
       "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
       "desde": "2026-10-05T23:15:55.940Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "carril acceso: comentarios e historial",
+      "desde": "2026-10-05T23:16:43.915Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/seguridad/politica.ts",
+      "motivo": "carril acceso: comentarios e historial",
+      "desde": "2026-10-05T23:16:43.915Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/server/seguridad/clasificacion.ts",
+      "motivo": "carril acceso: comentarios e historial",
+      "desde": "2026-10-05T23:16:43.915Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "carril acceso: comentarios e historial",
+      "desde": "2026-10-05T23:16:43.915Z"
     }
   ]
 }
