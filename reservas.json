@@ -155,6 +155,18 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "carril acceso: permisos finos (#12)",
       "desde": "2026-10-05T18:05:31.143Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/navegacion/ArbolPaginas.tsx",
+      "motivo": "carril acceso: compartidas conmigo",
+      "desde": "2026-10-05T18:10:52.185Z"
+    },
+    {
+      "agente": "prog8-acceso",
+      "ruta": "src/components/acceso/CompartidasConmigo.tsx",
+      "motivo": "carril acceso: compartidas conmigo",
+      "desde": "2026-10-05T18:10:52.185Z"
     }
   ]
 }
