@@ -100,7 +100,7 @@ export default function VistaPagina({ pagina, propio, pie }: {
       )}
       <article>
         <CabeceraLectura pagina={pagina} esMovil={esMovil} />
-        <BloquesLectura bloques={bloques} comentable={pagina.id} />
+        <BloquesLectura bloques={bloques} comentable={pagina.id} paginaId={pagina.id} />
       </article>
       {pie}
     </MarcoLectura>

@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { avisar } from './avisos.js';
 import { enviarCorreo, hayCorreo } from './correo.js';
+import { bloquesDe } from './bloquesSql.js';
 
 // ============================================================================
 // PERMISOS FINOS POR PÁGINA (2026-10-05, carril «acceso», #12)
@@ -69,7 +70,7 @@ export const madresValidas = (hija: any) => sql`
   JOIN knowledge_windows h ON h.id = f.pagina_id
   JOIN bd_tablas t ON t.id = f.tabla_id
   JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-    AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+    AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
     AND w.creator_user_id = t.creador_user_id
   WHERE f.pagina_id = ${hija} AND f.deleted_at IS NULL
   UNION
@@ -77,7 +78,7 @@ export const madresValidas = (hija: any) => sql`
   JOIN knowledge_windows h ON h.id = ${hija}
   WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
     AND w.creator_user_id = h.creator_user_id
-    AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${hija}))
+    AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${hija}))
 `;
 
 export type Quien = { id: string; nivel: number } | null;

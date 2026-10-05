@@ -8487,3 +8487,10 @@ en mis páginas como proyecto pendiente».
 - Servidor: `PUT/DELETE /api/bd/vistas/:id`, `POST /api/bd/vistas/:id/duplicar`; las compartidas solo las toca quien escribe en la tabla. `POST /api/bd/tablas/:id/filas` acepta `celdas`. Migración `0134_bd_vistas_config.sql` (`bd_vistas.config`, `bd_filas.recurrencia`).
 - El bloque de página guarda la vista elegida en su `vistaBd` como `vista:<id>`; las páginas que ya existían abren igual (`galeria`/`tabla` siguen siendo la vista «de siempre» hasta el primer cambio, que la guarda).
 - Los desplegables se colocan con `position: fixed` medidos desde su botón: dentro de la tabla los recortaba el `overflow`.
+
+### 2026-10-05 — Editor: títulos desplegables, migas de pan y bloque botón (prog8, carril editorA)
+- **Títulos 1/2/3 desplegables** (menú «/» y «+», o «Título desplegable» en el menú ⋮⋮ de cualquier título). Al convertir un título, se lleva dentro lo que tiene debajo hasta el siguiente título de su tamaño o mayor; al quitarlo, lo suelta. Flecha para plegar en el editor; en la página publicada salen cerrados (o abiertos con «Abierto al publicar»).
+- **Bloque «Migas de pan»**: la ruta de páginas madre hasta la actual, con enlaces (los del sitio si se lee dentro de uno). Nuevo `GET /api/paginas/:id/ruta` (módulo `src/server/edicionPaginas.ts`), que sube por las mismas madres que la herencia de permisos y corta en la primera que quien mira no puede ver.
+- **Bloque «Botón»** con panel de configuración (texto, acción, estilo): *insertar bloques* (copia su plantilla —lo que lleva dentro— debajo), *crear una página* (dentro de ésta, con la plantilla como contenido y título con `{fecha}`), *añadir una fila* a una base de datos de la página, o *abrir un enlace*. Al leer sólo se enseña el de enlace; la plantilla nunca.
+- `madresValidas` (`permisos.ts`) mira también las subpáginas anidadas en desplegables.
+- «Añadir un bloque» del pie añade arriba del todo, no dentro del último desplegable.

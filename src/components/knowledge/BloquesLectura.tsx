@@ -11,6 +11,8 @@ import { cn } from '../../utils/cn';
 import Rejilla from '../tablas/Rejilla';
 import ProductoPublico from './ProductoPublico';
 import { Portada, RejillaProductos, Columnas, Franja } from './BloquesMaqueta';
+import { MigasDePan, BotonVista } from './BloquesExtra';
+import { useSitio } from '../sitio/ContextoSitio';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -74,7 +76,7 @@ export function marcaLista(tipo: string, n: number, nivel: number): string {
 /** La página entera, para lo que mira más allá de su sitio (el índice), y lo
  *  hondo que está cada lista. Los bloques anidados se pintan con otro
  *  `BloquesLectura` dentro, que sólo ve a sus hermanos. */
-const Raiz = createContext<{ todos: any[] } | null>(null);
+const Raiz = createContext<{ todos: any[]; paginaId?: string } | null>(null);
 const Hondura = createContext(0);
 
 /*
@@ -127,13 +129,14 @@ function ConComentarios({ paginaId, bloqueId, children }: { paginaId: string; bl
   );
 }
 
-export default function BloquesLectura({ bloques, comentable }: { bloques: any[]; comentable?: string }) {
+export default function BloquesLectura({ bloques, comentable, paginaId }: { bloques: any[]; comentable?: string; paginaId?: string }) {
   const raiz = useContext(Raiz);
   const nivel = useContext(Hondura);
-  // La primera vez (la página entera) se apunta la raíz para el índice.
+  // La primera vez (la página entera) se apunta la raíz para el índice y
+  // para las migas de pan, que necesitan saber de qué página son.
   if (!raiz) {
     return (
-      <Raiz.Provider value={{ todos: todosLosBloques(bloques) }}>
+      <Raiz.Provider value={{ todos: todosLosBloques(bloques), paginaId: paginaId || comentable }}>
         <BloquesLectura bloques={bloques} comentable={comentable} />
       </Raiz.Provider>
     );
@@ -143,7 +146,7 @@ export default function BloquesLectura({ bloques, comentable }: { bloques: any[]
 
 /** Los bloques que pintan ELLOS MISMOS lo que llevan dentro. El resto lo
  *  lleva debajo, con sangría (ver `uno`). */
-const PINTAN_SUS_HIJOS = new Set(['desplegable', 'aviso', 'franja', 'columnas']);
+const PINTAN_SUS_HIJOS = new Set(['desplegable', 'aviso', 'franja', 'columnas', 'boton']);
 
 function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentable?: string; nivel: number }) {
   // UN ENLACE A UN BLOQUE (`#b-…`, 2026-09-30). El navegador salta al ancla
@@ -214,6 +217,7 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
 
 function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; bloques: any[]; nivel?: number }) {
   const raiz = useContext(Raiz);
+  const sitio = useSitio();
   if (!b || typeof b !== 'object') return null;
 
   // LOS TÍTULOS LLEVAN ANCLA. Sin ella, el índice enlaza a `#algo` que no
@@ -261,6 +265,18 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
 
     case 'aviso':
       return <Aviso b={b} />;
+
+    // Las migas de pan (2026-10-05): con los enlaces del sitio si la página
+    // se lee dentro de uno, y los de la plataforma si no.
+    case 'migas':
+      return <MigasDePan paginaId={raiz?.paginaId} enlace={sitio?.enlacePagina} />;
+
+    // UN BOTÓN, AL LEER (2026-10-05). Sólo el que abre un enlace hace algo
+    // para quien lee: insertar bloques, crear páginas o filas es de quien
+    // escribe, y enseñar un botón que no hace nada sería engañar. Su
+    // plantilla (sus hijos) tampoco se enseña: no es texto de la página.
+    case 'boton':
+      return b.boton?.tipo === 'enlace' && b.boton.url ? <BotonVista texto={b.texto} accion={b.boton} /> : null;
 
     case 'indice':
       // El índice necesita ver la página entera, no sólo su bloque (ni

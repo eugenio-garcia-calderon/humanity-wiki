@@ -10,7 +10,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Map as MapIcon,
+  PanelTop, Bookmark, Link2, Play, Map as MapIcon, MousePointerClick, Navigation,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,8 +33,10 @@ import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown, enFilas,
-  AIRE_BASE_DATOS, aplanar, aArbol, normalizarNiveles, finSubarbol, esPlegable,
+  AIRE_BASE_DATOS, aplanar, aArbol, normalizarNiveles, finSubarbol, esPlegable, esContenedor,
+  type AccionBoton,
 } from '../utils/bloques';
+import { MigasDePan, BotonVista, ConfigBoton, conFecha } from '../components/knowledge/BloquesExtra';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
 import HojaCrear from '../components/navegacion/HojaCrear';
@@ -72,7 +74,7 @@ import Adjuntos from '../components/archivo/Adjuntos';
 // dentro de cada grupo es el orden en que se ve. Ver `SelectorBloques.tsx`.
 // `video` y `mapa` no son tipos de bloque: son atajos —un vídeo acaba en un
 // bloque `medio`, un mapa en un `publicacion`— y los resuelve `insertar`.
-type TipoMenu = TipoBloque | 'video' | 'mapa';
+type TipoMenu = TipoBloque | 'video' | 'mapa' | 'plegable1' | 'plegable2' | 'plegable3';
 const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloque['grupo']; desc?: string; color?: string; claves?: string }[] = [
   // ── Básicos ──
   { tipo: 'parrafo', label: 'Texto', icon: Type, grupo: 'basico', color: 'bg-slate-100 text-slate-700', claves: 'parrafo escribir' },
@@ -91,6 +93,9 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   { tipo: 'mapa', label: 'Mapa', icon: MapIcon, grupo: 'herramienta', color: 'bg-teal-100 text-teal-700', desc: 'Inserta uno de tus mapas', claves: 'territorio' },
   // Una página dentro de ésta (2026-09-30), como en Notion.
   { tipo: 'subpagina', label: 'Página', icon: FileText, grupo: 'herramienta', color: 'bg-slate-100 text-slate-700', desc: 'Una página nueva dentro de esta', claves: 'subpagina' },
+  // Un botón que hace algo (2026-10-05): insertar una plantilla, crear una
+  // página o una fila, o abrir un enlace. Ver `ejecutarBoton`.
+  { tipo: 'boton', label: 'Botón', icon: MousePointerClick, grupo: 'herramienta', color: 'bg-slate-900 text-white', desc: 'Inserta bloques, crea una página o abre un enlace', claves: 'button plantilla accion' },
   { tipo: 'web', label: 'Web insertada', icon: Globe, grupo: 'herramienta', color: 'bg-emerald-100 text-emerald-700', desc: 'Otra web entera, dentro de la página', claves: 'iframe embed' },
   { tipo: 'publicacion', label: 'Publicación', icon: LayoutTemplate, grupo: 'herramienta', color: 'bg-indigo-100 text-indigo-700', desc: 'Algo ya publicado en la plataforma', claves: 'embeber' },
   // ── Tienda (fase 2 de Comercio) ──
@@ -105,6 +110,12 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   { tipo: 'tarea', label: 'Casilla', icon: CheckSquare, grupo: 'formato', claves: 'tarea check' },
   { tipo: 'cita', label: 'Cita', icon: Quote, grupo: 'formato' },
   { tipo: 'desplegable', label: 'Desplegable', icon: ChevronRight, grupo: 'formato', claves: 'toggle' },
+  // Títulos que pliegan lo de debajo (2026-10-05, los «toggle headings» de
+  // Notion). No son un tipo: son un título con `plegable` (ver `insertar`).
+  { tipo: 'plegable1', label: 'Título 1 desplegable', icon: Heading1, grupo: 'formato', claves: 'toggle heading titulo plegable' },
+  { tipo: 'plegable2', label: 'Título 2 desplegable', icon: Heading2, grupo: 'formato', claves: 'toggle heading titulo plegable' },
+  { tipo: 'plegable3', label: 'Título 3 desplegable', icon: Heading3, grupo: 'formato', claves: 'toggle heading titulo plegable' },
+  { tipo: 'migas', label: 'Migas de pan', icon: Navigation, grupo: 'formato', claves: 'breadcrumb ruta madre' },
   { tipo: 'aviso', label: 'Aviso', icon: Info, grupo: 'formato', claves: 'callout' },
   { tipo: 'indice', label: 'Índice', icon: List, grupo: 'formato' },
   { tipo: 'codigo', label: 'Código', icon: Code2, grupo: 'formato' },
@@ -227,6 +238,10 @@ function EditorPagina() {
   const arrastrando = arrastre?.id ?? null;
   /** El bloque cuyo menú del asa ⋮⋮ está abierto. */
   const [menuAsa, setMenuAsa] = useState<string | null>(null);
+  /** El botón cuyo panel de configuración está abierto, y el que se está
+   *  ejecutando (crear una página o una fila tarda un momento). */
+  const [configBoton, setConfigBoton] = useState<string | null>(null);
+  const [botonOcupado, setBotonOcupado] = useState<string | null>(null);
   /** Aviso de abajo con «Deshacer». */
   const [aviso, setAviso] = useState<string | null>(null);
   /** ══ UN FALLO AL HACER ALGO NO ES UN FALLO DE LA PÁGINA (2026-10-01) ════
@@ -497,6 +512,13 @@ function EditorPagina() {
     if (abrir.some(a => plegadosRef.current.has(a))) setPlegados(p => { const s = new Set(p); abrir.forEach(a => s.delete(a)); return s; });
   };
 
+  /** Los bloques que son la plantilla de un botón (sus hijos). */
+  const enPlantilla = useMemo(() => {
+    const s = new Set<string>();
+    bloques.forEach((b, i) => { if (b.tipo === 'boton') for (let k = i + 1; k <= finSubarbol(bloques, i); k++) s.add(bloques[k].id); });
+    return s;
+  }, [bloques]);
+
   /** Lo que se ve: todo menos lo que hay dentro de un desplegable cerrado. */
   const visibles = useMemo(() => {
     const out: Bloque[] = [];
@@ -506,7 +528,7 @@ function EditorPagina() {
       if (bajo !== null && n > bajo) continue;
       bajo = null;
       out.push(b);
-      if (esPlegable(b) && plegados.has(b.id)) bajo = n;
+      if (esContenedor(b) && plegados.has(b.id)) bajo = n;
     }
     return out;
   }, [bloques, plegados]);
@@ -580,8 +602,10 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto' || tipo === 'video' || tipo === 'mapa') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web') { insertar(b.id, tipo); return; }
-    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'migas' || tipo === 'boton') { insertar(b.id, tipo); return; }
+    const plegable = tipo.startsWith('plegable');
+    const real: TipoBloque = plegable ? `titulo${tipo.slice(-1)}` as TipoBloque : tipo as TipoBloque;
+    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: real, texto: '', plegable: plegable || undefined } : x));
     setFocoId(b.id);
     programarGuardado();
   };
@@ -599,7 +623,8 @@ function EditorPagina() {
       setResultadosPub([]);
       return;
     }
-    const tipo: TipoBloque = esVideo ? 'web' : tipoMenu as TipoBloque;
+    const plegable = tipoMenu.startsWith('plegable');
+    const tipo: TipoBloque = esVideo ? 'web' : plegable ? `titulo${tipoMenu.slice(-1)}` as TipoBloque : tipoMenu as TipoBloque;
     if (tipo === 'subpagina') { crearSubpagina(tras); return; }
     if (tipo === 'pizarra') { crearPizarra(tras); return; }
     if (tipo === 'medio') {
@@ -620,9 +645,11 @@ function EditorPagina() {
       return;
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
+    if (plegable) nuevo.plegable = true;
+    if (tipo === 'boton') { nuevo.texto = 'Botón'; nuevo.boton = { tipo: 'plantilla' }; setConfigBoton(nuevo.id); }
     if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web') textosRef.current[nuevo.id] = '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'migas') textosRef.current[nuevo.id] = nuevo.texto ?? '';
     setBloques(bs => {
       // Sin `tras`, arriba del todo (era así: `-1 + 1`).
       const { pos, nivel } = tras ? puntoInsercion(bs, tras) : { pos: 0, nivel: 0 };
@@ -692,16 +719,22 @@ function EditorPagina() {
   const vaDentro = (bs: Bloque[], i: number) => {
     const b = bs[i];
     if (!b || b.grupo || plegadosRef.current.has(b.id)) return false;
-    return esPlegable(b) || ((bs[i + 1]?.nivel || 0) > (b.nivel || 0));
+    return esContenedor(b) || ((bs[i + 1]?.nivel || 0) > (b.nivel || 0));
   };
 
   /** Dónde va (posición y sangría) un bloque nuevo puesto «detrás» de `tras`. */
   const puntoInsercion = (bs: Bloque[], tras: string | null) => {
+    // «Añadir un bloque» del pie: al final de la página y sin sangría, por
+    // mucho que el último bloque esté dentro de un desplegable.
+    if (alFinal.current) return { pos: bs.length, nivel: 0 };
     const i = tras ? bs.findIndex(b => b.id === tras) : -1;
     if (i < 0) return { pos: bs.length, nivel: 0 };
     if (vaDentro(bs, i)) return { pos: i + 1, nivel: (bs[i].nivel || 0) + 1 };
     return { pos: finSubarbol(bs, finDeFila(bs, i)) + 1, nivel: bs[i].nivel || 0 };
   };
+
+  const alFinal = useRef(false);
+  useEffect(() => { if (!menuAbierto) alFinal.current = false; }, [menuAbierto]);
 
   /** Tab (+1) y ⇧Tab (−1): el bloque se mueve con todos sus hijos. Como en
    *  Notion, al quitar sangría los hermanos que tenía debajo pasan a ser
@@ -760,6 +793,131 @@ function EditorPagina() {
     });
     setBloqueActivo(nuevo.id);
     setFocoId(nuevo.id);
+    programarGuardado();
+  };
+
+  /** Una copia de los hijos de `bs[i]` con ids nuevos (la plantilla de un
+   *  botón), con la sangría contada desde 0. */
+  const copiaHijos = (bs: Bloque[], i: number): Bloque[] => {
+    const n = (bs[i].nivel || 0) + 1;
+    return bs.slice(i + 1, finSubarbol(bs, i) + 1).map(o => {
+      const nid = nuevoIdBloque();
+      const texto = o.texto !== undefined || textosRef.current[o.id] !== undefined ? (textosRef.current[o.id] ?? o.texto ?? '') : undefined;
+      const filas = filasRef.current[o.id] ? filasRef.current[o.id].map(f => [...f]) : o.filas;
+      return { ...o, id: nid, texto, filas, nivel: ((o.nivel || 0) - n) || undefined };
+    });
+  };
+
+  /**
+   * PULSAR UN BOTÓN (2026-10-05, como los de Notion). En el editor hace lo
+   * suyo de verdad: es así como se prueba, y como se usa una página de
+   * trabajo (un diario, una lista de reuniones…).
+   */
+  const ejecutarBoton = async (b: Bloque) => {
+    const a: AccionBoton = b.boton || { tipo: 'plantilla' };
+    const bs = bloquesRef.current;
+    const i = bs.findIndex(x => x.id === b.id);
+    if (i < 0) return;
+    if (a.tipo === 'enlace') {
+      if (!a.url) { setConfigBoton(b.id); return; }
+      if (/^https?:/i.test(a.url)) window.open(a.url, '_blank', 'noopener'); else navigate(a.url);
+      return;
+    }
+    if (a.tipo === 'plantilla') {
+      const copia = copiaHijos(bs, i);
+      if (!copia.length) { avisar('La plantilla del botón está vacía: escribe dentro de él lo que quieras insertar.'); meterDentro(b.id); return; }
+      for (const c of copia) { if (c.texto !== undefined) textosRef.current[c.id] = c.texto; if (c.filas) filasRef.current[c.id] = c.filas; }
+      guardarHistoria();
+      setBloques(lista => {
+        const k = lista.findIndex(x => x.id === b.id);
+        if (k < 0) return lista;
+        const pos = finSubarbol(lista, k) + 1;
+        const n = lista[k].nivel || 0;
+        const out = [...lista];
+        out.splice(pos, 0, ...copia.map(c => ({ ...c, nivel: ((c.nivel || 0) + n) || undefined })));
+        return out;
+      });
+      programarGuardado();
+      avisar(copia.length === 1 ? 'Bloque insertado' : `${copia.length} bloques insertados`);
+      return;
+    }
+    setBotonOcupado(b.id);
+    try {
+      if (a.tipo === 'pagina') {
+        const tituloNuevo = conFecha(a.titulo || '') || 'Sin título';
+        const r = await fetch('/api/documentos', {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo: tituloNuevo }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.id) throw new Error(j.error || 'No se pudo crear la página.');
+        // La plantilla del botón es el contenido de la página nueva.
+        const contenido = copiaHijos(bs, i);
+        if (contenido.length) {
+          await fetch(`/api/windows/${j.id}`, {
+            method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: tituloNuevo, config: { bloques: aArbol(contenido) } }),
+          });
+        }
+        const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.id, pubTitulo: tituloNuevo };
+        guardarHistoria();
+        setBloques(lista => {
+          const k = lista.findIndex(x => x.id === b.id);
+          const out = [...lista];
+          out.splice(k < 0 ? out.length : finSubarbol(lista, k) + 1, 0, { ...nuevo, nivel: (lista[k]?.nivel || 0) || undefined });
+          return out;
+        });
+        programarGuardado();
+        window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+        avisar(`Página «${tituloNuevo}» creada`);
+      } else if (a.tipo === 'fila') {
+        if (!a.tabla_id) { setConfigBoton(b.id); return; }
+        const r = await fetch(`/api/bd/tablas/${a.tabla_id}/filas`, {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo: conFecha(a.titulo || '') || undefined }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || 'No se pudo añadir la fila.');
+        // La base de datos de la página se vuelve a leer para enseñarla.
+        setVersionDatos(v => v + 1);
+        avisar('Fila añadida a la base de datos');
+      }
+    } catch (e: any) { fallar(e.message); }
+    finally { setBotonOcupado(null); }
+  };
+
+  /** ¿Convertir este título en plegable (o al revés)? Al plegarlo se lleva
+   *  dentro lo que tiene debajo hasta el siguiente título de su tamaño o
+   *  mayor —«pliega lo que hay debajo»—; al desplegarlo, lo suelta. */
+  const alternarPlegable = (bid: string) => {
+    setMenuAsa(null);
+    guardarHistoria();
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === bid);
+      if (i < 0) return bs;
+      const t = bs[i];
+      const n = t.nivel || 0;
+      const nivelTitulo = Number(t.tipo.slice(-1));
+      const out = [...bs];
+      if (t.plegable) {
+        const fin = finSubarbol(bs, i);
+        for (let k = i + 1; k <= fin; k++) out[k] = { ...out[k], nivel: ((out[k].nivel || 0) - 1) || undefined };
+        out[i] = { ...t, plegable: undefined };
+        return normalizarNiveles(out);
+      }
+      // Lo que ya llevara dentro, más lo que tiene debajo a su altura.
+      let fin = finSubarbol(bs, i);
+      while (fin + 1 < bs.length) {
+        const x = bs[fin + 1];
+        if ((x.nivel || 0) < n) break;
+        if ((x.nivel || 0) === n && /^titulo[123]$/.test(x.tipo) && Number(x.tipo.slice(-1)) <= nivelTitulo) break;
+        fin = finSubarbol(bs, fin + 1);
+      }
+      const inicio = finSubarbol(bs, i) + 1;
+      for (let k = inicio; k <= fin; k++) out[k] = { ...out[k], nivel: (out[k].nivel || 0) + 1, grupo: (out[k].nivel || 0) === n ? undefined : out[k].grupo };
+      out[i] = { ...t, plegable: true };
+      return normalizarGrupos(out);
+    });
     programarGuardado();
   };
 
@@ -1953,6 +2111,12 @@ function EditorPagina() {
   /** Lo que el menú ⋮⋮ ofrece además según el bloque (ver `OpcionExtra`). */
   const opcionesExtra = (b: Bloque): OpcionExtra[] => {
     const out: OpcionExtra[] = [];
+    if (/^titulo[123]$/.test(b.tipo)) {
+      out.push({ icon: ChevronRight, label: 'Título desplegable', activo: !!b.plegable, onClick: () => alternarPlegable(b.id) });
+    }
+    if (b.tipo === 'boton') {
+      out.push({ icon: Settings2, label: 'Configurar el botón', onClick: () => { setMenuAsa(null); setConfigBoton(b.id); } });
+    }
     if (esPlegable(b)) {
       out.push({
         icon: ChevronDown, label: 'Abierto al publicar', activo: b.abierto === true,
@@ -2362,6 +2526,77 @@ function EditorPagina() {
         return <blockquote className="border-l-[3px] border-emerald-300 pl-3">{cuerpo()}</blockquote>;
       }
 
+      // UN TÍTULO PLEGABLE (2026-10-05): el título con su flecha delante; lo
+      // de dentro son sus hijos, como en un desplegable.
+      if (esPlegable(b) && b.tipo !== 'desplegable') {
+        const abierto = !plegados.has(b.id);
+        return (
+          <div>
+            <div className="flex items-start gap-1 -ml-7">
+              <div className={b.tipo === 'titulo1' ? 'mt-5' : b.tipo === 'titulo2' ? 'mt-3.5' : 'mt-2'}>
+                <FlechaPlegar abierto={abierto} onClick={() => plegar(b.id)} />
+              </div>
+              {cuerpo('flex-1 min-w-0')}
+            </div>
+            {editable && abierto && !tieneHijos(b) && (
+              <button type="button" onClick={() => meterDentro(b.id)}
+                className="mt-0.5 block text-left text-[13px] text-slate-400 hover:text-slate-600">
+                Título desplegable vacío. Pulsa para escribir dentro.
+              </button>
+            )}
+          </div>
+        );
+      }
+
+      if (b.tipo === 'migas') {
+        return <MigasDePan paginaId={docId.current} titulo={titulo} />;
+      }
+
+      // ── EL BOTÓN (2026-10-05) ───────────────────────────────────────────
+      // Sus hijos son la plantilla (se ven debajo, con un borde punteado).
+      // La rueda lo configura; la flecha enseña o esconde la plantilla.
+      if (b.tipo === 'boton') {
+        const abierto = !plegados.has(b.id);
+        const tablasPagina = bloques.filter(x => x.tipo === 'basedatos' && x.tabla_id)
+          .map(x => ({ id: x.tabla_id!, titulo: 'Base de datos' }));
+        return (
+          <div>
+            <BotonVista texto={texto} accion={b.boton} ocupado={botonOcupado === b.id}
+              onPulsar={() => ejecutarBoton(b)}
+              extra={editable && (
+                <>
+                  <button type="button" onClick={e => { e.stopPropagation(); setConfigBoton(c => (c === b.id ? null : b.id)); }}
+                    title="Configurar el botón" aria-label="Configurar el botón"
+                    className="w-8 h-8 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                    <Settings2 className="w-4 h-4" />
+                  </button>
+                  {(b.boton?.tipo || 'plantilla') !== 'enlace' && (b.boton?.tipo || 'plantilla') !== 'fila' && (
+                    <button type="button" onClick={e => { e.stopPropagation(); plegar(b.id); }}
+                      className="h-8 px-2 rounded-lg text-[11px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                      {abierto ? 'Ocultar plantilla' : 'Ver plantilla'}
+                    </button>
+                  )}
+                </>
+              )} />
+            {configBoton === b.id && editable && (
+              <ConfigBoton texto={texto} accion={b.boton || { tipo: 'plantilla' }} tablas={tablasPagina}
+                onCambio={(t, a) => {
+                  textosRef.current[b.id] = t;
+                  setBloques(bs => bs.map(x => (x.id === b.id ? { ...x, texto: t, boton: a } : x)));
+                  programarGuardado();
+                }}
+                onCerrar={() => setConfigBoton(null)} />
+            )}
+            {editable && abierto && !tieneHijos(b) && ['plantilla', 'pagina'].includes(b.boton?.tipo || 'plantilla') && (
+              <button type="button" onClick={() => meterDentro(b.id)}
+                className="ml-7 mt-1 block text-left text-[13px] text-slate-400 hover:text-slate-600">
+                Plantilla vacía. Pulsa para escribir dentro lo que {b.boton?.tipo === 'pagina' ? 'llevará cada página nueva' : 'insertará el botón'}.
+              </button>
+            )}
+          </div>
+        );
+      }
+
       // ── LOS TRES BLOQUES NUEVOS, EN EL EDITOR (2026-08-23) ─────────────────
       // Se escriben igual que un párrafo: el texto vive en el mismo sitio, así
       // que `cuerpo()` sirve tal cual y no hace falta tocar el guardado ni el
@@ -2479,7 +2714,7 @@ function EditorPagina() {
       return cuerpo();
     })();
 
-    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina', 'pizarra'].includes(b.tipo);
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina', 'pizarra', 'migas', 'boton'].includes(b.tipo);
 
     return (
       <div
@@ -2495,7 +2730,9 @@ function EditorPagina() {
           b.tipo === 'basedatos' && AIRE_BASE_DATOS,
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && claseColor(b.color),
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
-          seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60')}
+          seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60',
+          // Dentro de un botón es su plantilla: no es texto de la página.
+          enPlantilla.has(b.id) && 'border-l-2 border-dashed border-violet-200 pl-2')}
         onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
         // La sangría: cada nivel, un paso a la derecha, con sus mandos (el
         // «+» y el asa) detrás, como en Notion.
@@ -3152,7 +3389,7 @@ function EditorPagina() {
         {editable && (
           <div className="flex items-center gap-4 mt-6">
             <button
-              onClick={e => { e.stopPropagation(); setMenuAbierto(bloques[bloques.length - 1]?.id || null); }}
+              onClick={e => { e.stopPropagation(); alFinal.current = true; setMenuAbierto(bloques[bloques.length - 1]?.id || null); }}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-600 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" /> Añadir un bloque
