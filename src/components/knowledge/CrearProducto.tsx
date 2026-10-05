@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import EditorVariantes, { type VarianteForm, variantesAlServidor } from './EditorVariantes';
-import { X, Loader2, Plus, Trash2 } from 'lucide-react';
+import SoltarImagen from '../ui/SoltarImagen';
+import { X, Plus, Trash2, Loader2, ImagePlus } from 'lucide-react';
 
 // ============================================================================
 // CREAR UN PRODUCTO SIN SALIR DE LA PÁGINA — fase 2 del plan de Comercio
@@ -30,28 +31,14 @@ type Props = {
 export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
-  // COBRAR EN PUNTOS (2026-08-23, Eugenio: «preguntemos a los vendedores si
-  // quieren recibir el valor en puntos, y darles el equivalente cuando pongan
-  // el valor en euros, con un 50 % de descuento en la comisión»). El
-  // equivalente sale de la tasa que publica el servidor (1 punto = 1 € hoy).
-  const [aceptaPuntos, setAceptaPuntos] = useState(false);
-  // Las comisiones vigentes las dice el servidor (panel de Administración,
-  // 2026-08-24): escribirlas a mano aquí garantizaba que un día dijeran una
-  // cifra y el cobro hiciera otra.
-  const [tasaComision, setTasaComision] = useState<{ euros: number; puntos: number } | null>(null);
-  useEffect(() => {
-    fetch('/api/publicar/puntos-en-caja').then(r => r.json())
-      .then(j => { if (j && typeof j.comision_euros_pct === 'number') setTasaComision({ euros: j.comision_euros_pct, puntos: j.comision_puntos_pct }); })
-      .catch(() => {});
-  }, []);
+  // COBRAR EN PUNTOS — RETIRED FROM THIS FORM (2026-10-06, Eugenio: «elimina el
+  // tema de sistema de puntos como método de cobro de momento»). New products
+  // are created with `acepta_puntos: false`. The server field, the checkout
+  // path and the per-product switch in Comercio are untouched, so bringing it
+  // back is restoring the checkbox, not rebuilding anything.
   // BORRADOR (2026-08-23): guardar sin publicar. No se ve ni se puede comprar
   // hasta que se publique desde Comercio.
   const [borrador, setBorrador] = useState(false);
-  const [tasaPuntos, setTasaPuntos] = useState<number | null>(null);
-  useEffect(() => {
-    fetch('/api/publicar/puntos-en-caja').then(r => r.json())
-      .then(j => { if (typeof j?.puntos_por_euro === 'number') setTasaPuntos(j.puntos_por_euro); }).catch(() => {});
-  }, []);
   const [descripcion, setDescripcion] = useState('');
   // Cuatro formas de vender, no dos. Un servicio no se envía ni se descarga, y
   // una suscripción se cobra otra vez cada mes — que en el cobro es un modo
@@ -65,6 +52,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [envio, setEnvio] = useState('');
   const [fotos, setFotos] = useState<string[]>([]);
   const [fotoNueva, setFotoNueva] = useState('');
+  const [dialogoFoto, setDialogoFoto] = useState(false);
   // EL ARCHIVO DE UNA DESCARGA (2026-08-22): se sube a la zona privada de
   // subidas (`?privado=1`) en cuanto se elige, y lo que se guarda en el
   // producto es su URL interna. Nadie lo verá por esa URL: solo quien pague,
@@ -74,22 +62,22 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [subiendo, setSubiendo] = useState(false);
   const [guardando, setGuardando] = useState(false);
 
-  /** SUBIR UNA FOTO DESDE EL MÓVIL (2026-08-22): hasta hoy había que pegar la
-   *  dirección de una imagen que ya estuviera en internet — que es pedirle al
-   *  vendedor que tenga web antes de tener tienda. Va a la zona pública de
-   *  subidas (una foto de producto es para enseñarla). */
-  const [subiendoFoto, setSubiendoFoto] = useState(false);
-  async function subirFoto(f: File) {
-    setSubiendoFoto(true); setError(null);
+  /** SUBIR UNA FOTO (2026-08-22; 2026-10-06 through the cover dialog). Until
+   *  August you had to paste the address of an image already online — asking
+   *  the seller to have a website before having a shop. Now the same dialog as
+   *  «Añadir portada»: paste, drag or pick a file. It goes to the public
+   *  uploads area (a product photo is meant to be shown). Returning a string
+   *  keeps the dialog open with that message instead of closing on a failure. */
+  async function subirFoto(f: File): Promise<string | void> {
+    if (fotos.length >= 8) return 'Ya tiene 8 fotos, que es el máximo. Quita una para añadir otra.';
     try {
       const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'image/jpeg')}`, {
         method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f,
       });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.url) { setError(j.error || 'No se ha podido subir la foto.'); return; }
+      if (!r.ok || !j.url) return j.error || 'No se ha podido subir la foto.';
       setFotos(prev => [...prev, j.url].slice(0, 8));
-    } catch { setError('No hay conexión con el servidor.'); }
-    finally { setSubiendoFoto(false); }
+    } catch { return 'No hay conexión con el servidor.'; }
   }
 
   async function subirArchivo(f: File) {
@@ -148,7 +136,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           envio_centimos: tipo === 'fisico' && envio.trim() !== '' ? aCentimos(envio) : null,
           imagenes: fotos,
           archivo_digital: tipo === 'digital' && archivo ? archivo.url : undefined,
-          acepta_puntos: tipo !== 'suscripcion' && aceptaPuntos,
+          acepta_puntos: false,
           borrador,
           // Variantes (2026-08-23): solo en lo que no es suscripción.
           variantes: tipo !== 'suscripcion' ? variantesAlServidor(variantes) : [],
@@ -202,6 +190,9 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
             </div>
           </Campo>
 
+          {/* Price and shipping side by side: two short numbers. Everything that
+              needs width (variants above all) gets the full row — squeezed
+              into half the dialog, the variant boxes read «S · M · 3( · st». */}
           <div className={tipo === 'fisico' ? 'grid grid-cols-2 gap-3' : ''}>
             <Campo etiqueta={tipo === 'suscripcion' ? 'Cuánto cada vez' : 'Precio'}
                    ayuda={tipo === 'servicio' ? 'Déjalo en blanco si depende del caso' : undefined}>
@@ -211,54 +202,49 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                   className="w-full h-12 pl-3 pr-8 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
               </div>
-              {tipo !== 'suscripcion' && (() => {
-                const cent = aCentimos(precio);
-                const puntosEq = cent && !Number.isNaN(cent) && tasaPuntos ? Math.round((cent / 100) * tasaPuntos * 100) / 100 : null;
-                return (
-                  <label className={`mt-2 flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer ${aceptaPuntos ? 'border-amber-300 bg-amber-50/70' : 'border-slate-200'}`}>
-                    <input type="checkbox" checked={aceptaPuntos} onChange={e => setAceptaPuntos(e.target.checked)} className="mt-1" />
-                    <span className="text-xs leading-relaxed text-slate-700">
-                      <b>Acepto cobrar en puntos</b>
-                      {puntosEq !== null && <> — este precio son <b>{puntosEq.toLocaleString('es-ES')} puntos</b></>}.
-                      {' '}Quien compre con puntos te los paga a ti, y la comisión de la plataforma es <b>menor que en euros</b>{tasaComision ? <> ({tasaComision.puntos} % en puntos, frente al {tasaComision.euros} % en euros)</> : null}.
-                    </span>
-                  </label>
-                );
-              })()}
-              <label className="mt-2 flex items-start gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer">
-                <input type="checkbox" checked={borrador} onChange={e => setBorrador(e.target.checked)} className="mt-1" />
-                <span className="text-xs leading-relaxed text-slate-700">
-                  <b>Guardar como borrador</b> — no se verá ni se podrá comprar hasta que lo publiques desde Comercio.
-                </span>
-              </label>
             </Campo>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">IVA incluido en el precio</p>
-              <select value={iva} onChange={e => setIva(e.target.value)} className="h-10 px-2.5 rounded-lg border border-slate-200 text-sm bg-white" aria-label="Tipo de IVA">
-                <option value="">El de mis datos fiscales (por defecto 21 %)</option>
-                <option value="21">21 % general</option>
-                <option value="10">10 % reducido</option>
-                <option value="4">4 % superreducido</option>
-                <option value="0">0 % (exento)</option>
-              </select>
-            </div>
-            {tipo !== 'suscripcion' && (
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Variantes (tallas, colores…)</p>
-                <EditorVariantes valor={variantes} onCambio={setVariantes} precioBase={precio || undefined} />
-              </div>
-            )}
-            {/* El stock sólo tiene sentido en lo que se envía: «quedan 3» en un
-                servicio querría decir tres plazas, que es otra cosa, y en una
-                suscripción no quiere decir nada. */}
             {tipo === 'fisico' && (
+              <Campo etiqueta="Envío" ayuda="En blanco = lo acuerdas con quien compre">
+                <div className="relative">
+                  <input value={envio} onChange={e => setEnvio(e.target.value)}
+                    inputMode="decimal" placeholder="3,90"
+                    className="w-full h-12 pl-3 pr-8 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
+                </div>
+              </Campo>
+            )}
+          </div>
+
+          <Campo etiqueta="IVA incluido en el precio">
+            <select value={iva} onChange={e => setIva(e.target.value)} aria-label="Tipo de IVA"
+              className="w-full h-12 px-3 rounded-xl border border-slate-200 text-base bg-white focus:border-emerald-400 focus:outline-none">
+              <option value="">El de mis datos fiscales (por defecto 21 %)</option>
+              <option value="21">21 % general</option>
+              <option value="10">10 % reducido</option>
+              <option value="4">4 % superreducido</option>
+              <option value="0">0 % (exento)</option>
+            </select>
+          </Campo>
+
+          {tipo !== 'suscripcion' && (
+            <div>
+              <span className="block text-xs font-black text-slate-700 mb-1">Variantes <span className="font-bold text-slate-400">· tallas, colores, tamaños</span></span>
+              <EditorVariantes valor={variantes} onCambio={setVariantes} precioBase={precio || undefined} />
+            </div>
+          )}
+
+          {/* Stock only for what ships: «3 left» on a service would mean three
+              slots, which is something else. And with variants the stock lives
+              in each variant — the server adds them up and ignores this one. */}
+          {tipo === 'fisico' && (variantes.some(v => v.nombre.trim())
+            ? <p className="text-[11px] text-slate-400">Con variantes, el stock se pone en cada una.</p>
+            : (
               <Campo etiqueta="Cuántos tienes" ayuda="En blanco = no llevas la cuenta">
                 <input value={stock} onChange={e => setStock(e.target.value.replace(/\D/g, ''))}
                   inputMode="numeric" placeholder="—"
                   className="w-full h-12 px-3 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
               </Campo>
-            )}
-          </div>
+            ))}
 
           {tipo === 'suscripcion' && (
             <Campo etiqueta="Cada cuánto se cobra">
@@ -269,17 +255,6 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                     {t}
                   </button>
                 ))}
-              </div>
-            </Campo>
-          )}
-
-          {tipo === 'fisico' && (
-            <Campo etiqueta="Envío" ayuda="En blanco = lo acuerdas con quien compre">
-              <div className="relative">
-                <input value={envio} onChange={e => setEnvio(e.target.value)}
-                  inputMode="decimal" placeholder="3,90"
-                  className="w-full h-12 pl-3 pr-8 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
               </div>
             </Campo>
           )}
@@ -308,23 +283,27 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
             </Campo>
           )}
 
-          <Campo etiqueta="Fotos" ayuda="Sube una del móvil, o pega la dirección de una imagen">
-            <label className={`mb-2 flex items-center justify-center gap-2 h-12 rounded-xl border border-dashed text-sm cursor-pointer ${subiendoFoto ? 'border-slate-200 text-slate-400' : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'}`}>
-              <input type="file" accept="image/*,.heic,.heif" className="hidden" disabled={subiendoFoto || fotos.length >= 8}
-                onChange={e => { const f = e.target.files?.[0]; if (f) subirFoto(f); e.target.value = ''; }} />
-              {subiendoFoto ? <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo la foto…</> : <><Plus className="w-4 h-4" /> Subir una foto</>}
-            </label>
+          {/* Not a <Campo>: that one is a <label>, and a label forwards every
+              click inside it to its first button — tapping a thumbnail would
+              open the upload dialog. */}
+          <div>
+            <span className="block text-xs font-black text-slate-700 mb-1">Fotos</span>
+            <button type="button" onClick={() => setDialogoFoto(true)} disabled={fotos.length >= 8}
+              className="mb-2 flex w-full items-center justify-center gap-2 h-12 rounded-xl border border-dashed border-emerald-300 text-sm font-bold text-emerald-700 hover:bg-emerald-50 disabled:border-slate-200 disabled:text-slate-400">
+              <ImagePlus className="w-4 h-4" /> {fotos.length ? 'Añadir otra foto' : 'Añadir una foto'}
+            </button>
             <div className="flex gap-2">
               <input value={fotoNueva} onChange={e => setFotoNueva(e.target.value)}
-                placeholder="https://…"
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (fotoNueva.trim()) { setFotos([...fotos, fotoNueva.trim()]); setFotoNueva(''); } } }}
-                className="flex-1 h-12 px-3 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
-              <button type="button" aria-label="Añadir foto"
-                onClick={() => { if (fotoNueva.trim()) { setFotos([...fotos, fotoNueva.trim()]); setFotoNueva(''); } }}
+                placeholder="o pega la dirección: https://…" aria-label="Dirección de una imagen"
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (fotoNueva.trim()) { setFotos([...fotos, fotoNueva.trim()].slice(0, 8)); setFotoNueva(''); } } }}
+                className="flex-1 min-w-0 h-12 px-3 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
+              <button type="button" aria-label="Añadir foto por dirección"
+                onClick={() => { if (fotoNueva.trim()) { setFotos([...fotos, fotoNueva.trim()].slice(0, 8)); setFotoNueva(''); } }}
                 className="w-12 h-12 shrink-0 grid place-items-center rounded-xl border border-slate-200">
                 <Plus className="w-4 h-4 text-slate-600" />
               </button>
             </div>
+            <span className="block text-[11px] text-slate-400 mt-1">Pégala, arrástrala o súbela desde el móvil. Hasta 8; la primera es la de portada.</span>
             {fotos.length > 0 && (
               <div className="mt-2 flex gap-2 flex-wrap">
                 {fotos.map((f, i) => (
@@ -339,7 +318,21 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                 ))}
               </div>
             )}
-          </Campo>
+            {/* Rendered inside this card on purpose: the dialog is portalled to
+                <body>, but React events still bubble through the component
+                tree, and the card's stopPropagation keeps a click on the
+                dialog's backdrop from also closing the whole product form. */}
+            {dialogoFoto && (
+              <SoltarImagen titulo="Añadir una foto del producto" onArchivo={subirFoto} onCerrar={() => setDialogoFoto(false)} />
+            )}
+          </div>
+
+          <label className="flex items-start gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+            <input type="checkbox" checked={borrador} onChange={e => setBorrador(e.target.checked)} className="mt-1" />
+            <span className="text-xs leading-relaxed text-slate-700">
+              <b>Guardar como borrador</b> — no se verá ni se podrá comprar hasta que lo publiques desde Comercio.
+            </span>
+          </label>
 
           {error && <p className="text-xs font-bold text-rose-600">{error}</p>}
         </div>

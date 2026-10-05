@@ -8509,3 +8509,7 @@ en mis páginas como proyecto pendiente».
 - Las bases de datos de páginas compartidas (#12) o de miembros ya se leen: `tablaVisible` pregunta por quien hace la petición (`peticionActual.ts`).
 - Sin proveedor de correo, el enlace mágico no se ofrece en producción (con `RESEND_API_KEY` sí). Las cuentas creadas desde un sitio no reciben el regalo de puntos.
 - Probado en local (3022): muro, registro, entrar, enlace mágico (enlace de desarrollo) canjeado desde el muro, bloque visible solo a «Socios», cookie con otro anfitrión = anónimo, bloquear cierra sesiones, 5 contraseñas malas → 429, restringir la raíz entera y quitar la regla (vuelve a pública), CSV, comentario de miembro por la identidad de sitio.
+### 2026-10-06 — Creador de productos: variantes claras, sin puntos y fotos pegando o arrastrando (prog8)
+- **Variantes** (`EditorVariantes`, que usa también Comercio): una fila por variante a todo el ancho, con cabecera (Nombre · Precio € · Stock), campos de 16 px, el SKU detrás de «Añadir SKU» y atajos de un toque (Tallas S–XL, 36–44, Colores). Con variantes con nombre se oculta «Cuántos tienes»: el servidor suma el stock de las variantes y lo ignoraba igual.
+- **Cobrar en puntos, retirado del creador** de momento (Eugenio). Los productos nuevos se crean con `acepta_puntos: false`. El servidor, la caja y el interruptor por producto de Comercio no cambian.
+- **Fotos** con `SoltarImagen`, el diálogo de la portada: pegar, arrastrar o elegir archivo. Precio y envío comparten fila; IVA, variantes y «borrador» tienen la suya.
