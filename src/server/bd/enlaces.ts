@@ -213,3 +213,63 @@ export async function quienApuntaA(
   `);
   return r.rows as any[];
 }
+
+// ── LA CARA DE VUELTA DE UNA RELACIÓN (2026-10-05) ──────────────────────────
+// Eugenio: «que sea bidireccional, que en las dos bases de datos aparezca,
+// como en Notion, que está enlazada con la otra».
+//
+// Una relación de A a B puede tener su columna gemela en B
+// (`config.inversa_de` = la columna de A). La gemela NO GUARDA NADA: lee y
+// escribe las mismas filas de `bd_enlaces` que la de A, vistas al revés. Así
+// las dos caras no pueden contradecirse nunca, que es lo que pasaría con dos
+// listas guardadas por separado.
+
+/** Por cada fila de B, las filas de A que la enlazan por `columnaOrigen`. */
+export async function enlacesInversos(db: any, columnaOrigen: string, filaIds: string[]): Promise<Record<string, Apuntado[]>> {
+  const salida: Record<string, Apuntado[]> = {};
+  if (!filaIds.length) return salida;
+  const r = await db.execute(sql`
+    SELECT fila_origen, destino_id FROM bd_enlaces
+    WHERE columna_id = ${columnaOrigen} AND clase = 'fila'
+      AND destino_id = ANY(string_to_array(${filaIds.join(',')}, ','))
+    ORDER BY created_at, orden
+  `);
+  const filas = r.rows as any[];
+  if (!filas.length) return salida;
+  const f = FUENTES.fila;
+  const origenes = [...new Set(filas.map(x => x.fila_origen))];
+  const q = await db.execute(sql`
+    SELECT id, ${sql.raw(f.etiqueta)} AS etiqueta, ${sql.raw(f.extra)} AS extra
+    FROM bd_filas WHERE id = ANY(string_to_array(${origenes.join(',')}, ',')) AND ${sql.raw(f.filtro)}
+  `);
+  const nombres = new Map((q.rows as any[]).map(x => [x.id, x]));
+  for (const e of filas) {
+    const n = nombres.get(e.fila_origen);
+    // Una fila de A borrada no se enseña en B: desde aquí no hay nada que arreglar.
+    if (!n) continue;
+    (salida[e.destino_id] ||= []).push({ id: e.fila_origen, clase: 'fila', etiqueta: n.etiqueta ?? '', extra: n.extra ?? null, existe: true });
+  }
+  return salida;
+}
+
+/** Escribir desde la cara de vuelta: deja enlazadas a `filaId` exactamente
+ *  las filas de A de `origenes`, tocando sólo los enlaces que cambian. */
+export async function guardarInversos(db: any, opciones: { columnaOrigen: string; filaId: string; origenes: string[]; actor: string }) {
+  const { columnaOrigen, filaId, actor } = opciones;
+  const quiero = [...new Set(opciones.origenes.map(String))];
+  await db.execute(sql`
+    DELETE FROM bd_enlaces
+    WHERE columna_id = ${columnaOrigen} AND clase = 'fila' AND destino_id = ${filaId}
+      AND NOT (fila_origen = ANY(string_to_array(${quiero.join(',')}, ',')))
+  `);
+  for (const origen of quiero) {
+    await db.execute(sql`
+      INSERT INTO bd_enlaces (id, columna_id, fila_origen, clase, destino_id, orden, created_by)
+      VALUES (${`BDE${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 7).toUpperCase()}`},
+              ${columnaOrigen}, ${origen}, 'fila', ${filaId},
+              (SELECT COALESCE(max(orden), -1) + 1 FROM bd_enlaces WHERE columna_id = ${columnaOrigen} AND fila_origen = ${origen}),
+              ${actor})
+      ON CONFLICT (columna_id, fila_origen, clase, destino_id) DO NOTHING
+    `);
+  }
+}

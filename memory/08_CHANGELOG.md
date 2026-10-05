@@ -8356,3 +8356,19 @@ estrecho, sin el interruptor de IA y con «Buscar contenido…».
   AI panel now reaches the bottom edge (`bottom-0`).
 - `BuscadorSuperior`: 27.6 rem (was 34.5), capped below `xl` too, no IA toggle,
   placeholder «Buscar contenido…».
+
+### 2026-10-05 — Databases: two-way relations, visible on both sides
+- Eugenio asked to see which databases are connected, in both of them, like Notion, with a visual picker for what shows from the other one.
+- A relation A→B can now have a **twin column** in B (`config.inversa_de` = A's column; A's carries `config.reciproca_id`).
+  - The twin stores nothing. It reads and writes the same `bd_enlaces` rows seen backwards (`enlacesInversos` / `guardarInversos` in `bd/enlaces.ts`), so the two sides can never disagree.
+  - Archiving the relation archives the twin. Archiving only the twin keeps the relation one-sided.
+  - `PUT /api/bd/columnas/:id` keeps the twin markers.
+- `POST /api/bd/tablas/:id/columnas` with `config.reciproca` creates the twin, if the user can edit the other table. The link dialog has «Mostrar también en «X»», on by default.
+- `POST /api/bd/columnas/:id/reciproca` makes an existing one-sided relation two-way.
+- `GET /api/bd/tablas/:id` returns `conexiones`: each connected table that the viewer can read, its direction, and the local column.
+- New `src/components/tablas/ConexionesBD.tsx`: chips in the database header (⇄ both sides, → only from here, ← only from there).
+  - Clicking a chip opens a panel with toggle tiles for what shows from the other database (image, text, each field).
+  - The panel has a button to make the link two-way.
+  - Shown to editors only.
+- Databases on the same page reload each other when a link changes (`bd:cambio` event).
+- Verified locally end to end: a link from A shows in B, a link written from B appears in A, and both headers show «⇄».

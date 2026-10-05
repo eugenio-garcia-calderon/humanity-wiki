@@ -37,7 +37,7 @@ import { registrarHistorial } from './historial';
 import { tablaVisible } from './sitios';
 import { TIPOS, tipar, type Tipo } from './bd/tipos';
 import { celdasDe, type Celda } from './bd/celdas';
-import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, type Apuntado } from './bd/enlaces';
+import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, enlacesInversos, guardarInversos, type Apuntado } from './bd/enlaces';
 import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
 import { compilar } from './bd/formulas';
@@ -327,6 +327,12 @@ export function registerBdRoutes(app: Express, db: any) {
 
       const tarjetas = await tarjetasDe(filas.map(x => x.pagina_id).filter(Boolean));
       const colTitulo = await columnaTitulo(req.params.id);
+      // Las caras de vuelta (2026-10-05): leen los enlaces de su gemela al revés.
+      for (const c of columnasQueApuntan as any[]) {
+        if (!c.config?.inversa_de) continue;
+        const inv = await enlacesInversos(db, c.config.inversa_de, filas.map(x => x.id));
+        for (const [filaId, lista] of Object.entries(inv)) ((enlaces[filaId] ||= {})[c.id] = lista);
+      }
 
       const preparadas = filas.map(fila => {
           const celdas = celdasDe(fila.valores || {}, columnas);
@@ -426,7 +432,43 @@ export function registerBdRoutes(app: Express, db: any) {
       const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);
       const grupos = agrupadoPor ? agrupar(visibles, agrupadoPor) : null;
 
+      // ── CON QUÉ BASES DE DATOS ESTÁ CONECTADA (2026-10-05) ───────────────
+      // Para la cabecera: las relaciones que salen de aquí y las que llegan de
+      // otras tablas, ya juntas por tabla. `columna_id` es la columna de ESTA
+      // tabla (null si la relación llega pero aquí no se ve todavía).
+      const conexiones: Array<{ tabla_id: string; titulo: string; icono: string | null; columna_id: string | null; columna_remota: string | null; ambas: boolean }> = [];
+      {
+        const salen = (columnas as any[]).filter(c => c.tipo === 'relacion' && c.config?.tabla_destino && c.config.tabla_destino !== req.params.id);
+        const llegan = (await db.execute(sql`
+          SELECT c.id, c.tabla_id, c.config FROM bd_columnas c JOIN bd_tablas t ON t.id = c.tabla_id
+          WHERE c.tipo = 'relacion' AND c.archived_at IS NULL AND t.archived_at IS NULL AND t.deleted_at IS NULL
+            AND c.config->>'tabla_destino' = ${req.params.id} AND c.tabla_id <> ${req.params.id}
+            AND c.config->>'inversa_de' IS NULL
+        `)).rows as any[];
+        const ids = [...new Set([...salen.map(c => c.config.tabla_destino), ...llegan.map(c => c.tabla_id)])];
+        const info = ids.length ? new Map(((await db.execute(sql`
+          SELECT id, titulo, icono FROM bd_tablas WHERE id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND deleted_at IS NULL
+        `)).rows as any[]).map(t => [t.id, t])) : new Map();
+        // Sólo las que quien mira puede leer: el título de una base de datos
+        // privada de otro no se enseña por estar enlazada con ésta.
+        for (const id of [...info.keys()]) if ('error' in (await puedeConTabla(req, id, false))) info.delete(id);
+        for (const c of salen) {
+          const t = info.get(c.config.tabla_destino);
+          if (!t) continue;
+          const remota = c.config.inversa_de || c.config.reciproca_id || null;
+          conexiones.push({ tabla_id: t.id, titulo: t.titulo, icono: t.icono, columna_id: c.id, columna_remota: remota, ambas: !!remota });
+        }
+        for (const c of llegan) {
+          // Ya contada si su gemela es una columna de aquí.
+          if (c.config?.reciproca_id && salen.some(x => x.id === c.config.reciproca_id)) continue;
+          const t = info.get(c.tabla_id);
+          if (!t) continue;
+          conexiones.push({ tabla_id: t.id, titulo: t.titulo, icono: t.icono, columna_id: null, columna_remota: c.id, ambas: false });
+        }
+      }
+
       res.json({
+        conexiones,
         tabla: {
           id: permiso.tabla.id, titulo: permiso.tabla.titulo, icono: permiso.tabla.icono,
           descripcion: permiso.tabla.descripcion, proyecto_id: permiso.tabla.proyecto_id,
@@ -567,6 +609,42 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /** La columna gemela de `colOrigen` (de `tablaOrigen`) en `tablaDestino`. */
+  const crearGemela = async (tablaOrigen: string, colOrigen: string, tablaDestino: string): Promise<string> => {
+    const t = await db.execute(sql`SELECT titulo FROM bd_tablas WHERE id = ${tablaOrigen}`);
+    const base = String((t.rows[0] as any)?.titulo || 'Enlazado').slice(0, 110);
+    let nombre = base;
+    for (let n = 2; await nombreRepetido(tablaDestino, nombre); n++) nombre = `${base} (${n})`;
+    const gid = nid('BDC');
+    const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_columnas WHERE tabla_id = ${tablaDestino}`);
+    await db.execute(sql`
+      INSERT INTO bd_columnas (id, tabla_id, nombre, tipo, opciones, config, orden)
+      VALUES (${gid}, ${tablaDestino}, ${nombre}, 'relacion', '[]'::jsonb,
+              ${JSON.stringify({ tabla_destino: tablaOrigen, inversa_de: colOrigen, varios: true, mostrar: ['imagen'] })}::jsonb,
+              ${Number((ultima.rows[0] as any).m) + 1})
+    `);
+    await db.execute(sql`UPDATE bd_columnas SET config = config || ${JSON.stringify({ reciproca_id: gid })}::jsonb WHERE id = ${colOrigen}`);
+    return gid;
+  };
+
+  /** Mostrar una relación que ya existía también en la otra base de datos. */
+  app.post('/api/bd/columnas/:id/reciproca', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const c = await db.execute(sql`SELECT * FROM bd_columnas WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      const col = c.rows[0] as any;
+      if (!col || col.tipo !== 'relacion' || !col.config?.tabla_destino) return res.status(404).json({ error: 'Esa relación no existe.' });
+      if (col.config.inversa_de) return res.status(400).json({ error: 'Ésta ya es la cara de vuelta.' });
+      if (col.config.reciproca_id) {
+        const ya = await db.execute(sql`SELECT id FROM bd_columnas WHERE id = ${col.config.reciproca_id} AND archived_at IS NULL`);
+        if (ya.rows.length) return res.json({ reciproca_id: col.config.reciproca_id });
+      }
+      const permiso = await puedeConTabla(req, col.config.tabla_destino, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      res.json({ reciproca_id: await crearGemela(col.tabla_id, col.id, col.config.tabla_destino) });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.post('/api/bd/tablas/:id/columnas', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
@@ -608,7 +686,20 @@ export function registerBdRoutes(app: Express, db: any) {
                 ${JSON.stringify(opciones)}::jsonb, ${JSON.stringify(d.config || {})}::jsonb,
                 ${Number((ultima.rows[0] as any).m) + 1})
       `);
-      res.json({ id });
+
+      // ── EN LAS DOS BASES DE DATOS (2026-10-05) ──────────────────────────
+      // Una relación con `reciproca` nace con su gemela en la otra tabla, que
+      // enseña lo mismo visto desde allí. Sólo si quien la crea puede editar
+      // también la otra; si no, se queda de un lado y se dice.
+      let reciproca_id: string | null = null;
+      let aviso: string | null = null;
+      const destino = d.config?.tabla_destino;
+      if (tipo === 'relacion' && d.config?.reciproca && destino && destino !== req.params.id) {
+        const otra = await puedeConTabla(req, destino, true);
+        if ('error' in otra) aviso = 'El enlace se ve sólo en esta base de datos: no puedes editar la otra.';
+        else reciproca_id = await crearGemela(req.params.id, id, destino);
+      }
+      res.json({ id, reciproca_id, aviso });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -679,7 +770,10 @@ export function registerBdRoutes(app: Express, db: any) {
         UPDATE bd_columnas SET
           nombre   = COALESCE(${nombreNuevo}, nombre),
           opciones = COALESCE(${opciones ? JSON.stringify(opciones) : null}::jsonb, opciones),
-          config   = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
+          -- Las marcas de las dos caras no se pierden al editar el resto.
+          config   = COALESCE(${d.config ? JSON.stringify({ ...d.config,
+                       ...(col.config?.inversa_de ? { inversa_de: col.config.inversa_de, tabla_destino: col.config.tabla_destino } : {}),
+                       ...(col.config?.reciproca_id ? { reciproca_id: col.config.reciproca_id, tabla_destino: col.config.tabla_destino } : {}) }) : null}::jsonb, config),
           orden    = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
           updated_at = now()
         WHERE id = ${req.params.id}
@@ -738,13 +832,17 @@ export function registerBdRoutes(app: Express, db: any) {
   app.delete('/api/bd/columnas/:id', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
-      const c = await db.execute(sql`SELECT tabla_id FROM bd_columnas WHERE id = ${req.params.id}`);
+      const c = await db.execute(sql`SELECT tabla_id, config FROM bd_columnas WHERE id = ${req.params.id}`);
       const col = c.rows[0] as any;
       if (!col) return res.status(404).json({ error: 'Esa columna no existe.' });
       const permiso = await puedeConTabla(req, col.tabla_id, true);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
 
       await db.execute(sql`UPDATE bd_columnas SET archived_at = now() WHERE id = ${req.params.id}`);
+      // Las dos caras van juntas: quitar la relación quita su cara de vuelta;
+      // quitar sólo la cara de vuelta deja la relación de un lado.
+      if (col.config?.reciproca_id) await db.execute(sql`UPDATE bd_columnas SET archived_at = now() WHERE id = ${col.config.reciproca_id}`);
+      if (col.config?.inversa_de) await db.execute(sql`UPDATE bd_columnas SET config = config - 'reciproca_id' WHERE id = ${col.config.inversa_de}`);
       res.json({ ok: true });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -910,6 +1008,7 @@ export function registerBdRoutes(app: Express, db: any) {
     // celdas normales: si algo no vale, no se escribe media fila.
     const enlacesPendientes: Array<{ colId: string; clase: any; destinos: string[] }> = [];
     const ficherosPendientes: Array<{ colId: string; ids: string[] }> = [];
+    const inversosPendientes: Array<{ columnaOrigen: string; origenes: string[] }> = [];
 
     for (const [colId, bruto] of Object.entries(entrantes)) {
       const col = porId.get(colId);
@@ -929,6 +1028,8 @@ export function registerBdRoutes(app: Express, db: any) {
         // Se COMPRUEBA aquí y se ESCRIBE después de que todo haya validado.
         const comp = await comprobarEnlaces(db, clase, lista);
         if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+        // La cara de vuelta escribe en los enlaces de su gemela.
+        if (col.config?.inversa_de) { inversosPendientes.push({ columnaOrigen: col.config.inversa_de, origenes: lista }); continue; }
         enlacesPendientes.push({ colId, clase, destinos: lista });
         continue;
       }
@@ -965,6 +1066,9 @@ export function registerBdRoutes(app: Express, db: any) {
 
     for (const p of ficherosPendientes) {
       await guardarFicheros(db, { columnaId: p.colId, filaId: fila.id, archivoIds: p.ids });
+    }
+    for (const p of inversosPendientes) {
+      await guardarInversos(db, { columnaOrigen: p.columnaOrigen, filaId: fila.id, origenes: p.origenes, actor: req.user!.id });
     }
     for (const p of enlacesPendientes) {
       await guardarEnlaces(db, {
