@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { sql } from 'drizzle-orm';
 import { registrarRegaloBienvenida, anotarActividad } from './puntos.js';
+import { cumplirInvitaciones } from './permisos.js';
 // ══ LOS LÍMITES DE INTENTOS (2026-08-22, prog6) ══════════════════════════════
 // Van aquí y no en la lista de módulos por dos razones que no son de estilo:
 //
@@ -267,6 +268,11 @@ export function registerAuthRoutes(app: Express, db: any) {
               ${req.header('user-agent') || null}, ${req.ip || null})
     `);
     await db.execute(sql`UPDATE users SET last_login_at = now() WHERE id = ${userId}`);
+    // LAS INVITACIONES QUE ESPERABAN A ESTE CORREO (2026-10-05, #12): entrar
+    // en la cuenta de ese correo es lo que prueba que la invitación es tuya.
+    // Aquí y no en el alta, porque se entra por tres puertas (alta, Google,
+    // contraseña) y las tres pasan por esta línea. Nunca falla el login.
+    await cumplirInvitaciones(db, userId);
     setSessionCookie(res, token, maxAge);
     return token;
   };

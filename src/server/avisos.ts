@@ -58,7 +58,15 @@ export type TipoAviso =
   | 'vuelve_stock'
   // Comercio F7 (prog7, 2026-08-24): la devolución la pide quien compró.
   | 'devolucion_pedida'   // al vendedor: te piden devolver un pedido
-  | 'devolucion_resuelta'; // al comprador: aceptada o rechazada, con motivo
+  | 'devolucion_resuelta' // al comprador: aceptada o rechazada, con motivo
+  // Acceso (carril acceso, 2026-10-05): te han dado acceso a una página.
+  | 'acceso_concedido'
+  // Comentarios de página (carril acceso): un hilo tuyo se ha resuelto.
+  | 'comentario_resuelto'
+  // Seguir una página (carril acceso): ha cambiado una página que sigues.
+  | 'pagina_cambiada'
+  // Sitios con miembros (carril acceso): alguien pide entrar en tu sitio.
+  | 'miembro_pendiente';
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos

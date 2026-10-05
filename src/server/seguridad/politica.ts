@@ -172,6 +172,22 @@ const REVISADAS: Entrada[] = [
   { m: 'POST', ruta: '/api/veracidad/fuentes', guardia: { tipo: 'nivel', minimo: 1 },
     nota: 'de dónde sale una afirmación: lo puede aportar cualquiera con cuenta, y queda su nombre' },
   { m: 'DELETE', ruta: '/api/veracidad/fuentes/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+
+  // ── PERMISOS FINOS POR PÁGINA (carril acceso, 2026-10-05, #12) ────────────
+  // Todas exigen sesión aquí; el rol en la página (administrar, dueño) lo
+  // comprueba `permisos.ts` dentro de cada ruta, porque depende de la página.
+  { m: 'PUT', ruta: '/api/permisos/pagina/:id/persona', guardia: { tipo: 'sesion' }, nota: 'permisos.ts: exige administrar la página; «admin» solo lo da el dueño' },
+  { m: 'DELETE', ruta: '/api/permisos/pagina/:id/persona/:userId', guardia: { tipo: 'sesion' }, nota: 'administrar la página, o quitarse uno mismo' },
+  { m: 'PUT', ruta: '/api/permisos/pagina/:id/equipo', guardia: { tipo: 'sesion' }, nota: 'administrar la página y ser miembro del equipo' },
+  { m: 'DELETE', ruta: '/api/permisos/pagina/:id/equipo/:equipoId', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/permisos/pagina/:id/invitar', guardia: { tipo: 'sesion' }, nota: 'administrar la página; 50 correos como mucho por vez' },
+  { m: 'DELETE', ruta: '/api/permisos/pagina/:id/invitacion/:invId', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/permisos/pagina/:id/herencia', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/equipos', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/equipos/:id', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo' },
+  { m: 'DELETE', ruta: '/api/equipos/:id', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo; archiva, no borra' },
+  { m: 'PUT', ruta: '/api/equipos/:id/miembros', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo' },
+  { m: 'DELETE', ruta: '/api/equipos/:id/miembros/:userId', guardia: { tipo: 'sesion' }, nota: 'administrar el equipo, o salirse uno mismo' },
 ];
 
 /** Generadas del análisis del código, SIN revisar por una persona.

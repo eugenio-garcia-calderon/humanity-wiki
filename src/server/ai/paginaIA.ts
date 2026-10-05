@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { bdInterno } from '../bd';
+import { puedeEditarPagina as puedeEditar } from '../permisos.js';
 
 // ============================================================================
 // LA IA DENTRO DEL EDITOR DE PÁGINAS (2026-10-02)
@@ -20,21 +21,12 @@ import { bdInterno } from '../bd';
 //   3. Cómo se ejecutan. Pasan por los MISMOS permisos que el editor: la
 //      página, quien puede editarla; la tabla, `puedeConTabla` de `bd.ts`.
 
-const ADMIN = 4;
 
-/** ¿Puede esta persona editar esta página? Las mismas tres puertas que
- *  `PUT /api/windows/:id`: creadora, administración o acceso de edición. */
+/** ¿Puede esta persona editar esta página? Lo contesta `permisos.ts`, la
+ *  misma función que usa `PUT /api/windows/:id`: creadora, administración, o
+ *  rol «editar» o más (suyo, de un equipo suyo o heredado de la madre). */
 export async function puedeEditarPagina(db: any, userId: string, nivel: number, paginaId: string): Promise<boolean> {
-  const r = await db.execute(sql`
-    SELECT w.creator_user_id,
-           EXISTS (SELECT 1 FROM accesos_entidad a WHERE a.entidad_tipo = 'pagina' AND a.entidad_id = w.id
-                   AND a.user_id = ${userId} AND a.rol = 'edicion') AS editor
-    FROM knowledge_windows w
-    WHERE w.id = ${paginaId} AND w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-  `);
-  const w = r.rows[0] as any;
-  if (!w) return false;
-  return w.creator_user_id === userId || nivel >= ADMIN || !!w.editor;
+  return puedeEditar(db, { id: userId, nivel }, paginaId);
 }
 
 /** Un trozo de texto corto, sin saltos, para el resumen. */

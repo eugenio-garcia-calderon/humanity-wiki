@@ -71,6 +71,14 @@ export const CLASIFICACION: Clase[] = [
   c('dominios_paginas', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'que dominio de internet apunta a la pagina de quien: cambiar una fila manda el trafico de otro a otra parte'),
   c('handles_reservados', 'ALTA', 'BAJA', 'MEDIA', 'ALTA', 'el nombre público con el que se conoce a alguien: cambiarlo es suplantarlo'),
   c('memberships', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'da acceso pagado; cambiarla es regalar o quitar lo que alguien compró'),
+  // Quién entra en las páginas privadas (carril acceso, 0135). Una fila de más
+  // abre una página privada a quien no debía verla.
+  c('accesos_entidad', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'quién ve o edita una página privada: una fila de más la abre a otra persona'),
+  c('accesos_equipo', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'qué equipo ve o edita una página privada'),
+  c('accesos_herencia', 'ALTA', 'BAJA', 'MEDIA', 'MEDIA', 'si una página recibe los permisos de su madre: cambiarlo abre o cierra de golpe'),
+  c('equipos', 'MEDIA', 'MEDIA', 'MEDIA', 'MEDIA', 'los equipos a los que se da acceso de una vez'),
+  c('equipo_miembros', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'quién está en un equipo: entrar es ver todo lo que el equipo ve'),
+  c('invitaciones_acceso', 'ALTA', 'ALTA', 'ALTA', 'MEDIA', 'correos invitados a una página: guarda el correo de quien aún no tiene cuenta'),
 
   // ── DINERO ────────────────────────────────────────────────────────────────
   c('transactions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'movimientos de dinero real'),

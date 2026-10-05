@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag, Euro, PackageCheck, Undo2 } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag, Euro, PackageCheck, Undo2, KeyRound, CheckCircle2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -33,7 +33,7 @@ interface Aviso {
 
 /** Cada tipo con su icono y su frase. Un aviso que no sabe redactarse no se
  *  esconde: sale con su tipo en crudo, que al menos dice que algo pasó. */
-const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
+const COMO: Record<string, { icono: any; frase: (n: string, p?: any) => string }> = {
   comentario:        { icono: MessageSquare,   frase: n => `${n} ha comentado tu publicación` },
   respuesta:         { icono: CornerDownRight, frase: n => `${n} ha respondido a tu comentario` },
   mencion:           { icono: AtSign,          frase: n => `${n} te ha nombrado` },
@@ -63,6 +63,11 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   // Comercio F7 (prog7).
   devolucion_pedida:  { icono: Undo2,          frase: n => `${n} pide devolver un pedido` },
   devolucion_resuelta:{ icono: Undo2,          frase: () => 'Tu petición de devolución tiene respuesta' },
+  // Carril acceso (2026-10-05): páginas compartidas, hilos, seguir y sitios.
+  acceso_concedido:   { icono: KeyRound,       frase: (n, p) => `${n} te ha dado acceso a «${p?.titulo || 'una página'}»` },
+  comentario_resuelto:{ icono: CheckCircle2,   frase: (n, p) => `${n} ha resuelto un hilo en «${p?.titulo || 'una página'}»` },
+  pagina_cambiada:    { icono: FileText,       frase: (n, p) => `${n} ha cambiado «${p?.titulo || 'una página'}», que sigues` },
+  miembro_pendiente:  { icono: UserPlus,       frase: (n, p) => `${n} pide entrar en tu sitio «${p?.titulo || ''}»` },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -97,6 +102,8 @@ const destinoDe = (a: Aviso): string | null => {
   // tope: enterarse sin poder mirar el detalle obliga a buscarlo a mano.
   if (a.entity_type === 'gasto_ia') return '/vision?pestana=gasto';
   if (a.entity_type === 'stock') return a.payload?.destino || '/mercado';
+  // Un sitio con miembros: al panel de miembros de esa página.
+  if (a.entity_type === 'sitio_miembros') return a.payload?.destino || null;
   return null;
 };
 
@@ -261,7 +268,7 @@ export default function Campana({ compacto, enMenu = false }: { compacto?: boole
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[11px] text-slate-700 leading-snug">
-                    {c ? c.frase(nombre) : `${nombre}: ${a.type}`}
+                    {c ? c.frase(nombre, a.payload) : `${nombre}: ${a.type}`}
                   </span>
                   {a.payload?.texto && (
                     <span className="block text-[10px] text-slate-400 truncate mt-0.5">«{a.payload.texto}»</span>

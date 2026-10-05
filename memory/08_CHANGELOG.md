@@ -8459,3 +8459,13 @@ en mis páginas como proyecto pendiente».
 - Test bot `bot-arrastre.cjs` (Playwright with real mouse drags, server-side checks), run twice:
   - iteration 1: 15/15 passed. Its review led to the confirmation notice and the cross-tab fix.
   - iteration 2: 20/20 passed. It added folders, two tabs, dropping a page onto itself, and the notice.
+
+### 2026-10-05 — Permisos finos por página: roles, equipos, invitaciones y herencia (#12, carril acceso, prog8)
+- **Cuatro roles por página**: Ver, Comentar, Editar y Administrar (decide quién entra; no borra ni publica). Los viejos «lectura/edición» se traducen en la migración `0135_permisos_finos.sql`.
+- **Una sola función decide quién puede qué**: `rolEnPagina` en `src/server/permisos.ts`. La usan ya `GET/PUT /api/windows/:id`, las exportaciones y la IA del editor (antes eran tres consultas copiadas).
+- **Equipos** (`equipos`, `equipo_miembros`, `accesos_equipo`): se crean desde el propio diálogo («Mis equipos») y se les da acceso de una vez.
+- **Invitar por correo** aunque no haya cuenta (`invitaciones_acceso`): la invitación se cumple sola al crear la sesión con ese correo (`cumplirInvitaciones`, llamada desde `auth.ts`). Si ya tiene cuenta, entra al momento y le llega un aviso `acceso_concedido`. Sin proveedor de correo no se envía nada y la pantalla lo dice; con `RESEND_API_KEY` se envía (`src/server/correo.ts`).
+- **Herencia**: una hija hereda de su madre salvo que se pulse «Dejar de heredar» (`accesos_herencia`); al cortar, lo heredado se copia para no echar a nadie en silencio.
+- **Seguridad**: un eslabón madre→hija sólo cuenta si la madre es de la misma persona (o la base de datos es del dueño de la madre). Sin esto, enlazar la página privada de otro desde la tuya y dar «Editar» a un amigo le abría la página ajena. Probado con curl: 403.
+- **Diálogo de compartir al estilo Notion** (`components/acceso/PersonasConAcceso.tsx`) y sección **«Compartidas conmigo»** en el menú de páginas.
+- Probado en local (puerto 3022) con tres cuentas PRUEBA: herencia, corte de herencia, equipo que edita, admin que no puede nombrar admins, invitación cumplida al registrarse, y la trampa del enlace.

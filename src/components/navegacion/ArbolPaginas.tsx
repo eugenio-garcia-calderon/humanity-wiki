@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import CompartidasConmigo from '../acceso/CompartidasConmigo';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronRight, FileText, FolderKanban, Boxes, Loader2, Trash2 } from 'lucide-react';
@@ -369,6 +370,8 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     <div className="flex flex-col gap-px py-1">
       {hijasDe(null).map(c => carpetaFila(c, 0))}
       {arbol.raiz.map(id => nodos[id] && fila(nodos[id], 0))}
+      {/* Lo que otras personas han compartido contigo (#12). */}
+      <CompartidasConmigo onIr={onIr} />
       {/* Soltar aquí saca una página de donde estuviera, a la raíz. */}
       {arrastrando && <div {...zona('raiz', () => true, k => (esCarpeta(k) ? moverCarpeta(sinPrefijo(k), null) : mover(k, { carpeta: null })))}
         className={cn('mx-1 mt-1 rounded-lg border border-dashed px-2 py-1.5 text-center text-[11px] font-bold transition-all',
