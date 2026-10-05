@@ -158,6 +158,20 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     const FORMAS: MediaTrackConstraints[] = microfono
       ? [{ deviceId: { ideal: microfono }, ...proc(true) }, { deviceId: { ideal: microfono }, ...proc(false) }, proc(false), proc(true)]
       : [proc(true), proc(false)];
+    // ── EL MICRÓFONO DE ZOOM (2026-10-05) ──────────────────────────────────
+    // La causa de verdad del «no me escucha» en el Chrome del Mac de Eugenio,
+    // leída en el registro: Chrome abría «ZoomAudioDevice (Virtual)», el
+    // micrófono falso que instala Zoom, que sólo suena dentro de una llamada.
+    // Las cuatro formas de arriba abrían el MISMO, porque sin `deviceId` Chrome
+    // usa el que tenga elegido en sus ajustes; Firefox usa el del sistema y por
+    // eso allí sí iba. Ahora, tras abrir el primero, se añaden los demás
+    // micrófonos de verdad, cada uno por su id exacto, los físicos delante; si
+    // el abierto es virtual, se salta a uno físico en el acto; y el que acaba
+    // sonando se recuerda para la próxima vez.
+    const esVirtual = (l: string) => /virtual|zoom|teams|blackhole|loopback|soundflower|aggregate|agregado|krisp|obs|camo|webex|ndi/i.test(l);
+    const esIntegrado = (l: string) => /macbook|built-in|integrado|interno|internal/i.test(l);
+    /** El nombre de cada id, para el aviso cuando se cambia de micrófono. */
+    const nombres = new Map<string, string>();
     let ctx: AudioContext;
     try { ctx = new AudioContext(); ctx.resume().catch(() => {}); }
     catch { setListening(false); if (!conNavegador()) setError('Este navegador no permite grabar audio.'); return; }
@@ -177,6 +191,24 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
       return;
     }
     cargarMicrofonos(); // con permiso ya hay nombres
+    if (!vigente()) { stream.getTracks().forEach(t => t.stop()); soltarCtx(); return; }
+    let forma = 0;
+    try {
+      const abierto = stream.getAudioTracks()[0];
+      const idAbierto = abierto?.getSettings?.().deviceId || '';
+      const otros = (await navigator.mediaDevices.enumerateDevices())
+        .filter(d => d.kind === 'audioinput' && d.deviceId && d.deviceId !== 'default' && d.deviceId !== 'communications' && d.deviceId !== idAbierto)
+        .sort((a, b) => (+esVirtual(a.label) - +esVirtual(b.label)) || (+esIntegrado(b.label) - +esIntegrado(a.label)));
+      for (const d of otros) nombres.set(d.deviceId, d.label);
+      const reales = otros.filter(d => !esVirtual(d.label)).map(d => ({ deviceId: { exact: d.deviceId }, ...proc(true) }));
+      // Detrás del primero, los demás micrófonos físicos; luego lo de siempre.
+      FORMAS.splice(1, 0, ...reales);
+      // Si lo abierto es un micrófono virtual y hay uno físico, se cambia ya.
+      if (abierto && esVirtual(abierto.label) && reales.length) {
+        const nuevo = await navigator.mediaDevices.getUserMedia({ audio: FORMAS[1] }).catch(() => null);
+        if (nuevo) { stream.getTracks().forEach(t => t.stop()); stream = nuevo; forma = 1; }
+      }
+    } catch { /* sin lista de micrófonos: se sigue con el abierto */ }
     if (!vigente()) { stream.getTracks().forEach(t => t.stop()); soltarCtx(); return; }
 
     // 2. La sesión en el servidor. Si no puede, el reconocimiento del navegador.
@@ -227,7 +259,7 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     fuente.connect(nodo);
     let cola: Promise<unknown> = Promise.resolve();
     let grabado = 0, maximo = 0, avisadoMudo = false;
-    let forma = 0, grabadoForma = 0, maximoForma = 0, cambiando = false, sonoYa = false;
+    let grabadoForma = 0, maximoForma = 0, cambiando = false, sonoYa = false;
 
     /** Lo que de verdad se ha abierto, al registro del servidor: sin esto, «no
      *  me escucha» en el ordenador de otra persona no se puede localizar. */
@@ -276,7 +308,15 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
       grabadoForma += junto.length / ctx.sampleRate;
       if (rms > maximo) maximo = rms;
       if (rms > maximoForma) maximoForma = rms;
-      if (!sonoYa && maximoForma >= 0.003) { sonoYa = true; diagnostico('suena'); }
+      if (!sonoYa && maximoForma >= 0.003) {
+        sonoYa = true; diagnostico('suena');
+        // Ha sonado uno que no era el de entrada: se queda elegido, y se dice.
+        const id = stream.getAudioTracks()[0]?.getSettings?.().deviceId || '';
+        if (forma > 0 && id && id !== microfono && nombres.has(id)) {
+          setMicrofono(id);
+          setError(`El micrófono que tenía Chrome no daba sonido; uso «${nombres.get(id)}». Puedes cambiarlo en la flechita.`);
+        }
+      }
       // SILENCIO DIGITAL —ceros exactos— durante 1,5 s: el micrófono llega roto
       // por esta vía, y se prueba la siguiente. No vale un silencio normal:
       // una habitación callada nunca da cero exacto, así que quien tarda en
