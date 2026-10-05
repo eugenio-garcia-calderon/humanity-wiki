@@ -4,7 +4,9 @@ import path from 'node:path';
 import { completarClaudeStream, getProvider, AI_PLATFORM_FEE } from './ai/provider.js';
 import {
   type Bloque, markdownABloques, bloquesAMarkdown, tituloDeBloques, tokenizarInline,
+  aplanar, todosLosBloques, quitarDelArbol,
 } from '../utils/bloques.js';
+import { bloquesDe } from './bloquesSql.js';
 import { ROLE } from './auth.js';
 import { rolEnPagina, capacidades, quienDe } from './permisos.js';
 import { hayPresupuesto, apuntarGasto } from './ai/tope.js';
@@ -149,7 +151,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         SELECT f.id AS fila_id, t.id AS tabla_id, t.titulo AS tabla_titulo,
                (SELECT json_build_object('id', p.id, 'titulo', p.title) FROM knowledge_windows p
                 WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-                  AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', t.id))
+                  AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tabla_id', t.id))
                 ORDER BY p.created_at LIMIT 1) AS padre
         FROM bd_filas f JOIN bd_tablas t ON t.id = f.tabla_id
         WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL LIMIT 1
@@ -160,7 +162,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         const sp = await db.execute(sql`
           SELECT p.id, p.title FROM knowledge_windows p
           WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-            AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
+            AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
           ORDER BY p.created_at LIMIT 1
         `);
         const m = sp.rows[0] as any;
@@ -445,7 +447,9 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         nodos[p.id] = { id: p.id, tipo: 'pagina', titulo: p.title || 'Sin título', icono: p.icono || null, hijas: [] };
       }
       for (const p of paginas) {
-        const bloques: any[] = Array.isArray(p.bloques) ? p.bloques : [];
+        // A cualquier profundidad: una subpágina dentro de un desplegable
+        // sigue siendo hija de esta página (2026-10-05).
+        const bloques: any[] = todosLosBloques(p.bloques);
         for (const b of bloques) {
           if (b?.tipo === 'subpagina' && b.entityId && mias.has(b.entityId) && b.entityId !== p.id && !conPadre.has(b.entityId)) {
             nodos[p.id].hijas.push(b.entityId);
@@ -571,7 +575,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
             UNION
             SELECT blq->>'entityId' FROM baja
             JOIN knowledge_windows w ON w.id = baja.id
-            CROSS JOIN LATERAL jsonb_array_elements(COALESCE(w.config->'bloques', '[]'::jsonb)) blq
+            CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
             WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
           ) SELECT id FROM baja
         `)).rows.map((x: any) => x.id);
@@ -579,26 +583,38 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       }
 
       await db.transaction(async (tx: any) => {
-        // 1. Fuera de donde estuviera.
-        await tx.execute(sql`
-          UPDATE knowledge_windows w SET
-            config = jsonb_set(w.config, '{bloques}', COALESCE((
-              SELECT jsonb_agg(blq ORDER BY o) FROM jsonb_array_elements(w.config->'bloques') WITH ORDINALITY AS e(blq, o)
-              WHERE NOT (blq->>'tipo' = 'subpagina' AND blq->>'entityId' = ${id})
-            ), '[]'::jsonb)),
-            updated_at = now(), updated_by = ${yo}
+        // 1. Fuera de donde estuviera, aunque estuviera dentro de un
+        //    desplegable (2026-10-05): por eso se quita en JS y no con SQL,
+        //    que sólo veía la primera fila de bloques.
+        const madres = (await tx.execute(sql`
+          SELECT w.id, w.config->'bloques' AS bloques FROM knowledge_windows w
           WHERE w.kind = 'pagina' AND w.id <> ${dentroDe || ''}
-            AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
-        `);
+            AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
+        `)).rows as any[];
+        for (const m of madres) {
+          let arbol = m.bloques;
+          for (;;) {
+            const r = quitarDelArbol(arbol, (b: any) => b.tipo === 'subpagina' && b.entityId === id);
+            if (!r.quitado) break;
+            // Lo que llevara dentro el bloque (raro, pero posible) no se pierde.
+            const { arbol: a } = r;
+            arbol = Array.isArray(r.quitado.bloques) && r.quitado.bloques.length ? [...a, ...r.quitado.bloques] : a;
+          }
+          await tx.execute(sql`
+            UPDATE knowledge_windows SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', ${JSON.stringify(arbol)}::jsonb),
+              version = version + 1, updated_at = now(), updated_by = ${yo}
+            WHERE id = ${m.id}
+          `);
+        }
         if (dentroDe) {
           // 2. Al final de la nueva madre, si no estaba ya.
           const bloque = { id: `B${Date.now().toString(36)}${Math.floor(Math.random() * 46656).toString(36)}`, tipo: 'subpagina', entityId: id, pubTitulo: pag.title || 'Sin título' };
           await tx.execute(sql`
             UPDATE knowledge_windows SET
               config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', COALESCE(config->'bloques', '[]'::jsonb) || ${JSON.stringify([bloque])}::jsonb),
-              updated_at = now(), updated_by = ${yo}
+              version = version + 1, updated_at = now(), updated_by = ${yo}
             WHERE id = ${dentroDe}
-              AND NOT COALESCE(config->'bloques', '[]'::jsonb) @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
+              AND NOT ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
           `);
         } else if (req.body && 'carpeta_id' in req.body) {
           const destino = await proyectoTuyo(req, req.body.carpeta_id);
@@ -632,23 +648,24 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       const origen = dos.find(x => x.id === desde), meta = dos.find(x => x.id === destino);
       if (!origen || !meta) return res.status(404).json({ error: 'Una de las dos páginas no existe.' });
       if (!esAdmin && (origen.creator_user_id !== yo || meta.creator_user_id !== yo)) return res.status(403).json({ error: 'Sólo puedes mover entre páginas tuyas.' });
-      const lista: any[] = Array.isArray(origen.bloques) ? origen.bloques : [];
-      const i = lista.findIndex(b => (bloqueId && b?.id === bloqueId) || (tablaId && b?.tipo === 'basedatos' && b?.tabla_id === tablaId));
-      if (i < 0) return res.status(404).json({ error: 'Ese bloque ya no está en su página.' });
-      const bloque = { ...lista[i] };
+      // Esté donde esté —también dentro de un desplegable— y con lo que lleve
+      // dentro (2026-10-05).
+      const { arbol: quedan, quitado } = quitarDelArbol(origen.bloques,
+        b => (bloqueId && b?.id === bloqueId) || (tablaId && b?.tipo === 'basedatos' && b?.tabla_id === tablaId));
+      if (!quitado) return res.status(404).json({ error: 'Ese bloque ya no está en su página.' });
+      const bloque = { ...quitado };
       if (bloque.tipo === 'subpagina') return res.status(400).json({ error: 'Las páginas se mueven con /mover.' });
       // Fuera de su fila de columnas: en la otra página va solo, a lo ancho.
       delete bloque.grupo; delete bloque.ancho;
-      const quedan = lista.filter((_, j) => j !== i);
       await db.transaction(async (tx: any) => {
         await tx.execute(sql`
           UPDATE knowledge_windows SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', ${JSON.stringify(quedan)}::jsonb),
-            updated_at = now(), updated_by = ${yo} WHERE id = ${desde}
+            version = version + 1, updated_at = now(), updated_by = ${yo} WHERE id = ${desde}
         `);
         await tx.execute(sql`
           UPDATE knowledge_windows SET
             config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', COALESCE(config->'bloques', '[]'::jsonb) || ${JSON.stringify([bloque])}::jsonb),
-            updated_at = now(), updated_by = ${yo} WHERE id = ${destino}
+            version = version + 1, updated_at = now(), updated_by = ${yo} WHERE id = ${destino}
         `);
       });
       res.json({ ok: true, bloque });
@@ -914,7 +931,9 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
             }));
 
       const hijos: any[] = [new Paragraph({ text: w.title, heading: HeadingLevel.TITLE })];
-      const bloques: Bloque[] = w.config?.bloques || [];
+      // Con los bloques de dentro de los desplegables (2026-10-05): en papel
+      // no se pliega nada, así que va todo, en orden de lectura.
+      const bloques: Bloque[] = aplanar(w.config?.bloques || []);
       for (const b of bloques) {
         const texto = b.texto || '';
         switch (b.tipo) {
@@ -1015,7 +1034,9 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
       doc.font('Helvetica-Bold').fontSize(24).fillColor('#0f172a').text(w.title);
       doc.moveDown(0.8);
 
-      const bloques: Bloque[] = w.config?.bloques || [];
+      // Con los bloques de dentro de los desplegables (2026-10-05): en papel
+      // no se pliega nada, así que va todo, en orden de lectura.
+      const bloques: Bloque[] = aplanar(w.config?.bloques || []);
       for (const b of bloques) {
         const texto = b.texto || '';
         switch (b.tipo) {

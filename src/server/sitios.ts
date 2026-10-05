@@ -33,6 +33,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { resolverDominio } from './dominios';
 import { cabeceraEnHtml } from './cabeceraSitio';
+import { bloquesDe } from './bloquesSql';
 
 const DOMINIO = 'humanity.wiki';
 const RESERVADOS = new Set(['www', 'api', 'admin', 'app', 'mail', 'ftp', 'cdn', 'static', 'assets']);
@@ -53,13 +54,13 @@ const subirDesdePagina = (id: string) => sql`
       -- Madre por base de datos: la página que contiene la tabla de su fila.
       SELECT w.id FROM bd_filas f
       JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-        AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+        AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
       WHERE f.pagina_id = s.id AND f.deleted_at IS NULL
       UNION
       -- Madre por bloque «Página» (2026-09-30): la que la enlaza.
       SELECT w.id FROM knowledge_windows w
       WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-        AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
+        AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
     ) madre
     WHERE s.n < ${PROFUNDIDAD}
   )
@@ -84,12 +85,12 @@ export async function sitioDePagina(db: any, id: string) {
       CROSS JOIN LATERAL (
         SELECT w.id FROM bd_filas f
         JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-          AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+          AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
         WHERE f.pagina_id = s.id AND f.deleted_at IS NULL
         UNION
         SELECT w.id FROM knowledge_windows w
         WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-          AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
+          AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
       ) madre
       WHERE s.n < ${PROFUNDIDAD}
     )
@@ -114,7 +115,7 @@ export async function tablaVisible(db: any, tablaId: string): Promise<boolean> {
   const r = await db.execute(sql`
     SELECT id FROM knowledge_windows
     WHERE kind = 'pagina' AND deleted_at IS NULL AND archived_at IS NULL
-      AND config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', ${tablaId}::text))
+      AND ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tabla_id', ${tablaId}::text))
     LIMIT 20
   `);
   for (const p of r.rows as any[]) if (await paginaVisible(db, p.id)) return true;
@@ -127,7 +128,7 @@ export async function pizarraVisible(db: any, graphId: string): Promise<boolean>
   const r = await db.execute(sql`
     SELECT id FROM knowledge_windows
     WHERE kind = 'pagina' AND deleted_at IS NULL AND archived_at IS NULL
-      AND config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'pizarra', 'entityId', ${graphId}::text))
+      AND ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tipo', 'pizarra', 'entityId', ${graphId}::text))
     LIMIT 20
   `);
   for (const p of r.rows as any[]) if (await paginaVisible(db, p.id)) return true;
@@ -214,7 +215,7 @@ async function paginaPublica(db: any, id: string) {
     SELECT p.id, p.title, p.slug, p.publico, u.handle
     FROM bd_filas f
     JOIN knowledge_windows p ON p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-      AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+      AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
     JOIN users u ON u.id = p.creator_user_id
     WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL
     ORDER BY p.publico DESC, p.created_at LIMIT 1
@@ -225,7 +226,7 @@ async function paginaPublica(db: any, id: string) {
       SELECT p.id, p.title, p.slug, p.publico, u.handle FROM knowledge_windows p
       JOIN users u ON u.id = p.creator_user_id
       WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-        AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
+        AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
       ORDER BY p.publico DESC, p.created_at LIMIT 1
     `);
     p = sr.rows[0] as any;
@@ -300,7 +301,7 @@ export function registrarSitios(app: Express, db: any) {
             UNION
             SELECT h.hijo, b.n + 1 FROM baja b
             JOIN knowledge_windows w ON w.id = b.id
-            CROSS JOIN LATERAL jsonb_array_elements(COALESCE(w.config->'bloques', '[]'::jsonb)) blq
+            CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
             CROSS JOIN LATERAL (
               SELECT f.pagina_id AS hijo FROM bd_filas f
               WHERE blq->>'tipo' = 'basedatos' AND f.tabla_id = blq->>'tabla_id'

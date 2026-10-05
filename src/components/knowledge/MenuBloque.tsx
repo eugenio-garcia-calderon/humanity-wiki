@@ -28,7 +28,11 @@ export const CONVERTIBLES: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'desplegable', label: 'Desplegable', icon: ChevronRight },
 ];
 
-export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplicar, onConvertir, onColor, onEnlace, onSacarDeColumnas, onCerrar }: {
+/** Una opción más del menú, que depende del bloque (2026-10-05): abrir al
+ *  publicar, sincronizar, configurar un botón… El menú no sabe qué hacen. */
+export interface OpcionExtra { icon: any; label: string; onClick: () => void; activo?: boolean; atajo?: string }
+
+export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplicar, onConvertir, onColor, onEnlace, onSacarDeColumnas, onCerrar, extras }: {
   tipo: TipoBloque;
   color?: string;
   enColumnas: boolean;
@@ -39,6 +43,7 @@ export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplic
   onEnlace: () => void;
   onSacarDeColumnas: () => void;
   onCerrar: () => void;
+  extras?: OpcionExtra[];
 }) {
   const [sub, setSub] = useState<'convertir' | 'color' | null>(null);
   const caja = useRef<HTMLDivElement>(null);
@@ -74,6 +79,16 @@ export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplic
         <Opcion icon={Palette} label="Color" flecha onClick={() => setSub(s => s === 'color' ? null : 'color')} />
         <Opcion icon={Link2} label="Copiar enlace al bloque" onClick={onEnlace} />
         {enColumnas && <Opcion icon={Columns2} label="Sacar de las columnas" onClick={onSacarDeColumnas} />}
+        {extras && extras.length > 0 && <div className="border-t border-slate-100 my-1" />}
+        {extras?.map(x => (
+          <button key={x.label} onClick={x.onClick}
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-left text-slate-600 hover:bg-slate-100 transition-colors">
+            <x.icon className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+            <span className="flex-1">{x.label}</span>
+            {x.atajo && <span className="text-[10px] font-bold text-slate-300">{x.atajo}</span>}
+            {x.activo && <Check className="w-3 h-3 text-emerald-600" />}
+          </button>
+        ))}
       </div>
 
       {sub === 'convertir' && (

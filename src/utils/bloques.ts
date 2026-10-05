@@ -147,6 +147,112 @@ export interface Bloque {
    *  sigue funcionando sin saber de columnas; quien no las entiende las lee
    *  una debajo de otra, que es lo que se ve en un teléfono. */
   grupo?: string;
+  /** ══ BLOQUES DENTRO DE BLOQUES (2026-10-05) ═══════════════════════════
+   *  Eugenio quiere el editor «al nivel de Notion»: Tab sangra, ⇧Tab quita la
+   *  sangría, y un desplegable guarda dentro lo que se quiera. Lo guardado es
+   *  un ÁRBOL —cada bloque lleva a sus hijos en `bloques`—, que es lo que ya
+   *  sabía leer la página pública (`BloquesLectura`).
+   *
+   *  El editor, en cambio, trabaja con la lista PLANA de siempre y un número
+   *  de sangría (`nivel`): mover, partir con Enter, pegar, las columnas… todo
+   *  lo que ya funcionaba sobre una lista sigue funcionando, y los hijos de un
+   *  bloque son sencillamente los que van detrás con más sangría. `aArbol` y
+   *  `aplanar` traducen de una forma a la otra al guardar y al abrir. `nivel`
+   *  NUNCA se guarda: dos formas de decir lo mismo acabarían diciendo cosas
+   *  distintas. */
+  bloques?: Bloque[];
+  nivel?: number;
+  /** Un título que pliega lo que lleva dentro (2026-10-05, como los
+   *  «toggle headings» de Notion). Sólo en `titulo1`–`titulo3`; lo de dentro
+   *  son sus `bloques`, igual que en un desplegable. */
+  plegable?: boolean;
+}
+
+// ── EL ÁRBOL Y LA LISTA PLANA (2026-10-05) ───────────────────────────────
+// Ver el comentario de `bloques` en la interfaz. Las cuatro funciones son
+// puras y no saben de React: las usan el editor, la lectura y el servidor.
+
+/** Los bloques que se pueden abrir y cerrar con su flecha. */
+export const esPlegable = (b: Pick<Bloque, 'tipo' | 'plegable'>) =>
+  b.tipo === 'desplegable' || (!!b.plegable && /^titulo[123]$/.test(b.tipo));
+
+/** Árbol → lista plana con `nivel`. Lo que se abre en el editor. */
+export function aplanar(arbol: Bloque[] | undefined, nivel = 0, out: Bloque[] = []): Bloque[] {
+  for (const b of Array.isArray(arbol) ? arbol : []) {
+    if (!b || typeof b !== 'object') continue;
+    const { bloques: hijos, ...resto } = b;
+    out.push({ ...resto, nivel: nivel || undefined });
+    if (Array.isArray(hijos) && hijos.length) aplanar(hijos, nivel + 1, out);
+  }
+  return out;
+}
+
+/** Que ningún bloque tenga más de un nivel de sangría que el de encima: un
+ *  hueco (de 0 a 2) no tiene madre que lo contenga. Devuelve la misma lista
+ *  si no había nada que arreglar, para no provocar repintados de balde. */
+export function normalizarNiveles<T extends { nivel?: number }>(plano: T[]): T[] {
+  let previo = -1;
+  let cambio = false;
+  const out = plano.map(b => {
+    const n = Math.max(0, Math.min(b.nivel || 0, previo + 1));
+    previo = n;
+    if (n === (b.nivel || 0)) return b;
+    cambio = true;
+    return { ...b, nivel: n || undefined };
+  });
+  return cambio ? out : plano;
+}
+
+/** Lista plana → árbol. Lo que se guarda. */
+export function aArbol(plano: Bloque[]): Bloque[] {
+  const raiz: Bloque[] = [];
+  // pila[n] = la lista donde van los bloques de nivel n.
+  const pila: Bloque[][] = [raiz];
+  for (const b of normalizarNiveles(plano)) {
+    const n = b.nivel || 0;
+    const { nivel: _n, bloques: _h, ...resto } = b;
+    const limpio: Bloque = resto;
+    pila.length = n + 1;
+    pila[n].push(limpio);
+    pila[n + 1] = (limpio.bloques = []);
+  }
+  // Sin listas vacías en lo guardado: `bloques: []` no dice nada.
+  const podar = (bs: Bloque[]) => { for (const b of bs) { if (b.bloques?.length) podar(b.bloques); else delete b.bloques; } };
+  podar(raiz);
+  return raiz;
+}
+
+/** El índice del último descendiente de `plano[i]` (o `i` si no tiene). */
+export function finSubarbol(plano: { nivel?: number }[], i: number): number {
+  const n = plano[i]?.nivel || 0;
+  let j = i;
+  while (j + 1 < plano.length && (plano[j + 1].nivel || 0) > n) j++;
+  return j;
+}
+
+/** Todos los bloques del árbol, a cualquier profundidad, en orden de lectura.
+ *  Para quien sólo quiere MIRAR (buscar texto, exportar, la primera imagen). */
+export function todosLosBloques(arbol: any[] | undefined): any[] {
+  const out: any[] = [];
+  const ir = (bs: any) => { for (const b of Array.isArray(bs) ? bs : []) { if (!b || typeof b !== 'object') continue; out.push(b); ir(b.bloques); } };
+  ir(arbol);
+  return out;
+}
+
+/** Quita del árbol el primer bloque que cumpla `si`, esté donde esté.
+ *  Devuelve el árbol nuevo y lo quitado (con sus hijos). */
+export function quitarDelArbol(arbol: any[] | undefined, si: (b: any) => boolean): { arbol: any[]; quitado: any | null } {
+  let quitado: any = null;
+  const ir = (bs: any[]): any[] => {
+    const out: any[] = [];
+    for (const b of bs) {
+      if (!quitado && b && si(b)) { quitado = b; continue; }
+      out.push(b && Array.isArray(b.bloques) && !quitado ? { ...b, bloques: ir(b.bloques) } : b);
+    }
+    return out;
+  };
+  const nuevo = ir(Array.isArray(arbol) ? arbol : []);
+  return { arbol: quitado ? nuevo : (arbol || []), quitado };
 }
 
 /** Parte la lista en filas: un bloque suelto, o varios seguidos con el mismo
@@ -206,6 +312,14 @@ const esSeparadorTabla = (linea: string) => /^\|?\s*:?-{2,}/.test(linea.trim()) 
 /** Markdown → bloques. Tolerante: lo que no reconoce, es un párrafo. */
 export function markdownABloques(md: string): Bloque[] {
   const bloques: Bloque[] = [];
+  // Las listas con sangría («  - hijo») salen anidadas: se apunta el nivel de
+  // cada ítem y al final se convierte en árbol (`aArbol`). Dos espacios o un
+  // tabulador por nivel, que es lo que escriben casi todos los editores.
+  const sangria = (linea: string) => {
+    const m = linea.match(/^[ \t]*/)?.[0] || '';
+    const n = Math.floor(m.replace(/\t/g, '  ').length / 2);
+    return n || undefined;
+  };
   const lineas = md.replace(/\r\n/g, '\n').split('\n');
   let i = 0;
   while (i < lineas.length) {
@@ -248,15 +362,15 @@ export function markdownABloques(md: string): Bloque[] {
 
     const tarea = t.match(/^[-*]\s+\[( |x|X)\]\s+(.*)$/);
     if (tarea) {
-      bloques.push({ id: nuevoIdBloque(), tipo: 'tarea', texto: tarea[2], hecho: tarea[1].toLowerCase() === 'x' });
+      bloques.push({ id: nuevoIdBloque(), tipo: 'tarea', texto: tarea[2], hecho: tarea[1].toLowerCase() === 'x', nivel: sangria(linea) });
       i++; continue;
     }
 
     const vinyeta = t.match(/^[-*]\s+(.*)$/);
-    if (vinyeta) { bloques.push({ id: nuevoIdBloque(), tipo: 'lista', texto: vinyeta[1] }); i++; continue; }
+    if (vinyeta) { bloques.push({ id: nuevoIdBloque(), tipo: 'lista', texto: vinyeta[1], nivel: sangria(linea) }); i++; continue; }
 
     const numerada = t.match(/^\d+[.)]\s+(.*)$/);
-    if (numerada) { bloques.push({ id: nuevoIdBloque(), tipo: 'numerada', texto: numerada[1] }); i++; continue; }
+    if (numerada) { bloques.push({ id: nuevoIdBloque(), tipo: 'numerada', texto: numerada[1], nivel: sangria(linea) }); i++; continue; }
 
     const cita = t.match(/^>\s?(.*)$/);
     if (cita) {
@@ -288,13 +402,17 @@ export function markdownABloques(md: string): Bloque[] {
     }
     bloques.push({ id: nuevoIdBloque(), tipo: 'parrafo', texto: partes.join(' ') });
   }
-  return bloques;
+  return bloques.some(b => b.nivel) ? aArbol(bloques) : bloques;
 }
 
 /** Bloques → markdown (descarga y viaje de vuelta). */
 export function bloquesAMarkdown(bloques: Bloque[]): string {
   const salida: string[] = [];
-  for (const b of bloques) {
+  // Los hijos se escriben debajo con dos espacios por nivel: es como markdown
+  // anida las listas, y para el resto es lo más fiel que cabe en texto.
+  const plano = bloques.some(b => b.bloques?.length) ? aplanar(bloques) : bloques;
+  for (const b of plano) {
+    const antes = salida.length;
     switch (b.tipo) {
       case 'titulo1': salida.push(`# ${b.texto || ''}`); break;
       case 'titulo2': salida.push(`## ${b.texto || ''}`); break;
@@ -324,7 +442,15 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       }
       default: salida.push(b.texto || '');
     }
-    salida.push('');
+    if (b.nivel) {
+      const pre = '  '.repeat(b.nivel);
+      for (let k = antes; k < salida.length; k++) salida[k] = salida[k].split('\n').map(l => pre + l).join('\n');
+    }
+    // Los ítems de una misma lista van seguidos: con una línea en blanco entre
+    // medias, markdown los leería como listas sueltas.
+    const sig = plano[plano.indexOf(b) + 1];
+    const enLista = (x?: Bloque) => !!x && (x.tipo === 'lista' || x.tipo === 'numerada' || x.tipo === 'tarea');
+    if (!(enLista(b) && enLista(sig))) salida.push('');
   }
   return salida.join('\n').trim() + '\n';
 }
