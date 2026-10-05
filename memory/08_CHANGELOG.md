@@ -8255,3 +8255,12 @@ reach the model and answer instantly.
 - The account purge (anonymise accounts deleted more than 15 days ago) now runs inside the app: `src/server/vaciarCuentas.ts`, registered in `modulos.ts`. It runs 10 min after boot and then daily, with timers `unref`'d, so there is no extra process or container. It refuses to run if `users` has an unclassified column. Checked in production that day: 0 accounts were pending, so no deadline was missed.
 - The code recycle bin is now emptied by hand (`node scripts/papelera.mjs vaciar`) in a PR. `papelera/2026-08-22` emptied.
 - On the server: no unnecessary processes found (≈2.5 GB RAM free). Pruned 16 GB of old Docker build cache (disk 83% → 42%).
+
+### 2026-10-05 — Dictation: three buttons, three methods, keep the one that works
+- After three fixes to the live dictation that still wrote nothing in Eugenio's Chrome, he asked for several strategies side by side to try them himself.
+- The AI chat now shows three numbered mic buttons:
+  1. The existing live dictation (AudioContext → `server/voz.ts` → Gemini live).
+  2. Chrome's own speech recognition (`webkitSpeechRecognition`). Chrome opens and reads the mic itself, so nothing in our capture path can affect it. It auto-restarts after Chrome's silence cut-off.
+  3. Record with `MediaRecorder` (no AudioContext), upload the clip on stop to the new `POST /api/voz/grabacion`, and get the text back (Gemini Flash, about 4 s). Not live, but it is the path with the fewest parts.
+- Each method logs `[voz] informe {...}` / `[voz] grabación: …` to the app log, so a failure can be located without a report.
+- Verified locally with the real MacBook mic + `say`: all three transcribed. Once Eugenio picks one, the other two buttons and their hooks are removed (`src/hooks/useDictadoAlternativo.ts`).

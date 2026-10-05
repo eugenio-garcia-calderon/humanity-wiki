@@ -8,7 +8,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
-import BotonMicrofono from './BotonMicrofono';
+import BotonMicrofono, { BotonVozAlternativo } from './BotonMicrofono';
+import { useDictadoNavegador, useDictadoGrabacion } from '../../hooks/useDictadoAlternativo';
 import ResizeHandle from '../ui/ResizeHandle';
 import { cn } from '../../utils/cn';
 import { areasQueEncajan as areasDe, AREA_POR_ID } from '../../utils/objetivos';
@@ -874,18 +875,31 @@ export default function AIAssistant({ modo = 'panel' }: {
   };
   // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
   const dictationBase = useRef('');
-  const { listening, supported: voiceSupported, toggle: toggleVoice, error: errorVoz, nivel: nivelVoz, microfonos, microfono, setMicrofono, cargarMicrofonos } = useVoiceDictation((crudo, isFinal) => {
+  const alDictar = (crudo: string, isFinal: boolean) => {
     // Chrome empieza cada frase nueva con un espacio: sin quitarlo, salían
     // dos entre frase y frase.
     const text = crudo.replace(/^\s+/, '');
     const sep = dictationBase.current && !dictationBase.current.endsWith(' ') ? ' ' : '';
     setInput(dictationBase.current + sep + text);
     if (isFinal) dictationBase.current = dictationBase.current + sep + text;
-  });
-  const handleMicClick = () => {
-    if (!listening) dictationBase.current = input;
-    toggleVoice();
   };
+  const { listening: listening1, supported: voiceSupported, toggle: toggleVoice, error: errorVoz, nivel: nivelVoz, microfonos, microfono, setMicrofono, cargarMicrofonos } = useVoiceDictation(alDictar);
+  // TRES MÉTODOS A PRUEBA (2026-10-05): ver `useDictadoAlternativo.ts`. Cuando
+  // Eugenio diga cuál funciona, se quedan ese botón y su hook, y fuera el resto.
+  const voz2 = useDictadoNavegador(alDictar);
+  const voz3 = useDictadoGrabacion(alDictar);
+  const listening = listening1 || voz2.listening || voz3.listening;
+  /** Pulsar uno apaga los otros: nunca dos micrófonos a la vez. */
+  const pulsarVoz = (n: 1 | 2 | 3) => {
+    const toggles = { 1: [listening1, toggleVoice], 2: [voz2.listening, voz2.toggle], 3: [voz3.listening, voz3.toggle] } as const;
+    const [activo, alternar] = toggles[n];
+    if (!activo) {
+      for (const m of [1, 2, 3] as const) if (m !== n && toggles[m][0]) toggles[m][1]();
+      dictationBase.current = input;
+    }
+    alternar();
+  };
+  const handleMicClick = () => pulsarVoz(1);
 
   const location = useLocation();
   /** La ruta de ahora, para marcar en negro el botón donde estás. */
@@ -2587,9 +2601,17 @@ export default function AIAssistant({ modo = 'panel' }: {
               {voiceSupported && (
                 // Azul mientras escucha y con la pestañita del micrófono
                 // (2026-10-02). Ver `BotonMicrofono.tsx` y `useVoiceDictation.ts`.
-                <BotonMicrofono escuchando={listening} onPulsar={handleMicClick}
+                <BotonMicrofono escuchando={listening1} onPulsar={handleMicClick}
                   microfonos={microfonos} microfono={microfono} onElegir={setMicrofono}
-                  onAbrirLista={cargarMicrofonos} error={errorVoz} nivel={nivelVoz} />
+                  onAbrirLista={cargarMicrofonos} error={errorVoz} nivel={nivelVoz} numero={1} />
+              )}
+              {voz2.supported && (
+                <BotonVozAlternativo numero={2} titulo="el dictado de Chrome, en directo"
+                  escuchando={voz2.listening} onPulsar={() => pulsarVoz(2)} error={voz2.error} />
+              )}
+              {voz3.supported && (
+                <BotonVozAlternativo numero={3} titulo="graba y escribe al parar"
+                  escuchando={voz3.listening} procesando={voz3.procesando} onPulsar={() => pulsarVoz(3)} error={voz3.error} />
               )}
 
               {/* EL MODELO, ABAJO Y CON SU NOMBRE (2026-08-20, petición de
