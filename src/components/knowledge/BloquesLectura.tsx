@@ -12,6 +12,7 @@ import Rejilla from '../tablas/Rejilla';
 import ProductoPublico from './ProductoPublico';
 import { Portada, RejillaProductos, Columnas, Franja } from './BloquesMaqueta';
 import { MigasDePan, BotonVista } from './BloquesExtra';
+import { ImagenVista } from './ImagenBloque';
 import { useSitio } from '../sitio/ContextoSitio';
 
 // ============================================================================
@@ -320,11 +321,11 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
 
     case 'imagen':
       if (!b.url) return null;
+      // Con su tamaño y su recorte (2026-10-06, ver `ImagenBloque.tsx`).
       return (
         <figure>
-          <img src={b.url} alt={b.pie || ''} loading="lazy"
-               className="w-full rounded-xl border border-slate-200" />
-          {b.pie && <figcaption className="text-xs text-slate-400 mt-1">{b.pie}</figcaption>}
+          <ImagenVista b={b} />
+          {b.pie && <figcaption className={cn('text-xs text-slate-400 mt-1', (b.anchoImagen || b.recorte || b.relacion) && 'text-center')}>{b.pie}</figcaption>}
         </figure>
       );
 

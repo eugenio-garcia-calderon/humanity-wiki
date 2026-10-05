@@ -8513,3 +8513,10 @@ en mis páginas como proyecto pendiente».
 - **Variantes** (`EditorVariantes`, que usa también Comercio): una fila por variante a todo el ancho, con cabecera (Nombre · Precio € · Stock), campos de 16 px, el SKU detrás de «Añadir SKU» y atajos de un toque (Tallas S–XL, 36–44, Colores). Con variantes con nombre se oculta «Cuántos tienes»: el servidor suma el stock de las variantes y lo ignoraba igual.
 - **Cobrar en puntos, retirado del creador** de momento (Eugenio). Los productos nuevos se crean con `acepta_puntos: false`. El servidor, la caja y el interruptor por producto de Comercio no cambian.
 - **Fotos** con `SoltarImagen`, el diálogo de la portada: pegar, arrastrar o elegir archivo. Precio y envío comparten fila; IVA, variantes y «borrador» tienen la suya.
+
+### 2026-10-06 — Editor: imágenes como en PowerPoint (tamaño, recorte, pie) y «Comprimir imagen» (prog8, carril editorA)
+- **Asas de tamaño**: un clic en una imagen la selecciona (borde azul y ocho asas). Las esquinas cambian el tamaño sin deformarla; los lados la estiran. La imagen va centrada y el tamaño se guarda como % de su columna (`anchoImagen`) y, si se estiró, `relacion`. La página publicada lo respeta. «Tamaño original» lo deshace todo.
+- **Recortar** con las asas negras de PowerPoint (L en las esquinas, barras en los lados): lo que se quita se ve atenuado, el recuadro se puede mover, Enter o un clic fuera aplican y Esc cancela. No destructivo: se guarda `recorte` (fracciones de la imagen original) y se puede volver a ajustar o quitar. Cada cambio es un paso de ⌘Z.
+- **Pie de foto** editable debajo de la imagen.
+- **Peso**: en el editor, si la imagen pasa de 1,5 MB se ve su peso y «Comprimir imagen», que la recomprime en el navegador (canvas, 2000 px de lado, JPEG o WebP si tiene transparencia), la vuelve a subir, cambia la dirección y dice cuánto se ha ahorrado. El recorte y el tamaño se conservan. Nunca sale en la página pública.
+- Pieza nueva `src/components/knowledge/ImagenBloque.tsx` (`ImagenVista` para leer, `ImagenEditable` para el editor). Las imágenes sin tamaño ni recorte se pintan exactamente como antes.
