@@ -90,6 +90,36 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar }: {
 
   const filtradas = (opciones || []).filter(o => !q.trim() || o.nombre.toLowerCase().includes(q.trim().toLowerCase()));
 
+  // ══ CREAR LO QUE AÚN NO EXISTE (2026-10-06, Eugenio) ═════════════════════
+  // «Desde Proyectos, añadir al equipo una persona que aún no está en Equipo
+  // Humano»: si lo escrito no está en la otra base de datos, abajo sale
+  // «Crear: <nombre>», que crea la entrada allí (con su página) y la conecta
+  // aquí, sin salir de la celda. Solo si nadie se llama EXACTAMENTE así: crear
+  // un «Ana» cuando ya hay una «Ana» haría dos personas que parecen una.
+  const nombreNuevo = q.trim().replace(/\s+/g, ' ');
+  const yaExiste = !!nombreNuevo && (opciones || []).some(o => o.nombre.trim().toLowerCase() === nombreNuevo.toLowerCase());
+  const crear = async () => {
+    if (!destino || !nombreNuevo) return;
+    setGuardando(true); setFallo(null);
+    const r = await fetch(`/api/bd/tablas/${destino}/filas`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo: nombreNuevo }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.id) {
+      setGuardando(false);
+      setFallo(r.status === 403 ? 'No puedes añadir entradas en esa otra base de datos.' : (j.error || 'No se pudo crear.'));
+      return;
+    }
+    setOpciones(o => [...(o || []), { id: j.id, nombre: nombreNuevo }]);
+    setQ('');
+    await onGuardar(varios ? [...elegidos, j.id] : [j.id]);
+    setGuardando(false);
+    // La otra base de datos, si está en la misma página, se entera sola.
+    window.dispatchEvent(new CustomEvent('bd:cambio', { detail: { desde: destino } }));
+    if (!varios) setAbierto(false);
+  };
+
   return (
     <div ref={caja} className="relative">
       <div onClick={() => editable && setAbierto(v => !v)}
@@ -103,7 +133,7 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar }: {
         <div className="absolute left-0 top-full z-30 mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5">
           {!destino ? (
             <p className="p-2 text-xs text-slate-500">Esta columna no sabe a qué base de datos apunta. Edítala y elige una.</p>
-          ) : fallo ? (
+          ) : fallo && !opciones ? (
             <p className="p-2 text-xs font-bold text-rose-600">{fallo}</p>
           ) : !opciones ? (
             <p className="p-2 text-xs text-slate-400 inline-flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…</p>
@@ -111,7 +141,8 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar }: {
             <>
               <label className="flex items-center gap-1.5 px-2 h-9 border-b border-slate-100 mb-1">
                 <Search className="w-3.5 h-3.5 text-slate-300" />
-                <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar…"
+                <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar o crear…"
+                  onKeyDown={e => { if (e.key === 'Enter' && nombreNuevo && !yaExiste && !filtradas.length) crear(); }}
                   className="flex-1 min-w-0 text-xs outline-none bg-transparent" />
                 {guardando && <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-300" />}
               </label>
@@ -129,8 +160,16 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar }: {
                     </button>
                   );
                 })}
-                {!filtradas.length && <p className="p-2 text-xs text-slate-400">No hay nada con ese nombre.</p>}
+                {!filtradas.length && !nombreNuevo && <p className="p-2 text-xs text-slate-400">No hay nada con ese nombre.</p>}
               </div>
+              {nombreNuevo && !yaExiste && (
+                <button onClick={crear} disabled={guardando}
+                  className="mt-1 w-full flex items-center gap-2 px-2 py-1.5 rounded-md border-t border-slate-100 text-xs font-bold text-emerald-700 text-left hover:bg-emerald-50 disabled:opacity-50">
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Crear: <span className="text-slate-800">{nombreNuevo}</span></span>
+                </button>
+              )}
+              {fallo && <p className="px-2 py-1 text-[11px] font-bold text-rose-600">{fallo}</p>}
               {elegidos.length > 0 && (
                 <button onClick={async () => { setGuardando(true); await onGuardar([]); setGuardando(false); }}
                   className="mt-1 w-full inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50">

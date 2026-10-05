@@ -34,6 +34,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
+import { bloquesDe } from './bloquesSql';
 import { tablaVisible } from './sitios';
 import { TIPOS, tipar, type Tipo } from './bd/tipos';
 import { celdasDe, type Celda } from './bd/celdas';
@@ -487,6 +488,8 @@ export function registerBdRoutes(app: Express, db: any) {
         tabla: {
           id: permiso.tabla.id, titulo: permiso.tabla.titulo, icono: permiso.tabla.icono,
           descripcion: permiso.tabla.descripcion, proyecto_id: permiso.tabla.proyecto_id,
+          // Cómo se ve la página de cada fila (2026-10-06, «Personalizar diseño»).
+          config: permiso.tabla.config || {},
         },
         columnas,
         columna_titulo: colTitulo,
@@ -568,9 +571,10 @@ export function registerBdRoutes(app: Express, db: any) {
           titulo = COALESCE(${titulo}, titulo),
           descripcion = COALESCE(${req.body?.descripcion ?? null}, descripcion),
           icono = COALESCE(${req.body?.icono ?? null}, icono),
+          config = COALESCE(${req.body?.config && typeof req.body.config === 'object' && !Array.isArray(req.body.config) && JSON.stringify(req.body.config).length < 20000 ? JSON.stringify(req.body.config) : null}::jsonb, config),
           updated_by = ${req.user.id}, updated_at = now()
         WHERE id = ${String(req.params.id)}
-        RETURNING id, titulo, descripcion, icono
+        RETURNING id, titulo, descripcion, icono, config
       `);
       res.json(r.rows[0]);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
@@ -795,7 +799,10 @@ export function registerBdRoutes(app: Express, db: any) {
                        ...(col.config?.reciproca_id ? { reciproca_id: col.config.reciproca_id, tabla_destino: col.config.tabla_destino } : {}),
                        // El papel de madre/hijos y de dependencia tampoco: sin él la
                        // tabla dejaría de anidar en cuanto se editara la columna.
-                       ...(col.config?.rol ? { rol: col.config.rol, tabla_destino: col.config.tabla_destino } : {}) }) : null}::jsonb, config),
+                       ...(col.config?.rol ? { rol: col.config.rol, tabla_destino: col.config.tabla_destino } : {}),
+                       // La visibilidad en la página de la fila la pone su menú, no
+                       // el editor de la columna: si éste no la manda, se conserva.
+                       ...(col.config?.visibilidad && !('visibilidad' in d.config) ? { visibilidad: col.config.visibilidad } : {}) }) : null}::jsonb, config),
           orden    = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
           updated_at = now()
         WHERE id = ${req.params.id}
@@ -866,6 +873,120 @@ export function registerBdRoutes(app: Express, db: any) {
       if (col.config?.reciproca_id) await db.execute(sql`UPDATE bd_columnas SET archived_at = now() WHERE id = ${col.config.reciproca_id}`);
       if (col.config?.inversa_de) await db.execute(sql`UPDATE bd_columnas SET config = config - 'reciproca_id' WHERE id = ${col.config.inversa_de}`);
       res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ── LA PÁGINA DE UNA FILA (2026-10-06, carril «bd») ───────────────────────
+  // Lo que pide el menú de cada propiedad en la página de una fila, como en
+  // Notion: ordenar arrastrando, duplicar, ir a la base de datos enlazada, y
+  // en la página publicada, ver con qué está conectada.
+
+  /** Ordenar las columnas: la lista entera de ids, en el orden nuevo. Es el
+   *  orden de la TABLA: lo ven todas las filas y la rejilla. */
+  app.put('/api/bd/tablas/:id/orden-columnas', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, req.params.id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const ids: string[] | null = Array.isArray(req.body?.ids) ? req.body.ids.map(String).slice(0, 500) : null;
+      if (!ids?.length) return res.status(400).json({ error: 'Falta el orden.' });
+      // Las que no vengan en la lista van detrás, en su orden de antes: un
+      // cliente con la lista vieja no puede mandar una columna al limbo.
+      const todas = (await columnasDe(req.params.id)).map((c: any) => c.id as string);
+      const orden = [...ids.filter(id => todas.includes(id)), ...todas.filter(id => !ids.includes(id))];
+      await db.execute(sql`
+        UPDATE bd_columnas c SET orden = x.o::int - 1, updated_at = now()
+        FROM jsonb_array_elements_text(${JSON.stringify(orden)}::jsonb) WITH ORDINALITY AS x(id, o)
+        WHERE c.id = x.id AND c.tabla_id = ${req.params.id}
+      `);
+      res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Duplicar una propiedad CON SUS VALORES (los del jsonb y los enlaces). Una
+   *  relación duplicada nace sin cara de vuelta: dos columnas gemelas de la
+   *  misma de la otra tabla dirían dos cosas a la vez. Los archivos no se
+   *  duplican: cada archivo pertenece a una celda. */
+  app.post('/api/bd/columnas/:id/duplicar', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const c = await db.execute(sql`SELECT * FROM bd_columnas WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      const col = c.rows[0] as any;
+      if (!col) return res.status(404).json({ error: 'Esa columna no existe.' });
+      const permiso = await puedeConTabla(req, col.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      if (col.config?.inversa_de || col.config?.rol) return res.status(400).json({ error: 'Esta propiedad es una cara de una relación doble: no se puede duplicar.' });
+      let nombre = `${col.nombre} (copia)`.slice(0, 120);
+      for (let n = 2; await nombreRepetido(col.tabla_id, nombre); n++) nombre = `${col.nombre} (copia ${n})`.slice(0, 120);
+      const id = nid('BDC');
+      const config = { ...(col.config || {}) };
+      delete config.reciproca_id; delete config.reciproca;
+      await db.execute(sql`UPDATE bd_columnas SET orden = orden + 1 WHERE tabla_id = ${col.tabla_id} AND orden > ${col.orden}`);
+      await db.execute(sql`
+        INSERT INTO bd_columnas (id, tabla_id, nombre, tipo, opciones, config, orden)
+        VALUES (${id}, ${col.tabla_id}, ${nombre}, ${col.tipo}, ${JSON.stringify(col.opciones || [])}::jsonb, ${JSON.stringify(config)}::jsonb, ${col.orden + 1})
+      `);
+      await db.execute(sql`
+        UPDATE bd_filas SET valores = valores || jsonb_build_object(${id}::text, valores -> ${col.id}::text)
+        WHERE tabla_id = ${col.tabla_id} AND valores ? ${col.id}
+      `);
+      await db.execute(sql`
+        INSERT INTO bd_enlaces (id, columna_id, fila_origen, clase, destino_id, orden, created_by)
+        SELECT 'BDE' || upper(substr(md5(random()::text || e.id), 1, 14)), ${id}, e.fila_origen, e.clase, e.destino_id, e.orden, ${req.user!.id}
+        FROM bd_enlaces e WHERE e.columna_id = ${col.id}
+        ON CONFLICT DO NOTHING
+      `);
+      res.json({ id, nombre });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Dónde vive una base de datos: la primera página (que no sea la de una
+   *  fila) que la enseña. Es el ↗ del nombre de una relación. */
+  app.get('/api/bd/tablas/:id/hogar', async (req: Request, res: Response) => {
+    try {
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const r = await db.execute(sql`
+        SELECT p.id FROM knowledge_windows p
+        WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+          AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tabla_id', ${req.params.id}::text))
+          AND NOT EXISTS (SELECT 1 FROM bd_filas f WHERE f.pagina_id = p.id)
+        ORDER BY p.created_at LIMIT 1
+      `);
+      res.json({ pagina_id: (r.rows[0] as any)?.id || null, titulo: permiso.tabla.titulo });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * LAS RELACIONES DE UNA FILA, PARA SU PÁGINA PUBLICADA. Solo las que tienen
+   * algo conectado en esta fila: en una web, «Equipo: —» no informa de nada.
+   * Se respeta «ocultar siempre» y lo que esconde la otra tabla: si quien
+   * mira no puede leerla, no se enseña.
+   */
+  app.get('/api/bd/paginas/:paginaId/relaciones', async (req: Request, res: Response) => {
+    try {
+      const f = await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${req.params.paginaId} AND deleted_at IS NULL LIMIT 1`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.json({ relaciones: [] });
+      const permiso = await puedeConTabla(req, fila.tabla_id, false);
+      if ('error' in permiso) return res.json({ relaciones: [] });
+      const cols = (await columnasDe(fila.tabla_id)).filter((c: any) => c.tipo === 'relacion' && c.config?.visibilidad !== 'nunca');
+      if (!cols.length) return res.json({ relaciones: [] });
+      const enl: Record<string, any[]> = (await enlacesDe(db, [fila.id]))[fila.id] || {};
+      for (const c of cols) {
+        if (!c.config?.inversa_de) continue;
+        const inv = await enlacesInversos(db, c.config.inversa_de, [fila.id]);
+        if (inv[fila.id]) enl[c.id] = inv[fila.id];
+      }
+      const relaciones: any[] = [];
+      for (const c of cols) {
+        const lista = (enl[c.id] || []).filter((a: any) => a.existe !== false);
+        if (!lista.length) continue;
+        const destino = c.config?.tabla_destino;
+        if (destino && 'error' in (await puedeConTabla(req, destino, false))) continue;
+        relaciones.push({ columna_id: c.id, nombre: c.nombre, apuntados: lista });
+      }
+      res.json({ relaciones });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
