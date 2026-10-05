@@ -8246,3 +8246,12 @@ reach the model and answer instantly.
 - Medido en el registro de producción: sus dictados mandaban 21 s (y 304 s) de audio en SILENCIO TOTAL. El mismo micrófono, en un Chrome abierto por nosotros en el mismo Mac y con el Mac hablando en voz alta, transcribía bien —con el micrófono por defecto y eligiéndolo en la pestañita—: el silencio es de cómo SU Chrome abre el micrófono (otra aplicación con el procesado de voz del sistema, una extensión, el dispositivo).
 - Ahora, si una forma de abrir el micrófono da silencio digital (ceros exactos) 1,5 s, se prueba sola la siguiente: el elegido sin procesado de voz, el del sistema sin y con procesado. Probado con el micrófono real emulando que la primera apertura llega muda: se recupera y transcribe. Un silencio normal de habitación no cuenta, así que quien tarda en hablar no ve cambiar su micrófono.
 - Cada dictado manda al registro qué micrófono se abrió de verdad, en qué estado y con qué nivel (`[voz] … diag {…}`), para poder localizar un «no me escucha» sin pedírselo a nadie.
+
+### 2026-10-05 — No more «Run failed» e-mails: scheduled jobs moved off GitHub
+- Eugenio was receiving daily «Run failed» e-mails from two GitHub scheduled workflows.
+  - `vaciar-papelera.yml` could not push to `main` (GH006: main only accepts PRs).
+  - `vaciar-cuentas.yml` had never run: `npm install pg` failed, the database secret was missing, and the production DB is not reachable from outside (and must stay that way).
+- Both workflows and `scripts/vaciar-cuentas.mjs` removed.
+- The account purge (anonymise accounts deleted more than 15 days ago) now runs inside the app: `src/server/vaciarCuentas.ts`, registered in `modulos.ts`. It runs 10 min after boot and then daily, with timers `unref`'d, so there is no extra process or container. It refuses to run if `users` has an unclassified column. Checked in production that day: 0 accounts were pending, so no deadline was missed.
+- The code recycle bin is now emptied by hand (`node scripts/papelera.mjs vaciar`) in a PR. `papelera/2026-08-22` emptied.
+- On the server: no unnecessary processes found (≈2.5 GB RAM free). Pruned 16 GB of old Docker build cache (disk 83% → 42%).

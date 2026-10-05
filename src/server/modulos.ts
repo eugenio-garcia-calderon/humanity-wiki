@@ -33,6 +33,7 @@
 // aún antes, porque mide el tiempo que espera quien pide.
 import type { Express } from 'express';
 import { registrarVoz } from './voz.js';
+import { registrarVaciadoCuentas } from './vaciarCuentas.js';
 
 import { registrarGuardia } from './seguridad/guardia.js';
 import { registrarSelladoAutomatico } from './seguridad/selladoAutomatico.js';
@@ -299,6 +300,12 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registrarVoz(app, db),
     nota: 'Dictado en tiempo real (2026-10-02): el audio entra por HTTP en trozos y '
         + 'el texto sale por SSE; el websocket sólo existe hacia el transcriptor.',
+  },
+  {
+    nombre: 'vaciar-cuentas',
+    montar: (app, db) => registrarVaciadoCuentas(app, db),
+    nota: 'No monta rutas: una pasada al día que vacía las cuentas que pidieron borrarse hace más '
+        + 'de 15 días. Vivía en GitHub Actions y no había funcionado nunca (ver el módulo).',
   },
 ];
 
