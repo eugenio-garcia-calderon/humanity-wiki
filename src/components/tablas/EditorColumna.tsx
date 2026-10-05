@@ -158,7 +158,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const elegirDestino = (t: any) => {
     // «Admite varios» nace encendido: un proyecto suele tocar varias áreas, y
     // con uno solo el segundo enlace fallaba sin que se entendiera por qué.
-    setConfig((c: any) => ({ ...c, tabla_destino: t.id, varios: c.varios ?? true, mostrar: c.tabla_destino === t.id ? c.mostrar : ['imagen'] }));
+    setConfig((c: any) => ({ ...c, tabla_destino: t.id, varios: c.varios ?? true, reciproca: c.reciproca ?? true, mostrar: c.tabla_destino === t.id ? c.mostrar : ['imagen'] }));
     // El nombre sigue al de la base de datos mientras nadie lo haya escrito a mano.
     if (!nombre.trim() || nombre === nombreAuto) { setNombre(t.titulo); setNombreAuto(t.titulo); }
   };
@@ -281,6 +281,18 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <input type="checkbox" checked={!!config.varios}
                 onChange={e => setConfig((c: any) => ({ ...c, varios: e.target.checked }))} />
               <span className="text-xs font-bold text-slate-600">Admite varios</span>
+            </label>
+          )}
+          {/* EN LAS DOS (2026-10-05): la otra base de datos enseña el enlace
+              de vuelta, como en Notion. Encendido al nacer. */}
+          {tipo === 'relacion' && !editando && config.tabla_destino && config.tabla_destino !== tablaId && (
+            <label className={cn('flex items-start gap-2', soloEnlace && 'order-4')}>
+              <input type="checkbox" className="mt-0.5" checked={!!config.reciproca}
+                onChange={e => setConfig((c: any) => ({ ...c, reciproca: e.target.checked }))} />
+              <span className="text-xs font-bold text-slate-600">
+                Mostrar también en «{tablas.find(t => t.id === config.tabla_destino)?.titulo || 'la otra'}»
+                <span className="block text-[11px] font-medium text-slate-400">Allí aparecerá qué elementos de aquí la enlazan.</span>
+              </span>
             </label>
           )}
 
