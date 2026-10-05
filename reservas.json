@@ -89,6 +89,18 @@
       "ruta": "src/server/buscador.ts",
       "motivo": "editorA: bloques anidados (árbol) en menú y servidor",
       "desde": "2026-10-05T18:04:57.602Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "editorA PR1",
+      "desde": "2026-10-05T18:21:09.992Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/bloquesSql.ts",
+      "motivo": "editorA PR1",
+      "desde": "2026-10-05T18:21:09.992Z"
     }
   ]
 }
