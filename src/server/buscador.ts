@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { getProvider, providerOfModel } from './ai/provider';
+import { todosLosBloques } from '../utils/bloques';
 
 // ============================================================================
 // EL BUSCADOR — sugerencias al escribir, resultados y resumen (2026-08-24)
@@ -243,7 +244,8 @@ export function registerBuscadorRoutes(app: Express, db: any) {
       for (const r of paginas.rows as any[]) {
         // De una página se saca el primer texto de sus bloques: buscar dentro
         // del JSON entero encontraría también nombres de campos.
-        const bloques = (r.config?.bloques || []) as any[];
+        // También lo de dentro de los desplegables (2026-10-05).
+        const bloques = todosLosBloques(r.config?.bloques);
         const texto = Array.isArray(bloques)
           ? bloques.map(b => (typeof b?.texto === 'string' ? b.texto : '')).filter(Boolean).join(' ')
           : '';

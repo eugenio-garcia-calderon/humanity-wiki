@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { subirArchivo } from '../utils/subir';
 import SoltarImagen from '../components/ui/SoltarImagen';
@@ -6,7 +6,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
-  ChevronRight, Info,
+  ChevronRight, Info, ChevronDown, Undo2, Redo2,
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
@@ -20,7 +20,7 @@ import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import CreadorMenu from '../components/knowledge/CreadorMenu';
-import MenuBloque from '../components/knowledge/MenuBloque';
+import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
 import { TarjetaMarcador, WebInsertada, leerEnlace } from '../components/knowledge/BloqueEnlace';
@@ -33,7 +33,7 @@ import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown, enFilas,
-  AIRE_BASE_DATOS,
+  AIRE_BASE_DATOS, aplanar, aArbol, normalizarNiveles, finSubarbol, esPlegable,
 } from '../utils/bloques';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
@@ -49,7 +49,7 @@ import CrearProducto from '../components/knowledge/CrearProducto';
 // importa de allí. Una sola definición: lo que se escribe y lo que se
 // publica tienen que verse igual, y con dos copias el fallo sale siempre en
 // la pantalla pública, que es la que nadie mira.
-import { CLASES_TEXTO } from '../components/knowledge/BloquesLectura';
+import { CLASES_TEXTO, marcaLista } from '../components/knowledge/BloquesLectura';
 import Adjuntos from '../components/archivo/Adjuntos';
 
 // ============================================================================
@@ -243,8 +243,35 @@ function EditorPagina() {
     if (texto) falloTimer.current = setTimeout(() => setFallo(null), 8000);
   };
   const avisoTimer = useRef<any>(null);
-  /** Fotos de la estructura antes de cada cambio que no se deshace tecleando. */
-  const historia = useRef<Bloque[][]>([]);
+  // ══ DESHACER Y REHACER, COMO NOTION (2026-10-05) ════════════════════════
+  // Antes ⌘Z sólo deshacía lo de estructura (borrar, mover…) y lo tecleado lo
+  // deshacía el navegador, bloque a bloque y a su manera: al pasar a otro
+  // bloque se perdía. Ahora hay UNA historia para todo, con fotos de la página
+  // entera (estructura + texto de cada bloque):
+  //  - `presente` es la foto de cómo está la página ahora mismo. Se renueva
+  //    tras cada cambio, sea una tecla o un bloque movido.
+  //  - antes de un cambio, la foto de antes va a `pilaDeshacer`.
+  //  - LAS TECLAS SE AGRUPAN, como en Notion: escribir una frase seguida es
+  //    UN paso, no cuarenta. Un grupo se cierra al pararse un segundo, al
+  //    cambiar de bloque, al hacer algo de estructura, o —si se escribe sin
+  //    parar— en el primer espacio pasados cuatro segundos, para no deshacer
+  //    un párrafo entero de golpe.
+  // Las fotos son la lista plana con sus textos (lo mismo que se guarda), así
+  // que deshacer es sencillamente volver a poner una foto.
+  type Foto = { bloques: Bloque[]; foco: { id: string; pos: number | null } | null };
+  const pilaDeshacer = useRef<Foto[]>([]);
+  const pilaRehacer = useRef<Foto[]>([]);
+  const presente = useRef<Foto | null>(null);
+  const grupoTexto = useRef<{ id: string; desde: number; ultima: number } | null>(null);
+  /** El próximo cambio de estructura no lo ha hecho quien escribe (abrir la
+   *  página, deshacer, lo que llega de otra pestaña): no se apila. */
+  const sinRegistrar = useRef(false);
+  /** Sube al deshacer: obliga a volver a montar el bloque que se está
+   *  escribiendo, cuyo texto es del DOM (ver `BloqueEditable`). */
+  const [revision, setRevision] = useState(0);
+  /** Cuántos pasos hay para atrás y para delante (para los botones). */
+  const [pasos, setPasos] = useState({ atras: 0, adelante: 0 });
+  const contarPasos = () => setPasos({ atras: pilaDeshacer.current.length, adelante: pilaRehacer.current.length });
   const archivoRef = useRef<HTMLInputElement>(null);
   const archivoTras = useRef<string | null>(null);
   /** Hay un archivo del escritorio volando sobre el documento (2026-08-22).
@@ -294,7 +321,8 @@ function EditorPagina() {
         const aj: Ajustes = {};
         for (const k of CLAVES_AJUSTES) if (j.config?.[k] !== undefined) (aj as any)[k] = j.config[k];
         setAjustes(aj);
-        let bs: Bloque[] = j.config?.bloques || [];
+        // Lo guardado es un árbol; el editor trabaja con la lista plana.
+        let bs: Bloque[] = aplanar(j.config?.bloques || []);
         // Documentos guardados antes del arreglo del título duplicado: si el
         // primer bloque es un H1 idéntico al título, se omite (y el próximo
         // autoguardado lo retira del todo).
@@ -303,6 +331,9 @@ function EditorPagina() {
           if (b.texto !== undefined) textosRef.current[b.id] = b.texto;
           if (b.filas) filasRef.current[b.id] = b.filas;
         }
+        // Abrir (o volver a leer lo que cambió la IA) no es algo que se deshaga.
+        sinRegistrar.current = true;
+        setRevision(r => r + 1);
         setBloques(bs.length ? normalizarGrupos(bs) : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
       })
       .catch(e => setError(e.message))
@@ -389,7 +420,8 @@ function EditorPagina() {
               // cada token sería malgastar y parpadear.
               if (Date.now() - ultimaPintada > 160) {
                 ultimaPintada = Date.now();
-                setBloques(markdownABloques(buffer));
+                sinRegistrar.current = true;
+                setBloques(aplanar(markdownABloques(buffer)));
                 finalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
               }
             } else if (evento === 'fin') {
@@ -431,6 +463,54 @@ function EditorPagina() {
       filas: b.tipo === 'tabla' ? (filasRef.current[b.id] ?? b.filas ?? [['', ''], ['', '']]) : undefined,
     })), []);
 
+  /** La foto de la página tal como está (ver «DESHACER Y REHACER»). */
+  const fotoAhora = (): Foto => {
+    const el = document.activeElement as HTMLElement | null;
+    const id = el?.dataset?.bloque;
+    return { bloques: serializar(), foco: id ? { id, pos: offsetCaret(el!) } : null };
+  };
+  const apilar = (foto: Foto) => {
+    pilaDeshacer.current.push(foto);
+    if (pilaDeshacer.current.length > 200) pilaDeshacer.current.shift();
+    // Un cambio nuevo hace imposible el «rehacer» de antes, como en todas partes.
+    pilaRehacer.current = [];
+    contarPasos();
+  };
+
+  // ══ LOS DESPLEGABLES CERRADOS, EN EL EDITOR (2026-10-05) ════════════════
+  // Qué desplegables (y títulos plegables) tiene cerrados quien escribe. Es
+  // cosa de la pantalla, no de la página: no se guarda. Lo que ve quien lee
+  // al llegar lo decide `abierto`, que se cambia desde el menú del asa.
+  const [plegados, setPlegados] = useState<Set<string>>(() => new Set());
+  const plegadosRef = useRef(plegados);
+  plegadosRef.current = plegados;
+  const plegar = (bid: string) => setPlegados(p => { const n = new Set(p); if (n.has(bid)) n.delete(bid); else n.add(bid); return n; });
+  /** Abre los desplegables que esconden un bloque. */
+  const abrirAncestros = (bs: Bloque[], bid: string) => {
+    const i = bs.findIndex(x => x.id === bid);
+    if (i < 0) return;
+    let n = bs[i].nivel || 0;
+    const abrir: string[] = [];
+    for (let j = i - 1; j >= 0 && n > 0; j--) {
+      if ((bs[j].nivel || 0) < n) { abrir.push(bs[j].id); n = bs[j].nivel || 0; }
+    }
+    if (abrir.some(a => plegadosRef.current.has(a))) setPlegados(p => { const s = new Set(p); abrir.forEach(a => s.delete(a)); return s; });
+  };
+
+  /** Lo que se ve: todo menos lo que hay dentro de un desplegable cerrado. */
+  const visibles = useMemo(() => {
+    const out: Bloque[] = [];
+    let bajo: number | null = null;
+    for (const b of bloques) {
+      const n = b.nivel || 0;
+      if (bajo !== null && n > bajo) continue;
+      bajo = null;
+      out.push(b);
+      if (esPlegable(b) && plegados.has(b.id)) bajo = n;
+    }
+    return out;
+  }, [bloques, plegados]);
+
   const guardarAhora = useCallback(async (estructura?: Bloque[]) => {
     if (!docId.current || !puedoEditar) return;
     setGuardado('guardando');
@@ -443,7 +523,8 @@ function EditorPagina() {
         title: meta.titulo || 'Documento sin título',
         // Los ajustes van en la misma `config`: si no se mandaran, cada
         // guardado automático los borraría.
-        config: { ...meta.ajustes, bloques: bs, portada: meta.portada || undefined, icono: meta.icono || undefined },
+        // Se guarda como árbol: los hijos dentro de su madre (`aArbol`).
+        config: { ...meta.ajustes, bloques: aArbol(bs), portada: meta.portada || undefined, icono: meta.icono || undefined },
       }),
     }).catch(() => null);
     setGuardado(r?.ok ? 'sí' : 'pendiente');
@@ -543,9 +624,10 @@ function EditorPagina() {
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
     if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web') textosRef.current[nuevo.id] = '';
     setBloques(bs => {
-      const i = tras ? finDeFila(bs, bs.findIndex(b => b.id === tras)) : -1;
+      // Sin `tras`, arriba del todo (era así: `-1 + 1`).
+      const { pos, nivel } = tras ? puntoInsercion(bs, tras) : { pos: 0, nivel: 0 };
       const copia = [...bs];
-      copia.splice(i + 1, 0, nuevo);
+      copia.splice(pos, 0, { ...nuevo, nivel: nivel || undefined });
       return copia;
     });
     setMenuAbierto(null);
@@ -560,7 +642,8 @@ function EditorPagina() {
       const copia = bs.filter(b => b.id !== bid);
       const anterior = copia[Math.max(0, i - 1)];
       if (anterior) { setFocoId(anterior.id); setBloqueActivo(anterior.id); }
-      return copia.length ? copia : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
+      // Sus hijos, si tenía, se quedan: pasan a ser del bloque de encima.
+      return copia.length ? normalizarNiveles(copia) : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
     });
     delete textosRef.current[bid];
     delete filasRef.current[bid];
@@ -596,13 +679,100 @@ function EditorPagina() {
     });
     const cuenta: Record<string, number> = {};
     for (const x of tramos) if (x.grupo) cuenta[x.grupo] = (cuenta[x.grupo] || 0) + 1;
-    return tramos.map(x => (x.grupo && cuenta[x.grupo] < 2 ? { ...x, grupo: undefined } : x));
+    return normalizarNiveles(tramos.map(x => (x.grupo && cuenta[x.grupo] < 2 ? { ...x, grupo: undefined } : x)));
   };
 
-  const guardarHistoria = () => {
-    historia.current.push(serializar());
-    if (historia.current.length > 50) historia.current.shift();
+  // ══ BLOQUES DENTRO DE BLOQUES, EN LA LISTA PLANA (2026-10-05) ═══════════
+  // Ver `bloques` en `utils/bloques.ts`. Los hijos de `bs[i]` son los que van
+  // justo detrás con más `nivel`; `finSubarbol` dice dónde acaban.
+
+  /** ¿Lo nuevo que se ponga «detrás» de este bloque va DENTRO de él? Sí si
+   *  está abierto y tiene hijos a la vista, o si es un desplegable abierto
+   *  (aunque esté vacío): es lo que se ve justo debajo, como en Notion. */
+  const vaDentro = (bs: Bloque[], i: number) => {
+    const b = bs[i];
+    if (!b || b.grupo || plegadosRef.current.has(b.id)) return false;
+    return esPlegable(b) || ((bs[i + 1]?.nivel || 0) > (b.nivel || 0));
   };
+
+  /** Dónde va (posición y sangría) un bloque nuevo puesto «detrás» de `tras`. */
+  const puntoInsercion = (bs: Bloque[], tras: string | null) => {
+    const i = tras ? bs.findIndex(b => b.id === tras) : -1;
+    if (i < 0) return { pos: bs.length, nivel: 0 };
+    if (vaDentro(bs, i)) return { pos: i + 1, nivel: (bs[i].nivel || 0) + 1 };
+    return { pos: finSubarbol(bs, finDeFila(bs, i)) + 1, nivel: bs[i].nivel || 0 };
+  };
+
+  /** Tab (+1) y ⇧Tab (−1): el bloque se mueve con todos sus hijos. Como en
+   *  Notion, al quitar sangría los hermanos que tenía debajo pasan a ser
+   *  hijos suyos (en la lista plana sale solo: siguen con más sangría). */
+  const sangrar = (ids: string[], delta: 1 | -1) => {
+    setBloques(bs => {
+      let lista = [...bs];
+      // Si una madre y su hija van marcadas, la hija ya viaja con su madre.
+      const marcados = new Set(ids);
+      const orden = lista.map((x, i) => ({ x, i })).filter(({ x }) => marcados.has(x.id));
+      const hechos = new Set<string>();
+      for (const { x } of orden) {
+        const i = lista.findIndex(y => y.id === x.id);
+        const n = lista[i].nivel || 0;
+        // ¿Lo ha movido ya su madre?
+        let madreMarcada = false;
+        for (let j = i - 1, m = n; j >= 0 && m > 0; j--) {
+          if ((lista[j].nivel || 0) < m) { if (hechos.has(lista[j].id)) { madreMarcada = true; break; } m = lista[j].nivel || 0; }
+        }
+        if (madreMarcada) continue;
+        // En columnas no se sangra: una columna lleva un bloque.
+        if (lista[i].grupo) continue;
+        if (delta === 1 && (i === 0 || (lista[i - 1].nivel || 0) < n)) continue;   // no tiene hermano encima
+        if (delta === -1 && n === 0) continue;
+        const fin = finSubarbol(lista, i);
+        lista = lista.map((y, k) => (k >= i && k <= fin ? { ...y, nivel: ((y.nivel || 0) + delta) || undefined } : y));
+        hechos.add(x.id);
+        // Sangrar dentro de un desplegable cerrado lo esconde: se abre.
+        if (delta === 1) {
+          for (let j = i - 1; j >= 0; j--) if ((lista[j].nivel || 0) === n) { if (plegadosRef.current.has(lista[j].id)) plegar(lista[j].id); break; }
+        }
+      }
+      return hechos.size ? normalizarNiveles(lista) : bs;
+    });
+    programarGuardado();
+  };
+
+  // Del estado y no de `bloquesRef`: se usa al pintar, y el ref se pone al
+  // día DESPUÉS del primer pintado.
+  const tieneHijos = (b: Bloque) => {
+    const i = bloques.findIndex(x => x.id === b.id);
+    return i >= 0 && (bloques[i + 1]?.nivel || 0) > (b.nivel || 0);
+  };
+
+  /** Un párrafo nuevo, el primero dentro de `bid`, con el cursor en él. */
+  const meterDentro = (bid: string) => {
+    const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'parrafo', texto: '' };
+    textosRef.current[nuevo.id] = '';
+    setPlegados(p => { if (!p.has(bid)) return p; const s = new Set(p); s.delete(bid); return s; });
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === bid);
+      if (i < 0) return bs;
+      const copia = [...bs];
+      copia.splice(i + 1, 0, { ...nuevo, nivel: (bs[i].nivel || 0) + 1 });
+      return copia;
+    });
+    setBloqueActivo(nuevo.id);
+    setFocoId(nuevo.id);
+    programarGuardado();
+  };
+
+  /** Los ids de un bloque y de todo lo que lleva dentro. */
+  const idsSubarbol = (bs: Bloque[], bid: string) => {
+    const i = bs.findIndex(x => x.id === bid);
+    return i < 0 ? [] : bs.slice(i, finSubarbol(bs, i) + 1).map(x => x.id);
+  };
+
+  /** Lo que antes hacía la foto a mano: ahora la foto la hace sola el efecto
+   *  de `bloques`. Aquí sólo se cierra el grupo de teclas, para que lo que
+   *  viene después sea un paso aparte. */
+  const guardarHistoria = () => { grupoTexto.current = null; };
 
   const avisar = (texto: string) => {
     setAviso(texto);
@@ -610,24 +780,56 @@ function EditorPagina() {
     avisoTimer.current = setTimeout(() => setAviso(null), 6000);
   };
 
-  const deshacer = () => {
-    const antes = historia.current.pop();
-    if (!antes) return;
-    for (const x of antes) {
+  /** Pone una foto en la página: estructura, textos y dónde estaba el cursor. */
+  const restaurar = (foto: Foto) => {
+    for (const x of foto.bloques) {
       if (x.texto !== undefined) textosRef.current[x.id] = x.texto;
-      if (x.filas) filasRef.current[x.id] = x.filas;
+      if (x.filas) filasRef.current[x.id] = x.filas.map(f => [...f]);
     }
-    setBloques(antes);
-    setAviso(null);
+    sinRegistrar.current = true;
+    grupoTexto.current = null;
+    setRevision(r => r + 1);
+    setBloques(foto.bloques.map(x => ({ ...x })));
+    setBarra(null);
+    if (foto.foco && foto.bloques.some(x => x.id === foto.foco!.id)) {
+      // Si el bloque quedó dentro de un desplegable cerrado, se abre: el
+      // cursor tiene que verse donde está el cambio.
+      abrirAncestros(foto.bloques, foto.foco.id);
+      setBloqueActivo(foto.foco.id);
+      posicionCaret.current = foto.foco.pos;
+      setFocoId(foto.foco.id);
+    }
     programarGuardado();
+  };
+
+  const deshacer = () => {
+    const foto = pilaDeshacer.current.pop();
+    if (!foto) return;
+    pilaRehacer.current.push(fotoAhora());
+    restaurar(foto);
+    setAviso(null);
+    contarPasos();
+  };
+
+  const rehacer = () => {
+    const foto = pilaRehacer.current.pop();
+    if (!foto) return;
+    pilaDeshacer.current.push(fotoAhora());
+    restaurar(foto);
+    contarPasos();
   };
 
   const borrarBloque = (bid: string) => {
     guardarHistoria();
     setMenuAsa(null);
+    // Con lo que lleva dentro, como en Notion: borrar un desplegable no deja
+    // su contenido suelto por la página.
+    const fuera = idsSubarbol(bloquesRef.current, bid);
+    for (const x of fuera.slice(1)) { delete textosRef.current[x]; delete filasRef.current[x]; }
+    if (fuera.length > 1) setBloques(bs => bs.filter(x => !fuera.slice(1).includes(x.id)));
     eliminar(bid);
     setBloques(bs => normalizarGrupos(bs));
-    avisar('Bloque borrado');
+    avisar(fuera.length > 1 ? `Bloque borrado (con ${fuera.length - 1} dentro)` : 'Bloque borrado');
   };
 
   const duplicar = (bid: string) => {
@@ -637,20 +839,24 @@ function EditorPagina() {
     setBloques(bs => {
       const i = bs.findIndex(x => x.id === bid);
       if (i < 0) return bs;
-      const o = bs[i];
-      const copia: Bloque = {
-        ...o, id: nuevoId, grupo: undefined,
-        texto: o.texto !== undefined || textosRef.current[o.id] !== undefined ? (textosRef.current[o.id] ?? o.texto ?? '') : undefined,
-        filas: filasRef.current[o.id] ? filasRef.current[o.id].map(f => [...f]) : o.filas,
-      };
-      if (copia.texto !== undefined) textosRef.current[nuevoId] = copia.texto;
-      if (copia.filas) filasRef.current[nuevoId] = copia.filas;
+      // El bloque y todo lo que lleva dentro, cada uno con su id nuevo.
+      const trozo = bs.slice(i, finSubarbol(bs, i) + 1);
+      const copias: Bloque[] = trozo.map((o, k) => {
+        const nid = k === 0 ? nuevoId : nuevoIdBloque();
+        const c: Bloque = {
+          ...o, id: nid, grupo: undefined,
+          texto: o.texto !== undefined || textosRef.current[o.id] !== undefined ? (textosRef.current[o.id] ?? o.texto ?? '') : undefined,
+          filas: filasRef.current[o.id] ? filasRef.current[o.id].map(f => [...f]) : o.filas,
+        };
+        if (c.texto !== undefined) textosRef.current[nid] = c.texto;
+        if (c.filas) filasRef.current[nid] = c.filas;
+        return c;
+      });
       // En columnas, la copia va debajo de toda la fila: una columna aquí no
       // apila bloques dentro.
-      let j = i;
-      while (o.grupo && bs[j + 1]?.grupo === o.grupo) j++;
+      const j = finSubarbol(bs, finDeFila(bs, i));
       const lista = [...bs];
-      lista.splice(j + 1, 0, copia);
+      lista.splice(j + 1, 0, ...copias);
       return lista;
     });
     setBloqueActivo(nuevoId);
@@ -672,27 +878,48 @@ function EditorPagina() {
   };
 
   /** Mueve un bloque encima, debajo o a un lado de otro. */
+  /** Mueve un bloque —CON TODO LO QUE LLEVA DENTRO— encima, debajo o a un
+   *  lado de otro. */
   const mover = (bid: string, d: NonNullable<typeof destino>) => {
     if (bid === d.id) return;
     guardarHistoria();
     setBloques(bs => {
-      const movido = bs.find(x => x.id === bid);
-      if (!movido) return bs;
-      let lista = normalizarGrupos(bs.filter(x => x.id !== bid));
+      const i0 = bs.findIndex(x => x.id === bid);
+      if (i0 < 0) return bs;
+      const fin0 = finSubarbol(bs, i0);
+      const trozo = bs.slice(i0, fin0 + 1);
+      // Dentro de sí mismo no se puede.
+      if (trozo.some(x => x.id === d.id)) return bs;
+      const movido = trozo[0];
+      const n0 = movido.nivel || 0;
+      const lateral = d.lado === 'izquierda' || d.lado === 'derecha';
+      // A un lado, en columnas, va solo: una columna lleva un bloque. Sus
+      // hijos se quedan donde estaban, un nivel más arriba.
+      const hijosSueltos = lateral ? trozo.slice(1).map(x => ({ ...x, nivel: ((x.nivel || 0) - 1) || undefined })) : [];
+      let lista = normalizarGrupos([...bs.slice(0, i0), ...hijosSueltos, ...bs.slice(fin0 + 1)]);
       const t = lista.findIndex(x => x.id === d.id);
       if (t < 0) return bs;
       const obj = lista[t];
-      if (d.lado === 'izquierda' || d.lado === 'derecha') {
+      const nObj = obj.nivel || 0;
+      if (lateral) {
         const g = obj.grupo || `G${nuevoIdBloque()}`;
         lista = lista.map(x => (x.id === obj.id ? { ...x, grupo: g } : x));
-        lista.splice(d.lado === 'izquierda' ? t : t + 1, 0, { ...movido, grupo: g });
+        lista.splice(d.lado === 'izquierda' ? t : t + 1, 0, { ...movido, grupo: g, nivel: nObj || undefined });
       } else {
         // Encima o debajo de un bloque en columnas es encima o debajo de TODA
         // la fila: meterlo en medio partiría las columnas en dos.
         let i = t, j = t;
         while (obj.grupo && lista[i - 1]?.grupo === obj.grupo) i--;
         while (obj.grupo && lista[j + 1]?.grupo === obj.grupo) j++;
-        lista.splice(d.lado === 'arriba' ? i : j + 1, 0, { ...movido, grupo: undefined });
+        // Debajo de un desplegable abierto es DENTRO, el primero: es lo que
+        // se ve justo debajo. Debajo de otro bloque, detrás de sus hijos.
+        let pos: number, nivel: number;
+        if (d.lado === 'arriba') { pos = i; nivel = nObj; }
+        else if (vaDentro(lista, t)) { pos = t + 1; nivel = nObj + 1; }
+        else { pos = finSubarbol(lista, j) + 1; nivel = nObj; }
+        lista.splice(pos, 0, ...trozo.map((x, k) => ({
+          ...x, grupo: k === 0 ? undefined : x.grupo, nivel: ((x.nivel || 0) - n0 + nivel) || undefined,
+        })));
       }
       return normalizarGrupos(lista);
     });
@@ -793,7 +1020,9 @@ function EditorPagina() {
     }).catch(() => null);
     const j = r ? await r.json().catch(() => ({})) : {};
     if (!r?.ok) { fallar(j.error || 'No se ha podido llevar a esa página.'); return; }
-    setBloques(bs => bs.filter(x => x.id !== bid));
+    // Con lo que llevaba dentro: el servidor se lo ha llevado entero.
+    const fuera = idsSubarbol(bloquesRef.current, bid);
+    setBloques(bs => normalizarNiveles(bs.filter(x => !fuera.includes(x.id))));
     // Con el bloque, para que la página de destino, si está abierta en otra
     // pestaña, lo ponga en su pantalla y no lo borre al guardar.
     const destinoNombre = document.querySelector(`[data-arbol-destino="${pid}"]`)?.textContent?.replace('Meter dentro', '').trim() || 'la otra página';
@@ -829,9 +1058,9 @@ function EditorPagina() {
     if (!r.ok || !g.id) { fallar(g.error || 'No se pudo crear la pizarra.'); return; }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'pizarra', entityId: g.id, pubTitulo: g.title };
     setBloques(bs => {
-      const i = tras ? finDeFila(bs, bs.findIndex(x => x.id === tras)) : bs.length - 1;
+      const { pos, nivel } = puntoInsercion(bs, tras);
       const copia = [...bs];
-      copia.splice(i + 1, 0, nuevo);
+      copia.splice(pos, 0, { ...nuevo, nivel: nivel || undefined });
       return copia;
     });
     programarGuardado();
@@ -849,29 +1078,89 @@ function EditorPagina() {
     if (!r.ok || !j.id) { fallar(j.error || 'No se pudo crear la página.'); return; }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.id, pubTitulo: 'Sin título' };
     const lista = serializar();
-    const i = tras ? finDeFila(lista, lista.findIndex(x => x.id === tras)) : lista.length - 1;
-    lista.splice(i + 1, 0, nuevo);
+    const { pos, nivel } = puntoInsercion(lista, tras);
+    lista.splice(pos, 0, { ...nuevo, nivel: nivel || undefined });
     setBloques(lista);
     await guardarAhora(lista);
     navigate(`/paginas/${j.id}`);
   };
 
-  // ⌘Z fuera de un texto deshace lo último (borrar, mover, duplicar…). Dentro
-  // de un bloque manda el navegador, que sabe deshacer lo tecleado.
+  // ⌘Z deshace y ⌘⇧Z (o ⌘Y) rehace, estés escribiendo en un bloque o no.
+  // Lo que se queda fuera es lo que tiene su propia historia: el título y
+  // los campos de texto (el navegador), y una pizarra incrustada (la suya).
   useEffect(() => {
-    const tecla = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z' || e.shiftKey) return;
+    const esMio = () => {
       const activo = document.activeElement as HTMLElement | null;
-      if (activo && (activo.isContentEditable || activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA')) return;
-      // Dentro de una pizarra, ⌘Z deshace en la pizarra, no en la página.
-      if (document.querySelector('[data-pizarra-activa]')) return;
-      if (!historia.current.length) return;
+      if (document.querySelector('[data-pizarra-activa]')) return false;
+      if (activo && (activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA' || activo.tagName === 'SELECT')) return false;
+      if (activo?.isContentEditable && !docRef.current?.contains(activo)) return false;
+      return true;
+    };
+    const tecla = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      const k = e.key.toLowerCase();
+      const quiere = k === 'z' ? (e.shiftKey ? 'rehacer' : 'deshacer') : k === 'y' && !e.shiftKey ? 'rehacer' : null;
+      if (!quiere || !puedoEditar || !esMio()) return;
       e.preventDefault();
-      deshacer();
+      if (quiere === 'deshacer') deshacer(); else rehacer();
+    };
+    // «Deshacer» del menú Edición del navegador, o el gesto de agitar: llega
+    // como `beforeinput` y no como tecla.
+    const antes = (e: InputEvent) => {
+      if (e.inputType !== 'historyUndo' && e.inputType !== 'historyRedo') return;
+      if (!docRef.current?.contains(e.target as Node)) return;
+      e.preventDefault();
+      if (e.inputType === 'historyUndo') deshacer(); else rehacer();
     };
     window.addEventListener('keydown', tecla);
-    return () => window.removeEventListener('keydown', tecla);
+    window.addEventListener('beforeinput', antes as any);
+    return () => { window.removeEventListener('keydown', tecla); window.removeEventListener('beforeinput', antes as any); };
   });
+
+  // EL GRUPO DE TECLAS (ver «DESHACER Y REHACER» arriba). `beforeinput` llega
+  // ANTES de que la letra entre: es el momento de la foto de «antes», con el
+  // cursor todavía donde estaba. Y `input`, que en `document` llega DESPUÉS de
+  // que el bloque haya apuntado su texto, renueva el presente.
+  useEffect(() => {
+    if (!puedoEditar) return;
+    const deQuien = (t: EventTarget | null) => {
+      const el = (t as HTMLElement | null)?.closest?.('[data-bloque],[data-celda-de]') as HTMLElement | null;
+      if (!el || !docRef.current?.contains(el)) return null;
+      return el.dataset.bloque || el.dataset.celdaDe || null;
+    };
+    const antes = (e: InputEvent) => {
+      if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') return;
+      const id = deQuien(e.target);
+      if (!id) return;
+      const ahora = Date.now();
+      const g = grupoTexto.current;
+      const espacio = e.data === ' ' || e.inputType === 'insertParagraph';
+      const sigue = g && g.id === id && ahora - g.ultima < 1000 && !(espacio && ahora - g.desde > 4000);
+      if (sigue) { g!.ultima = ahora; return; }
+      apilar(fotoAhora());
+      grupoTexto.current = { id, desde: ahora, ultima: ahora };
+    };
+    const despues = (e: Event) => { if (deQuien(e.target)) presente.current = fotoAhora(); };
+    document.addEventListener('beforeinput', antes as any);
+    document.addEventListener('input', despues);
+    return () => { document.removeEventListener('beforeinput', antes as any); document.removeEventListener('input', despues); };
+  });
+
+  // Cada cambio de estructura apila la foto de antes —que es `presente`—, sea
+  // cual sea la función que lo hizo. Así ninguna puede olvidarse de hacerlo.
+  useEffect(() => {
+    if (sinRegistrar.current || generando || !presente.current) {
+      sinRegistrar.current = false;
+      presente.current = fotoAhora();
+      return;
+    }
+    const ahora = fotoAhora();
+    if (JSON.stringify(ahora.bloques) === JSON.stringify(presente.current.bloques)) return;
+    apilar(presente.current);
+    grupoTexto.current = null;
+    presente.current = ahora;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bloques]);
 
   // MOVIDA DESDE EL MENÚ (2026-10-05, `ArbolPaginas.tsx`). El servidor ya ha
   // cambiado los bloques; aquí se pone igual lo que hay en pantalla, porque el
@@ -892,8 +1181,13 @@ function EditorPagina() {
     const bloque = (e: Event) => {
       const d = (e as CustomEvent).detail || {};
       if (!d.bloque || !docId.current) return;
-      if (d.desde === docId.current) setBloques(bs => bs.filter(b => b.id !== d.bloque.id));
-      if (d.a === docId.current) setBloques(bs => (bs.some(b => b.id === d.bloque.id) ? bs : [...bs, d.bloque]));
+      if (d.desde === docId.current) setBloques(bs => { const fuera = idsSubarbol(bs, d.bloque.id); return normalizarNiveles(bs.filter(b => !fuera.includes(b.id))); });
+      if (d.a === docId.current) {
+        // Puede traer hijos (un desplegable con lo suyo): se aplana.
+        const llegan = aplanar([d.bloque]);
+        for (const x of llegan) if (x.texto !== undefined) textosRef.current[x.id] = x.texto;
+        setBloques(bs => (bs.some(b => b.id === d.bloque.id) ? bs : [...bs, ...llegan]));
+      }
     };
     window.addEventListener('humanity:bloque-movido', bloque);
     return () => { window.removeEventListener('humanity:pagina-movida', oir); window.removeEventListener('humanity:bloque-movido', bloque); };
@@ -936,9 +1230,9 @@ function EditorPagina() {
     };
     setBloques(bs => {
       if (buscadorPub === '') return [...bs, nuevo];
-      const i = finDeFila(bs, bs.findIndex(b => b.id === buscadorPub));
+      const { pos, nivel } = puntoInsercion(bs, buscadorPub);
       const copia = [...bs];
-      copia.splice(i + 1, 0, nuevo);
+      copia.splice(pos, 0, { ...nuevo, nivel: nivel || undefined });
       return copia;
     });
     setBuscadorPub(null);
@@ -996,7 +1290,7 @@ function EditorPagina() {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
-      const nuevos: Bloque[] = j.bloques || [];
+      const nuevos: Bloque[] = aplanar(j.bloques || []);
       for (const n of nuevos) if (n.texto !== undefined) textosRef.current[n.id] = n.texto;
       setBloques(bs => [...bs, ...nuevos]);
       programarGuardado();
@@ -1065,6 +1359,15 @@ function EditorPagina() {
     // ⌘D duplica el bloque, como en Notion.
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicar(b.id); return; }
 
+    // TAB SANGRA Y ⇧TAB QUITA LA SANGRÍA (2026-10-05), en cualquier bloque.
+    // En el código, Tab es un tabulador: ahí se escribe código.
+    if (e.key === 'Tab' && !(barra && barra.bloque === b.id) && b.tipo !== 'codigo') {
+      e.preventDefault();
+      guardarHistoria();
+      sangrar([b.id], e.shiftKey ? -1 : 1);
+      return;
+    }
+
     // ⌘A SELECCIONA ESTE BLOQUE, NO EL DOCUMENTO ENTERO (2026-08-20). El
     // «seleccionar todo» del navegador se lleva por delante media página; al
     // escribir encima, el navegador borraba nodos de OTROS bloques que React
@@ -1106,8 +1409,11 @@ function EditorPagina() {
       e.preventDefault();
       const heredan: TipoBloque[] = ['lista', 'numerada', 'tarea'];
       const texto = el.textContent || '';
-      // Enter en un ítem vacío de lista lo convierte en párrafo, como Notion.
+      // Enter en un ítem vacío de lista: si está sangrado sale un nivel, y si
+      // no, pasa a párrafo. Como Notion.
       if (heredan.includes(b.tipo) && !texto.trim()) {
+        guardarHistoria();
+        if (b.nivel) { sangrar([b.id], -1); return; }
         setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: 'parrafo' } : x));
         programarGuardado();
         return;
@@ -1120,10 +1426,14 @@ function EditorPagina() {
       textosRef.current[b.id] = antes;
       const nuevo: Bloque = { id: nuevoIdBloque(), tipo: heredan.includes(b.tipo) ? b.tipo : 'parrafo', texto: despues };
       textosRef.current[nuevo.id] = despues;
+      guardarHistoria();
       setBloques(bs => {
-        const i = finDeFila(bs, bs.findIndex(x => x.id === b.id));
+        // Detrás de un desplegable abierto (o de un bloque con hijos) el
+        // nuevo va DENTRO, el primero; si no, de hermano, con su sangría.
+        const { pos, nivel } = puntoInsercion(bs, b.id);
+        const dentro = nivel > (bs.find(x => x.id === b.id)?.nivel || 0);
         const copia = bs.map(x => x.id === b.id ? { ...x, texto: antes } : x);
-        copia.splice(i + 1, 0, nuevo);
+        copia.splice(pos, 0, { ...nuevo, tipo: dentro && !heredan.includes(b.tipo) ? 'parrafo' : nuevo.tipo, nivel: nivel || undefined });
         return copia;
       });
       setBloqueActivo(nuevo.id);
@@ -1132,25 +1442,51 @@ function EditorPagina() {
       programarGuardado();
     } else if (e.key === 'Backspace') {
       const texto = el.textContent || '';
+      const alPrincipio = !texto || offsetCaret(el) === 0;
+      // RETROCESO AL PRINCIPIO, POR PASOS, COMO NOTION (2026-10-05):
+      //  1. una lista, un título, una cita… vuelve a ser texto normal;
+      //  2. un bloque sangrado sale un nivel;
+      //  3. y sólo entonces se junta con el de encima (o se borra si está vacío).
+      const VUELVEN: TipoBloque[] = ['lista', 'numerada', 'tarea', 'cita', 'titulo1', 'titulo2', 'titulo3', 'desplegable'];
+      if (alPrincipio && VUELVEN.includes(b.tipo) && !window.getSelection()?.toString()) {
+        e.preventDefault();
+        guardarHistoria();
+        setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: 'parrafo', plegable: undefined, hecho: undefined } : x));
+        posicionCaret.current = 0;
+        setFocoId(b.id);
+        programarGuardado();
+        return;
+      }
+      if (alPrincipio && b.nivel && !window.getSelection()?.toString()) {
+        e.preventDefault();
+        guardarHistoria();
+        sangrar([b.id], -1);
+        posicionCaret.current = 0;
+        setFocoId(b.id);
+        return;
+      }
       if (!texto) {
         e.preventDefault();
+        guardarHistoria();
         eliminar(b.id);
         return;
       }
       // Backspace con el cursor al principio FUSIONA con el bloque de texto
-      // anterior, dejando el cursor en la juntura (como Notion).
+      // anterior, dejando el cursor en la juntura (como Notion). El de
+      // «encima» es el que se VE encima: lo de un desplegable cerrado no.
       if (offsetCaret(el) === 0) {
-        const i = bloques.findIndex(x => x.id === b.id);
-        const anterior = bloques[i - 1];
+        const i = visibles.findIndex(x => x.id === b.id);
+        const anterior = visibles[i - 1];
         if (anterior && ES_TEXTO.includes(anterior.tipo)) {
           e.preventDefault();
           const textoAnterior = textosRef.current[anterior.id] ?? anterior.texto ?? '';
           const fusionado = textoAnterior + texto;
+          guardarHistoria();
           textosRef.current[anterior.id] = fusionado;
           delete textosRef.current[b.id];
-          setBloques(bs => bs
+          setBloques(bs => normalizarNiveles(bs
             .map(x => x.id === anterior.id ? { ...x, texto: fusionado } : x)
-            .filter(x => x.id !== b.id));
+            .filter(x => x.id !== b.id)));
           setBloqueActivo(anterior.id);
           posicionCaret.current = textoAnterior.length;
           setFocoId(anterior.id);
@@ -1172,9 +1508,17 @@ function EditorPagina() {
     for (const [re, tipo] of reglas) {
       if (re.test(texto)) {
         const limpio = texto.replace(re, '');
+        // Deshacer un atajo devuelve lo tecleado («# » incluido), como en
+        // Notion: la foto de antes lleva el texto en crudo.
+        const antes = fotoAhora();
+        antes.bloques = antes.bloques.map(x => (x.id === b.id ? { ...x, texto } : x));
+        apilar(antes);
+        sinRegistrar.current = true;
+        grupoTexto.current = null;
         textosRef.current[b.id] = limpio;
         setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: limpio } : x));
-        posicionCaret.current = 0;
+        // El cursor, donde estaba menos lo que se ha comido el atajo.
+        posicionCaret.current = Math.max(0, offsetCaret(el) - (texto.length - limpio.length));
         setFocoId(b.id);
         programarGuardado();
         return;
@@ -1217,16 +1561,21 @@ function EditorPagina() {
    *  Con `b = null` van al final del documento: es lo que hace falta cuando se
    *  pega sin haber pinchado en ninguna línea. */
   const insertarBloques = useCallback((b: Bloque | null, nuevos: Bloque[], vacio: boolean) => {
+    // Lo pegado puede venir anidado (una lista con sangría): se aplana.
+    nuevos = aplanar(nuevos);
     for (const n of nuevos) if (n.texto !== undefined) textosRef.current[n.id] = n.texto;
     setBloques(bs => {
       if (!b) return [...bs, ...nuevos];
       const i = bs.findIndex(x => x.id === b.id);
+      if (i < 0) return [...bs, ...nuevos];
       const copia = [...bs];
-      // Sobre un bloque vacío lo sustituyen (y heredan su columna); con
-      // texto, van detrás de la fila.
+      // Sobre un bloque vacío lo sustituyen (y heredan su columna y su
+      // sangría); con texto, van detrás, donde iría un bloque nuevo.
       if (vacio && b.grupo && nuevos.length === 1) nuevos = [{ ...nuevos[0], grupo: b.grupo }];
-      copia.splice(vacio ? i : finDeFila(bs, i) + 1, vacio ? 1 : 0, ...nuevos);
-      return copia;
+      const { pos, nivel } = vacio ? { pos: i, nivel: bs[i].nivel || 0 } : puntoInsercion(bs, b.id);
+      const conNivel = nuevos.map(n => ({ ...n, nivel: ((n.nivel || 0) + nivel) || undefined }));
+      copia.splice(pos, vacio ? 1 : 0, ...conNivel);
+      return normalizarNiveles(copia);
     });
     if (b && vacio) delete textosRef.current[b.id];
     const ultimo = nuevos[nuevos.length - 1];
@@ -1466,10 +1815,11 @@ function EditorPagina() {
 
   const eliminarSeleccion = useCallback(() => {
     if (!seleccion.length) return;
-    historia.current.push(serializar());
     setAviso(seleccion.length === 1 ? 'Bloque borrado' : `${seleccion.length} bloques borrados`);
     setBloques(bs => {
-      const restantes = normalizarGrupos(bs.filter(x => !seleccion.includes(x.id)));
+      // Lo que va dentro de un bloque marcado se va con él.
+      const fuera = new Set(seleccion.flatMap(s => idsSubarbol(bs, s)));
+      const restantes = normalizarGrupos(bs.filter(x => !fuera.has(x.id)));
       return restantes.length ? restantes : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
     });
     for (const id of seleccion) { delete textosRef.current[id]; delete filasRef.current[id]; }
@@ -1487,6 +1837,8 @@ function EditorPagina() {
       if (activo && (activo.isContentEditable || activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA')) return;
       if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); eliminarSeleccion(); }
       else if (e.key === 'Escape') setSeleccion([]);
+      // Tab con varios bloques marcados los sangra todos a la vez.
+      else if (e.key === 'Tab') { e.preventDefault(); guardarHistoria(); sangrar(seleccion, e.shiftKey ? -1 : 1); }
     };
     window.addEventListener('keydown', tecla);
     return () => window.removeEventListener('keydown', tecla);
@@ -1497,7 +1849,11 @@ function EditorPagina() {
   // concreto (partir con Enter deja el cursor al INICIO del bloque nuevo;
   // fusionar con Backspace lo deja en la juntura).
   const posicionCaret = useRef<number | null>(null);
-  useEffect(() => {
+  // `useLayoutEffect` y no `useEffect` (2026-10-05): el cursor tiene que
+  // estar en su sitio ANTES de que el navegador atienda la tecla siguiente.
+  // Con `useEffect`, al escribir deprisa «- Uno», «Uno» entraba en el bloque
+  // y DESPUÉS el cursor saltaba al principio, y el Enter siguiente partía mal.
+  useLayoutEffect(() => {
     if (!focoId) return;
     const el = document.querySelector<HTMLElement>(`[data-bloque="${focoId}"]`);
     if (el) {
@@ -1593,6 +1949,21 @@ function EditorPagina() {
   const editable = puedoEditar && !generando;
 
   // Sin barra flotante (2026-10-02) ya no hay que reservarle hueco abajo.
+
+  /** Lo que el menú ⋮⋮ ofrece además según el bloque (ver `OpcionExtra`). */
+  const opcionesExtra = (b: Bloque): OpcionExtra[] => {
+    const out: OpcionExtra[] = [];
+    if (esPlegable(b)) {
+      out.push({
+        icon: ChevronDown, label: 'Abierto al publicar', activo: b.abierto === true,
+        onClick: () => cambiarBloque(b.id, { abierto: b.abierto ? undefined : true }),
+      });
+    }
+    // Sangrar también desde el menú: en un teléfono no hay tecla Tab.
+    out.push({ icon: ChevronRight, label: 'Meter un nivel', atajo: 'Tab', onClick: () => { setMenuAsa(null); sangrar([b.id], 1); } });
+    if (b.nivel) out.push({ icon: ArrowLeft, label: 'Sacar un nivel', atajo: '⇧Tab', onClick: () => { setMenuAsa(null); sangrar([b.id], -1); } });
+    return out;
+  };
 
   /** Dónde se inserta lo nuevo: tras el bloque activo, o al final. */
   const anclaInsercion = () => bloqueActivo ?? (bloques.length ? bloques[bloques.length - 1].id : null);
@@ -1850,7 +2221,7 @@ function EditorPagina() {
                       // `inicial` en vez de pintar el texto como hijo: es lo que
                       // impide que React reescriba la celda mientras escribes y
                       // te mande el cursor al principio. Ver `CeldaEditable`.
-                      <CeldaEditable key={ci} inicial={celda}
+                      <CeldaEditable key={`${ci}-${revision}`} inicial={celda} data-celda-de={b.id}
                         className={cn('border border-slate-200 px-2.5 py-1.5 align-top',
                           fi === 0 ? 'bg-slate-50 font-bold text-slate-800' : 'text-slate-600')}
                         contentEditable={editable} suppressContentEditableWarning
@@ -1984,7 +2355,7 @@ function EditorPagina() {
       /** El cuerpo del bloque. Cuando se está editando NO lleva hijos de
        *  React (ver `BloqueEditable`); cuando solo se lee, sí. */
       const cuerpo = (extra?: string) => esActivo
-        ? <BloqueEditable key={`${b.id}-edit`} inicial={texto} vivo={b.tipo !== 'codigo'} {...comun} className={cn(comun.className, extra)} />
+        ? <BloqueEditable key={`${b.id}-edit-${revision}`} inicial={texto} vivo={b.tipo !== 'codigo'} {...comun} className={cn(comun.className, extra)} />
         : <div key={`${b.id}-ver`} {...comun} className={cn(comun.className, extra)}><Inline texto={texto} /></div>;
 
       if (b.tipo === 'cita') {
@@ -2023,20 +2394,22 @@ function EditorPagina() {
         );
       }
 
+      // ── EL DESPLEGABLE, CON SUS BLOQUES DENTRO (2026-10-05) ──────────────
+      // Lo de dentro son los bloques que van detrás con más sangría (ver
+      // «BLOQUES DENTRO DE BLOQUES»). La flecha lo abre y lo cierra aquí, en
+      // el editor; cómo lo encuentra quien lee lo dice `abierto` (menú ⋮⋮).
       if (b.tipo === 'desplegable') {
         return (
-          <div className="border-l-2 border-slate-200 pl-3">
-            <div className="flex items-start gap-1.5">
-              <ChevronRight className="w-4 h-4 mt-1 shrink-0 text-slate-400" />
+          <div>
+            <div className="flex items-start gap-1">
+              <FlechaPlegar abierto={!plegados.has(b.id)} onClick={() => plegar(b.id)} />
               {cuerpo('flex-1 min-w-0 font-bold')}
             </div>
-            {/* SE DICE LO QUE VA A PASAR AL PUBLICAR, porque aquí no se puede
-                enseñar: en el editor todo está abierto para poder escribirlo.
-                Sin esta línea, quien lo pone no entiende para qué sirve. */}
-            {editable && (
-              <p className="mt-1 text-[11px] text-slate-400">
-                Al publicarla, esto se verá cerrado y se abre al pulsarlo.
-              </p>
+            {editable && !plegados.has(b.id) && !tieneHijos(b) && (
+              <button type="button" onClick={() => meterDentro(b.id)}
+                className="ml-7 mt-0.5 block text-left text-[13px] text-slate-400 hover:text-slate-600">
+                Desplegable vacío. Pulsa para escribir dentro, o arrastra bloques aquí.
+              </button>
             )}
           </div>
         );
@@ -2072,15 +2445,22 @@ function EditorPagina() {
         return <pre className="bg-slate-900 rounded-xl px-4 py-3 overflow-x-auto">{cuerpo()}</pre>;
       }
       if (b.tipo === 'lista' || b.tipo === 'numerada') {
-        // El número real se calcula contando los hermanos seguidos del mismo tipo.
+        // El número real se calcula contando los hermanos seguidos del mismo
+        // tipo; los hijos de por medio (más sangría) no cortan la cuenta.
         let n = 1;
         if (b.tipo === 'numerada') {
-          for (let i = indice - 1; i >= 0 && bloques[i].tipo === 'numerada'; i--) n++;
+          const nv = b.nivel || 0;
+          for (let i = indice - 1; i >= 0; i--) {
+            const x = bloques[i], nx = x.nivel || 0;
+            if (nx > nv) continue;
+            if (nx < nv || x.tipo !== 'numerada') break;
+            n++;
+          }
         }
         return (
           <div className="flex gap-2">
             <span className="text-slate-400 select-none shrink-0 w-5 text-right leading-relaxed text-[15px]">
-              {b.tipo === 'lista' ? '•' : `${n}.`}
+              {marcaLista(b.tipo, n, b.nivel || 0)}
             </span>
             {cuerpo('flex-1 min-w-0')}
           </div>
@@ -2117,6 +2497,9 @@ function EditorPagina() {
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
           seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60')}
         onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
+        // La sangría: cada nivel, un paso a la derecha, con sus mandos (el
+        // «+» y el asa) detrás, como en Notion.
+        style={b.nivel ? { marginLeft: Math.min(b.nivel, 10) * (esMovil ? 18 : 28) } : undefined}
       >
         {/* LOS MANDOS DEL BLOQUE. En escritorio viven FUERA de la columna, a
             56 px por la izquierda, y aparecen al pasar el ratón.
@@ -2182,6 +2565,7 @@ function EditorPagina() {
                 onEnlace={() => copiarEnlace(b.id)}
                 onSacarDeColumnas={() => sacarDeColumnas(b.id)}
                 onCerrar={() => setMenuAsa(null)}
+                extras={opcionesExtra(b)}
               />
             )}
           </div>
@@ -2367,6 +2751,18 @@ function EditorPagina() {
             <>
               {/* Lo que se está pegando manda sobre el estado de guardado: es
                   lo único que puede tardar de verdad (un vídeo son megas). */}
+              {/* DESHACER Y REHACER, también a la vista (2026-10-05): quien no
+                  sabe los atajos tiene que poder encontrarlos. */}
+              <span className="hidden sm:inline-flex items-center">
+                <button onClick={deshacer} disabled={!pasos.atras} title="Deshacer (⌘Z)" aria-label="Deshacer"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
+                  <Undo2 className="w-4 h-4" />
+                </button>
+                <button onClick={rehacer} disabled={!pasos.adelante} title="Rehacer (⌘⇧Z)" aria-label="Rehacer"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
+                  <Redo2 className="w-4 h-4" />
+                </button>
+              </span>
               <span className={cn('font-bold', subiendo ? 'text-emerald-600' : guardado === 'sí' ? 'text-slate-300' : 'text-amber-600')}>
                 {subiendo
                   ? subiendo
@@ -2733,7 +3129,7 @@ function EditorPagina() {
         <div className={cn('space-y-2', editable && 'pl-0')}>
           {/* Una fila es un bloque suelto o varios en columnas. En un
               teléfono las columnas se apilan: 390 px no caben dos. */}
-          {enFilas(bloques).map(fila => fila.length === 1
+          {enFilas(visibles).map(fila => fila.length === 1
             ? renderBloque(fila[0], bloques.indexOf(fila[0]))
             : (
               <div key={`fila-${fila[0].grupo}`} className="flex flex-col sm:flex-row gap-2 sm:gap-14">
@@ -2819,7 +3215,7 @@ function EditorPagina() {
       {aviso && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-3 pl-4 pr-2 h-11 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-2xl">
           <span>{aviso}</span>
-          {historia.current.length > 0 && !aviso.startsWith('Enlace') && !aviso.startsWith('http') && (
+          {pasos.atras > 0 && !aviso.startsWith('Enlace') && !aviso.startsWith('http') && (
             <button onClick={deshacer} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20">Deshacer <span className="text-white/50">⌘Z</span></button>
           )}
         </div>
@@ -2971,8 +3367,9 @@ function BloqueEditable({ inicial, vivo = true, onInput, ...props }: { inicial: 
   const ref = useRef<HTMLDivElement>(null);
   const pintado = useRef<string | null>(null);
   // El texto se pone UNA vez, al montar, y a mano. A partir de ahí React ni lo
-  // sabe ni le importa: para él este div está vacío.
-  useEffect(() => {
+  // sabe ni le importa: para él este div está vacío. En `useLayoutEffect`
+  // para que esté puesto antes de que la página coloque el cursor dentro.
+  useLayoutEffect(() => {
     if (!ref.current) return;
     ref.current.textContent = inicial;
     // Con el formato a la vista desde el primer momento (`marcadoVivo.ts`).
@@ -3144,6 +3541,17 @@ function SubiendoImagen({ vista, fraccion, texto }: { vista: string | null; frac
         </div>
       </div>
     </div>
+  );
+}
+
+/** La flecha de un desplegable o un título plegable: gira al abrirse. */
+function FlechaPlegar({ abierto, onClick }: { abierto: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={e => { e.stopPropagation(); onClick(); }}
+      aria-label={abierto ? 'Cerrar' : 'Abrir'} aria-expanded={abierto}
+      className="mt-0.5 w-6 h-6 shrink-0 grid place-items-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+      <ChevronRight className={cn('w-4 h-4 transition-transform', abierto && 'rotate-90')} />
+    </button>
   );
 }
 

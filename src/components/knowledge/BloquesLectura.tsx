@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { enFilas, AIRE_BASE_DATOS } from '../../utils/bloques';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { enFilas, AIRE_BASE_DATOS, esPlegable, todosLosBloques } from '../../utils/bloques';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
@@ -47,6 +47,35 @@ export const CLASES_TEXTO: Record<string, string> = {
   cita: 'text-[15px] leading-relaxed text-slate-600 italic',
   codigo: 'font-mono text-[13px] leading-relaxed text-slate-100 whitespace-pre-wrap',
 };
+
+/**
+ * LA MARCA DE UNA LISTA SEGÚN LO HONDA QUE ESTÉ (2026-10-05). Como Notion:
+ * viñetas • ◦ ▪ y números 1. a. i. que se alternan al sangrar, para que se
+ * vea a simple vista qué cuelga de qué. La usan el editor y la lectura.
+ */
+export function marcaLista(tipo: string, n: number, nivel: number): string {
+  if (tipo === 'lista') return ['•', '◦', '▪'][nivel % 3];
+  const forma = nivel % 3;
+  if (forma === 1) {
+    // a, b, … z, aa, ab…
+    let s = '', k = n;
+    while (k > 0) { k--; s = String.fromCharCode(97 + (k % 26)) + s; k = Math.floor(k / 26); }
+    return `${s}.`;
+  }
+  if (forma === 2) {
+    const R: [number, string][] = [[1000, 'm'], [900, 'cm'], [500, 'd'], [400, 'cd'], [100, 'c'], [90, 'xc'], [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i']];
+    let s = '', k = n;
+    for (const [v, l] of R) while (k >= v) { s += l; k -= v; }
+    return `${s}.`;
+  }
+  return `${n}.`;
+}
+
+/** La página entera, para lo que mira más allá de su sitio (el índice), y lo
+ *  hondo que está cada lista. Los bloques anidados se pintan con otro
+ *  `BloquesLectura` dentro, que sólo ve a sus hermanos. */
+const Raiz = createContext<{ todos: any[] } | null>(null);
+const Hondura = createContext(0);
 
 /*
  * ══ CADA BLOQUE SE PUEDE COMENTAR (2026-08-25, fase 5 de «todo son páginas»)
@@ -99,12 +128,30 @@ function ConComentarios({ paginaId, bloqueId, children }: { paginaId: string; bl
 }
 
 export default function BloquesLectura({ bloques, comentable }: { bloques: any[]; comentable?: string }) {
+  const raiz = useContext(Raiz);
+  const nivel = useContext(Hondura);
+  // La primera vez (la página entera) se apunta la raíz para el índice.
+  if (!raiz) {
+    return (
+      <Raiz.Provider value={{ todos: todosLosBloques(bloques) }}>
+        <BloquesLectura bloques={bloques} comentable={comentable} />
+      </Raiz.Provider>
+    );
+  }
+  return <ListaBloques bloques={bloques} comentable={comentable} nivel={nivel} />;
+}
+
+/** Los bloques que pintan ELLOS MISMOS lo que llevan dentro. El resto lo
+ *  lleva debajo, con sangría (ver `uno`). */
+const PINTAN_SUS_HIJOS = new Set(['desplegable', 'aviso', 'franja', 'columnas']);
+
+function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentable?: string; nivel: number }) {
   // UN ENLACE A UN BLOQUE (`#b-…`, 2026-09-30). El navegador salta al ancla
   // al cargar, pero aquí los bloques llegan después: se salta a mano y se
   // resalta un momento para que se vea a qué apuntaba el enlace.
   useEffect(() => {
     const h = typeof location !== 'undefined' ? location.hash : '';
-    if (!h.startsWith('#b-')) return;
+    if (nivel > 0 || !h.startsWith('#b-')) return;
     const el = document.getElementById(h.slice(1));
     if (!el) return;
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -114,12 +161,25 @@ export default function BloquesLectura({ bloques, comentable }: { bloques: any[]
   }, [bloques]);
 
   if (!Array.isArray(bloques) || bloques.length === 0) {
-    return <p className="text-sm text-slate-400">Esta página todavía no tiene contenido.</p>;
+    return nivel > 0 ? null : <p className="text-sm text-slate-400">Esta página todavía no tiene contenido.</p>;
   }
 
   const uno = (b: any) => {
     const i = bloques.indexOf(b);
-    const dentro = <Bloque b={b} indice={i} bloques={bloques} />;
+    // LOS HIJOS DE UN BLOQUE (2026-10-05), debajo y con sangría, como en el
+    // editor. Los desplegables y los títulos plegables los llevan dentro de
+    // su caja; el resto, aquí.
+    const hijos: any[] = Array.isArray(b?.bloques) && b.bloques.length && !PINTAN_SUS_HIJOS.has(b.tipo) && !esPlegable(b) ? b.bloques : [];
+    const dentro = (
+      <>
+        <Bloque b={b} indice={i} bloques={bloques} nivel={nivel} />
+        {hijos.length > 0 && (
+          <div className="ml-7 mt-2.5">
+            <Hondura.Provider value={nivel + 1}><BloquesLectura bloques={hijos} comentable={comentable} /></Hondura.Provider>
+          </div>
+        )}
+      </>
+    );
     // Color y ancla van en un envoltorio: ningún tipo de bloque tiene que
     // saber de ellos.
     // La base de datos recibe el color y lo pinta ella (ver `tonoDe`).
@@ -152,7 +212,8 @@ export default function BloquesLectura({ bloques, comentable }: { bloques: any[]
   );
 }
 
-function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[] }) {
+function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; bloques: any[]; nivel?: number }) {
+  const raiz = useContext(Raiz);
   if (!b || typeof b !== 'object') return null;
 
   // LOS TÍTULOS LLEVAN ANCLA. Sin ella, el índice enlaza a `#algo` que no
@@ -170,19 +231,41 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
     </div>
   );
 
+  // UN TÍTULO PLEGABLE (2026-10-05): el título de siempre, con su flecha, y
+  // lo de dentro escondido hasta que se pulsa. `<details>` por lo mismo que
+  // el desplegable: sin JavaScript, y Ctrl+F encuentra lo de dentro.
+  if (esPlegable(b) && b.tipo !== 'desplegable') {
+    const dentro: any[] = Array.isArray(b.bloques) ? b.bloques : [];
+    return (
+      <details open={b.abierto === true} className="group/pl">
+        <summary className="flex items-start gap-1.5 cursor-pointer list-none -ml-1 pl-1 rounded-lg hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+          <ChevronRight className={cn('shrink-0 text-slate-400 transition-transform group-open/pl:rotate-90',
+            b.tipo === 'titulo1' ? 'w-6 h-6 mt-5' : b.tipo === 'titulo2' ? 'w-5 h-5 mt-4' : 'w-4 h-4 mt-2.5')} />
+          {texto('flex-1 min-w-0')}
+        </summary>
+        <div className="ml-7 mt-1">
+          {dentro.length > 0
+            ? <Hondura.Provider value={nivel + 1}><BloquesLectura bloques={dentro} /></Hondura.Provider>
+            : <p className="text-sm text-slate-400">Aquí todavía no hay nada.</p>}
+        </div>
+      </details>
+    );
+  }
+
   switch (b.tipo) {
     case 'separador':
       return <hr className="border-slate-200 my-2" />;
 
     case 'desplegable':
-      return <Desplegable b={b} />;
+      return <Desplegable b={b} nivel={nivel} />;
 
     case 'aviso':
       return <Aviso b={b} />;
 
     case 'indice':
-      // El índice necesita ver la página entera, no sólo su bloque.
-      return <Indice bloques={bloques} />;
+      // El índice necesita ver la página entera, no sólo su bloque (ni
+      // sólo sus hermanos, si está dentro de un desplegable).
+      return <Indice bloques={raiz?.todos || bloques} />;
 
     case 'cita':
       return <blockquote className="border-l-[3px] border-emerald-300 pl-3">{texto()}</blockquote>;
@@ -202,7 +285,7 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       return (
         <div className="flex gap-2">
           <span className="text-slate-400 select-none shrink-0 w-5 text-right leading-relaxed text-[15px]">
-            {b.tipo === 'lista' ? '•' : `${n}.`}
+            {marcaLista(b.tipo, n, nivel)}
           </span>
           {texto('flex-1 min-w-0')}
         </div>
@@ -384,14 +467,14 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
  * JavaScript, el buscador de la página (Ctrl+F) encuentra lo de dentro aunque
  * esté cerrado, y el teclado lo abre solo.
  */
-function Desplegable({ b }: { b: any }) {
+function Desplegable({ b, nivel = 0 }: { b: any; nivel?: number }) {
   const dentro: any[] = Array.isArray(b.bloques) ? b.bloques : [];
   return (
     <details open={b.abierto === true} className="group">
-      <summary className="flex items-start gap-2 cursor-pointer list-none py-1 -ml-1 pl-1 rounded-lg hover:bg-slate-50">
+      <summary className="flex items-start gap-2 cursor-pointer list-none py-1 -ml-1 pl-1 rounded-lg hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
         <ChevronRight className="w-4 h-4 mt-1 shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
-        <span className="text-[15px] font-bold text-slate-800 leading-relaxed">
-          {b.texto || 'Sin título'}
+        <span className="text-[15px] font-bold text-slate-800 leading-relaxed" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+          {b.texto ? <TextoEnriquecido texto={b.texto} /> : 'Sin título'}
         </span>
       </summary>
       <div className="ml-6 mt-1 space-y-2.5">
@@ -400,7 +483,7 @@ function Desplegable({ b }: { b: any }) {
             bloque, que es como se escribe hoy. Aceptar sólo la primera dejaría
             vacío todo lo que se escriba con el editor actual. */}
         {dentro.length > 0
-          ? <BloquesLectura bloques={dentro} />
+          ? <Hondura.Provider value={nivel + 1}><BloquesLectura bloques={dentro} /></Hondura.Provider>
           : b.detalle
             ? <p className="text-[15px] leading-relaxed text-slate-700"
                  style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{b.detalle}</p>
@@ -434,9 +517,10 @@ function Aviso({ b }: { b: any }) {
     <div className={`flex gap-3 p-3.5 rounded-xl border ${t.fondo} ${t.borde}`}>
       <t.Icono className={`w-4 h-4 shrink-0 mt-0.5 ${t.texto}`} />
       <div className={`min-w-0 flex-1 text-[15px] leading-relaxed ${t.texto}`}>
-        {dentro.length > 0
-          ? <BloquesLectura bloques={dentro} />
-          : <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}><TextoEnriquecido texto={b.texto || ''} /></p>}
+        {/* Su texto y, debajo, lo que lleve dentro (2026-10-05): antes era lo
+            uno o lo otro, y el editor ya escribe las dos cosas. */}
+        {(b.texto || !dentro.length) && <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}><TextoEnriquecido texto={b.texto || ''} /></p>}
+        {dentro.length > 0 && <div className={b.texto ? 'mt-2' : ''}><BloquesLectura bloques={dentro} /></div>}
       </div>
     </div>
   );
