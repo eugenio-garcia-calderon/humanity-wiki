@@ -161,6 +161,36 @@
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "editorA: imágenes estilo PowerPoint",
       "desde": "2026-10-05T22:57:06.298Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/PropiedadesFila.tsx",
+      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
+      "desde": "2026-10-05T22:58:57.037Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/Relacion.tsx",
+      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
+      "desde": "2026-10-05T22:58:57.037Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/sitio/VistaPagina.tsx",
+      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
+      "desde": "2026-10-05T22:58:57.037Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/RelacionesPublicas.tsx",
+      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
+      "desde": "2026-10-05T22:58:57.037Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "src/components/tablas/MenuPropiedad.tsx",
+      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
+      "desde": "2026-10-05T22:58:57.037Z"
     }
   ]
 }
