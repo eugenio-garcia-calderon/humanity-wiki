@@ -2,48 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-espacio",
-      "ruta": "drizzle/0143_api_publica_webhooks.sql",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/apiPublica.ts",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/webhooks.ts",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/bd.ts",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/compartir.ts",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/pages/Desarrolladores.tsx",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
       "ruta": "src/App.tsx",
       "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
       "desde": "2026-10-06T04:46:40.405Z"
@@ -53,30 +11,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
       "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/espacio.ts",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/components/navegacion/AvatarRail.tsx",
-      "motivo": "",
-      "desde": "2026-10-06T05:01:22.773Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/i18n/index.ts",
-      "motivo": "",
-      "desde": "2026-10-06T05:01:22.773Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/i18n/en.ts",
-      "motivo": "",
-      "desde": "2026-10-06T05:01:22.773Z"
     }
   ]
 }
