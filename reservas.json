@@ -119,6 +119,12 @@
       "ruta": "src/server/avisos.ts",
       "motivo": "carril acceso: seguir páginas, capa social, estadísticas",
       "desde": "2026-10-06T04:00:34.020Z"
+    },
+    {
+      "agente": "prog8-bd",
+      "ruta": "drizzle/0140_bd_formularios.sql",
+      "motivo": "renumerada: 0138 ya existe en main",
+      "desde": "2026-10-06T04:00:57.245Z"
     }
   ]
 }
