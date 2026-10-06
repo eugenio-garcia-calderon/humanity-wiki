@@ -36,6 +36,7 @@ import HojaExplorar from '../navegacion/HojaExplorar';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
 import PaletaBusqueda from '../espacio/PaletaBusqueda';
 import { SincronizarPreferencias } from '../espacio/AparienciaIdioma';
+import AvisoBorradores from '../espacio/AvisoBorradores';
 import { t as tr } from '../../i18n';
 import BotonCalendario from '../navegacion/BotonCalendario';
 import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
@@ -1084,6 +1085,7 @@ export default function Layout() {
         {/* ⌘K y ⌘P: la paleta de búsqueda rápida (#15). Es un modal; aquí solo escucha. */}
         <PaletaBusqueda />
         <SincronizarPreferencias />
+        <AvisoBorradores />
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
             Eugenio, 2026-08-21: «vuelve a poner el menú colapsable superior a

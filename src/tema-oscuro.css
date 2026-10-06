@@ -469,10 +469,11 @@ html.dark .from-slate-950\/95 { --tw-gradient-from: rgb(0 0 0 / 0.95); }
 html.dark .via-slate-950\/95 { --tw-gradient-via: rgb(0 0 0 / 0.95); }
 html.dark .to-slate-950\/95 { --tw-gradient-to: rgb(0 0 0 / 0.95); }
 
-/* 3. Lo escrito a mano en index.css (no usa variables de Tailwind). */
+/* 3. Lo escrito a mano en index.css (no usa variables de Tailwind), incluido «buscar en la página» (editorB). */
 html.dark .md-marca { color: #7d8a9c; }
 html.dark .md-codigo { background: #1e2631; }
 html.dark .md-mencion { background: #1e2631; color: #dbe2ec; }
 html.dark .md-formula { color: #aab6c6; }
+html.dark ::highlight(busqueda) { background-color: rgb(161 98 7 / 0.65); color: inherit; }
 html.dark ::selection { background: rgb(52 211 153 / 0.35); }
 html.dark input::placeholder, html.dark textarea::placeholder { color: #7d8a9c; }

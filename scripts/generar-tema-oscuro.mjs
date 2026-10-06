@@ -70,11 +70,12 @@ for (const n of OVERLAYS) {
 css += `\n`;
 
 // 3. CSS escrito a mano en index.css.
-css += `/* 3. Lo escrito a mano en index.css (no usa variables de Tailwind). */
+css += `/* 3. Lo escrito a mano en index.css (no usa variables de Tailwind), incluido «buscar en la página» (editorB). */
 html.dark .md-marca { color: ${SLATE[400]}; }
 html.dark .md-codigo { background: ${SLATE[100]}; }
 html.dark .md-mencion { background: ${SLATE[100]}; color: ${SLATE[800]}; }
 html.dark .md-formula { color: ${SLATE[600]}; }
+html.dark ::highlight(busqueda) { background-color: rgb(161 98 7 / 0.65); color: inherit; }
 html.dark ::selection { background: rgb(52 211 153 / 0.35); }
 html.dark input::placeholder, html.dark textarea::placeholder { color: ${SLATE[400]}; }
 `;
