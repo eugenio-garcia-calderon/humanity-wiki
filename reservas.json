@@ -65,6 +65,12 @@
       "ruta": "scripts/probar-colab.mts",
       "motivo": "Edición colaborativa Yjs: servidor y persistencia (prog8-colab)",
       "desde": "2026-10-06T10:26:20.783Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "montar el módulo colab",
+      "desde": "2026-10-06T10:37:53.584Z"
     }
   ]
 }
