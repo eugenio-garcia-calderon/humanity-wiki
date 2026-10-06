@@ -1,3 +1,16 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-variantes",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "Botón de compra en la galería",
+      "desde": "2026-10-06T10:16:01.449Z"
+    },
+    {
+      "agente": "prog8-variantes",
+      "ruta": "src/components/tablas/BotonCompra.tsx",
+      "motivo": "Botón de compra en la galería",
+      "desde": "2026-10-06T10:16:01.449Z"
+    }
+  ]
 }
