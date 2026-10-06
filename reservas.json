@@ -1,238 +1,34 @@
 {
   "reservas": [
     {
-      "agente": "prog8-variantes",
-      "ruta": "src/components/knowledge/CrearProducto.tsx",
-      "motivo": "Variantes más claras, quitar cobro en puntos y foto con pegar/arrastrar en el creador de productos",
-      "desde": "2026-10-05T22:56:04.529Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "src/components/knowledge/EditorVariantes.tsx",
-      "motivo": "Variantes más claras, quitar cobro en puntos y foto con pegar/arrastrar en el creador de productos",
-      "desde": "2026-10-05T22:56:04.529Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/ImagenBloque.tsx",
-      "motivo": "editorA: imágenes estilo PowerPoint",
-      "desde": "2026-10-05T22:57:06.298Z"
+      "agente": "prog8-bd",
+      "ruta": "drizzle/0138_bd_formularios.sql",
+      "motivo": "carril bd: formularios públicos",
+      "desde": "2026-10-06T03:53:17.871Z"
     },
     {
       "agente": "prog8-bd",
-      "ruta": "src/components/tablas/PropiedadesFila.tsx",
-      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
-      "desde": "2026-10-05T22:58:57.037Z"
+      "ruta": "src/server/limites/index.ts",
+      "motivo": "carril bd: formularios públicos",
+      "desde": "2026-10-06T03:53:17.871Z"
     },
     {
       "agente": "prog8-bd",
-      "ruta": "src/components/tablas/Relacion.tsx",
-      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
-      "desde": "2026-10-05T22:58:57.037Z"
+      "ruta": "src/components/tablas/FormularioVista.tsx",
+      "motivo": "carril bd: formularios públicos",
+      "desde": "2026-10-06T03:53:17.871Z"
     },
     {
       "agente": "prog8-bd",
-      "ruta": "src/components/sitio/VistaPagina.tsx",
-      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
-      "desde": "2026-10-05T22:58:57.037Z"
+      "ruta": "src/pages/FormularioPublico.tsx",
+      "motivo": "carril bd: formularios públicos",
+      "desde": "2026-10-06T03:53:17.871Z"
     },
     {
       "agente": "prog8-bd",
-      "ruta": "src/components/tablas/RelacionesPublicas.tsx",
-      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
-      "desde": "2026-10-05T22:58:57.037Z"
-    },
-    {
-      "agente": "prog8-bd",
-      "ruta": "src/components/tablas/MenuPropiedad.tsx",
-      "motivo": "carril bd: relaciones crear/↗, menú de propiedad, orden",
-      "desde": "2026-10-05T22:58:57.037Z"
-    },
-    {
-      "agente": "prog8-bd",
-      "ruta": "drizzle/0137_bd_tablas_diseno.sql",
-      "motivo": "carril bd: diseño de la página de la fila",
-      "desde": "2026-10-05T23:02:55.317Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/comentarios.ts",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/versiones.ts",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/acceso/HerramientasPagina.tsx",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/acceso/PanelComentarios.tsx",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/acceso/PanelVersiones.tsx",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/components/acceso/ComentarSeleccion.tsx",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/utils/diferencias.ts",
-      "motivo": "carril acceso: comentarios (#11) e historial (#8)",
-      "desde": "2026-10-05T23:13:55.772Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "drizzle/0138_comentarios_pagina.sql",
-      "motivo": "carril acceso: comentarios",
-      "desde": "2026-10-05T23:14:23.125Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "drizzle/0137_bd_tienda.sql",
-      "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
-      "desde": "2026-10-05T23:15:55.940Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "src/server/bd/tienda.ts",
-      "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
-      "desde": "2026-10-05T23:15:55.940Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "src/server/bd.ts",
-      "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
-      "desde": "2026-10-05T23:15:55.940Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "src/server/bd/tipos.ts",
-      "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
-      "desde": "2026-10-05T23:15:55.940Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "src/components/tablas/EditorColumna.tsx",
-      "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
-      "desde": "2026-10-05T23:15:55.940Z"
-    },
-    {
-      "agente": "prog8-variantes",
-      "ruta": "src/components/tablas/Celda.tsx",
-      "motivo": "Tienda dentro de bases de datos: propiedades Precio, Variantes, Envío, Stock y Botón de compra",
-      "desde": "2026-10-05T23:15:55.940Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "carril acceso: comentarios e historial",
-      "desde": "2026-10-05T23:16:43.915Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/seguridad/politica.ts",
-      "motivo": "carril acceso: comentarios e historial",
-      "desde": "2026-10-05T23:16:43.915Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/server/seguridad/clasificacion.ts",
-      "motivo": "carril acceso: comentarios e historial",
-      "desde": "2026-10-05T23:16:43.915Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "carril acceso: comentarios e historial",
-      "desde": "2026-10-05T23:16:43.915Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "drizzle/0139_bloques_sincronizados.sql",
-      "motivo": "editorA: bloques sincronizados (#22)",
-      "desde": "2026-10-05T23:18:35.388Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/edicionPaginas.ts",
-      "motivo": "editorA: bloques sincronizados (#22)",
-      "desde": "2026-10-05T23:18:35.388Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "editorA: bloques sincronizados (#22)",
-      "desde": "2026-10-05T23:18:35.388Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/utils/bloques.ts",
-      "motivo": "editorA: bloques sincronizados (#22)",
-      "desde": "2026-10-05T23:18:35.388Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/BloquesLectura.tsx",
-      "motivo": "editorA: bloques sincronizados (#22)",
-      "desde": "2026-10-05T23:18:35.388Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/BloquesExtra.tsx",
-      "motivo": "editorA: bloques sincronizados (#22)",
-      "desde": "2026-10-05T23:18:35.388Z"
-    },
-    {
-      "agente": "prog8-carrusel",
-      "ruta": "src/components/tablas/Galeria.tsx",
-      "motivo": "galería en carrusel con ver todo",
-      "desde": "2026-10-05T23:20:00.669Z"
-    },
-    {
-      "agente": "prog8-carrusel",
-      "ruta": "src/components/tablas/GaleriaCarrusel.tsx",
-      "motivo": "galería en carrusel con ver todo",
-      "desde": "2026-10-05T23:20:00.669Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/utils/avisoPaginas.ts",
-      "motivo": "editorA: aviso de sincronizado entre pestañas",
-      "desde": "2026-10-05T23:20:37.372Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/pages/SubpaginaSitio.tsx",
-      "motivo": "carril acceso: comentarios en sitios",
-      "desde": "2026-10-05T23:23:05.622Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/pages/PaginaDeDominio.tsx",
-      "motivo": "carril acceso: comentarios en sitios",
-      "desde": "2026-10-05T23:23:05.622Z"
-    },
-    {
-      "agente": "prog8-acceso",
-      "ruta": "src/pages/PaginaPublica.tsx",
-      "motivo": "carril acceso: comentarios en sitios",
-      "desde": "2026-10-05T23:23:05.622Z"
+      "ruta": "src/server/bd/formularios.ts",
+      "motivo": "carril bd: formularios públicos",
+      "desde": "2026-10-06T03:53:17.871Z"
     }
   ]
 }
