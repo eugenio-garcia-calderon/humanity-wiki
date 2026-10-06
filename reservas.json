@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog1",
-      "ruta": "src/server/bd.ts",
-      "motivo": "Vista carrusel (prog8 voz)",
-      "desde": "2026-10-06T10:43:24.964Z"
-    },
-    {
       "agente": "prog8-colab",
       "ruta": "src/pages/Documento.tsx",
       "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
