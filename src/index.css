@@ -65,3 +65,6 @@ html, body { overscroll-behavior-x: none; }
    gris claro y sin negrita, para que se lea la palabra y no la marca. */
 .md-marca { color: rgb(203 213 225); font-weight: 400; font-style: normal; }
 .md-codigo { padding: 0 0.25rem; border-radius: 0.25rem; background: rgb(241 245 249); font-family: ui-monospace, monospace; font-size: 0.9em; }
+/* Menciones y fórmulas mientras se escriben (2026-10-06). */
+.md-mencion { padding: 0 0.25rem; border-radius: 0.25rem; background: rgb(241 245 249); color: rgb(30 41 59); font-weight: 500; }
+.md-formula { font-family: ui-monospace, monospace; font-size: 0.9em; color: rgb(71 85 105); }

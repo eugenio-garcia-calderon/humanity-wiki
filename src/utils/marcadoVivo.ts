@@ -18,7 +18,11 @@
 
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const RE = /(\*\*[^*\n]+\*\*|`[^`\n]+`|(?<![*\w])\*[^*\s\n][^*\n]*\*(?![*\w]))/g;
+// 2026-10-06 (#6, #19): las menciones (`[@Ana](/personas/…)`) y las fórmulas
+// (`$x^2$`) también se ven mientras se escriben: la mención como una etiqueta
+// con su dirección en gris, y la fórmula con el TeX en mono. El texto sigue
+// siendo el mismo.
+const RE = /(\*\*[^*\n]+\*\*|`[^`\n]+`|(?<![\\$\w])\$(?![\s$])[^$\n]+?(?<![\s\\])\$(?![\d$])|\[@?[^\]\n]+\]\((?:\/personas\/|\/paginas\/|fecha:)[^)\s]+\)|(?<![*\w])\*[^*\s\n][^*\n]*\*(?![*\w]))/g;
 
 /** El HTML del bloque activo: el mismo texto, con el formato a la vista. */
 export function marcadoVivo(texto: string): string {
@@ -32,6 +36,11 @@ export function marcadoVivo(texto: string): string {
     const marca = (x: string) => `<span class="md-marca">${x}</span>`;
     if (s.startsWith('**')) out += `${marca('**')}<strong>${esc(s.slice(2, -2))}</strong>${marca('**')}`;
     else if (s.startsWith('`')) out += `${marca('`')}<code class="md-codigo">${esc(s.slice(1, -1))}</code>${marca('`')}`;
+    else if (s.startsWith('$')) out += `${marca('$')}<span class="md-formula">${esc(s.slice(1, -1))}</span>${marca('$')}`;
+    else if (s.startsWith('[')) {
+      const l = s.match(/^\[([^\]]+)\](\(.*\))$/)!;
+      out += `${marca('[')}<span class="md-mencion">${esc(l[1])}</span>${marca(']' + l[2])}`;
+    }
     else out += `${marca('*')}<em>${esc(s.slice(1, -1))}</em>${marca('*')}`;
     ultimo = m.index + s.length;
   }
