@@ -32,10 +32,13 @@ import { cn } from '../../utils/cn';
 //     centradas, sin flechas ni «Ver todo». Un carrusel que gira con tres
 //     tarjetas parece roto.
 
-const PX_POR_SEGUNDO = 28;
+/** La velocidad de siempre; cada vista Carrusel puede elegir otra (2026-10-06). */
+export const VELOCIDAD_CARRUSEL = 28;
 const HUECO = 16;
 
-export default function GaleriaCarrusel({ tarjetas, copias, ancho, pie, todo, titulo = 'Todas las entradas' }: {
+export default function GaleriaCarrusel({ tarjetas, copias, ancho, pie, todo, titulo = 'Todas las entradas', velocidad = VELOCIDAD_CARRUSEL }: {
+  /** Píxeles por segundo. */
+  velocidad?: number;
   /** Las tarjetas, ya pintadas. */
   tarjetas: ReactNode[];
   /** Las mismas, para la segunda vuelta (sin foco, ocultas a lectores). */
@@ -57,6 +60,9 @@ export default function GaleriaCarrusel({ tarjetas, copias, ancho, pie, todo, ti
   const foco = useRef(false);
   const pausaHasta = useRef(0);
   const pos = useRef(0);
+  // En un ref: cambiar la velocidad no reinicia el movimiento ni lo hace saltar.
+  const rapidez = useRef(velocidad);
+  rapidez.current = velocidad;
   const [reducir] = useState(() => {
     try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; }
   });
@@ -100,7 +106,7 @@ export default function GaleriaCarrusel({ tarjetas, copias, ancho, pie, todo, ti
       if (f && !encima.current && !arrastrando.current && !foco.current && t > pausaHasta.current) {
         // Si alguien movió la fila por su cuenta, se sigue desde donde quedó.
         if (Math.abs(f.scrollLeft - pos.current) > 1.5) pos.current = f.scrollLeft;
-        pos.current += PX_POR_SEGUNDO * dt;
+        pos.current += rapidez.current * dt;
         f.scrollLeft = pos.current;
         envolver();
       }

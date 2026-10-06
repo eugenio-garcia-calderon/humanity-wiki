@@ -8623,3 +8623,14 @@ en mis páginas como proyecto pendiente».
 - Connected-database chips sit under the toolbar.
 - «Buscar» filters rows on screen by page name and cell text, without touching the saved view.
 - Readers of published pages see no change.
+
+### 2026-10-06 — Databases: «Carrusel» is its own view; «Galería» is static again
+- Eugenio asked to choose between a static gallery and the moving carousel, and to set its speed.
+- New view form `carrusel` («Una fila de tarjetas que se mueve sola»):
+  - icon `GalleryHorizontal`;
+  - accepted by the server's `FORMAS`;
+  - treated as a gallery everywhere in `Rejilla` (`esGaleria`), with the same settings, grouping and properties.
+- `Galeria` renders the static grid unless `carrusel` is set. Existing gallery views stop moving; switch them to «Carrusel» to get the movement back.
+- Speed: five levels in the view's «Ajustes»: 12 / 28 / 50 / 80 / 120 px/s, default 28. It is saved in the view config (`config.velocidad`), so it also applies on the published page.
+  - `GaleriaCarrusel` reads it from a ref, so changing it does not restart or jump the scroll.
+- Verified locally: the gallery stays still; the carousel at level 5 moved 240 px in 2 s, and still did after a reload.

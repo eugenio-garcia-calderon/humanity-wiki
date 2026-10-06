@@ -2,6 +2,10 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
+import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
+
+/** Las cinco velocidades del carrusel, en píxeles por segundo. */
+const VELOCIDADES = [{ v: 12, l: '1', t: 'Muy lenta' }, { v: 28, l: '2', t: 'Lenta' }, { v: 50, l: '3', t: 'Media' }, { v: 80, l: '4', t: 'Rápida' }, { v: 120, l: '5', t: 'Muy rápida' }];
 import type { TamanoGaleria } from '../../utils/bloques';
 import { useSitio } from '../sitio/ContextoSitio';
 import ConexionesBD, { type Conexion } from './ConexionesBD';
@@ -43,7 +47,7 @@ import {
  *  «de siempre», sin guardar) o `vista:<id>`, una vista guardada de la tabla
  *  (2026-10-05). Va en el mismo campo del bloque (`vistaBd`) para que las
  *  páginas que ya existían sigan abriendo igual sin migrar nada. */
-export type FormaVista = 'galeria' | 'tabla';
+export type FormaVista = 'galeria' | 'carrusel' | 'tabla';
 
 /** Colores para las columnas nuevas del tablero, en el orden en que salen. */
 const PALETA = ['#64748b', '#d97706', '#16a34a', '#2563eb', '#9333ea', '#db2777', '#0891b2', '#dc2626'];
@@ -581,7 +585,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // galería no hay marco, ni barra gris, ni contador de filas: el título como
   // un encabezado y las tarjetas. Los mandos sólo existen para quien edita.
   // La vista de tabla conserva su marco: ahí sí ayuda a leer filas y columnas.
-  const limpia = vista === 'galeria';
+  // El carrusel es una galería que se mueve: todo lo de la galería vale para él.
+  const esGaleria = vista === 'galeria' || vista === 'carrusel';
+  const limpia = esGaleria;
 
   // ══ LA CABECERA COMO EN NOTION (2026-10-05) ════════════════════════════
   // Eugenio, con una captura de Notion: «más elegante, limpio, adaptado a
@@ -612,6 +618,25 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           <span className="text-xs font-bold text-slate-600">Mostrar el título al publicar</span>
           <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={!tituloOculto} onChange={e => onCambiarTituloOculto(!e.target.checked)} />
         </label>
+      )}
+      {/* LA VELOCIDAD DEL CARRUSEL (2026-10-06): se guarda en la vista, así
+          que vale igual en la página publicada. Se ve al momento debajo. */}
+      {vista === 'carrusel' && (
+        <div className="flex items-center justify-between gap-2 px-1 py-1">
+          <span className="text-xs font-bold text-slate-600">Velocidad</span>
+          <div role="radiogroup" aria-label="Velocidad del carrusel" className="flex rounded-lg bg-slate-100 p-0.5">
+            {VELOCIDADES.map(t => {
+              const actual = activa.config.velocidad ?? VELOCIDAD_CARRUSEL;
+              const es = Math.abs(actual - t.v) < 1;
+              return (
+                <button key={t.v} role="radio" aria-checked={es} title={t.t} onClick={() => cambiarVista({ config: { ...activa.config, velocidad: t.v } })}
+                  className={cn('h-7 px-2 rounded-md text-[11px] font-black transition-colors', es ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
+                  {t.l}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       )}
       {onCambiarTamano && <Segmentos etiqueta="Tamaño de las tarjetas" valor={tamano} onCambiar={onCambiarTamano} />}
       {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño del título" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
@@ -785,7 +810,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                 <input type="checkbox" checked={!!activa.config.portada} onChange={e => cambiarVista({ config: { ...activa.config, portada: e.target.checked } })} />
                 Enseñar la imagen de la página en cada tarjeta
               </label>
-            ) : vista === 'galeria' ? ajustesGaleria : undefined}
+            ) : esGaleria ? ajustesGaleria : undefined}
             extra={mandosExtra} />
           {/* Con qué otras bases de datos está enlazada, debajo de la barra. */}
           {!!datos.conexiones?.length && (
@@ -826,14 +851,15 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         <Suspense fallback={<div className="flex items-center gap-2 p-6 text-slate-400 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Preparando el gráfico…</div>}>
           <Grafico columnas={columnas} filas={filas} vista={activa} editable={editable} onCambiarVista={cambiarVista} />
         </Suspense>
-      ) : vista === 'galeria' ? (
+      ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
           {porGrupos(filas, fs => (
             <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} visibles={visibles} />
+              claseTitulo={tono.texto} tamano={tamano} visibles={visibles}
+              carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad} />
           ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
           colAgr && editable ? celdas => <div className="max-w-xs"><NuevoElemento onCrear={t => crearCon(t, celdas)} /></div> : undefined)}
         </div>
@@ -929,7 +955,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             cargar();
             avisarCambio();
             // Creada desde la galería, se ve en las tarjetas desde ya.
-            if (idNueva && vista === 'galeria' && onCambiarVisibles) {
+            if (idNueva && esGaleria && onCambiarVisibles) {
               const actuales = visibles ?? columnas.filter(x => x.id !== datos?.columna_titulo).slice(0, 3).map(x => x.id);
               onCambiarVisibles([...actuales, idNueva]);
             }

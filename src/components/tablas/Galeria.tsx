@@ -43,7 +43,11 @@ const PROPIEDADES = 3;
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad }: {
+  /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
+  carrusel?: boolean;
+  /** Carrusel: píxeles por segundo. */
+  velocidad?: number;
   tablaId: string;
   columnas: Columna[];
   filas: Fila[];
@@ -242,9 +246,13 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           como mucho un 50 % y lo que sobra se reparte a los dos lados. */}
       {/* UNA SOLA FILA QUE SE MUEVE (2026-10-06): ver `GaleriaCarrusel`. Quien edita
           ve «+ Nueva página» al lado de «Ver todo». */}
-      <GaleriaCarrusel ancho={ANCHO_TARJETA[tamano] ?? 220}
-        tarjetas={filas.map(f => tarjeta(f))} copias={filas.map(f => tarjeta(f, true))}
-        pie={botonNueva} todo={rejilla} />
+      {/* GALERÍA O CARRUSEL (2026-10-06, Eugenio: «que se pueda escoger
+          entre la galería, estática, y el carrusel móvil»). */}
+      {carrusel ? (
+        <GaleriaCarrusel ancho={ANCHO_TARJETA[tamano] ?? 220} velocidad={velocidad}
+          tarjetas={filas.map(f => tarjeta(f))} copias={filas.map(f => tarjeta(f, true))}
+          pie={botonNueva} todo={rejilla} />
+      ) : rejilla}
       {!filas.length && !editable && (
         <p className="py-6 text-center text-xs text-slate-400">Todavía no hay nada en esta base de datos.</p>
       )}

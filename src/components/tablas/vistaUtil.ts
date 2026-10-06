@@ -36,7 +36,7 @@ export type Recurrencia = {
   proxima?: string | null;
 };
 
-export type Forma = 'tabla' | 'galeria' | 'tablero' | 'lista' | 'calendario' | 'linea' | 'grafico' | 'formulario';
+export type Forma = 'tabla' | 'galeria' | 'carrusel' | 'tablero' | 'lista' | 'calendario' | 'linea' | 'grafico' | 'formulario';
 
 export type Filtro = { columna_id: string; operador: string; valor?: any };
 export type GrupoFiltros = { y_o: 'y' | 'o'; reglas: Array<Filtro | GrupoFiltros> };
@@ -50,6 +50,8 @@ export type ConfigVista = {
   ocultar_vacios?: boolean;
   /** Fechas por mes, semana o día al agrupar por una fecha. */
   fecha_por?: 'dia' | 'semana' | 'mes' | 'anyo';
+  /** Carrusel: cuántos píxeles por segundo avanza la fila (2026-10-06). */
+  velocidad?: number;
   /** Qué propiedades se ven en las tarjetas (tablero, lista, calendario). */
   propiedades?: string[];
   /** Calendario y línea de tiempo. */
@@ -100,7 +102,9 @@ export type Vista = {
 
 export const FORMAS: Array<{ forma: Forma; label: string; desc: string }> = [
   { forma: 'tabla', label: 'Tabla', desc: 'Filas y columnas' },
-  { forma: 'galeria', label: 'Galería', desc: 'Tarjetas con imagen' },
+  { forma: 'galeria', label: 'Galería', desc: 'Tarjetas con imagen, quietas' },
+  // El carrusel (2026-10-06): la galería en una fila que se mueve sola.
+  { forma: 'carrusel', label: 'Carrusel', desc: 'Una fila de tarjetas que se mueve sola' },
   { forma: 'tablero', label: 'Tablero', desc: 'Columnas por estado, kanban' },
   { forma: 'lista', label: 'Lista', desc: 'Una línea por elemento' },
   { forma: 'calendario', label: 'Calendario', desc: 'Por una fecha, mes a mes' },

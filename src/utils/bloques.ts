@@ -151,7 +151,7 @@ export interface Bloque {
    *  la de por defecto, como pidió Eugenio—; `tabla` si quien escribe la
    *  cambió. Se guarda en el bloque y no en la tabla: la misma tabla puede
    *  verse como galería en una página y como rejilla en otra. */
-  vistaBd?: 'galeria' | 'tabla';
+  vistaBd?: 'galeria' | 'carrusel' | 'tabla' | string;
   /** `basedatos` en galería: el tamaño de las tarjetas (2026-10-01, como
    *  Notion). Sin valor, mediano. */
   tamanoGaleria?: TamanoGaleria;
