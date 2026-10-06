@@ -40,12 +40,14 @@ import {
   type AccionBoton,
 } from '../utils/bloques';
 import { MigasDePan, BotonVista, ConfigBoton, conFecha } from '../components/knowledge/BloquesExtra';
-import { usePresencia, CarasPresencia } from '../components/knowledge/PresenciaPagina';
+import { usePresencia, CarasPresencia, type Persona } from '../components/knowledge/PresenciaPagina';
 import { fusionarBloques } from '../utils/colaboracion';
 import { useColab, type CallbacksEditor } from '../components/knowledge/useColab';
 import type { InfoColab } from '../utils/colabCliente';
 import { posTrasDelta, type Plano } from '../utils/colabTexto';
-import { parchearBloque, estaComponiendo } from '../utils/colabDom';
+import { parchearBloque, estaComponiendo, leerSeleccion } from '../utils/colabDom';
+import CursoresAjenos from '../components/knowledge/CursoresAjenos';
+import type { PresenciaPersona } from '../utils/colabCliente';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
 import HojaCrear from '../components/navegacion/HojaCrear';
@@ -174,6 +176,17 @@ const EMOJIS_ICONO = ['📄', '📊', '📚', '🌍', '🔥', '💧', '🌱', '�
 
 /** Marcado inline de markdown → nodos React (negrita, cursiva, código,
  *  enlaces y direcciones pegadas). El mismo pintor que la página publicada. */
+/** De los estados de presencia de Yjs a las caras de arriba: una por persona. */
+function carasDe(ps: PresenciaPersona[]): Persona[] {
+  const por = new Map<string, Persona>();
+  for (const p of ps) {
+    const x = por.get(p.id);
+    if (x) { x.pestanas++; x.edita = x.edita || p.edita; }
+    else por.set(p.id, { id: p.id, nombre: p.nombre, avatar: p.avatar, color: p.color, edita: p.edita, pestanas: 1 });
+  }
+  return [...por.values()];
+}
+
 function Inline({ texto }: { texto: string }) {
   return <TextoEnriquecido texto={texto} />;
 }
@@ -845,6 +858,58 @@ function EditorPagina() {
   const bloqueActivoRef = useRef<string | null>(null);
   bloqueActivoRef.current = bloqueActivo;
   const [pasosColab, setPasosColab] = useState({ atras: 0, adelante: 0 });
+  /** Quién más está (con sus cursores) y a quién sigo. */
+  const [personasColab, setPersonasColab] = useState<PresenciaPersona[]>([]);
+  const [siguiendo, setSiguiendo] = useState<string | null>(null);
+  const ultimaCaja = useRef<string | null>(null);
+
+  // ══ MI PRESENCIA: DÓNDE ESTOY Y QUÉ TENGO SELECCIONADO (2026-10-06) ═════
+  // El cursor viaja como posición relativa de Yjs (ver `CursoresAjenos`). En un
+  // bloque que no es texto, lo que se comparte es el bloque donde se hizo clic
+  // o el que se ha marcado.
+  const publicarPresencia = () => {
+    const c = colabRef.current;
+    if (!c || c.estado !== 'vivo') return;
+    const act = document.activeElement as HTMLElement | null;
+    const el = act?.dataset?.bloque && docRef.current?.contains(act) ? act : null;
+    if (el) {
+      const id = el.dataset.bloque!;
+      const sel = leerSeleccion(el);
+      const cursor = sel ? { a: c.posicionRelativa(id, sel.a), h: c.posicionRelativa(id, sel.f) } : null;
+      ultimaCaja.current = id;
+      c.ponerPresencia({ bloque: id, cursor: cursor && cursor.a && cursor.h ? cursor : null, sig: siguiendo });
+    } else {
+      c.ponerPresencia({ bloque: seleccion[0] || ultimaCaja.current, cursor: null, sig: siguiendo });
+    }
+  };
+  const publicarRef = useRef(publicarPresencia);
+  publicarRef.current = publicarPresencia;
+  useEffect(() => {
+    let t: any = null;
+    const programar = () => { if (!t) t = setTimeout(() => { t = null; publicarRef.current(); }, 80); };
+    const abajo = (e: PointerEvent) => {
+      const caja = (e.target as HTMLElement | null)?.closest?.('[data-bloque-caja]') as HTMLElement | null;
+      if (caja && docRef.current?.contains(caja)) { ultimaCaja.current = caja.dataset.bloqueCaja || null; programar(); }
+    };
+    document.addEventListener('selectionchange', programar);
+    document.addEventListener('pointerdown', abajo, true);
+    return () => { document.removeEventListener('selectionchange', programar); document.removeEventListener('pointerdown', abajo, true); clearTimeout(t); };
+  }, []);
+  useEffect(() => { publicarRef.current(); }, [seleccion, siguiendo, infoColab?.sincronizado]);
+
+  // SIGUIENDO A ALGUIEN (como en Notion): la página se desplaza a donde esté.
+  // Se deja de seguir al desplazarse o teclear uno mismo.
+  const bloqueSeguido = personasColab.find(p => p.id === siguiendo && !p.yo)?.bloque || null;
+  useEffect(() => {
+    if (!siguiendo || !bloqueSeguido) return;
+    document.getElementById(`b-${bloqueSeguido}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [siguiendo, bloqueSeguido]);
+  useEffect(() => {
+    if (!siguiendo) return;
+    const parar = (e: Event) => { if ((e as KeyboardEvent).key === 'Shift') return; setSiguiendo(null); };
+    const t = setTimeout(() => { window.addEventListener('wheel', parar, { passive: true }); window.addEventListener('keydown', parar); window.addEventListener('touchmove', parar, { passive: true }); }, 1200);
+    return () => { clearTimeout(t); window.removeEventListener('wheel', parar); window.removeEventListener('keydown', parar); window.removeEventListener('touchmove', parar); };
+  }, [siguiendo]);
   // Lo que Yjs le dice al editor (se renueva en cada render; ver `useColab`).
   colabCb.current = {
     leerEditor: (): Plano | null => (cargandoRef.current ? null : { titulo: metaRef.current.titulo, bloques: serializar() }),
@@ -855,6 +920,7 @@ function EditorPagina() {
       if (i.version != null && (versionBase.current ?? 0) < i.version) versionBase.current = i.version;
     },
     alAviso: (t: string) => avisar(t),
+    alPresencia: (p: PresenciaPersona[]) => setPersonasColab(p),
     alRemoto: (plano: Plano, c, origen) => aplicarRemoto(plano, c, origen),
   };
   const cargandoRef = useRef(cargando);
@@ -3704,7 +3770,12 @@ function EditorPagina() {
                   lo único que puede tardar de verdad (un vídeo son megas). */}
               {/* DESHACER Y REHACER, también a la vista (2026-10-05): quien no
                   sabe los atajos tiene que poder encontrarlos. */}
-              <CarasPresencia personas={presencia.personas} yo={presencia.yo} />
+              {/* En vivo, las caras salen de la presencia de Yjs (con su cursor);
+                  sin conexión en vivo, del aviso de siempre (SSE). */}
+              <CarasPresencia
+                personas={infoColab?.estado === 'vivo' ? carasDe(personasColab) : presencia.personas}
+                yo={infoColab?.estado === 'vivo' ? infoColab.yo?.id ?? null : presencia.yo}
+                siguiendo={siguiendo} alSeguir={infoColab?.estado === 'vivo' ? (id => setSiguiendo(s => (s === id ? null : id))) : undefined} />
               <span className="hidden sm:inline-flex items-center">
                 <button onClick={deshacer} disabled={!(infoColab && infoColab.estado !== 'abandonado' ? pasosColab.atras : pasos.atras)} title={tr('Deshacer (⌘Z)')} aria-label={tr('Deshacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
@@ -3814,9 +3885,10 @@ function EditorPagina() {
           onDragOver={e => { if (!arrastrando && traeArchivos(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setArchivoEncima(true); } }}
           onDragLeave={e => { if (e.currentTarget === e.target) setArchivoEncima(false); }}
           onDrop={alSoltarArchivos}
-          className={cn('bg-white rounded-2xl transition-colors', clasesDePagina(ajustes),
+          className={cn('relative bg-white rounded-2xl transition-colors', clasesDePagina(ajustes),
             archivoEncima && 'ring-2 ring-emerald-400 ring-offset-4')}
         >
+        {infoColab?.estado === 'vivo' && <CursoresAjenos personas={personasColab} contenedor={docRef} colab={colabRef} />}
         {/* PÁGINA BLOQUEADA (2026-10-06, #29): se lee pero no se escribe. */}
         {ajustes.bloqueada && (
           <div role="status" data-pagina-bloqueada className="mb-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">

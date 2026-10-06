@@ -40,7 +40,7 @@ export function usePresencia(paginaId: string | null, activo: boolean, alGuardar
 const iniciales = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]?.toUpperCase()).join('') || '?';
 
 /** Las caras. Quien eres tú va la última y sin repetirse en las demás pestañas. */
-export function CarasPresencia({ personas, yo }: { personas: Persona[]; yo: string | null }) {
+export function CarasPresencia({ personas, yo, siguiendo, alSeguir }: { personas: Persona[]; yo: string | null; siguiendo?: string | null; alSeguir?: (id: string) => void }) {
   const otras = personas.filter(p => p.id !== yo);
   if (!otras.length) return null;
   const MAX = 4;
@@ -48,8 +48,10 @@ export function CarasPresencia({ personas, yo }: { personas: Persona[]; yo: stri
   return (
     <div className="flex items-center -space-x-1.5" aria-label={`${otras.length} ${otras.length === 1 ? 'persona más' : 'personas más'} en esta página`}>
       {vistas.map(p => (
-        <span key={p.id} title={`${p.nombre}${p.edita ? ' · editando' : ' · mirando'}`}
-          className={cn('relative w-7 h-7 rounded-full grid place-items-center text-[10px] font-black text-white ring-2 ring-white overflow-hidden', !p.edita && 'opacity-80')}
+        <span key={p.id} title={`${p.nombre}${p.edita ? ' · editando' : ' · mirando'}${alSeguir ? (siguiendo === p.id ? ' · pulsa para dejar de seguir' : ' · pulsa para seguir') : ''}`}
+          onClick={alSeguir ? () => alSeguir(p.id) : undefined}
+          role={alSeguir ? 'button' : undefined}
+          className={cn('relative w-7 h-7 rounded-full grid place-items-center text-[10px] font-black text-white ring-2 ring-white overflow-hidden', !p.edita && 'opacity-80', alSeguir && 'cursor-pointer', siguiendo === p.id && '!ring-emerald-500')}
           style={{ background: p.color }}>
           {p.avatar ? <img src={p.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : iniciales(p.nombre)}
         </span>
