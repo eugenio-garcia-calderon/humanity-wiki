@@ -11,6 +11,7 @@ import { OBJETIVOS, hablaDe } from '../../utils/objetivos';
 import { useContextoNavegacion, type Contexto } from '../../utils/contextoNavegacion';
 import { HojaPanel, type Herramienta } from './Rail';
 
+import { t as tr } from '../../i18n';
 /*
  * EL PANEL (2026-08-23, agente de APP/UX)
  * ============================================================================
@@ -65,7 +66,7 @@ function Cabecera({ titulo, onCerrar }: { titulo: string; onCerrar: () => void }
   return (
     <div className="flex items-center justify-between px-3 pb-2 pt-3">
       <h2 className="text-sm font-black text-slate-900">{titulo}</h2>
-      <button onClick={onCerrar} title="Cerrar" aria-label="Cerrar el panel"
+      <button onClick={onCerrar} title={tr('Cerrar')} aria-label={tr('Cerrar el panel')}
         className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
         <X className="h-4 w-4" />
       </button>
@@ -187,7 +188,7 @@ function useLista<T = any>(url: string, extrae?: (j: any) => T[]) {
 
 /** Lo que se pinta mientras la lista no es una lista. */
 function Estado({ estado, que, onReintentar }: { estado: any; que: string; onReintentar: () => void }) {
-  if (estado === null) return <Vacio>Cargando…</Vacio>;
+  if (estado === null) return <Vacio>{tr('Cargando…')}</Vacio>;
   if (estado !== 'fallo') return null;
   return (
     <div className="px-3 py-4">
@@ -196,7 +197,7 @@ function Estado({ estado, que, onReintentar }: { estado: any; que: string; onRei
       </p>
       <button onClick={onReintentar}
         className="mt-2 rounded-lg border border-amber-300 px-2.5 py-1.5 text-[12px] font-bold text-amber-800 hover:bg-amber-50">
-        Volver a intentarlo
+        {tr('Volver a intentarlo')}
       </button>
     </div>
   );
@@ -265,17 +266,17 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Carpetas" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una carpeta…" />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar una carpeta…')} />
 
       <button
         onClick={() => navegar('/carpetas?nuevo=1')}
         className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-2 text-[13px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
       >
-        <Plus className="h-3.5 w-3.5" /> Nueva carpeta
+        <Plus className="h-3.5 w-3.5" /> {tr('Nueva carpeta')}
       </button>
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-        {proyectos === null && <Vacio>Cargando…</Vacio>}
+        {proyectos === null && <Vacio>{tr('Cargando…')}</Vacio>}
         {proyectos === 'fallo' && (
           <div className="px-3 py-4">
             <p className="text-xs leading-relaxed text-amber-700">
@@ -284,7 +285,7 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
             </p>
             <button onClick={() => { setProyectos(null); recargar(); }}
               className="mt-2 rounded-lg border border-amber-300 px-2.5 py-1.5 text-[12px] font-bold text-amber-800 hover:bg-amber-50">
-              Volver a intentarlo
+              {tr('Volver a intentarlo')}
             </button>
           </div>
         )}
@@ -320,11 +321,11 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
                 <div className="pn-cascada ml-6 border-l border-slate-100 pl-2">
                   {arbol === 'cargando' && (
                     <p className="flex items-center gap-1.5 px-2 py-2 text-[11px] text-slate-400">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Abriendo…
+                      <Loader2 className="h-3 w-3 animate-spin" /> {tr('Abriendo…')}
                     </p>
                   )}
                   {Array.isArray(arbol) && arbol.length === 0 && (
-                    <p className="px-2 py-2 text-[11px] text-slate-400">Esta carpeta está vacía todavía.</p>
+                    <p className="px-2 py-2 text-[11px] text-slate-400">{tr('Esta carpeta está vacía todavía.')}</p>
                   )}
                   {Array.isArray(arbol) && arbol.map((rama: any) => (
                     <div key={rama.clave} className="py-0.5">
@@ -394,17 +395,17 @@ function PanelPaginas({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Páginas" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en tus páginas…" />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar en tus páginas…')} />
 
       <button
         onClick={() => navegar('/paginas?nueva=1')}
         className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-2 text-[13px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
       >
-        <Plus className="h-3.5 w-3.5" /> Nueva página
+        <Plus className="h-3.5 w-3.5" /> {tr('Nueva página')}
       </button>
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-        {grupos === null && <Vacio>Cargando…</Vacio>}
+        {grupos === null && <Vacio>{tr('Cargando…')}</Vacio>}
         {grupos !== null && cuantas === 0 && (
           <Vacio>{q ? 'Ninguna página con ese texto.' : 'Todavía no tienes páginas. Empieza por el botón de arriba.'}</Vacio>
         )}
@@ -420,7 +421,7 @@ function PanelPaginas({ onCerrar }: { onCerrar: () => void }) {
               <span className="text-[10px] text-slate-300">{g.paginas.length}</span>
             </div>
             {g.paginas.length === 0 && (
-              <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin páginas todavía</p>
+              <p className="px-2.5 py-1 text-[11px] italic text-slate-300">{tr('Sin páginas todavía')}</p>
             )}
             {g.paginas.map((p: any) => (
               <HojaPanel key={p.id} a={`/paginas/${p.id}`} icono={FileText} insignia={p.publico ? '' : undefined}>
@@ -455,8 +456,8 @@ function PanelMapas({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Mapas" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un mapa…" />
-      <BotonCrear a="/mapas?nuevo=1">Nuevo mapa</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar un mapa…')} />
+      <BotonCrear a="/mapas?nuevo=1">{tr('Nuevo mapa')}</BotonCrear>
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="los mapas" onReintentar={recargar} />
@@ -469,7 +470,7 @@ function PanelMapas({ onCerrar }: { onCerrar: () => void }) {
         {Array.isArray(estado) && user && (mios.length > 0 || !q) && (
           <div>
             <Grupo icono={MapIcon} titulo="Tuyos" cuantos={mios.length} />
-            {mios.length === 0 && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin mapas todavía</p>}
+            {mios.length === 0 && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">{tr('Sin mapas todavía')}</p>}
             {mios.map(m => <HojaPanel key={m.id} a={`/mapas/${m.slug}`} icono={MapIcon}>{m.title || 'Sin título'}</HojaPanel>)}
           </div>
         )}
@@ -494,9 +495,9 @@ function PanelMapas({ onCerrar }: { onCerrar: () => void }) {
 // afirmación sobre qué mirar antes.
 // ---------------------------------------------------------------------------
 const ESTADOS_TAREA = [
-  { clave: 'por_hacer', label: 'Por hacer', color: 'text-slate-400' },
-  { clave: 'en_curso',  label: 'En curso',  color: 'text-amber-500' },
-  { clave: 'hecho',     label: 'Hecho',     color: 'text-emerald-500' },
+  { clave: 'por_hacer', get label() { return tr('Por hacer'); }, color: 'text-slate-400' },
+  { clave: 'en_curso',  get label() { return tr('En curso'); },  color: 'text-amber-500' },
+  { clave: 'hecho',     get label() { return tr('Hecho'); },     color: 'text-emerald-500' },
 ];
 
 function PanelTareas({ onCerrar }: { onCerrar: () => void }) {
@@ -508,8 +509,8 @@ function PanelTareas({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Tareas" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una tarea…" />
-      <BotonCrear a="/tareas?nueva=1">Nueva tarea</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar una tarea…')} />
+      <BotonCrear a="/tareas?nueva=1">{tr('Nueva tarea')}</BotonCrear>
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="las tareas" onReintentar={recargar} />
@@ -589,8 +590,8 @@ function PanelComercio({ onCerrar }: { onCerrar: () => void }) {
       )}
       <Estado estado={ventas.estado} que="tus ventas" onReintentar={ventas.recargar} />
 
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en lo que vendes…" />
-      <BotonCrear a="/comercio?nuevo=1">Nuevo producto</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar en lo que vendes…')} />
+      <BotonCrear a="/comercio?nuevo=1">{tr('Nuevo producto')}</BotonCrear>
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={productos.estado} que="tus productos" onReintentar={productos.recargar} />
@@ -643,8 +644,8 @@ function PanelEsquemas({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Esquemas" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un esquema…" />
-      <BotonCrear a="/esquemas?nuevo=1">Nuevo esquema</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar un esquema…')} />
+      <BotonCrear a="/esquemas?nuevo=1">{tr('Nuevo esquema')}</BotonCrear>
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="los esquemas" onReintentar={recargar} />
         {Array.isArray(estado) && !mios.length && !otros.length && (
@@ -653,7 +654,7 @@ function PanelEsquemas({ onCerrar }: { onCerrar: () => void }) {
         {Array.isArray(estado) && user && (mios.length > 0 || !q) && (
           <div>
             <Grupo icono={Globe2} titulo="Tuyos" cuantos={mios.length} />
-            {!mios.length && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin esquemas todavía</p>}
+            {!mios.length && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">{tr('Sin esquemas todavía')}</p>}
             {mios.map(g => (
               <HojaPanel key={g.id} a={`/esquemas/${g.slug}`} icono={Globe2} insignia={g.window_count || undefined}>
                 {g.title || 'Sin título'}
@@ -706,8 +707,8 @@ function PanelTablas({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Tablas" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una tabla…" />
-      <BotonCrear a="/tablas?nueva=1">Nueva tabla</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar una tabla…')} />
+      <BotonCrear a="/tablas?nueva=1">{tr('Nueva tabla')}</BotonCrear>
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={tablas.estado} que="las tablas" onReintentar={tablas.recargar} />
         {Array.isArray(tablas.estado) && visibles.length === 0 && (
@@ -745,8 +746,8 @@ function PanelPublicaciones({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Publicaciones" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en lo tuyo…" />
-      <BotonCrear a="/explorar?crear=1">Publicar algo</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar en lo tuyo…')} />
+      <BotonCrear a="/explorar?crear=1">{tr('Publicar algo')}</BotonCrear>
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="tus publicaciones" onReintentar={recargar} />
         {Array.isArray(estado) && (
@@ -791,8 +792,8 @@ function PanelIA({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Asistente" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una conversación…" />
-      <BotonCrear a="/ia">Nueva conversación</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar una conversación…')} />
+      <BotonCrear a="/ia">{tr('Nueva conversación')}</BotonCrear>
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="tus conversaciones" onReintentar={recargar} />
         {Array.isArray(estado) && visibles.length === 0 && (
@@ -861,8 +862,8 @@ function PanelCalendario({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Calendario" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una fecha…" />
-      <BotonCrear a="/calendario?nuevo=1">Nueva fecha</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar una fecha…')} />
+      <BotonCrear a="/calendario?nuevo=1">{tr('Nueva fecha')}</BotonCrear>
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="el calendario" onReintentar={recargar} />
         {Array.isArray(estado) && visibles.length === 0 && (
@@ -894,10 +895,10 @@ function PanelCalendario({ onCerrar }: { onCerrar: () => void }) {
 // vídeo, un PDF— antes de acordarte de dónde estaba.
 // ---------------------------------------------------------------------------
 const TIPOS_ARCHIVO: Array<{ kind: string[]; label: string; icono: any }> = [
-  { kind: ['imagen'], label: 'Imágenes', icono: Paperclip },
-  { kind: ['video'], label: 'Vídeos', icono: Paperclip },
-  { kind: ['enlace'], label: 'Enlaces', icono: Bookmark },
-  { kind: ['pagina', 'documento'], label: 'Documentos', icono: FileText },
+  { kind: ['imagen'], get label() { return tr('Imágenes'); }, icono: Paperclip },
+  { kind: ['video'], get label() { return tr('Vídeos'); }, icono: Paperclip },
+  { kind: ['enlace'], get label() { return tr('Enlaces'); }, icono: Bookmark },
+  { kind: ['pagina', 'documento'], get label() { return tr('Documentos'); }, icono: FileText },
 ];
 
 function PanelArchivos({ onCerrar }: { onCerrar: () => void }) {
@@ -911,8 +912,8 @@ function PanelArchivos({ onCerrar }: { onCerrar: () => void }) {
   return (
     <>
       <Cabecera titulo="Archivos" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un archivo…" />
-      <BotonCrear a="/archivos">Subir un archivo</BotonCrear>
+      <Buscador valor={busca} onCambiar={setBusca} placeholder={tr('Buscar un archivo…')} />
+      <BotonCrear a="/archivos">{tr('Subir un archivo')}</BotonCrear>
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="tus archivos" onReintentar={recargar} />
         {Array.isArray(estado) && visibles.length === 0 && (

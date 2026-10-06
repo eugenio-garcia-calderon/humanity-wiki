@@ -1,5 +1,6 @@
 import { Boxes, FileText, FolderKanban, UserRound } from 'lucide-react';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
+import { t } from '../../i18n';
 
 // El servidor marca lo hallado entre ⟦ y ⟧. Se parte el texto y se pintan
 // <mark> como nodos de React: nunca se inyecta HTML, así que una página que
@@ -12,7 +13,8 @@ export function Resaltado({ texto }: { texto: string }) {
 }
 
 export type TipoResultado = 'pagina' | 'bd' | 'carpeta' | 'persona';
-export const ETIQUETA_TIPO: Record<TipoResultado, string> = { pagina: 'Página', bd: 'Base de datos', carpeta: 'Carpeta', persona: 'Persona' };
+/** Función y no objeto: el texto depende del idioma de ahora. */
+export const etiquetaTipo = (t_: TipoResultado) => t({ pagina: 'Página', bd: 'Base de datos', carpeta: 'Carpeta', persona: 'Persona' }[t_]);
 
 export function IconoResultado({ tipo, icono }: { tipo: TipoResultado; icono: string | null }) {
   if (icono && [...icono].length <= 2 && !/^[\w-]+$/.test(icono)) return <span className="w-5 text-center text-[16px] leading-none shrink-0">{icono}</span>;

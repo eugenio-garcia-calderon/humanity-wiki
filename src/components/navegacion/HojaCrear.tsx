@@ -9,6 +9,7 @@ import {
   PreviaMundo, PreviaNavegador, PreviaDebate,
 } from '../bienvenida/previas';
 
+import { t } from '../../i18n';
 /*
  * CREAR — LA HOJA QUE SUBE DESDE EL BOTÓN (2026-08-23, agente de APP/UX)
  * ============================================================================
@@ -73,42 +74,42 @@ interface Cosa {
 }
 
 const COSAS: Cosa[] = [
-  { nombre: 'Foto o vídeo', Previa: PreviaArchivos,      a: '/?atajo=crear',      nota: 'Con la cámara' },
-  { nombre: 'Publicación',  Previa: PreviaPublicaciones, a: '/explorar?crear=1',  nota: 'En el muro' },
+  { get nombre() { return t('Foto o vídeo'); }, Previa: PreviaArchivos,      a: '/?atajo=crear',      get nota() { return t('Con la cámara'); } },
+  { get nombre() { return t('Publicación'); },  Previa: PreviaPublicaciones, a: '/explorar?crear=1',  get nota() { return t('En el muro'); } },
   // REPUBLICAR VA AQUÍ Y NO SÓLO EN EL MENÚ DE UNA TARJETA (2026-08-24).
   // Desde una tarjeta se republica lo que ya estás viendo; desde aquí se
   // republica algo de FUERA —un tuit, un vídeo, un artículo—, que es un
   // «quiero hacer esto» y no un «esto que estoy leyendo». Sin esta entrada, lo
   // de fuera no tendría puerta: no hay ninguna tarjeta de la que colgarlo.
-  { nombre: 'Republicar',   Previa: PreviaPublicaciones, a: '/explorar?republicar=1', nota: 'De aquí o de otra red' },
-  { nombre: 'Carpeta',      Previa: PreviaTareas,        a: '/carpetas?nuevo=1', nota: 'Para tus páginas' },
-  { nombre: 'Tarea',        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
-  { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, fotos y vídeo' },
-  { nombre: 'Esquema',      Previa: PreviaEsquema,       a: '/esquemas?nuevo=1',  nota: 'Ideas conectadas' },
+  { get nombre() { return t('Republicar'); },   Previa: PreviaPublicaciones, a: '/explorar?republicar=1', get nota() { return t('De aquí o de otra red'); } },
+  { get nombre() { return t('Carpeta'); },      Previa: PreviaTareas,        a: '/carpetas?nuevo=1', get nota() { return t('Para tus páginas'); } },
+  { get nombre() { return t('Tarea'); },        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
+  { get nombre() { return t('Página'); },       Previa: PreviaPagina,        a: '/paginas?nueva=1',   get nota() { return t('Texto, fotos y vídeo'); } },
+  { get nombre() { return t('Esquema'); },      Previa: PreviaEsquema,       a: '/esquemas?nuevo=1',  get nota() { return t('Ideas conectadas'); } },
   // Un debate se CREA como cualquier otra cosa (2026-08-24, Eugenio). Estaba
   // solo en el menú de información, que es donde se EXPLICA lo que es — y ahí
   // no lo encuentra quien tiene algo que discutir, que es el que hace falta.
-  { nombre: 'Debate',       Previa: PreviaDebate,        a: '/debates?nuevo=1',   nota: 'Con argumentos y votos' },
-  { nombre: 'Mapa',         Previa: PreviaMapa,          a: '/mapas?nuevo=1' },
-  { nombre: 'Tabla',        Previa: PreviaTabla,         a: '/tablas?nueva=1',    nota: 'Datos con columnas' },
-  { nombre: 'Fecha',        Previa: PreviaCalendario,    a: '/calendario?nuevo=1' },
-  { nombre: 'Producto',     Previa: PreviaComercio,      a: '/comercio?nuevo=1',  nota: 'Para vender' },
-  { nombre: 'Persona',      Previa: PreviaTelecom,       a: '/personas?nueva=1' },
-  { nombre: 'Archivo',      Previa: PreviaArchivos,      a: '/archivos' },
-  { nombre: 'Pedírselo a la IA', Previa: PreviaIA,       a: '/ia',                nota: 'Que lo haga ella' },
+  { get nombre() { return t('Debate'); },       Previa: PreviaDebate,        a: '/debates?nuevo=1',   get nota() { return t('Con argumentos y votos'); } },
+  { get nombre() { return t('Mapa'); },         Previa: PreviaMapa,          a: '/mapas?nuevo=1' },
+  { get nombre() { return t('Tabla'); },        Previa: PreviaTabla,         a: '/tablas?nueva=1',    get nota() { return t('Datos con columnas'); } },
+  { get nombre() { return t('Fecha'); },        Previa: PreviaCalendario,    a: '/calendario?nuevo=1' },
+  { get nombre() { return t('Producto'); },     Previa: PreviaComercio,      a: '/comercio?nuevo=1',  get nota() { return t('Para vender'); } },
+  { get nombre() { return t('Persona'); },      Previa: PreviaTelecom,       a: '/personas?nueva=1' },
+  { get nombre() { return t('Archivo'); },      Previa: PreviaArchivos,      a: '/archivos' },
+  { get nombre() { return t('Pedírselo a la IA'); }, Previa: PreviaIA,       a: '/ia',                get nota() { return t('Que lo haga ella'); } },
   // LAS TRES QUE FALTABAN (2026-08-24, Eugenio: «cuidado que hay herramientas
   // que aún no están en ese menú central, como el visor 3D o el navegador o
   // CONTACTOS»). Se habían quedado fuera al montar la hoja, y ahora que el menú
   // de la derecha ya no lleva herramientas, **éste es su único sitio**: si no
   // estuvieran aquí, no habría forma de llegar a ellas.
-  { nombre: 'Visor 3D',     Previa: PreviaMundo,         a: '/juego',             nota: 'Camina por tus proyectos' },
+  { get nombre() { return t('Visor 3D'); },     Previa: PreviaMundo,         a: '/juego',             get nota() { return t('Camina por tus proyectos'); } },
   // `about:inicio` es la página de arranque del propio navegador, la misma con
   // la que lo abría el menú ☰ de antes. No se le pasa una web de verdad: quien
   // lo abre desde aquí todavía no ha dicho a dónde quiere ir.
-  { nombre: 'Navegador',    Previa: PreviaNavegador,
+  { get nombre() { return t('Navegador'); },    Previa: PreviaNavegador,
     abrir: () => abrirVentana({ titulo: 'Navegador', clase: 'navegador', destino: 'about:inicio' }),
-    nota: 'Navega por internet' },
-  { nombre: 'Contactos',    Previa: PreviaTelecom,       a: '/telefono',          nota: 'Tu gente y sus llamadas' },
+    get nota() { return t('Navega por internet'); } },
+  { get nombre() { return t('Contactos'); },    Previa: PreviaTelecom,       a: '/telefono',          get nota() { return t('Tu gente y sus llamadas'); } },
 ];
 
 /*
@@ -222,7 +223,7 @@ export default function HojaCrear({ onCerrar, gesto, titulo = 'Crear', items, on
               escribirlo, y es lo que la gente ya conoce de su teléfono. */}
           <div className="flex items-center justify-between px-5 pb-2 pt-3">
             <span className="mx-auto h-1 w-10 rounded-full bg-slate-200" />
-            <button onClick={onCerrar} title="Cerrar" aria-label="Cerrar"
+            <button onClick={onCerrar} title={t('Cerrar')} aria-label={t('Cerrar')}
               className="absolute right-4 top-3 grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
               <X className="h-4 w-4" />
             </button>

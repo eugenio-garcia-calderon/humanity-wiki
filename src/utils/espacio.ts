@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t } from '../i18n';
 
 // ============================================================================
 // FAVORITOS Y RECIENTES, DEL LADO DEL CLIENTE (2026-10-06, carril «espacio»)
@@ -56,10 +57,10 @@ export async function alternarFavorito(tipo: TipoEspacio, id: string, titulo = '
       method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tipo, id, favorito: quiere }),
     });
-    if (!r.ok) { poner(antes); return (await r.json().catch(() => ({}))).error || 'No se ha podido guardar el favorito.'; }
+    if (!r.ok) { poner(antes); return (await r.json().catch(() => ({}))).error || t('No se ha podido guardar el favorito.'); }
     void recargarEspacio();
     return null;
-  } catch { poner(antes); return 'Sin conexión: no se ha podido guardar el favorito.'; }
+  } catch { poner(antes); return t('Sin conexión: no se ha podido guardar el favorito.'); }
 }
 
 /** Anota que se ha abierto algo. Sin esperar y sin quejarse: un reciente que se pierde no es grave. */

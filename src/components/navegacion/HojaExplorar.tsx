@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { X, SlidersHorizontal } from 'lucide-react';
 import type { Herramienta } from './Rail';
 
+import { t as tr } from '../../i18n';
 // ============================================================================
 // EXPLORAR, POR ABAJO (2026-10-02)
 // ============================================================================
@@ -29,21 +30,21 @@ export default function HojaExplorar({ temas, onElegir, onCerrar, onPersonalizar
   return (
     <div className="fixed inset-0 z-[9996] flex flex-col justify-end">
       <div onClick={onCerrar} aria-hidden className="absolute inset-0 bg-slate-900/25 animate-in fade-in duration-150" />
-      <div role="dialog" aria-label="Explorar"
+      <div role="dialog" aria-label={tr('Explorar')}
         className="relative w-full max-h-[62vh] overflow-y-auto bg-white rounded-t-3xl shadow-2xl border-t border-slate-200 animate-in slide-in-from-bottom duration-200"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur flex items-center gap-2 px-5 sm:px-8 pt-3 pb-2">
           <span aria-hidden className="absolute left-1/2 top-1.5 -translate-x-1/2 w-10 h-1 rounded-full bg-slate-200" />
-          <h2 className="text-base font-black text-slate-900 mt-2">Explorar</h2>
-          <p className="hidden sm:block mt-2 text-xs text-slate-400">Los temas de la humanidad: elige uno para ver todo lo que hay.</p>
+          <h2 className="text-base font-black text-slate-900 mt-2">{tr('Explorar')}</h2>
+          <p className="hidden sm:block mt-2 text-xs text-slate-400">{tr('Los temas de la humanidad: elige uno para ver todo lo que hay.')}</p>
           <span className="flex-1" />
           {onPersonalizar && (
             <button type="button" onClick={onPersonalizar}
               className="mt-2 inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-800">
-              <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Personalizar</span>
+              <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{tr('Personalizar')}</span>
             </button>
           )}
-          <button type="button" onClick={onCerrar} aria-label="Cerrar"
+          <button type="button" onClick={onCerrar} aria-label={tr('Cerrar')}
             className="mt-2 w-10 h-10 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X className="w-5 h-5" />
           </button>

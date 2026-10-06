@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { FileText, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
+import { t } from '../../i18n';
 // ============================================================================
 // COMPARTIDAS CONMIGO (2026-10-05, carril «acceso», #12)
 // ============================================================================
@@ -39,12 +40,12 @@ export default function CompartidasConmigo({ onIr }: { onIr?: () => void }) {
       <button type="button" onClick={alternar} aria-expanded={abierta}
         className="flex w-full items-center gap-1 rounded-lg px-1 py-1 text-left text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-slate-600">
         <ChevronRight className={cn('h-3 w-3 transition-transform', abierta && 'rotate-90')} />
-        Compartidas conmigo <span className="font-bold normal-case tracking-normal">· {paginas.length}</span>
+        {t('Compartidas conmigo')} <span className="font-bold normal-case tracking-normal">· {paginas.length}</span>
       </button>
       {abierta && paginas.map(p => {
         const ruta = `/paginas/${p.id}`;
         return (
-          <Link key={p.id} to={ruta} onClick={onIr} title={`De ${p.de} · ${NOMBRE[p.rol] || p.rol}`}
+          <Link key={p.id} to={ruta} onClick={onIr} title={`${p.de} · ${t(NOMBRE[p.rol] || p.rol)}`}
             className={cn('flex items-center gap-2 rounded-lg py-1.5 pl-6 pr-2 text-[13px]',
               aqui === ruta ? 'bg-slate-100 font-bold text-slate-900' : 'font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900')}>
             {p.icono && [...p.icono].length <= 2 ? <span className="w-4 text-center text-[14px] leading-none">{p.icono}</span> : <FileText className="h-4 w-4 shrink-0" />}

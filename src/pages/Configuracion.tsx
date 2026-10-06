@@ -12,7 +12,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { BorrarCuenta } from '../components/cuenta/BorrarCuenta';
 import CuentaDeGoogle from '../components/social/CuentaDeGoogle';
 import { Bloqueados } from '../components/cuenta/Bloqueados';
+import AparienciaIdioma from '../components/espacio/AparienciaIdioma';
 
+import { t } from '../i18n';
 export default function Configuracion() {
   const { fontScale, setFontScale } = useSettings();
   const { user } = useAuth();
@@ -20,15 +22,15 @@ export default function Configuracion() {
   return (
     <div className="max-w-2xl mx-auto w-full">
       <h1 className="inline-flex items-center gap-2 text-xl font-black tracking-tight text-slate-900 mb-6">
-        <Settings className="w-5 h-5 text-emerald-600" /> Configuración
+        <Settings className="w-5 h-5 text-emerald-600" /> {t('Configuración')}
       </h1>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="inline-flex items-center gap-2 text-sm font-black text-slate-800 mb-1">
-          <Type className="w-4 h-4 text-slate-400" /> Tamaño de letra
+          <Type className="w-4 h-4 text-slate-400" /> {t('Tamaño de letra')}
         </h2>
         <p className="text-xs text-slate-400 mb-4">
-          Se aplica a toda la plataforma{user ? ' y se guarda en tu cuenta, así que te sigue a cualquier dispositivo' : ''}.
+          {t('Se aplica a toda la plataforma{cuenta}.', { cuenta: user ? t(' y se guarda en tu cuenta, así que te sigue a cualquier dispositivo') : '' })}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {(Object.keys(FONT_SCALE_LABELS) as FontScaleKey[]).map(key => (
@@ -40,11 +42,18 @@ export default function Configuracion() {
                   ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}
             >
-              {FONT_SCALE_LABELS[key]}
+              {t(FONT_SCALE_LABELS[key])}
               {fontScale === key && <Check className="w-3.5 h-3.5" />}
             </button>
           ))}
         </div>
+      </section>
+
+      {/* APARIENCIA E IDIOMA (#25, #34): lo mismo que el menú del perfil, con sitio para leerlo. */}
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 className="inline-flex items-center gap-2 text-sm font-black text-slate-800 mb-1">{t('Apariencia')} · {t('Idioma')}</h2>
+        <p className="text-xs text-slate-400 mb-2">{t('Elige cómo se ve la plataforma y en qué idioma. Se guarda en tu cuenta y te sigue a cualquier dispositivo.')}</p>
+        <div className="max-w-sm"><AparienciaIdioma desplegado /></div>
       </section>
 
       {/* Y lo de la cuenta, al final y separado: lo de arriba se toca a menudo,

@@ -8,6 +8,29 @@
          fichero para los dos sitios, así que no pueden acabar distintos. -->
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="theme-color" content="#2b2258" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- MODO OSCURO SIN PARPADEO (2026-10-06, #25). Se decide aquí, de forma
+         síncrona y antes de que el navegador pinte: si esperase a React, quien
+         prefiere oscuro vería un fogonazo blanco en cada carga. Lee la misma
+         clave que `src/utils/tema.ts` (`humanity:tema`: claro, oscuro o
+         sistema) y, sin elección, el modo del sistema. El fondo también se
+         pone aquí: el lienzo vacío del navegador es blanco hasta que llega el
+         CSS. -->
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem('humanity:tema');
+          var oscuro = p === 'oscuro' || (p !== 'claro' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+          if (oscuro) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+            document.documentElement.style.backgroundColor = '#11161d';
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', '#11161d');
+          }
+        } catch (e) { /* sin almacenamiento: se ve claro */ }
+      })();
+    </script>
 
     <!-- PWA (2026-08-22, Programador 3).
          El `apple-touch-icon` apuntaba a `/logo.svg`: iOS NO admite SVG ahí, así

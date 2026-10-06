@@ -5,6 +5,7 @@ import { componenteDeTrazo } from '../ui/iconosDeTrazo';
 import { HojaPanel, type Herramienta } from './Rail';
 import { cn } from '../../utils/cn';
 
+import { t } from '../../i18n';
 /*
  * EL RAÍL DE LA DERECHA SON TUS PROYECTOS (2026-08-25, agente de APP/UX)
  * ============================================================================
@@ -136,7 +137,7 @@ export function PanelProyecto({ proyecto, onCerrar }: { proyecto: Proyecto; onCe
     <div className="flex h-full w-64 shrink-0 flex-col border-l border-slate-200 bg-white">
       <div className="flex items-center justify-between px-3 pb-2 pt-3">
         <h2 className="min-w-0 truncate text-sm font-black text-slate-900">{proyecto.titulo}</h2>
-        <button onClick={onCerrar} title="Cerrar" aria-label="Cerrar el panel"
+        <button onClick={onCerrar} title={t('Cerrar')} aria-label={t('Cerrar el panel')}
           className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <X className="h-4 w-4" />
         </button>
@@ -148,13 +149,13 @@ export function PanelProyecto({ proyecto, onCerrar }: { proyecto: Proyecto; onCe
         to={`/carpetas/${proyecto.slug}`}
         className="mx-3 mb-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-1.5 text-center text-[12px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
       >
-        Abrir el proyecto
+        {t('Abrir el proyecto')}
       </Link>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         {arbol === null && (
           <p className="flex items-center gap-1.5 px-2 py-2 text-[11px] text-slate-400">
-            <Loader2 className="h-3 w-3 animate-spin" /> Abriendo…
+            <Loader2 className="h-3 w-3 animate-spin" /> {t('Abriendo…')}
           </p>
         )}
 
@@ -171,7 +172,7 @@ export function PanelProyecto({ proyecto, onCerrar }: { proyecto: Proyecto; onCe
           </div>
         )}
 
-        {vacio && <p className="px-2 py-2 text-[11px] text-slate-400">Esta carpeta está vacía todavía.</p>}
+        {vacio && <p className="px-2 py-2 text-[11px] text-slate-400">{t('Esta carpeta está vacía todavía.')}</p>}
 
         {Array.isArray(arbol) && arbol.map((rama: any) => (
           rama.hijos?.length ? (
@@ -210,12 +211,12 @@ export function PieProyectos({ estado, desplegado, onReintentar }: {
       <div className="px-1.5 py-2">
         <button
           onClick={onReintentar}
-          title="Volver a cargar tus carpetas"
+          title={t('Volver a cargar tus carpetas')}
           className={cn('flex h-9 items-center gap-2 rounded-xl px-[10px] text-[12px] font-bold text-amber-700 hover:bg-amber-50',
             desplegado ? 'w-full' : 'w-10 justify-center')}
         >
           <Loader2 className="h-4 w-4 shrink-0" />
-          {desplegado && <span className="truncate">Reintentar</span>}
+          {desplegado && <span className="truncate">{t('Reintentar')}</span>}
         </button>
       </div>
     );
@@ -243,14 +244,14 @@ export function PieProyectos({ estado, desplegado, onReintentar }: {
         Va ENCIMA de «Nuevo proyecto» porque ir a lo que ya existe es lo que se
         hace a diario y crear es lo excepcional.
       */}
-      <Link to="/carpetas" title="Todas las carpetas" className={fila(desplegado)}>
+      <Link to="/carpetas" title={t('Todas las carpetas')} className={fila(desplegado)}>
         <LayoutGrid className="h-4 w-4 shrink-0" />
-        <span className={palabra(desplegado)}>Todas las carpetas</span>
+        <span className={palabra(desplegado)}>{t('Todas las carpetas')}</span>
       </Link>
 
-      <Link to="/carpetas?nuevo=1" title="Nueva carpeta" className={fila(desplegado)}>
+      <Link to="/carpetas?nuevo=1" title={t('Nueva carpeta')} className={fila(desplegado)}>
         <Plus className="h-4 w-4 shrink-0" />
-        <span className={palabra(desplegado)}>Nueva carpeta</span>
+        <span className={palabra(desplegado)}>{t('Nueva carpeta')}</span>
       </Link>
     </>
   );
