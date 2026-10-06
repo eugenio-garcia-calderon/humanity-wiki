@@ -3,6 +3,7 @@ import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { subirArchivo } from '../../utils/subir';
 import { cn } from '../../utils/cn';
 import type { Cabecera } from './CabeceraPagina';
+import { textoLectura, type Letra, type Ancho } from '../../utils/ajustesPagina';
 
 // ============================================================================
 // AJUSTES DE LA PÁGINA (2026-09-30)
@@ -21,9 +22,20 @@ export type Ajustes = {
    *  pestaña, en Google y para los lectores de pantalla. */
   ocultarTitulo?: boolean;
   mostrarFecha?: boolean;
-  /** Ya no se usa: desde el 2026-10-02 todas las páginas son de ancho
-   *  completo, sin opción (Eugenio). Se conserva para leer las que lo tenían. */
+  /** Ya no se usa (se leía antes de `ancho`). */
   anchoCompleto?: boolean;
+  /** 2026-10-06 (#29, como Notion). Cómo se ve la página, en el editor y
+   *  publicada (`utils/ajustesPagina.ts`). Sin valor: letra de siempre,
+   *  tamaño normal y ancho COMPLETO, que es lo que ya tenían todas. */
+  letra?: Letra;
+  textoPequeno?: boolean;
+  ancho?: Ancho;
+  /** Nadie la edita hasta que se desbloquee. Es un seguro contra los
+   *  descuidos de quien edita (como el candado de Notion), no una barrera de
+   *  seguridad: quien puede editar la página puede desbloquearla. */
+  bloqueada?: boolean;
+  /** Publicada, «320 palabras · 2 min de lectura» bajo el título. */
+  tiempoLectura?: boolean;
   /** Para buscadores y para la vista previa al compartir. */
   descripcion?: string;
   /** La imagen de la vista previa. Sin ella, la portada. */
@@ -41,12 +53,14 @@ export type Ajustes = {
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio'];
 
-export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCerrar }: {
+export default function AjustesPagina({ ajustes, portada, titulo, resumen, onCambio, onCerrar }: {
   ajustes: Ajustes;
   portada: string | null;
   titulo: string;
+  /** Palabras y minutos de lectura de la página ahora mismo. */
+  resumen?: { palabras: number; caracteres: number; minutos: number };
   onCambio: (a: Ajustes) => void;
   onCerrar: () => void;
 }) {
@@ -74,8 +88,53 @@ export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCe
           </button>
         </div>
 
+        {/* ══ LA PÁGINA, COMO NOTION (2026-10-06, #29) ═══════════════════════
+            Letra, tamaño y ancho valen en el editor y publicada. */}
+        <section className="space-y-3">
+          <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Estilo de la página</p>
+          <div>
+            <span className="text-xs font-bold text-slate-700">Tipo de letra</span>
+            <div role="radiogroup" aria-label="Tipo de letra" className="mt-1 grid grid-cols-3 gap-1.5">
+              {([['defecto', 'Ag', 'Por defecto', ''], ['serif', 'Ag', 'Serif', 'font-serif'], ['mono', 'Ag', 'Mono', 'font-mono']] as const).map(([v, muestra, nombre, clase]) => (
+                <button key={v} type="button" role="radio" aria-checked={(ajustes.letra || 'defecto') === v}
+                  onClick={() => pon({ letra: v === 'defecto' ? undefined : v })}
+                  className={cn('h-16 rounded-xl border text-center transition-colors',
+                    (ajustes.letra || 'defecto') === v ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-300')}>
+                  <span className={cn('block text-xl text-slate-800 leading-6', clase)}>{muestra}</span>
+                  <span className="block text-[11px] font-bold text-slate-500">{nombre}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <Interruptor etiqueta="Texto pequeño" ayuda="Todo el contenido un poco más pequeño."
+            valor={!!ajustes.textoPequeno} onCambio={v => pon({ textoPequeno: v || undefined })} />
+          <div>
+            <span className="text-xs font-bold text-slate-700">Ancho de la página</span>
+            <div role="radiogroup" aria-label="Ancho de la página" className="mt-1 grid grid-cols-2 gap-1.5">
+              {([['normal', 'Normal', 'Una columna de lectura'], ['completo', 'Completo', 'Todo el ancho']] as const).map(([v, nombre, ayuda]) => (
+                <button key={v} type="button" role="radio" aria-checked={(ajustes.ancho || 'completo') === v}
+                  onClick={() => pon({ ancho: v === 'completo' ? undefined : v })}
+                  className={cn('h-14 rounded-xl border text-center transition-colors',
+                    (ajustes.ancho || 'completo') === v ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-300')}>
+                  <span className="block text-xs font-bold text-slate-800">{nombre}</span>
+                  <span className="block text-[11px] text-slate-400">{ayuda}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <Interruptor etiqueta="Bloquear la página" ayuda="Nadie la edita hasta que se desbloquee: un seguro contra descuidos."
+            valor={!!ajustes.bloqueada} onCambio={v => pon({ bloqueada: v || undefined })} />
+          {resumen && (
+            <p className="text-[11px] text-slate-500 rounded-lg bg-slate-50 px-3 py-2" data-resumen-pagina>
+              {textoLectura(resumen.palabras, resumen.minutos)} · {resumen.caracteres.toLocaleString('es-ES')} caracteres
+            </p>
+          )}
+        </section>
+
         <section className="space-y-1">
           <p className="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Cómo se ve publicada</p>
+          <Interruptor etiqueta="Mostrar el tiempo de lectura" ayuda="«320 palabras · 2 min de lectura» bajo el título."
+            valor={!!ajustes.tiempoLectura} onCambio={v => pon({ tiempoLectura: v || undefined })} />
           <Interruptor etiqueta="Mostrar el autor" ayuda="Tu nombre y tu foto bajo el título."
             valor={!!ajustes.mostrarAutor} onCambio={v => pon({ mostrarAutor: v })} />
           <Interruptor etiqueta="Mostrar el título" ayuda="Apágalo si la portada o el logotipo ya dicen cómo se llama."
