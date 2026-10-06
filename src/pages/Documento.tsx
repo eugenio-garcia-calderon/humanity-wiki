@@ -10,7 +10,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Sigma, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
+  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -64,6 +64,10 @@ import EnlazanAqui from '../components/knowledge/EnlazanAqui';
 import BloqueEmbed from '../components/knowledge/BloqueEmbed';
 import Formula from '../components/knowledge/Formula';
 import { embedDe, type Embed } from '../utils/embeds';
+// Ajustes de página, buscar y atajos (2026-10-06, carril editorB, #29 y #30).
+import BuscarEnPagina from '../components/knowledge/BuscarEnPagina';
+import AtajosAyuda from '../components/knowledge/AtajosAyuda';
+import { anchoDePagina, clasesDePagina, contarPagina } from '../utils/ajustesPagina';
 import { detectarMencion, referenciasDe } from '../utils/menciones';
 
 import { t as tr } from '../i18n';
@@ -242,6 +246,9 @@ function EditorPagina() {
   /** Ajustes de publicación (autor, fecha, ancho, descripción, imagen). */
   const [ajustes, setAjustes] = useState<Ajustes>({});
   const [ajustesAbierto, setAjustesAbierto] = useState(false);
+  /** Buscar en la página (⌘F propio) y la lista de atajos («?»). */
+  const [buscando, setBuscando] = useState<{ q: string; senal: number } | null>(null);
+  const [atajosAbiertos, setAtajosAbiertos] = useState(false);
   const [menuSitioAbierto, setMenuSitioAbierto] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
@@ -1590,7 +1597,7 @@ function EditorPagina() {
       if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
       const k = e.key.toLowerCase();
       const quiere = k === 'z' ? (e.shiftKey ? 'rehacer' : 'deshacer') : k === 'y' && !e.shiftKey ? 'rehacer' : null;
-      if (!quiere || !puedoEditar || !esMio()) return;
+      if (!quiere || !puedoEditar || ajustes.bloqueada || !esMio()) return;
       e.preventDefault();
       if (quiere === 'deshacer') deshacer(); else rehacer();
     };
@@ -1606,6 +1613,24 @@ function EditorPagina() {
     window.addEventListener('beforeinput', antes as any);
     return () => { window.removeEventListener('keydown', tecla); window.removeEventListener('beforeinput', antes as any); };
   });
+
+  // ⌘F BUSCA EN LA PÁGINA, y «?» ENSEÑA LOS ATAJOS (2026-10-06, #29 y #30).
+  // El ⌘F del navegador no ve lo escondido ni distingue el texto de la página
+  // del de los menús; «?» sólo cuenta fuera de un texto (en un texto es un «?»).
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        const sel = window.getSelection()?.toString().trim() || '';
+        setBuscando(b => ({ q: sel && sel.length <= 80 && !sel.includes('\n') ? sel : (b?.q || ''), senal: (b?.senal || 0) + 1 }));
+      } else if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey && !enCampoDeTexto(e.target)) {
+        e.preventDefault();
+        setAtajosAbiertos(true);
+      }
+    };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  }, []);
 
   // EL GRUPO DE TECLAS (ver «DESHACER Y REHACER» arriba). `beforeinput` llega
   // ANTES de que la letra entre: es el momento de la foto de «antes», con el
@@ -2315,7 +2340,7 @@ function EditorPagina() {
    * Aquí se recoge lo que nadie ha atendido y se añade al final.
    */
   useEffect(() => {
-    if (!puedoEditar || generando) return;
+    if (!puedoEditar || generando || ajustes.bloqueada) return;
     const alPegarEnLaPagina = (e: ClipboardEvent) => {
       // Trabajando en una pizarra incrustada, lo pegado es suyo.
       if (document.querySelector('[data-pizarra-activa]')) return;
@@ -2340,7 +2365,7 @@ function EditorPagina() {
     };
     window.addEventListener('paste', alPegarEnLaPagina);
     return () => window.removeEventListener('paste', alPegarEnLaPagina);
-  }, [puedoEditar, generando, bloquesDelPortapapeles, insertarBloques]);
+  }, [puedoEditar, generando, ajustes.bloqueada, bloquesDelPortapapeles, insertarBloques]);
 
   // -- Selección múltiple -----------------------------------------------------
   const clicSeleccion = (b: Bloque, e: React.MouseEvent) => {
@@ -2497,7 +2522,8 @@ function EditorPagina() {
   // --------------------------------------------------------------------------
   // Render de un bloque
   // --------------------------------------------------------------------------
-  const editable = puedoEditar && !generando;
+  // Una página BLOQUEADA no se edita hasta que se desbloquee (2026-10-06, #29).
+  const editable = puedoEditar && !generando && !ajustes.bloqueada;
 
   // Sin barra flotante (2026-10-02) ya no hay que reservarle hueco abajo.
 
@@ -3439,7 +3465,7 @@ function EditorPagina() {
     <div className="h-full overflow-y-auto">
       {/* SIEMPRE A ANCHO COMPLETO (2026-10-02, Eugenio: «quita la opción de
           que no sea ancho completo»). El mismo ancho que la página publicada. */}
-      <div className="mx-auto px-6 sm:px-12 pt-8 pb-32 max-w-6xl">
+      <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', anchoDePagina(ajustes))}>
 
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">
@@ -3517,6 +3543,22 @@ function EditorPagina() {
               <PanelTop className="w-4 h-4" />
             </button>
           )}
+          {/* BUSCAR Y ATAJOS, para quien no sabe las teclas (2026-10-06). */}
+          <button onClick={() => setBuscando(b => ({ q: b?.q || '', senal: (b?.senal || 0) + 1 }))} title="Buscar en la página (⌘F)" aria-label="Buscar en la página"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+            <Search className="w-4 h-4" />
+          </button>
+          <button onClick={() => setAtajosAbiertos(true)} title="Atajos de teclado (?)" aria-label="Atajos de teclado"
+            className="hidden sm:inline-flex p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+            <Keyboard className="w-4 h-4" />
+          </button>
+          {puedoEditar && !generando && (
+            <button onClick={() => { setAjustes(a => ({ ...a, bloqueada: a.bloqueada ? undefined : true })); programarGuardado(); }}
+              title={ajustes.bloqueada ? 'Desbloquear la página' : 'Bloquear la página'} aria-label={ajustes.bloqueada ? 'Desbloquear la página' : 'Bloquear la página'}
+              className={cn('p-1.5 rounded-lg transition-colors', ajustes.bloqueada ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50')}>
+              {ajustes.bloqueada ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+            </button>
+          )}
           {editable && (
             <button onClick={() => setAjustesAbierto(true)} title={tr('Ajustes de la página')} aria-label={tr('Ajustes de la página')}
               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
@@ -3559,9 +3601,20 @@ function EditorPagina() {
           onDragOver={e => { if (!arrastrando && traeArchivos(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setArchivoEncima(true); } }}
           onDragLeave={e => { if (e.currentTarget === e.target) setArchivoEncima(false); }}
           onDrop={alSoltarArchivos}
-          className={cn('bg-white rounded-2xl transition-colors',
+          className={cn('bg-white rounded-2xl transition-colors', clasesDePagina(ajustes),
             archivoEncima && 'ring-2 ring-emerald-400 ring-offset-4')}
         >
+        {/* PÁGINA BLOQUEADA (2026-10-06, #29): se lee pero no se escribe. */}
+        {ajustes.bloqueada && (
+          <div role="status" data-pagina-bloqueada className="mb-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
+            <Lock className="w-3.5 h-3.5 shrink-0" />
+            <span className="flex-1">Esta página está bloqueada: nadie la edita hasta que se desbloquee.</span>
+            {puedoEditar && (
+              <button type="button" onClick={() => { setAjustes(a => ({ ...a, bloqueada: undefined })); programarGuardado(); }}
+                className="h-8 px-2.5 rounded-lg bg-white border border-amber-200 hover:bg-amber-100">Desbloquear</button>
+            )}
+          </div>
+        )}
         {/* SUÉLTALO AQUÍ. Solo mientras hay algo volando encima. */}
         {archivoEncima && (
           <p className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-dashed border-emerald-300 text-xs font-bold text-emerald-700">
@@ -3787,6 +3840,8 @@ function EditorPagina() {
             <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">{tr('IA')}</span>
           </button>
         )}
+        {buscando && <BuscarEnPagina raiz={docRef} inicial={buscando.q} senal={buscando.senal} onCerrar={() => setBuscando(null)} />}
+        {atajosAbiertos && <AtajosAyuda onCerrar={() => setAtajosAbiertos(false)} />}
         {menc && <MencionesMenu x={menc.x} y={menc.y} tipo={menc.tipo} q={menc.q} onElegir={aplicarMencion} onCerrar={cerrarMenc} />}
         {/* ¿QUÉ HAGO CON ESTE ENLACE? (2026-10-02, como Notion) */}
         {menuEnlace && (
@@ -3839,6 +3894,7 @@ function EditorPagina() {
         )}
         {ajustesAbierto && (
           <AjustesPagina ajustes={ajustes} portada={portada} titulo={titulo}
+            resumen={contarPagina(aArbol(bloques), textosRef.current)}
             onCambio={a => { setAjustes(a); programarGuardado(); }}
             onCerrar={() => setAjustesAbierto(false)} />
         )}
