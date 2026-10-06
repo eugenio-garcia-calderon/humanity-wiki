@@ -119,6 +119,18 @@
       "ruta": "src/index.css",
       "motivo": "editorB",
       "desde": "2026-10-06T04:20:48.858Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/utils/embeds.ts",
+      "motivo": "editorB",
+      "desde": "2026-10-06T04:29:45.024Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/BloqueEmbed.tsx",
+      "motivo": "editorB",
+      "desde": "2026-10-06T04:29:45.024Z"
     }
   ]
 }
