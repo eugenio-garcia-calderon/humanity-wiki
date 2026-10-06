@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Clock, CornerDownLeft, Loader2, Search } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEspacio } from '../../utils/espacio';
-import { ETIQUETA_TIPO, IconoResultado, Resaltado, type TipoResultado } from './Resaltado';
+import { etiquetaTipo, IconoResultado, Resaltado, type TipoResultado } from './Resaltado';
 import { cn } from '../../utils/cn';
+import { t } from '../../i18n';
 
 // ============================================================================
 // LA PALETA DE BÚSQUEDA RÁPIDA — ⌘K y ⌘P (2026-10-06, #15)
@@ -86,20 +87,20 @@ export default function PaletaBusqueda() {
 
   return createPortal(
     <div className="fixed inset-0 z-[300] flex items-start justify-center bg-slate-900/40 px-3 pt-[12vh]" onMouseDown={e => { if (e.target === e.currentTarget) setAbierta(false); }}>
-      <div role="dialog" aria-modal="true" aria-label="Buscar" onKeyDown={teclado}
+      <div role="dialog" aria-modal="true" aria-label={t('Buscar')} onKeyDown={teclado}
         className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
         <div className="flex items-center gap-2 border-b border-slate-100 px-4">
           <Search className="h-4 w-4 shrink-0 text-slate-400" />
           <input ref={entrada} value={q} onChange={e => setQ(e.target.value)} autoComplete="off" spellCheck={false}
-            placeholder="Busca una página, base de datos, carpeta o persona…" aria-label="Buscar"
+            placeholder={t('Busca una página, base de datos, carpeta o persona…')} aria-label={t('Buscar')}
             className="h-12 min-w-0 flex-1 bg-transparent text-[15px] text-slate-900 outline-none placeholder:text-slate-400" />
           {cargando && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
         </div>
         <div ref={lista} className="max-h-[50vh] overflow-y-auto p-1.5" role="listbox">
-          {!q.trim() && mostrados.length > 0 && <p className="flex items-center gap-1 px-2.5 pb-1 pt-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400"><Clock className="h-3 w-3" /> Recientes</p>}
-          {!q.trim() && mostrados.length === 0 && <p className="px-3 py-6 text-center text-[13px] text-slate-500">Escribe para buscar. Aquí saldrán también lo último que abras.</p>}
-          {q.trim() && !cargando && !fallo && mostrados.length === 0 && <p className="px-3 py-6 text-center text-[13px] text-slate-500">No hay nada que coincida con «{q.trim()}».</p>}
-          {fallo && <p role="alert" className="px-3 py-6 text-center text-[13px] font-bold text-rose-600">La búsqueda ha fallado. Prueba otra vez.</p>}
+          {!q.trim() && mostrados.length > 0 && <p className="flex items-center gap-1 px-2.5 pb-1 pt-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400"><Clock className="h-3 w-3" /> {t('Recientes')}</p>}
+          {!q.trim() && mostrados.length === 0 && <p className="px-3 py-6 text-center text-[13px] text-slate-500">{t('Escribe para buscar. Aquí saldrán también lo último que abras.')}</p>}
+          {q.trim() && !cargando && !fallo && mostrados.length === 0 && <p className="px-3 py-6 text-center text-[13px] text-slate-500">{t('No hay nada que coincida con «{q}».', { q: q.trim() })}</p>}
+          {fallo && <p role="alert" className="px-3 py-6 text-center text-[13px] font-bold text-rose-600">{t('La búsqueda ha fallado. Prueba otra vez.')}</p>}
           {mostrados.map((it, i) => (
             <button key={`${it.tipo}:${it.id}`} type="button" role="option" aria-selected={i === sel} data-sel={i === sel}
               onMouseEnter={() => setSel(i)} onClick={() => ir(it.ruta)}
@@ -108,7 +109,7 @@ export default function PaletaBusqueda() {
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
                   <span className="truncate text-[14px] font-bold text-slate-900">{it.titulo}</span>
-                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-400">{ETIQUETA_TIPO[it.tipo]}</span>
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-400">{etiquetaTipo(it.tipo)}</span>
                 </span>
                 {it.fragmento && <span className="mt-0.5 line-clamp-2 block text-[12px] leading-snug text-slate-500"><Resaltado texto={it.fragmento} /></span>}
               </span>
@@ -117,8 +118,8 @@ export default function PaletaBusqueda() {
           ))}
         </div>
         <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2 text-[11px] text-slate-400">
-          <span><kbd className="font-bold">↑↓</kbd> moverte · <kbd className="font-bold">Intro</kbd> abrir · <kbd className="font-bold">Esc</kbd> cerrar</span>
-          <button type="button" onClick={verTodos} className="font-bold text-emerald-700 hover:underline">Ver todos los resultados{q.trim() ? '' : ' y filtros'}</button>
+          <span><kbd className="font-bold">↑↓</kbd> {t('moverte')} · <kbd className="font-bold">{t('Intro')}</kbd> {t('abrir')} · <kbd className="font-bold">Esc</kbd> {t('cerrar')}</span>
+          <button type="button" onClick={verTodos} className="font-bold text-emerald-700 hover:underline">{q.trim() ? t('Ver todos los resultados') : t('Ver todos los resultados y filtros')}</button>
         </div>
       </div>
     </div>,

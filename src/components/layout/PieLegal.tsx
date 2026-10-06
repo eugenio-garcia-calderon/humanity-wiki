@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { SelectorMini } from '../espacio/AparienciaIdioma';
+import { t } from '../../i18n';
 
 // ============================================================================
 // EL PIE: UNA FRANJA MUY FINA EN TODAS LAS PÁGINAS (2026-10-05)
@@ -20,11 +22,13 @@ export default function PieLegal() {
       style={{ left: 'var(--hueco-paginas, 0px)', right: 'var(--hueco-temas, 0px)', height: ALTO_PIE, paddingBottom: 'env(safe-area-inset-bottom)' }}
       className="fixed bottom-0 z-[9980] flex items-center justify-center gap-2 border-t border-slate-100 bg-white/90 text-[10.5px] text-slate-500 backdrop-blur-sm"
     >
-      <Link to="/sobre-red-humana" className={enlace}>Sobre Humanity.Wiki</Link>
+      <Link to="/sobre-red-humana" className={enlace}>{t('Sobre Humanity.Wiki')}</Link>
       <span aria-hidden>·</span>
-      <Link to="/avisos-legales" className={enlace}>Avisos legales</Link>
+      <Link to="/avisos-legales" className={enlace}>{t('Avisos legales')}</Link>
       <span aria-hidden>·</span>
-      <Link to="/privacidad" className={enlace}>Privacidad</Link>
+      <Link to="/privacidad" className={enlace}>{t('Privacidad')}</Link>
+      {/* Tema e idioma también para quien no tiene cuenta (#25, #34). */}
+      <SelectorMini />
     </footer>
   );
 }

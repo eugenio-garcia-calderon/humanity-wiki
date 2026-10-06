@@ -1,6 +1,9 @@
 import {createRoot} from 'react-dom/client';
 import {dominioPropio} from './utils/subdominio.ts';
 import './index.css';
+import './tema-oscuro.css';
+import {iniciarTema} from './utils/tema.ts';
+import {iniciarIdioma, ConIdioma} from './i18n/index.ts';
 import {registrarPWA} from './pwa.ts';
 
 // Sin StrictMode: su doble montaje (solo en desarrollo) deja el panZoom de
@@ -26,14 +29,16 @@ import {registrarPWA} from './pwa.ts';
 // En un dominio propio, hasta que llega, se ve la cabecera que el servidor ya
 // escribió dentro de `#root` (`cabeceraSitio.tsx`). `render` la sustituye por
 // la misma, ya viva.
+iniciarTema();
+iniciarIdioma();
 const DOMINIO_PROPIO = dominioPropio();
 const raiz = createRoot(document.getElementById('root')!);
 
 if (DOMINIO_PROPIO) {
   import('./AplicacionDeDominio.tsx').then(({default: AplicacionDeDominio}) =>
-    raiz.render(<AplicacionDeDominio host={DOMINIO_PROPIO} />));
+    raiz.render(<ConIdioma><AplicacionDeDominio host={DOMINIO_PROPIO} /></ConIdioma>));
 } else {
-  import('./App.tsx').then(({default: App}) => raiz.render(<App />));
+  import('./App.tsx').then(({default: App}) => raiz.render(<ConIdioma><App /></ConIdioma>));
 }
 
 // PWA: en producción siempre, en desarrollo solo con `?sw=on`. Ver src/pwa.ts.

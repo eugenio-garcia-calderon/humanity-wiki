@@ -4,6 +4,7 @@ import { Boxes, ChevronRight, Clock, FileText, FolderKanban, Search, Star } from
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
 import { anotarReciente, useEspacio, type Elemento } from '../../utils/espacio';
 import { cn } from '../../utils/cn';
+import { t } from '../../i18n';
 
 // ============================================================================
 // «BUSCAR», «FAVORITOS» Y «RECIENTES», ARRIBA DEL ÁRBOL (2026-10-06, #14)
@@ -83,11 +84,11 @@ export default function FavoritosRecientes({ onIr, carpetas }: { onIr?: () => vo
       <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('humanity:paleta'))}
         className="mb-1 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-800">
         <Search className="h-4 w-4 shrink-0" />
-        <span className="flex-1">Buscar</span>
+        <span className="flex-1">{t('Buscar')}</span>
         <kbd className="rounded border border-slate-200 px-1 text-[10px] font-bold text-slate-400">⌘K</kbd>
       </button>
-      <Seccion id="favoritos" titulo="Favoritos" icono={<Star className="h-3 w-3 text-amber-500" />} items={favoritos} onIr={onIr} abiertaPorDefecto />
-      <Seccion id="recientes" titulo="Recientes" icono={<Clock className="h-3 w-3" />} items={recientes} onIr={onIr} abiertaPorDefecto />
+      <Seccion id="favoritos" titulo={t('Favoritos')} icono={<Star className="h-3 w-3 text-amber-500" />} items={favoritos} onIr={onIr} abiertaPorDefecto />
+      <Seccion id="recientes" titulo={t('Recientes')} icono={<Clock className="h-3 w-3" />} items={recientes} onIr={onIr} abiertaPorDefecto />
     </div>
   );
 }

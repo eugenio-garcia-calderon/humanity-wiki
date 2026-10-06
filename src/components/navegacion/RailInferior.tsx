@@ -8,6 +8,7 @@ import { cn } from '../../utils/cn';
 import type { Herramienta } from './Rail';
 import { useContextoNavegacion, conContexto } from '../../utils/contextoNavegacion';
 
+import { t } from '../../i18n';
 /*
  * EL MENÚ DE ABAJO — LAS HERRAMIENTAS, A MANO (2026-08-25, agente de APP/UX)
  * ============================================================================
@@ -53,15 +54,15 @@ import { useContextoNavegacion, conContexto } from '../../utils/contextoNavegaci
  * escritorio —tablas, comercio, archivos— al final.
  */
 export const HERRAMIENTAS_ABAJO: Herramienta[] = [
-  { clave: 'publicaciones', nombre: 'Publicaciones', icono: Compass,      ruta: '/explorar',    conPanel: true },
-  { clave: 'paginas',       nombre: 'Páginas',       icono: FileText,     ruta: '/paginas',     conPanel: true },
-  { clave: 'esquemas',      nombre: 'Esquemas',      icono: Globe2,       ruta: '/esquemas',    conPanel: true },
-  { clave: 'mapas',         nombre: 'Mapas',         icono: MapIcon,      ruta: '/mapas',       conPanel: true },
-  { clave: 'tareas',        nombre: 'Tareas',        icono: ListChecks,   ruta: '/tareas',      conPanel: true },
-  { clave: 'tablas',        nombre: 'Tablas',        icono: Table2,       ruta: '/tablas',      conPanel: true },
-  { clave: 'calendario',    nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario',  conPanel: true },
-  { clave: 'archivos',      nombre: 'Archivos',      icono: Database,     ruta: '/archivos',    conPanel: true },
-  { clave: 'comercio',      nombre: 'Comercio',      icono: Store,        ruta: '/comercio',    conPanel: true },
+  { clave: 'publicaciones', get nombre() { return t('Publicaciones'); }, icono: Compass,      ruta: '/explorar',    conPanel: true },
+  { clave: 'paginas',       get nombre() { return t('Páginas'); },       icono: FileText,     ruta: '/paginas',     conPanel: true },
+  { clave: 'esquemas',      get nombre() { return t('Esquemas'); },      icono: Globe2,       ruta: '/esquemas',    conPanel: true },
+  { clave: 'mapas',         get nombre() { return t('Mapas'); },         icono: MapIcon,      ruta: '/mapas',       conPanel: true },
+  { clave: 'tareas',        get nombre() { return t('Tareas'); },        icono: ListChecks,   ruta: '/tareas',      conPanel: true },
+  { clave: 'tablas',        get nombre() { return t('Tablas'); },        icono: Table2,       ruta: '/tablas',      conPanel: true },
+  { clave: 'calendario',    get nombre() { return t('Calendario'); },    icono: CalendarDays, ruta: '/calendario',  conPanel: true },
+  { clave: 'archivos',      get nombre() { return t('Archivos'); },      icono: Database,     ruta: '/archivos',    conPanel: true },
+  { clave: 'comercio',      get nombre() { return t('Comercio'); },      icono: Store,        ruta: '/comercio',    conPanel: true },
   // LAS QUE NO ESTABAN EN NINGÚN MENÚ y sólo se abrían desde el cajetín de
   // crear. Son herramientas de contenido como las demás: aquí es su sitio.
   //
@@ -70,8 +71,8 @@ export const HERRAMIENTAS_ABAJO: Herramienta[] = [
   // flotante— y las dos abrían cosas distintas: éste llevaba a la página `/ia`
   // y aquél abría el chat con tu historial. Dos puertas al mismo sitio que no
   // llevan al mismo sitio es peor que una sola.
-  { clave: 'visor3d',       nombre: 'Visor 3D',      icono: Gamepad2,     ruta: '/juego' },
-  { clave: 'navegador',     nombre: 'Navegador',     icono: Globe,        ruta: '/navegador' },
+  { clave: 'visor3d',       get nombre() { return t('Visor 3D'); },      icono: Gamepad2,     ruta: '/juego' },
+  { clave: 'navegador',     get nombre() { return t('Navegador'); },     icono: Globe,        ruta: '/navegador' },
 ];
 
 /** Lo que reserva abajo, para que ninguna página esconda su última fila. */
@@ -163,7 +164,7 @@ export default function RailInferior({
       style={{ bottom: `calc(12px + env(safe-area-inset-bottom))` }}
     >
       <nav
-        aria-label="Herramientas"
+        aria-label={t('Herramientas')}
         className={cn(
           'pointer-events-auto flex max-w-full items-end gap-0.5 overflow-x-auto rounded-2xl bg-slate-900 px-2 shadow-2xl ring-1 ring-white/10 transition-all duration-200',
           desplegado ? 'py-2' : 'py-1.5',
@@ -191,9 +192,9 @@ export default function RailInferior({
             crear desde un proyecto la mete en ese proyecto. */}
         <div className="relative flex shrink-0 flex-col items-center">
           <button
-            onClick={() => onElegir({ clave: 'crear-pagina', nombre: 'Crear página', icono: Plus, ruta: conContexto('/paginas?nueva=1', contexto) })}
-            title="Crear una página"
-            aria-label="Crear una página"
+            onClick={() => onElegir({ clave: 'crear-pagina', get nombre() { return t('Crear página'); }, icono: Plus, ruta: conContexto('/paginas?nueva=1', contexto) })}
+            title={t('Crear una página')}
+            aria-label={t('Crear una página')}
             className="flex flex-col items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-white shadow-lg shadow-emerald-600/40 ring-1 ring-emerald-400/50 transition-colors hover:bg-emerald-500"
           >
             <Plus className="h-5 w-5 shrink-0" />
@@ -201,7 +202,7 @@ export default function RailInferior({
               'overflow-hidden whitespace-nowrap text-[10px] font-black leading-none transition-all duration-200',
               desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
             )}>
-              Crear
+              {t('Crear')}
             </span>
           </button>
         </div>
@@ -234,8 +235,8 @@ export default function RailInferior({
         <div className="relative flex shrink-0 flex-col items-center">
           <button
             onClick={onIA}
-            title="Preguntar a la IA"
-            aria-label="Preguntar a la IA"
+            title={t('Preguntar a la IA')}
+            aria-label={t('Preguntar a la IA')}
             className="flex flex-col items-center gap-1 rounded-xl bg-violet-600 px-2.5 py-1.5 text-white shadow-lg shadow-violet-600/40 ring-1 ring-violet-400/50 transition-colors hover:bg-violet-500"
           >
             <Sparkles className="h-5 w-5 shrink-0" />
@@ -243,7 +244,7 @@ export default function RailInferior({
               'overflow-hidden whitespace-nowrap text-[10px] font-black leading-none transition-all duration-200',
               desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
             )}>
-              IA
+              {t('IA')}
             </span>
           </button>
         </div>

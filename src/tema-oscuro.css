@@ -1,0 +1,478 @@
+/* GENERADO por scripts/generar-tema-oscuro.mjs — no se edita a mano (2026-10-06, #25).
+   Cómo y por qué: la cabecera del generador. Se activa con la clase `dark` en <html>
+   (ver src/utils/tema.ts y el script de index.html, que la pone antes de pintar). */
+
+html.dark {
+  background-color: var(--color-white);
+  color-scheme: dark;
+  --color-white: #11161d;
+  --color-slate-50: #171d26;
+  --color-gray-50: #171d26;
+  --color-zinc-50: #171d26;
+  --color-neutral-50: #171d26;
+  --color-stone-50: #171d26;
+  --color-slate-100: #1e2631;
+  --color-gray-100: #1e2631;
+  --color-zinc-100: #1e2631;
+  --color-neutral-100: #1e2631;
+  --color-stone-100: #1e2631;
+  --color-slate-200: #2a3442;
+  --color-gray-200: #2a3442;
+  --color-zinc-200: #2a3442;
+  --color-neutral-200: #2a3442;
+  --color-stone-200: #2a3442;
+  --color-slate-300: #3a4656;
+  --color-gray-300: #3a4656;
+  --color-zinc-300: #3a4656;
+  --color-neutral-300: #3a4656;
+  --color-stone-300: #3a4656;
+  --color-slate-400: #7d8a9c;
+  --color-gray-400: #7d8a9c;
+  --color-zinc-400: #7d8a9c;
+  --color-neutral-400: #7d8a9c;
+  --color-stone-400: #7d8a9c;
+  --color-slate-500: #94a3b8;
+  --color-gray-500: #94a3b8;
+  --color-zinc-500: #94a3b8;
+  --color-neutral-500: #94a3b8;
+  --color-stone-500: #94a3b8;
+  --color-slate-600: #aab6c6;
+  --color-gray-600: #aab6c6;
+  --color-zinc-600: #aab6c6;
+  --color-neutral-600: #aab6c6;
+  --color-stone-600: #aab6c6;
+  --color-slate-700: #c3cdda;
+  --color-gray-700: #c3cdda;
+  --color-zinc-700: #c3cdda;
+  --color-neutral-700: #c3cdda;
+  --color-stone-700: #c3cdda;
+  --color-slate-800: #dbe2ec;
+  --color-gray-800: #dbe2ec;
+  --color-zinc-800: #dbe2ec;
+  --color-neutral-800: #dbe2ec;
+  --color-stone-800: #dbe2ec;
+  --color-slate-900: #eef2f7;
+  --color-gray-900: #eef2f7;
+  --color-zinc-900: #eef2f7;
+  --color-neutral-900: #eef2f7;
+  --color-stone-900: #eef2f7;
+  --color-slate-950: #f8fafc;
+  --color-gray-950: #f8fafc;
+  --color-zinc-950: #f8fafc;
+  --color-neutral-950: #f8fafc;
+  --color-stone-950: #f8fafc;
+  --color-emerald-50: color-mix(in oklab, var(--color-emerald-500) 10%, #11161d);
+  --color-emerald-100: color-mix(in oklab, var(--color-emerald-500) 16%, #11161d);
+  --color-emerald-200: color-mix(in oklab, var(--color-emerald-500) 26%, #11161d);
+  --color-emerald-700: var(--color-emerald-400);
+  --color-emerald-800: var(--color-emerald-300);
+  --color-emerald-900: var(--color-emerald-200);
+  --color-green-50: color-mix(in oklab, var(--color-green-500) 10%, #11161d);
+  --color-green-100: color-mix(in oklab, var(--color-green-500) 16%, #11161d);
+  --color-green-200: color-mix(in oklab, var(--color-green-500) 26%, #11161d);
+  --color-green-700: var(--color-green-400);
+  --color-green-800: var(--color-green-300);
+  --color-green-900: var(--color-green-200);
+  --color-lime-50: color-mix(in oklab, var(--color-lime-500) 10%, #11161d);
+  --color-lime-100: color-mix(in oklab, var(--color-lime-500) 16%, #11161d);
+  --color-lime-200: color-mix(in oklab, var(--color-lime-500) 26%, #11161d);
+  --color-lime-700: var(--color-lime-400);
+  --color-lime-800: var(--color-lime-300);
+  --color-lime-900: var(--color-lime-200);
+  --color-teal-50: color-mix(in oklab, var(--color-teal-500) 10%, #11161d);
+  --color-teal-100: color-mix(in oklab, var(--color-teal-500) 16%, #11161d);
+  --color-teal-200: color-mix(in oklab, var(--color-teal-500) 26%, #11161d);
+  --color-teal-700: var(--color-teal-400);
+  --color-teal-800: var(--color-teal-300);
+  --color-teal-900: var(--color-teal-200);
+  --color-cyan-50: color-mix(in oklab, var(--color-cyan-500) 10%, #11161d);
+  --color-cyan-100: color-mix(in oklab, var(--color-cyan-500) 16%, #11161d);
+  --color-cyan-200: color-mix(in oklab, var(--color-cyan-500) 26%, #11161d);
+  --color-cyan-700: var(--color-cyan-400);
+  --color-cyan-800: var(--color-cyan-300);
+  --color-cyan-900: var(--color-cyan-200);
+  --color-sky-50: color-mix(in oklab, var(--color-sky-500) 10%, #11161d);
+  --color-sky-100: color-mix(in oklab, var(--color-sky-500) 16%, #11161d);
+  --color-sky-200: color-mix(in oklab, var(--color-sky-500) 26%, #11161d);
+  --color-sky-700: var(--color-sky-400);
+  --color-sky-800: var(--color-sky-300);
+  --color-sky-900: var(--color-sky-200);
+  --color-blue-50: color-mix(in oklab, var(--color-blue-500) 10%, #11161d);
+  --color-blue-100: color-mix(in oklab, var(--color-blue-500) 16%, #11161d);
+  --color-blue-200: color-mix(in oklab, var(--color-blue-500) 26%, #11161d);
+  --color-blue-700: var(--color-blue-400);
+  --color-blue-800: var(--color-blue-300);
+  --color-blue-900: var(--color-blue-200);
+  --color-indigo-50: color-mix(in oklab, var(--color-indigo-500) 10%, #11161d);
+  --color-indigo-100: color-mix(in oklab, var(--color-indigo-500) 16%, #11161d);
+  --color-indigo-200: color-mix(in oklab, var(--color-indigo-500) 26%, #11161d);
+  --color-indigo-700: var(--color-indigo-400);
+  --color-indigo-800: var(--color-indigo-300);
+  --color-indigo-900: var(--color-indigo-200);
+  --color-violet-50: color-mix(in oklab, var(--color-violet-500) 10%, #11161d);
+  --color-violet-100: color-mix(in oklab, var(--color-violet-500) 16%, #11161d);
+  --color-violet-200: color-mix(in oklab, var(--color-violet-500) 26%, #11161d);
+  --color-violet-700: var(--color-violet-400);
+  --color-violet-800: var(--color-violet-300);
+  --color-violet-900: var(--color-violet-200);
+  --color-purple-50: color-mix(in oklab, var(--color-purple-500) 10%, #11161d);
+  --color-purple-100: color-mix(in oklab, var(--color-purple-500) 16%, #11161d);
+  --color-purple-200: color-mix(in oklab, var(--color-purple-500) 26%, #11161d);
+  --color-purple-700: var(--color-purple-400);
+  --color-purple-800: var(--color-purple-300);
+  --color-purple-900: var(--color-purple-200);
+  --color-fuchsia-50: color-mix(in oklab, var(--color-fuchsia-500) 10%, #11161d);
+  --color-fuchsia-100: color-mix(in oklab, var(--color-fuchsia-500) 16%, #11161d);
+  --color-fuchsia-200: color-mix(in oklab, var(--color-fuchsia-500) 26%, #11161d);
+  --color-fuchsia-700: var(--color-fuchsia-400);
+  --color-fuchsia-800: var(--color-fuchsia-300);
+  --color-fuchsia-900: var(--color-fuchsia-200);
+  --color-pink-50: color-mix(in oklab, var(--color-pink-500) 10%, #11161d);
+  --color-pink-100: color-mix(in oklab, var(--color-pink-500) 16%, #11161d);
+  --color-pink-200: color-mix(in oklab, var(--color-pink-500) 26%, #11161d);
+  --color-pink-700: var(--color-pink-400);
+  --color-pink-800: var(--color-pink-300);
+  --color-pink-900: var(--color-pink-200);
+  --color-rose-50: color-mix(in oklab, var(--color-rose-500) 10%, #11161d);
+  --color-rose-100: color-mix(in oklab, var(--color-rose-500) 16%, #11161d);
+  --color-rose-200: color-mix(in oklab, var(--color-rose-500) 26%, #11161d);
+  --color-rose-700: var(--color-rose-400);
+  --color-rose-800: var(--color-rose-300);
+  --color-rose-900: var(--color-rose-200);
+  --color-red-50: color-mix(in oklab, var(--color-red-500) 10%, #11161d);
+  --color-red-100: color-mix(in oklab, var(--color-red-500) 16%, #11161d);
+  --color-red-200: color-mix(in oklab, var(--color-red-500) 26%, #11161d);
+  --color-red-700: var(--color-red-400);
+  --color-red-800: var(--color-red-300);
+  --color-red-900: var(--color-red-200);
+  --color-orange-50: color-mix(in oklab, var(--color-orange-500) 10%, #11161d);
+  --color-orange-100: color-mix(in oklab, var(--color-orange-500) 16%, #11161d);
+  --color-orange-200: color-mix(in oklab, var(--color-orange-500) 26%, #11161d);
+  --color-orange-700: var(--color-orange-400);
+  --color-orange-800: var(--color-orange-300);
+  --color-orange-900: var(--color-orange-200);
+  --color-amber-50: color-mix(in oklab, var(--color-amber-500) 10%, #11161d);
+  --color-amber-100: color-mix(in oklab, var(--color-amber-500) 16%, #11161d);
+  --color-amber-200: color-mix(in oklab, var(--color-amber-500) 26%, #11161d);
+  --color-amber-700: var(--color-amber-400);
+  --color-amber-800: var(--color-amber-300);
+  --color-amber-900: var(--color-amber-200);
+  --color-yellow-50: color-mix(in oklab, var(--color-yellow-500) 10%, #11161d);
+  --color-yellow-100: color-mix(in oklab, var(--color-yellow-500) 16%, #11161d);
+  --color-yellow-200: color-mix(in oklab, var(--color-yellow-500) 26%, #11161d);
+  --color-yellow-700: var(--color-yellow-400);
+  --color-yellow-800: var(--color-yellow-300);
+  --color-yellow-900: var(--color-yellow-200);
+}
+
+/* 1. Blanco sobre fondos de color: el blanco es aquí tinta, no superficie. */
+html.dark :is(
+  [class*="bg-black"],
+  [class*="from-black"],
+  [class*="bg-emerald-400"],
+  [class*="from-emerald-400"],
+  [class*="bg-emerald-500"],
+  [class*="from-emerald-500"],
+  [class*="bg-emerald-600"],
+  [class*="from-emerald-600"],
+  [class*="bg-emerald-700"],
+  [class*="from-emerald-700"],
+  [class*="bg-emerald-800"],
+  [class*="from-emerald-800"],
+  [class*="bg-emerald-900"],
+  [class*="from-emerald-900"],
+  [class*="bg-green-400"],
+  [class*="from-green-400"],
+  [class*="bg-green-500"],
+  [class*="from-green-500"],
+  [class*="bg-green-600"],
+  [class*="from-green-600"],
+  [class*="bg-green-700"],
+  [class*="from-green-700"],
+  [class*="bg-green-800"],
+  [class*="from-green-800"],
+  [class*="bg-green-900"],
+  [class*="from-green-900"],
+  [class*="bg-lime-400"],
+  [class*="from-lime-400"],
+  [class*="bg-lime-500"],
+  [class*="from-lime-500"],
+  [class*="bg-lime-600"],
+  [class*="from-lime-600"],
+  [class*="bg-lime-700"],
+  [class*="from-lime-700"],
+  [class*="bg-lime-800"],
+  [class*="from-lime-800"],
+  [class*="bg-lime-900"],
+  [class*="from-lime-900"],
+  [class*="bg-teal-400"],
+  [class*="from-teal-400"],
+  [class*="bg-teal-500"],
+  [class*="from-teal-500"],
+  [class*="bg-teal-600"],
+  [class*="from-teal-600"],
+  [class*="bg-teal-700"],
+  [class*="from-teal-700"],
+  [class*="bg-teal-800"],
+  [class*="from-teal-800"],
+  [class*="bg-teal-900"],
+  [class*="from-teal-900"],
+  [class*="bg-cyan-400"],
+  [class*="from-cyan-400"],
+  [class*="bg-cyan-500"],
+  [class*="from-cyan-500"],
+  [class*="bg-cyan-600"],
+  [class*="from-cyan-600"],
+  [class*="bg-cyan-700"],
+  [class*="from-cyan-700"],
+  [class*="bg-cyan-800"],
+  [class*="from-cyan-800"],
+  [class*="bg-cyan-900"],
+  [class*="from-cyan-900"],
+  [class*="bg-sky-400"],
+  [class*="from-sky-400"],
+  [class*="bg-sky-500"],
+  [class*="from-sky-500"],
+  [class*="bg-sky-600"],
+  [class*="from-sky-600"],
+  [class*="bg-sky-700"],
+  [class*="from-sky-700"],
+  [class*="bg-sky-800"],
+  [class*="from-sky-800"],
+  [class*="bg-sky-900"],
+  [class*="from-sky-900"],
+  [class*="bg-blue-400"],
+  [class*="from-blue-400"],
+  [class*="bg-blue-500"],
+  [class*="from-blue-500"],
+  [class*="bg-blue-600"],
+  [class*="from-blue-600"],
+  [class*="bg-blue-700"],
+  [class*="from-blue-700"],
+  [class*="bg-blue-800"],
+  [class*="from-blue-800"],
+  [class*="bg-blue-900"],
+  [class*="from-blue-900"],
+  [class*="bg-indigo-400"],
+  [class*="from-indigo-400"],
+  [class*="bg-indigo-500"],
+  [class*="from-indigo-500"],
+  [class*="bg-indigo-600"],
+  [class*="from-indigo-600"],
+  [class*="bg-indigo-700"],
+  [class*="from-indigo-700"],
+  [class*="bg-indigo-800"],
+  [class*="from-indigo-800"],
+  [class*="bg-indigo-900"],
+  [class*="from-indigo-900"],
+  [class*="bg-violet-400"],
+  [class*="from-violet-400"],
+  [class*="bg-violet-500"],
+  [class*="from-violet-500"],
+  [class*="bg-violet-600"],
+  [class*="from-violet-600"],
+  [class*="bg-violet-700"],
+  [class*="from-violet-700"],
+  [class*="bg-violet-800"],
+  [class*="from-violet-800"],
+  [class*="bg-violet-900"],
+  [class*="from-violet-900"],
+  [class*="bg-purple-400"],
+  [class*="from-purple-400"],
+  [class*="bg-purple-500"],
+  [class*="from-purple-500"],
+  [class*="bg-purple-600"],
+  [class*="from-purple-600"],
+  [class*="bg-purple-700"],
+  [class*="from-purple-700"],
+  [class*="bg-purple-800"],
+  [class*="from-purple-800"],
+  [class*="bg-purple-900"],
+  [class*="from-purple-900"],
+  [class*="bg-fuchsia-400"],
+  [class*="from-fuchsia-400"],
+  [class*="bg-fuchsia-500"],
+  [class*="from-fuchsia-500"],
+  [class*="bg-fuchsia-600"],
+  [class*="from-fuchsia-600"],
+  [class*="bg-fuchsia-700"],
+  [class*="from-fuchsia-700"],
+  [class*="bg-fuchsia-800"],
+  [class*="from-fuchsia-800"],
+  [class*="bg-fuchsia-900"],
+  [class*="from-fuchsia-900"],
+  [class*="bg-pink-400"],
+  [class*="from-pink-400"],
+  [class*="bg-pink-500"],
+  [class*="from-pink-500"],
+  [class*="bg-pink-600"],
+  [class*="from-pink-600"],
+  [class*="bg-pink-700"],
+  [class*="from-pink-700"],
+  [class*="bg-pink-800"],
+  [class*="from-pink-800"],
+  [class*="bg-pink-900"],
+  [class*="from-pink-900"],
+  [class*="bg-rose-400"],
+  [class*="from-rose-400"],
+  [class*="bg-rose-500"],
+  [class*="from-rose-500"],
+  [class*="bg-rose-600"],
+  [class*="from-rose-600"],
+  [class*="bg-rose-700"],
+  [class*="from-rose-700"],
+  [class*="bg-rose-800"],
+  [class*="from-rose-800"],
+  [class*="bg-rose-900"],
+  [class*="from-rose-900"],
+  [class*="bg-red-400"],
+  [class*="from-red-400"],
+  [class*="bg-red-500"],
+  [class*="from-red-500"],
+  [class*="bg-red-600"],
+  [class*="from-red-600"],
+  [class*="bg-red-700"],
+  [class*="from-red-700"],
+  [class*="bg-red-800"],
+  [class*="from-red-800"],
+  [class*="bg-red-900"],
+  [class*="from-red-900"],
+  [class*="bg-orange-400"],
+  [class*="from-orange-400"],
+  [class*="bg-orange-500"],
+  [class*="from-orange-500"],
+  [class*="bg-orange-600"],
+  [class*="from-orange-600"],
+  [class*="bg-orange-700"],
+  [class*="from-orange-700"],
+  [class*="bg-orange-800"],
+  [class*="from-orange-800"],
+  [class*="bg-orange-900"],
+  [class*="from-orange-900"],
+  [class*="bg-amber-400"],
+  [class*="from-amber-400"],
+  [class*="bg-amber-500"],
+  [class*="from-amber-500"],
+  [class*="bg-amber-600"],
+  [class*="from-amber-600"],
+  [class*="bg-amber-700"],
+  [class*="from-amber-700"],
+  [class*="bg-amber-800"],
+  [class*="from-amber-800"],
+  [class*="bg-amber-900"],
+  [class*="from-amber-900"],
+  [class*="bg-yellow-400"],
+  [class*="from-yellow-400"],
+  [class*="bg-yellow-500"],
+  [class*="from-yellow-500"],
+  [class*="bg-yellow-600"],
+  [class*="from-yellow-600"],
+  [class*="bg-yellow-700"],
+  [class*="from-yellow-700"],
+  [class*="bg-yellow-800"],
+  [class*="from-yellow-800"],
+  [class*="bg-yellow-900"],
+  [class*="from-yellow-900"]
+) {
+  --color-white: #fff;
+}
+
+/* 2. Telones de modales y degradados sobre fotos: siempre negros, con su opacidad. */
+html.dark .bg-slate-900\/20 { background-color: rgb(0 0 0 / 0.2); }
+html.dark .bg-slate-950\/20 { background-color: rgb(0 0 0 / 0.2); }
+html.dark .bg-slate-800\/20 { background-color: rgb(0 0 0 / 0.2); }
+html.dark .from-slate-950\/20 { --tw-gradient-from: rgb(0 0 0 / 0.2); }
+html.dark .via-slate-950\/20 { --tw-gradient-via: rgb(0 0 0 / 0.2); }
+html.dark .to-slate-950\/20 { --tw-gradient-to: rgb(0 0 0 / 0.2); }
+html.dark .bg-slate-900\/25 { background-color: rgb(0 0 0 / 0.25); }
+html.dark .bg-slate-950\/25 { background-color: rgb(0 0 0 / 0.25); }
+html.dark .bg-slate-800\/25 { background-color: rgb(0 0 0 / 0.25); }
+html.dark .from-slate-950\/25 { --tw-gradient-from: rgb(0 0 0 / 0.25); }
+html.dark .via-slate-950\/25 { --tw-gradient-via: rgb(0 0 0 / 0.25); }
+html.dark .to-slate-950\/25 { --tw-gradient-to: rgb(0 0 0 / 0.25); }
+html.dark .bg-slate-900\/30 { background-color: rgb(0 0 0 / 0.3); }
+html.dark .bg-slate-950\/30 { background-color: rgb(0 0 0 / 0.3); }
+html.dark .bg-slate-800\/30 { background-color: rgb(0 0 0 / 0.3); }
+html.dark .from-slate-950\/30 { --tw-gradient-from: rgb(0 0 0 / 0.3); }
+html.dark .via-slate-950\/30 { --tw-gradient-via: rgb(0 0 0 / 0.3); }
+html.dark .to-slate-950\/30 { --tw-gradient-to: rgb(0 0 0 / 0.3); }
+html.dark .bg-slate-900\/40 { background-color: rgb(0 0 0 / 0.4); }
+html.dark .bg-slate-950\/40 { background-color: rgb(0 0 0 / 0.4); }
+html.dark .bg-slate-800\/40 { background-color: rgb(0 0 0 / 0.4); }
+html.dark .from-slate-950\/40 { --tw-gradient-from: rgb(0 0 0 / 0.4); }
+html.dark .via-slate-950\/40 { --tw-gradient-via: rgb(0 0 0 / 0.4); }
+html.dark .to-slate-950\/40 { --tw-gradient-to: rgb(0 0 0 / 0.4); }
+html.dark .bg-slate-900\/45 { background-color: rgb(0 0 0 / 0.45); }
+html.dark .bg-slate-950\/45 { background-color: rgb(0 0 0 / 0.45); }
+html.dark .bg-slate-800\/45 { background-color: rgb(0 0 0 / 0.45); }
+html.dark .from-slate-950\/45 { --tw-gradient-from: rgb(0 0 0 / 0.45); }
+html.dark .via-slate-950\/45 { --tw-gradient-via: rgb(0 0 0 / 0.45); }
+html.dark .to-slate-950\/45 { --tw-gradient-to: rgb(0 0 0 / 0.45); }
+html.dark .bg-slate-900\/50 { background-color: rgb(0 0 0 / 0.5); }
+html.dark .bg-slate-950\/50 { background-color: rgb(0 0 0 / 0.5); }
+html.dark .bg-slate-800\/50 { background-color: rgb(0 0 0 / 0.5); }
+html.dark .from-slate-950\/50 { --tw-gradient-from: rgb(0 0 0 / 0.5); }
+html.dark .via-slate-950\/50 { --tw-gradient-via: rgb(0 0 0 / 0.5); }
+html.dark .to-slate-950\/50 { --tw-gradient-to: rgb(0 0 0 / 0.5); }
+html.dark .bg-slate-900\/55 { background-color: rgb(0 0 0 / 0.55); }
+html.dark .bg-slate-950\/55 { background-color: rgb(0 0 0 / 0.55); }
+html.dark .bg-slate-800\/55 { background-color: rgb(0 0 0 / 0.55); }
+html.dark .from-slate-950\/55 { --tw-gradient-from: rgb(0 0 0 / 0.55); }
+html.dark .via-slate-950\/55 { --tw-gradient-via: rgb(0 0 0 / 0.55); }
+html.dark .to-slate-950\/55 { --tw-gradient-to: rgb(0 0 0 / 0.55); }
+html.dark .bg-slate-900\/60 { background-color: rgb(0 0 0 / 0.6); }
+html.dark .bg-slate-950\/60 { background-color: rgb(0 0 0 / 0.6); }
+html.dark .bg-slate-800\/60 { background-color: rgb(0 0 0 / 0.6); }
+html.dark .from-slate-950\/60 { --tw-gradient-from: rgb(0 0 0 / 0.6); }
+html.dark .via-slate-950\/60 { --tw-gradient-via: rgb(0 0 0 / 0.6); }
+html.dark .to-slate-950\/60 { --tw-gradient-to: rgb(0 0 0 / 0.6); }
+html.dark .bg-slate-900\/70 { background-color: rgb(0 0 0 / 0.7); }
+html.dark .bg-slate-950\/70 { background-color: rgb(0 0 0 / 0.7); }
+html.dark .bg-slate-800\/70 { background-color: rgb(0 0 0 / 0.7); }
+html.dark .from-slate-950\/70 { --tw-gradient-from: rgb(0 0 0 / 0.7); }
+html.dark .via-slate-950\/70 { --tw-gradient-via: rgb(0 0 0 / 0.7); }
+html.dark .to-slate-950\/70 { --tw-gradient-to: rgb(0 0 0 / 0.7); }
+html.dark .bg-slate-900\/72 { background-color: rgb(0 0 0 / 0.72); }
+html.dark .bg-slate-950\/72 { background-color: rgb(0 0 0 / 0.72); }
+html.dark .bg-slate-800\/72 { background-color: rgb(0 0 0 / 0.72); }
+html.dark .from-slate-950\/72 { --tw-gradient-from: rgb(0 0 0 / 0.72); }
+html.dark .via-slate-950\/72 { --tw-gradient-via: rgb(0 0 0 / 0.72); }
+html.dark .to-slate-950\/72 { --tw-gradient-to: rgb(0 0 0 / 0.72); }
+html.dark .bg-slate-900\/75 { background-color: rgb(0 0 0 / 0.75); }
+html.dark .bg-slate-950\/75 { background-color: rgb(0 0 0 / 0.75); }
+html.dark .bg-slate-800\/75 { background-color: rgb(0 0 0 / 0.75); }
+html.dark .from-slate-950\/75 { --tw-gradient-from: rgb(0 0 0 / 0.75); }
+html.dark .via-slate-950\/75 { --tw-gradient-via: rgb(0 0 0 / 0.75); }
+html.dark .to-slate-950\/75 { --tw-gradient-to: rgb(0 0 0 / 0.75); }
+html.dark .bg-slate-900\/80 { background-color: rgb(0 0 0 / 0.8); }
+html.dark .bg-slate-950\/80 { background-color: rgb(0 0 0 / 0.8); }
+html.dark .bg-slate-800\/80 { background-color: rgb(0 0 0 / 0.8); }
+html.dark .from-slate-950\/80 { --tw-gradient-from: rgb(0 0 0 / 0.8); }
+html.dark .via-slate-950\/80 { --tw-gradient-via: rgb(0 0 0 / 0.8); }
+html.dark .to-slate-950\/80 { --tw-gradient-to: rgb(0 0 0 / 0.8); }
+html.dark .bg-slate-900\/85 { background-color: rgb(0 0 0 / 0.85); }
+html.dark .bg-slate-950\/85 { background-color: rgb(0 0 0 / 0.85); }
+html.dark .bg-slate-800\/85 { background-color: rgb(0 0 0 / 0.85); }
+html.dark .from-slate-950\/85 { --tw-gradient-from: rgb(0 0 0 / 0.85); }
+html.dark .via-slate-950\/85 { --tw-gradient-via: rgb(0 0 0 / 0.85); }
+html.dark .to-slate-950\/85 { --tw-gradient-to: rgb(0 0 0 / 0.85); }
+html.dark .bg-slate-900\/90 { background-color: rgb(0 0 0 / 0.9); }
+html.dark .bg-slate-950\/90 { background-color: rgb(0 0 0 / 0.9); }
+html.dark .bg-slate-800\/90 { background-color: rgb(0 0 0 / 0.9); }
+html.dark .from-slate-950\/90 { --tw-gradient-from: rgb(0 0 0 / 0.9); }
+html.dark .via-slate-950\/90 { --tw-gradient-via: rgb(0 0 0 / 0.9); }
+html.dark .to-slate-950\/90 { --tw-gradient-to: rgb(0 0 0 / 0.9); }
+html.dark .bg-slate-900\/95 { background-color: rgb(0 0 0 / 0.95); }
+html.dark .bg-slate-950\/95 { background-color: rgb(0 0 0 / 0.95); }
+html.dark .bg-slate-800\/95 { background-color: rgb(0 0 0 / 0.95); }
+html.dark .from-slate-950\/95 { --tw-gradient-from: rgb(0 0 0 / 0.95); }
+html.dark .via-slate-950\/95 { --tw-gradient-via: rgb(0 0 0 / 0.95); }
+html.dark .to-slate-950\/95 { --tw-gradient-to: rgb(0 0 0 / 0.95); }
+
+/* 3. Lo escrito a mano en index.css (no usa variables de Tailwind). */
+html.dark .md-marca { color: #7d8a9c; }
+html.dark .md-codigo { background: #1e2631; }
+html.dark .md-mencion { background: #1e2631; color: #dbe2ec; }
+html.dark .md-formula { color: #aab6c6; }
+html.dark ::selection { background: rgb(52 211 153 / 0.35); }
+html.dark input::placeholder, html.dark textarea::placeholder { color: #7d8a9c; }

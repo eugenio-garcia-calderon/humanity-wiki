@@ -66,6 +66,7 @@ import Formula from '../components/knowledge/Formula';
 import { embedDe, type Embed } from '../utils/embeds';
 import { detectarMencion, referenciasDe } from '../utils/menciones';
 
+import { t as tr } from '../i18n';
 // ============================================================================
 // DOCUMENTO estilo Notion (2026-08-08, petición del usuario) — Fase 1
 // ============================================================================
@@ -2988,7 +2989,7 @@ function EditorPagina() {
             {editable && (
               <>
                 <button type="button" onClick={e => { e.stopPropagation(); copiarSincronizado(b); }}
-                  className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">Copiar</button>
+                  className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">{tr('Copiar')}</button>
                 <button type="button" onClick={e => { e.stopPropagation(); dejarDeSincronizar(b.id); }}
                   className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">Dejar de sincronizar</button>
               </>
@@ -3243,8 +3244,8 @@ function EditorPagina() {
               : cn('-left-14 top-0.5 z-20 opacity-0 group-hover/bloque:opacity-100', menuAsa === b.id && '!opacity-100'))}>
             <button
               onClick={e => { e.stopPropagation(); setMenuAbierto(m => (m === b.id ? null : b.id)); }}
-              title="Añadir un bloque debajo"
-              aria-label="Añadir un bloque debajo"
+              title={tr('Añadir un bloque debajo')}
+              aria-label={tr('Añadir un bloque debajo')}
               className={cn('rounded-md transition-colors',
                 esMovil
                   ? 'w-11 h-11 grid place-items-center text-slate-400 bg-white/85 active:bg-slate-100'
@@ -3255,9 +3256,9 @@ function EditorPagina() {
             {!esMovil && (
               <span
                 role="button"
-                aria-label="Opciones del bloque"
+                aria-label={tr('Opciones del bloque')}
                 onPointerDown={e => empezarArrastre(b.id, e)}
-                title="Arrastra para mover · clic para opciones"
+                title={tr('Arrastra para mover · clic para opciones')}
                 className="p-1 rounded-md text-slate-300 hover:text-slate-500 hover:bg-slate-50 cursor-grab active:cursor-grabbing touch-none"
               >
                 <GripVertical className="w-4 h-4" />
@@ -3398,7 +3399,7 @@ function EditorPagina() {
             );
             return esMovil ? createPortal(
               <div onClick={e => e.stopPropagation()} className="fixed inset-0 z-[60] flex items-end bg-slate-900/30">
-                <button aria-label="Cerrar" className="absolute inset-0" onClick={() => setMenuAbierto(null)} />
+                <button aria-label={tr('Cerrar')} className="absolute inset-0" onClick={() => setMenuAbierto(null)} />
                 <div className="relative w-full">{selector}</div>
               </div>, document.body) : <Flotante>{selector}</Flotante>;
           })()
@@ -3415,7 +3416,7 @@ function EditorPagina() {
     return () => window.removeEventListener('click', cerrar);
   }, [menuAbierto, menuDescargar]);
 
-  if (cargando) return <p className="text-sm text-slate-400 text-center py-24">Abriendo el documento…</p>;
+  if (cargando) return <p className="text-sm text-slate-400 text-center py-24">{tr('Abriendo el documento…')}</p>;
 
   if (error) {
     return (
@@ -3427,7 +3428,7 @@ function EditorPagina() {
               sitio y ése es el que quiere recuperar. */}
           <button onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/paginas'))}
             className="inline-flex items-center gap-1.5 mt-4 h-11 px-3 text-xs font-black text-emerald-700 hover:underline">
-            <ArrowLeft className="w-3.5 h-3.5" /> Volver atrás
+            <ArrowLeft className="w-3.5 h-3.5" /> {tr('Volver atrás')}
           </button>
         </div>
       </div>
@@ -3466,11 +3467,11 @@ function EditorPagina() {
                   sabe los atajos tiene que poder encontrarlos. */}
               <CarasPresencia personas={presencia.personas} yo={presencia.yo} />
               <span className="hidden sm:inline-flex items-center">
-                <button onClick={deshacer} disabled={!pasos.atras} title="Deshacer (⌘Z)" aria-label="Deshacer"
+                <button onClick={deshacer} disabled={!pasos.atras} title={tr('Deshacer (⌘Z)')} aria-label={tr('Deshacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
                   <Undo2 className="w-4 h-4" />
                 </button>
-                <button onClick={rehacer} disabled={!pasos.adelante} title="Rehacer (⌘⇧Z)" aria-label="Rehacer"
+                <button onClick={rehacer} disabled={!pasos.adelante} title={tr('Rehacer (⌘⇧Z)')} aria-label={tr('Rehacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
                   <Redo2 className="w-4 h-4" />
                 </button>
@@ -3493,7 +3494,7 @@ function EditorPagina() {
                 <a href={urlPublicada} target="_blank" rel="noopener noreferrer" data-externo
                   title={urlPublicada}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors">
-                  <ExternalLink className="w-3 h-3" /> Ver página publicada
+                  <ExternalLink className="w-3 h-3" /> {tr('Ver página publicada')}
                 </a>
               )}
             </>
@@ -3505,19 +3506,19 @@ function EditorPagina() {
           {/* EL MENÚ Y EL PIE DE LA WEB (2026-10-02). Con su nombre y no
               escondido en los ajustes: es lo que convierte una página en una web. */}
           {editable && (
-            <button onClick={() => setMenuSitioAbierto(true)} title="Menú y pie de página de la web"
+            <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')}
               className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
-              <PanelTop className="w-4 h-4" /> Menú y pie
+              <PanelTop className="w-4 h-4" /> {tr('Menú y pie')}
             </button>
           )}
           {editable && (
-            <button onClick={() => setMenuSitioAbierto(true)} title="Menú y pie de página de la web" aria-label="Menú y pie de página de la web"
+            <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')} aria-label={tr('Menú y pie de página de la web')}
               className="sm:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
               <PanelTop className="w-4 h-4" />
             </button>
           )}
           {editable && (
-            <button onClick={() => setAjustesAbierto(true)} title="Ajustes de la página" aria-label="Ajustes de la página"
+            <button onClick={() => setAjustesAbierto(true)} title={tr('Ajustes de la página')} aria-label={tr('Ajustes de la página')}
               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
               <Settings2 className="w-4 h-4" />
             </button>
@@ -3526,11 +3527,11 @@ function EditorPagina() {
           {!esNuevo && id && <BotonFavorito tipo="pagina" id={id} titulo={titulo} />}
           <button onClick={() => setCompartirAbierto(true)}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
-            <Share2 className="w-3.5 h-3.5" /> Compartir
+            <Share2 className="w-3.5 h-3.5" /> {tr('Compartir')}
           </button>
 
           <div className="relative">
-            <button onClick={e => { e.stopPropagation(); setMenuDescargar(m => !m); }} title="Descargar"
+            <button onClick={e => { e.stopPropagation(); setMenuDescargar(m => !m); }} title={tr('Descargar')}
               className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">
               <Download className="w-4 h-4" />
             </button>
@@ -3564,7 +3565,7 @@ function EditorPagina() {
         {/* SUÉLTALO AQUÍ. Solo mientras hay algo volando encima. */}
         {archivoEncima && (
           <p className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-dashed border-emerald-300 text-xs font-bold text-emerald-700">
-            Suelta el archivo y lo añado al final de la página.
+            {tr('Suelta el archivo y lo añado al final de la página.')}
           </p>
         )}
         {compartirAbierto && (
@@ -3607,11 +3608,11 @@ function EditorPagina() {
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
                   <button onClick={() => setEligiendoPortada(true)}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
-                    Cambiar
+                    {tr('Cambiar')}
                   </button>
                   <button onClick={() => { setPortada(null); programarGuardado(); }}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
-                    Quitar
+                    {tr('Quitar')}
                   </button>
                 </div>
               )}
@@ -3623,7 +3624,7 @@ function EditorPagina() {
                 {!icono && !eligiendoIcono && (
                   <button onClick={() => setEligiendoIcono(true)}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <Smile className="w-3.5 h-3.5" /> Añadir icono
+                    <Smile className="w-3.5 h-3.5" /> {tr('Añadir icono')}
                   </button>
                 )}
                 {/* EL ICONO: UN EMOJI, O UNA IMAGEN PEGADA, ARRASTRADA O SUBIDA
@@ -3642,7 +3643,7 @@ function EditorPagina() {
                     }}
                     pie={icono ? (
                       <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
-                        className="w-full text-center text-xs font-bold text-slate-400 hover:text-rose-500">Quitar el icono</button>
+                        className="w-full text-center text-xs font-bold text-slate-400 hover:text-rose-500">{tr('Quitar el icono')}</button>
                     ) : null}
                   >
                     <div>
@@ -3670,13 +3671,13 @@ function EditorPagina() {
                 {!portada && !eligiendoIcono && (
                   <button onClick={() => setEligiendoPortada(true)}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
+                    <ImageIcon className="w-3.5 h-3.5" /> {tr('Añadir portada')}
                   </button>
                 )}
                 {ajustes.subtitulo === undefined && !eligiendoIcono && (
                   <button onClick={() => { setAjustes(a => ({ ...a, subtitulo: '' })); setFocoDescripcion(true); }}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <AlignLeft className="w-3.5 h-3.5" /> Añadir descripción
+                    <AlignLeft className="w-3.5 h-3.5" /> {tr('Añadir descripción')}
                   </button>
                 )}
                 {(portada || icono || ajustes.subtitulo !== undefined) && !eligiendoIcono && (
@@ -3783,7 +3784,7 @@ function EditorPagina() {
           <button onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
             title="Pedirle a la IA que añada contenido a esta página" aria-label="Abrir la IA"
             className="fixed right-4 bottom-24 sm:right-6 sm:bottom-8 z-[9991] inline-flex items-center gap-2 h-12 pl-3.5 pr-4 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 transition-colors">
-            <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">IA</span>
+            <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">{tr('IA')}</span>
           </button>
         )}
         {menc && <MencionesMenu x={menc.x} y={menc.y} tipo={menc.tipo} q={menc.q} onElegir={aplicarMencion} onCerrar={cerrarMenc} />}
@@ -3872,7 +3873,7 @@ function EditorPagina() {
               onClick={e => { e.stopPropagation(); alFinal.current = true; setMenuAbierto(bloques[bloques.length - 1]?.id || null); }}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-600 transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" /> Añadir un bloque
+              <Plus className="w-3.5 h-3.5" /> {tr('Añadir un bloque')}
             </button>
             <button
               onClick={iaContinuar}
@@ -3924,7 +3925,7 @@ function EditorPagina() {
       {fallo && (
         <div role="alert" className="fixed top-20 left-1/2 -translate-x-1/2 z-[85] flex items-center gap-3 pl-4 pr-2 min-h-11 max-w-[calc(100vw-2rem)] rounded-xl bg-rose-600 text-white text-xs font-bold shadow-2xl">
           <span className="py-2">{fallo}</span>
-          <button onClick={() => fallar(null)} aria-label="Cerrar el aviso" className="w-8 h-8 grid place-items-center rounded-lg hover:bg-white/15">
+          <button onClick={() => fallar(null)} aria-label={tr('Cerrar el aviso')} className="w-8 h-8 grid place-items-center rounded-lg hover:bg-white/15">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -3935,7 +3936,7 @@ function EditorPagina() {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-3 pl-4 pr-2 h-11 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-2xl">
           <span>{aviso}</span>
           {pasos.atras > 0 && !aviso.startsWith('Enlace') && !aviso.startsWith('http') && (
-            <button onClick={deshacer} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20">Deshacer <span className="text-white/50">⌘Z</span></button>
+            <button onClick={deshacer} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20">{tr('Deshacer')} <span className="text-white/50">⌘Z</span></button>
           )}
         </div>
       )}
@@ -3948,7 +3949,7 @@ function EditorPagina() {
             onClick={eliminarSeleccion}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 rounded-xl text-xs font-black transition-colors"
           >
-            <Trash2 className="w-3.5 h-3.5" /> Eliminar
+            <Trash2 className="w-3.5 h-3.5" /> {tr('Eliminar')}
           </button>
           <button
             onClick={() => setSeleccion([])}
@@ -4198,7 +4199,7 @@ function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: st
       value={valor}
       onChange={e => onCambiar(e.target.value)}
       onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-      placeholder="Título del documento"
+      placeholder={tr('Título del documento')}
       className="w-full text-4xl font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1 resize-none overflow-hidden block bg-transparent leading-tight"
     />
   );
@@ -4230,8 +4231,8 @@ function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onV
       value={valor}
       onChange={e => onCambiar(e.target.value)}
       onBlur={() => { if (!valor.trim()) onVaciar(); }}
-      placeholder="Escribe una descripción…"
-      aria-label="Descripción de la página"
+      placeholder={tr('Escribe una descripción…')}
+      aria-label={tr('Descripción de la página')}
       style={{ fontSize: letra }}
       className="mt-2 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
     />

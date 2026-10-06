@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
+import { t as tr } from '../../i18n';
 /*
  * EL RAÍL (2026-08-23, agente de APP/UX)
  * ============================================================================
@@ -66,16 +67,16 @@ export interface Herramienta {
  * abren desde el botón del centro.
  */
 export const HERRAMIENTAS: Herramienta[] = [
-  { clave: 'proyectos',    nombre: 'Carpetas',      icono: Folder, ruta: '/carpetas',    conPanel: true },
-  { clave: 'paginas',      nombre: 'Páginas',       icono: FileText,     ruta: '/paginas',      conPanel: true },
-  { clave: 'esquemas',     nombre: 'Esquemas',      icono: Globe2,       ruta: '/esquemas' , conPanel: true },
-  { clave: 'mapas',        nombre: 'Mapas',         icono: MapIcon,      ruta: '/mapas' , conPanel: true },
-  { clave: 'tareas',       nombre: 'Tareas',        icono: ListChecks,   ruta: '/tareas' , conPanel: true },
-  { clave: 'tablas',       nombre: 'Tablas',        icono: Table2,       ruta: '/tablas' , conPanel: true },
-  { clave: 'publicaciones', nombre: 'Publicaciones', icono: Compass,     ruta: '/explorar' , conPanel: true },
-  { clave: 'comercio',     nombre: 'Comercio',      icono: Store,        ruta: '/comercio' , conPanel: true },
-  { clave: 'calendario',   nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario' , conPanel: true },
-  { clave: 'archivos',     nombre: 'Archivos',      icono: Database,     ruta: '/archivos' , conPanel: true },
+  { clave: 'proyectos',    get nombre() { return tr('Carpetas'); },      icono: Folder, ruta: '/carpetas',    conPanel: true },
+  { clave: 'paginas',      get nombre() { return tr('Páginas'); },       icono: FileText,     ruta: '/paginas',      conPanel: true },
+  { clave: 'esquemas',     get nombre() { return tr('Esquemas'); },      icono: Globe2,       ruta: '/esquemas' , conPanel: true },
+  { clave: 'mapas',        get nombre() { return tr('Mapas'); },         icono: MapIcon,      ruta: '/mapas' , conPanel: true },
+  { clave: 'tareas',       get nombre() { return tr('Tareas'); },        icono: ListChecks,   ruta: '/tareas' , conPanel: true },
+  { clave: 'tablas',       get nombre() { return tr('Tablas'); },        icono: Table2,       ruta: '/tablas' , conPanel: true },
+  { clave: 'publicaciones', get nombre() { return tr('Publicaciones'); }, icono: Compass,     ruta: '/explorar' , conPanel: true },
+  { clave: 'comercio',     get nombre() { return tr('Comercio'); },      icono: Store,        ruta: '/comercio' , conPanel: true },
+  { clave: 'calendario',   get nombre() { return tr('Calendario'); },    icono: CalendarDays, ruta: '/calendario' , conPanel: true },
+  { clave: 'archivos',     get nombre() { return tr('Archivos'); },      icono: Database,     ruta: '/archivos' , conPanel: true },
 ];
 
 /*
@@ -113,13 +114,13 @@ export const PERSONALES: Herramienta[] = [];
 
 /** Lo que había aquí antes del 2026-08-25, por si hay que volver a mirarlo. */
 export const PERSONALES_MUDADAS: Herramienta[] = [
-  { clave: 'personas',  nombre: 'Todas las personas', icono: Users2,       ruta: '/personas' },
-  { clave: 'mensajes',  nombre: 'Mensajes',         icono: MessageSquare,  ruta: '/mensajes' },
+  { clave: 'personas',  get nombre() { return tr('Todas las personas'); }, icono: Users2,       ruta: '/personas' },
+  { clave: 'mensajes',  get nombre() { return tr('Mensajes'); },         icono: MessageSquare,  ruta: '/mensajes' },
   // CONTACTOS, NO «TELÉFONO» (2026-08-24, Eugenio: «antes era Teléfono,
   // llámalo contactos a partir de ahora»). Es mejor nombre: un teléfono es el
   // aparato y lo que hay dentro son personas.
-  { clave: 'contactos', nombre: 'Contactos',        icono: Phone,          ruta: '/telefono' },
-  { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
+  { clave: 'contactos', get nombre() { return tr('Contactos'); },        icono: Phone,          ruta: '/telefono' },
+  { clave: 'perfil',    get nombre() { return tr('Mi perfil'); },        icono: User,           ruta: '/persona/yo' },
   /*
    * LAS DOS QUE BAJARON DE LA BARRA DE LA PORTADA (2026-08-24). Al vaciar la
    * parte de arriba de «Explorar» —petición de Eugenio— la papelera y el
@@ -128,8 +129,8 @@ export const PERSONALES_MUDADAS: Herramienta[] = [
    * Van por dirección (`?papelera=1`, `?portada=1`) y no por un evento, para
    * que además se puedan guardar en favoritos y compartir.
    */
-  { clave: 'papelera',  nombre: 'Papelera',         icono: Trash2,         ruta: '/explorar?papelera=1' },
-  { clave: 'portada',   nombre: 'Tu portada',       icono: LayoutGrid,     ruta: '/explorar?portada=1' },
+  { clave: 'papelera',  get nombre() { return tr('Papelera'); },         icono: Trash2,         ruta: '/explorar?papelera=1' },
+  { clave: 'portada',   get nombre() { return tr('Tu portada'); },       icono: LayoutGrid,     ruta: '/explorar?portada=1' },
 ];
 
 export default function Rail({
@@ -696,7 +697,7 @@ export default function Rail({
             <div className="relative shrink-0">
               <button
                 onClick={e => { e.stopPropagation(); setMenuDe(v => (v === h.clave ? null : h.clave)); }}
-                title="Más"
+                title={tr('Más')}
                 aria-label={`Más sobre ${h.nombre}`}
                 aria-expanded={menuDe === h.clave}
                 className={cn('grid h-7 place-items-center rounded-lg text-slate-400 transition-all hover:text-slate-600',
@@ -722,9 +723,9 @@ export default function Rail({
                     className="flex w-full items-start gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50">
                     <EyeOff className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                     <span>
-                      Quitar del menú
+                      {tr('Quitar del menú')}
                       <span className="mt-0.5 block text-[10px] font-normal text-slate-400">
-                        Sigue saliendo en el muro
+                        {tr('Sigue saliendo en el muro')}
                       </span>
                     </span>
                   </button>
@@ -735,7 +736,7 @@ export default function Rail({
             {personal!.reordenar && (
               <span
                 aria-hidden
-                title="Arrastra para ordenar"
+                title={tr('Arrastra para ordenar')}
                 className="hidden h-7 w-4 shrink-0 cursor-grab place-items-center text-slate-200 transition-opacity group-hover/fila:grid"
               >
                 <GripVertical className="h-3.5 w-3.5" />
@@ -773,7 +774,7 @@ export default function Rail({
     <div className={cn('relative h-full shrink-0 transition-[width] duration-200',
       siempreAbierto ? 'w-64' : anclado ? 'w-56' : 'w-14')}>
       <nav
-        aria-label="Herramientas"
+        aria-label={tr('Herramientas')}
         onMouseEnter={() => setEncima(true)}
         onMouseLeave={() => setEncima(false)}
         className={cn(
@@ -865,8 +866,8 @@ export default function Rail({
           {desplegado && anclado && (onPlegar || fijado) && (
             <button
               onClick={() => { if (fijado) fijar(); onPlegar?.(); }}
-              title="Plegar el menú"
-              aria-label="Plegar el menú"
+              title={tr('Plegar el menú')}
+              aria-label={tr('Plegar el menú')}
               className={cn(
                 'grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors',
                 claro
@@ -896,8 +897,8 @@ export default function Rail({
         {personal?.onPersonalizar && (
           <button
             onClick={personal.onPersonalizar}
-            title="Personalizar tus temas"
-            aria-label="Personalizar tus temas"
+            title={tr('Personalizar tus temas')}
+            aria-label={tr('Personalizar tus temas')}
             className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
               desplegado ? 'w-full' : 'w-10 justify-center',
               claro ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white')}
@@ -905,7 +906,7 @@ export default function Rail({
             <SlidersHorizontal className="h-4 w-4 shrink-0" />
             <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
               desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
-              Personalizar
+              {tr('Personalizar')}
             </span>
           </button>
         )}
@@ -919,8 +920,8 @@ export default function Rail({
         {personal?.onNuevoTema && (
           <button
             onClick={personal.onNuevoTema}
-            title="Crear un tema"
-            aria-label="Crear un tema"
+            title={tr('Crear un tema')}
+            aria-label={tr('Crear un tema')}
             className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
               desplegado ? 'w-full' : 'w-10 justify-center',
               claro ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white')}
@@ -928,7 +929,7 @@ export default function Rail({
             <Plus className="h-4 w-4 shrink-0" />
             <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
               desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
-              Nuevo tema
+              {tr('Nuevo tema')}
             </span>
           </button>
         )}
@@ -957,7 +958,7 @@ export default function Rail({
         {desplegado && personal?.ocultos && personal.ocultos.length > 0 && (
           <div className={cn('mt-1 shrink-0 border-t pt-1.5', claro ? 'border-slate-200' : 'border-slate-800')}>
             <p className="px-2.5 pb-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">
-              Quitados del menú
+              {tr('Quitados del menú')}
             </p>
             {personal.ocultos.map(o => (
               <button
@@ -969,7 +970,7 @@ export default function Rail({
               >
                 <EyeOff className="h-3 w-3 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{o.nombre}</span>
-                <span className="shrink-0 text-[10px] opacity-0 transition-opacity group-hover:opacity-100">Devolver</span>
+                <span className="shrink-0 text-[10px] opacity-0 transition-opacity group-hover:opacity-100">{tr('Devolver')}</span>
               </button>
             ))}
           </div>
@@ -1029,7 +1030,7 @@ export default function Rail({
               </p>
               {ramas.de(rozada.h.clave).filter(t => !t.padre_id).length === 0 && (
                 <p className={cn('px-3 py-1.5 text-[11px]', claro ? 'text-slate-400' : 'text-slate-500')}>
-                  Abriendo…
+                  {tr('Abriendo…')}
                 </p>
               )}
               {ramas.de(rozada.h.clave).filter(t => !t.padre_id).map(t => (
