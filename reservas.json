@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "editorA PR4",
-      "desde": "2026-10-06T03:56:58.109Z"
-    },
-    {
       "agente": "prog8-acceso",
       "ruta": "drizzle/0139_estadisticas_pagina.sql",
       "motivo": "carril acceso: seguir páginas, capa social, estadísticas",
@@ -119,6 +113,12 @@
       "ruta": "src/pages/Documento.tsx",
       "motivo": "editorA: presencia, versión y conflictos",
       "desde": "2026-10-06T04:01:27.815Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "editorA PR5",
+      "desde": "2026-10-06T04:07:08.359Z"
     }
   ]
 }
