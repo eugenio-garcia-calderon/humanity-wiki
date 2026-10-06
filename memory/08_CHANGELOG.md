@@ -8611,3 +8611,15 @@ en mis páginas como proyecto pendiente».
 - Nuevo grupo **«Tienda»** al crear una propiedad: **Precio**, **Variantes**, **Envío**, **Stock** y **Botón de compra**. Los cuatro primeros son tipos de siempre (moneda, etiquetas, número) con un `config.rol`; el botón es el único tipo nuevo (`compra`, migración 0144).
 - Cada fila de una base de datos con botón de compra tiene detrás un producto normal (`products.bd_fila_id`), que se copia de la fila al leer la tabla y solo si algo cambió (`bd/tienda.ts`). Fila sin precio → borrador; fila borrada o botón quitado → producto archivado. Cesta, pago, pedidos y stock son los de siempre.
 - **El botón** (`BotonCompra`): precio × unidades, selector de variante y de unidades, y «Añadir a la cesta» dentro de una tienda (subdominio o dominio propio) o «Comprar» fuera de ella. Sale en la tabla y siempre en la galería, que así es un catálogo.
+
+### 2026-10-05 — Database header redesigned after Notion
+- Eugenio asked, with a Notion screenshot, for cleaner configuration buttons in the database editor, adapted to our options.
+- The title row now holds only the title.
+- One toolbar below it:
+  - left: view tabs as rounded pills, plus «+»;
+  - right: icon-only controls with tooltips (Filtrar, Ordenar, Agrupar, Propiedades, Ajustes, Buscar, Enlazar), each with a blue count badge when active (`claseBoton`/`Cuenta` in `BarraVista.tsx`);
+  - a blue split «Nuevo» button: the main part adds an item; the arrow offers new item, new property, or link to another database.
+- The gallery's loose controls (Ocultar título, Propiedades, the two size selects) moved into «Ajustes»: a title switch, S/M/L/XL segmented sizes and the eye-toggle list of visible properties.
+- Connected-database chips sit under the toolbar.
+- «Buscar» filters rows on screen by page name and cell text, without touching the saved view.
+- Readers of published pages see no change.

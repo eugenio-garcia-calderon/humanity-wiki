@@ -1,5 +1,5 @@
 import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -10,7 +10,7 @@ import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { cn } from '../../utils/cn';
 import { tonoDe } from '../../utils/coloresBloque';
-import BarraVista, { Desplegable } from './BarraVista';
+import BarraVista, { Desplegable, claseBoton, Cuenta } from './BarraVista';
 import EditorRecurrencia from './EditorRecurrencia';
 import Tablero from './Tablero';
 import Lista from './Lista';
@@ -119,6 +119,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     conexiones?: Conexion[];
   } | null>(null);
   const [cargando, setCargando] = useState(true);
+  /** La búsqueda de la barra: `null` cerrada, '' abierta y vacía. */
+  const [busca, setBusca] = useState<string | null>(null);
+  const [menuNuevo, setMenuNuevo] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
@@ -417,7 +420,12 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   }
   if (!datos) return null;
 
-  const { columnas, filas } = datos;
+  const { columnas } = datos;
+  // La búsqueda de la barra: en el nombre de la página y en lo escrito en
+  // cada celda. Sólo pantalla; la vista guardada no cambia.
+  const q = (busca || '').trim().toLocaleLowerCase('es');
+  const textoDe = (v: any): string => v == null ? '' : typeof v === 'object' ? Object.values(v).map(textoDe).join(' ') : String(v);
+  const filas = q ? datos.filas.filter(f => `${f.pagina?.titulo || ''} ${textoDe(f.celdas)} ${textoDe(f.apuntados)}`.toLocaleLowerCase('es').includes(q)) : datos.filas;
   // Las columnas que se ven en ESTA vista. El nombre de la fila nunca se
   // esconde: sin él, una fila de la tabla no se sabe qué es.
   const ocultas = new Set(activa.ocultas.filter(id => id !== datos.columna_titulo));
@@ -575,6 +583,116 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // La vista de tabla conserva su marco: ahí sí ayuda a leer filas y columnas.
   const limpia = vista === 'galeria';
 
+  // ══ LA CABECERA COMO EN NOTION (2026-10-05) ════════════════════════════
+  // Eugenio, con una captura de Notion: «más elegante, limpio, adaptado a
+  // nuestra lógica». Arriba sólo el título. Debajo una barra: a la izquierda
+  // las vistas; a la derecha, mandos de sólo icono —filtrar, ordenar,
+  // agrupar, buscar, enlazar, ajustes— y el botón azul «Nuevo». Todo lo que
+  // antes se amontonaba junto al título (ocultar título, propiedades de las
+  // tarjetas, los dos tamaños) vive ahora dentro de «Ajustes».
+  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
+  const Segmentos = ({ valor, onCambiar, etiqueta }: { valor: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string }) => (
+    <div className="flex items-center justify-between gap-2 px-1 py-1">
+      <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
+      <div role="radiogroup" aria-label={etiqueta} className="flex rounded-lg bg-slate-100 p-0.5">
+        {TAMANOS.map(t => (
+          <button key={t.v} role="radio" aria-checked={valor === t.v} onClick={() => onCambiar(t.v)}
+            className={cn('w-9 h-7 rounded-md text-[11px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
+            {t.l}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+  const visiblesAhora = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
+  const ajustesGaleria = (
+    <div className="space-y-2">
+      {onCambiarTituloOculto && (
+        <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
+          <span className="text-xs font-bold text-slate-600">Mostrar el título al publicar</span>
+          <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={!tituloOculto} onChange={e => onCambiarTituloOculto(!e.target.checked)} />
+        </label>
+      )}
+      {onCambiarTamano && <Segmentos etiqueta="Tamaño de las tarjetas" valor={tamano} onCambiar={onCambiarTamano} />}
+      {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño del título" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+      {onCambiarVisibles && (
+        <div className="pt-1 border-t border-slate-100">
+          <p className="px-1 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
+          {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
+            const puesta = visiblesAhora.includes(c.id);
+            return (
+              <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
+                <button onClick={() => onCambiarVisibles(puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id])}
+                  className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-9 text-xs font-bold text-slate-600 text-left">
+                  {puesta ? <Eye className="w-3.5 h-3.5 text-blue-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+                  <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
+                  {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
+                </button>
+                {editable && (
+                  <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
+                    className="w-8 h-8 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+          {editable && (
+            <button onClick={() => setEditorColumna('nueva')}
+              className="mt-1 w-full flex items-center gap-2 px-1.5 h-9 rounded-md text-xs font-bold text-blue-600 hover:bg-blue-50">
+              <Plus className="w-3.5 h-3.5" /> Nueva propiedad
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+  const mandosExtra = (
+    <>
+      {/* BUSCAR: filtra lo que se ve mientras escribes; no se guarda en la vista. */}
+      {busca === null ? (
+        <button onClick={() => setBusca('')} className={claseBoton(false)} title="Buscar" aria-label="Buscar en la base de datos">
+          <Search className="w-[18px] h-[18px]" />
+        </button>
+      ) : (
+        <label className="flex items-center gap-1.5 h-9 w-44 px-2.5 rounded-lg bg-slate-100 focus-within:ring-2 focus-within:ring-blue-300">
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+          <input autoFocus value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar…" aria-label="Buscar en la base de datos"
+            onKeyDown={e => { if (e.key === 'Escape') setBusca(null); }}
+            onBlur={() => { if (!busca) setBusca(null); }}
+            className="flex-1 min-w-0 bg-transparent text-xs font-semibold text-slate-800 outline-none placeholder:text-slate-400" />
+          {busca && <button onClick={() => setBusca(null)} aria-label="Quitar la búsqueda" className="text-slate-400 hover:text-slate-700"><X className="w-3.5 h-3.5" /></button>}
+        </label>
+      )}
+      <button onClick={() => setEditorColumna('nueva-relacion')} className={claseBoton(!!datos.conexiones?.length)}
+        title="Enlazar con otra base de datos" aria-label="Enlazar con otra base de datos">
+        <Link2 className="w-[18px] h-[18px]" />{!!datos.conexiones?.length && <Cuenta n={datos.conexiones.length} />}
+      </button>
+      {/* NUEVO, AZUL Y PARTIDO: el botón crea un elemento; la flecha, lo demás. */}
+      <div className="relative ml-1.5 flex">
+        <button onClick={anadirFila} className="h-9 pl-3.5 pr-3 rounded-l-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors">
+          Nuevo
+        </button>
+        <button onClick={() => setMenuNuevo(v => !v)} aria-label="Más formas de crear" aria-expanded={menuNuevo}
+          className="h-9 w-8 grid place-items-center rounded-r-lg bg-blue-600 text-white border-l border-blue-500 hover:bg-blue-700 transition-colors">
+          <ChevronDown className="w-4 h-4" />
+        </button>
+        <Desplegable abierto={menuNuevo} onCerrar={() => setMenuNuevo(false)} ancho="w-60" derecha>
+          {[
+            { l: 'Nuevo elemento', d: 'Una fila más, con su página', I: Plus, f: anadirFila },
+            { l: 'Nueva propiedad', d: 'Una columna: texto, fecha, número…', I: Table2, f: () => setEditorColumna('nueva') },
+            { l: 'Enlazar con otra base de datos', d: 'Relaciona sus elementos con los de otra', I: Link2, f: () => setEditorColumna('nueva-relacion') },
+          ].map(o => (
+            <button key={o.l} onClick={() => { setMenuNuevo(false); o.f(); }} className="w-full flex items-start gap-2.5 px-2 py-2 rounded-md text-left hover:bg-slate-50">
+              <o.I className="w-4 h-4 mt-0.5 text-slate-500 shrink-0" />
+              <span className="min-w-0"><span className="block text-xs font-bold text-slate-700">{o.l}</span><span className="block text-[11px] text-slate-400">{o.d}</span></span>
+            </button>
+          ))}
+        </Desplegable>
+      </div>
+    </>
+  );
+
   return (
     <div className={limpia
       ? cn(tono.fondo && `${tono.fondo} rounded-2xl p-4`)
@@ -612,17 +730,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           <p className={cn('font-black truncate', limpia ? LETRA_TITULO[tamanoTitulo] : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
         )}
         </div>
-        {/* Ocultar el título al publicar (2026-10-02, Eugenio). */}
-        {limpia && editable && onCambiarTituloOculto && (
-          <button onClick={() => onCambiarTituloOculto(!tituloOculto)}
-            title={tituloOculto ? 'El título no se ve en la página publicada. Pulsa para mostrarlo.' : 'Ocultar el título en la página publicada'}
-            className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md border text-[11px] font-bold shrink-0',
-              tituloOculto ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300')}>
-            {tituloOculto ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{tituloOculto ? 'Título oculto al publicar' : 'Ocultar título'}</span>
-          </button>
-        )}
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
+        {limpia && editable && tituloOculto && (
+          <span className="basis-full text-center text-[11px] font-bold text-amber-600">Título oculto al publicar · se cambia en Ajustes</span>
+        )}
         {!limpia && <span className="text-[11px] text-slate-400">
           {/* Si hay filtro puesto se dice: sin este número, una tabla filtrada y
               una completa se ven igual y nadie sabe que mira un trozo. */}
@@ -630,104 +741,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             ? `${datos.mostradas} de ${datos.total} filas`
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
         </span>}
-        {/* LAS BASES DE DATOS CONECTADAS (2026-10-05): ver `ConexionesBD.tsx`.
-            Sólo para quien edita: en la página publicada lo enlazado ya se ve
-            en las tarjetas. */}
-        {editable && !!datos.conexiones?.length && (
-          <div className={cn(limpia && 'basis-full flex justify-center')}>
-            <ConexionesBD conexiones={datos.conexiones} columnas={columnas} editable={editable} onCambio={() => { cargar(); avisarCambio(); }} />
-          </div>
-        )}
-        {/* Las dos vistas, como las pestañas de Notion. */}
-        {/* ENLAZAR CON OTRA BASE DE DATOS, A LA VISTA (2026-10-02). Eugenio
-            no encontraba cómo relacionar bases de datos: sólo se podía
-            creando una columna desde la vista Tabla. Ahora está aquí, en la
-            galería, con su nombre. */}
-        {editable && vista === 'galeria' && (
-          <button onClick={() => setEditorColumna('nueva-relacion')}
-            title="Enlazar los elementos de esta base de datos con los de otra"
-            className={cn(!limpia && 'ml-auto', 'inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300 shrink-0')}>
-            <Link2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Enlazar con otra base de datos</span>
-          </button>
-        )}
-        {/* QUÉ SE VE EN LAS TARJETAS (2026-10-01): «configurar la vista de
-            galería para mostrar los enlaces a otras bases de datos». */}
-        {vista === 'galeria' && onCambiarVisibles && (
-          <div className="relative shrink-0">
-            <button onClick={() => setMenuProps(v => !v)} aria-expanded={menuProps}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300">
-              <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Propiedades</span>
-            </button>
-            {menuProps && (
-              <div className="absolute right-0 top-full z-30 mt-1 w-60 bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5">
-                <p className="px-2 pt-1 pb-1.5 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
-                {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
-                  const actuales = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
-                  const puesta = actuales.includes(c.id);
-                  return (
-                    <button key={c.id}
-                      onClick={() => onCambiarVisibles(puesta ? actuales.filter(x => x !== c.id) : [...actuales, c.id])}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-bold text-slate-600 text-left hover:bg-slate-50">
-                      <span className={cn('w-3.5 h-3.5 rounded border grid place-items-center shrink-0',
-                        puesta ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300')}>
-                        {puesta && <Check className="w-2.5 h-2.5" />}
-                      </span>
-                      <span className="flex-1 truncate">{c.nombre}</span>
-                      {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
-                      {editable && (
-                        <span role="button" tabIndex={0} title="Editar la propiedad" aria-label={`Editar ${c.nombre}`}
-                          onClick={e => { e.stopPropagation(); setMenuProps(false); setEditorColumna(c); }}
-                          onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setMenuProps(false); setEditorColumna(c); } }}
-                          className="w-7 h-7 -mr-1 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
-                          <Pencil className="w-3 h-3" />
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-                {/* NUEVA PROPIEDAD DESDE LA GALERÍA (2026-10-02, Eugenio: «en la
-                    vista de galería no se puede agregar una nueva propiedad; solo
-                    desde la vista de tabla dándole al más»). Es el mismo editor
-                    que el «+» de la tabla, y la propiedad nueva sale ya marcada
-                    para verse en las tarjetas: si no, parecería que no ha pasado
-                    nada. */}
-                {editable && (
-                  <button onClick={() => { setMenuProps(false); setEditorColumna('nueva'); }}
-                    className="mt-1 w-full flex items-center gap-2 px-2 h-9 rounded-md border-t border-slate-100 text-xs font-bold text-emerald-700 hover:bg-emerald-50">
-                    <Plus className="w-3.5 h-3.5" /> Nueva propiedad
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-        {/* Tamaño de las tarjetas: sólo en galería y sólo para quien edita. */}
-        {vista === 'galeria' && onCambiarTamanoTitulo && (
-          <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0">
-            <span className="hidden sm:inline">Título</span>
-            <select value={tamanoTitulo} onChange={e => onCambiarTamanoTitulo(e.target.value as TamanoGaleria)}
-              aria-label="Tamaño del título"
-              className="h-8 rounded-md border border-slate-200 bg-white px-1.5 text-[11px] font-bold text-slate-600 outline-none focus:border-emerald-400">
-              <option value="pequeno">Pequeño</option>
-              <option value="mediano">Mediano</option>
-              <option value="grande">Grande</option>
-              <option value="muy-grande">Muy grande</option>
-            </select>
-          </label>
-        )}
-        {vista === 'galeria' && onCambiarTamano && (
-          <label className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0', !limpia && !onCambiarVisibles && 'ml-auto')}>
-            <span className="hidden sm:inline">Tamaño</span>
-            <select value={tamano} onChange={e => onCambiarTamano(e.target.value as TamanoGaleria)}
-              aria-label="Tamaño de las tarjetas"
-              className="h-8 rounded-md border border-slate-200 bg-white px-1.5 text-[11px] font-bold text-slate-600 outline-none focus:border-emerald-400">
-              <option value="pequeno">Pequeño</option>
-              <option value="mediano">Mediano</option>
-              <option value="grande">Grande</option>
-              <option value="muy-grande">Muy grande</option>
-            </select>
-          </label>
-        )}
       </div>
       )}
 
@@ -772,7 +785,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                 <input type="checkbox" checked={!!activa.config.portada} onChange={e => cambiarVista({ config: { ...activa.config, portada: e.target.checked } })} />
                 Enseñar la imagen de la página en cada tarjeta
               </label>
-            ) : undefined} />
+            ) : vista === 'galeria' ? ajustesGaleria : undefined}
+            extra={mandosExtra} />
+          {/* Con qué otras bases de datos está enlazada, debajo de la barra. */}
+          {!!datos.conexiones?.length && (
+            <div className="pt-2">
+              <ConexionesBD conexiones={datos.conexiones} columnas={columnas} editable={editable} onCambio={() => { cargar(); avisarCambio(); }} />
+            </div>
+          )}
           {falloVista && <p className="pt-1 text-[11px] font-bold text-rose-600">{falloVista}</p>}
         </div>
       )}

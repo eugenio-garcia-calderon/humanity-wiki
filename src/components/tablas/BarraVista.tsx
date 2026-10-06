@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Plus, Filter, ArrowUpDown, Layers, Eye, EyeOff, X, ChevronDown, ChevronUp, MoreHorizontal, Copy, Trash2, Pencil,
-  Table2, LayoutGrid, Columns3, List, CalendarDays, GanttChart, BarChart3, ClipboardList, Check, Settings2,
+  Table2, LayoutGrid, Columns3, List, CalendarDays, GanttChart, BarChart3, ClipboardList, Check, Settings2, SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Columna } from './Celda';
@@ -83,8 +83,17 @@ export function Desplegable({ abierto, onCerrar, children, ancho = 'w-80', derec
 }
 
 const claseSelect = 'h-8 min-w-0 rounded-md border border-slate-200 bg-white px-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-400';
-const claseBoton = (activo: boolean) => cn('inline-flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-bold shrink-0 transition-colors',
-  activo ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent');
+// LOS MANDOS, SÓLO ICONO (2026-10-05). Eugenio, con una captura de Notion:
+// «más elegantes los botones de configuración». Un icono por mando, el nombre
+// al pasar el ratón, y un punto azul con el número cuando ese mando está
+// haciendo algo (un filtro puesto, un orden…): lo activo se ve sin leer.
+const claseBoton = (activo: boolean) => cn('relative grid place-items-center w-9 h-9 rounded-lg shrink-0 transition-colors',
+  activo ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100');
+/** El número de un mando activo, en su esquina. */
+export const Cuenta = ({ n }: { n: number | string }) => (
+  <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 grid place-items-center rounded-full bg-blue-600 text-white text-[9px] font-black leading-none">{n}</span>
+);
+export { claseBoton };
 
 // ── UNA REGLA DE FILTRO ─────────────────────────────────────────────────────
 
@@ -448,7 +457,7 @@ export default function BarraVista({
   const lista = activa.id === null ? [activa, ...vistas] : vistas;
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-1 min-w-0', centrada && 'justify-center')}>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
       {/* LAS PESTAÑAS. Una por vista; la activa, marcada. */}
       <div className="flex items-center gap-0.5 min-w-0 overflow-x-auto max-w-full" role="tablist" aria-label="Vistas">
         {lista.map(v => {
@@ -467,15 +476,15 @@ export default function BarraVista({
             <div key={clave} className="relative shrink-0 flex items-center">
               <button role="tab" aria-selected={es} onClick={() => onElegir(v)}
                 onDoubleClick={() => editable && setRenombrando(clave)}
-                className={cn('inline-flex items-center gap-1 h-8 pl-2 rounded-md text-[11px] font-bold transition-colors whitespace-nowrap',
-                  es && editable ? 'pr-0.5' : 'pr-2',
-                  es ? 'bg-white text-slate-800 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-700 border border-transparent')}>
-                <Icono className="w-3.5 h-3.5" /> {v.nombre}
+                className={cn('inline-flex items-center gap-2 h-9 pl-3.5 rounded-full text-[13px] font-semibold transition-colors whitespace-nowrap',
+                  es && editable ? 'pr-1' : 'pr-3.5',
+                  es ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50')}>
+                <Icono className="w-4 h-4" /> {v.nombre}
                 {es && editable && (
                   <span role="button" tabIndex={0} aria-label="Opciones de la vista"
                     onClick={e => { e.stopPropagation(); setAbierto(abierto === 'menu:' + clave ? null : 'menu:' + clave); }}
                     onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setAbierto('menu:' + clave); } }}
-                    className="w-6 h-6 grid place-items-center rounded text-slate-300 hover:text-slate-700 hover:bg-slate-100">
+                    className="w-7 h-7 grid place-items-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200">
                     <ChevronDown className="w-3 h-3" />
                   </span>
                 )}
@@ -499,7 +508,7 @@ export default function BarraVista({
         {editable && (
           <div className="relative shrink-0">
             <button onClick={() => setAbierto(abierto === 'nueva' ? null : 'nueva')} title="Añadir una vista" aria-label="Añadir una vista"
-              className="w-8 h-8 grid place-items-center rounded-md text-slate-400 hover:text-emerald-700 hover:bg-emerald-50">
+              className="w-9 h-9 grid place-items-center rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100">
               <Plus className="w-4 h-4" />
             </button>
           <Desplegable abierto={abierto === 'nueva'} onCerrar={cerrar} ancho="w-64">
@@ -525,10 +534,11 @@ export default function BarraVista({
       {/* LOS MANDOS. Solo para quien edita: la página publicada enseña la
           vista tal como la dejó su autor. */}
       {editable && conMandos && (
-        <div className={cn('flex flex-wrap items-center gap-0.5', !centrada && 'ml-auto')}>
+        <div className="ml-auto flex flex-wrap items-center gap-0.5">
           <div className="relative">
-            <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseBoton(nFiltros > 0)} aria-expanded={abierto === 'filtro'}>
-              <Filter className="w-3.5 h-3.5" /> Filtrar{nFiltros > 0 && ` · ${nFiltros}`}
+            <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseBoton(nFiltros > 0)} aria-expanded={abierto === 'filtro'}
+              title={nFiltros ? `Filtrar · ${nFiltros} ${nFiltros === 1 ? 'regla' : 'reglas'}` : 'Filtrar'} aria-label="Filtrar">
+              <Filter className="w-[18px] h-[18px]" />{nFiltros > 0 && <Cuenta n={nFiltros} />}
             </button>
             <Desplegable abierto={abierto === 'filtro'} onCerrar={cerrar} ancho="w-[34rem]" derecha>
               <PanelFiltro vista={activa} columnas={columnas} conocidos={conocidos} onCambiar={f => onCambiar({ filtros: f })} />
@@ -536,8 +546,9 @@ export default function BarraVista({
           </div>
           {activa.forma !== 'grafico' && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'orden' ? null : 'orden')} className={claseBoton(nOrden > 0)} aria-expanded={abierto === 'orden'}>
-                <ArrowUpDown className="w-3.5 h-3.5" /> Ordenar{nOrden > 0 && ` · ${nOrden}`}
+              <button onClick={() => setAbierto(abierto === 'orden' ? null : 'orden')} className={claseBoton(nOrden > 0)} aria-expanded={abierto === 'orden'}
+                title="Ordenar" aria-label="Ordenar">
+                <ArrowUpDown className="w-[18px] h-[18px]" />{nOrden > 0 && <Cuenta n={nOrden} />}
               </button>
               <Desplegable abierto={abierto === 'orden'} onCerrar={cerrar} ancho="w-96" derecha>
                 <PanelOrden vista={activa} columnas={columnas} onCambiar={o => onCambiar({ orden_por: o })} />
@@ -546,8 +557,9 @@ export default function BarraVista({
           )}
           {conAgrupar && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'agrupar' ? null : 'agrupar')} className={claseBoton(!!colAgr)} aria-expanded={abierto === 'agrupar'}>
-                <Layers className="w-3.5 h-3.5" /> {activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}{colAgr && `: ${colAgr.nombre}`}
+              <button onClick={() => setAbierto(abierto === 'agrupar' ? null : 'agrupar')} className={claseBoton(!!colAgr)} aria-expanded={abierto === 'agrupar'}
+                title={`${activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}${colAgr ? `: ${colAgr.nombre}` : ''}`} aria-label={activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}>
+                <Layers className="w-[18px] h-[18px]" />{colAgr && <Cuenta n="1" />}
               </button>
               <Desplegable abierto={abierto === 'agrupar'} onCerrar={cerrar} ancho="w-80" derecha>
                 <PanelAgrupar vista={activa} columnas={columnas} onCambiar={onCambiar} gruposConocidos={gruposConocidos} />
@@ -556,8 +568,9 @@ export default function BarraVista({
           )}
           {conPropiedades && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'props' ? null : 'props')} className={claseBoton(false)} aria-expanded={abierto === 'props'}>
-                <Eye className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Propiedades</span>
+              <button onClick={() => setAbierto(abierto === 'props' ? null : 'props')} className={claseBoton(false)} aria-expanded={abierto === 'props'}
+                title="Propiedades que se ven" aria-label="Propiedades">
+                <Eye className="w-[18px] h-[18px]" />
               </button>
               <Desplegable abierto={abierto === 'props'} onCerrar={cerrar} ancho="w-64" derecha>
                 <PanelPropiedades vista={activa} columnas={columnas} columnaTitulo={columnaTitulo} onCambiar={onCambiar} />
@@ -566,8 +579,8 @@ export default function BarraVista({
           )}
           {ajustes && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseBoton(false)} aria-expanded={abierto === 'ajustes'} title="Ajustes de esta vista">
-                <Settings2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Ajustes</span>
+              <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseBoton(false)} aria-expanded={abierto === 'ajustes'} title="Ajustes de esta vista" aria-label="Ajustes de esta vista">
+                <SlidersHorizontal className="w-[18px] h-[18px]" />
               </button>
               <Desplegable abierto={abierto === 'ajustes'} onCerrar={cerrar} ancho="w-80" derecha>{ajustes}</Desplegable>
             </div>
@@ -576,11 +589,11 @@ export default function BarraVista({
         </div>
       )}
       {editable && !conMandos && (ajustes || extra) && (
-        <div className={cn('flex items-center gap-0.5', !centrada && 'ml-auto')}>
+        <div className="ml-auto flex items-center gap-0.5">
           {ajustes && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseBoton(false)} title="Ajustes de esta vista">
-                <MoreHorizontal className="w-3.5 h-3.5" /> Ajustes
+              <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseBoton(false)} title="Ajustes de esta vista" aria-label="Ajustes de esta vista">
+                <SlidersHorizontal className="w-[18px] h-[18px]" />
               </button>
               <Desplegable abierto={abierto === 'ajustes'} onCerrar={cerrar} ancho="w-96" derecha>{ajustes}</Desplegable>
             </div>
