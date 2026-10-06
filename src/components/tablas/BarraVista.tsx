@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Plus, Filter, ArrowUpDown, Layers, Eye, EyeOff, X, ChevronDown, ChevronUp, MoreHorizontal, Copy, Trash2, Pencil,
-  Table2, LayoutGrid, Columns3, List, CalendarDays, GanttChart, BarChart3, ClipboardList, Check, Settings2, SlidersHorizontal,
+  Table2, LayoutGrid, Columns3, List, CalendarDays, GanttChart, BarChart3, ClipboardList, Check, Settings2, SlidersHorizontal, GalleryHorizontal,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Columna } from './Celda';
@@ -23,7 +23,7 @@ import {
 // mirando un trozo.
 
 export const ICONO_FORMA: Record<Forma, typeof Table2> = {
-  tabla: Table2, galeria: LayoutGrid, tablero: Columns3, lista: List,
+  tabla: Table2, galeria: LayoutGrid, carrusel: GalleryHorizontal, tablero: Columns3, lista: List,
   calendario: CalendarDays, linea: GanttChart, grafico: BarChart3, formulario: ClipboardList,
 };
 
@@ -453,7 +453,7 @@ export default function BarraVista({
   const colAgr = columnas.find(c => c.id === activa.agrupar_por);
   const conMandos = !['formulario'].includes(activa.forma);
   const conPropiedades = ['tabla', 'tablero', 'lista', 'calendario', 'linea'].includes(activa.forma);
-  const conAgrupar = ['tabla', 'galeria', 'tablero', 'lista', 'linea'].includes(activa.forma);
+  const conAgrupar = ['tabla', 'galeria', 'carrusel', 'tablero', 'lista', 'linea'].includes(activa.forma);
   const lista = activa.id === null ? [activa, ...vistas] : vistas;
 
   return (

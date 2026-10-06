@@ -53,7 +53,7 @@ import { emitirEventoFila } from './webhooks';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
  *  misma tabla: cambiar de forma no toca ni una fila. */
-const FORMAS = ['tabla', 'galeria', 'tablero', 'lista', 'calendario', 'linea', 'grafico', 'formulario'] as const;
+const FORMAS = ['tabla', 'galeria', 'carrusel', 'tablero', 'lista', 'calendario', 'linea', 'grafico', 'formulario'] as const;
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
