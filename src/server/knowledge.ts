@@ -6,6 +6,7 @@ import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
 import { graphLimitReached } from './ai/assistant.js';
+import { avisarGuardado } from './colaboracion.js';
 
 // ============================================================================
 // Grafos de Conocimiento — Fase 11
@@ -1798,14 +1799,27 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       // huecos justo en lo que no se tocó.
       const antes = await db.execute(sql`SELECT * FROM knowledge_windows WHERE id = ${req.params.id}`);
 
-      await db.execute(sql`
+      // EDITAR A LA VEZ (2026-10-06, `utils/colaboracion.ts`): el editor manda
+      // la `version_base` con la que partía; si el servidor ya va por otra,
+      // alguien guardó entretanto y NO se escribe: 409 con lo que hay ahora
+      // para que el editor fusione. Sin `version_base` (otras llamadas, la IA)
+      // se guarda como siempre.
+      const vBase = d.version_base === undefined || d.version_base === null ? null : Number(d.version_base);
+      const upd = await db.execute(sql`
         UPDATE knowledge_windows SET
           title = COALESCE(${d.title ?? null}, title),
           kind = COALESCE(${kind}, kind),
           config = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
           version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
-        WHERE id = ${req.params.id}
+        WHERE id = ${req.params.id} AND (${vBase}::int IS NULL OR version = ${vBase}::int)
+        RETURNING version
       `);
+      if (!upd.rows.length) {
+        const ahora = (await db.execute(sql`SELECT title, config, version, updated_by FROM knowledge_windows WHERE id = ${req.params.id}`)).rows[0] as any;
+        const por = ahora?.updated_by ? (await db.execute(sql`SELECT COALESCE(display_name, name, email) AS n FROM users WHERE id = ${ahora.updated_by}`)).rows[0] as any : null;
+        return res.status(409).json({ error: 'Otra persona ha guardado esta página mientras tanto.', version: ahora?.version, title: ahora?.title, config: ahora?.config, por: por?.n || null });
+      }
+      const versionNueva = Number((upd.rows[0] as any).version);
 
       // LA PÁGINA DE UNA FILA (2026-09-30): su título es el nombre de la fila
       // en la base de datos. Se reescribe la primera columna de texto para
@@ -1840,7 +1854,9 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         operacion: 'update', previo: antes.rows[0] ?? null, actor: req.user!.id, agrupar: true,
       });
 
-      res.json({ success: true });
+      // A quien más tenga la página abierta (menos a esta pestaña).
+      avisarGuardado(req.params.id, versionNueva, req.user!.id, d.conexion ? String(d.conexion) : null);
+      res.json({ success: true, version: versionNueva });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
