@@ -58,7 +58,12 @@ export type TipoBloque =
   | 'migas' | 'boton'
   // 2026-10-06 (#22). El mismo contenido en varias páginas: sus `bloques`
   // son una copia del que vive en `bloques_sincronizados` (`sincId`).
-  | 'sincronizado';
+  | 'sincronizado'
+  // 2026-10-06 (carril editorB). `ecuacion`: su `texto` es TeX (LaTeX), que se
+  // pinta con KaTeX (`Formula.tsx`). `embed`: contenido de un tercero (Figma,
+  // Maps, Spotify…): `url` es la dirección que se pegó y el iframe sale de la
+  // lista blanca de `utils/embeds.ts`, nunca de lo guardado tal cual.
+  | 'ecuacion' | 'embed';
 
 /** Lo que hace un bloque `boton` (2026-10-05, como los botones de Notion). */
 export interface AccionBoton {
@@ -380,6 +385,20 @@ export function markdownABloques(md: string): Bloque[] {
       continue;
     }
 
+    // Ecuación en bloque: `$$ tex $$` en una línea, o `$$` … `$$` en varias.
+    if (t.startsWith('$$')) {
+      const una = t.match(/^\$\$(.+)\$\$$/);
+      if (una) { bloques.push({ id: nuevoIdBloque(), tipo: 'ecuacion', texto: una[1].trim() }); i++; continue; }
+      if (t === '$$') {
+        const cuerpo: string[] = [];
+        i++;
+        while (i < lineas.length && lineas[i].trim() !== '$$') { cuerpo.push(lineas[i].trim()); i++; }
+        i++;
+        bloques.push({ id: nuevoIdBloque(), tipo: 'ecuacion', texto: cuerpo.join(' ').trim() });
+        continue;
+      }
+    }
+
     // Tabla GFM: fila | separador | filas…
     if (filaTabla(t) && i + 1 < lineas.length && esSeparadorTabla(lineas[i + 1])) {
       const filas: string[][] = [filaTabla(t)!];
@@ -465,6 +484,8 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       case 'separador': salida.push('---'); break;
       case 'codigo': salida.push('```' + (b.lenguaje || '') + '\n' + (b.texto || '') + '\n```'); break;
       case 'imagen': salida.push(`![${b.pie || ''}](${b.url || ''})`); break;
+      case 'ecuacion': salida.push(`$$\n${b.texto || ''}\n$$`); break;
+      case 'embed': salida.push(b.url || ''); break;
       case 'marcador': salida.push(`[${b.enlaceTitulo || b.url || ''}](${b.url || ''})`); break;
       case 'web': salida.push(b.url || ''); break;
       // Markdown no sabe de vídeo ni de PDF: un enlace es lo más fiel que se

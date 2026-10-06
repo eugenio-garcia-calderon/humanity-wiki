@@ -10,7 +10,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
+  PanelTop, Bookmark, Link2, Play, Sigma, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -61,6 +61,9 @@ import Adjuntos from '../components/archivo/Adjuntos';
 // @menciones, [[enlaces]] y «Enlazan aquí» (2026-10-06, carril editorB, #6).
 import MencionesMenu from '../components/knowledge/MencionesMenu';
 import EnlazanAqui from '../components/knowledge/EnlazanAqui';
+import BloqueEmbed from '../components/knowledge/BloqueEmbed';
+import Formula from '../components/knowledge/Formula';
+import { embedDe, type Embed } from '../utils/embeds';
 import { detectarMencion, referenciasDe } from '../utils/menciones';
 
 // ============================================================================
@@ -108,6 +111,8 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   // El mismo contenido en varias páginas (2026-10-06, #22). Ver «BLOQUES
   // SINCRONIZADOS» más abajo.
   { tipo: 'sincronizado', label: 'Bloque sincronizado', icon: RefreshCw, grupo: 'herramienta', color: 'bg-orange-100 text-orange-600', desc: 'El mismo contenido en varias páginas', claves: 'synced sincronizar reutilizar' },
+  // Contenido de terceros (2026-10-06, #20): Figma, Maps, Drive, Spotify, Loom…
+  { tipo: 'embed', label: 'Contenido incrustado', icon: PanelTop, grupo: 'herramienta', color: 'bg-fuchsia-100 text-fuchsia-700', desc: 'Figma, Maps, Drive, Spotify, Loom, CodePen, X, Miro…', claves: 'embed figma maps mapa google drive docs slides spotify soundcloud loom codepen twitter x miro incrustar' },
   { tipo: 'web', label: 'Web insertada', icon: Globe, grupo: 'herramienta', color: 'bg-emerald-100 text-emerald-700', desc: 'Otra web entera, dentro de la página', claves: 'iframe embed' },
   { tipo: 'publicacion', label: 'Publicación', icon: LayoutTemplate, grupo: 'herramienta', color: 'bg-indigo-100 text-indigo-700', desc: 'Algo ya publicado en la plataforma', claves: 'embeber' },
   // ── Tienda (fase 2 de Comercio) ──
@@ -131,6 +136,8 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   { tipo: 'aviso', label: 'Aviso', icon: Info, grupo: 'formato', claves: 'callout' },
   { tipo: 'indice', label: 'Índice', icon: List, grupo: 'formato' },
   { tipo: 'codigo', label: 'Código', icon: Code2, grupo: 'formato' },
+  // Una fórmula LaTeX con KaTeX (2026-10-06, #19). También: «$$ » al principio.
+  { tipo: 'ecuacion', label: 'Ecuación', icon: Sigma, grupo: 'formato', claves: 'latex katex formula matematicas equation math' },
   { tipo: 'separador', label: 'Separador', icon: Minus, grupo: 'formato', claves: 'linea' },
   // La de texto se queda, y dice lo que es, para quien solo quiera una
   // rejilla de texto en un documento.
@@ -706,7 +713,7 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto' || tipo === 'video' || tipo === 'mapa') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'migas' || tipo === 'boton' || tipo === 'sincronizado') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'embed' || tipo === 'migas' || tipo === 'boton' || tipo === 'sincronizado') { insertar(b.id, tipo); return; }
     const plegable = tipo.startsWith('plegable');
     const real: TipoBloque = plegable ? `titulo${tipo.slice(-1)}` as TipoBloque : tipo as TipoBloque;
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: real, texto: '', plegable: plegable || undefined } : x));
@@ -754,7 +761,7 @@ function EditorPagina() {
     if (tipo === 'boton') { nuevo.texto = 'Botón'; nuevo.boton = { tipo: 'plantilla' }; setConfigBoton(nuevo.id); }
     if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'migas') textosRef.current[nuevo.id] = nuevo.texto ?? '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'embed' && tipo !== 'migas') textosRef.current[nuevo.id] = nuevo.texto ?? '';
     setBloques(bs => {
       // Sin `tras`, arriba del todo (era así: `-1 + 1`).
       const { pos, nivel } = tras ? puntoInsercion(bs, tras) : { pos: 0, nivel: 0 };
@@ -1902,7 +1909,8 @@ function EditorPagina() {
       }
       // Enter PARTE el texto por el cursor: lo de antes se queda, lo de
       // después baja al bloque nuevo con el cursor a su inicio (como Notion).
-      const corte = offsetCaret(el);
+      // Una ecuación no se parte: partir un TeX por el medio lo rompe.
+      const corte = b.tipo === 'ecuacion' ? texto.length : offsetCaret(el);
       const antes = texto.slice(0, corte);
       const despues = texto.slice(corte);
       textosRef.current[b.id] = antes;
@@ -1985,7 +1993,7 @@ function EditorPagina() {
     const reglas: [RegExp, TipoBloque][] = [
       [/^###\s/, 'titulo3'], [/^##\s/, 'titulo2'], [/^#\s/, 'titulo1'],
       [/^[-*]\s/, 'lista'], [/^1[.)]\s/, 'numerada'], [/^>\s/, 'cita'],
-      [/^\[\s?\]\s/, 'tarea'], [/^```/, 'codigo'],
+      [/^\[\s?\]\s/, 'tarea'], [/^```/, 'codigo'], [/^\$\$\s/, 'ecuacion'],
     ];
     for (const [re, tipo] of reglas) {
       if (re.test(texto)) {
@@ -2109,10 +2117,12 @@ function EditorPagina() {
   // mención. El texto vive en el DOM: se reescribe ahí y se avisa con un
   // `input`, para que todo lo demás (guardado, historia, formato) lo vea
   // como si se hubiera tecleado.
+  /** Lo que se está tecleando en una ecuación, para su vista previa en vivo. */
+  const [texEnVivo, setTexEnVivo] = useState<{ id: string; tex: string } | null>(null);
   const [menc, setMenc] = useState<{ bloque: string; tipo: '@' | '[['; desde: number; q: string; x: number; y: number } | null>(null);
   const cerrarMenc = useCallback(() => setMenc(null), []);
   const vigilarMencion = (b: Bloque, el: HTMLElement) => {
-    if (b.tipo === 'codigo') { setMenc(null); return; }
+    if (b.tipo === 'codigo' || b.tipo === 'ecuacion') { setMenc(null); return; }
     const total = el.textContent || '';
     const cursor = offsetCaret(el);
     const d = detectarMencion(total.slice(0, cursor));
@@ -2146,6 +2156,8 @@ function EditorPagina() {
   const [menuEnlace, setMenuEnlace] = useState<{
     bloqueId: string; url: string; x: number; y: number;
     video: { medio: 'youtube' | 'vimeo'; id: string } | null;
+    /** Un servicio de terceros que se incrusta (Figma, Spotify…): ver `utils/embeds.ts`. */
+    embed?: Embed | null;
     /** ¿La web se deja meter en otra? `null` mientras se comprueba. */
     insertable: boolean | null;
     elegido: number;
@@ -2162,8 +2174,11 @@ function EditorPagina() {
     const y = ((r && r.bottom) || caja?.bottom || 100) + 6;
     const yt = idYoutube(url), vm = idVimeo(url);
     const video = yt ? { medio: 'youtube' as const, id: yt } : vm ? { medio: 'vimeo' as const, id: vm } : null;
-    setMenuEnlace({ bloqueId, url, x, y, video, insertable: video ? true : null, elegido: 0 });
-    if (!video) {
+    // Un servicio conocido se ofrece como «Insertar» sin preguntar a la web
+    // (muchas no se dejan meter en un marco, y estas tienen su propio incrustador).
+    const embed = video ? null : embedDe(url);
+    setMenuEnlace({ bloqueId, url, x, y, video, embed, insertable: video || embed ? true : null, elegido: 0 });
+    if (!video && !embed) {
       const p = lecturasEnlace.current[url] ||= leerEnlace(url);
       p.then(l => setMenuEnlace(m => m && m.url === url ? { ...m, insertable: l ? l.insertable : false } : m));
     }
@@ -2197,7 +2212,9 @@ function EditorPagina() {
       ? { id: nuevoIdBloque(), tipo: 'marcador', url: m.url }
       : m.video
         ? { id: nuevoIdBloque(), tipo: 'medio', medio: m.video.medio, medioId: m.video.id } as Bloque
-        : { id: nuevoIdBloque(), tipo: 'web', url: m.url, alto: 480 };
+        : m.embed
+          ? { id: nuevoIdBloque(), tipo: 'embed', url: m.url, alto: m.embed.alto }
+          : { id: nuevoIdBloque(), tipo: 'web', url: m.url, alto: 480 };
     if (!resto.trim()) {
       insertarBloques(b, [nuevo], true);
     } else {
@@ -2554,6 +2571,20 @@ function EditorPagina() {
           : <WebInsertada b={b} onAlto={editable ? alto => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, alto } : x)); programarGuardado(); } : undefined} />;
       }
 
+      // ── CONTENIDO DE TERCEROS (2026-10-06, #20) ──────────────────────────
+      if (b.tipo === 'embed') {
+        if (!b.url) {
+          return editable ? (
+            <EntradaEnlace tipo="embed"
+              onListo={url => {
+                setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url, alto: embedDe(url)?.alto } : x));
+                programarGuardado();
+              }} />
+          ) : null;
+        }
+        return <BloqueEmbed b={b} onAlto={editable ? alto => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, alto } : x)); programarGuardado(); } : undefined} />;
+      }
+
       if (b.tipo === 'pizarra') {
         return b.entityId ? (
           <BloquePizarra id={b.entityId} titulo={b.pubTitulo} vista={b.vista} editable={editable}
@@ -2887,6 +2918,7 @@ function EditorPagina() {
         onInput: (e: React.FormEvent<HTMLDivElement>) => {
           const t = e.currentTarget.textContent || '';
           textosRef.current[b.id] = t;
+          if (b.tipo === 'ecuacion') setTexEnVivo({ id: b.id, tex: t });
           // Con la barra abierta, lo que escribes ES el filtro. Si borras la
           // «/» o te vas a otra línea, se cierra sola.
           if (barra && barra.bloque === b.id) {
@@ -2910,7 +2942,7 @@ function EditorPagina() {
       /** El cuerpo del bloque. Cuando se está editando NO lleva hijos de
        *  React (ver `BloqueEditable`); cuando solo se lee, sí. */
       const cuerpo = (extra?: string) => esActivo
-        ? <BloqueEditable key={`${b.id}-edit-${revision}`} inicial={texto} vivo={b.tipo !== 'codigo'} {...comun} className={cn(comun.className, extra)} />
+        ? <BloqueEditable key={`${b.id}-edit-${revision}`} inicial={texto} vivo={b.tipo !== 'codigo' && b.tipo !== 'ecuacion'} {...comun} className={cn(comun.className, extra)} />
         : <div key={`${b.id}-ver`} {...comun} className={cn(comun.className, extra)}><Inline texto={texto} /></div>;
 
       if (b.tipo === 'cita') {
@@ -3095,6 +3127,29 @@ function EditorPagina() {
       }
       if (b.tipo === 'codigo') {
         return <pre className="bg-slate-900 rounded-xl px-4 py-3 overflow-x-auto">{cuerpo()}</pre>;
+      }
+      // ── ECUACIÓN LaTeX (2026-10-06, #19) ─────────────────────────────────
+      // Pulsada, se ve el TeX y debajo la fórmula, que se repinta en cada
+      // tecla (`texEnVivo`). Sin pulsar, sólo la fórmula.
+      if (b.tipo === 'ecuacion') {
+        const activa = editable && bloqueActivo === b.id;
+        const tex = activa && texEnVivo?.id === b.id ? texEnVivo.tex : texto;
+        return (
+          <div className={cn('rounded-xl border px-4 py-3', activa ? 'border-emerald-300 bg-emerald-50/30' : 'border-transparent bg-slate-50/70')}>
+            {activa && (
+              <div className="mb-2">
+                {cuerpo('font-mono text-[13px] text-slate-700 !bg-white border border-slate-200 !px-2 py-1.5')}
+                <p className="mt-1 text-[11px] text-slate-400">LaTeX, por ejemplo <code>\frac{'{a}{b}'}</code> o <code>\sum_{'{i=1}'}^n x_i</code>. Intro sigue en un párrafo.</p>
+              </div>
+            )}
+            <div role={editable && !activa ? 'button' : undefined} tabIndex={editable && !activa ? 0 : undefined}
+              className={cn('text-center overflow-x-auto text-slate-800 min-h-[1.6em]', editable && !activa && 'cursor-pointer')}
+              onClick={editable && !activa ? () => { setSeleccion([]); setBloqueActivo(b.id); setFocoId(b.id); } : undefined}
+              onKeyDown={editable && !activa ? e => { if (e.key === 'Enter') { setBloqueActivo(b.id); setFocoId(b.id); } } : undefined}>
+              <Formula tex={tex} bloque />
+            </div>
+          </div>
+        );
       }
       if (b.tipo === 'lista' || b.tipo === 'numerada') {
         // El número real se calcula contando los hermanos seguidos del mismo
@@ -3743,6 +3798,8 @@ function EditorPagina() {
               { icono: Bookmark, nombre: 'Marcador', ayuda: 'Tarjeta con imagen, título y descripción' },
               menuEnlace.video
                 ? { icono: Play, nombre: 'Insertar el vídeo', ayuda: 'Se reproduce dentro de la página' }
+                : menuEnlace.embed
+                ? { icono: PanelTop, nombre: `Insertar ${menuEnlace.embed.proveedor}`, ayuda: 'Se ve dentro de la página' }
                 : {
                   icono: Globe, nombre: 'Insertar la web',
                   ayuda: menuEnlace.insertable === null ? 'Comprobando si se deja…'
@@ -4219,24 +4276,31 @@ function FlechaPlegar({ abierto, onClick }: { abierto: boolean; onClick: () => v
 }
 
 /** Un marcador o una web recién creados desde «/»: se les pega la dirección. */
-function EntradaEnlace({ tipo, onListo, onSubir }: { tipo: 'marcador' | 'web' | 'video'; onListo: (url: string) => void; onSubir?: () => void }) {
+function EntradaEnlace({ tipo, onListo, onSubir }: { tipo: 'marcador' | 'web' | 'video' | 'embed'; onListo: (url: string) => void; onSubir?: () => void }) {
   const [v, setV] = useState('');
   const [fallo, setFallo] = useState(false);
   const enviar = () => {
     const url = /^https?:\/\//i.test(v.trim()) ? v.trim() : v.trim() ? `https://${v.trim()}` : '';
-    try { if (!url) throw 0; new URL(url); onListo(url); } catch { setFallo(true); }
+    try {
+      if (!url) throw 0;
+      new URL(url);
+      // Un incrustado sólo acepta los servicios de la lista blanca.
+      if (tipo === 'embed' && !embedDe(url)) throw 0;
+      onListo(url);
+    } catch { setFallo(true); }
   };
-  const Icono = tipo === 'marcador' ? Bookmark : tipo === 'video' ? Play : Globe;
+  const Icono = tipo === 'marcador' ? Bookmark : tipo === 'video' ? Play : tipo === 'embed' ? PanelTop : Globe;
   return (
     <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl border border-dashed border-slate-300 bg-slate-50">
       <Icono className="w-4 h-4 text-slate-400 shrink-0" />
       <input autoFocus value={v} onChange={e => { setV(e.target.value); setFallo(false); }}
         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); enviar(); } }}
-        placeholder={tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : tipo === 'video' ? 'Pega el enlace de YouTube o Vimeo…' : 'Pega el enlace de la web que quieres insertar…'}
+        placeholder={tipo === 'embed' ? 'Pega un enlace de Figma, Maps, Drive, Spotify, Loom, CodePen, X, Miro…' : tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : tipo === 'video' ? 'Pega el enlace de YouTube o Vimeo…' : 'Pega el enlace de la web que quieres insertar…'}
         className={cn('flex-1 min-w-[10rem] h-9 px-2 rounded-lg border bg-white text-sm outline-none', fallo ? 'border-rose-300' : 'border-slate-200 focus:border-emerald-400')} />
       <button type="button" onClick={enviar} className="h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
         {tipo === 'marcador' ? 'Crear marcador' : 'Insertar'}
       </button>
+      {fallo && tipo === 'embed' && <p className="basis-full text-xs font-bold text-rose-600">Ese enlace no es de un servicio compatible (Figma, Google Maps/Drive/Docs/Slides, Spotify, SoundCloud, Loom, CodePen, X o Miro).</p>}
       {tipo === 'video' && onSubir && (
         <button type="button" onClick={onSubir} className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-100">
           o sube un vídeo
