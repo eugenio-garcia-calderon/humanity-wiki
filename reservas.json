@@ -119,6 +119,36 @@
       "ruta": "drizzle/0140_bd_formularios.sql",
       "motivo": "renumerada: 0138 ya existe en main",
       "desde": "2026-10-06T04:00:57.245Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/colaboracion.ts",
+      "motivo": "editorA: presencia, versión y conflictos",
+      "desde": "2026-10-06T04:01:27.815Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/colaboracion.ts",
+      "motivo": "editorA: presencia, versión y conflictos",
+      "desde": "2026-10-06T04:01:27.815Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/PresenciaPagina.tsx",
+      "motivo": "editorA: presencia, versión y conflictos",
+      "desde": "2026-10-06T04:01:27.815Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/edicionPaginas.ts",
+      "motivo": "editorA: presencia, versión y conflictos",
+      "desde": "2026-10-06T04:01:27.815Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "editorA: presencia, versión y conflictos",
+      "desde": "2026-10-06T04:01:27.815Z"
     }
   ]
 }
