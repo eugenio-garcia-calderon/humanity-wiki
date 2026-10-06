@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Star, ExternalLink, Paperclip, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { CeldaRelacion } from './Relacion';
+import BotonCompra from './BotonCompra';
 
 // ============================================================================
 // TABLAS · UNA CELDA
@@ -39,6 +40,11 @@ const FICHEROS = new Set(['imagen', 'video', 'documento']);
 export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; archivos?: any[] }): string {
   if (c.estado !== 'ok') return '';
   const v = c.valor;
+  // The buy button as text (cards, lists): its price. The button itself is
+  // drawn by the grid and the gallery.
+  if (col.tipo === 'compra') {
+    return v?.precio_centimos == null ? '' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: v.moneda || 'EUR' }).format(v.precio_centimos / 100);
+  }
 
   // UNA COLUMNA CALCULADA NO TIENE TIPO PROPIO, así que no sabría cómo
   // enseñarse: multiplicar euros por unidades daba «360000» pelado. Se mira el
@@ -138,6 +144,12 @@ export default function CeldaTabla({
         <span className="text-xs">Calculando…</span>
       </div>
     );
+  }
+
+  // ── BOTÓN DE COMPRA (2026-10-06): nothing to edit, it sells ─────────────
+  if (columna.tipo === 'compra') {
+    return celda.estado === 'ok' ? <BotonCompra datos={celda.valor} compacto />
+      : <span className="block px-2 py-1.5 text-[11px] text-slate-300">—</span>;
   }
 
   // ── CASILLA: se marca de un toque, sin entrar a editar ────────────────────

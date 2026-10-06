@@ -14,7 +14,7 @@ import { cn } from '../../utils/cn';
 // pregunta que se hace el usuario —qué quiero meter aquí— tiene cuatro
 // respuestas en vez de veintiuna.
 
-export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string }> }> = [
+export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; nombre?: string }> }> = [
   {
     grupo: 'Texto y números',
     tipos: [
@@ -67,6 +67,21 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
       { id: 'formula', label: 'Fórmula', ayuda: '{Precio} * {Unidades}' },
       { id: 'condicional', label: 'Condición', ayuda: 'Si esto, entonces aquello' },
       { id: 'agregado', label: 'Resumen de otra tabla', ayuda: 'Suma, cuenta, media…' },
+    ],
+  },
+  // LA TIENDA (2026-10-06, Eugenio: «cuando tú creas una base de datos, vas a
+  // poder crear una propiedad que sea precio, otra que sea variante… y una
+  // puede ser botón de compra»). Four of the five are ordinary types with a
+  // `config.rol` — a «Precio» is a `moneda` that sorts, sums and charts like
+  // any other. Only the button is new. See `src/server/bd/tienda.ts`.
+  {
+    grupo: 'Tienda',
+    tipos: [
+      { id: 'moneda', rol: 'precio', nombre: 'Precio', label: 'Precio', ayuda: 'Lo que cuesta cada unidad' },
+      { id: 'seleccion_multiple', rol: 'variantes', nombre: 'Variantes', label: 'Variantes', ayuda: 'Tallas, colores… las que tenga cada uno' },
+      { id: 'moneda', rol: 'envio', nombre: 'Envío', label: 'Envío', ayuda: 'Gastos de envío; vacío = se acuerda' },
+      { id: 'numero', rol: 'stock', nombre: 'Stock', label: 'Stock', ayuda: 'Cuántos quedan; vacío = sin cuenta' },
+      { id: 'compra', nombre: 'Comprar', label: 'Botón de compra', ayuda: 'Unidades y «Añadir a la cesta»' },
     ],
   },
 ];
@@ -231,14 +246,24 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                 {GRUPOS.map(g => (
                   <div key={g.grupo} className="p-1.5">
                     <p className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-300">{g.grupo}</p>
-                    {g.tipos.map(t => (
-                      <button key={t.id} onClick={() => setTipo(t.id)}
+                    {g.tipos.map(t => {
+                      // A shop entry is a type PLUS a role: «Precio» and «Moneda»
+                      // are the same type and must not both light up.
+                      const elegido = tipo === t.id && (config.rol || undefined) === t.rol;
+                      return (
+                      <button key={t.id + (t.rol || '')} onClick={() => {
+                          setTipo(t.id);
+                          setConfig((c: any) => { const { rol: _fuera, ...resto } = c || {}; return t.rol ? { ...resto, rol: t.rol } : resto; });
+                          // The name follows the shop entry while nobody has typed one.
+                          if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
+                        }}
                         className={cn('w-full flex items-baseline gap-2 px-2 h-11 rounded-lg text-left transition-colors',
-                          tipo === t.id ? 'bg-emerald-50 text-emerald-800' : 'hover:bg-slate-50')}>
+                          elegido ? 'bg-emerald-50 text-emerald-800' : 'hover:bg-slate-50')}>
                         <span className="text-xs font-bold">{t.label}</span>
                         {t.ayuda && <span className="text-[10px] text-slate-400">{t.ayuda}</span>}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 ))}
               </div>

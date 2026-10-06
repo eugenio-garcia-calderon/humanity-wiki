@@ -3,6 +3,7 @@ import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Plus, Move } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
+import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
 import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
@@ -72,7 +73,9 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   // las tres primeras. Una lista vacía elegida a propósito es «ninguna».
   const otras = visibles
     ? visibles.map(id => columnas.find(c => c.id === id)).filter((c): c is Columna => !!c && c.id !== columnaTitulo)
-    : columnas.filter(c => c.id !== columnaTitulo).slice(0, PROPIEDADES);
+    // Without a choice, the first few — plus the buy button wherever it sits:
+    // a product card without its button is a catalogue nobody can buy from.
+    : [...columnas.filter(c => c.id !== columnaTitulo && c.tipo !== 'compra').slice(0, PROPIEDADES), ...columnas.filter(c => c.tipo === 'compra')];
 
   const abrir = async (f: Fila) => {
     setFallo(null);
@@ -191,6 +194,12 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                         {lista.map((a: any) => <FichaRelacion key={a.id} a={a} />)}
                       </div>
                     ) : null;
+                  }
+                  // The shop card (2026-10-06): the buy button itself, so a
+                  // gallery of products is a catalogue you can buy from.
+                  if (c.tipo === 'compra') {
+                    const cc = f.celdas[c.id];
+                    return cc?.estado === 'ok' ? <BotonCompra key={c.id} datos={cc.valor} centrado={centrada} /> : null;
                   }
                   const v = formatear(f.celdas[c.id] ?? { estado: 'vacia' }, c,
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });

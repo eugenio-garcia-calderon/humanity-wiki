@@ -32,6 +32,9 @@ export const TIPOS = [
   // `bd/calculo.ts` al leer. Guardar el resultado daría dos verdades: lo
   // guardado y lo que sale de recalcular.
   'formula', 'agregado', 'condicional',
+  // 2026-10-06: the buy button. Stores nothing: its cell is filled on read
+  // from the product behind the row (see `bd/tienda.ts`).
+  'compra',
 ] as const;
 
 export type Tipo = typeof TIPOS[number];
@@ -259,6 +262,9 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
 
     case 'formula': case 'agregado': case 'condicional':
       return mal('Esta columna se calcula sola: no se puede escribir en ella.');
+
+    case 'compra':
+      return mal('El botón de compra no se escribe: sale del precio, las variantes y el envío de la fila.');
 
     case 'imagen': case 'video': case 'documento':
       return mal('Esta columna guarda archivos: no se escribe como un valor.');
