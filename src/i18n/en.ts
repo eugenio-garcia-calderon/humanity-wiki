@@ -261,6 +261,7 @@ const en: Record<string, string> = {
   "Normal": "Normal",
   "Grande": "Large",
   "Muy grande": "Extra large",
+  "Desarrolladores": "Developers",
   "Ver": "View",
   "Comentar": "Comment",
   "Editar": "Edit",

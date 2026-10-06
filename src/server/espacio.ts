@@ -50,7 +50,7 @@ const palabrasDe = (q: string) => normalizar(q).split(/[^\p{L}\p{N}]+/u).filter(
 type Ids = { yo: string };
 
 /** Las páginas que esta persona ve: suyas, compartidas con ella o con un equipo suyo. */
-const visibles = ({ yo }: Ids) => sql`
+export const visibles = ({ yo }: Ids) => sql`
   SELECT w.id FROM knowledge_windows w
     WHERE w.kind = 'pagina' AND w.creator_user_id = ${yo} AND w.archived_at IS NULL AND w.deleted_at IS NULL
   UNION

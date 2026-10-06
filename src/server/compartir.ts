@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { emitirPaginaPublicada } from './webhooks';
 
 // ============================================================================
 // LA CAJITA DE COMPARTIR, UNA PARA TODAS (2026-08-25)
@@ -290,6 +291,8 @@ export function registrarCompartir(app: Express, db: any) {
           ${sql.raw(c.col.slug)}    = CASE WHEN ${slug === undefined} THEN ${sql.raw(c.col.slug)} ELSE ${slug ?? null}::text END
         WHERE ${sql.raw(c.col.id)} = ${req.params.id}
       `);
+      // Webhook `page.published` (#24): solo al publicar una página (no al despublicar).
+      if (c.tabla === 'knowledge_windows' && publico === true) void emitirPaginaPublicada(db, String(req.params.id));
       res.json({ ok: true });
     } catch (e: any) {
       if (String(e?.cause?.code || e?.code) === '23505') {

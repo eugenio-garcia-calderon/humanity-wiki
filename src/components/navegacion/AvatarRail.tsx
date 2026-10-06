@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   User, MessageSquare, Phone, CalendarDays, Trash2, LayoutGrid,
-  Users2, Settings, LogOut, ChevronDown, UserX,
+  Users2, Settings, LogOut, ChevronDown, UserX, Code2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
@@ -70,6 +70,7 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
     { icono: LayoutGrid,    nombre: 'Tu portada', ruta: '/explorar?portada=1' },
     { icono: User,          nombre: 'Mi perfil', ruta: `/personas/${user.id}` },
     { icono: Settings,      nombre: 'Configuración', ruta: '/configuracion' },
+    { icono: Code2,         nombre: 'Desarrolladores', ruta: '/desarrolladores' },
     /*
      * BORRAR TU CUENTA, AQUÍ Y NO EN EL DESPLEGABLE DE INFORMACIÓN
      * (2026-08-25). Eugenio: «ponlo mejor en el apartado de Configuración de

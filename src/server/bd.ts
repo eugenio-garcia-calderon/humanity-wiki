@@ -48,6 +48,7 @@ import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
 import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
+import { emitirEventoFila } from './webhooks';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
  *  misma tabla: cambiar de forma no toca ni una fila. */
@@ -72,6 +73,9 @@ export const bdInterno: {
     => Promise<{ id: string; pagina_id: string } | { error: string; codigo: number }>;
   escribirCeldas?: (req: Pick<Request, 'user'>, filaId: string, celdas: Record<string, unknown>)
     => Promise<{ codigo: number; cuerpo: any }>;
+  /** La pregunta de permisos de siempre, para la API pública (`apiPublica.ts`). */
+  puedeConTabla?: (req: Pick<Request, 'user'>, tablaId: string, escribir: boolean)
+    => Promise<{ tabla: any } | { error: string; codigo: number }>;
 } = {};
 
 export function registerBdRoutes(app: Express, db: any) {
@@ -122,6 +126,7 @@ export function registerBdRoutes(app: Express, db: any) {
     if (await tablaVisible(db, t.id)) return { tabla: t };
     return { error: 'No tienes acceso a esa tabla.', codigo: 403 };
   }
+  bdInterno.puedeConTabla = puedeConTabla;
 
   /**
    * ¿Vale esta columna calculada? Devuelve el motivo por el que no, o `null`.
@@ -1461,6 +1466,8 @@ export function registerBdRoutes(app: Express, db: any) {
       VALUES (${id}, ${tablaId}, ${JSON.stringify(valores)}::jsonb, ${Number((ultima.rows[0] as any).m) + 1}, ${req.user!.id}, ${req.user!.id})
     `);
     const pagina_id = await crearPaginaDeFila(id, permiso.tabla, titulo, req.user!.id);
+    // Webhook `row.created` (#24). Sin esperar y sin poder romper el guardado.
+    void emitirEventoFila(db, 'row.created', tablaId, id, valores, await columnasDe(tablaId));
     return { id, pagina_id };
   };
   bdInterno.crearFila = crearFila;
@@ -1707,6 +1714,8 @@ export function registerBdRoutes(app: Express, db: any) {
         `);
       }
     }
+    // Webhook `row.updated` (#24).
+    void emitirEventoFila(db, 'row.updated', fila.tabla_id, fila.id, valores, columnas);
     const trasEscribir = celdasDe(valores, columnas);
     const enlacesAhora = await enlacesDe(db, [fila.id]);
     for (const c of columnas) {
