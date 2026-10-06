@@ -19,6 +19,7 @@ import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
+import BotonFavorito from '../components/espacio/BotonFavorito';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import CreadorMenu from '../components/knowledge/CreadorMenu';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
@@ -3396,6 +3397,8 @@ function EditorPagina() {
               <Settings2 className="w-4 h-4" />
             </button>
           )}
+          {/* FAVORITA (#14): la estrella marca la página para el menú de la izquierda. */}
+          {!esNuevo && id && <BotonFavorito tipo="pagina" id={id} titulo={titulo} />}
           <button onClick={() => setCompartirAbierto(true)}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
             <Share2 className="w-3.5 h-3.5" /> Compartir

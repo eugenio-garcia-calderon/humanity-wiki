@@ -34,6 +34,7 @@ import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import HojaExplorar from '../navegacion/HojaExplorar';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
+import PaletaBusqueda from '../espacio/PaletaBusqueda';
 import BotonCalendario from '../navegacion/BotonCalendario';
 import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
 import Campana from '../social/Campana';
@@ -1078,6 +1079,8 @@ export default function Layout() {
             es donde vive la rueda: él se corrigió a sí mismo en la frase y
             **manda la corrección**, no la primera versión. */}
         <BuscadorSuperior compacto={compacto} />
+        {/* ⌘K y ⌘P: la paleta de búsqueda rápida (#15). Es un modal; aquí solo escucha. */}
+        <PaletaBusqueda />
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
             Eugenio, 2026-08-21: «vuelve a poner el menú colapsable superior a
