@@ -643,7 +643,7 @@ each selling row.
 **Chosen: (c).** Cart, checkout, reservations, orders, payouts and receipts
 are reused untouched; a «Precio» sorts, filters, sums and charts as the
 `moneda` it is. New code: `bd/tienda.ts`, `BotonCompra.tsx`, five entries in
-the property picker, migration 0137.
+the property picker, migration 0144.
 
 **The copy is made on READ, not on write.** A row changes through many doors
 (cells, title, photos, renamed options, AI filling). Each read of a table
