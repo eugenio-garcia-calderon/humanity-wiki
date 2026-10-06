@@ -83,6 +83,7 @@ const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
 const Buscar = lazy(() => import('./pages/Buscar'));
+const BusquedaAvanzada = lazy(() => import('./pages/BusquedaAvanzada'));
 const Comercio = lazy(() => import('./pages/Comercio'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
@@ -399,6 +400,7 @@ export default function App() {
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="hormiguero" element={<Hormiguero />} />
                 <Route path="buscar" element={<Buscar />} />
+                <Route path="busqueda" element={<BusquedaAvanzada />} />
                 <Route path="comercio" element={<Comercio />} />
                 <Route path="tablas" element={<Tablas />} />
                 <Route path="preferencias" element={<Preferencias />} />

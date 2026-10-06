@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import CompartidasConmigo from '../acceso/CompartidasConmigo';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronRight, FileText, FolderKanban, Boxes, Loader2, Trash2 } from 'lucide-react';
+import { ChevronRight, FileText, FolderKanban, Boxes, Loader2, Trash2, Star } from 'lucide-react';
+import FavoritosRecientes from '../espacio/FavoritosRecientes';
+import { alternarFavorito, useEspacio, type TipoEspacio } from '../../utils/espacio';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
 import { avisarMovimiento } from '../../utils/avisoPaginas';
 import { cn } from '../../utils/cn';
@@ -34,6 +36,10 @@ import { cn } from '../../utils/cn';
 // CLIC DERECHO → BORRAR, como en Notion. Una página va a la papelera (15 días)
 // con todas las que lleva dentro, y el aviso trae «Deshacer». Una carpeta se
 // archiva y lo de dentro sale fuera, sin borrarse: eso se pregunta antes.
+//
+// FAVORITOS (2026-10-06, #14). El mismo clic derecho ofrece «Añadir a
+// favoritos» —a páginas, carpetas y bases de datos— y los favoritos y
+// recientes salen en `FavoritosRecientes`, arriba del árbol.
 
 type Nodo = { id: string; tipo: 'pagina' | 'bd' | 'fila'; titulo: string; icono: string | null; hijas: string[] };
 type Carpeta = { id: string; titulo: string; slug: string; icono: string | null; padre_id: string | null; paginas: string[] };
@@ -58,7 +64,8 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
   const [sobre, setSobre] = useState<string | null>(null);
   const [aviso, setAviso] = useState<{ texto: string; error?: boolean; deshacer?: () => void } | null>(null);
   /** El menú del clic derecho: dónde se abrió y sobre qué. */
-  const [menu, setMenu] = useState<{ x: number; y: number; tipo: 'pagina' | 'carpeta'; id: string; titulo: string } | null>(null);
+  const [menu, setMenu] = useState<{ x: number; y: number; tipo: 'pagina' | 'carpeta' | 'bd'; id: string; titulo: string } | null>(null);
+  const { favoritos } = useEspacio();
   const navigate = useNavigate();
   const cajaMenu = useRef<HTMLDivElement | null>(null);
   const [arrastrando, setArrastrando] = useState(false);
@@ -198,8 +205,17 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
   const conDescendientes = (id: string): string[] =>
     [id, ...(nodos[id]?.hijas || []).flatMap(h => (nodos[h]?.tipo === 'pagina' ? conDescendientes(h) : []))];
 
+  const alternarFav = async (m: NonNullable<typeof menu>) => {
+    setMenu(null);
+    const id = m.tipo === 'bd' ? m.id.replace(/^bd:/, '') : m.id;
+    const ruta = m.tipo === 'carpeta' ? `/carpetas/${arbol.carpetas.find(c => c.id === m.id)?.slug}` : m.tipo === 'bd' ? '' : `/paginas/${m.id}`;
+    const e = await alternarFavorito(m.tipo as TipoEspacio, id, m.titulo, null, ruta);
+    if (e) setAviso({ texto: e, error: true });
+  };
+
   const borrar = async (m: NonNullable<typeof menu>) => {
     setMenu(null);
+    if (m.tipo === 'bd') return;
     if (m.tipo === 'carpeta') {
       if (!window.confirm(`¿Borrar la carpeta «${m.titulo}»?\n\nLo que hay dentro no se borra: saldrá fuera de la carpeta.`)) return;
       const r = await fetch(`/api/proyectos/${m.id}`, { method: 'DELETE', credentials: 'include' }).catch(() => null);
@@ -224,7 +240,7 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
   };
 
-  const abrirMenu = (tipo: 'pagina' | 'carpeta', id: string, titulo: string) => (e: React.MouseEvent) => {
+  const abrirMenu = (tipo: 'pagina' | 'carpeta' | 'bd', id: string, titulo: string) => (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
     setMenu({ x: e.clientX, y: e.clientY, tipo, id, titulo });
   };
@@ -289,7 +305,7 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
           draggable={movible}
           onDragStart={movible ? empezar(n.id) : undefined}
           onDragEnd={terminar}
-          onContextMenu={n.tipo === 'pagina' ? abrirMenu('pagina', n.id, n.titulo) : undefined}
+          onContextMenu={n.tipo === 'pagina' || n.tipo === 'bd' ? abrirMenu(n.tipo, n.id, n.titulo) : undefined}
           className={cn('group/arbol relative flex items-center rounded-lg transition-colors',
             resaltada ? 'bg-emerald-50 ring-2 ring-emerald-400' : activa ? 'bg-slate-100' : 'hover:bg-slate-50')}>
           <button type="button"
@@ -368,6 +384,7 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
 
   return (
     <div className="flex flex-col gap-px py-1">
+      <FavoritosRecientes onIr={onIr} carpetas={arbol.carpetas} />
       {hijasDe(null).map(c => carpetaFila(c, 0))}
       {arbol.raiz.map(id => nodos[id] && fila(nodos[id], 0))}
       {/* Lo que otras personas han compartido contigo (#12). */}
@@ -388,13 +405,25 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
       {menu && createPortal(
         <div role="menu" ref={cajaMenu} aria-label={`Opciones de ${menu.titulo}`}
           onContextMenu={e => e.preventDefault()}
-          style={{ left: Math.min(menu.x, window.innerWidth - 216), top: Math.min(menu.y, window.innerHeight - 64) }}
+          style={{ left: Math.min(menu.x, window.innerWidth - 216), top: Math.min(menu.y, window.innerHeight - 110) }}
           className="fixed z-[200] w-52 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
           <p className="truncate px-2.5 pb-1 pt-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">{menu.titulo}</p>
-          <button type="button" role="menuitem" ref={el => el?.focus({ preventScroll: true })} onClick={() => borrar(menu)}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-semibold text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:outline-none">
-            <Trash2 className="h-4 w-4" /> Borrar
-          </button>
+          {(() => {
+            const idFav = menu.tipo === 'bd' ? menu.id.replace(/^bd:/, '') : menu.id;
+            const es = favoritos.some(f => f.tipo === menu.tipo && f.id === idFav);
+            return (
+              <button type="button" role="menuitem" ref={el => el?.focus({ preventScroll: true })} onClick={() => alternarFav(menu)}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none">
+                <Star className={cn('h-4 w-4', es ? 'fill-amber-400 text-amber-500' : 'text-slate-400')} /> {es ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+              </button>
+            );
+          })()}
+          {menu.tipo !== 'bd' && (
+            <button type="button" role="menuitem" onClick={() => borrar(menu)}
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-semibold text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:outline-none">
+              <Trash2 className="h-4 w-4" /> Borrar
+            </button>
+          )}
         </div>,
         document.body,
       )}

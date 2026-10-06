@@ -97,6 +97,7 @@ import { registerCalendarioGoogleRoutes } from './calendarioGoogle.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
+import { registrarEspacio } from './espacio.js';
 
 /**
  * Un módulo de la API.
@@ -349,6 +350,7 @@ export const MODULOS: Modulo[] = [
     nota: 'No monta rutas: una pasada al día que vacía las cuentas que pidieron borrarse hace más '
         + 'de 15 días. Vivía en GitHub Actions y no había funcionado nunca (ver el módulo).',
   },
+  { nombre: 'espacio', montar: (app, db) => registrarEspacio(app, db), nota: 'Favoritos, recientes y búsqueda avanzada del espacio de trabajo (#14, #15).' },
 ];
 
 /**
