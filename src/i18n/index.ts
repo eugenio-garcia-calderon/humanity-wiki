@@ -39,7 +39,8 @@ import { createElement, Fragment, useEffect, useState, type ReactNode } from 're
 // SIN TRADUCIR: el editor por dentro (menú «/», menú de cada bloque, ajustes
 //             de bloque), bases de datos (vistas, filtros, propiedades),
 //             comentarios, versiones y compartir en detalle, Mercado, Debates,
-//             Veracidad, Juego, Mensajes y Teléfono, administración, páginas
+//             Veracidad, Juego, Mensajes y Teléfono, /desarrolladores (docs
+//             de la API y webhooks), administración, páginas
 //             legales, textos largos de ayuda y los errores del servidor.
 //             Mientras no se traduzcan se ven en español, sin romper nada.
 

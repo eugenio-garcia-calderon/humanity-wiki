@@ -98,6 +98,8 @@ import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
 import { registrarEspacio } from './espacio.js';
+import { registrarApiPublica } from './apiPublica.js';
+import { registrarWebhooks } from './webhooks.js';
 
 /**
  * Un módulo de la API.
@@ -175,6 +177,14 @@ export const MODULOS: Modulo[] = [
         + 'comprar). Montado después, esas rutas ya habrían contestado «inicia sesión».',
   },
 
+  {
+    nombre: 'api-publica',
+    montar: (app, db) => registrarApiPublica(app, db),
+    nota: 'La API pública /api/v1 con claves (#24). ANTES de las rutas de bases de datos: para leer filas '
+        + 'reescribe la dirección hacia `/api/bd/tablas/:id` y esa ruta tiene que montarse DESPUÉS (Express '
+        + 'solo busca hacia delante). Va tras `miembros` y sobrescribe `req.user` con el de la clave.',
+  },
+  { nombre: 'webhooks', montar: (app, db) => registrarWebhooks(app, db), nota: 'Webhooks salientes firmados y su cola de reintentos (#24).' },
   { nombre: 'graph', montar: (app, db) => registerGraphRoutes(app, db) },
   { nombre: 'social', montar: (app, db) => registerSocialRoutes(app, db) },
 
