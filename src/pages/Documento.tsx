@@ -71,6 +71,7 @@ import { anchoDePagina, clasesDePagina, contarPagina } from '../utils/ajustesPag
 import { detectarMencion, referenciasDe } from '../utils/menciones';
 
 import { t as tr } from '../i18n';
+import { guardarBorrador, leerBorrador, borrarBorrador, registrarEditorAbierto, hayRed } from '../utils/sinConexion';
 // ============================================================================
 // DOCUMENTO estilo Notion (2026-08-08, petición del usuario) — Fase 1
 // ============================================================================
@@ -205,7 +206,7 @@ function EditorPagina() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generando, setGenerando] = useState(esNuevo);
-  const [guardado, setGuardado] = useState<'sí' | 'pendiente' | 'guardando'>('sí');
+  const [guardado, setGuardado] = useState<'sí' | 'pendiente' | 'guardando' | 'sin conexión'>('sí');
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null); // id del bloque cuyo + está abierto
   /** El buscador está buscando PRODUCTOS, no publicaciones. */
   const [buscaProducto, setBuscaProducto] = useState(false);
@@ -352,11 +353,25 @@ function EditorPagina() {
   // --------------------------------------------------------------------------
   // Carga normal (documento existente)
   // --------------------------------------------------------------------------
+  // ── EDITAR SIN CONEXIÓN (#33, `utils/sinConexion.ts`) ──────────────────────
+  // Si esta página tiene un borrador sin enviar, se recupera aquí. Sin red y sin
+  // copia del servicio de trabajo, se abre el propio borrador: lo único que hay.
+  const recuperadoDeBorrador = useRef(false);
   const cargar = useCallback((winId: string) => {
     fetch(`/api/windows/${winId}`, { credentials: 'include' })
       .then(async r => {
-        const j = await r.json();
+        let j = await r.json();
         if (!r.ok) throw new Error(j.error || 'No se ha podido cargar.');
+        const bor = await leerBorrador(winId);
+        // La BASE de la próxima fusión es lo que tiene el servidor, no el borrador.
+        let baseServidor: Bloque[] | null = null;
+        if (bor && !bor.error) {
+          baseServidor = aplanar(j.config?.bloques || []);
+          const mio = aplanar(bor.config?.bloques || []);
+          const fusion = j.version === bor.versionBase ? mio : fusionarBloques(bor.base || [], mio, baseServidor).bloques;
+          j = { ...j, title: bor.titulo, config: { ...(j.config || {}), ...bor.config, bloques: aArbol(fusion) } };
+          recuperadoDeBorrador.current = true;
+        }
         setTitulo(j.title || '');
         setFilaDe(j.fila_de || null);
         setAutor(j.autor_nombre || null);
@@ -380,7 +395,7 @@ function EditorPagina() {
         // La versión con la que se parte y cómo estaba la página: sin ellas no
         // se puede detectar que alguien guardó entretanto ni fusionar.
         versionBase.current = typeof j.version === 'number' ? j.version : null;
-        bloquesBase.current = bs.map(x => ({ ...x }));
+        bloquesBase.current = (baseServidor ?? bs).map(x => ({ ...x }));
         // Abrir (o volver a leer lo que cambió la IA) no es algo que se deshaga.
         sinRegistrar.current = true;
         setRevision(r => r + 1);
@@ -389,7 +404,25 @@ function EditorPagina() {
         // ser de antes de que se editara en otra.
         refrescarSincRef.current(bs);
       })
-      .catch(e => setError(e.message))
+      .catch(async e => {
+        // Sin red y sin copia guardada del servidor: si hay borrador, se abre ese.
+        const bor = await leerBorrador(winId).catch(() => null);
+        if (bor && !bor.error && !hayRed()) {
+          const bs: Bloque[] = aplanar(bor.config?.bloques || []);
+          for (const b of bs) { if (b.texto !== undefined) textosRef.current[b.id] = b.texto; if (b.filas) filasRef.current[b.id] = b.filas; }
+          setTitulo(bor.titulo || ''); setPuedoEditar(true); setPortada(bor.config?.portada || null); setIcono(bor.config?.icono || null);
+          const aj: Ajustes = {};
+          for (const k of CLAVES_AJUSTES) if (bor.config?.[k] !== undefined) (aj as any)[k] = bor.config[k];
+          setAjustes(aj);
+          versionBase.current = bor.versionBase;
+          bloquesBase.current = (bor.base || bs).map(x => ({ ...x }));
+          sinRegistrar.current = true;
+          setRevision(r => r + 1);
+          setBloques(bs.length ? normalizarGrupos(bs) : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
+          recuperadoDeBorrador.current = true;
+          setGuardado('sin conexión');
+        } else setError(e.message);
+      })
       .finally(() => setCargando(false));
   }, []);
 
@@ -608,6 +641,7 @@ function EditorPagina() {
     setGuardado('guardando');
     let bs = estructura ?? serializar();
     const meta = metaRef.current;
+    const configDe = (lista: Bloque[]) => ({ ...meta.ajustes, bloques: aArbol(lista), portada: meta.portada || undefined, icono: meta.icono || undefined });
     const enviar = (lista: Bloque[]) => fetch(`/api/windows/${docId.current}`, {
       method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -616,12 +650,14 @@ function EditorPagina() {
         // Los ajustes van en la misma `config`: si no se mandaran, cada
         // guardado automático los borraría.
         // Se guarda como árbol: los hijos dentro de su madre (`aArbol`).
-        config: { ...meta.ajustes, bloques: aArbol(lista), portada: meta.portada || undefined, icono: meta.icono || undefined },
+        config: configDe(lista),
         version_base: versionBase.current ?? undefined,
         conexion: presenciaRef.current.conexion.current ?? undefined,
       }),
     }).catch(() => null);
-    let r = await enviar(bs);
+    // SIN RED (#33): ni se intenta (esperar el tiempo de espera de una petición
+    // que no va a llegar deja «Guardando…» colgado); va directo al borrador.
+    let r = hayRed() ? await enviar(bs) : null;
 
     // 409: alguien guardó entretanto. Se fusiona (BASE, MÍO, SUYO) y se
     // vuelve a guardar; nada de lo que ha escrito el otro se pierde.
@@ -636,7 +672,7 @@ function EditorPagina() {
       setBloques(normalizarNiveles(fusion));
       versionBase.current = typeof j.version === 'number' ? j.version : versionBase.current;
       bs = fusion;
-      r = await enviar(bs);
+      r = hayRed() ? await enviar(bs) : null;
       avisar(conflictos.length
         ? `${j.por || 'Otra persona'} cambió a la vez ${conflictos.length === 1 ? `«${conflictos[0].texto || 'un bloque'}»` : `${conflictos.length} bloques`}: se ha guardado tu versión.`
         : `${j.por || 'Otra persona'} guardó cambios mientras escribías: se han juntado los dos.`);
@@ -648,6 +684,16 @@ function EditorPagina() {
       bloquesBase.current = bs.map(x => ({ ...x }));
       await guardarSincRef.current(bs);
       sincronizarReferencias(bs);
+      void borrarBorrador(docId.current!);
+    } else if (!r) {
+      // Sin conexión: lo escrito se guarda en este aparato (IndexedDB) y se
+      // enviará al volver la red. El editor sigue funcionando.
+      void guardarBorrador({
+        pageId: docId.current!, titulo: meta.titulo || 'Documento sin título', config: configDe(bs),
+        versionBase: versionBase.current, base: bloquesBase.current, guardadoEn: Date.now(),
+      });
+      setGuardado('sin conexión');
+      return;
     }
     setGuardado(r?.ok ? 'sí' : 'pendiente');
   }, [puedoEditar, serializar]);
@@ -679,12 +725,39 @@ function EditorPagina() {
     };
   }, [guardarAhora, cargar]);
 
+  // ── VUELVE LA RED (#33): lo guardado en el borrador se envía por el camino de
+  // siempre —con `version_base` y su fusión si alguien guardó entretanto—. Y
+  // mientras este editor está abierto, el reenvío global lo deja en paz.
+  useEffect(() => {
+    if (esNuevo || !id) return;
+    const soltar = registrarEditorAbierto(id);
+    const alVolver = () => { if (hayPendiente.current) { clearTimeout(timerGuardado.current); guardarAhoraRef.current(); } };
+    window.addEventListener('online', alVolver);
+    return () => { window.removeEventListener('online', alVolver); soltar(); };
+  }, [esNuevo, id]);
+  // El navegador puede creerse con red cuando el servidor no contesta (y no
+  // dispara `online` al volver el servidor): mientras haya algo sin enviar, se
+  // reintenta cada 15 s.
+  useEffect(() => {
+    if (guardado !== 'sin conexión') return;
+    const t = setInterval(() => { if (hayRed()) guardarAhoraRef.current(); }, 15000);
+    return () => clearInterval(t);
+  }, [guardado]);
+  // Se recuperó un borrador al abrir: se envía ya (si hay red) y se dice.
+  useEffect(() => {
+    if (cargando || !recuperadoDeBorrador.current) return;
+    recuperadoDeBorrador.current = false;
+    avisar(tr('Se han recuperado tus cambios hechos sin conexión.'));
+    if (hayRed()) programarGuardado(); else setGuardado('sin conexión');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cargando]);
+
   // Al irse de la página (p. ej. a una tarjeta de su galería) lo que quedaba
   // por guardar se guarda YA, en vez de tirarse con el temporizador.
   const guardarAhoraRef = useRef(guardarAhora);
   guardarAhoraRef.current = guardarAhora;
   const hayPendiente = useRef(false);
-  useEffect(() => { hayPendiente.current = guardado === 'pendiente'; }, [guardado]);
+  useEffect(() => { hayPendiente.current = guardado === 'pendiente' || guardado === 'sin conexión'; }, [guardado]);
   const sinGuardar = useRef(false);
   useEffect(() => { sinGuardar.current = guardado !== 'sí'; }, [guardado]);
 
@@ -3505,7 +3578,7 @@ function EditorPagina() {
               <span className={cn('font-bold', subiendo ? 'text-emerald-600' : guardado === 'sí' ? 'text-slate-300' : 'text-amber-600')}>
                 {subiendo
                   ? subiendo
-                  : guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : 'Cambios sin guardar'}
+                    : guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : guardado === 'sin conexión' ? tr('sin conexión · se guardará al volver') : 'Cambios sin guardar'}
               </span>
               <button onClick={cambiarVisibilidad}
                 className={cn('inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border transition-colors',
