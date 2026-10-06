@@ -76,6 +76,7 @@ import { registerPuntosRoutes } from './puntos.js';
 import { registerGastoRoutes } from './gasto.js';
 import { registerDocumentosRoutes } from './documentos.js';
 import { registrarEdicionPaginas } from './edicionPaginas.js';
+import { registrarColab } from './colabServidor.js';
 import { registrarPermisos } from './permisos.js';
 import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
@@ -274,6 +275,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'gasto', montar: (app, db) => registerGastoRoutes(app, db) },
   { nombre: 'documentos', montar: (app, db) => registerDocumentosRoutes(app, db) },
   { nombre: 'edicionPaginas', montar: (app, db) => registrarEdicionPaginas(app, db) },
+  {
+    nombre: 'colab',
+    montar: (app, db) => registrarColab(app, db),
+    nota: 'Edición simultánea con Yjs: WebSocket `/api/colab/:id` (se engancha a `app.listen`, sin tocar '
+        + '`server.ts`) y `/api/colab/:id/estado`. Ver la cabecera de `colabServidor.ts`.',
+  },
   {
     nombre: 'permisos',
     montar: (app, db) => registrarPermisos(app, db),
