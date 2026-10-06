@@ -10,7 +10,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Map as MapIcon, MousePointerClick, Navigation,
+  PanelTop, Bookmark, Link2, Play, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -98,6 +98,9 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   // Un botón que hace algo (2026-10-05): insertar una plantilla, crear una
   // página o una fila, o abrir un enlace. Ver `ejecutarBoton`.
   { tipo: 'boton', label: 'Botón', icon: MousePointerClick, grupo: 'herramienta', color: 'bg-slate-900 text-white', desc: 'Inserta bloques, crea una página o abre un enlace', claves: 'button plantilla accion' },
+  // El mismo contenido en varias páginas (2026-10-06, #22). Ver «BLOQUES
+  // SINCRONIZADOS» más abajo.
+  { tipo: 'sincronizado', label: 'Bloque sincronizado', icon: RefreshCw, grupo: 'herramienta', color: 'bg-orange-100 text-orange-600', desc: 'El mismo contenido en varias páginas', claves: 'synced sincronizar reutilizar' },
   { tipo: 'web', label: 'Web insertada', icon: Globe, grupo: 'herramienta', color: 'bg-emerald-100 text-emerald-700', desc: 'Otra web entera, dentro de la página', claves: 'iframe embed' },
   { tipo: 'publicacion', label: 'Publicación', icon: LayoutTemplate, grupo: 'herramienta', color: 'bg-indigo-100 text-indigo-700', desc: 'Algo ya publicado en la plataforma', claves: 'embeber' },
   // ── Tienda (fase 2 de Comercio) ──
@@ -354,6 +357,9 @@ function EditorPagina() {
         sinRegistrar.current = true;
         setRevision(r => r + 1);
         setBloques(bs.length ? normalizarGrupos(bs) : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
+        // Lo último de cada bloque sincronizado: la copia de la página puede
+        // ser de antes de que se editara en otra.
+        refrescarSincRef.current(bs);
       })
       .catch(e => setError(e.message))
       .finally(() => setCargando(false));
@@ -553,6 +559,7 @@ function EditorPagina() {
         config: { ...meta.ajustes, bloques: aArbol(bs), portada: meta.portada || undefined, icono: meta.icono || undefined },
       }),
     }).catch(() => null);
+    if (r?.ok) await guardarSincRef.current(bs);
     setGuardado(r?.ok ? 'sí' : 'pendiente');
   }, [puedoEditar, serializar]);
 
@@ -606,7 +613,7 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto' || tipo === 'video' || tipo === 'mapa') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'migas' || tipo === 'boton') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'migas' || tipo === 'boton' || tipo === 'sincronizado') { insertar(b.id, tipo); return; }
     const plegable = tipo.startsWith('plegable');
     const real: TipoBloque = plegable ? `titulo${tipo.slice(-1)}` as TipoBloque : tipo as TipoBloque;
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: real, texto: '', plegable: plegable || undefined } : x));
@@ -630,6 +637,7 @@ function EditorPagina() {
     const plegable = tipoMenu.startsWith('plegable');
     const tipo: TipoBloque = esVideo ? 'web' : plegable ? `titulo${tipoMenu.slice(-1)}` as TipoBloque : tipoMenu as TipoBloque;
     if (tipo === 'subpagina') { crearSubpagina(tras); return; }
+    if (tipo === 'sincronizado') { setMenuAbierto(null); crearSincronizado(tras); return; }
     if (tipo === 'pizarra') { crearPizarra(tras); return; }
     if (tipo === 'medio') {
       setMenuAbierto(null);
@@ -924,6 +932,225 @@ function EditorPagina() {
     });
     programarGuardado();
   };
+
+  // ══ BLOQUES SINCRONIZADOS (2026-10-06, #22) ═════════════════════════════
+  // Un bloque `sincronizado` lleva dentro (sus hijos) una copia del contenido
+  // que vive en `bloques_sincronizados`. Al guardar la página, si esa copia
+  // ha cambiado respecto a lo último que se supo del servidor (`sincBase`),
+  // se guarda también allí, y el servidor pone al día las demás páginas. Al
+  // abrir la página se pide lo último; y las otras pestañas se enteran al
+  // momento por `avisoPaginas` (BroadcastChannel).
+  const sincBase = useRef<Record<string, { firma: string; version: number }>>({});
+  const [sincPaginas, setSincPaginas] = useState<Record<string, { id: string; titulo: string }[]>>({});
+
+  /** JSON con las claves en orden: dos copias iguales dan la misma firma. */
+  const firma = (x: unknown): string => JSON.stringify(x, (_k, v) =>
+    v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).filter(([, y]) => y !== undefined).sort(([a], [b]) => a.localeCompare(b))) : v);
+
+  /** El contenido (árbol) del sincronizado `bs[i]`, con el texto vivo. */
+  const contenidoSinc = (bs: Bloque[], i: number): Bloque[] => {
+    const n = (bs[i].nivel || 0) + 1;
+    return aArbol(bs.slice(i + 1, finSubarbol(bs, i) + 1).map(x => ({
+      ...x,
+      texto: x.texto !== undefined || textosRef.current[x.id] !== undefined ? (textosRef.current[x.id] ?? x.texto ?? '') : undefined,
+      filas: x.tipo === 'tabla' ? (filasRef.current[x.id] ?? x.filas) : undefined,
+      nivel: ((x.nivel || 0) - n) || undefined,
+    })));
+  };
+
+  /** Cambia lo de dentro de cada sincronizado `sincId` por `arbol` (sin que
+   *  cuente para deshacer: no lo ha hecho quien escribe aquí). */
+  const ponerContenidoSinc = (sincId: string, arbol: Bloque[]) => {
+    sinRegistrar.current = true;
+    setRevision(r => r + 1);
+    setBloques(bs => {
+      let lista = bs;
+      for (let i = 0; i < lista.length; i++) {
+        const b = lista[i];
+        if (b.tipo !== 'sincronizado' || b.sincId !== sincId) continue;
+        const fin = finSubarbol(lista, i);
+        const n = (b.nivel || 0) + 1;
+        const nuevos = aplanar(arbol).map(x => ({ ...x, nivel: ((x.nivel || 0) + n) || undefined }));
+        for (const x of nuevos) { if (x.texto !== undefined) textosRef.current[x.id] = x.texto; if (x.filas) filasRef.current[x.id] = x.filas; }
+        lista = [...lista.slice(0, i + 1), ...nuevos, ...lista.slice(fin + 1)];
+        i += nuevos.length;
+      }
+      return lista;
+    });
+  };
+
+  const refrescarSincRef = useRef<(bs: Bloque[]) => void>(() => {});
+  refrescarSincRef.current = (bs: Bloque[]) => {
+    const ids = [...new Set(bs.filter(b => b.tipo === 'sincronizado' && b.sincId).map(b => b.sincId!))];
+    for (const sid of ids) {
+      fetch(`/api/sincronizados/${sid}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => {
+        if (!j) return;
+        setSincPaginas(p => ({ ...p, [sid]: j.paginas || [] }));
+        const contenido = aArbol(aplanar(j.bloques || []));
+        sincBase.current[sid] = { firma: firma(contenido), version: j.version };
+        const i = bloquesRef.current.findIndex(b => b.sincId === sid);
+        if (i >= 0 && firma(contenidoSinc(bloquesRef.current, i)) !== firma(contenido)) ponerContenidoSinc(sid, contenido);
+      }).catch(() => {});
+    }
+  };
+
+  const guardarSincRef = useRef<(bs: Bloque[]) => Promise<void>>(async () => {});
+  guardarSincRef.current = async (bs: Bloque[]) => {
+    const hechos = new Set<string>();
+    for (let i = 0; i < bs.length; i++) {
+      const b = bs[i];
+      if (b.tipo !== 'sincronizado' || !b.sincId || hechos.has(b.sincId)) continue;
+      hechos.add(b.sincId);
+      const base = sincBase.current[b.sincId];
+      // Sin saber aún qué hay en el servidor no se escribe: la copia de esta
+      // página podría ser vieja y pisaría lo que se hizo en otra.
+      if (!base) continue;
+      const contenido = contenidoSinc(bs, i);
+      const f = firma(contenido);
+      if (f === base.firma) continue;
+      const enviar = (version: number) => fetch(`/api/sincronizados/${b.sincId}`, {
+        method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bloques: contenido, version_base: version, pagina: docId.current }),
+      }).catch(() => null);
+      let r = await enviar(base.version);
+      if (r?.status === 409) {
+        // Otra página lo cambió entretanto. Gana lo que se acaba de escribir
+        // aquí (es lo que se ve en pantalla), y se dice.
+        const j = await r.json().catch(() => ({}));
+        r = await enviar(j.version);
+        avisar('Este bloque sincronizado también se había cambiado en otra página: se ha guardado tu versión.');
+      }
+      if (!r?.ok) continue;
+      const j = await r.json().catch(() => ({}));
+      sincBase.current[b.sincId] = { firma: f, version: j.version };
+      avisarMovimiento('humanity:sincronizado-cambiado', { sincId: b.sincId, bloques: contenido, version: j.version, desde: docId.current });
+    }
+  };
+
+  // Lo que se edita en otra pestaña llega aquí al momento.
+  useEffect(() => {
+    const oir = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (!d.sincId || d.desde === docId.current) return;
+      if (!bloquesRef.current.some(b => b.sincId === d.sincId)) return;
+      const contenido = aArbol(aplanar(d.bloques || []));
+      sincBase.current[d.sincId] = { firma: firma(contenido), version: d.version };
+      ponerContenidoSinc(d.sincId, contenido);
+    };
+    window.addEventListener('humanity:sincronizado-cambiado', oir);
+    return () => window.removeEventListener('humanity:sincronizado-cambiado', oir);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Inserta un sincronizado que ya existe (pegado de otra página). */
+  const insertarSincronizado = async (tras: string | null, sid: string, sustituir?: string) => {
+    const r = await fetch(`/api/sincronizados/${sid}`, { credentials: 'include' }).catch(() => null);
+    const j = r?.ok ? await r.json().catch(() => null) : null;
+    if (!j) { fallar('No se ha encontrado ese bloque sincronizado (o no tienes acceso a él).'); return; }
+    const contenido = aArbol(aplanar(j.bloques || []));
+    sincBase.current[sid] = { firma: firma(contenido), version: j.version };
+    setSincPaginas(p => ({ ...p, [sid]: j.paginas || [] }));
+    const madre: Bloque = { id: nuevoIdBloque(), tipo: 'sincronizado', sincId: sid };
+    guardarHistoria();
+    setBloques(bs => {
+      const k = sustituir ? bs.findIndex(x => x.id === sustituir) : -1;
+      const { pos, nivel } = k >= 0 ? { pos: k, nivel: bs[k].nivel || 0 } : puntoInsercion(bs, tras);
+      const hijos = aplanar(contenido).map(x => ({ ...x, nivel: (x.nivel || 0) + nivel + 1 }));
+      for (const x of hijos) { if (x.texto !== undefined) textosRef.current[x.id] = x.texto; if (x.filas) filasRef.current[x.id] = x.filas; }
+      const out = [...bs];
+      out.splice(pos, k >= 0 ? 1 : 0, { ...madre, nivel: nivel || undefined }, ...hijos);
+      return out;
+    });
+    programarGuardado();
+    avisar('Bloque sincronizado pegado: lo que cambies aquí cambiará en todas sus páginas.');
+  };
+
+  /** Uno nuevo, vacío salvo un párrafo para escribir. */
+  const crearSincronizado = async (tras: string | null, envolver?: string) => {
+    if (!docId.current) return;
+    // Al convertir un bloque, su contenido (con sus hijos) es lo de dentro.
+    const bs0 = bloquesRef.current;
+    const k = envolver ? bs0.findIndex(x => x.id === envolver) : -1;
+    const contenido = k >= 0 ? contenidoSinc([{ ...bs0[k], id: '_', nivel: (bs0[k].nivel || 0) - 1 }, ...bs0.slice(k, finSubarbol(bs0, k) + 1)], 0) : [];
+    const r = await fetch('/api/sincronizados', {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pagina: docId.current, bloques: contenido }),
+    }).catch(() => null);
+    const j = r?.ok ? await r.json().catch(() => null) : null;
+    if (!j?.id) { fallar('No se ha podido crear el bloque sincronizado.'); return; }
+    sincBase.current[j.id] = { firma: firma(aArbol(aplanar(contenido))), version: j.version };
+    setSincPaginas(p => ({ ...p, [j.id]: [{ id: docId.current!, titulo }] }));
+    const madre: Bloque = { id: nuevoIdBloque(), tipo: 'sincronizado', sincId: j.id };
+    guardarHistoria();
+    if (k >= 0) {
+      setBloques(bs => {
+        const i = bs.findIndex(x => x.id === envolver);
+        if (i < 0) return bs;
+        const fin = finSubarbol(bs, i);
+        const out = [...bs];
+        for (let m = i; m <= fin; m++) out[m] = { ...out[m], nivel: (out[m].nivel || 0) + 1, grupo: undefined };
+        out.splice(i, 0, { ...madre, nivel: bs[i].nivel || undefined });
+        return out;
+      });
+    } else {
+      const hijo: Bloque = { id: nuevoIdBloque(), tipo: 'parrafo', texto: '' };
+      textosRef.current[hijo.id] = '';
+      setBloques(bs => {
+        const { pos, nivel } = puntoInsercion(bs, tras);
+        const out = [...bs];
+        out.splice(pos, 0, { ...madre, nivel: nivel || undefined }, { ...hijo, nivel: nivel + 1 });
+        return out;
+      });
+      setBloqueActivo(hijo.id);
+      setFocoId(hijo.id);
+    }
+    programarGuardado();
+  };
+
+  /** Copia el bloque para pegarlo en otra página (⌘V allí). */
+  const copiarSincronizado = (b: Bloque) => {
+    setMenuAsa(null);
+    const marca = `humanity-sincronizado:${b.sincId}`;
+    navigator.clipboard?.writeText(marca).then(
+      () => avisar('Copiado. Pégalo (⌘V) en otra página: quedará sincronizado con éste.'),
+      () => avisar(marca));
+  };
+
+  /** Deja de sincronizar ESTA copia: lo de dentro pasa a ser bloques
+   *  normales de la página (con ids nuevos), y las demás páginas siguen. */
+  const dejarDeSincronizar = (bid: string) => {
+    setMenuAsa(null);
+    guardarHistoria();
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === bid);
+      if (i < 0) return bs;
+      const fin = finSubarbol(bs, i);
+      const sueltos = bs.slice(i + 1, fin + 1).map(x => {
+        const nid = nuevoIdBloque();
+        if (textosRef.current[x.id] !== undefined) textosRef.current[nid] = textosRef.current[x.id];
+        if (filasRef.current[x.id]) filasRef.current[nid] = filasRef.current[x.id];
+        return { ...x, id: nid, nivel: ((x.nivel || 0) - 1) || undefined };
+      });
+      return normalizarNiveles([...bs.slice(0, i), ...sueltos, ...bs.slice(fin + 1)]);
+    });
+    programarGuardado();
+    avisar('Ya no está sincronizado: ahora es contenido normal de esta página.');
+  };
+
+  /** Para cada bloque, el sincronizado que lo contiene (si lo hay) y cuántos
+   *  sincronizados tiene por encima (no cuentan para la sangría: lo de dentro
+   *  se ve a la altura del propio bloque, como en Notion). */
+  const enSinc = useMemo(() => {
+    const m: Record<string, { sinc: string; capas: number }> = {};
+    const pila: { id: string; nivel: number }[] = [];
+    for (const b of bloques) {
+      const n = b.nivel || 0;
+      while (pila.length && pila[pila.length - 1].nivel >= n) pila.pop();
+      if (pila.length) m[b.id] = { sinc: pila[pila.length - 1].id, capas: pila.length };
+      if (b.tipo === 'sincronizado') pila.push({ id: b.id, nivel: n });
+    }
+    return m;
+  }, [bloques]);
 
   /** Los ids de un bloque y de todo lo que lleva dentro. */
   const idsSubarbol = (bs: Bloque[], bid: string) => {
@@ -1891,6 +2118,14 @@ function EditorPagina() {
     // (la web o el vídeo dentro de la página). Se pega a mano como texto
     // plano: el pegado del navegador, con HTML, metería un enlace con otro
     // texto y la dirección se perdería.
+    // PEGAR UN BLOQUE SINCRONIZADO copiado en otra página (2026-10-06).
+    const sinc = url.match(/^humanity-sincronizado:([A-Z0-9]+)$/i);
+    if (sinc) {
+      e.preventDefault();
+      insertarSincronizado(b.id, sinc[1], !(e.currentTarget.textContent || '').trim() ? b.id : undefined);
+      return;
+    }
+
     if (esEnlace && !enlaceDeMedio && b.tipo !== 'codigo' && !dt.files?.length) {
       e.preventDefault();
       document.execCommand('insertText', false, url);
@@ -1938,6 +2173,8 @@ function EditorPagina() {
       const dt = e.clipboardData;
       if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return;
       e.preventDefault();
+      const sinc = (dt.getData('text/plain') || '').trim().match(/^humanity-sincronizado:([A-Z0-9]+)$/i);
+      if (sinc) { insertarSincronizado(null, sinc[1]); return; }
       bloquesDelPortapapeles(dt).then(nuevos => {
         setSubiendo(null);
         if (nuevos?.length) { insertarBloques(null, nuevos, false); return; }
@@ -2121,6 +2358,12 @@ function EditorPagina() {
     }
     if (b.tipo === 'boton') {
       out.push({ icon: Settings2, label: 'Configurar el botón', onClick: () => { setMenuAsa(null); setConfigBoton(b.id); } });
+    }
+    if (b.tipo === 'sincronizado') {
+      out.push({ icon: Copy, label: 'Copiar para otra página', onClick: () => copiarSincronizado(b) });
+      out.push({ icon: Unlink, label: 'Dejar de sincronizar', onClick: () => dejarDeSincronizar(b.id) });
+    } else if (!enSinc[b.id] && b.tipo !== 'subpagina') {
+      out.push({ icon: RefreshCw, label: 'Convertir en sincronizado', onClick: () => { setMenuAsa(null); crearSincronizado(null, b.id); } });
     }
     if (esPlegable(b)) {
       out.push({
@@ -2562,6 +2805,32 @@ function EditorPagina() {
         );
       }
 
+      // ── EL SINCRONIZADO, ARRIBA DE SU CONTENIDO (2026-10-06) ─────────────
+      // Una franja naranja que dice que lo de debajo está en más páginas, en
+      // cuáles, y lo que se puede hacer con él.
+      if (b.tipo === 'sincronizado') {
+        const paginas = sincPaginas[b.sincId || ''] || [];
+        const otras = paginas.filter(p => p.id !== docId.current);
+        return (
+          <div className="flex items-center gap-2 flex-wrap text-[11px] font-bold text-orange-700">
+            <span className="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-orange-50 border border-orange-200">
+              <RefreshCw className="w-3 h-3" /> Sincronizado
+            </span>
+            <span className="text-orange-600/80 font-medium">
+              {otras.length === 0 ? 'Sólo en esta página por ahora' : `También en ${otras.length === 1 ? '«' + otras[0].titulo + '»' : otras.length + ' páginas más'}`}
+            </span>
+            {editable && (
+              <>
+                <button type="button" onClick={e => { e.stopPropagation(); copiarSincronizado(b); }}
+                  className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">Copiar</button>
+                <button type="button" onClick={e => { e.stopPropagation(); dejarDeSincronizar(b.id); }}
+                  className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">Dejar de sincronizar</button>
+              </>
+            )}
+          </div>
+        );
+      }
+
       if (b.tipo === 'migas') {
         return <MigasDePan paginaId={docId.current} titulo={titulo} />;
       }
@@ -2709,7 +2978,7 @@ function EditorPagina() {
         return (
           <div className="flex gap-2">
             <span className="text-slate-400 select-none shrink-0 w-5 text-right leading-relaxed text-[15px]">
-              {marcaLista(b.tipo, n, b.nivel || 0)}
+              {marcaLista(b.tipo, n, (b.nivel || 0) - (enSinc[b.id]?.capas || 0))}
             </span>
             {cuerpo('flex-1 min-w-0')}
           </div>
@@ -2746,11 +3015,13 @@ function EditorPagina() {
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
           seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60',
           // Dentro de un botón es su plantilla: no es texto de la página.
-          enPlantilla.has(b.id) && 'border-l-2 border-dashed border-violet-200 pl-2')}
+          enPlantilla.has(b.id) && 'border-l-2 border-dashed border-violet-200 pl-2',
+          // Lo de dentro de un sincronizado lleva su raya naranja, como Notion.
+          enSinc[b.id] && 'border-l-2 border-orange-300 pl-2')}
         onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
         // La sangría: cada nivel, un paso a la derecha, con sus mandos (el
         // «+» y el asa) detrás, como en Notion.
-        style={b.nivel ? { marginLeft: Math.min(b.nivel, 10) * (esMovil ? 18 : 28) } : undefined}
+        style={b.nivel ? { marginLeft: Math.min(b.nivel - (enSinc[b.id]?.capas || 0), 10) * (esMovil ? 18 : 28) } : undefined}
       >
         {/* LOS MANDOS DEL BLOQUE. En escritorio viven FUERA de la columna, a
             56 px por la izquierda, y aparecen al pasar el ratón.

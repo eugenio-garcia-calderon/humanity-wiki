@@ -15,7 +15,7 @@ canal?.addEventListener('message', e => {
   if (typeof tipo === 'string' && tipo.startsWith('humanity:')) window.dispatchEvent(new CustomEvent(tipo, { detail: detalle }));
 });
 
-export function avisarMovimiento(tipo: 'humanity:pagina-movida' | 'humanity:bloque-movido', detalle: Record<string, unknown>) {
+export function avisarMovimiento(tipo: 'humanity:pagina-movida' | 'humanity:bloque-movido' | 'humanity:sincronizado-cambiado', detalle: Record<string, unknown>) {
   window.dispatchEvent(new CustomEvent(tipo, { detail: detalle }));
   try { canal?.postMessage({ tipo, detalle }); } catch { /* sin canal: sólo esta pestaña */ }
 }
