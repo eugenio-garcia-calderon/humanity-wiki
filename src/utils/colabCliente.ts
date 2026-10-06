@@ -482,6 +482,11 @@ export class Colab {
       return abs && abs.type === t ? abs.index : null;
     } catch { return null; }
   }
+  /** El texto crudo de un bloque, tal como está en el documento. */
+  textoDe(id: string): string | null {
+    const t = raices(this.doc).mapa.get(id)?.get('texto');
+    return t instanceof Y.Text ? t.toString() : null;
+  }
   /** ¿Cambió algo en el documento que el editor no tenga? (para pruebas) */
   firmaDoc() { return firma(leerPlano(this.doc)); }
 }

@@ -82,3 +82,59 @@ if (typeof document !== 'undefined') {
   document.addEventListener('compositionend', () => { componiendo = false; }, true);
 }
 export const estaComponiendo = () => componiendo;
+
+/**
+ * De un offset en el texto CRUDO (con `**`, `[…](…)`) al offset en el texto
+ * que se VE (lo que pinta un bloque que no se está escribiendo). Sirve para
+ * poner el cursor de otra persona en su sitio dentro de un bloque que aquí se
+ * ve ya con formato. Devuelve también el largo del texto visible, para que
+ * quien llama compruebe que coincide con el DOM y, si no, no se invente nada.
+ */
+export function crudoAVisible(raw: string, idx: number): { visible: number; largo: number } {
+  const re = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\(([^)]+)\))/g;
+  let ultimo = 0, vis = 0, res: number | null = null;
+  const poner = (r: number) => { if (res === null) res = r; };
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(raw))) {
+    if (idx < m.index) poner(vis + (idx - ultimo));
+    vis += m.index - ultimo;
+    const s = m[0];
+    let marca = 0, dentro = s;
+    if (s.startsWith('**')) { marca = 2; dentro = s.slice(2, -2); }
+    else if (s.startsWith('`') || s.startsWith('*')) { marca = 1; dentro = s.slice(1, -1); }
+    else { marca = 1; dentro = s.slice(1, s.indexOf('](')); }
+    if (idx >= m.index && idx < m.index + s.length) poner(vis + Math.max(0, Math.min(dentro.length, idx - m.index - marca)));
+    vis += dentro.length;
+    ultimo = m.index + s.length;
+  }
+  if (idx >= ultimo) poner(vis + (idx - ultimo));
+  vis += raw.length - ultimo;
+  return { visible: Math.min(res ?? vis, vis), largo: vis };
+}
+
+/** Rectángulos (relativos a `contenedor`) de un tramo de texto de `el`. */
+export function rectasDeTramo(el: HTMLElement, contenedor: HTMLElement, a: number, f: number): { x: number; y: number; w: number; h: number }[] {
+  const ubi = (n: number): { nodo: Node; desp: number } | null => {
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let quedan = n, nodo = w.nextNode(), ult: Node | null = null;
+    while (nodo) {
+      const l = nodo.textContent?.length ?? 0;
+      if (quedan <= l) return { nodo, desp: quedan };
+      quedan -= l; ult = nodo; nodo = w.nextNode();
+    }
+    return ult ? { nodo: ult, desp: ult.textContent?.length ?? 0 } : null;
+  };
+  const A = ubi(Math.min(a, f)), F = ubi(Math.max(a, f));
+  if (!A || !F) return [];
+  const r = document.createRange();
+  r.setStart(A.nodo, A.desp); r.setEnd(F.nodo, F.desp);
+  const base = contenedor.getBoundingClientRect();
+  let rects = [...r.getClientRects()];
+  if (!rects.length) {
+    // Un cursor sin selección: si el navegador no da rectángulo (línea vacía),
+    // se usa el del elemento.
+    const e = el.getBoundingClientRect();
+    rects = [{ left: e.left, top: e.top, width: 0, height: e.height || 20 } as DOMRect];
+  }
+  return rects.map(q => ({ x: q.left - base.left, y: q.top - base.top, w: q.width, h: q.height }));
+}
