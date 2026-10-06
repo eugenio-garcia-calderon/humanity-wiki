@@ -38,12 +38,6 @@
     },
     {
       "agente": "prog8-colab",
-      "ruta": "src/server/edicionPaginas.ts",
-      "motivo": "Edición colaborativa Yjs: servidor y persistencia (prog8-colab)",
-      "desde": "2026-10-06T10:26:20.783Z"
-    },
-    {
-      "agente": "prog8-colab",
       "ruta": "package.json",
       "motivo": "Edición colaborativa Yjs: servidor y persistencia (prog8-colab)",
       "desde": "2026-10-06T10:26:20.783Z"
