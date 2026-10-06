@@ -147,7 +147,7 @@ export default function BloquesLectura({ bloques, comentable, paginaId }: { bloq
 
 /** Los bloques que pintan ELLOS MISMOS lo que llevan dentro. El resto lo
  *  lleva debajo, con sangría (ver `uno`). */
-const PINTAN_SUS_HIJOS = new Set(['desplegable', 'aviso', 'franja', 'columnas', 'boton']);
+const PINTAN_SUS_HIJOS = new Set(['desplegable', 'aviso', 'franja', 'columnas', 'boton', 'sincronizado']);
 
 function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentable?: string; nivel: number }) {
   // UN ENLACE A UN BLOQUE (`#b-…`, 2026-09-30). El navegador salta al ancla
@@ -266,6 +266,14 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
 
     case 'aviso':
       return <Aviso b={b} />;
+
+    // UN BLOQUE SINCRONIZADO (2026-10-06): su contenido, a la misma altura
+    // que el resto, como si estuviera escrito aquí. La copia que lleva la
+    // página la mantiene al día el servidor cada vez que se edita en otra.
+    case 'sincronizado':
+      return Array.isArray(b.bloques) && b.bloques.length
+        ? <Hondura.Provider value={nivel}><BloquesLectura bloques={b.bloques} /></Hondura.Provider>
+        : null;
 
     // Las migas de pan (2026-10-05): con los enlaces del sitio si la página
     // se lee dentro de uno, y los de la plataforma si no.

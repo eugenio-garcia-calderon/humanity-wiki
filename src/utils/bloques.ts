@@ -55,7 +55,10 @@ export type TipoBloque =
   // 2026-10-05 (carril editorA, «al nivel de Notion»). `migas` es la ruta de
   // páginas madre (no guarda nada: se pregunta al pintar). `boton` hace algo
   // al pulsarlo (ver `AccionBoton`); su plantilla son sus `bloques` hijos.
-  | 'migas' | 'boton';
+  | 'migas' | 'boton'
+  // 2026-10-06 (#22). El mismo contenido en varias páginas: sus `bloques`
+  // son una copia del que vive en `bloques_sincronizados` (`sincId`).
+  | 'sincronizado';
 
 /** Lo que hace un bloque `boton` (2026-10-05, como los botones de Notion). */
 export interface AccionBoton {
@@ -185,6 +188,8 @@ export interface Bloque {
   plegable?: boolean;
   /** `boton`: qué hace al pulsarlo. Su texto es `texto`. */
   boton?: AccionBoton;
+  /** `sincronizado`: cuál (fila de `bloques_sincronizados`). */
+  sincId?: string;
   /** ══ LA IMAGEN, COMO EN POWERPOINT (2026-10-06) ═══════════════════════
    *  Ver `ImagenBloque.tsx`. `anchoImagen` es el % de su columna (no `ancho`, que
    *  ya usó la maqueta de columnas); `relacion`, el
