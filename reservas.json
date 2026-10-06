@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-espacio",
-      "ruta": "src/App.tsx",
-      "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
-      "desde": "2026-10-06T04:46:40.405Z"
-    },
-    {
-      "agente": "prog8-espacio",
       "ruta": "src/pages/Documento.tsx",
       "motivo": "carril espacio: edicion sin conexion (#33)",
       "desde": "2026-10-06T05:09:22.821Z"
