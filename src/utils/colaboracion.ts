@@ -32,61 +32,19 @@
 //    haya ocho procesos»). Hoy hay uno.
 //  - Los avisos son SSE (sólo servidor → cliente); los cambios suben por PUT.
 //
-// ── EL PASO A UN CRDT (YJS): QUÉ FALTA Y CÓMO SE HARÍA ─────────────────────
-// Objetivo: que cada tecla viaje a los demás en milisegundos y que dos
-// ediciones simultáneas del MISMO texto se combinen sin perder ninguna.
-//
-//  1. MODELO. Un `Y.Doc` por página:
-//       - `Y.Array<Y.Map>` `bloques` — un `Y.Map` por bloque con sus campos
-//         (`tipo`, `nivel`, `hecho`, `url`, `anchoImagen`, `recorte`…); la
-//         lista PLANA con `nivel` que ya usa el editor es justo lo que Yjs
-//         maneja bien (mover un bloque = borrar + insertar con el mismo id, y
-//         los hijos ya viajan por tener más `nivel`).
-//       - `texto` de cada bloque = `Y.Text`. Hoy el texto vive en el DOM
-//         (`BloqueEditable`, ver su comentario) y en `textosRef`: con Yjs el
-//         dueño del texto pasa a ser el `Y.Text`, y el contentEditable se
-//         enlaza con él (`y-prosemirror`/`y-quill` son la referencia; para un
-//         contentEditable por bloque lo más simple es observar `Y.Text` y
-//         aplicar `delta`s al DOM, y traducir `beforeinput` a deltas).
-//       - `filas` de las tablas de texto: `Y.Array<Y.Array<Y.Text>>`.
-//       - Título y ajustes: un `Y.Map` `meta`.
-//  2. TRANSPORTE. Un servidor Yjs sobre WebSocket (`y-websocket`, o el
-//     protocolo de sincronización de `y-protocols` sobre `ws`). Esto exige
-//     enganchar un WebSocket al servidor HTTP: toca `server.ts`, que está
-//     congelado (ver `src/server/CLAUDE.md`, y la cabecera de `telecomHub.ts`
-//     donde se eligió SSE por eso). Alternativa SIN WebSocket: SSE para bajar
-//     actualizaciones + `POST /api/paginas/:id/yjs` para subirlas (cada
-//     actualización de Yjs es un `Uint8Array` pequeño); sirve y no toca nada
-//     congelado, a cambio de más peticiones.
-//  3. PERSISTENCIA. Guardar el estado del `Y.Doc` (binario) en una columna
-//     nueva `knowledge_windows.yjs bytea`, y SEGUIR escribiendo `config.bloques`
-//     como hoy a partir del documento: así la lectura pública, la búsqueda,
-//     el historial (`entity_history`), las exportaciones y `BloquesLectura` no
-//     cambian. El documento Yjs es la fuente en edición; `config.bloques` es
-//     su proyección. Migración: la primera vez que se abre, el `Y.Doc` se
-//     construye desde `config.bloques` (`aplanar`).
-//  4. PRESENCIA Y CURSORES. `y-protocols/awareness`: nombre, color y posición
-//     del cursor de cada persona; sustituye al SSE de presencia de hoy (la
-//     lista de avatares sale de ahí) y permite pintar el cursor ajeno.
-//  5. DESHACER. `Y.UndoManager` con `trackedOrigins` propios: ⌘Z sólo deshace
-//     lo MÍO, no lo de los demás. Hoy `Documento.tsx` tiene su pila de fotos
-//     (ver «DESHACER Y REHACER»); habría que sustituirla por el UndoManager.
-//  6. PERMISOS. El servidor ya sabe quién puede editar qué página
-//     (`rolEnPagina`, `permisos.ts`): rechazar las actualizaciones de quien
-//     sólo puede ver o comentar, y dejar a esas personas conectarse en modo
-//     lectura (reciben, no envían).
-//  7. LOS BLOQUES QUE NO SON TEXTO (base de datos, pizarra, sincronizados)
-//     tienen su propia fuente de verdad en el servidor y no entran en el
-//     `Y.Doc`: dentro sólo va la referencia (`tabla_id`, `entityId`, `sincId`).
-//     Un bloque sincronizado ya es, en pequeño, esto mismo (ver
-//     `bloques_sincronizados`): su contenido se podría llevar a un `Y.Doc`
-//     propio con el mismo mecanismo.
-//  8. PRUEBAS. Dos navegadores contra el mismo servidor, tecleando a la vez
-//     en el mismo bloque, en bloques distintos, moviendo un bloque que el
-//     otro edita, y cortando la red de uno y reconectando.
-//
-// Estimación: lo difícil no es Yjs, es el punto 1 (el texto vivo en el DOM) y
-// el 5 (deshacer). Lo demás es transporte y una columna.
+// ── EL PASO A UN CRDT (YJS): HECHO (2026-10-06, carril colab) ──────────────
+// Lo que arriba se describe como «lo que no hay» ya existe, encima de esto y no
+// en su lugar:
+//   · el diseño y el modelo del documento:  `colabModelo.ts` (y `colabTexto.ts`)
+//   · la conexión y el puente con el editor: `colabCliente.ts`, `colabDom.ts`,
+//     `components/knowledge/useColab.ts` y `CursoresAjenos.tsx`
+//   · el servidor (WebSocket `/api/colab/:id`, persistencia, derivación a
+//     `config.bloques`, varios procesos con LISTEN/NOTIFY): `server/colabServidor.ts`
+//   · las pruebas: `scripts/probar-colab.mts` y `scripts/probar-colab-modelo.mts`
+// Esta fusión por bloque (`fusionarBloques`) NO sobra: es el respaldo cuando el
+// WebSocket no conecta (autoguardado + 409), la reconciliación con las
+// escrituras «por fuera» (IA, API, restaurar versión) y la del borrador sin
+// conexión que se recupera al recargar.
 // ============================================================================
 
 import type { Bloque } from './bloques';
