@@ -101,6 +101,12 @@
       "ruta": "src/components/knowledge/CrearProducto.tsx",
       "motivo": "Una sola forma de crear: bases de datos con plantillas y precio = producto; creador de propiedades nuevo",
       "desde": "2026-10-06T10:50:43.656Z"
+    },
+    {
+      "agente": "prog8-variantes",
+      "ruta": "src/components/tablas/PropiedadesFila.tsx",
+      "motivo": "Añadir propiedad desde la página del elemento",
+      "desde": "2026-10-06T10:54:52.118Z"
     }
   ]
 }
