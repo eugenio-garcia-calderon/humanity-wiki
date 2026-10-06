@@ -77,6 +77,12 @@
       "ruta": "scripts/probar-colab.mts",
       "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
       "desde": "2026-10-06T14:05:09.234Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/utils/colabCliente.ts",
+      "motivo": "",
+      "desde": "2026-10-06T14:05:56.336Z"
     }
   ]
 }
