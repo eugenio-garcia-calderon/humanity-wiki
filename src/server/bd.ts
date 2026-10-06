@@ -35,6 +35,8 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
 import { bloquesDe } from './bloquesSql';
+import { REGLAS, guardian, ritmo, ipDe } from './limites/index';
+import { limpiarConfigFormulario, validarRespuesta, TIPOS_DE_FORMULARIO, type CampoForm } from './bd/formularios';
 import { tablaVisible } from './sitios';
 import { TIPOS, tipar, type Tipo } from './bd/tipos';
 import { celdasDe, type Celda } from './bd/celdas';
@@ -876,6 +878,84 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  // ── FORMULARIOS PÚBLICOS (2026-10-06, carril «bd») ────────────────────────
+  // Ver `bd/formularios.ts` para el porqué de cada precaución. Las dos rutas
+  // son PÚBLICAS a propósito —el que rellena no tiene cuenta— y por eso no
+  // piden sesión ni miran `puedeConTabla`: lo único que abre la puerta es el
+  // token de un formulario que su autor ha publicado.
+  const TOKEN = /^[a-f0-9]{32}$/;
+  const formularioPorToken = async (token: string) => {
+    if (!TOKEN.test(token)) return null;
+    const r = await db.execute(sql`
+      SELECT v.id AS vista_id, v.tabla_id, v.config, t.titulo AS tabla_titulo,
+             CASE WHEN t.proyecto_id IS NOT NULL THEN p.creador_user_id ELSE t.creador_user_id END AS dueno
+      FROM bd_vistas v
+      JOIN bd_tablas t ON t.id = v.tabla_id AND t.deleted_at IS NULL AND t.archived_at IS NULL
+      LEFT JOIN proyectos p ON p.id = t.proyecto_id
+      WHERE v.config -> 'formulario' ->> 'token' = ${token} AND v.archived_at IS NULL AND v.forma = 'formulario'
+        AND v.config -> 'formulario' ->> 'publico' = 'true'
+    `);
+    const f = r.rows[0] as any;
+    if (!f || !f.dueno) return null;
+    const cols = (await columnasDe(f.tabla_id)).filter((c: any) => TIPOS_DE_FORMULARIO.has(c.tipo));
+    const cfg = f.config?.formulario || {};
+    const campos: CampoForm[] = (cfg.campos || []).filter((c: CampoForm) => cols.some((x: any) => x.id === c.columna_id));
+    return { ...f, cfg, cols, campos };
+  };
+
+  app.get('/api/bd/formularios/:token', async (req: Request, res: Response) => {
+    try {
+      const f = await formularioPorToken(String(req.params.token));
+      if (!f) return res.status(404).json({ error: 'Este formulario no existe o ya no está abierto.' });
+      res.set('Cache-Control', 'no-store');
+      res.json({
+        titulo: f.cfg.titulo || f.tabla_titulo, descripcion: f.cfg.descripcion || '', boton: f.cfg.boton || 'Enviar',
+        campos: f.campos.map((c: CampoForm) => {
+          const col = f.cols.find((x: any) => x.id === c.columna_id);
+          return {
+            columna_id: col.id, nombre: c.etiqueta || col.nombre, tipo: col.tipo, opciones: col.opciones || [],
+            config: { decimales: col.config?.decimales, maximo: col.config?.maximo, moneda: col.config?.moneda },
+            obligatorio: !!c.obligatorio, ayuda: c.ayuda || '',
+          };
+        }),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: 'No se pudo abrir el formulario.' }); }
+  });
+
+  app.post('/api/bd/formularios/:token', guardian(db, REGLAS.formulario, () => null), async (req: Request, res: Response) => {
+    try {
+      const f = await formularioPorToken(String(req.params.token));
+      if (!f) return res.status(404).json({ error: 'Este formulario no existe o ya no está abierto.' });
+      const ip = ipDe(req);
+      // EL CAMPO TRAMPA: un campo que las personas no ven (`sitio_web`). Un
+      // robot rellena todo lo que encuentra. Se le contesta que ha ido bien —
+      // sin pistas de que ha sido descubierto— y no se guarda nada, pero SÍ
+      // cuenta para el límite de su IP.
+      if (typeof req.body?.sitio_web === 'string' && req.body.sitio_web.trim()) {
+        void ritmo(db, REGLAS.formulario, ip);
+        return res.json({ ok: true, gracias: f.cfg.gracias || '¡Gracias! Hemos recibido tu respuesta.' });
+      }
+      if (!f.campos.length) return res.status(400).json({ error: 'Este formulario todavía no tiene campos.' });
+      const v = validarRespuesta(req.body?.valores || {}, f.campos, f.cols);
+      if ('fallos' in v) return res.status(400).json({ error: 'Revisa los campos marcados.', fallos: v.fallos });
+      if (!Object.keys(v.valores).length) return res.status(400).json({ error: 'Rellena al menos un campo.' });
+
+      // Quien recibe la fila es el dueño de la tabla: es el que tendría
+      // permiso de escribirla, y así pasa por la MISMA función que cualquier
+      // fila (con su página). Después se marca de dónde vino.
+      const colTitulo = await columnaTitulo(f.tabla_id);
+      const pseudo = { user: { id: f.dueno, roleLevel: 0 } } as Pick<Request, 'user'>;
+      const nueva = await crearFila(pseudo, f.tabla_id, colTitulo ? v.valores[colTitulo] ?? '' : '');
+      if ('error' in nueva) return res.status(nueva.codigo).json({ error: 'No se pudo guardar tu respuesta.' });
+      await db.execute(sql`
+        UPDATE bd_filas SET valores = valores || ${JSON.stringify(v.valores)}::jsonb, created_by = ${'formulario:' + f.vista_id}, updated_by = ${'formulario:' + f.vista_id}
+        WHERE id = ${nueva.id}
+      `);
+      void ritmo(db, REGLAS.formulario, ip);
+      res.json({ ok: true, gracias: f.cfg.gracias || '¡Gracias! Hemos recibido tu respuesta.' });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: 'No se pudo guardar tu respuesta.' }); }
+  });
+
   // ── LA PÁGINA DE UNA FILA (2026-10-06, carril «bd») ───────────────────────
   // Lo que pide el menú de cada propiedad en la página de una fila, como en
   // Notion: ordenar arrastrando, duplicar, ir a la base de datos enlazada, y
@@ -1267,6 +1347,12 @@ export function registerBdRoutes(app: Express, db: any) {
       const limpio = limpiarVista(d);
       if ('error' in limpio) return res.status(400).json({ error: limpio.error });
 
+      // El enlace de un formulario lo pone el servidor, nunca el cliente; y solo
+      // una vista de forma «formulario» puede llevar la sección `formulario`.
+      if (limpio.config) {
+        if (limpio.forma === 'formulario' && limpio.config.formulario) limpio.config = { ...limpio.config, formulario: limpiarConfigFormulario(limpio.config.formulario, null) };
+        else { const { formulario, ...resto } = limpio.config; void formulario; limpio.config = resto; }
+      }
       const id = nid('BDV');
       const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_vistas WHERE tabla_id = ${req.params.id} AND archived_at IS NULL`);
       await db.execute(sql`
@@ -1290,6 +1376,15 @@ export function registerBdRoutes(app: Express, db: any) {
       if ('error' in p) return res.status(p.codigo).json({ error: p.error });
       const c = limpiarVista(req.body || {});
       if ('error' in c) return res.status(400).json({ error: c.error });
+      // Ver el POST: el token del formulario es del servidor. Se conserva el
+      // que había (o se crea al publicar, o se cambia si piden regenerarlo).
+      if (c.config) {
+        const forma = c.forma || p.vista.forma;
+        if (forma === 'formulario') {
+          const previo = p.vista.config?.formulario || null;
+          c.config = { ...c.config, formulario: limpiarConfigFormulario(c.config.formulario ?? previo, previo) };
+        } else { const { formulario, ...resto } = c.config; void formulario; c.config = resto; }
+      }
       const j = (v: any) => v === undefined ? null : JSON.stringify(v);
       await db.execute(sql`
         UPDATE bd_vistas SET
@@ -1322,7 +1417,7 @@ export function registerBdRoutes(app: Express, db: any) {
         SELECT ${id}, tabla_id, left(nombre || ' (copia)', 120), usuario_id, forma, orden_por, filtros, ocultas, agrupar_por,
                -- Un formulario duplicado nace CERRADO: abrir un segundo enlace
                -- público sin que nadie lo haya decidido sería publicar por descuido.
-               CASE WHEN forma = 'formulario' THEN jsonb_set(config, '{formulario,publico}', 'false'::jsonb, true) ELSE config END,
+               CASE WHEN forma = 'formulario' THEN jsonb_set(config #- '{formulario,token}', '{formulario,publico}', 'false'::jsonb, true) ELSE config END,
                orden + 1
         FROM bd_vistas WHERE id = ${v.id}
       `);
