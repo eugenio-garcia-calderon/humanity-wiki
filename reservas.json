@@ -2,18 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-espacio",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
-      "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/App.tsx",
-      "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
-      "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
       "desde": "2026-10-06T04:15:50.766Z"
@@ -101,48 +89,6 @@
       "ruta": "src/components/knowledge/BloqueEmbed.tsx",
       "motivo": "editorB",
       "desde": "2026-10-06T04:29:45.024Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/main.tsx",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "index.html",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/components/navegacion/AvatarRail.tsx",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/tema-oscuro.css",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "scripts/generar-tema-oscuro.mjs",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/utils/tema.ts",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/i18n",
-      "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
-      "desde": "2026-10-06T04:31:55.157Z"
     },
     {
       "agente": "prog8-editorb",
