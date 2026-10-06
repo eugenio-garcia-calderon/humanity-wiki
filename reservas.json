@@ -17,6 +17,12 @@
       "ruta": "drizzle/0144_bd_tienda.sql",
       "motivo": "Tienda en bases de datos (era 0137, ocupado)",
       "desde": "2026-10-06T10:21:23.269Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "Cabecera de base de datos estilo Notion (prog8 voz)",
+      "desde": "2026-10-06T10:23:33.790Z"
     }
   ]
 }
