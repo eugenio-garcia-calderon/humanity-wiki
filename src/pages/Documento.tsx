@@ -58,6 +58,10 @@ import CrearProducto from '../components/knowledge/CrearProducto';
 // la pantalla pública, que es la que nadie mira.
 import { CLASES_TEXTO, marcaLista } from '../components/knowledge/BloquesLectura';
 import Adjuntos from '../components/archivo/Adjuntos';
+// @menciones, [[enlaces]] y «Enlazan aquí» (2026-10-06, carril editorB, #6).
+import MencionesMenu from '../components/knowledge/MencionesMenu';
+import EnlazanAqui from '../components/knowledge/EnlazanAqui';
+import { detectarMencion, referenciasDe } from '../utils/menciones';
 
 // ============================================================================
 // DOCUMENTO estilo Notion (2026-08-08, petición del usuario) — Fase 1
@@ -560,6 +564,30 @@ function EditorPagina() {
   const bloquesBase = useRef<Bloque[]>([]);
   const pendienteRemoto = useRef<{ version: number; por: string | null } | null>(null);
 
+  /** ══ AVISAR A LAS PERSONAS NOMBRADAS, E INDEXAR LOS ENLACES (2026-10-06) ══
+   *  Tras guardar, si lo que la página nombra (personas con @, páginas con
+   *  [[ o enlaces internos) ha cambiado, se le dice al servidor, que lee la
+   *  página guardada, avisa a quien falte y rehace «Enlazan aquí». También se
+   *  repite mientras alguien nombrado siga sin poder ver la página. */
+  const refsEnviadas = useRef<string | null>(null);
+  const refsSinAcceso = useRef(false);
+  const sincronizarReferencias = (bs: Bloque[]) => {
+    const r = referenciasDe(aArbol(bs.map(b => ({ ...b, texto: b.texto !== undefined ? (textosRef.current[b.id] ?? b.texto) : b.texto }))), docId.current || '');
+    const firmaRefs = JSON.stringify([[...r.personas].sort(), [...r.paginas].sort()]);
+    // La primera vez sólo se apunta cómo estaba la página al abrirla.
+    if (refsEnviadas.current === null) { refsEnviadas.current = firmaRefs; if (!r.personas.length) return; }
+    if (firmaRefs === refsEnviadas.current && !refsSinAcceso.current) return;
+    refsEnviadas.current = firmaRefs;
+    fetch(`/api/paginas/${docId.current}/referencias`, { method: 'POST', credentials: 'include' })
+      .then(x => x.ok ? x.json() : null)
+      .then(j => {
+        if (!j) return;
+        refsSinAcceso.current = (j.sinAcceso || []).length > 0;
+        if (j.sinAcceso?.length) avisar(`${j.sinAcceso.map((p: any) => p.nombre).join(', ')} no puede${j.sinAcceso.length > 1 ? 'n' : ''} ver esta página: no se le ha avisado. Compártela para que la vea.`);
+        else if (j.avisados) avisar(j.avisados === 1 ? 'Aviso enviado a la persona nombrada' : `Aviso enviado a ${j.avisados} personas`);
+      }).catch(() => {});
+  };
+
   const guardarAhora = useCallback(async (estructura?: Bloque[]): Promise<void> => {
     if (!docId.current || !puedoEditar) return;
     setGuardado('guardando');
@@ -604,6 +632,7 @@ function EditorPagina() {
       if (typeof j.version === 'number') versionBase.current = j.version;
       bloquesBase.current = bs.map(x => ({ ...x }));
       await guardarSincRef.current(bs);
+      sincronizarReferencias(bs);
     }
     setGuardado(r?.ok ? 'sí' : 'pendiente');
   }, [puedoEditar, serializar]);
@@ -2073,6 +2102,46 @@ function EditorPagina() {
   /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
    *  markdown de siempre — pegar una lista pega una lista de verdad. Y desde
    *  2026-08-19, pegar una imagen, un vídeo o un PDF crea su bloque. */
+  // ══ MENCIONES CON @ Y [[ (2026-10-06, #6) ═══════════════════════════════
+  // Mientras se escribe, `onInput` mira si el cursor está tras un «@» o un
+  // «[[» (`detectarMencion`) y abre el selector (`MencionesMenu`). Al elegir,
+  // lo escrito desde el disparador se cambia por el enlace markdown de la
+  // mención. El texto vive en el DOM: se reescribe ahí y se avisa con un
+  // `input`, para que todo lo demás (guardado, historia, formato) lo vea
+  // como si se hubiera tecleado.
+  const [menc, setMenc] = useState<{ bloque: string; tipo: '@' | '[['; desde: number; q: string; x: number; y: number } | null>(null);
+  const cerrarMenc = useCallback(() => setMenc(null), []);
+  const vigilarMencion = (b: Bloque, el: HTMLElement) => {
+    if (b.tipo === 'codigo') { setMenc(null); return; }
+    const total = el.textContent || '';
+    const cursor = offsetCaret(el);
+    const d = detectarMencion(total.slice(0, cursor));
+    if (!d) { setMenc(null); return; }
+    setMenc(m => {
+      if (m && m.bloque === b.id && m.desde === d.desde && m.tipo === d.tipo) return { ...m, q: d.q };
+      const sel = window.getSelection();
+      const r = sel?.rangeCount ? sel.getRangeAt(0).getBoundingClientRect() : null;
+      const caja = el.getBoundingClientRect();
+      return { bloque: b.id, tipo: d.tipo, desde: d.desde, q: d.q, x: (r && r.left) || caja.left, y: (r && r.bottom) || caja.bottom };
+    });
+  };
+  const aplicarMencion = (md: string) => {
+    const m = menc;
+    setMenc(null);
+    if (!m) return;
+    const el = document.querySelector(`[data-bloque="${m.bloque}"]`) as HTMLElement | null;
+    if (!el) return;
+    const total = el.textContent || '';
+    const hasta = offsetCaret(el);
+    // Un espacio detrás para seguir escribiendo, salvo que ya lo haya.
+    const cola = total.slice(hasta);
+    const nuevo = total.slice(0, m.desde) + md + (cola.startsWith(' ') ? '' : ' ') + cola;
+    el.textContent = nuevo;
+    repintar(el, null);
+    ponerCursor(el, m.desde + md.length + 1);
+    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: ' ' }));
+  };
+
   // ── EL MENÚ DE «¿QUÉ HAGO CON ESTE ENLACE?» (2026-10-02) ────────────────
   const [menuEnlace, setMenuEnlace] = useState<{
     bloqueId: string; url: string; x: number; y: number;
@@ -2825,6 +2894,7 @@ function EditorPagina() {
             else setBarra(x => x && ({ ...x, texto: t.slice(1), elegido: 0 }));
             return;
           }
+          vigilarMencion(b, e.currentTarget);
           autoformato(b, e.currentTarget);
           programarGuardado();
         },
@@ -3661,6 +3731,7 @@ function EditorPagina() {
             <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">IA</span>
           </button>
         )}
+        {menc && <MencionesMenu x={menc.x} y={menc.y} tipo={menc.tipo} q={menc.q} onElegir={aplicarMencion} onCerrar={cerrarMenc} />}
         {/* ¿QUÉ HAGO CON ESTE ENLACE? (2026-10-02, como Notion) */}
         {menuEnlace && (
           <div data-menu-enlace role="menu" aria-label="Qué hacer con el enlace"
@@ -3779,6 +3850,8 @@ function EditorPagina() {
             <Adjuntos contenedor="pagina_id" id={id} puedeEditar={puedoEditar} soloSiHay />
           </div>
         )}
+        {/* Las páginas que nombran o enlazan a ésta (2026-10-06, #6). */}
+        {id && !esNuevo && !generando && <EnlazanAqui key={`ea-${id}`} paginaId={id} />}
       </div>
 
       <input ref={archivoRef} type="file" multiple className="hidden" onChange={e => subirDesdeMenu(e.target.files)} />

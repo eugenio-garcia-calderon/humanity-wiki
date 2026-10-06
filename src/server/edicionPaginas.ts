@@ -4,6 +4,7 @@ import { madresValidas, rolEnPagina, capacidades, quienDe, PROFUNDIDAD, puedeEdi
 import { paginaVisible } from './sitios.js';
 import { bloquesDe } from './bloquesSql.js';
 import { registrarColaboracion } from './colaboracion.js';
+import { registrarReferencias } from './referencias.js';
 
 const nuevoId = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 46656).toString(36).toUpperCase()}`;
 
@@ -42,6 +43,8 @@ async function puedeVer(db: any, quien: Quien, id: string) {
 export function registrarEdicionPaginas(app: Express, db: any) {
   // Presencia y avisos de guardado (2026-10-06): su propio fichero.
   registrarColaboracion(app, db);
+  // @menciones, [[enlaces]] y «Enlazan aquí» (2026-10-06): su propio fichero.
+  registrarReferencias(app, db);
 
   /**
    * LA RUTA DE PÁGINAS MADRE — `GET /api/paginas/:id/ruta` — para el bloque
