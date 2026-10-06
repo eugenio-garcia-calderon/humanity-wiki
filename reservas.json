@@ -143,6 +143,30 @@
       "ruta": "src/i18n",
       "motivo": "carril espacio: modo oscuro e idioma (#25 #34)",
       "desde": "2026-10-06T04:31:55.157Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/utils/ajustesPagina.ts",
+      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
+      "desde": "2026-10-06T04:36:03.135Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/BuscarEnPagina.tsx",
+      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
+      "desde": "2026-10-06T04:36:03.135Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/AtajosAyuda.tsx",
+      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
+      "desde": "2026-10-06T04:36:03.135Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
+      "desde": "2026-10-06T04:36:03.135Z"
     }
   ]
 }
