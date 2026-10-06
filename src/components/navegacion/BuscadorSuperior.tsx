@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import CajaBusqueda from '../buscador/CajaBusqueda';
 
+import { t } from '../../i18n';
 /*
  * EL BUSCADOR DE ARRIBA (2026-08-24, agente de APP/UX)
  * ============================================================================
@@ -95,8 +96,8 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
       <button
         type="button"
         onClick={() => navegar('/buscar')}
-        title="Buscar"
-        aria-label="Buscar"
+        title={t('Buscar')}
+        aria-label={t('Buscar')}
         className={cn(
           'grid shrink-0 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 lg:hidden',
           compacto ? 'h-7 w-7' : 'h-9 w-9',
@@ -108,7 +109,7 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
       <CajaBusqueda
         pastilla
         compacto={compacto}
-        placeholder="Buscar contenido…"
+        placeholder={t('Buscar contenido…')}
         className={cn('hidden lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
         // CON EL INTERRUPTOR ENCENDIDO, BUSCAR ES PREGUNTAR. Las sugerencias de
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
@@ -126,8 +127,8 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
           <>
             <button
               type="submit"
-              title="Buscar"
-              aria-label="Buscar"
+              title={t('Buscar')}
+              aria-label={t('Buscar')}
               className={cn(
                 'grid shrink-0 place-items-center rounded-full text-white transition-colors',
                 conIA ? 'bg-violet-600 hover:bg-violet-700' : 'bg-slate-900 hover:bg-slate-800',

@@ -65,3 +65,14 @@ html, body { overscroll-behavior-x: none; }
    gris claro y sin negrita, para que se lea la palabra y no la marca. */
 .md-marca { color: rgb(203 213 225); font-weight: 400; font-style: normal; }
 .md-codigo { padding: 0 0.25rem; border-radius: 0.25rem; background: rgb(241 245 249); font-family: ui-monospace, monospace; font-size: 0.9em; }
+/* TEXTO PEQUEÑO (2026-10-06, `utils/ajustesPagina.ts`): como el «Small text» de
+   Notion. `zoom` achica todo el contenido de la página a la vez, imágenes y
+   cabecera incluidas, sin tocar cada tamaño por separado. */
+.pagina-chica { zoom: 0.9; }
+/* La búsqueda dentro de la página (`BuscarEnPagina.tsx`), con la API de
+   resaltado del navegador: pinta sin tocar el DOM del editor. */
+::highlight(busqueda) { background-color: rgb(254 240 138); color: inherit; }
+::highlight(busqueda-actual) { background-color: rgb(251 146 60); color: white; }
+/* Menciones y fórmulas mientras se escriben (2026-10-06). */
+.md-mencion { padding: 0 0.25rem; border-radius: 0.25rem; background: rgb(241 245 249); color: rgb(30 41 59); font-weight: 500; }
+.md-formula { font-family: ui-monospace, monospace; font-size: 0.9em; color: rgb(71 85 105); }

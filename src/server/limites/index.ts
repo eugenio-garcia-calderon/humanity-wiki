@@ -112,6 +112,13 @@ export const REGLAS: Record<string, Regla> = {
   // Y `abrir` si el limitador no puede decidir: es una lectura. Cerrar el
   // buscador de toda la plataforma porque no se pudo consultar el freno sería
   // cambiar un problema que no existe por uno que sí.
+  // Enviar una respuesta a un formulario público (2026-10-06, carril «bd»):
+  // cualquiera, sin cuenta, escribe en una tabla. Cinco gratis seguidas desde
+  // la misma IP (una oficina entera rellenando a la vez cabe), y desde ahí 30 s,
+  // 60, 120… hasta un cuarto de hora. POR IP: no hay cuenta. Se CIERRA si el
+  // limitador no puede decidir: aquí lo que se protege es una escritura.
+  formulario: { puerta: 'formulario', gracia: 5, baseSegundos: 30, topeSegundos: 900, alFallar: 'cerrar' },
+
   buscar: { puerta: 'buscar', gracia: 40, baseSegundos: 1, topeSegundos: 60, alFallar: 'abrir' },
 };
 

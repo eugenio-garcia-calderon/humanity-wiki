@@ -79,6 +79,10 @@ import { registrarEdicionPaginas } from './edicionPaginas.js';
 import { registrarPermisos } from './permisos.js';
 import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
+import { registrarComentarios } from './comentarios.js';
+import { registrarVersiones } from './versiones.js';
+import { registrarSeguir } from './seguir.js';
+import { registrarEstadisticas } from './estadisticas.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
@@ -93,6 +97,9 @@ import { registerCalendarioGoogleRoutes } from './calendarioGoogle.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
+import { registrarEspacio } from './espacio.js';
+import { registrarApiPublica } from './apiPublica.js';
+import { registrarWebhooks } from './webhooks.js';
 
 /**
  * Un módulo de la API.
@@ -170,6 +177,14 @@ export const MODULOS: Modulo[] = [
         + 'comprar). Montado después, esas rutas ya habrían contestado «inicia sesión».',
   },
 
+  {
+    nombre: 'api-publica',
+    montar: (app, db) => registrarApiPublica(app, db),
+    nota: 'La API pública /api/v1 con claves (#24). ANTES de las rutas de bases de datos: para leer filas '
+        + 'reescribe la dirección hacia `/api/bd/tablas/:id` y esa ruta tiene que montarse DESPUÉS (Express '
+        + 'solo busca hacia delante). Va tras `miembros` y sobrescribe `req.user` con el de la clave.',
+  },
+  { nombre: 'webhooks', montar: (app, db) => registrarWebhooks(app, db), nota: 'Webhooks salientes firmados y su cola de reintentos (#24).' },
   { nombre: 'graph', montar: (app, db) => registerGraphRoutes(app, db) },
   { nombre: 'social', montar: (app, db) => registerSocialRoutes(app, db) },
 
@@ -265,6 +280,15 @@ export const MODULOS: Modulo[] = [
     nota: 'Quién puede qué en una página: roles, equipos, invitaciones y herencia (#12). '
         + 'Sólo rutas bajo `/api/permisos/…` y `/api/equipos/…`; el sitio en la lista da igual.',
   },
+  {
+    nombre: 'comentarios',
+    montar: (app, db) => registrarComentarios(app, db),
+    nota: 'Hilos anclados a un trozo de texto, con respuestas, resolver y menciones (#11). Después de '
+        + '`miembros`, que convierte la sesión de un sitio en `req.user` para `/api/comentarios`.',
+  },
+  { nombre: 'versiones', montar: (app, db) => registrarVersiones(app, db), nota: 'Historial de versiones de una página: ver, comparar y restaurar (#8).' },
+  { nombre: 'seguir-paginas', montar: (app, db) => registrarSeguir(app, db), nota: 'Seguir páginas y avisar cuando cambian (#31). Misma tabla `follows`.' },
+  { nombre: 'estadisticas', montar: (app, db) => registrarEstadisticas(app, db), nota: 'Visitas por día, únicos y origen, sin datos personales (migración 0139).' },
   { nombre: 'menu', montar: (app, db) => registerMenuRoutes(app, db) },
   { nombre: 'mensajes', montar: (app, db) => registerMensajesRoutes(app, db) },
   { nombre: 'calendario', montar: (app, db) => registerCalendarioRoutes(app, db) },
@@ -336,6 +360,7 @@ export const MODULOS: Modulo[] = [
     nota: 'No monta rutas: una pasada al día que vacía las cuentas que pidieron borrarse hace más '
         + 'de 15 días. Vivía en GitHub Actions y no había funcionado nunca (ver el módulo).',
   },
+  { nombre: 'espacio', montar: (app, db) => registrarEspacio(app, db), nota: 'Favoritos, recientes y búsqueda avanzada del espacio de trabajo (#14, #15).' },
 ];
 
 /**

@@ -2,6 +2,9 @@ import { useEffect, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
+import EnlazanAqui from '../knowledge/EnlazanAqui';
+import { contarPagina, textoLectura } from '../../utils/ajustesPagina';
+import RelacionesPublicas from '../tablas/RelacionesPublicas';
 import { useSitio } from './ContextoSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
@@ -100,7 +103,14 @@ export default function VistaPagina({ pagina, propio, pie }: {
       )}
       <article>
         <CabeceraLectura pagina={pagina} esMovil={esMovil} />
+        {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
+        {cfg.tiempoLectura === true && (() => {
+          const c = contarPagina(bloques);
+          return c.palabras > 0 ? <p className="-mt-4 mb-6 text-xs font-bold text-slate-400" data-tiempo-lectura>{textoLectura(c.palabras, c.minutos)}</p> : null;
+        })()}
+        <RelacionesPublicas paginaId={pagina.id} />
         <BloquesLectura bloques={bloques} comentable={pagina.id} paginaId={pagina.id} />
+        <EnlazanAqui paginaId={pagina.id} />
       </article>
       {pie}
     </MarcoLectura>

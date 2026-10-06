@@ -10,7 +10,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Map as MapIcon, MousePointerClick, Navigation,
+  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,8 @@ import { useEsMovil } from '../hooks/useEsMovil';
 import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
+import HerramientasPagina from '../components/acceso/HerramientasPagina';
+import BotonFavorito from '../components/espacio/BotonFavorito';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import CreadorMenu from '../components/knowledge/CreadorMenu';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
@@ -38,6 +40,8 @@ import {
   type AccionBoton,
 } from '../utils/bloques';
 import { MigasDePan, BotonVista, ConfigBoton, conFecha } from '../components/knowledge/BloquesExtra';
+import { usePresencia, CarasPresencia } from '../components/knowledge/PresenciaPagina';
+import { fusionarBloques } from '../utils/colaboracion';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
 import HojaCrear from '../components/navegacion/HojaCrear';
@@ -54,7 +58,20 @@ import CrearProducto from '../components/knowledge/CrearProducto';
 // la pantalla pública, que es la que nadie mira.
 import { CLASES_TEXTO, marcaLista } from '../components/knowledge/BloquesLectura';
 import Adjuntos from '../components/archivo/Adjuntos';
+// @menciones, [[enlaces]] y «Enlazan aquí» (2026-10-06, carril editorB, #6).
+import MencionesMenu from '../components/knowledge/MencionesMenu';
+import EnlazanAqui from '../components/knowledge/EnlazanAqui';
+import BloqueEmbed from '../components/knowledge/BloqueEmbed';
+import Formula from '../components/knowledge/Formula';
+import { embedDe, type Embed } from '../utils/embeds';
+// Ajustes de página, buscar y atajos (2026-10-06, carril editorB, #29 y #30).
+import BuscarEnPagina from '../components/knowledge/BuscarEnPagina';
+import AtajosAyuda from '../components/knowledge/AtajosAyuda';
+import { anchoDePagina, clasesDePagina, contarPagina } from '../utils/ajustesPagina';
+import { detectarMencion, referenciasDe } from '../utils/menciones';
 
+import { t as tr } from '../i18n';
+import { guardarBorrador, leerBorrador, borrarBorrador, registrarEditorAbierto, hayRed } from '../utils/sinConexion';
 // ============================================================================
 // DOCUMENTO estilo Notion (2026-08-08, petición del usuario) — Fase 1
 // ============================================================================
@@ -97,6 +114,11 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   // Un botón que hace algo (2026-10-05): insertar una plantilla, crear una
   // página o una fila, o abrir un enlace. Ver `ejecutarBoton`.
   { tipo: 'boton', label: 'Botón', icon: MousePointerClick, grupo: 'herramienta', color: 'bg-slate-900 text-white', desc: 'Inserta bloques, crea una página o abre un enlace', claves: 'button plantilla accion' },
+  // El mismo contenido en varias páginas (2026-10-06, #22). Ver «BLOQUES
+  // SINCRONIZADOS» más abajo.
+  { tipo: 'sincronizado', label: 'Bloque sincronizado', icon: RefreshCw, grupo: 'herramienta', color: 'bg-orange-100 text-orange-600', desc: 'El mismo contenido en varias páginas', claves: 'synced sincronizar reutilizar' },
+  // Contenido de terceros (2026-10-06, #20): Figma, Maps, Drive, Spotify, Loom…
+  { tipo: 'embed', label: 'Contenido incrustado', icon: PanelTop, grupo: 'herramienta', color: 'bg-fuchsia-100 text-fuchsia-700', desc: 'Figma, Maps, Drive, Spotify, Loom, CodePen, X, Miro…', claves: 'embed figma maps mapa google drive docs slides spotify soundcloud loom codepen twitter x miro incrustar' },
   { tipo: 'web', label: 'Web insertada', icon: Globe, grupo: 'herramienta', color: 'bg-emerald-100 text-emerald-700', desc: 'Otra web entera, dentro de la página', claves: 'iframe embed' },
   { tipo: 'publicacion', label: 'Publicación', icon: LayoutTemplate, grupo: 'herramienta', color: 'bg-indigo-100 text-indigo-700', desc: 'Algo ya publicado en la plataforma', claves: 'embeber' },
   // ── Tienda (fase 2 de Comercio) ──
@@ -120,6 +142,8 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   { tipo: 'aviso', label: 'Aviso', icon: Info, grupo: 'formato', claves: 'callout' },
   { tipo: 'indice', label: 'Índice', icon: List, grupo: 'formato' },
   { tipo: 'codigo', label: 'Código', icon: Code2, grupo: 'formato' },
+  // Una fórmula LaTeX con KaTeX (2026-10-06, #19). También: «$$ » al principio.
+  { tipo: 'ecuacion', label: 'Ecuación', icon: Sigma, grupo: 'formato', claves: 'latex katex formula matematicas equation math' },
   { tipo: 'separador', label: 'Separador', icon: Minus, grupo: 'formato', claves: 'linea' },
   // La de texto se queda, y dice lo que es, para quien solo quiera una
   // rejilla de texto en un documento.
@@ -152,7 +176,9 @@ function Inline({ texto }: { texto: string }) {
 
 export default function Documento() {
   const { id } = useParams<{ id: string }>();
-  return <EditorPagina key={id} />;
+  // Comentarios anclados e historial de versiones (carril acceso, #11 y #8):
+  // fuera del editor a propósito, para no tocar su estado.
+  return <><EditorPagina key={id} />{id && <HerramientasPagina key={`h-${id}`} paginaId={id} />}</>;
 }
 
 function EditorPagina() {
@@ -175,10 +201,12 @@ function EditorPagina() {
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
+  /** La presencia (se declara más abajo, tras `cargar`); el guardado la lee. */
+  const presenciaRef = useRef<{ conexion: React.MutableRefObject<string | null> }>({ conexion: { current: null } });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generando, setGenerando] = useState(esNuevo);
-  const [guardado, setGuardado] = useState<'sí' | 'pendiente' | 'guardando'>('sí');
+  const [guardado, setGuardado] = useState<'sí' | 'pendiente' | 'guardando' | 'sin conexión'>('sí');
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null); // id del bloque cuyo + está abierto
   /** El buscador está buscando PRODUCTOS, no publicaciones. */
   const [buscaProducto, setBuscaProducto] = useState(false);
@@ -219,6 +247,9 @@ function EditorPagina() {
   /** Ajustes de publicación (autor, fecha, ancho, descripción, imagen). */
   const [ajustes, setAjustes] = useState<Ajustes>({});
   const [ajustesAbierto, setAjustesAbierto] = useState(false);
+  /** Buscar en la página (⌘F propio) y la lista de atajos («?»). */
+  const [buscando, setBuscando] = useState<{ q: string; senal: number } | null>(null);
+  const [atajosAbiertos, setAtajosAbiertos] = useState(false);
   const [menuSitioAbierto, setMenuSitioAbierto] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
@@ -322,11 +353,25 @@ function EditorPagina() {
   // --------------------------------------------------------------------------
   // Carga normal (documento existente)
   // --------------------------------------------------------------------------
+  // ── EDITAR SIN CONEXIÓN (#33, `utils/sinConexion.ts`) ──────────────────────
+  // Si esta página tiene un borrador sin enviar, se recupera aquí. Sin red y sin
+  // copia del servicio de trabajo, se abre el propio borrador: lo único que hay.
+  const recuperadoDeBorrador = useRef(false);
   const cargar = useCallback((winId: string) => {
     fetch(`/api/windows/${winId}`, { credentials: 'include' })
       .then(async r => {
-        const j = await r.json();
+        let j = await r.json();
         if (!r.ok) throw new Error(j.error || 'No se ha podido cargar.');
+        const bor = await leerBorrador(winId);
+        // La BASE de la próxima fusión es lo que tiene el servidor, no el borrador.
+        let baseServidor: Bloque[] | null = null;
+        if (bor && !bor.error) {
+          baseServidor = aplanar(j.config?.bloques || []);
+          const mio = aplanar(bor.config?.bloques || []);
+          const fusion = j.version === bor.versionBase ? mio : fusionarBloques(bor.base || [], mio, baseServidor).bloques;
+          j = { ...j, title: bor.titulo, config: { ...(j.config || {}), ...bor.config, bloques: aArbol(fusion) } };
+          recuperadoDeBorrador.current = true;
+        }
         setTitulo(j.title || '');
         setFilaDe(j.fila_de || null);
         setAutor(j.autor_nombre || null);
@@ -347,12 +392,37 @@ function EditorPagina() {
           if (b.texto !== undefined) textosRef.current[b.id] = b.texto;
           if (b.filas) filasRef.current[b.id] = b.filas;
         }
+        // La versión con la que se parte y cómo estaba la página: sin ellas no
+        // se puede detectar que alguien guardó entretanto ni fusionar.
+        versionBase.current = typeof j.version === 'number' ? j.version : null;
+        bloquesBase.current = (baseServidor ?? bs).map(x => ({ ...x }));
         // Abrir (o volver a leer lo que cambió la IA) no es algo que se deshaga.
         sinRegistrar.current = true;
         setRevision(r => r + 1);
         setBloques(bs.length ? normalizarGrupos(bs) : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
+        // Lo último de cada bloque sincronizado: la copia de la página puede
+        // ser de antes de que se editara en otra.
+        refrescarSincRef.current(bs);
       })
-      .catch(e => setError(e.message))
+      .catch(async e => {
+        // Sin red y sin copia guardada del servidor: si hay borrador, se abre ese.
+        const bor = await leerBorrador(winId).catch(() => null);
+        if (bor && !bor.error && !hayRed()) {
+          const bs: Bloque[] = aplanar(bor.config?.bloques || []);
+          for (const b of bs) { if (b.texto !== undefined) textosRef.current[b.id] = b.texto; if (b.filas) filasRef.current[b.id] = b.filas; }
+          setTitulo(bor.titulo || ''); setPuedoEditar(true); setPortada(bor.config?.portada || null); setIcono(bor.config?.icono || null);
+          const aj: Ajustes = {};
+          for (const k of CLAVES_AJUSTES) if (bor.config?.[k] !== undefined) (aj as any)[k] = bor.config[k];
+          setAjustes(aj);
+          versionBase.current = bor.versionBase;
+          bloquesBase.current = (bor.base || bs).map(x => ({ ...x }));
+          sinRegistrar.current = true;
+          setRevision(r => r + 1);
+          setBloques(bs.length ? normalizarGrupos(bs) : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
+          recuperadoDeBorrador.current = true;
+          setGuardado('sin conexión');
+        } else setError(e.message);
+      })
       .finally(() => setCargando(false));
   }, []);
 
@@ -534,12 +604,45 @@ function EditorPagina() {
     return out;
   }, [bloques, plegados]);
 
-  const guardarAhora = useCallback(async (estructura?: Bloque[]) => {
+  // ══ EDITAR A LA VEZ (2026-10-06): versión y fusión ═════════════════════
+  // Ver `utils/colaboracion.ts`. `versionBase` es la versión que el servidor
+  // tenía cuando se abrió o se guardó por última vez; `bloquesBase`, cómo
+  // estaba entonces la página (la BASE de la fusión de tres vías).
+  const versionBase = useRef<number | null>(null);
+  const bloquesBase = useRef<Bloque[]>([]);
+  const pendienteRemoto = useRef<{ version: number; por: string | null } | null>(null);
+
+  /** ══ AVISAR A LAS PERSONAS NOMBRADAS, E INDEXAR LOS ENLACES (2026-10-06) ══
+   *  Tras guardar, si lo que la página nombra (personas con @, páginas con
+   *  [[ o enlaces internos) ha cambiado, se le dice al servidor, que lee la
+   *  página guardada, avisa a quien falte y rehace «Enlazan aquí». También se
+   *  repite mientras alguien nombrado siga sin poder ver la página. */
+  const refsEnviadas = useRef<string | null>(null);
+  const refsSinAcceso = useRef(false);
+  const sincronizarReferencias = (bs: Bloque[]) => {
+    const r = referenciasDe(aArbol(bs.map(b => ({ ...b, texto: b.texto !== undefined ? (textosRef.current[b.id] ?? b.texto) : b.texto }))), docId.current || '');
+    const firmaRefs = JSON.stringify([[...r.personas].sort(), [...r.paginas].sort()]);
+    // La primera vez sólo se apunta cómo estaba la página al abrirla.
+    if (refsEnviadas.current === null) { refsEnviadas.current = firmaRefs; if (!r.personas.length) return; }
+    if (firmaRefs === refsEnviadas.current && !refsSinAcceso.current) return;
+    refsEnviadas.current = firmaRefs;
+    fetch(`/api/paginas/${docId.current}/referencias`, { method: 'POST', credentials: 'include' })
+      .then(x => x.ok ? x.json() : null)
+      .then(j => {
+        if (!j) return;
+        refsSinAcceso.current = (j.sinAcceso || []).length > 0;
+        if (j.sinAcceso?.length) avisar(`${j.sinAcceso.map((p: any) => p.nombre).join(', ')} no puede${j.sinAcceso.length > 1 ? 'n' : ''} ver esta página: no se le ha avisado. Compártela para que la vea.`);
+        else if (j.avisados) avisar(j.avisados === 1 ? 'Aviso enviado a la persona nombrada' : `Aviso enviado a ${j.avisados} personas`);
+      }).catch(() => {});
+  };
+
+  const guardarAhora = useCallback(async (estructura?: Bloque[]): Promise<void> => {
     if (!docId.current || !puedoEditar) return;
     setGuardado('guardando');
-    const bs = estructura ?? serializar();
+    let bs = estructura ?? serializar();
     const meta = metaRef.current;
-    const r = await fetch(`/api/windows/${docId.current}`, {
+    const configDe = (lista: Bloque[]) => ({ ...meta.ajustes, bloques: aArbol(lista), portada: meta.portada || undefined, icono: meta.icono || undefined });
+    const enviar = (lista: Bloque[]) => fetch(`/api/windows/${docId.current}`, {
       method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -547,9 +650,51 @@ function EditorPagina() {
         // Los ajustes van en la misma `config`: si no se mandaran, cada
         // guardado automático los borraría.
         // Se guarda como árbol: los hijos dentro de su madre (`aArbol`).
-        config: { ...meta.ajustes, bloques: aArbol(bs), portada: meta.portada || undefined, icono: meta.icono || undefined },
+        config: configDe(lista),
+        version_base: versionBase.current ?? undefined,
+        conexion: presenciaRef.current.conexion.current ?? undefined,
       }),
     }).catch(() => null);
+    // SIN RED (#33): ni se intenta (esperar el tiempo de espera de una petición
+    // que no va a llegar deja «Guardando…» colgado); va directo al borrador.
+    let r = hayRed() ? await enviar(bs) : null;
+
+    // 409: alguien guardó entretanto. Se fusiona (BASE, MÍO, SUYO) y se
+    // vuelve a guardar; nada de lo que ha escrito el otro se pierde.
+    if (r?.status === 409) {
+      const j = await r.json().catch(() => ({}));
+      const suyo = aplanar(j.config?.bloques || []);
+      const { bloques: fusion, conflictos } = fusionarBloques(bloquesBase.current, bs, suyo);
+      for (const x of fusion) { if (x.texto !== undefined) textosRef.current[x.id] = x.texto; if (x.filas) filasRef.current[x.id] = x.filas; }
+      // Lo de los demás aparece en pantalla (no cuenta para deshacer).
+      sinRegistrar.current = true;
+      setRevision(n => n + 1);
+      setBloques(normalizarNiveles(fusion));
+      versionBase.current = typeof j.version === 'number' ? j.version : versionBase.current;
+      bs = fusion;
+      r = hayRed() ? await enviar(bs) : null;
+      avisar(conflictos.length
+        ? `${j.por || 'Otra persona'} cambió a la vez ${conflictos.length === 1 ? `«${conflictos[0].texto || 'un bloque'}»` : `${conflictos.length} bloques`}: se ha guardado tu versión.`
+        : `${j.por || 'Otra persona'} guardó cambios mientras escribías: se han juntado los dos.`);
+    }
+
+    if (r?.ok) {
+      const j = await r.clone().json().catch(() => ({}));
+      if (typeof j.version === 'number') versionBase.current = j.version;
+      bloquesBase.current = bs.map(x => ({ ...x }));
+      await guardarSincRef.current(bs);
+      sincronizarReferencias(bs);
+      void borrarBorrador(docId.current!);
+    } else if (!r) {
+      // Sin conexión: lo escrito se guarda en este aparato (IndexedDB) y se
+      // enviará al volver la red. El editor sigue funcionando.
+      void guardarBorrador({
+        pageId: docId.current!, titulo: meta.titulo || 'Documento sin título', config: configDe(bs),
+        versionBase: versionBase.current, base: bloquesBase.current, guardadoEn: Date.now(),
+      });
+      setGuardado('sin conexión');
+      return;
+    }
     setGuardado(r?.ok ? 'sí' : 'pendiente');
   }, [puedoEditar, serializar]);
 
@@ -580,12 +725,58 @@ function EditorPagina() {
     };
   }, [guardarAhora, cargar]);
 
+  // ── VUELVE LA RED (#33): lo guardado en el borrador se envía por el camino de
+  // siempre —con `version_base` y su fusión si alguien guardó entretanto—. Y
+  // mientras este editor está abierto, el reenvío global lo deja en paz.
+  useEffect(() => {
+    if (esNuevo || !id) return;
+    const soltar = registrarEditorAbierto(id);
+    const alVolver = () => { if (hayPendiente.current) { clearTimeout(timerGuardado.current); guardarAhoraRef.current(); } };
+    window.addEventListener('online', alVolver);
+    return () => { window.removeEventListener('online', alVolver); soltar(); };
+  }, [esNuevo, id]);
+  // El navegador puede creerse con red cuando el servidor no contesta (y no
+  // dispara `online` al volver el servidor): mientras haya algo sin enviar, se
+  // reintenta cada 15 s.
+  useEffect(() => {
+    if (guardado !== 'sin conexión') return;
+    const t = setInterval(() => { if (hayRed()) guardarAhoraRef.current(); }, 15000);
+    return () => clearInterval(t);
+  }, [guardado]);
+  // Se recuperó un borrador al abrir: se envía ya (si hay red) y se dice.
+  useEffect(() => {
+    if (cargando || !recuperadoDeBorrador.current) return;
+    recuperadoDeBorrador.current = false;
+    avisar(tr('Se han recuperado tus cambios hechos sin conexión.'));
+    if (hayRed()) programarGuardado(); else setGuardado('sin conexión');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cargando]);
+
   // Al irse de la página (p. ej. a una tarjeta de su galería) lo que quedaba
   // por guardar se guarda YA, en vez de tirarse con el temporizador.
   const guardarAhoraRef = useRef(guardarAhora);
   guardarAhoraRef.current = guardarAhora;
   const hayPendiente = useRef(false);
-  useEffect(() => { hayPendiente.current = guardado === 'pendiente'; }, [guardado]);
+  useEffect(() => { hayPendiente.current = guardado === 'pendiente' || guardado === 'sin conexión'; }, [guardado]);
+  const sinGuardar = useRef(false);
+  useEffect(() => { sinGuardar.current = guardado !== 'sí'; }, [guardado]);
+
+  // ══ QUIÉN MÁS ESTÁ AQUÍ, Y «ALGUIEN HA GUARDADO» (2026-10-06) ═════════════
+  // Si otra persona (u otra pestaña) guarda y aquí no hay nada sin guardar,
+  // la página se pone al día sola. Si sí lo hay, no se toca nada: al guardar
+  // se fusionan los dos (ver `guardarAhora`).
+  const presencia = usePresencia(esNuevo ? null : id || null, puedoEditar && !generando, (version, por) => {
+    if (version <= (versionBase.current ?? 0)) return;
+    if (sinGuardar.current || !docId.current) return;
+    // Un texto con el cursor dentro no se recarga bajo los dedos.
+    if (document.activeElement && (document.activeElement as HTMLElement).dataset?.bloque) {
+      pendienteRemoto.current = { version, por };
+      return;
+    }
+    cargar(docId.current);
+    avisar(`${por || 'Otra persona'} ha actualizado la página.`);
+  });
+  presenciaRef.current = presencia;
   useEffect(() => () => {
     clearTimeout(timerGuardado.current);
     if (hayPendiente.current) guardarAhoraRef.current();
@@ -603,7 +794,7 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto' || tipo === 'video' || tipo === 'mapa') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'migas' || tipo === 'boton') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'embed' || tipo === 'migas' || tipo === 'boton' || tipo === 'sincronizado') { insertar(b.id, tipo); return; }
     const plegable = tipo.startsWith('plegable');
     const real: TipoBloque = plegable ? `titulo${tipo.slice(-1)}` as TipoBloque : tipo as TipoBloque;
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: real, texto: '', plegable: plegable || undefined } : x));
@@ -627,6 +818,7 @@ function EditorPagina() {
     const plegable = tipoMenu.startsWith('plegable');
     const tipo: TipoBloque = esVideo ? 'web' : plegable ? `titulo${tipoMenu.slice(-1)}` as TipoBloque : tipoMenu as TipoBloque;
     if (tipo === 'subpagina') { crearSubpagina(tras); return; }
+    if (tipo === 'sincronizado') { setMenuAbierto(null); crearSincronizado(tras); return; }
     if (tipo === 'pizarra') { crearPizarra(tras); return; }
     if (tipo === 'medio') {
       setMenuAbierto(null);
@@ -650,7 +842,7 @@ function EditorPagina() {
     if (tipo === 'boton') { nuevo.texto = 'Botón'; nuevo.boton = { tipo: 'plantilla' }; setConfigBoton(nuevo.id); }
     if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'migas') textosRef.current[nuevo.id] = nuevo.texto ?? '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'embed' && tipo !== 'migas') textosRef.current[nuevo.id] = nuevo.texto ?? '';
     setBloques(bs => {
       // Sin `tras`, arriba del todo (era así: `-1 + 1`).
       const { pos, nivel } = tras ? puntoInsercion(bs, tras) : { pos: 0, nivel: 0 };
@@ -921,6 +1113,225 @@ function EditorPagina() {
     });
     programarGuardado();
   };
+
+  // ══ BLOQUES SINCRONIZADOS (2026-10-06, #22) ═════════════════════════════
+  // Un bloque `sincronizado` lleva dentro (sus hijos) una copia del contenido
+  // que vive en `bloques_sincronizados`. Al guardar la página, si esa copia
+  // ha cambiado respecto a lo último que se supo del servidor (`sincBase`),
+  // se guarda también allí, y el servidor pone al día las demás páginas. Al
+  // abrir la página se pide lo último; y las otras pestañas se enteran al
+  // momento por `avisoPaginas` (BroadcastChannel).
+  const sincBase = useRef<Record<string, { firma: string; version: number }>>({});
+  const [sincPaginas, setSincPaginas] = useState<Record<string, { id: string; titulo: string }[]>>({});
+
+  /** JSON con las claves en orden: dos copias iguales dan la misma firma. */
+  const firma = (x: unknown): string => JSON.stringify(x, (_k, v) =>
+    v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).filter(([, y]) => y !== undefined).sort(([a], [b]) => a.localeCompare(b))) : v);
+
+  /** El contenido (árbol) del sincronizado `bs[i]`, con el texto vivo. */
+  const contenidoSinc = (bs: Bloque[], i: number): Bloque[] => {
+    const n = (bs[i].nivel || 0) + 1;
+    return aArbol(bs.slice(i + 1, finSubarbol(bs, i) + 1).map(x => ({
+      ...x,
+      texto: x.texto !== undefined || textosRef.current[x.id] !== undefined ? (textosRef.current[x.id] ?? x.texto ?? '') : undefined,
+      filas: x.tipo === 'tabla' ? (filasRef.current[x.id] ?? x.filas) : undefined,
+      nivel: ((x.nivel || 0) - n) || undefined,
+    })));
+  };
+
+  /** Cambia lo de dentro de cada sincronizado `sincId` por `arbol` (sin que
+   *  cuente para deshacer: no lo ha hecho quien escribe aquí). */
+  const ponerContenidoSinc = (sincId: string, arbol: Bloque[]) => {
+    sinRegistrar.current = true;
+    setRevision(r => r + 1);
+    setBloques(bs => {
+      let lista = bs;
+      for (let i = 0; i < lista.length; i++) {
+        const b = lista[i];
+        if (b.tipo !== 'sincronizado' || b.sincId !== sincId) continue;
+        const fin = finSubarbol(lista, i);
+        const n = (b.nivel || 0) + 1;
+        const nuevos = aplanar(arbol).map(x => ({ ...x, nivel: ((x.nivel || 0) + n) || undefined }));
+        for (const x of nuevos) { if (x.texto !== undefined) textosRef.current[x.id] = x.texto; if (x.filas) filasRef.current[x.id] = x.filas; }
+        lista = [...lista.slice(0, i + 1), ...nuevos, ...lista.slice(fin + 1)];
+        i += nuevos.length;
+      }
+      return lista;
+    });
+  };
+
+  const refrescarSincRef = useRef<(bs: Bloque[]) => void>(() => {});
+  refrescarSincRef.current = (bs: Bloque[]) => {
+    const ids = [...new Set(bs.filter(b => b.tipo === 'sincronizado' && b.sincId).map(b => b.sincId!))];
+    for (const sid of ids) {
+      fetch(`/api/sincronizados/${sid}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => {
+        if (!j) return;
+        setSincPaginas(p => ({ ...p, [sid]: j.paginas || [] }));
+        const contenido = aArbol(aplanar(j.bloques || []));
+        sincBase.current[sid] = { firma: firma(contenido), version: j.version };
+        const i = bloquesRef.current.findIndex(b => b.sincId === sid);
+        if (i >= 0 && firma(contenidoSinc(bloquesRef.current, i)) !== firma(contenido)) ponerContenidoSinc(sid, contenido);
+      }).catch(() => {});
+    }
+  };
+
+  const guardarSincRef = useRef<(bs: Bloque[]) => Promise<void>>(async () => {});
+  guardarSincRef.current = async (bs: Bloque[]) => {
+    const hechos = new Set<string>();
+    for (let i = 0; i < bs.length; i++) {
+      const b = bs[i];
+      if (b.tipo !== 'sincronizado' || !b.sincId || hechos.has(b.sincId)) continue;
+      hechos.add(b.sincId);
+      const base = sincBase.current[b.sincId];
+      // Sin saber aún qué hay en el servidor no se escribe: la copia de esta
+      // página podría ser vieja y pisaría lo que se hizo en otra.
+      if (!base) continue;
+      const contenido = contenidoSinc(bs, i);
+      const f = firma(contenido);
+      if (f === base.firma) continue;
+      const enviar = (version: number) => fetch(`/api/sincronizados/${b.sincId}`, {
+        method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bloques: contenido, version_base: version, pagina: docId.current }),
+      }).catch(() => null);
+      let r = await enviar(base.version);
+      if (r?.status === 409) {
+        // Otra página lo cambió entretanto. Gana lo que se acaba de escribir
+        // aquí (es lo que se ve en pantalla), y se dice.
+        const j = await r.json().catch(() => ({}));
+        r = await enviar(j.version);
+        avisar('Este bloque sincronizado también se había cambiado en otra página: se ha guardado tu versión.');
+      }
+      if (!r?.ok) continue;
+      const j = await r.json().catch(() => ({}));
+      sincBase.current[b.sincId] = { firma: f, version: j.version };
+      avisarMovimiento('humanity:sincronizado-cambiado', { sincId: b.sincId, bloques: contenido, version: j.version, desde: docId.current });
+    }
+  };
+
+  // Lo que se edita en otra pestaña llega aquí al momento.
+  useEffect(() => {
+    const oir = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (!d.sincId || d.desde === docId.current) return;
+      if (!bloquesRef.current.some(b => b.sincId === d.sincId)) return;
+      const contenido = aArbol(aplanar(d.bloques || []));
+      sincBase.current[d.sincId] = { firma: firma(contenido), version: d.version };
+      ponerContenidoSinc(d.sincId, contenido);
+    };
+    window.addEventListener('humanity:sincronizado-cambiado', oir);
+    return () => window.removeEventListener('humanity:sincronizado-cambiado', oir);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Inserta un sincronizado que ya existe (pegado de otra página). */
+  const insertarSincronizado = async (tras: string | null, sid: string, sustituir?: string) => {
+    const r = await fetch(`/api/sincronizados/${sid}`, { credentials: 'include' }).catch(() => null);
+    const j = r?.ok ? await r.json().catch(() => null) : null;
+    if (!j) { fallar('No se ha encontrado ese bloque sincronizado (o no tienes acceso a él).'); return; }
+    const contenido = aArbol(aplanar(j.bloques || []));
+    sincBase.current[sid] = { firma: firma(contenido), version: j.version };
+    setSincPaginas(p => ({ ...p, [sid]: j.paginas || [] }));
+    const madre: Bloque = { id: nuevoIdBloque(), tipo: 'sincronizado', sincId: sid };
+    guardarHistoria();
+    setBloques(bs => {
+      const k = sustituir ? bs.findIndex(x => x.id === sustituir) : -1;
+      const { pos, nivel } = k >= 0 ? { pos: k, nivel: bs[k].nivel || 0 } : puntoInsercion(bs, tras);
+      const hijos = aplanar(contenido).map(x => ({ ...x, nivel: (x.nivel || 0) + nivel + 1 }));
+      for (const x of hijos) { if (x.texto !== undefined) textosRef.current[x.id] = x.texto; if (x.filas) filasRef.current[x.id] = x.filas; }
+      const out = [...bs];
+      out.splice(pos, k >= 0 ? 1 : 0, { ...madre, nivel: nivel || undefined }, ...hijos);
+      return out;
+    });
+    programarGuardado();
+    avisar('Bloque sincronizado pegado: lo que cambies aquí cambiará en todas sus páginas.');
+  };
+
+  /** Uno nuevo, vacío salvo un párrafo para escribir. */
+  const crearSincronizado = async (tras: string | null, envolver?: string) => {
+    if (!docId.current) return;
+    // Al convertir un bloque, su contenido (con sus hijos) es lo de dentro.
+    const bs0 = bloquesRef.current;
+    const k = envolver ? bs0.findIndex(x => x.id === envolver) : -1;
+    const contenido = k >= 0 ? contenidoSinc([{ ...bs0[k], id: '_', nivel: (bs0[k].nivel || 0) - 1 }, ...bs0.slice(k, finSubarbol(bs0, k) + 1)], 0) : [];
+    const r = await fetch('/api/sincronizados', {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pagina: docId.current, bloques: contenido }),
+    }).catch(() => null);
+    const j = r?.ok ? await r.json().catch(() => null) : null;
+    if (!j?.id) { fallar('No se ha podido crear el bloque sincronizado.'); return; }
+    sincBase.current[j.id] = { firma: firma(aArbol(aplanar(contenido))), version: j.version };
+    setSincPaginas(p => ({ ...p, [j.id]: [{ id: docId.current!, titulo }] }));
+    const madre: Bloque = { id: nuevoIdBloque(), tipo: 'sincronizado', sincId: j.id };
+    guardarHistoria();
+    if (k >= 0) {
+      setBloques(bs => {
+        const i = bs.findIndex(x => x.id === envolver);
+        if (i < 0) return bs;
+        const fin = finSubarbol(bs, i);
+        const out = [...bs];
+        for (let m = i; m <= fin; m++) out[m] = { ...out[m], nivel: (out[m].nivel || 0) + 1, grupo: undefined };
+        out.splice(i, 0, { ...madre, nivel: bs[i].nivel || undefined });
+        return out;
+      });
+    } else {
+      const hijo: Bloque = { id: nuevoIdBloque(), tipo: 'parrafo', texto: '' };
+      textosRef.current[hijo.id] = '';
+      setBloques(bs => {
+        const { pos, nivel } = puntoInsercion(bs, tras);
+        const out = [...bs];
+        out.splice(pos, 0, { ...madre, nivel: nivel || undefined }, { ...hijo, nivel: nivel + 1 });
+        return out;
+      });
+      setBloqueActivo(hijo.id);
+      setFocoId(hijo.id);
+    }
+    programarGuardado();
+  };
+
+  /** Copia el bloque para pegarlo en otra página (⌘V allí). */
+  const copiarSincronizado = (b: Bloque) => {
+    setMenuAsa(null);
+    const marca = `humanity-sincronizado:${b.sincId}`;
+    navigator.clipboard?.writeText(marca).then(
+      () => avisar('Copiado. Pégalo (⌘V) en otra página: quedará sincronizado con éste.'),
+      () => avisar(marca));
+  };
+
+  /** Deja de sincronizar ESTA copia: lo de dentro pasa a ser bloques
+   *  normales de la página (con ids nuevos), y las demás páginas siguen. */
+  const dejarDeSincronizar = (bid: string) => {
+    setMenuAsa(null);
+    guardarHistoria();
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === bid);
+      if (i < 0) return bs;
+      const fin = finSubarbol(bs, i);
+      const sueltos = bs.slice(i + 1, fin + 1).map(x => {
+        const nid = nuevoIdBloque();
+        if (textosRef.current[x.id] !== undefined) textosRef.current[nid] = textosRef.current[x.id];
+        if (filasRef.current[x.id]) filasRef.current[nid] = filasRef.current[x.id];
+        return { ...x, id: nid, nivel: ((x.nivel || 0) - 1) || undefined };
+      });
+      return normalizarNiveles([...bs.slice(0, i), ...sueltos, ...bs.slice(fin + 1)]);
+    });
+    programarGuardado();
+    avisar('Ya no está sincronizado: ahora es contenido normal de esta página.');
+  };
+
+  /** Para cada bloque, el sincronizado que lo contiene (si lo hay) y cuántos
+   *  sincronizados tiene por encima (no cuentan para la sangría: lo de dentro
+   *  se ve a la altura del propio bloque, como en Notion). */
+  const enSinc = useMemo(() => {
+    const m: Record<string, { sinc: string; capas: number }> = {};
+    const pila: { id: string; nivel: number }[] = [];
+    for (const b of bloques) {
+      const n = b.nivel || 0;
+      while (pila.length && pila[pila.length - 1].nivel >= n) pila.pop();
+      if (pila.length) m[b.id] = { sinc: pila[pila.length - 1].id, capas: pila.length };
+      if (b.tipo === 'sincronizado') pila.push({ id: b.id, nivel: n });
+    }
+    return m;
+  }, [bloques]);
 
   /** Los ids de un bloque y de todo lo que lleva dentro. */
   const idsSubarbol = (bs: Bloque[], bid: string) => {
@@ -1259,7 +1670,7 @@ function EditorPagina() {
       if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
       const k = e.key.toLowerCase();
       const quiere = k === 'z' ? (e.shiftKey ? 'rehacer' : 'deshacer') : k === 'y' && !e.shiftKey ? 'rehacer' : null;
-      if (!quiere || !puedoEditar || !esMio()) return;
+      if (!quiere || !puedoEditar || ajustes.bloqueada || !esMio()) return;
       e.preventDefault();
       if (quiere === 'deshacer') deshacer(); else rehacer();
     };
@@ -1275,6 +1686,24 @@ function EditorPagina() {
     window.addEventListener('beforeinput', antes as any);
     return () => { window.removeEventListener('keydown', tecla); window.removeEventListener('beforeinput', antes as any); };
   });
+
+  // ⌘F BUSCA EN LA PÁGINA, y «?» ENSEÑA LOS ATAJOS (2026-10-06, #29 y #30).
+  // El ⌘F del navegador no ve lo escondido ni distingue el texto de la página
+  // del de los menús; «?» sólo cuenta fuera de un texto (en un texto es un «?»).
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        const sel = window.getSelection()?.toString().trim() || '';
+        setBuscando(b => ({ q: sel && sel.length <= 80 && !sel.includes('\n') ? sel : (b?.q || ''), senal: (b?.senal || 0) + 1 }));
+      } else if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey && !enCampoDeTexto(e.target)) {
+        e.preventDefault();
+        setAtajosAbiertos(true);
+      }
+    };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  }, []);
 
   // EL GRUPO DE TECLAS (ver «DESHACER Y REHACER» arriba). `beforeinput` llega
   // ANTES de que la letra entre: es el momento de la foto de «antes», con el
@@ -1579,7 +2008,8 @@ function EditorPagina() {
       }
       // Enter PARTE el texto por el cursor: lo de antes se queda, lo de
       // después baja al bloque nuevo con el cursor a su inicio (como Notion).
-      const corte = offsetCaret(el);
+      // Una ecuación no se parte: partir un TeX por el medio lo rompe.
+      const corte = b.tipo === 'ecuacion' ? texto.length : offsetCaret(el);
       const antes = texto.slice(0, corte);
       const despues = texto.slice(corte);
       textosRef.current[b.id] = antes;
@@ -1662,7 +2092,7 @@ function EditorPagina() {
     const reglas: [RegExp, TipoBloque][] = [
       [/^###\s/, 'titulo3'], [/^##\s/, 'titulo2'], [/^#\s/, 'titulo1'],
       [/^[-*]\s/, 'lista'], [/^1[.)]\s/, 'numerada'], [/^>\s/, 'cita'],
-      [/^\[\s?\]\s/, 'tarea'], [/^```/, 'codigo'],
+      [/^\[\s?\]\s/, 'tarea'], [/^```/, 'codigo'], [/^\$\$\s/, 'ecuacion'],
     ];
     for (const [re, tipo] of reglas) {
       if (re.test(texto)) {
@@ -1779,10 +2209,54 @@ function EditorPagina() {
   /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
    *  markdown de siempre — pegar una lista pega una lista de verdad. Y desde
    *  2026-08-19, pegar una imagen, un vídeo o un PDF crea su bloque. */
+  // ══ MENCIONES CON @ Y [[ (2026-10-06, #6) ═══════════════════════════════
+  // Mientras se escribe, `onInput` mira si el cursor está tras un «@» o un
+  // «[[» (`detectarMencion`) y abre el selector (`MencionesMenu`). Al elegir,
+  // lo escrito desde el disparador se cambia por el enlace markdown de la
+  // mención. El texto vive en el DOM: se reescribe ahí y se avisa con un
+  // `input`, para que todo lo demás (guardado, historia, formato) lo vea
+  // como si se hubiera tecleado.
+  /** Lo que se está tecleando en una ecuación, para su vista previa en vivo. */
+  const [texEnVivo, setTexEnVivo] = useState<{ id: string; tex: string } | null>(null);
+  const [menc, setMenc] = useState<{ bloque: string; tipo: '@' | '[['; desde: number; q: string; x: number; y: number } | null>(null);
+  const cerrarMenc = useCallback(() => setMenc(null), []);
+  const vigilarMencion = (b: Bloque, el: HTMLElement) => {
+    if (b.tipo === 'codigo' || b.tipo === 'ecuacion') { setMenc(null); return; }
+    const total = el.textContent || '';
+    const cursor = offsetCaret(el);
+    const d = detectarMencion(total.slice(0, cursor));
+    if (!d) { setMenc(null); return; }
+    setMenc(m => {
+      if (m && m.bloque === b.id && m.desde === d.desde && m.tipo === d.tipo) return { ...m, q: d.q };
+      const sel = window.getSelection();
+      const r = sel?.rangeCount ? sel.getRangeAt(0).getBoundingClientRect() : null;
+      const caja = el.getBoundingClientRect();
+      return { bloque: b.id, tipo: d.tipo, desde: d.desde, q: d.q, x: (r && r.left) || caja.left, y: (r && r.bottom) || caja.bottom };
+    });
+  };
+  const aplicarMencion = (md: string) => {
+    const m = menc;
+    setMenc(null);
+    if (!m) return;
+    const el = document.querySelector(`[data-bloque="${m.bloque}"]`) as HTMLElement | null;
+    if (!el) return;
+    const total = el.textContent || '';
+    const hasta = offsetCaret(el);
+    // Un espacio detrás para seguir escribiendo, salvo que ya lo haya.
+    const cola = total.slice(hasta);
+    const nuevo = total.slice(0, m.desde) + md + (cola.startsWith(' ') ? '' : ' ') + cola;
+    el.textContent = nuevo;
+    repintar(el, null);
+    ponerCursor(el, m.desde + md.length + 1);
+    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: ' ' }));
+  };
+
   // ── EL MENÚ DE «¿QUÉ HAGO CON ESTE ENLACE?» (2026-10-02) ────────────────
   const [menuEnlace, setMenuEnlace] = useState<{
     bloqueId: string; url: string; x: number; y: number;
     video: { medio: 'youtube' | 'vimeo'; id: string } | null;
+    /** Un servicio de terceros que se incrusta (Figma, Spotify…): ver `utils/embeds.ts`. */
+    embed?: Embed | null;
     /** ¿La web se deja meter en otra? `null` mientras se comprueba. */
     insertable: boolean | null;
     elegido: number;
@@ -1799,8 +2273,11 @@ function EditorPagina() {
     const y = ((r && r.bottom) || caja?.bottom || 100) + 6;
     const yt = idYoutube(url), vm = idVimeo(url);
     const video = yt ? { medio: 'youtube' as const, id: yt } : vm ? { medio: 'vimeo' as const, id: vm } : null;
-    setMenuEnlace({ bloqueId, url, x, y, video, insertable: video ? true : null, elegido: 0 });
-    if (!video) {
+    // Un servicio conocido se ofrece como «Insertar» sin preguntar a la web
+    // (muchas no se dejan meter en un marco, y estas tienen su propio incrustador).
+    const embed = video ? null : embedDe(url);
+    setMenuEnlace({ bloqueId, url, x, y, video, embed, insertable: video || embed ? true : null, elegido: 0 });
+    if (!video && !embed) {
       const p = lecturasEnlace.current[url] ||= leerEnlace(url);
       p.then(l => setMenuEnlace(m => m && m.url === url ? { ...m, insertable: l ? l.insertable : false } : m));
     }
@@ -1834,7 +2311,9 @@ function EditorPagina() {
       ? { id: nuevoIdBloque(), tipo: 'marcador', url: m.url }
       : m.video
         ? { id: nuevoIdBloque(), tipo: 'medio', medio: m.video.medio, medioId: m.video.id } as Bloque
-        : { id: nuevoIdBloque(), tipo: 'web', url: m.url, alto: 480 };
+        : m.embed
+          ? { id: nuevoIdBloque(), tipo: 'embed', url: m.url, alto: m.embed.alto }
+          : { id: nuevoIdBloque(), tipo: 'web', url: m.url, alto: 480 };
     if (!resto.trim()) {
       insertarBloques(b, [nuevo], true);
     } else {
@@ -1888,6 +2367,14 @@ function EditorPagina() {
     // (la web o el vídeo dentro de la página). Se pega a mano como texto
     // plano: el pegado del navegador, con HTML, metería un enlace con otro
     // texto y la dirección se perdería.
+    // PEGAR UN BLOQUE SINCRONIZADO copiado en otra página (2026-10-06).
+    const sinc = url.match(/^humanity-sincronizado:([A-Z0-9]+)$/i);
+    if (sinc) {
+      e.preventDefault();
+      insertarSincronizado(b.id, sinc[1], !(e.currentTarget.textContent || '').trim() ? b.id : undefined);
+      return;
+    }
+
     if (esEnlace && !enlaceDeMedio && b.tipo !== 'codigo' && !dt.files?.length) {
       e.preventDefault();
       document.execCommand('insertText', false, url);
@@ -1926,7 +2413,7 @@ function EditorPagina() {
    * Aquí se recoge lo que nadie ha atendido y se añade al final.
    */
   useEffect(() => {
-    if (!puedoEditar || generando) return;
+    if (!puedoEditar || generando || ajustes.bloqueada) return;
     const alPegarEnLaPagina = (e: ClipboardEvent) => {
       // Trabajando en una pizarra incrustada, lo pegado es suyo.
       if (document.querySelector('[data-pizarra-activa]')) return;
@@ -1935,6 +2422,8 @@ function EditorPagina() {
       const dt = e.clipboardData;
       if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return;
       e.preventDefault();
+      const sinc = (dt.getData('text/plain') || '').trim().match(/^humanity-sincronizado:([A-Z0-9]+)$/i);
+      if (sinc) { insertarSincronizado(null, sinc[1]); return; }
       bloquesDelPortapapeles(dt).then(nuevos => {
         setSubiendo(null);
         if (nuevos?.length) { insertarBloques(null, nuevos, false); return; }
@@ -1949,7 +2438,7 @@ function EditorPagina() {
     };
     window.addEventListener('paste', alPegarEnLaPagina);
     return () => window.removeEventListener('paste', alPegarEnLaPagina);
-  }, [puedoEditar, generando, bloquesDelPortapapeles, insertarBloques]);
+  }, [puedoEditar, generando, ajustes.bloqueada, bloquesDelPortapapeles, insertarBloques]);
 
   // -- Selección múltiple -----------------------------------------------------
   const clicSeleccion = (b: Bloque, e: React.MouseEvent) => {
@@ -2106,7 +2595,8 @@ function EditorPagina() {
   // --------------------------------------------------------------------------
   // Render de un bloque
   // --------------------------------------------------------------------------
-  const editable = puedoEditar && !generando;
+  // Una página BLOQUEADA no se edita hasta que se desbloquee (2026-10-06, #29).
+  const editable = puedoEditar && !generando && !ajustes.bloqueada;
 
   // Sin barra flotante (2026-10-02) ya no hay que reservarle hueco abajo.
 
@@ -2118,6 +2608,12 @@ function EditorPagina() {
     }
     if (b.tipo === 'boton') {
       out.push({ icon: Settings2, label: 'Configurar el botón', onClick: () => { setMenuAsa(null); setConfigBoton(b.id); } });
+    }
+    if (b.tipo === 'sincronizado') {
+      out.push({ icon: Copy, label: 'Copiar para otra página', onClick: () => copiarSincronizado(b) });
+      out.push({ icon: Unlink, label: 'Dejar de sincronizar', onClick: () => dejarDeSincronizar(b.id) });
+    } else if (!enSinc[b.id] && b.tipo !== 'subpagina') {
+      out.push({ icon: RefreshCw, label: 'Convertir en sincronizado', onClick: () => { setMenuAsa(null); crearSincronizado(null, b.id); } });
     }
     if (esPlegable(b)) {
       out.push({
@@ -2173,6 +2669,20 @@ function EditorPagina() {
         return b.tipo === 'marcador'
           ? <TarjetaMarcador b={b} cargando={leyendoEnlace.includes(b.id)} />
           : <WebInsertada b={b} onAlto={editable ? alto => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, alto } : x)); programarGuardado(); } : undefined} />;
+      }
+
+      // ── CONTENIDO DE TERCEROS (2026-10-06, #20) ──────────────────────────
+      if (b.tipo === 'embed') {
+        if (!b.url) {
+          return editable ? (
+            <EntradaEnlace tipo="embed"
+              onListo={url => {
+                setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url, alto: embedDe(url)?.alto } : x));
+                programarGuardado();
+              }} />
+          ) : null;
+        }
+        return <BloqueEmbed b={b} onAlto={editable ? alto => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, alto } : x)); programarGuardado(); } : undefined} />;
       }
 
       if (b.tipo === 'pizarra') {
@@ -2508,6 +3018,7 @@ function EditorPagina() {
         onInput: (e: React.FormEvent<HTMLDivElement>) => {
           const t = e.currentTarget.textContent || '';
           textosRef.current[b.id] = t;
+          if (b.tipo === 'ecuacion') setTexEnVivo({ id: b.id, tex: t });
           // Con la barra abierta, lo que escribes ES el filtro. Si borras la
           // «/» o te vas a otra línea, se cierra sola.
           if (barra && barra.bloque === b.id) {
@@ -2515,6 +3026,7 @@ function EditorPagina() {
             else setBarra(x => x && ({ ...x, texto: t.slice(1), elegido: 0 }));
             return;
           }
+          vigilarMencion(b, e.currentTarget);
           autoformato(b, e.currentTarget);
           programarGuardado();
         },
@@ -2530,7 +3042,7 @@ function EditorPagina() {
       /** El cuerpo del bloque. Cuando se está editando NO lleva hijos de
        *  React (ver `BloqueEditable`); cuando solo se lee, sí. */
       const cuerpo = (extra?: string) => esActivo
-        ? <BloqueEditable key={`${b.id}-edit-${revision}`} inicial={texto} vivo={b.tipo !== 'codigo'} {...comun} className={cn(comun.className, extra)} />
+        ? <BloqueEditable key={`${b.id}-edit-${revision}`} inicial={texto} vivo={b.tipo !== 'codigo' && b.tipo !== 'ecuacion'} {...comun} className={cn(comun.className, extra)} />
         : <div key={`${b.id}-ver`} {...comun} className={cn(comun.className, extra)}><Inline texto={texto} /></div>;
 
       if (b.tipo === 'cita') {
@@ -2554,6 +3066,32 @@ function EditorPagina() {
                 className="mt-0.5 block text-left text-[13px] text-slate-400 hover:text-slate-600">
                 Título desplegable vacío. Pulsa para escribir dentro.
               </button>
+            )}
+          </div>
+        );
+      }
+
+      // ── EL SINCRONIZADO, ARRIBA DE SU CONTENIDO (2026-10-06) ─────────────
+      // Una franja naranja que dice que lo de debajo está en más páginas, en
+      // cuáles, y lo que se puede hacer con él.
+      if (b.tipo === 'sincronizado') {
+        const paginas = sincPaginas[b.sincId || ''] || [];
+        const otras = paginas.filter(p => p.id !== docId.current);
+        return (
+          <div className="flex items-center gap-2 flex-wrap text-[11px] font-bold text-orange-700">
+            <span className="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-orange-50 border border-orange-200">
+              <RefreshCw className="w-3 h-3" /> Sincronizado
+            </span>
+            <span className="text-orange-600/80 font-medium">
+              {otras.length === 0 ? 'Sólo en esta página por ahora' : `También en ${otras.length === 1 ? '«' + otras[0].titulo + '»' : otras.length + ' páginas más'}`}
+            </span>
+            {editable && (
+              <>
+                <button type="button" onClick={e => { e.stopPropagation(); copiarSincronizado(b); }}
+                  className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">{tr('Copiar')}</button>
+                <button type="button" onClick={e => { e.stopPropagation(); dejarDeSincronizar(b.id); }}
+                  className="h-6 px-2 rounded-md text-orange-700 hover:bg-orange-100">Dejar de sincronizar</button>
+              </>
             )}
           </div>
         );
@@ -2690,6 +3228,29 @@ function EditorPagina() {
       if (b.tipo === 'codigo') {
         return <pre className="bg-slate-900 rounded-xl px-4 py-3 overflow-x-auto">{cuerpo()}</pre>;
       }
+      // ── ECUACIÓN LaTeX (2026-10-06, #19) ─────────────────────────────────
+      // Pulsada, se ve el TeX y debajo la fórmula, que se repinta en cada
+      // tecla (`texEnVivo`). Sin pulsar, sólo la fórmula.
+      if (b.tipo === 'ecuacion') {
+        const activa = editable && bloqueActivo === b.id;
+        const tex = activa && texEnVivo?.id === b.id ? texEnVivo.tex : texto;
+        return (
+          <div className={cn('rounded-xl border px-4 py-3', activa ? 'border-emerald-300 bg-emerald-50/30' : 'border-transparent bg-slate-50/70')}>
+            {activa && (
+              <div className="mb-2">
+                {cuerpo('font-mono text-[13px] text-slate-700 !bg-white border border-slate-200 !px-2 py-1.5')}
+                <p className="mt-1 text-[11px] text-slate-400">LaTeX, por ejemplo <code>\frac{'{a}{b}'}</code> o <code>\sum_{'{i=1}'}^n x_i</code>. Intro sigue en un párrafo.</p>
+              </div>
+            )}
+            <div role={editable && !activa ? 'button' : undefined} tabIndex={editable && !activa ? 0 : undefined}
+              className={cn('text-center overflow-x-auto text-slate-800 min-h-[1.6em]', editable && !activa && 'cursor-pointer')}
+              onClick={editable && !activa ? () => { setSeleccion([]); setBloqueActivo(b.id); setFocoId(b.id); } : undefined}
+              onKeyDown={editable && !activa ? e => { if (e.key === 'Enter') { setBloqueActivo(b.id); setFocoId(b.id); } } : undefined}>
+              <Formula tex={tex} bloque />
+            </div>
+          </div>
+        );
+      }
       if (b.tipo === 'lista' || b.tipo === 'numerada') {
         // El número real se calcula contando los hermanos seguidos del mismo
         // tipo; los hijos de por medio (más sangría) no cortan la cuenta.
@@ -2706,7 +3267,7 @@ function EditorPagina() {
         return (
           <div className="flex gap-2">
             <span className="text-slate-400 select-none shrink-0 w-5 text-right leading-relaxed text-[15px]">
-              {marcaLista(b.tipo, n, b.nivel || 0)}
+              {marcaLista(b.tipo, n, (b.nivel || 0) - (enSinc[b.id]?.capas || 0))}
             </span>
             {cuerpo('flex-1 min-w-0')}
           </div>
@@ -2743,11 +3304,13 @@ function EditorPagina() {
           b.color && !PINTAN_SU_COLOR.has(b.tipo) && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
           seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60',
           // Dentro de un botón es su plantilla: no es texto de la página.
-          enPlantilla.has(b.id) && 'border-l-2 border-dashed border-violet-200 pl-2')}
+          enPlantilla.has(b.id) && 'border-l-2 border-dashed border-violet-200 pl-2',
+          // Lo de dentro de un sincronizado lleva su raya naranja, como Notion.
+          enSinc[b.id] && 'border-l-2 border-orange-300 pl-2')}
         onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
         // La sangría: cada nivel, un paso a la derecha, con sus mandos (el
         // «+» y el asa) detrás, como en Notion.
-        style={b.nivel ? { marginLeft: Math.min(b.nivel, 10) * (esMovil ? 18 : 28) } : undefined}
+        style={b.nivel ? { marginLeft: Math.min(b.nivel - (enSinc[b.id]?.capas || 0), 10) * (esMovil ? 18 : 28) } : undefined}
       >
         {/* LOS MANDOS DEL BLOQUE. En escritorio viven FUERA de la columna, a
             56 px por la izquierda, y aparecen al pasar el ratón.
@@ -2780,8 +3343,8 @@ function EditorPagina() {
               : cn('-left-14 top-0.5 z-20 opacity-0 group-hover/bloque:opacity-100', menuAsa === b.id && '!opacity-100'))}>
             <button
               onClick={e => { e.stopPropagation(); setMenuAbierto(m => (m === b.id ? null : b.id)); }}
-              title="Añadir un bloque debajo"
-              aria-label="Añadir un bloque debajo"
+              title={tr('Añadir un bloque debajo')}
+              aria-label={tr('Añadir un bloque debajo')}
               className={cn('rounded-md transition-colors',
                 esMovil
                   ? 'w-11 h-11 grid place-items-center text-slate-400 bg-white/85 active:bg-slate-100'
@@ -2792,9 +3355,9 @@ function EditorPagina() {
             {!esMovil && (
               <span
                 role="button"
-                aria-label="Opciones del bloque"
+                aria-label={tr('Opciones del bloque')}
                 onPointerDown={e => empezarArrastre(b.id, e)}
-                title="Arrastra para mover · clic para opciones"
+                title={tr('Arrastra para mover · clic para opciones')}
                 className="p-1 rounded-md text-slate-300 hover:text-slate-500 hover:bg-slate-50 cursor-grab active:cursor-grabbing touch-none"
               >
                 <GripVertical className="w-4 h-4" />
@@ -2935,7 +3498,7 @@ function EditorPagina() {
             );
             return esMovil ? createPortal(
               <div onClick={e => e.stopPropagation()} className="fixed inset-0 z-[60] flex items-end bg-slate-900/30">
-                <button aria-label="Cerrar" className="absolute inset-0" onClick={() => setMenuAbierto(null)} />
+                <button aria-label={tr('Cerrar')} className="absolute inset-0" onClick={() => setMenuAbierto(null)} />
                 <div className="relative w-full">{selector}</div>
               </div>, document.body) : <Flotante>{selector}</Flotante>;
           })()
@@ -2952,7 +3515,7 @@ function EditorPagina() {
     return () => window.removeEventListener('click', cerrar);
   }, [menuAbierto, menuDescargar]);
 
-  if (cargando) return <p className="text-sm text-slate-400 text-center py-24">Abriendo el documento…</p>;
+  if (cargando) return <p className="text-sm text-slate-400 text-center py-24">{tr('Abriendo el documento…')}</p>;
 
   if (error) {
     return (
@@ -2964,7 +3527,7 @@ function EditorPagina() {
               sitio y ése es el que quiere recuperar. */}
           <button onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/paginas'))}
             className="inline-flex items-center gap-1.5 mt-4 h-11 px-3 text-xs font-black text-emerald-700 hover:underline">
-            <ArrowLeft className="w-3.5 h-3.5" /> Volver atrás
+            <ArrowLeft className="w-3.5 h-3.5" /> {tr('Volver atrás')}
           </button>
         </div>
       </div>
@@ -2975,7 +3538,7 @@ function EditorPagina() {
     <div className="h-full overflow-y-auto">
       {/* SIEMPRE A ANCHO COMPLETO (2026-10-02, Eugenio: «quita la opción de
           que no sea ancho completo»). El mismo ancho que la página publicada. */}
-      <div className="mx-auto px-6 sm:px-12 pt-8 pb-32 max-w-6xl">
+      <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', anchoDePagina(ajustes))}>
 
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">
@@ -3001,12 +3564,13 @@ function EditorPagina() {
                   lo único que puede tardar de verdad (un vídeo son megas). */}
               {/* DESHACER Y REHACER, también a la vista (2026-10-05): quien no
                   sabe los atajos tiene que poder encontrarlos. */}
+              <CarasPresencia personas={presencia.personas} yo={presencia.yo} />
               <span className="hidden sm:inline-flex items-center">
-                <button onClick={deshacer} disabled={!pasos.atras} title="Deshacer (⌘Z)" aria-label="Deshacer"
+                <button onClick={deshacer} disabled={!pasos.atras} title={tr('Deshacer (⌘Z)')} aria-label={tr('Deshacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
                   <Undo2 className="w-4 h-4" />
                 </button>
-                <button onClick={rehacer} disabled={!pasos.adelante} title="Rehacer (⌘⇧Z)" aria-label="Rehacer"
+                <button onClick={rehacer} disabled={!pasos.adelante} title={tr('Rehacer (⌘⇧Z)')} aria-label={tr('Rehacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
                   <Redo2 className="w-4 h-4" />
                 </button>
@@ -3014,7 +3578,7 @@ function EditorPagina() {
               <span className={cn('font-bold', subiendo ? 'text-emerald-600' : guardado === 'sí' ? 'text-slate-300' : 'text-amber-600')}>
                 {subiendo
                   ? subiendo
-                  : guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : 'Cambios sin guardar'}
+                    : guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : guardado === 'sin conexión' ? tr('sin conexión · se guardará al volver') : 'Cambios sin guardar'}
               </span>
               <button onClick={cambiarVisibilidad}
                 className={cn('inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border transition-colors',
@@ -3029,7 +3593,7 @@ function EditorPagina() {
                 <a href={urlPublicada} target="_blank" rel="noopener noreferrer" data-externo
                   title={urlPublicada}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors">
-                  <ExternalLink className="w-3 h-3" /> Ver página publicada
+                  <ExternalLink className="w-3 h-3" /> {tr('Ver página publicada')}
                 </a>
               )}
             </>
@@ -3041,30 +3605,48 @@ function EditorPagina() {
           {/* EL MENÚ Y EL PIE DE LA WEB (2026-10-02). Con su nombre y no
               escondido en los ajustes: es lo que convierte una página en una web. */}
           {editable && (
-            <button onClick={() => setMenuSitioAbierto(true)} title="Menú y pie de página de la web"
+            <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')}
               className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
-              <PanelTop className="w-4 h-4" /> Menú y pie
+              <PanelTop className="w-4 h-4" /> {tr('Menú y pie')}
             </button>
           )}
           {editable && (
-            <button onClick={() => setMenuSitioAbierto(true)} title="Menú y pie de página de la web" aria-label="Menú y pie de página de la web"
+            <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')} aria-label={tr('Menú y pie de página de la web')}
               className="sm:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
               <PanelTop className="w-4 h-4" />
             </button>
           )}
+          {/* BUSCAR Y ATAJOS, para quien no sabe las teclas (2026-10-06). */}
+          <button onClick={() => setBuscando(b => ({ q: b?.q || '', senal: (b?.senal || 0) + 1 }))} title="Buscar en la página (⌘F)" aria-label="Buscar en la página"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+            <Search className="w-4 h-4" />
+          </button>
+          <button onClick={() => setAtajosAbiertos(true)} title="Atajos de teclado (?)" aria-label="Atajos de teclado"
+            className="hidden sm:inline-flex p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+            <Keyboard className="w-4 h-4" />
+          </button>
+          {puedoEditar && !generando && (
+            <button onClick={() => { setAjustes(a => ({ ...a, bloqueada: a.bloqueada ? undefined : true })); programarGuardado(); }}
+              title={ajustes.bloqueada ? 'Desbloquear la página' : 'Bloquear la página'} aria-label={ajustes.bloqueada ? 'Desbloquear la página' : 'Bloquear la página'}
+              className={cn('p-1.5 rounded-lg transition-colors', ajustes.bloqueada ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50')}>
+              {ajustes.bloqueada ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+            </button>
+          )}
           {editable && (
-            <button onClick={() => setAjustesAbierto(true)} title="Ajustes de la página" aria-label="Ajustes de la página"
+            <button onClick={() => setAjustesAbierto(true)} title={tr('Ajustes de la página')} aria-label={tr('Ajustes de la página')}
               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
               <Settings2 className="w-4 h-4" />
             </button>
           )}
+          {/* FAVORITA (#14): la estrella marca la página para el menú de la izquierda. */}
+          {!esNuevo && id && <BotonFavorito tipo="pagina" id={id} titulo={titulo} />}
           <button onClick={() => setCompartirAbierto(true)}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
-            <Share2 className="w-3.5 h-3.5" /> Compartir
+            <Share2 className="w-3.5 h-3.5" /> {tr('Compartir')}
           </button>
 
           <div className="relative">
-            <button onClick={e => { e.stopPropagation(); setMenuDescargar(m => !m); }} title="Descargar"
+            <button onClick={e => { e.stopPropagation(); setMenuDescargar(m => !m); }} title={tr('Descargar')}
               className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">
               <Download className="w-4 h-4" />
             </button>
@@ -3092,13 +3674,24 @@ function EditorPagina() {
           onDragOver={e => { if (!arrastrando && traeArchivos(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setArchivoEncima(true); } }}
           onDragLeave={e => { if (e.currentTarget === e.target) setArchivoEncima(false); }}
           onDrop={alSoltarArchivos}
-          className={cn('bg-white rounded-2xl transition-colors',
+          className={cn('bg-white rounded-2xl transition-colors', clasesDePagina(ajustes),
             archivoEncima && 'ring-2 ring-emerald-400 ring-offset-4')}
         >
+        {/* PÁGINA BLOQUEADA (2026-10-06, #29): se lee pero no se escribe. */}
+        {ajustes.bloqueada && (
+          <div role="status" data-pagina-bloqueada className="mb-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
+            <Lock className="w-3.5 h-3.5 shrink-0" />
+            <span className="flex-1">Esta página está bloqueada: nadie la edita hasta que se desbloquee.</span>
+            {puedoEditar && (
+              <button type="button" onClick={() => { setAjustes(a => ({ ...a, bloqueada: undefined })); programarGuardado(); }}
+                className="h-8 px-2.5 rounded-lg bg-white border border-amber-200 hover:bg-amber-100">Desbloquear</button>
+            )}
+          </div>
+        )}
         {/* SUÉLTALO AQUÍ. Solo mientras hay algo volando encima. */}
         {archivoEncima && (
           <p className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-dashed border-emerald-300 text-xs font-bold text-emerald-700">
-            Suelta el archivo y lo añado al final de la página.
+            {tr('Suelta el archivo y lo añado al final de la página.')}
           </p>
         )}
         {compartirAbierto && (
@@ -3141,11 +3734,11 @@ function EditorPagina() {
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
                   <button onClick={() => setEligiendoPortada(true)}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
-                    Cambiar
+                    {tr('Cambiar')}
                   </button>
                   <button onClick={() => { setPortada(null); programarGuardado(); }}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
-                    Quitar
+                    {tr('Quitar')}
                   </button>
                 </div>
               )}
@@ -3157,7 +3750,7 @@ function EditorPagina() {
                 {!icono && !eligiendoIcono && (
                   <button onClick={() => setEligiendoIcono(true)}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <Smile className="w-3.5 h-3.5" /> Añadir icono
+                    <Smile className="w-3.5 h-3.5" /> {tr('Añadir icono')}
                   </button>
                 )}
                 {/* EL ICONO: UN EMOJI, O UNA IMAGEN PEGADA, ARRASTRADA O SUBIDA
@@ -3176,7 +3769,7 @@ function EditorPagina() {
                     }}
                     pie={icono ? (
                       <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
-                        className="w-full text-center text-xs font-bold text-slate-400 hover:text-rose-500">Quitar el icono</button>
+                        className="w-full text-center text-xs font-bold text-slate-400 hover:text-rose-500">{tr('Quitar el icono')}</button>
                     ) : null}
                   >
                     <div>
@@ -3204,13 +3797,13 @@ function EditorPagina() {
                 {!portada && !eligiendoIcono && (
                   <button onClick={() => setEligiendoPortada(true)}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
+                    <ImageIcon className="w-3.5 h-3.5" /> {tr('Añadir portada')}
                   </button>
                 )}
                 {ajustes.subtitulo === undefined && !eligiendoIcono && (
                   <button onClick={() => { setAjustes(a => ({ ...a, subtitulo: '' })); setFocoDescripcion(true); }}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <AlignLeft className="w-3.5 h-3.5" /> Añadir descripción
+                    <AlignLeft className="w-3.5 h-3.5" /> {tr('Añadir descripción')}
                   </button>
                 )}
                 {(portada || icono || ajustes.subtitulo !== undefined) && !eligiendoIcono && (
@@ -3317,9 +3910,12 @@ function EditorPagina() {
           <button onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
             title="Pedirle a la IA que añada contenido a esta página" aria-label="Abrir la IA"
             className="fixed right-4 bottom-24 sm:right-6 sm:bottom-8 z-[9991] inline-flex items-center gap-2 h-12 pl-3.5 pr-4 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 transition-colors">
-            <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">IA</span>
+            <Sparkles className="w-5 h-5" /> <span className="hidden sm:inline">{tr('IA')}</span>
           </button>
         )}
+        {buscando && <BuscarEnPagina raiz={docRef} inicial={buscando.q} senal={buscando.senal} onCerrar={() => setBuscando(null)} />}
+        {atajosAbiertos && <AtajosAyuda onCerrar={() => setAtajosAbiertos(false)} />}
+        {menc && <MencionesMenu x={menc.x} y={menc.y} tipo={menc.tipo} q={menc.q} onElegir={aplicarMencion} onCerrar={cerrarMenc} />}
         {/* ¿QUÉ HAGO CON ESTE ENLACE? (2026-10-02, como Notion) */}
         {menuEnlace && (
           <div data-menu-enlace role="menu" aria-label="Qué hacer con el enlace"
@@ -3331,6 +3927,8 @@ function EditorPagina() {
               { icono: Bookmark, nombre: 'Marcador', ayuda: 'Tarjeta con imagen, título y descripción' },
               menuEnlace.video
                 ? { icono: Play, nombre: 'Insertar el vídeo', ayuda: 'Se reproduce dentro de la página' }
+                : menuEnlace.embed
+                ? { icono: PanelTop, nombre: `Insertar ${menuEnlace.embed.proveedor}`, ayuda: 'Se ve dentro de la página' }
                 : {
                   icono: Globe, nombre: 'Insertar la web',
                   ayuda: menuEnlace.insertable === null ? 'Comprobando si se deja…'
@@ -3369,6 +3967,7 @@ function EditorPagina() {
         )}
         {ajustesAbierto && (
           <AjustesPagina ajustes={ajustes} portada={portada} titulo={titulo}
+            resumen={contarPagina(aArbol(bloques), textosRef.current)}
             onCambio={a => { setAjustes(a); programarGuardado(); }}
             onCerrar={() => setAjustesAbierto(false)} />
         )}
@@ -3403,7 +4002,7 @@ function EditorPagina() {
               onClick={e => { e.stopPropagation(); alFinal.current = true; setMenuAbierto(bloques[bloques.length - 1]?.id || null); }}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-600 transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" /> Añadir un bloque
+              <Plus className="w-3.5 h-3.5" /> {tr('Añadir un bloque')}
             </button>
             <button
               onClick={iaContinuar}
@@ -3438,6 +4037,8 @@ function EditorPagina() {
             <Adjuntos contenedor="pagina_id" id={id} puedeEditar={puedoEditar} soloSiHay />
           </div>
         )}
+        {/* Las páginas que nombran o enlazan a ésta (2026-10-06, #6). */}
+        {id && !esNuevo && !generando && <EnlazanAqui key={`ea-${id}`} paginaId={id} />}
       </div>
 
       <input ref={archivoRef} type="file" multiple className="hidden" onChange={e => subirDesdeMenu(e.target.files)} />
@@ -3453,7 +4054,7 @@ function EditorPagina() {
       {fallo && (
         <div role="alert" className="fixed top-20 left-1/2 -translate-x-1/2 z-[85] flex items-center gap-3 pl-4 pr-2 min-h-11 max-w-[calc(100vw-2rem)] rounded-xl bg-rose-600 text-white text-xs font-bold shadow-2xl">
           <span className="py-2">{fallo}</span>
-          <button onClick={() => fallar(null)} aria-label="Cerrar el aviso" className="w-8 h-8 grid place-items-center rounded-lg hover:bg-white/15">
+          <button onClick={() => fallar(null)} aria-label={tr('Cerrar el aviso')} className="w-8 h-8 grid place-items-center rounded-lg hover:bg-white/15">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -3464,7 +4065,7 @@ function EditorPagina() {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-3 pl-4 pr-2 h-11 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-2xl">
           <span>{aviso}</span>
           {pasos.atras > 0 && !aviso.startsWith('Enlace') && !aviso.startsWith('http') && (
-            <button onClick={deshacer} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20">Deshacer <span className="text-white/50">⌘Z</span></button>
+            <button onClick={deshacer} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20">{tr('Deshacer')} <span className="text-white/50">⌘Z</span></button>
           )}
         </div>
       )}
@@ -3477,7 +4078,7 @@ function EditorPagina() {
             onClick={eliminarSeleccion}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 rounded-xl text-xs font-black transition-colors"
           >
-            <Trash2 className="w-3.5 h-3.5" /> Eliminar
+            <Trash2 className="w-3.5 h-3.5" /> {tr('Eliminar')}
           </button>
           <button
             onClick={() => setSeleccion([])}
@@ -3727,7 +4328,7 @@ function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: st
       value={valor}
       onChange={e => onCambiar(e.target.value)}
       onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-      placeholder="Título del documento"
+      placeholder={tr('Título del documento')}
       className="w-full text-4xl font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1 resize-none overflow-hidden block bg-transparent leading-tight"
     />
   );
@@ -3759,8 +4360,8 @@ function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onV
       value={valor}
       onChange={e => onCambiar(e.target.value)}
       onBlur={() => { if (!valor.trim()) onVaciar(); }}
-      placeholder="Escribe una descripción…"
-      aria-label="Descripción de la página"
+      placeholder={tr('Escribe una descripción…')}
+      aria-label={tr('Descripción de la página')}
       style={{ fontSize: letra }}
       className="mt-2 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
     />
@@ -3805,24 +4406,31 @@ function FlechaPlegar({ abierto, onClick }: { abierto: boolean; onClick: () => v
 }
 
 /** Un marcador o una web recién creados desde «/»: se les pega la dirección. */
-function EntradaEnlace({ tipo, onListo, onSubir }: { tipo: 'marcador' | 'web' | 'video'; onListo: (url: string) => void; onSubir?: () => void }) {
+function EntradaEnlace({ tipo, onListo, onSubir }: { tipo: 'marcador' | 'web' | 'video' | 'embed'; onListo: (url: string) => void; onSubir?: () => void }) {
   const [v, setV] = useState('');
   const [fallo, setFallo] = useState(false);
   const enviar = () => {
     const url = /^https?:\/\//i.test(v.trim()) ? v.trim() : v.trim() ? `https://${v.trim()}` : '';
-    try { if (!url) throw 0; new URL(url); onListo(url); } catch { setFallo(true); }
+    try {
+      if (!url) throw 0;
+      new URL(url);
+      // Un incrustado sólo acepta los servicios de la lista blanca.
+      if (tipo === 'embed' && !embedDe(url)) throw 0;
+      onListo(url);
+    } catch { setFallo(true); }
   };
-  const Icono = tipo === 'marcador' ? Bookmark : tipo === 'video' ? Play : Globe;
+  const Icono = tipo === 'marcador' ? Bookmark : tipo === 'video' ? Play : tipo === 'embed' ? PanelTop : Globe;
   return (
     <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl border border-dashed border-slate-300 bg-slate-50">
       <Icono className="w-4 h-4 text-slate-400 shrink-0" />
       <input autoFocus value={v} onChange={e => { setV(e.target.value); setFallo(false); }}
         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); enviar(); } }}
-        placeholder={tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : tipo === 'video' ? 'Pega el enlace de YouTube o Vimeo…' : 'Pega el enlace de la web que quieres insertar…'}
+        placeholder={tipo === 'embed' ? 'Pega un enlace de Figma, Maps, Drive, Spotify, Loom, CodePen, X, Miro…' : tipo === 'marcador' ? 'Pega el enlace para crear el marcador…' : tipo === 'video' ? 'Pega el enlace de YouTube o Vimeo…' : 'Pega el enlace de la web que quieres insertar…'}
         className={cn('flex-1 min-w-[10rem] h-9 px-2 rounded-lg border bg-white text-sm outline-none', fallo ? 'border-rose-300' : 'border-slate-200 focus:border-emerald-400')} />
       <button type="button" onClick={enviar} className="h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
         {tipo === 'marcador' ? 'Crear marcador' : 'Insertar'}
       </button>
+      {fallo && tipo === 'embed' && <p className="basis-full text-xs font-bold text-rose-600">Ese enlace no es de un servicio compatible (Figma, Google Maps/Drive/Docs/Slides, Spotify, SoundCloud, Loom, CodePen, X o Miro).</p>}
       {tipo === 'video' && onSubir && (
         <button type="button" onClick={onSubir} className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-100">
           o sube un vídeo

@@ -34,6 +34,10 @@ import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import HojaExplorar from '../navegacion/HojaExplorar';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
+import PaletaBusqueda from '../espacio/PaletaBusqueda';
+import { SincronizarPreferencias } from '../espacio/AparienciaIdioma';
+import AvisoBorradores from '../espacio/AvisoBorradores';
+import { t as tr } from '../../i18n';
 import BotonCalendario from '../navegacion/BotonCalendario';
 import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
 import Campana from '../social/Campana';
@@ -958,7 +962,7 @@ export default function Layout() {
             // pulsando ahí se abre el menú de la izquierda.
             className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
             {paginasPlegado || esMovil ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">{tr('Mis páginas')}</span>
           </button>
         )}
         {/* «Mis páginas» ya no está aquí (2026-10-05): vive dentro del menú
@@ -1078,6 +1082,10 @@ export default function Layout() {
             es donde vive la rueda: él se corrigió a sí mismo en la frase y
             **manda la corrección**, no la primera versión. */}
         <BuscadorSuperior compacto={compacto} />
+        {/* ⌘K y ⌘P: la paleta de búsqueda rápida (#15). Es un modal; aquí solo escucha. */}
+        <PaletaBusqueda />
+        <SincronizarPreferencias />
+        <AvisoBorradores />
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
             Eugenio, 2026-08-21: «vuelve a poner el menú colapsable superior a
@@ -1104,8 +1112,8 @@ export default function Layout() {
         {esMovil && !menuPuesto && (
           <button
             onClick={ponerMenu}
-            title="Herramientas"
-            aria-label="Herramientas"
+            title={tr('Herramientas')}
+            aria-label={tr('Herramientas')}
             aria-expanded={false}
             // SIN FONDO NEGRO (2026-08-22, hormiguero: «el icono del menú no
             // debería tener fondo negro»). Era la pastilla más oscura de toda
@@ -1189,7 +1197,7 @@ export default function Layout() {
                     onClick={() => { cerrarTodasLasVentanas(); setConfirmarCerrarTodas(false); }}
                     className="flex-1 px-2 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold"
                   >
-                    Cerrar todas
+                    {tr('Cerrar todas')}
                   </button>
                 </div>
               </div>
@@ -1401,11 +1409,11 @@ export default function Layout() {
 
         {!user && !cargandoSesion && (
           <Link to="/login"
-            aria-label="Iniciar sesión"
+            aria-label={tr('Iniciar sesión')}
             className="h-9 px-2.5 sm:px-3 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
             <User className="w-3.5 h-3.5 shrink-0" />
-            <span className="sm:hidden">Entrar</span>
-            <span className="hidden sm:inline">Iniciar sesión</span>
+            <span className="sm:hidden">{tr('Entrar')}</span>
+            <span className="hidden sm:inline">{tr('Iniciar sesión')}</span>
           </Link>
         )}
       </header>
@@ -1474,7 +1482,7 @@ export default function Layout() {
                       circulo === 'explorar' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
                   >
                     <LayoutGrid className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Ver todos los temas</span>
+                    <span className="truncate">{tr('Ver todos los temas')}</span>
                   </button>
                 </>
               )}
@@ -1638,7 +1646,7 @@ export default function Layout() {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Menú"
+            aria-label={tr('Menú')}
             className="fixed inset-y-0 left-0 z-50 flex animate-in slide-in-from-left duration-200"
           >
             {/* EL MISMO RAÍL QUE EN ESCRITORIO, desplegado. Antes aquí iba
@@ -1714,25 +1722,25 @@ export default function Layout() {
       <PieLegal />
       <button
         onClick={() => navigate('/hormiguero')}
-        title="Feedback: cuéntanos qué falla o qué falta"
-        aria-label="Feedback"
+        title={tr('Feedback: cuéntanos qué falla o qué falta')}
+        aria-label={tr('Feedback')}
         style={{ left: 'calc(var(--hueco-paginas, 0px) + 16px)', bottom: `calc(${ALTO_PIE + 12}px + env(safe-area-inset-bottom))` }}
         className={cn('fixed z-[9990] inline-flex h-12 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 text-sm font-black text-amber-800 shadow-lg transition-colors hover:bg-amber-100',
           location.pathname === '/hormiguero' && 'bg-amber-200')}
       >
         <IconoFeedback className="h-5 w-5 shrink-0" />
-        <span className="hidden sm:inline">Feedback</span>
+        <span className="hidden sm:inline">{tr('Feedback')}</span>
       </button>
       {!/^\/paginas\/[^/]+/.test(location.pathname) && !isIAPage && (
         <button
           onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
-          title="Hablar con la IA"
-          aria-label="Abrir el chat de la IA"
+          title={tr('Hablar con la IA')}
+          aria-label={tr('Abrir el chat de la IA')}
           style={{ right: 'calc(var(--hueco-temas, 0px) + 16px)', bottom: `calc(${ALTO_PIE + 12}px + env(safe-area-inset-bottom))` }}
           className="fixed z-[9990] inline-flex h-12 items-center gap-2 rounded-full bg-violet-600 px-4 text-sm font-black text-white shadow-lg shadow-violet-600/30 transition-colors hover:bg-violet-700"
         >
           <Sparkles className="h-5 w-5 shrink-0" />
-          <span className="hidden sm:inline">IA</span>
+          <span className="hidden sm:inline">{tr('IA')}</span>
         </button>
       )}
 

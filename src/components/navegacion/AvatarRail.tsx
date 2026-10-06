@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   User, MessageSquare, Phone, CalendarDays, Trash2, LayoutGrid,
-  Users2, Settings, LogOut, ChevronDown, UserX,
+  Users2, Settings, LogOut, ChevronDown, UserX, Code2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
 import Campana from '../social/Campana';
+import AparienciaIdioma from '../espacio/AparienciaIdioma';
+import { t } from '../../i18n';
 
 /*
  * TU FOTO, ARRIBA DEL RAÍL DE LA DERECHA (2026-08-25, agente de APP/UX)
@@ -68,6 +70,7 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
     { icono: LayoutGrid,    nombre: 'Tu portada', ruta: '/explorar?portada=1' },
     { icono: User,          nombre: 'Mi perfil', ruta: `/personas/${user.id}` },
     { icono: Settings,      nombre: 'Configuración', ruta: '/configuracion' },
+    { icono: Code2,         nombre: 'Desarrolladores', ruta: '/desarrolladores' },
     /*
      * BORRAR TU CUENTA, AQUÍ Y NO EN EL DESPLEGABLE DE INFORMACIÓN
      * (2026-08-25). Eugenio: «ponlo mejor en el apartado de Configuración de
@@ -88,7 +91,7 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
       <button
         onClick={() => setAbierto(a => !a)}
         title={user.displayName || user.email}
-        aria-label="Tu cuenta"
+        aria-label={t('Tu cuenta')}
         aria-expanded={abierto}
         className={cn('mb-1 flex h-11 items-center gap-2 rounded-xl px-1.5 transition-colors hover:bg-slate-100',
           desplegado ? 'w-full' : 'w-10 justify-center')}
@@ -100,7 +103,7 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
                 {(user.displayName || user.email || '?').trim().charAt(0).toUpperCase()}
               </span>}
           {sinLeer > 0 && !abierto && (
-            <span aria-label={`${sinLeer} notificaciones sin leer`}
+            <span aria-label={t('{n} notificaciones sin leer', { n: sinLeer })}
               className="absolute -right-1 -top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white">
               {sinLeer > 9 ? '9+' : sinLeer}
             </span>
@@ -126,8 +129,8 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
           <button
             key={e.nombre}
             onClick={() => { setAbierto(false); navegar(e.ruta); }}
-            title={e.nombre}
-            aria-label={e.nombre}
+            title={t(e.nombre)}
+            aria-label={t(e.nombre)}
             className={cn('flex h-9 items-center gap-3 rounded-xl px-[10px] transition-colors',
               desplegado ? 'w-full' : 'w-10 justify-center',
               aqui ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900')}
@@ -135,24 +138,27 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
             <e.icono className="h-4 w-4 shrink-0" />
             <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
               desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
-              {e.nombre}
+              {t(e.nombre)}
             </span>
           </button>
         );
       })}
 
+      {/* Apariencia e idioma (#25, #34): claro/oscuro/sistema y Español/English. */}
+      {abierto && <AparienciaIdioma desplegado={desplegado} />}
+
       {abierto && (
         <button
           onClick={() => { setAbierto(false); logout(); navegar('/'); }}
-          title="Cerrar sesión"
-          aria-label="Cerrar sesión"
+          title={t('Cerrar sesión')}
+          aria-label={t('Cerrar sesión')}
           className={cn('flex h-9 items-center gap-3 rounded-xl px-[10px] text-slate-500 transition-colors hover:bg-rose-50 hover:text-rose-600',
             desplegado ? 'w-full' : 'w-10 justify-center')}
         >
           <LogOut className="h-4 w-4 shrink-0" />
           <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
             desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
-            Cerrar sesión
+            {t('Cerrar sesión')}
           </span>
         </button>
       )}

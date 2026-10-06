@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { cn } from '../../utils/cn';
+import { anchoDePagina, clasesDePagina } from '../../utils/ajustesPagina';
 import { MarcoSitio, type Rutas } from './MenuSitio';
 import { completarSitio } from './sitioWeb';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../knowledge/CabeceraPagina';
@@ -32,7 +33,9 @@ export function MarcoLectura({ pagina, rutas, children }: {
   const conMarco = !!sitio && (sitio.menu.activo || sitio.pie.activo);
   const cuerpo = (
     <div className={conMarco ? 'bg-white' : 'min-h-screen bg-white'}>
-      <div className="mx-auto px-5 sm:px-8 pb-16 pt-6 sm:pt-12 max-w-6xl">
+      {/* Ancho, letra y tamaño que eligió el autor (2026-10-06, #29). Sin
+          elegir, ancho completo y letra de siempre. */}
+      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-6 sm:pt-12', anchoDePagina(pagina?.config), clasesDePagina(pagina?.config))}>
         {children}
       </div>
     </div>

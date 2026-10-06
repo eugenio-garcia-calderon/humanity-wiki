@@ -3,6 +3,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import Cesta from '../components/knowledge/Cesta';
 import MuroMiembros, { type Muro } from '../components/sitio/MuroMiembros';
 import BarraMiembro from '../components/sitio/BarraMiembro';
+import HerramientasPagina from '../components/acceso/HerramientasPagina';
 import VistaPagina, { Cargando, SinPagina } from '../components/sitio/VistaPagina';
 import { ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 
@@ -142,6 +143,7 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
   return (
     <ProveedorSitio sitio={sitio}>
       {pagina?.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
+      {pagina?.id && <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" contarVisita />}
       <VistaPagina pagina={pagina} propio={propio} pie={<>
         {!propio && (
           <footer className="mt-10 pt-4 border-t border-slate-100">

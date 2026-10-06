@@ -8,6 +8,7 @@ import { FichaRelacion } from './Relacion';
 import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
 import type { TamanoGaleria } from '../../utils/bloques';
+import GaleriaCarrusel from './GaleriaCarrusel';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -107,28 +108,16 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
     } catch (e: any) { setFallo(e.message); setAbriendo(null); }
   };
 
-  return (
-    <div className={sinMargen ? '' : 'p-3'}>
-      {fallo && <p className="mb-2 text-xs font-bold text-rose-600">{fallo}</p>}
-      {/* EL TAMAÑO DE LAS TARJETAS (2026-10-01). Se da como ANCHO MÍNIMO de
-          tarjeta y la rejilla mete las que quepan: así el mismo «grande» son
-          tres por fila en un escritorio ancho y una en un teléfono, sin un
-          ajuste distinto para cada pantalla. */}
-      {/* CENTRADA (2026-10-02): con `auto-fill` y `1fr` sobraban columnas
-          vacías a la derecha y dos tarjetas quedaban pegadas a la izquierda.
-          Con `auto-fit` las columnas vacías desaparecen, cada tarjeta crece
-          como mucho un 50 % y lo que sobra se reparte a los dos lados. */}
-      <div className="grid gap-x-4 gap-y-5" style={centrada
-        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
-        : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filas.map(f => {
+  /** Una tarjeta. `copia` es la segunda vuelta del carrusel: no se enfoca ni se lee. */
+  const tarjeta = (f: Fila, copia = false) => {
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
           return (
             // Un `div` que hace de botón, no un `<button>`: dentro van los
             // mandos de recolocar la imagen, y un botón no puede llevar otro.
-            <div key={f.id} role="link" tabIndex={0}
+            <div key={copia ? `${f.id}-copia` : f.id} role="link" tabIndex={copia ? -1 : 0}
+              aria-hidden={copia || undefined}
               aria-disabled={!!sitio && !f.pagina_id}
               onClick={() => abrir(f)}
               onKeyDown={e => { if (e.key === 'Enter') abrir(f); }}
@@ -212,7 +201,23 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               </div>
             </div>
           );
-        })}
+  };
+
+  /** El «+ Nueva página» de quien edita: junto a «Ver todo» y dentro del pop-up. */
+  const botonNueva = editable ? (
+    <button onClick={nueva} disabled={abriendo === 'nueva'}
+      className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 text-[13px] font-bold text-slate-500 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-60">
+      {abriendo === 'nueva' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Nueva página
+    </button>
+  ) : null;
+
+  /** La galería entera, sin carrusel: todas las entradas, las filas que hagan falta. */
+  const rejilla = (
+    <div>
+      <div className="grid gap-x-4 gap-y-5" style={centrada
+        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
+        : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
+        {filas.map(f => tarjeta(f))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             className="min-h-[9rem] aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors">
@@ -221,6 +226,25 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           </button>
         )}
       </div>
+    </div>
+  );
+
+  return (
+    <div className={sinMargen ? '' : 'p-3'}>
+      {fallo && <p className="mb-2 text-xs font-bold text-rose-600">{fallo}</p>}
+      {/* EL TAMAÑO DE LAS TARJETAS (2026-10-01). Se da como ANCHO MÍNIMO de
+          tarjeta y la rejilla mete las que quepan: así el mismo «grande» son
+          tres por fila en un escritorio ancho y una en un teléfono, sin un
+          ajuste distinto para cada pantalla. */}
+      {/* CENTRADA (2026-10-02): con `auto-fill` y `1fr` sobraban columnas
+          vacías a la derecha y dos tarjetas quedaban pegadas a la izquierda.
+          Con `auto-fit` las columnas vacías desaparecen, cada tarjeta crece
+          como mucho un 50 % y lo que sobra se reparte a los dos lados. */}
+      {/* UNA SOLA FILA QUE SE MUEVE (2026-10-06): ver `GaleriaCarrusel`. Quien edita
+          ve «+ Nueva página» al lado de «Ver todo». */}
+      <GaleriaCarrusel ancho={ANCHO_TARJETA[tamano] ?? 220}
+        tarjetas={filas.map(f => tarjeta(f))} copias={filas.map(f => tarjeta(f, true))}
+        pie={botonNueva} todo={rejilla} />
       {!filas.length && !editable && (
         <p className="py-6 text-center text-xs text-slate-400">Todavía no hay nada en esta base de datos.</p>
       )}
