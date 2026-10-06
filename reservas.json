@@ -71,6 +71,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "montar el módulo colab",
       "desde": "2026-10-06T10:37:53.584Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "Vista carrusel (prog8 voz)",
+      "desde": "2026-10-06T10:43:08.417Z"
     }
   ]
 }
