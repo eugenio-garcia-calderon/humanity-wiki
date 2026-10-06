@@ -47,30 +47,6 @@
       "ruta": "src/components/tablas/PropiedadesFila.tsx",
       "motivo": "Añadir propiedad desde la página del elemento",
       "desde": "2026-10-06T10:54:52.118Z"
-    },
-    {
-      "agente": "prog8-colab",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "Edición colaborativa Yjs: cliente (prog8-colab PR 2)",
-      "desde": "2026-10-06T13:51:50.723Z"
-    },
-    {
-      "agente": "prog8-colab",
-      "ruta": "src/utils/colabCliente.ts",
-      "motivo": "Edición colaborativa Yjs: cliente (prog8-colab PR 2)",
-      "desde": "2026-10-06T13:51:50.723Z"
-    },
-    {
-      "agente": "prog8-colab",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Edición colaborativa Yjs: cliente (prog8-colab PR 2)",
-      "desde": "2026-10-06T13:51:50.723Z"
-    },
-    {
-      "agente": "prog8-colab",
-      "ruta": "scripts/probar-colab.mts",
-      "motivo": "Edición colaborativa Yjs: cliente (prog8-colab PR 2)",
-      "desde": "2026-10-06T13:51:50.723Z"
     }
   ]
 }
