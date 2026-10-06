@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageSquare, History, MessageSquarePlus } from 'lucide-react';
+import { MessageSquare, History, MessageSquarePlus, Bell, BellRing, BarChart3 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import PanelComentarios, { type Ancla, type Hilo } from './PanelComentarios';
 import PanelVersiones from './PanelVersiones';
+import PanelEstadisticas from './PanelEstadisticas';
+import ListaPersonas from './ListaPersonas';
 
 // ============================================================================
 // COMENTARIOS E HISTORIAL, SOBRE CUALQUIER PÁGINA (2026-10-06, carril acceso)
@@ -60,13 +62,17 @@ function rangoDe(a: Ancla): Range | null {
   return r;
 }
 
-export default function HerramientasPagina({ paginaId, raiz = 'main' }: {
+export default function HerramientasPagina({ paginaId, raiz = 'main', contarVisita = false }: {
   paginaId: string;
   /** Dónde se puede seleccionar para comentar. */
   raiz?: string;
+  /** Es la lectura de una página publicada (no el editor): cuenta la visita. */
+  contarVisita?: boolean;
 }) {
   const [poder, setPoder] = useState<{ ver: boolean; comentar: boolean; editar: boolean } | null>(null);
-  const [panel, setPanel] = useState<'comentarios' | 'historial' | null>(null);
+  const [panel, setPanel] = useState<'comentarios' | 'historial' | 'estadisticas' | 'seguidores' | null>(null);
+  const [seg, setSeg] = useState<{ seguidores: number; siguiendo: boolean; es_duenyo: boolean } | null>(null);
+  const [puedeGestionar, setPuedeGestionar] = useState(false);
   const [borrador, setBorrador] = useState<Ancla | null>(null);
   const [foco, setFoco] = useState<string | null>(null);
   const [hilos, setHilos] = useState<Hilo[]>([]);
@@ -84,6 +90,30 @@ export default function HerramientasPagina({ paginaId, raiz = 'main' }: {
         setPoder({ ver: true, comentar: !!j.puedo?.comentar, editar: !!j.puedo?.resolver });
       }).catch(() => setPoder(null));
   }, [paginaId]);
+
+  // ── SEGUIR, ESTADÍSTICAS Y LA VISITA ───────────────────────────────────────
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/seguir/pagina/${encodeURIComponent(paginaId)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null)).then(j => vivo && setSeg(j)).catch(() => {});
+    fetch(`/api/permisos/mio/${encodeURIComponent(paginaId)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null)).then(j => vivo && setPuedeGestionar(!!j?.gestionar)).catch(() => {});
+    return () => { vivo = false; };
+  }, [paginaId]);
+  // La visita se cuenta una vez por carga, y sin esperar a nada más: el
+  // servidor ignora a robots y a quien administra (ver `estadisticas.ts`).
+  useEffect(() => {
+    if (!contarVisita) return;
+    fetch(`/api/estadisticas/visita/${encodeURIComponent(paginaId)}`, {
+      method: 'POST', credentials: 'include', keepalive: true,
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ referente: document.referrer || '' }),
+    }).catch(() => {});
+  }, [paginaId, contarVisita]);
+  const alternarSeguir = async () => {
+    const r = await fetch(`/api/seguir/pagina/${encodeURIComponent(paginaId)}`, { method: 'POST', credentials: 'include' });
+    if (r.status === 401) { window.location.href = '/'; return; }
+    if (r.ok) setSeg(await r.json().then(j => ({ ...j, es_duenyo: false })));
+  };
 
   // ── RESALTAR LOS TROZOS COMENTADOS ─────────────────────────────────────────
   const resaltar = useCallback(() => {
@@ -163,8 +193,8 @@ export default function HerramientasPagina({ paginaId, raiz = 'main' }: {
   };
 
   const abiertos = hilos.filter(h => !h.resuelto_en).length;
-  // Quien sólo lee y no hay nada que leer: nada que enseñar.
-  if (!poder || (!poder.comentar && !hilos.length)) return null;
+  // Quien sólo lee, sin comentarios que leer ni nada que seguir: nada que enseñar.
+  if (!poder && !seg) return null;
 
   return (
     <>
@@ -177,14 +207,33 @@ export default function HerramientasPagina({ paginaId, raiz = 'main' }: {
         </button>
       )}
       <div className="fixed right-3 top-1/2 z-[60] flex -translate-y-1/2 flex-col gap-1.5 print:hidden">
-        <button onClick={() => { setBorrador(null); setFoco(null); setPanel(p => (p === 'comentarios' ? null : 'comentarios')); }}
+        {seg && !seg.es_duenyo && (
+          <button onClick={alternarSeguir} title={seg.siguiendo ? 'Dejar de seguir' : 'Seguir esta página: te avisamos cuando cambie'}
+            aria-pressed={seg.siguiendo} aria-label={seg.siguiendo ? 'Dejar de seguir esta página' : 'Seguir esta página'}
+            className={cn('grid h-11 w-11 place-items-center rounded-full border shadow-md transition-colors',
+              seg.siguiendo ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-200 bg-white text-slate-500 hover:text-slate-900')}>
+            {seg.siguiendo ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+          </button>
+        )}
+        {seg && (seg.seguidores > 0) && (
+          <button onClick={() => setPanel('seguidores')} className="text-center text-[10px] font-bold text-slate-500 hover:text-slate-900" aria-label={`${seg.seguidores} seguidores`}>
+            {seg.seguidores}<br />{seg.seguidores === 1 ? 'sigue' : 'siguen'}
+          </button>
+        )}
+        {puedeGestionar && (
+          <button onClick={() => setPanel('estadisticas')} title="Estadísticas" aria-label="Estadísticas de la página"
+            className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-md hover:text-slate-900">
+            <BarChart3 className="h-4 w-4" />
+          </button>
+        )}
+        {poder && <button onClick={() => { setBorrador(null); setFoco(null); setPanel(p => (p === 'comentarios' ? null : 'comentarios')); }}
           title="Comentarios" aria-label={`Comentarios${abiertos ? `: ${abiertos} abiertos` : ''}`}
           className={cn('relative grid h-11 w-11 place-items-center rounded-full border bg-white shadow-md transition-colors',
             panel === 'comentarios' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:text-slate-900')}>
           <MessageSquare className="h-4 w-4" />
           {abiertos > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-amber-500 px-1 text-[10px] font-black text-white">{abiertos}</span>}
-        </button>
-        {poder.editar && (
+        </button>}
+        {poder?.editar && (
           <button onClick={abrirHistorial} title="Historial de versiones" aria-label="Historial de versiones"
             className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-md hover:text-slate-900">
             <History className="h-4 w-4" />
@@ -194,6 +243,8 @@ export default function HerramientasPagina({ paginaId, raiz = 'main' }: {
       {panel === 'comentarios' && (
         <PanelComentarios paginaId={paginaId} borrador={borrador} foco={foco} onCerrar={() => setPanel(null)} onCambio={setHilos} onIrA={irA} />
       )}
+      {panel === 'estadisticas' && <PanelEstadisticas paginaId={paginaId} onCerrar={() => setPanel(null)} />}
+      {panel === 'seguidores' && <ListaPersonas titulo="Quién sigue esta página" url={`/api/seguir/pagina/${encodeURIComponent(paginaId)}/seguidores`} onCerrar={() => setPanel(null)} />}
       {panel === 'historial' && actual && (
         <PanelVersiones paginaId={paginaId} bloquesActuales={actual.bloques} tituloActual={actual.titulo} onCerrar={() => setPanel(null)} />
       )}

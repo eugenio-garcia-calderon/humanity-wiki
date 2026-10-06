@@ -81,6 +81,8 @@ import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
 import { registrarComentarios } from './comentarios.js';
 import { registrarVersiones } from './versiones.js';
+import { registrarSeguir } from './seguir.js';
+import { registrarEstadisticas } from './estadisticas.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
@@ -274,6 +276,8 @@ export const MODULOS: Modulo[] = [
         + '`miembros`, que convierte la sesión de un sitio en `req.user` para `/api/comentarios`.',
   },
   { nombre: 'versiones', montar: (app, db) => registrarVersiones(app, db), nota: 'Historial de versiones de una página: ver, comparar y restaurar (#8).' },
+  { nombre: 'seguir-paginas', montar: (app, db) => registrarSeguir(app, db), nota: 'Seguir páginas y avisar cuando cambian (#31). Misma tabla `follows`.' },
+  { nombre: 'estadisticas', montar: (app, db) => registrarEstadisticas(app, db), nota: 'Visitas por día, únicos y origen, sin datos personales (migración 0139).' },
   { nombre: 'menu', montar: (app, db) => registerMenuRoutes(app, db) },
   { nombre: 'mensajes', montar: (app, db) => registerMensajesRoutes(app, db) },
   { nombre: 'calendario', montar: (app, db) => registerCalendarioRoutes(app, db) },

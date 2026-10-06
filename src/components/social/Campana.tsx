@@ -38,7 +38,7 @@ const COMO: Record<string, { icono: any; frase: (n: string, p?: any) => string }
   respuesta:         { icono: CornerDownRight, frase: n => `${n} ha respondido a tu comentario` },
   mencion:           { icono: AtSign,          frase: n => `${n} te ha nombrado` },
   reaccion:          { icono: Heart,           frase: n => `A ${n} le gusta lo que has publicado` },
-  seguidor:          { icono: UserPlus,        frase: n => `${n} ha empezado a seguirte` },
+  seguidor:          { icono: UserPlus,        frase: (n, p) => (p?.titulo ? `${n} ha empezado a seguir «${p.titulo}»` : `${n} ha empezado a seguirte`) },
   guardado:          { icono: Bookmark,        frase: n => `${n} ha guardado algo tuyo` },
   nueva_publicacion: { icono: FileText,        frase: n => `${n} ha publicado algo nuevo` },
   // Telecomunicaciones (2026-08-22).

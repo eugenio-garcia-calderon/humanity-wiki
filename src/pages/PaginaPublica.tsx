@@ -143,7 +143,7 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
   return (
     <ProveedorSitio sitio={sitio}>
       {pagina?.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
-      {pagina?.id && <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" />}
+      {pagina?.id && <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" contarVisita />}
       <VistaPagina pagina={pagina} propio={propio} pie={<>
         {!propio && (
           <footer className="mt-10 pt-4 border-t border-slate-100">
