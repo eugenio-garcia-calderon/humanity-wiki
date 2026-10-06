@@ -101,6 +101,12 @@
       "ruta": "src/components/tablas/vistaUtil.ts",
       "motivo": "Vista carrusel (prog8 voz)",
       "desde": "2026-10-06T10:43:21.659Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/bd.ts",
+      "motivo": "Vista carrusel (prog8 voz)",
+      "desde": "2026-10-06T10:43:24.964Z"
     }
   ]
 }
