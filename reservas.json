@@ -35,6 +35,36 @@
       "ruta": "src/server/bd.ts",
       "motivo": "Vista carrusel (prog8 voz)",
       "desde": "2026-10-06T10:43:24.964Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
+      "desde": "2026-10-06T10:48:09.701Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/components/knowledge/PresenciaPagina.tsx",
+      "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
+      "desde": "2026-10-06T10:48:09.701Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/utils/colabCliente.ts",
+      "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
+      "desde": "2026-10-06T10:48:09.701Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
+      "desde": "2026-10-06T10:48:09.701Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "scripts/probar-colab.mts",
+      "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
+      "desde": "2026-10-06T10:48:09.701Z"
     }
   ]
 }
