@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog8-colab",
-      "ruta": "src/components/knowledge/PresenciaPagina.tsx",
-      "motivo": "Edición colaborativa Yjs: cliente y texto (prog8-colab, PR 2)",
-      "desde": "2026-10-06T10:48:09.701Z"
-    },
-    {
       "agente": "prog8-variantes",
       "ruta": "src/pages/Comercio.tsx",
       "motivo": "Una sola forma de crear: bases de datos con plantillas y precio = producto; creador de propiedades nuevo",
@@ -47,6 +41,42 @@
       "ruta": "src/components/tablas/PropiedadesFila.tsx",
       "motivo": "Añadir propiedad desde la página del elemento",
       "desde": "2026-10-06T10:54:52.118Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
+      "desde": "2026-10-06T14:05:09.234Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/components/knowledge/PresenciaPagina.tsx",
+      "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
+      "desde": "2026-10-06T14:05:09.234Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/utils/colabDom.ts",
+      "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
+      "desde": "2026-10-06T14:05:09.234Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "src/components/knowledge/CursoresAjenos.tsx",
+      "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
+      "desde": "2026-10-06T14:05:09.234Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
+      "desde": "2026-10-06T14:05:09.234Z"
+    },
+    {
+      "agente": "prog8-colab",
+      "ruta": "scripts/probar-colab.mts",
+      "motivo": "Edición colaborativa: presencia y cursores (prog8-colab PR 3)",
+      "desde": "2026-10-06T14:05:09.234Z"
     }
   ]
 }
