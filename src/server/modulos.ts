@@ -79,6 +79,8 @@ import { registrarEdicionPaginas } from './edicionPaginas.js';
 import { registrarPermisos } from './permisos.js';
 import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
+import { registrarComentarios } from './comentarios.js';
+import { registrarVersiones } from './versiones.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
@@ -265,6 +267,13 @@ export const MODULOS: Modulo[] = [
     nota: 'Quién puede qué en una página: roles, equipos, invitaciones y herencia (#12). '
         + 'Sólo rutas bajo `/api/permisos/…` y `/api/equipos/…`; el sitio en la lista da igual.',
   },
+  {
+    nombre: 'comentarios',
+    montar: (app, db) => registrarComentarios(app, db),
+    nota: 'Hilos anclados a un trozo de texto, con respuestas, resolver y menciones (#11). Después de '
+        + '`miembros`, que convierte la sesión de un sitio en `req.user` para `/api/comentarios`.',
+  },
+  { nombre: 'versiones', montar: (app, db) => registrarVersiones(app, db), nota: 'Historial de versiones de una página: ver, comparar y restaurar (#8).' },
   { nombre: 'menu', montar: (app, db) => registerMenuRoutes(app, db) },
   { nombre: 'mensajes', montar: (app, db) => registerMensajesRoutes(app, db) },
   { nombre: 'calendario', montar: (app, db) => registerCalendarioRoutes(app, db) },
