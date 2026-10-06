@@ -87,6 +87,7 @@ export const CLASIFICACION: Clase[] = [
   c('sitio_enlaces', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un enlace mágico vivo abre el sitio como esa persona'),
   c('sitio_restricciones', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'qué ve cada categoría: una fila de menos abre contenido privado'),
   c('sitio_guardados', 'BAJA', 'MEDIA', 'BAJA', 'BAJA', 'lo que cada miembro guarda del sitio'),
+  c('comentarios_pagina', 'MEDIA', 'MEDIA', 'MEDIA', 'MEDIA', 'hilos de comentarios de una página: pueden citar trozos de páginas privadas'),
 
   // ── DINERO ────────────────────────────────────────────────────────────────
   c('transactions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'movimientos de dinero real'),

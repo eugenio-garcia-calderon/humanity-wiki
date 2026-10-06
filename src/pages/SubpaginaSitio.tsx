@@ -4,6 +4,7 @@ import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../com
 import { paginaPrecargada } from '../utils/precargado';
 import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros';
 import BarraMiembro from '../components/sitio/BarraMiembro';
+import HerramientasPagina from '../components/acceso/HerramientasPagina';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -38,6 +39,7 @@ export default function SubpaginaSitio({ propio }: { propio: boolean }) {
   return <>
     <VistaPagina pagina={pagina} propio={propio} />
     {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
+      <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" />
   </>;
 }
 

@@ -18,6 +18,7 @@ import { useEsMovil } from '../hooks/useEsMovil';
 import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
+import HerramientasPagina from '../components/acceso/HerramientasPagina';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import CreadorMenu from '../components/knowledge/CreadorMenu';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
@@ -152,7 +153,9 @@ function Inline({ texto }: { texto: string }) {
 
 export default function Documento() {
   const { id } = useParams<{ id: string }>();
-  return <EditorPagina key={id} />;
+  // Comentarios anclados e historial de versiones (carril acceso, #11 y #8):
+  // fuera del editor a propósito, para no tocar su estado.
+  return <><EditorPagina key={id} />{id && <HerramientasPagina key={`h-${id}`} paginaId={id} />}</>;
 }
 
 function EditorPagina() {
