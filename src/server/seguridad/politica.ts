@@ -193,6 +193,9 @@ const REVISADAS: Entrada[] = [
   // Las del panel exigen sesión de la plataforma y administrar la página raíz
   // (lo mira `miembros.ts`). Las del visitante son públicas a propósito: son
   // la propia puerta del sitio, con el guardián de intentos delante.
+  // ── SEGUIR PÁGINAS Y ESTADÍSTICAS (carril acceso, #31) ────────────────────
+  { m: 'POST', ruta: '/api/seguir/pagina/:id', guardia: { tipo: 'sesion' }, nota: 'seguir.ts: exige poder ver la página' },
+  { m: 'POST', ruta: '/api/estadisticas/visita/:id', guardia: { tipo: 'publica', porque: 'la manda el navegador de quien lee; no cuenta robots ni a quien administra, una fila por huella y día' } },
   // ── COMENTARIOS E HISTORIAL DE PÁGINA (carril acceso, #11 y #8) ───────────
   // Sesión aquí; el rol en la página lo comprueba cada ruta (`comentarios.ts`, `versiones.ts`).
   { m: 'POST', ruta: '/api/comentarios/pagina/:id', guardia: { tipo: 'sesion' }, nota: 'comentar: rol Comentar o más, página pública o miembro con permiso' },

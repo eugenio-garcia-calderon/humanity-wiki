@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ListaPersonas from '../components/acceso/ListaPersonas';
 import { subirArchivo } from '../utils/subir';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
@@ -121,6 +122,7 @@ export default function PersonaPublica() {
   const [productos, setProductos] = useState<Array<{ id: string; nombre: string; precio: number | null; imagen: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
+  const [lista, setLista] = useState<'seguidores' | 'siguiendo' | null>(null);
   const [supportStep, setSupportStep] = useState<'amount' | 'checkout' | null>(null);
   const [supportAmount, setSupportAmount] = useState(SUPPORT_AMOUNTS[0]);
   const [showCreateGraph, setShowCreateGraph] = useState(false);
@@ -248,7 +250,7 @@ export default function PersonaPublica() {
         body: JSON.stringify({ entity_type: 'users', entity_id: id }),
       });
       const json = await res.json();
-      if (res.ok) setFollowing(!!json.following);
+      if (res.ok) { setFollowing(!!json.following); setStats(st => ({ ...st, followers: Math.max(0, st.followers + (json.following ? 1 : -1)) })); }
     } catch { setFollowing(f => !f); }
   };
 
@@ -584,12 +586,26 @@ export default function PersonaPublica() {
           )}
         </div>
 
-        {/* LOS CONTADORES SE FUERON (2026-08-22, Eugenio: «quita lo de siguiendo
-            y seguidores y lo de publicaciones, los números esos fuera»). En una
-            plataforma que empieza, «0 seguidores» en el perfil de todo el mundo
-            no informa de nada y desanima a quien acaba de llegar. Los datos
-            siguen ahí —los usan los círculos de la portada para sugerir a
-            quién seguir—; lo que se quita es el marcador. */}
+        {/* LOS CONTADORES VUELVEN (2026-10-06, Eugenio: «contador de seguidores y
+            seguidos en el perfil, y una lista de seguidores»). Se quitaron el
+            2026-08-22 porque «0 seguidores» en todos los perfiles desanimaba a
+            quien llegaba; por eso aquí NO sale un 0: con cero, no se enseña el
+            número, y quien tiene seguidores los puede abrir y ver quiénes son. */}
+        {(stats.followers > 0 || stats.following > 0) && (
+          <div className="mt-3 flex gap-4 text-sm">
+            {stats.followers > 0 && (
+              <button onClick={() => setLista('seguidores')} className="h-9 text-slate-500 hover:text-slate-900">
+                <b className="text-slate-900">{stats.followers}</b> {stats.followers === 1 ? 'seguidor' : 'seguidores'}
+              </button>
+            )}
+            {stats.following > 0 && (
+              <button onClick={() => setLista('siguiendo')} className="h-9 text-slate-500 hover:text-slate-900">
+                <b className="text-slate-900">{stats.following}</b> siguiendo
+              </button>
+            )}
+          </div>
+        )}
+        {lista && <ListaPersonas titulo={lista === 'seguidores' ? 'Seguidores' : 'Siguiendo'} url={`/api/users/${id}/${lista}`} onCerrar={() => setLista(null)} />}
       </div>
 
       {/* ══ LAS TRES FILAS ══════════════════════════════════════════════════

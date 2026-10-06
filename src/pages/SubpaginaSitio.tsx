@@ -39,7 +39,7 @@ export default function SubpaginaSitio({ propio }: { propio: boolean }) {
   return <>
     <VistaPagina pagina={pagina} propio={propio} />
     {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
-      <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" />
+      <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" contarVisita />
   </>;
 }
 

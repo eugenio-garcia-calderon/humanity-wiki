@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { pizarraVisible } from './sitios';
 import { registrarHistorial } from './historial';
 import { puedeEditarPagina, quienDe } from './permisos.js';
+import { avisarSeguidoresDePagina } from './seguir.js';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
@@ -1853,6 +1854,9 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         entidad: 'knowledge_windows', tabla: 'knowledge_windows', id: req.params.id,
         operacion: 'update', previo: antes.rows[0] ?? null, actor: req.user!.id, agrupar: true,
       });
+      // Quienes siguen la página se enteran de que ha cambiado (carril acceso, #31).
+      // Sin esperar: un aviso lento no retrasa el guardado.
+      void avisarSeguidoresDePagina(db, String(req.params.id), req.user!.id);
 
       // A quien más tenga la página abierta (menos a esta pestaña).
       avisarGuardado(req.params.id, versionNueva, req.user!.id, d.conexion ? String(d.conexion) : null);

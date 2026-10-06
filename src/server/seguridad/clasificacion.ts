@@ -88,6 +88,7 @@ export const CLASIFICACION: Clase[] = [
   c('sitio_restricciones', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'qué ve cada categoría: una fila de menos abre contenido privado'),
   c('sitio_guardados', 'BAJA', 'MEDIA', 'BAJA', 'BAJA', 'lo que cada miembro guarda del sitio'),
   c('comentarios_pagina', 'MEDIA', 'MEDIA', 'MEDIA', 'MEDIA', 'hilos de comentarios de una página: pueden citar trozos de páginas privadas'),
+  c('pagina_visitas', 'BAJA', 'MEDIA', 'BAJA', 'BAJA', 'visitas por día con huella sin sal guardada: sin datos personales y recalculable solo hacia delante', true),
 
   // ── DINERO ────────────────────────────────────────────────────────────────
   c('transactions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'movimientos de dinero real'),
