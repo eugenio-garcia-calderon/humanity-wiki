@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog1",
-      "ruta": "src/components/tablas/BarraVista.tsx",
-      "motivo": "Cabecera de base de datos estilo Notion (prog8 voz)",
-      "desde": "2026-10-06T10:23:37.187Z"
-    },
-    {
       "agente": "prog8-colab",
       "ruta": "drizzle/0145_colab_yjs.sql",
       "motivo": "Edición colaborativa Yjs: servidor y persistencia (prog8-colab)",
