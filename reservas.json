@@ -131,6 +131,72 @@
       "ruta": "src/pages/Documento.tsx",
       "motivo": "carril espacio: boton favorito en la barra de la pagina",
       "desde": "2026-10-06T04:17:11.130Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "drizzle/0142_pagina_referencias.sql",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/server/edicionPaginas.ts",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/TextoEnriquecido.tsx",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/utils/marcadoVivo.ts",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/sitio/VistaPagina.tsx",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/AjustesPagina.tsx",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/utils/menciones.ts",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/MencionesMenu.tsx",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
+    },
+    {
+      "agente": "prog8-editorb",
+      "ruta": "src/components/knowledge/EnlazanAqui.tsx",
+      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
+      "desde": "2026-10-06T04:17:44.443Z"
     }
   ]
 }
