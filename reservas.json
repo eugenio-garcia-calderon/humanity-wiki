@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-bd",
-      "ruta": "drizzle/0138_bd_formularios.sql",
-      "motivo": "carril bd: formularios públicos",
-      "desde": "2026-10-06T03:53:17.871Z"
-    },
-    {
-      "agente": "prog8-bd",
       "ruta": "src/server/limites/index.ts",
       "motivo": "carril bd: formularios públicos",
       "desde": "2026-10-06T03:53:17.871Z"
