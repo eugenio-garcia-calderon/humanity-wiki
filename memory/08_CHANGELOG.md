@@ -8643,3 +8643,11 @@ en mis páginas como proyecto pendiente».
 - Speed: five levels in the view's «Ajustes»: 12 / 28 / 50 / 80 / 120 px/s, default 28. It is saved in the view config (`config.velocidad`), so it also applies on the published page.
   - `GaleriaCarrusel` reads it from a ref, so changing it does not restart or jump the scroll.
 - Verified locally: the gallery stays still; the carousel at level 5 moved 240 px in 2 s, and still did after a reload.
+### 2026-10-06 — Edición simultánea con Yjs: cliente y texto (carril colab, PR 2 de 4)
+- El editor de páginas se conecta al WebSocket `/api/colab/:id` al abrir una página: lo que se teclea viaja por Yjs (`utils/colabCliente.ts`) y dos personas escribiendo en el MISMO párrafo se fusionan carácter a carácter; mover/borrar mientras otra persona edita no pierde texto (cabecera de `colabModelo.ts`). El servidor guarda y deriva `config.bloques`.
+- **Carga perezosa**: Yjs va en un trozo aparte (`colabCliente`, 106 KB, 33 KB comprimido) que sólo baja quien abre una página.
+- **El editor no se reescribe**: enlace por diferencias (tres vías). El bloque que se escribe tiene el texto en el DOM; lo que escribe otra persona se parchea a mano y el cursor/selección se desplazan con lo escrito delante (`utils/colabDom.ts`); una composición con acentos espera.
+- **Deshacer/rehacer**: `Y.UndoManager`, cada persona deshace SOLO lo suyo (las teclas se agrupan 1 s, la estructura va aparte). Los botones usan sus pasos.
+- **Guardado**: en vivo no hay `PUT` de bloques (sube todo por Yjs); los ajustes (portada, icono…) siguen por `PUT` sin bloques ni título. Mientras reconecta, lo escrito se queda en el documento (se funde al volver, a nivel de carácter) y en el borrador de IndexedDB del carril «sin conexión». Si nunca consigue conectar (3 intentos: proxy, sin permiso) se «abandona» y TODO sigue como antes (autoguardado + 409 + fusión por bloque).
+- Reconexión con espera creciente y azar, latido de 25 s para detectar conexiones muertas, y reconexión inmediata al volver la red.
+- Probado en el navegador con un cliente Yjs real como segunda persona: lo suyo aparece en pantalla, lo tecleado llega a la otra parte y a `config.bloques`, el cursor no salta cuando la otra persona escribe delante, y ⌘Z sólo deshizo lo propio.

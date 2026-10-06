@@ -42,6 +42,10 @@ import {
 import { MigasDePan, BotonVista, ConfigBoton, conFecha } from '../components/knowledge/BloquesExtra';
 import { usePresencia, CarasPresencia } from '../components/knowledge/PresenciaPagina';
 import { fusionarBloques } from '../utils/colaboracion';
+import { useColab, type CallbacksEditor } from '../components/knowledge/useColab';
+import type { InfoColab } from '../utils/colabCliente';
+import { posTrasDelta, type Plano } from '../utils/colabTexto';
+import { parchearBloque, estaComponiendo } from '../utils/colabDom';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
 import HojaCrear from '../components/navegacion/HojaCrear';
@@ -203,6 +207,12 @@ function EditorPagina() {
   const [bloques, setBloques] = useState<Bloque[]>([]);
   /** La presencia (se declara más abajo, tras `cargar`); el guardado la lee. */
   const presenciaRef = useRef<{ conexion: React.MutableRefObject<string | null> }>({ conexion: { current: null } });
+  /** Cada tabla que cambió por fuera (otra persona): sube para volver a pintar
+   *  sus celdas, cuyo texto es del DOM (ver `CeldaEditable`). */
+  const [revTablas, setRevTablas] = useState<Record<string, number>>({});
+  /** Cómo estaba el título en el servidor al abrir (la base de lo que se lleva sin enviar). */
+  const tituloBase = useRef('');
+  const ultimaMeta = useRef<string | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generando, setGenerando] = useState(esNuevo);
@@ -362,6 +372,7 @@ function EditorPagina() {
       .then(async r => {
         let j = await r.json();
         if (!r.ok) throw new Error(j.error || 'No se ha podido cargar.');
+        tituloBase.current = j.title || '';
         const bor = await leerBorrador(winId);
         // La BASE de la próxima fusión es lo que tiene el servidor, no el borrador.
         let baseServidor: Bloque[] | null = null;
@@ -382,6 +393,7 @@ function EditorPagina() {
         const aj: Ajustes = {};
         for (const k of CLAVES_AJUSTES) if (j.config?.[k] !== undefined) (aj as any)[k] = j.config[k];
         setAjustes(aj);
+        ultimaMeta.current = JSON.stringify({ ...aj, portada: j.config?.portada || undefined, icono: j.config?.icono || undefined });
         // Lo guardado es un árbol; el editor trabaja con la lista plana.
         let bs: Bloque[] = aplanar(j.config?.bloques || []);
         // Documentos guardados antes del arreglo del título duplicado: si el
@@ -636,8 +648,30 @@ function EditorPagina() {
       }).catch(() => {});
   };
 
+  /** Los ajustes (portada, icono, publicación) no viajan por Yjs: van por el
+   *  `PUT` de siempre, SIN bloques ni título (esos ya están en el documento). */
+  const guardarMeta = async () => {
+    const m = metaRef.current;
+    const config = { ...m.ajustes, portada: m.portada || undefined, icono: m.icono || undefined };
+    const f = JSON.stringify(config);
+    if (ultimaMeta.current === null || f === ultimaMeta.current) return;
+    const r = await fetch(`/api/windows/${docId.current}`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config, conexion: presenciaRef.current.conexion.current ?? undefined }),
+    }).catch(() => null);
+    if (r?.ok) ultimaMeta.current = f;
+  };
   const guardarAhora = useCallback(async (estructura?: Bloque[]): Promise<void> => {
     if (!docId.current || !puedoEditar) return;
+    if (colabRef.current && colabVivo()) {
+      // EN VIVO: lo escrito sube a Yjs y el servidor guarda la página.
+      colabRef.current.empujar({ titulo: metaRef.current.titulo, bloques: estructura ?? serializar() });
+      await guardarMeta();
+      await guardarSincRef.current(estructura ?? serializar());
+      void borrarBorrador(docId.current);
+      setGuardado('sí');
+      return;
+    }
     setGuardado('guardando');
     let bs = estructura ?? serializar();
     const meta = metaRef.current;
@@ -657,7 +691,7 @@ function EditorPagina() {
     }).catch(() => null);
     // SIN RED (#33): ni se intenta (esperar el tiempo de espera de una petición
     // que no va a llegar deja «Guardando…» colgado); va directo al borrador.
-    let r = hayRed() ? await enviar(bs) : null;
+    let r = hayRed() && !colabEsperando() ? await enviar(bs) : null;
 
     // 409: alguien guardó entretanto. Se fusiona (BASE, MÍO, SUYO) y se
     // vuelve a guardar; nada de lo que ha escrito el otro se pierde.
@@ -698,7 +732,16 @@ function EditorPagina() {
     setGuardado(r?.ok ? 'sí' : 'pendiente');
   }, [puedoEditar, serializar]);
 
+  const timerColab = useRef<any>(null);
   const programarGuardado = useCallback(() => {
+    if (colabRef.current && colabVivo()) {
+      // Sube a Yjs enseguida (lo de estructura, tablas…; el texto ya subió
+      // con cada tecla) y se confirma «Guardado» a los instantes.
+      setGuardado('guardando');
+      clearTimeout(timerColab.current);
+      timerColab.current = setTimeout(() => { void guardarAhoraRef.current(); }, 200);
+      return;
+    }
     setGuardado('pendiente');
     clearTimeout(timerGuardado.current);
     timerGuardado.current = setTimeout(() => guardarAhora(), 1200);
@@ -714,7 +757,7 @@ function EditorPagina() {
     const alCambiar = (e: Event) => {
       const d = (e as CustomEvent).detail || {};
       if (!docId.current) return;
-      if (d.entityId === docId.current) { clearTimeout(timerGuardado.current); cargar(docId.current); }
+      if (d.entityId === docId.current && !(colabRef.current && colabRef.current.estado !== 'abandonado')) { clearTimeout(timerGuardado.current); cargar(docId.current); }
       if (d.tabla_id && bloquesRef.current.some(b => (b as any).tabla_id === d.tabla_id)) setVersionDatos(v => v + 1);
     };
     window.addEventListener('humanity:ia-va-a-leer', alLeer);
@@ -767,6 +810,8 @@ function EditorPagina() {
   // se fusionan los dos (ver `guardarAhora`).
   const presencia = usePresencia(esNuevo ? null : id || null, puedoEditar && !generando, (version, por) => {
     if (version <= (versionBase.current ?? 0)) return;
+    // En vivo, lo de los demás llega por Yjs: no se recarga la página.
+    if (colabRef.current && colabRef.current.estado !== 'abandonado') { versionBase.current = version; return; }
     if (sinGuardar.current || !docId.current) return;
     // Un texto con el cursor dentro no se recarga bajo los dedos.
     if (document.activeElement && (document.activeElement as HTMLElement).dataset?.bloque) {
@@ -777,6 +822,92 @@ function EditorPagina() {
     avisar(`${por || 'Otra persona'} ha actualizado la página.`);
   });
   presenciaRef.current = presencia;
+
+  // ══ EDICIÓN SIMULTÁNEA CON YJS (2026-10-06, carril colab) ═══════════════
+  // Ver `utils/colabModelo.ts` (el diseño), `utils/colabCliente.ts` (la
+  // conexión) y `colabServidor.ts`. Aquí sólo está lo que une al editor con
+  // eso. Si la conexión no se puede (proxy, sin permiso) el estado pasa a
+  // `abandonado` y TODO sigue como antes: autoguardado, 409 y fusión por bloque.
+  const colabCb = useRef<CallbacksEditor>({ leerEditor: () => null, alRemoto: () => {} });
+  const { colabRef, info: infoColab } = useColab({
+    paginaId: esNuevo ? null : id || null,
+    activo: !esNuevo && !cargando && !generando && !!user,
+    base: () => ({ titulo: tituloBase.current, bloques: bloquesBase.current }),
+    callbacks: colabCb,
+  });
+  /** La edición en vivo está funcionando: lo que se escribe ya viaja por
+   *  Yjs y el servidor guarda; no hace falta el `PUT` de siempre. */
+  const colabVivo = () => { const c = colabRef.current; return !!c && c.estado === 'vivo' && c.sincronizado; };
+  /** Está conectando o reconectando: no se escribe por el camino de siempre
+   *  (acabaría dos veces en el documento); lo escrito se queda en el
+   *  documento y en el borrador de este aparato hasta que vuelva. */
+  const colabEsperando = () => { const c = colabRef.current; return !!c && (c.estado === 'conectando' || c.estado === 'reconectando'); };
+  const bloqueActivoRef = useRef<string | null>(null);
+  bloqueActivoRef.current = bloqueActivo;
+  const [pasosColab, setPasosColab] = useState({ atras: 0, adelante: 0 });
+  // Lo que Yjs le dice al editor (se renueva en cada render; ver `useColab`).
+  colabCb.current = {
+    leerEditor: (): Plano | null => (cargandoRef.current ? null : { titulo: metaRef.current.titulo, bloques: serializar() }),
+    alInfo: (i: InfoColab) => {
+      setPasosColab(i.pasos);
+      if (i.estado === 'vivo' && i.sincronizado) { setGuardado(g => (g === 'sin conexión' || g === 'pendiente' ? 'sí' : g)); void borrarBorrador(docId.current!); }
+      else if (i.estado === 'reconectando') setGuardado('sin conexión');
+      if (i.version != null && (versionBase.current ?? 0) < i.version) versionBase.current = i.version;
+    },
+    alAviso: (t: string) => avisar(t),
+    alRemoto: (plano: Plano, c, origen) => aplicarRemoto(plano, c, origen),
+  };
+  const cargandoRef = useRef(cargando);
+  cargandoRef.current = cargando;
+
+  /** Llega a la pantalla lo que otra persona (o un deshacer) cambió. El bloque
+   *  que se está escribiendo tiene su texto en el DOM: se parchea a mano para
+   *  no mover el cursor; todo lo demás lo pinta React desde el estado. */
+  const aplicarRemoto = (plano: Plano, c: import('../utils/colabModelo').CambiosRemotos, origen: 'remoto' | 'deshacer' | 'primera') => {
+    // Con una composición a medias (acentos, IME) se espera a que acabe.
+    if (estaComponiendo()) { setTimeout(() => aplicarRemoto(plano, c, origen), 80); return; }
+    const nuevos = normalizarNiveles(plano.bloques);
+    const ids = new Set(nuevos.map(b => b.id));
+    for (const k of Object.keys(textosRef.current)) if (!ids.has(k)) delete textosRef.current[k];
+    for (const k of Object.keys(filasRef.current)) if (!ids.has(k)) delete filasRef.current[k];
+    const activo = bloqueActivoRef.current;
+    const el = activo ? document.querySelector(`[data-bloque="${activo}"]`) as HTMLElement | null : null;
+    const tablasNuevas: Record<string, number> = {};
+    for (const b of nuevos) {
+      if (b.texto !== undefined) textosRef.current[b.id] = b.texto;
+      if (b.filas) {
+        const antes = filasRef.current[b.id];
+        if (antes && JSON.stringify(antes) !== JSON.stringify(b.filas)) {
+          // Celdas con el cursor dentro no se tocan; el resto, al momento.
+          const t = document.querySelector(`[data-celda-de="${b.id}"]`)?.closest('table') as HTMLTableElement | null;
+          const mismasDim = antes.length === b.filas.length && antes.every((f, i) => f.length === b.filas![i].length);
+          if (t && mismasDim) {
+            b.filas.forEach((f, fi) => f.forEach((txt, ci) => {
+              const td = t.rows[fi]?.cells[ci];
+              if (td && td !== document.activeElement && td.textContent !== txt) td.textContent = txt;
+            }));
+          } else tablasNuevas[b.id] = (revTablas[b.id] || 0) + 1;
+        }
+        filasRef.current[b.id] = b.filas;
+      }
+    }
+    if (el && activo && ids.has(activo)) {
+      const b = nuevos.find(x => x.id === activo)!;
+      const delta = c.textos.get(activo)?.delta;
+      parchearBloque(el, textosRef.current[activo] ?? '', b.tipo !== 'codigo' && b.tipo !== 'ecuacion', origen === 'deshacer' && delta ? posTrasDelta(delta) : null);
+    }
+    bloquesRef.current = nuevos;
+    bloquesBase.current = nuevos.map(x => ({ ...x }));
+    sinRegistrar.current = true;
+    setBloques(nuevos.length ? nuevos : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
+    if (Object.keys(tablasNuevas).length) setRevTablas(r => ({ ...r, ...tablasNuevas }));
+    if (plano.titulo !== metaRef.current.titulo) { metaRef.current = { ...metaRef.current, titulo: plano.titulo }; setTitulo(plano.titulo); }
+  };
+  // Cada cambio de estructura o de campos sube a Yjs al renderizarse.
+  useEffect(() => {
+    if (colabVivo() && !cargando) colabRef.current!.empujar({ titulo: metaRef.current.titulo, bloques: serializar() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bloques]);
   useEffect(() => () => {
     clearTimeout(timerGuardado.current);
     if (hayPendiente.current) guardarAhoraRef.current();
@@ -1373,6 +1504,8 @@ function EditorPagina() {
   };
 
   const deshacer = () => {
+    // En vivo, cada persona deshace SOLO lo suyo (`Y.UndoManager`).
+    if (colabRef.current && colabVivo()) { colabRef.current.deshacer(); return; }
     const foto = pilaDeshacer.current.pop();
     if (!foto) return;
     pilaRehacer.current.push(fotoAhora());
@@ -1382,6 +1515,7 @@ function EditorPagina() {
   };
 
   const rehacer = () => {
+    if (colabRef.current && colabVivo()) { colabRef.current.rehacer(); return; }
     const foto = pilaRehacer.current.pop();
     if (!foto) return;
     pilaDeshacer.current.push(fotoAhora());
@@ -1737,6 +1871,8 @@ function EditorPagina() {
   // Cada cambio de estructura apila la foto de antes —que es `presente`—, sea
   // cual sea la función que lo hizo. Así ninguna puede olvidarse de hacerlo.
   useEffect(() => {
+    // En vivo no hay fotos de la página entera: serían de los demás también.
+    if (colabVivo()) { sinRegistrar.current = false; return; }
     if (sinRegistrar.current || generando || !presente.current) {
       sinRegistrar.current = false;
       presente.current = fotoAhora();
@@ -2906,7 +3042,7 @@ function EditorPagina() {
                       // `inicial` en vez de pintar el texto como hijo: es lo que
                       // impide que React reescriba la celda mientras escribes y
                       // te mande el cursor al principio. Ver `CeldaEditable`.
-                      <CeldaEditable key={`${ci}-${revision}`} inicial={celda} data-celda-de={b.id}
+                      <CeldaEditable key={`${ci}-${revision}-${revTablas[b.id] || 0}`} inicial={celda} data-celda-de={b.id}
                         className={cn('border border-slate-200 px-2.5 py-1.5 align-top',
                           fi === 0 ? 'bg-slate-50 font-bold text-slate-800' : 'text-slate-600')}
                         contentEditable={editable} suppressContentEditableWarning
@@ -3018,6 +3154,9 @@ function EditorPagina() {
         onInput: (e: React.FormEvent<HTMLDivElement>) => {
           const t = e.currentTarget.textContent || '';
           textosRef.current[b.id] = t;
+          // Cada tecla viaja a Yjs (menos a mitad de una composición: el
+          // texto a medias de un acento no se manda; al terminar, sí).
+          if (!(e.nativeEvent as InputEvent).isComposing) colabRef.current?.texto(b.id, t);
           if (b.tipo === 'ecuacion') setTexEnVivo({ id: b.id, tex: t });
           // Con la barra abierta, lo que escribes ES el filtro. Si borras la
           // «/» o te vas a otra línea, se cierra sola.
@@ -3031,6 +3170,7 @@ function EditorPagina() {
           programarGuardado();
         },
         onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => alTeclear(b, e),
+        onCompositionEnd: (e: React.CompositionEvent<HTMLDivElement>) => colabRef.current?.texto(b.id, e.currentTarget.textContent || ''),
         onPaste: (e: React.ClipboardEvent<HTMLDivElement>) => alPegar(b, e),
         onBlur: () => setBloqueActivo(a => (a === b.id ? null : a)),
         className: cn(CLASES_TEXTO[b.tipo], 'outline-none bg-emerald-50/40 rounded px-1 -mx-1 min-h-[1.4em] whitespace-pre-wrap'),
@@ -3566,11 +3706,11 @@ function EditorPagina() {
                   sabe los atajos tiene que poder encontrarlos. */}
               <CarasPresencia personas={presencia.personas} yo={presencia.yo} />
               <span className="hidden sm:inline-flex items-center">
-                <button onClick={deshacer} disabled={!pasos.atras} title={tr('Deshacer (⌘Z)')} aria-label={tr('Deshacer')}
+                <button onClick={deshacer} disabled={!(infoColab && infoColab.estado !== 'abandonado' ? pasosColab.atras : pasos.atras)} title={tr('Deshacer (⌘Z)')} aria-label={tr('Deshacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
                   <Undo2 className="w-4 h-4" />
                 </button>
-                <button onClick={rehacer} disabled={!pasos.adelante} title={tr('Rehacer (⌘⇧Z)')} aria-label={tr('Rehacer')}
+                <button onClick={rehacer} disabled={!(infoColab && infoColab.estado !== 'abandonado' ? pasosColab.adelante : pasos.adelante)} title={tr('Rehacer (⌘⇧Z)')} aria-label={tr('Rehacer')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
                   <Redo2 className="w-4 h-4" />
                 </button>
@@ -3834,7 +3974,7 @@ function EditorPagina() {
         {editable ? (
           <TituloEditable
             valor={titulo}
-            onCambiar={v => { setTitulo(v); programarGuardado(); }}
+            onCambiar={v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); }}
           />
         ) : (
           <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-1 break-words">{titulo}</h1>
