@@ -220,19 +220,16 @@ const OBJETIVOS_VALIDOS = new Set([
   'O008', 'O009', 'O010', 'O011', 'O012', 'O013', 'O014',
 ]);
 
-export function registerAuthRoutes(app: Express, db: any) {
-
-  // Middleware: resuelve req.user a partir de la cookie de sesión. Se monta
-  // para TODA la aplicación, así cualquier endpoint puede consultar
-  // req.user sin repetir lógica.
-  const attachUser = async (req: Request, _res: Response, next: NextFunction) => {
-    try {
-      const token = parseCookies(req.headers.cookie)[SESSION_COOKIE];
-      req.user = null;
-      req.sessionToken = token || null;
-      if (!token) return next();
-
-      const result = await db.execute(sql`
+/**
+ * LA FILA DE USUARIO DE UN TOKEN DE SESIÓN VÁLIDO (o ninguna). Una sola
+ * consulta para todo el que necesite saber «quién es»: el middleware de abajo y
+ * el WebSocket de edición simultánea (`colabServidor.ts`), que no pasa por
+ * Express y no puede usar `req.user`. Si hubiera dos copias de estas reglas
+ * (sesión revocada, caducada, cuenta archivada o en la papelera), una de ellas
+ * acabaría abriendo una puerta que la otra cerró.
+ */
+async function filaDeSesion(db: any, token: string): Promise<{ rows: any[] }> {
+  return await db.execute(sql`
         SELECT u.* FROM sessions s
         JOIN users u ON u.id = s.user_id
         WHERE s.token = ${token}
@@ -246,6 +243,30 @@ export function registerAuthRoutes(app: Express, db: any) {
           -- contraseña, que es lo que cancela el borrado a propósito.
           AND u.deleted_at IS NULL
       `);
+}
+
+/** Quién es la persona de la cookie de sesión de una petición (HTTP o de
+ *  actualización a WebSocket). `null` si no hay sesión válida. */
+export async function usuarioDeCookie(db: any, cookieHeader: string | undefined): Promise<AuthUser | null> {
+  const token = parseCookies(cookieHeader)[SESSION_COOKIE];
+  if (!token) return null;
+  const row = (await filaDeSesion(db, token)).rows[0];
+  return row ? rowToUser(row) : null;
+}
+
+export function registerAuthRoutes(app: Express, db: any) {
+
+  // Middleware: resuelve req.user a partir de la cookie de sesión. Se monta
+  // para TODA la aplicación, así cualquier endpoint puede consultar
+  // req.user sin repetir lógica.
+  const attachUser = async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const token = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+      req.user = null;
+      req.sessionToken = token || null;
+      if (!token) return next();
+
+      const result = await filaDeSesion(db, token);
       const row = result.rows[0];
       if (row) {
         req.user = rowToUser(row);
