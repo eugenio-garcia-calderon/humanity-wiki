@@ -43,6 +43,7 @@ import { celdasDe, type Celda } from './bd/celdas';
 import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, enlacesInversos, guardarInversos, type Apuntado } from './bd/enlaces';
 import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
+import { sincronizarTienda } from './bd/tienda';
 import { compilar } from './bd/formulas';
 import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
@@ -430,6 +431,25 @@ export function registerBdRoutes(app: Express, db: any) {
         filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas })),
       });
       for (const f of preparadas) Object.assign(f.celdas, porFila[f.id] || {});
+
+      // LA TIENDA (2026-10-06): a table with a «Botón de compra» column keeps a
+      // product behind each row, and the button's cell carries what it needs
+      // (product id, price, variants). See `bd/tienda.ts`. A failure here must
+      // not take the table down with it: the rows still show, the button says
+      // it cannot sell right now.
+      const columnasCompra = (columnas as any[]).filter(c => c.tipo === 'compra');
+      try {
+        const compras = await sincronizarTienda(db, {
+          tablaId: req.params.id, duenoId: permiso.tabla.creador_user_id, columnas: columnas as any[], colTitulo,
+          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos })),
+        });
+        for (const f of preparadas) for (const c of columnasCompra) {
+          f.celdas[c.id] = compras[f.id] ? { estado: 'ok', valor: compras[f.id] as any } : { estado: 'vacia' };
+        }
+      } catch (e: any) {
+        console.error('[bd] tienda:', e?.message || e);
+        for (const f of preparadas) for (const c of columnasCompra) f.celdas[c.id] = { estado: 'error', mensaje: 'La tienda no responde ahora.' };
+      }
 
       // ORDENAR Y FILTRAR VA DESPUÉS DE CALCULAR. Tiene que ser así: la mitad
       // de las columnas —fórmulas y agregados— no existen en la base de datos,

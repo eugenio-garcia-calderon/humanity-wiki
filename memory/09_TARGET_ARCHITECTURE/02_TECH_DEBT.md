@@ -366,3 +366,12 @@ layout: Eugenio asked for only the floating AI button. Creating now goes
 through the left menu (Nueva carpeta, Todas mis páginas → Nueva página) and
 each tool's own page. If nobody misses the bar in a few weeks, delete the
 component and the dead state in `Layout.tsx` (~200 lines).
+
+## 2026-10-06 — Database shop: product copy on read
+
+`bd/tienda.ts` syncs `products` from rows when the table is read. Right for
+now (one place, every edit path covered). When shop tables grow to thousands
+of rows or are read very often, move the sync to the write paths
+(`escribirCeldas`, file upload, row create/delete) behind one helper — about
+half a day today, more once more write paths exist. Comercio does not yet
+mark database-backed products as «se edita en su base de datos».

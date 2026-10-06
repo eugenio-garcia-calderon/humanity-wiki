@@ -627,3 +627,32 @@ complaint every round.
 **Next step when it hurts:** (b). The free local model (`iaLocal.ts`) could
 tag pages on save into `subtema_contenido`, turning «Por palabras» into «Del
 tema» over time without a schema change.
+
+## 2026-10-06 — A shop inside a database: roles on existing types, a product behind each row
+
+**Context.** Eugenio wants the page/database builder to double as a product
+builder, Notion style: properties «Precio», «Variantes», «Envío» and a «Botón
+de compra» with a units selector, created by hand like any other property.
+
+**Options.** (a) A parallel shop on `bd_filas`: its own cart lines, checkout,
+stock and orders keyed by row. (b) New column types `precio`, `envio`,
+`variantes` everywhere a type is switched on. (c) Existing types plus a
+`config.rol`, one new type (`compra`), and an ordinary `products` row behind
+each selling row.
+
+**Chosen: (c).** Cart, checkout, reservations, orders, payouts and receipts
+are reused untouched; a «Precio» sorts, filters, sums and charts as the
+`moneda` it is. New code: `bd/tienda.ts`, `BotonCompra.tsx`, five entries in
+the property picker, migration 0144.
+
+**The copy is made on READ, not on write.** A row changes through many doors
+(cells, title, photos, renamed options, AI filling). Each read of a table
+with a buy button hashes the relevant values per row and writes only when
+`products.bd_huella` differs; rows that left the table archive their product.
+Cost: one extra SELECT per read of a shop table. It also means an anonymous
+read can write — but only a deterministic copy of the owner's own data.
+
+**Known edges.** Editing a database-backed product in Comercio is overwritten
+by the row on the next read (the row is the source). Variants are by name and
+share the product price/stock. The unverified-seller cap (30) applies: rows
+beyond it show the reason instead of a button.

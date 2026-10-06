@@ -8606,3 +8606,8 @@ en mis páginas como proyecto pendiente».
 - Límites, dichos en la cabecera del módulo: solo texto y ajustes de la página (subir archivos, escribir en bases de datos, crear páginas o comentar necesitan red); no se crea una página nueva sin conexión.
 - Dark: `buscar en la página` (editorB) tiene su resaltado oscuro; los componentes nuevos de editorB usan clases Tailwind, así que el tema oscuro los cubre.
 - Probado en local (3026) parando de verdad el servidor: guardado en línea, borrador con el editor abierto, envío al volver el servidor, conflicto (otra persona añadió un bloque mientras tanto: quedan los dos), y borrador con la página cerrada enviado por el reenvío global.
+
+### 2026-10-06 — Tienda dentro de las bases de datos (prog8)
+- Nuevo grupo **«Tienda»** al crear una propiedad: **Precio**, **Variantes**, **Envío**, **Stock** y **Botón de compra**. Los cuatro primeros son tipos de siempre (moneda, etiquetas, número) con un `config.rol`; el botón es el único tipo nuevo (`compra`, migración 0144).
+- Cada fila de una base de datos con botón de compra tiene detrás un producto normal (`products.bd_fila_id`), que se copia de la fila al leer la tabla y solo si algo cambió (`bd/tienda.ts`). Fila sin precio → borrador; fila borrada o botón quitado → producto archivado. Cesta, pago, pedidos y stock son los de siempre.
+- **El botón** (`BotonCompra`): precio × unidades, selector de variante y de unidades, y «Añadir a la cesta» dentro de una tienda (subdominio o dominio propio) o «Comprar» fuera de ella. Sale en la tabla y siempre en la galería, que así es un catálogo.
