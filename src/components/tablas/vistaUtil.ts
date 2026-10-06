@@ -78,6 +78,10 @@ export type ConfigVista = {
     gracias?: string;
     boton?: string;
     publico?: boolean;
+    /** Lo pone el servidor; el cliente solo lo lee. */
+    token?: string;
+    /** Pide un enlace nuevo; el servidor lo borra al atenderlo. */
+    regenerar_token?: boolean;
   };
 };
 
@@ -102,6 +106,7 @@ export const FORMAS: Array<{ forma: Forma; label: string; desc: string }> = [
   { forma: 'calendario', label: 'Calendario', desc: 'Por una fecha, mes a mes' },
   { forma: 'linea', label: 'Línea de tiempo', desc: 'Barras de inicio a fin' },
   { forma: 'grafico', label: 'Gráfico', desc: 'Barras, líneas o circular' },
+  { forma: 'formulario', label: 'Formulario', desc: 'Un enlace público: cada respuesta crea una fila' },
 ];
 
 export const nombreForma = (f: string) => FORMAS.find(x => x.forma === f)?.label || 'Tabla';

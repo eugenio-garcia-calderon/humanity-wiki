@@ -14,6 +14,7 @@ import BarraVista, { Desplegable } from './BarraVista';
 import EditorRecurrencia from './EditorRecurrencia';
 import Tablero from './Tablero';
 import Lista from './Lista';
+import FormularioVista from './FormularioVista';
 import Calendario from './Calendario';
 import LineaTiempo from './LineaTiempo';
 import { NuevoElemento, MarcaRecurrente } from './Tarjetas';
@@ -127,6 +128,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** La fila cuyo panel de «Repetir…» está abierto. */
   const [repitiendo, setRepitiendo] = useState<string | null>(null);
   const [falloVista, setFalloVista] = useState<string | null>(null);
+  const pendienteForm = useRef<{ id: string; cuerpo: Partial<Vista> } | null>(null);
+  const relojForm = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cargarVistas = useCallback(async () => {
     try {
@@ -178,6 +181,22 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       return;
     }
     setVistas(vs => (vs || []).map(v => v.id === activa.id ? { ...v, ...parcial } : v));
+    // EL EDITOR DEL FORMULARIO GUARDA AL DEJAR DE TECLEAR: cada letra de un
+    // título sería un PUT, y dos que llegaran al revés dejarían el texto viejo.
+    if (activa.forma === 'formulario' && 'config' in parcial) {
+      const id = activa.id;
+      pendienteForm.current = { id, cuerpo: parcial };
+      if (relojForm.current) clearTimeout(relojForm.current);
+      relojForm.current = setTimeout(async () => {
+        const p = pendienteForm.current; pendienteForm.current = null;
+        if (!p) return;
+        const r2 = await fetch(`/api/bd/vistas/${p.id}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p.cuerpo) });
+        if (!r2.ok) { const j = await r2.json().catch(() => ({})); setFalloVista(j.error || 'No se pudo guardar el formulario.'); }
+        // El servidor pone el enlace al abrirlo: se vuelve a leer la vista.
+        await cargarVistas();
+      }, 500);
+      return;
+    }
     const r = await fetch(`/api/bd/vistas/${activa.id}`, {
       method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(parcial),
@@ -781,6 +800,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : vista === 'linea' ? (
         <LineaTiempo columnas={columnas} filas={filas} vista={activa} columnaTitulo={datos.columna_titulo ?? null} editable={editable}
           onGuardar={guardarCeldas} onAbrir={abrirComoFila} onCambiarVista={cambiarVista} dependencias={dependencias} />
+      ) : vista === 'formulario' ? (
+        <FormularioVista columnas={columnas} vista={activa} editable={editable} onCambiarVista={cambiarVista} />
       ) : vista === 'grafico' ? (
         <Suspense fallback={<div className="flex items-center gap-2 p-6 text-slate-400 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Preparando el gráfico…</div>}>
           <Grafico columnas={columnas} filas={filas} vista={activa} editable={editable} onCambiarVista={cambiarVista} />

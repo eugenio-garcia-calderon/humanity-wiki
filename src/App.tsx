@@ -86,6 +86,7 @@ const Buscar = lazy(() => import('./pages/Buscar'));
 const Comercio = lazy(() => import('./pages/Comercio'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
+const FormularioPublico = lazy(() => import('./pages/FormularioPublico'));
 const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnCasa })));
 const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
@@ -290,6 +291,10 @@ export default function App() {
                   Va FUERA del Layout a proposito — quien llega aqui viene de un
                   enlace, no tiene cuenta, y no debe ver la barra de trabajo ni
                   un «todavia no tienes proyectos» que no es su vida. */}
+              {/* El formulario público de una base de datos: `/formulario/:token`.
+                  También fuera del Layout, y antes de `:arroba/:slug`, al que
+                  se parece. */}
+              <Route path="formulario/:token" element={<FormularioPublico />} />
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />
