@@ -39,6 +39,8 @@ import {
   type AccionBoton,
 } from '../utils/bloques';
 import { MigasDePan, BotonVista, ConfigBoton, conFecha } from '../components/knowledge/BloquesExtra';
+import { usePresencia, CarasPresencia } from '../components/knowledge/PresenciaPagina';
+import { fusionarBloques } from '../utils/colaboracion';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
 import HojaCrear from '../components/navegacion/HojaCrear';
@@ -181,6 +183,8 @@ function EditorPagina() {
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
+  /** La presencia (se declara más abajo, tras `cargar`); el guardado la lee. */
+  const presenciaRef = useRef<{ conexion: React.MutableRefObject<string | null> }>({ conexion: { current: null } });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generando, setGenerando] = useState(esNuevo);
@@ -353,6 +357,10 @@ function EditorPagina() {
           if (b.texto !== undefined) textosRef.current[b.id] = b.texto;
           if (b.filas) filasRef.current[b.id] = b.filas;
         }
+        // La versión con la que se parte y cómo estaba la página: sin ellas no
+        // se puede detectar que alguien guardó entretanto ni fusionar.
+        versionBase.current = typeof j.version === 'number' ? j.version : null;
+        bloquesBase.current = bs.map(x => ({ ...x }));
         // Abrir (o volver a leer lo que cambió la IA) no es algo que se deshaga.
         sinRegistrar.current = true;
         setRevision(r => r + 1);
@@ -543,12 +551,20 @@ function EditorPagina() {
     return out;
   }, [bloques, plegados]);
 
-  const guardarAhora = useCallback(async (estructura?: Bloque[]) => {
+  // ══ EDITAR A LA VEZ (2026-10-06): versión y fusión ═════════════════════
+  // Ver `utils/colaboracion.ts`. `versionBase` es la versión que el servidor
+  // tenía cuando se abrió o se guardó por última vez; `bloquesBase`, cómo
+  // estaba entonces la página (la BASE de la fusión de tres vías).
+  const versionBase = useRef<number | null>(null);
+  const bloquesBase = useRef<Bloque[]>([]);
+  const pendienteRemoto = useRef<{ version: number; por: string | null } | null>(null);
+
+  const guardarAhora = useCallback(async (estructura?: Bloque[]): Promise<void> => {
     if (!docId.current || !puedoEditar) return;
     setGuardado('guardando');
-    const bs = estructura ?? serializar();
+    let bs = estructura ?? serializar();
     const meta = metaRef.current;
-    const r = await fetch(`/api/windows/${docId.current}`, {
+    const enviar = (lista: Bloque[]) => fetch(`/api/windows/${docId.current}`, {
       method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -556,10 +572,38 @@ function EditorPagina() {
         // Los ajustes van en la misma `config`: si no se mandaran, cada
         // guardado automático los borraría.
         // Se guarda como árbol: los hijos dentro de su madre (`aArbol`).
-        config: { ...meta.ajustes, bloques: aArbol(bs), portada: meta.portada || undefined, icono: meta.icono || undefined },
+        config: { ...meta.ajustes, bloques: aArbol(lista), portada: meta.portada || undefined, icono: meta.icono || undefined },
+        version_base: versionBase.current ?? undefined,
+        conexion: presenciaRef.current.conexion.current ?? undefined,
       }),
     }).catch(() => null);
-    if (r?.ok) await guardarSincRef.current(bs);
+    let r = await enviar(bs);
+
+    // 409: alguien guardó entretanto. Se fusiona (BASE, MÍO, SUYO) y se
+    // vuelve a guardar; nada de lo que ha escrito el otro se pierde.
+    if (r?.status === 409) {
+      const j = await r.json().catch(() => ({}));
+      const suyo = aplanar(j.config?.bloques || []);
+      const { bloques: fusion, conflictos } = fusionarBloques(bloquesBase.current, bs, suyo);
+      for (const x of fusion) { if (x.texto !== undefined) textosRef.current[x.id] = x.texto; if (x.filas) filasRef.current[x.id] = x.filas; }
+      // Lo de los demás aparece en pantalla (no cuenta para deshacer).
+      sinRegistrar.current = true;
+      setRevision(n => n + 1);
+      setBloques(normalizarNiveles(fusion));
+      versionBase.current = typeof j.version === 'number' ? j.version : versionBase.current;
+      bs = fusion;
+      r = await enviar(bs);
+      avisar(conflictos.length
+        ? `${j.por || 'Otra persona'} cambió a la vez ${conflictos.length === 1 ? `«${conflictos[0].texto || 'un bloque'}»` : `${conflictos.length} bloques`}: se ha guardado tu versión.`
+        : `${j.por || 'Otra persona'} guardó cambios mientras escribías: se han juntado los dos.`);
+    }
+
+    if (r?.ok) {
+      const j = await r.clone().json().catch(() => ({}));
+      if (typeof j.version === 'number') versionBase.current = j.version;
+      bloquesBase.current = bs.map(x => ({ ...x }));
+      await guardarSincRef.current(bs);
+    }
     setGuardado(r?.ok ? 'sí' : 'pendiente');
   }, [puedoEditar, serializar]);
 
@@ -596,6 +640,25 @@ function EditorPagina() {
   guardarAhoraRef.current = guardarAhora;
   const hayPendiente = useRef(false);
   useEffect(() => { hayPendiente.current = guardado === 'pendiente'; }, [guardado]);
+  const sinGuardar = useRef(false);
+  useEffect(() => { sinGuardar.current = guardado !== 'sí'; }, [guardado]);
+
+  // ══ QUIÉN MÁS ESTÁ AQUÍ, Y «ALGUIEN HA GUARDADO» (2026-10-06) ═════════════
+  // Si otra persona (u otra pestaña) guarda y aquí no hay nada sin guardar,
+  // la página se pone al día sola. Si sí lo hay, no se toca nada: al guardar
+  // se fusionan los dos (ver `guardarAhora`).
+  const presencia = usePresencia(esNuevo ? null : id || null, puedoEditar && !generando, (version, por) => {
+    if (version <= (versionBase.current ?? 0)) return;
+    if (sinGuardar.current || !docId.current) return;
+    // Un texto con el cursor dentro no se recarga bajo los dedos.
+    if (document.activeElement && (document.activeElement as HTMLElement).dataset?.bloque) {
+      pendienteRemoto.current = { version, por };
+      return;
+    }
+    cargar(docId.current);
+    avisar(`${por || 'Otra persona'} ha actualizado la página.`);
+  });
+  presenciaRef.current = presencia;
   useEffect(() => () => {
     clearTimeout(timerGuardado.current);
     if (hayPendiente.current) guardarAhoraRef.current();
@@ -3275,6 +3338,7 @@ function EditorPagina() {
                   lo único que puede tardar de verdad (un vídeo son megas). */}
               {/* DESHACER Y REHACER, también a la vista (2026-10-05): quien no
                   sabe los atajos tiene que poder encontrarlos. */}
+              <CarasPresencia personas={presencia.personas} yo={presencia.yo} />
               <span className="hidden sm:inline-flex items-center">
                 <button onClick={deshacer} disabled={!pasos.atras} title="Deshacer (⌘Z)" aria-label="Deshacer"
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">

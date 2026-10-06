@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { madresValidas, rolEnPagina, capacidades, quienDe, PROFUNDIDAD, puedeEditarPagina, type Quien } from './permisos.js';
 import { paginaVisible } from './sitios.js';
 import { bloquesDe } from './bloquesSql.js';
+import { registrarColaboracion } from './colaboracion.js';
 
 const nuevoId = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 46656).toString(36).toUpperCase()}`;
 
@@ -39,6 +40,9 @@ async function puedeVer(db: any, quien: Quien, id: string) {
 // la rodea: la ruta de páginas madre para el bloque de migas de pan.
 
 export function registrarEdicionPaginas(app: Express, db: any) {
+  // Presencia y avisos de guardado (2026-10-06): su propio fichero.
+  registrarColaboracion(app, db);
+
   /**
    * LA RUTA DE PÁGINAS MADRE — `GET /api/paginas/:id/ruta` — para el bloque
    * «Migas de pan». De la más alta a la madre directa (sin la propia página).

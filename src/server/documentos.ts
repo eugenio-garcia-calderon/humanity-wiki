@@ -114,7 +114,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   app.get('/api/windows/:id', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
-        SELECT id, title, kind, config, publico, creator_user_id, views, created_at, updated_at, deleted_at
+        SELECT id, title, kind, config, publico, creator_user_id, views, created_at, updated_at, deleted_at, version
         FROM knowledge_windows WHERE id = ${req.params.id} AND archived_at IS NULL
       `);
       const w = r.rows[0] as any;
