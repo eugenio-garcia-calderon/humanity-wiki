@@ -8548,3 +8548,8 @@ en mis páginas como proyecto pendiente».
 - **Fusión**: con el 409 el editor hace una fusión de tres vías por bloque (`fusionarBloques` en `src/utils/colaboracion.ts`: base, mío, suyo) y vuelve a guardar. Lo que sólo cambió uno se queda; borrado por uno y editado por el otro se conserva editado; si los dos tocaron el mismo bloque, gana el mío y se avisa. Se probó con dos escritores sobre la misma página.
 - **«Alguien ha guardado»**: el mismo SSE avisa; si aquí no hay nada sin guardar, la página se pone al día sola; si lo hay, se fusiona en el siguiente guardado.
 - **Para el CRDT (Yjs)**: el diseño —qué falta y cómo se haría, punto por punto— está en la cabecera de `src/utils/colaboracion.ts`. No se implementa todavía.
+
+### 2026-10-06 — Vista galería: carrusel de una fila y «Ver todo» (prog8)
+- La vista galería de una base de datos enseña **una sola fila que se mueve despacio** (28 px/s) para que se vea que hay muchas entradas. Se para con el ratón encima, al arrastrar, con el foco dentro y si el sistema pide «reducir movimiento». **Flechas grandes** a los lados; también se **arrastra con el ratón** (y con el dedo, con su inercia). Un arrastre no abre la tarjeta.
+- Debajo, un botón **«Ver todo»**: abre un pop-up con la misma galería **entera, sin carrusel** y con todas las filas que hagan falta; se cierra pinchando fuera, con Escape o con la X. Quien edita ve «Nueva página» al lado.
+- Si todas caben en la fila no se mueven ni hay flechas ni «Ver todo». `src/components/tablas/GaleriaCarrusel.tsx` (nuevo) y `Galeria.tsx` (la tarjeta pasa a una función y se reutiliza en la fila y en el pop-up).
