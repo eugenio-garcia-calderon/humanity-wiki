@@ -2,30 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-espacio",
-      "ruta": "drizzle/0141_espacio_favoritos_busqueda.sql",
-      "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
-      "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/server/espacio.ts",
-      "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
-      "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/components/navegacion/ArbolPaginas.tsx",
-      "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
-      "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
-      "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
-      "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
       "desde": "2026-10-06T04:15:50.766Z"
@@ -41,12 +17,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "carril espacio: favoritos, recientes, busqueda avanzada (#14 #15)",
       "desde": "2026-10-06T04:15:50.766Z"
-    },
-    {
-      "agente": "prog8-espacio",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "carril espacio: boton favorito en la barra de la pagina",
-      "desde": "2026-10-06T04:17:11.130Z"
     },
     {
       "agente": "prog8-editorb",
