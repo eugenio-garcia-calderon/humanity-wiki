@@ -1,9 +1,12 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, lazy, Suspense, useContext, useEffect, useState } from 'react';
 import { enFilas, AIRE_BASE_DATOS, esPlegable, todosLosBloques } from '../../utils/bloques';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
 import { TarjetaMarcador, WebInsertada } from './BloqueEnlace';
+import BloqueEmbed from './BloqueEmbed';
+// KaTeX se pide al pintar la primera fórmula (2026-10-06, #19).
+const Formula = lazy(() => import('./Formula'));
 import BloquePizarra from './BloquePizarra';
 import EntityComments from './EntityComments';
 import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
@@ -419,6 +422,15 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       return b.url ? <TarjetaMarcador b={b} /> : null;
     case 'web':
       return b.url ? <WebInsertada b={b} /> : null;
+
+    // Contenido de un tercero y ecuación (2026-10-06, carril editorB).
+    case 'embed':
+      return b.url ? <BloqueEmbed b={b} /> : null;
+
+    case 'ecuacion':
+      return b.texto?.trim()
+        ? <div className="text-center overflow-x-auto py-1 text-slate-800"><Suspense fallback={<code className="font-mono text-sm text-slate-400">{b.texto}</code>}><Formula tex={b.texto} bloque /></Suspense></div>
+        : null;
 
     case 'pizarra':
       // La misma pizarra, sin poder editarla (el servidor sólo deja a su autor).
