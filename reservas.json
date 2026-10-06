@@ -89,6 +89,12 @@
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "Vista carrusel (prog8 voz)",
       "desde": "2026-10-06T10:43:15.110Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/tablas/BarraVista.tsx",
+      "motivo": "Vista carrusel (prog8 voz)",
+      "desde": "2026-10-06T10:43:18.465Z"
     }
   ]
 }
