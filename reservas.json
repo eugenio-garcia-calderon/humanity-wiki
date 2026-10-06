@@ -1,48 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog8-editorb",
-      "ruta": "src/components/sitio/VistaPagina.tsx",
-      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
-      "desde": "2026-10-06T04:17:44.443Z"
-    },
-    {
-      "agente": "prog8-editorb",
-      "ruta": "src/components/knowledge/AjustesPagina.tsx",
-      "motivo": "carril editorB: menciones @, ecuaciones, embeds, ajustes de pagina, atajos",
-      "desde": "2026-10-06T04:17:44.443Z"
-    },
-    {
-      "agente": "prog8-editorb",
-      "ruta": "src/index.css",
-      "motivo": "editorB",
-      "desde": "2026-10-06T04:20:48.858Z"
-    },
-    {
-      "agente": "prog8-editorb",
-      "ruta": "src/utils/ajustesPagina.ts",
-      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
-      "desde": "2026-10-06T04:36:03.135Z"
-    },
-    {
-      "agente": "prog8-editorb",
-      "ruta": "src/components/knowledge/BuscarEnPagina.tsx",
-      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
-      "desde": "2026-10-06T04:36:03.135Z"
-    },
-    {
-      "agente": "prog8-editorb",
-      "ruta": "src/components/knowledge/AtajosAyuda.tsx",
-      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
-      "desde": "2026-10-06T04:36:03.135Z"
-    },
-    {
-      "agente": "prog8-editorb",
-      "ruta": "src/components/sitio/CabeceraLectura.tsx",
-      "motivo": "carril editorB: ajustes de pagina, buscar, atajos",
-      "desde": "2026-10-06T04:36:03.135Z"
-    },
-    {
       "agente": "prog8-espacio",
       "ruta": "drizzle/0143_api_publica_webhooks.sql",
       "motivo": "carril espacio: API publica /api/v1 y webhooks (#24)",
