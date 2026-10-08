@@ -3094,6 +3094,8 @@ function EditorPagina() {
             onCambiarVisibles={editable ? ids => { b.propsGaleria = ids; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamano={editable ? t => { b.tamanoGaleria = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tamanoTitulo={b.tamanoTitulo || 'mediano'}
+            tamanoNombre={b.tamanoNombre}
+            onCambiarTamanoNombre={editable ? t => { b.tamanoNombre = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tituloOculto={!!b.tituloOculto}
             onCambiarTituloOculto={editable ? v => { b.tituloOculto = v || undefined; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamanoTitulo={editable ? t => { b.tamanoTitulo = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}

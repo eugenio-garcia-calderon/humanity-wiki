@@ -157,6 +157,8 @@ export interface Bloque {
   tamanoGaleria?: TamanoGaleria;
   /** El tamaño del título de la base de datos (2026-10-02). */
   tamanoTitulo?: TamanoGaleria;
+  /** `basedatos` en galería: letra del nombre bajo cada tarjeta. Sin valor, la de siempre. */
+  tamanoNombre?: TamanoGaleria;
   /** El título de la base de datos no se enseña al publicar (2026-10-02). */
   tituloOculto?: boolean;
   /** `basedatos` en galería: qué columnas se ven en las tarjetas (ids, en
