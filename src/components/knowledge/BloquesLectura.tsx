@@ -193,7 +193,7 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
     const propio = PINTAN_SU_COLOR.has(b?.tipo);
     const color = propio ? '' : claseColor(b?.color);
     const caja = (
-      <div id={b?.id ? `b-${b.id}` : undefined}
+      <div id={b?.tipo === 'basedatos' && b?.tabla_id ? `bd-${b.tabla_id}` : (b?.id ? `b-${b.id}` : undefined)}
         className={cn(color, b?.tipo === 'basedatos' && AIRE_BASE_DATOS, !propio && b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
         {dentro}
       </div>
@@ -445,7 +445,19 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloOculto={!!b.tituloOculto} visibles={b.propsGaleria} /> : null;
+        return tablaId ? (
+          <div className="relative">
+            <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloOculto={!!b.tituloOculto} visibles={b.propsGaleria} />
+            {/* Botón para abrir en página: URL pública de la BD (2026-10-08) */}
+            <button
+              onClick={() => window.open(`${window.location.pathname}#bd/${tablaId}`, '_blank')}
+              title="Abrir en página"
+              className="absolute top-4 right-4 p-1 rounded-lg bg-white/90 text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm border border-slate-200 transition-colors opacity-0 hover:opacity-100 focus:opacity-100"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </button>
+          </div>
+        ) : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────

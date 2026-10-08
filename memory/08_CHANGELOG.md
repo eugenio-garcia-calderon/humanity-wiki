@@ -8678,3 +8678,16 @@ en mis páginas como proyecto pendiente».
 - **Causa**: el carrito exige una tarifa por zona (`producto_envio_zonas`) para cada producto físico; sin tarifa para la zona del destino dice «no se envía a ese destino». La sincronización de `bd/tienda.ts` creaba el producto pero **nunca sus tarifas**, así que todo producto salido de una base de datos fallaba en todos los destinos.
 - **Arreglo**: cada vez que se lee la tabla se garantizan las cuatro zonas de cada producto, con el precio de la columna «Envío» (gratis si no hay). Solo se inserta lo que falta: lo que el vendedor ajustó a mano en Comercio no se pisa, y si cambia «Envío» siguen el cambio las zonas que no se habían tocado. Migración `0146` para los productos que ya existen. Probado: sin tarifas → `no_llega`; con el arreglo → 4,50 € a ES, Canarias, FR y US, y el ajuste manual de «resto» sobrevive a cambiar «Envío».
 - Pendiente: tarifas por zona dentro de la propia tabla (columnas «Envío Canarias», «Envío UE»…) y envío de pago por defecto distinto de «igual en todas las zonas».
+
+### 2026-10-08 — Menú con enlaces a bases de datos (MVP) (prog8)
+- **Estructura**: `NodoMenu` extendido con `tabla_id`, `modo_bd` ('scroll' | 'pagina'), `nombre_bd`, `nombreOculto`.
+- **Navegación en menú**: si el nodo tiene `tabla_id`:
+  - `modo_bd === 'scroll'`: scroll suave hasta la BD (buscando `id=bd-${tabla_id}` en la página)
+  - `modo_bd === 'pagina'`: abre URL pública `#bd/${tabla_id}` en nueva pestaña o misma pestaña
+  - Si `nombreOculto` es true, muestra "BD" en lugar del nombre
+- **Endpoints nuevos**:
+  - `GET /api/paginas/:id/bloques-bd` — devuelve BDs de una página (id, tabla_id, nombre, titulo_oculto)
+- **Bloque BD mejorado**: 
+  - ID corregido: `id=bd-${tabla_id}` (no `b-${id}`) para permitir scroll desde menú
+  - Botón "Abrir en página" en esquina superior derecha (abre `#bd/${tabla_id}` en nueva pestaña)
+- **Pendiente**: editor del menú para seleccionar BDs al crear un enlace (requiere componente de selector en el editor del menú).
