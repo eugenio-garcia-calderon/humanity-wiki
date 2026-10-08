@@ -35,12 +35,4 @@ export interface NodoMenu {
    *  esto, el nodo no enseña los tres puntos: una herramienta fija como
    *  «Mapas» no se renombra. */
   editable?: { tipo: string; id: string };
-  /** Enlace a una BD: id de la tabla a la que apunta. */
-  tabla_id?: string;
-  /** Cómo abrir la BD: 'scroll' (interno en la página) o 'pagina' (URL pública). */
-  modo_bd?: 'scroll' | 'pagina';
-  /** Nombre de la BD, para mostrarlo en el menú (si nombreOculto es false). */
-  nombre_bd?: string;
-  /** No mostrar el nombre de la página/BD, solo el icono (2026-10-08). */
-  nombreOculto?: boolean;
 }
