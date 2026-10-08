@@ -2443,6 +2443,64 @@ function EditorPagina() {
   const traeArchivos = (dt: DataTransfer | null) =>
     !!dt && (Array.from(dt.types || []).includes('Files') || (dt.files?.length ?? 0) > 0);
 
+  // ══ SACAR UNA ENTRADA DE SU BASE DE DATOS (2026-10-08) ═══════════════════
+  // Eugenio: «que se pueda sacar una entrada de una base de datos y, si se suelta fuera, se crea una página en un
+  // bloque, como hace Notion». La tarjeta de la galería lleva su id en el arrastre (`application/x-humanity-fila`).
+  // Soltada SOBRE una base de datos la recibe ella (la reordena o la pasa de tabla: `Galeria.tsx`); soltada en
+  // cualquier otro sitio del cuerpo de la página, la entrada deja de ser una fila y se queda aquí como una página
+  // hija, en un bloque «Página», justo donde se soltó (`POST /api/bd/filas/:id/sacar`).
+  const MIME_ENTRADA = 'application/x-humanity-fila';
+  const esEntrada = (dt: DataTransfer | null) => !!dt && Array.from(dt.types || []).includes(MIME_ENTRADA);
+  const encimaDeBd = (el: EventTarget | null) => {
+    const caja = (el as HTMLElement | null)?.closest?.('[data-bloque-caja]') as HTMLElement | null;
+    return !!caja && bloquesRef.current.find(x => x.id === caja.dataset.bloqueCaja)?.tipo === 'basedatos';
+  };
+  const alPasarEntrada = (e: React.DragEvent) => {
+    if (!editable || !esEntrada(e.dataTransfer) || encimaDeBd(e.target)) {
+      if (destinoRef.current && esEntrada(e.dataTransfer)) { destinoRef.current = null; setDestino(null); }
+      return;
+    }
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    const caja = (e.target as HTMLElement).closest?.('[data-bloque-caja]') as HTMLElement | null;
+    if (!caja) return;
+    const r = caja.getBoundingClientRect();
+    const lado = e.clientY < r.top + r.height / 2 ? 'arriba' : 'abajo';
+    const id = caja.dataset.bloqueCaja!;
+    if (destinoRef.current?.id === id && destinoRef.current.lado === lado) return;
+    destinoRef.current = { id, lado }; setDestino(destinoRef.current);
+  };
+  const alSoltarEntrada = async (e: React.DragEvent) => {
+    let d: { fila: string; tabla: string; nombre?: string } | null = null;
+    try { d = JSON.parse(e.dataTransfer.getData(MIME_ENTRADA)); } catch { d = null; }
+    const donde = destinoRef.current;
+    destinoRef.current = null; setDestino(null);
+    // Sobre una base de datos manda ella; y sin permiso de edición no hay nada que hacer.
+    if (!d?.fila || !editable || encimaDeBd(e.target) || !docId.current) return;
+    e.preventDefault(); e.stopPropagation();
+    try {
+      const r = await fetch(`/api/bd/filas/${encodeURIComponent(d.fila)}/sacar`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pagina_destino: docId.current }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.pagina_id) { fallar(j.error || 'No se ha podido sacar la entrada de la base de datos.'); return; }
+      const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.pagina_id, pubTitulo: j.titulo || d.nombre || 'Sin título' };
+      guardarHistoria();
+      setBloques(bs => {
+        const i = donde ? bs.findIndex(x => x.id === donde.id) : -1;
+        if (i < 0) return normalizarNiveles([...bs, nuevo]);
+        const copia = [...bs];
+        const { pos, nivel } = donde!.lado === 'arriba' ? { pos: i, nivel: bs[i].nivel || 0 } : puntoInsercion(bs, donde!.id);
+        copia.splice(pos, 0, { ...nuevo, nivel: nivel || undefined });
+        return normalizarNiveles(copia);
+      });
+      programarGuardado();
+      // La tarjeta ya no está en la galería, y el menú de la izquierda tiene una página nueva debajo de ésta.
+      window.dispatchEvent(new CustomEvent('bd:cambio', { detail: { desde: '' } }));
+      window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+    } catch { fallar('No hay conexión con el servidor.'); }
+  };
+
   const alSoltarArchivos = async (e: React.DragEvent) => {
     if (arrastrando || !traeArchivos(e.dataTransfer)) return;
     e.preventDefault();
@@ -3949,9 +4007,15 @@ function EditorPagina() {
 
         <div
           ref={docRef}
-          onDragOver={e => { if (!arrastrando && traeArchivos(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setArchivoEncima(true); } }}
-          onDragLeave={e => { if (e.currentTarget === e.target) setArchivoEncima(false); }}
-          onDrop={alSoltarArchivos}
+          onDragOver={e => {
+            if (!arrastrando && traeArchivos(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setArchivoEncima(true); return; }
+            alPasarEntrada(e);
+          }}
+          onDragLeave={e => {
+            if (e.currentTarget === e.target) setArchivoEncima(false);
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null) && destinoRef.current) { destinoRef.current = null; setDestino(null); }
+          }}
+          onDrop={e => { if (esEntrada(e.dataTransfer)) { alSoltarEntrada(e); return; } alSoltarArchivos(e); }}
           className={cn('relative bg-white rounded-2xl transition-colors', clasesDePagina(ajustes),
             archivoEncima && 'ring-2 ring-emerald-400 ring-offset-4')}
         >

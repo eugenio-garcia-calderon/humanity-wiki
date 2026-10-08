@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import CajaBusqueda from '../buscador/CajaBusqueda';
 import { IconoElemento } from '../espacio/FavoritosRecientes';
@@ -42,7 +42,11 @@ import { t } from '../../i18n';
  * pinches, que es la peor forma de romper un buscador: sin que falle nada.
  */
 
-export default function BuscadorSuperior({ compacto = false }: { compacto?: boolean }) {
+export default function BuscadorSuperior({ compacto = false, menuPaginas }: {
+  compacto?: boolean;
+  /** El botón «Mis páginas» (pliega y despliega el menú izquierdo): con un favorito en la barra, va a su izquierda. */
+  menuPaginas?: { plegado: boolean; alternar: () => void };
+}) {
   const navegar = useNavigate();
   // Sin interruptor de IA (2026-10-05): preguntar a la IA se hace con el
   // botón flotante del chat, abajo a la derecha.
@@ -73,8 +77,8 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
     // anchura. Si no, los iconos se vendrían al centro con la caja encima.
     // Un 20 % más estrecha (2026-10-05): 34,5 → 27,6 rem, y con tope también
     // por debajo de `xl`, donde antes se estiraba todo lo que hubiera libre.
-    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 lg:max-w-[27.6rem]
-      xl:absolute xl:left-1/2 xl:w-[27.6rem] xl:-translate-x-1/2 xl:flex-none">
+    <div className={cn('flex min-w-0 flex-1 items-center justify-center gap-1.5 lg:max-w-[27.6rem]',
+      'xl:absolute xl:left-1/2 xl:-translate-x-1/2 xl:flex-none', primero && menuPaginas ? 'xl:w-[35rem] xl:max-w-none' : 'xl:w-[27.6rem]')}>
       {/* ══ EN UNA PANTALLA MUY ESTRECHA, UN BOTÓN Y NO UNA CAJA ══════════
           Medido a 320 px: la caja quedaba en 18 px de ancho **con 116 px de
           botones dentro**, y el campo de escribir medía **0**. O sea que el
@@ -99,6 +103,17 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
 
           Es lo mismo que hace YouTube en un teléfono, y por el mismo motivo:
           ahí arriba no caben a la vez un campo de texto útil y la cuenta. */}
+      {/* «MIS PÁGINAS» A LA IZQUIERDA DEL FAVORITO (2026-10-08, Eugenio: «el botón de Mis páginas, el que hace que se
+          expanda el menú izquierdo»). Es el mismo botón de la esquina, que con un favorito en la barra se viene aquí. */}
+      {primero && menuPaginas && (
+        <button type="button" onClick={menuPaginas.alternar}
+          title={menuPaginas.plegado ? 'Mostrar tus páginas' : 'Ocultar tus páginas'} aria-label={menuPaginas.plegado ? 'Mostrar tus páginas' : 'Ocultar tus páginas'}
+          aria-expanded={!menuPaginas.plegado} data-mis-paginas-barra
+          className="hidden h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 xl:inline-flex">
+          {menuPaginas.plegado ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          <span className="whitespace-nowrap text-[13px] font-black">{t('Mis páginas')}</span>
+        </button>
+      )}
       {primero && (
         <Link
           to={primero.ruta}
