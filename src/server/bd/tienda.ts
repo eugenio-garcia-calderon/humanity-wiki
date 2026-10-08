@@ -113,7 +113,7 @@ export async function sincronizarTienda(db: any, args: {
   const ex = new Map<string, any>();
   if (filas.length) {
     const r = await db.execute(sql`
-      SELECT id, bd_fila_id, bd_huella, status, archived_at FROM products
+      SELECT id, bd_fila_id, bd_huella, status, archived_at, envio_centimos FROM products
       WHERE bd_fila_id = ANY(string_to_array(${filas.map(f => f.id).join(',')}, ','))
     `);
     for (const p of r.rows as any[]) ex.set(p.bd_fila_id, p);
@@ -181,6 +181,13 @@ export async function sincronizarTienda(db: any, args: {
           WHERE id = ${actual.id}
         `);
         await sincronizarVariantes(db, actual.id, variantes);
+        // El precio de envío cambió: las zonas que seguían con el precio de
+        // antes lo siguen; una que el vendedor ajustó a mano se queda como está.
+        const antes = actual.envio_centimos === null || actual.envio_centimos === undefined ? 0 : Number(actual.envio_centimos);
+        const ahora = envio ?? 0;
+        if (antes !== ahora) {
+          await db.execute(sql`UPDATE producto_envio_zonas SET centimos = ${ahora}, updated_at = now() WHERE producto_id = ${actual.id} AND centimos = ${antes}`);
+        }
       }
       salida[fila.id] = { ...base, producto_id: actual.id };
     }
@@ -195,6 +202,26 @@ export async function sincronizarTienda(db: any, args: {
 
   // Variant ids for the buttons, in one query.
   const pids = Object.values(salida).map(s => s.producto_id).filter(Boolean) as string[];
+
+  // LAS ZONAS DE ENVÍO (2026-10-08). El carrito no cobra el envío de un
+  // producto físico si no tiene tarifa para la zona del destino: sin ninguna,
+  // el cliente leía «no se envía a ese destino» en TODOS los pedidos, que era
+  // lo que le pasaba a un producto salido de una base de datos (esta ruta
+  // creaba el producto pero nunca sus tarifas). Aquí se garantiza que cada
+  // producto tiene las cuatro zonas: con el precio de la columna «Envío» o
+  // gratis si no hay (o no se rellenó), igual en todas. Solo se INSERTA lo que
+  // falta: lo que el vendedor ajustó a mano en Comercio no se pisa. Una sola
+  // consulta para toda la tabla, también para los productos de antes de este
+  // arreglo.
+  if (pids.length) {
+    await db.execute(sql`
+      INSERT INTO producto_envio_zonas (producto_id, zona, centimos, updated_at)
+      SELECT p.id, z.zona, COALESCE(p.envio_centimos, 0), now()
+      FROM products p CROSS JOIN (VALUES ('peninsula'), ('no_peninsular'), ('europa'), ('resto')) AS z(zona)
+      WHERE p.id = ANY(string_to_array(${pids.join(',')}, ','))
+      ON CONFLICT (producto_id, zona) DO NOTHING
+    `);
+  }
   if (pids.length) {
     const r = await db.execute(sql`
       SELECT id, producto_id, nombre FROM producto_variantes
