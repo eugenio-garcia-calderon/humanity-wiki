@@ -1,3 +1,58 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/miembros.ts",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/MenuSitio.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/BarraMiembro.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/PaginaDeDominio.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/PaginaPublica.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/BaseDatosSitio.tsx",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "icono de cuenta en el menú del sitio",
+      "desde": "2026-10-08T13:08:08.283Z"
+    }
+  ]
 }
