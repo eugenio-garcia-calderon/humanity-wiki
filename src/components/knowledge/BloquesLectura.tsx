@@ -5,6 +5,7 @@ import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
 import { TarjetaMarcador, WebInsertada } from './BloqueEnlace';
 import BloqueEmbed from './BloqueEmbed';
+import PdfEmbebido from './PdfEmbebido';
 // KaTeX se pide al pintar la primera fórmula (2026-10-06, #19).
 const Formula = lazy(() => import('./Formula'));
 import BloquePizarra from './BloquePizarra';
@@ -380,6 +381,9 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
             {pie}
           </figure>
         );
+      }
+      if (b.medio === 'pdf' && b.vista === 'embebido' && b.url) {
+        return <figure><PdfEmbebido url={b.url} titulo={b.pie || 'PDF'} alto={b.alto} />{pie}</figure>;
       }
       // PDF y archivo: tarjeta con el nombre y el enlace, la misma decisión que
       // tomó Eugenio para el editor el 2026-08-22 (un visor de 70vh parte la

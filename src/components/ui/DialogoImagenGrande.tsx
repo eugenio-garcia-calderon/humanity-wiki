@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ImageDown, FolderOpen, X } from 'lucide-react';
-import { LIMITE_IMAGEN, tamanoLegible } from '../../utils/prepararImagen';
+import { ImageDown, FolderOpen, Upload, X } from 'lucide-react';
+import { LIMITE_IMAGEN, MAXIMO_SERVIDOR, tamanoLegible } from '../../utils/prepararImagen';
 
 // ============================================================================
 // «ESTA IMAGEN PESA MUCHO» (2026-10-02)
@@ -16,7 +16,7 @@ import { LIMITE_IMAGEN, tamanoLegible } from '../../utils/prepararImagen';
 // «Elegir otro» abre el selector de archivos en el mismo clic: el navegador
 // sólo deja abrirlo como respuesta directa a un gesto de la persona.
 
-export type Eleccion = { tipo: 'comprimir' } | { tipo: 'otro'; archivo: File } | { tipo: 'cancelar' };
+export type Eleccion = { tipo: 'comprimir' } | { tipo: 'original' } | { tipo: 'otro'; archivo: File } | { tipo: 'cancelar' };
 
 export function preguntarImagenGrande(archivo: File): Promise<Eleccion> {
   return new Promise(resolver => {
@@ -37,6 +37,7 @@ function Dialogo({ archivo, onElegir }: { archivo: File; onElegir: (e: Eleccion)
     input.onchange = () => { const f = input.files?.[0]; if (f) onElegir({ tipo: 'otro', archivo: f }); };
     input.click();
   };
+  const cabe = archivo.size <= MAXIMO_SERVIDOR;
   return (
     <div className="fixed inset-0 z-[10050] bg-slate-900/50 flex items-center justify-center p-4" onClick={() => onElegir({ tipo: 'cancelar' })}>
       <div role="dialog" aria-label="La imagen pesa mucho" onClick={e => e.stopPropagation()}
@@ -60,13 +61,22 @@ function Dialogo({ archivo, onElegir }: { archivo: File; onElegir: (e: Eleccion)
             className="w-full h-11 rounded-xl bg-slate-900 text-white text-sm font-bold inline-flex items-center justify-center gap-2 hover:bg-slate-800">
             <ImageDown className="w-4 h-4" /> Comprimir la imagen
           </button>
+          <button onClick={() => onElegir({ tipo: 'original' })} disabled={!cabe}
+            className="w-full h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 inline-flex items-center justify-center gap-2 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+            <Upload className="w-4 h-4" /> Subir el original
+          </button>
+          {!cabe && (
+            <p className="text-[11px] text-amber-700 leading-relaxed">
+              El original no se puede subir: el máximo que admite el servidor es {tamanoLegible(MAXIMO_SERVIDOR)}. Comprime la imagen o elige otra.
+            </p>
+          )}
           <button onClick={elegirOtro}
             className="w-full h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 inline-flex items-center justify-center gap-2 hover:border-slate-300">
             <FolderOpen className="w-4 h-4" /> Elegir otro archivo
           </button>
         </div>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Comprimir la deja en un tamaño adecuado para la web sin que se note en la pantalla. La original no se toca.
+          Comprimir la deja en un tamaño adecuado para la web sin que se note en la pantalla. Subir el original la deja tal cual, aunque la página cargue más despacio.
         </p>
       </div>
     </div>
