@@ -23,6 +23,12 @@
       "ruta": "src/pages/Documento.tsx",
       "motivo": "menú ⋯ en la página de una entrada de base de datos",
       "desde": "2026-10-08T09:49:44.332Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada del changelog",
+      "desde": "2026-10-08T10:04:40.965Z"
     }
   ]
 }
