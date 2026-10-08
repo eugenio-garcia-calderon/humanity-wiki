@@ -1,3 +1,16 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-orden",
+      "ruta": "drizzle/0149_feedback_relevancia.sql",
+      "motivo": "feedback: 8 peticiones",
+      "desde": "2026-10-08T21:26:41.792Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "feedback: 8 peticiones",
+      "desde": "2026-10-08T21:26:41.792Z"
+    }
+  ]
 }
