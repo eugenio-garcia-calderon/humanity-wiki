@@ -24,6 +24,7 @@ import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowl
 import CreadorMenu from '../components/knowledge/CreadorMenu';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
+import MenuEntradaPagina from '../components/tablas/MenuEntradaPagina';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
 import { TarjetaMarcador, WebInsertada, leerEnlace } from '../components/knowledge/BloqueEnlace';
 import { repintar, ponerCursor } from '../utils/marcadoVivo';
@@ -3878,6 +3879,11 @@ function EditorPagina() {
               </div>
             )}
           </div>
+          {/* LOS TRES PUNTITOS DE UNA ENTRADA DE BASE DE DATOS (2026-10-08). */}
+          {editable && filaDe?.fila_id && filaDe.tabla_id && id && (
+            <MenuEntradaPagina filaId={filaDe.fila_id} tablaId={filaDe.tabla_id} paginaId={id}
+              nombre={titulo} tablaTitulo={filaDe.tabla_titulo} padre={filaDe.padre} />
+          )}
         </div>
 
         <div

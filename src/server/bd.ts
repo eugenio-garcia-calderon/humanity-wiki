@@ -1008,6 +1008,46 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /** Mover UNA fila a otro sitio de la tabla (2026-10-08, Eugenio: «pinchar una
+   *  imagen de la galería y arrastrarla a una posición nueva, por ejemplo la
+   *  primera»). Llega la fila y ANTES DE QUÉ fila va (`null` = al final).
+   *
+   *  Se renumera la tabla entera y no solo las dos vecinas: son filas de una
+   *  tabla, no un millón, y así el orden que queda es exactamente el que se
+   *  ve. Quien arrastra con un filtro puesto no ve todas las filas, y «antes
+   *  de la fila X» sigue teniendo sentido para las que no ve: se quedan donde
+   *  estaban respecto a las demás. */
+  app.put('/api/bd/tablas/:id/orden-filas', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, req.params.id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const id = String(req.body?.id || '');
+      const antes = req.body?.antes_de ? String(req.body.antes_de) : null;
+      if (!id) return res.status(400).json({ error: 'Falta la fila que se mueve.' });
+      if (antes === id) return res.json({ ok: true });
+      const r = await db.execute(sql`
+        SELECT id FROM bd_filas
+        WHERE tabla_id = ${req.params.id} AND deleted_at IS NULL AND archived_at IS NULL
+        ORDER BY orden, created_at
+      `);
+      const todas = (r.rows as any[]).map(f => f.id as string);
+      if (!todas.includes(id)) return res.status(404).json({ error: 'Esa fila no existe en esta tabla.' });
+      if (antes && !todas.includes(antes)) return res.status(404).json({ error: 'La fila de destino no existe en esta tabla.' });
+      const sin = todas.filter(x => x !== id);
+      const i = antes ? sin.indexOf(antes) : sin.length;
+      const nuevo = [...sin.slice(0, i), id, ...sin.slice(i)];
+      await db.execute(sql`
+        UPDATE bd_filas f SET orden = x.o::int - 1
+        FROM jsonb_array_elements_text(${JSON.stringify(nuevo)}::jsonb) WITH ORDINALITY AS x(id, o)
+        WHERE f.id = x.id AND f.tabla_id = ${req.params.id} AND f.orden IS DISTINCT FROM x.o::int - 1
+      `);
+      // Sin tocar `updated_at`: recolocar no es editar, y marcar todas las
+      // filas como «modificadas hoy» ensuciaría los avisos y el historial.
+      res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** Duplicar una propiedad CON SUS VALORES (los del jsonb y los enlaces). Una
    *  relación duplicada nace sin cara de vuelta: dos columnas gemelas de la
    *  misma de la otra tabla dirían dos cosas a la vez. Los archivos no se
@@ -1790,16 +1830,60 @@ export function registerBdRoutes(app: Express, db: any) {
   });
 
   /** A la papelera, no al vacío. Quince días para arrepentirse. */
+  /** Duplicar una entrada (2026-10-08): la copia nace JUSTO DEBAJO de la
+   *  original, con sus valores, sus enlaces y el contenido de su página, y
+   *  «(copia)» detrás del nombre. Es la misma copia que hace nacer «la
+   *  siguiente» de una tarea que se repite: `copiarFila`. Los archivos de las
+   *  columnas de archivo no se copian: cada archivo pertenece a una celda. */
+  app.post('/api/bd/filas/:id/duplicar', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL AND archived_at IS NULL`);
+      const origen = f.rows[0] as any;
+      if (!origen) return res.status(404).json({ error: 'Esa entrada no existe.' });
+      const permiso = await puedeConTabla(req, origen.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const colTitulo = await columnaTitulo(origen.tabla_id);
+      const nombre = colTitulo ? String(origen.valores?.[colTitulo] ?? '').trim() : '';
+      const cambios: Record<string, any> = colTitulo && nombre ? { [colTitulo]: `${nombre} (copia)`.slice(0, 2000) } : {};
+      const id = await copiarFila(origen, cambios, null, req.user!.id);
+      const p = await db.execute(sql`SELECT pagina_id FROM bd_filas WHERE id = ${id}`);
+      res.status(201).json({ id, pagina_id: (p.rows[0] as any)?.pagina_id ?? null });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Deshacer un borrado: la entrada vuelve a su sitio. Solo dentro de los
+   *  15 días que se guardan, y solo quien puede escribir en la tabla. */
+  app.post('/api/bd/filas/:id/restaurar', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`
+        SELECT tabla_id, pagina_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NOT NULL AND deleted_at > now() - interval '15 days'
+      `);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa entrada no se puede recuperar.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      await db.execute(sql`UPDATE bd_filas SET deleted_at = NULL, updated_by = ${req.user!.id} WHERE id = ${req.params.id}`);
+      if (fila.pagina_id) await db.execute(sql`UPDATE knowledge_windows SET deleted_at = NULL WHERE id = ${fila.pagina_id} AND deleted_at > now() - interval '15 days'`);
+      res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.delete('/api/bd/filas/:id', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
-      const f = await db.execute(sql`SELECT tabla_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const f = await db.execute(sql`SELECT tabla_id, pagina_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
       const fila = f.rows[0] as any;
       if (!fila) return res.status(404).json({ error: 'Esa fila no existe.' });
       const permiso = await puedeConTabla(req, fila.tabla_id, true);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
 
       await db.execute(sql`UPDATE bd_filas SET deleted_at = now(), updated_by = ${req.user!.id} WHERE id = ${req.params.id}`);
+      // Su página se va con ella (2026-10-08): si no, queda suelta en «Todas
+      // mis páginas» como una página huérfana de una entrada que ya no existe.
+      // Vuelve con `restaurar`.
+      if (fila.pagina_id) await db.execute(sql`UPDATE knowledge_windows SET deleted_at = now() WHERE id = ${fila.pagina_id} AND deleted_at IS NULL`);
       res.json({ ok: true, diasParaBorradoDefinitivo: 15 });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });

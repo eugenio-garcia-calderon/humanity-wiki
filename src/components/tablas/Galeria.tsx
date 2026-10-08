@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Loader2, Plus, Move } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpToLine, Copy, ExternalLink, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -9,6 +9,8 @@ import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
 import type { TamanoGaleria } from '../../utils/bloques';
 import GaleriaCarrusel from './GaleriaCarrusel';
+import MenuAcciones, { type AccionMenu } from './MenuAcciones';
+import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -43,11 +45,15 @@ const PROPIEDADES = 3;
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
   velocidad?: number;
+  /** Se pueden arrastrar las tarjetas para cambiar el orden de la tabla. */
+  ordenable?: boolean;
+  /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
+  motivoSinOrden?: string;
   tablaId: string;
   columnas: Columna[];
   filas: Fila[];
@@ -72,6 +78,116 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   const sitio = useSitio();
   const [abriendo, setAbriendo] = useState<string | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
+
+  // ── ORDENAR ARRASTRANDO (2026-10-08) ─────────────────────────────────────
+  // Eugenio: «pinchar una de las imágenes y arrastrarla a una posición nueva,
+  // por ejemplo la primera». La tarjeta soltada va ANTES de la que tiene
+  // debajo si se suelta en su mitad izquierda, y DESPUÉS si es en la derecha.
+  // Se enseña el resultado al instante (`ordenLocal`) y se guarda en
+  // segundo plano; si falla, se vuelve atrás y se dice por qué.
+  const [arrastrada, setArrastrada] = useState<string | null>(null);
+  const [destino, setDestino] = useState<{ id: string; lado: 'antes' | 'despues'; eje: 'h' | 'v' } | null>(null);
+  const [ordenLocal, setOrdenLocal] = useState<string[] | null>(null);
+  const [ocultas, setOcultas] = useState<Set<string>>(new Set());
+  const [anuncio, setAnuncio] = useState('');
+  useEffect(() => { setOrdenLocal(null); }, [filas]);
+
+  const filasVis = useMemo(() => {
+    let lista = filas.filter(f => !ocultas.has(f.id));
+    if (ordenLocal) {
+      const m = new Map(lista.map(f => [f.id, f]));
+      const puestas = ordenLocal.map(id => m.get(id)).filter((f): f is Fila => !!f);
+      const ya = new Set(puestas.map(f => f.id));
+      lista = [...puestas, ...lista.filter(f => !ya.has(f.id))];
+    }
+    return lista;
+  }, [filas, ordenLocal, ocultas]);
+
+  const moverFila = async (id: string, antesDe: string | null) => {
+    const ids = filasVis.map(f => f.id);
+    const sin = ids.filter(x => x !== id);
+    const i = antesDe ? sin.indexOf(antesDe) : sin.length;
+    if (i < 0) return;
+    const nuevo = [...sin.slice(0, i), id, ...sin.slice(i)];
+    if (nuevo.join() === ids.join()) return;
+    setOrdenLocal(nuevo);
+    setAnuncio(`Movida a la posición ${nuevo.indexOf(id) + 1} de ${nuevo.length}`);
+    try {
+      const r = await fetch(`/api/bd/tablas/${tablaId}/orden-filas`, {
+        method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, antes_de: antesDe }),
+      });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'No se pudo cambiar el orden.'); }
+      onCambio();
+    } catch (e: any) { setOrdenLocal(null); setFallo(e.message); }
+  };
+
+  const soltar = (f: Fila) => {
+    const id = arrastrada, lado = destino?.id === f.id ? destino.lado : 'antes';
+    setArrastrada(null); setDestino(null);
+    if (!id || id === f.id) return;
+    if (lado === 'antes') { moverFila(id, f.id); return; }
+    const resto = filasVis.filter(x => x.id !== id);
+    const k = resto.findIndex(x => x.id === f.id);
+    moverFila(id, resto[k + 1]?.id ?? null);
+  };
+
+  /** Con el teclado: Alt + flecha mueve la tarjeta enfocada un puesto. */
+  const moverUno = (id: string, dir: -1 | 1) => {
+    const k = filasVis.findIndex(x => x.id === id);
+    if (k < 0) return;
+    if (dir < 0) { if (k > 0) moverFila(id, filasVis[k - 1].id); }
+    else if (k < filasVis.length - 1) moverFila(id, filasVis[k + 2]?.id ?? null);
+  };
+
+  // ── MENÚ DE LA ENTRADA (2026-10-08) ──────────────────────────────────────
+  // Clic derecho (PC), dos dedos (Mac) o «⋯» (móvil): abrir, duplicar,
+  // copiar el enlace y eliminar. Eliminar no pregunta: la entrada queda
+  // recuperable y el aviso trae «Deshacer», como en Notion.
+  const [menu, setMenu] = useState<{ fila: Fila; x: number; y: number } | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; deshacer?: () => void } | null>(null);
+  useEffect(() => {
+    if (!aviso) return;
+    const t = setTimeout(() => setAviso(null), aviso.deshacer ? 10000 : 3500);
+    return () => clearTimeout(t);
+  }, [aviso]);
+  const nombreDe = (f: Fila) => (columnas.find(c => c.id === columnaTitulo)
+    ? formatear(f.celdas[columnaTitulo as string] ?? { estado: 'vacia' }, columnas.find(c => c.id === columnaTitulo)!) : '')
+    || f.pagina?.titulo || 'Sin título';
+
+  const duplicar = async (f: Fila) => {
+    setFallo(null); setAviso({ texto: 'Duplicando…' });
+    try { await duplicarFila(f.id); onCambio(); setAviso({ texto: 'Entrada duplicada, debajo de la original' }); }
+    catch (e: any) { setAviso(null); setFallo(e.message); }
+  };
+  const eliminar = async (f: Fila) => {
+    setFallo(null);
+    try {
+      await eliminarFila(f.id);
+      setOcultas(o => new Set(o).add(f.id)); onCambio();
+      setAviso({
+        texto: `«${nombreDe(f)}» eliminada`,
+        deshacer: async () => {
+          try { await restaurarFila(f.id); setOcultas(o => { const n = new Set(o); n.delete(f.id); return n; }); onCambio(); setAviso(null); }
+          catch (e: any) { setFallo(e.message); }
+        },
+      });
+    } catch (e: any) { setFallo(e.message); }
+  };
+  const accionesDe = (f: Fila, puedeMover: boolean): AccionMenu[] => [
+    { etiqueta: 'Abrir', icono: FileText, onClick: () => abrir(f) },
+    { etiqueta: 'Abrir en pestaña nueva', icono: ExternalLink, deshabilitada: !f.pagina_id, onClick: () => window.open(f.pagina_id ? `/paginas/${f.pagina_id}` : '/', '_blank', 'noopener') },
+    { etiqueta: 'Copiar enlace', icono: Link2, deshabilitada: !f.pagina_id, onClick: () => {
+      navigator.clipboard?.writeText(`${window.location.origin}/paginas/${f.pagina_id}`)
+        .then(() => setAviso({ texto: 'Enlace copiado' }), () => setFallo('No se pudo copiar el enlace.'));
+    } },
+    { etiqueta: 'Duplicar', icono: Copy, onClick: () => duplicar(f) },
+    ...(puedeMover ? [
+      { etiqueta: 'Mover al principio', icono: ArrowUpToLine, deshabilitada: filasVis[0]?.id === f.id, onClick: () => moverFila(f.id, filasVis[0]?.id ?? null) },
+      { etiqueta: 'Mover al final', icono: ArrowDownToLine, deshabilitada: filasVis[filasVis.length - 1]?.id === f.id, onClick: () => moverFila(f.id, null) },
+    ] : []),
+    { etiqueta: 'Eliminar', icono: Trash2, peligro: true, onClick: () => eliminar(f) },
+  ];
 
   const colTitulo = columnas.find(c => c.id === columnaTitulo) || null;
   // Las que se ven en la tarjeta: las que eligió quien edita o, si no eligió,
@@ -113,7 +229,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   };
 
   /** Una tarjeta. `copia` es la segunda vuelta del carrusel: no se enfoca ni se lee. */
-  const tarjeta = (f: Fila, copia = false) => {
+  const tarjeta = (f: Fila, copia = false, mover = false) => {
+          const conMenu = editable && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
@@ -124,11 +241,50 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               aria-hidden={copia || undefined}
               aria-disabled={!!sitio && !f.pagina_id}
               onClick={() => abrir(f)}
-              onKeyDown={e => { if (e.key === 'Enter') abrir(f); }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') abrir(f);
+                if (mover && e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); e.stopPropagation(); moverUno(f.id, e.key === 'ArrowLeft' ? -1 : 1); }
+              }}
+              onContextMenu={conMenu ? e => {
+                e.preventDefault(); e.stopPropagation();
+                const r = e.currentTarget.getBoundingClientRect();
+                // Con la tecla de menú no hay puntero: se abre en la esquina de la tarjeta.
+                const sinPuntero = e.clientX === 0 && e.clientY === 0;
+                setMenu({ fila: f, x: sinPuntero ? r.left + 16 : e.clientX, y: sinPuntero ? r.top + 16 : e.clientY });
+              } : undefined}
+              draggable={mover || undefined}
+              onDragStart={mover ? e => { setArrastrada(f.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', f.id); } : undefined}
+              onDragEnd={mover ? () => { setArrastrada(null); setDestino(null); } : undefined}
+              onDragOver={mover ? e => {
+                if (!arrastrada || arrastrada === f.id) return;
+                e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+                const r = e.currentTarget.getBoundingClientRect();
+                // En una rejilla de varias columnas se decide por la mitad izquierda o
+                // derecha; en una sola columna (una página estrecha, un teléfono), por
+                // la mitad de arriba o de abajo. Se sabe mirando si algún vecino
+                // está a la misma altura.
+                const vecino = [e.currentTarget.previousElementSibling, e.currentTarget.nextElementSibling]
+                  .some(v => v && Math.abs(v.getBoundingClientRect().top - r.top) < r.height / 2);
+                const eje = vecino ? 'h' : 'v';
+                const lado = (eje === 'h' ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2) ? 'antes' : 'despues';
+                setDestino(d => (d && d.id === f.id && d.lado === lado && d.eje === eje ? d : { id: f.id, lado, eje }));
+              } : undefined}
+              onDragLeave={mover ? e => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDestino(d => (d?.id === f.id ? null : d));
+              } : undefined}
+              onDrop={mover ? e => { if (!arrastrada) return; e.preventDefault(); e.stopPropagation(); soltar(f); } : undefined}
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              className="group text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl">
+              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40')}>
+              {/* Dónde caerá la tarjeta: una barra verde en el lado correspondiente. */}
+              {mover && arrastrada && destino?.id === f.id && (
+                <span aria-hidden className={cn('pointer-events-none absolute z-20 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]',
+                  destino.eje === 'h'
+                    ? cn('top-0 h-[calc(100%-0.5rem)] w-1', destino.lado === 'antes' ? '-left-2.5' : '-right-2.5')
+                    : cn('inset-x-0 h-1', destino.lado === 'antes' ? '-top-3' : '-bottom-3')
+                )} />
+              )}
               <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
@@ -148,6 +304,23 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <p className="w-full h-full p-3 text-[11px] leading-snug text-slate-400 overflow-hidden">{f.pagina.resumen}</p>
                 ) : (
                   <FileText className="w-8 h-8 text-slate-200" />
+                )}
+                {/* El asa dice que se puede arrastrar; toda la tarjeta se arrastra. */}
+                {mover && (
+                  <span role="img" aria-label="Arrastrar para cambiar el orden" title="Arrastra para cambiar el orden (Alt + flechas con el teclado)"
+                    className="absolute bottom-2 left-2 z-10 grid h-8 w-8 cursor-grab place-items-center rounded-lg border border-slate-200 bg-white/90 text-slate-500 opacity-60 shadow-sm transition-opacity group-hover:opacity-100 [@media(hover:none)]:hidden">
+                    <GripVertical className="h-4 w-4" />
+                  </span>
+                )}
+                {/* Los tres puntitos: lo que en el PC es el botón derecho y en el
+                    Mac los dos dedos. En una pantalla táctil se ven siempre. */}
+                {conMenu && (
+                  <button type="button" aria-label="Más opciones" title="Más opciones" aria-haspopup="menu" aria-expanded={menu?.fila.id === f.id}
+                    onClick={e => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setMenu({ fila: f, x: r.right - 240, y: r.bottom + 4 }); }}
+                    onKeyDown={e => e.stopPropagation()}
+                    className="absolute right-2 top-2 z-10 grid h-8 w-8 [@media(hover:none)]:h-11 [@media(hover:none)]:w-11 place-items-center rounded-lg border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition-opacity hover:bg-white hover:text-slate-900 focus:opacity-100 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
                 )}
               </div>
               {/* CENTRADOS EN UNA PÁGINA (2026-10-02, Eugenio: «el título de cada
@@ -221,15 +394,20 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
       <div className="grid gap-x-4 gap-y-5" style={centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filas.map(f => tarjeta(f))}
+        {filasVis.map(f => tarjeta(f, false, ordenable && editable && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
+            onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}
+            onDrop={arrastrada ? e => { e.preventDefault(); const id = arrastrada; setArrastrada(null); setDestino(null); moverFila(id, null); } : undefined}
             className="min-h-[9rem] aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors">
             {abriendo === 'nueva' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
             Nueva página
           </button>
         )}
       </div>
+      {editable && !ordenable && motivoSinOrden && filas.length > 1 && (
+        <p className="mt-3 text-center text-[11px] font-bold text-slate-400">{motivoSinOrden}</p>
+      )}
     </div>
   );
 
@@ -250,11 +428,19 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           entre la galería, estática, y el carrusel móvil»). */}
       {carrusel ? (
         <GaleriaCarrusel ancho={ANCHO_TARJETA[tamano] ?? 220} velocidad={velocidad}
-          tarjetas={filas.map(f => tarjeta(f))} copias={filas.map(f => tarjeta(f, true))}
+          tarjetas={filasVis.map(f => tarjeta(f))} copias={filasVis.map(f => tarjeta(f, true))}
           pie={botonNueva} todo={rejilla} />
       ) : rejilla}
       {!filas.length && !editable && (
         <p className="py-6 text-center text-xs text-slate-400">Todavía no hay nada en esta base de datos.</p>
+      )}
+      <span className="sr-only" role="status" aria-live="polite">{anuncio}</span>
+      {menu && <MenuAcciones x={menu.x} y={menu.y} acciones={accionesDe(menu.fila, ordenable && editable && !sitio && filasVis.length > 1)} onCerrar={() => setMenu(null)} etiqueta={`Acciones de ${nombreDe(menu.fila)}`} />}
+      {aviso && (
+        <div role="status" aria-live="polite" className="fixed bottom-5 left-1/2 z-[400] flex h-11 max-w-[92vw] -translate-x-1/2 items-center gap-3 rounded-xl bg-slate-900 px-4 text-[13px] font-bold text-white shadow-2xl">
+          <span className="truncate">{aviso.texto}</span>
+          {aviso.deshacer && <button type="button" onClick={aviso.deshacer} className="shrink-0 rounded-md px-1.5 py-0.5 font-black text-emerald-300 hover:bg-white/10">Deshacer</button>}
+        </div>
       )}
     </div>
   );
@@ -287,6 +473,7 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
     // imagen quedaba fuera de la parte visible, donde no se podía arrastrar.
     <div className={cn('absolute inset-0', modo && 'cursor-move touch-none')}
       onClick={modo ? parar : undefined}
+      onMouseDown={modo ? e => e.preventDefault() : undefined}
       onPointerDown={modo ? e => {
         e.stopPropagation();
         const r = e.currentTarget.getBoundingClientRect();
@@ -310,7 +497,7 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
       {recolocable && !modo && (
         <button type="button"
           onClick={e => { e.stopPropagation(); setPos(encuadre || { x: 50, y: 50 }); setModo(true); }}
-          className="absolute top-2 right-2 inline-flex items-center gap-1 h-8 px-2 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
+          className="absolute bottom-2 right-2 inline-flex items-center gap-1 h-8 px-2 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
           <Move className="w-3 h-3" /> Recolocar
         </button>
       )}

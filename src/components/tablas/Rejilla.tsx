@@ -859,7 +859,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} visibles={visibles}
-              carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad} />
+              carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
+              ordenable={editable && !colAgr && !activa.orden_por.length}
+              motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
           ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
           colAgr && editable ? celdas => <div className="max-w-xs"><NuevoElemento onCrear={t => crearCon(t, celdas)} /></div> : undefined)}
         </div>
