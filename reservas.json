@@ -1,3 +1,76 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/sitioWeb.ts",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/MenuSitio.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/ContextoSitio.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/VistaPagina.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/knowledge/CreadorMenu.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/App.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
+      "desde": "2026-10-08T12:33:09.770Z"
+    }
+  ]
 }
