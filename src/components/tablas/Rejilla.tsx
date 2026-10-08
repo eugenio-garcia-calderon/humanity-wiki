@@ -8,6 +8,7 @@ import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
 const VELOCIDADES = [{ v: 12, l: '1', t: 'Muy lenta' }, { v: 28, l: '2', t: 'Lenta' }, { v: 50, l: '3', t: 'Media' }, { v: 80, l: '4', t: 'Rápida' }, { v: 120, l: '5', t: 'Muy rápida' }];
 import type { TamanoGaleria } from '../../utils/bloques';
 import { useSitio } from '../sitio/ContextoSitio';
+import { slugDe } from '../sitio/sitioWeb';
 import ConexionesBD, { type Conexion } from './ConexionesBD';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
@@ -693,6 +694,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         title="Enlazar con otra base de datos" aria-label="Enlazar con otra base de datos">
         <Link2 className="w-[18px] h-[18px]" />{!!datos.conexiones?.length && <Cuenta n={datos.conexiones.length} />}
       </button>
+      {/* SU PÁGINA PROPIA (2026-10-08): la base de datos como página en sí, con su
+          dirección para buscadores, en una pestaña nueva. */}
+      <a href={sitio ? sitio.enlaceBd(tablaId, datos.tabla?.titulo) : `/bd/${tablaId}${slugDe(datos.tabla?.titulo) ? `/${slugDe(datos.tabla?.titulo)}` : ''}`}
+        target="_blank" rel="noopener noreferrer" className={claseBoton(false)}
+        title="Abrir como página, en una pestaña nueva" aria-label="Abrir esta base de datos como página, en una pestaña nueva">
+        <ArrowUpRight className="w-[18px] h-[18px]" />
+      </a>
       {/* NUEVO, AZUL Y PARTIDO: el botón crea un elemento; la flecha, lo demás. */}
       <div className="relative ml-1.5 flex">
         <button onClick={anadirFila} className="h-9 pl-3.5 pr-3 rounded-l-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors">

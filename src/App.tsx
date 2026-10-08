@@ -91,6 +91,8 @@ const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const FormularioPublico = lazy(() => import('./pages/FormularioPublico'));
 const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnCasa })));
 const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
+const BaseDatosEnEspacio = lazy(() => import('./pages/BaseDatosSitio').then(m => ({ default: m.BaseDatosEnEspacio })));
+const BaseDatosEnCasa = lazy(() => import('./pages/BaseDatosSitio').then(m => ({ default: m.BaseDatosEnCasa })));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
 const MiPedido = lazy(() => import('./pages/MiPedido'));
 const FichaProducto = lazy(() => import('./pages/FichaProducto'));
@@ -235,6 +237,9 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
           {/* Las subpáginas (elementos de sus bases de datos), dentro del
               subdominio y sin armazón. Ver `SubpaginaSitio`. */}
           <Route path="p/:id" element={<SubpaginaEnEspacio />} />
+          {/* La página propia de una base de datos, con su nombre en la dirección para los buscadores. */}
+          <Route path="bd/:tablaId" element={<BaseDatosEnEspacio />} />
+          <Route path="bd/:tablaId/:slug" element={<BaseDatosEnEspacio />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
@@ -300,6 +305,11 @@ export default function App() {
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />
+              {/* La página propia de una base de datos: con o sin el arroba. */}
+              <Route path=":arroba/bd/:tablaId" element={<BaseDatosEnCasa />} />
+              <Route path=":arroba/bd/:tablaId/:slug" element={<BaseDatosEnCasa />} />
+              <Route path="bd/:tablaId" element={<BaseDatosEnCasa />} />
+              <Route path="bd/:tablaId/:slug" element={<BaseDatosEnCasa />} />
 
               {/* LA MISMA PÁGINA, POR LA PUERTA CORTA. En
                   `claude-dos.humanity.wiki/mi-pagina` el nombre viaja en el

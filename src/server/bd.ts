@@ -317,6 +317,22 @@ export function registerBdRoutes(app: Express, db: any) {
   });
 
   /** Una tabla entera: definición, columnas y filas ya en forma de celdas. */
+  /** SOLO LOS NOMBRES (2026-10-08): `GET /api/bd/titulos?ids=a,b,c` → `{ a: 'Tienda', … }`.
+   *  El editor del menú necesita llamar «Tienda» a una base de datos, y leer
+   *  la tabla entera (filas, columnas, productos) para eso era un disparate.
+   *  Las que no se pueden ver no salen. */
+  app.get('/api/bd/titulos', async (req: Request, res: Response) => {
+    try {
+      const ids = [...new Set(String(req.query.ids || '').split(',').map(x => x.trim()).filter(Boolean))].slice(0, 30);
+      const salida: Record<string, string> = {};
+      for (const id of ids) {
+        const p = await puedeConTabla(req, id, false);
+        if (!('error' in p)) salida[id] = String(p.tabla.titulo || '');
+      }
+      res.json(salida);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/bd/tablas/:id', async (req: Request, res: Response) => {
     try {
       const permiso = await puedeConTabla(req, req.params.id, false);

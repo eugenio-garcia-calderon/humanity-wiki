@@ -108,6 +108,8 @@ export type DatosPagina = {
   titulo: string;
   config: any;
   indexable?: boolean | null;
+  /** La página propia de una base de datos (`/bd/:tabla`), no una página guardada. */
+  virtual?: boolean;
   created_at?: string;
   updated_at?: string;
   autor?: { handle?: string; nombre?: string; avatar?: string | null };

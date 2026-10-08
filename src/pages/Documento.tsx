@@ -4177,6 +4177,8 @@ function EditorPagina() {
             opciones={{
               secciones: bloques.filter(b => ['titulo1', 'titulo2', 'titulo3'].includes(b.tipo) && (b as any).texto?.trim())
                 .map(b => ({ id: b.id, titulo: String((b as any).texto).replace(/[*_`#]/g, '').trim().slice(0, 60) })),
+              bases: bloques.filter(b => b.tipo === 'basedatos' && (b as any).tabla_id)
+                .map(b => ({ bloque: b.id, tabla: String((b as any).tabla_id) })),
               paginas: bloques.filter(b => b.tipo === 'subpagina' && (b as any).entityId)
                 .map(b => ({ id: (b as any).entityId, titulo: (b as any).pubTitulo || 'Subpágina' })),
             }}

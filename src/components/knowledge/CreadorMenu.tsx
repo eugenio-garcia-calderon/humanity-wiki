@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { X, Plus, Trash2, ArrowUp, ArrowDown, Monitor, Smartphone, Image as ImageIcon, Loader2, Smile } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { subirArchivo } from '../../utils/subir';
@@ -29,6 +29,10 @@ import {
 export type OpcionesDestino = {
   secciones: { id: string; titulo: string }[];
   paginas: { id: string; titulo: string }[];
+  /** Las bases de datos de esta página: el id del bloque (el ancla) y el de la tabla. */
+  bases: { bloque: string; tabla: string }[];
+  /** Cómo se llama cada tabla, por id. Lo rellena `CreadorMenu` al abrirse. */
+  titulos?: Record<string, string>;
 };
 
 export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, onCambio, onCerrar }: {
@@ -41,6 +45,17 @@ export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, 
   onCerrar: () => void;
 }) {
   const [s, setS] = useState<Sitio>(() => completarSitio(guardado));
+  // Los nombres de las bases de datos de la página, para poder elegirlas por nombre.
+  const [titulos, setTitulos] = useState<Record<string, string>>({});
+  const idsBases = [...new Set(opciones.bases.map(b => b.tabla))].join(',');
+  useEffect(() => {
+    if (!idsBases) return;
+    let vivo = true;
+    fetch(`/api/bd/titulos?ids=${encodeURIComponent(idsBases)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : {})).then(j => { if (vivo) setTitulos(j || {}); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [idsBases]);
+  opciones = { ...opciones, titulos };
   const [pestana, setPestana] = useState<'menu' | 'pie' | 'legal'>('menu');
   const [pantalla, setPantalla] = useState<'escritorio' | 'telefono'>('escritorio');
   const poner = (n: Sitio) => { setS(n); onCambio(n); };
@@ -94,7 +109,7 @@ export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, 
                 onClickCapture={e => { if ((e.target as HTMLElement).closest('a')) e.preventDefault(); }}
                 className={cn('mx-auto bg-white shadow-lg rounded-xl overflow-hidden transition-all',
                   pantalla === 'telefono' ? 'w-[375px]' : 'w-full')}>
-                <MarcoSitio sitio={s} rutas={{ enlacePagina: id => `#${id}`, raizId: null }} logo={icono} nombre={titulo}>
+                <MarcoSitio sitio={s} rutas={{ enlacePagina: id => `#${id}`, enlaceBd: t => `#bd-${t}`, raizId: null }} logo={icono} nombre={titulo}>
                   <div className="mx-auto max-w-6xl px-5 py-10 space-y-4">
                     <p className="text-3xl font-black text-slate-900">{titulo || 'Sin título'}</p>
                     {[92, 80, 86, 60].map((w, i) => <div key={i} className="h-3 rounded bg-slate-100" style={{ width: `${w}%` }} />)}
@@ -300,6 +315,11 @@ function ListaEnlaces({ enlaces, onCambio, conEstilo, opciones }: {
             <button onClick={() => onCambio(enlaces.filter((_, j) => j !== i))} aria-label="Quitar" className="w-8 h-10 grid place-items-center text-slate-400 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
           </div>
           <ElegirDestino valor={e.destino} opciones={opciones} onCambio={d => cambiar(i, { destino: d })} />
+          {/* Dónde se abre: sólo cuando el enlace sale de la página. Bajar a una sección o a una base de datos de la misma página no abre nada. */}
+          {!['seccion', 'contacto', 'legal'].includes(e.destino.tipo) && !(e.destino.tipo === 'basedatos' && e.destino.modo === 'scroll') && (
+            <Elegir valor={e.nuevaPestana ? 'nueva' : 'misma'} onCambio={v => cambiar(i, { nuevaPestana: v === 'nueva' ? true : undefined })} pequeno
+              opciones={[['misma', 'En la misma pestaña'], ['nueva', 'En una pestaña nueva']]} />
+          )}
           {conEstilo && (
             <Elegir valor={e.estilo || 'texto'} onCambio={v => cambiar(i, { estilo: v })} pequeno
               opciones={[['texto', 'Como texto'], ['boton', 'Como botón']]} />
@@ -318,11 +338,16 @@ function ListaEnlaces({ enlaces, onCambio, conEstilo, opciones }: {
 function ElegirDestino({ valor, opciones, onCambio }: { valor: Destino; opciones: OpcionesDestino; onCambio: (d: Destino) => void }) {
   const clave = valor.tipo === 'pagina' ? `pagina:${valor.id}`
     : valor.tipo === 'seccion' ? `seccion:${valor.bloque}`
+    : valor.tipo === 'basedatos' ? `bd:${valor.bloque || valor.tabla}`
     : valor.tipo === 'legal' ? `legal:${valor.doc}` : valor.tipo;
   const elegir = (k: string) => {
     const [tipo, x] = k.split(':');
     if (tipo === 'pagina') onCambio({ tipo: 'pagina', id: x, titulo: opciones.paginas.find(p => p.id === x)?.titulo });
     else if (tipo === 'seccion') onCambio({ tipo: 'seccion', bloque: x, titulo: opciones.secciones.find(p => p.id === x)?.titulo });
+    else if (tipo === 'bd') {
+      const b = opciones.bases.find(y => y.bloque === x);
+      if (b) onCambio({ tipo: 'basedatos', tabla: b.tabla, bloque: b.bloque, titulo: opciones.titulos?.[b.tabla], modo: valor.tipo === 'basedatos' ? valor.modo : 'scroll' });
+    }
     else if (tipo === 'legal') onCambio({ tipo: 'legal', doc: x as DocLegal });
     else if (tipo === 'url') onCambio({ tipo: 'url', url: '' });
     else onCambio({ tipo: tipo as 'inicio' | 'contacto' });
@@ -330,7 +355,14 @@ function ElegirDestino({ valor, opciones, onCambio }: { valor: Destino; opciones
   // Una página o sección que ya no está en la lista (se borró) se sigue
   // enseñando con su nombre: si no, el desplegable diría otra cosa.
   const huerfana = (valor.tipo === 'pagina' && !opciones.paginas.some(p => p.id === valor.id))
-    || (valor.tipo === 'seccion' && !opciones.secciones.some(p => p.id === valor.bloque));
+    || (valor.tipo === 'seccion' && !opciones.secciones.some(p => p.id === valor.bloque))
+    || (valor.tipo === 'basedatos' && !opciones.bases.some(p => p.bloque === valor.bloque));
+  // Dos bloques con la misma base de datos se distinguen por su número.
+  const nombreBase = (b: { bloque: string; tabla: string }) => {
+    const n = opciones.titulos?.[b.tabla] || 'Base de datos';
+    const gemelas = opciones.bases.filter(x => x.tabla === b.tabla);
+    return gemelas.length > 1 ? `${n} (${gemelas.findIndex(x => x.bloque === b.bloque) + 1})` : n;
+  };
   return (
     <div className="space-y-2">
       <select value={clave} onChange={e => elegir(e.target.value)} aria-label="Adónde lleva"
@@ -344,6 +376,11 @@ function ElegirDestino({ valor, opciones, onCambio }: { valor: Destino; opciones
             {opciones.secciones.map(x => <option key={x.id} value={`seccion:${x.id}`}>{x.titulo}</option>)}
           </optgroup>
         )}
+        {opciones.bases.length > 0 && (
+          <optgroup label="Una base de datos de esta página">
+            {opciones.bases.map(x => <option key={x.bloque} value={`bd:${x.bloque}`}>{nombreBase(x)}</option>)}
+          </optgroup>
+        )}
         {opciones.paginas.length > 0 && (
           <optgroup label="Una página de tu web">
             {opciones.paginas.map(x => <option key={x.id} value={`pagina:${x.id}`}>{x.titulo}</option>)}
@@ -353,6 +390,10 @@ function ElegirDestino({ valor, opciones, onCambio }: { valor: Destino; opciones
           {(Object.keys(NOMBRES_LEGALES) as DocLegal[]).map(d => <option key={d} value={`legal:${d}`}>{NOMBRES_LEGALES[d]}</option>)}
         </optgroup>
       </select>
+      {valor.tipo === 'basedatos' && (
+        <Elegir valor={valor.modo} onCambio={m => onCambio({ ...valor, modo: m })} pequeno
+          opciones={[['scroll', 'Bajar hasta ella'], ['pagina', 'Abrir su página']]} />
+      )}
       {valor.tipo === 'url' && (
         <input value={valor.url} onChange={e => onCambio({ tipo: 'url', url: e.target.value })}
           placeholder="https://…, mailto:hola@… o tel:+34…" inputMode="url"

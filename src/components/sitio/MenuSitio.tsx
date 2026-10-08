@@ -47,13 +47,21 @@ export function IconoMenu({ valor, tamano }: { valor?: string; tamano: number })
 
 /** Cómo se arman las direcciones en este sitio: en un dominio propio la raíz
  *  es `/`, dentro de humanity.wiki es `/@quien/p/…`. */
-export type Rutas = { enlacePagina: (id: string) => string; raizId?: string | null };
+export type Rutas = {
+  enlacePagina: (id: string) => string;
+  /** La página propia de una base de datos: `/bd/:tabla/:nombre`. */
+  enlaceBd?: (tabla: string, titulo?: string) => string;
+  raizId?: string | null;
+};
 
 export function hrefDe(d: Destino, rutas: Rutas): string {
   switch (d?.tipo) {
     case 'inicio': return rutas.raizId ? rutas.enlacePagina(rutas.raizId) : '/';
     case 'pagina': return rutas.enlacePagina(d.id);
     case 'seccion': return `#b-${d.bloque}`;
+    case 'basedatos':
+      if (d.modo === 'scroll' && d.bloque) return `#b-${d.bloque}`;
+      return rutas.enlaceBd ? rutas.enlaceBd(d.tabla, d.titulo) : '#';
     case 'legal': return `#${d.doc}`;
     case 'contacto': return '#contacto';
     case 'url': return d.url || '#';
@@ -62,8 +70,10 @@ export function hrefDe(d: Destino, rutas: Rutas): string {
 }
 
 /** Una dirección de este mismo sitio se abre sin recargar (ver `VistaPagina`). */
-const esInterno = (d: Destino) => d?.tipo === 'inicio' || d?.tipo === 'pagina';
-const esFuera = (d: Destino) => d?.tipo === 'url' && /^https?:/.test(d.url || '');
+const esInterno = (d: Destino, nueva?: boolean) => !nueva && (d?.tipo === 'inicio' || d?.tipo === 'pagina' || (d?.tipo === 'basedatos' && d.modo === 'pagina'));
+/** Una pestaña nueva: la que se pidió, o una dirección de otra web. Bajar por la misma página nunca la abre. */
+const esFuera = (d: Destino, nueva?: boolean) => (d?.tipo === 'url' && /^https?:/.test(d.url || ''))
+  || (!!nueva && d?.tipo !== 'seccion' && d?.tipo !== 'contacto' && d?.tipo !== 'legal' && !(d?.tipo === 'basedatos' && d.modo === 'scroll'));
 
 const MEDIDAS: Record<Tamano, { alto: number; logo: number; letra: string; caja: string; icono: number }> = {
   pequeno: { alto: 56, logo: 28, letra: 'text-[13px]', caja: 'h-8 px-2.5', icono: 14 },
@@ -80,9 +90,9 @@ function EnlaceMenu({ e, rutas, tamano, acento, lleno }: {
   const boton = e.estilo === 'boton';
   return (
     <a href={hrefDe(e.destino, rutas)}
-      data-interno={esInterno(e.destino) ? '' : undefined}
-      target={esFuera(e.destino) ? '_blank' : undefined}
-      rel={esFuera(e.destino) ? 'noopener noreferrer' : undefined}
+      data-interno={esInterno(e.destino, e.nuevaPestana) ? '' : undefined}
+      target={esFuera(e.destino, e.nuevaPestana) ? '_blank' : undefined}
+      rel={esFuera(e.destino, e.nuevaPestana) ? 'noopener noreferrer' : undefined}
       style={boton ? { background: acento, color: textoSobre(acento) } : undefined}
       className={cn('inline-flex items-center gap-2 rounded-lg font-bold whitespace-nowrap transition-opacity',
         m.letra, m.caja, lleno && 'w-full', boton ? 'hover:opacity-90 justify-center' : 'opacity-80 hover:opacity-100')}>
@@ -181,8 +191,8 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
             <ul className="space-y-2">
               {p.enlaces.map(e => (
                 <li key={e.id}>
-                  <a href={hrefDe(e.destino, rutas)} data-interno={esInterno(e.destino) ? '' : undefined}
-                    target={esFuera(e.destino) ? '_blank' : undefined} rel={esFuera(e.destino) ? 'noopener noreferrer' : undefined}
+                  <a href={hrefDe(e.destino, rutas)} data-interno={esInterno(e.destino, e.nuevaPestana) ? '' : undefined}
+                    target={esFuera(e.destino, e.nuevaPestana) ? '_blank' : undefined} rel={esFuera(e.destino, e.nuevaPestana) ? 'noopener noreferrer' : undefined}
                     className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100">
                     <IconoMenu valor={e.icono} tamano={15} /> {e.texto}
                   </a>

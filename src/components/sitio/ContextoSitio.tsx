@@ -1,4 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react';
+import { slugDe } from './sitioWeb';
 
 // ============================================================================
 // EN QUÉ SITIO ESTAMOS (2026-09-30)
@@ -15,6 +16,8 @@ import { createContext, useContext, type ReactNode } from 'react';
 export type Sitio = {
   /** La dirección de una subpágina (un elemento de una base de datos). */
   enlacePagina: (id: string) => string;
+  /** La página propia de una base de datos (2026-10-08). */
+  enlaceBd: (tabla: string, titulo?: string) => string;
   /** La dirección de una página publicada por su nombre corto. */
   enlaceSlug: (slug: string, handle: string) => string;
   /** El id de la página que abre el sitio, si se sabe: volver a ella es
@@ -33,6 +36,7 @@ export const useSitio = () => useContext(Contexto);
 /** Dominio propio y subdominio: todo cuelga de la raíz del anfitrión. */
 export const sitioConAnfitrion = (raizId?: string | null): Sitio => ({
   enlacePagina: id => (raizId && id === raizId ? '/' : `/p/${id}`),
+  enlaceBd: (t, titulo) => `/bd/${t}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`,
   enlaceSlug: slug => `/${slug}`,
   raizId,
 });
@@ -40,5 +44,6 @@ export const sitioConAnfitrion = (raizId?: string | null): Sitio => ({
 /** `humanity.wiki/@quien/…`: todo cuelga del arroba. */
 export const sitioEnCasa = (handle: string): Sitio => ({
   enlacePagina: id => `/@${handle}/p/${id}`,
+  enlaceBd: (t, titulo) => `/@${handle}/bd/${t}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`,
   enlaceSlug: (slug, h) => `/@${h || handle}/${slug}`,
 });
