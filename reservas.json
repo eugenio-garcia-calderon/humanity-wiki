@@ -1,16 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-orden",
-      "ruta": "drizzle/0146_bd_tienda_zonas_envio.sql",
-      "motivo": "tarifas de envío para productos de bases de datos",
-      "desde": "2026-10-08T11:55:23.919Z"
-    },
-    {
-      "agente": "prog8-orden",
-      "ruta": "src/server/bd/tienda.ts",
-      "motivo": "tarifas de envío para productos de bases de datos",
-      "desde": "2026-10-08T11:55:23.919Z"
-    }
-  ]
+  "reservas": []
 }
