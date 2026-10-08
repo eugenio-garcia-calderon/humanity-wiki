@@ -8712,3 +8712,10 @@ en mis páginas como proyecto pendiente».
 - **Es privada y sólo desde humanity.wiki — dos cerrojos en `consola.ts`**: (1) sólo quien **gestiona** la página (dueño, administrador del equipo o de la plataforma; un editor no); (2) sólo en la casa: desde un dominio propio o un subdominio la ruta contesta 404 aunque viaje la cookie. Los datos viven en su **propia tabla** `consolas` (migración `0148`), no en `config`, que sí sale por las rutas públicas: así no hay forma de que se filtre por descuido. Probado: sin sesión 401, otro host 404, usuario sin permiso 403 (GET y PUT), y la página pública no la contiene.
 - Entrada saneada (`utils/consola.ts`): tipos, tamaños, estados válidos y enlaces sólo http(s) o relativos.
 - **Pendiente (lo dicho por Eugenio)**: conectar la tienda y el almacén para que escriban aquí sus métricas en tiempo real (hay sitio: cada eslabón admitirá `metricas`); traer tareas reales del proyecto; avisos cuando algo pase a rojo.
+
+### 2026-10-08 — Feedback: editar, voz y relevancia (prog8)
+- **Editar un feedback ya enviado** (`PUT /api/incidencias/:id`): el autor o un administrador cambia título, detalle, tipo y relevancia (el estado sigue siendo solo del equipo; un ajeno recibe 403; título vacío o relevancia fuera de 1-10 dan 400). Botón de lápiz por elemento en `Hormiguero.tsx`. Antes el autor no podía tocar el título si ya tenía respuesta.
+- **Voz**: `CajaVoz` reutiliza `useVoiceDictation` y `BotonMicrofono` del chat de IA en los cuadros de crear y editar.
+- **Relevancia 1-10** (migración `0149_feedback_relevancia.sql`, columna `incidencias.relevancia`, por defecto 5, con CHECK): slider con etiquetas 1 detalle · 5 relevante · 10 crítico, insignia en la lista, y `GET /api/incidencias` ordena por estado, luego relevancia descendente y luego antigüedad (el campo viaja en el JSON para los agentes).
+- Probado en local: crear/editar por API y por pantalla, 403 de ajeno, 400 de valores inválidos, orden, migración idempotente (aplicada dos veces).
+- **No probado**: hablar de verdad al micrófono (solo se comprobó que el control está montado); la migración no está aplicada en producción (la aplica el despliegue).
