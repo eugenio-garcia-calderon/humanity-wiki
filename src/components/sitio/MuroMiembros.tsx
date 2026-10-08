@@ -146,7 +146,9 @@ export default function MuroMiembros({ muro, paginaId, onDentro, enLinea }: {
       ) : (
         <>
           <p className="mt-2 text-center text-xs text-slate-500">
-            {s.mensaje || (modo === 'registro' ? 'Crea tu cuenta para ver el contenido para miembros.' : 'Este contenido es para miembros. Entra para verlo.')}
+            {s.mensaje || (enLinea
+              ? (modo === 'registro' ? 'Crea tu cuenta para entrar en esta web.' : 'Entra con tu cuenta, o crea una si aún no la tienes.')
+              : modo === 'registro' ? 'Crea tu cuenta para ver el contenido para miembros.' : 'Este contenido es para miembros. Entra para verlo.')}
           </p>
           <div className={cn('mt-5 grid gap-1 rounded-xl bg-slate-100 p-1', s.enlace_magico ? 'grid-cols-3' : 'grid-cols-2')} role="tablist">
             {([['entrar', 'Entrar', KeyRound], ['registro', 'Crear cuenta', UserPlus], ...(s.enlace_magico ? [['enlace', 'Enlace', Mail]] : [])] as const).map(([id, txt, Ic]: any) => (

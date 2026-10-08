@@ -770,11 +770,47 @@ export function registrarMiembros(app: Express, db: any) {
       if (!a) return res.json({ activo: false });
       const muro = await muroDe(db, a);
       const m = a.miembro;
+      // La foto de perfil de quien ha entrado (la de su cuenta), para el icono del menú. Y, si es del equipo
+      // (la persona que gestiona la web), su nombre y su foto de la plataforma.
+      const foto = async (uid: string | null | undefined) => uid
+        ? ((await db.execute(sql`SELECT avatar_url FROM users WHERE id = ${uid}`)).rows[0] as any)?.avatar_url || null
+        : null;
+      res.set('Cache-Control', 'private, no-store');
       res.json({
         activo: true, ...muro.sitio, es_equipo: a.esEquipo,
-        yo: m ? { nombre: m.nombre, email: m.email, estado: m.estado, categoria: m.categoriaNombre, permisos: m.estado === 'activo' ? m.permisos : null } : null,
+        yo: m ? { nombre: m.nombre, email: m.email, estado: m.estado, categoria: m.categoriaNombre, avatar: await foto(m.userId), permisos: m.estado === 'activo' ? m.permisos : null } : null,
+        equipo: a.esEquipo && req.user ? { nombre: req.user.displayName || req.user.name || req.user.email, avatar: req.user.avatarUrl || null } : null,
       });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * «MIS PEDIDOS», DENTRO DE LA WEB (2026-10-08). Los pedidos que esta persona ha hecho EN ESTA TIENDA (los de quien
+   * publica la web): por su cuenta o por el correo con el que compró antes de registrarse. Sólo para quien tiene su
+   * sesión de sitio activa; no abre nada de la plataforma ni enseña pedidos de otras tiendas.
+   */
+  app.get('/api/sitio-miembros/:raiz/mis-pedidos', async (req: Request, res: Response) => {
+    try {
+      res.set('Cache-Control', 'private, no-store');
+      const raiz = String(req.params.raiz);
+      const c = await config(raiz);
+      if (!c?.activo) return res.json({ pedidos: [] });
+      const m = await miembroActual(db, req, raiz);
+      if (!m || m.estado !== 'activo') return res.status(401).json({ error: 'Entra para ver tus pedidos.' });
+      const dueno = ((await db.execute(sql`SELECT creator_user_id FROM knowledge_windows WHERE id = ${raiz}`)).rows[0] as any)?.creator_user_id;
+      if (!dueno) return res.json({ pedidos: [] });
+      const r = await db.execute(sql`
+        SELECT codigo, producto_nombre, importe_centimos, envio_centimos, moneda, estado, seguimiento, entrega_estimada, created_at
+        FROM pedidos
+        WHERE vendedor_user_id = ${dueno}
+          AND ((${m.userId}::text IS NOT NULL AND comprador_user_id = ${m.userId}) OR lower(comprador_email) = lower(${m.email}))
+        ORDER BY created_at DESC LIMIT 30
+      `);
+      res.json({ pedidos: (r.rows as any[]).map(p => ({
+        codigo: p.codigo, resumen: p.producto_nombre, total_centimos: Number(p.importe_centimos || 0), moneda: p.moneda || 'EUR',
+        estado: p.estado, seguimiento: p.seguimiento || null, entrega_estimada: p.entrega_estimada || null, fecha: p.created_at,
+      })) });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
   /** Abrir sesión en el sitio para un miembro ya decidido. */

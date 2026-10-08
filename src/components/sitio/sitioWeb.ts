@@ -147,6 +147,9 @@ export function completarSitio(s: any): Sitio {
   };
 }
 
+/** ¿Esta página se pinta con el menú del sitio encendido? Entonces el icono de cuenta va dentro de él. */
+export const conMenuDeSitio = (pagina: any): boolean => !!pagina?.sitio?.config && completarSitio(pagina.sitio.config).menu.activo;
+
 /** Negro o blanco, el que se lea mejor sobre ese color. */
 export function textoSobre(fondo: string): string {
   const m = /^#?([0-9a-f]{6})$/i.exec(fondo || '');

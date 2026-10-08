@@ -4,6 +4,7 @@ import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../component
 import { paginaPrecargada } from '../utils/precargado';
 import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros';
 import BarraMiembro from '../components/sitio/BarraMiembro';
+import { conMenuDeSitio } from '../components/sitio/sitioWeb';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
 
 // ============================================================================
@@ -71,7 +72,7 @@ export default function PaginaDeDominio({ host, resuelto }: { host: string; resu
         // Si la página vende algo, la cesta va igual: el dominio cambia la
         // dirección, no lo que la página es.
         pie={resuelto.datos?.autor?.handle ? <Cesta tienda={resuelto.datos.autor.handle} /> : null} />
-      {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} />}
+      {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} conMenu={conMenuDeSitio(pagina)} />}
       <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" contarVisita />
     </>
   );
