@@ -158,7 +158,7 @@ type Sitio =
   | { forma: 'subdominio'; host: string; handle: string }
   | { forma: 'casa'; host: string };
 
-function sitioDe(req: Request): Sitio {
+export function sitioDe(req: Request): Sitio {
   const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase().replace(/:\d+$/, '');
   if (host === DOMINIO || host === 'localhost' || /^[0-9.]+$/.test(host) || !host) return { forma: 'casa', host };
   if (host.endsWith('.' + DOMINIO) || host.endsWith('.localhost')) {
