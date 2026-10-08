@@ -470,7 +470,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
 
         const ids = carrito.map(l => l[0]);
         const productos = (await db.execute(sql`
-          SELECT id, name, created_by, price_cents, kind FROM products
+          SELECT id, name, created_by, price_cents, kind, bd_modo FROM products
           WHERE id = ANY(string_to_array(${ids.join(',')}, ','))
         `)).rows as any[];
         if (productos.length === 0) break;
@@ -488,7 +488,8 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
         // compró está disponible en el pedido desde el segundo uno. Si hay
         // una sola cosa física en el carrito, el pedido es de los que se
         // envían y sigue el camino normal.
-        const todoDigital = productos.every(p => (p.kind || 'fisico') === 'digital');
+        // Una donación tampoco tiene nada que enviar: nace entregada (2026-10-08).
+        const todoDigital = productos.every(p => (p.kind || 'fisico') === 'digital' || p.bd_modo === 'donar');
 
         const correo = session.customer_details?.email || session.customer_email || null;
         const vendedorId = session.metadata!.vendedor_id || productos[0].created_by || null;
@@ -564,7 +565,17 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
           // ── EL PEDIDO Y SUS LÍNEAS (fases 6 y 7) ───────────────────────
           const envioCent = Number(session.metadata!.envio_centimos || 0) || 0;
           const d = session.customer_details;
-          const envio = (session as any).shipping_details || (session as any).shipping || null;
+          // LO QUE SE ESCRIBIÓ EN NUESTRO FORMULARIO (2026-10-08): con el pago en nuestro dominio, Stripe ya no
+          // pide la dirección —la pedimos nosotros y la dejamos ligada a la sesión—, así que se lee de ahí.
+          // Si no hay (el pago antiguo, de la página de Stripe), manda lo que diga Stripe, como siempre.
+          const propias = (await db.execute(sql`SELECT envio, facturacion, telefono FROM checkout_direcciones WHERE stripe_session_id = ${session.id}`)).rows[0] as any;
+          const envio = propias?.envio
+            ? { name: propias.envio.nombre, address: { line1: propias.envio.linea1, line2: propias.envio.linea2 || null, postal_code: propias.envio.cp, city: propias.envio.ciudad, state: propias.envio.provincia || null, country: propias.envio.pais } }
+            : ((session as any).shipping_details || (session as any).shipping || null);
+          const facturacion = propias?.facturacion || null;
+          const nifComprador = facturacion?.nif || null;
+          const compradorPedido = session.metadata!.buyer_id || null;
+          const telefonoDelPedido = normalizarTelefonoSeguro(propias?.telefono || d?.phone || (session.metadata as any)?.telefono);
 
           // ══ COBRO AGREGADO: UN PAGO, VARIAS TIENDAS (2026-08-24) ═══════
           // El dinero ha entrado ENTERO en la cuenta de la plataforma. Aquí se
@@ -599,16 +610,18 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                                      importe_centimos, envio_centimos, moneda,
                                      comprador_user_id, comprador_email, comprador_nombre,
                                      direccion_envio, vendedor_user_id, estado,
-                                     stripe_session_id, transaction_id, telefono_contacto, cobro_tipo)
+                                     stripe_session_id, transaction_id, telefono_contacto, cobro_tipo,
+                                     direccion_facturacion, comprador_nif)
                 VALUES (${idT}, ${codigoDePedido()},
                         ${lineasT.length === 1 ? lineasT[0][0] : null}, ${resumenT},
                         ${lineasT.length === 1 ? lineasT[0][1] : null},
                         ${brutoT}, ${envioT}, ${(session.currency || 'eur').toUpperCase()},
-                        NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
+                        ${compradorPedido}, ${d?.email || null}, ${envio?.name || d?.name || null},
                         ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
                         ${vid || null}, ${digitalT ? 'entregado' : 'pagado'},
                         ${`${session.id}#${vid}`}, ${txId},
-                        ${normalizarTelefonoSeguro(d?.phone || (session.metadata as any)?.telefono)}, 'agregado')
+                        ${telefonoDelPedido}, 'agregado',
+                        ${facturacion ? JSON.stringify(facturacion) : null}::jsonb, ${nifComprador})
                 ON CONFLICT (stripe_session_id) DO NOTHING
                 RETURNING id
               `);
@@ -646,16 +659,18 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                                  importe_centimos, envio_centimos, moneda,
                                  comprador_user_id, comprador_email, comprador_nombre,
                                  direccion_envio, vendedor_user_id, estado,
-                                 stripe_session_id, transaction_id, telefono_contacto)
+                                 stripe_session_id, transaction_id, telefono_contacto,
+                                 direccion_facturacion, comprador_nif)
             VALUES (${pedidoId}, ${codigoDePedido()},
                     ${carrito.length === 1 ? carrito[0][0] : null}, ${resumen},
                     ${carrito.length === 1 ? carrito[0][1] : null},
                     ${session.amount_total || 0}, ${envioCent},
                     ${(session.currency || 'eur').toUpperCase()},
-                    NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
+                    ${compradorPedido}, ${d?.email || null}, ${envio?.name || d?.name || null},
                     ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
                     ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${session.id}, ${txId},
-                    ${normalizarTelefonoSeguro(d?.phone || (session.metadata as any)?.telefono)})
+                    ${telefonoDelPedido},
+                    ${facturacion ? JSON.stringify(facturacion) : null}::jsonb, ${nifComprador})
             ON CONFLICT (stripe_session_id) DO NOTHING
             RETURNING id
           `);

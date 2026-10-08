@@ -44,6 +44,11 @@ export type CompraFila = {
   envio_centimos: number | null;
   stock: number | null;
   variantes: { id: string; nombre: string }[];
+  /** Cómo se comporta el botón (2026-10-08): `comprar` va derecho al pago, `carrito` añade a la
+   *  cesta, `donar` deja elegir cuánto (sin IVA) y `recompensa` es una donación con algo a cambio. */
+  modo: 'comprar' | 'carrito' | 'donar' | 'recompensa';
+  /** Qué recibe quien apoya, en `recompensa`. */
+  recompensa: string | null;
   /** Why it cannot be bought, in words for the person looking. */
   motivo?: string;
 };
@@ -108,6 +113,15 @@ export async function sincronizarTienda(db: any, args: {
   const cStock = columnaConRol(columnas, 'stock', ['numero']);
   const cVar = columnaConRol(columnas, 'variantes', ['seleccion_multiple', 'seleccion']);
   const cImg = columnas.find(c => c.tipo === 'imagen') || null;
+  // LAS CUATRO FORMAS DEL BOTÓN (2026-10-08). Sin `modo` (los de antes) es la cesta.
+  const MODOS = ['comprar', 'carrito', 'donar', 'recompensa'] as const;
+  const cBoton = columnas.find(c => c.tipo === 'compra');
+  const modo: CompraFila['modo'] = MODOS.includes(cBoton?.config?.modo) ? cBoton.config.modo : 'carrito';
+  const esDonacion = modo === 'donar' || modo === 'recompensa';
+  const cRecompensa = columnaConRol(columnas, 'recompensa', ['texto']);
+  // Qué es el producto de detrás: lo que se envía es físico; una donación no se envía ni se descarga
+  // (y la recompensa sólo se envía si la base de datos tiene propiedad «Envío»).
+  const kind = modo === 'donar' ? 'servicio' : modo === 'recompensa' ? (cEnvio ? 'fisico' : 'servicio') : 'fisico';
   const moneda = String(cPrecio?.config?.moneda || 'EUR').toUpperCase();
 
   const ex = new Map<string, any>();
@@ -134,17 +148,20 @@ export async function sincronizarTienda(db: any, args: {
 
   for (const fila of filas) {
     const nombre = String(valorDe(colTitulo ? fila.celdas[colTitulo] : null) || '').trim().slice(0, 200) || 'Sin nombre';
-    const precio = cPrecio ? aCentimos(valorDe(fila.celdas[cPrecio.id])) : null;
+    const precioPuesto = cPrecio ? aCentimos(valorDe(fila.celdas[cPrecio.id])) : null;
+    // Una donación sin importe sugerido sale con 5 €: es el que se ofrece de entrada, se puede cambiar.
+    const precio = precioPuesto ?? (modo === 'donar' ? 500 : null);
+    const textoRecompensa = modo === 'recompensa' && cRecompensa ? (String(valorDe(fila.celdas[cRecompensa.id]) || '').trim().slice(0, 500) || null) : null;
     const envio = cEnvio ? aCentimos(valorDe(fila.celdas[cEnvio.id])) : null;
     const stockBruto = cStock ? valorDe(fila.celdas[cStock.id]) : null;
-    const stock = typeof stockBruto === 'number' && Number.isFinite(stockBruto) ? Math.max(0, Math.round(stockBruto)) : null;
+    const stock = !esDonacion && typeof stockBruto === 'number' && Number.isFinite(stockBruto) ? Math.max(0, Math.round(stockBruto)) : (modo === 'recompensa' && typeof stockBruto === 'number' && Number.isFinite(stockBruto) ? Math.max(0, Math.round(stockBruto)) : null);
     const imagenes = cImg ? (fila.archivos?.[cImg.id] || []).map((a: any) => a.url).filter(Boolean).slice(0, 8) : [];
     const marcadas = cVar ? valorDe(fila.celdas[cVar.id]) : null;
     const variantes = (Array.isArray(marcadas) ? marcadas : marcadas ? [marcadas] : [])
       .map((id: string) => opcionLabel.get(id)).filter(Boolean) as string[];
 
-    const base: CompraFila = { producto_id: null, nombre, precio_centimos: precio, moneda, envio_centimos: envio, stock, variantes: [] };
-    const huella = createHash('sha1').update(JSON.stringify([nombre, precio, moneda, envio, stock, imagenes, variantes])).digest('hex');
+    const base: CompraFila = { producto_id: null, nombre, precio_centimos: precio, moneda, envio_centimos: envio, stock, variantes: [], modo, recompensa: textoRecompensa };
+    const huella = createHash('sha1').update(JSON.stringify([nombre, precio, moneda, envio, stock, imagenes, variantes, modo, textoRecompensa])).digest('hex');
     const actual = ex.get(fila.id);
 
     if (!actual) {
@@ -155,10 +172,11 @@ export async function sincronizarTienda(db: any, args: {
       const id = nuevoId('PRD');
       const r = await db.execute(sql`
         INSERT INTO products (id, name, category, price_cents, currency, kind, modality, stock, images, status,
-                              created_by, updated_by, envio_centimos, acepta_puntos, bd_fila_id, bd_tabla_id, bd_huella)
-        VALUES (${id}, ${nombre}, 'OTROS', ${precio}, ${moneda}, 'fisico', 'unico', ${stock}, ${JSON.stringify(imagenes)}::jsonb,
+                              created_by, updated_by, envio_centimos, acepta_puntos, bd_fila_id, bd_tabla_id, bd_huella,
+                              bd_modo, description, iva_pct)
+        VALUES (${id}, ${nombre}, 'OTROS', ${precio}, ${moneda}, ${kind}, 'unico', ${stock}, ${JSON.stringify(imagenes)}::jsonb,
                 ${precio === null ? 'borrador' : estadoVendible}, ${duenoId}, ${duenoId}, ${envio}, false,
-                ${fila.id}, ${tablaId}, ${huella})
+                ${fila.id}, ${tablaId}, ${huella}, ${modo}, ${textoRecompensa}, ${esDonacion ? 0 : null})
         ON CONFLICT (bd_fila_id) WHERE bd_fila_id IS NOT NULL DO NOTHING
         RETURNING id
       `);
@@ -176,6 +194,9 @@ export async function sincronizarTienda(db: any, args: {
           UPDATE products SET name = ${nombre}, price_cents = ${precio}, currency = ${moneda}, stock = ${stock},
                  images = ${JSON.stringify(imagenes)}::jsonb, envio_centimos = ${envio}, bd_huella = ${huella},
                  bd_tabla_id = ${tablaId}, archived_at = NULL, updated_by = ${duenoId}, updated_at = now(),
+                 kind = ${kind}, bd_modo = ${modo}, description = ${textoRecompensa},
+                 -- Una donación no lleva IVA. Si deja de serlo, vuelve al IVA que tuviera por defecto el vendedor.
+                 iva_pct = CASE WHEN ${esDonacion} THEN 0 WHEN bd_modo IN ('donar', 'recompensa') THEN NULL ELSE iva_pct END,
                  status = CASE WHEN ${precio}::int IS NULL THEN 'borrador'
                                WHEN status = 'borrador' THEN ${estadoVendible} ELSE status END
           WHERE id = ${actual.id}

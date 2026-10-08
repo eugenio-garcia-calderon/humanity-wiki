@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
 import { useCarrito, aLineasServidor, claveLinea } from '../../hooks/useCarrito';
+import CheckoutPropio, { type LineaPago } from './CheckoutPropio';
 
 // ============================================================================
 // LA CESTA — fase 7 del plan de tiendas (2026-08-22)
@@ -164,8 +166,52 @@ function CompraHecha({ tienda }: { tienda: string }) {
   );
 }
 
-export default function Cesta({ tienda }: { tienda: string }) {
+// QUIÉN PONE LA CESTA (2026-10-08). Las páginas de una tienda ya llevan la suya (`<Cesta>`). Los botones
+// de compra de una base de datos pueden estar en CUALQUIER página, así que cada uno pide una (`CestaDeBotones`)
+// y sólo sale la de uno de ellos, y sólo si la página no tiene ya la suya: dos cestas encima la una de la otra
+// serían dos «Tu cesta» con el mismo contenido.
+const propias = new Map<string, number>();
+const deBotones = new Map<string, symbol[]>();
+const oyentes = new Set<() => void>();
+const avisarCestas = () => oyentes.forEach(f => f());
+
+export function CestaDeBotones({ tienda }: { tienda: string }) {
+  const [yo] = useState(() => Symbol('boton'));
+  const [, fuerza] = useState(0);
+  useEffect(() => {
+    deBotones.set(tienda, [...(deBotones.get(tienda) || []), yo]);
+    const oir = () => fuerza(n => n + 1);
+    oyentes.add(oir); avisarCestas();
+    return () => { deBotones.set(tienda, (deBotones.get(tienda) || []).filter(x => x !== yo)); oyentes.delete(oir); avisarCestas(); };
+  }, [tienda, yo]);
+  const lidera = deBotones.get(tienda)?.[0] === yo && !propias.get(tienda);
+  return lidera ? createPortal(<Cesta tienda={tienda} registrar={false} />, document.body) : null;
+}
+
+export default function Cesta({ tienda, registrar = true }: { tienda: string; registrar?: boolean }) {
   const { lineas, unidades, subtotal, cambiar, quitar, vaciar } = useCarrito(tienda);
+  useEffect(() => {
+    if (!registrar) return;
+    propias.set(tienda, (propias.get(tienda) || 0) + 1); avisarCestas();
+    return () => { propias.set(tienda, Math.max(0, (propias.get(tienda) || 1) - 1)); avisarCestas(); };
+  }, [tienda, registrar]);
+  // FINALIZAR COMPRA = el pago en nuestro dominio (`CheckoutPropio`), con lo que haya en la cesta (o, con
+  // varias tiendas, con las líneas de la que toca ahora). Al volver pagado, sólo salen de la cesta ESAS líneas.
+  const [pagoAbierto, setPagoAbierto] = useState<{ lineas: LineaPago[]; extra: Record<string, any> } | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !/[?&]compra=hecha/.test(window.location.search)) return;
+    try {
+      const k = `humanity:pagando:${tienda}`;
+      const pagadas: string[] = JSON.parse(sessionStorage.getItem(k) || '[]');
+      sessionStorage.removeItem(k);
+      for (const c of pagadas) { const [pid, vid] = c.split('|'); quitar(pid, vid || undefined); }
+    } catch { /* sin sessionStorage: la cesta se queda y se vacía a mano */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const abrirPago = (ls: LineaPago[], extra: Record<string, any>) => {
+    try { sessionStorage.setItem(`humanity:pagando:${tienda}`, JSON.stringify(ls.map(l => `${l.producto_id}|${l.variante_id || ''}`))); } catch { /* idem */ }
+    setPagoAbierto({ lineas: ls, extra });
+  };
   // `?cesta=abrir` la abre al cargar: es adonde lleva el aviso «tu cesta sigue ahí».
   const [abierta, setAbierta] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('cesta') === 'abrir');
   // El aviso de cesta olvidada se apaga AQUÍ, en la propia cesta (revisión
@@ -191,7 +237,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
   // todo (2026-08-23); y la dirección, por si entonces hay que enviar algo.
   const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean;
     zona?: string; zona_nombre?: string; se_envia?: boolean; no_llega?: string | null; envio_estimado?: boolean; recogida_posible?: boolean;
-    varias_tiendas?: boolean;
+    varias_tiendas?: boolean; con_donacion?: boolean;
     tiendas?: { vendedor_id: string | null; tienda: string | null; nombre: string | null; lineas: { producto_id: string; variante_id: string | null; cantidad: number }[];
       subtotal_centimos: number; envio_centimos: number | null; se_envia: boolean; no_llega: string | null; todo_acepta_puntos: boolean }[] } | null>(null);
   // Varias tiendas (F11): cuando se paga con puntos se liquidan todas
@@ -200,16 +246,15 @@ export default function Cesta({ tienda }: { tienda: string }) {
   // Recogida en persona (F8, 2026-08-24): si todo lo de la cesta la admite, se
   // puede elegir en vez de envío — sin porte y sin pedir dirección.
   const [recogida, setRecogida] = useState(false);
-  const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
   useEffect(() => {
     if (!abierta || lineas.length === 0) return;
     fetch('/api/publicar/cotizar', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       // Con el destino que se va escribiendo: el porte depende de la zona, y
       // enseñarlo al final es la primera causa de carrito abandonado.
-      body: JSON.stringify({ lineas: aLineasServidor(lineas), pais: direccion.pais || undefined, cp: direccion.cp || undefined }),
+      body: JSON.stringify({ lineas: aLineasServidor(lineas) }),
     }).then(r => r.json()).then(j => { if (typeof j?.subtotal_centimos === 'number') setCotiza(j); }).catch(() => {});
-  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}`).join('|'), direccion.pais, direccion.cp]);
+  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}:${l.importe_centimos || ''}`).join('|')]);
   // CUPÓN DEL VENDEDOR (2026-08-22): se comprueba contra el servidor antes de
   // pagar, para que la cesta diga el descuento y no lo adivine.
   const [cupon, setCupon] = useState('');
@@ -250,32 +295,27 @@ export default function Cesta({ tienda }: { tienda: string }) {
   const maxPuntos = caja?.saldo != null ? Math.min(caja.saldo, todoEnPuntos) : 0;
   const cubreTodo = !!caja && !!cotiza?.todo_acepta_puntos && puntosPedidos >= todoEnPuntos && maxPuntos >= todoEnPuntos && todoEnPuntos > 0;
   const descuentoCent = caja ? Math.min(parteProductos + (cubreTodo ? envioCent : 0), Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)) : 0;
-  const faltaDireccion = cubreTodo && !!cotiza?.es_fisico && !direccionCompleta(direccion);
 
   const dinero = (c: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(c / 100);
 
-  /** Una tienda: el cobro de siempre, con las líneas que le tocan. */
-  async function pagarTienda(lineasTienda: any[], usarPuntos: number | null) {
-    return fetch('/api/publicar/comprar', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        lineas: lineasTienda,
-        volver_a: window.location.href,
-        ...(usarPuntos && usarPuntos > 0 ? { usar_puntos: usarPuntos } : {}),
-        ...(cubreTodo && cotiza?.es_fisico && !recogida ? { direccion } : {}),
-        ...(direccion.telefono.trim() ? { telefono: direccion.telefono.trim() } : {}),
-        ...(recogida ? { entrega: 'recogida' } : {}),
-      }),
-    });
-  }
+  /** Lo que acompaña a las líneas en el cobro: cupón, puntos y si se recoge en persona. */
+  const extraPago = (puntos: number | null, conCupon: boolean) => ({
+    ...(puntos && puntos > 0 ? { usar_puntos: puntos } : {}),
+    ...(conCupon && cuponOk ? { cupon: cuponOk.codigo } : {}),
+    ...(recogida ? { entrega: 'recogida' } : {}),
+  });
+  const deLaCesta = (ls: { producto_id: string; cantidad: number; variante_id?: string | null; importe_centimos?: number }[]): LineaPago[] =>
+    ls.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}), ...(l.importe_centimos ? { importe_centimos: l.importe_centimos } : {}) }));
+  /** Pagado entero con puntos (sin pasarela): la compra ya está hecha. */
+  const alPagarConPuntos = (url: string) => { vaciar(); window.location.href = url; };
 
   /**
    * VARIAS TIENDAS (F11, 2026-08-24). Un cobro sigue siendo de una tienda
    * —cada vendedor cobra en su cuenta—, así que aquí se paga una detrás de
    * otra. Si todo va con puntos, se liquidan todas seguidas y quien compra
-   * solo ve «3 pedidos hechos». Si hace falta tarjeta, se paga la primera y
-   * al volver queda la siguiente en la cesta, que lo dice.
+   * solo ve «3 pedidos hechos». Si hace falta tarjeta, se abre el pago de la
+   * primera y al volver queda la siguiente en la cesta, que lo dice.
    */
   async function pagarVariasTiendas() {
     const tiendas = cotiza?.tiendas || [];
@@ -284,22 +324,32 @@ export default function Cesta({ tienda }: { tienda: string }) {
     for (let i = 0; i < tiendas.length; i++) {
       const t = tiendas[i];
       setProgresoTiendas(`Pagando ${t.nombre || t.tienda || 'una tienda'} (${i + 1} de ${tiendas.length})…`);
-      // Con puntos solo se puede liquidar la tienda entera; si no, va a Stripe
-      // y allí se para: lo demás se queda en la cesta esperando.
-      const puntosTienda = caja?.activo && t.todo_acepta_puntos && caja.puntos_por_euro
+      const lns = deLaCesta(t.lineas);
+      // Con puntos sólo se puede liquidar la tienda entera; si no, va con tarjeta, y allí se para.
+      const puntosTienda = caja?.activo && caja.con_sesion && t.todo_acepta_puntos && caja.puntos_por_euro
         ? Math.floor((((t.subtotal_centimos + (t.envio_centimos || 0)) / 100) * caja.puntos_por_euro) * 100) / 100
         : 0;
-      const r = await pagarTienda(t.lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}) })), puntosTienda || null);
-      const j = await r.json().catch(() => ({}));
-      if (r.ok && j.pagado_con_puntos) {
-        hechos.push(j.codigo);
-        // Lo pagado sale de la cesta; lo que quede sigue esperando.
-        for (const l of t.lineas) quitar(l.producto_id, l.variante_id || undefined);
-        continue;
+      if (puntosTienda > 0) {
+        const r = await fetch('/api/publicar/comprar', {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lineas: lns, volver_a: window.location.href, embebido: true, usar_puntos: puntosTienda }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.pagado_con_puntos) {
+          hechos.push(j.codigo);
+          // Lo pagado sale de la cesta; lo que quede sigue esperando.
+          for (const l of t.lineas) quitar(l.producto_id, l.variante_id || undefined);
+          continue;
+        }
+        if (!r.ok && !j.falta_direccion && !j.falta_email) {
+          setError(`${t.nombre || 'Una tienda'}: ${j.error || 'no se ha podido pagar.'}${hechos.length ? ` (${hechos.length} ya pagadas: ${hechos.join(', ')})` : ''}`);
+          setPagando(false); setProgresoTiendas(null);
+          return;
+        }
       }
-      if (r.ok && j.url) { window.location.href = j.url; return; }  // tarjeta: se para aquí
-      setError(`${t.nombre || 'Una tienda'}: ${j.error || 'no se ha podido pagar.'}${hechos.length ? ` (${hechos.length} ya pagadas: ${hechos.join(', ')})` : ''}`);
+      // Tarjeta (o puntos que no alcanzan, o falta una dirección): el pago de esta tienda, aquí mismo.
       setPagando(false); setProgresoTiendas(null);
+      abrirPago(lns, extraPago(puntosTienda > 0 ? puntosTienda : null, false));
       return;
     }
     setProgresoTiendas(null); setPagando(false);
@@ -308,49 +358,16 @@ export default function Cesta({ tienda }: { tienda: string }) {
 
   async function pagar() {
     if (cotiza?.varias_tiendas && (cotiza.tiendas?.length || 0) > 1) return pagarVariasTiendas();
-    setPagando(true); setError(null);
-    try {
-      const r = await fetch('/api/publicar/comprar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lineas: aLineasServidor(lineas),
-          volver_a: window.location.href,
-          ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
-          ...(cuponOk ? { cupon: cuponOk.codigo } : {}),
-          ...(cubreTodo && cotiza?.es_fisico && !recogida ? { direccion } : {}),
-          ...(direccion.telefono.trim() ? { telefono: direccion.telefono.trim() } : {}),
-          ...(recogida ? { entrega: 'recogida' } : {}),
-        }),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (r.ok && j.pagado_con_puntos) {
-        // Todo pagado con puntos: no hay pasarela. La cesta SÍ se vacía aquí,
-        // porque la compra ya está hecha — y se va a la tienda con el código.
-        vaciar();
-        window.location.href = j.url;
-        return;
-      }
-      if (!r.ok || !j.url) {
-        // El motivo se enseña tal cual: «de la miel solo quedan 2» es lo que
-        // hace falta saber para arreglarlo. Un «ha habido un error» obligaría
-        // a adivinar cuál de las cinco cosas del carrito es la que falla.
-        setError(j.error || 'No se ha podido abrir el pago.');
-        setPagando(false);
-        return;
-      }
-      // El carrito NO se vacía aquí. Si alguien se arrepiente en la pantalla
-      // de Stripe y vuelve, tiene que encontrar su cesta como la dejó.
-      window.location.href = j.url;
-    } catch {
-      setError('No hay conexión con el servidor.');
-      setPagando(false);
-    }
+    setError(null);
+    abrirPago(deLaCesta(lineas), extraPago(caja?.activo && puntosPedidos > 0 ? Math.min(puntosPedidos, maxPuntos) : null, true));
   }
 
   return (
     <>
       {hayConfirmacion && <CompraHecha tienda={tienda} />}
+      {pagoAbierto && (
+        <CheckoutPropio lineas={pagoAbierto.lineas} extra={pagoAbierto.extra} onCerrar={() => setPagoAbierto(null)} onPagadoConPuntos={alPagarConPuntos} />
+      )}
       {!abierta && (
         <button type="button" onClick={() => setAbierta(true)}
           className="fixed bottom-5 right-5 z-40 h-14 pl-4 pr-5 rounded-2xl bg-slate-900 text-white
@@ -384,9 +401,9 @@ export default function Cesta({ tienda }: { tienda: string }) {
                 <li key={claveLinea(l)} className="flex items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-slate-800 truncate">{l.nombre}{l.variante_nombre ? <span className="text-slate-500 font-semibold"> · {l.variante_nombre}</span> : null}</p>
-                    <p className="text-xs text-slate-400">{dinero(l.precio_centimos)} cada uno</p>
+                    <p className="text-xs text-slate-400">{l.importe_centimos ? `Donación de ${dinero(l.importe_centimos)}` : `${dinero(l.precio_centimos)} cada uno`}</p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className={`flex items-center gap-1 shrink-0 ${l.importe_centimos ? 'hidden' : ''}`}>
                     <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad - 1, l.variante_id)}
                             aria-label="Uno menos"
                             className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
@@ -429,6 +446,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
                 </div>
               )}
               {progresoTiendas && <p className="mt-2 text-xs font-bold text-slate-700">{progresoTiendas}</p>}
+              {cotiza?.con_donacion && <p className="mt-1 text-[11px] text-slate-400">Las donaciones no llevan IVA.</p>}
               {cotiza?.recogida_posible && (
                 <label className="mt-2 flex items-start gap-2 cursor-pointer p-2 rounded-lg border border-slate-200">
                   <input type="checkbox" checked={recogida} onChange={e => setRecogida(e.target.checked)} className="mt-0.5" />
@@ -497,21 +515,19 @@ export default function Cesta({ tienda }: { tienda: string }) {
                           : ' Solo lo que el vendedor acepta en puntos puede pagarse así; el resto y el envío van con tarjeta.'}
                     </p>
                   )}
-                  {cubreTodo && cotiza?.es_fisico && <DireccionEnvio valor={direccion} onCambio={setDireccion} />}
                 </div>
               )}
 
               {error && <p className="mt-3 text-xs font-bold text-rose-600">{error}</p>}
 
-              <button type="button" onClick={pagar} disabled={pagando || faltaDireccion}
+              <button type="button" onClick={pagar} disabled={pagando}
                 className="mt-4 w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-60">
                 {pagando
-                  ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {cubreTodo ? 'Pagando con puntos…' : 'Abriendo el pago…'}</span>
-                  : faltaDireccion ? 'Falta la dirección de envío'
-                  : cubreTodo ? 'Pagar con puntos' : 'Pagar'}
+                  ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {cubreTodo ? 'Pagando con puntos…' : 'Un momento…'}</span>
+                  : 'Finalizar compra'}
               </button>
               <p className="mt-2 text-center text-[11px] text-slate-400">
-                Pago seguro con tarjeta. No hace falta cuenta.
+                Pago seguro con tarjeta, sin salir de aquí. No hace falta cuenta.
               </p>
               <button type="button" onClick={vaciar}
                       className="mt-2 w-full h-11 text-xs font-bold text-slate-400 hover:text-slate-600">
