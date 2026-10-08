@@ -80,6 +80,7 @@ import { registrarColab } from './colabServidor.js';
 import { registrarPermisos } from './permisos.js';
 import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
+import { registrarConsola } from './consola.js';
 import { registrarComentarios } from './comentarios.js';
 import { registrarVersiones } from './versiones.js';
 import { registrarSeguir } from './seguir.js';
@@ -225,6 +226,8 @@ export const MODULOS: Modulo[] = [
   // de páginas publicadas. Si no monta, las páginas se siguen viendo: sólo
   // se pierde la vista previa y las subpáginas públicas.
   { nombre: 'sitios', montar: (app, db) => registrarSitios(app, db) },
+  // La consola de la cadena de valor de una web: sólo para quien gestiona la página y sólo desde humanity.wiki.
+  { nombre: 'consola', montar: (app, db) => registrarConsola(app, db) },
   { nombre: 'buscador', montar: (app, db) => registerBuscadorRoutes(app, db) },
   { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
   { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },

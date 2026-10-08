@@ -10,7 +10,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy,
+  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, CircleDashed,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,6 +22,7 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 import BotonFavorito from '../components/espacio/BotonFavorito';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import CreadorMenu from '../components/knowledge/CreadorMenu';
+import ConsolaCadena from '../components/knowledge/ConsolaCadena';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
 import MenuEntradaPagina from '../components/tablas/MenuEntradaPagina';
@@ -218,6 +219,7 @@ function EditorPagina() {
   const [filaDe, setFilaDe] = useState<{ fila_id?: string; tabla_id?: string; tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
+  const [puedoGestionar, setPuedoGestionar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
   /** La presencia (se declara más abajo, tras `cargar`); el guardado la lee. */
   const presenciaRef = useRef<{ conexion: React.MutableRefObject<string | null> }>({ conexion: { current: null } });
@@ -275,6 +277,7 @@ function EditorPagina() {
   const [buscando, setBuscando] = useState<{ q: string; senal: number } | null>(null);
   const [atajosAbiertos, setAtajosAbiertos] = useState(false);
   const [menuSitioAbierto, setMenuSitioAbierto] = useState(false);
+  const [consolaAbierta, setConsolaAbierta] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
   /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
@@ -402,6 +405,7 @@ function EditorPagina() {
         setAutor(j.autor_nombre || null);
         setPublico(!!j.publico);
         setPuedoEditar(!!j.puedo_editar);
+        setPuedoGestionar(!!j.puedo_gestionar);
         setPortada(j.config?.portada || null);
         setIcono(j.config?.icono || null);
         const aj: Ajustes = {};
@@ -3822,6 +3826,14 @@ function EditorPagina() {
               <PanelTop className="w-4 h-4" /> {tr('Menú y pie')}
             </button>
           )}
+          {/* LA CONSOLA (2026-10-08): la cadena de valor del negocio, privada. Sólo a quien gestiona la página
+              y sólo en humanity.wiki (el servidor lo exige; aquí sólo se esconde el botón). */}
+          {puedoGestionar && !filaDe?.fila_id && ['humanity.wiki', 'localhost', '127.0.0.1'].includes(window.location.hostname) && (
+            <button onClick={() => setConsolaAbierta(true)} title="Consola: cómo va el negocio" aria-label="Consola: cómo va el negocio"
+              className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
+              <CircleDashed className="w-4 h-4" /> <span className="hidden sm:inline">Consola</span>
+            </button>
+          )}
           {editable && (
             <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')} aria-label={tr('Menú y pie de página de la web')}
               className="sm:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
@@ -4172,6 +4184,7 @@ function EditorPagina() {
             })}
           </div>
         )}
+        {consolaAbierta && id && <ConsolaCadena paginaId={id} titulo={titulo} onCerrar={() => setConsolaAbierta(false)} />}
         {menuSitioAbierto && (
           <CreadorMenu sitio={ajustes.sitio} titulo={titulo} icono={icono}
             opciones={{
