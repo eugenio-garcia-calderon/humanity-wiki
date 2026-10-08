@@ -78,6 +78,24 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
   const Icono = nodo.icono || Folder;
   const esActiva = !!nodo.destino && nodo.destino === activo;
 
+  
+  const abrirNodo = () => {
+    if (nodo.tabla_id) {
+      // Enlace a una BD: scroll o navegar a URL pública
+      if (nodo.modo_bd === 'scroll') {
+        const elem = document.getElementById(`bd-${nodo.tabla_id}`);
+        if (elem) { elem.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      } else {
+        // Abrir URL pública de la BD
+        const url = `${window.location.pathname}#bd/${nodo.tabla_id}`;
+        if (nodo.abrir === 'ventana') window.open(url, '_blank');
+        else window.location.hash = `bd/${nodo.tabla_id}`;
+      }
+    } else {
+      onAbrir(nodo);
+    }
+  };
+
   const alternar = async () => {
     if (abierta) { setAbierta(false); return; }
     setAbierta(true);
@@ -95,7 +113,7 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
   if (colapsado) {
     return (
       <button
-        onClick={() => (nodo.destino ? onAbrir(nodo) : alternar())}
+        onClick={() => (nodo.destino || nodo.tabla_id ? abrirNodo() : alternar())}
         title={nodo.label}
         className={cn('w-9 h-9 mx-auto grid place-items-center rounded-lg transition-colors shrink-0',
           esActiva ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900')}
@@ -164,7 +182,7 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
         )}
 
         <button
-          onClick={() => (nodo.destino ? onAbrir(nodo) : alternar())}
+          onClick={() => (nodo.destino || nodo.tabla_id ? abrirNodo() : alternar())}
           title={label}
           // EL COLOR SE PONE AQUÍ, UNA VEZ, y lo heredan el icono y la letra.
           className={cn('flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left',
@@ -173,7 +191,9 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
           {icono
             ? <IconoElemento valor={icono} tamano={20} />
             : <Icono strokeWidth={1.75} className="shrink-0" style={{ width: 20, height: 20 }} />}
-          <span className="flex-1 truncate text-[13px] font-bold">{label}</span>
+          {!nodo.nombreOculto && (
+            <span className="flex-1 truncate text-[13px] font-bold">{nodo.nombre_bd || label}</span>
+          )}
           {nodo.punto && <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', nodo.punto)} />}
           {typeof nodo.cuantos === 'number' && nodo.cuantos > 0 && (
             <span className="text-[10px] font-bold text-slate-400 shrink-0">{nodo.cuantos}</span>

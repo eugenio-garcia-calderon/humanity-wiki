@@ -1013,6 +1013,22 @@ export function registerPublicarRoutes(app: Express, db: any) {
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
+  /** BDs DE UNA PÁGINA (2026-10-08) — para que el menú pueda enlazar. */
+  app.get('/api/paginas/:id/bloques-bd', async (req: Request, res: Response) => {
+    try {
+      const p = (await db.execute(sql`SELECT config FROM knowledge_windows WHERE id = ${req.params.id} AND deleted_at IS NULL`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Esa página no existe.' });
+      const bloques: any[] = p.config?.bloques || [];
+      const bds = bloques.filter(b => b.tipo === 'basedatos' && b.tabla_id).map((b, i) => ({
+        id: b.id,
+        tabla_id: b.tabla_id,
+        nombre: b.titulo || 'Base de datos',
+        titulo_oculto: b.tituloOculto || false,
+      }));
+      res.json(bds);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
 
   /** Dejar de publicar. La página no se toca: solo deja de ser alcanzable. */
   app.delete('/api/publicar/paginas/:id', async (req: Request, res: Response) => {
