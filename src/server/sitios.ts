@@ -34,6 +34,7 @@ import path from 'node:path';
 import { resolverDominio } from './dominios';
 import { cabeceraEnHtml } from './cabeceraSitio';
 import { bloquesDe } from './bloquesSql';
+import { slugDe } from '../components/sitio/sitioWeb';
 import { madresValidas, rolEnPagina, capacidades, quienDe } from './permisos.js';
 import { accesoMiembro, filtrarBloques, muroDe } from './miembros.js';
 import { peticionActual } from './peticionActual.js';
@@ -190,6 +191,86 @@ async function datosPagina(db: any, id: string) {
   return (r.rows[0] as any) || null;
 }
 
+
+// ── LA PÁGINA PROPIA DE UNA BASE DE DATOS (2026-10-08) ──────────────────────
+// Eugenio: «en cada base de datos un botón para que se abra en una pestaña
+// nueva y sea una página en sí, con su URL, para el SEO». `/bd/:tabla/:nombre`.
+//
+// NO ES UNA PÁGINA GUARDADA: es la galería de la base de datos con el menú y
+// el pie de la página que la enseña, armada al vuelo. Por eso no hay nada que
+// mantener al día —si cambia la tabla, cambia aquí— y no se puede quedar una
+// página huérfana. El `:nombre` de la dirección es sólo para los buscadores y
+// para quien la lee: se ignora al buscar (manda el id) y el canonical lo
+// vuelve a escribir bien.
+//
+// QUIÉN LA VE es quien ve la página que la contiene (`tablaVisible`). Si el
+// bloque está restringido a miembros, para un anónimo no existe.
+
+const buscarBloqueBd = (lista: any[], tabla: string): any | null => {
+  for (const b of Array.isArray(lista) ? lista : []) {
+    if (b?.tipo === 'basedatos' && b.tabla_id === tabla) return b;
+    const dentro = buscarBloqueBd(b?.bloques, tabla);
+    if (dentro) return dentro;
+  }
+  return null;
+};
+
+export async function baseDatosPublica(db: any, tablaId: string, req?: Request): Promise<any | null> {
+  const t = (await db.execute(sql`SELECT id, titulo, icono, descripcion, updated_at FROM bd_tablas WHERE id = ${tablaId} AND deleted_at IS NULL AND archived_at IS NULL`)).rows[0] as any;
+  if (!t) return null;
+  const r = await db.execute(sql`
+    SELECT id FROM knowledge_windows
+    WHERE kind = 'pagina' AND deleted_at IS NULL AND archived_at IS NULL
+      AND ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tabla_id', ${tablaId}::text))
+    ORDER BY publico DESC, created_at LIMIT 20
+  `);
+  // La primera página que la contiene Y que se puede ver, con el bloque aún a la vista.
+  for (const p of r.rows as any[]) {
+    const acceso = await accesoMiembro(db, req, p.id);
+    const publica = await paginaVisible(db, p.id);
+    const porMiembro = !!acceso && acceso.permitido && (acceso.restringida || acceso.esEquipo);
+    if (!publica && !porMiembro && !(req && await laVeQuienPregunta(db, p.id))) continue;
+    const w = await datosPagina(db, p.id);
+    if (!w) continue;
+    const { config } = await filtrarBloques(db, w.id, w.config, acceso);
+    const bloque = buscarBloqueBd(config?.bloques, tablaId);
+    if (!bloque) continue;
+
+    // Los primeros elementos: dan la descripción y la imagen para buscadores y redes.
+    const filas = (await db.execute(sql`
+      SELECT pw.title, pw.config->>'portada' AS portada FROM bd_filas f
+      JOIN knowledge_windows pw ON pw.id = f.pagina_id AND pw.deleted_at IS NULL
+      WHERE f.tabla_id = ${tablaId} AND f.deleted_at IS NULL AND f.archived_at IS NULL
+      ORDER BY f.orden, f.created_at LIMIT 12
+    `)).rows as any[];
+    const nombres = filas.map(f => String(f.title || '').trim()).filter(Boolean);
+    const titulo = String(t.titulo || '').trim() || 'Base de datos';
+    const descripcion = String(t.descripcion || '').trim()
+      || (nombres.length ? `${titulo}: ${nombres.join(', ')}`.slice(0, 300) : titulo);
+    const portada = filas.find(f => f.portada)?.portada || null;
+
+    const sitio = await sitioDePagina(db, w.id);
+    return {
+      id: `bd-${tablaId}`, titulo, virtual: true,
+      title: titulo,
+      // El bloque tal como lo dejó quien escribe la página (vista, tamaño,
+      // propiedades) pero sin su título: lo pinta la cabecera, como h1.
+      config: {
+        bloques: [{ ...bloque, tituloOculto: true }],
+        descripcion, imagenCompartir: portada, icono: t.icono || undefined,
+        cabecera: undefined, mostrarAutor: false,
+      },
+      indexable: w.publico ? !!w.indexable : true,
+      created_at: w.created_at, updated_at: t.updated_at,
+      autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
+      padre: { id: w.id, titulo: w.title, slug: w.publico ? w.slug : null, handle: w.handle },
+      sitio,
+      miembros: acceso ? { raiz: acceso.sitio.raiz, ocultos: 0 } : null,
+    };
+  }
+  return null;
+}
+
 /** La descripción para buscadores y redes: la que escribió el autor, o el
  *  primer texto de la página. */
 export function descripcionDe(config: any): string {
@@ -292,6 +373,16 @@ const jsonEnScript = (x: unknown) => JSON.stringify(x)
 // ── LAS RUTAS ───────────────────────────────────────────────────────────────
 
 export function registrarSitios(app: Express, db: any) {
+  /** La página propia de una base de datos: `/bd/:tabla`. */
+  app.get('/api/sitio/bd/:id', async (req: Request, res: Response) => {
+    try {
+      const p = await baseDatosPublica(db, req.params.id, req);
+      if (!p) return res.status(404).json({ error: 'Esa base de datos no existe o no está publicada.' });
+      res.set('Cache-Control', 'private, no-store');
+      res.json(p);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /**
    * Una subpágina de un sitio publicado — `/p/:id` en cualquier forma de
    * sitio. Devuelve lo mismo que el resolvedor de páginas publicadas, más su
@@ -347,6 +438,18 @@ export function registrarSitios(app: Express, db: any) {
           WHERE b.n > 0 AND w.deleted_at IS NULL AND w.archived_at IS NULL
         `);
         for (const x of r.rows as any[]) urls.push({ loc: `https://${s.host}/p/${x.id}`, mod: fecha(x.updated_at) });
+        // Y la página propia de cada base de datos que enseñan.
+        const ids = [raiz, ...(r.rows as any[]).map(x => x.id)];
+        const bd = await db.execute(sql`
+          SELECT DISTINCT t.id, t.titulo, t.updated_at FROM knowledge_windows w
+          CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
+          JOIN bd_tablas t ON t.id = blq->>'tabla_id' AND t.deleted_at IS NULL AND t.archived_at IS NULL
+          WHERE w.id = ANY(string_to_array(${ids.join(',')}, ',')) AND blq->>'tipo' = 'basedatos'
+        `);
+        for (const t of bd.rows as any[]) {
+          const n = slugDe(t.titulo);
+          urls.push({ loc: `https://${s.host}/bd/${t.id}${n ? `/${n}` : ''}`, mod: fecha(t.updated_at) });
+        }
       };
 
       if (s.forma === 'dominio') {
@@ -415,7 +518,11 @@ export function registrarSitios(app: Express, db: any) {
       const desc = descripcionDe(w.config);
       const img = imagenDe(w.config);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
-      const url = `https://${s.host}${req.path}`;
+      // La de una base de datos lleva su nombre en la dirección, venga como venga la visita.
+      const arroba = /^\/(@[^/]+)\//.exec(req.path)?.[1];
+      const url = w.virtual
+        ? `https://${s.host}${arroba ? `/${arroba}` : ''}/bd/${String(w.id).slice(3)}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`
+        : `https://${s.host}${req.path}`;
       const icono = w.config?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -510,6 +617,13 @@ export function registrarSitios(app: Express, db: any) {
   async function paginaDeLaDireccion(req: Request): Promise<any | null> {
     const s = sitioDe(req);
     const tramos = req.path.split('/').filter(Boolean).map(decodeURIComponent);
+
+    // `/bd/:tabla[/:nombre]`, en todas las formas (y `/@quien/bd/…` en casa).
+    const sinArroba = s.forma === 'casa' && tramos[0]?.startsWith('@') ? tramos.slice(1) : tramos;
+    if (sinArroba[0] === 'bd' && (sinArroba.length === 2 || sinArroba.length === 3)) {
+      const b = await baseDatosPublica(db, sinArroba[1]);
+      return b ? { ...b, publico: false } : null;
+    }
 
     // `/p/:id` es la misma en todas las formas (y `/@quien/p/:id` en casa).
     const sub = tramos[0] === 'p' && tramos.length === 2 ? tramos[1]

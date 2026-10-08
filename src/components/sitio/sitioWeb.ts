@@ -21,6 +21,11 @@ export type Destino =
   | { tipo: 'inicio' }
   | { tipo: 'pagina'; id: string; titulo?: string }
   | { tipo: 'seccion'; bloque: string; titulo?: string }
+  /** Una base de datos de esta página (2026-10-08). `scroll`: baja hasta ella
+   *  sin salir de la página (el ancla es el id del BLOQUE, no el de la tabla:
+   *  la misma tabla puede estar dos veces). `pagina`: abre su página propia
+   *  (`/bd/:tabla/:nombre`), con su dirección y sus etiquetas para buscadores. */
+  | { tipo: 'basedatos'; tabla: string; bloque?: string; titulo?: string; modo: 'scroll' | 'pagina' }
   | { tipo: 'url'; url: string }
   | { tipo: 'legal'; doc: DocLegal }
   | { tipo: 'contacto' };
@@ -32,7 +37,15 @@ export type Enlace = {
   /** `lucide:Home` o un emoji. Vacío, sin icono. */
   icono?: string;
   estilo?: 'texto' | 'boton';
+  /** Abrir en otra pestaña (2026-10-08). Vacío: la misma. No cuenta cuando el
+   *  enlace sólo baja por la misma página. */
+  nuevaPestana?: boolean;
 };
+
+/** Un nombre para la dirección: «Mis Tiendas Ñ» → «mis-tiendas-n». */
+export const slugDe = (t?: string | null) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+
 
 export type Tamano = 'pequeno' | 'mediano' | 'grande';
 

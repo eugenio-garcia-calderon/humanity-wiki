@@ -91,7 +91,7 @@ export default function VistaPagina({ pagina, propio, pie }: {
     navegar(href);
     window.scrollTo(0, 0);
   };
-  const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, raizId: pagina.sitio.raizId } : undefined;
+  const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, raizId: pagina.sitio.raizId } : undefined;
 
   return (
     <div onClickCapture={alPinchar}>
@@ -108,9 +108,11 @@ export default function VistaPagina({ pagina, propio, pie }: {
           const c = contarPagina(bloques);
           return c.palabras > 0 ? <p className="-mt-4 mb-6 text-xs font-bold text-slate-400" data-tiempo-lectura>{textoLectura(c.palabras, c.minutos)}</p> : null;
         })()}
-        <RelacionesPublicas paginaId={pagina.id} />
-        <BloquesLectura bloques={bloques} comentable={pagina.id} paginaId={pagina.id} />
-        <EnlazanAqui paginaId={pagina.id} />
+        {/* La página de una base de datos no es una página de verdad: no tiene
+            relaciones, ni comentarios, ni quien la enlace. */}
+        {!pagina.virtual && <RelacionesPublicas paginaId={pagina.id} />}
+        <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
+        {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
       </article>
       {pie}
     </MarcoLectura>
