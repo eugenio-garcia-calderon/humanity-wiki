@@ -1,3 +1,34 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "autoscroll al arrastrar entradas, sacar entrada de la base de datos, boton Mis paginas",
+      "desde": "2026-10-08T21:33:10.532Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "autoscroll al arrastrar entradas, sacar entrada de la base de datos, boton Mis paginas",
+      "desde": "2026-10-08T21:33:10.532Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
+      "motivo": "autoscroll al arrastrar entradas, sacar entrada de la base de datos, boton Mis paginas",
+      "desde": "2026-10-08T21:33:10.532Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/bd.ts",
+      "motivo": "autoscroll al arrastrar entradas, sacar entrada de la base de datos, boton Mis paginas",
+      "desde": "2026-10-08T21:33:10.532Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "autoscroll al arrastrar entradas, sacar entrada de la base de datos, boton Mis paginas",
+      "desde": "2026-10-08T21:33:10.532Z"
+    }
+  ]
 }
