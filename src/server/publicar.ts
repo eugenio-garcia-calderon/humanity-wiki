@@ -2556,7 +2556,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       const lineas = (await db.execute(sql`
         SELECT l.id, l.producto_nombre, l.unidades, l.precio_unitario_centimos,
-               coalesce(pr.kind, 'fisico') AS kind,
+               coalesce(pr.kind, 'fisico') AS kind, pr.bd_modo,
                (pr.archivo_digital IS NOT NULL) AS con_archivo
         FROM pedido_lineas l LEFT JOIN products pr ON pr.id = l.producto_id
         WHERE l.pedido_id = ${p.id}
@@ -2600,7 +2600,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         descuento_centimos: Number(p.descuento_centimos || 0),
         // Un pedido sin nada físico no se envía: la pantalla no debe pintar
         // «enviado» como un paso pendiente que nunca llegará.
-        solo_digital: lineas.length > 0 && lineas.every(l => l.kind === 'digital'),
+        // Una donación tampoco se envía.
+        solo_digital: lineas.length > 0 && lineas.every(l => l.kind === 'digital' || l.bd_modo === 'donar'),
         lineas: lineas.map(l => ({
           id: l.id,
           producto: l.producto_nombre,
