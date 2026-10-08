@@ -54,7 +54,7 @@ const PALETA = ['#64748b', '#d97706', '#16a34a', '#2563eb', '#9333ea', '#db2777'
 
 /** La letra del título en galería, según el tamaño elegido. */
 const LETRA_TITULO: Record<TamanoGaleria, string> = {
-  pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
+  xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
 export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto }: {
@@ -596,14 +596,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // agrupar, buscar, enlazar, ajustes— y el botón azul «Nuevo». Todo lo que
   // antes se amontonaba junto al título (ocultar título, propiedades de las
   // tarjetas, los dos tamaños) vive ahora dentro de «Ajustes».
-  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
+  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
   const Segmentos = ({ valor, onCambiar, etiqueta }: { valor: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string }) => (
     <div className="flex items-center justify-between gap-2 px-1 py-1">
       <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
       <div role="radiogroup" aria-label={etiqueta} className="flex rounded-lg bg-slate-100 p-0.5">
         {TAMANOS.map(t => (
           <button key={t.v} role="radio" aria-checked={valor === t.v} onClick={() => onCambiar(t.v)}
-            className={cn('w-9 h-7 rounded-md text-[11px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
+            className={cn('min-w-8 px-1.5 h-7 rounded-md text-[11px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
             {t.l}
           </button>
         ))}
@@ -861,6 +861,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               claseTitulo={tono.texto} tamano={tamano} visibles={visibles}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               ordenable={editable && !colAgr && !activa.orden_por.length}
+              tituloTabla={datos.tabla?.titulo}
               motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
           ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
           colAgr && editable ? celdas => <div className="max-w-xs"><NuevoElemento onCrear={t => crearCon(t, celdas)} /></div> : undefined)}
