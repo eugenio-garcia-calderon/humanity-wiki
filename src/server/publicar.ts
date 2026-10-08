@@ -177,7 +177,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       tipo: 'recibo',
       aviso: 'Recibo de compra. No es una factura: no lleva número y no sustituye a una. Precios con IVA incluido.',
       codigo: p.codigo, fecha: p.created_at, estado: p.estado, moneda: p.moneda || 'EUR',
-      comprador: { nombre: p.comprador_nombre || null, email: p.comprador_email || null, direccion: p.direccion_envio || null },
+      comprador: { nombre: p.comprador_nombre || null, email: p.comprador_email || null, direccion: p.direccion_envio || null, facturacion: p.direccion_facturacion || null, nif: p.comprador_nif || null },
       vendedor: {
         nombre: p.vendedor_nombre || null, tienda: p.vendedor_handle || null,
         fiscal: completos ? { nombre_fiscal: fiscal.nombre_fiscal, nif: fiscal.nif, direccion: fiscal.direccion, cp: fiscal.cp, ciudad: fiscal.ciudad, pais: fiscal.pais } : null,
@@ -218,6 +218,83 @@ export function registerPublicarRoutes(app: Express, db: any) {
   // ==========================================================================
   const dominioPublico = () => process.env.DOMINIO_PUBLICO || 'humanity.wiki';
 
+  // ==========================================================================
+  // LAS DIRECCIONES DE QUIEN COMPRA (2026-10-08)
+  // ==========================================================================
+  // Eugenio: «que el usuario tenga una dirección de envío que se guarda, si
+  // está registrado, y una de facturación, que puede ser la misma o distinta».
+  // UNA de cada tipo por persona. Si la de facturación es «igual que el envío»
+  // no se guarda copia: se lee de la de envío (dos sitios donde viva la misma
+  // verdad acaban diciendo cosas distintas).
+  type DirForm = { nombre: string; nif: string | null; linea1: string; linea2: string | null; cp: string; ciudad: string; provincia: string | null; pais: string; telefono: string | null };
+
+  /** Lo que llega de un formulario de dirección, limpio; `null` si falta algo imprescindible. */
+  const leerDireccion = (d: any, conNif = false): DirForm | null => {
+    if (!d || typeof d !== 'object') return null;
+    const nombre = limpiaTexto(d.nombre ?? d.name, 120);
+    const linea1 = limpiaTexto(d.linea1 ?? d.line1, 160);
+    const cp = limpiaTexto(d.cp ?? d.postal_code, 12);
+    const ciudad = limpiaTexto(d.ciudad ?? d.city, 80);
+    if (!nombre || !linea1 || !cp || !ciudad) return null;
+    return {
+      nombre, linea1, cp, ciudad,
+      nif: conNif ? limpiaTexto(d.nif, 20) : null,
+      linea2: limpiaTexto(d.linea2 ?? d.line2, 160),
+      provincia: limpiaTexto(d.provincia ?? d.state, 80),
+      pais: (limpiaTexto(d.pais ?? d.country, 2) || 'ES').toUpperCase(),
+      telefono: normalizarTelefono(d.telefono ?? d.phone),
+    };
+  };
+  /** Como la quiere Stripe. */
+  const aStripe = (d: DirForm) => ({ line1: d.linea1, line2: d.linea2 || undefined, postal_code: d.cp, city: d.ciudad, state: d.provincia || undefined, country: d.pais });
+
+  /** GET /api/publicar/mis-direcciones → { envio, facturacion, facturacion_igual } (sin sesión: todo vacío). */
+  app.get('/api/publicar/mis-direcciones', async (req: Request, res: Response) => {
+    try {
+      res.set('Cache-Control', 'private, no-store');
+      if (!req.user) return res.json({ con_sesion: false, envio: null, facturacion: null, facturacion_igual: true });
+      const r = (await db.execute(sql`SELECT * FROM direcciones_usuario WHERE user_id = ${req.user.id}`)).rows as any[];
+      const fila = (t: string) => {
+        const x = r.find(y => y.tipo === t);
+        return x && x.linea1 ? { nombre: x.nombre || '', nif: x.nif || '', linea1: x.linea1, linea2: x.linea2 || '', cp: x.cp || '', ciudad: x.ciudad || '', provincia: x.provincia || '', pais: x.pais || 'ES', telefono: x.telefono || '' } : null;
+      };
+      const f = r.find(y => y.tipo === 'facturacion');
+      // Sin fila de facturación = «la misma»: es lo que se espera de quien nunca ha elegido.
+      res.json({ con_sesion: true, email: req.user.email || null, envio: fila('envio'), facturacion: fila('facturacion'), facturacion_igual: f ? !!f.igual_que_envio : true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** PUT /api/publicar/mis-direcciones { envio?, facturacion?, facturacion_igual? } — guarda lo que venga. */
+  app.put('/api/publicar/mis-direcciones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Entra en tu cuenta para guardar tus direcciones.' });
+      const cuerpo = req.body || {};
+      const guardar = async (tipo: 'envio' | 'facturacion', d: DirForm | null, igual: boolean) => {
+        await db.execute(sql`
+          INSERT INTO direcciones_usuario (user_id, tipo, igual_que_envio, nombre, nif, linea1, linea2, cp, ciudad, provincia, pais, telefono, updated_at)
+          VALUES (${req.user!.id}, ${tipo}, ${igual}, ${igual ? null : d?.nombre ?? null}, ${igual ? null : d?.nif ?? null}, ${igual ? null : d?.linea1 ?? null},
+                  ${igual ? null : d?.linea2 ?? null}, ${igual ? null : d?.cp ?? null}, ${igual ? null : d?.ciudad ?? null},
+                  ${igual ? null : d?.provincia ?? null}, ${d?.pais || 'ES'}, ${igual ? null : d?.telefono ?? null}, now())
+          ON CONFLICT (user_id, tipo) DO UPDATE SET igual_que_envio = EXCLUDED.igual_que_envio, nombre = EXCLUDED.nombre, nif = EXCLUDED.nif,
+            linea1 = EXCLUDED.linea1, linea2 = EXCLUDED.linea2, cp = EXCLUDED.cp, ciudad = EXCLUDED.ciudad, provincia = EXCLUDED.provincia,
+            pais = EXCLUDED.pais, telefono = EXCLUDED.telefono, updated_at = now()
+        `);
+      };
+      if (cuerpo.envio !== undefined) {
+        const e = leerDireccion(cuerpo.envio);
+        if (!e) return res.status(400).json({ error: 'La dirección de envío necesita nombre, calle, código postal y ciudad.' });
+        await guardar('envio', e, false);
+      }
+      if (cuerpo.facturacion_igual === true) await guardar('facturacion', null, true);
+      else if (cuerpo.facturacion !== undefined) {
+        const f = leerDireccion(cuerpo.facturacion, true);
+        if (!f) return res.status(400).json({ error: 'La dirección de facturación necesita nombre, calle, código postal y ciudad.' });
+        await guardar('facturacion', f, false);
+      }
+      res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** PUT /api/publicar/cesta { tienda, lineas } — guardar la cesta de quien tiene sesión (vacía = borrarla). */
   app.put('/api/publicar/cesta', async (req: Request, res: Response) => {
     try {
@@ -228,6 +305,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         producto_id: String(l?.producto_id || ''), cantidad: Math.max(1, Math.min(99, Number(l?.cantidad) || 1)),
         nombre: String(l?.nombre || '').slice(0, 200), precio_centimos: Number(l?.precio_centimos) || 0,
         ...(l?.variante_id ? { variante_id: String(l.variante_id), variante_nombre: String(l.variante_nombre || '').slice(0, 120) } : {}),
+        ...(Number(l?.importe_centimos) > 0 ? { importe_centimos: Math.round(Number(l.importe_centimos)) } : {}),
       })).filter((l: any) => l.producto_id) : [];
       if (!lineas.length) {
         await db.execute(sql`DELETE FROM cestas_guardadas WHERE user_id = ${req.user.id} AND tienda = ${tienda}`);
@@ -320,7 +398,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const primera = (c.lineas as any[])[0]?.nombre || 'algo';
       await avisar(db, {
         paraQuien: c.user_id, dePartede: null, tipo: 'cesta_olvidada', entidadTipo: 'cestas', entidadId: `${c.tienda}:${Date.now()}`,
-        datos: { texto: `Dejaste ${n === 1 ? primera : `${n} cosas (${primera}…)`} en la cesta de ${c.tienda}. Sigue ahí. (Este aviso se apaga desde la propia cesta.)`, tienda: c.tienda, destino: `https://${c.tienda}.${dominioPublico()}/?cesta=abrir` },
+        datos: { texto: `Dejaste ${n === 1 ? primera : `${n} cosas (${primera}…)`} en ${c.tienda === 'general' ? 'tu cesta' : `la cesta de ${c.tienda}`}. Sigue ahí. (Este aviso se apaga desde la propia cesta.)`, tienda: c.tienda, destino: c.tienda === 'general' ? `https://${dominioPublico()}/?cesta=abrir` : `https://${c.tienda}.${dominioPublico()}/?cesta=abrir` },
       });
       await db.execute(sql`UPDATE cestas_guardadas SET avisada_at = now() WHERE user_id = ${c.user_id} AND tienda = ${c.tienda}`);
     }
@@ -1383,7 +1461,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const ids = crudas.map(l => String(l?.producto_id || '')).filter(Boolean);
       if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
       const productos = (await db.execute(sql`
-        SELECT id, name, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos, recogida_en_persona
+        SELECT id, name, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos, recogida_en_persona, bd_modo
         FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       // Con variante, el precio es el de la variante (2026-08-23).
@@ -1391,6 +1469,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const lineas = crudas.map(l => {
         const p = productos.find(x => x.id === String(l.producto_id));
         const v = p ? (mapaV.get(p.id) || []).find((x: any) => x.id === String(l.variante_id || '')) : null;
+        // Una donación se cobra por lo que dice quien dona (de 1 a 5.000 €), y siempre es una sola.
+        if (p?.bd_modo === 'donar') return { p, v, precio: Math.min(500000, Math.max(100, Math.round(Number(l.importe_centimos) || p.price_cents || 0))), unidades: 1 };
         return { p, v, precio: v && v.precio_centimos !== null ? v.precio_centimos : p?.price_cents, unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) };
       }).filter(l => l.p && l.precio);
       if (!lineas.length) return res.status(404).json({ error: 'Esos productos no están a la venta.' });
@@ -1461,6 +1541,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         envio_estimado: !(req.body?.pais || req.body?.cp),
         recogida_posible: recogidaPosible,
         es_fisico: fisicas.length > 0,
+        // Las donaciones no llevan IVA: la cesta lo dice.
+        con_donacion: lineas.some(l => l.p.bd_modo === 'donar' || l.p.bd_modo === 'recompensa'),
+        solo_donaciones: lineas.every(l => l.p.bd_modo === 'donar'),
         acepta_puntos_centimos: aceptan,
         todo_acepta_puntos: aceptan >= subtotal,
         puntos_por_euro: puntosPorEuro(),
@@ -1710,14 +1793,16 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // no, se reservaría dos veces y el stock se comprobaría contra sí mismo.
       // La clave de una línea es producto + variante (2026-08-23): dos
       // tallas del mismo producto son dos líneas.
-      const pedidas = new Map<string, { id: string; vid: string | null; n: number }>();
+      const pedidas = new Map<string, { id: string; vid: string | null; n: number; importe: number }>();
       for (const l of crudas) {
         const id = String(l?.producto_id || '').trim();
         if (!id) continue;
         const vid = String(l?.variante_id || '').trim() || null;
         const n = Math.max(1, Math.min(99, Number(l?.cantidad) || 1));
-        const k = `${id}|${vid || ''}`;
-        pedidas.set(k, { id, vid, n: Math.min(99, (pedidas.get(k)?.n || 0) + n) });
+        // El importe sólo cuenta en una donación (lo elige quien dona): dos donaciones distintas al mismo sitio son dos líneas.
+        const importe = Math.round(Number(l?.importe_centimos) || 0);
+        const k = `${id}|${vid || ''}|${importe}`;
+        pedidas.set(k, { id, vid, importe, n: Math.min(99, (pedidas.get(k)?.n || 0) + n) });
       }
       if (pedidas.size === 0) return res.status(400).json({ error: 'No has elegido nada.' });
 
@@ -1725,7 +1810,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
                billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
-               recogida_en_persona, recogida_donde
+               recogida_en_persona, recogida_donde, bd_modo
         FROM products
         WHERE id = ANY(string_to_array(${idsProductos.join(',')}, ','))
           AND archived_at IS NULL AND status <> 'borrador'
@@ -1737,7 +1822,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // Cada línea lleva `precio` y `nombre` efectivos (los de la variante si
       // la hay): es lo que se cobra, se reserva y se escribe en el pedido.
       const lineas: any[] = [];
-      for (const { id, vid, n: unidades } of pedidas.values()) {
+      for (const { id, vid, n, importe } of pedidas.values()) {
+        let unidades = n;
         const p = productos.find(x => x.id === id);
         if (!p) return res.status(404).json({ error: 'Una de las cosas que llevas ya no está a la venta.', producto_id: id });
         const variantes = mapaVariantes.get(id) || [];
@@ -1745,7 +1831,12 @@ export function registerPublicarRoutes(app: Express, db: any) {
         if (variantes.length && !v) {
           return res.status(400).json({ error: `Elige una opción de «${p.name}» (${variantes.slice(0, 3).map((x: any) => x.nombre).join(', ')}${variantes.length > 3 ? '…' : ''}).`, producto_id: id, falta_variante: true });
         }
-        const precio = v && v.precio_centimos !== null ? v.precio_centimos : p.price_cents;
+        let precio = v && v.precio_centimos !== null ? v.precio_centimos : p.price_cents;
+        // UNA DONACIÓN (2026-10-08): la cantidad la pone quien dona, de 1 a 5.000 €, y es una sola. Sin IVA (lo decide el producto: iva_pct 0).
+        if (p.bd_modo === 'donar') {
+          if (importe < 100 || importe > 500000) return res.status(400).json({ error: 'Elige cuánto quieres donar (de 1 a 5.000 €).', producto_id: id });
+          precio = importe; unidades = 1;
+        }
         if (!precio) {
           return res.status(400).json({ error: `«${p.name}» no tiene precio: hay que preguntar antes de comprarlo.`, producto_id: id });
         }
@@ -1845,6 +1936,30 @@ export function registerPublicarRoutes(app: Express, db: any) {
       }
       const gratisPorUmbral = calculo.gratis_por_umbral;
       const envioCobrado = !esFisico ? null : calculo.centimos;
+
+      // ══ EL PAGO EN NUESTRO DOMINIO (2026-10-08) ═══════════════════════════
+      // Eugenio: «que el checkout sea en nuestro propio dominio en vez de en el
+      // de Stripe: embébelo, cogiendo los datos de dirección de nuestra base de
+      // datos; y si no los hay, pedirlos y guardarlos». Con `embebido` la
+      // dirección la pide NUESTRO formulario (el de la cesta), no Stripe, y se
+      // apunta aquí al abrir el pago. Stripe sólo recibe la tarjeta.
+      const embebido = cuerpo.embebido === true;
+      const dirEnvio = esFisico && !quiereRecogida ? leerDireccion(cuerpo.direccion) : null;
+      if (embebido && esFisico && !quiereRecogida && !dirEnvio) {
+        return res.status(400).json({ error: 'Para enviártelo hacen falta nombre, dirección, código postal y ciudad.', falta_direccion: true });
+      }
+      const facturaIgual = cuerpo.facturacion_igual !== false;
+      const dirFact = !embebido ? null
+        : facturaIgual ? (dirEnvio ? { ...dirEnvio, nif: limpiaTexto(cuerpo.nif, 20) } : null)
+        : leerDireccion(cuerpo.facturacion, true);
+      if (embebido && !facturaIgual && !dirFact) {
+        return res.status(400).json({ error: 'La dirección de facturación necesita nombre, calle, código postal y ciudad.', falta_facturacion: true });
+      }
+      const emailCompra = String(req.user?.email || cuerpo.email || '').trim().toLowerCase().slice(0, 200);
+      if (embebido && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailCompra)) {
+        return res.status(400).json({ error: 'Escribe un correo al que mandarte el recibo.', falta_email: true });
+      }
+      const telefonoCompra = normalizarTelefono(cuerpo.telefono) || dirEnvio?.telefono || null;
 
       const vendedorId = lineas[0].p.created_by;
       const vendedor = vendedorId
@@ -2031,15 +2146,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
             name: [cuponRow ? `Cupón ${cuponRow.codigo}` : '', puntosUsados > 0 ? `${puntosUsados} puntos` : ''].filter(Boolean).join(' + '),
           })
         : null;
+      // Lo que va con el cobro: el reparto al vendedor y, si lo pedimos nosotros, a dónde se envía
+      // (así queda en el recibo de Stripe y en la disputa, si la hay).
+      const intent: any = {};
+      if (reparte && !suscripcion) { intent.application_fee_amount = comisionReal; intent.transfer_data = { destination: vendedor.stripe_account_id }; }
+      if (embebido && dirEnvio && !suscripcion) intent.shipping = { name: dirEnvio.nombre, phone: telefonoCompra || undefined, address: aStripe(dirEnvio) };
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
         // EL TELÉFONO, PARA AVISAR POR WHATSAPP (F6, 2026-08-24). Se pide en
         // el pago porque quien compra sin cuenta no tiene dónde dejarlo, y sin
         // él su código de pedido solo vive en una pestaña que puede cerrar.
         // Es opcional para Stripe: quien no quiera, sigue comprando igual.
-        phone_number_collection: { enabled: true },
+        ...(embebido ? { customer_email: emailCompra } : { phone_number_collection: { enabled: true } }),
         ...(cupon ? { discounts: [{ coupon: cupon.id }] } : {}),
-        ui_mode: 'hosted',
+        ui_mode: embebido ? 'embedded' : 'hosted',
         line_items: lineas.map(l => ({
           price_data: {
             currency: moneda,
@@ -2048,11 +2168,14 @@ export function registerPublicarRoutes(app: Express, db: any) {
             ...(suscripcion ? { recurring: { interval: l.p.billing_period === 'anual' ? 'year' as const : 'month' as const } } : {}),
           },
           quantity: l.unidades,
-        })),
+        })).concat(
+          // Sin que Stripe pida la dirección, el envío va como una línea más: es lo que cobramos, sin más.
+          embebido && esFisico && envioCobrado ? [{ price_data: { currency: moneda, product_data: { name: 'Envío', description: undefined }, unit_amount: envioCobrado }, quantity: 1 }] as any : [],
+        ),
         ...(suscripcion ? {} : { customer_creation: 'always' as const }),
         ...(esFisico ? {
-          shipping_address_collection: { allowed_countries: [...PAISES_DE_ENVIO] },
-          ...(envioCobrado !== null ? {
+          ...(embebido ? {} : { shipping_address_collection: { allowed_countries: [...PAISES_DE_ENVIO] } }),
+          ...(!embebido && envioCobrado !== null ? {
             shipping_options: [{
               shipping_rate_data: {
                 type: 'fixed_amount' as const,
@@ -2062,17 +2185,12 @@ export function registerPublicarRoutes(app: Express, db: any) {
             }],
           } : {}),
         } : {}),
-        ...(reparte && !suscripcion ? {
-          payment_intent_data: {
-            application_fee_amount: comisionReal,
-            transfer_data: { destination: vendedor.stripe_account_id },
-          },
-        } : {}),
+        ...(Object.keys(intent).length ? { payment_intent_data: intent } : {}),
         metadata: {
           kind: 'compra_publica',
           vendedor_id: vendedorId || '',
           puntos: puntosUsados > 0 ? String(puntosUsados) : '',
-          buyer_id: puntosUsados > 0 && req.user ? req.user.id : '',
+          buyer_id: req.user ? req.user.id : '',
           cupon_id: cuponRow ? String(cuponRow.id) : '',
           cupon_codigo: cuponRow ? String(cuponRow.codigo) : '',
           cupon_centimos: cuponCent > 0 ? String(cuponCent) : '',
@@ -2089,8 +2207,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
           product_id: lineas.length === 1 ? lineas[0].p.id : '',
           quantity: lineas.length === 1 ? String(lineas[0].unidades) : '',
         },
-        success_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${destino}?compra=cancelada`,
+        ...(embebido
+          ? { return_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}` }
+          : { success_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}`, cancel_url: `${destino}?compra=cancelada` }),
         expires_at: Math.floor(Date.now() / 1000) + MINUTOS_DE_RESERVA * 60,
       });
 
@@ -2107,8 +2226,35 @@ export function registerPublicarRoutes(app: Express, db: any) {
         `);
       }
 
+      // LO ESCRITO EN NUESTRO FORMULARIO, ligado a la sesión: el aviso de pago lo lee de aquí. Y si hay
+      // sesión de usuario, se guarda para la próxima: no se pide dos veces lo mismo.
+      if (embebido) {
+        await db.execute(sql`
+          INSERT INTO checkout_direcciones (stripe_session_id, envio, facturacion, telefono)
+          VALUES (${sesion.id}, ${dirEnvio ? JSON.stringify(dirEnvio) : null}::jsonb, ${dirFact ? JSON.stringify(dirFact) : null}::jsonb, ${telefonoCompra})
+          ON CONFLICT (stripe_session_id) DO NOTHING
+        `);
+        if (req.user && cuerpo.guardar_direcciones !== false) {
+          const guardarDir = async (tipo: 'envio' | 'facturacion', d: DirForm | null, igual: boolean) => db.execute(sql`
+            INSERT INTO direcciones_usuario (user_id, tipo, igual_que_envio, nombre, nif, linea1, linea2, cp, ciudad, provincia, pais, telefono, updated_at)
+            VALUES (${req.user!.id}, ${tipo}, ${igual}, ${igual ? null : d?.nombre ?? null}, ${igual ? null : d?.nif ?? null}, ${igual ? null : d?.linea1 ?? null},
+                    ${igual ? null : d?.linea2 ?? null}, ${igual ? null : d?.cp ?? null}, ${igual ? null : d?.ciudad ?? null},
+                    ${igual ? null : d?.provincia ?? null}, ${d?.pais || 'ES'}, ${igual ? null : d?.telefono ?? null}, now())
+            ON CONFLICT (user_id, tipo) DO UPDATE SET igual_que_envio = EXCLUDED.igual_que_envio, nombre = EXCLUDED.nombre, nif = EXCLUDED.nif,
+              linea1 = EXCLUDED.linea1, linea2 = EXCLUDED.linea2, cp = EXCLUDED.cp, ciudad = EXCLUDED.ciudad, provincia = EXCLUDED.provincia,
+              pais = EXCLUDED.pais, telefono = EXCLUDED.telefono, updated_at = now()
+          `);
+          try {
+            if (dirEnvio) await guardarDir('envio', dirEnvio, false);
+            if (facturaIgual) { if (dirEnvio) await guardarDir('facturacion', null, true); }
+            else if (dirFact) await guardarDir('facturacion', dirFact, false);
+          } catch (e: any) { console.error('guardar direcciones:', e?.message); }
+        }
+      }
+
       res.json({
-        url: sesion.url, reparte, comision_centimos: comision,
+        url: sesion.url, clientSecret: embebido ? sesion.client_secret : undefined, sesion_id: sesion.id,
+        reparte, comision_centimos: comision,
         subtotal_centimos: subtotal,
         envio_centimos: envioCobrado,
         pide_direccion: esFisico,

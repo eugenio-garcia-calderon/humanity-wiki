@@ -23,12 +23,14 @@ export type LineaCarrito = {
   // La variante elegida (2026-08-23): talla, color… Dos variantes del mismo
   // producto son dos líneas distintas.
   variante_id?: string; variante_nombre?: string;
+  /** Una donación (2026-10-08): lo que ha elegido dar. Es también su `precio_centimos`, y siempre es una sola. */
+  importe_centimos?: number;
 };
 /** La clave de una línea: producto + variante. */
 export const claveLinea = (l: { producto_id: string; variante_id?: string | null }) => `${l.producto_id}|${l.variante_id || ''}`;
 /** Las líneas tal como las espera el servidor (comprar, cotizar, cupón). */
 export const aLineasServidor = (ls: LineaCarrito[]) =>
-  ls.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}) }));
+  ls.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}), ...(l.importe_centimos ? { importe_centimos: l.importe_centimos } : {}) }));
 
 const MAX_LINEAS = 20;
 
@@ -50,6 +52,7 @@ function leer(tienda: string): LineaCarrito[] {
            nombre: typeof x.nombre === 'string' ? x.nombre : 'Producto',
            precio_centimos: Number(x.precio_centimos) || 0,
            ...(typeof x.variante_id === 'string' && x.variante_id ? { variante_id: x.variante_id, variante_nombre: typeof x.variante_nombre === 'string' ? x.variante_nombre : '' } : {}),
+           ...(Number(x.importe_centimos) > 0 ? { importe_centimos: Math.round(Number(x.importe_centimos)) } : {}),
          }))
          .slice(0, MAX_LINEAS)
       : [];
@@ -120,7 +123,9 @@ export function useCarrito(tienda: string) {
     if (ya) {
       // Pulsar «añadir» dos veces suma, no duplica la línea: si no, el
       // servidor recibiría el mismo producto dos veces y reservaría de más.
-      ya.cantidad = Math.min(99, ya.cantidad + linea.cantidad);
+      // Una donación no se suma: dar otra vez cambia lo que se da, no cuántas veces.
+      if (linea.importe_centimos) { ya.importe_centimos = linea.importe_centimos; ya.precio_centimos = linea.importe_centimos; ya.cantidad = 1; }
+      else ya.cantidad = Math.min(99, ya.cantidad + linea.cantidad);
       guardar([...actuales]);
     } else {
       if (actuales.length >= MAX_LINEAS) return false;

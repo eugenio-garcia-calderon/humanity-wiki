@@ -14,7 +14,7 @@ import { cn } from '../../utils/cn';
 // pregunta que se hace el usuario —qué quiero meter aquí— tiene cuatro
 // respuestas en vez de veintiuna.
 
-export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; nombre?: string }> }> = [
+export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; modo?: string; nombre?: string }> }> = [
   {
     grupo: 'Texto y números',
     tipos: [
@@ -81,7 +81,14 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
       { id: 'seleccion_multiple', rol: 'variantes', nombre: 'Variantes', label: 'Variantes', ayuda: 'Tallas, colores… las que tenga cada uno' },
       { id: 'moneda', rol: 'envio', nombre: 'Envío', label: 'Envío', ayuda: 'Gastos de envío; vacío = se acuerda' },
       { id: 'numero', rol: 'stock', nombre: 'Stock', label: 'Stock', ayuda: 'Cuántos quedan; vacío = sin cuenta' },
-      { id: 'compra', nombre: 'Comprar', label: 'Botón de compra', ayuda: 'Unidades y «Añadir a la cesta»' },
+      // LOS CUATRO BOTONES (2026-10-08). Cada uno tiene su lógica: `comprar` va derecho al pago;
+      // `carrito` añade a la cesta y se paga al terminar; `donar` deja elegir cuánto y NO lleva IVA;
+      // `recompensa` es una donación con algo a cambio (también sin IVA).
+      { id: 'compra', modo: 'comprar', nombre: 'Comprar', label: 'Botón de compra', ayuda: 'Va derecho al pago' },
+      { id: 'compra', modo: 'carrito', nombre: 'Añadir a la cesta', label: 'Botón de añadir a la cesta', ayuda: 'Se paga al finalizar la compra' },
+      { id: 'compra', modo: 'donar', nombre: 'Donar', label: 'Botón de donar', ayuda: 'Cada uno elige cuánto · sin IVA' },
+      { id: 'compra', modo: 'recompensa', nombre: 'Apoyar', label: 'Donación con recompensa', ayuda: 'Una cantidad a cambio de algo · sin IVA' },
+      { id: 'texto', rol: 'recompensa', nombre: 'Recompensa', label: 'Recompensa', ayuda: 'Qué recibe quien apoya (para «Donación con recompensa»)' },
     ],
   },
 ];
@@ -249,11 +256,12 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                     {g.tipos.map(t => {
                       // A shop entry is a type PLUS a role: «Precio» and «Moneda»
                       // are the same type and must not both light up.
-                      const elegido = tipo === t.id && (config.rol || undefined) === t.rol;
+                      const elegido = tipo === t.id && (config.rol || undefined) === t.rol
+                        && (t.id !== 'compra' || (config.modo || 'carrito') === t.modo);
                       return (
                       <button key={t.id + (t.rol || '')} onClick={() => {
                           setTipo(t.id);
-                          setConfig((c: any) => { const { rol: _fuera, ...resto } = c || {}; return t.rol ? { ...resto, rol: t.rol } : resto; });
+                          setConfig((c: any) => { const { rol: _fuera, modo: _modo, ...resto } = c || {}; return { ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}) }; });
                           // The name follows the shop entry while nobody has typed one.
                           if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
                         }}
@@ -265,6 +273,22 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       );
                     })}
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── EL BOTÓN DE COMPRA: se puede cambiar su forma sin crearlo otra vez ── */}
+          {tipo === 'compra' && editando && (
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Qué hace el botón</span>
+              <div className="mt-1 grid grid-cols-2 gap-1.5">
+                {GRUPOS.flatMap(g => g.tipos).filter(t => t.id === 'compra').map(t => (
+                  <button key={t.modo} type="button" onClick={() => setConfig((c: any) => ({ ...c, modo: t.modo }))}
+                    className={cn('px-2.5 py-2 rounded-lg border text-left transition-colors', (config.modo || 'carrito') === t.modo ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-200 hover:bg-slate-50')}>
+                    <span className="block text-xs font-bold">{t.label.replace('Botón de ', '').replace(/^./, ch => ch.toUpperCase())}</span>
+                    <span className="block text-[10px] text-slate-400">{t.ayuda}</span>
+                  </button>
                 ))}
               </div>
             </div>
