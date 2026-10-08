@@ -1,3 +1,28 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/bd.ts",
+      "motivo": "tamaños XS/XXS y mover entradas entre bases de datos",
+      "desde": "2026-10-08T10:17:26.808Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "tamaños XS/XXS y mover entradas entre bases de datos",
+      "desde": "2026-10-08T10:17:26.808Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "tamaños XS/XXS y mover entradas entre bases de datos",
+      "desde": "2026-10-08T10:17:26.808Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "tamaños XS/XXS y mover entradas entre bases de datos",
+      "desde": "2026-10-08T10:17:26.808Z"
+    }
+  ]
 }
