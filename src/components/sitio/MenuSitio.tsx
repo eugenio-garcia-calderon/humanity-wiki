@@ -1,3 +1,4 @@
+import CuentaMenu from './CuentaMenu';
 import type { CSSProperties, ReactNode } from 'react';
 import {
   Menu as Tres, X, Home, Mail, Phone, MapPin, ShoppingBag, ShoppingCart, Info, Users, Calendar, Star,
@@ -117,8 +118,8 @@ function Marca({ logo, nombre, tamano, rutas, columna }: {
 }
 
 /** La barra de arriba. También es la del teléfono cuando el menú es lateral. */
-function Barra({ s, rutas, logo, nombre, soloMovil }: {
-  s: Sitio; rutas: Rutas; logo?: string; nombre?: string; soloMovil?: boolean;
+function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
+  s: Sitio; rutas: Rutas; logo?: string; nombre?: string; soloMovil?: boolean; cuenta?: string | null;
 }) {
   const mn = s.menu;
   const m = MEDIDAS[mn.tamano];
@@ -149,16 +150,19 @@ function Barra({ s, rutas, logo, nombre, soloMovil }: {
             </div>
           </details>
         )}
+        {/* El icono de cuenta, arriba a la derecha: sólo si la web tiene miembros (2026-10-08). */}
+        {cuenta && <CuentaMenu raiz={cuenta} />}
       </div>
     </header>
   );
 }
 
-function Lateral({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string }) {
+function Lateral({ s, rutas, logo, nombre, cuenta }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string; cuenta?: string | null }) {
   const mn = s.menu;
   return (
     <aside style={{ background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` }}
       className={cn('hidden @2xl:flex flex-col gap-8 w-64 shrink-0 p-6 self-start sticky top-0 h-screen overflow-y-auto', mn.borde && 'border-r')}>
+      {cuenta && <div className="absolute right-3 top-3"><CuentaMenu raiz={cuenta} /></div>}
       <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} columna />
       <nav aria-label="Menú" className="flex flex-col gap-1">
         {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
@@ -272,8 +276,11 @@ export function TextoSencillo({ texto }: { texto: string }) {
  * `logo` y `nombre` son los de la página raíz: si quien publica no pone otros,
  * el menú usa su icono y su título.
  */
-export function MarcoSitio({ sitio, rutas, logo, nombre, children }: {
-  sitio: Sitio | null; rutas: Rutas; logo?: string | null; nombre?: string; children: ReactNode;
+export function MarcoSitio({ sitio, rutas, logo, nombre, cuenta, children }: {
+  sitio: Sitio | null; rutas: Rutas; logo?: string | null; nombre?: string;
+  /** La página raíz del sitio, si tiene miembros: con ella el menú lleva el icono de cuenta. */
+  cuenta?: string | null;
+  children: ReactNode;
 }) {
   if (!sitio || (!sitio.menu.activo && !sitio.pie.activo)) return <>{children}</>;
   const mn = sitio.menu;
@@ -284,9 +291,9 @@ export function MarcoSitio({ sitio, rutas, logo, nombre, children }: {
   const lateral = mn.activo && mn.posicion === 'lateral' && mn.plegado !== 'siempre';
   return (
     <div className="@container min-h-screen bg-white flex flex-col">
-      {mn.activo && <Barra s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} soloMovil={lateral} />}
+      {mn.activo && <Barra s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} soloMovil={lateral} cuenta={cuenta} />}
       <div className={cn('flex-1', lateral && '@2xl:flex')}>
-        {lateral && <Lateral s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} />}
+        {lateral && <Lateral s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} cuenta={cuenta} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
       {sitio.pie.activo && <PieSitio s={sitio} rutas={rutas} logo={logoPie} nombre={nombrePie} />}

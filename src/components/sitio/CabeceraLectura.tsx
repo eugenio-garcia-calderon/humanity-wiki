@@ -43,7 +43,7 @@ export function MarcoLectura({ pagina, rutas, children }: {
   if (!conMarco) return cuerpo;
   return (
     <MarcoSitio sitio={sitio} rutas={rutas || { enlacePagina: id => `/p/${id}`, raizId: s!.raizId }}
-      logo={s!.icono} nombre={s!.titulo}>
+      logo={s!.icono} nombre={s!.titulo} cuenta={(pagina as any)?.miembros?.raiz || null}>
       {cuerpo}
     </MarcoSitio>
   );

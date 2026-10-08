@@ -21,7 +21,11 @@ type Estado = {
   yo: { nombre: string | null; email: string; estado: string; categoria: string | null; permisos: Record<string, boolean> | null } | null;
 };
 
-export default function BarraMiembro({ raiz, paginaId, onCambio }: { raiz: string; paginaId: string; onCambio: () => void }) {
+export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
+  raiz: string; paginaId: string; onCambio: () => void;
+  /** El menú del sitio está encendido: el icono de cuenta ya va en él (`CuentaMenu`) y la píldora sobra. */
+  conMenu?: boolean;
+}) {
   const [e, setE] = useState<Estado | null>(null);
   const [abierto, setAbierto] = useState<'menu' | 'entrar' | null>(null);
   const [guardados, setGuardados] = useState<any[] | null>(null);
@@ -43,6 +47,8 @@ export default function BarraMiembro({ raiz, paginaId, onCambio }: { raiz: strin
     return () => window.removeEventListener('pointerdown', fuera);
   }, [abierto]);
 
+  // Con el menú encendido, aquí sólo queda el aviso del enlace mágico (el canje sigue siendo cosa de esta pieza).
+  if (conMenu) return avisoEnlace ? <p className="fixed bottom-4 left-4 z-[60] max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p> : null;
   if (!e?.activo || e.es_equipo) return null;
   const yo = e.yo;
   const acento = e.acento || '#0f172a';
