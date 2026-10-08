@@ -8719,3 +8719,8 @@ en mis páginas como proyecto pendiente».
 - **Relevancia 1-10** (migración `0149_feedback_relevancia.sql`, columna `incidencias.relevancia`, por defecto 5, con CHECK): slider con etiquetas 1 detalle · 5 relevante · 10 crítico, insignia en la lista, y `GET /api/incidencias` ordena por estado, luego relevancia descendente y luego antigüedad (el campo viaja en el JSON para los agentes).
 - Probado en local: crear/editar por API y por pantalla, 403 de ajeno, 400 de valores inválidos, orden, migración idempotente (aplicada dos veces).
 - **No probado**: hablar de verdad al micrófono (solo se comprobó que el control está montado); la migración no está aplicada en producción (la aplica el despliegue).
+### 2026-10-08 — Barra superior con favorito y tamaño del nombre en galería (prog8)
+
+- **Top bar favourite tab.** `BuscadorSuperior.tsx` reads `useEspacio().favoritos[0]` (the first favourite, ordered by `favoritos_espacio.orden`) and draws it as a tab (icon + truncated name, `data-favorito-barra`) to the left of the search box. Total width of the block is unchanged (27.6 rem), so the box gets narrower and moves right. xl and up only; below that, and with no favourites, nothing changes. It follows the shared `useEspacio` store, so adding/removing/reordering favourites updates it live.
+- The bar has no «Página» button; the closest one is «Mis páginas» (far left), which stays before the tab. Nothing moved.
+- **Card name size in galleries.** New block field `tamanoNombre` (XS…XL) set from «Tamaño del nombre de las tarjetas» in the view settings (`Rejilla.tsx`), passed through `Documento.tsx` and `BloquesLectura.tsx` into `Galeria.tsx` (`LETRA_NOMBRE`). Unset = the previous look. It is independent from `tamanoTitulo`, which is the database title.

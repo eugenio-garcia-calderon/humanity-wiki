@@ -58,7 +58,7 @@ const LETRA_TITULO: Record<TamanoGaleria, string> = {
   xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -79,6 +79,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
    *  título hace de encabezado. */
   tamanoTitulo?: TamanoGaleria;
   onCambiarTamanoTitulo?: (t: TamanoGaleria) => void;
+  /** Letra del nombre bajo cada tarjeta (XS…XL). Sin valor, la de siempre. */
+  tamanoNombre?: TamanoGaleria;
+  onCambiarTamanoNombre?: (t: TamanoGaleria) => void;
   /** Las demás bases de datos de la misma página, para enlazar con ellas
    *  primero (2026-10-02). */
   tablasPagina?: string[];
@@ -598,11 +601,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // antes se amontonaba junto al título (ocultar título, propiedades de las
   // tarjetas, los dos tamaños) vive ahora dentro de «Ajustes».
   const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
-  const Segmentos = ({ valor, onCambiar, etiqueta }: { valor: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string }) => (
+  const Segmentos = ({ valor, onCambiar, etiqueta, desde = 0 }: { valor?: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string; desde?: number }) => (
     <div className="flex items-center justify-between gap-2 px-1 py-1">
       <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
       <div role="radiogroup" aria-label={etiqueta} className="flex rounded-lg bg-slate-100 p-0.5">
-        {TAMANOS.map(t => (
+        {TAMANOS.slice(desde).map(t => (
           <button key={t.v} role="radio" aria-checked={valor === t.v} onClick={() => onCambiar(t.v)}
             className={cn('min-w-8 px-1.5 h-7 rounded-md text-[11px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
             {t.l}
@@ -640,6 +643,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </div>
       )}
       {onCambiarTamano && <Segmentos etiqueta="Tamaño de las tarjetas" valor={tamano} onCambiar={onCambiarTamano} />}
+      {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre de las tarjetas" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
       {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño del título" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
       {onCambiarVisibles && (
         <div className="pt-1 border-t border-slate-100">
@@ -866,7 +870,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           {porGrupos(filas, fs => (
             <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} visibles={visibles}
+              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} visibles={visibles}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               ordenable={editable && !colAgr && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}

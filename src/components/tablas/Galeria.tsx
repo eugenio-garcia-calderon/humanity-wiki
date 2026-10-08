@@ -55,7 +55,11 @@ const esFilaAjena = (e: React.DragEvent) => Array.from(e.dataTransfer.types || [
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
+  xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
+};
+
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -77,6 +81,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   claseTitulo?: string;
   /** Tamaño de las tarjetas. */
   tamano?: TamanoGaleria;
+  /** Letra del nombre de cada tarjeta; sin valor, la que corresponde al tamaño de la tarjeta. */
+  tamanoNombre?: TamanoGaleria;
   /** Qué columnas se ven en la tarjeta, en orden. Sin valor, las tres primeras. */
   visibles?: string[];
   /** Sin el relleno de alrededor: la galería limpia de una página. */
@@ -432,7 +438,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   tarjeta centrado, al igual que la descripción, y no a la
                   izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
               <div className={cn(chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
-                <p className={cn('flex items-center gap-1.5 font-bold min-w-0', chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+                <p className={cn('flex items-center gap-1.5 font-bold min-w-0', tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                   {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                     : icono ? (esUrl(icono)
                       ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />

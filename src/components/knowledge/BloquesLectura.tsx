@@ -445,7 +445,7 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloOculto={!!b.tituloOculto} visibles={b.propsGaleria} /> : null;
+        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} visibles={b.propsGaleria} /> : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────
