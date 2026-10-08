@@ -1,7 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import CajaBusqueda from '../buscador/CajaBusqueda';
+import { IconoElemento } from '../espacio/FavoritosRecientes';
+import { useEspacio } from '../../utils/espacio';
 
 import { t } from '../../i18n';
 /*
@@ -45,6 +47,10 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
   // Sin interruptor de IA (2026-10-05): preguntar a la IA se hace con el
   // botón flotante del chat, abajo a la derecha.
   const conIA = false;
+  // The first favourite sits as a tab left of the search box (xl and up only:
+  // below that the bar has no room). No favourites, nothing is drawn.
+  const primero = useEspacio().favoritos[0];
+  const aqui = useLocation().pathname;
 
   return (
     // ══ CENTRADA EN LA PANTALLA, NO EN EL HUECO QUE SOBRA ═══════════════════
@@ -93,6 +99,20 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
 
           Es lo mismo que hace YouTube en un teléfono, y por el mismo motivo:
           ahí arriba no caben a la vez un campo de texto útil y la cuenta. */}
+      {primero && (
+        <Link
+          to={primero.ruta}
+          title={primero.titulo}
+          data-favorito-barra
+          className={cn(
+            'hidden h-9 w-36 shrink-0 items-center gap-1.5 rounded-lg px-2 text-[13px] font-bold transition-colors xl:flex',
+            aqui === primero.ruta ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+          )}
+        >
+          <IconoElemento e={primero} />
+          <span className="min-w-0 flex-1 truncate">{primero.titulo}</span>
+        </Link>
+      )}
       <button
         type="button"
         onClick={() => navegar('/buscar')}
@@ -110,7 +130,7 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
         pastilla
         compacto={compacto}
         placeholder={t('Buscar contenido…')}
-        className={cn('hidden lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
+        className={cn('hidden min-w-0 lg:block', primero && 'xl:flex-1', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
         // CON EL INTERRUPTOR ENCENDIDO, BUSCAR ES PREGUNTAR. Las sugerencias de
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
         // gratis y no dependen de la IA. Lo que cambia es a dónde va el Intro.

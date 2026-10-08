@@ -47,6 +47,12 @@ const CLASES = new Set(['fallo', 'mejora']);
 // general» — lo que se esconde se decide una por una, no por descarte.
 const AREAS = new Set(['general', 'seguridad', 'servidores']);
 
+/** Relevancia 1-10; lo que no sea un entero de ese rango vale null y se ignora. */
+const leerRelevancia = (v: unknown): number | null => {
+  const n = Number(v);
+  return v != null && v !== '' && Number.isInteger(n) && n >= 1 && n <= 10 ? n : null;
+};
+
 const nuevoId = () => `INC${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 
 export function registerIncidenciasRoutes(app: Express, db: any) {
@@ -138,7 +144,8 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
           CASE i.estado
             WHEN 'bloqueada' THEN 0 WHEN 'esperando' THEN 1
             WHEN 'propuesta' THEN 2 ELSE 3 END,
-          i.created_at DESC
+          -- Dentro de cada estado, lo más relevante primero y luego lo más antiguo.
+          i.relevancia DESC, i.created_at ASC
       `);
       res.json(r.rows);
     } catch (e: any) {
@@ -163,6 +170,7 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       // ha encontrado, que es exactamente lo que estamos quitando del
       // Hormiguero. De fuera, todo entra en `general`.
       const areaPedida = AREAS.has(String(req.body?.area)) ? String(req.body.area) : 'general';
+      const relevancia = leerRelevancia(req.body?.relevancia) ?? 5;
       const id = nuevoId();
 
       // ══ DE QUIÉN VIENE DECIDE DÓNDE ENTRA (2026-08-22) ═══════════════════
@@ -179,11 +187,11 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       const estadoInicial = delEquipo ? 'esperando' : 'propuesta';
       await db.execute(sql`
         INSERT INTO incidencias (id, titulo, detalle, clase, autor_user_id, respondido_por,
-                                 de_admin, estado, area)
+                                 de_admin, estado, area, relevancia)
         VALUES (${id}, ${titulo.slice(0, 300)}, ${req.body?.detalle || null}, ${clase},
                 ${quien.clase === 'persona' ? quien.id : null},
                 ${quien.clase === 'agente' ? quien.nombre : null},
-                ${delEquipo}, ${estadoInicial}, ${delEquipo ? areaPedida : 'general'})
+                ${delEquipo}, ${estadoInicial}, ${delEquipo ? areaPedida : 'general'}, ${relevancia})
       `);
       const r = await db.execute(sql`
         SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto
@@ -227,6 +235,8 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       if (!admin && !suya) return res.status(403).json({ error: 'Esa nota no es tuya.' });
 
       const d = req.body || {};
+      if (d.titulo !== undefined && suya && !String(d.titulo).trim()) return res.status(400).json({ error: 'El título no puede quedar vacío.' });
+      if (d.relevancia !== undefined && leerRelevancia(d.relevancia) === null) return res.status(400).json({ error: 'La relevancia va de 1 a 10.' });
       const estado = admin && ESTADOS.has(String(d.estado)) ? String(d.estado) : null;
       // MOVER UNA NOTA DE TABLERO. Solo un administrador, y por eso no está
       // junto a `titulo` y `detalle`: cambiar el área de una nota decide quién
@@ -244,8 +254,10 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
 
       await db.execute(sql`
         UPDATE incidencias SET
-          titulo    = COALESCE(${suya && !i.respuesta ? (d.titulo ?? null) : null}, titulo),
+          titulo    = COALESCE(${suya && d.titulo != null ? String(d.titulo).trim().slice(0, 300) : null}, titulo),
           detalle   = COALESCE(${suya ? (d.detalle ?? null) : null}, detalle),
+          clase     = COALESCE(${suya && CLASES.has(String(d.clase)) ? String(d.clase) : null}, clase),
+          relevancia = COALESCE(${leerRelevancia(d.relevancia)}, relevancia),
           estado    = COALESCE(${estado}, estado),
           area      = COALESCE(${areaNueva}, area),
           necesita  = COALESCE(${admin ? (d.necesita ?? null) : null}, necesita),

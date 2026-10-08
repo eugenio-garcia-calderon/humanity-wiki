@@ -27,6 +27,9 @@
  *  con diez así ya tarda en un teléfono. */
 export const LIMITE_IMAGEN = 3 * 1024 * 1024;
 
+/** Lo máximo que acepta el servidor para una imagen (uploads.ts, MAX_BYTES). */
+export const MAXIMO_SERVIDOR = 10 * 1024 * 1024;
+
 export const esHeic = (f: File) =>
   /^image\/hei[cf]/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 

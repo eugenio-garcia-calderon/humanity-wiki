@@ -129,6 +129,7 @@ async function prepararParaSubir(f: File, maxLado?: number): Promise<{ archivo: 
     const e = await preguntarImagenGrande(actual);
     if (e.tipo === 'cancelar') return { error: 'No se ha subido: la imagen pesaba demasiado.' };
     if (e.tipo === 'otro') { actual = e.archivo; continue; }
+    if (e.tipo === 'original') return { archivo: actual };
     try {
       let c = await comprimirImagen(actual, 2000, 0.82);
       if (c.size > LIMITE_IMAGEN) c = await comprimirImagen(c, 1400, 0.72);

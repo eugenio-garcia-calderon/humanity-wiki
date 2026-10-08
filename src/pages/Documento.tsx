@@ -70,6 +70,7 @@ import Adjuntos from '../components/archivo/Adjuntos';
 import MencionesMenu from '../components/knowledge/MencionesMenu';
 import EnlazanAqui from '../components/knowledge/EnlazanAqui';
 import BloqueEmbed from '../components/knowledge/BloqueEmbed';
+import PdfEmbebido from '../components/knowledge/PdfEmbebido';
 import Formula from '../components/knowledge/Formula';
 import { embedDe, type Embed } from '../utils/embeds';
 // Ajustes de página, buscar y atajos (2026-10-06, carril editorB, #29 y #30).
@@ -1749,18 +1750,63 @@ function EditorPagina() {
       destinoRef.current = { id: tid, lado };
       setDestino(destinoRef.current);
     };
+    // AUTOSCROLL (2026-10-08): cerca del borde de arriba o de abajo la página
+    // se desliza sola, más deprisa cuanto más cerca, para poder llevar el bloque lejos.
+    let ultimo = { x: x0, y: y0 };
+    let raf = 0;
+    let cancelado = false;
+    const contenedor = (() => {
+      let el = document.querySelector<HTMLElement>('[data-bloque-caja]')?.parentElement || null;
+      while (el && el !== document.body) {
+        const oy = getComputedStyle(el).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) return el;
+        el = el.parentElement;
+      }
+      return null;
+    })();
+    const deslizar = () => {
+      const r = contenedor?.getBoundingClientRect();
+      const arriba = Math.max(0, r?.top ?? 0), abajo = Math.min(window.innerHeight, r?.bottom ?? window.innerHeight);
+      const zona = 80;
+      const v = ultimo.y < arriba + zona ? -(1 - Math.max(0, ultimo.y - arriba) / zona)
+        : ultimo.y > abajo - zona ? (1 - Math.max(0, abajo - ultimo.y) / zona) : 0;
+      if (v) {
+        const px = Math.round(v * 24) || (v > 0 ? 1 : -1);
+        if (contenedor) contenedor.scrollTop += px; else window.scrollBy(0, px);
+        calcular(ultimo.x, ultimo.y);
+      }
+      raf = requestAnimationFrame(deslizar);
+    };
+    const parar = () => {
+      cancelAnimationFrame(raf); raf = 0;
+      window.removeEventListener('keydown', alTecla);
+    };
+    const alTecla = (ev: KeyboardEvent) => {
+      if (ev.key !== 'Escape') return;
+      cancelado = true;
+      alSoltar(new PointerEvent('pointerup'));
+    };
     const alMover = (ev: PointerEvent) => {
       if (!movido && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
-      if (!movido) { movido = true; setMenuAsa(null); document.body.style.userSelect = 'none'; }
+      if (!movido) {
+        movido = true; setMenuAsa(null); document.body.style.userSelect = 'none';
+        window.addEventListener('keydown', alTecla);
+        raf = requestAnimationFrame(deslizar);
+      }
+      ultimo = { x: ev.clientX, y: ev.clientY };
       setArrastre({ id: bid, x: ev.clientX, y: ev.clientY });
       calcular(ev.clientX, ev.clientY);
     };
     const alSoltar = (ev: PointerEvent) => {
       window.removeEventListener('pointermove', alMover);
+      parar();
+      if (ev.type === 'pointercancel') cancelado = true;
       // Se decide donde se SUELTA, no donde fue el último movimiento.
-      if (movido && (ev.clientX || ev.clientY)) calcular(ev.clientX, ev.clientY);
+      if (movido && !cancelado && (ev.clientX || ev.clientY)) calcular(ev.clientX, ev.clientY);
       window.removeEventListener('pointerup', alSoltar);
+      window.removeEventListener('pointercancel', alSoltar);
       document.body.style.userSelect = '';
+      if (cancelado) { destinoRef.current = null; setDestino(null); aPagina = null; window.dispatchEvent(new CustomEvent('humanity:bloque-sobre', { detail: { pagina: null } })); setArrastre(null); return; }
       if (aPagina) window.dispatchEvent(new CustomEvent('humanity:bloque-sobre', { detail: { pagina: null } }));
       if (!movido) setMenuAsa(m => (m === bid ? null : bid));
       else if (aPagina) llevarAPagina(bid, aPagina);
@@ -1771,6 +1817,7 @@ function EditorPagina() {
     };
     window.addEventListener('pointermove', alMover);
     window.addEventListener('pointerup', alSoltar);
+    window.addEventListener('pointercancel', alSoltar);
   };
 
   /**
@@ -3010,8 +3057,8 @@ function EditorPagina() {
           if (b.vista === 'embebido') {
             return (
               <figure>
-                <iframe src={b.url} title={b.pie || 'PDF'}
-                        className="w-full h-[70vh] rounded-xl border border-slate-200 bg-slate-50" />
+                <PdfEmbebido url={b.url || ''} titulo={b.pie || 'PDF'} alto={b.alto}
+                  onAlto={editable ? alto => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, alto } : x)); programarGuardado(); } : undefined} />
                 {pie}
               </figure>
             );
@@ -3094,6 +3141,8 @@ function EditorPagina() {
             onCambiarVisibles={editable ? ids => { b.propsGaleria = ids; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamano={editable ? t => { b.tamanoGaleria = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tamanoTitulo={b.tamanoTitulo || 'mediano'}
+            tamanoNombre={b.tamanoNombre}
+            onCambiarTamanoNombre={editable ? t => { b.tamanoNombre = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tituloOculto={!!b.tituloOculto}
             onCambiarTituloOculto={editable ? v => { b.tituloOculto = v || undefined; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamanoTitulo={editable ? t => { b.tamanoTitulo = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}

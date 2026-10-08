@@ -12,11 +12,13 @@
 // está parado esperando a una persona; enterrarlo entre lo demás es cómo se
 // quedan las cosas paradas una semana sin que nadie lo sepa.
 import { useEffect, useRef, useState } from 'react';
-import { Bug, Lightbulb, Plus, Loader2, Check, Hand, Circle, Trash2, MessageSquare, Paperclip, X, ImageIcon } from 'lucide-react';
+import { Bug, Lightbulb, Plus, Loader2, Check, Hand, Circle, Trash2, MessageSquare, Paperclip, X, ImageIcon, Pencil } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { IconoFeedback } from '../components/ui/IconoFeedback';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { subirArchivo } from '../utils/subir';
+import { useVoiceDictation } from '../hooks/useVoiceDictation';
+import BotonMicrofono from '../components/ai/BotonMicrofono';
 
 interface Incidencia {
   id: string;
@@ -29,6 +31,8 @@ interface Incidencia {
   de_admin?: boolean;
   /** Quién movió el estado o contestó: una persona o un programador IA. */
   respondido_por?: string | null;
+  /** 1 detalle · 5 relevante · 10 crítico: lo que la IA debe atender primero. */
+  relevancia?: number;
   necesita: string | null;
   respuesta: string | null;
   autor_user_id: string | null;
@@ -52,6 +56,44 @@ const SEMAFORO = {
   hecha:     { punto: 'bg-emerald-500', texto: 'text-emerald-700', fondo: 'bg-emerald-50 border-emerald-200', label: 'Hecha' },
 } as const;
 
+/** Cuadro de texto con el mismo dictado por voz del chat de IA. */
+function CajaVoz({ valor, onChange, rows, placeholder }: { valor: string; onChange: (v: string) => void; rows: number; placeholder: string }) {
+  const base = useRef('');
+  const alDictar = (crudo: string, esFinal: boolean) => {
+    const texto = crudo.replace(/^\s+/, '');
+    const sep = base.current && !base.current.endsWith(' ') ? ' ' : '';
+    onChange(base.current + sep + texto);
+    if (esFinal) base.current = base.current + sep + texto;
+  };
+  const v = useVoiceDictation(alDictar);
+  return (
+    <div className="relative">
+      <textarea value={valor} onChange={e => onChange(e.target.value)} rows={rows} placeholder={placeholder}
+        className="w-full pl-3 pr-20 py-2 border border-slate-200 rounded-xl text-sm resize-none leading-snug focus:outline-none focus:border-emerald-300" />
+      {v.supported && (
+        <div className="absolute right-1 top-1">
+          <BotonMicrofono escuchando={v.listening} nivel={v.nivel} error={v.error}
+            onPulsar={() => { if (!v.listening) base.current = valor; v.toggle(); }}
+            microfonos={v.microfonos} microfono={v.microfono} onElegir={v.setMicrofono} onAbrirLista={v.cargarMicrofonos} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeslizadorRelevancia({ valor, onChange }: { valor: number; onChange: (n: number) => void }) {
+  return (
+    <div className="px-1">
+      <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-0.5">
+        <span>Relevancia</span><span className="text-slate-900">{valor}/10</span>
+      </div>
+      <input type="range" min={1} max={10} step={1} value={valor} aria-label="Relevancia del 1 al 10"
+        onChange={e => onChange(Number(e.target.value))} className="w-full accent-emerald-600" />
+      <div className="flex justify-between text-[10px] text-slate-400"><span>1 · detalle</span><span>5 · relevante</span><span>10 · crítico</span></div>
+    </div>
+  );
+}
+
 export default function Hormiguero() {
   const { user, can } = useAuth();
   const esAdmin = can(ROLE.ADMIN);
@@ -59,6 +101,8 @@ export default function Hormiguero() {
   const [titulo, setTitulo] = useState('');
   const [detalle, setDetalle] = useState('');
   const [clase, setClase] = useState<'fallo' | 'mejora'>('fallo');
+  const [relevancia, setRelevancia] = useState(5);
+  const [editando, setEditando] = useState<{ id: string; titulo: string; detalle: string; clase: 'fallo' | 'mejora'; relevancia: number } | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<'todas' | Incidencia['estado']>('todas');
@@ -87,7 +131,7 @@ export default function Hormiguero() {
       const r = await fetch('/api/incidencias', {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo: titulo.trim(), detalle: detalle.trim() || null, clase }),
+        body: JSON.stringify({ titulo: titulo.trim(), detalle: detalle.trim() || null, clase, relevancia }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j?.error || 'No se ha podido anotar.');
@@ -116,7 +160,7 @@ export default function Hormiguero() {
         setSubiendo(false);
       }
       setLista(l => [{ ...j, adjuntos }, ...(l || [])]);
-      setTitulo(''); setDetalle(''); setEnLaMano([]);
+      setTitulo(''); setDetalle(''); setEnLaMano([]); setRelevancia(5);
     } catch (e: any) { setError(e.message); } finally { setGuardando(false); }
   };
 
@@ -136,6 +180,19 @@ export default function Hormiguero() {
       setError(e.message);
       setLista(antes);
     }
+  };
+
+  const guardarEdicion = async () => {
+    if (!editando) return;
+    if (!editando.titulo.trim()) { setError('El título no puede quedar vacío.'); return; }
+    const { id, ...campos } = editando;
+    const r = await fetch(`/api/incidencias/${id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...campos, titulo: campos.titulo.trim(), detalle: campos.detalle.trim() }),
+    });
+    if (!r.ok) { setError((await r.json().catch(() => null))?.error || 'No se ha podido guardar.'); return; }
+    setError(null); setEditando(null); cargar();
   };
 
   const quitar = async (i: Incidencia) => {
@@ -174,16 +231,11 @@ export default function Hormiguero() {
               </button>
             ))}
           </div>
-          <textarea
-            value={titulo} onChange={e => setTitulo(e.target.value)} rows={2}
-            placeholder={clase === 'fallo' ? 'Qué has hecho y qué ha pasado' : 'Qué te gustaría que hiciera'}
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none leading-snug focus:outline-none focus:border-emerald-300"
-          />
-          <textarea
-            value={detalle} onChange={e => setDetalle(e.target.value)} rows={2}
-            placeholder="Dónde estabas, en qué pantalla, lo que haga falta (opcional)"
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none leading-snug focus:outline-none focus:border-emerald-300"
-          />
+          <CajaVoz valor={titulo} onChange={setTitulo} rows={2}
+            placeholder={clase === 'fallo' ? 'Qué has hecho y qué ha pasado' : 'Qué te gustaría que hiciera'} />
+          <CajaVoz valor={detalle} onChange={setDetalle} rows={2}
+            placeholder="Dónde estabas, en qué pantalla, lo que haga falta (opcional)" />
+          <DeslizadorRelevancia valor={relevancia} onChange={setRelevancia} />
           {error && <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-2.5 py-1.5">{error}</p>}
           {/* LO QUE LLEVA ADJUNTO, antes de anotarlo. Cada uno con su ✕: si
               te has equivocado de captura, quitarla no puede obligarte a
@@ -258,8 +310,30 @@ export default function Hormiguero() {
               <li key={i.id} className={cn('rounded-2xl border p-3', i.estado === 'bloqueada' ? s.fondo : 'border-slate-200 bg-white')}>
                 <div className="flex items-start gap-2.5">
                   <span className={cn('mt-1.5 w-2.5 h-2.5 rounded-full shrink-0', s.punto)} title={s.label} />
+                  {editando?.id === i.id ? (
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex gap-1.5">
+                      {([['fallo', 'Algo falla'], ['mejora', 'Una idea']] as const).map(([k, t]) => (
+                        <button key={k} onClick={() => setEditando({ ...editando, clase: k })}
+                          className={cn('px-3 py-1 rounded-full text-xs font-bold border', editando.clase === k ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600')}>{t}</button>
+                      ))}
+                    </div>
+                    <CajaVoz valor={editando.titulo} onChange={v => setEditando(e => e && { ...e, titulo: v })} rows={2} placeholder="Qué pasa" />
+                    <CajaVoz valor={editando.detalle} onChange={v => setEditando(e => e && { ...e, detalle: v })} rows={2} placeholder="Detalle (opcional)" />
+                    <DeslizadorRelevancia valor={editando.relevancia} onChange={n => setEditando(e => e && { ...e, relevancia: n })} />
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setEditando(null)} className="px-3 py-1.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-500">Cancelar</button>
+                      <button onClick={guardarEdicion} className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar</button>
+                    </div>
+                  </div>
+                  ) : (
                   <div className="min-w-0 flex-1">
                     <p className={cn('text-sm font-bold leading-snug', i.estado === 'hecha' ? 'text-slate-400 line-through' : 'text-slate-800')}>
+                      <span title={`Relevancia ${i.relevancia ?? 5} de 10`}
+                        className={cn('inline-block mr-1.5 px-1.5 rounded-md text-[10px] font-black align-middle no-underline',
+                          (i.relevancia ?? 5) >= 8 ? 'bg-rose-100 text-rose-700' : (i.relevancia ?? 5) >= 5 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500')}>
+                        {i.relevancia ?? 5}
+                      </span>
                       {i.titulo}
                     </p>
                     {i.detalle && <p className="text-[11px] text-slate-500 leading-snug mt-0.5 whitespace-pre-wrap">{i.detalle}</p>}
@@ -315,8 +389,9 @@ export default function Hormiguero() {
                       {i.respondido_por && <span className="text-slate-400"> · lo lleva {i.respondido_por}</span>}
                     </p>
                   </div>
+                  )}
 
-                  <div className="flex items-center gap-0.5 shrink-0">
+                  <div className={cn('flex items-center gap-0.5 shrink-0', editando?.id === i.id && 'hidden')}>
                     {/* EL ESTADO SOLO LO MUEVE QUIEN PROGRAMA. Si lo moviera
                         quien la escribe, el tablero dejaría de decir lo que de
                         verdad está hecho. */}
@@ -353,6 +428,13 @@ export default function Hormiguero() {
                           <Check className="w-3.5 h-3.5" />
                         </button>
                       </>
+                    )}
+                    {(esAdmin || i.autor_user_id === user?.id) && (
+                      <button onClick={() => setEditando({ id: i.id, titulo: i.titulo, detalle: i.detalle || '', clase: i.clase, relevancia: i.relevancia ?? 5 })}
+                        title="Editar" aria-label="Editar"
+                        className="w-7 h-7 grid place-items-center rounded-lg text-slate-300 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
                     )}
                     {(esAdmin || i.autor_user_id === user?.id) && (
                       <button onClick={() => quitar(i)} title="Quitar"
