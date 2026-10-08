@@ -1,3 +1,40 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "consola de la cadena de valor",
+      "desde": "2026-10-08T13:33:17.940Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "consola de la cadena de valor",
+      "desde": "2026-10-08T13:33:17.940Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "consola de la cadena de valor",
+      "desde": "2026-10-08T13:33:17.940Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "server.ts",
+      "motivo": "consola de la cadena de valor",
+      "desde": "2026-10-08T13:33:17.940Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "drizzle/0148_consola.sql",
+      "motivo": "consola de la cadena de valor",
+      "desde": "2026-10-08T13:33:17.940Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "consola de la cadena de valor",
+      "desde": "2026-10-08T13:33:17.940Z"
+    }
+  ]
 }
