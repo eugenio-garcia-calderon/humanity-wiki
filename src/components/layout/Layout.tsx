@@ -33,6 +33,7 @@ import ArbolPaginas from '../navegacion/ArbolPaginas';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import HojaExplorar from '../navegacion/HojaExplorar';
+import { useEspacio } from '../../utils/espacio';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
 import PaletaBusqueda from '../espacio/PaletaBusqueda';
 import { SincronizarPreferencias } from '../espacio/AparienciaIdioma';
@@ -341,6 +342,7 @@ export default function Layout() {
     return () => { document.documentElement.style.setProperty('--hueco-temas', '0px'); };
   }, [temasVisible]);
 
+  const hayFavoritoBarra = !!useEspacio().favoritos[0];
   const [paginasPlegado, setPaginasPlegadoState] = useState<boolean>(() => {
     try { return localStorage.getItem('humanity:paginas-plegado') === '1'; } catch { return false; }
   });
@@ -960,7 +962,9 @@ export default function Layout() {
             aria-expanded={esMovil ? circulo === 'organizar' : !paginasPlegado}
             // «Mis páginas» junto al icono (2026-10-05): que se entienda que
             // pulsando ahí se abre el menú de la izquierda.
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            className={cn('inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900',
+              // Con un favorito en la barra, este botón se viene a su izquierda (`BuscadorSuperior`), desde 1280 px.
+              !esMovil && hayFavoritoBarra && 'xl:hidden')}>
             {paginasPlegado || esMovil ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
             <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">{tr('Mis páginas')}</span>
           </button>
@@ -1081,7 +1085,7 @@ export default function Layout() {
             palabra es el rótulo de esa columna. Y lleva a `/preferencias`, que
             es donde vive la rueda: él se corrigió a sí mismo en la frase y
             **manda la corrección**, no la primera versión. */}
-        <BuscadorSuperior compacto={compacto} />
+        <BuscadorSuperior compacto={compacto} menuPaginas={user && !esMovil ? { plegado: paginasPlegado, alternar: () => { setPorRoce(false); setPaginasPlegado(v => !v); } } : undefined} />
         {/* ⌘K y ⌘P: la paleta de búsqueda rápida (#15). Es un modal; aquí solo escucha. */}
         <PaletaBusqueda />
         <SincronizarPreferencias />

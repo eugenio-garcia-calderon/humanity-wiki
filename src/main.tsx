@@ -5,6 +5,9 @@ import './tema-oscuro.css';
 import {iniciarTema} from './utils/tema.ts';
 import {iniciarIdioma, ConIdioma} from './i18n/index.ts';
 import {registrarPWA} from './pwa.ts';
+import {instalarAutoscrollArrastre} from './utils/autoscrollArrastre.ts';
+
+instalarAutoscrollArrastre();
 
 // Sin StrictMode: su doble montaje (solo en desarrollo) deja el panZoom de
 // React Flow 12 enganchado a un DOM desmontado y rompe fitView/zoom

@@ -38,6 +38,7 @@ import { bloquesDe } from './bloquesSql';
 import { REGLAS, guardian, ritmo, ipDe } from './limites/index';
 import { limpiarConfigFormulario, validarRespuesta, TIPOS_DE_FORMULARIO, type CampoForm } from './bd/formularios';
 import { tablaVisible } from './sitios';
+import { madresValidas, PROFUNDIDAD, puedeEditarPagina, quienDe } from './permisos';
 import { TIPOS, tipar, type Tipo } from './bd/tipos';
 import { celdasDe, type Celda } from './bd/celdas';
 import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, enlacesInversos, guardarInversos, type Apuntado } from './bd/enlaces';
@@ -1856,6 +1857,52 @@ export function registerBdRoutes(app: Express, db: any) {
   });
 
   /** A la papelera, no al vacío. Quince días para arrepentirse. */
+  /** SACAR UNA ENTRADA DE LA BASE DE DATOS A LA PÁGINA (2026-10-08, Eugenio: «que se pueda sacar una entrada de una
+   *  base de datos y, si se suelta fuera, se crea una página en un bloque, como hace Notion»).
+   *
+   *  CÓMO LO HACE NOTION, Y POR QUÉ AQUÍ ES IGUAL: arrastrar una fila fuera de su base de datos y soltarla en el
+   *  cuerpo de una página la CONVIERTE en una página hija en ese sitio: sigue siendo la misma página (mismo contenido,
+   *  mismo id, mismos enlaces entrantes), pero deja de ser una fila. No es una copia ni un atajo: si lo fuera, la
+   *  entrada seguiría en la tabla y habría dos cosas donde se pidió una.
+   *
+   *  LO QUE PASA: la fila sale de la tabla (a la papelera de la tabla, SIN su página: es lo único que cambia respecto de
+   *  «eliminar», que se la lleva) y devuelve el id de su página. Quien llama pone el bloque «Página» donde se soltó.
+   *  Lo que apuntaba a la fila desde otras tablas deja de apuntar: ya no está allí. No se puede sacar a una página que
+   *  cuelga de la propia entrada (haría un círculo). */
+  app.post('/api/bd/filas/:id/sacar', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const destino = String(req.body?.pagina_destino || '');
+      if (!destino) return res.status(400).json({ error: 'Falta la página donde ponerla.' });
+      const fila = (await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL AND archived_at IS NULL`)).rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa entrada no existe.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      if (!(await puedeEditarPagina(db, quienDe(req), destino))) return res.status(403).json({ error: 'No puedes editar esa página.' });
+
+      const colTitulo = await columnaTitulo(fila.tabla_id);
+      const nombre = String(colTitulo ? fila.valores?.[colTitulo] ?? '' : '').trim();
+      // Una entrada que aún no abrió su página la recibe ahora: sacarla es convertirla en página.
+      let paginaId: string | null = fila.pagina_id || null;
+      if (!paginaId) paginaId = await crearPaginaDeFila(fila.id, permiso.tabla, nombre, req.user!.id);
+      if (paginaId === destino) return res.status(400).json({ error: 'No puedes meter una página dentro de sí misma.' });
+      // El destino no puede colgar de esa página, ni ser ella: sería un círculo.
+      const sube = await db.execute(sql`
+        WITH RECURSIVE sube(id, n) AS (
+          SELECT ${destino}::text, 0
+          UNION
+          SELECT madre.id, s.n + 1 FROM sube s CROSS JOIN LATERAL (${madresValidas(sql`s.id`)}) madre WHERE s.n < ${PROFUNDIDAD}
+        ) SELECT 1 FROM sube WHERE id = ${paginaId} LIMIT 1
+      `);
+      if (sube.rows.length) return res.status(400).json({ error: 'Esa página cuelga de la entrada: sería un círculo.' });
+
+      await db.execute(sql`UPDATE bd_filas SET deleted_at = now(), pagina_id = NULL, updated_by = ${req.user!.id}, updated_at = now() WHERE id = ${fila.id}`);
+      await db.execute(sql`DELETE FROM bd_enlaces WHERE (fila_origen = ${fila.id}) OR (destino_id = ${fila.id} AND clase = 'fila')`);
+      const titulo = String(((await db.execute(sql`SELECT title FROM knowledge_windows WHERE id = ${paginaId}`)).rows[0] as any)?.title || nombre || 'Sin título');
+      res.json({ ok: true, pagina_id: paginaId, titulo });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** MOVER UNA ENTRADA A OTRA BASE DE DATOS (2026-10-08, Eugenio: «arrastrar
    *  una entrada de una base de datos a otra y que se coloque en la nueva,
    *  como Notion»). La fila CAMBIA de tabla: su id, su página y su historia
