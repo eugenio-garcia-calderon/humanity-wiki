@@ -23,6 +23,12 @@
       "ruta": "src/utils/bloques.ts",
       "motivo": "tamaños XS/XXS y mover entradas entre bases de datos",
       "desde": "2026-10-08T10:17:26.808Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada del changelog",
+      "desde": "2026-10-08T10:32:55.069Z"
     }
   ]
 }
