@@ -71,6 +71,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "menú del sitio enlaza a bases de datos + página pública por BD",
       "desde": "2026-10-08T12:33:09.770Z"
+    },
+    {
+      "agente": "prog8-orden",
+      "ruta": "src/server/bd.ts",
+      "motivo": "títulos ligeros de tablas",
+      "desde": "2026-10-08T12:34:31.847Z"
     }
   ]
 }
