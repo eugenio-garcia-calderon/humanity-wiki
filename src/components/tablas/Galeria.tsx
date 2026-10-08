@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDownToLine, ArrowUpToLine, Copy, ExternalLink, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Copy, ExternalLink, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -35,23 +35,35 @@ type Fila = {
 
 /** Ancho mínimo de una tarjeta, en píxeles, por tamaño. */
 export const ANCHO_TARJETA: Record<TamanoGaleria, number> = {
-  pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
+  xxs: 84, xs: 112, pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
 };
 
 /** Cuántas propiedades se enseñan bajo el título. Más no caben sin que la
  *  tarjeta se convierta en una ficha. */
 const PROPIEDADES = 3;
 
+/** Las galerías montadas ahora mismo en la página y editables, para ofrecer
+ *  «Mover a…» en el menú de una tarjeta (el arrastre no existe en una pantalla
+ *  táctil ni con el teclado). Se lee al abrir el menú, nunca al pintar. */
+type Receptora = { tablaId: string; titulo: string; recibir: (d: { fila: string; tabla: string; nombre?: string }, antes: string | null) => Promise<void> };
+const galerias = new Map<symbol, { actual: Receptora }>();
+
+/** Lo que viaja en un arrastre de entrada, para soltarla en OTRA base de datos. */
+const MIME_FILA = 'application/x-humanity-fila';
+const esFilaAjena = (e: React.DragEvent) => Array.from(e.dataTransfer.types || []).includes(MIME_FILA);
+
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
   velocidad?: number;
   /** Se pueden arrastrar las tarjetas para cambiar el orden de la tabla. */
   ordenable?: boolean;
+  /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
+  tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
   motivoSinOrden?: string;
   tablaId: string;
@@ -90,7 +102,18 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   const [ordenLocal, setOrdenLocal] = useState<string[] | null>(null);
   const [ocultas, setOcultas] = useState<Set<string>>(new Set());
   const [anuncio, setAnuncio] = useState('');
-  useEffect(() => { setOrdenLocal(null); }, [filas]);
+  useEffect(() => { setOrdenLocal(null); setArrastrada(null); setDestino(null); }, [filas]);
+  // Si la tarjeta arrastrada se va a otra base de datos, desaparece de aquí
+  // antes de que el navegador avise de que soltaron («dragend» no llega a un
+  // elemento que ya no existe): sin esto, esta galería se quedaba creyendo
+  // que seguía arrastrando y trataba lo que le soltaban como una orden de
+  // recolocar una fila que ya no es suya.
+  useEffect(() => {
+    const limpiar = () => setTimeout(() => { setArrastrada(null); setDestino(null); setEntrando(false); }, 0);
+    window.addEventListener('dragend', limpiar, true);
+    window.addEventListener('drop', limpiar, true);
+    return () => { window.removeEventListener('dragend', limpiar, true); window.removeEventListener('drop', limpiar, true); };
+  }, []);
 
   const filasVis = useMemo(() => {
     let lista = filas.filter(f => !ocultas.has(f.id));
@@ -132,6 +155,61 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
     moverFila(id, resto[k + 1]?.id ?? null);
   };
 
+  // ── SOLTAR UNA ENTRADA DE OTRA BASE DE DATOS (2026-10-08) ────────────────
+  // Eugenio: «arrastrar una entrada de una base de datos a otra, como
+  // Notion». La tarjeta lleva su id y su tabla en el arrastre; quien la recibe
+  // pide al servidor que la mueva aquí (`mover-a-tabla`), y todas las
+  // galerías de la página se recargan (`bd:cambio`).
+  const [entrando, setEntrando] = useState(false);
+  const colocarAjena = async (d: { fila: string; tabla: string; nombre?: string }, antes: string | null) => {
+    setFallo(null);
+    try {
+      if (d.tabla === tablaId) {
+        // Otra vista de la MISMA base de datos: es solo recolocar.
+        if (antes === d.fila) return;
+        const r = await fetch(`/api/bd/tablas/${tablaId}/orden-filas`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: d.fila, antes_de: antes }) });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'No se pudo cambiar el orden.');
+      } else {
+        setAviso({ texto: `Moviendo «${d.nombre || 'la entrada'}»…` });
+        const r = await fetch(`/api/bd/filas/${d.fila}/mover-a-tabla`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tabla_destino: tablaId, antes_de: antes }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || 'No se pudo mover la entrada.');
+        const donde = j.tabla_titulo || tituloTabla || 'esta base de datos';
+        const perdidas: string[] = j.perdidas || [];
+        // «Deshacer» solo si no se perdió nada: lo perdido no vuelve.
+        setAviso(perdidas.length
+          ? { texto: `Movida a «${donde}». Sin sitio allí, no pasó: ${perdidas.join(', ')}`, larga: true }
+          : { texto: `Movida a «${donde}»`, deshacer: async () => {
+            // Deshacer = mandarla de vuelta a la base de datos de la que salió.
+            const v = await fetch(`/api/bd/filas/${d.fila}/mover-a-tabla`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tabla_destino: d.tabla }) });
+            if (!v.ok) { setFallo((await v.json().catch(() => ({}))).error || 'No se pudo deshacer.'); return; }
+            setAviso(null); onCambio();
+            window.dispatchEvent(new CustomEvent('bd:cambio', { detail: { desde: tablaId } }));
+          } });
+      }
+      onCambio();
+      window.dispatchEvent(new CustomEvent('bd:cambio', { detail: { desde: tablaId } }));
+    } catch (err: any) { setAviso(null); setFallo(err.message); }
+  };
+  const recibir = (e: React.DragEvent, antes: string | null) => {
+    setEntrando(false); setDestino(null);
+    let d: { fila: string; tabla: string; nombre?: string } | null = null;
+    try { d = JSON.parse(e.dataTransfer.getData(MIME_FILA)); } catch { d = null; }
+    if (!d?.fila || !d.tabla) return;
+    e.preventDefault(); e.stopPropagation();
+    colocarAjena(d, antes);
+  };
+  // Esta galería se anuncia como destino posible de «Mover a…».
+  const receptora = useRef<Receptora>({ tablaId, titulo: tituloTabla || '', recibir: colocarAjena });
+  receptora.current = { tablaId, titulo: tituloTabla || '', recibir: colocarAjena };
+  useEffect(() => {
+    if (!editable || sitio) return;
+    const k = Symbol('galeria');
+    galerias.set(k, { actual: receptora.current });
+    const t = setInterval(() => { const g = galerias.get(k); if (g) g.actual = receptora.current; }, 500);
+    return () => { clearInterval(t); galerias.delete(k); };
+  }, [editable, sitio]);
+
   /** Con el teclado: Alt + flecha mueve la tarjeta enfocada un puesto. */
   const moverUno = (id: string, dir: -1 | 1) => {
     const k = filasVis.findIndex(x => x.id === id);
@@ -145,10 +223,10 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   // copiar el enlace y eliminar. Eliminar no pregunta: la entrada queda
   // recuperable y el aviso trae «Deshacer», como en Notion.
   const [menu, setMenu] = useState<{ fila: Fila; x: number; y: number } | null>(null);
-  const [aviso, setAviso] = useState<{ texto: string; deshacer?: () => void } | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; deshacer?: () => void; larga?: boolean } | null>(null);
   useEffect(() => {
     if (!aviso) return;
-    const t = setTimeout(() => setAviso(null), aviso.deshacer ? 10000 : 3500);
+    const t = setTimeout(() => setAviso(null), aviso.deshacer || aviso.larga ? 10000 : 3500);
     return () => clearTimeout(t);
   }, [aviso]);
   const nombreDe = (f: Fila) => (columnas.find(c => c.id === columnaTitulo)
@@ -186,6 +264,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
       { etiqueta: 'Mover al principio', icono: ArrowUpToLine, deshabilitada: filasVis[0]?.id === f.id, onClick: () => moverFila(f.id, filasVis[0]?.id ?? null) },
       { etiqueta: 'Mover al final', icono: ArrowDownToLine, deshabilitada: filasVis[filasVis.length - 1]?.id === f.id, onClick: () => moverFila(f.id, null) },
     ] : []),
+    ...[...new Map([...galerias.values()].map(g => g.actual).filter(g => g.tablaId !== tablaId && g.titulo).map(g => [g.tablaId, g])).values()].map(g => (
+      { etiqueta: `Mover a «${g.titulo.length > 22 ? g.titulo.slice(0, 21) + '…' : g.titulo}»`, icono: ArrowRightLeft, onClick: () => { g.recibir({ fila: f.id, tabla: tablaId, nombre: nombreDe(f) }, null); } } as AccionMenu)),
     { etiqueta: 'Eliminar', icono: Trash2, peligro: true, onClick: () => eliminar(f) },
   ];
 
@@ -229,7 +309,10 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   };
 
   /** Una tarjeta. `copia` es la segunda vuelta del carrusel: no se enfoca ni se lee. */
-  const tarjeta = (f: Fila, copia = false, mover = false) => {
+  // XS y XXS (2026-10-08): miniaturas con solo imagen y nombre. Sin descripción,
+  // propiedades ni mandos grandes: no caben, y taparían la imagen.
+  const chica = tamano === 'xs' || tamano === 'xxs';
+  const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
           const conMenu = editable && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
@@ -252,12 +335,23 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 const sinPuntero = e.clientX === 0 && e.clientY === 0;
                 setMenu({ fila: f, x: sinPuntero ? r.left + 16 : e.clientX, y: sinPuntero ? r.top + 16 : e.clientY });
               } : undefined}
-              draggable={mover || undefined}
-              onDragStart={mover ? e => { setArrastrada(f.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', f.id); } : undefined}
-              onDragEnd={mover ? () => { setArrastrada(null); setDestino(null); } : undefined}
-              onDragOver={mover ? e => {
-                if (!arrastrada || arrastrada === f.id) return;
+              draggable={arrastre || undefined}
+              onDragStart={arrastre ? e => {
+                setArrastrada(f.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', f.id);
+                e.dataTransfer.setData(MIME_FILA, JSON.stringify({ fila: f.id, tabla: tablaId, nombre: nombreDe(f) }));
+              } : undefined}
+              onDragEnd={arrastre ? e => {
+                setArrastrada(null); setDestino(null);
+                // Soltada en otra base de datos: aquí ya no está.
+                if (e.dataTransfer.dropEffect === 'move') onCambio();
+              } : undefined}
+              onDragOver={arrastre ? e => {
+                const propia = !!arrastrada;
+                if (propia ? arrastrada === f.id : !esFilaAjena(e)) return;
+                // Dentro de la misma galería solo se reordena si el orden es a mano.
+                if (propia && !mover) return;
                 e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+                if (!mover) return;
                 const r = e.currentTarget.getBoundingClientRect();
                 // En una rejilla de varias columnas se decide por la mitad izquierda o
                 // derecha; en una sola columna (una página estrecha, un teléfono), por
@@ -269,16 +363,26 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 const lado = (eje === 'h' ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2) ? 'antes' : 'despues';
                 setDestino(d => (d && d.id === f.id && d.lado === lado && d.eje === eje ? d : { id: f.id, lado, eje }));
               } : undefined}
-              onDragLeave={mover ? e => {
+              onDragLeave={arrastre ? e => {
                 if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDestino(d => (d?.id === f.id ? null : d));
               } : undefined}
-              onDrop={mover ? e => { if (!arrastrada) return; e.preventDefault(); e.stopPropagation(); soltar(f); } : undefined}
+              onDrop={arrastre ? e => {
+                if (arrastrada) { if (!mover) return; e.preventDefault(); e.stopPropagation(); soltar(f); return; }
+                if (!esFilaAjena(e)) return;
+                // De otra base de datos: antes o después de ESTA tarjeta, o al final si el orden no es a mano.
+                let antes: string | null = null;
+                if (mover) {
+                  const lado = destino?.id === f.id ? destino.lado : 'antes';
+                  antes = lado === 'antes' ? f.id : (filasVis[filasVis.findIndex(x => x.id === f.id) + 1]?.id ?? null);
+                }
+                recibir(e, antes);
+              } : undefined}
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
               className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40')}>
               {/* Dónde caerá la tarjeta: una barra verde en el lado correspondiente. */}
-              {mover && arrastrada && destino?.id === f.id && (
+              {mover && destino?.id === f.id && (
                 <span aria-hidden className={cn('pointer-events-none absolute z-20 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]',
                   destino.eje === 'h'
                     ? cn('top-0 h-[calc(100%-0.5rem)] w-1', destino.lado === 'antes' ? '-left-2.5' : '-right-2.5')
@@ -288,7 +392,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
-                    recolocable={editable && !sitio && !!f.pagina_id}
+                    recolocable={editable && !sitio && !!f.pagina_id && !chica}
                     onGuardar={async (x, y) => {
                       const r = await fetch(`/api/bd/filas/${f.id}/encuadre`, {
                         method: 'PUT', credentials: 'include',
@@ -306,7 +410,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <FileText className="w-8 h-8 text-slate-200" />
                 )}
                 {/* El asa dice que se puede arrastrar; toda la tarjeta se arrastra. */}
-                {mover && (
+                {mover && !chica && (
                   <span role="img" aria-label="Arrastrar para cambiar el orden" title="Arrastra para cambiar el orden (Alt + flechas con el teclado)"
                     className="absolute bottom-2 left-2 z-10 grid h-8 w-8 cursor-grab place-items-center rounded-lg border border-slate-200 bg-white/90 text-slate-500 opacity-60 shadow-sm transition-opacity group-hover:opacity-100 [@media(hover:none)]:hidden">
                     <GripVertical className="h-4 w-4" />
@@ -318,7 +422,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <button type="button" aria-label="Más opciones" title="Más opciones" aria-haspopup="menu" aria-expanded={menu?.fila.id === f.id}
                     onClick={e => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setMenu({ fila: f, x: r.right - 240, y: r.bottom + 4 }); }}
                     onKeyDown={e => e.stopPropagation()}
-                    className="absolute right-2 top-2 z-10 grid h-8 w-8 [@media(hover:none)]:h-11 [@media(hover:none)]:w-11 place-items-center rounded-lg border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition-opacity hover:bg-white hover:text-slate-900 focus:opacity-100 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+                    className={cn('absolute z-10 grid place-items-center rounded-lg', chica ? 'right-1 top-1 h-6 w-6 [@media(hover:none)]:h-9 [@media(hover:none)]:w-9' : 'right-2 top-2 h-8 w-8 [@media(hover:none)]:h-11 [@media(hover:none)]:w-11',
+                    ' border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition-opacity hover:bg-white hover:text-slate-900 focus:opacity-100 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100')}>
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 )}
@@ -326,8 +431,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               {/* CENTRADOS EN UNA PÁGINA (2026-10-02, Eugenio: «el título de cada
                   tarjeta centrado, al igual que la descripción, y no a la
                   izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
-              <div className={cn('px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
-                <p className={cn('flex items-center gap-1.5 text-sm font-bold min-w-0', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+              <div className={cn(chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
+                <p className={cn('flex items-center gap-1.5 font-bold min-w-0', chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                   {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                     : icono ? (esUrl(icono)
                       ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
@@ -337,10 +442,10 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 </p>
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
-                {f.pagina?.descripcion && (
+                {!chica && f.pagina?.descripcion && (
                   <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line"><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
-                {otras.map(c => {
+                {!chica && otras.map(c => {
                   // Una relación se enseña como fichas que llevan a la página
                   // enlazada: «Movilidad» en la tarjeta del coche volador.
                   if (c.tipo === 'relacion') {
@@ -391,17 +496,21 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   /** La galería entera, sin carrusel: todas las entradas, las filas que hagan falta. */
   const rejilla = (
     <div>
-      <div className="grid gap-x-4 gap-y-5" style={centrada
+      <div className={cn(chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
+        onDragOver={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
+        onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
+        onDrop={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
+        style={centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filasVis.map(f => tarjeta(f, false, ordenable && editable && !sitio))}
+        {filasVis.map(f => tarjeta(f, false, editable && !sitio, ordenable && editable && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}
             onDrop={arrastrada ? e => { e.preventDefault(); const id = arrastrada; setArrastrada(null); setDestino(null); moverFila(id, null); } : undefined}
-            className="min-h-[9rem] aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors">
+            className={cn('aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors', chica ? 'min-h-0' : 'min-h-[9rem]')} aria-label="Nueva página">
             {abriendo === 'nueva' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-            Nueva página
+            {tamano !== 'xxs' && !(tamano === 'xs') && 'Nueva página'}
           </button>
         )}
       </div>

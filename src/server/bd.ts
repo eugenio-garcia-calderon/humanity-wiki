@@ -1008,6 +1008,30 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /** Pone una fila de la tabla ANTES de otra (o al final) y renumera. Devuelve
+   *  el texto del fallo, o `null` si salió bien. Sin tocar `updated_at`:
+   *  recolocar no es editar, y marcar todas las filas como «modificadas
+   *  hoy» ensuciaría los avisos y el historial. */
+  const colocarFila = async (tablaId: string, id: string, antes: string | null): Promise<string | null> => {
+    const r = await db.execute(sql`
+      SELECT id FROM bd_filas
+      WHERE tabla_id = ${tablaId} AND deleted_at IS NULL AND archived_at IS NULL
+      ORDER BY orden, created_at
+    `);
+    const todas = (r.rows as any[]).map(f => f.id as string);
+    if (!todas.includes(id)) return 'Esa fila no existe en esta tabla.';
+    if (antes && !todas.includes(antes)) return 'La fila de destino no existe en esta tabla.';
+    const sin = todas.filter(x => x !== id);
+    const i = antes ? sin.indexOf(antes) : sin.length;
+    const nuevo = [...sin.slice(0, i), id, ...sin.slice(i)];
+    await db.execute(sql`
+      UPDATE bd_filas f SET orden = x.o::int - 1
+      FROM jsonb_array_elements_text(${JSON.stringify(nuevo)}::jsonb) WITH ORDINALITY AS x(id, o)
+      WHERE f.id = x.id AND f.tabla_id = ${tablaId} AND f.orden IS DISTINCT FROM x.o::int - 1
+    `);
+    return null;
+  };
+
   /** Mover UNA fila a otro sitio de la tabla (2026-10-08, Eugenio: «pinchar una
    *  imagen de la galería y arrastrarla a una posición nueva, por ejemplo la
    *  primera»). Llega la fila y ANTES DE QUÉ fila va (`null` = al final).
@@ -1026,22 +1050,8 @@ export function registerBdRoutes(app: Express, db: any) {
       const antes = req.body?.antes_de ? String(req.body.antes_de) : null;
       if (!id) return res.status(400).json({ error: 'Falta la fila que se mueve.' });
       if (antes === id) return res.json({ ok: true });
-      const r = await db.execute(sql`
-        SELECT id FROM bd_filas
-        WHERE tabla_id = ${req.params.id} AND deleted_at IS NULL AND archived_at IS NULL
-        ORDER BY orden, created_at
-      `);
-      const todas = (r.rows as any[]).map(f => f.id as string);
-      if (!todas.includes(id)) return res.status(404).json({ error: 'Esa fila no existe en esta tabla.' });
-      if (antes && !todas.includes(antes)) return res.status(404).json({ error: 'La fila de destino no existe en esta tabla.' });
-      const sin = todas.filter(x => x !== id);
-      const i = antes ? sin.indexOf(antes) : sin.length;
-      const nuevo = [...sin.slice(0, i), id, ...sin.slice(i)];
-      await db.execute(sql`
-        UPDATE bd_filas f SET orden = x.o::int - 1
-        FROM jsonb_array_elements_text(${JSON.stringify(nuevo)}::jsonb) WITH ORDINALITY AS x(id, o)
-        WHERE f.id = x.id AND f.tabla_id = ${req.params.id} AND f.orden IS DISTINCT FROM x.o::int - 1
-      `);
+      const fallo = await colocarFila(req.params.id, id, antes);
+      if (fallo) return res.status(404).json({ error: fallo });
       // Sin tocar `updated_at`: recolocar no es editar, y marcar todas las
       // filas como «modificadas hoy» ensuciaría los avisos y el historial.
       res.json({ ok: true });
@@ -1830,6 +1840,136 @@ export function registerBdRoutes(app: Express, db: any) {
   });
 
   /** A la papelera, no al vacío. Quince días para arrepentirse. */
+  /** MOVER UNA ENTRADA A OTRA BASE DE DATOS (2026-10-08, Eugenio: «arrastrar
+   *  una entrada de una base de datos a otra y que se coloque en la nueva,
+   *  como Notion»). La fila CAMBIA de tabla: su id, su página y su historia
+   *  son los mismos.
+   *
+   *  QUÉ SE LLEVA. Las propiedades se casan por NOMBRE y TIPO (sin mirar
+   *  mayúsculas): «Estado» de una va a «Estado» de la otra. El nombre (la
+   *  primera columna de texto) siempre pasa al nombre del destino. En las
+   *  de selección se casan las opciones por su etiqueta y las que no existen
+   *  se crean en el destino. Los enlaces y los archivos van con su columna
+   *  si hay una gemela. Lo que no tiene gemela se pierde, y la respuesta lo
+   *  dice (`perdidas`) para que la pantalla avise.
+   *
+   *  LO QUE DEJA DE VALER. Las filas de otras tablas que apuntaban a esta
+   *  (por una relación hacia la tabla de origen) dejan de apuntar: ya no está
+   *  allí. La repetición de la fila se quita porque habla de columnas del
+   *  origen. Y la página toma la visibilidad de la tabla nueva, como si
+   *  hubiera nacido allí. */
+  app.post('/api/bd/filas/:id/mover-a-tabla', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const destinoId = String(req.body?.tabla_destino || '');
+      const antes = req.body?.antes_de ? String(req.body.antes_de) : null;
+      if (!destinoId) return res.status(400).json({ error: 'Falta la base de datos de destino.' });
+      const f = await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL AND archived_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa entrada no existe.' });
+      if (fila.tabla_id === destinoId) return res.status(400).json({ error: 'Esa entrada ya está en esa base de datos.' });
+      const pOrigen = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in pOrigen) return res.status(pOrigen.codigo).json({ error: pOrigen.error });
+      const pDestino = await puedeConTabla(req, destinoId, true);
+      if ('error' in pDestino) return res.status(pDestino.codigo).json({ error: pDestino.error });
+
+      const colsO = await columnasDe(fila.tabla_id);
+      const colsD = await columnasDe(destinoId);
+      const tituloO = await columnaTitulo(fila.tabla_id);
+      const tituloD = await columnaTitulo(destinoId);
+      const clave = (c: any) => `${String(c.nombre).trim().toLowerCase()}|${c.tipo}`;
+      const porClave = new Map<string, any>();
+      for (const c of colsD) if (!porClave.has(clave(c))) porClave.set(clave(c), c);
+      // Cada columna del origen → su gemela en el destino (o nada).
+      const gemela = new Map<string, any>();
+      for (const c of colsO) {
+        if (c.id === tituloO && tituloD) { gemela.set(c.id, colsD.find((d: any) => d.id === tituloD)); continue; }
+        if (c.config?.inversa_de || c.config?.rol) continue;
+        const d = porClave.get(clave(c));
+        if (!d || d.config?.inversa_de || d.config?.rol) continue;
+        // Una relación solo casa con otra que apunte a la MISMA tabla.
+        if (c.tipo === 'relacion' && c.config?.tabla_destino !== d.config?.tabla_destino) continue;
+        gemela.set(c.id, d);
+      }
+
+      // Valores. Las opciones de selección se casan por etiqueta; las que
+      // faltan se añaden al destino.
+      const valores: Record<string, any> = {};
+      const perdidas: string[] = [];
+      const opcionesNuevas = new Map<string, any[]>();
+      for (const c of colsO) {
+        const crudo = fila.valores?.[c.id];
+        const d = gemela.get(c.id);
+        const lleva = crudo !== undefined && crudo !== null && crudo !== '' && !(Array.isArray(crudo) && !crudo.length);
+        if (!d) { if (lleva) perdidas.push(c.nombre); continue; }
+        if (!lleva) continue;
+        if (c.tipo === 'seleccion' || c.tipo === 'seleccion_multiple') {
+          const ops: any[] = opcionesNuevas.get(d.id) ?? [...(Array.isArray(d.opciones) ? d.opciones : [])];
+          const aId = (idO: string) => {
+            const et = (Array.isArray(c.opciones) ? c.opciones : []).find((o: any) => o?.id === idO)?.label;
+            if (!et) return null;
+            let o = ops.find((x: any) => String(x?.label).toLowerCase() === String(et).toLowerCase());
+            if (!o) { o = { id: nid('OPT'), color: (Array.isArray(c.opciones) ? c.opciones : []).find((x: any) => x?.id === idO)?.color ?? null, label: et }; ops.push(o); }
+            return o.id as string;
+          };
+          const ids = (Array.isArray(crudo) ? crudo : [crudo]).map(aId).filter((x): x is string => !!x);
+          opcionesNuevas.set(d.id, ops);
+          if (!ids.length) continue;
+          valores[d.id] = c.tipo === 'seleccion' ? ids[0] : ids;
+        } else {
+          valores[d.id] = crudo;
+        }
+      }
+      for (const [colId, ops] of opcionesNuevas) {
+        await db.execute(sql`UPDATE bd_columnas SET opciones = ${JSON.stringify(ops)}::jsonb, updated_at = now() WHERE id = ${colId}`);
+      }
+
+      // Enlaces y archivos: con su columna gemela, o fuera.
+      for (const c of colsO) {
+        const d = gemela.get(c.id);
+        if (!['relacion', 'persona', 'proyecto', 'publicacion', 'imagen', 'video', 'documento'].includes(c.tipo)) continue;
+        if (c.tipo === 'imagen' || c.tipo === 'video' || c.tipo === 'documento') {
+          if (d) await db.execute(sql`UPDATE archivos SET columna_id = ${d.id} WHERE fila_id = ${fila.id} AND columna_id = ${c.id}`);
+          else {
+            const n = await db.execute(sql`UPDATE archivos SET archived_at = now() WHERE fila_id = ${fila.id} AND columna_id = ${c.id} AND archived_at IS NULL RETURNING id`);
+            if (n.rows.length) perdidas.push(c.nombre);
+          }
+          continue;
+        }
+        if (d) await db.execute(sql`UPDATE bd_enlaces SET columna_id = ${d.id} WHERE fila_origen = ${fila.id} AND columna_id = ${c.id}`);
+        else {
+          const n = await db.execute(sql`DELETE FROM bd_enlaces WHERE fila_origen = ${fila.id} AND columna_id = ${c.id} RETURNING id`);
+          if (n.rows.length) perdidas.push(c.nombre);
+        }
+      }
+      // Lo que apuntaba a esta fila desde otras tablas, por relaciones hacia el origen.
+      await db.execute(sql`
+        DELETE FROM bd_enlaces e USING bd_columnas c
+        WHERE e.destino_id = ${fila.id} AND e.clase = 'fila' AND c.id = e.columna_id
+          AND COALESCE(c.config->>'tabla_destino', '') <> ${destinoId}
+      `);
+
+      await db.execute(sql`
+        UPDATE bd_filas SET tabla_id = ${destinoId}, valores = ${JSON.stringify(valores)}::jsonb, recurrencia = NULL,
+               orden = (SELECT COALESCE(max(orden), -1) + 1 FROM bd_filas WHERE tabla_id = ${destinoId}),
+               updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${fila.id}
+      `);
+      if (fila.pagina_id) {
+        const t = pDestino.tabla;
+        let publico = false;
+        if (t.proyecto_id) publico = !!((await db.execute(sql`SELECT publico FROM proyectos WHERE id = ${t.proyecto_id}`)).rows[0] as any)?.publico;
+        await db.execute(sql`
+          UPDATE knowledge_windows SET proyecto_id = ${t.proyecto_id || null}, publico = ${publico}, updated_at = now()
+          WHERE id = ${fila.pagina_id} AND deleted_at IS NULL
+        `);
+      }
+      const fallo = await colocarFila(destinoId, fila.id, antes);
+      if (fallo && antes) await colocarFila(destinoId, fila.id, null);
+      res.json({ ok: true, id: fila.id, tabla_id: destinoId, tabla_titulo: pDestino.tabla.titulo ?? null, perdidas: [...new Set(perdidas)] });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** Duplicar una entrada (2026-10-08): la copia nace JUSTO DEBAJO de la
    *  original, con sus valores, sus enlaces y el contenido de su página, y
    *  «(copia)» detrás del nombre. Es la misma copia que hace nacer «la

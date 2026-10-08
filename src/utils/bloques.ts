@@ -81,7 +81,7 @@ export interface AccionBoton {
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
  *  pegar y que hay que REPRODUCIR o LEER dentro del documento, no descargar. */
-export type TamanoGaleria = 'pequeno' | 'mediano' | 'grande' | 'muy-grande';
+export type TamanoGaleria = 'xxs' | 'xs' | 'pequeno' | 'mediano' | 'grande' | 'muy-grande';
 
 export type ClaseMedio = 'video' | 'youtube' | 'vimeo' | 'audio' | 'pdf' | 'archivo';
 
