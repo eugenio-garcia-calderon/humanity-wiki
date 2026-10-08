@@ -1,34 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-orden",
-      "ruta": "src/components/layout/menu/tipos.ts",
-      "motivo": "menú que enlaza a BDs de la página, con scroll o página nueva, y URLs públicas para cada BD",
-      "desde": "2026-10-08T12:20:33.214Z"
-    },
-    {
-      "agente": "prog8-orden",
-      "ruta": "src/components/layout/menu/RamaMenu.tsx",
-      "motivo": "menú que enlaza a BDs de la página, con scroll o página nueva, y URLs públicas para cada BD",
-      "desde": "2026-10-08T12:20:33.214Z"
-    },
-    {
-      "agente": "prog8-orden",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "menú que enlaza a BDs de la página, con scroll o página nueva, y URLs públicas para cada BD",
-      "desde": "2026-10-08T12:20:33.214Z"
-    },
-    {
-      "agente": "prog8-orden",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "menú que enlaza a BDs de la página, con scroll o página nueva, y URLs públicas para cada BD",
-      "desde": "2026-10-08T12:20:33.214Z"
-    },
-    {
-      "agente": "prog8-orden",
-      "ruta": "src/components/knowledge/BloquesLectura.tsx",
-      "motivo": "menú que enlaza a BDs de la página, con scroll o página nueva, y URLs públicas para cada BD",
-      "desde": "2026-10-08T12:20:33.214Z"
-    }
-  ]
+  "reservas": []
 }
