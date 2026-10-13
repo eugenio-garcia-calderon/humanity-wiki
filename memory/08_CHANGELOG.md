@@ -8759,3 +8759,12 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-13 — Optimización web: mide por el dominio propio cuando lo tiene (prog8)
 - Si la página tiene un dominio propio **activo** (los pendientes aún no sirven la web), la medición va por ese dominio, como la ven sus visitantes. Si no, por la dirección de la página en humanity.wiki. Cada medición guarda a qué dirección corresponde (`destino`, migración `0151`), y la comparación solo se hace con mediciones del mismo sitio.
 - Probado en local: sin dominio, mide la página; con un dominio activo de prueba, intenta medir por ese dominio y avisa cuando no responde. La medición real por un dominio conectado no se ha podido probar aquí.
+
+### 2026-10-13 — Nuevo logo y favicón de Humanity.wiki (prog8)
+- `public/logo.svg` (favicón y logo de los sitios) y los iconos de la app (`public/iconos/`, 180/192/512 y maskable) con el nuevo logo: círculo azul noche, anillo amarillo partido en cuatro arcos y núcleo amarillo.
+- **Redibujado a partir de la imagen enviada en el chat, no del fichero original**: sustituir por el original cuando se tenga.
+- La cabecera de la app sigue siendo solo el texto «Humanity.Wiki»; la marca no aparece ahí.
+
+### 2026-10-13 — Logo y favicón de Humanity.wiki: el original enviado por Eugenio (prog8)
+- `public/logo.png` es el logo original enviado por Eugenio (PNG de 128×128). Sustituye al SVG anterior en el favicón (`index.html`), en el menú lateral, en las notificaciones y en la precarga del service worker. Los iconos de la app (`public/iconos/`) se generan a partir de él, con fondo azul noche; el original es de 128 píxeles, así que los de 512 salen algo suaves.
+- Se quitan los SVG fuente anteriores. Un redibujo hecho por error llegó a producción unos minutos y se revirtió (PR #562).

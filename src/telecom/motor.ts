@@ -237,7 +237,7 @@ function avisoDelSistema(titulo: string, cuerpo: string) {
   try {
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
     if (document.visibilityState === 'visible') return;
-    const n = new Notification(titulo, { body: cuerpo, icon: '/logo.svg', tag: 'humanity-llamada' });
+    const n = new Notification(titulo, { body: cuerpo, icon: '/logo.png', tag: 'humanity-llamada' });
     n.onclick = () => { window.focus(); n.close(); };
   } catch { /* que no suene un aviso no puede romper una llamada */ }
 }
