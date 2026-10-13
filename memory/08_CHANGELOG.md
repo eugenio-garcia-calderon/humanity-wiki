@@ -8744,3 +8744,7 @@ en mis páginas como proyecto pendiente».
 - **Nombre encima de la imagen** (opcional, «Nombre: Debajo / Encima» en las tarjetas) y **grosor del nombre** (Fino, Normal, Negrita; por defecto Negrita, lo de siempre). Campos `nombreArriba` y `pesoNombre` del bloque; se respetan en la página publicada.
 - **Ajustes de la base de datos reagrupados** en secciones plegables, en cascada: «Carrusel» (solo en vista de carrusel), «Tarjetas» (tamaño de tarjeta, tamaño, grosor y posición del nombre, y qué propiedades se ven), «Título de la base de datos» (tamaño, grosor, color y «Mostrar el título al publicar») y «Descripción» (solo quien edita). Los controles en fila, más pequeños, y el valor elegido se marca.
 - Probado en local: el nombre pasa encima de la imagen y con grosor fino, y se mantiene al recargar. Pendiente: verlo en la página publicada.
+
+### 2026-10-13 — Tablas de una página publicada: se cargan de arriba abajo (prog8)
+- En una página con muchas tablas se pedían todas a la vez y la primera y la segunda tardaban segundos en aparecer. Ahora, por defecto (`components/knowledge/CargaEnOrden.tsx`): las dos primeras arrancan enseguida y las siguientes, en orden, cuando la anterior está montada y la tabla se acerca a la pantalla (600 px de adelanto). Mientras, cada una muestra «Cargando…» con su altura reservada, para que la página no salte.
+- Probado en local con cinco tablas: al abrir solo aparecen las dos primeras; el resto se monta al acercarse en orden. El editor no cambia.

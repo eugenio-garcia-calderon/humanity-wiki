@@ -18,6 +18,7 @@ import { Portada, RejillaProductos, Columnas, Franja } from './BloquesMaqueta';
 import { MigasDePan, BotonVista } from './BloquesExtra';
 import { ImagenVista } from './ImagenBloque';
 import { useSitio } from '../sitio/ContextoSitio';
+import { CargaEnOrden } from './CargaEnOrden';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -449,7 +450,7 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloColor={b.tituloColor} tituloPeso={b.tituloPeso || 'negrita'} nombreArriba={!!b.nombreArriba} pesoNombre={b.pesoNombre || 'negrita'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} visibles={b.propsGaleria} /> : null;
+        return tablaId ? <CargaEnOrden alto={520}><Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloColor={b.tituloColor} tituloPeso={b.tituloPeso || 'negrita'} nombreArriba={!!b.nombreArriba} pesoNombre={b.pesoNombre || 'negrita'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} visibles={b.propsGaleria} /></CargaEnOrden> : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────
