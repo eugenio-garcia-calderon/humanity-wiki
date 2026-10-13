@@ -483,7 +483,7 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
             ventanas, que si no tapan el inicio al que acabas de ir. */}
         <button onClick={() => { minimizarTodas(); navigate('/'); }} title="Ir al inicio"
           className="min-w-0 flex-1 text-left flex items-center gap-2 hover:opacity-85 transition-opacity">
-          <img src="/logo.png" alt="" className="w-7 h-7 rounded-lg shrink-0" />
+          <img src="/logo-v2.png" alt="" className="w-7 h-7 rounded-lg shrink-0" />
           <span className="text-sm font-extrabold tracking-tight text-slate-900 truncate">
             Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
           </span>

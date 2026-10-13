@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageSquare, History, MessageSquarePlus, Bell, BellRing, BarChart3 } from 'lucide-react';
+import { History, MessageSquarePlus, BarChart3 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import PanelComentarios, { type Ancla, type Hilo } from './PanelComentarios';
 import PanelVersiones from './PanelVersiones';
@@ -207,14 +207,6 @@ export default function HerramientasPagina({ paginaId, raiz = 'main', contarVisi
         </button>
       )}
       <div className="fixed right-3 top-1/2 z-[60] flex -translate-y-1/2 flex-col gap-1.5 print:hidden">
-        {seg && !seg.es_duenyo && (
-          <button onClick={alternarSeguir} title={seg.siguiendo ? 'Dejar de seguir' : 'Seguir esta página: te avisamos cuando cambie'}
-            aria-pressed={seg.siguiendo} aria-label={seg.siguiendo ? 'Dejar de seguir esta página' : 'Seguir esta página'}
-            className={cn('grid h-11 w-11 place-items-center rounded-full border shadow-md transition-colors',
-              seg.siguiendo ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-200 bg-white text-slate-500 hover:text-slate-900')}>
-            {seg.siguiendo ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-          </button>
-        )}
         {seg && (seg.seguidores > 0) && (
           <button onClick={() => setPanel('seguidores')} className="text-center text-[10px] font-bold text-slate-500 hover:text-slate-900" aria-label={`${seg.seguidores} seguidores`}>
             {seg.seguidores}<br />{seg.seguidores === 1 ? 'sigue' : 'siguen'}
@@ -226,13 +218,6 @@ export default function HerramientasPagina({ paginaId, raiz = 'main', contarVisi
             <BarChart3 className="h-4 w-4" />
           </button>
         )}
-        {poder && <button onClick={() => { setBorrador(null); setFoco(null); setPanel(p => (p === 'comentarios' ? null : 'comentarios')); }}
-          title="Comentarios" aria-label={`Comentarios${abiertos ? `: ${abiertos} abiertos` : ''}`}
-          className={cn('relative grid h-11 w-11 place-items-center rounded-full border bg-white shadow-md transition-colors',
-            panel === 'comentarios' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:text-slate-900')}>
-          <MessageSquare className="h-4 w-4" />
-          {abiertos > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-amber-500 px-1 text-[10px] font-black text-white">{abiertos}</span>}
-        </button>}
         {poder?.editar && (
           <button onClick={abrirHistorial} title="Historial de versiones" aria-label="Historial de versiones"
             className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-md hover:text-slate-900">
