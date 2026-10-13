@@ -8768,3 +8768,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-13 — Logo y favicón de Humanity.wiki: el original enviado por Eugenio (prog8)
 - `public/logo.png` es el logo original enviado por Eugenio (PNG de 128×128). Sustituye al SVG anterior en el favicón (`index.html`), en el menú lateral, en las notificaciones y en la precarga del service worker. Los iconos de la app (`public/iconos/`) se generan a partir de él, con fondo azul noche; el original es de 128 píxeles, así que los de 512 salen algo suaves.
 - Se quitan los SVG fuente anteriores. Un redibujo hecho por error llegó a producción unos minutos y se revirtió (PR #562).
+
+### 2026-10-13 — Fuera los botones de comentarios y de seguir en el lateral de las páginas publicadas (prog8)
+- En las páginas publicadas se quitan del lateral derecho el botón de **comentarios** y el de **seguir** (campanita). El contador de seguidores, estadísticas e historial siguen.
+- El logo pasa a `public/logo-v2.png`: el CDN había guardado un 404 de `/logo.png` antes de que el fichero existiera, y el nombre nuevo evita esa caché.
