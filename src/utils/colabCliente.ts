@@ -451,7 +451,8 @@ export class Colab {
     this.awareness.getStates().forEach((s: any, clientId: number) => {
       if (!s?.user?.id) return;
       personas.push({
-        clientId, yo: clientId === this.doc.clientID,
+        // Lo mismo que yo: esta pestaña, o otra de mi cuenta. Si no, me aparecía a mí mismo editando.
+        clientId, yo: clientId === this.doc.clientID || (!!this.yo && s.user.id === this.yo.id),
         id: s.user.id, nombre: s.user.nombre, color: s.user.color, avatar: s.user.avatar || null, edita: !!s.user.edita,
         bloque: s.bloque || null, cursor: s.cursor || null, sig: s.sig || null,
       });

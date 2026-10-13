@@ -161,6 +161,9 @@ export interface Bloque {
   tamanoNombre?: TamanoGaleria;
   /** El título de la base de datos no se enseña al publicar (2026-10-02). */
   tituloOculto?: boolean;
+  /** El color y el grosor del título de una base de datos (como el tamaño: por bloque). Sin valor, el de siempre. */
+  tituloColor?: string;
+  tituloPeso?: 'fino' | 'normal' | 'negrita';
   /** `basedatos` en galería: qué columnas se ven en las tarjetas (ids, en
    *  orden). Sin valor, las tres primeras. */
   propsGaleria?: string[];
