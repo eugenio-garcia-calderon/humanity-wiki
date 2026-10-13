@@ -8777,3 +8777,7 @@ en mis páginas como proyecto pendiente».
 - Con el icono al lado del título, la cabecera de la página publicada va alineada a la izquierda, como la descripción. Con el icono encima o sin icono, sigue centrada.
 - El espacio superior baja un 25 %: de 24 a 18 px en el móvil y de 48 a 36 px en escritorio.
 - Probado en local con una página con icono y descripción.
+
+### 2026-10-13 — Tablas que tardaban 30–60 s en aparecer: peticiones con tiempo límite y reintento (prog8)
+- Una tabla pedía sus datos sin límite de tiempo: al reiniciarse el servidor (despliegues) una petición quedaba sin respuesta y el navegador esperaba hasta un minuto. Ahora cada petición de datos y de vistas espera 10 s como máximo y, si falla o recibe un error del servidor, se repite hasta tres veces.
+- Causa comprobada: los tiempos de la página y de sus tablas desde fuera eran de 0,3 s, y el reinicio del servidor coincidía con los despliegues de hoy.
