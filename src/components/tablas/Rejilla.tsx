@@ -58,7 +58,37 @@ const LETRA_TITULO: Record<TamanoGaleria, string> = {
   xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso }: {
+const PESOS: Array<[ 'fino' | 'normal' | 'negrita', string ]> = [['fino', 'Fino'], ['normal', 'Normal'], ['negrita', 'Negrita']];
+
+/** Un grupo plegable de ajustes: lo de dentro se ve al abrirlo, sin ocupar el resto. */
+function Grupo({ titulo, abierto = false, children }: { titulo: string; abierto?: boolean; children: React.ReactNode }) {
+  return (
+    <details open={abierto} className="group rounded-lg border border-slate-100">
+      <summary className="flex h-8 cursor-pointer list-none items-center justify-between px-2 text-[11px] font-black uppercase tracking-wide text-slate-500 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+        {titulo}
+        <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="space-y-0.5 px-1 pb-2">{children}</div>
+    </details>
+  );
+}
+
+/** Opciones en fila, compactas: el valor elegido se marca y se ve con su propio grosor o texto. */
+function Chips<T extends string>({ etiqueta, valor, onCambiar, opciones }: { etiqueta: string; valor: T; onCambiar: (v: T) => void; opciones: Array<[T, string]> }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-1 py-0.5">
+      <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
+      <div role="radiogroup" aria-label={etiqueta} className="flex rounded-lg bg-slate-100 p-0.5">
+        {opciones.map(([v, l]) => (
+          <button key={v} role="radio" aria-checked={valor === v} onClick={() => onCambiar(v)}
+            className={cn('h-6 px-2 rounded-md text-[11px]', valor === v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>{l}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -94,6 +124,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   onCambiarTituloColor?: (c: string | undefined) => void;
   tituloPeso?: 'fino' | 'normal' | 'negrita';
   onCambiarTituloPeso?: (p: 'fino' | 'normal' | 'negrita') => void;
+  /** El nombre de cada tarjeta, encima de la imagen o debajo, y su grosor (la vista de galería). */
+  nombreArriba?: boolean;
+  onCambiarNombreArriba?: (v: boolean) => void;
+  pesoNombre?: 'fino' | 'normal' | 'negrita';
+  onCambiarPesoNombre?: (p: 'fino' | 'normal' | 'negrita') => void;
   /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
   visibles?: string[];
   onCambiarVisibles?: (ids: string[]) => void;
@@ -636,14 +671,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   );
   const visiblesAhora = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
   const ajustesGaleria = (
-    <div className="space-y-2">
-      {onCambiarTituloOculto && (
-        <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
-          <span className="text-xs font-bold text-slate-600">Mostrar el título al publicar</span>
-          <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={!tituloOculto} onChange={e => onCambiarTituloOculto(!e.target.checked)} />
-        </label>
-      )}
-      {/* LA VELOCIDAD DEL CARRUSEL (2026-10-06): se guarda en la vista, así
+    <div className="space-y-1">
+      {vista === 'carrusel' && <Grupo titulo="Carrusel" abierto>
+        {/* LA VELOCIDAD DEL CARRUSEL (2026-10-06): se guarda en la vista, así
           que vale igual en la página publicada. Se ve al momento debajo. */}
       {vista === 'carrusel' && (
         <div className="flex items-center justify-between gap-2 px-1 py-1">
@@ -662,72 +692,72 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           </div>
         </div>
       )}
-      {onCambiarTamano && <Segmentos etiqueta="Tamaño de las tarjetas" valor={tamano} onCambiar={onCambiarTamano} />}
-      {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre de las tarjetas" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
-      {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño del título" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
-      {onCambiarTituloPeso && (
-        <div className="flex items-center justify-between gap-2 px-1 py-1">
-          <span className="text-xs font-bold text-slate-600">Grosor del título</span>
-          <div role="radiogroup" aria-label="Grosor del título" className="flex rounded-lg bg-slate-100 p-0.5">
-            {([['fino', 'Fino'], ['normal', 'Normal'], ['negrita', 'Negrita']] as const).map(([v, l]) => (
-              <button key={v} role="radio" aria-checked={tituloPeso === v} onClick={() => onCambiarTituloPeso(v)}
-                className={cn('h-7 px-2 rounded-md text-[11px]', v === 'fino' ? 'font-light' : v === 'normal' ? 'font-semibold' : 'font-black', tituloPeso === v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>{l}</button>
-            ))}
-          </div>
-        </div>
-      )}
-      {onCambiarTituloColor && (
-        <div className="flex items-center justify-between gap-2 px-1 py-1">
-          <span className="text-xs font-bold text-slate-600">Color del título</span>
-          <div role="radiogroup" aria-label="Color del título" className="flex flex-wrap justify-end gap-1">
-            <button role="radio" aria-checked={!tituloColor} aria-label="Color por defecto" title="Por defecto" onClick={() => onCambiarTituloColor(undefined)}
-              className={cn('h-6 w-6 rounded-full border text-[10px] font-bold text-slate-500', !tituloColor ? 'ring-2 ring-slate-900 ring-offset-1' : 'border-slate-300')}>A</button>
-            {COLORES.filter(c => !c.clave.startsWith('fondo-')).map(c => (
-              <button key={c.clave} role="radio" aria-checked={tituloColor === c.clave} aria-label={c.nombre} title={c.nombre} onClick={() => onCambiarTituloColor(c.clave)}
-                className={cn('h-6 w-6 rounded-full', SWATCH[c.clave], tituloColor === c.clave ? 'ring-2 ring-slate-900 ring-offset-1' : '')} />
-            ))}
-          </div>
-        </div>
-      )}
-      {editable && (
-        <div className="px-1 py-1 space-y-1">
-          <span className="text-xs font-bold text-slate-600">Descripción</span>
-          <textarea defaultValue={datos?.tabla.descripcion || ''} rows={2} maxLength={1000} aria-label="Descripción de la base de datos"
-            placeholder="Para qué es esta base de datos…"
-            onBlur={e => guardarDescripcion(e.currentTarget.value)}
-            className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-emerald-400" />
-        </div>
-      )}
-      {onCambiarVisibles && (
-        <div className="pt-1 border-t border-slate-100">
-          <p className="px-1 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
-          {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
-            const puesta = visiblesAhora.includes(c.id);
-            return (
-              <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
-                <button onClick={() => onCambiarVisibles(puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id])}
-                  className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-9 text-xs font-bold text-slate-600 text-left">
-                  {puesta ? <Eye className="w-3.5 h-3.5 text-blue-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
-                  <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
-                  {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
-                </button>
-                {editable && (
-                  <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
-                    className="w-8 h-8 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
-                    <Pencil className="w-3 h-3" />
+      </Grupo>}
+      <Grupo titulo="Tarjetas" abierto>
+        {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
+        {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
+        {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
+        {onCambiarNombreArriba && <Chips etiqueta="Nombre" valor={nombreArriba ? 'arriba' : 'abajo'} onCambiar={v => onCambiarNombreArriba(v === 'arriba')} opciones={[['abajo', 'Debajo'], ['arriba', 'Encima']]} />}
+        {onCambiarVisibles && (
+          <div className="pt-1 border-t border-slate-100">
+            <p className="px-1 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
+            {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
+              const puesta = visiblesAhora.includes(c.id);
+              return (
+                <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
+                  <button onClick={() => onCambiarVisibles(puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id])}
+                    className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-9 text-xs font-bold text-slate-600 text-left">
+                    {puesta ? <Eye className="w-3.5 h-3.5 text-blue-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+                    <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
+                    {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
                   </button>
-                )}
-              </div>
-            );
-          })}
-          {editable && (
-            <button onClick={() => setEditorColumna('nueva')}
-              className="mt-1 w-full flex items-center gap-2 px-1.5 h-9 rounded-md text-xs font-bold text-blue-600 hover:bg-blue-50">
-              <Plus className="w-3.5 h-3.5" /> Nueva propiedad
-            </button>
-          )}
-        </div>
-      )}
+                  {editable && (
+                    <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
+                      className="w-8 h-8 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {editable && (
+              <button onClick={() => setEditorColumna('nueva')}
+                className="mt-1 w-full flex items-center gap-2 px-1.5 h-9 rounded-md text-xs font-bold text-blue-600 hover:bg-blue-50">
+                <Plus className="w-3.5 h-3.5" /> Nueva propiedad
+              </button>
+            )}
+          </div>
+        )}
+      </Grupo>
+      <Grupo titulo="Título de la base de datos">
+        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+        {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
+        {onCambiarTituloColor && (
+          <div className="flex items-center justify-between gap-2 px-1 py-0.5">
+            <span className="text-xs font-bold text-slate-600">Color</span>
+            <div role="radiogroup" aria-label="Color del título" className="flex flex-wrap justify-end gap-1">
+              <button role="radio" aria-checked={!tituloColor} aria-label="Color por defecto" title="Por defecto" onClick={() => onCambiarTituloColor(undefined)}
+                className={cn('h-5 w-5 rounded-full border text-[9px] font-bold text-slate-500', !tituloColor ? 'ring-2 ring-slate-900 ring-offset-1' : 'border-slate-300')}>A</button>
+              {COLORES.filter(c => !c.clave.startsWith('fondo-')).map(c => (
+                <button key={c.clave} role="radio" aria-checked={tituloColor === c.clave} aria-label={c.nombre} title={c.nombre} onClick={() => onCambiarTituloColor(c.clave)}
+                  className={cn('h-5 w-5 rounded-full', SWATCH[c.clave], tituloColor === c.clave ? 'ring-2 ring-slate-900 ring-offset-1' : '')} />
+              ))}
+            </div>
+          </div>
+        )}
+        {onCambiarTituloOculto && (
+          <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
+            <span className="text-xs font-bold text-slate-600">Mostrar el título al publicar</span>
+            <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={!tituloOculto} onChange={e => onCambiarTituloOculto(!e.target.checked)} />
+          </label>
+        )}
+      </Grupo>
+      {editable && <Grupo titulo="Descripción">
+        <textarea defaultValue={datos?.tabla.descripcion || ''} rows={2} maxLength={1000} aria-label="Descripción de la base de datos"
+          placeholder="Para qué es esta base de datos…"
+          onBlur={e => guardarDescripcion(e.currentTarget.value)}
+          className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-emerald-400" />
+      </Grupo>}
     </div>
   );
   const mandosExtra = (
@@ -926,7 +956,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           {porGrupos(filas, fs => (
             <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} visibles={visibles}
+              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visibles}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               ordenable={editable && !colAgr && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}

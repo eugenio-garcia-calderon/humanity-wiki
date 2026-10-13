@@ -164,6 +164,9 @@ export interface Bloque {
   /** El color y el grosor del título de una base de datos (como el tamaño: por bloque). Sin valor, el de siempre. */
   tituloColor?: string;
   tituloPeso?: 'fino' | 'normal' | 'negrita';
+  /** Con la galería: el nombre de cada tarjeta encima de la imagen, y su grosor. Sin valor, debajo y negrita. */
+  nombreArriba?: boolean;
+  pesoNombre?: 'fino' | 'normal' | 'negrita';
   /** `basedatos` en galería: qué columnas se ven en las tarjetas (ids, en
    *  orden). Sin valor, las tres primeras. */
   propsGaleria?: string[];
