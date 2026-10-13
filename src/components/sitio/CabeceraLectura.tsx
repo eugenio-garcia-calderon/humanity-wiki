@@ -35,7 +35,7 @@ export function MarcoLectura({ pagina, rutas, children }: {
     <div className={conMarco ? 'bg-white' : 'min-h-screen bg-white'}>
       {/* Ancho, letra y tamaño que eligió el autor (2026-10-06, #29). Sin
           elegir, ancho completo y letra de siempre. */}
-      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-6 sm:pt-12', anchoDePagina(pagina?.config), clasesDePagina(pagina?.config))}>
+      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-[18px] sm:pt-9', anchoDePagina(pagina?.config), clasesDePagina(pagina?.config))}>
         {children}
       </div>
     </div>
@@ -54,18 +54,20 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
   const mostrarAutor = cfg.mostrarAutor === true;
   const icono: string | null = cfg.icono || null;
   const lado = ladoIcono(cfg.cabecera, esMovil);
+  // Con el icono al lado del título, la cabecera va alineada a la izquierda como la descripción. Con el icono encima o sin icono, centrada como siempre.
+  const alIzquierda = !!icono && cfg.cabecera?.iconoPos !== 'encima';
   return (
     // La misma cabecera que el editor: imagen arriba, debajo o a un
     // lado, con el tamaño que eligió el autor.
     <header className="mb-8">
       <LayoutCabecera
-        centrado
+        centrado={!alIzquierda}
         cabecera={cfg.cabecera}
         // `fetchPriority`: es lo primero que se ve, que no espere detrás
         // de los iconos y las imágenes de más abajo.
         imagen={cfg.portada ? <img src={cfg.portada} alt="" fetchPriority="high" className="rounded-2xl" /> : null}
         cuerpo={<>
-          <FilaTitulo centrado cabecera={cfg.cabecera} icono={icono ? (
+          <FilaTitulo centrado={!alIzquierda} cabecera={cfg.cabecera} icono={icono ? (
             <div>
               {esUrl(icono)
                 ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />

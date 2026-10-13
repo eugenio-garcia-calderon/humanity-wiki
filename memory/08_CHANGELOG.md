@@ -8772,3 +8772,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-13 — Fuera los botones de comentarios y de seguir en el lateral de las páginas publicadas (prog8)
 - En las páginas publicadas se quitan del lateral derecho el botón de **comentarios** y el de **seguir** (campanita). El contador de seguidores, estadísticas e historial siguen.
 - El logo pasa a `public/logo-v2.png`: el CDN había guardado un 404 de `/logo.png` antes de que el fichero existiera, y el nombre nuevo evita esa caché.
+
+### 2026-10-13 — Cabecera de la página publicada: título alineado con el icono y margen superior menor (prog8)
+- Con el icono al lado del título, la cabecera de la página publicada va alineada a la izquierda, como la descripción. Con el icono encima o sin icono, sigue centrada.
+- El espacio superior baja un 25 %: de 24 a 18 px en el móvil y de 48 a 36 px en escritorio.
+- Probado en local con una página con icono y descripción.
