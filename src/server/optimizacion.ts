@@ -73,10 +73,20 @@ function comprobarSeo(w: any) {
   ];
 }
 
+/** El dominio propio de la página, si lo tiene y ya está activo. Un dominio pendiente todavía no sirve la web. */
+async function dominioDePagina(db: any, id: string): Promise<string | null> {
+  const r = await db.execute(sql`
+    SELECT dominio FROM dominios_paginas
+    WHERE entidad_tipo = 'pagina' AND entidad_id = ${id} AND estado = 'activo'
+    ORDER BY activo_desde DESC NULLS LAST LIMIT 1
+  `);
+  return (r.rows[0] as any)?.dominio || null;
+}
+
 /** Mide la página publicada tal como la recibe un visitante. Devuelve null si no está publicada o no tiene dirección. */
-async function medirPublicada(w: any, base: string) {
-  if (!w.publico || !w.slug || !w.handle) return null;
-  const html = `${base}/@${w.handle}/${w.slug}`;
+async function medirPublicada(w: any, base: string, ruta: string) {
+  if (!w.publico) return null;
+  const html = `${base}${ruta}`;
   const api = `${base}/api/sitio/pagina/${w.id}`;
 
   const t1 = Date.now();
@@ -123,16 +133,21 @@ export function registrarOptimizacion(app: Express, db: any) {
     try {
       res.set('Cache-Control', 'private, no-store');
       const w = await paginaDeGestion(req, res, db); if (!w) return;
-      const mediciones = (await db.execute(sql`
-        SELECT id, medido_at, ms_html, ms_contenido, ms_imagenes, ms_total, bytes_html, bytes_imagenes, bytes_max, n_imagenes, n_tablas
-        FROM optimizacion_mediciones WHERE pagina_id = ${w.id} ORDER BY medido_at DESC LIMIT 10
+      const dominio = await dominioDePagina(db, w.id);
+      const destinoActual = dominio || DOMINIO();
+      const todas = (await db.execute(sql`
+        SELECT id, medido_at, destino, ms_html, ms_contenido, ms_imagenes, ms_total, bytes_html, bytes_imagenes, bytes_max, n_imagenes, n_tablas
+        FROM optimizacion_mediciones WHERE pagina_id = ${w.id} ORDER BY medido_at DESC LIMIT 30
       `)).rows as any[];
+      // Solo se compara con lo medido en el mismo sitio: el dominio propio y humanity.wiki no son comparables.
+      const mediciones = todas.filter(m => (m.destino || DOMINIO()) === destinoActual);
       const bloques = aplanarBloques(w.config?.bloques);
       const tablas = bloques.filter(b => b.tipo === 'basedatos');
       const pesadas = bloques.filter(b => b.tipo === 'imagen' && b.url && !b.optimizada).length;
       res.json({
         publicada: !!w.publico && !!w.slug,
-        urlPublica: w.publico && w.slug && w.handle ? `https://${DOMINIO()}/@${w.handle}/${w.slug}` : null,
+        urlPublica: dominio ? `https://${dominio}/` : w.publico && w.slug && w.handle ? `https://${DOMINIO()}/@${w.handle}/${w.slug}` : null,
+        destino: destinoActual,
         indexable: w.indexable !== false,
         mediciones,
         ultima: mediciones[0] || null,
@@ -151,11 +166,14 @@ export function registrarOptimizacion(app: Express, db: any) {
       const w = await paginaDeGestion(req, res, db); if (!w) return;
       // Se mide por la misma dirección por la que entra un visitante (la del propio servidor, detrás de su proxy).
       const proto = String(req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0];
-      const m = await medirPublicada(w, `${proto}://${req.get('host')}`);
+      const dominio = await dominioDePagina(db, w.id);
+      const m = dominio
+        ? await medirPublicada(w, `https://${dominio}`, '/')
+        : await medirPublicada(w, `${proto}://${req.get('host')}`, w.handle && w.slug ? `/@${w.handle}/${w.slug}` : '/');
       if (!m) return res.status(400).json({ error: 'Publica la página para poder medirla: un visitante es quien la mide.' });
       await db.execute(sql`
-        INSERT INTO optimizacion_mediciones (pagina_id, ms_html, ms_contenido, ms_imagenes, ms_total, bytes_html, bytes_imagenes, bytes_max, n_imagenes, n_tablas)
-        VALUES (${w.id}, ${m.ms_html}, ${m.ms_contenido}, ${m.ms_imagenes}, ${m.ms_total}, ${m.bytes_html}, ${m.bytes_imagenes}, ${m.bytes_max}, ${m.n_imagenes}, ${m.n_tablas})
+        INSERT INTO optimizacion_mediciones (pagina_id, destino, ms_html, ms_contenido, ms_imagenes, ms_total, bytes_html, bytes_imagenes, bytes_max, n_imagenes, n_tablas)
+        VALUES (${w.id}, ${dominio || DOMINIO()}, ${m.ms_html}, ${m.ms_contenido}, ${m.ms_imagenes}, ${m.ms_total}, ${m.bytes_html}, ${m.bytes_imagenes}, ${m.bytes_max}, ${m.n_imagenes}, ${m.n_tablas})
       `);
       res.json({ ok: true, medicion: m });
     } catch (e: any) {

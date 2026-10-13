@@ -8755,3 +8755,7 @@ en mis páginas como proyecto pendiente».
   - **SEO**: interruptor para indexar o no (solo cambia esa marca), comprobaciones de la propia página (título, descripción, estructura, contenido, imágenes, publicación) y **Generar propuesta con IA** (acciones concretas sobre el texto de la página; respeta el presupuesto de la IA).
 - **Carga de las tablas de arriba abajo**: por defecto, en la página publicada (ver entrada anterior); la recomendación correspondiente sale sobrante y se quitó.
 - Probado en local: medición real (1 imagen de 2,5 MB), recomendación y aplicar (la imagen queda en 606 KB y guardada), deshacer, indexar y quitar, y la propuesta de la IA (cuatro acciones). Pendiente: probar en una página publicada de verdad con muchas imágenes y ver la propuesta con una cuenta real.
+
+### 2026-10-13 — Optimización web: mide por el dominio propio cuando lo tiene (prog8)
+- Si la página tiene un dominio propio **activo** (los pendientes aún no sirven la web), la medición va por ese dominio, como la ven sus visitantes. Si no, por la dirección de la página en humanity.wiki. Cada medición guarda a qué dirección corresponde (`destino`, migración `0151`), y la comparación solo se hace con mediciones del mismo sitio.
+- Probado en local: sin dominio, mide la página; con un dominio activo de prueba, intenta medir por ese dominio y avisa cuando no responde. La medición real por un dominio conectado no se ha podido probar aquí.
