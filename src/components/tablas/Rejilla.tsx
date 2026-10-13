@@ -88,6 +88,20 @@ function Chips<T extends string>({ etiqueta, valor, onCambiar, opciones }: { eti
   );
 }
 
+/** Una petición de datos que no se queda colgada: si no contesta en 10 s, o contesta con un error del servidor, se
+ *  vuelve a pedir (un reinicio del servidor deja conexiones sin respuesta y el navegador esperaba hasta un minuto). */
+async function pedirDatos(url: string, intentos = 3): Promise<Response> {
+  for (let i = 1; ; i++) {
+    try {
+      const r = await fetch(url, { credentials: 'include', signal: AbortSignal.timeout(10000) });
+      if (r.status < 500 || i >= intentos) return r;
+    } catch (e) {
+      if (i >= intentos) throw e;
+    }
+    await new Promise(res => setTimeout(res, 500 * i));
+  }
+}
+
 export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
@@ -187,7 +201,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
 
   const cargarVistas = useCallback(async () => {
     try {
-      const r = await fetch(`/api/bd/tablas/${tablaId}/vistas`, { credentials: 'include' });
+      const r = await pedirDatos(`/api/bd/tablas/${tablaId}/vistas`);
       setVistas(r.ok ? (await r.json()).map(normalizarVista) : []);
     } catch { setVistas([]); }
   }, [tablaId]);
@@ -201,7 +215,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     const mio = ++turno.current;
     setFallo(null);
     try {
-      const r = await fetch(`/api/bd/tablas/${tablaId}${activa.id ? `?vista=${encodeURIComponent(activa.id)}` : ''}`, { credentials: 'include' });
+      const r = await pedirDatos(`/api/bd/tablas/${tablaId}${activa.id ? `?vista=${encodeURIComponent(activa.id)}` : ''}`);
       const j = await r.json();
       if (mio !== turno.current) return;
       if (!r.ok) { setFallo(j.error || 'No se pudo cargar la tabla.'); setDatos(null); }
