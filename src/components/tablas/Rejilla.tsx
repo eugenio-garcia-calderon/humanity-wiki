@@ -88,12 +88,12 @@ function Chips<T extends string>({ etiqueta, valor, onCambiar, opciones }: { eti
   );
 }
 
-/** Una petición de datos que no se queda colgada: si no contesta en 10 s, o contesta con un error del servidor, se
+/** Una petición de datos que no se queda colgada: si no contesta en 5 s, o contesta con un error del servidor, se
  *  vuelve a pedir (un reinicio del servidor deja conexiones sin respuesta y el navegador esperaba hasta un minuto). */
 async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   for (let i = 1; ; i++) {
     try {
-      const r = await fetch(url, { credentials: 'include', signal: AbortSignal.timeout(10000) });
+      const r = await fetch(url, { credentials: 'include', signal: AbortSignal.timeout(5000) });
       if (r.status < 500 || i >= intentos) return r;
     } catch (e) {
       if (i >= intentos) throw e;
