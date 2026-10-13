@@ -118,7 +118,7 @@ const BUILD = [];
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
-  "/logo.svg",
+  "/logo.png",
   "/iconos/icono-180.png",
   "/iconos/icono-192.png",
   "/iconos/icono-512.png",
