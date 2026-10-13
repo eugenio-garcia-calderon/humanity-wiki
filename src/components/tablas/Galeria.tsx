@@ -59,7 +59,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -83,6 +83,9 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   tamano?: TamanoGaleria;
   /** Letra del nombre de cada tarjeta; sin valor, la que corresponde al tamaño de la tarjeta. */
   tamanoNombre?: TamanoGaleria;
+  /** El nombre de cada tarjeta encima de la imagen (y no debajo), y su grosor. */
+  nombreArriba?: boolean;
+  pesoNombre?: 'fino' | 'normal' | 'negrita';
   /** Qué columnas se ven en la tarjeta, en orden. Sin valor, las tres primeras. */
   visibles?: string[];
   /** Sin el relleno de alrededor: la galería limpia de una página. */
@@ -323,6 +326,17 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
+      const pesoClase = pesoNombre === 'fino' ? 'font-light' : pesoNombre === 'normal' ? 'font-semibold' : 'font-bold';
+      const nombreEl = (
+                  <p className={cn('flex items-center gap-1.5 min-w-0', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+                    {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
+                      : icono ? (esUrl(icono)
+                        ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
+                        : <span className="shrink-0">{icono}</span>)
+                      : null}
+                    <span className={cn('truncate', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
+                  </p>
+      );
           return (
             // Un `div` que hace de botón, no un `<button>`: dentro van los
             // mandos de recolocar la imagen, y un botón no puede llevar otro.
@@ -395,6 +409,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                     : cn('inset-x-0 h-1', destino.lado === 'antes' ? '-top-3' : '-bottom-3')
                 )} />
               )}
+              {nombreArriba && <div className="mb-2">{nombreEl}</div>}
               <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
@@ -438,14 +453,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   tarjeta centrado, al igual que la descripción, y no a la
                   izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
               <div className={cn(chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
-                <p className={cn('flex items-center gap-1.5 font-bold min-w-0', tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
-                  {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
-                    : icono ? (esUrl(icono)
-                      ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
-                      : <span className="shrink-0">{icono}</span>)
-                    : null}
-                  <span className={cn('truncate', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
-                </p>
+{!nombreArriba && nombreEl}
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
                 {!chica && f.pagina?.descripcion && (
