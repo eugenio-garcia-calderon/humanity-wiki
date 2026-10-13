@@ -14,7 +14,7 @@ import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { cn } from '../../utils/cn';
-import { tonoDe } from '../../utils/coloresBloque';
+import { tonoDe, COLORES } from '../../utils/coloresBloque';
 import BarraVista, { Desplegable, claseBoton, Cuenta } from './BarraVista';
 import EditorRecurrencia from './EditorRecurrencia';
 import Tablero from './Tablero';
@@ -58,7 +58,7 @@ const LETRA_TITULO: Record<TamanoGaleria, string> = {
   xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -89,12 +89,20 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
    *  viendo, atenuado y con el aviso. */
   tituloOculto?: boolean;
   onCambiarTituloOculto?: (v: boolean) => void;
+  /** Color (una clave de `COLORES`, en texto) y grosor del título; quien edita los cambia. */
+  tituloColor?: string;
+  onCambiarTituloColor?: (c: string | undefined) => void;
+  tituloPeso?: 'fino' | 'normal' | 'negrita';
+  onCambiarTituloPeso?: (p: 'fino' | 'normal' | 'negrita') => void;
   /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
   visibles?: string[];
   onCambiarVisibles?: (ids: string[]) => void;
 }) {
   const [menuProps, setMenuProps] = useState(false);
   const tono = tonoDe(color);
+  const tituloTono = tonoDe(tituloColor).texto;
+  const SWATCH: Record<string, string> = { gris: 'bg-slate-500', marron: 'bg-amber-800', naranja: 'bg-orange-600', amarillo: 'bg-yellow-600', verde: 'bg-emerald-600', azul: 'bg-sky-600', morado: 'bg-violet-600', rosa: 'bg-pink-600', rojo: 'bg-rose-600' };
+  const pesoTitulo = tituloPeso === 'fino' ? 'font-light' : tituloPeso === 'normal' ? 'font-semibold' : 'font-black';
   const esMovil = useEsMovil();
   const navigate = useNavigate();
   const sitio = useSitio();
@@ -386,6 +394,18 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** El nombre mientras se edita; `null` cuando no se está editando. */
   const [nombre, setNombre] = useState<string | null>(null);
   const [falloNombre, setFalloNombre] = useState<string | null>(null);
+  const guardarDescripcion = async (valor: string) => {
+    if (!datos) return;
+    const limpio = valor.trim();
+    if (limpio === (datos.tabla.descripcion || '').trim()) return;
+    const r = await fetch(`/api/bd/tablas/${tablaId}`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ descripcion: limpio }),
+    });
+    if (!r.ok) { setFalloNombre((await r.json().catch(() => ({}))).error || 'No se pudo guardar la descripción.'); return; }
+    setDatos(d => d ? { ...d, tabla: { ...d.tabla, descripcion: limpio || null } } : d);
+  };
+
   const guardarNombre = async () => {
     if (nombre === null || !datos) return;
     const limpio = nombre.trim();
@@ -645,6 +665,39 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       {onCambiarTamano && <Segmentos etiqueta="Tamaño de las tarjetas" valor={tamano} onCambiar={onCambiarTamano} />}
       {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre de las tarjetas" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
       {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño del título" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+      {onCambiarTituloPeso && (
+        <div className="flex items-center justify-between gap-2 px-1 py-1">
+          <span className="text-xs font-bold text-slate-600">Grosor del título</span>
+          <div role="radiogroup" aria-label="Grosor del título" className="flex rounded-lg bg-slate-100 p-0.5">
+            {([['fino', 'Fino'], ['normal', 'Normal'], ['negrita', 'Negrita']] as const).map(([v, l]) => (
+              <button key={v} role="radio" aria-checked={tituloPeso === v} onClick={() => onCambiarTituloPeso(v)}
+                className={cn('h-7 px-2 rounded-md text-[11px]', v === 'fino' ? 'font-light' : v === 'normal' ? 'font-semibold' : 'font-black', tituloPeso === v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>{l}</button>
+            ))}
+          </div>
+        </div>
+      )}
+      {onCambiarTituloColor && (
+        <div className="flex items-center justify-between gap-2 px-1 py-1">
+          <span className="text-xs font-bold text-slate-600">Color del título</span>
+          <div role="radiogroup" aria-label="Color del título" className="flex flex-wrap justify-end gap-1">
+            <button role="radio" aria-checked={!tituloColor} aria-label="Color por defecto" title="Por defecto" onClick={() => onCambiarTituloColor(undefined)}
+              className={cn('h-6 w-6 rounded-full border text-[10px] font-bold text-slate-500', !tituloColor ? 'ring-2 ring-slate-900 ring-offset-1' : 'border-slate-300')}>A</button>
+            {COLORES.filter(c => !c.clave.startsWith('fondo-')).map(c => (
+              <button key={c.clave} role="radio" aria-checked={tituloColor === c.clave} aria-label={c.nombre} title={c.nombre} onClick={() => onCambiarTituloColor(c.clave)}
+                className={cn('h-6 w-6 rounded-full', SWATCH[c.clave], tituloColor === c.clave ? 'ring-2 ring-slate-900 ring-offset-1' : '')} />
+            ))}
+          </div>
+        </div>
+      )}
+      {editable && (
+        <div className="px-1 py-1 space-y-1">
+          <span className="text-xs font-bold text-slate-600">Descripción</span>
+          <textarea defaultValue={datos?.tabla.descripcion || ''} rows={2} maxLength={1000} aria-label="Descripción de la base de datos"
+            placeholder="Para qué es esta base de datos…"
+            onBlur={e => guardarDescripcion(e.currentTarget.value)}
+            className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-emerald-400" />
+        </div>
+      )}
       {onCambiarVisibles && (
         <div className="pt-1 border-t border-slate-100">
           <p className="px-1 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
@@ -740,6 +793,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           al centro. */}
       {/* Oculto y sin nada más que enseñar (quien lee no tiene mandos): ni la
           fila del título se pinta, para que no quede un hueco encima. */}
+      {limpia && datos.tabla.descripcion && !(tituloOculto && !editable) && (
+        <p className={cn('-mt-2 mb-3 max-w-2xl mx-auto text-center text-sm leading-relaxed whitespace-pre-line text-slate-500', tituloOculto && 'opacity-40')}>{datos.tabla.descripcion}</p>
+      )}
       {!(limpia && tituloOculto && !editable) && (
       <div className={limpia
         ? 'flex flex-wrap items-center justify-center gap-2 pb-4 min-h-9'
@@ -757,14 +813,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               if (e.key === 'Enter') e.currentTarget.blur();
               if (e.key === 'Escape') { setNombre(null); setFalloNombre(null); }
             }}
-            className={cn('min-w-0 flex-1 max-w-xs px-1.5 -mx-1.5 rounded border border-slate-300 bg-white font-black outline-none focus:border-emerald-400', limpia ? cn('min-h-9', LETRA_TITULO[tamanoTitulo]) : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))} />
+            className={cn(pesoTitulo, 'min-w-0 flex-1 max-w-xs px-1.5 -mx-1.5 rounded border border-slate-300 bg-white outline-none focus:border-emerald-400', limpia ? cn('min-h-9', LETRA_TITULO[tamanoTitulo]) : 'h-7 text-xs', tituloTono || tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))} />
         ) : editable ? (
           <button onClick={() => setNombre(datos.tabla.titulo || '')} title="Cambiar el nombre"
-            className={cn('min-w-0 px-1.5 -mx-1.5 rounded font-black truncate hover:bg-slate-100 transition-colors', limpia ? cn('min-h-9', LETRA_TITULO[tamanoTitulo]) : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>
+            className={cn(pesoTitulo, 'min-w-0 px-1.5 -mx-1.5 rounded truncate hover:bg-slate-100 transition-colors', limpia ? cn('min-h-9', LETRA_TITULO[tamanoTitulo]) : 'h-7 text-xs', tituloTono || tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>
             {datos.tabla.titulo}
           </button>
         ) : (
-          <p className={cn('font-black truncate', limpia ? LETRA_TITULO[tamanoTitulo] : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
+          <p className={cn(pesoTitulo, 'truncate', limpia ? LETRA_TITULO[tamanoTitulo] : 'text-xs', tituloTono || tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
         )}
         </div>
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
