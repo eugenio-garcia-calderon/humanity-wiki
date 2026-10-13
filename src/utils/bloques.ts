@@ -167,6 +167,8 @@ export interface Bloque {
   /** Con la galería: el nombre de cada tarjeta encima de la imagen, y su grosor. Sin valor, debajo y negrita. */
   nombreArriba?: boolean;
   pesoNombre?: 'fino' | 'normal' | 'negrita';
+  /** Una imagen ya comprimida por la optimización web: no se vuelve a intentar. */
+  optimizada?: boolean;
   /** `basedatos` en galería: qué columnas se ven en las tarjetas (ids, en
    *  orden). Sin valor, las tres primeras. */
   propsGaleria?: string[];

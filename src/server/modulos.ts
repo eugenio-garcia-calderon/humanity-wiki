@@ -81,6 +81,7 @@ import { registrarPermisos } from './permisos.js';
 import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
 import { registrarConsola } from './consola.js';
+import { registrarOptimizacion } from './optimizacion.js';
 import { registrarComentarios } from './comentarios.js';
 import { registrarVersiones } from './versiones.js';
 import { registrarSeguir } from './seguir.js';
@@ -228,6 +229,8 @@ export const MODULOS: Modulo[] = [
   { nombre: 'sitios', montar: (app, db) => registrarSitios(app, db) },
   // La consola de la cadena de valor de una web: sólo para quien gestiona la página y sólo desde humanity.wiki.
   { nombre: 'consola', montar: (app, db) => registrarConsola(app, db) },
+  // Optimización web de una página publicada: medición real, recomendaciones e indexación (solo quien edita).
+  { nombre: 'optimizacion', montar: (app, db) => registrarOptimizacion(app, db) },
   { nombre: 'buscador', montar: (app, db) => registerBuscadorRoutes(app, db) },
   { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
   { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },
