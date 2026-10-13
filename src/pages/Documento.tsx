@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { subirArchivo } from '../utils/subir';
+import OptimizacionWeb from '../components/knowledge/OptimizacionWeb';
 import SoltarImagen from '../components/ui/SoltarImagen';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -10,7 +11,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, CircleDashed,
+  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, CircleDashed, Gauge,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -279,6 +280,7 @@ function EditorPagina() {
   const [atajosAbiertos, setAtajosAbiertos] = useState(false);
   const [menuSitioAbierto, setMenuSitioAbierto] = useState(false);
   const [consolaAbierta, setConsolaAbierta] = useState(false);
+  const [optimizacionAbierta, setOptimizacionAbierta] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
   /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
@@ -3941,6 +3943,13 @@ function EditorPagina() {
               <PanelTop className="w-4 h-4" /> {tr('Menú y pie')}
             </button>
           )}
+          {/* OPTIMIZACIÓN WEB (2026-10-13): solo cuando la página está publicada, y a quien la edita. */}
+          {puedoEditar && publico && (
+            <button onClick={() => setOptimizacionAbierta(true)} title="Optimización web: tiempo de carga y SEO" aria-label="Optimización web"
+              className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
+              <Gauge className="w-4 h-4" /> <span className="hidden sm:inline">Optimización</span>
+            </button>
+          )}
           {/* LA CONSOLA (2026-10-08): la cadena de valor del negocio, privada. Sólo a quien gestiona la página
               y sólo en humanity.wiki (el servidor lo exige; aquí sólo se esconde el botón). */}
           {puedoGestionar && !filaDe?.fila_id && ['humanity.wiki', 'localhost', '127.0.0.1'].includes(window.location.hostname) && (
@@ -4305,6 +4314,7 @@ function EditorPagina() {
             })}
           </div>
         )}
+        {optimizacionAbierta && id && <OptimizacionWeb paginaId={id} bloques={bloques} setBloques={setBloques} programarGuardado={programarGuardado} onCerrar={() => setOptimizacionAbierta(false)} />}
         {consolaAbierta && id && <ConsolaCadena paginaId={id} titulo={titulo} onCerrar={() => setConsolaAbierta(false)} />}
         {menuSitioAbierto && (
           <CreadorMenu sitio={ajustes.sitio} titulo={titulo} icono={icono}
