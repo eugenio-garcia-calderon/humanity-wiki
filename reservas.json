@@ -1,3 +1,28 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/BarraVista.tsx",
+      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
+      "desde": "2026-10-14T10:24:45.098Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
+      "desde": "2026-10-14T10:24:45.098Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/bd.ts",
+      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
+      "desde": "2026-10-14T10:24:45.098Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
+      "desde": "2026-10-14T10:24:45.098Z"
+    }
+  ]
 }
