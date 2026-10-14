@@ -93,8 +93,8 @@
     {
       "agente": "prog8",
       "ruta": "src/components/tablas/Galeria.tsx",
-      "motivo": "Arrastrar entradas a otro grupo",
-      "desde": "2026-10-14T12:38:52.282Z"
+      "motivo": "Imagen completa y cuadrada en la galería",
+      "desde": "2026-10-14T12:42:51.819Z"
     }
   ]
 }
