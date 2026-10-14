@@ -8833,3 +8833,8 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
 - «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
+
+### 2026-10-14 — Flecha de enlace en galería, tamaño XXXS y arrastrar entradas entre grupos (prog8)
+- La flecha de un enlace abre la base enlazada en una ventana, en vista de galería.
+- Nuevo tamaño de tarjeta XXXS, más pequeño que XXS.
+- En una galería agrupada, arrastrar una entrada a otro grupo cambia su propiedad de agrupar, sin abrirla.

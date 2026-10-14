@@ -56,7 +56,7 @@ const PALETA = ['#64748b', '#d97706', '#16a34a', '#2563eb', '#9333ea', '#db2777'
 
 /** La letra del título en galería, según el tamaño elegido. */
 const LETRA_TITULO: Record<TamanoGaleria, string> = {
-  xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
+  minimo: 'text-[11px]', xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
 const PESOS: Array<[ 'fino' | 'normal' | 'negrita', string ]> = [['fino', 'Fino'], ['normal', 'Normal'], ['negrita', 'Negrita']];
@@ -396,6 +396,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     if (columnas.find(c => c.id === columnaId)?.tipo === 'relacion') avisarCambio();
   };
 
+  // ARRASTRAR A UN GRUPO (2026-10-14): soltar una entrada en un grupo cambia la propiedad por la de ese grupo. Sin abrirla.
+  const moverAGrupo = async (filaId: string, hacia: Grupo) => {
+    if (!colAgr || !datos) return;
+    const f = datos.filas.find(x => x.id === filaId);
+    if (!f) return;
+    const desde = agruparFilas(datos.filas, colAgr, { ...activa.config, ocultar_vacios: false }).find(g => g.filas.some(x => x.id === filaId)) || null;
+    if (desde && desde.clave === hacia.clave) return;
+    const valor = valorAlMover(f, colAgr, desde, hacia);
+    await guardarCeldas(filaId, { [colAgr.id]: valor });
+  };
   // AÑADIR ABRE UN POP-UP (2026-10-14): se escribe el título y se crea; «Ampliar» la crea y la abre en grande.
   const [nuevaEntrada, setNuevaEntrada] = useState(false);
   const [tituloNueva, setTituloNueva] = useState('');
@@ -573,13 +583,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
    */
   const porGrupos = (
     lista: Fila[],
-    pintar: (fs: Fila[]) => ReactNode,
+    pintar: (fs: Fila[], grupo?: Grupo) => ReactNode,
     cabecera: (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => ReactNode,
     pie?: (celdas: Record<string, any>) => ReactNode,
     nivel = 0, padre: Grupo | null = null, celdasPadre: Record<string, any> = {},
   ): ReactNode => {
     const col = nivel === 0 ? colAgr : nivel === 1 ? colSub : null;
-    if (!col) return <>{pintar(lista)}{pie?.(celdasPadre)}</>;
+    if (!col) return <>{pintar(lista, padre || undefined)}{pie?.(celdasPadre)}</>;
     const grupos = agruparFilas(lista, col, nivel === 0 ? activa.config : { ...activa.config, ocultar_vacios: true })
       .filter(g => nivel > 0 || !gruposOcultos.has(g.clave));
     return grupos.map(g => {
@@ -712,7 +722,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // agrupar, buscar, enlazar, ajustes— y el botón azul «Nuevo». Todo lo que
   // antes se amontonaba junto al título (ocultar título, propiedades de las
   // tarjetas, los dos tamaños) vive ahora dentro de «Ajustes».
-  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
+  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'minimo', l: 'XXXS' }, { v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
   const Segmentos = ({ valor, onCambiar, etiqueta, desde = 0 }: { valor?: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string; desde?: number }) => (
     <div className="flex items-center justify-between gap-2 px-1 py-1">
       <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
@@ -1033,8 +1043,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
-          {porGrupos(colAgr ? filas : visiblesGaleria, fs => (
+          {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo) => (
             <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
+              alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined}
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visibles}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}

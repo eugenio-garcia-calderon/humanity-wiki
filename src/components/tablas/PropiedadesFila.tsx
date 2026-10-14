@@ -139,7 +139,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
     const r = await fetch(`/api/bd/tablas/${destino}/hogar`, { credentials: 'include' });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) { setFallo(j.error || 'No puedes abrir esa base de datos.'); return; }
-    abrirVentana({ titulo: j.titulo || 'Base de datos', clase: 'app', destino: `/tablas?tabla=${destino}` });
+    abrirVentana({ titulo: j.titulo || 'Base de datos', clase: 'app', destino: `/tablas?tabla=${destino}&vista=galeria` });
   };
 
   /** Soltar una propiedad delante de otra: el orden nuevo de TODA la tabla. */
