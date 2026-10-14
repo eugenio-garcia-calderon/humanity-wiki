@@ -8837,3 +8837,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-14 — Base de datos nueva en su bloque, como galería, con una entrada (prog8)
 - Una base de datos que se crea desde un bloque nace como galería «Sin título» con una entrada «Sin título».
 - Un bloque insertado desde otro sitio ya no cae al final de la página: la marca de «al final» se usa una sola vez.
+
+### 2026-10-14 — Copiar, cortar y pegar páginas entre bloques (prog8)
+- Un bloque «Página» tiene en su menú «Copiar página» y «Cortar página». Copiar deja la página lista para pegarla en otro bloque, y al pegarla queda enlazada allí. Cortar quita el bloque de aquí y, al pegarlo en otro bloque, la página pasa a ese documento.
+- Cualquier bloque ofrece «Pegar … aquí», que inserta la página justo después.

@@ -11,7 +11,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
-  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, CircleDashed, Gauge,
+  PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, Scissors, ClipboardPaste, CircleDashed, Gauge,
 } from 'lucide-react';
 import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
@@ -300,6 +300,8 @@ function EditorPagina() {
   const arrastrando = arrastre?.id ?? null;
   /** El bloque cuyo menú del asa ⋮⋮ está abierto. */
   const [menuAsa, setMenuAsa] = useState<string | null>(null);
+  /** Una página copiada o cortada desde un bloque, lista para pegarse en otro (2026-10-14). */
+  const [portapapelesPagina, setPortapapelesPagina] = useState<{ entityId: string; titulo: string; corte: boolean } | null>(null);
   /** El botón cuyo panel de configuración está abierto, y el que se está
    *  ejecutando (crear una página o una fila tarda un momento). */
   const [configBoton, setConfigBoton] = useState<string | null>(null);
@@ -2927,8 +2929,41 @@ function EditorPagina() {
   // Sin barra flotante (2026-10-02) ya no hay que reservarle hueco abajo.
 
   /** Lo que el menú ⋮⋮ ofrece además según el bloque (ver `OpcionExtra`). */
+  /** Pega la página del portapapeles justo después de `tras`. Cortada: la página cambia de padre a este documento. */
+  const pegarPagina = async (tras: string) => {
+    const pg = portapapelesPagina;
+    setMenuAsa(null);
+    if (!pg) return;
+    if (pg.corte) {
+      const r = await fetch(`/api/paginas/${pg.entityId}/mover`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dentro_de: docId.current }),
+      });
+      if (!r.ok) { avisar('No se pudo mover la página'); return; }
+      setPortapapelesPagina(null);
+    }
+    guardarHistoria();
+    const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: pg.entityId, pubTitulo: pg.titulo };
+    setBloques(bs => {
+      const { pos, nivel } = puntoInsercion(bs, tras);
+      const copia = [...bs];
+      copia.splice(pos, 0, { ...nuevo, nivel: nivel || undefined });
+      return copia;
+    });
+    programarGuardado();
+    avisar(pg.corte ? 'Página movida aquí' : 'Página pegada');
+  };
+
   const opcionesExtra = (b: Bloque): OpcionExtra[] => {
     const out: OpcionExtra[] = [];
+    if (b.tipo === 'subpagina' && b.entityId) {
+      const pg = { entityId: b.entityId, titulo: b.pubTitulo || 'Sin título' };
+      out.push({ icon: Copy, label: 'Copiar página', onClick: () => { setMenuAsa(null); setPortapapelesPagina({ ...pg, corte: false }); avisar('Página copiada'); } });
+      out.push({ icon: Scissors, label: 'Cortar página', onClick: () => { setPortapapelesPagina({ ...pg, corte: true }); borrarBloque(b.id); } });
+    }
+    if (portapapelesPagina) {
+      out.push({ icon: ClipboardPaste, label: `Pegar «${portapapelesPagina.titulo}» aquí`, onClick: () => pegarPagina(b.id) });
+    }
     if (/^titulo[123]$/.test(b.tipo)) {
       out.push({ icon: ChevronRight, label: 'Título desplegable', activo: !!b.plegable, onClick: () => alternarPlegable(b.id) });
     }
