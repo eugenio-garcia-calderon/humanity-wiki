@@ -50,12 +50,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
-      "desde": "2026-10-14T11:25:42.788Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Galería: filas visibles y Mostrar más",
       "desde": "2026-10-14T11:36:29.774Z"
@@ -77,6 +71,12 @@
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "Añadir entrada con pop-up",
       "desde": "2026-10-14T12:27:00.321Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "Bloque de base de datos: posición y creación directa",
+      "desde": "2026-10-14T12:32:31.557Z"
     }
   ]
 }
