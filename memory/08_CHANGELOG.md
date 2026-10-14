@@ -8818,3 +8818,9 @@ en mis páginas como proyecto pendiente».
 - El botón de ajustes de la galería lleva la palabra «Configuración». En «Título y descripción», «Posición»: centro o izquierda.
 - Crear propiedad: buscador de tipos, rejilla de dos columnas, resumen del tipo elegido, botón Cancelar, aviso de que falta el nombre, y Escape cierra.
 - Las conexiones con otras bases de datos ya no aparecen como fila bajo la barra: van dentro del panel de propiedades, en «Conexiones».
+
+### 2026-10-14 — «Agrupar» con su palabra y editor de propiedades más sencillo (prog8)
+- El botón de agrupar lleva la palabra «Agrupar» (en tableros, «Columnas»), como filtrar y ordenar.
+- Al crear una propiedad, la rejilla de tipos se pliega al elegir uno y deja una fila «Tipo · Cambiar».
+- Las opciones de una lista van justo debajo del tipo, con «Opción 1…» como texto de ayuda y Enter para añadir otra.
+- La fórmula muestra su ejemplo como texto de ayuda, no como texto de ejemplo dentro del campo.
