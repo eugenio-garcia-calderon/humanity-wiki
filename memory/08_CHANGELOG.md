@@ -8830,3 +8830,6 @@ en mis páginas como proyecto pendiente».
 - Las opciones de una lista se suben y bajan con flechas, además de quitarse.
 - El diálogo «Nueva propiedad» queda por encima del botón de IA, que antes lo tapaba.
 - El título «Tipo» y las descripciones de cada tipo tienen más contraste y tamaño.
+
+### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
+- «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
