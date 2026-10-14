@@ -484,9 +484,13 @@ export function registerBdRoutes(app: Express, db: any) {
       // se ignora. Quien pide la tabla tiene que poder verla aunque el enlace
       // que siguió llevara un filtro mal escrito.
       const deUrl = (q: unknown) => { try { return q ? JSON.parse(String(q)) : null; } catch { return null; } };
-      let filtros: Filtros = vista?.filtros || deUrl(req.query.filtros) || [];
+      // Lo que llega por la URL manda sobre la vista guardada: así quien mira la
+      // página publicada filtra y ordena sin tocar la vista de su autor.
+      const filtrosUrl = deUrl(req.query.filtros);
+      let filtros: Filtros = filtrosUrl ?? vista?.filtros ?? [];
       if (!filtroValido(filtros)) filtros = [];
-      const ordenPor: Orden[] = vista?.orden_por || deUrl(req.query.orden) || [];
+      const ordenUrl = deUrl(req.query.orden);
+      const ordenPor: Orden[] = Array.isArray(ordenUrl) ? ordenUrl : (vista?.orden_por || []);
       visibles = ordenarFilas(filtrar(visibles, filtros), ordenPor);
 
       const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);

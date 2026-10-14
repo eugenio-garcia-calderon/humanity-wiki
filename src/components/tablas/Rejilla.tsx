@@ -161,8 +161,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [seleccion, setSeleccion] = useState<string>(vistaInicial || 'tabla');
   useEffect(() => { if (vistaInicial) setSeleccion(vistaInicial); }, [vistaInicial]);
   const [vistas, setVistas] = useState<Vista[] | null>(null);
+  /** Lo que el visitante de la página publicada filtra u ordena. No se guarda: solo vive en esta carga. */
+  const [visitante, setVisitante] = useState<Partial<Pick<Vista, 'filtros' | 'orden_por'>>>({});
   const elegir = (sel: string) => {
     setSeleccion(sel);
+    setVisitante({});
     // El tipo del bloque todavía dice «galeria | tabla»; por dentro se guarda
     // cualquier texto, y `vista:<id>` es lo que abre la vista guardada.
     onCambiarVista?.(sel as FormaVista);
@@ -178,6 +181,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     return (!id && lista.find(v => v.forma === forma)) || vistaVirtual(id ? 'tabla' : forma);
   }, [seleccion, vistas]);
   const vista = activa.forma;
+  // Lo que se ve: en el editor, la vista guardada; en la página publicada, la misma con los filtros del visitante encima.
+  const mostrada: Vista = useMemo(() => editable ? activa : { ...activa, ...visitante }, [activa, visitante, editable]);
   const [datos, setDatos] = useState<{
     tabla: any; columnas: Columna[]; filas: Fila[]; ciclo?: string[]; total?: number; mostradas?: number;
     columna_titulo?: string | null;
@@ -214,17 +219,31 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     if (vistas === null) return;
     const mio = ++turno.current;
     setFallo(null);
+    const params = new URLSearchParams();
+    if (activa.id) params.set('vista', activa.id);
+    if (!editable && visitante.filtros) params.set('filtros', JSON.stringify(visitante.filtros));
+    if (!editable && visitante.orden_por) params.set('orden', JSON.stringify(visitante.orden_por));
+    const qs = params.toString();
     try {
-      const r = await pedirDatos(`/api/bd/tablas/${tablaId}${activa.id ? `?vista=${encodeURIComponent(activa.id)}` : ''}`);
+      const r = await pedirDatos(`/api/bd/tablas/${tablaId}${qs ? `?${qs}` : ''}`);
       const j = await r.json();
       if (mio !== turno.current) return;
       if (!r.ok) { setFallo(j.error || 'No se pudo cargar la tabla.'); setDatos(null); }
       else setDatos(j);
     } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
     if (mio === turno.current) setCargando(false);
-  }, [tablaId, activa.id, vistas === null]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tablaId, activa.id, vistas === null, visitante, editable]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { cargar(); }, [cargar]);
+
+  /** El visitante cambia el filtro o el orden solo en su pantalla: la vista del autor no se toca. */
+  const cambiarVisitante = (parcial: Partial<Vista>) => {
+    setVisitante(v => ({
+      ...v,
+      ...(parcial.filtros !== undefined ? { filtros: parcial.filtros } : {}),
+      ...(parcial.orden_por !== undefined ? { orden_por: parcial.orden_por } : {}),
+    }));
+  };
 
   /**
    * CAMBIAR LA VISTA ACTIVA (filtro, orden, grupos, ajustes de su forma).
@@ -791,19 +810,19 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           {busca && <button onClick={() => setBusca(null)} aria-label="Quitar la búsqueda" className="text-slate-400 hover:text-slate-700"><X className="w-3.5 h-3.5" /></button>}
         </label>
       )}
-      <button onClick={() => setEditorColumna('nueva-relacion')} className={claseBoton(!!datos.conexiones?.length)}
+      {editable && <button onClick={() => setEditorColumna('nueva-relacion')} className={claseBoton(!!datos.conexiones?.length)}
         title="Enlazar con otra base de datos" aria-label="Enlazar con otra base de datos">
         <Link2 className="w-[18px] h-[18px]" />{!!datos.conexiones?.length && <Cuenta n={datos.conexiones.length} />}
-      </button>
+      </button>}
       {/* SU PÁGINA PROPIA (2026-10-08): la base de datos como página en sí, con su
           dirección para buscadores, en una pestaña nueva. */}
-      <a href={sitio ? sitio.enlaceBd(tablaId, datos.tabla?.titulo) : `/bd/${tablaId}${slugDe(datos.tabla?.titulo) ? `/${slugDe(datos.tabla?.titulo)}` : ''}`}
+      {editable && <a href={sitio ? sitio.enlaceBd(tablaId, datos.tabla?.titulo) : `/bd/${tablaId}${slugDe(datos.tabla?.titulo) ? `/${slugDe(datos.tabla?.titulo)}` : ''}`}
         target="_blank" rel="noopener noreferrer" className={claseBoton(false)}
         title="Abrir como página, en una pestaña nueva" aria-label="Abrir esta base de datos como página, en una pestaña nueva">
         <ArrowUpRight className="w-[18px] h-[18px]" />
-      </a>
+      </a>}
       {/* NUEVO, AZUL Y PARTIDO: el botón crea un elemento; la flecha, lo demás. */}
-      <div className="relative ml-1.5 flex">
+      {editable && <div className="relative ml-1.5 flex">
         <button onClick={anadirFila} className="h-9 pl-3.5 pr-3 rounded-l-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors">
           Nuevo
         </button>
@@ -823,7 +842,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             </button>
           ))}
         </Desplegable>
-      </div>
+      </div>}
     </>
   );
 
@@ -885,13 +904,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           interruptor Galería/Tabla, y «Filtrar · Ordenar · Agrupar» se
           guardan en la vista. Solo para quien edita: en la web publicada la
           vista la decide el autor y el visitante no necesita mandos. */}
-      {editable && vistas && (
+      {vistas && (
         <div className={limpia ? 'pb-3' : cn('px-2 py-1.5 border-b border-slate-100', tono.fondo ? 'bg-white/30' : 'bg-white')}>
-          <BarraVista vistas={vistas} activa={activa} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null}
+          <BarraVista vistas={vistas} activa={mostrada} visitante={!editable} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null}
             editable={editable} conocidos={conocidos.current} centrada={limpia}
             gruposConocidos={colAgr ? agruparFilas(filas, colAgr, { ...activa.config, ocultar_vacios: false }).map(g => ({ clave: g.clave, etiqueta: g.etiqueta })) : []}
             onElegir={v => elegir(v.id ? `vista:${v.id}` : v.forma)}
-            onCrear={crearVista} onCambiar={cambiarVista}
+            onCrear={crearVista} onCambiar={editable ? cambiarVista : cambiarVisitante}
             onRenombrar={renombrarVista} onDuplicar={duplicarVista} onBorrar={borrarVista}
             ajustes={vista === 'tabla' ? (
               <div className="space-y-1">
