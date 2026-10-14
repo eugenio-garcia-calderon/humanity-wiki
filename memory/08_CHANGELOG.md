@@ -8824,3 +8824,9 @@ en mis páginas como proyecto pendiente».
 - Al crear una propiedad, la rejilla de tipos se pliega al elegir uno y deja una fila «Tipo · Cambiar».
 - Las opciones de una lista van justo debajo del tipo, con «Opción 1…» como texto de ayuda y Enter para añadir otra.
 - La fórmula muestra su ejemplo como texto de ayuda, no como texto de ejemplo dentro del campo.
+
+### 2026-10-14 — Editor de propiedades: Enter elige tipo, opciones con flechas, diálogo sobre el botón de IA (prog8)
+- En el buscador de tipos, Enter elige el primer resultado.
+- Las opciones de una lista se suben y bajan con flechas, además de quitarse.
+- El diálogo «Nueva propiedad» queda por encima del botón de IA, que antes lo tapaba.
+- El título «Tipo» y las descripciones de cada tipo tienen más contraste y tamaño.
