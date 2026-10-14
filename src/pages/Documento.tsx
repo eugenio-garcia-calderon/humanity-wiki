@@ -1007,6 +1007,16 @@ function EditorPagina() {
     programarGuardado();
   };
 
+  /** Una base de datos NUEVA en un bloque (2026-10-14): galería «Sin título» con una entrada «Sin título», lista para escribir. */
+  const crearBaseEnBloque = async (bid: string) => {
+    const t = await (await fetch('/api/bd/tablas', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: 'Sin título' }) })).json();
+    if (!t.id) return;
+    await fetch(`/api/bd/tablas/${t.id}/vistas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre: 'Galería', forma: 'galeria' }) });
+    await fetch(`/api/bd/tablas/${t.id}/filas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: 'Sin título' }) });
+    setBloques(bs => bs.map(x => x.id === bid ? { ...x, tabla_id: t.id, vistaBd: 'galeria' } as any : x));
+    programarGuardado();
+  };
+
   const insertar = (tras: string | null, tipoMenu: TipoMenu) => {
     // Un vídeo es un bloque de web que espera su enlace: si es de YouTube o
     // Vimeo pasa a reproductor (ver `alPonerEnlace`), y si no, sale a subirlo.
@@ -1044,6 +1054,7 @@ function EditorPagina() {
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
     if (plegable) nuevo.plegable = true;
+    if (tipo === 'basedatos') { (nuevo as any).vistaBd = 'galeria'; setTimeout(() => crearBaseEnBloque(nuevo.id), 0); }
     if (tipo === 'boton') { nuevo.texto = 'Botón'; nuevo.boton = { tipo: 'plantilla' }; setConfigBoton(nuevo.id); }
     if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
@@ -1124,7 +1135,8 @@ function EditorPagina() {
   const puntoInsercion = (bs: Bloque[], tras: string | null) => {
     // «Añadir un bloque» del pie: al final de la página y sin sangría, por
     // mucho que el último bloque esté dentro de un desplegable.
-    if (alFinal.current) return { pos: bs.length, nivel: 0 };
+    // Se consume aquí: si quedara activa, el siguiente bloque que se inserte (desde otro sitio) caería al final.
+    if (alFinal.current) { alFinal.current = false; return { pos: bs.length, nivel: 0 }; }
     const i = tras ? bs.findIndex(b => b.id === tras) : -1;
     if (i < 0) return { pos: bs.length, nivel: 0 };
     if (vaDentro(bs, i)) return { pos: i + 1, nivel: (bs[i].nivel || 0) + 1 };
@@ -3167,25 +3179,9 @@ function EditorPagina() {
               <p className="text-xs font-bold text-slate-500">Este bloque todavía no apunta a ninguna tabla.</p>
               {editable && (
                 <button
-                  onClick={async () => {
-                    const r = await fetch('/api/bd/tablas', {
-                      method: 'POST', credentials: 'include',
-                      headers: { 'Content-Type': 'application/json' },
-                      // Nace como «Nueva base de datos» (Eugenio, 2026-10-01), no
-                      // con el título de la página: dos cosas con el mismo nombre
-                      // en la misma pantalla no se distinguen. Se renombra
-                      // pinchando en el nombre.
-                      body: JSON.stringify({ titulo: 'Nueva base de datos' }),
-                    });
-                    const j = await r.json();
-                    if (j.id) {
-                      (b as any).tabla_id = j.id;
-                      setBloques(bs => [...bs]);
-                      programarGuardado();
-                    }
-                  }}
+                  onClick={() => crearBaseEnBloque(b.id)}
                   className="mt-2 inline-flex items-center gap-1.5 h-11 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
-                  Crear una tabla aquí
+                  Crear una base de datos aquí
                 </button>
               )}
             </div>
