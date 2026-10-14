@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/PropiedadesFila.tsx",
-      "motivo": "Enlace a otra base de datos abre una ventana",
-      "desde": "2026-10-14T10:34:14.790Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "src/components/ventanas/bus.ts",
       "motivo": "Enlace a otra base de datos abre una ventana",
       "desde": "2026-10-14T10:34:14.790Z"
@@ -68,15 +62,39 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/Rejilla.tsx",
-      "motivo": "Añadir entrada con pop-up",
-      "desde": "2026-10-14T12:27:00.321Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "src/pages/Documento.tsx",
       "motivo": "Bloque de base de datos: posición y creación directa",
       "desde": "2026-10-14T12:32:31.557Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Tablas.tsx",
+      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
+      "desde": "2026-10-14T12:36:11.015Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/PropiedadesFila.tsx",
+      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
+      "desde": "2026-10-14T12:36:11.015Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
+      "desde": "2026-10-14T12:36:11.015Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
+      "desde": "2026-10-14T12:36:11.015Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
+      "desde": "2026-10-14T12:36:11.015Z"
     }
   ]
 }
