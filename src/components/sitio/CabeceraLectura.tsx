@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn';
 import { anchoDePagina, clasesDePagina } from '../../utils/ajustesPagina';
 import { MarcoSitio, type Rutas } from './MenuSitio';
 import { completarSitio } from './sitioWeb';
-import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../knowledge/CabeceraPagina';
+import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina } from '../knowledge/CabeceraPagina';
 
 // ============================================================================
 // EL MARCO Y LA CABECERA DE UNA PÁGINA PUBLICADA (2026-10-01)
@@ -35,7 +35,7 @@ export function MarcoLectura({ pagina, rutas, children }: {
     <div className={conMarco ? 'bg-white' : 'min-h-screen bg-white'}>
       {/* Ancho, letra y tamaño que eligió el autor (2026-10-06, #29). Sin
           elegir, ancho completo y letra de siempre. */}
-      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-[18px] sm:pt-9', anchoDePagina(pagina?.config), clasesDePagina(pagina?.config))}>
+      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-[18px] sm:pt-5', anchoDePagina(pagina?.config), clasesDePagina(pagina?.config))}>
         {children}
       </div>
     </div>
@@ -59,7 +59,7 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
   return (
     // La misma cabecera que el editor: imagen arriba, debajo o a un
     // lado, con el tamaño que eligió el autor.
-    <header className="mb-8">
+    <header className="mb-5">
       <LayoutCabecera
         centrado={!alIzquierda}
         cabecera={cfg.cabecera}
@@ -77,7 +77,8 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
           {/* OCULTO AL PÚBLICO SI SE PIDE (2026-10-02, Eugenio: «permite ocultar
               el título de la página»). Se queda para los lectores de pantalla y
               los buscadores (`sr-only`): una página sin título no se entiende. */}
-          <h1 className={cn('text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words', cfg.ocultarTitulo && 'sr-only')}>
+          <h1 className={cn('font-black tracking-tight text-slate-900 break-words', cfg.ocultarTitulo && 'sr-only')}
+            style={{ fontSize: tituloPagina(cfg.cabecera) }}>
             {pagina.titulo || 'Sin título'}
           </h1>
           {/* Si está escrita, se publica. */}

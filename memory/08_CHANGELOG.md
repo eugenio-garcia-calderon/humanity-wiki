@@ -8803,3 +8803,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-14 — Ajustes de la galería plegados y con el título y la descripción primero (prog8)
 - El botón de configuración de una galería arranca con todos sus grupos plegados.
 - «Título de la base de datos» y «Descripción» son ahora un solo grupo, «Título y descripción», el primero de la lista. Después van Carrusel (si lo es) y Tarjetas.
+
+### 2026-10-14 — Cabecera de página más compacta, con tamaño de título, y ocultar filtrar/ordenar/buscar en la web (prog8)
+- La cabecera de una página publicada (icono, título, descripción) es más pequeña y sube más arriba. El título tiene su propio «Tamaño del título» en el diseño de la cabecera, junto al del icono y la descripción.
+- Cada base de datos de una página puede ocultar filtrar, ordenar y buscar en la web publicada («Ocultar filtrar, ordenar y buscar en la web», en sus ajustes). Pensado para bases pequeñas.
