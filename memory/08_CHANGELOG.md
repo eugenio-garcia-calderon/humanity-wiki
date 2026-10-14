@@ -8807,3 +8807,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-14 — Cabecera de página más compacta, con tamaño de título, y ocultar filtrar/ordenar/buscar en la web (prog8)
 - La cabecera de una página publicada (icono, título, descripción) es más pequeña y sube más arriba. El título tiene su propio «Tamaño del título» en el diseño de la cabecera, junto al del icono y la descripción.
 - Cada base de datos de una página puede ocultar filtrar, ordenar y buscar en la web publicada («Ocultar filtrar, ordenar y buscar en la web», en sus ajustes). Pensado para bases pequeñas.
+
+### 2026-10-14 — Barra de la base de datos: Añadir directo y propiedades en un panel (prog8)
+- «Nuevo» con su flecha pasa a ser «Añadir»: un botón que crea una fila al pulsarlo.
+- «Propiedades» es un botón con su palabra, como filtrar y ordenar. Dentro: lo que se ve, «Nueva propiedad» y «Enlazar con otra base de datos». Sale también en la galería.
+- El botón de enlazar de la barra desaparece; enlazar está ahora en el panel de propiedades.

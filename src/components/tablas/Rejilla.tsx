@@ -194,7 +194,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [cargando, setCargando] = useState(true);
   /** La búsqueda de la barra: `null` cerrada, '' abierta y vacía. */
   const [busca, setBusca] = useState<string | null>(null);
-  const [menuNuevo, setMenuNuevo] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
@@ -772,39 +771,47 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
         {onCambiarNombreArriba && <Chips etiqueta="Nombre" valor={nombreArriba ? 'arriba' : 'abajo'} onCambiar={v => onCambiarNombreArriba(v === 'arriba')} opciones={[['abajo', 'Debajo'], ['arriba', 'Encima']]} />}
-        {onCambiarVisibles && (
-          <div className="pt-1 border-t border-slate-100">
-            <p className="px-1 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
-            {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
-              const puesta = visiblesAhora.includes(c.id);
-              return (
-                <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
-                  <button onClick={() => onCambiarVisibles(puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id])}
-                    className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-9 text-xs font-bold text-slate-600 text-left">
-                    {puesta ? <Eye className="w-3.5 h-3.5 text-blue-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
-                    <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
-                    {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
-                  </button>
-                  {editable && (
-                    <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
-                      className="w-8 h-8 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-            {editable && (
-              <button onClick={() => setEditorColumna('nueva')}
-                className="mt-1 w-full flex items-center gap-2 px-1.5 h-9 rounded-md text-xs font-bold text-blue-600 hover:bg-blue-50">
-                <Plus className="w-3.5 h-3.5" /> Nueva propiedad
-              </button>
-            )}
-          </div>
-        )}
       </Grupo>
     </div>
   );
+  // LAS PROPIEDADES, EN UN SOLO SITIO (2026-10-14): el botón «Propiedades» de la barra
+  // enseña cuáles se ven (en la galería, dentro de la tarjeta) y, al pie, crear una
+  // propiedad o enlazar con otra base de datos, como en Notion.
+  const panelVisiblesGaleria = onCambiarVisibles ? (
+    <div className="max-h-72 overflow-y-auto">
+      <p className="px-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
+      {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
+        const puesta = visiblesAhora.includes(c.id);
+        return (
+          <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
+            <button onClick={() => onCambiarVisibles(puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id])}
+              className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-8 text-xs font-bold text-slate-600 text-left">
+              {puesta ? <Eye className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+              <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
+              {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
+            </button>
+            {editable && (
+              <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
+                className="w-7 h-7 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
+                <Pencil className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  ) : undefined;
+  const accionesPropiedades = editable ? (
+    <>
+      <button onClick={() => setEditorColumna('nueva')} className="w-full flex items-center gap-2 px-1.5 h-8 rounded-md text-xs font-bold text-blue-600 hover:bg-blue-50">
+        <Plus className="w-3.5 h-3.5" /> Nueva propiedad
+      </button>
+      <button onClick={() => setEditorColumna('nueva-relacion')} className="w-full flex items-center gap-2 px-1.5 h-8 rounded-md text-xs font-bold text-slate-700 hover:bg-slate-50">
+        <Link2 className="w-3.5 h-3.5 text-slate-500" /> Enlazar con otra base de datos
+        {!!datos.conexiones?.length && <span className="ml-auto text-[10px] font-black text-slate-400">{datos.conexiones.length}</span>}
+      </button>
+    </>
+  ) : undefined;
   const mandosExtra = (
     <>
       {/* BUSCAR: filtra lo que se ve mientras escribes; no se guarda en la vista. */}
@@ -822,10 +829,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           {busca && <button onClick={() => setBusca(null)} aria-label="Quitar la búsqueda" className="text-slate-400 hover:text-slate-700"><X className="w-3.5 h-3.5" /></button>}
         </label>
       )}
-      {editable && <button onClick={() => setEditorColumna('nueva-relacion')} className={claseBoton(!!datos.conexiones?.length)}
-        title="Enlazar con otra base de datos" aria-label="Enlazar con otra base de datos">
-        <Link2 className="w-[18px] h-[18px]" />{!!datos.conexiones?.length && <Cuenta n={datos.conexiones.length} />}
-      </button>}
       {/* SU PÁGINA PROPIA (2026-10-08): la base de datos como página en sí, con su
           dirección para buscadores, en una pestaña nueva. */}
       {editable && <a href={sitio ? sitio.enlaceBd(tablaId, datos.tabla?.titulo) : `/bd/${tablaId}${slugDe(datos.tabla?.titulo) ? `/${slugDe(datos.tabla?.titulo)}` : ''}`}
@@ -833,28 +836,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         title="Abrir como página, en una pestaña nueva" aria-label="Abrir esta base de datos como página, en una pestaña nueva">
         <ArrowUpRight className="w-[18px] h-[18px]" />
       </a>}
-      {/* NUEVO, AZUL Y PARTIDO: el botón crea un elemento; la flecha, lo demás. */}
-      {editable && <div className="relative ml-1.5 flex">
-        <button onClick={anadirFila} className="h-9 pl-3.5 pr-3 rounded-l-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors">
-          Nuevo
-        </button>
-        <button onClick={() => setMenuNuevo(v => !v)} aria-label="Más formas de crear" aria-expanded={menuNuevo}
-          className="h-9 w-8 grid place-items-center rounded-r-lg bg-blue-600 text-white border-l border-blue-500 hover:bg-blue-700 transition-colors">
-          <ChevronDown className="w-4 h-4" />
-        </button>
-        <Desplegable abierto={menuNuevo} onCerrar={() => setMenuNuevo(false)} ancho="w-60" derecha>
-          {[
-            { l: 'Nuevo elemento', d: 'Una fila más, con su página', I: Plus, f: anadirFila },
-            { l: 'Nueva propiedad', d: 'Una columna: texto, fecha, número…', I: Table2, f: () => setEditorColumna('nueva') },
-            { l: 'Enlazar con otra base de datos', d: 'Relaciona sus elementos con los de otra', I: Link2, f: () => setEditorColumna('nueva-relacion') },
-          ].map(o => (
-            <button key={o.l} onClick={() => { setMenuNuevo(false); o.f(); }} className="w-full flex items-start gap-2.5 px-2 py-2 rounded-md text-left hover:bg-slate-50">
-              <o.I className="w-4 h-4 mt-0.5 text-slate-500 shrink-0" />
-              <span className="min-w-0"><span className="block text-xs font-bold text-slate-700">{o.l}</span><span className="block text-[11px] text-slate-400">{o.d}</span></span>
-            </button>
-          ))}
-        </Desplegable>
-      </div>}
+      {/* AÑADIR: crea una entrada al pulsarlo, sin menú. Las propiedades y los enlaces están en «Propiedades». */}
+      {editable && <button onClick={anadirFila} className="ml-1.5 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors">
+        <Plus className="w-4 h-4" /> Añadir
+      </button>}
     </>
   );
 
@@ -954,6 +939,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                 Enseñar la imagen de la página en cada tarjeta
               </label>
             ) : esGaleria ? ajustesGaleria : undefined}
+            panelPropiedades={esGaleria ? panelVisiblesGaleria : undefined}
+            acciones={accionesPropiedades}
             extra={mandosExtra} />
           {/* Con qué otras bases de datos está enlazada, debajo de la barra. */}
           {editable && !!datos.conexiones?.length && (
