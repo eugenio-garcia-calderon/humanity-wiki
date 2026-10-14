@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/BarraVista.tsx",
-      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
-      "desde": "2026-10-14T10:24:45.098Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "src/server/bd.ts",
       "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
       "desde": "2026-10-14T10:24:45.098Z"
@@ -56,21 +50,27 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/Rejilla.tsx",
-      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
-      "desde": "2026-10-14T11:25:42.788Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "src/pages/Documento.tsx",
       "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
       "desde": "2026-10-14T11:25:42.788Z"
     },
     {
       "agente": "prog8",
+      "ruta": "src/components/tablas/Rejilla.tsx",
+      "motivo": "Barra de bases de datos: Añadir directo, propiedades y enlaces en un panel",
+      "desde": "2026-10-14T11:29:40.866Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/BarraVista.tsx",
+      "motivo": "Barra de bases de datos: Añadir directo, propiedades y enlaces en un panel",
+      "desde": "2026-10-14T11:29:40.866Z"
+    },
+    {
+      "agente": "prog8",
       "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
-      "desde": "2026-10-14T11:25:42.788Z"
+      "motivo": "Barra de bases de datos: Añadir directo, propiedades y enlaces en un panel",
+      "desde": "2026-10-14T11:29:40.866Z"
     }
   ]
 }
