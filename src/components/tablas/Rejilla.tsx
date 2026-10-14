@@ -1,4 +1,5 @@
 import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
@@ -395,9 +396,20 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     if (columnas.find(c => c.id === columnaId)?.tipo === 'relacion') avisarCambio();
   };
 
-  const anadirFila = async () => {
-    await fetch(`/api/bd/tablas/${tablaId}/filas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-    cargar();
+  // AÑADIR ABRE UN POP-UP (2026-10-14): se escribe el título y se crea; «Ampliar» la crea y la abre en grande.
+  const [nuevaEntrada, setNuevaEntrada] = useState(false);
+  const [tituloNueva, setTituloNueva] = useState('');
+  const anadirFila = () => { setTituloNueva(''); setNuevaEntrada(true); };
+  const crearEntrada = async (ampliar: boolean) => {
+    const r = await fetch(`/api/bd/tablas/${tablaId}/filas`, {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo: tituloNueva.trim() || 'Sin título' }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setNuevaEntrada(false);
+    if (!r.ok) { setFallo(j.error || 'No se pudo crear la entrada.'); return; }
+    await cargar();
+    if (ampliar && j.id) abrirPagina({ id: j.id, pagina_id: null } as any);
   };
 
   /** Varias celdas de una vez (tablero, calendario, línea de tiempo). */
@@ -868,6 +880,26 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     <div className={limpia
       ? cn(tono.fondo && `${tono.fondo} rounded-2xl p-4`)
       : cn('border border-slate-200 rounded-xl overflow-hidden', tono.fondo || 'bg-white')}>
+      {nuevaEntrada && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-[15vh] bg-slate-900/40" onClick={() => setNuevaEntrada(false)}>
+          <div role="dialog" aria-label="Nueva entrada" onClick={e => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-5"
+            onKeyDown={e => { if (e.key === 'Escape') setNuevaEntrada(false); }}>
+            <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Nueva entrada en {datos?.tabla?.titulo || 'la base de datos'}</p>
+            <input autoFocus value={tituloNueva} onChange={e => setTituloNueva(e.target.value)} maxLength={200}
+              placeholder="Sin título" aria-label="Título de la entrada"
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); crearEntrada(false); } }}
+              className="mt-2 w-full h-12 px-3 rounded-xl border border-slate-200 text-base font-bold text-slate-900 outline-none focus:border-emerald-400" />
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <button type="button" onClick={() => setNuevaEntrada(false)} className="h-10 px-3 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100">Cancelar</button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => crearEntrada(true)} className="h-10 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">Ampliar</button>
+                <button type="button" onClick={() => crearEntrada(false)} className="h-10 px-4 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800">Crear</button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body)}
       {/* CENTRADA (2026-10-02, Eugenio: «el título de la base de datos
           centrado y la galería centrada, no esquinada a la izquierda»). El
           título va solo en su línea; los mandos del editor, debajo y también
