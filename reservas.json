@@ -32,9 +32,21 @@
     },
     {
       "agente": "prog8",
+      "ruta": "src/utils/consola.ts",
+      "motivo": "Consola: reordenar eslabones e icono con selector",
+      "desde": "2026-10-14T10:37:05.682Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/ConsolaCadena.tsx",
+      "motivo": "Consola: reordenar eslabones e icono con selector",
+      "desde": "2026-10-14T10:37:05.682Z"
+    },
+    {
+      "agente": "prog8",
       "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Enlace a otra base de datos abre una ventana",
-      "desde": "2026-10-14T10:34:14.790Z"
+      "motivo": "Consola: reordenar eslabones e icono con selector",
+      "desde": "2026-10-14T10:37:05.682Z"
     }
   ]
 }
