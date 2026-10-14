@@ -8790,3 +8790,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-14 — La flecha de un enlace a otra base de datos abre esa base en una ventana (prog8)
 - En una entrada de una base de datos, la flecha diagonal de una propiedad de enlace abría la página de inicio con todas las bases. Ahora abre la base enlazada en una ventana del Escritorio, encima de la entrada.
 - Dentro de una ventana del Escritorio, abrir una ventana sube la orden a la página de arriba, que es la que tiene el gestor de ventanas.
+
+### 2026-10-14 — Consola: reordenar los eslabones y elegir su icono (prog8)
+- La consola tiene una lista «Orden de la cadena» con flechas para subir y bajar cada eslabón. El círculo sigue el mismo orden.
+- Cada eslabón tiene su icono elegido en el selector de iconos (de trazo, imagen o ninguno), en vez de escribir un emoji. Los emojis que ya había siguen funcionando.
