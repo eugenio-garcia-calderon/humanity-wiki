@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/BarraVista.tsx",
-      "motivo": "Barra de bases de datos: Añadir directo, propiedades y enlaces en un panel",
-      "desde": "2026-10-14T11:29:40.866Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Galería: filas visibles y Mostrar más",
       "desde": "2026-10-14T11:36:29.774Z"
@@ -77,6 +71,12 @@
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "Conexiones dentro del panel de propiedades",
       "desde": "2026-10-14T11:50:50.005Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/BarraVista.tsx",
+      "motivo": "Palabra Agrupar junto al icono",
+      "desde": "2026-10-14T12:06:09.869Z"
     }
   ]
 }
