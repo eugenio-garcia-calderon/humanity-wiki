@@ -3205,6 +3205,8 @@ function EditorPagina() {
             onCambiarTamanoNombre={editable ? t => { b.tamanoNombre = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tituloOculto={!!b.tituloOculto}
             onCambiarTituloOculto={editable ? v => { b.tituloOculto = v || undefined; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
+            ocultarMandosPublica={!!b.ocultarMandosPublica}
+            onCambiarOcultarMandos={editable ? v => { b.ocultarMandosPublica = v || undefined; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamanoTitulo={editable ? t => { b.tamanoTitulo = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tituloColor={b.tituloColor}
             onCambiarTituloColor={editable ? c => { b.tituloColor = c; setBloques(bs => [...bs]); programarGuardado(); } : undefined}

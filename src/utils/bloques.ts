@@ -161,6 +161,8 @@ export interface Bloque {
   tamanoNombre?: TamanoGaleria;
   /** El título de la base de datos no se enseña al publicar (2026-10-02). */
   tituloOculto?: boolean;
+  /** Quitar filtrar, ordenar y buscar de la web publicada (bases pequeñas). */
+  ocultarMandosPublica?: boolean;
   /** El color y el grosor del título de una base de datos (como el tamaño: por bloque). Sin valor, el de siempre. */
   tituloColor?: string;
   tituloPeso?: 'fino' | 'normal' | 'negrita';

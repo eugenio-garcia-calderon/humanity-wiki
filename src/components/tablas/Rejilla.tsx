@@ -102,7 +102,7 @@ async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   }
 }
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -132,6 +132,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Ocultar el título al público (2026-10-02, Eugenio). Quien edita lo sigue
    *  viendo, atenuado y con el aviso. */
   tituloOculto?: boolean;
+  /** Quitar filtrar, ordenar y buscar de la web publicada (bases pequeñas). */
+  ocultarMandosPublica?: boolean;
+  onCambiarOcultarMandos?: (v: boolean) => void;
   onCambiarTituloOculto?: (v: boolean) => void;
   /** Color (una clave de `COLORES`, en texto) y grosor del título; quien edita los cambia. */
   tituloColor?: string;
@@ -705,6 +708,12 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const visiblesAhora = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
   const ajustesGaleria = (
     <div className="space-y-1">
+      {onCambiarOcultarMandos && (
+        <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
+          <span className="text-xs font-bold text-slate-600">Ocultar filtrar, ordenar y buscar en la web</span>
+          <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={ocultarMandosPublica} onChange={e => onCambiarOcultarMandos(e.target.checked)} />
+        </label>
+      )}
       <Grupo titulo="Título y descripción">
         {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
         {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
@@ -907,7 +916,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           interruptor Galería/Tabla, y «Filtrar · Ordenar · Agrupar» se
           guardan en la vista. Solo para quien edita: en la web publicada la
           vista la decide el autor y el visitante no necesita mandos. */}
-      {vistas && (
+      {vistas && !(ocultarMandosPublica && !editable) && (
         <div className={limpia ? 'pb-3' : cn('px-2 py-1.5 border-b border-slate-100', tono.fondo ? 'bg-white/30' : 'bg-white')}>
           <BarraVista vistas={vistas} activa={mostrada} visitante={!editable} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null}
             editable={editable} conocidos={conocidos.current} centrada={limpia}

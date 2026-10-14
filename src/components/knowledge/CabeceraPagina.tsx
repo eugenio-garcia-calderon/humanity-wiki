@@ -37,6 +37,8 @@ export type Cabecera = {
   descripcion?: number;
   /** El icono al lado del título (por defecto) o encima. */
   iconoPos?: 'lado' | 'encima';
+  /** Tamaño de letra del título, 16–64 px. */
+  titulo?: number;
 };
 
 /**
@@ -81,6 +83,8 @@ export const TAMANO_POR_DEFECTO = 50;
 export const DISPOSICION_POR_DEFECTO: Disposicion = 'derecha';
 export const ICONO_POR_DEFECTO = 56;
 export const DESCRIPCION_POR_DEFECTO = 18;
+/** Compacto: el título es un encabezado de menú, no un cartel. */
+export const TITULO_POR_DEFECTO = 28;
 
 /** El tamaño de letra de la descripción. En un teléfono, como mucho 22 px:
  *  una entradilla enorme empuja el contenido fuera de la primera pantalla. */
@@ -91,6 +95,9 @@ export function letraDescripcion(cabecera: Cabecera | undefined, esMovil: boolea
 
 const acotar = (n: number | undefined, min: number, max: number, def: number) =>
   typeof n === 'number' && Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
+
+/** El tamaño de letra del título de la página, en px. */
+export const tituloPagina = (cabecera: Cabecera | undefined): number => acotar(cabecera?.titulo, 16, 64, TITULO_POR_DEFECTO);
 
 /** El alto de la imagen apilada, en px de escritorio: 20 → 120, 80 → 480. */
 const altoDe = (t: number) => Math.round(120 + ((t - 20) / 60) * 360);
@@ -212,6 +219,11 @@ export function MandosCabecera({ cabecera, hayImagen, hayIcono, hayDescripcion =
           ))}
         </div>
       )}
+      <Deslizador
+        etiqueta="Tamaño del título"
+        valor={tituloPagina(c)} min={16} max={64}
+        texto={v => `${v} px`}
+        onCambio={v => pon({ titulo: v })} />
       {hayIcono && (
         <Deslizador
           etiqueta="Tamaño del icono"
