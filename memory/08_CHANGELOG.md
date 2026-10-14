@@ -8833,3 +8833,7 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
 - «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
+
+### 2026-10-14 — Base de datos nueva en su bloque, como galería, con una entrada (prog8)
+- Una base de datos que se crea desde un bloque nace como galería «Sin título» con una entrada «Sin título».
+- Un bloque insertado desde otro sitio ya no cae al final de la página: la marca de «al final» se usa una sola vez.
