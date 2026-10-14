@@ -71,6 +71,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Galería: filas visibles y Mostrar más",
       "desde": "2026-10-14T11:36:29.774Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/EditorColumna.tsx",
+      "motivo": "Editor de propiedades: elegir tipo con búsqueda y rejilla",
+      "desde": "2026-10-14T11:40:41.020Z"
     }
   ]
 }
