@@ -62,12 +62,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/EditorColumna.tsx",
-      "motivo": "Editor de propiedades: elegir tipo con búsqueda y rejilla",
-      "desde": "2026-10-14T11:40:41.020Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "Conexiones dentro del panel de propiedades",
       "desde": "2026-10-14T11:50:50.005Z"
@@ -77,6 +71,12 @@
       "ruta": "src/components/tablas/BarraVista.tsx",
       "motivo": "Palabra Agrupar junto al icono",
       "desde": "2026-10-14T12:06:09.869Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/EditorColumna.tsx",
+      "motivo": "Correcciones del editor de propiedades",
+      "desde": "2026-10-14T12:19:56.542Z"
     }
   ]
 }
