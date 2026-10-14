@@ -443,7 +443,7 @@ function PanelPropiedades({ vista, columnas, columnaTitulo, onCambiar }: {
 
 export default function BarraVista({
   vistas, activa, columnas, columnaTitulo, editable, conocidos, gruposConocidos, centrada = false, visitante = false,
-  onElegir, onCrear, onCambiar, onRenombrar, onDuplicar, onBorrar, ajustes, extra,
+  onElegir, onCrear, onCambiar, onRenombrar, onDuplicar, onBorrar, ajustes, extra, panelPropiedades, acciones,
 }: {
   vistas: Vista[];
   activa: Vista;
@@ -467,6 +467,10 @@ export default function BarraVista({
   ajustes?: ReactNode;
   /** Lo que quien la usa quiera poner a la derecha. */
   extra?: ReactNode;
+  /** Las propiedades que se ven (la galería tiene las suyas). Sin valor, la de tabla. */
+  panelPropiedades?: ReactNode;
+  /** Lo que va al pie del panel de propiedades: crear una y enlazar con otra base. */
+  acciones?: ReactNode;
 }) {
   const [abierto, setAbierto] = useState<null | 'filtro' | 'orden' | 'agrupar' | 'props' | 'nueva' | 'ajustes' | string>(null);
   const [renombrando, setRenombrando] = useState<string | null>(null);
@@ -475,7 +479,7 @@ export default function BarraVista({
   const nOrden = activa.orden_por.length;
   const colAgr = columnas.find(c => c.id === activa.agrupar_por);
   const conMandos = !['formulario'].includes(activa.forma);
-  const conPropiedades = ['tabla', 'tablero', 'lista', 'calendario', 'linea'].includes(activa.forma);
+  const conPropiedades = !!panelPropiedades || ['tabla', 'tablero', 'lista', 'calendario', 'linea'].includes(activa.forma);
   const conAgrupar = ['tabla', 'galeria', 'carrusel', 'tablero', 'lista', 'linea'].includes(activa.forma);
   const lista = activa.id === null ? [activa, ...vistas] : vistas;
 
@@ -592,12 +596,13 @@ export default function BarraVista({
           )}
           {editable && conPropiedades && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'props' ? null : 'props')} className={claseBoton(false)} aria-expanded={abierto === 'props'}
-                title="Propiedades que se ven" aria-label="Propiedades">
-                <Eye className="w-[18px] h-[18px]" />
+              <button onClick={() => setAbierto(abierto === 'props' ? null : 'props')} className={claseEtiqueta(false)} aria-expanded={abierto === 'props'}
+                title="Propiedades" aria-label="Propiedades">
+                <Eye className="w-[18px] h-[18px]" />Propiedades
               </button>
-              <Desplegable abierto={abierto === 'props'} onCerrar={cerrar} ancho="w-64" derecha>
-                <PanelPropiedades vista={activa} columnas={columnas} columnaTitulo={columnaTitulo} onCambiar={onCambiar} />
+              <Desplegable abierto={abierto === 'props'} onCerrar={cerrar} ancho="w-72" derecha>
+                {panelPropiedades ?? <PanelPropiedades vista={activa} columnas={columnas} columnaTitulo={columnaTitulo} onCambiar={onCambiar} />}
+                {acciones && <div className="mt-1.5 pt-1.5 border-t border-slate-100 space-y-0.5">{acciones}</div>}
               </Desplegable>
             </div>
           )}
