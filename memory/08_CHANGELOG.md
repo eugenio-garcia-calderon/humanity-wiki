@@ -8838,3 +8838,7 @@ en mis páginas como proyecto pendiente».
 - La flecha de un enlace abre la base enlazada en una ventana, en vista de galería.
 - Nuevo tamaño de tarjeta XXXS, más pequeño que XXS.
 - En una galería agrupada, arrastrar una entrada a otro grupo cambia su propiedad de agrupar, sin abrirla.
+
+### 2026-10-14 — Galería con imágenes completas y cuadradas; pop-up de nueva entrada con imagen y descripción (prog8)
+- Las tarjetas de la galería son cuadradas y la imagen se ve entera, sin recortar: si es horizontal, deja huecos arriba y abajo. Se quita «Recolocar», que ya no tiene efecto.
+- Al pulsar «Añadir» en una base de datos, el pop-up pide título, imagen y descripción. La imagen y la descripción quedan en la página de la entrada.

@@ -1,5 +1,6 @@
 import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { subirArchivo } from '../../utils/subir';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
@@ -409,7 +410,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // AÑADIR ABRE UN POP-UP (2026-10-14): se escribe el título y se crea; «Ampliar» la crea y la abre en grande.
   const [nuevaEntrada, setNuevaEntrada] = useState(false);
   const [tituloNueva, setTituloNueva] = useState('');
-  const anadirFila = () => { setTituloNueva(''); setNuevaEntrada(true); };
+  const [descNueva, setDescNueva] = useState('');
+  const [imagenNueva, setImagenNueva] = useState<string | null>(null);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+  const anadirFila = () => { setTituloNueva(''); setDescNueva(''); setImagenNueva(null); setNuevaEntrada(true); };
   const crearEntrada = async (ampliar: boolean) => {
     const r = await fetch(`/api/bd/tablas/${tablaId}/filas`, {
       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
@@ -418,6 +422,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     const j = await r.json().catch(() => ({}));
     setNuevaEntrada(false);
     if (!r.ok) { setFallo(j.error || 'No se pudo crear la entrada.'); return; }
+    // La imagen y la descripción van a la página de la entrada: son lo que enseña la galería.
+    const cuerpo: Record<string, any> = {};
+    if (imagenNueva) cuerpo.portada = imagenNueva;
+    if (descNueva.trim()) cuerpo.subtitulo = descNueva.trim();
+    if (j.id && Object.keys(cuerpo).length) {
+      const pg = await fetch(`/api/bd/filas/${j.id}/pagina`, { method: 'POST', credentials: 'include' }).then(x => x.json()).catch(() => ({}));
+      if (pg.pagina_id) await fetch(`/api/windows/${pg.pagina_id}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: cuerpo }) });
+    }
     await cargar();
     if (ampliar && j.id) abrirPagina({ id: j.id, pagina_id: null } as any);
   };
@@ -900,6 +912,25 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               placeholder="Sin título" aria-label="Título de la entrada"
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); crearEntrada(false); } }}
               className="mt-2 w-full h-12 px-3 rounded-xl border border-slate-200 text-base font-bold text-slate-900 outline-none focus:border-emerald-400" />
+            <div className="mt-3 flex items-start gap-3">
+              <label className="relative shrink-0 w-24 h-24 rounded-xl border border-dashed border-slate-300 bg-slate-50 grid place-items-center cursor-pointer overflow-hidden hover:border-emerald-300">
+                {imagenNueva
+                  ? <img src={imagenNueva} alt="" className="w-full h-full object-contain bg-white" />
+                  : <span className="text-[11px] font-bold text-slate-400 text-center px-2">{subiendoImagen ? 'Subiendo…' : 'Añadir imagen'}</span>}
+                <input type="file" accept="image/*" className="sr-only" aria-label="Imagen de la entrada"
+                  onChange={async e => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    setSubiendoImagen(true);
+                    const sub = await subirArchivo(f, undefined, undefined, { maxLado: 1600 }).catch(() => null);
+                    setSubiendoImagen(false);
+                    if (sub?.url) setImagenNueva(sub.url);
+                  }} />
+              </label>
+              <textarea value={descNueva} onChange={e => setDescNueva(e.target.value)} rows={4} maxLength={300}
+                placeholder="Descripción: de qué trata esta entrada…" aria-label="Descripción de la entrada"
+                className="flex-1 min-w-0 resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-400" />
+            </div>
             <div className="mt-4 flex items-center justify-between gap-2">
               <button type="button" onClick={() => setNuevaEntrada(false)} className="h-10 px-3 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100">Cancelar</button>
               <div className="flex items-center gap-2">
