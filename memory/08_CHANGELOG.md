@@ -8781,3 +8781,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-13 — Tablas que tardaban 30–60 s en aparecer: peticiones con tiempo límite y reintento (prog8)
 - Una tabla pedía sus datos sin límite de tiempo: al reiniciarse el servidor (despliegues) una petición quedaba sin respuesta y el navegador esperaba hasta un minuto. Ahora cada petición de datos y de vistas espera 5 s como máximo y, si falla o recibe un error del servidor, se repite hasta tres veces.
 - Causa comprobada: los tiempos de la página y de sus tablas desde fuera eran de 0,3 s, y el reinicio del servidor coincidía con los despliegues de hoy.
+
+### 2026-10-14 — La flecha de un enlace a otra base de datos abre esa base en una ventana (prog8)
+- En una entrada de una base de datos, la flecha diagonal de una propiedad de enlace abría la página de inicio con todas las bases. Ahora abre la base enlazada en una ventana del Escritorio, encima de la entrada.
+- Dentro de una ventana del Escritorio, abrir una ventana sube la orden a la página de arriba, que es la que tiene el gestor de ventanas.
