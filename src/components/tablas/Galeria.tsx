@@ -35,7 +35,7 @@ type Fila = {
 
 /** Ancho mínimo de una tarjeta, en píxeles, por tamaño. */
 export const ANCHO_TARJETA: Record<TamanoGaleria, number> = {
-  xxs: 84, xs: 112, pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
+  minimo: 56, xxs: 84, xs: 112, pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
 };
 
 /** Cuántas propiedades se enseñan bajo el título. Más no caben sin que la
@@ -56,16 +56,18 @@ const esFilaAjena = (e: React.DragEvent) => Array.from(e.dataTransfer.types || [
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
 const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
-  xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
+  minimo: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ alSoltarEnGrupo, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
   velocidad?: number;
   /** Se pueden arrastrar las tarjetas para cambiar el orden de la tabla. */
   ordenable?: boolean;
+  /** En una vista agrupada: soltar una entrada aquí la pone en este grupo (id de la entrada). */
+  alSoltarEnGrupo?: (filaId: string) => void;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -320,7 +322,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   /** Una tarjeta. `copia` es la segunda vuelta del carrusel: no se enfoca ni se lee. */
   // XS y XXS (2026-10-08): miniaturas con solo imagen y nombre. Sin descripción,
   // propiedades ni mandos grandes: no caben, y taparían la imagen.
-  const chica = tamano === 'xs' || tamano === 'xxs';
+  const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'minimo';
   const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
           const conMenu = editable && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
@@ -328,7 +330,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           const icono = f.pagina?.icono;
       const pesoClase = pesoNombre === 'fino' ? 'font-light' : pesoNombre === 'normal' ? 'font-semibold' : 'font-bold';
       const nombreEl = (
-                  <p className={cn('flex items-center gap-1.5 min-w-0', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+                  <p className={cn('flex items-center gap-1.5 min-w-0', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'minimo' ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                     {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                       : icono ? (esUrl(icono)
                         ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
@@ -365,7 +367,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 // Soltada en otra base de datos: aquí ya no está.
                 if (e.dataTransfer.dropEffect === 'move') onCambio();
               } : undefined}
-              onDragOver={arrastre ? e => {
+              onDragOver={arrastre && !alSoltarEnGrupo ? e => {
                 const propia = !!arrastrada;
                 if (propia ? arrastrada === f.id : !esFilaAjena(e)) return;
                 // Dentro de la misma galería solo se reordena si el orden es a mano.
@@ -386,7 +388,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               onDragLeave={arrastre ? e => {
                 if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDestino(d => (d?.id === f.id ? null : d));
               } : undefined}
-              onDrop={arrastre ? e => {
+              onDrop={arrastre && !alSoltarEnGrupo ? e => {
                 if (arrastrada) { if (!mover) return; e.preventDefault(); e.stopPropagation(); soltar(f); return; }
                 if (!esFilaAjena(e)) return;
                 // De otra base de datos: antes o después de ESTA tarjeta, o al final si el orden no es a mano.
@@ -511,13 +513,13 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   const rejilla = (
     <div>
       <div className={cn(chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
-        onDragOver={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
+        onDragOver={alSoltarEnGrupo ? e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } : editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
-        onDrop={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
+        onDrop={alSoltarEnGrupo ? e => { e.preventDefault(); setEntrando(false); const id = e.dataTransfer.getData('text/plain'); if (id) alSoltarEnGrupo(id); } : editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
         style={centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filasVis.map(f => tarjeta(f, false, editable && !sitio, ordenable && editable && !sitio))}
+        {filasVis.map(f => tarjeta(f, false, (editable && !sitio) || !!alSoltarEnGrupo, ordenable && editable && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}
