@@ -8799,3 +8799,7 @@ en mis páginas como proyecto pendiente».
 - En la página publicada de una base de datos desaparecen la pestaña «Galería» y la fila de conexiones de debajo. Quedan los botones de filtrar, ordenar y buscar.
 - Los botones de filtrar y ordenar llevan su palabra junto al icono.
 - Al abrir «Filtrar» o «Ordenar» aparecen las propiedades de la base: un toque añade el filtro o el orden por esa propiedad, sin pulsar «Añadir filtro» u «Añadir orden». Lo mismo para quien edita.
+
+### 2026-10-14 — Ajustes de la galería plegados y con el título y la descripción primero (prog8)
+- El botón de configuración de una galería arranca con todos sus grupos plegados.
+- «Título de la base de datos» y «Descripción» son ahora un solo grupo, «Título y descripción», el primero de la lista. Después van Carrusel (si lo es) y Tarjetas.
