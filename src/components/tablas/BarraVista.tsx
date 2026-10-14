@@ -608,8 +608,8 @@ export default function BarraVista({
           )}
           {editable && ajustes && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseBoton(false)} aria-expanded={abierto === 'ajustes'} title="Ajustes de esta vista" aria-label="Ajustes de esta vista">
-                <SlidersHorizontal className="w-[18px] h-[18px]" />
+              <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseEtiqueta(false)} aria-expanded={abierto === 'ajustes'} title="Configuración de esta vista" aria-label="Configuración de esta vista">
+                <SlidersHorizontal className="w-[18px] h-[18px]" />Configuración
               </button>
               <Desplegable abierto={abierto === 'ajustes'} onCerrar={cerrar} ancho="w-80" derecha>{ajustes}</Desplegable>
             </div>

@@ -102,7 +102,7 @@ async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   }
 }
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -132,6 +132,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Ocultar el título al público (2026-10-02, Eugenio). Quien edita lo sigue
    *  viendo, atenuado y con el aviso. */
   tituloOculto?: boolean;
+  /** Título y descripción al centro o a la izquierda (galería). */
+  tituloAlineacion?: 'centro' | 'izquierda';
+  onCambiarTituloAlineacion?: (a: 'centro' | 'izquierda') => void;
   /** Quitar filtrar, ordenar y buscar de la web publicada (bases pequeñas). */
   ocultarMandosPublica?: boolean;
   onCambiarOcultarMandos?: (v: boolean) => void;
@@ -194,6 +197,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [cargando, setCargando] = useState(true);
   /** La búsqueda de la barra: `null` cerrada, '' abierta y vacía. */
   const [busca, setBusca] = useState<string | null>(null);
+  /** Las tandas de «Mostrar más» pedidas. Vuelve a cero al cambiar de vista o de cuántas filas. */
+  const [tandas, setTandas] = useState(0);
+  useEffect(() => { setTandas(0); }, [activa.id, activa.config.filas_mostrar]);
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
@@ -523,7 +529,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // cada celda. Sólo pantalla; la vista guardada no cambia.
   const q = (busca || '').trim().toLocaleLowerCase('es');
   const textoDe = (v: any): string => v == null ? '' : typeof v === 'object' ? Object.values(v).map(textoDe).join(' ') : String(v);
+  // CUÁNTAS FILAS SE VEN EN LA GALERÍA (2026-10-14): lo que eligió el autor, y «Mostrar más» suma otra tanda igual.
+  const porTanda = activa.config.filas_mostrar && activa.config.filas_mostrar !== 'todas' ? Number(activa.config.filas_mostrar) : null;
   const filas = q ? datos.filas.filter(f => `${f.pagina?.titulo || ''} ${textoDe(f.celdas)} ${textoDe(f.apuntados)}`.toLocaleLowerCase('es').includes(q)) : datos.filas;
+  // Las filas de la galería: sin agrupar, solo las que caben en lo visto hasta ahora.
+  const visiblesGaleria = porTanda ? filas.slice(0, porTanda * (tandas + 1)) : filas;
   // Las columnas que se ven en ESTA vista. El nombre de la fila nunca se
   // esconde: sin él, una fila de la tabla no se sabe qué es.
   const ocultas = new Set(activa.ocultas.filter(id => id !== datos.columna_titulo));
@@ -715,6 +725,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       )}
       <Grupo titulo="Título y descripción">
         {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+        {onCambiarTituloAlineacion && <Chips etiqueta="Posición" valor={tituloAlineacion} onCambiar={onCambiarTituloAlineacion} opciones={[['centro', 'Centro'], ['izquierda', 'Izquierda']]} />}
         {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
         {onCambiarTituloColor && (
           <div className="flex items-center justify-between gap-2 px-1 py-0.5">
@@ -767,6 +778,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       )}
       </Grupo>}
       <Grupo titulo="Tarjetas">
+        <Chips etiqueta="Filas que se ven" valor={String(activa.config.filas_mostrar || 'todas')}
+          onCambiar={v => cambiarVista({ config: { ...activa.config, filas_mostrar: v } })}
+          opciones={[['1', '1'], ['2', '2'], ['3', '3'], ['5', '5'], ['10', '10'], ['50', '50'], ['todas', 'Todas']]} />
         {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
         {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
@@ -803,6 +817,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   ) : undefined;
   const accionesPropiedades = editable ? (
     <>
+      {/* LAS CONEXIONES, DENTRO DEL CAJETÍN: no como una fila visible bajo la barra. */}
+      {!!datos.conexiones?.length && (
+        <div className="px-1.5 pt-1 pb-2 mb-1 border-b border-slate-100">
+          <p className="pb-1.5 text-[10px] font-black uppercase tracking-wide text-slate-400">Conexiones</p>
+          <ConexionesBD conexiones={datos.conexiones} columnas={columnas} editable={editable} onCambio={() => { cargar(); avisarCambio(); }} />
+        </div>
+      )}
       <button onClick={() => setEditorColumna('nueva')} className="w-full flex items-center gap-2 px-1.5 h-8 rounded-md text-xs font-bold text-blue-600 hover:bg-blue-50">
         <Plus className="w-3.5 h-3.5" /> Nueva propiedad
       </button>
@@ -854,17 +875,17 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       {/* Oculto y sin nada más que enseñar (quien lee no tiene mandos): ni la
           fila del título se pinta, para que no quede un hueco encima. */}
       {limpia && datos.tabla.descripcion && !(tituloOculto && !editable) && (
-        <p className={cn('-mt-2 mb-3 max-w-2xl mx-auto text-center text-sm leading-relaxed whitespace-pre-line text-slate-500', tituloOculto && 'opacity-40')}>{datos.tabla.descripcion}</p>
+        <p className={cn('-mt-2 mb-3 max-w-2xl text-sm', tituloAlineacion === 'izquierda' ? 'text-left' : 'mx-auto text-center', 'leading-relaxed whitespace-pre-line text-slate-500', tituloOculto && 'opacity-40')}>{datos.tabla.descripcion}</p>
       )}
       {!(limpia && tituloOculto && !editable) && (
       <div className={limpia
-        ? 'flex flex-wrap items-center justify-center gap-2 pb-4 min-h-9'
+        ? cn('flex flex-wrap items-center gap-2 pb-4 min-h-9', tituloAlineacion === 'izquierda' ? 'justify-start' : 'justify-center')
         : cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
         {!limpia && <Table2 className="w-4 h-4 text-slate-400 shrink-0" />}
         {/* El nombre se cambia pinchando en él (2026-09-30, Eugenio: «permite
             cambiar el nombre de la base de datos»). Enter o salir guarda;
             Escape deja el de antes. */}
-        <div className={cn(limpia ? 'basis-full flex items-center justify-center gap-1 min-w-0' : 'contents', limpia && tituloOculto && 'opacity-40')}>
+        <div className={cn(limpia ? cn('basis-full flex items-center gap-1 min-w-0', tituloAlineacion === 'izquierda' ? 'justify-start' : 'justify-center') : 'contents', limpia && tituloOculto && 'opacity-40')}>
         {editable && nombre !== null ? (
           <input autoFocus value={nombre} maxLength={200} aria-label="Nombre de la base de datos"
             onChange={e => setNombre(e.target.value)}
@@ -943,11 +964,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             acciones={accionesPropiedades}
             extra={mandosExtra} />
           {/* Con qué otras bases de datos está enlazada, debajo de la barra. */}
-          {editable && !!datos.conexiones?.length && (
-            <div className="pt-2">
-              <ConexionesBD conexiones={datos.conexiones} columnas={columnas} editable={editable} onCambio={() => { cargar(); avisarCambio(); }} />
-            </div>
-          )}
           {falloVista && <p className="pt-1 text-[11px] font-bold text-rose-600">{falloVista}</p>}
         </div>
       )}
@@ -985,7 +1001,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
-          {porGrupos(filas, fs => (
+          {porGrupos(colAgr ? filas : visiblesGaleria, fs => (
             <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visibles}
@@ -995,6 +1011,15 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
           ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
           colAgr && editable ? celdas => <div className="max-w-xs"><NuevoElemento onCrear={t => crearCon(t, celdas)} /></div> : undefined)}
+          {/* Mostrar más: otra tanda igual a la que se eligió. */}
+          {!colAgr && porTanda && filas.length > visiblesGaleria.length && (
+            <div className="flex justify-center pt-3">
+              <button onClick={() => setTandas(t => t + 1)}
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                <ChevronDown className="w-3.5 h-3.5" /> Mostrar más: {(datos.tabla?.titulo || 'filas').toLowerCase()}
+              </button>
+            </div>
+          )}
         </div>
       ) : esMovil ? (
         <div className="divide-y divide-slate-100" style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
