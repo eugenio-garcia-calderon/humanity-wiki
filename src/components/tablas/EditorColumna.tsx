@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Plus, Trash2, Loader2, AlertTriangle, Check, Image as ImageIcon, AlignLeft, Database } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, AlertTriangle, Check, Image as ImageIcon, AlignLeft, Database, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -139,6 +139,14 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const [buscarTipo, setBuscarTipo] = useState('');
   /** La rejilla de tipos: abierta al crear, plegada en cuanto se elige uno (como en Notion). */
   const [tiposAbiertos, setTiposAbiertos] = useState(!columna);
+  type TipoElegible = { id: string; label: string; rol?: string; modo?: string; nombre?: string };
+  const elegirTipo = (t: TipoElegible) => {
+    setTipo(t.id);
+    setTiposAbiertos(false);
+    setConfig((c: any) => { const { rol: _fuera, modo: _modo, ...resto } = c || {}; return { ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}) }; });
+    // The name follows the shop entry while nobody has typed one.
+    if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
+  };
   // Escape cierra el diálogo, como en cualquier ventana de Notion.
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
@@ -226,7 +234,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   };
 
   return (
-    <div className="fixed inset-0 z-[9990] flex items-start justify-center p-4 sm:p-8 bg-slate-900/40 overflow-y-auto"
+    <div className="fixed inset-0 z-[10000] flex items-start justify-center p-4 sm:p-8 bg-slate-900/40 overflow-y-auto"
       onClick={onCerrar}>
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-100">
@@ -259,7 +267,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
           ) : (
             <div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Tipo</span>
+                <span className="text-[11px] font-black uppercase tracking-wide text-slate-500">Tipo</span>
                 {(() => {
                   const actual = GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol);
                   return actual ? <span className="text-[11px] font-bold text-slate-500 truncate">Elegido: {actual.label}{actual.ayuda ? ` · ${actual.ayuda}` : ''}</span> : null;
@@ -267,6 +275,13 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               </div>
               {tiposAbiertos ? (<>
               <input value={buscarTipo} onChange={e => setBuscarTipo(e.target.value)} placeholder="Buscar un tipo…" aria-label="Buscar un tipo"
+                onKeyDown={e => {
+                  if (e.key !== 'Enter') return;
+                  e.preventDefault();
+                  const q = buscarTipo.trim().toLocaleLowerCase('es');
+                  const primero = GRUPOS.flatMap(g => g.tipos).find(t => !q || `${t.label} ${t.ayuda || ''}`.toLocaleLowerCase('es').includes(q));
+                  if (primero) elegirTipo(primero);
+                }}
                 className="mt-1 w-full h-10 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-400" />
               <div className="mt-2 space-y-3">
                 {GRUPOS.map(g => {
@@ -283,17 +298,11 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       const elegido = tipo === t.id && (config.rol || undefined) === t.rol
                         && (t.id !== 'compra' || (config.modo || 'carrito') === t.modo);
                       return (
-                      <button key={t.id + (t.rol || '')} aria-pressed={elegido} onClick={() => {
-                          setTipo(t.id);
-                          setTiposAbiertos(false);
-                          setConfig((c: any) => { const { rol: _fuera, modo: _modo, ...resto } = c || {}; return { ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}) }; });
-                          // The name follows the shop entry while nobody has typed one.
-                          if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
-                        }}
+                      <button key={t.id + (t.rol || '')} aria-pressed={elegido} onClick={() => elegirTipo(t)}
                         className={cn('w-full flex flex-col justify-center gap-0.5 px-2.5 min-h-12 rounded-lg text-left border transition-colors',
                           elegido ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-transparent hover:bg-slate-50')}>
                         <span className="text-xs font-bold">{t.label}</span>
-                        {t.ayuda && <span className="text-[10px] leading-snug text-slate-500">{t.ayuda}</span>}
+                        {t.ayuda && <span className="text-[11px] leading-snug text-slate-500">{t.ayuda}</span>}
                       </button>
                       );
                     })}
@@ -325,6 +334,14 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       onChange={e => setOpciones(os => os.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setOpciones(os => [...os, { label: '' }]); } }}
                       className="flex-1 h-11 px-3 border border-slate-200 rounded-xl text-base sm:text-sm outline-none focus:border-emerald-400" />
+                    <button onClick={() => setOpciones(os => os.map((x, j, all) => j === i - 1 ? all[i] : j === i ? all[i - 1] : x))} disabled={i === 0}
+                      aria-label={`Subir la opción ${i + 1}`} className="w-8 h-11 grid place-items-center text-slate-300 hover:text-slate-700 disabled:opacity-30">
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setOpciones(os => os.map((x, j, all) => j === i + 1 ? all[i] : j === i ? all[i + 1] : x))} disabled={i === opciones.length - 1}
+                      aria-label={`Bajar la opción ${i + 1}`} className="w-8 h-11 grid place-items-center text-slate-300 hover:text-slate-700 disabled:opacity-30">
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
                     <button onClick={() => setOpciones(os => os.filter((_, j) => j !== i))}
                       aria-label="Quitar la opción"
                       className="w-11 h-11 grid place-items-center text-slate-300 hover:text-rose-600">
