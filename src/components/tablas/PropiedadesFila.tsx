@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Link2, ArrowUpRight, GripVertical, Pencil, Settings2, MessageSquare, Eye, EyeOff, Copy, Trash2, LayoutTemplate,
   ChevronRight, ChevronDown, Check, X,
@@ -8,6 +7,7 @@ import CeldaTabla, { type Columna } from './Celda';
 import EditorColumna from './EditorColumna';
 import EntityComments from '../knowledge/EntityComments';
 import { Desplegable } from './BarraVista';
+import { abrirVentana } from '../ventanas/bus';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -48,7 +48,6 @@ const vacia = (fila: any, c: Columna) => {
 export default function PropiedadesFila({ tablaId, filaId, editable }: {
   tablaId: string; filaId: string; editable: boolean;
 }) {
-  const navigate = useNavigate();
   const [datos, setDatos] = useState<{ columnas: Columna[]; fila: any; titulo: string | null; diseno: Diseno } | null>(null);
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState<Columna | null>(null);
@@ -134,11 +133,13 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   };
   /** ↗: la página donde vive la base de datos enlazada; si no está en
    *  ninguna, la herramienta «Tablas» abierta en ella. */
+  // La base de datos enlazada se abre en una ventana del Escritorio, encima de
+  // esta entrada: la flecha no te saca de la página en la que estás.
   const irABase = async (destino: string) => {
     const r = await fetch(`/api/bd/tablas/${destino}/hogar`, { credentials: 'include' });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) { setFallo(j.error || 'No puedes abrir esa base de datos.'); return; }
-    navigate(j.pagina_id ? `/paginas/${j.pagina_id}` : `/tablas?tabla=${destino}`);
+    abrirVentana({ titulo: j.titulo || 'Base de datos', clase: 'app', destino: `/tablas?tabla=${destino}` });
   };
 
   /** Soltar una propiedad delante de otra: el orden nuevo de TODA la tabla. */

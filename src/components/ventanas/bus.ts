@@ -30,8 +30,12 @@ export interface VentanaEstado {
   delante: boolean;
 }
 
-export const abrirVentana = (a: AbrirVentana) =>
-  window.dispatchEvent(new CustomEvent('humanity:abrir-ventana', { detail: a }));
+// Dentro de una ventana del Escritorio (un marco) no hay gestor de ventanas: el
+// aviso sube a la página de arriba, que es la que lo tiene.
+export const abrirVentana = (a: AbrirVentana) => {
+  const evento = new CustomEvent('humanity:abrir-ventana', { detail: a });
+  try { (window.top ?? window).dispatchEvent(evento); } catch { window.dispatchEvent(evento); }
+};
 
 /** Pulsar el icono de una ventana en la cabecera. */
 export const pulsarVentana = (id: string) =>
