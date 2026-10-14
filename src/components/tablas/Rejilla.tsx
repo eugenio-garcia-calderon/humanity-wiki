@@ -705,7 +705,39 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const visiblesAhora = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
   const ajustesGaleria = (
     <div className="space-y-1">
-      {vista === 'carrusel' && <Grupo titulo="Carrusel" abierto>
+      <Grupo titulo="Título y descripción">
+        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+        {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
+        {onCambiarTituloColor && (
+          <div className="flex items-center justify-between gap-2 px-1 py-0.5">
+            <span className="text-xs font-bold text-slate-600">Color</span>
+            <div role="radiogroup" aria-label="Color del título" className="flex flex-wrap justify-end gap-1">
+              <button role="radio" aria-checked={!tituloColor} aria-label="Color por defecto" title="Por defecto" onClick={() => onCambiarTituloColor(undefined)}
+                className={cn('h-5 w-5 rounded-full border text-[9px] font-bold text-slate-500', !tituloColor ? 'ring-2 ring-slate-900 ring-offset-1' : 'border-slate-300')}>A</button>
+              {COLORES.filter(c => !c.clave.startsWith('fondo-')).map(c => (
+                <button key={c.clave} role="radio" aria-checked={tituloColor === c.clave} aria-label={c.nombre} title={c.nombre} onClick={() => onCambiarTituloColor(c.clave)}
+                  className={cn('h-5 w-5 rounded-full', SWATCH[c.clave], tituloColor === c.clave ? 'ring-2 ring-slate-900 ring-offset-1' : '')} />
+              ))}
+            </div>
+          </div>
+        )}
+        {onCambiarTituloOculto && (
+          <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
+            <span className="text-xs font-bold text-slate-600">Mostrar el título al publicar</span>
+            <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={!tituloOculto} onChange={e => onCambiarTituloOculto(!e.target.checked)} />
+          </label>
+        )}
+        {editable && (
+          <div className="pt-1 border-t border-slate-100">
+            <p className="px-1 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Descripción</p>
+            <textarea defaultValue={datos?.tabla.descripcion || ''} rows={2} maxLength={1000} aria-label="Descripción de la base de datos"
+              placeholder="Para qué es esta base de datos…"
+              onBlur={e => guardarDescripcion(e.currentTarget.value)}
+              className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-emerald-400" />
+          </div>
+        )}
+      </Grupo>
+      {vista === 'carrusel' && <Grupo titulo="Carrusel">
         {/* LA VELOCIDAD DEL CARRUSEL (2026-10-06): se guarda en la vista, así
           que vale igual en la página publicada. Se ve al momento debajo. */}
       {vista === 'carrusel' && (
@@ -726,7 +758,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </div>
       )}
       </Grupo>}
-      <Grupo titulo="Tarjetas" abierto>
+      <Grupo titulo="Tarjetas">
         {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
         {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
@@ -762,35 +794,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           </div>
         )}
       </Grupo>
-      <Grupo titulo="Título de la base de datos">
-        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
-        {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
-        {onCambiarTituloColor && (
-          <div className="flex items-center justify-between gap-2 px-1 py-0.5">
-            <span className="text-xs font-bold text-slate-600">Color</span>
-            <div role="radiogroup" aria-label="Color del título" className="flex flex-wrap justify-end gap-1">
-              <button role="radio" aria-checked={!tituloColor} aria-label="Color por defecto" title="Por defecto" onClick={() => onCambiarTituloColor(undefined)}
-                className={cn('h-5 w-5 rounded-full border text-[9px] font-bold text-slate-500', !tituloColor ? 'ring-2 ring-slate-900 ring-offset-1' : 'border-slate-300')}>A</button>
-              {COLORES.filter(c => !c.clave.startsWith('fondo-')).map(c => (
-                <button key={c.clave} role="radio" aria-checked={tituloColor === c.clave} aria-label={c.nombre} title={c.nombre} onClick={() => onCambiarTituloColor(c.clave)}
-                  className={cn('h-5 w-5 rounded-full', SWATCH[c.clave], tituloColor === c.clave ? 'ring-2 ring-slate-900 ring-offset-1' : '')} />
-              ))}
-            </div>
-          </div>
-        )}
-        {onCambiarTituloOculto && (
-          <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
-            <span className="text-xs font-bold text-slate-600">Mostrar el título al publicar</span>
-            <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={!tituloOculto} onChange={e => onCambiarTituloOculto(!e.target.checked)} />
-          </label>
-        )}
-      </Grupo>
-      {editable && <Grupo titulo="Descripción">
-        <textarea defaultValue={datos?.tabla.descripcion || ''} rows={2} maxLength={1000} aria-label="Descripción de la base de datos"
-          placeholder="Para qué es esta base de datos…"
-          onBlur={e => guardarDescripcion(e.currentTarget.value)}
-          className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-emerald-400" />
-      </Grupo>}
     </div>
   );
   const mandosExtra = (
