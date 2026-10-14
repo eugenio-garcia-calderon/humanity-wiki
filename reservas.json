@@ -20,9 +20,21 @@
     },
     {
       "agente": "prog8",
+      "ruta": "src/components/tablas/PropiedadesFila.tsx",
+      "motivo": "Enlace a otra base de datos abre una ventana",
+      "desde": "2026-10-14T10:34:14.790Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/ventanas/bus.ts",
+      "motivo": "Enlace a otra base de datos abre una ventana",
+      "desde": "2026-10-14T10:34:14.790Z"
+    },
+    {
+      "agente": "prog8",
       "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
-      "desde": "2026-10-14T10:24:45.098Z"
+      "motivo": "Enlace a otra base de datos abre una ventana",
+      "desde": "2026-10-14T10:34:14.790Z"
     }
   ]
 }
