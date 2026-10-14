@@ -80,12 +80,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/tablas/Galeria.tsx",
-      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
-      "desde": "2026-10-14T12:36:11.015Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "Flecha abre galería en ventana; tamaño XXXS",
       "desde": "2026-10-14T12:36:11.015Z"
@@ -95,6 +89,12 @@
       "ruta": "src/utils/bloques.ts",
       "motivo": "Flecha abre galería en ventana; tamaño XXXS",
       "desde": "2026-10-14T12:36:11.015Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/tablas/Galeria.tsx",
+      "motivo": "Arrastrar entradas a otro grupo",
+      "desde": "2026-10-14T12:38:52.282Z"
     }
   ]
 }
