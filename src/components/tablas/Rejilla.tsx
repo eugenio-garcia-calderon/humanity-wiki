@@ -944,7 +944,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             ) : esGaleria ? ajustesGaleria : undefined}
             extra={mandosExtra} />
           {/* Con qué otras bases de datos está enlazada, debajo de la barra. */}
-          {!!datos.conexiones?.length && (
+          {editable && !!datos.conexiones?.length && (
             <div className="pt-2">
               <ConexionesBD conexiones={datos.conexiones} columnas={columnas} editable={editable} onCambio={() => { cargar(); avisarCambio(); }} />
             </div>

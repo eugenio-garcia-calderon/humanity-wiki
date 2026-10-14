@@ -8794,3 +8794,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-14 — Consola: reordenar los eslabones y elegir su icono (prog8)
 - La consola tiene una lista «Orden de la cadena» con flechas para subir y bajar cada eslabón. El círculo sigue el mismo orden.
 - Cada eslabón tiene su icono elegido en el selector de iconos (de trazo, imagen o ninguno), en vez de escribir un emoji. Los emojis que ya había siguen funcionando.
+
+### 2026-10-14 — Página publicada: filtrar y ordenar con su palabra y las propiedades a un toque (prog8)
+- En la página publicada de una base de datos desaparecen la pestaña «Galería» y la fila de conexiones de debajo. Quedan los botones de filtrar, ordenar y buscar.
+- Los botones de filtrar y ordenar llevan su palabra junto al icono.
+- Al abrir «Filtrar» o «Ordenar» aparecen las propiedades de la base: un toque añade el filtro o el orden por esa propiedad, sin pulsar «Añadir filtro» u «Añadir orden». Lo mismo para quien edita.

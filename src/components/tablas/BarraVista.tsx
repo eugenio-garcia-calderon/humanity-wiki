@@ -89,6 +89,9 @@ const claseSelect = 'h-8 min-w-0 rounded-md border border-slate-200 bg-white px-
 // haciendo algo (un filtro puesto, un orden…): lo activo se ve sin leer.
 const claseBoton = (activo: boolean) => cn('relative grid place-items-center w-9 h-9 rounded-lg shrink-0 transition-colors',
   activo ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100');
+/** Un mando con su palabra al lado del icono (filtrar, ordenar). */
+const claseEtiqueta = (activo: boolean) => cn('relative inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg shrink-0 text-[13px] font-bold transition-colors',
+  activo ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100');
 /** El número de un mando activo, en su esquina. */
 export const Cuenta = ({ n }: { n: number | string }) => (
   <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 grid place-items-center rounded-full bg-blue-600 text-white text-[9px] font-black leading-none">{n}</span>
@@ -200,6 +203,20 @@ function Conector({ indice, y_o, onCambiar }: { indice: number; y_o: 'y' | 'o'; 
   );
 }
 
+/** Las propiedades a la vista: un toque añade el filtro o el orden por ellas, sin pulsar «Añadir». */
+function ElegirPropiedad({ columnas, texto, onElegir }: { columnas: Columna[]; texto: string; onElegir: (c: Columna) => void }) {
+  if (!columnas.length) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1 pb-1.5 border-b border-slate-100">
+      <span className="w-full px-1 pt-0.5 text-[10px] font-black uppercase tracking-wide text-slate-400">{texto}</span>
+      {columnas.map(c => (
+        <button key={c.id} type="button" onClick={() => onElegir(c)}
+          className="inline-flex items-center h-7 px-2.5 rounded-full border border-slate-200 text-[11px] font-bold text-slate-600 hover:border-blue-300 hover:text-blue-700 hover:bg-blue-50">{c.nombre}</button>
+      ))}
+    </div>
+  );
+}
+
 function PanelFiltro({ vista, columnas, conocidos, onCambiar }: {
   vista: Vista; columnas: Columna[]; conocidos: Record<string, Map<string, string>>; onCambiar: (f: GrupoFiltros) => void;
 }) {
@@ -216,6 +233,8 @@ function PanelFiltro({ vista, columnas, conocidos, onCambiar }: {
   if (!columnas.length) return <p className="p-2 text-xs text-slate-400">No hay propiedades por las que filtrar.</p>;
   return (
     <div className="space-y-1.5">
+      <ElegirPropiedad columnas={columnas} texto="Filtrar por"
+        onElegir={c => onCambiar({ ...grupo, reglas: [...grupo.reglas, { columna_id: c.id, operador: operadoresDe(c.tipo)[0] }] })} />
       {!grupo.reglas.length && <p className="px-1 py-2 text-xs text-slate-400">Sin filtros: se ven todas las filas.</p>}
       {grupo.reglas.map((r, i) => esGrupo(r) ? (
         <div key={i} className="flex items-start gap-1">
@@ -271,6 +290,8 @@ function PanelOrden({ vista, columnas, onCambiar }: { vista: Vista; columnas: Co
   const libres = columnas.filter(c => !orden.some(o => o.columna_id === c.id));
   return (
     <div className="space-y-1.5">
+      <ElegirPropiedad columnas={libres} texto="Ordenar por"
+        onElegir={c => onCambiar([...orden, { columna_id: c.id, direccion: 'asc' }])} />
       {!orden.length && <p className="px-1 py-2 text-xs text-slate-400">Sin orden: las filas van como las colocaste a mano.</p>}
       {orden.map((o, i) => (
         <div key={o.columna_id + i} className="flex items-center gap-1">
@@ -461,7 +482,8 @@ export default function BarraVista({
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
       {/* LAS PESTAÑAS. Una por vista; la activa, marcada. */}
-      <div className="flex items-center gap-0.5 min-w-0 overflow-x-auto max-w-full" role="tablist" aria-label="Vistas">
+      {/* En la página publicada no hay pestañas: la vista la decidió su autor. */}
+      {!visitante && <div className="flex items-center gap-0.5 min-w-0 overflow-x-auto max-w-full" role="tablist" aria-label="Vistas">
         {lista.map(v => {
           const Icono = ICONO_FORMA[v.forma] || Table2;
           const es = v.id === activa.id;
@@ -531,16 +553,16 @@ export default function BarraVista({
           </Desplegable>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* LOS MANDOS. Solo para quien edita: la página publicada enseña la
           vista tal como la dejó su autor. */}
       {(editable || visitante) && conMandos && (
         <div className="ml-auto flex flex-wrap items-center gap-0.5">
           <div className="relative">
-            <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseBoton(nFiltros > 0)} aria-expanded={abierto === 'filtro'}
+            <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseEtiqueta(nFiltros > 0)} aria-expanded={abierto === 'filtro'}
               title={nFiltros ? `Filtrar · ${nFiltros} ${nFiltros === 1 ? 'regla' : 'reglas'}` : 'Filtrar'} aria-label="Filtrar">
-              <Filter className="w-[18px] h-[18px]" />{nFiltros > 0 && <Cuenta n={nFiltros} />}
+              <Filter className="w-[18px] h-[18px]" />Filtrar{nFiltros > 0 && <Cuenta n={nFiltros} />}
             </button>
             <Desplegable abierto={abierto === 'filtro'} onCerrar={cerrar} ancho="w-[34rem]" derecha>
               <PanelFiltro vista={activa} columnas={columnas} conocidos={conocidos} onCambiar={f => onCambiar({ filtros: f })} />
@@ -548,9 +570,9 @@ export default function BarraVista({
           </div>
           {activa.forma !== 'grafico' && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'orden' ? null : 'orden')} className={claseBoton(nOrden > 0)} aria-expanded={abierto === 'orden'}
+              <button onClick={() => setAbierto(abierto === 'orden' ? null : 'orden')} className={claseEtiqueta(nOrden > 0)} aria-expanded={abierto === 'orden'}
                 title="Ordenar" aria-label="Ordenar">
-                <ArrowUpDown className="w-[18px] h-[18px]" />{nOrden > 0 && <Cuenta n={nOrden} />}
+                <ArrowUpDown className="w-[18px] h-[18px]" />Ordenar{nOrden > 0 && <Cuenta n={nOrden} />}
               </button>
               <Desplegable abierto={abierto === 'orden'} onCerrar={cerrar} ancho="w-96" derecha>
                 <PanelOrden vista={activa} columnas={columnas} onCambiar={o => onCambiar({ orden_por: o })} />
