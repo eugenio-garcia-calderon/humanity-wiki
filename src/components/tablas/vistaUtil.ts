@@ -42,6 +42,8 @@ export type Filtro = { columna_id: string; operador: string; valor?: any };
 export type GrupoFiltros = { y_o: 'y' | 'o'; reglas: Array<Filtro | GrupoFiltros> };
 
 export type ConfigVista = {
+  /** Cuántas filas se ven en la galería: «1», «2»…«50» o «todas» (sin valor). «Mostrar más» suma otra tanda. */
+  filas_mostrar?: string;
   /** El segundo nivel de agrupación (Notion: «subgrupos»). */
   subagrupar_por?: string | null;
   /** Grupos escondidos, por clave. Sirve igual para columnas del tablero. */

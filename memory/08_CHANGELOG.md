@@ -8812,3 +8812,9 @@ en mis páginas como proyecto pendiente».
 - «Nuevo» con su flecha pasa a ser «Añadir»: un botón que crea una fila al pulsarlo.
 - «Propiedades» es un botón con su palabra, como filtrar y ordenar. Dentro: lo que se ve, «Nueva propiedad» y «Enlazar con otra base de datos». Sale también en la galería.
 - El botón de enlazar de la barra desaparece; enlazar está ahora en el panel de propiedades.
+
+### 2026-10-14 — Galería con filas visibles, Configuración y editor de propiedades más claro (prog8)
+- En la configuración de tarjetas, «Filas que se ven»: 1, 2, 3, 5, 10, 50 o Todas. Si no caben todas, aparece «Mostrar más: <base>», que suma otra tanda igual.
+- El botón de ajustes de la galería lleva la palabra «Configuración». En «Título y descripción», «Posición»: centro o izquierda.
+- Crear propiedad: buscador de tipos, rejilla de dos columnas, resumen del tipo elegido, botón Cancelar, aviso de que falta el nombre, y Escape cierra.
+- Las conexiones con otras bases de datos ya no aparecen como fila bajo la barra: van dentro del panel de propiedades, en «Conexiones».

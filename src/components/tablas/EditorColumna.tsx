@@ -135,6 +135,14 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const [tipo, setTipo] = useState(columna?.tipo || tipoInicial || 'texto');
   const [opciones, setOpciones] = useState<Array<{ id?: string; label: string }>>(columna?.opciones || []);
   const [config, setConfig] = useState<any>(columna?.config || {});
+  /** Lo que se escribe en el buscador de tipos. */
+  const [buscarTipo, setBuscarTipo] = useState('');
+  // Escape cierra el diálogo, como en cualquier ventana de Notion.
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  }, [onCerrar]);
   const [tablas, setTablas] = useState<any[]>([]);
   const [otrasColumnas, setOtrasColumnas] = useState<any[]>([]);
   const [guardando, setGuardando] = useState(false);
@@ -248,32 +256,50 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
             </p>
           ) : (
             <div>
-              <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Tipo</span>
-              <div className="mt-1 max-h-64 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-50">
-                {GRUPOS.map(g => (
-                  <div key={g.grupo} className="p-1.5">
-                    <p className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-300">{g.grupo}</p>
-                    {g.tipos.map(t => {
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Tipo</span>
+                {(() => {
+                  const actual = GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol);
+                  return actual ? <span className="text-[11px] font-bold text-slate-500 truncate">Elegido: {actual.label}{actual.ayuda ? ` · ${actual.ayuda}` : ''}</span> : null;
+                })()}
+              </div>
+              <input value={buscarTipo} onChange={e => setBuscarTipo(e.target.value)} placeholder="Buscar un tipo…" aria-label="Buscar un tipo"
+                className="mt-1 w-full h-10 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-400" />
+              <div className="mt-2 space-y-3">
+                {GRUPOS.map(g => {
+                  const q = buscarTipo.trim().toLocaleLowerCase('es');
+                  const tipos = q ? g.tipos.filter(t => `${t.label} ${t.ayuda || ''} ${g.grupo}`.toLocaleLowerCase('es').includes(q)) : g.tipos;
+                  if (!tipos.length) return null;
+                  return (
+                  <div key={g.grupo}>
+                    <p className="px-1 pb-1 text-[11px] font-black uppercase tracking-wide text-slate-500">{g.grupo}</p>
+                    <div className="grid grid-cols-2 gap-1">
+                    {tipos.map(t => {
                       // A shop entry is a type PLUS a role: «Precio» and «Moneda»
                       // are the same type and must not both light up.
                       const elegido = tipo === t.id && (config.rol || undefined) === t.rol
                         && (t.id !== 'compra' || (config.modo || 'carrito') === t.modo);
                       return (
-                      <button key={t.id + (t.rol || '')} onClick={() => {
+                      <button key={t.id + (t.rol || '')} aria-pressed={elegido} onClick={() => {
                           setTipo(t.id);
                           setConfig((c: any) => { const { rol: _fuera, modo: _modo, ...resto } = c || {}; return { ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}) }; });
                           // The name follows the shop entry while nobody has typed one.
                           if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
                         }}
-                        className={cn('w-full flex items-baseline gap-2 px-2 h-11 rounded-lg text-left transition-colors',
-                          elegido ? 'bg-emerald-50 text-emerald-800' : 'hover:bg-slate-50')}>
+                        className={cn('w-full flex flex-col justify-center gap-0.5 px-2.5 min-h-12 rounded-lg text-left border transition-colors',
+                          elegido ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-transparent hover:bg-slate-50')}>
                         <span className="text-xs font-bold">{t.label}</span>
-                        {t.ayuda && <span className="text-[10px] text-slate-400">{t.ayuda}</span>}
+                        {t.ayuda && <span className="text-[10px] leading-snug text-slate-500">{t.ayuda}</span>}
                       </button>
                       );
                     })}
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
+                {buscarTipo.trim() && !GRUPOS.some(g => g.tipos.some(t => `${t.label} ${t.ayuda || ''}`.toLocaleLowerCase('es').includes(buscarTipo.trim().toLocaleLowerCase('es')))) && (
+                  <p className="px-1 text-xs text-slate-500">Ningún tipo se llama así. Prueba con «texto», «fecha» o «lista».</p>
+                )}
               </div>
             </div>
           )}
@@ -543,12 +569,17 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
             <button onClick={borrar} className="inline-flex items-center gap-1.5 h-11 px-3 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50">
               <Trash2 className="w-4 h-4" /> Quitar columna
             </button>
-          ) : <span />}
-          <button onClick={guardar} disabled={guardando || !nombre.trim() || (tipo === 'relacion' && !config.tabla_destino)}
-            className="inline-flex items-center gap-1.5 h-11 px-4 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-40 hover:bg-slate-800">
-            {guardando && <Loader2 className="w-4 h-4 animate-spin" />}
-            {editando ? 'Guardar' : tipo === 'relacion' ? 'Crear el enlace' : 'Crear columna'}
-          </button>
+          ) : (
+            <button onClick={onCerrar} className="inline-flex items-center h-11 px-3 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100">Cancelar</button>
+          )}
+          <div className="flex items-center gap-2 min-w-0">
+            {!nombre.trim() && !editando && <span className="text-[11px] font-bold text-slate-400 truncate">Ponle un nombre para continuar</span>}
+            <button onClick={guardar} disabled={guardando || !nombre.trim() || (tipo === 'relacion' && !config.tabla_destino)}
+              className="inline-flex items-center gap-1.5 h-11 px-4 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-40 hover:bg-slate-800">
+              {guardando && <Loader2 className="w-4 h-4 animate-spin" />}
+              {editando ? 'Guardar' : tipo === 'relacion' ? 'Crear el enlace' : 'Crear columna'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

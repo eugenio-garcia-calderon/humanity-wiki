@@ -3211,6 +3211,8 @@ function EditorPagina() {
             tituloColor={b.tituloColor}
             onCambiarTituloColor={editable ? c => { b.tituloColor = c; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             tituloPeso={b.tituloPeso || 'negrita'}
+            tituloAlineacion={b.tituloAlineacion || 'centro'}
+            onCambiarTituloAlineacion={editable ? a => { b.tituloAlineacion = a; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             nombreArriba={!!b.nombreArriba}
             onCambiarNombreArriba={editable ? v => { b.nombreArriba = v || undefined; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             pesoNombre={b.pesoNombre || 'negrita'}

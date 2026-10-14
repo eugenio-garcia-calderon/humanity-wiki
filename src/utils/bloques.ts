@@ -166,6 +166,8 @@ export interface Bloque {
   /** El color y el grosor del título de una base de datos (como el tamaño: por bloque). Sin valor, el de siempre. */
   tituloColor?: string;
   tituloPeso?: 'fino' | 'normal' | 'negrita';
+  /** Título y descripción de la galería: al centro (por defecto) o a la izquierda. */
+  tituloAlineacion?: 'centro' | 'izquierda';
   /** Con la galería: el nombre de cada tarjeta encima de la imagen, y su grosor. Sin valor, debajo y negrita. */
   nombreArriba?: boolean;
   pesoNombre?: 'fino' | 'normal' | 'negrita';
