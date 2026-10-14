@@ -6,7 +6,7 @@ export type EstadoEslabon = 'rojo' | 'amarillo' | 'verde' | 'sin_datos';
 export type Eslabon = {
   id: string;
   nombre: string;
-  /** Un emoji. */
+  /** Un emoji, un icono de trazo (`lucide:Nombre`) o una imagen (su dirección). Ver `Icono`. */
   icono: string;
   descripcion: string;
   /** `auto`: sale del avance de sus objetivos y tareas; los otros lo fija una persona. */
@@ -47,7 +47,7 @@ export function limpiarConsola(c: any): Consola {
     eslabones: lista.slice(0, 12).map((x: any, i: number): Eslabon => ({
       id: idDe(x?.id, i, 'e'),
       nombre: texto(x?.nombre, 80) || `Eslabón ${i + 1}`,
-      icono: texto(x?.icono, 8),
+      icono: texto(x?.icono, 500),
       descripcion: largo(x?.descripcion, 400),
       estado: ['auto', 'rojo', 'amarillo', 'verde'].includes(x?.estado) ? x.estado : 'auto',
       objetivos: (Array.isArray(x?.objetivos) ? x.objetivos : []).slice(0, 40).map((o: any, j: number) => ({ id: idDe(o?.id, j, 'o'), texto: texto(o?.texto, 200), hecho: !!o?.hecho })).filter((o: any) => o.texto),

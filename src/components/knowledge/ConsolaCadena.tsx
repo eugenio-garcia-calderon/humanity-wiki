@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, Loader2, ExternalLink, ChevronLeft, ChevronRight, Lock, Check, AlertTriangle } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, ExternalLink, ChevronLeft, ChevronRight, Lock, Check, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import Icono from '../ui/Icono';
+import SelectorDeIcono from '../ui/SelectorDeIcono';
 import { estadoDe, type Consola, type Eslabon, type EstadoEslabon, type EstadoManual } from '../../utils/consola';
 
 // ============================================================================
@@ -78,6 +80,13 @@ export default function ConsolaCadena({ paginaId, titulo, onCerrar }: { paginaId
   const actual = eslabones.find(x => x.id === abierto) || null;
   const foco = eslabones.map((x, i) => ({ x, e: estados[i] })).filter(f => f.e === 'rojo' || f.e === 'amarillo').sort((a, b) => ORDEN_FOCO.indexOf(a.e) - ORDEN_FOCO.indexOf(b.e));
 
+  // Cambia de sitio un eslabón con su vecino. Es el mismo orden que el del círculo.
+  const moverEslabon = (i: number, d: number) => {
+    const j = i + d;
+    if (!consola || j < 0 || j >= consola.eslabones.length) return;
+    const n = [...consola.eslabones]; [n[i], n[j]] = [n[j], n[i]]; poner({ eslabones: n });
+  };
+
   const anadir = () => {
     if (!consola || consola.eslabones.length >= 12) return;
     const x: Eslabon = { id: nuevoId('e'), nombre: 'Nuevo eslabón', icono: '⭕', descripcion: '', estado: 'auto', objetivos: [], tareas: [], personas: [], protocolos: [], notas: '' };
@@ -138,7 +147,7 @@ export default function ConsolaCadena({ paginaId, titulo, onCerrar }: { paginaId
                       style={{ left: `${p.x}%`, top: `${p.y}%`, borderColor: c.aro, background: c.relleno, color: c.texto }}
                       aria-label={`${i + 1}. ${x.nombre}: ${c.nombre}`}
                       className="absolute flex h-[22%] w-[22%] min-h-[64px] min-w-[64px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-0.5 rounded-full border-[3px] p-1.5 text-center shadow-md transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                      <span className="text-xl leading-none sm:text-2xl" aria-hidden>{x.icono || '⭕'}</span>
+                      <span className="grid h-7 place-items-center sm:h-8" aria-hidden>{x.icono ? <Icono valor={x.icono} tamano={28} /> : <span className="text-xl leading-none sm:text-2xl">⭕</span>}</span>
                       <span className="line-clamp-2 text-[9px] font-black leading-tight sm:text-[11px]">{x.nombre}</span>
                       <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full text-[10px] font-black text-white" style={{ background: c.aro }}>{i + 1}</span>
                     </button>
@@ -149,6 +158,21 @@ export default function ConsolaCadena({ paginaId, titulo, onCerrar }: { paginaId
 
             {/* La leyenda y dónde poner el foco */}
             <aside className="shrink-0 space-y-5 border-t border-slate-100 p-5 lg:w-80 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+              {/* El orden de la cadena, de arriba abajo, con sus flechas para subir o bajar uno. */}
+              <div>
+                <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Orden de la cadena</p>
+                <ol className="space-y-1">
+                  {eslabones.map((x, i) => (
+                    <li key={x.id} className="flex items-center gap-2 rounded-xl border border-slate-100 px-2 py-1.5">
+                      <span className="w-4 text-center text-[11px] font-black text-slate-400">{i + 1}</span>
+                      <span className="grid h-6 w-6 shrink-0 place-items-center">{x.icono ? <Icono valor={x.icono} tamano={18} /> : <span className="text-sm" aria-hidden>⭕</span>}</span>
+                      <button type="button" onClick={() => setAbierto(x.id)} className="min-w-0 flex-1 truncate text-left text-[13px] font-bold text-slate-800 hover:underline">{x.nombre}</button>
+                      <button type="button" onClick={() => moverEslabon(i, -1)} disabled={i === 0} aria-label={`Subir ${x.nombre}`} className="grid h-7 w-7 place-items-center rounded-md text-slate-400 hover:bg-slate-100 disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => moverEslabon(i, 1)} disabled={i === eslabones.length - 1} aria-label={`Bajar ${x.nombre}`} className="grid h-7 w-7 place-items-center rounded-md text-slate-400 hover:bg-slate-100 disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
+                    </li>
+                  ))}
+                </ol>
+              </div>
               <div>
                 <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Dónde poner el foco</p>
                 {foco.length === 0 && <p className="text-xs text-slate-400">{estados.every(e => e === 'sin_datos') ? 'Aún no hay nada que medir: abre un eslabón y añade sus objetivos y tareas.' : 'Nada en rojo ni en amarillo. Bien.'}</p>}
@@ -234,7 +258,7 @@ function Eslabon_({ x, indice, total, estado, onCambio, onCerrar, onIr, onBorrar
       <div onClick={e => e.stopPropagation()} className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-xl sm:rounded-3xl" role="dialog" aria-label={x.nombre}>
         <div className="flex items-center gap-2 border-b px-4 py-3" style={{ background: c.relleno, borderColor: c.aro + '55' }}>
           <button onClick={() => onIr(-1)} aria-label="Eslabón anterior" className="grid h-9 w-9 place-items-center rounded-lg hover:bg-white/60"><ChevronLeft className="h-4 w-4" style={{ color: c.texto }} /></button>
-          <input value={x.icono} onChange={e => onCambio({ icono: e.target.value.slice(0, 8) })} aria-label="Icono (un emoji)" className="h-11 w-11 shrink-0 rounded-xl border border-white/80 bg-white/70 text-center text-2xl outline-none" />
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/80 bg-white/70" style={{ color: c.texto }} aria-hidden>{x.icono ? <Icono valor={x.icono} tamano={26} /> : <span className="text-2xl">⭕</span>}</span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: c.texto }}>Eslabón {indice + 1} de {total}</p>
             <input value={x.nombre} onChange={e => onCambio({ nombre: e.target.value })} aria-label="Nombre del eslabón" className="w-full bg-transparent text-base font-black text-slate-900 outline-none" />
@@ -244,6 +268,11 @@ function Eslabon_({ x, indice, total, estado, onCambio, onCerrar, onIr, onBorrar
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+          <div>
+            <Titulo t="Icono" />
+            <SelectorDeIcono valor={x.icono || null} onElegir={v => onCambio({ icono: v ?? '' })} alto="max-h-48" />
+          </div>
+
           <div>
             <Titulo t="Estado" n={x.estado === 'auto' ? (totalItems ? `automático · ${hechos} de ${totalItems} hechos` : 'automático · sin objetivos ni tareas') : 'fijado por ti'} />
             <div className="grid grid-cols-5 gap-1.5" role="radiogroup" aria-label="Estado del eslabón">
