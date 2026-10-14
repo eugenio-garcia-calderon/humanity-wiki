@@ -38,15 +38,39 @@
     },
     {
       "agente": "prog8",
+      "ruta": "src/components/knowledge/CabeceraPagina.tsx",
+      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
+      "desde": "2026-10-14T11:25:42.788Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
+      "desde": "2026-10-14T11:25:42.788Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
+      "desde": "2026-10-14T11:25:42.788Z"
+    },
+    {
+      "agente": "prog8",
       "ruta": "src/components/tablas/Rejilla.tsx",
-      "motivo": "Ajustes de la galería plegados y título con descripción",
-      "desde": "2026-10-14T11:06:14.744Z"
+      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
+      "desde": "2026-10-14T11:25:42.788Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
+      "desde": "2026-10-14T11:25:42.788Z"
     },
     {
       "agente": "prog8",
       "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Ajustes de la galería plegados y título con descripción",
-      "desde": "2026-10-14T11:06:14.744Z"
+      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
+      "desde": "2026-10-14T11:25:42.788Z"
     }
   ]
 }
