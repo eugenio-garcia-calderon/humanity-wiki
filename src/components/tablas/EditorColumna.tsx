@@ -137,6 +137,8 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const [config, setConfig] = useState<any>(columna?.config || {});
   /** Lo que se escribe en el buscador de tipos. */
   const [buscarTipo, setBuscarTipo] = useState('');
+  /** La rejilla de tipos: abierta al crear, plegada en cuanto se elige uno (como en Notion). */
+  const [tiposAbiertos, setTiposAbiertos] = useState(!columna);
   // Escape cierra el diálogo, como en cualquier ventana de Notion.
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
@@ -263,6 +265,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                   return actual ? <span className="text-[11px] font-bold text-slate-500 truncate">Elegido: {actual.label}{actual.ayuda ? ` · ${actual.ayuda}` : ''}</span> : null;
                 })()}
               </div>
+              {tiposAbiertos ? (<>
               <input value={buscarTipo} onChange={e => setBuscarTipo(e.target.value)} placeholder="Buscar un tipo…" aria-label="Buscar un tipo"
                 className="mt-1 w-full h-10 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-400" />
               <div className="mt-2 space-y-3">
@@ -282,6 +285,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       return (
                       <button key={t.id + (t.rol || '')} aria-pressed={elegido} onClick={() => {
                           setTipo(t.id);
+                          setTiposAbiertos(false);
                           setConfig((c: any) => { const { rol: _fuera, modo: _modo, ...resto } = c || {}; return { ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}) }; });
                           // The name follows the shop entry while nobody has typed one.
                           if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
@@ -301,6 +305,44 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                   <p className="px-1 text-xs text-slate-500">Ningún tipo se llama así. Prueba con «texto», «fecha» o «lista».</p>
                 )}
               </div>
+              </>) : (
+                <div className="mt-1 flex items-center justify-between gap-2 min-h-11 px-3 rounded-xl border border-emerald-200 bg-emerald-50/60">
+                  <span className="text-sm font-bold text-emerald-800 truncate">{GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol)?.label || tipo}</span>
+                  <button type="button" onClick={() => setTiposAbiertos(true)} className="shrink-0 h-9 px-2 text-xs font-bold text-slate-600 hover:text-slate-900 underline-offset-2 hover:underline">Cambiar</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── OPCIONES DE UNA LISTA ─────────────────────────────────────── */}
+          {CON_OPCIONES.has(tipo) && (
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Opciones</span>
+              <div className="mt-1 space-y-1">
+                {opciones.map((o, i) => (
+                  <div key={o.id || i} className="flex items-center gap-1">
+                    <input value={o.label} placeholder={`Opción ${i + 1}`} aria-label={`Opción ${i + 1}`}
+                      onChange={e => setOpciones(os => os.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setOpciones(os => [...os, { label: '' }]); } }}
+                      className="flex-1 h-11 px-3 border border-slate-200 rounded-xl text-base sm:text-sm outline-none focus:border-emerald-400" />
+                    <button onClick={() => setOpciones(os => os.filter((_, j) => j !== i))}
+                      aria-label="Quitar la opción"
+                      className="w-11 h-11 grid place-items-center text-slate-300 hover:text-rose-600">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => setOpciones(os => [...os, { label: '' }])}
+                  className="inline-flex items-center gap-1 h-11 px-2 text-xs font-bold text-slate-400 hover:text-emerald-600">
+                  <Plus className="w-3.5 h-3.5" /> Añadir opción
+                </button>
+                <p className="px-1 text-[11px] text-slate-400">Enter añade otra opción debajo.</p>
+              </div>
+              {editando && (
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Renombrar una opción no cambia ninguna fila: se guarda su identificador, no su texto.
+                </p>
+              )}
             </div>
           )}
 
@@ -317,36 +359,6 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* ── OPCIONES DE UNA LISTA ─────────────────────────────────────── */}
-          {CON_OPCIONES.has(tipo) && (
-            <div>
-              <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Opciones</span>
-              <div className="mt-1 space-y-1">
-                {opciones.map((o, i) => (
-                  <div key={o.id || i} className="flex items-center gap-1">
-                    <input value={o.label}
-                      onChange={e => setOpciones(os => os.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
-                      className="flex-1 h-11 px-3 border border-slate-200 rounded-xl text-base sm:text-sm outline-none focus:border-emerald-400" />
-                    <button onClick={() => setOpciones(os => os.filter((_, j) => j !== i))}
-                      aria-label="Quitar la opción"
-                      className="w-11 h-11 grid place-items-center text-slate-300 hover:text-rose-600">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                <button onClick={() => setOpciones(os => [...os, { label: '' }])}
-                  className="inline-flex items-center gap-1 h-11 px-2 text-xs font-bold text-slate-400 hover:text-emerald-600">
-                  <Plus className="w-3.5 h-3.5" /> Añadir opción
-                </button>
-              </div>
-              {editando && (
-                <p className="mt-1 text-[11px] text-slate-400">
-                  Renombrar una opción no cambia ninguna fila: se guarda su identificador, no su texto.
-                </p>
-              )}
             </div>
           )}
 
@@ -441,8 +453,9 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Fórmula</span>
               <input value={config.formula || ''}
                 onChange={e => setConfig((c: any) => ({ ...c, formula: e.target.value }))}
-                placeholder="{Precio} * {Unidades}"
+                placeholder="Escribe una fórmula…"
                 className="mt-1 w-full h-11 px-3 border border-slate-200 rounded-xl font-mono text-base sm:text-sm outline-none focus:border-emerald-400" />
+              <p className="mt-1 text-[11px] text-slate-500">Ejemplo: <span className="font-mono">{'{Precio} * {Unidades}'}</span></p>
               <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
                 Entre llaves, el nombre de una columna. Separador de argumentos «;».
                 Hay SI, Y, O, SUMA, MEDIA, MIN, MAX, REDONDEAR, DIAS, HOY, CONTIENE, SI.VACIO y SI.ERROR.

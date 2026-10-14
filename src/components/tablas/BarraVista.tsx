@@ -585,9 +585,9 @@ export default function BarraVista({
           )}
           {editable && conAgrupar && (
             <div className="relative">
-              <button onClick={() => setAbierto(abierto === 'agrupar' ? null : 'agrupar')} className={claseBoton(!!colAgr)} aria-expanded={abierto === 'agrupar'}
+              <button onClick={() => setAbierto(abierto === 'agrupar' ? null : 'agrupar')} className={claseEtiqueta(!!colAgr)} aria-expanded={abierto === 'agrupar'}
                 title={`${activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}${colAgr ? `: ${colAgr.nombre}` : ''}`} aria-label={activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}>
-                <Layers className="w-[18px] h-[18px]" />{colAgr && <Cuenta n="1" />}
+                <Layers className="w-[18px] h-[18px]" />{activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}{colAgr && <Cuenta n="1" />}
               </button>
               <Desplegable abierto={abierto === 'agrupar'} onCerrar={cerrar} ancho="w-80" derecha>
                 <PanelAgrupar vista={activa} columnas={columnas} onCambiar={onCambiar} gruposConocidos={gruposConocidos} />
