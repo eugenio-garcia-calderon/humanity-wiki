@@ -8781,3 +8781,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-13 — Tablas que tardaban 30–60 s en aparecer: peticiones con tiempo límite y reintento (prog8)
 - Una tabla pedía sus datos sin límite de tiempo: al reiniciarse el servidor (despliegues) una petición quedaba sin respuesta y el navegador esperaba hasta un minuto. Ahora cada petición de datos y de vistas espera 5 s como máximo y, si falla o recibe un error del servidor, se repite hasta tres veces.
 - Causa comprobada: los tiempos de la página y de sus tablas desde fuera eran de 0,3 s, y el reinicio del servidor coincidía con los despliegues de hoy.
+
+### 2026-10-14 — Filtrar, ordenar y buscar también en la página publicada (prog8)
+- En la página publicada de una base de datos aparecen los mandos de filtro y de orden, y el botón de búsqueda con lupa. Quien visita filtra y ordena en su pantalla; la vista que guardó el autor no cambia.
+- Los filtros ya se adaptan al tipo de propiedad: fecha (con fechas relativas), selección de estado y personas (elegir una persona concreta).
+- El servidor acepta el filtro y el orden por la URL y los aplica por encima de la vista guardada. Los botones de crear, enlazar, agrupar, propiedades y ajustes siguen siendo solo de quien edita.

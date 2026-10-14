@@ -421,7 +421,7 @@ function PanelPropiedades({ vista, columnas, columnaTitulo, onCambiar }: {
 // ── LA BARRA ────────────────────────────────────────────────────────────────
 
 export default function BarraVista({
-  vistas, activa, columnas, columnaTitulo, editable, conocidos, gruposConocidos, centrada = false,
+  vistas, activa, columnas, columnaTitulo, editable, conocidos, gruposConocidos, centrada = false, visitante = false,
   onElegir, onCrear, onCambiar, onRenombrar, onDuplicar, onBorrar, ajustes, extra,
 }: {
   vistas: Vista[];
@@ -434,6 +434,8 @@ export default function BarraVista({
   /** Los grupos que hay ahora mismo, para poder esconderlos uno a uno. */
   gruposConocidos: Array<{ clave: string; etiqueta: string }>;
   centrada?: boolean;
+  /** Quien mira la página publicada: solo puede filtrar y ordenar, sin tocar la vista del autor. */
+  visitante?: boolean;
   onElegir: (v: Vista) => void;
   onCrear: (forma: Forma) => void;
   onCambiar: (c: Partial<Vista>) => void;
@@ -533,7 +535,7 @@ export default function BarraVista({
 
       {/* LOS MANDOS. Solo para quien edita: la página publicada enseña la
           vista tal como la dejó su autor. */}
-      {editable && conMandos && (
+      {(editable || visitante) && conMandos && (
         <div className="ml-auto flex flex-wrap items-center gap-0.5">
           <div className="relative">
             <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseBoton(nFiltros > 0)} aria-expanded={abierto === 'filtro'}
@@ -555,7 +557,7 @@ export default function BarraVista({
               </Desplegable>
             </div>
           )}
-          {conAgrupar && (
+          {editable && conAgrupar && (
             <div className="relative">
               <button onClick={() => setAbierto(abierto === 'agrupar' ? null : 'agrupar')} className={claseBoton(!!colAgr)} aria-expanded={abierto === 'agrupar'}
                 title={`${activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}${colAgr ? `: ${colAgr.nombre}` : ''}`} aria-label={activa.forma === 'tablero' ? 'Columnas' : 'Agrupar'}>
@@ -566,7 +568,7 @@ export default function BarraVista({
               </Desplegable>
             </div>
           )}
-          {conPropiedades && (
+          {editable && conPropiedades && (
             <div className="relative">
               <button onClick={() => setAbierto(abierto === 'props' ? null : 'props')} className={claseBoton(false)} aria-expanded={abierto === 'props'}
                 title="Propiedades que se ven" aria-label="Propiedades">
@@ -577,7 +579,7 @@ export default function BarraVista({
               </Desplegable>
             </div>
           )}
-          {ajustes && (
+          {editable && ajustes && (
             <div className="relative">
               <button onClick={() => setAbierto(abierto === 'ajustes' ? null : 'ajustes')} className={claseBoton(false)} aria-expanded={abierto === 'ajustes'} title="Ajustes de esta vista" aria-label="Ajustes de esta vista">
                 <SlidersHorizontal className="w-[18px] h-[18px]" />
