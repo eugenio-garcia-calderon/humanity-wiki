@@ -66,6 +66,13 @@ export type ConfigVista = {
   anidar?: boolean;
   /** Tablero: la imagen de la página en la tarjeta. */
   portada?: boolean;
+  /** EL DISEÑO DE LOS GRUPOS en la galería (2026-10-18, Eugenio): tamaño del
+   *  título (por defecto «m», más grande que antes), dónde va (por defecto
+   *  centrado) y si se ve la imagen de lo enlazado —la de «Movilidad» al
+   *  agrupar por áreas— (por defecto sí). */
+  grupo_titulo?: 's' | 'm' | 'l' | 'xl';
+  grupo_alineacion?: 'izquierda' | 'centro';
+  grupo_imagen?: boolean;
   /** Gráfico (ver `Grafico.tsx`). */
   grafico?: {
     tipo?: 'barras' | 'barras_h' | 'lineas' | 'area' | 'circular' | 'anillo' | 'numero';
@@ -197,6 +204,8 @@ export type Grupo = {
   filas: Fila[];
   /** El valor que hay que escribir en la celda para que una fila caiga aquí. */
   valor: any;
+  /** Al agrupar por una relación: la imagen de la página de lo enlazado. */
+  imagen?: string | null;
 };
 
 /** ¿Por qué propiedades se puede agrupar? Todas menos ficheros y texto largo:
@@ -229,7 +238,7 @@ function claveFecha(v: string, por: ConfigVista['fecha_por'] = 'mes'): { clave: 
 /** Los grupos de una fila en una columna. Una fila con varias etiquetas o
  *  varias personas está en VARIOS grupos, como en Notion: si solo cayera en
  *  el primero, filtrar por la segunda etiqueta y agrupar no cuadrarían. */
-function clavesDe(f: Fila, col: Columna, cfg: ConfigVista): Array<{ clave: string; etiqueta: string; color?: string | null; valor: any }> {
+function clavesDe(f: Fila, col: Columna, cfg: ConfigVista): Array<{ clave: string; etiqueta: string; color?: string | null; valor: any; imagen?: string | null }> {
   const c = f.celdas[col.id];
   if (!c || c.estado !== 'ok') return [];
   const v = c.valor;
@@ -245,7 +254,7 @@ function clavesDe(f: Fila, col: Columna, cfg: ConfigVista): Array<{ clave: strin
   }
   if (APUNTAN.has(col.tipo)) {
     const ap = f.apuntados?.[col.id] || [];
-    return ap.map(a => ({ clave: String(a.id), etiqueta: a.etiqueta || 'Sin nombre', valor: a.id }));
+    return ap.map(a => ({ clave: String(a.id), etiqueta: a.etiqueta || 'Sin nombre', valor: a.id, imagen: a.miniatura || null }));
   }
   if (col.tipo === 'casilla') return [{ clave: v ? 'true' : 'false', etiqueta: v ? 'Marcado' : 'Sin marcar', valor: !!v }];
   if (col.tipo === 'fecha') { const k = claveFecha(String(v), cfg.fecha_por); return [{ ...k, valor: v }]; }

@@ -9001,3 +9001,8 @@ en mis páginas como proyecto pendiente».
 - **«+» en las relaciones** de la ficha para buscar y enlazar otra entrada.
 - **El desplegable de una relación** se pinta en su propia capa (portal, `fixed`): ya no lo tapa una imagen ni lo recorta un contenedor; se abre hacia arriba si abajo no cabe.
 - **Entradas borradas**: un enlace a algo que ya no existe no se enseña («(ya no existe)» bloqueaba añadir otra). Si se recupera de la papelera, vuelve a salir.
+
+## 2026-10-18 — Diseño de los grupos en la galería (prog8)
+- Los títulos de los grupos de una galería salen **más grandes y centrados** por defecto y, al agrupar por una relación (p. ej. por Áreas), con la **imagen de lo enlazado** (la de «Movilidad»).
+- En **Configuración → Grupos**: tamaño del título (S, M, L, XL), alineación (izquierda o centro) e «Imagen del grupo» (sí/no). Se guardan en la vista (`grupo_titulo`, `grupo_alineacion`, `grupo_imagen`).
+- La imagen sale de la `miniatura` que el servidor ya manda en cada entrada enlazada; `agruparFilas` la pasa al grupo (`Grupo.imagen`).
