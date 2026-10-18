@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/htmlBloques.ts",
-      "motivo": "W2: R2 direcciones legibles",
-      "desde": "2026-10-18T12:30:05.516Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/apiPublica.ts",
       "motivo": "W2: R2 routes recompute from /api/v1",
       "desde": "2026-10-18T12:49:40.043Z"
