@@ -8839,6 +8839,7 @@ en mis páginas como proyecto pendiente».
 - `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
 - Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
 - `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).
+
 ### 2026-10-18 — La visibilidad de las propiedades en la galería se aplica (prog8)
 - En una galería, mostrar u ocultar una propiedad desde el panel de Propiedades no tenía efecto en las tarjetas: el panel guardaba la lista en la vista, pero las tarjetas leían otra lista del bloque. Ahora la galería lee y escribe esa misma lista, guardada en la vista.
 
