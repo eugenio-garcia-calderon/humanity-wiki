@@ -110,6 +110,40 @@
           "naturaleza": "declarado",
           "fuente": "https://goalzero.com/products/crush-light-chroma",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Farol Crush Light Chroma; cable USB-C",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0520/1156/5225/files/crush-light-chroma-user-guide-103-142e.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/pages/user-guides",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "La lista de funciones de la marca (modos de color, vela, carga) no incluye sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Jardín y exterior"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "91 g y 15 mm plegado, con luz de colores: ambiente en la tienda de campaña o la terraza."
         }
       },
       "origen": {
@@ -368,6 +402,40 @@
           "naturaleza": "declarado",
           "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Linterna Torch 500; cable USB-A a USB-C; guía de usuario",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0520/1156/5225/files/torch-500-user-guide-155-da5b.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/pages/user-guides",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18",
+          "nota": "La lista de funciones de la marca no incluye sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18",
+          "nota": "Foco y luz de área, IP67 y batería de 5200 mAh que también carga el móvil en un corte de luz."
         }
       },
       "origen": {
@@ -621,6 +689,41 @@
           "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
           "fecha": "2026-10-18",
           "nota": "B&H indica garantía limitada de 1 año del fabricante; no coinciden."
+        },
+        "en_la_caja": {
+          "valor": "Farol Lighthouse 600 con powerbank USB",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "La marca no lista accesorios; el panel solar se compra aparte."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0520/1156/5225/files/2022-07_Lighthouse_600_User_Guide_TR_CL070622V1_WEB.pdf?v=1657143773",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/pages/user-guides",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "La lista de funciones de la marca no incluye sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "600 lúmenes, manivela y salida USB: ilumina una estancia y carga el móvil durante un apagón."
         }
       },
       "origen": {
@@ -873,6 +976,41 @@
           "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
           "fecha": "2026-10-18",
           "nota": "Más «lifetime support»."
+        },
+        "en_la_caja": {
+          "valor": "Farol hinchable Luci Original",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "La marca no lista cable: se recarga al sol o con un cable USB-C propio."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0666/9741/files/Luci-Original-IM.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://help.bioliteenergy.com/hc/en-us/articles/35204758893467-Luci-Original-Product-Guide",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "La marca describe cuatro modos manuales (bajo, medio, alto, intermitente) y ningún sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "125 g, plegable a 2,5 cm e IP67: cabe en cualquier mochila o cajón de emergencias."
         }
       },
       "origen": {
@@ -1130,6 +1268,40 @@
           "naturaleza": "declarado",
           "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Farol solar Luci Charge 150; cable USB",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0666/9741/files/Luci-Charge150-IM.pdf?v=1742587073",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://help.bioliteenergy.com/hc/en-us/articles/35204361574683-Luci-Charge-150-360-Product-Guide",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18",
+          "nota": "La marca solo describe modos manuales (bajo, medio, alto, intermitente)."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18",
+          "nota": "Plegable e IP67, con batería de 2000 mAh que también da carga de emergencia al móvil."
         }
       },
       "origen": {
@@ -1363,6 +1535,34 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Farol hinchable Luci Pro Lux; cable USB a USB de 1 m",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p138352/mpowerd-luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "La tienda menciona el cable pero no da una lista completa del contenido."
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p138352/mpowerd-luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "La ficha detalla cuatro modos manuales y el indicador de batería, sin sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://varuste.net/es/p138352/mpowerd-luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Plegable, IP67 y con USB bidireccional que recupera un 30–50 % de batería del móvil."
         }
       },
       "origen": {
@@ -1595,6 +1795,26 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "La ficha detalla cuatro modos manuales sin sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Jardín y exterior"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "Hasta 300 lúmenes y 4000 mAh con USB bidireccional: luz de campamento o de reserva en casa."
         }
       },
       "origen": {
@@ -1817,6 +2037,33 @@
           "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
           "fecha": "2026-10-18",
           "nota": "Garantía que da la tienda sobre materiales y fabricación."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0666/9741/files/04162018_SunLight_IM_reader.pdf?12038558884961838580",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://help.bioliteenergy.com/hc/en-us/articles/4403172684443-SunLight-100-Product-Guide",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0666/9741/files/04162018_SunLight_IM_reader.pdf?12038558884961838580",
+          "fecha": "2026-10-18",
+          "nota": "El manual describe luz blanca, color y modo fiesta, todos manuales; no menciona sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Jardín y exterior"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18",
+          "nota": "Luz de bolsillo con pie orientable al sol y colores, para la tienda o la mesa exterior."
         }
       },
       "origen": {
@@ -2034,6 +2281,42 @@
           "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
           "fecha": "2026-10-18",
           "nota": "Garantía de la tienda."
+        },
+        "en_la_caja": {
+          "valor": "Caja de control con batería; 2 luces colgantes; 1 luz de seguridad con sensor de movimiento; panel solar; adaptador USB",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/2396/7729/files/20170907_SHS_InstructionManual_reader.pdf?2231314463141749087",
+          "fecha": "2026-10-18",
+          "nota": "Lista del manual del SolarHome 620; BioLite lo enlaza como manual del 620+."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/2396/7729/files/20170907_SHS_InstructionManual_reader.pdf?2231314463141749087",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://help.bioliteenergy.com/hc/en-us/articles/4402928890139-SolarHome-620-and-625-Product-Guide",
+          "fecha": "2026-10-18",
+          "nota": "El PDF se titula SolarHome 620; la marca lo ofrece para el 620+."
+        },
+        "sensor_movimiento": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/2396/7729/files/20170907_SHS_InstructionManual_reader.pdf?2231314463141749087",
+          "fecha": "2026-10-18",
+          "nota": "Una de las tres luces es de seguridad con sensor de movimiento: se enciende 30 s al detectar a alguien."
+        },
+        "ideal_para": {
+          "valor": [
+            "Casa entera",
+            "Apagones y emergencias",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "fecha": "2026-10-18",
+          "nota": "Kit fijo con tres luces, radio y USB para iluminar una cabaña, una furgoneta o una casa sin red."
         }
       },
       "origen": {
@@ -2253,6 +2536,26 @@
           "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "La ficha detalla dos niveles de brillo, indicador de carga y botón luminiscente, sin sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Uso diario",
+            "Apagones y emergencias",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "Farol barato de 60 lúmenes pensado como luz principal de hogares sin red eléctrica."
         }
       },
       "origen": {
@@ -2475,6 +2778,25 @@
           "naturaleza": "tercero",
           "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
           "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://in.sunking.com/product/pico-plus/",
+          "fecha": "2026-10-18",
+          "nota": "La marca la presenta como linterna, flexo o luz de pared, sin sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Uso diario",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://in.sunking.com/product/pico-plus/",
+          "fecha": "2026-10-18",
+          "nota": "Lámpara de estudio con panel integrado: 50 lúmenes unas 4 horas o hasta 72 h en ahorro."
         }
       },
       "origen": {
@@ -2694,6 +3016,26 @@
           "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
           "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "La lista de funciones de la marca (radio, MP3, USB, tres modos de luz) no incluye sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Casa entera",
+            "Apagones y emergencias",
+            "Uso diario"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "Farol, radio y carga de móvil con panel aparte y cable de 5 m, para un hogar sin red."
         }
       },
       "origen": {
@@ -2937,6 +3279,33 @@
           "fuente": "https://littlesun.org/product/little-sun-original",
           "fecha": "2026-10-18",
           "nota": "La página enlaza las condiciones pero no da la duración."
+        },
+        "en_la_caja": {
+          "valor": "Lámpara solar Little Sun Original; cordón para colgar; librito con una historia",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Se maneja con un único botón de encendido y regulación; la marca no menciona sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Uso diario",
+            "Apagones y emergencias",
+            "Jardín y exterior"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Lámpara de mano de 96 g que se carga sola al sol: luz de lectura o de reserva sin enchufe."
         }
       },
       "origen": {
@@ -3189,6 +3558,33 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Lámpara solar Little Sun Diamond; soporte de lectura; cordón para colgar; librito con un boceto de Olafur Eliasson",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-diamond/",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-diamond/",
+          "fecha": "2026-10-18",
+          "nota": "La marca describe un funcionamiento de un solo botón y no menciona sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Uso diario",
+            "Viajes",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://littlesun.org/product/little-sun-diamond/",
+          "fecha": "2026-10-18",
+          "nota": "De bolsillo y con soporte de lectura: cinco horas al sol dan unas cinco horas de luz intensa."
         }
       },
       "origen": {
@@ -3420,6 +3816,25 @@
           "fuente": "https://www.publiclands.com/p/coleman-peak1-200l-rechargeable-lantern-23colupk1200lrchbcac/23colupk1200lrchbcac",
           "fecha": "2026-10-18",
           "nota": "Garantía limitada."
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18",
+          "nota": "La ficha detalla cuatro modos manuales, indicador de batería y mosquetón, sin sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18",
+          "nota": "Farol de 200 lúmenes con mosquetón para la mochila o la tienda, hasta 100 h en modo bajo."
         }
       },
       "origen": {
@@ -3640,6 +4055,25 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "fecha": "2026-10-18",
+          "nota": "La reseña describe botón de linterna y asas plegables, sin sensor de movimiento."
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "fecha": "2026-10-18",
+          "nota": "Carga por sol, USB o manivela y powerbank de 3000 mAh: útil cuando no hay red ni sol."
         }
       },
       "origen": {
@@ -3884,6 +4318,34 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Lámpara con panel solar; trípode de soporte; maletín de transporte; cable de carga de 12 V; cable de carga de 220 V; 3 piquetas; 4 linternas individuales",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "La ficha enumera cinco modos de luz manuales y no menciona sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Jardín y exterior",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "Trípode de 2 m, cuatro linternas sueltas y carga por 12 V: ilumina un campamento entero."
         }
       },
       "origen": {
@@ -4109,6 +4571,33 @@
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18",
           "nota": "Garantía legal indicada por la tienda."
+        },
+        "en_la_caja": {
+          "valor": "Linterna solar; cable USB",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18",
+          "nota": "La descripción habla de un adaptador incluido que la lista de contenido no recoge."
+        },
+        "sensor_movimiento": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18",
+          "nota": "La ficha describe seis modos que se cambian con un botón, sin sensor."
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18",
+          "nota": "Linterna de mano potente que también carga el móvil; su resistencia al agua es dudosa según la propia ficha."
         }
       },
       "origen": {
