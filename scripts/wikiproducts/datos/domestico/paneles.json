@@ -483,7 +483,7 @@
         "valor": 2024,
         "unidad": "año",
         "naturaleza": "declarado",
-        "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_a8e1d794329d4d53b5238258aa790b1e.pdf",
+        "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_a8e1d794329d4d53b5238258aa790b1e.pdf",
         "fecha": "2026-10-18",
         "nota": "Fichas preliminares de julio de 2024. La serie LEO anterior (PERC, 340–410 W) es de 2022 según SolarQuotes."
       },
@@ -498,7 +498,7 @@
           "valor": 435,
           "unidad": "Wp",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "STC; clasificación 0/+4,99 W."
         },
@@ -506,7 +506,7 @@
           "valor": "430–440",
           "unidad": "Wp",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión de 96 medias células: 380–390 W. No hay una variante de 450 W o más."
         },
@@ -514,7 +514,7 @@
           "valor": 21.7,
           "unidad": "%",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante 435 W. Comprobación: 435 / (1,752 × 1,144) = 21,70 %. 430 W: 21,5 %; 440 W: 22,0 %."
         },
@@ -522,7 +522,7 @@
           "valor": "TOPCon, N-type, 10 busbars",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Células de 182 × 91 mm."
         },
@@ -530,7 +530,7 @@
           "valor": "monocristalina",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -538,7 +538,7 @@
           "valor": 108,
           "unidad": "medias células",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -562,7 +562,7 @@
           "valor": "simple (vidrio solar templado de 3,2 mm con antirreflejo) + lámina trasera de polímero blanca",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión LEO-N Black con lámina negra."
         },
@@ -570,7 +570,7 @@
           "valor": "aleación de aluminio negra, 40 mm",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -578,7 +578,7 @@
           "valor": "1752 × 1144 × 40",
           "unidad": "mm",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "2,0 m²."
         },
@@ -586,7 +586,7 @@
           "valor": 22,
           "unidad": "kg",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -594,7 +594,7 @@
           "valor": -0.31,
           "unidad": "%/°C",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Voc −0,24 %/K; Isc +0,029 %/K."
         },
@@ -602,7 +602,7 @@
           "valor": null,
           "unidad": "°C",
           "naturaleza": "no_publicado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "No aparecía en el texto extraído de la ficha."
         },
@@ -610,7 +610,7 @@
           "valor": 1,
           "unidad": "%",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "99 % garantizado el primer año."
         },
@@ -618,7 +618,7 @@
           "valor": 0.4,
           "unidad": "%/año",
           "naturaleza": "calculado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha da 99 % (año 1) y 87,4 % (año 30) con curva lineal: (99 − 87,4) / 29 = 0,4 %/año."
         },
@@ -626,7 +626,7 @@
           "valor": 39.41,
           "unidad": "V",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Vmpp 33,38 V; Impp 13,03 A."
         },
@@ -634,7 +634,7 @@
           "valor": 13.71,
           "unidad": "A",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -642,7 +642,7 @@
           "valor": 1000,
           "unidad": "V DC",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Corriente inversa admisible 25 A. Menos que los 1500 V de muchos módulos actuales; suficiente para una vivienda."
         },
@@ -650,7 +650,7 @@
           "valor": "5400 / 2400 (ensayo); 3600 / 1600 (diseño)",
           "unidad": "Pa (presión/succión)",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Carga de diseño = ensayo / 1,5. Una de las pocas fichas que da ambas cifras."
         },
@@ -658,7 +658,7 @@
           "valor": "IP68",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Caja en tres partes según IEC 62790, 3 diodos de bypass."
         },
@@ -666,7 +666,7 @@
           "valor": "MC4 original (Stäubli), EN 62852; cables de 1200 mm",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha dice «Genuine MC4»; Stäubli es el fabricante de la marca MC4."
         },
@@ -690,7 +690,7 @@
           "valor": 30,
           "unidad": "años",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Según la ficha y la página de atención al cliente, desde la fecha de compra, «según las condiciones del certificado de garantía correspondiente», que no se pudo leer."
         },
@@ -698,7 +698,7 @@
           "valor": 30,
           "unidad": "años",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. El 0,4 % anual es calculado a partir de los puntos inicial y final."
         },
@@ -706,7 +706,7 @@
           "valor": 0.874,
           "unidad": "fracción",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
         },
@@ -714,7 +714,7 @@
           "valor": "La ficha remite a un certificado de garantía y a unas condiciones publicadas en la web que no se encontraron; no se pudieron comprobar plazos de reclamación, exclusiones ni topes.\nLa ficha promete «100 % de cobertura de costes en caso de garantía», sin precisar si incluye desmontaje, reinstalación y transporte; un resumen de gama de 09/2024 dice que aleo cubre envío de vuelta, reparación o reposición y costes de instalación «razonables», sujeto al certificado.\nLa reclamación se canaliza primero a través del instalador, según la página de atención al cliente de aleo.\nRiesgo principal: la empresa detuvo su única fábrica en 2025 (pv magazine). La garantía de 30 años depende de que aleo solar GmbH o su matriz sigan existiendo y tengan módulos compatibles para sustituir; no se encontró información pública sobre cómo se atenderán las garantías ni sobre un seguro que las respalde.\nEn España la garantía legal frente al vendedor es independiente de la del fabricante.",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
         },
@@ -722,7 +722,7 @@
           "valor": "aleo solar GmbH (Prenzlau, Alemania), propiedad del grupo taiwanés Sino-American Silicon Products a través de Sunrise Global Solar Energy. No se publica aseguradora de garantía; tras el cierre de la producción no hay información pública sobre la continuidad del servicio de garantía.",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
         },
         "ideal_para": {
@@ -747,7 +747,7 @@
       "garantias": {
         "producto": {
           "anios": 30,
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Según la ficha y la página de atención al cliente, desde la fecha de compra, «según las condiciones del certificado de garantía correspondiente», que no se pudo leer."
         },
@@ -756,7 +756,7 @@
           "porcentaje_final": 87.4,
           "primer_anio_pct": 99,
           "lineal_anual_pct": 0.4,
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "El 0,4 % anual es calculado a partir de los puntos inicial y final."
         },
@@ -800,13 +800,13 @@
         {
           "nombre": "IEC 61215:2021, IEC 61730:2023 (incl. IEC 62804 PID, IEC/TS 62782), IEC 62716, IEC 61701",
           "emisor": "no indicado en la ficha",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
         },
         {
           "nombre": "Reacción al fuego clase C (IEC 61730), E (EN 13501-1), B2 (DIN 4102-1)",
           "emisor": "no indicado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
         }
       ],
@@ -847,7 +847,7 @@
         },
         {
           "afirmacion": "MADE IN GERMANY",
-          "donde": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "donde": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "veredicto": "matizable",
           "explicacion": "Cierto para el ensamblaje de los módulos fabricados en Prenzlau hasta 2025; la ficha no dice de dónde proceden las células.",
           "fuentes": [
@@ -857,11 +857,11 @@
         },
         {
           "afirmacion": "100 % Kostenübernahme im Garantiefall",
-          "donde": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_06da123165464040aea26d9300080cd4.pdf",
+          "donde": "https://www.aleo-solar.de/_files/ugd/ecbda7_06da123165464040aea26d9300080cd4.pdf",
           "veredicto": "sin_pruebas",
           "explicacion": "No se pudo leer el certificado de garantía que concreta qué costes cubre; el resumen de gama habla de costes «razonables», lo que sugiere límites.",
           "fuentes": [
-            "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_5a7311926a904ebbb28a5f5d15108707.pdf"
+            "https://www.aleo-solar.de/_files/ugd/ecbda7_5a7311926a904ebbb28a5f5d15108707.pdf"
           ],
           "fecha": "2026-10-18"
         }
