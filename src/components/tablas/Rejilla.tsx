@@ -2,7 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Galeria from './Galeria';
+import Galeria, { ANCHO_TARJETA } from './Galeria';
 import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
 
 /** Las cinco velocidades del carrusel, en píxeles por segundo. */
@@ -58,7 +58,7 @@ const PALETA = ['#64748b', '#d97706', '#16a34a', '#2563eb', '#9333ea', '#db2777'
 
 /** La letra del título en galería, según el tamaño elegido. */
 const LETRA_TITULO: Record<TamanoGaleria, string> = {
-  xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
+  xxxs: 'text-xs', xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
 const PESOS: Array<[ 'fino' | 'normal' | 'negrita', string ]> = [['fino', 'Fino'], ['normal', 'Normal'], ['negrita', 'Negrita']];
@@ -609,6 +609,30 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       // El último nivel de grupos lleva su «Añadir» al lado del título.
       const hoja = !(nivel === 0 ? colSub : null);
       const arriba = pieArriba && hoja && pie;
+      // GRUPOS PEQUEÑOS, UNO AL LADO DEL OTRO (2026-10-18, Eugenio): un grupo
+      // de la galería con una o dos tarjetas ocupa solo lo que miden ellas, y
+      // varios así comparten fila, cada uno con su título encima. Los de más
+      // tarjetas siguen ocupando la fila entera.
+      const juntos = pieArriba && nivel === 0 && !colSub;
+      if (juntos) {
+        const n = g.filas.length;
+        const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
+        const ancho = n <= 2
+          // ×1,5: la rejilla de la galería decide cuántas columnas caben por su ancho MÁXIMO.
+          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.5) + (Math.max(1, n) - 1) * (chica ? 8 : 16)
+          : null;
+        return (
+          <div key={clave} className={cn('min-w-0', ancho ? 'flex-none' : 'basis-full')} style={ancho ? { width: 'max-content', minWidth: `min(100%, ${ancho}px)`, maxWidth: '100%' } : undefined}>
+            {arriba ? (
+              <div className={cn('flex flex-wrap items-center gap-1', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
+                {cabecera(g, nivel, plegado, alternar)}
+                {pie(celdas)}
+              </div>
+            ) : cabecera(g, nivel, plegado, alternar)}
+            {!plegado && porGrupos(g.filas, pintar, cabecera, arriba ? undefined : pie, nivel + 1, g, celdas, pieArriba)}
+          </div>
+        );
+      }
       return (
         <Fragment key={clave}>
           {arriba ? (
@@ -758,14 +782,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // agrupar, buscar, enlazar, ajustes— y el botón azul «Nuevo». Todo lo que
   // antes se amontonaba junto al título (ocultar título, propiedades de las
   // tarjetas, los dos tamaños) vive ahora dentro de «Ajustes».
-  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
+  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxxs', l: 'XXXS' }, { v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
   const Segmentos = ({ valor, onCambiar, etiqueta, desde = 0 }: { valor?: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string; desde?: number }) => (
     <div className="flex items-center justify-between gap-2 px-1 py-1">
       <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
-      <div role="radiogroup" aria-label={etiqueta} className="flex rounded-lg bg-slate-100 p-0.5">
+      <div role="radiogroup" aria-label={etiqueta} className="flex shrink-0 rounded-lg bg-slate-100 p-0.5">
         {TAMANOS.slice(desde).map(t => (
           <button key={t.v} role="radio" aria-checked={valor === t.v} onClick={() => onCambiar(t.v)}
-            className={cn('min-w-8 px-1.5 h-7 rounded-md text-[11px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
+            className={cn('min-w-7 px-1 h-7 rounded-md text-[10px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
             {t.l}
           </button>
         ))}
@@ -785,7 +809,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </label>
       )}
       <Grupo titulo="Título y descripción">
-        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} desde={1} />}
         {onCambiarTituloAlineacion && <Chips etiqueta="Posición" valor={tituloAlineacion} onCambiar={onCambiarTituloAlineacion} opciones={[['centro', 'Centro'], ['izquierda', 'Izquierda']]} />}
         {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
         {onCambiarTituloColor && (
@@ -860,7 +884,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           onCambiar={v => cambiarVista({ config: { ...activa.config, filas_mostrar: v } })}
           opciones={[['1', '1'], ['2', '2'], ['3', '3'], ['5', '5'], ['10', '10'], ['50', '50'], ['todas', 'Todas']]} />
         {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
-        {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
+        {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={2} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
         {onCambiarNombreArriba && <Chips etiqueta="Nombre" valor={nombreArriba ? 'arriba' : 'abajo'} onCambiar={v => onCambiarNombreArriba(v === 'arriba')} opciones={[['abajo', 'Debajo'], ['arriba', 'Encima']]} />}
       </Grupo>
@@ -1098,7 +1122,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
-        <div>
+        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-start gap-x-10 gap-y-2', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).

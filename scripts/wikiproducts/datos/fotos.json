@@ -1,5 +1,5 @@
 {
-  "_comentario": "Una foto de Wikimedia Commons por producto, sólo si el archivo es identificable como ese modelo. La licencia y el autor no se copian aquí: cargar.mjs los lee de la API de Commons y sólo admite CC0, dominio público, CC BY y CC BY-SA. Búsqueda del 2026-10-18 en commons.wikimedia.org: 94 productos, 2 con foto identificable; el resto se deja sin foto.",
+  "_comentario": "Dónde buscar la foto de un producto cuando no basta con lo que ya dicen sus datos (fotos.mjs prueba antes la imagen de los datos, las páginas de las tiendas de sus ofertas y la página de la marca). «commons»: un archivo de Wikimedia Commons, que va primero porque trae autor y licencia propios (fotos.mjs los lee de la API). «pagina»: una página de la que leer la foto (og:image). «imagen»: la dirección de la imagen, con «pagina» para el crédito. Decisión de Eugenio, 2026-10-18: valen las fotos que publican la marca y las tiendas.",
   "fotos": {
     "jackery-explorer-1000-v2": {
       "commons": "Jackery Explorer 1000 New JE-1000D.jpg",
@@ -8,6 +8,14 @@
     "tesla-powerwall-2": {
       "commons": "Tesla Powerwall 2.jpg",
       "por_que": "El título del archivo nombra el producto y la generación."
+    },
+    "goal-zero-nomad-20": {
+      "pagina": "https://goalzero.com/products/nomad-20-solar-panel",
+      "por_que": "No tiene ofertas ni página de producto en sus datos: la ficha del fabricante."
+    },
+    "choetech-sc009-100w": {
+      "pagina": "https://www.choetech.com/product/sc009-100w-foldable-solar-panel-charger.html",
+      "por_que": "No tiene ofertas ni página de producto en sus datos: la ficha del fabricante (dirección sin comprobar desde aquí)."
     }
   }
 }

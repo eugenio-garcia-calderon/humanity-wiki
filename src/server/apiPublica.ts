@@ -1,4 +1,4 @@
-import type { Express, Request, Response, NextFunction } from 'express';
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import { sql } from 'drizzle-orm';
 import crypto from 'node:crypto';
 import { filaAUsuario } from './auth';
@@ -9,6 +9,7 @@ import { rolEnPagina, capacidades, puedeEditarPagina, quienDe } from './permisos
 import { registrarHistorial } from './historial';
 import { markdownABloques, bloquesAMarkdown, nuevoIdBloque, esBloqueDatos } from '../utils/bloques';
 import { guardarProcedencia, ponerPlantilla } from './bd/plantillaFicha';
+import { guardarArchivo } from './uploads';
 
 // ============================================================================
 // LA API PÚBLICA, /api/v1 (2026-10-06, carril «espacio», #24)
@@ -444,6 +445,27 @@ export function registrarApiPublica(app: Express, db: any) {
       const c = (await columnasDe(t.id)).find(x => x.id === r.cuerpo.id);
       res.status(201).json({ ...columnaPublica(c), ...(r.cuerpo.aviso ? { warning: r.cuerpo.aviso } : {}) });
     } catch (e: any) { console.error('v1 crear columna:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  // ── IMAGES ─────────────────────────────────────────────────────────────────
+  /** Store an image and get its address, so a row's photo cell can point at
+   *  a copy kept here instead of at somebody else's server (W3a, 2026-10-18:
+   *  shop CDNs block or move their files). Raw bytes, `?type=image/jpeg`.
+   *  Images only and no SVG: anything stored here is served from our domain.
+   *  Same store and same 10 MB cap as `POST /api/uploads`. */
+  const IMAGEN_API = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']);
+  app.post('/api/v1/uploads', express.raw({ type: () => true, limit: 10 * 1024 * 1024 }), (req: Request, res: Response) => {
+    try {
+      const tipo = String(req.query.type || '').toLowerCase().split(';')[0].trim();
+      if (!IMAGEN_API.has(tipo)) return res.status(400).json({ error: 'Solo imágenes: indica ?type=image/jpeg, image/png, image/webp, image/avif o image/gif.' });
+      const bytes = req.body as Buffer;
+      if (!Buffer.isBuffer(bytes) || !bytes.length) return res.status(400).json({ error: 'La imagen llegó vacía.' });
+      const g = guardarArchivo(tipo, bytes);
+      res.status(201).json({ url: g.url, bytes: g.bytes, type: g.type });
+    } catch (e: any) {
+      if (/supera|admitido/.test(e.message || '')) return res.status(413).json({ error: e.message });
+      console.error('v1 uploads:', e); res.status(500).json({ error: 'Error interno.' });
+    }
   });
 
   /** Recompute every row's readable address after loading rows in bulk
