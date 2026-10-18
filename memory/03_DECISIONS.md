@@ -811,3 +811,47 @@ customer's order is deduced from all entries and never goes back.
 
 **Diverges from `docs/`?** Not that we know of; payment option A in Stripe
 test mode is the plan's default, real keys wait for Eugenio.
+
+## 2026-10-18 — Site support chat and paid expert consultations (Wikiproducts W6)
+
+**Own tables, not `mensajes`.** Direct messages are person-to-person and need
+a platform session. A site's support is answered by whoever is on the site's
+team, and most askers have no account. `soporte_conversaciones` +
+`soporte_mensajes` reuse the same notification paths (`avisar`, `telecomHub`).
+Visitors without an account are identified by a random token in an HttpOnly
+cookie on that host; only its sha256 is stored.
+
+**No AI auto-answer yet.** Answering with the model when nobody is online is
+one call per question and, on an encyclopedia that sells «no invented
+claims», a wrong answer is worse than «we'll reply here». Left for Eugenio.
+
+**Expert payments: Connect when the expert has it, else the platform holds
+the money and records the debt on the consultation** (`cobro = 'plataforma'`,
+`neto_experto_centimos`, cleared only with a transfer reference). Not reusing
+`liquidaciones`: it is keyed by `pedido_id` and its unique index is per order.
+Price and commission are read server-side from the expert row and frozen on
+the consultation. The commission is shown to the buyer in euros.
+
+**Double booking is prevented by a partial unique index**
+`(experto_id, inicio) WHERE estado IN ('reservando','pagada','hecha')`, not
+by a check-then-insert. A held slot expires with the 30-minute Stripe session.
+Late payment for a taken slot is refunded automatically.
+
+**Availability is stored in the expert's local time** (`zona_horaria`) and
+converted per day with `Intl`, so DST does not move consultations; no date
+library added.
+
+### 2026-10-18 — W6: help chat hidden, expert payments on live Stripe
+
+**Decision (Eugenio):** do not offer the site help chat for now, and use the
+live Stripe account rather than test mode for expert consultations.
+
+**How:** the `chat` block gets `enMenu: false` (kept in code: expert
+consultations reuse the same conversation server, and blocks already placed
+still render). Live vs test is decided only by `STRIPE_SECRET_KEY` on the
+server, so no code path changes. Re-offering the chat is deleting one line.
+
+**Consequence:** the paid Checkout flow was never exercised against Stripe
+(not reachable from the build environment). The first real booking after the
+merge is the first real test; a low-priced test consultation, refunded from
+the management panel, is the cheapest way to check it.

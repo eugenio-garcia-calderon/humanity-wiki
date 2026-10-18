@@ -93,6 +93,7 @@ export const TIPOS_BLOQUE_DATOS = [
   'ofertas',       // 3.6  ofertas por distribuidor con precio y comisión
   'chat',          // 3.12 chat de atención del sitio
   'experto',       // 3.12 reservar y pagar una consulta con un experto
+  'menuTemas',     // menú de temas con icono y color (Humanidad Wiki, 2026-10-18)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 
