@@ -67,6 +67,8 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   const [verOcultas, setVerOcultas] = useState(false);
   const [arrastrando, setArrastrando] = useState<string | null>(null);
   const [encima, setEncima] = useState<string | null>(null);
+  /** Si cae antes o después de la propiedad de debajo del puntero. */
+  const [lado, setLado] = useState<'antes' | 'despues'>('antes');
   const [fallo, setFallo] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
@@ -152,12 +154,13 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   };
 
   /** Soltar una propiedad delante de otra: el orden nuevo de TODA la tabla. */
-  const soltar = async (antesDe: string) => {
+  const soltar = async (sobre: string, donde: 'antes' | 'despues' = 'antes') => {
     const movida = arrastrando;
     setArrastrando(null); setEncima(null);
-    if (!movida || movida === antesDe) return;
+    if (!movida || movida === sobre) return;
     const ids = datos.columnas.map(c => c.id).filter(id => id !== movida);
-    ids.splice(Math.max(0, ids.indexOf(antesDe)), 0, movida);
+    const k = ids.indexOf(sobre);
+    ids.splice(k < 0 ? ids.length : donde === 'despues' ? k + 1 : k, 0, movida);
     setDatos(x => x ? { ...x, columnas: ids.map(id => x.columnas.find(c => c.id === id)!).filter(Boolean) } : x);
     const r = await fetch(`/api/bd/tablas/${tablaId}/orden-columnas`, {
       method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }),
@@ -180,25 +183,42 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
     const v = visibilidad(c);
     return (
       <div key={c.id}
-        onDragOver={e => { if (arrastrando && arrastrando !== c.id) { e.preventDefault(); setEncima(c.id); } }}
-        onDragLeave={() => setEncima(x => (x === c.id ? null : x))}
-        onDrop={e => { e.preventDefault(); soltar(c.id); }}
+        // ARRASTRAR PARA ORDENAR, COMO LOS BLOQUES (2026-10-18, Eugenio): en la
+        // rejilla cae a la izquierda o a la derecha según la mitad de la casilla
+        // sobre la que se suelte; en la lista, arriba o abajo.
+        onDragOver={e => {
+          if (!arrastrando || arrastrando === c.id) return;
+          e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+          const r = e.currentTarget.getBoundingClientRect();
+          const l = (enRejilla ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2) ? 'antes' : 'despues';
+          setEncima(c.id); setLado(l);
+        }}
+        onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEncima(x => (x === c.id ? null : x)); }}
+        onDrop={e => { e.preventDefault(); soltar(c.id, lado); }}
         className={cn('group/prop relative min-w-0',
           // La barra de avance ocupa la fila entera, gruesa, como en un crowdfunding.
           enRejilla && c.tipo === 'porcentaje' && c.config?.barra !== false && 'col-span-full',
           enRejilla && 'rounded-xl px-3 pt-2.5 pb-1 bg-slate-50/70 hover:bg-slate-100/60 transition-colors',
-          encima === c.id && (enRejilla ? 'ring-2 ring-emerald-400' : 'border-t-2 border-t-emerald-400'), arrastrando === c.id && 'opacity-40')}>
+          arrastrando === c.id && 'opacity-40')}>
+        {/* Dónde caerá: una barra verde a ese lado, como entre bloques. */}
+        {encima === c.id && (
+          <span aria-hidden className={cn('pointer-events-none absolute z-10 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]',
+            enRejilla ? cn('inset-y-1 w-1', lado === 'antes' ? '-left-1.5' : '-right-1.5') : cn('inset-x-0 h-0.5', lado === 'antes' ? '-top-px' : '-bottom-px'))} />
+        )}
         <div className={cn(enRejilla ? 'flex flex-col' : 'flex items-start gap-1 py-0.5')}>
           {editable && (
             <span draggable onDragStart={e => { setArrastrando(c.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.id); }}
               onDragEnd={() => { setArrastrando(null); setEncima(null); }}
               title="Arrastra para ordenar (el orden es el de toda la tabla)" aria-label={`Mover ${c.nombre}`}
-              className={cn('shrink-0 w-4 h-5 grid place-items-center text-slate-300 cursor-grab opacity-0 group-hover/prop:opacity-100 active:cursor-grabbing',
-                enRejilla ? 'absolute right-1.5 top-2' : 'mt-2 -ml-5')}>
-              <GripVertical className="w-3.5 h-3.5" />
+              className={cn('shrink-0 grid place-items-center rounded-md text-slate-400 cursor-grab opacity-0 group-hover/prop:opacity-100 hover:bg-slate-200/70 hover:text-slate-600 active:cursor-grabbing',
+                enRejilla ? 'absolute left-1.5 top-2 h-7 w-6' : 'mt-2 -ml-5 w-4 h-5')}>
+              <GripVertical className="w-4 h-4" />
             </span>
           )}
-          <div className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', enRejilla ? 'justify-center px-5 -mb-0.5' : 'w-32 sm:w-40')}>
+          <div draggable={editable && renombrando !== c.id}
+            onDragStart={editable ? e => { setArrastrando(c.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.id); } : undefined}
+            onDragEnd={() => { setArrastrando(null); setEncima(null); }}
+            className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', editable && 'cursor-grab active:cursor-grabbing', enRejilla ? 'justify-center px-7 -mb-0.5' : 'w-32 sm:w-40')}>
             {renombrando === c.id ? (
               <input autoFocus defaultValue={c.nombre} maxLength={120} aria-label="Nombre de la propiedad"
                 onBlur={e => { setRenombrando(null); const n = e.target.value.trim(); if (n && n !== c.nombre) cambiarColumna(c, { nombre: n }); }}
