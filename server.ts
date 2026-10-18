@@ -2224,6 +2224,23 @@ async function startServer() {
     res.status(404).json({ error: "Esa dirección de la API no existe." });
   });
 
+  // UN ERROR DE EXPRESS EN /api TAMBIÉN CONTESTA EN JSON (2026-10-18). Un cuerpo
+  // demasiado grande (el `express.json()` o el `express.raw()` de las subidas)
+  // o un JSON mal formado caían en el manejador de errores por defecto, que
+  // contesta una PÁGINA HTML: el cliente la leía como JSON y enseñaba
+  // «Unexpected token '<', "<!DOCTYPE"…». Ahora dice qué ha pasado.
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!req.path.startsWith("/api") || res.headersSent) return next(err);
+    const estado = Number(err?.status || err?.statusCode) || 500;
+    const error = estado === 413 || err?.type === "entity.too.large"
+      ? "El archivo o los datos son demasiado grandes para enviarlos."
+      : err?.type === "entity.parse.failed"
+        ? "Lo enviado no se ha podido leer. Vuelve a intentarlo."
+        : "Algo ha fallado en el servidor. Vuelve a intentarlo en un momento.";
+    if (estado >= 500) console.error("[api] error sin capturar:", err);
+    res.status(estado).json({ error });
+  });
+
   if (process.env.NODE_ENV !== "production") {
     // Import dinámico: vite solo existe (y solo hace falta) en desarrollo —
     // el bundle de producción nunca lo carga.
