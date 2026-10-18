@@ -9381,3 +9381,10 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Code only; no load needed. Not checked on production.
 ## 2026-10-18 — «Batería (capacidad)» y «Batería (energía)», no dos «Batería» (Wikiproducts W1)
 - Al quitar la unidad del nombre («Batería (mAh)» → «Batería»), las luces solares tenían dos datos llamados igual, uno en mAh y otro en Wh (Goal Zero, revisión en producción). Ahora se llaman «Batería (capacidad)» y «Batería (energía)» (`ETIQUETA_POR_CLAVE`), y en general la unidad se queda en el nombre cuando otra columna de la tabla se llamaría igual sin ella. Solo había este caso en las cinco tablas.
+
+## 2026-10-18 — Wikiproducts: «Precio desde» no longer counts sold-out shops (W3a, evaluator round 3)
+
+- Each offers table gets a hidden formula column «Precio si quedan existencias»: `SI(SI.VACIO({Disponible}; 1); {Precio})`, the price unless the shop marks it sold out (Disponible false; empty counts as available). The products' existing «Precio desde» aggregate now takes its minimum over it, so the column keeps its id and name, and everything that reads it (sheet, cards, comparator, search results, «La mejor en cada criterio», «Precio por kWh/W/Wp») follows with no code change.
+- `crear-esquema.mjs` re-points an existing aggregate when the schema says it should read another column (it compares relation, target, operation and direction only).
+- New `PATCH /api/v1/databases/:id/columns/:columnId` `{config, name?}`, through the screen's own `PUT /api/bd/columnas/:id` (same cycle check, type still not changeable).
+- Local copy, real data: 20 priced-but-sold-out offers drop out. Goal Zero Crush Light Chroma's «Precio desde» goes from 29,95 € to empty, while Anker 737 stays at 144,20 €. A second run changes nothing. «Precio hasta» and «Tiendas con precio» read the same in-stock column, so «desde X hasta Y en N tiendas» describes one set of offers.
