@@ -1,5 +1,5 @@
 {
-  "_comentario": "Las consultas de pago con expertos en wikiproducts.humanity.wiki (W6). Lo lee expertos.mjs. Los expertos, su precio y su agenda los decide Eugenio. Un experto de esta lista se da de alta UNA vez; después manda el panel «Gestionar expertos» de la página: volver a ejecutar el script no pisa lo que se cambió allí.",
+  "_comentario": "Las consultas de pago con expertos en wikiproducts.humanity.wiki (W6). Lo lee expertos.mjs. Los expertos, su precio y su agenda los decide Eugenio. Un experto de esta lista se da de alta UNA vez; después manda el panel «Gestionar expertos» de la página: volver a ejecutar el script no pisa lo que se cambió allí. Decisión del 2026-10-18 (opción recomendada, aplicada porque Eugenio no revisa los hilos): él mismo, 30 min a 25 €, de lunes a viernes de 18:00 a 20:00 hora de Madrid, sin comisión (el experto y el sitio son la misma persona).",
   "pagina": {
     "madre_id": "KWMVDTQQ35QI",
     "titulo": "Consultar a un experto",
@@ -14,5 +14,45 @@
       "compacto": true
     }
   },
-  "expertos": []
+  "expertos": [
+    {
+      "name": "Eugenio García",
+      "specialty": "Fundador de Wikiproducts",
+      "bio": "Te ayudo a leer las fichas de Wikiproducts para tu caso: qué datos mirar, qué alternativas comparar y qué preguntar a la tienda antes de comprar.",
+      "account_email": "eugenio@lighthumanity.org",
+      "price_cents": 2500,
+      "currency": "EUR",
+      "duration_min": 30,
+      "commission_bps": 0,
+      "timezone": "Europe/Madrid",
+      "availability": [
+        {
+          "dia": 1,
+          "desde": "18:00",
+          "hasta": "20:00"
+        },
+        {
+          "dia": 2,
+          "desde": "18:00",
+          "hasta": "20:00"
+        },
+        {
+          "dia": 3,
+          "desde": "18:00",
+          "hasta": "20:00"
+        },
+        {
+          "dia": 4,
+          "desde": "18:00",
+          "hasta": "20:00"
+        },
+        {
+          "dia": 5,
+          "desde": "18:00",
+          "hasta": "20:00"
+        }
+      ],
+      "notice_hours": 24
+    }
+  ]
 }
