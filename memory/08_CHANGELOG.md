@@ -8878,6 +8878,15 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
 - El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
 
+### 2026-10-18 — Valoraciones de la comunidad por criterio (Wikiproducts W4)
+- Nuevo tipo de propiedad en las bases de datos, grupo «Comunidad»: Calidad, Precio, Garantía, Ecología, Salud, Estética, Ética, Atención al cliente (sólo puntúa quien compró) y Nota media. No se escribe a mano: la celda enseña la media de los votos y cuántos son, o «Sin votos suficientes» con menos de 3.
+- Bloque «Valoración de la comunidad» para la página de una fila: una barra por criterio con su media y sus votos, estrellas para votar (un voto por persona y criterio, se cambia o se quita), la media de compradores verificados aparte y una explicación de cómo se calcula.
+- La galería publicada se ordena por cualquier criterio («ordenar por ética») con el «Ordenar» de siempre. El orden usa una media ajustada (bayesiana) y nunca la comisión; `npx tsx scripts/probar-valoraciones.ts` lo comprueba.
+- Quien compró a través de la plataforma cuenta doble, y sólo él puede puntuar la atención al cliente de un distribuidor. Si devuelve el pedido, deja de contar.
+- Los miembros de un sitio publicado pueden votar si su categoría puede comentar.
+- El HTML que leen los buscadores y las IA ya trae las puntuaciones (media y votos por criterio, o «aún sin votos suficientes»), y la página lleva `AggregateRating` en sus datos estructurados sólo si enseña el bloque y hay votos suficientes (SEO R4).
+- Migración `0152_valoraciones.sql`.
+
 ### 2026-10-18 — "Where to buy it", visible commission and managed orders (Wikiproducts W5)
 - Offers block (`src/components/bloquesDatos/ofertas/`): on a product sheet, one card per shop with price, shipping, delivered total, lead time, stock, "installation included", the date the price was checked, and the commission that shop pays Wikiproducts. "Añadir a la cesta" and "Ver en la tienda" (`rel="sponsored"` with commission, `nofollow` without).
 - Order comes from `ordenarOfertas` (`src/utils/ofertas.ts`): price plus shipping, then customer-service rating, sold-out last. **It never reads the commission**; `scripts/probar-ofertas.ts` checks it across every permutation of commissions.

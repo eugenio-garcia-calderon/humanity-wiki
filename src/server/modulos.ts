@@ -81,6 +81,7 @@ import { registrarColab } from './colabServidor.js';
 import { registrarPermisos } from './permisos.js';
 import { registrarPeticionActual } from './peticionActual.js';
 import { registrarMiembros } from './miembros.js';
+import { registrarValoraciones } from './valoraciones.js';
 import { registrarConsola } from './consola.js';
 import { registrarOptimizacion } from './optimizacion.js';
 import { registrarComentarios } from './comentarios.js';
@@ -266,6 +267,8 @@ export const MODULOS: Modulo[] = [
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
+  // Community ratings per criterion (Wikiproducts W4). After `bd`: it asks `bdInterno` who may read a table.
+  { nombre: 'valoraciones', montar: (app, db) => registrarValoraciones(app, db) },
   { nombre: 'publicar', montar: (app, db) => registerPublicarRoutes(app, db) },
   { nombre: 'navegadorRemoto', montar: app => registerNavegadorRemotoRoutes(app) },
   { nombre: 'finanzas', montar: (app, db) => registerFinanzasRoutes(app, db) },

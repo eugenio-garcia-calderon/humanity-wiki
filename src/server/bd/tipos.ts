@@ -35,6 +35,9 @@ export const TIPOS = [
   // 2026-10-06: the buy button. Stores nothing: its cell is filled on read
   // from the product behind the row (see `bd/tienda.ts`).
   'compra',
+  // 2026-10-18 (Wikiproducts): a community rating criterion. Stores nothing:
+  // its cell is the score of the votes in `valoraciones` (see `bd/comunidad.ts`).
+  'comunidad',
 ] as const;
 
 export type Tipo = typeof TIPOS[number];
@@ -265,6 +268,9 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
 
     case 'compra':
       return mal('El botón de compra no se escribe: sale del precio, las variantes y el envío de la fila.');
+
+    case 'comunidad':
+      return mal('La nota de la comunidad no se escribe: sale de los votos de quien puntúa.');
 
     case 'imagen': case 'video': case 'documento':
       return mal('Esta columna guarda archivos: no se escribe como un valor.');
