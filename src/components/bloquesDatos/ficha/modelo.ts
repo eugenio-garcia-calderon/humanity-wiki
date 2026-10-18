@@ -76,7 +76,7 @@ export type Ficha = {
 };
 
 export const ROLES = [
-  'marca', 'modelo', 'gtin', 'imagen', 'resumen', 'estado',
+  'marca', 'modelo', 'gtin', 'imagen', 'credito_imagen', 'subcategoria', 'resumen', 'estado',
   'precio_min', 'precio_max', 'num_ofertas', 'revisado',
   'afirmaciones', 'retiradas', 'ofertas', 'retiradas_fecha', 'retiradas_busqueda',
   // Inside related tables:
@@ -94,7 +94,12 @@ export type Rol = typeof ROLES[number];
  */
 export const NUNCA_ORDENA: ReadonlySet<string> = new Set(['comision']);
 
-export const rolDe = (c: Columna | undefined): string | undefined => c?.config?.ficha;
+/** Two roles arrived after the schema was created in production, and a
+ *  column's config cannot be changed through the API yet: their loader keys
+ *  in `esquema-bd.json` stand in for them. */
+const ROL_POR_CLAVE: Record<string, Rol> = { foto_licencia: 'credito_imagen', tipo: 'subcategoria' };
+export const rolDe = (c: Columna | undefined): string | undefined =>
+  c?.config?.ficha || (c?.config?.clave ? ROL_POR_CLAVE[c.config.clave] : undefined);
 export const grupoDe = (c: Columna | undefined): string | undefined => c?.config?.grupo;
 export const columnaPorRol = (t: TablaFicha | undefined, rol: Rol): Columna | undefined =>
   t?.columnas.find(c => rolDe(c) === rol);

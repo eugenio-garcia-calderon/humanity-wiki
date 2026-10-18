@@ -466,7 +466,8 @@
           "config": {
             "clave": "foto_licencia",
             "grupo": "control",
-            "visibilidad": "nunca"
+            "visibilidad": "nunca",
+            "ficha": "credito_imagen"
           }
         },
         {
@@ -1041,7 +1042,8 @@
           "config": {
             "clave": "foto_licencia",
             "grupo": "control",
-            "visibilidad": "nunca"
+            "visibilidad": "nunca",
+            "ficha": "credito_imagen"
           }
         },
         {
@@ -1547,7 +1549,8 @@
           "config": {
             "clave": "foto_licencia",
             "grupo": "control",
-            "visibilidad": "nunca"
+            "visibilidad": "nunca",
+            "ficha": "credito_imagen"
           }
         },
         {
@@ -2052,7 +2055,8 @@
           "config": {
             "clave": "foto_licencia",
             "grupo": "control",
-            "visibilidad": "nunca"
+            "visibilidad": "nunca",
+            "ficha": "credito_imagen"
           }
         },
         {
@@ -2736,7 +2740,8 @@
           "config": {
             "clave": "foto_licencia",
             "grupo": "control",
-            "visibilidad": "nunca"
+            "visibilidad": "nunca",
+            "ficha": "credito_imagen"
           }
         },
         {

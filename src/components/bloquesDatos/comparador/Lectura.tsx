@@ -87,7 +87,7 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
                   const href = p.actual ? null : enlace(p.paginaId);
                   return (
                     <th key={p.id} scope="col" className={cn('min-w-[9.5rem] px-3 py-2 text-left align-bottom', p.actual && 'bg-sky-50/60')}>
-                      {p.imagen ? <img src={p.imagen} alt="" loading="lazy" className="mb-1 h-16 w-16 rounded-lg object-contain" /> : null}
+                      {p.imagen ? <img src={p.imagen} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = 'none'; }} className="mb-1 h-16 w-16 rounded-lg object-contain" /> : null}
                       <div className="flex items-start gap-1">
                         {href ? <a href={href} className="font-bold text-sky-700 hover:underline">{p.nombre}</a> : <span className="font-bold text-slate-900">{p.nombre}</span>}
                         {!p.actual && modo !== 'fijo' ? (
