@@ -40,6 +40,9 @@ export interface ContextoHtml {
   titulos: Map<string, string>;
   /** Lo que un bloque registrado haya querido precargar (por tipo). */
   extra: Map<string, any>;
+  /** La página que se escribe, tal como la dejaron las ampliaciones
+   *  (`ampliarPagina.ts`): p. ej. `pagina.ficha` de la plantilla de ficha. */
+  pagina?: any;
 }
 
 export interface TablaHtml {
@@ -220,8 +223,10 @@ async function tablaHtml(db: any, tablaId: string, b: any): Promise<TablaHtml | 
 const claveTabla = (b: any) => `${b.tabla_id || b.tablaId || ''}|${b.vistaBd || ''}|${(b.propsGaleria || []).join(',')}`;
 
 /** Pregunta de una vez lo que los bloques de la página necesitan. */
-export async function prepararHtml(db: any, bloques: any[], enlacePagina: (id: string) => string): Promise<ContextoHtml> {
-  const ctx: ContextoHtml = { enlacePagina, tablas: new Map(), titulos: new Map(), extra: new Map() };
+export async function prepararHtml(db: any, bloques: any[], enlacePagina: (id: string) => string, pagina?: any): Promise<ContextoHtml> {
+  const ctx: ContextoHtml = { enlacePagina, tablas: new Map(), titulos: new Map(), extra: new Map(), pagina };
+  // También en `extra`, para quien ya la busque ahí.
+  if (pagina) ctx.extra.set('pagina', pagina);
   const todos = aplanar(bloques);
   for (const b of todos) {
     const tablaId = b.tipo === 'basedatos' ? (b.tabla_id || b.tablaId) : null;
@@ -387,6 +392,6 @@ export function bloquesEnHtml(bloques: any[], ctx: ContextoHtml, n = 0): string 
 export async function cuerpoEnHtml(db: any, pagina: any, enlacePagina: (id: string) => string): Promise<string> {
   const bloques = pagina?.config?.bloques || pagina?.config?.blocks || [];
   if (!Array.isArray(bloques) || !bloques.length) return '';
-  const ctx = await prepararHtml(db, bloques, enlacePagina);
+  const ctx = await prepararHtml(db, bloques, enlacePagina, pagina);
   return bloquesEnHtml(bloques, ctx);
 }
