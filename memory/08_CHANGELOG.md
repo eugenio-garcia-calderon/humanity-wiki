@@ -9230,3 +9230,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 
 ## 2026-10-18 — Wikiproducts: clean photo for the AIKO Neostar panel (W3a)
 - The AIKO row's photo came from a shop's preview image (aceflex): a banner with logo, text and stars. Because AIKO is the first home panel, that banner was also the picture on the «Paneles solares domésticos» card on the home page and on /energia-solar-domestica. `datos/fotos.json` now pins AIKO's own product image (aikosolar.com, Neostar 3P54). The next load with fotos=si replaces it, since a pinned source must match the photo's credit.
+- Same PR: the texts no longer promise what is not true yet.
+  - «Cómo trabajamos» (via `datos/textos.json`, corregir-textos): the commission and the double vote of verified buyers are now worded as what happens once purchases through Wikiproducts are open. Today every offer says «Sin comisión».
+  - Every published site's Cookies template (`sitioWeb.ts`) now says that a member who signs in gets one technical session cookie, `rh_sitio_<root>` (HttpOnly, 30 days), and nothing for tracking.
+  - The Privacy template has a «Si te creas una cuenta» section: email, name, hashed password, published ratings, legal basis 6.1.b, kept while the account exists, deletion with the 15-day recycle bin, and published ratings kept without the name.
