@@ -9190,3 +9190,25 @@ Eugenio: «inspírate en las landing pages de Amazon… que la información est�
 - Checked locally on a production build at 900, 1,024, 1,100, 1,280 and back down to 700 px: no overlap and no clipped links at any width. With the current four links it is folded at 900 and 1,024 and open from 1,100. Not checked on wikiproducts.humanity.wiki (unreachable from the container).
 - «Inicio» leaves the Wikiproducts menu: the site name already opens the home page, and the link cost the bar ~70 px. `sitio.json` → `quitar_del_menu: ["Inicio"]`, applied by `enlazar-sitio.mjs` step 5 through `DELETE /api/v1/pages/:id/site/menu/links/:id` on W3a's next «Cargar Wikiproducts» run. It only removes a link with that text that goes to the home page. Run twice on the local copy: removed, then «no está en el menú».
 - Measured locally with three links plus the «Entrar» pill (members on, 94 px): folded at 900 and 1,024 (brand, search, menu button, pill) and open from 1,100 (three links, search, pill); nothing overlaps at any width.
+
+## 2026-10-18 — Wikiproducts W1: price per watt and per kWh, units said once
+
+Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en baterías, en paneles, para que sea algo realmente comparable».
+- New formula columns in `esquema-bd.json`, role `precio_unidad`:
+  - powerbanks: «Precio por kWh» = Precio desde ÷ Energía nominal × 1000 (€/kWh, so it compares with home batteries);
+  - home batteries: «Precio por kWh» = Precio desde ÷ Capacidad útil (€/kWh);
+  - portable panels: «Precio por vatio» = Precio desde ÷ Potencia pico (€/W);
+  - home panels: «Precio por vatio» = Precio desde ÷ Potencia pico (€/Wp).
+
+  They are calculated from the cheapest current offer, so nothing has to be loaded, and `crear-esquema.mjs` creates them on the next load run.
+- How the price per unit appears:
+  - its provenance is «Calculado», with how it is worked out in the tooltip (`config.explicacion`);
+  - with no shop, the sheet says «Sin precio en ninguna tienda todavía»;
+  - the header shows it under the price («Precio por kWh: 514 €/kWh»);
+  - the comparator has it among its main lines and marks the cheapest;
+  - «La mejor en cada criterio» ranks by it;
+  - gallery cards show it;
+  - visitors can sort a gallery by it, like any other column.
+- On home tables the loaded estimates «Precio por Wp» and «Precio por kWh útil» are hidden from the sheet when the calculated column exists. A market estimate next to our shops' figure would contradict it.
+- Unit shown once: a column named «Garantía (años)» whose value already says «años» is labelled «Garantía» (`etiquetaColumna`). «1 años» now reads «1 año».
+- Lights: «Batería (Wh)» and «Panel solar (W)» count as key figures, so a light with no runtime or weight still fills its header.
