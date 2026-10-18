@@ -97,7 +97,7 @@ const distribuidores = unirPorId(leerLista('distribuidores.json', 'distribuidore
 
 // ── 2. FROM A DATA VALUE TO A CELL ──────────────────────────────────────────
 const esDato = x => x && typeof x === 'object' && !Array.isArray(x) && ('valor' in x || 'naturaleza' in x || 'origen' in x);
-const NATURALEZAS = new Set(['declarado', 'medido', 'calculado', 'no_publicado']);
+const NATURALEZAS = new Set(['declarado', 'medido', 'calculado', 'no_publicado', 'tercero']);
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A URL as the server's check wants it: spaces in a pasted file name are %20. */
@@ -113,7 +113,7 @@ function procedenciaDe(d) {
   const fuente = typeof f === 'string' && /^https?:\/\/\S+$/.test(f) ? f.slice(0, 1000) : null;
   // The server refuses «declarado»/«medido» with no source, and rightly: the
   // value still loads, its provenance does not, and the dry run counts it.
-  if (!fuente && (naturaleza === 'declarado' || naturaleza === 'medido')) return { rechazo: `«${naturaleza}» sin fuente` };
+  if (!fuente && (naturaleza === 'declarado' || naturaleza === 'medido' || naturaleza === 'tercero')) return { rechazo: `«${naturaleza}» sin fuente` };
   const out = { nature: naturaleza, source: fuente, date: typeof d.fecha === 'string' && FECHA.test(d.fecha) ? d.fecha : null };
   if (typeof d.nota === 'string' && d.nota) out.note = d.nota.slice(0, 500);
   return out;

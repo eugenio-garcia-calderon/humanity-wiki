@@ -1182,7 +1182,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No indicado en ficha ni garantía",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/ch-de/solarspeicher/speicher/5319/b-box-premium-hvs-7.7-7-68-kwh",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Ursprungsland: China». Puede variar según el lote."
+        },
         "fabrica": null,
         "materiales_principales": [
           "celdas LFP (fosfato de hierro y litio, sin cobalto)",
@@ -2541,7 +2547,13 @@
       },
       "origen": {
         "pais_marca": "Estados Unidos",
-        "pais_fabricacion": "No publicado (versión europea)",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/IQ-Battery-5P-3P-INT-Flex-Phase/0157209",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "Plantas de fabricación en EE. UU. para las unidades con «contenido nacional» (sin nombre publicado), según Enphase en julio de 2025",
           "unidad": null,
@@ -4430,7 +4442,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No indicado en ficha ni garantía",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/LUNA2000-10KW-C1-Power-Module/0156565",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": null,
         "materiales_principales": [
           "celdas LFP",
@@ -6346,7 +6364,13 @@
       },
       "origen": {
         "pais_marca": "Israel",
-        "pais_fabricacion": "No publicado",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/es-es/SolarEdge-HOME-BATTERY-10-kWh-BATTERY-9-7-kWh/1352051",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat país de origen | China». Puede variar según el lote."
+        },
         "fabrica": null,
         "materiales_principales": [
           "celdas de iones de litio NMC",
@@ -7306,7 +7330,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No publicado en ficha ni garantía",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/de-en/storage-solutions/storages/54010/sbr-battery-module-premium-3-2-kwh-v13.2",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": null,
         "materiales_principales": [
           "celdas prismáticas LFP",

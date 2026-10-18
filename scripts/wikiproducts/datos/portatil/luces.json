@@ -1375,11 +1375,11 @@
           "nota": "Marca de MPOWERD, absorbida por BioLite (junio de 2024)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p138352/mpowerd-luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (varuste.net): «País de origen: China». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,
@@ -1606,11 +1606,11 @@
           "fecha": "2026-10-18"
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (varuste.net): «País de origen: China». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,
@@ -2949,11 +2949,11 @@
           "nota": "No se encontró una fuente con la sede social de Little Sun."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://collections.vam.ac.uk/item/O1600748",
+          "fecha": "2026-10-18",
+          "nota": "Según el catálogo (collections.vam.ac.uk): «Location: Designed Denmark, manufactured China.». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,

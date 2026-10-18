@@ -470,11 +470,11 @@
           "nota": "La marca pertenece a Shenzhen Huabao New Energy Co., Ltd. (Wikipedia; no es una fuente de la marca)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://www.buerklin.com/en/p/27A0044/",
           "fecha": "2026-10-18",
-          "nota": "El manual no indica el país de fabricación."
+          "nota": "Según el distribuidor (buerklin.com): «Country of origin: CN». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,

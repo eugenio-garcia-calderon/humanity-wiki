@@ -3283,7 +3283,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/JAM54D40-460-LB/0159081",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "China, Vietnam y EE. UU. (desde finales de 2023), según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "unidad": null,
@@ -3714,7 +3720,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado en la ficha",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/de-de/JKM475N-48QL6-DV-Tiger-Neo-III/0163792",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat Ursprungsland: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "China (Sichuan, Jiangxi, entre otras) y Vietnam, según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "unidad": null,
@@ -4614,7 +4626,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado en la ficha ni en la web del producto",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/Hi-MO-X10-Explorer-LR7-54HVH-480M/0158571",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde; El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "unidad": null,
@@ -7654,7 +7672,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado en la ficha",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/TSM-460NEG9R.28-Vertex-S/0157659",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": null,
         "materiales_principales": [
           "silicio monocristalino tipo n",
