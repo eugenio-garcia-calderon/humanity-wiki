@@ -85,7 +85,7 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
 };
 
 export type VistaPropiedad =
-  | { estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; gtin: string; categoria: string }
+  | { estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; credito: string; gtin: string; categoria: string }
   | { estilo: 'texto'; titulo: string; texto: string; procedencia: Procedencia | null }
   | { estilo: 'tabla' | 'lista'; titulo: string; lineas: Linea[] }
   | { estilo: 'pie'; revisado: string | null; fuentes: string[]; editadoEl: string | null };
@@ -102,13 +102,19 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     const cMarca = porRol('marca');
     const cImg = porRol('imagen');
     const img = cImg ? textoDe(fila, cImg) : '';
+    const imagen = (URL_SOLA.test(img) || img.startsWith('/') ? img : '') || fila.imagen || null;
+    // CC BY and CC BY-SA photos require a visible credit; shown even though
+    // the column is `visibilidad: nunca` (that only keeps it out of the lists),
+    // and only under a photo.
+    const cCredito = porRol('credito_imagen');
     return {
       estilo,
       nombre: fila.titulo,
       marca: cMarca && tieneValor(fila, cMarca) ? valorDe(f, fila, cMarca) : null,
       modelo: porRol('modelo') ? textoDe(fila, porRol('modelo')!) : '',
       estado: porRol('estado') ? textoDe(fila, porRol('estado')!) : '',
-      imagen: (URL_SOLA.test(img) || img.startsWith('/') ? img : '') || fila.imagen || null,
+      imagen,
+      credito: imagen && cCredito ? textoDe(fila, cCredito) : '',
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
       categoria: t.titulo,
     };
@@ -144,8 +150,18 @@ export type VistaComparador = {
   productos: Array<{ id: string; nombre: string; paginaId: string | null; imagen: string | null; actual: boolean }>;
   /** One line per attribute, one cell per product, in the same order. */
   lineas: Array<{ columnaId: string; etiqueta: string; grupo: string; sentido: 'mayor' | 'menor' | null; celdas: CeldaComparada[] }>;
-  /** Siblings that could be added, for the picker. */
+  /** Siblings that could be added, for the picker: only those of the same
+   *  subcategory as the first product, when the table has subcategories. */
   candidatos: Array<{ id: string; nombre: string }>;
+  /** Set when the products are of different types (a link can still bring
+   *  them together): a sentence warning that the figures don't compare. */
+  mezcla: string | null;
+};
+
+/** The subcategory of a row («Powerbank»), '' when the table has none. */
+const subDe = (t: TablaFicha, x: FilaFicha | undefined): string => {
+  const c = columnaPorRol(t, 'subcategoria');
+  return c && x && tieneValor(x, c) ? textoDe(x, c) : '';
 };
 
 /**
@@ -157,7 +173,10 @@ export type VistaComparador = {
  */
 export function porDefecto(t: TablaFicha, actualId: string, n = MAX_COMPARAR - 1): string[] {
   const actual = t.filas.find(x => x.id === actualId);
-  const otras = t.filas.filter(x => x.id !== actualId);
+  // Same type first: a power bank is compared with power banks, never by
+  // default with a 600 W station that happens to share its table.
+  const sub = subDe(t, actual);
+  const otras = t.filas.filter(x => x.id !== actualId && (!sub || subDe(t, x) === sub));
   const ref = [columnaPorRol(t, 'precio_min'), ...t.columnas.filter(c => grupoDe(c) === 'tecnico' && ordenable(c))]
     .find(c => c && actual && numeroDe(actual, c) !== null);
   const base = ref && actual ? numeroDe(actual, ref)! : null;
@@ -198,11 +217,15 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
       };
     });
   const elegidos = new Set(filas.map(x => x.id));
+  const sub = subDe(t, filas[0]);
+  const tipos = [...new Set(filas.map(x => subDe(t, x)).filter(Boolean))];
   return {
     titulo: String(opciones.titulo || '').trim(),
     productos: filas.map(x => ({ id: x.id, nombre: x.titulo, paginaId: x.pagina_id, imagen: x.imagen || imagenDe(t, x), actual: x.id === opciones.actualId })),
     lineas,
-    candidatos: t.filas.filter(x => !elegidos.has(x.id)).map(x => ({ id: x.id, nombre: x.titulo })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    candidatos: t.filas.filter(x => !elegidos.has(x.id) && (!sub || subDe(t, x) === sub))
+      .map(x => ({ id: x.id, nombre: x.titulo })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    mezcla: tipos.length > 1 ? `Estás comparando productos de distinto tipo (${tipos.join(', ')}): sus cifras no se pueden comparar entre sí.` : null,
   };
 }
 
@@ -216,6 +239,11 @@ function imagenDe(t: TablaFicha, x: FilaFicha): string | null {
 
 export type VistaAlternativas = {
   titulo: string;
+  /** The subcategory the ranking was made in («Powerbank»), when the table has one. */
+  subcategoria: string | null;
+  /** What the ranking was made among, as a sentence: «Entre los productos del
+   *  mismo tipo (Powerbank) y tamaño parecido: Energía nominal de 43 a 172 Wh.» */
+  ambito: string | null;
   criterios: Array<{
     columnaId: string;
     criterio: string;
@@ -236,30 +264,56 @@ export type VistaAlternativas = {
 export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): VistaAlternativas | null {
   const t = f.tabla;
   const actual = filaActual(f);
-  if (!actual || t.filas.length < 2) return null;
+  if (!actual) return null;
+  // The best IN ITS SUBCATEGORY: a 20,000 mAh power bank is not beaten on
+  // capacity by a 2 kWh power station that shares its table.
+  const cSub = columnaPorRol(t, 'subcategoria');
+  const sub = cSub && tieneValor(actual, cSub) ? textoDe(actual, cSub) : '';
+  let filas = sub ? t.filas.filter(x => textoDe(x, cSub!) === sub) : t.filas;
+  // ...and of a COMPARABLE SIZE: a 5 kWh battery module ranked against 15 kWh
+  // systems comes last in everything and teaches nothing. Half to double its
+  // size; if that leaves fewer than three products, the size filter is dropped
+  // rather than showing a ranking of two.
+  const cTam = columnaPorRol(t, 'tamano');
+  const propio = cTam ? numeroDe(actual, cTam) : null;
+  let rango = '';
+  if (cTam && propio && propio > 0) {
+    const desde = propio / 2, hasta = propio * 2;
+    const parecidas = filas.filter(x => { const n = numeroDe(x, cTam); return n !== null && n >= desde && n <= hasta; });
+    if (parecidas.length >= 3) {
+      filas = parecidas;
+      const cifra = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: n < 10 ? 1 : 0 });
+      const unidad = cTam.config?.unidad ? ` ${cTam.config.unidad}` : '';
+      rango = `${cTam.nombre} de ${cifra(desde)} a ${cifra(hasta)}${unidad}`;
+    }
+  }
+  if (filas.length < 2) return null;
   const cols = (elegidas(t, datos.columnas) || t.columnas.filter(c =>
     esComunidad(c) ? c.config?.criterio !== 'media' : listable(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
     .filter(ordenable);
   const max = Math.max(1, Math.min(12, Number(datos.max) || 8));
   const criterios: VistaAlternativas['criterios'] = [];
   for (const c of cols) {
-    const orden = ordenarPor(t.filas, c);
+    const orden = ordenarPor(filas, c);
     // A «best» among fewer than two products is not a comparison, and a tie
     // for first between everyone says nothing.
-    if (orden.length < 2 || !mejoresEn(t.filas, c).size) continue;
+    if (orden.length < 2 || !mejoresEn(filas, c).size) continue;
     const g = orden[0];
     const i = orden.findIndex(x => x.id === actual.id);
     criterios.push({
       columnaId: c.id,
       criterio: c.nombre,
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
-      esEsta: mejoresEn(t.filas, c).has(actual.id),
+      esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
     });
     if (criterios.length >= max) break;
   }
   if (!criterios.length) return null;
-  return { titulo: String(datos.titulo || '').trim(), criterios };
+  const ambito = sub && rango ? `Entre los productos del mismo tipo (${sub}) y tamaño parecido: ${rango}.`
+    : sub ? `Entre los productos del mismo tipo: ${sub}.`
+    : rango ? `Entre los productos de tamaño parecido: ${rango}.` : null;
+  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, ambito, criterios };
 }
 
 // ── AFIRMACIONES PUBLICITARIAS ──────────────────────────────────────────────
@@ -305,6 +359,10 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
   const c = relacionConRol(f, 'afirmaciones', 'veredicto');
   if (!c) return null;
   const rel = relacionadasPor(f, c);
+  // Claims the reader cannot open: neither show them as reviewed nor say
+  // «we have not reviewed any». Say nothing.
+  const apuntadas = filaActual(f)?.apuntados?.[c.id]?.length || 0;
+  if (apuntadas > (rel?.filas.length || 0) && !rel?.filas.length) return null;
   const items = (rel?.filas || []).map(x => {
     const donde = textoRol(rel!.tabla, x, 'donde');
     const fecha = columnaPorRol(rel!.tabla, 'fecha');
@@ -369,6 +427,12 @@ export function vistaRetiradas(f: Ficha | null, datos: Record<string, unknown>):
       enlace: URL_SOLA.test(enlace) ? enlace : null, paginaId: x.pagina_id,
     };
   });
+  // A recall the reader cannot open (its table is not public) still exists:
+  // say its name rather than «no conocemos ninguna».
+  const leidas = new Set((rel?.filas || []).map(x => x.id));
+  for (const a of (c ? fila?.apuntados?.[c.id] || [] : [])) {
+    if (!leidas.has(a.id) && a.etiqueta) items.push({ titulo: a.etiqueta, pais: '', organismo: '', fecha: '', motivo: '', referencia: '', enlace: null, paginaId: null });
+  }
   const cFecha = columnaPorRol(f.tabla, 'retiradas_fecha');
   const cBusq = columnaPorRol(f.tabla, 'retiradas_busqueda');
   const comprobado = cFecha && tieneValor(fila, cFecha) ? textoDe(fila, cFecha) : null;
@@ -385,4 +449,4 @@ export function fraseSinRetiradas(v: VistaRetiradas): string {
 }
 
 /** The sentence under the header of a sheet that is a template preview. */
-export const DESCRIPCION_NATURALEZA = 'Junto a cada dato se indica de dónde viene: lo que dice la marca, lo que midió un tercero o lo que calculamos.';
+export const DESCRIPCION_NATURALEZA = 'Junto a cada dato se indica de dónde viene: lo que dice la marca, lo que midió un tercero, lo que publica otra fuente (una tienda, la prensa, un organismo) o lo que calculamos.';

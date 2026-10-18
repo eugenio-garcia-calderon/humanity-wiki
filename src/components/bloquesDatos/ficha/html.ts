@@ -9,7 +9,7 @@
 // result. Plain semantic HTML, no classes: the app replaces it on load, and a
 // crawler only needs the structure (h2, table/th scope, ul, q, time).
 import type { Ficha, TablaFicha, Procedencia } from './modelo';
-import { ETIQUETA_NATURALEZA, sitioDe, fechaCorta } from './modelo';
+import { etiquetaProcedencia, sitioDe, fechaCorta } from './modelo';
 import {
   vistaPropiedad, vistaComparador, vistaAlternativas, vistaAfirmaciones, vistaRetiradas,
   porDefecto, fraseSinRetiradas, ETIQUETA_VEREDICTO, DESCRIPCION_NATURALEZA, type Valor,
@@ -29,8 +29,7 @@ export const claveTablaComparador = (tablaId: string) => `ficha:tabla:${tablaId}
 
 function procedencia(p: Procedencia | null, h: Herramientas): string {
   if (!p?.naturaleza) return '';
-  const host = sitioDe(p.fuente);
-  const texto = h.esc(`${ETIQUETA_NATURALEZA[p.naturaleza]}${host ? ` · ${host}` : ''}`);
+  const texto = h.esc(p.etiqueta || etiquetaProcedencia(p));
   const href = p.fuente ? h.hrefSeguro(p.fuente) : null;
   return ` <small>(${href ? `<a href="${h.esc(href)}" rel="nofollow noopener">${texto}</a>` : texto})</small>`;
 }
@@ -57,7 +56,8 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
       if (v.gtin) filas.push(['EAN', h.esc(v.gtin)]);
       const img = v.imagen && h.hrefSeguro(v.imagen);
-      return `<section>${img ? `<img src="${h.esc(img)}" alt="${h.esc(v.nombre)}">` : ''}<dl>${filas.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></section>`;
+      const foto = img ? `<figure><img src="${h.esc(img)}" alt="${h.esc(v.nombre)}">${v.credito ? `<figcaption>${h.enLinea(v.credito)}</figcaption>` : ''}</figure>` : '';
+      return `<section>${foto}<dl>${filas.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></section>`;
     }
     case 'texto':
       return `<section>${h2(v.titulo, h)}<p>${h.enLinea(v.texto)}${procedencia(v.procedencia, h)}</p></section>`;
@@ -84,7 +84,7 @@ export function comparadorHtml(f: Ficha | null | undefined, tablaSuelta: TablaFi
   if (!v || v.productos.length < 2) return '';
   const cab = v.productos.map(p => `<th scope="col">${p.paginaId && !p.actual ? `<a href="${h.esc(h.enlacePagina(p.paginaId))}">${h.esc(p.nombre)}</a>` : h.esc(p.nombre)}</th>`).join('');
   const filas = v.lineas.map(l => `<tr><th scope="row">${h.esc(l.etiqueta)}</th>${l.celdas.map(c => `<td>${c.mejor ? `<strong>${h.esc(c.texto)}</strong> (mejor)` : h.esc(c.texto)}</td>`).join('')}</tr>`).join('');
-  return `<section>${h2(v.titulo, h)}<table><thead><tr><th scope="col">Dato</th>${cab}</tr></thead><tbody>${filas}</tbody></table></section>`;
+  return `<section>${h2(v.titulo, h)}${v.mezcla ? `<p>${h.esc(v.mezcla)}</p>` : ''}<table><thead><tr><th scope="col">Dato</th>${cab}</tr></thead><tbody>${filas}</tbody></table></section>`;
 }
 
 export function alternativasHtml(f: Ficha | null | undefined, datos: any, h: Herramientas): string {
@@ -95,7 +95,8 @@ export function alternativasHtml(f: Ficha | null | undefined, datos: any, h: Her
     const quien = c.esEsta ? 'Este producto' : c.ganador.paginaId ? `<a href="${h.esc(h.enlacePagina(c.ganador.paginaId))}">${h.esc(c.ganador.nombre)}</a>` : h.esc(c.ganador.nombre);
     return `<li>${h.esc(c.criterio)}: ${quien} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
   }).join('');
-  return `<section>${h2(v.titulo, h)}<ul>${li}</ul><p><small>El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</small></p></section>`;
+  const sub = v.ambito ? `<p>${h.esc(v.ambito)}</p>` : '';
+  return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</small></p></section>`;
 }
 
 export function afirmacionHtml(f: Ficha | null | undefined, datos: any, h: Herramientas): string {

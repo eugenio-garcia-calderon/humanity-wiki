@@ -290,10 +290,24 @@ export function registerBdRoutes(app: Express, db: any) {
       SELECT id, title, config, slug FROM knowledge_windows
       WHERE id IN (${sql.join(paginaIds.map(i => sql`${i}`), sql`, `)}) AND deleted_at IS NULL
     `);
+    // A product sheet keeps its photo in a column (W1, `config.ficha: 'imagen'`),
+    // not in the page: without this its card stays bare even with a photo.
+    const fotos = new Map<string, string>();
+    const fr = await db.execute(sql`
+      SELECT f.pagina_id, f.valores->>c.id AS url FROM bd_filas f
+      JOIN bd_columnas c ON c.tabla_id = f.tabla_id AND c.archived_at IS NULL
+        -- or the loader 'foto' column, whose config production cannot patch (W1 ROL_POR_CLAVE)
+        AND (c.config->>'ficha' = 'imagen' OR (c.config->>'ficha' IS NULL AND c.config->>'clave' = 'foto' AND c.tipo = 'url'))
+      WHERE f.pagina_id IN (${sql.join(paginaIds.map(i => sql`${i}`), sql`, `)}) AND f.deleted_at IS NULL
+    `);
+    for (const x of fr.rows as any[]) {
+      const u = typeof x.url === 'string' ? x.url.trim() : '';
+      if (/^https?:\/\/\S+$/.test(u) || /^\/[^/]/.test(u)) fotos.set(x.pagina_id, u);
+    }
     for (const w of r.rows as any[]) {
       const cfg = w.config || {};
       const bloques: any[] = Array.isArray(cfg.bloques) ? cfg.bloques : [];
-      const img = bloques.find(b => b?.tipo === 'imagen' && b.url)?.url || null;
+      const img = bloques.find(b => b?.tipo === 'imagen' && b.url)?.url || fotos.get(w.id) || null;
       const texto = bloques.find(b => typeof b?.texto === 'string' && b.texto.trim())?.texto || '';
       out[w.id] = {
         titulo: w.title || '',

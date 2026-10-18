@@ -24,7 +24,7 @@ import { bdInterno, celdasDe } from './bd.js';
 import { enlacesDe, enlacesInversos, celdaDeEnlaces, CLASE_DE_TIPO, type Apuntado } from './bd/enlaces.js';
 import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/ficheros.js';
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
-import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision } from '../utils/ofertas.js';
+import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, textoSinPrecio } from '../utils/ofertas.js';
 import { registrarHtml, esc } from './htmlBloques.js';
 import { notaAtencionDistribuidores } from './bd/comunidad.js';
 import { paginaVisible } from './sitios.js';
@@ -241,7 +241,8 @@ export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string 
   const moneda = ofertas[0].moneda || 'EUR';
   const desde = conPrecio.length ? Math.min(...conPrecio.map(o => totalOferta(o)!)) : null;
   const tiendas = ofertas.length === 1 ? 'una tienda' : `${ofertas.length} tiendas`;
-  const resumen = desde !== null ? `Desde ${dineroHtml(desde, moneda)} con envío, en ${tiendas}.` : `${tiendas[0].toUpperCase()}${tiendas.slice(1)}, sin precio disponible ahora.`;
+  const sinPrecio = ofertas.filter(o => o.precio_centimos === null).length;
+  const resumen = desde !== null ? `Desde ${dineroHtml(desde, moneda)} con envío, en ${tiendas}${sinPrecio ? ` (${textoSinPrecio(sinPrecio)})` : ''}.` : `${tiendas[0].toUpperCase()}${tiendas.slice(1)}, sin precio disponible ahora.`;
   const items = ofertas.map(o => {
     const partes: string[] = [`<strong>${esc(o.distribuidor || 'Tienda sin nombre')}</strong>`];
     if (o.precio_centimos !== null) {
@@ -250,14 +251,14 @@ export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string 
         : o.envio_centimos === 0 ? 'envío gratis' : `+ ${dineroHtml(o.envio_centimos, o.moneda)} de envío`;
       const total = totalOferta(o);
       partes.push(`${dineroHtml(o.precio_centimos, o.moneda)} (${envio}${total !== null && o.envio_centimos ? `; total ${dineroHtml(total, o.moneda)}` : ''})`);
-    } else partes.push('precio no publicado');
+    } else partes.push(esc(motivoSinPrecio(o).replace(/\.$/, '')));
     if (o.nota_distribuidor !== null) partes.push(`atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`);
     if (o.plazo) partes.push(`entrega: ${esc(o.plazo)}`);
     if (o.agotada) partes.push('agotado');
     if (o.instalacion === true) partes.push('incluye instalación');
     if (o.comprobado) partes.push(`precio comprobado el ${esc(o.comprobado)}`);
     const comision = textoComision(o.comision_pct, o.precio_centimos === null ? null : comisionDeLinea(o.precio_centimos, 1, o.comision_pct), o.moneda);
-    const enlace = o.enlace ? ` <a href="${esc(o.enlace)}" rel="${esc(o.rel)}">Ver en la tienda</a>` : '';
+    const enlace = o.enlace ? ` <a href="${esc(o.enlace)}" rel="${esc(o.rel)}">${o.precio_centimos === null ? 'Ver el precio en la tienda' : 'Ver en la tienda'}</a>` : '';
     return `<li>${partes.join(' · ')}. ${esc(comision)}${enlace}</li>`;
   }).join('');
   return `<section>${cab}<p>${esc(resumen)}</p><ul>${items}</ul>`
@@ -302,7 +303,11 @@ export function registrarOfertas(app: Express, db: any) {
         tablaId: req.query.tabla ? String(req.query.tabla) : null,
       });
       if ('error' in r) return res.status(r.codigo).json({ error: r.error });
-      res.json(r);
+      // Whether the reader owns these offers (or is an admin): with a Stripe
+      // TEST key only they get the cart, to try it; visitors get the shop link.
+      const yo = req.user;
+      const dueno = yo && r.tabla_id ? (yo.roleLevel ?? 0) >= 4 || (await duenoDe(db, r.tabla_id)) === yo.id : false;
+      res.json({ ...r, es_dueno: !!dueno });
     } catch (e: any) { console.error(e); res.status(500).json({ error: 'No se han podido leer las ofertas.' }); }
   });
 }

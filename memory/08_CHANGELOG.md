@@ -9032,3 +9032,58 @@ en mis páginas como proyecto pendiente».
 - 10 ofertas nuevas para 9 de los 18 productos que no tenían ninguna (AlphaESS SMILE-G3, Sungrow SBR, Huasun Himalaya, Anker SOLIX X1, Canadian Solar TOPHiKu6, Qcells Q.TRON, Anker PowerPort Solar 21W, Maxeon 7, SENEC.Home), sacadas de fichas públicas de tiendas; sólo 3 con precio leído en la página. Maxeon 7 y SENEC se venden a través de su red de instaladores: su oferta lleva al buscador oficial de instaladores, sin precio. Los otros 9 siguen sin tienda: descatalogados en Europa o sin venta en la UE encontrada (fuentes en la búsqueda del hilo W3a).
 - Fotos: sólo de Wikimedia Commons, con la licencia leída de la API de Commons al cargar (CC0, dominio público, CC BY o CC BY-SA) y el crédito en «Licencia de la foto». Las 8 imágenes de fabricante que se habían cargado sin licencia se quitan. De 94 productos, sólo 2 tienen en Commons una foto identificable como ese modelo (Jackery Explorer 1000 v2, Tesla Powerwall 2). No se cargan hasta que la ficha enseñe el crédito: la acción «Cargar Wikiproducts» tiene la opción «fotos».
 - `llms.txt` de un dominio propio encuentra las páginas del sitio estén donde estén enlazadas: en cualquier bloque (también dentro de pestañas u otros contenedores), en un enlace `/paginas/…` del texto o del menú de temas, y en un destino del menú escrito como dirección (`/energia-portatil`). Y se guarda 5 minutos en vez de una hora, para que un cambio se vea enseguida.
+
+## 2026-10-18 — Wikiproducts W1: sheet polish (brand once, alternatives by type, photo credit, gallery photo)
+
+- Product sheet no longer repeats the brand: `VistaPagina` skips the generic «Relaciones» list on row pages that carry a sheet (`pagina.ficha`), since the sheet already shows brand, claims, recalls and offers.
+- «La mejor en cada criterio» now compares only rows of the same subcategory (new sheet role `subcategoria`, resolved from loader clave `tipo`), so a power station no longer "wins" on a powerbank sheet. Shows «Entre los productos del mismo tipo: X».
+- Header photo shows its credit (new role `credito_imagen`, clave `foto_licencia`) as a caption, only when there is a photo, in both React and server HTML. A photo that fails to load hides itself instead of showing alt text.
+- Gallery cards fall back to the row's `imagen`-role column when the page has no cover or image block (`tarjetasDe` in `src/server/bd.ts`).
+- Recalls/claims linked but not readable no longer produce «No conocemos ninguna retirada»: recalls are listed by title, claims block hides.
+## 2026-10-18 — Grupos pequeños, uno al lado del otro (prog8)
+- En una galería agrupada (sin subgrupos), un grupo con **una o dos tarjetas** ocupa solo lo que miden ellas y comparte fila con otros así, cada uno con su título encima de sus tarjetas. Los grupos de tres o más siguen ocupando la fila entera. En el móvil se apilan.
+- `porGrupos` envuelve cada grupo de nivel 0 en una caja de `min-width` = n × ancho máximo de tarjeta (la rejilla decide las columnas por ese ancho) y el contenedor es `flex-wrap`, centrado si los títulos van centrados.
+
+## 2026-10-18 — Wikiproducts W3a: one photo per product, kept on our server
+
+- Eugenio's decision (2026-10-18): use the photos the maker or the shops publish for each product; Wikiproducts credits them. Replaces the Commons-only rule.
+- New `POST /api/v1/uploads?type=image/…` (write scope, raw bytes, JPEG/PNG/WebP/AVIF/GIF only, no SVG, 10 MB): stores an image in the same store as `/api/uploads` and returns its `/uploads/…` address.
+- New `scripts/wikiproducts/fotos.mjs`: per product, tries `datos/fotos.json` (Commons file, page or image), the image in the data, the shop pages of its offers, then the maker's page (never a home page). Reads `og:image` / `twitter:image` / JSON-LD `Product.image`, downloads it, rejects non-images, files under 4 KB and anything under 250×250 px, stores it and fills «Foto» (absolute `https://humanity.wiki/uploads/…`) and «Licencia de la foto» («Foto: <shop or maker> — <page>»). Skips rows whose photo is already ours from the same page.
+- `cargar.mjs` no longer writes the photo cells. `cargar-en-servidor.sh` runs `fotos.mjs` only when the workflow is dispatched with `fotos=si`.
+## 2026-10-18 — Tarjetas XXXS (prog8)
+- Nuevo tamaño de tarjeta **XXXS** (60 px de mínimo, huecos de 4/8 px, nombre a 9 px), el más pequeño y junto de la galería. Solo para las tarjetas: el tamaño del título empieza en XXS y el del nombre en XS, como antes.
+- Los selectores de tamaño del panel son un poco más estrechos para que quepan los siete.
+
+## 2026-10-18 — Recuadros de los grupos en la galería (prog8)
+- Cada grupo de una galería agrupada va en un **recuadro**: fondo gris suave, borde un punto más oscuro, esquinas redondeadas y una **sombra** ligera para que destaque sobre el blanco. El título va dentro, más grande (`text-[1.375rem]`, extrabold) y con más aire hasta las tarjetas; el contador es una píldora y «Añadir» va a su altura.
+- Dentro del recuadro las **tarjetas son blancas** (con un borde fino), para que no se confundan con el fondo. Fuera de los grupos, las galerías no cambian.
+- **Configuración → Grupos → Color del recuadro**: gris (por defecto), blanco, azul, verde, ámbar, rosa o violeta (`grupo_color`, `COLORES_GRUPO`).
+- El color de una opción de selección sale como un punto junto al título, no tiñendo el texto. En el móvil, el recuadro ocupa todo el ancho.
+- Estética revisada por un agente evaluador (nota inicial 6/10); se aplicaron sus 8 propuestas de estilo.
+
+### 2026-10-18 — Cart postal code, honest «no price», and no cart while charging is off (Wikiproducts W5)
+- The cart asked for «el código postal y el país para el precio exacto» and had nowhere to type them. It now has both fields under the shipping line (country is a list: Spain, the EU countries, «Otro país (fuera de la UE)»). Shipping is re-quoted as they are typed (`/api/publicar/cotizar` already took `pais`/`cp`), they are kept in this browser (`humanity:destino`), and the checkout form starts with them. «El envío se calcula al pagar» only shows while there is no shipping figure yet.
+- «Precio no publicado» read as a broken card. A shop without a price now says «Sin precio confirmado» plus why: «No pudimos confirmar el precio en su web el <fecha>: puede estar agotado o haber cambiado. Míralo directamente en la tienda.», and its link reads «Ver el precio en la tienda». The summary says how many shops have no confirmed price. The same sentence goes into the HTML for search engines (`motivoSinPrecio` in `utils/ofertas.ts`). A buy cell with no price no longer shows the seller's «Ponle un precio para venderlo» to readers.
+- While charging is off (`TIENDAS_COBRO` not 1, or no `STRIPE_SECRET_KEY`), an offer no longer offers «Añadir a la cesta» (it led to filling in the address only to get «La compra todavía no está abierta»). It shows «Comprar en la tienda» (the shop's link) and a note: «Muy pronto podrás comprar a través de Wikiproducts». The cart, wherever it opens, replaces «Finalizar compra» with «Todavía no se puede pagar en esta web» while `/api/publicar/comprar` would refuse. Both switch back on their own: `GET /api/publicar/cobro` now also says `con_pasarela`, read once per page by `hooks/useCobro.ts`.
+- Checked locally as an anonymous visitor, with charging on and off: the offer card in both states, and the cart's postal-code field re-pricing shipping to Baleares on «07001». The cart's closed-state notice was not seen rendered (no local page reached a cart once the offer button is hidden); it is checked by reading only.
+## 2026-10-18 — Wikiproducts W1: evaluator round 1 on the product sheet
+
+- «La mejor en cada criterio»: same type and comparable size (half to double), and the sentence says so; community criteria always show their vote count («0 votos, hacen falta 3»).
+- Comparator: on phones 16 px text, 44×44 remove buttons and picker, narrower fixed label column with a visible edge, a «desliza» hint, and the table scrolls to a product just added. It only offers products of the same type and warns when a link mixes types.
+- Sheet layout no longer jumps while loading (CLS 0.78 → 0.00 measured locally on the Anker Zolo sheet): data-block chunks and community scores are fetched before the first paint (`bloquesDatos/precarga.ts`); a broken header photo keeps its box.
+- Visitors no longer see «Ponle un precio para venderlo» (the buy button now says «Sin precio todavía»).
+- Gallery cards of product tables show brand, key figure with its unit, «Precio desde» and the community score by default.
+- «Sugerir una corrección» on every sheet (via the existing report queue).
+- New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).
+
+
+### 2026-10-18 — Offers: no cart for visitors while Stripe runs a test key (Wikiproducts W5)
+- Production answered `GET /api/publicar/cobro` with `{"abierto":true,"pruebas":true,"con_pasarela":true}`: charging open with an `sk_test` key, so a visitor could add a 1.790 € offer to the cart and have their real card refused at payment. Now, with a test key, visitors see «Comprar en la tienda» and the «Muy pronto…» note; only the owner of the offers table (or an admin) keeps «Añadir a la cesta», with an amber «Modo de pruebas» note naming the 4242 test card. `GET /api/ofertas` adds `es_dueno`. With a live key everyone gets the cart, as before.
+- Checked locally in three states: test key as visitor (shop link), test key as owner (cart + note), and a non-test key as visitor (cart).
+
+### 2026-10-18 — Wikiproducts: «Consultar a un experto» en cada ficha y en su propia página (W6)
+- El evaluador no encontró la palabra «experto» en todo el sitio: el bloque de reservar existía pero nada lo ofrecía.
+- Bloque «Reservar experto» con **versión corta** (`datos.compacto`) para la ficha de un producto: «¿Dudas antes de comprar? Consulta a un experto», una línea por experto con duración y precio y «Elegir hora», que abre la reserva allí mismo. Sin expertos no sale (sólo el equipo ve un aviso). El HTML del servidor sigue la misma regla y no lleva la bio, que la versión corta tampoco enseña.
+- `PUT /api/v1/pages/:id/experts` (en `apiPublica.ts`, lógica en `expertos.ts`): da de alta o pone al día los expertos del sitio por nombre, con la misma validación que el panel y sólo para el equipo del sitio. Con `only_new` no toca a los que ya existen.
+- `scripts/wikiproducts/expertos.mjs` + `expertos.json`, llamado desde `cargar-en-servidor.sh` tras `enlazar-sitio.mjs` (y sin parar la carga si falla): crea la página «Consultar a un experto» bajo la raíz del sitio, da de alta los expertos del fichero una sola vez (después manda el panel) y pone la versión corta del bloque en la plantilla de ficha de cada tabla de productos, tras «Ofertas». Probado dos veces seguidas en la copia local: la segunda no cambia nada.
+- La lista de expertos de `expertos.json` está vacía hasta que Eugenio diga quién atiende y a qué precio: mientras, la ficha no enseña nada nuevo.

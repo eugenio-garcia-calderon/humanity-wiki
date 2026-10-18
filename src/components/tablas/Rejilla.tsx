@@ -2,7 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Galeria from './Galeria';
+import Galeria, { ANCHO_TARJETA } from './Galeria';
 import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
 
 /** Las cinco velocidades del carrusel, en píxeles por segundo. */
@@ -15,6 +15,7 @@ import ConexionesBD, { type Conexion } from './ConexionesBD';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
+import { propiedadesTarjeta } from '../bloquesDatos/ficha/modelo';
 import { cn } from '../../utils/cn';
 import { tonoDe, COLORES } from '../../utils/coloresBloque';
 import BarraVista, { Desplegable, claseBoton, Cuenta } from './BarraVista';
@@ -55,9 +56,23 @@ export type FormaVista = 'galeria' | 'carrusel' | 'tabla';
 /** Colores para las columnas nuevas del tablero, en el orden en que salen. */
 const PALETA = ['#64748b', '#d97706', '#16a34a', '#2563eb', '#9333ea', '#db2777', '#0891b2', '#dc2626'];
 
+/** EL RECUADRO DE CADA GRUPO DE LA GALERÍA (2026-10-18, Eugenio): un fondo
+ *  suave, un borde un punto más oscuro y una sombra ligera para que destaque
+ *  sobre el blanco. Gris por defecto; el color se elige en Configuración → Grupos. */
+export const COLORES_GRUPO: Record<string, { nombre: string; caja: string; muestra: string }> = {
+  gris:    { nombre: 'Gris',    caja: 'bg-slate-100/70 border-slate-300/70', muestra: 'bg-slate-200' },
+  blanco:  { nombre: 'Blanco',  caja: 'bg-white border-slate-200',         muestra: 'bg-white border border-slate-300' },
+  azul:    { nombre: 'Azul',    caja: 'bg-sky-50 border-sky-200/80',       muestra: 'bg-sky-200' },
+  verde:   { nombre: 'Verde',   caja: 'bg-emerald-50 border-emerald-200/80', muestra: 'bg-emerald-200' },
+  ambar:   { nombre: 'Ámbar',   caja: 'bg-amber-50 border-amber-200/80',   muestra: 'bg-amber-200' },
+  rosa:    { nombre: 'Rosa',    caja: 'bg-rose-50 border-rose-200/80',     muestra: 'bg-rose-200' },
+  violeta: { nombre: 'Violeta', caja: 'bg-violet-50 border-violet-200/80', muestra: 'bg-violet-200' },
+};
+const SOMBRA_GRUPO = 'shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_24px_-8px_rgba(15,23,42,0.14)]';
+
 /** La letra del título en galería, según el tamaño elegido. */
 const LETRA_TITULO: Record<TamanoGaleria, string> = {
-  xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
+  xxxs: 'text-xs', xxs: 'text-xs', xs: 'text-sm', pequeno: 'text-base', mediano: 'text-lg', grande: 'text-2xl tracking-tight', 'muy-grande': 'text-3xl sm:text-4xl tracking-tight',
 };
 
 const PESOS: Array<[ 'fino' | 'normal' | 'negrita', string ]> = [['fino', 'Fino'], ['normal', 'Normal'], ['negrita', 'Negrita']];
@@ -608,6 +623,36 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       // El último nivel de grupos lleva su «Añadir» al lado del título.
       const hoja = !(nivel === 0 ? colSub : null);
       const arriba = pieArriba && hoja && pie;
+      // GRUPOS PEQUEÑOS, UNO AL LADO DEL OTRO (2026-10-18, Eugenio): un grupo
+      // de la galería con una o dos tarjetas ocupa solo lo que miden ellas, y
+      // varios así comparten fila, cada uno con su título encima. Los de más
+      // tarjetas siguen ocupando la fila entera.
+      // En la galería, cada grupo de primer nivel va en su recuadro.
+      const enCaja = pieArriba && nivel === 0;
+      const juntos = enCaja && !colSub;
+      if (enCaja) {
+        const n = g.filas.length;
+        const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
+        const ancho = n <= 2
+          // ×1,5: la rejilla de la galería decide cuántas columnas caben por su ancho MÁXIMO.
+          // + el relleno del recuadro (p-5 y el borde, a cada lado).
+          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.5) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 42
+          : null;
+        const caja = (COLORES_GRUPO[activa.config.grupo_color || 'gris'] || COLORES_GRUPO.gris).caja;
+        return (
+          <div key={clave} className={cn('min-w-0 rounded-2xl border p-3 sm:p-5 sm:pt-4 max-sm:w-full max-sm:basis-full', caja, SOMBRA_GRUPO,
+            juntos && ancho ? 'flex-none' : juntos ? 'basis-full' : 'mb-6')}
+            style={juntos && ancho ? { width: 'max-content', minWidth: `min(100%, ${ancho}px)`, maxWidth: '100%' } : undefined}>
+            {arriba ? (
+              <div className={cn('mb-4 sm:mb-5 flex flex-wrap items-center gap-x-3 gap-y-1', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
+                {cabecera(g, nivel, plegado, alternar)}
+                {pie(celdas)}
+              </div>
+            ) : <div className="mb-4 sm:mb-5">{cabecera(g, nivel, plegado, alternar)}</div>}
+            {!plegado && porGrupos(g.filas, pintar, cabecera, arriba ? undefined : pie, nivel + 1, g, celdas, pieArriba)}
+          </div>
+        );
+      }
       return (
         <Fragment key={clave}>
           {arriba ? (
@@ -628,14 +673,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     const talla = cfg.grupo_titulo || 'm';
     const centro = (cfg.grupo_alineacion || 'centro') === 'centro';
     const conImagen = cfg.grupo_imagen !== false && !!g.imagen && !nivel;
-    const letra = nivel ? 'text-sm' : ({ s: 'text-sm', m: 'text-lg', l: 'text-2xl', xl: 'text-4xl' } as const)[talla];
+    const letra = nivel ? 'text-sm' : ({ s: 'text-base', m: 'text-[1.375rem] tracking-tight', l: 'text-2xl tracking-tight', xl: 'text-4xl tracking-tight' } as const)[talla];
     const lado = ({ s: 'h-8 w-8', m: 'h-12 w-12', l: 'h-16 w-16', xl: 'h-24 w-24' } as const)[talla];
     return (
       <button onClick={alternar} aria-expanded={!plegado}
-        className={cn('group/grupo flex items-center gap-2.5 py-1 font-black text-slate-800', !centro && (nivel ? 'pl-6' : 'pl-2'))}>
-        {conImagen && <img src={g.imagen!} alt="" loading="lazy" className={cn('shrink-0 rounded-xl object-cover bg-slate-100', lado)} />}
-        <span className={cn('leading-tight', letra, g.vacio && 'text-slate-400')} style={g.color ? { color: g.color } : undefined}>{g.etiqueta}</span>
-        <span className="text-xs font-bold text-slate-400">{g.filas.length}</span>
+        className={cn('group/grupo flex items-center gap-2.5 py-1 font-extrabold text-slate-800', !centro && (nivel ? 'pl-6' : 'pl-2'))}>
+        {conImagen && <img src={g.imagen!} alt="" loading="lazy" className={cn('shrink-0 rounded-xl object-cover bg-slate-100 ring-1 ring-black/5', lado)} />}
+        {/* El color de la opción, como un punto: el título queda en un solo tono. */}
+        {g.color && !conImagen && <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: g.color }} />}
+        <span className={cn('leading-tight', letra, g.vacio && 'text-slate-400')}>{g.etiqueta}</span>
+        <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">{g.filas.length}</span>
         {plegado ? <ChevronRight className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-300 opacity-0 transition-opacity group-hover/grupo:opacity-100" />}
       </button>
     );
@@ -757,14 +804,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // agrupar, buscar, enlazar, ajustes— y el botón azul «Nuevo». Todo lo que
   // antes se amontonaba junto al título (ocultar título, propiedades de las
   // tarjetas, los dos tamaños) vive ahora dentro de «Ajustes».
-  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
+  const TAMANOS: Array<{ v: TamanoGaleria; l: string }> = [{ v: 'xxxs', l: 'XXXS' }, { v: 'xxs', l: 'XXS' }, { v: 'xs', l: 'XS' }, { v: 'pequeno', l: 'S' }, { v: 'mediano', l: 'M' }, { v: 'grande', l: 'L' }, { v: 'muy-grande', l: 'XL' }];
   const Segmentos = ({ valor, onCambiar, etiqueta, desde = 0 }: { valor?: TamanoGaleria; onCambiar: (v: TamanoGaleria) => void; etiqueta: string; desde?: number }) => (
     <div className="flex items-center justify-between gap-2 px-1 py-1">
       <span className="text-xs font-bold text-slate-600">{etiqueta}</span>
-      <div role="radiogroup" aria-label={etiqueta} className="flex rounded-lg bg-slate-100 p-0.5">
+      <div role="radiogroup" aria-label={etiqueta} className="flex shrink-0 rounded-lg bg-slate-100 p-0.5">
         {TAMANOS.slice(desde).map(t => (
           <button key={t.v} role="radio" aria-checked={valor === t.v} onClick={() => onCambiar(t.v)}
-            className={cn('min-w-8 px-1.5 h-7 rounded-md text-[11px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
+            className={cn('min-w-7 px-1 h-7 rounded-md text-[10px] font-black transition-colors', valor === t.v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>
             {t.l}
           </button>
         ))}
@@ -774,7 +821,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // Qué propiedades se ven en cada tarjeta: lo que se guarda en la vista (el panel de Propiedades lo escribe ahí).
   // Sin nada guardado, lo que traiga el bloque de la página o, si no, las tres primeras.
   const visiblesAhora: string[] = (esGaleria && Array.isArray(activa.config.propiedades) ? activa.config.propiedades : null)
-    ?? visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
+    ?? visibles ?? propiedadesTarjeta(columnas as any, datos.columna_titulo) ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
   const ajustesGaleria = (
     <div className="space-y-1">
       {onCambiarOcultarMandos && (
@@ -784,7 +831,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </label>
       )}
       <Grupo titulo="Título y descripción">
-        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} />}
+        {onCambiarTamanoTitulo && <Segmentos etiqueta="Tamaño" valor={tamanoTitulo} onCambiar={onCambiarTamanoTitulo} desde={1} />}
         {onCambiarTituloAlineacion && <Chips etiqueta="Posición" valor={tituloAlineacion} onCambiar={onCambiarTituloAlineacion} opciones={[['centro', 'Centro'], ['izquierda', 'Izquierda']]} />}
         {onCambiarTituloPeso && <Chips etiqueta="Grosor" valor={tituloPeso} onCambiar={onCambiarTituloPeso} opciones={PESOS} />}
         {onCambiarTituloColor && (
@@ -842,6 +889,19 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           <Chips etiqueta="Tamaño del título" valor={activa.config.grupo_titulo || 'm'}
             onCambiar={v => cambiarVista({ config: { ...activa.config, grupo_titulo: v } })}
             opciones={[['s', 'S'], ['m', 'M'], ['l', 'L'], ['xl', 'XL']]} />
+          <div className="flex items-center justify-between gap-2 px-1 py-1">
+            <span className="text-xs font-bold text-slate-600">Color del recuadro</span>
+            <div role="radiogroup" aria-label="Color del recuadro" className="flex flex-wrap justify-end gap-1">
+              {Object.entries(COLORES_GRUPO).map(([id, c]) => {
+                const puesto = (activa.config.grupo_color || 'gris') === id;
+                return (
+                  <button key={id} role="radio" aria-checked={puesto} aria-label={c.nombre} title={c.nombre}
+                    onClick={() => cambiarVista({ config: { ...activa.config, grupo_color: id } })}
+                    className={cn('h-6 w-6 rounded-full', c.muestra, puesto ? 'ring-2 ring-slate-900 ring-offset-2' : 'hover:ring-2 hover:ring-slate-300 hover:ring-offset-1')} />
+                );
+              })}
+            </div>
+          </div>
           <Chips etiqueta="Alineación" valor={activa.config.grupo_alineacion || 'centro'}
             onCambiar={v => cambiarVista({ config: { ...activa.config, grupo_alineacion: v } })}
             opciones={[['izquierda', 'Izquierda'], ['centro', 'Centro']]} />
@@ -859,7 +919,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           onCambiar={v => cambiarVista({ config: { ...activa.config, filas_mostrar: v } })}
           opciones={[['1', '1'], ['2', '2'], ['3', '3'], ['5', '5'], ['10', '10'], ['50', '50'], ['todas', 'Todas']]} />
         {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
-        {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={1} />}
+        {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={2} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
         {onCambiarNombreArriba && <Chips etiqueta="Nombre" valor={nombreArriba ? 'arriba' : 'abajo'} onCambiar={v => onCambiarNombreArriba(v === 'arriba')} opciones={[['abajo', 'Debajo'], ['arriba', 'Encima']]} />}
       </Grupo>
@@ -1097,11 +1157,12 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
-        <div>
+        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-start gap-5 sm:gap-6', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
               celdasAlRecibir={colAgr && editable ? celdasGrupo : undefined}
+              enCaja={!!colAgr}
               alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
@@ -1111,10 +1172,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               ordenable={editable && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}
               motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
-          ), (g, nivel, plegado, alternar) => <div className={cn('flex pt-4', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>{cabeceraGaleria(g, nivel, plegado, alternar)}</div>,
+          ), (g, nivel, plegado, alternar) => <div className={cn('flex', nivel && 'pt-4', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>{cabeceraGaleria(g, nivel, plegado, alternar)}</div>,
           // «Añadir», pegado al título del grupo (2026-10-18, Eugenio): así se ve
           // a qué grupo va la tarjeta nueva.
-          colAgr && editable ? celdas => <div className="pt-2"><NuevoElemento texto="Añadir" className="w-auto" onCrear={t => crearCon(t, celdas)} /></div> : undefined,
+          colAgr && editable ? celdas => <NuevoElemento texto="Añadir" className="w-auto h-7 rounded-full px-2.5 font-semibold text-slate-500 hover:bg-white hover:text-slate-700" onCrear={t => crearCon(t, celdas)} /> : undefined,
           0, null, {}, true)}
           {/* Mostrar más: otra tanda igual a la que se eligió. */}
           {!colAgr && porTanda && filas.length > visiblesGaleria.length && (

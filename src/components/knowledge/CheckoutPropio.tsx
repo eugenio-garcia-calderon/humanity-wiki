@@ -96,17 +96,19 @@ function PagoEmbebido({ clientSecret, onFallo }: { clientSecret: string; onFallo
   );
 }
 
-export default function CheckoutPropio({ lineas, extra, titulo = 'Finalizar compra', onCerrar, onPagadoConPuntos }: {
+export default function CheckoutPropio({ lineas, extra, titulo = 'Finalizar compra', destino, onCerrar, onPagadoConPuntos }: {
   lineas: LineaPago[];
   /** El resto del cuerpo de `comprar`: cupón, puntos, recogida en persona. */
   extra?: Record<string, any>;
   titulo?: string;
+  /** Postal code and country already typed in the cart: the form starts with them unless a saved address wins. */
+  destino?: { cp: string; pais: string };
   onCerrar: () => void;
   onPagadoConPuntos?: (url: string) => void;
 }) {
   const [cot, setCot] = useState<any>(null);
   const [cuenta, setCuenta] = useState<{ con_sesion: boolean; email: string | null } | null>(null);
-  const [envio, setEnvio] = useState<Dir>(VACIA);
+  const [envio, setEnvio] = useState<Dir>(() => destino ? { ...VACIA, cp: destino.cp.trim(), pais: destino.pais || 'ES' } : VACIA);
   const [factura, setFactura] = useState<Dir>(VACIA);
   const [igual, setIgual] = useState(true);
   const [quiereFactura, setQuiereFactura] = useState(false);

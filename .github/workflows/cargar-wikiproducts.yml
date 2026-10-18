@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       fotos:
-        description: "Cargar también las fotos de Commons (sólo cuando la ficha enseñe el crédito)"
+        description: "Cargar también las fotos: una por producto, de la página de la marca o de la tienda, guardada en el servidor"
         type: choice
         options: ["no", "si"]
         default: "no"
