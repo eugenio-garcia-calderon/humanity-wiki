@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/server/apiPublica.ts",
+      "motivo": "W6: PUT /api/v1/pages/:id/experts",
+      "desde": "2026-10-18T16:40:39.390Z"
+    }
+  ]
 }
