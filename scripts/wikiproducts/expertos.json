@@ -1,9 +1,9 @@
 {
   "_comentario": "Las consultas de pago con expertos en wikiproducts.humanity.wiki (W6). Lo lee expertos.mjs. Los expertos, su precio y su agenda los decide Eugenio. Un experto de esta lista se da de alta UNA vez; después manda el panel «Gestionar expertos» de la página: volver a ejecutar el script no pisa lo que se cambió allí.",
   "pagina": {
-    "madre_titulo": "Wikiproducts",
+    "madre_id": "KWMVDTQQ35QI",
     "titulo": "Consultar a un experto",
-    "texto": "Antes de una compra grande —una batería doméstica, unos paneles para el tejado— a veces hace falta que alguien que sabe mire tu caso. Aquí puedes reservar una videollamada con un experto: eliges la hora, pagas el precio que ves y, al terminar el pago, se abre una conversación con él para preparar la consulta.\n\nEl precio de cada consulta y la parte que se queda Wikiproducts se publican en la ficha de cada experto. Una consulta no cambia el orden de las fichas: ese orden lo deciden las valoraciones de la comunidad.",
+    "texto": "Antes de una compra grande —una batería doméstica, unos paneles para el tejado— a veces hace falta que alguien que sabe mire tu caso. Aquí puedes reservar una videollamada con un experto: eliges la hora, pagas el precio que ves y, al terminar el pago, se abre una conversación con el experto para preparar la consulta.\n\nEl precio de cada consulta y la parte que se queda Wikiproducts se publican en la ficha de cada experto. Una consulta no cambia el orden de las fichas: ese orden lo deciden las valoraciones de la comunidad.",
     "bloque": {
       "titulo": "Nuestros expertos"
     }

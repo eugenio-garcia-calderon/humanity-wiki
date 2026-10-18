@@ -33,7 +33,7 @@ if (!CLAVE) { console.error('Falta HW_API_KEY (una clave hw_live_… con alcance
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const esquema = JSON.parse(readFileSync(path.join(dir, 'esquema-bd.json'), 'utf8'));
-const conf = JSON.parse(readFileSync(path.join(dir, opcion('--config', 'expertos.json')), 'utf8'));
+const conf = JSON.parse(readFileSync(path.resolve(dir, opcion('--config', 'expertos.json')), 'utf8'));
 
 let escrituras = 0;
 async function api(metodo, ruta, cuerpo) {
