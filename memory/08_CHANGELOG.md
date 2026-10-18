@@ -8914,3 +8914,7 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — Las entradas ocultas tampoco salen en el HTML, el sitemap ni el buscador (W2)
 - Una entrada oculta (0154, #599) ya no se veía en la tabla de la pantalla, pero el HTML del servidor (#589), el sitemap, el buscador del sitio y la página pública de la entrada (`/p/:id`) leían las filas sin mirar `oculta`: quien abriera el código de la página o el sitemap la veía. Ahora la página de una entrada oculta deja de heredar «publicada» de la página que enseña su base de datos (`subirDesdePagina`) y las cuatro lecturas la saltan. Quien edita la tabla la sigue viendo en el editor.
+
+### 2026-10-18 — Portadas con vídeo (prog8)
+- La portada de una página puede ser un vídeo: pegando un enlace de YouTube o Vimeo (en el campo del diálogo o con ⌘V) o subiendo un archivo de vídeo, arrastrado o elegido. Se reproduce en silencio y en bucle, en el editor y en la página publicada.
+- Las imágenes siguen pasando por el recortador; los vídeos no. Una portada de vídeo no se usa como imagen de tarjeta en las galerías: ahí sale la primera imagen de la página.

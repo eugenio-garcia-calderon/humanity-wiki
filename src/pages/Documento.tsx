@@ -4,6 +4,8 @@ import { subirArchivo } from '../utils/subir';
 import OptimizacionWeb from '../components/knowledge/OptimizacionWeb';
 import SoltarImagen from '../components/ui/SoltarImagen';
 import RecortarImagen from '../components/ui/RecortarImagen';
+import MediaPortada from '../components/ui/MediaPortada';
+import { esVideoPortada } from '../utils/videoPortada';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
@@ -4115,17 +4117,19 @@ function EditorPagina() {
             <SubiendoImagen vista={subidas.portada.vista} fraccion={subidas.portada.fraccion} texto="Subiendo la portada" />
           ) : portada ? (
             <div className="group/portada relative w-fit max-w-full">
-              <img src={portada} alt="" className="w-full h-56 object-cover rounded-2xl" />
+              <MediaPortada src={portada} className="w-full h-56 object-cover rounded-2xl" />
               {editable && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
                   <button onClick={() => setEligiendoPortada(true)}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     {tr('Cambiar')}
                   </button>
-                  <button onClick={() => setRecortandoPortada(portada)}
-                    className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
-                    {tr('Recortar')}
-                  </button>
+                  {!esVideoPortada(portada) && (
+                    <button onClick={() => setRecortandoPortada(portada)}
+                      className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
+                      {tr('Recortar')}
+                    </button>
+                  )}
                   <button onClick={() => { setPortada(null); programarGuardado(); }}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     {tr('Quitar')}
@@ -4181,7 +4185,10 @@ function EditorPagina() {
                     onCerrar={() => setEligiendoPortada(false)}
                     // Se cierra en cuanto hay archivo: la portada enseña su
                     // propia barra de subida en la página, con la foto ya puesta.
-                    onArchivo={f => { setRecortandoPortada(f); }}
+                    // Imagen: primero se recorta. Vídeo: se sube tal cual. Enlace de YouTube o Vimeo: se guarda.
+                    conVideo
+                    onArchivo={f => { if (f.type.startsWith('video/')) subirPortada(f); else setRecortandoPortada(f); }}
+                    onEnlace={url => { setPortada(url); programarGuardado(); }}
                   />
                 )}
                 {recortandoPortada && (
