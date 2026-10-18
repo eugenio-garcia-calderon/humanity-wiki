@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/server/apiPublica.ts",
-      "motivo": "W2: hide_title en PATCH de bloque basedatos",
-      "desde": "2026-10-18T21:43:03.043Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/wikiproducts/enlazar-sitio.mjs",
       "motivo": "W2: ocultar título de la galería en subcategorías",
       "desde": "2026-10-18T21:43:06.050Z"
