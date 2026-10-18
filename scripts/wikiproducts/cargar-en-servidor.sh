@@ -16,6 +16,9 @@
 #      out of the MVP on 2026-10-18. The script and `expertos.json` stay in
 #      the repo; to bring them back, restore the step before step 4 and the
 #      «Expertos» link in `sitio.json` → `menu`.)
+#   3c. Runs `plantilla-ficha.mjs` (W1): the order of the blocks of every
+#      product sheet, from `plantilla-ficha.json`. It also removes the
+#      expert block that earlier loads put on the templates.
 #   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
 #      a visitor sees none of it (a table inherits visibility from its page).
 #   5. With WP_FOTOS=si, runs `fotos.mjs`: one photo per product, downloaded
@@ -117,6 +120,11 @@ nodo cargar.mjs
 
 # Expert consultations are out of the MVP (Eugenio, 2026-10-18), so
 # `nodo expertos.mjs` is not run here. See step 3b in the header.
+
+echo "== Fichas: el orden de los bloques de cada producto =="
+# The layout has no expert block, so this also takes out the one earlier
+# loads put on the templates. Not fatal: the sheets keep their previous order.
+nodo plantilla-ficha.mjs || echo "AVISO: no se ha podido ordenar la ficha (arriba dice por qué); el resto de la carga sigue."
 
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs

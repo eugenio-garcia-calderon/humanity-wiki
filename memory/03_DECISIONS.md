@@ -909,3 +909,19 @@ the management panel, is the cheapest way to check it.
 ## 2026-10-18 — Turning on a site's members from a migration (Wikiproducts)
 
 Members can only be activated with the owner's session (`PUT /api/sitio-miembros/:raiz/config`); the `/api/v1` key does not reach it. For Wikiproducts the activation went into migration 0159, keyed by the site's address and guarded by "no config yet", rather than a new public-API endpoint or a step in `cargar-en-servidor.sh` (owned by W3a). Alternative kept open: a `/api/v1` members endpoint, if other sites need it scripted. Cost of switching later: the migration is a one-off, nothing depends on it.
+## 2026-10-18 — Product sheet header from columns, and the layout as a script (W1)
+
+**Decision.** The shop-style header is the existing `propiedad` block in `cabecera` style. It reads price, score and key figures from the row's columns, and no new block type was added. The key figures are chosen by loader key, in code (`DESTACADAS_POR_CLAVE`).
+
+**Why.**
+- The key figures live in code because production column config cannot be patched through `/api/v1`; it is the same reason `ROL_POR_CLAVE` exists.
+- The order of the sheet lives in `plantilla-ficha.json` and is applied by a script, because a template's blocks can only be changed one by one through the API.
+
+**Alternatives.**
+- A new «compra» block. Rejected: the price and the score would then be painted by two blocks.
+- Editing each template by hand. Rejected: there are five templates, and a by-hand edit cannot be reproduced on a fresh copy.
+
+**Cost of the shortcut.**
+- `plantillaInicial()` repeats the JSON's order: two lists to keep in step, about 5 minutes to unify when the API can read a file.
+- The script rewrites every data block of a template when the order differs, which is about 28 API writes per table, once.
+

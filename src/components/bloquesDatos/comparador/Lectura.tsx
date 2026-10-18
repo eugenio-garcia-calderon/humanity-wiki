@@ -55,6 +55,8 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   // a product must SEE it, so the table scrolls to the new last column.
   const caja = useRef<HTMLDivElement>(null);
   const [anadido, setAnadido] = useState(0);
+  // Compact first (2026-10-18): the key lines, and every line on request.
+  const [todo, setTodo] = useState(false);
   useEffect(() => {
     if (anadido && caja.current) caja.current.scrollTo({ left: caja.current.scrollWidth, behavior: 'smooth' });
   }, [anadido]);
@@ -81,6 +83,9 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   const caben = !v || v.productos.length < MAX_COMPARAR;
   // Repeated group headers are dropped: one per run of the same group.
   let grupoAnterior = '';
+  const nClave = v ? v.lineas.filter(l => l.clave).length : 0;
+  const plegable = !!v && nClave >= 3 && nClave < v.lineas.length;
+  const lineas = v ? (plegable && !todo ? v.lineas.filter(l => l.clave) : v.lineas) : [];
 
   return (
     <Seccion titulo={v?.titulo}>
@@ -114,7 +119,7 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
               </tr>
             </thead>
             <tbody>
-              {v.lineas.map(l => {
+              {lineas.map(l => {
                 const cabecera = l.grupo && l.grupo !== grupoAnterior ? l.grupo : '';
                 grupoAnterior = l.grupo;
                 return [
@@ -141,6 +146,11 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
             </tbody>
           </table>
         </div>
+      ) : null}
+      {plegable ? (
+        <Button variant="outline" onClick={() => setTodo(x => !x)} aria-expanded={todo} className="mt-2 min-h-[44px] gap-2 normal-case tracking-normal text-sm">
+          {todo ? 'Ver sólo lo principal' : `Ver las ${v!.lineas.length} características`}
+        </Button>
       ) : null}
       {modo !== 'fijo' && caben && v?.candidatos.length ? (
         <label className="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-600">
