@@ -8970,3 +8970,7 @@ en mis páginas como proyecto pendiente».
 - `scripts/wikiproducts/cargar.mjs` los escribe por `/api/v1` en las tablas de `crear-esquema.mjs` (que ejecuta antes si faltan): valores, procedencia por celda, marca, afirmaciones y retiradas enlazadas, ofertas con «sin acuerdo» como comisión vacía, y las direcciones `/subcategoria/marca-modelo` al final. Reconoce cada fila por su nombre: repetirlo sólo escribe lo que cambió y nunca borra. `--seco` lo comprueba sin servidor.
 - Probado en la copia local (`local.sh`): 621 filas sin fallos; la segunda carga, 0 cambios.
 - Un importe decimal se envía con coma («0,138»): el tipo «moneda» del servidor lee «0.138» como 138 (punto de millar), también cuando llega como número por la API.
+
+### 2026-10-18 — Plantilla «Humanidad Wiki» (Humanidad Wiki, fase 2) (prog8)
+- Nueva página `/plantillas/humanidad-wiki` con el botón «Crear en mi perfil»: crea, con la sesión de quien la pulsa, una página principal «Humanidad Wiki» con el menú de temas y una subpágina por cada tema con su bloque «Contenido de un tema». Nace privada; es una página normal de Wiki Creator que se puede cambiar y replicar.
+- El bloque «Menú de temas», dentro de una web publicada, abre las páginas propias por su dirección pública, que hereda la visibilidad de la página madre.
