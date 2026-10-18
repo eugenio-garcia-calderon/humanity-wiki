@@ -74,12 +74,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/03_DECISIONS.md",
-      "motivo": "W6",
-      "desde": "2026-10-18T11:44:25.352Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "W6",
       "desde": "2026-10-18T11:44:27.817Z"
