@@ -18,16 +18,19 @@
       "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
     },
     "iniu-b41-10000-22-5w": {
-      "pagina": "https://iniushop.com/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "imagen": "https://www.pcworld.com/wp-content/uploads/2025/04/Iniu-portable-charger-10000mah.jpg?quality=50&strip=all&w=1024",
+      "pagina": "https://www.pcworld.com/article/2382089/snag-this-ultra-thin-10k-power-bank-for-your-phone-now-just-16.html",
+      "por_que": "og:image (1024×576) de un artículo de PCWorld sobre la INIU B41; la foto está acreditada a «Iniu» (foto oficial). No pude ver la imagen, solo su alt y crédito."
     },
     "anker-powercore-10000": {
+      "imagen": "https://cdn.shopify.com/s/files/1/0595/4034/0926/products/A1263011.jpg?v=1654744958&width=1200",
       "pagina": "https://www.anker.com/eu-pl/products/a1263",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "por_que": "La página polaca de Anker sí declara og:image: A1263011.jpg, primera foto de la galería del PowerCore 10000 (A1263). No vi la imagen en sí."
     },
     "anker-prime-power-bank-27650-250w": {
-      "pagina": "https://www.anker.com/eu-de/products/a1340-250w-power-bank",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "pagina": "https://galaxus.at/en/s1/product/anker-prime-27650-mah-250-w-9954-wh-powerbanks-40773021",
+      "imagen": "https://static01.galaxus.com/productimages/4/8/3/7/5/9/8/8/2/3/9/9/0/3/6/1/7/3/4/d6111992-19ea-4948-872a-1fd969756faa_cropped.jpg_720.jpeg",
+      "por_que": "Distribuidor Galaxus, og:title «Anker Prime (27650 mAh, 250 W, 99.54 Wh)»; og:image y versión 720 px de la foto de producto. Alternativa: og:image de anker.com/eu-de (Rectangle1.png), sin verificar qué muestra."
     },
     "hiluckey-hi-s025-solar-25000": {
       "pagina": "https://hiluckey.com/products/hiluckey-solar-charger-25000mah-with-4-solar-panels-3-usb-outputs-1",
@@ -75,16 +78,19 @@
       "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
     },
     "biolite-solarhome-620-plus": {
-      "pagina": "https://eu.bioliteenergy.com/products/solarhome-620-plus",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "imagen": "https://s3.amazonaws.com/syncpigeon/alti_prod/images/blt-sha0301_no-color.jpg",
+      "pagina": "https://altitude-sports.com/products/biolite-biolite-solar-home-system-620-llll-blt-sha0301",
+      "por_que": "Primera foto de la galería de Altitude Sports para «BioLite Solar Home System 620+» (ref. BLT-SHA0301); la página no tiene og:image, así que va como URL directa (la sirven vía proxy img.thelasthunt.com). Tamaño no comprobado."
     },
     "little-sun-original": {
-      "pagina": "https://littlesun.org/product/little-sun-original",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "imagen": "https://shop.noma.org/cdn/shop/products/SUNLAMPNEW.jpg?v=1668716145&width=1200",
+      "pagina": "https://shop.noma.org/products/little-sun-solar-lamp",
+      "por_que": "og:image (2100×2100, Shopify, aquí reducida a 1200) de la tienda del New Orleans Museum of Art para la «Little Sun Solar Lamp» de Olafur Eliasson, que es el modelo Original. No vi la imagen."
     },
     "coleman-peak1-200-solar": {
-      "pagina": "https://www.evo.com/lanterns/coleman-peak1-200-lumen-solar-rechargeable-lantern",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "pagina": "https://Backcountry.com/coleman-peak1-200l-rechargeable-lantern-c004",
+      "imagen": "https://content.backcountry.com/images/items/large/CMN/CMNK1BL/ONECOL.jpg",
+      "por_que": "og:image de Backcountry «Coleman Peak1 200 Lumen Rechargeable Lantern»; la ficha la describe como farol solar (11 h de sol para recarga completa). Tamaño 'large' no medido."
     },
     "canadian-solar-tophiku6": {
       "imagen": "https://static.csisolar.com/wp-content/uploads/sites/2/2023/08/11160216/TOPHiKu6-detailed-au.png",
@@ -124,9 +130,9 @@
       "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
     },
     "anker-solix-x1": {
-      "imagen": "https://cdn.shopify.com/s/files/1/0890/0060/8050/files/Group_1312316465_3840x.png?v=1774256073",
-      "pagina": "https://www.ankersolix.com/uk/x1-energy-storage-system-hes",
-      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+      "imagen": "https://cdn.shopify.com/s/files/1/0650/3769/7280/files/Group_1312316465.png?v=1716530649&width=1200",
+      "pagina": "https://www.ankersolix.com/uk/x1-0334",
+      "por_que": "Imagen principal («Anker SOLIX X1») de la página oficial de Anker SOLIX UK, con width=1200 para no pasar de 8 MB; esa página tiene og:image vacío. No vi la imagen; puede ser render de marketing."
     },
     "dyness-tower": {
       "pagina": "https://solarscouts.de/dyness-tower-t10-10-66-kwh-battery-storage-your-ideal-10-kwh-photovoltaic-storage-with-bdu-1-5g",
@@ -143,8 +149,9 @@
       "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
     },
     "lg-resu": {
-      "pagina": "https://www.ecowizard.co.uk/battery-storage/lg-chem-10kwh-prime-hv-li-battery/",
-      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+      "imagen": "https://muhammed.portlandiaelectric.supply/cdn/shop/files/pes_7385174933638.jpg?v=1785258677&width=1200",
+      "pagina": "https://muhammed.portlandiaelectric.supply/products/lg-resu-10h-prime",
+      "por_que": "Foto frontal (Shopify, 1200 px) del distribuidor Portlandia Electric, og:title «LG Chem RESU10H Prime 9.6kWh Battery». Alternativa: og:image de suministrosdelsol.com (3821-large_default). Vale para el RESU10H Prime, no para RESU16H ni Flex."
     },
     "sungrow-sbr": {
       "imagen": "https://official-oversears-file.sungrowpower.com/page-assets/e22839ec-9eb2-499d-83dc-ef697800cbcf.png",
