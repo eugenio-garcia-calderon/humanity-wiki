@@ -9341,6 +9341,11 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Descatalogado y a la venta**: si el estado es «Descatalogado» y hay tiendas con precio, la etiqueta dice «Descatalogado por el fabricante · aún a la venta en N tiendas» (Tesla Powerwall 2). Sin precio, sigue diciendo «Descatalogado». La etiqueta verde es solo para «A la venta».
 - **Capacidad útil**: en las baterías domésticas, la cifra de las tarjetas, del buscador y del filtro de alternativas por tamaño es la **capacidad útil**, la misma que usa el precio por kWh (antes, la total: «14 kWh» junto a un €/kWh calculado con 13,5). Además la publican 16 de 18 baterías, frente a 10 que publican la total.
 
+## 2026-10-18 — «La mejor en cada criterio», con los criterios de la valoración (Wikiproducts W4)
+- El bloque de alternativas de la ficha empieza ahora por los criterios de la valoración: **Precio, Garantía, Ecología y Salud y seguridad**. Mientras no hay votos suficientes, cada uno se decide con un dato publicado que se nombra en la línea («Según los datos: precio por kWh», «ciclos de carga declarados (más ciclos, más años de uso)», «degradación anual (pierde menos potencia cada año)», «retiradas y alertas de seguridad»). Cuando al menos dos productos tienen nota de la comunidad en un criterio, manda la comunidad («Según los votos de la comunidad»).
+- **Calidad, Estética y Ética** sólo aparecen con votos: ningún dato nuestro dice lo bonito o lo ético que es un producto, y no se inventa.
+- Seguridad cuenta sólo los productos cuyas retiradas se buscaron (`retiradas_fecha`); empates «y N más». Tras los criterios, las cifras técnicas de antes, sin repetir otro precio ni otra garantía.
+- La nota del pie lo explica cuando hay criterios por datos. La comisión sigue sin poder ser criterio. Pruebas en `scripts/probar-valoraciones.ts` (10).
 ## 2026-10-18 — Wikiproducts: «Qué conviene mirar» on each subcategory page (W3a, evaluator round 3)
 
 - Each of the 5 subcategory pages gets a short buying guide: 4–5 points on what to compare (energy in Wh vs mAh, output power, real vs peak watts, usable vs total kWh, the two panel warranties, certificates, flight rules). Neutral, no product named; every figure links its source (IATA, ICAO, PVEducation, Lighting Global, Fraunhofer ISE). Text lives in `scripts/wikiproducts/datos/textos.json` → `guias`.
