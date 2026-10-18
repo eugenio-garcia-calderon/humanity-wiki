@@ -103,6 +103,8 @@ import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
 import { registrarEspacio } from './espacio.js';
 import { registrarApiPublica } from './apiPublica.js';
 import { registrarWebhooks } from './webhooks.js';
+import { registrarSoporte } from './soporte.js';
+import { registrarExpertos } from './expertos.js';
 
 /**
  * Un módulo de la API.
@@ -374,6 +376,11 @@ export const MODULOS: Modulo[] = [
         + 'de 15 días. Vivía en GitHub Actions y no había funcionado nunca (ver el módulo).',
   },
   { nombre: 'espacio', montar: (app, db) => registrarEspacio(app, db), nota: 'Favoritos, recientes y búsqueda avanzada del espacio de trabajo (#14, #15).' },
+  // Chat de ayuda de los sitios y consultas de pago con expertos (W6 de Wikiproducts).
+  // Leen la sesión de miembro del sitio por su cuenta (`miembroActual`), así que no
+  // dependen del orden respecto a `miembros`; el aviso de pago les llega desde `stripe.ts`.
+  { nombre: 'soporte', montar: (app, db) => registrarSoporte(app, db) },
+  { nombre: 'expertos', montar: (app, db) => registrarExpertos(app, db) },
 ];
 
 /**

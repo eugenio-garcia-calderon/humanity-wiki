@@ -66,7 +66,10 @@ export type TipoAviso =
   // Seguir una página (carril acceso): ha cambiado una página que sigues.
   | 'pagina_cambiada'
   // Sitios con miembros (carril acceso): alguien pide entrar en tu sitio.
-  | 'miembro_pendiente';
+  | 'miembro_pendiente'
+  // Chat de ayuda y expertos de los sitios (W6 Wikiproducts, 2026-10-18).
+  | 'soporte_mensaje'     // te han escrito (o respondido) en el chat de ayuda de un sitio
+  | 'consulta_reservada'; // alguien ha reservado y pagado una consulta con un experto
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos

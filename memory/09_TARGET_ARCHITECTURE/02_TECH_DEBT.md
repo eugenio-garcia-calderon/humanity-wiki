@@ -375,3 +375,20 @@ of rows or are read very often, move the sync to the write paths
 (`escribirCeldas`, file upload, row create/delete) behind one helper — about
 half a day today, more once more write paths exist. Comercio does not yet
 mark database-backed products as «se edita en su base de datos».
+
+## 2026-10-18 — Expert consultations and support chat (Wikiproducts W6)
+
+- **The site's commission goes to the platform account.** With Stripe
+  Connect, `application_fee` lands in humanity.wiki's account, not the site
+  owner's. For Wikiproducts they are the same person. For other creators'
+  sites it needs a split (owner Connect account as a second transfer) —
+  about half a day now, more once sites with experts exist.
+- **Visitors poll every 8 s** while the chat is open (site sessions do not
+  get the `telecomHub` live connection). Fine for a help chat; a live
+  channel for site sessions is the right pattern if traffic grows.
+- **Paid booking verified only up to Stripe.** No Stripe test key in the
+  environment where it was built: the session creation, the webhook branch
+  and `/confirmar` against a real Stripe session are untested. First thing to
+  run once a test key exists.
+- **No server-rendered HTML fallback yet** for the two blocks (W2's
+  `registrarHtml` was not merged when this was written).

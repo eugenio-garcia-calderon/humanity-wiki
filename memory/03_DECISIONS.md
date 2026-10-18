@@ -656,3 +656,32 @@ read can write — but only a deterministic copy of the owner's own data.
 by the row on the next read (the row is the source). Variants are by name and
 share the product price/stock. The unverified-seller cap (30) applies: rows
 beyond it show the reason instead of a button.
+
+## 2026-10-18 — Site support chat and paid expert consultations (Wikiproducts W6)
+
+**Own tables, not `mensajes`.** Direct messages are person-to-person and need
+a platform session. A site's support is answered by whoever is on the site's
+team, and most askers have no account. `soporte_conversaciones` +
+`soporte_mensajes` reuse the same notification paths (`avisar`, `telecomHub`).
+Visitors without an account are identified by a random token in an HttpOnly
+cookie on that host; only its sha256 is stored.
+
+**No AI auto-answer yet.** Answering with the model when nobody is online is
+one call per question and, on an encyclopedia that sells «no invented
+claims», a wrong answer is worse than «we'll reply here». Left for Eugenio.
+
+**Expert payments: Connect when the expert has it, else the platform holds
+the money and records the debt on the consultation** (`cobro = 'plataforma'`,
+`neto_experto_centimos`, cleared only with a transfer reference). Not reusing
+`liquidaciones`: it is keyed by `pedido_id` and its unique index is per order.
+Price and commission are read server-side from the expert row and frozen on
+the consultation. The commission is shown to the buyer in euros.
+
+**Double booking is prevented by a partial unique index**
+`(experto_id, inicio) WHERE estado IN ('reservando','pagada','hecha')`, not
+by a check-then-insert. A held slot expires with the 30-minute Stripe session.
+Late payment for a taken slot is refunded automatically.
+
+**Availability is stored in the expert's local time** (`zona_horaria`) and
+converted per day with `Intl`, so DST does not move consultations; no date
+library added.
