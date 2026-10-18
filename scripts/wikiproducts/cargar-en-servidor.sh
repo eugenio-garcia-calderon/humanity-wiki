@@ -114,6 +114,17 @@ nodo cargar.mjs
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs
 
+echo "== Textos: frases corregidas en las páginas del sitio, y lo que dicen =="
+nodo corregir-textos.mjs
+
+# The legal notice is built from the site's «Datos legales» (titular and
+# contact): what is empty shows on the page in brackets. Printed, read-only,
+# so it can be checked without opening production. All of it is public.
+echo "== Aviso legal: datos del titular del sitio (lo vacío sale entre corchetes) =="
+sql "SELECT jsonb_pretty(jsonb_build_object('titular', w.config->'sitio'->'titular', 'contacto', w.config->'sitio'->'pie'->'contacto'))
+     FROM dominios_paginas d JOIN knowledge_windows w ON w.id = COALESCE(d.pagina_id, CASE WHEN d.entidad_tipo = 'pagina' THEN d.entidad_id END)
+     WHERE d.dominio = 'wikiproducts.humanity.wiki' LIMIT 1" || echo "(no se ha podido leer)"
+
 # Only when asked (`fotos=si` in the workflow): it reads a page per product.
 if [ "${WP_FOTOS:-no}" = "si" ]; then
   echo "== Fotos: una por producto, de la marca o de la tienda, guardada aquí =="

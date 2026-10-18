@@ -359,6 +359,36 @@ export function registrarApiPublica(app: Express, db: any) {
     } catch (e: any) { console.error('v1 añadir bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
+  /** `{ text: "…" }`: rewrite the text of one text block (paragraph, heading,
+   *  list item, quote, callout) and nothing else, so a loader can correct a
+   *  sentence without rewriting the page through markdown (W3a, 2026-10-18). */
+  const TEXTO_EDITABLE = new Set(['parrafo', 'titulo1', 'titulo2', 'titulo3', 'lista', 'numerada', 'cita', 'aviso', 'tarea', 'desplegable']);
+  const cambiarTexto = (lista: any[], id: string, texto: string): { lista: any[]; previo: any | null } => {
+    let previo: any = null;
+    const out = lista.map(b => {
+      if (previo) return b;
+      if (b?.id === id) { previo = b; return { ...b, texto }; }
+      if (Array.isArray(b?.bloques)) {
+        const r = cambiarTexto(b.bloques, id, texto);
+        if (r.previo) { previo = r.previo; return { ...b, bloques: r.lista }; }
+      }
+      return b;
+    });
+    return { lista: out, previo };
+  };
+  app.patch('/api/v1/pages/:id/blocks/:blockId', async (req: Request, res: Response) => {
+    try {
+      const texto = req.body?.text;
+      if (typeof texto !== 'string' || !texto.trim() || texto.length > 5000) return res.status(400).json({ error: '«text» tiene que ser un texto de 1 a 5000 caracteres.' });
+      const antes = await paginaParaEditar(req, res); if (!antes) return;
+      const r = cambiarTexto(Array.isArray(antes.config?.bloques) ? antes.config.bloques : [], String(req.params.blockId), texto);
+      if (!r.previo) return res.status(404).json({ error: 'Esa página no tiene un bloque con ese id.' });
+      if (!TEXTO_EDITABLE.has(r.previo.tipo) || typeof r.previo.texto !== 'string') return res.status(400).json({ error: 'Por aquí sólo se cambia el texto de un párrafo, título, lista, cita o aviso.' });
+      const w = await guardarBloques(req, res, antes, r.lista); if (!w) return;
+      res.json({ block: { ...r.previo, texto }, page: paginaPublica(w, { version: w.version }) });
+    } catch (e: any) { console.error('v1 cambiar texto:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
   app.delete('/api/v1/pages/:id/blocks/:blockId', async (req: Request, res: Response) => {
     try {
       const antes = await paginaParaEditar(req, res); if (!antes) return;
