@@ -17,6 +17,12 @@
       "ruta": "src/components/bloquesDatos/ficha/modelo.ts",
       "motivo": "W2: R10 sin exigir foto",
       "desde": "2026-10-18T16:06:02.679Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/buscadorSitio.ts",
+      "motivo": "W2: orden del buscador",
+      "desde": "2026-10-18T16:07:55.042Z"
     }
   ]
 }
