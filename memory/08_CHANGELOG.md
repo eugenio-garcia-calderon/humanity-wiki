@@ -8975,3 +8975,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Plantilla «Humanidad Wiki» (Humanidad Wiki, fase 2) (prog8)
 - Nueva página `/plantillas/humanidad-wiki` con el botón «Crear en mi perfil»: crea, con la sesión de quien la pulsa, una página principal «Humanidad Wiki» con el menú de temas y una subpágina por cada tema con su bloque «Contenido de un tema». Nace privada; es una página normal de Wiki Creator que se puede cambiar y replicar.
 - El bloque «Menú de temas», dentro de una web publicada, abre las páginas propias por su dirección pública, que hereda la visibilidad de la página madre.
+
+## 2026-10-18 — Propiedades de la ficha: rejilla y enlaces con imagen (prog8)
+- La página de un elemento enseña sus propiedades en una **rejilla** que se adapta al ancho (una casilla por fila en el móvil, tres o cuatro en escritorio), con el nombre encima y el valor debajo, en orden de izquierda a derecha. Es el diseño por defecto; «dos columnas» se lee como rejilla y «Una columna» sigue disponible en «Personalizar diseño».
+- Lo enlazado desde otra base de datos (Áreas, Equipo…) sale con la **imagen de su página** y más grande; sin imagen, su inicial en color. El servidor añade `miniatura` a cada entrada enlazada, mirando el permiso de la tabla de destino.
+- Archivos: `PropiedadesFila.tsx`, `Relacion.tsx` (`FichaConImagen`), `Celda.tsx` (`enFicha`), `server/bd.ts`.

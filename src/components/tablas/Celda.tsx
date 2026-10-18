@@ -32,7 +32,7 @@ export { formatear, textoComunidad };
 
 
 export default function CeldaTabla({
-  celda, columna, apuntados, archivos, editable, onGuardar,
+  celda, columna, apuntados, archivos, editable, onGuardar, enFicha = false,
 }: {
   celda: Celda;
   columna: Columna;
@@ -40,6 +40,8 @@ export default function CeldaTabla({
   archivos?: any[];
   editable: boolean;
   onGuardar: (valor: any) => Promise<{ error?: string } | void>;
+  /** En la página del elemento: las relaciones salen con su imagen, más grandes. */
+  enFicha?: boolean;
 }) {
   const [editando, setEditando] = useState(false);
   const [borrador, setBorrador] = useState('');
@@ -139,7 +141,7 @@ export default function CeldaTabla({
   //    selector para elegirlas (2026-10-01). Ver `Relacion.tsx`.
   if (columna.tipo === 'relacion') {
     return (
-      <CeldaRelacion columna={columna} apuntados={apuntados || []} editable={puedeEditar}
+      <CeldaRelacion columna={columna} apuntados={apuntados || []} editable={puedeEditar} conImagen={enFicha}
         onGuardar={ids => guardar(ids)} />
     );
   }
