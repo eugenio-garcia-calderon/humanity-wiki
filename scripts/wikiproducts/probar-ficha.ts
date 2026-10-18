@@ -189,4 +189,34 @@ prueba('las tarjetas de una tabla de productos enseñan marca, cifra, precio y n
   assert.equal(propiedadesTarjeta([{ id: 'x', nombre: 'X', tipo: 'texto', config: {} } as any], null), null);
 });
 
+prueba('la cabecera dice precio, nota y cifras clave, sacadas de las columnas', () => {
+  const t: TablaFicha = { ...tabla, columnas: tabla.columnas.map(c => (c.id === 'cap' ? { ...c, config: { ...c.config, clave: 'capacidad_wh' } } : c.id === 'peso' ? { ...c, config: { ...c.config, destacado: true } } : c)) };
+  const v = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.ok(v.compra.desde.includes('149'));
+  assert.deepEqual(v.nota, { media: '4,3', votos: 12 });
+  // `destacado: true` first, then the loader keys; never the commission.
+  assert.deepEqual(v.destacados.map((l: any) => l.columnaId), ['peso', 'cap']);
+  // Under three voters there is no score, and the header says so instead of 0.
+  const sin = vistaPropiedad(ficha('c'), { estilo: 'cabecera' }) as any;
+  assert.deepEqual(sin.nota, { media: '', votos: 0 });
+});
+
+prueba('lo que nadie publica se dice en una frase, no en una fila cada dato', () => {
+  const t: TablaFicha = { ...tabla, filas: tabla.filas.map(f => (f.id === 'c' ? { ...f, procedencia: { peso: { naturaleza: 'no_publicado' as const } } } : f)) };
+  const sinPeso: TablaFicha = { ...t, filas: t.filas.map(f => (f.id === 'c' ? { ...f, celdas: { ...f.celdas, peso: { estado: 'vacia' } as any } } : f)) };
+  const v = vistaPropiedad({ pagina_id: 'PC', fila_id: 'c', tabla: sinPeso, relacionadas: {} }, { estilo: 'tabla', grupo: 'tecnico' }) as any;
+  assert.deepEqual(v.lineas.map((l: any) => l.columnaId), ['cap']);
+  assert.deepEqual(v.sinDato, [{ motivo: 'El fabricante no lo publica', etiquetas: ['Peso (kg)'] }]);
+  const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
+  const html = propiedadHtml({ pagina_id: 'PC', fila_id: 'c', tabla: sinPeso, relacionadas: {} }, { estilo: 'tabla', grupo: 'tecnico' }, h);
+  assert.ok(html.includes('El fabricante no lo publica: Peso (kg).'));
+});
+
+prueba('el comparador marca como principales el precio, la nota y las cifras clave', () => {
+  const t: TablaFicha = { ...tabla, columnas: tabla.columnas.map(c => (c.id === 'cap' ? { ...c, config: { ...c.config, clave: 'capacidad_wh' } } : c)) };
+  const v = vistaComparador(t, ['b', 'c'], { actualId: 'a' })!;
+  assert.deepEqual(v.lineas.filter(l => l.clave).map(l => l.columnaId).sort(), ['cap', 'med', 'pre']);
+  assert.ok(v.lineas.some(l => !l.clave), 'el resto sigue ahí, detrás de «ver todas»');
+});
+
 console.log(`\n${n} comprobaciones, todas bien.`);

@@ -52,8 +52,11 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       const filas: Array<[string, string]> = [];
       if (v.marca) filas.push(['Marca', valor(v.marca, h)]);
       if (v.modelo) filas.push(['Modelo', h.esc(v.modelo)]);
-      filas.push(['Categoría', h.esc(v.categoria)]);
+      filas.push(['Categoría', h.esc(v.subcategoria || v.categoria)]);
+      if (v.nota) filas.push(['Valoración de la comunidad', v.nota.media ? `${h.esc(v.nota.media)} de 5 (${v.nota.votos} ${v.nota.votos === 1 ? 'voto' : 'votos'})` : 'Sin valoraciones suficientes todavía']);
+      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}` : 'Sin precio todavía']);
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
+      for (const l of v.destacados) filas.push([h.esc(l.etiqueta), `${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}`]);
       if (v.gtin) filas.push(['EAN', h.esc(v.gtin)]);
       const img = v.imagen && h.hrefSeguro(v.imagen);
       const foto = img ? `<figure><img src="${h.esc(img)}" alt="${h.esc(v.nombre)}">${v.credito ? `<figcaption>${h.enLinea(v.credito)}</figcaption>` : ''}</figure>` : '';
@@ -65,8 +68,11 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       return `<footer><p>${v.revisado ? `Datos revisados el <time datetime="${h.esc(v.revisado)}">${h.esc(fechaCorta(v.revisado))}</time>.` : 'Estos datos todavía no tienen fecha de revisión.'}${v.fuentes.length ? ` Fuentes: ${h.esc(v.fuentes.join(', '))}.` : ''}</p><p>${h.esc(DESCRIPCION_NATURALEZA)}</p></footer>`;
     case 'lista':
       return `<section>${h2(v.titulo, h)}<ul>${v.lineas.map(l => `<li>${h.esc(l.etiqueta)}: ${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}</li>`).join('')}</ul></section>`;
-    default:
-      return `<section>${h2(v.titulo, h)}<table><tbody>${v.lineas.map(l => `<tr><th scope="row">${h.esc(l.etiqueta)}</th><td>${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}</td></tr>`).join('')}</tbody></table></section>`;
+    default: {
+      const sin = v.sinDato.map(x => `<p>${h.esc(x.motivo)}: ${h.esc(x.etiquetas.join(', '))}.</p>`).join('');
+      const tabla = v.lineas.length ? `<table><tbody>${v.lineas.map(l => `<tr><th scope="row">${h.esc(l.etiqueta)}</th><td>${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}</td></tr>`).join('')}</tbody></table>` : '';
+      return `<section>${h2(v.titulo, h)}${tabla}${sin}</section>`;
+    }
   }
 }
 

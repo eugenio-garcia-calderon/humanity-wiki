@@ -904,3 +904,20 @@ the management panel, is the cheapest way to check it.
 - **An unknown address on a custom domain shows a 404 page, not the home page.** This replaces the 2026-08-22 decision («`lamieldelasierra.com/loquesea` shows the honey»): since SEO R16 the server already answered 404 + `noindex`, so the screen contradicted the status code. The home is one click away from the 404 page.
 - **The menu API only accepts destinations inside the site** (a page of the same owner, the home, or a path starting with `/`), like the blocks API: a leaked key cannot plant an external link in a published menu. External links stay an editor-only action.
 - **Contrast and 16 px are fixed with a scoped stylesheet** (`.sitio-lectura` in `index.css`) over the published reading frame, not by editing each block's classes. See the tech-debt entry.
+
+## 2026-10-18 — Product sheet header from columns, and the layout as a script (W1)
+
+**Decision.** The shop-style header is the existing `propiedad` block in `cabecera` style. It reads price, score and key figures from the row's columns, and no new block type was added. The key figures are chosen by loader key, in code (`DESTACADAS_POR_CLAVE`).
+
+**Why.**
+- The key figures live in code because production column config cannot be patched through `/api/v1`; it is the same reason `ROL_POR_CLAVE` exists.
+- The order of the sheet lives in `plantilla-ficha.json` and is applied by a script, because a template's blocks can only be changed one by one through the API.
+
+**Alternatives.**
+- A new «compra» block. Rejected: the price and the score would then be painted by two blocks.
+- Editing each template by hand. Rejected: there are five templates, and a by-hand edit cannot be reproduced on a fresh copy.
+
+**Cost of the shortcut.**
+- `plantillaInicial()` repeats the JSON's order: two lists to keep in step, about 5 minutes to unify when the API can read a file.
+- The script rewrites every data block of a template when the order differs, which is about 28 API writes per table, once.
+

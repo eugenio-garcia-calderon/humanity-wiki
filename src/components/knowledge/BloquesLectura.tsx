@@ -198,7 +198,7 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
     const propio = PINTAN_SU_COLOR.has(b?.tipo);
     const color = propio ? '' : claseColor(b?.color);
     const caja = (
-      <div id={b?.id ? `b-${b.id}` : undefined}
+      <div id={b?.id ? `b-${b.id}` : undefined} data-tipo={b?.tipo || undefined}
         className={cn(color, b?.tipo === 'basedatos' && AIRE_BASE_DATOS, b?.tipo === 'basedatos' && 'scroll-mt-24', !propio && b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
         {dentro}
       </div>

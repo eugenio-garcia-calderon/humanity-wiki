@@ -167,6 +167,18 @@ function aCelda(col, crudo) {
       const igual = op.find(o => sinAcentos(o) === t) || op.find(o => t.startsWith(sinAcentos(o)));
       return igual ? { valor: igual } : { rechazo: `«${String(aTexto(v)).slice(0, 60)}» no es una de: ${op.join(', ')}` };
     }
+    case 'seleccion_multiple': {
+      // A list, or one string split on commas/semicolons: «Viajes; Camping y montaña».
+      const op = (col.opciones || []).map(o => (typeof o === 'string' ? o : o.label));
+      const lista = Array.isArray(v) ? v.map(x => aTexto(x)) : String(aTexto(v)).split(/[;,]\s*/);
+      const valor = [], fuera = [];
+      for (const x of lista.map(s => String(s).trim()).filter(Boolean)) {
+        const igual = op.find(o => sinAcentos(o) === sinAcentos(x));
+        if (igual) valor.push(igual); else fuera.push(x);
+      }
+      if (fuera.length) return { rechazo: `«${fuera.join(', ').slice(0, 60)}» no es una de: ${op.join(', ')}` };
+      return valor.length ? { valor } : { rechazo: 'lista vacía' };
+    }
     case 'fecha': {
       const t = String(v).trim();
       return /^\d{4}(-\d{2}(-\d{2})?)?$/.test(t) ? { valor: t } : { rechazo: `no es una fecha: «${t.slice(0, 40)}»` };

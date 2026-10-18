@@ -37,7 +37,13 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
           <span>{fraseSinRetiradas(v)}</span>
         </p>
       )}
-      {v.busqueda && v.estado !== 'sin_comprobar' ? <p className="mt-1 text-sm text-slate-500">Dónde se buscó: <TextoConEnlaces texto={v.busqueda} /></p> : null}
+      {/* Folded: one search per agency was a paragraph taller than the recalls. */}
+      {v.busqueda && v.estado !== 'sin_comprobar' ? (
+        <details className="mt-1 text-sm text-slate-500">
+          <summary className="cursor-pointer py-2 font-semibold text-slate-600">Dónde se buscó</summary>
+          <p className="whitespace-pre-line"><TextoConEnlaces texto={v.busqueda} /></p>
+        </details>
+      ) : null}
     </Seccion>
   );
 }

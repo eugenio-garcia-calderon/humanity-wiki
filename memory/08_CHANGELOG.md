@@ -9117,3 +9117,25 @@ en mis páginas como proyecto pendiente».
 - Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
 - Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
 - Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
+
+## 2026-10-18 — Wikiproducts W1: product sheet as a shop landing page
+
+Eugenio: «inspírate en las landing pages de Amazon… que la información esté más compacta… propiedades dentro de una base de datos».
+- **Header** (`propiedad` estilo `cabecera`): photo on the left. Beside it are brand, type and model, the community score as stars with its vote count, or «Sin valoraciones suficientes todavía», and the «Desde» price with how many shops sell it and the stock status. Below that sit up to six key figures as tiles, the buttons «Ver dónde comprarlo» and «Comparar con otros» (they scroll to those blocks), and the EAN. Every value comes from a column. The key figures are picked by loader key (`DESTACADAS_POR_CLAVE` in `ficha/modelo.ts`) or by `config.destacado: true`.
+- **Property tables** are now a grid of tiles: name, value, and a one-line source. «Not published» rows fold into one sentence per reason, for example «El fabricante no lo publica: Tensión de celda, Ciclos de carga.». The server HTML keeps a real `<table>` and adds the same sentence.
+- **Comparator** shows only the main lines at first: price, overall score and the key figures. A button opens all of them. The server HTML still writes every line.
+- **Recalls**: «Dónde se buscó» is folded.
+- **New properties** in `esquema-bd.json`:
+  - every product table: «Qué hay en la caja», «Ideal para» (multi-select with 10 fixed uses) and «Manual de instrucciones»;
+  - powerbanks: recharge time, built-in cable, wireless charging, pass-through charging and battery indicator;
+  - portable panels: kickstand;
+  - lights: motion sensor;
+  - home batteries: phone app.
+  `cargar.mjs` now writes multi-select cells, as a list or as «a; b».
+- **Block order** of every sheet is set in `scripts/wikiproducts/plantilla-ficha.json`:
+  1. header, summary, specs, box and uses, warranty;
+  2. shops, comparator, best in each criterion, ratings;
+  3. claims, recalls, origin, documents, sources.
+
+  `plantilla-ficha.mjs` applies it to each product table's template. It is idempotent and keeps each block's own settings. It runs in `cargar-en-servidor.sh` after `expertos.mjs`, and it **drops the expert booking block** from the sheets: experts are out of the MVP. `plantillaInicial()` gives new tables the same order.
+- Measured on the local copy (Anker Zolo, production build): 9,595 → 8,213 px tall at 390 px and 6,283 → 4,864 px at 1,280 px. CLS is 0 and there is no horizontal scroll. The new properties are empty until W3a loads them.

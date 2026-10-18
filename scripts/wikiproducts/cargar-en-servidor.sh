@@ -16,6 +16,8 @@
 #      experts of `expertos.json` (once each; then the panel rules) and the
 #      short experts block in every product sheet template. Before step 4,
 #      so the «Expertos» menu link that step adds finds the page.
+#   3c. Runs `plantilla-ficha.mjs` (W1): the order of the blocks of every
+#      product sheet, from `plantilla-ficha.json`.
 #   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
 #      a visitor sees none of it (a table inherits visibility from its page).
 #   5. With WP_FOTOS=si, runs `fotos.mjs`: one photo per product, downloaded
@@ -96,6 +98,12 @@ echo "== Expertos: su página, sus fichas y el recuadro en cada producto =="
 # to a page «Consultar a un experto» that already exists. Not fatal: without
 # it the site still loads, it just offers no experts.
 nodo expertos.mjs || echo "AVISO: el paso de expertos ha fallado (arriba dice por qué); el resto de la carga sigue."
+
+echo "== Fichas: el orden de los bloques de cada producto =="
+# After expertos.mjs: the layout has no expert block (dropped from the MVP),
+# so this is the last word on the templates. Not fatal: the sheets keep their
+# previous order.
+nodo plantilla-ficha.mjs || echo "AVISO: no se ha podido ordenar la ficha (arriba dice por qué); el resto de la carga sigue."
 
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs
