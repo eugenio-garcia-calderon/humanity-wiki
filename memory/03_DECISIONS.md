@@ -656,3 +656,38 @@ read can write — but only a deterministic copy of the owner's own data.
 by the row on the next read (the row is the source). Variants are by name and
 share the product price/stock. The unverified-seller cap (30) applies: rows
 beyond it show the reason instead of a button.
+
+## 2026-10-18 — Community ratings: one criterion = one computed column (`comunidad`)
+
+**Context.** Wikiproducts (plan §2.3, 3.3, 3.10): members rate each product 1-5
+on calidad, precio, garantía, ecología, salud, estética and ética, and each
+distributor on atención al cliente; the gallery sorts by any criterion; the
+ranking must never read commission.
+
+**Options.** (a) A rating block with its own criteria list in `bloque.datos`
+and a separate «sort by criterion» feature in the gallery. (b) A new computed
+column type whose cell is the score, filled on read from a `valoraciones`
+table, like the buy button is filled from `products`.
+
+**Chosen: (b).** Sorting (`?orden=`), filtering, formulas, the public API, the
+comparator and «la mejor en cada criterio» (W1) all read a number in a cell
+with zero new code. The block reads the table's `comunidad` columns as its
+criteria. Pieces: `drizzle/0152_valoraciones.sql`, `src/server/bd/comunidad.ts`
+(the maths, pure), `src/server/valoraciones.ts` (routes), the block in
+`src/components/bloquesDatos/valoracion/`.
+
+**The numbers.** Bayesian with a neutral prior: (5·3 + Σ w·x)/(5 + Σ w),
+verified buyer w = 2, nothing shown under 3 voters. The prior is the scale's
+middle (3), not the table's mean: measured in `scripts/probar-valoraciones.ts`,
+with the table's mean as prior one popular 4.6 product lifts the prior and
+three 5s outrank it (4.75 vs 4.6). The adjusted note ORDERS; the plain mean is
+what is SHOWN, because «3,75» for three people who all gave 5 reads as a bug.
+
+**Verified buyer is read, not stored.** A paid/sent/delivered order of the
+product behind the row, or behind a row that links to it (offer → distributor).
+A refund removes the weight by itself. Cost: one CTE over `pedidos` per read of
+a rated table, limited to people who voted.
+
+**Commission.** `bd/comunidad.ts` receives votes and row ids, never row cells;
+the test fails if the word appears in that file or if 50 random commission
+changes move the order.
