@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/bd.ts",
-      "motivo": "W5 Wikiproducts: pasar los apuntados a la tienda (1 línea)",
-      "desde": "2026-10-18T11:28:33.174Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/tablas/EditorColumna.tsx",
       "motivo": "W5 Wikiproducts: grupo de propiedades Ofertas",
       "desde": "2026-10-18T11:33:56.058Z"
