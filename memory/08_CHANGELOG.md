@@ -9371,3 +9371,4 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 
 ## 2026-10-18 — Zonas táctiles de 44 px en la puntuación de la comunidad (Wikiproducts W4)
 - En el móvil, «Entrar para puntuar» medía 32 px de alto y «Cómo se calcula y cómo se ordena» menos de 44: ahora los dos miden al menos 44 px (`min-h-11`). Las estrellas para votar pasan de 32×36 a 44×44, y los enlaces de «Opiniones en otras webs» también tienen 44 px de alto. Medido a 390 px de ancho en la copia local.
+- El pie de «La mejor en cada criterio» ya no enumera precio, garantía, ecología y seguridad: en las luces sólo salen dos y prometía cuatro. Ahora dice que «las líneas marcadas “Según los datos”» se deciden con el dato que nombran.
