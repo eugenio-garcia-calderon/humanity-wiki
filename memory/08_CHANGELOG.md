@@ -8875,6 +8875,7 @@ en mis páginas como proyecto pendiente».
 - El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
 - Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
+
 ### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
 - El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
 
@@ -8885,3 +8886,4 @@ en mis páginas como proyecto pendiente».
 - **La comisión nunca ordena nada**: ni el comparador ni «la mejor en cada criterio» pueden usarla, aunque alguien la configure para eso. Lo comprueba `scripts/wikiproducts/probar-ficha.ts`, y la ficha lo dice al lector.
 - Para buscadores: la ficha sale entera en el HTML del servidor, con título «Marca Modelo: datos, precio y opiniones», datos estructurados `Product` (con precio y, sólo si hay votos reales, nota) y `noindex` mientras le falte foto, resumen, 8 datos con fuente, una oferta o la fecha de revisión.
 - La API v1 crea bases de datos y columnas (`POST /api/v1/databases`, `POST /api/v1/databases/:id/columns`) y fija la forma de las direcciones de sus filas (`route`). `scripts/wikiproducts/crear-esquema.mjs` crea las 14 bases de datos de Wikiproducts (`esquema-bd.json`) sin repetir nada.
+- En el móvil, la burbuja de comentar de cada bloque ya no ensancha la página 16 px (salía por fuera de la columna y se podía arrastrar la página de lado). Ahora queda dentro de la columna en pantallas estrechas.
