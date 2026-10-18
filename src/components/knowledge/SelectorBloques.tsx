@@ -24,13 +24,15 @@ import { cn } from '../../utils/cn';
 
 export type OpcionBloque = {
   tipo: string; label: string; icon: any;
-  grupo: 'basico' | 'herramienta' | 'formato' | 'tienda';
+  // `datos`: los bloques de `components/bloquesDatos/` (2026-10-18).
+  grupo: 'basico' | 'herramienta' | 'datos' | 'formato' | 'tienda';
   desc?: string; color?: string; claves?: string;
 };
 
 const GRUPOS: { id: OpcionBloque['grupo']; titulo: string }[] = [
   { id: 'basico', titulo: 'Básicos' },
   { id: 'herramienta', titulo: 'Herramientas' },
+  { id: 'datos', titulo: 'Datos' },
   { id: 'tienda', titulo: 'Tienda' },
   { id: 'formato', titulo: 'Formato de texto' },
 ];

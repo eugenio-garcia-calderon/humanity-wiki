@@ -1,5 +1,6 @@
 import { createContext, lazy, Suspense, useContext, useEffect, useState } from 'react';
-import { enFilas, AIRE_BASE_DATOS, esPlegable, todosLosBloques } from '../../utils/bloques';
+import { enFilas, AIRE_BASE_DATOS, esPlegable, todosLosBloques, esBloqueDatos } from '../../utils/bloques';
+import { LecturaBloqueDatos } from '../bloquesDatos/registro';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
@@ -261,6 +262,10 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       </details>
     );
   }
+
+  // Los bloques de datos se pintan ellos mismos (2026-10-18). Ver
+  // `bloquesDatos/registro.tsx`: este fichero no tiene que saber de cada uno.
+  if (esBloqueDatos(b.tipo)) return <LecturaBloqueDatos bloque={b} paginaId={raiz?.paginaId} />;
 
   switch (b.tipo) {
     case 'separador':
