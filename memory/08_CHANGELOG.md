@@ -9009,4 +9009,10 @@ en mis páginas como proyecto pendiente».
 - Los títulos de los grupos de una galería salen **más grandes y centrados** por defecto y, al agrupar por una relación (p. ej. por Áreas), con la **imagen de lo enlazado** (la de «Movilidad»).
 - En **Configuración → Grupos**: tamaño del título (S, M, L, XL), alineación (izquierda o centro) e «Imagen del grupo» (sí/no). Se guardan en la vista (`grupo_titulo`, `grupo_alineacion`, `grupo_imagen`).
 - La imagen sale de la `miniatura` que el servidor ya manda en cada entrada enlazada; `agruparFilas` la pasa al grupo (`Grupo.imagen`).
+
+## 2026-10-18 — Soltar en un grupo una tarjeta de otra base de datos (prog8)
+- Al arrastrar una tarjeta de otra base de datos a un grupo de una galería agrupada, se queda en ESE grupo (antes caía en «Sin …»): tras `mover-a-tabla`, la galería escribe los valores del grupo (`celdasAlRecibir`, que `porGrupos` pasa con todos los niveles de grupo).
+- Un grupo vacío también recibe tarjetas: su «Todavía no hay nada» es zona de soltar («Suéltala aquí»).
+### 2026-10-18 — Los distribuidores tienen «Nota» (Wikiproducts W1)
+- Nueva columna «Nota» (texto largo, interna) en la base de datos de distribuidores, para lo que la carga de datos trae en `nota`: direcciones, o avisos de trabajo como «páginas no legibles por la herramienta». Es interna: no sale en la ficha pública del distribuidor. `crear-esquema.mjs` la crea en tablas que ya existen sin tocar nada más (crea sólo las columnas que faltan).
 - Los enlaces a una ficha con dirección legible salen por ella en todo el sitio, no por `/p/…`: los de las tablas y galerías, los del texto, los del menú y los de las fichas a otras fichas. Antes, cada uno de esos enlaces llevaba a un 301, un salto de más para los buscadores. En el HTML del servidor se cambian todos a la vez, y el navegador recibe las mismas direcciones (`src/utils/rutasLegibles.ts`).

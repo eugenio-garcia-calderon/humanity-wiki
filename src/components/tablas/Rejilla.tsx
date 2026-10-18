@@ -589,7 +589,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
    */
   const porGrupos = (
     lista: Fila[],
-    pintar: (fs: Fila[], grupo?: Grupo) => ReactNode,
+    pintar: (fs: Fila[], grupo?: Grupo, celdas?: Record<string, any>) => ReactNode,
     cabecera: (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => ReactNode,
     pie?: (celdas: Record<string, any>) => ReactNode,
     nivel = 0, padre: Grupo | null = null, celdasPadre: Record<string, any> = {},
@@ -597,7 +597,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     pieArriba = false,
   ): ReactNode => {
     const col = nivel === 0 ? colAgr : nivel === 1 ? colSub : null;
-    if (!col) return <>{pintar(lista, padre || undefined)}{pie?.(celdasPadre)}</>;
+    if (!col) return <>{pintar(lista, padre || undefined, celdasPadre)}{pie?.(celdasPadre)}</>;
     const grupos = agruparFilas(lista, col, nivel === 0 ? activa.config : { ...activa.config, ocultar_vacios: true })
       .filter(g => nivel > 0 || !gruposOcultos.has(g.clave));
     return grupos.map(g => {
@@ -1098,8 +1098,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
-          {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo) => (
+          {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
+              // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
+              celdasAlRecibir={colAgr && editable ? celdasGrupo : undefined}
               alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
