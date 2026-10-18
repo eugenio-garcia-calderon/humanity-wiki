@@ -195,7 +195,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
               <GripVertical className="w-3.5 h-3.5" />
             </span>
           )}
-          <div className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', enRejilla ? 'pr-5 -mb-0.5' : 'w-32 sm:w-40')}>
+          <div className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', enRejilla ? 'justify-center px-5 -mb-0.5' : 'w-32 sm:w-40')}>
             {renombrando === c.id ? (
               <input autoFocus defaultValue={c.nombre} maxLength={120} aria-label="Nombre de la propiedad"
                 onBlur={e => { setRenombrando(null); const n = e.target.value.trim(); if (n && n !== c.nombre) cambiarColumna(c, { nombre: n }); }}
@@ -240,7 +240,10 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
               {opcionMenu(LayoutTemplate, 'Personalizar diseño', () => { setMenu(null); setDisenando(true); })}
             </Desplegable>
           </div>
-          <div className={cn('flex-1 min-w-0', enRejilla && '-mx-2')}>
+          {/* EN EL CENTRO (2026-10-18, Eugenio): en la rejilla, el nombre de la
+              propiedad y su valor van centrados, uno encima del otro —también
+              los números, que en la tabla van a la derecha—. */}
+          <div className={cn('flex-1 min-w-0', enRejilla && '-mx-2 text-center [&_.text-right]:text-center [&_.flex-wrap]:justify-center')}>
             <CeldaTabla enFicha celda={datos.fila.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
               apuntados={datos.fila.apuntados?.[c.id]} archivos={datos.fila.archivos?.[c.id]}
               editable={editable} onGuardar={val => guardar(c.id, val)} />
