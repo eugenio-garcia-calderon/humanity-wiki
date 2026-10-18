@@ -128,6 +128,11 @@ ok('las condiciones de la tienda llenan la caja; «desconocido» no es un plazo'
   assert.equal(t.stock, 'Disponibilidad sin confirmar');
   assert.match(t.comprobado, /^Precio comprobado el 18 de octubre de 2026$/);
   assert.equal(texto({ ...oferta, plazo: '24-48 h' }).entrega, 'Entrega: 24-48 h');
+  // A calendar date goes stale in days: the shop's range is shown instead.
+  for (const plazo of ['Recíbelo entre el lunes 26 de octubre y el lunes 2 de noviembre', '22–26/10/2026', '26 oct – 2 nov', 'entrega 20/10/2026'])
+    assert.equal(texto({ ...oferta, plazo }).entrega, 'Entrega en 1–2 días', plazo);
+  for (const plazo of ['2–5 días laborables', '48/72 h', '24/48 h', '1–2 días hábiles (envío)'])
+    assert.equal(texto({ ...oferta, plazo }).entrega, `Entrega: ${plazo}`, plazo);
 });
 ok('«en stock» sin cantidad dice En stock; una cantidad manda sobre él', () => {
   assert.equal(texto({ ...oferta, en_stock: true }).stock, 'En stock');
