@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/AplicacionDeDominio.tsx",
-      "motivo": "W2: páginas por su nombre en dominio propio + llms.txt",
-      "desde": "2026-10-18T15:54:40.402Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/bloquesDatos/ficha/modelo.ts",
       "motivo": "W2: R10 sin exigir foto",
       "desde": "2026-10-18T16:06:02.679Z"
