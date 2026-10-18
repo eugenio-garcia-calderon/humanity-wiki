@@ -405,3 +405,13 @@ subdomain; on a custom domain whose root IS that parent, the right path is
 `/`. Fix by passing the parent's canonical into the ampliación (W2) — half
 an hour — once W2's readable-URL follow-up (R2) lands, since it changes the
 paths anyway.
+
+## 2026-10-18 — Client-side links to rows still use `/p/:id` (Wikiproducts W2, R2)
+
+The server HTML, sitemap and canonical use a row's readable URL, but the React
+gallery/table link with `enlacePagina(id)` → `/p/:id`, so in-app navigation shows
+`/p/BDF…` in the address bar (a hard load of it 301s to the readable one).
+Fixing it means passing the row page's slug to the reading components
+(`Rejilla`, `Galeria`) and an `enlaceRuta` in `ContextoSitio`: about an hour
+today, touching files other threads edit often. Do it when the product sheet
+(W1) settles.

@@ -8904,3 +8904,13 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Ocultar una entrada entera al público (prog8)
 - En el menú de una tarjeta (clic derecho o ⋯), «Ocultar al publicar»: la entrada deja de verse en la web publicada. Quien edita la sigue viendo, atenuada y con la marca «Oculta», y la vuelve a enseñar con «Mostrar al publicar».
 - El servidor no manda las entradas ocultas a quien no puede editar la tabla (columna `bd_filas.oculta`, migración 0154).
+
+
+### 2026-10-18 — Direcciones legibles para las fichas (Wikiproducts W2, SEO R2)
+- Una base de datos puede llevar una plantilla de dirección (`config.ruta`, p. ej. `powerbanks/{Marca}-{Modelo}`) y cada fila se abre por su nombre: `wikiproducts.humanity.wiki/powerbanks/anker-737-powercore-24k` en vez de `/p/BDF…`. Funciona igual en dominio propio, subdominio y `humanity.wiki/@quien/…`.
+- Dos o tres tramos; el primero no puede ser uno de la aplicación (`p`, `bd`, `buscar`…). `{Columna}` toma el valor de esa columna; una relación (la marca) da el nombre de la fila apuntada. Si falta un dato, la ficha sigue en `/p/:id`.
+- Si la ficha cambia de nombre, la dirección vieja contesta 301 a la nueva para siempre (tabla `direcciones_anteriores`, migración 0158). `/p/:id` de una ficha con dirección legible también lleva a ella con un 301.
+- La dirección se calcula al leer (sitemap, visita a `/p/:id`), al poner la plantilla con `PATCH /api/v1/databases/:id {route}`, y con `POST /api/v1/databases/:id/routes` (con clave de API) o `POST /api/bd/tablas/:id/rutas` (con sesión) para quien carga datos en bloque. El sitemap, la canónica y el HTML del servidor usan ya la dirección legible.
+
+### 2026-10-18 — Las entradas ocultas tampoco salen en el HTML, el sitemap ni el buscador (W2)
+- Una entrada oculta (0154, #599) ya no se veía en la tabla de la pantalla, pero el HTML del servidor (#589), el sitemap, el buscador del sitio y la página pública de la entrada (`/p/:id`) leían las filas sin mirar `oculta`: quien abriera el código de la página o el sitemap la veía. Ahora la página de una entrada oculta deja de heredar «publicada» de la página que enseña su base de datos (`subirDesdePagina`) y las cuatro lecturas la saltan. Quien edita la tabla la sigue viendo en el editor.

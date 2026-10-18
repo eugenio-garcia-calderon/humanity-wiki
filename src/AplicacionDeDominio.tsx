@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProveedorSitio, sitioConAnfitrion } from './components/sitio/ContextoSitio';
 import PaginaDeDominio, { type Resuelto } from './pages/PaginaDeDominio';
 import SubpaginaSitio from './pages/SubpaginaSitio';
+import RutaSitio from './pages/RutaSitio';
 import BuscadorSitio from './components/sitio/BuscadorSitio';
 import { resolverPrecargado } from './utils/precargado';
 
@@ -81,6 +82,10 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
             <Route path="p/:id" element={<SubpaginaSitio propio />} />
             {/* El buscador del sitio (2026-10-18). */}
             <Route path="buscar" element={<BuscadorSitio />} />
+            {/* La dirección legible de una ficha: `/powerbanks/anker-737` (SEO R2).
+                Si no es ninguna, lo de siempre: la página del dominio. */}
+            <Route path=":categoria/:ficha" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
+            <Route path=":categoria/:sub/:ficha" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
             <Route path="*" element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
           </Routes>
       </ProveedorSitio>
