@@ -189,6 +189,113 @@
           }
         },
         {
+          "clave": "envia_a_espana",
+          "nombre": "Envía a España",
+          "tipo": "casilla",
+          "config": {
+            "clave": "envia_a_espana",
+            "grupo": "compra",
+            "rol": "envia_espana"
+          }
+        },
+        {
+          "clave": "entrega_min_dias",
+          "nombre": "Entrega desde (días)",
+          "tipo": "numero",
+          "config": {
+            "clave": "entrega_min_dias",
+            "grupo": "compra",
+            "rol": "entrega_min"
+          }
+        },
+        {
+          "clave": "entrega_max_dias",
+          "nombre": "Entrega hasta (días)",
+          "tipo": "numero",
+          "config": {
+            "clave": "entrega_max_dias",
+            "grupo": "compra",
+            "rol": "entrega_max"
+          }
+        },
+        {
+          "clave": "envio_eur",
+          "nombre": "Envío estándar",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_eur",
+            "grupo": "compra",
+            "rol": "envio_tienda",
+            "moneda": "EUR"
+          }
+        },
+        {
+          "clave": "envio_gratis_desde_eur",
+          "nombre": "Envío gratis desde",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_gratis_desde_eur",
+            "grupo": "compra",
+            "rol": "envio_gratis_desde",
+            "moneda": "EUR"
+          }
+        },
+        {
+          "clave": "devolucion_dias",
+          "nombre": "Plazo de devolución (días)",
+          "tipo": "numero",
+          "config": {
+            "clave": "devolucion_dias",
+            "grupo": "compra",
+            "rol": "devolucion_dias"
+          }
+        },
+        {
+          "clave": "devolucion_gratis",
+          "nombre": "Devolución gratuita",
+          "tipo": "casilla",
+          "config": {
+            "clave": "devolucion_gratis",
+            "grupo": "compra",
+            "rol": "devolucion_gratis"
+          }
+        },
+        {
+          "clave": "garantia_gestion",
+          "nombre": "Quién gestiona la garantía",
+          "tipo": "seleccion",
+          "opciones": [
+            "La tienda",
+            "La marca",
+            "La tienda o la marca"
+          ],
+          "config": {
+            "clave": "garantia_gestion",
+            "grupo": "compra",
+            "rol": "garantia"
+          }
+        },
+        {
+          "clave": "condiciones_url",
+          "nombre": "Condiciones de la tienda",
+          "tipo": "url",
+          "config": {
+            "clave": "condiciones_url",
+            "grupo": "compra",
+            "rol": "condiciones"
+          }
+        },
+        {
+          "clave": "condiciones_fecha",
+          "nombre": "Condiciones consultadas el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "condiciones_fecha",
+            "grupo": "compra",
+            "rol": "condiciones_fecha"
+          }
+        },
+        {
           "clave": "fuentes",
           "nombre": "Fuentes",
           "tipo": "texto_largo",

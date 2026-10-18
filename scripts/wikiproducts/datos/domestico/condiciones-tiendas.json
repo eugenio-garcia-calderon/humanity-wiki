@@ -1,0 +1,1439 @@
+{
+  "generado": "2026-10-18",
+  "fuente": "W5: condiciones publicadas por cada tienda (evaluador ronda 2, arreglo 3)",
+  "distribuidores": [
+    {
+      "id": "basic-solar-de",
+      "nombre": "basic-solar.de",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://basic-solar.de/versandkosten/",
+        "fecha": "2026-10-18",
+        "nota": "Tarifas «válidas para Alemania y Austria». Datos para Alemania."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Ni la página de envío ni las condiciones dan plazo; solo fichas de producto («en 7 días»)."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Ni la página de envío ni las condiciones dan plazo; solo fichas de producto («en 7 días»)."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://basic-solar.de/versandkosten/",
+        "fecha": "2026-10-18",
+        "nota": "Según tamaño: paquete 3,90-7,90 €, palé 69 € (más suplemento por pieza)."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://basic-solar.de/versandkosten/",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis por importe; solo ciertos kits indicados en su ficha."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://basic-solar.de/rueckerstattung_rueckgaben-2/",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://basic-solar.de/rueckerstattung_rueckgaben-2/",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga los costes directos de la devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://basic-solar.de/allgemeine-geschaeftsbedingungen/",
+        "fecha": "2026-10-18",
+        "nota": "Las condiciones (§7) aplican la garantía legal del vendedor."
+      },
+      "condiciones_url": "https://basic-solar.de/versandkosten/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "aceflex-de",
+      "nombre": "aceflex.de",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/zahlung-versand/",
+        "fecha": "2026-10-18",
+        "nota": "Envía sobre todo en Alemania; lista de países UE bajo pedido sin España. Datos para Alemania."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/zahlung-versand/",
+        "fecha": "2026-10-18",
+        "nota": "Paquetes en Alemania «ca. 2-3 Werktage» (otra sección dice 1-3)."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/zahlung-versand/",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/zahlung-versand/",
+        "fecha": "2026-10-18",
+        "nota": "Calculado al pagar: paquete 5,99 € o 17 € según artículo; transporte según peso y CP."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de pago y envío no menciona umbral de envío gratis."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/widerrufsbelehrung/",
+        "fecha": "2026-10-18",
+        "nota": "Solo consumidores."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/widerrufsbelehrung/",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga los costes directos de la devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.aceflex.de/agb/",
+        "fecha": "2026-10-18",
+        "nota": "«Gewährleistungsansprüche sind an den Verkäufer zu richten» (tienda web)."
+      },
+      "condiciones_url": "https://www.aceflex.de/zahlung-versand/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "sun",
+      "nombre": "sun.store",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Marketplace B2B europeo; no publica lista de países. Venta directa Ex Works, solo empresas."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Venta directa: plazo acordado con el comprador (máx. 6 meses); sin plazo estándar."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Venta directa: plazo acordado con el comprador (máx. 6 meses); sin plazo estándar."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://storage.sun.store/public/legal-hub/terms_of_sale_and_supply_EU.pdf",
+        "fecha": "2026-10-18",
+        "nota": "Venta directa Ex Works; transporte a cargo del comprador, presupuestado aparte."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://storage.sun.store/public/legal-hub/terms_of_sale_and_supply_EU.pdf",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis"
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://storage.sun.store/public/legal-hub/terms_of_sale_and_supply_EU.pdf",
+        "fecha": "2026-10-18",
+        "nota": "Solo B2B, sin desistimiento; no se cancela sin consentimiento. En marketplace, plazo del vendedor."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Política de devoluciones: lo acuerdan vendedor y comprador; no se publica quién paga."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://storage.sun.store/public/legal-hub/terms_of_sale_and_supply_EU.pdf",
+        "fecha": "2026-10-18",
+        "nota": "Venta directa: sun.store no da garantía propia; reclamar al fabricante (§10.2)."
+      },
+      "condiciones_url": "https://storage.sun.store/public/legal-hub/terms_of_sale_and_supply_EU.pdf",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "krannich-solar",
+      "nombre": "Krannich Solar (Suiza), sección «Restposten» (restos de stock)",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Tienda solo para empresas; las condiciones (ALB) no publican países de entrega."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Plazos no vinculantes (§5 ALB); solo herramienta «Versandtermin ermitteln»."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Plazos no vinculantes (§5 ALB); solo herramienta «Versandtermin ermitteln»."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://shop.krannich-solar.com/de-de/Rechtliches/ALB",
+        "fecha": "2026-10-18",
+        "nota": "Precios desde su sede más transporte, embalaje y seguro, sin tarifa publicada."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las ALB no mencionan envío gratis."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://shop.krannich-solar.com/de-de/Rechtliches/ALB",
+        "fecha": "2026-10-18",
+        "nota": "Solo empresas: sin derecho de desistimiento; devoluciones solo con permiso escrito (§12.7)."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las ALB no regulan devoluciones fuera de defectos."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda o la marca",
+        "naturaleza": "declarado",
+        "fuente": "https://shop.krannich-solar.com/de-de/Rechtliches/ALB",
+        "fecha": "2026-10-18",
+        "nota": "Defectos: Krannich (§12, 1 año). Garantías comerciales: contra el fabricante (§4.2)."
+      },
+      "condiciones_url": "https://shop.krannich-solar.com/de-de/Rechtliches/ALB",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "7sun-eu",
+      "nombre": "7SUN (7sun.eu)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://7sun.eu/delivery/",
+        "fecha": "2026-10-18",
+        "nota": "Entrega en Polonia, UE, Suiza y Ucrania. Tienda solo B2B (empresas)."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones dicen que los plazos son aproximados; no hay cifra publicada."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones dicen que los plazos son aproximados; no hay cifra publicada."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://7sun.eu/terms-and-conditions-2/",
+        "fecha": "2026-10-18",
+        "nota": "Coste indicado al hacer el pedido o acordado aparte."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Ni la página de entrega ni las condiciones mencionan envío gratis."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://7sun.eu/terms-and-conditions-2/",
+        "fecha": "2026-10-18",
+        "nota": "Solo B2B: sin desistimiento; devolución solo con consentimiento previo del vendedor."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones no dicen quién paga la devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://7sun.eu/terms-and-conditions-2/",
+        "fecha": "2026-10-18",
+        "nota": "Garantía legal del vendedor excluida; defectos según garantía de cada fabricante."
+      },
+      "condiciones_url": "https://7sun.eu/terms-and-conditions-2/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "pvundso-de",
+      "nombre": "pvundso.de",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://pvundso.de/versand__lieferung/",
+        "fecha": "2026-10-18",
+        "nota": "Tabla de envío solo con Alemania, Austria y Países Bajos. Datos para Alemania."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de envío no da plazos; varían por producto (p. ej. 3-5 o 10-14 días)."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de envío no da plazos; varían por producto (p. ej. 3-5 o 10-14 días)."
+      },
+      "envio_eur": {
+        "valor": 6.95,
+        "naturaleza": "declarado",
+        "fuente": "https://pvundso.de/versand__lieferung/",
+        "fecha": "2026-10-18",
+        "nota": "Paquete en Alemania. Transporte (Spedition) 89 €, gratis desde 899 €."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 100,
+        "naturaleza": "declarado",
+        "fuente": "https://pvundso.de/versand__lieferung/",
+        "fecha": "2026-10-18",
+        "nota": "Paquete en Alemania."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://pvundso.de/widerrufsbelehrung/",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://pvundso.de/widerrufsbelehrung/",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga los costes directos; voluminosos hasta ~129 € por artículo."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://pvundso.de/allgemeine_geschaeftsbedingungen/",
+        "fecha": "2026-10-18",
+        "nota": "Las condiciones (§7) aplican la garantía legal del vendedor."
+      },
+      "condiciones_url": "https://pvundso.de/versand__lieferung/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "solarplus-es",
+      "nombre": "DamiaSolar (precio citado por solarplus.es)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.damiasolar.com/content/envio-gratuito-y-urgente-en-2448-horas.html",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones de DamiaSolar (damiasolar.com); solarplus.es es solo una guía, no vende."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.damiasolar.com/content/envio-gratuito-y-urgente-en-2448-horas.html",
+        "fecha": "2026-10-18",
+        "nota": "Solo el rótulo «ENVIO GRATIS 48/72H», sin decir si es entrega o laborables."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.damiasolar.com/content/envio-gratuito-y-urgente-en-2448-horas.html",
+        "fecha": "2026-10-18",
+        "nota": "Solo el rótulo «ENVIO GRATIS 48/72H», sin decir si es entrega o laborables."
+      },
+      "envio_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://www.damiasolar.com/content/envio-gratuito-y-urgente-en-2448-horas.html",
+        "fecha": "2026-10-18",
+        "nota": "«Envíos con portes gratuitos a España peninsular»."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://www.damiasolar.com/content/envio-gratuito-y-urgente-en-2448-horas.html",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página «Condiciones de compra» no se pudo leer (sin texto accesible); no hallado en otras páginas."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página «Condiciones de compra» no se pudo leer; no hallado en otras páginas."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró página de garantía; condiciones de compra ilegibles."
+      },
+      "condiciones_url": "https://www.damiasolar.com/content/envio-gratuito-y-urgente-en-2448-horas.html",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "klima-pt",
+      "nombre": "Klima.pt",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://klima.pt/content/1-entrega-e-devolucoes",
+        "fecha": "2026-10-18",
+        "nota": "España aparece en el formulario de presupuesto de portes; web: «Envios para toda a Europa»."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de entregas no da plazos."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de entregas no da plazos."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://klima.pt/content/1-entrega-e-devolucoes",
+        "fecha": "2026-10-18",
+        "nota": "Presupuesto de portes por e-mail según productos y destino."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se menciona envío gratis en la página de entregas ni en la portada."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página exige estar «dentro do período de devolução» sin dar días; condiciones de venta no halladas."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de devoluciones no dice quién paga el envío."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de posventa: SAT oficial y garantía de fabricante y distribuidor; no queda claro a quién reclamar."
+      },
+      "condiciones_url": "https://klima.pt/content/1-entrega-e-devolucoes",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "solartraders",
+      "nombre": "Solartraders",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Marketplace B2B: entrega en Alemania y «países UE seleccionados»; España no se nombra."
+      },
+      "entrega_min_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.solartraders.com/en/terms",
+        "fecha": "2026-10-18",
+        "nota": "UE: 3-7 días hábiles tras aprobación de envío y pago; envía cada vendedor."
+      },
+      "entrega_max_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://www.solartraders.com/en/terms",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://help.solartraders.com/en/articles/5499607-shipping-and-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Lo fija cada vendedor; hay que preguntarle."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las páginas de ayuda sobre envío y portes no mencionan envío gratis."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo empresas; las condiciones no regulan devoluciones (contrato con cada vendedor)."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones no regulan devoluciones."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Plataforma intermediaria: no da garantía; depende de cada vendedor."
+      },
+      "condiciones_url": "https://www.solartraders.com/en/terms",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "tienda-solar-es",
+      "nombre": "Tienda Solar (tienda-solar.es)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "Solo envía a la península; resto bajo consulta."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18"
+      },
+      "entrega_max_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "«Entre 2 y 8 días laborables» desde la confirmación del pago."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "5,90 € + IVA hasta 1 kg y 0,50 € + IVA por kg extra (máx. 39,90 € + IVA)."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 150,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "Gratis desde 150 € sin contar paneles; los paneles no pagan envío (puede haber manipulación)."
+      },
+      "devolucion_dias": {
+        "valor": 15,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "15 días desde la recepción; las condiciones de compra dicen 7 días."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "Los portes de devolución los paga el cliente."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+        "fecha": "2026-10-18",
+        "nota": "La tienda tramita la garantía con el servicio técnico oficial de la marca."
+      },
+      "condiciones_url": "https://tienda-solar.es/en/content/1-payments-and-shipments",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "photovoltaik4all-de",
+      "nombre": "photovoltaik4all",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/versand-und-transport",
+        "fecha": "2026-10-18",
+        "nota": "Solo Alemania y Austria; otros países bajo consulta por e-mail. Datos para Alemania."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/versand-und-transport",
+        "fecha": "2026-10-18",
+        "nota": "Paquete en Alemania: 1-3 laborables. Transporte con stock: 7-10."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/versand-und-transport",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/versand-und-transport",
+        "fecha": "2026-10-18",
+        "nota": "Según peso: desde 6,90 € (hasta 10 kg) hasta 149 € (más de 300 kg) en Alemania."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de envío no menciona umbral de envío gratis."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/widerrufsrecht",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/widerrufsrecht",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga los costes directos de la devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.photovoltaik4all.de/allgemeine-geschaeftsbedingungen",
+        "fecha": "2026-10-18",
+        "nota": "Las condiciones (§11) aplican la garantía legal del vendedor."
+      },
+      "condiciones_url": "https://www.photovoltaik4all.de/versand-und-transport",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "allkitsolar",
+      "nombre": "AllKitSolar (allkitsolar.com)",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Portada: «Delivery in Europe», sin nombrar España. Páginas de entrega y CGV no accesibles (error)."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de entrega no accesible; solo «disponible en 21 días» en productos sin stock."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de entrega no accesible; solo «disponible en 21 días» en productos sin stock."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de entrega y CGV no accesibles; búsqueda sin resultados."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de entrega y CGV no accesibles; búsqueda sin resultados."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Portada dice «Refund within 30 days» sin aclarar si es plazo de devolución; CGV no accesibles."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "CGV no accesibles."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró página de garantía; CGV no accesibles."
+      },
+      "condiciones_url": "https://allkitsolar.com",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "autosolar-es",
+      "nombre": "AutoSolar (autosolar.es)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/informacion-sobre-envios",
+        "fecha": "2026-10-18"
+      },
+      "entrega_min_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/terminos-de-servicio",
+        "fecha": "2026-10-18",
+        "nota": "Península: «4-5 días hábiles»."
+      },
+      "entrega_max_dias": {
+        "valor": 5,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/terminos-de-servicio",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/informacion-sobre-envios",
+        "fecha": "2026-10-18",
+        "nota": "Pedidos < 150 €: 8 €. De 150 a 3.000 €: 3 % sin IVA; > 3.000 €: 2 %. Paneles: +30 € manipulación."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/informacion-sobre-envios",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis; solo instalaciones completas de más de 3.000 €."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/terminos-de-servicio",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/terminos-de-servicio",
+        "fecha": "2026-10-18",
+        "nota": "La empresa no paga los portes de devolución en el desistimiento."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://autosolar.es/terminos-de-servicio",
+        "fecha": "2026-10-18",
+        "nota": "Reclamación a través del servicio de atención al cliente de Autosolar."
+      },
+      "condiciones_url": "https://autosolar.es/terminos-de-servicio",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "cuencasolar-es",
+      "nombre": "Cuenca Solar (cuencasolar.es)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://cuencasolar.es/envios/",
+        "fecha": "2026-10-18",
+        "nota": "Envíos en toda España; el envío gratis solo aplica a la península."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No publica plazo en días. El pie dice «Envío Gratis 72h» sin explicarlo; las condiciones fijan un máximo de 30 días naturales."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No publica plazo habitual; solo un máximo legal de 30 días naturales desde la confirmación (términos y condiciones)."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://cuencasolar.es/envios/",
+        "fecha": "2026-10-18",
+        "nota": "No publica importe para pedidos de menos de 200 €; los paneles llevan siempre coste adicional de transporte."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 200,
+        "naturaleza": "declarado",
+        "fuente": "https://cuencasolar.es/envios/",
+        "fecha": "2026-10-18",
+        "nota": "Pedidos de más de 200 € a la península."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://cuencasolar.es/devoluciones/",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://cuencasolar.es/devoluciones/",
+        "fecha": "2026-10-18",
+        "nota": "Los portes de devolución corren a cargo del cliente."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda o la marca",
+        "naturaleza": "declarado",
+        "fuente": "https://cuencasolar.es/terminos-y-condiciones/",
+        "fecha": "2026-10-18",
+        "nota": "Avisar a la tienda; también se puede acudir directamente a la marca o fabricante."
+      },
+      "condiciones_url": "https://cuencasolar.es/envios/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "vicoexport",
+      "nombre": "Vico Export Solar Energy",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Solo venta B2B a profesionales. Sirve «Europa, África y Latinoamérica»; sede en Paterna (Valencia). España no se nombra."
+      },
+      "entrega_min_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Unidad publicada: semana. «Standard delivery time: 1 week», sujeto a stock. Publicado en semanas."
+      },
+      "entrega_max_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Unidad publicada: semana. «Standard delivery time: 1 week», sujeto a stock. Publicado en semanas."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Portes a cargo del cliente salvo pacto; no publica tarifa."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis (portes a cargo del cliente salvo pacto)."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Venta B2B: no publica derecho de desistimiento; las reclamaciones deben hacerse en 48 h desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Gastos de devolución a cargo del cliente salvo pacto."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+        "fecha": "2026-10-18",
+        "nota": "Garantía según las condiciones de cada fabricante."
+      },
+      "condiciones_url": "https://www.vicoexport.com/en/general-terms-and-conditions-of-sale/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "fvcomponentes",
+      "nombre": "FV Componentes (Cartagena, Murcia)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/terminos-y-condiciones/",
+        "fecha": "2026-10-18",
+        "nota": "Envío a península; recogida gratis en almacén de Cartagena."
+      },
+      "entrega_min_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/faq-preguntas-y-respuestas-comunes/",
+        "fecha": "2026-10-18",
+        "nota": "Con stock: 2-4 días hábiles de preparación + 2-4 de tránsito. Bajo pedido, 1-3 semanas más."
+      },
+      "entrega_max_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/faq-preguntas-y-respuestas-comunes/",
+        "fecha": "2026-10-18",
+        "nota": "Con stock: 2-4 días hábiles de preparación + 2-4 de tránsito. Bajo pedido, 1-3 semanas más."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/faq-preguntas-y-respuestas-comunes/",
+        "fecha": "2026-10-18",
+        "nota": "Calculado en el carrito según destino y producto; baterías y paneles Victron con tarifa fija (ADR)."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 300,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/terminos-y-condiciones/",
+        "fecha": "2026-10-18",
+        "nota": "Península. Baterías y paneles Victron no se bonifican aunque se supere el umbral."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/terminos-y-condiciones/",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/terminos-y-condiciones/",
+        "fecha": "2026-10-18",
+        "nota": "En desistimiento paga el comprador; si es defectuoso o erróneo, paga la tienda."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://fvcomponentes.com/faq-preguntas-y-respuestas-comunes/",
+        "fecha": "2026-10-18",
+        "nota": "Se abre ticket con soporte; la tienda diagnostica y gestiona la garantía con el fabricante."
+      },
+      "condiciones_url": "https://fvcomponentes.com/terminos-y-condiciones/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "solarboss-ie",
+      "nombre": "Solarboss",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No dice si envía a España: envíos internacionales «case-by-case». Datos de abajo para Irlanda."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Irlanda: solo dice que se despacha en 1-2 días laborables; no da plazo de entrega. Máximo legal 30 días."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Irlanda: solo dice que se despacha en 1-2 días laborables; no da plazo de entrega. Máximo legal 30 días."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://solarboss.ie/pages/terms-conditions",
+        "fecha": "2026-10-18",
+        "nota": "Irlanda: coste indicado antes de confirmar el pedido; no hay tarifa fija publicada."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No encontrado en términos, devoluciones ni contacto."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://solarboss.ie/pages/returns",
+        "fecha": "2026-10-18",
+        "nota": "Irlanda: 14 días desde la entrega (cooling off)."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://solarboss.ie/pages/terms-conditions",
+        "fecha": "2026-10-18",
+        "nota": "Irlanda: el cliente paga el coste directo de devolución salvo productos defectuosos."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://solarboss.ie/pages/terms-conditions",
+        "fecha": "2026-10-18",
+        "nota": "«Goods come with the manufacturer's warranty only»; se mantienen los derechos legales frente a la tienda."
+      },
+      "condiciones_url": "https://solarboss.ie/pages/terms-conditions",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "wattuneed",
+      "nombre": "Wattuneed",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "España no se nombra: aplica «otros países» de Europa (solo fuera de Europa piden contactar). Web en español."
+      },
+      "entrega_min_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "Otros países: 8-10 días hábiles, más 2 días hábiles de preparación."
+      },
+      "entrega_max_dias": {
+        "valor": 10,
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "Otros países: 8-10 días hábiles, más 2 días hábiles de preparación."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "Calculado según peso del carrito y dirección de entrega."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de entrega no menciona envío gratis; la web principal no se pudo cargar."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "14 días desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "En desistimiento paga el cliente; en defecto de conformidad paga Wattuneed."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "Wattuneed gestiona la garantía legal y asume devolución y reenvío si hay defecto."
+      },
+      "condiciones_url": "https://www.wattuneed.com/es/content/1-condiciones-de-entrega-y-politica-de-devoluciones",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "suministrosdelsol",
+      "nombre": "Suministros del Sol",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/1-envio",
+        "fecha": "2026-10-18"
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/1-envio",
+        "fecha": "2026-10-18"
+      },
+      "entrega_max_dias": {
+        "valor": 5,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/1-envio",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 9.99,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/1-envio",
+        "fecha": "2026-10-18",
+        "nota": "Pedidos de 300 € o menos, IVA incluido."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 300,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/1-envio",
+        "fecha": "2026-10-18",
+        "nota": "Gratis en compras superiores a 300 € IVA incluido."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/12-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/12-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "Paga el cliente salvo producto defectuoso, dañado o incorrecto."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://suministrosdelsol.com/es/content/12-devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "La tienda tramita según las indicaciones de garantía del fabricante."
+      },
+      "condiciones_url": "https://suministrosdelsol.com/es/content/1-envio",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "offgridtec",
+      "nombre": "Offgridtec",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.offgridtec.com/versandkosten",
+        "fecha": "2026-10-18",
+        "nota": "España no se nombra; entra en la tarifa UE (no está entre los países excluidos)."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Paquete: 1-3 días laborables tras salir del almacén, sin decir si vale fuera de Alemania. Palé a la UE: 3-6 días laborables."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Paquete: 1-3 días laborables tras salir del almacén, sin decir si vale fuera de Alemania. Palé a la UE: 3-6 días laborables."
+      },
+      "envio_eur": {
+        "valor": 19.9,
+        "naturaleza": "declarado",
+        "fuente": "https://www.offgridtec.com/versandkosten",
+        "fecha": "2026-10-18",
+        "nota": "Paquete a la UE (hasta 40 kg). Voluminoso 39,90 €; agencia de transporte desde 190,90 €."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.offgridtec.com/versandkosten",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis a la UE en la tabla de tarifas."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.offgridtec.com/widerrufsrecht",
+        "fecha": "2026-10-18",
+        "nota": "La web dice «un mes» desde la recepción; luego 14 días para devolver."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.offgridtec.com/widerrufsrecht",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga la devolución; no paquetizable aprox. 40-100 €."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda o la marca",
+        "naturaleza": "declarado",
+        "fuente": "https://www.offgridtec.com/ueber-offgridtec/herstellergarantie.html",
+        "fecha": "2026-10-18",
+        "nota": "Depende de la marca: unas directamente al fabricante, otras (Phaesun, Pytes, Victron) vía la tienda."
+      },
+      "condiciones_url": "https://www.offgridtec.com/versandkosten",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "nkon-nl",
+      "nombre": "NKON",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/es/ordering-and-shipping",
+        "fecha": "2026-10-18",
+        "nota": "Envía a Europa (España no se nombra); tiene web y condiciones en español."
+      },
+      "entrega_min_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/es/ordering-and-shipping",
+        "fecha": "2026-10-18",
+        "nota": "Unidad publicada: días. Promedio «unos 4 días a Europa»; no dice si laborables. Paquetes pequeños hasta 3 semanas."
+      },
+      "entrega_max_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/es/ordering-and-shipping",
+        "fecha": "2026-10-18",
+        "nota": "Unidad publicada: días. Promedio «unos 4 días a Europa»; no dice si laborables. Paquetes pequeños hasta 3 semanas."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/ordering-and-shipping",
+        "fecha": "2026-10-18",
+        "nota": "Según peso; «aproximadamente 10 €» a otros países de Europa, varía por país y peso."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No mencionado en pedidos y envíos ni en términos."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/terms-en",
+        "fecha": "2026-10-18",
+        "nota": "14 días desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/ordering-and-shipping",
+        "fecha": "2026-10-18",
+        "nota": "La devolución corre a cargo y riesgo del comprador."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.nkon.nl/terms-en",
+        "fecha": "2026-10-18",
+        "nota": "NKON garantiza la calidad 24 meses; los defectos se comunican por escrito a NKON."
+      },
+      "condiciones_url": "https://www.nkon.nl/es/ordering-and-shipping",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "holaluz",
+      "nombre": "Holaluz",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Vende instalación de placas solares, no envío de productos; no hay política de envíos."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de placas solares no da plazo de instalación."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de placas solares no da plazo de instalación."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: servicio de instalación, sin envíos."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: servicio de instalación, sin envíos."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las CCGG publicadas (14 días naturales) son del contrato de luz; no hallé condiciones de placas solares."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No hallé condiciones de desistimiento para placas solares."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de placas no indica garantía de equipos ni quién la gestiona."
+      },
+      "condiciones_url": "https://www.holaluz.com/placas-solares",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "vekto-nl",
+      "nombre": "Vekto",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/verzendmethodes-vekto",
+        "fecha": "2026-10-18",
+        "nota": "Solo Benelux: «Vekto levert niet naar andere landen binnen de EU». Datos de abajo para Países Bajos."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/verzendmethodes-vekto",
+        "fecha": "2026-10-18",
+        "nota": "Países Bajos: en general 1 día laborable salvo otra fecha en el artículo."
+      },
+      "entrega_max_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/verzendmethodes-vekto",
+        "fecha": "2026-10-18",
+        "nota": "Países Bajos: en general 1 día laborable salvo otra fecha en el artículo."
+      },
+      "envio_eur": {
+        "valor": 7.5,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/verzendmethodes-vekto",
+        "fecha": "2026-10-18",
+        "nota": "Países Bajos/Bélgica, pedidos hasta 150 € IVA incl."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 150,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/verzendmethodes-vekto",
+        "fecha": "2026-10-18",
+        "nota": "Paquete estándar; voluminoso a Bélgica desde 1.000 €."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/retourneren-en-garantie",
+        "fecha": "2026-10-18",
+        "nota": "30 días de reflexión desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/retourneren-en-garantie",
+        "fecha": "2026-10-18",
+        "nota": "Gratis solo en Países Bajos vía PostNL (antwoordnummer), máx. 23 kg y 100 cm."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.vekto.nl/retourneren-en-garantie",
+        "fecha": "2026-10-18",
+        "nota": "Vekto da mínimo 1 año de garantía en todos los artículos."
+      },
+      "condiciones_url": "https://www.vekto.nl/retourneren-en-garantie",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "zonnefabriek-nl",
+      "nombre": "Zonnefabriek",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Instalador en Países Bajos sin tienda online; no publica envíos a España."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Instalación «en un plazo razonable» tras confirmación (art. 4.1); sin días."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Instalación «en un plazo razonable» tras confirmación (art. 4.1); sin días."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: instalador, sin envíos publicados."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: instalador, sin envíos publicados."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.zonnefabriek.nl/assets/uploads/docs/algemene-voorwaarden-2025.pdf",
+        "fecha": "2026-10-18",
+        "nota": "Países Bajos: 14 días desde la firma del contrato (art. 2.1)."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones no dicen quién paga una devolución."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "5 años en mano de obra de la propia empresa; productos según garantía del fabricante, sin decir a quién reclamar."
+      },
+      "condiciones_url": "https://www.zonnefabriek.nl/assets/uploads/docs/algemene-voorwaarden-2025.pdf",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "sunpower-instaladores-es",
+      "nombre": "Red de instaladores SunPower (Maxeon) en España",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de captación que pone en contacto con instaladores; no vende ni envía."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No hay condiciones de venta publicadas; dependen del instalador."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No hay condiciones de venta publicadas; dependen del instalador."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de garantía da 30-40 años pero no dice quién gestiona la reclamación; varía según instalador."
+      },
+      "condiciones_url": "https://www.sunpowerglobal.com/es/por-que-sunpower/garantia",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "senec-fachpartner-de",
+      "nombre": "Red de socios especialistas SENEC (Alemania)",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página comercial que deriva a socios instaladores en Alemania; no vende ni envía y no menciona España."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No aplica: no hay venta online."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No hay condiciones de venta publicadas; dependen del socio instalador."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No hay condiciones de venta publicadas; dependen del socio instalador."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página no trata la garantía ni quién la gestiona."
+      },
+      "condiciones_url": "https://senec.com/en/node/3389",
+      "condiciones_fecha": "2026-10-18"
+    }
+  ]
+}

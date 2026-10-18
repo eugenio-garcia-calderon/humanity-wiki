@@ -9266,3 +9266,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Cada propiedad de la ficha tiene **ancho** en columnas de la rejilla: se estira o encoge con el **tirador del borde derecho** (aparece al pasar el ratón) o desde su menú («Ancho: 1, 2, 3… Todo»). Por defecto, 1: las de al lado miden lo mismo y, en la misma fila, igualan su alto. La barra de avance ya no ocupa la fila entera por defecto. `config.ancho_ficha`.
 - **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
 - El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).
+
+## 2026-10-18 — Caja de compra al estilo de Amazon en «Dónde comprarlo» (Wikiproducts W5)
+- Cada oferta enseña ahora, debajo de la tienda: **plazo de entrega**, **envío** (el de la oferta o, si no lo dice, la regla de la tienda: «Envío gratis (pedidos desde 50 €)», «Envío 4,99 €, gratis desde 50 €»), **devoluciones** («Devolución gratuita en 30 días»), **quién gestiona la garantía**, **disponibilidad** y **cuándo se comprobó el precio**, con un enlace a las condiciones de la tienda y la fecha en que se leyeron. Si la tienda no envía a España, se dice.
+- Lo que no se sabe se dice («Plazo de entrega: la tienda no lo publica»), en gris; un plazo cargado como «desconocido» ya no sale como «Entrega: desconocido».
+- Las condiciones son **propiedades de la fila del distribuidor** (11 columnas nuevas en «Distribuidores», encontradas por `rol`), con fuente y fecha de cada valor: `datos/*/condiciones-tiendas.json`, investigadas en la web de las 58 tiendas. Solo se leen de una tabla de distribuidores del mismo dueño que las ofertas.
+- El HTML para buscadores (`ofertasEnHtml`) dice las mismas líneas (`lineasCompra`, compartida).

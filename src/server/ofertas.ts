@@ -24,7 +24,7 @@ import { bdInterno, celdasDe } from './bd.js';
 import { enlacesDe, enlacesInversos, celdaDeEnlaces, CLASE_DE_TIPO, type Apuntado } from './bd/enlaces.js';
 import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/ficheros.js';
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
-import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, textoSinPrecio } from '../utils/ofertas.js';
+import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, textoSinPrecio, lineasCompra, textoCondiciones, textoEnvioTienda, type CondicionesTienda } from '../utils/ofertas.js';
 import { registrarHtml, esc } from './htmlBloques.js';
 import { atencionDistribuidores } from './bd/comunidad.js';
 import { paginaVisible } from './sitios.js';
@@ -56,6 +56,9 @@ export type OfertaPublica = {
   /** Cuántas personas puntuaron esa atención y cuántas hacen falta para que
    *  haya nota («1 de 3 votos»). `null` si su tabla no tiene ese criterio. */
   votos_distribuidor: { votos: number; umbral: number } | null;
+  /** The shop's delivery, shipping, returns and warranty conditions, from its
+   *  «Distribuidores» row; `null` when it has none or is someone else's table. */
+  tienda: CondicionesTienda | null;
 };
 
 const valorDe = (c: any) => (c && c.estado === 'ok' ? c.valor : null);
@@ -115,6 +118,53 @@ async function permisoOfertas(
   if (!dO || dO !== dP) return directo;
   const t = (await db.execute(sql`SELECT * FROM bd_tablas WHERE id = ${tablaId}`)).rows[0];
   return { tabla: t };
+}
+
+// ── THE SHOP'S CONDITIONS (evaluator round 2, fix 3) ────────────────────────
+// Read from the distributor rows by column `rol`, so the table can be renamed
+// or reordered. Only from a distributors table of the SAME owner as the
+// offers: a relation can point at anyone's table, and someone else's row must
+// not get to promise «free returns» on this sheet.
+const ROLES_TIENDA = {
+  envia_espana: ['casilla'], entrega_min: ['numero'], entrega_max: ['numero'], envio_tienda: ['moneda', 'numero'],
+  envio_gratis_desde: ['moneda', 'numero'], devolucion_dias: ['numero'], devolucion_gratis: ['casilla'],
+  garantia: ['seleccion', 'texto'], condiciones: ['url'], condiciones_fecha: ['fecha'],
+} as const;
+
+async function condicionesDeTiendas(db: any, ids: string[], dueno: string | null): Promise<Map<string, CondicionesTienda>> {
+  const out = new Map<string, CondicionesTienda>();
+  const unicos = [...new Set(ids)];
+  if (!unicos.length || !dueno) return out;
+  const filas = (await db.execute(sql`
+    SELECT id, tabla_id, valores FROM bd_filas
+    WHERE id IN (${sql.join(unicos.map(i => sql`${i}`), sql`, `)}) AND archived_at IS NULL AND deleted_at IS NULL
+  `)).rows as any[];
+  const porTabla = new Map<string, any[]>();
+  for (const f of filas) (porTabla.get(f.tabla_id) || porTabla.set(f.tabla_id, []).get(f.tabla_id)!).push(f);
+  for (const [tablaId, deTabla] of porTabla) {
+    if ((await duenoDe(db, tablaId)) !== dueno) continue;
+    const columnas = (await db.execute(sql`
+      SELECT id, tipo, config FROM bd_columnas WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
+    `)).rows as any[];
+    const col = Object.fromEntries(Object.entries(ROLES_TIENDA).map(([r, t]) => [r, columnaConRol(columnas, r, [...t])])) as Record<keyof typeof ROLES_TIENDA, any>;
+    if (!Object.values(col).some(Boolean)) continue;
+    for (const f of deTabla) {
+      const celdas: Record<string, any> = celdasDe(f.valores || {}, columnas);
+      const v = (r: keyof typeof ROLES_TIENDA) => (col[r] ? valorDe(celdas[col[r].id]) : null);
+      const n = (r: keyof typeof ROLES_TIENDA) => { const x = v(r); return typeof x === 'number' && Number.isFinite(x) && x >= 0 ? x : null; };
+      const cent = (r: keyof typeof ROLES_TIENDA) => { const x = n(r); return x === null ? null : Math.round(x * 100); };
+      const e = v('envia_espana'), g = v('garantia'), b = v('devolucion_gratis'), u = v('condiciones'), d = v('condiciones_fecha');
+      out.set(f.id, {
+        envia_a_espana: typeof e === 'boolean' ? e : null,
+        entrega_min_dias: n('entrega_min'), entrega_max_dias: n('entrega_max'),
+        envio_centimos: cent('envio_tienda'), envio_gratis_desde_centimos: cent('envio_gratis_desde'),
+        devolucion_dias: n('devolucion_dias'), devolucion_gratis: typeof b === 'boolean' ? b : null,
+        garantia: typeof g === 'string' && g.trim() ? g.trim() : null,
+        condiciones_url: enlaceSeguro(u), condiciones_fecha: d ? String(d).slice(0, 10) : null,
+      });
+    }
+  }
+  return out;
 }
 
 /**
@@ -222,6 +272,7 @@ export async function ofertasDeProducto(
       compra: compra && compra.producto_id && !compra.motivo ? compra : null,
       nota_distribuidor: null,
       votos_distribuidor: null,
+      tienda: null,
     };
   });
   // The distributor's customer-service note (W4), the same adjusted note
@@ -232,6 +283,8 @@ export async function ofertasDeProducto(
     x.nota_distribuidor = a?.nota ?? null;
     x.votos_distribuidor = a ? { votos: a.votos, umbral: a.umbral } : null;
   }
+  const condiciones = await condicionesDeTiendas(db, ofertas.map(x => x.distribuidor_id).filter(Boolean) as string[], await duenoDe(db, tablaId));
+  for (const x of ofertas) x.tienda = (x.distribuidor_id && condiciones.get(x.distribuidor_id)) || null;
   return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id };
 }
 
@@ -255,20 +308,21 @@ export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string 
     const partes: string[] = [`<strong>${esc(o.distribuidor || 'Tienda sin nombre')}</strong>`];
     if (o.precio_centimos !== null) {
       const envio = o.envio_centimos === null
-        ? (o.compra ? 'sin gastos de envío comprando aquí' : 'envío: lo dice la tienda')
+        ? (o.compra ? 'sin gastos de envío comprando aquí' : (textoEnvioTienda(o) || 'Envío: lo dice la tienda').replace(/^E/, 'e'))
         : o.envio_centimos === 0 ? 'envío gratis' : `+ ${dineroHtml(o.envio_centimos, o.moneda)} de envío`;
       const total = totalOferta(o);
       partes.push(`${dineroHtml(o.precio_centimos, o.moneda)} (${envio}${total !== null && o.envio_centimos ? `; total ${dineroHtml(total, o.moneda)}` : ''})`);
     } else partes.push(esc(motivoSinPrecio(o).replace(/\.$/, '')));
     if (o.nota_distribuidor !== null) partes.push(`atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`);
     else if (o.votos_distribuidor) partes.push(`atención al cliente: aún sin nota (${o.votos_distribuidor.votos} de ${o.votos_distribuidor.umbral} votos)`);
-    if (o.plazo) partes.push(`entrega: ${esc(o.plazo)}`);
-    if (o.agotada) partes.push('agotado');
+    // The same purchase-box lines as the sheet, in the same order (`lineasCompra`).
+    for (const l of lineasCompra(o)) partes.push(esc(l.texto));
     if (o.instalacion === true) partes.push('incluye instalación');
-    if (o.comprobado) partes.push(`precio comprobado el ${esc(o.comprobado)}`);
     const comision = textoComision(o.comision_pct, o.precio_centimos === null ? null : comisionDeLinea(o.precio_centimos, 1, o.comision_pct), o.moneda);
     const enlace = o.enlace ? ` <a href="${esc(o.enlace)}" rel="${esc(o.rel)}">${o.precio_centimos === null ? 'Ver el precio en la tienda' : 'Ver en la tienda'}</a>` : '';
-    return `<li>${partes.join(' · ')}. ${esc(comision)}${enlace}</li>`;
+    const cond = textoCondiciones(o.tienda);
+    const condiciones = cond && o.tienda?.condiciones_url ? ` <a href="${esc(o.tienda.condiciones_url)}" rel="nofollow noopener">${esc(cond)}</a>` : '';
+    return `<li>${partes.join(' · ')}. ${esc(comision)}${enlace}${condiciones}</li>`;
   }).join('');
   return `<section>${cab}<p>${esc(resumen)}</p><ul>${items}</ul>`
     + '<p>Ordenadas por lo que pagas con el envío; a igual precio, por la atención al cliente de la tienda. La comisión no cambia el orden.</p></section>';
