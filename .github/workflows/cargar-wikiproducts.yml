@@ -1,0 +1,38 @@
+# ============================================================================
+# Cargar los datos de Wikiproducts en producción (2026-10-18, W3a)
+# ============================================================================
+# Se lanza a mano (Actions → «Cargar Wikiproducts» → Run workflow). Entra por
+# SSH con los mismos secretos que el despliegue y ejecuta
+# `scripts/wikiproducts/cargar-en-servidor.sh`, que crea una clave temporal en
+# la base de datos, carga las tablas como la dueña del sitio y la borra al
+# terminar, salga bien o mal. La clave no sale nunca del servidor ni aparece en
+# este registro.
+#
+# Comparte grupo con el despliegue: si hay uno en marcha, esto espera a que
+# acabe, para cargar siempre contra la versión ya desplegada.
+# Se puede repetir: la carga es idempotente.
+
+name: Cargar Wikiproducts
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  cargar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Cargar por SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          # Unas 700 escrituras a 30 por minuto: media hora larga.
+          command_timeout: 80m
+          script: |
+            cd /opt/humanity-wiki && echo "Versión desplegada: $(git rev-parse --short HEAD)" && bash scripts/wikiproducts/cargar-en-servidor.sh

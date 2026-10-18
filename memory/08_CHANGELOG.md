@@ -9001,3 +9001,7 @@ en mis páginas como proyecto pendiente».
 - **«+» en las relaciones** de la ficha para buscar y enlazar otra entrada.
 - **El desplegable de una relación** se pinta en su propia capa (portal, `fixed`): ya no lo tapa una imagen ni lo recorta un contenedor; se abre hacia arriba si abajo no cabe.
 - **Entradas borradas**: un enlace a algo que ya no existe no se enseña («(ya no existe)» bloqueaba añadir otra). Si se recupera de la papelera, vuelve a salir.
+
+### 2026-10-18 — Cargar Wikiproducts desde el propio servidor, sin clave de API a mano (W3a)
+- `scripts/wikiproducts/cargar-en-servidor.sh` y la acción manual «Cargar Wikiproducts» (`.github/workflows/cargar-wikiproducts.yml`): entra por SSH con los secretos del despliegue, crea en la base de datos una clave de escritura temporal para la dueña del sitio (eugenio@lighthumanity.org), guardando sólo su huella sha256, ejecuta `crear-esquema.mjs --plantillas` y `cargar.mjs` contra la app en 127.0.0.1 y borra la clave al salir, salga bien o mal. La clave no se imprime, no se escribe en disco y no sale del servidor. Comparte cola con el despliegue (`deploy-prod`). Se puede repetir: la carga es idempotente, y una clave que quedara de una ejecución matada se borra al empezar la siguiente.
+- `CARGA_MODO=local` hace lo mismo contra la copia de `local.sh`. Probado allí, incluida una ejecución cortada a medias: la clave se borró y la siguiente siguió donde iba.
