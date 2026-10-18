@@ -110,7 +110,7 @@ export default function VistaPagina({ pagina, propio, pie }: {
             {migas.map((m, i) => (
               <li key={m.id} className={cn('items-center gap-1', i === migas.length - 1 ? 'flex' : 'hidden sm:flex')}>
                 {i === migas.length - 1 ? <ChevronLeft className="w-4 h-4 text-slate-500 sm:hidden" aria-hidden /> : null}
-                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-2">
+                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-3">
                   {i === 0 && (sitio?.raizId === m.id || pagina.sitio?.raizId === m.id) ? 'Inicio' : (m.titulo || 'Volver')}
                 </Link>
                 <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migas.length - 1 && 'hidden sm:block')} aria-hidden />
