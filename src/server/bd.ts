@@ -45,6 +45,7 @@ import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnla
 import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
 import { sincronizarTienda } from './bd/tienda';
+import { notasComunidad } from './bd/comunidad';
 import { compilar } from './bd/formulas';
 import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
@@ -446,10 +447,14 @@ export function registerBdRoutes(app: Express, db: any) {
         `);
         const colsDestino = (await columnasDe(destino)).filter((x: any) => mostrar.includes(x.id));
         const tarjetasOtras = await tarjetasDe((otras.rows as any[]).map(o => o.pagina_id).filter(Boolean));
+        // A community note shown through a link (an offer showing its
+        // distributor's «Atención al cliente») is not in `valores`: it is
+        // computed from the votes (`bd/comunidad.ts`).
+        const notas = await notasComunidad(db, colsDestino, (otras.rows as any[]).map(o => o.id));
         const porId = new Map<string, any>();
         for (const o of otras.rows as any[]) {
           const t = o.pagina_id ? tarjetasOtras[o.pagina_id] : null;
-          const celdas = celdasDe(o.valores || {}, colsDestino);
+          const celdas = { ...celdasDe(o.valores || {}, colsDestino), ...(notas[o.id] || {}) };
           porId.set(o.id, {
             imagen: mostrar.includes('imagen') ? t?.imagen || null : undefined,
             texto: mostrar.includes('texto') ? (t?.descripcion || t?.resumen || null) : undefined,

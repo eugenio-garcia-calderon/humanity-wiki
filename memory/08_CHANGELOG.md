@@ -8879,6 +8879,15 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
 - El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
 
+### 2026-10-18 — Valoraciones de la comunidad por criterio (Wikiproducts W4)
+- Nuevo tipo de propiedad en las bases de datos, grupo «Comunidad»: Calidad, Precio, Garantía, Ecología, Salud, Estética, Ética, Atención al cliente (sólo puntúa quien compró) y Nota media. No se escribe a mano: la celda enseña la media de los votos y cuántos son, o «Sin votos suficientes» con menos de 3.
+- Bloque «Valoración de la comunidad» para la página de una fila: una barra por criterio con su media y sus votos, estrellas para votar (un voto por persona y criterio, se cambia o se quita), la media de compradores verificados aparte y una explicación de cómo se calcula.
+- La galería publicada se ordena por cualquier criterio («ordenar por ética») con el «Ordenar» de siempre. El orden usa una media ajustada (bayesiana) y nunca la comisión; `npx tsx scripts/probar-valoraciones.ts` lo comprueba.
+- Quien compró a través de la plataforma cuenta doble, y sólo él puede puntuar la atención al cliente de un distribuidor. Si devuelve el pedido, deja de contar.
+- Los miembros de un sitio publicado pueden votar si su categoría puede comentar.
+- El HTML que leen los buscadores y las IA ya trae las puntuaciones (media y votos por criterio, o «aún sin votos suficientes»), y la página lleva `AggregateRating` en sus datos estructurados sólo si enseña el bloque y hay votos suficientes (SEO R4).
+- Migración `0152_valoraciones.sql`.
+
 ### 2026-10-18 — Ficha de producto: plantilla, propiedades, comparador, «la mejor en cada criterio», afirmaciones y retiradas (Wikiproducts W1)
 - Una base de datos puede tener una **plantilla de ficha**: una página normal (se edita con el editor de siempre) cuyos bloques se ponen delante de los de cada fila. Cien productos, un solo diseño. En la propia plantilla se ve con los datos de la fila más completa. `PUT /api/bd/tablas/:id/plantilla`, `PATCH /api/v1/databases/:id {create_template}`.
 - Cinco bloques nuevos que leen «la fila de esta página»: **Propiedades** (tabla, lista, cabecera, texto o pie, por grupo), **Comparador** (de 2 a 4 filas lado a lado, la mejor celda resaltada, se puede compartir con `?comparar=`), **La mejor en cada criterio**, **Afirmaciones verificadas** (cierta / matizable / falsa / sin pruebas, las falsas primero) y **Retiradas y alertas** (distingue «buscado y no hay ninguna, a fecha X» de «todavía no comprobado»).

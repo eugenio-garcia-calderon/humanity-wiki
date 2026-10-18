@@ -27,8 +27,9 @@ const FICHEROS = new Set(['imagen', 'video', 'documento']);
 
 // The read-only formatting moved to `utils/formatoCelda.ts` (2026-10-18) so the
 // server can write the same text into the HTML of a published page.
-import { formatear } from '../../utils/formatoCelda';
-export { formatear };
+import { formatear, textoComunidad } from '../../utils/formatoCelda';
+export { formatear, textoComunidad };
+
 
 export default function CeldaTabla({
   celda, columna, apuntados, archivos, editable, onGuardar,
@@ -48,7 +49,7 @@ export default function CeldaTabla({
 
   useEffect(() => { if (editando) ref.current?.focus(); }, [editando]);
 
-  const puedeEditar = editable && !CALCULADOS.has(columna.tipo);
+  const puedeEditar = editable && !CALCULADOS.has(columna.tipo) && columna.tipo !== 'comunidad';
 
   const guardar = async (valor: any) => {
     setGuardando(true); setFallo(null);
@@ -76,6 +77,18 @@ export default function CeldaTabla({
         <Loader2 className="w-3.5 h-3.5 animate-spin" />
         <span className="text-xs">Calculando…</span>
       </div>
+    );
+  }
+
+  // ── NOTA DE LA COMUNIDAD (2026-10-18): it is voted in the row's page, with
+  //    the «Valoración» block, never typed into the cell.
+  if (columna.tipo === 'comunidad') {
+    const hay = celda.estado === 'ok';
+    return (
+      <span className={cn('flex items-center gap-1 px-2 py-1.5 text-xs', hay ? 'font-bold text-slate-700' : 'text-slate-400')}>
+        {hay && <Star className="w-3.5 h-3.5 shrink-0 fill-amber-400 text-amber-400" />}
+        <span className="truncate">{textoComunidad(celda)}</span>
+      </span>
     );
   }
 

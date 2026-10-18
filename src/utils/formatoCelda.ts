@@ -19,6 +19,18 @@ export type Columna = {
   config?: any;
 };
 
+const decimal = (n: number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
+const votosTexto = (n: number) => `${n} ${n === 1 ? 'voto' : 'votos'}`;
+
+/** «4,6 · 12 votos», or «Sin votos suficientes (2 votos)». Used by the cell
+ *  and by anything that writes a rating as text. */
+export function textoComunidad(c: Celda): string {
+  const votos = Number((c as any).votos) || 0;
+  if (c.estado !== 'ok') return votos ? `Sin votos suficientes (${votosTexto(votos)})` : 'Sin votos todavía';
+  const media = (c as any).media;
+  return `${decimal(typeof media === 'number' ? media : Number(c.valor))} · ${votosTexto(votos)}`;
+}
+
 /** Los tipos que no se escriben a mano: se calculan o se eligen de una lista. */
 const CALCULADOS = new Set(['formula', 'agregado', 'condicional']);
 const APUNTAN = new Set(['persona', 'proyecto', 'publicacion', 'relacion']);
@@ -30,6 +42,10 @@ const FICHEROS = new Set(['imagen', 'video', 'documento']);
 export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; archivos?: any[] }): string {
   if (c.estado !== 'ok') return '';
   const v = c.valor;
+  // Community rating (2026-10-18, Wikiproducts W4): the plain mean people gave
+  // and how many they are. `valor` is the adjusted note that orders; it is not
+  // what is shown (see `src/server/bd/comunidad.ts`).
+  if (col.tipo === 'comunidad') return textoComunidad(c);
   // The buy button as text (cards, lists): its price. The button itself is
   // drawn by the grid and the gallery.
   if (col.tipo === 'compra') {
