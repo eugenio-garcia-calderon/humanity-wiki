@@ -22,7 +22,7 @@ export default function Logo({ onClick, className }: { onClick: () => void; clas
       className={cn('flex h-8 shrink-0 items-center rounded-lg px-2 text-slate-900 transition-colors hover:bg-slate-100', className)}
     >
       <span className="whitespace-nowrap text-[16px] font-black tracking-tight">
-        Humanity<span className="text-emerald-600">.Wiki</span>
+        Wiki<span className="text-emerald-600">.Creator</span>
       </span>
     </button>
   );
