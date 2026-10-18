@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "scripts/wikiproducts/probar-ficha.ts",
-      "motivo": "W2: R10 sin foto",
-      "desde": "2026-10-18T16:12:55.936Z"
-    }
-  ]
+  "reservas": []
 }
