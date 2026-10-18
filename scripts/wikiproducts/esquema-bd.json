@@ -197,6 +197,16 @@
           }
         },
         {
+          "clave": "nota",
+          "nombre": "Nota",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "nota",
+            "grupo": "documentos",
+            "interna": true
+          }
+        },
+        {
           "clave": "comunidad_atencion",
           "nombre": "Atención al cliente",
           "tipo": "comunidad",

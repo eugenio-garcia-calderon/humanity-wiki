@@ -9009,3 +9009,6 @@ en mis páginas como proyecto pendiente».
 - Los títulos de los grupos de una galería salen **más grandes y centrados** por defecto y, al agrupar por una relación (p. ej. por Áreas), con la **imagen de lo enlazado** (la de «Movilidad»).
 - En **Configuración → Grupos**: tamaño del título (S, M, L, XL), alineación (izquierda o centro) e «Imagen del grupo» (sí/no). Se guardan en la vista (`grupo_titulo`, `grupo_alineacion`, `grupo_imagen`).
 - La imagen sale de la `miniatura` que el servidor ya manda en cada entrada enlazada; `agruparFilas` la pasa al grupo (`Grupo.imagen`).
+
+### 2026-10-18 — Los distribuidores tienen «Nota» (Wikiproducts W1)
+- Nueva columna «Nota» (texto largo, interna) en la base de datos de distribuidores, para lo que la carga de datos trae en `nota`: direcciones, o avisos de trabajo como «páginas no legibles por la herramienta». Es interna: no sale en la ficha pública del distribuidor. `crear-esquema.mjs` la crea en tablas que ya existen sin tocar nada más (crea sólo las columnas que faltan).
