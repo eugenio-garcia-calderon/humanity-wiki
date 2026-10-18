@@ -32,6 +32,7 @@ import { useProyectos, PanelProyecto, PieProyectos } from '../navegacion/Proyect
 import ArbolPaginas from '../navegacion/ArbolPaginas';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
+import GestorCargas from '../ui/GestorCargas';
 import HojaExplorar from '../navegacion/HojaExplorar';
 import { useEspacio } from '../../utils/espacio';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
@@ -1521,6 +1522,8 @@ export default function Layout() {
             aplicación, y montarlo allí también significaría cuatro conexiones
             abiertas por persona y el mismo timbre sonando cuatro veces. */}
         <CapaTelecom />
+        {/* Las subidas que siguen aunque cambies de página (2026-10-18). */}
+        <GestorCargas />
       </div>
 
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra

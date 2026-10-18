@@ -6,8 +6,10 @@ import {iniciarTema} from './utils/tema.ts';
 import {iniciarIdioma, ConIdioma} from './i18n/index.ts';
 import {registrarPWA} from './pwa.ts';
 import {instalarAutoscrollArrastre} from './utils/autoscrollArrastre.ts';
+import {instalarRespuestasAmables} from './utils/respuestasAmables.ts';
 import {precargarBloquesDePagina} from './components/bloquesDatos/precarga.ts';
 
+instalarRespuestasAmables();
 instalarAutoscrollArrastre();
 
 // Sin StrictMode: su doble montaje (solo en desarrollo) deja el panZoom de

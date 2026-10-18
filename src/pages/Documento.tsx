@@ -36,6 +36,7 @@ import { repintar, ponerCursor } from '../utils/marcadoVivo';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
+import { useCargas, iniciarCarga, registrarReceptor, claveDestino, type DestinoCarga } from '../utils/cargas';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion, TALLAS_PORTADA, tallaDe } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -2179,32 +2180,29 @@ function EditorPagina() {
   // Eugenio: con una imagen pesada «parece que no está haciendo nada», y uno
   // cancela, sale o la vuelve a subir. Mientras sube se enseña la propia foto
   // (en local, al instante) con una barra y el porcentaje.
-  const [subidas, setSubidas] = useState<Record<string, { fraccion: number; vista: string | null }>>({});
-  const conProgreso = async (clave: string, archivo: File) => {
-    const vista = archivo.type.startsWith('image/') ? URL.createObjectURL(archivo) : null;
-    setSubidas(s => ({ ...s, [clave]: { fraccion: 0, vista } }));
-    try {
-      return await subirArchivo(archivo, undefined, f => setSubidas(s => (s[clave] ? { ...s, [clave]: { ...s[clave], fraccion: f } } : s)));
-    } finally {
-      setSubidas(s => { const n = { ...s }; delete n[clave]; return n; });
-      if (vista) setTimeout(() => URL.revokeObjectURL(vista), 5000);
-    }
-  };
-  // Salir a mitad de una subida la pierde: el navegador pregunta antes.
-  const haySubidas = Object.keys(subidas).length > 0;
-  useEffect(() => {
-    if (!haySubidas) return;
-    const aviso = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
-    window.addEventListener('beforeunload', aviso);
-    return () => window.removeEventListener('beforeunload', aviso);
-  }, [haySubidas]);
-
-  const subirPortada = async (archivo: File) => {
-    const sub = await conProgreso('portada', archivo);
-    if (sub.error) { fallar(sub.error); return; }
-    setPortada(sub.url);
+  //
+  // (2026-10-18) Las subidas viven ahora en el GESTOR DE CARGAS
+  // (`utils/cargas.ts`), fuera de esta pantalla: si te vas de la página, siguen,
+  // y al volver se ve otra vez su progreso. Esta pantalla es su «receptor»
+  // mientras está abierta: cuando una termina, pone la portada o la imagen y
+  // guarda, como antes. Si está cerrada, el gestor la escribe en el servidor.
+  const claveCargas = docId.current || 'nueva';
+  const todasLasCargas = useCargas();
+  const subidas: Record<string, { fraccion: number; vista: string | null }> = {};
+  for (const c of todasLasCargas) {
+    if (c.paginaId === claveCargas && c.estado === 'subiendo') subidas[claveDestino(c.destino)] = { fraccion: c.fraccion, vista: c.vista };
+  }
+  const alTerminarCarga = useRef<(d: DestinoCarga, r: any) => void>(() => {});
+  alTerminarCarga.current = (d, r) => {
+    if (!r.ok) { fallar(r.error); return; }
+    if (d.tipo === 'portada') setPortada(r.resultado.url);
+    // Con su peso, para avisar si pasa de 1,5 MB (ver `ImagenBloque.tsx`).
+    else setBloques(bs => bs.map(x => x.id === d.id ? { ...x, url: r.resultado.url, medioBytes: r.resultado.bytes || undefined } : x));
     programarGuardado();
   };
+  useEffect(() => registrarReceptor(claveCargas, (d, r) => alTerminarCarga.current(d, r)), [claveCargas]);
+
+  const subirPortada = (archivo: File) => { iniciarCarga(archivo, claveCargas, { tipo: 'portada' }); };
 
   const ES_TEXTO: TipoBloque[] = ['parrafo', 'titulo1', 'titulo2', 'titulo3', 'lista', 'numerada', 'tarea', 'cita'];
 
@@ -2874,13 +2872,7 @@ function EditorPagina() {
     return previo.toString().length;
   };
 
-  const subirImagen = async (b: Bloque, archivo: File) => {
-    const sub = await conProgreso(b.id, archivo);
-    if (sub.error) { fallar(sub.error); return; }
-    // Con su peso, para avisar si pasa de 1,5 MB (ver `ImagenBloque.tsx`).
-    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url: sub.url, medioBytes: sub.bytes || undefined } : x));
-    programarGuardado();
-  };
+  const subirImagen = (b: Bloque, archivo: File) => { iniciarCarga(archivo, claveCargas, { tipo: 'bloque', id: b.id }); };
 
   // El diálogo de compartir pide PNG y Markdown por evento en vez de recibir
   // las funciones como props: las dos viven aquí porque necesitan el DOM del
