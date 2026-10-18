@@ -24,6 +24,39 @@
     "Cómo trabajamos",
     "Aviso legal",
     "Política de privacidad",
-    "Contacto"
+    "Contacto",
+    "Powerbanks y baterías portátiles",
+    "Paneles solares portátiles",
+    "Luces solares portátiles",
+    "Paneles solares domésticos",
+    "Baterías domésticas"
+  ],
+  "guias_comentario": "Guía de compra corta de cada subcategoría (evaluador, ronda 3). corregir-textos.mjs la pone justo encima de la galería y la pliega, cerrada, si la página todavía no tiene un título con ese texto. Una guía que ya está no se reescribe: para cambiarla, va como un «cambio» más. Neutral: qué comparar, nunca qué comprar; cada cifra lleva su fuente.",
+  "guias": [
+    {
+      "pagina": "KWMVDTQNR7D6",
+      "subcategoria": "Powerbanks y baterías portátiles",
+      "markdown": "### Qué conviene mirar\n\n- **Energía en Wh, no sólo en mAh.** Los mAh se cuentan a la tensión de la celda, no a la del USB, así que dos baterías con los mismos mAh pueden guardar distinta energía. Lo que llega al teléfono es menos que lo nominal, por las pérdidas al convertir la tensión.\n- **Potencia de salida**: la máxima total y la de cada puerto (USB-C PD, USB-A, enchufe en las estaciones de energía), y si basta para cargar un portátil.\n- **Química y ciclos**: ion de litio o LiFePO₄ (LFP), y cuántos ciclos promete el fabricante y hasta qué porcentaje de la capacidad.\n- **Peso** frente a energía, y la **garantía**: años y quién la gestiona.\n- **Avión**: según la [IATA](https://www.iata.org/contentassets/6fea26dd84d24b26a7a1fd5788561d6e/passenger-lithium-battery.pdf), siempre en cabina y nunca facturada; hasta 100 Wh sin permiso, de 100 a 160 Wh con permiso de la aerolínea, y más de 160 Wh no se admite. Desde el 27 de marzo de 2026 la [OACI](https://www.icao.int/news/new-power-bank-restrictions-will-safeguard-international-aviation) limita a dos por pasajero y prohíbe recargarlas en vuelo."
+    },
+    {
+      "pagina": "KWMVDTQO1OM5",
+      "subcategoria": "Paneles solares portátiles",
+      "markdown": "### Qué conviene mirar\n\n- **Potencia pico (W)**: se mide en condiciones estándar de laboratorio, con 1.000 W/m² de luz y la célula a 25 °C ([PVEducation](https://pveducation.org/es/fotovoltaica/module-measurement)). Con sol real, calor o mala orientación, el panel da menos.\n- **Qué puede cargar**: el conector y la tensión de salida (USB, MC4, Anderson, 8 mm) tienen que servir a tu batería o estación de energía.\n- **Peso y medidas plegado**, y la **resistencia al agua** (código IP).\n- **Tipo de célula y eficiencia**, y la **garantía**: años y quién la gestiona."
+    },
+    {
+      "pagina": "KWMVDTQOC0CI",
+      "subcategoria": "Luces solares portátiles",
+      "markdown": "### Qué conviene mirar\n\n- **Lúmenes y autonomía en cada modo**: una cifra de lúmenes sin las horas que dura no dice cuánto alumbra una noche.\n- **Batería y carga**: la capacidad, si también se carga por USB y si puede cargar un teléfono.\n- **Resistencia al agua** (código IP) y a los golpes.\n- **Ensayos independientes**: los estándares de calidad de [Lighting Global](https://www.lightingglobal.org/iec-adopts-lighting-global-quality-standards/), hoy norma IEC TS 62257-9-8, comprueban la durabilidad y que lo anunciado sea verdad en luces solares pensadas para hogares sin red."
+    },
+    {
+      "pagina": "KWMVDTQOMQVL",
+      "subcategoria": "Paneles solares domésticos",
+      "markdown": "### Qué conviene mirar\n\n- **Potencia (Wp), eficiencia y tecnología de célula** (PERC, TOPCon, HJT, IBC), y si es bifacial.\n- **Coeficiente de temperatura (%/°C)**: cuánta potencia pierde el panel con el calor, que en un tejado al sol es lo normal.\n- **Dos garantías distintas**: la de producto, que cubre defectos, y la de rendimiento, que dice qué porcentaje de la potencia promete al cabo de los años y cuánto se degrada cada año.\n- **Precio por Wp**, sabiendo que la instalación se paga aparte.\n- **Certificados**: IEC 61215 (rendimiento y fiabilidad) e IEC 61730 (seguridad), según el [Fraunhofer ISE](https://www.ise.fraunhofer.de/en/rd-infrastructure/accredited-labs/testlab-pv-modules/module-certification.html)."
+    },
+    {
+      "pagina": "KWMVDTQOX54K",
+      "subcategoria": "Baterías domésticas",
+      "markdown": "### Qué conviene mirar\n\n- **Capacidad útil, no sólo la total (kWh)**: no toda la energía que guarda la batería se puede usar. Para comparar precios por kWh, usa la misma de las dos en todas.\n- **Potencia continua y de pico (kW)**, y si da **respaldo ante un apagón**.\n- **Química (LFP o NMC), ciclos y eficiencia ida y vuelta**: cuánta de la energía que entra vuelve a salir.\n- **Compatibilidad**: con qué inversores funciona, si se conecta en alterna o en continua y si se puede ampliar.\n- **Letra pequeña de la garantía**: los años y la energía total garantizada (MWh), la que se acabe antes. Cada ficha la detalla."
+    }
   ]
 }

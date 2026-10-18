@@ -3,6 +3,7 @@ import type { PropsLectura } from '../tipos';
 import { useFicha } from '../ficha/useFicha';
 import { vistaAlternativas } from '../ficha/vistas';
 import { Cargando, Seccion, SinFila, useEnlaceFila } from '../ficha/comunes';
+import { NOTA_POR_DATOS, NOTA_ORDEN } from '../ficha/vistas';
 
 // THE BEST IN EACH CRITERION (plan §3.5). One line per criterion: who wins,
 // with what value, and where this product stands. The ranking is
@@ -25,15 +26,19 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
           const href = c.esEsta ? null : enlace(c.ganador.paginaId);
           return (
             <li key={c.columnaId} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 px-3 py-2 text-base">
-              <span className="font-medium text-slate-600">{c.criterio}</span>
+              <span className="font-medium text-slate-600">
+                {c.criterio}
+                {c.base ? <span className="block text-sm font-normal text-slate-500">{c.base === 'votos' ? 'Según los votos de la comunidad' : `Según los datos: ${c.segun}`}</span> : null}
+              </span>
               <span className="text-right">
                 {c.esEsta ? (
-                  <span className="inline-flex items-center gap-1 font-bold text-emerald-700"><Trophy className="h-3.5 w-3.5" /> Este producto</span>
+                  <span className="inline-flex items-center gap-1 font-bold text-emerald-700"><Trophy className="h-3.5 w-3.5" /> Este producto{c.empates ? ` (y ${c.empates} más)` : ''}</span>
                 ) : href ? (
                   <a href={href} className="font-bold text-sky-700 hover:underline">{c.ganador.nombre}</a>
                 ) : (
                   <span className="font-bold text-slate-800">{c.ganador.nombre}</span>
                 )}
+                {!c.esEsta && c.empates ? <span className="text-slate-500"> y {c.empates} más</span> : null}
                 <span className="ml-1.5 text-slate-500">{c.ganador.valor}</span>
                 {!c.esEsta && c.puesto ? <span className="block text-sm text-slate-500">Este producto: {c.puesto.n}.º de {c.puesto.de}</span> : null}
               </span>
@@ -41,7 +46,7 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
           );
         })}
       </ul>
-      <p className="mt-1.5 text-sm text-slate-500">El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</p>
+      <p className="mt-1.5 text-sm text-slate-500">{v.porDatos ? NOTA_POR_DATOS : NOTA_ORDEN}</p>
     </Seccion>
   );
 }
