@@ -17,6 +17,12 @@
       "ruta": "drizzle/0159_wikiproducts_miembros.sql",
       "motivo": "W4: activar miembros en el sitio Wikiproducts",
       "desde": "2026-10-18T17:32:15.834Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "W6",
+      "desde": "2026-10-18T17:39:08.222Z"
     }
   ]
 }
