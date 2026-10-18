@@ -9295,3 +9295,10 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Breadcrumbs: W1's #661 version kept (one level on the phone); this PR's one-line variant dropped in the merge.
 - Subcategory pages: «Qué conviene mirar» is folded on load so a product shows before scrolling at 390 px. New route `POST /api/v1/pages/:id/blocks/:blockId/fold` (owner key, top-level `titulo1-3` only, idempotent); `enlazar-sitio.mjs` step 1 calls it. Needs a «Cargar Wikiproducts» run to reach production. The server HTML still renders the folded text open (crawlers read it).
 - Not checked on production (unreachable from the cloud session).
+
+## 2026-10-18 — Production check after #662: gallery title, phone home, search photos, mobile menu (Wikiproducts W2)
+
+- Subcategory pages: on production the products gallery repeated the page title (the table's title) and a second description (the table's) before the first product. New `PATCH /api/v1/pages/:id/blocks/:blockId` body `{hide_title: true}` (database blocks only, idempotent); `enlazar-sitio.mjs` step 1 sets it on each subcategory's products gallery, so it reaches production with the next «Cargar Wikiproducts». The server HTML now also drops the table description when the title is hidden, as the page already did.
+- Home at 390 px: section cards two per row and smaller (36 px thumbnail, 13 px title, up to 3 lines). Locally the five cards take 324 px from «Explora por categoría»; production's intro is shorter than the local copy's, so they should all fit at 390×844. Not checked on production.
+- Search: the first 8 result photos load eagerly (was 4).
+- Mobile menu dropdown is placed under the whole header, so it no longer covers the search box.

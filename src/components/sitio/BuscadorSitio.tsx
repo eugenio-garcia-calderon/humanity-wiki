@@ -95,7 +95,7 @@ export default function BuscadorSitio() {
                   <Link to={enlace(r.id)} className="flex gap-3 items-center group">
                     <span className="w-16 h-16 rounded-lg bg-slate-50 shrink-0 flex items-center justify-center overflow-hidden">
                       {r.portada
-                        ? <img src={r.portada} alt="" width={64} height={64} loading={i < 4 ? 'eager' : 'lazy'} className="w-full h-full object-contain" />
+                        ? <img src={r.portada} alt="" width={64} height={64} loading={i < 8 ? 'eager' : 'lazy'} className="w-full h-full object-contain" />
                         : <Package className="w-6 h-6 text-slate-400" aria-hidden />}
                     </span>
                     <span className="min-w-0 flex-1">
