@@ -1037,7 +1037,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
           {porGrupos(colAgr ? filas : visiblesGaleria, fs => (
-            <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
+            <Galeria onGuardarCelda={editable ? guardar : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}

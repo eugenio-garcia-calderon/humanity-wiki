@@ -31,7 +31,7 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import { sql } from 'drizzle-orm';
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolverDominio } from './dominios';
+import { resolverDominio, esSubdominioDeSitio } from './dominios';
 import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
@@ -167,6 +167,10 @@ export function sitioDe(req: Request): Sitio {
   if (host.endsWith('.' + DOMINIO) || host.endsWith('.localhost')) {
     const primero = host.split('.')[0];
     if (!primero || RESERVADOS.has(primero)) return { forma: 'casa', host };
+    // UN SUBDOMINIO DE SITIO (2026-10-18, `dominios.ts`): se porta como un
+    // dominio propio. En desarrollo, `algo.localhost` hace de `algo.humanity.wiki`.
+    const comoSitio = host.endsWith('.localhost') ? `${primero}.${DOMINIO}` : host;
+    if (esSubdominioDeSitio(comoSitio)) return { forma: 'dominio', host: comoSitio };
     return { forma: 'subdominio', host, handle: primero };
   }
   return { forma: 'dominio', host };
@@ -386,7 +390,8 @@ async function canonicaDe(db: any, w: any, publica: any): Promise<string | null>
     SELECT d.dominio, d.pagina_id FROM dominios_paginas d JOIN users u ON u.id = d.propietario_user_id
     LEFT JOIN sube s ON s.id = d.pagina_id
     WHERE u.handle = ${handle} AND d.estado = 'activo' AND (d.pagina_id IS NULL OR s.id IS NOT NULL)
-    ORDER BY (d.pagina_id IS NULL), s.n LIMIT 1
+    -- Un dominio comprado gana a un subdominio de humanity.wiki: es el definitivo.
+    ORDER BY (d.dominio LIKE ${'%.' + DOMINIO}), (d.pagina_id IS NULL), s.n LIMIT 1
   `)).rows[0] as any;
   if (d?.pagina_id) return `https://${d.dominio}${ruta(!w.virtual && w.id === d.pagina_id)}`;
   if (d) return `https://${d.dominio}${ruta(false)}`;
@@ -794,6 +799,8 @@ export function registrarSitios(app: Express, db: any) {
     if (s.forma === 'casa' && sinArroba === t) return false;
     if (sinArroba[0] === 'p' && sinArroba.length === 2) return true;
     if (sinArroba[0] === 'bd' && (sinArroba.length === 2 || sinArroba.length === 3)) return true;
+    // `buscar` es la página de resultados del buscador del sitio.
+    if (sinArroba.length === 1 && sinArroba[0] === 'buscar') return false;
     if (s.forma === 'subdominio') return t.length === 1 && t[0] !== 'pedido';
     if (s.forma === 'casa') return sinArroba.length === 1;
     return false;
