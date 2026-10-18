@@ -32,6 +32,7 @@
 // verdades sobre quién ve qué, y un proyecto que pasa de privado a público
 // arrastra sus tablas sin migrar nada.
 import type { Express, Request, Response } from 'express';
+import { esVideoPortada } from '../utils/videoPortada.js';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
 import { bloquesDe } from './bloquesSql';
@@ -45,6 +46,7 @@ import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnla
 import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
 import { sincronizarTienda } from './bd/tienda';
+import { notasComunidad } from './bd/comunidad';
 import { compilar } from './bd/formulas';
 import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
@@ -78,7 +80,28 @@ export const bdInterno: {
   /** La pregunta de permisos de siempre, para la API pública (`apiPublica.ts`). */
   puedeConTabla?: (req: Pick<Request, 'user'>, tablaId: string, escribir: boolean)
     => Promise<{ tabla: any } | { error: string; codigo: number }>;
+  /** `GET /api/bd/tablas/:id` without HTTP: definition, columns and computed rows. */
+  leerTabla?: (req: Pick<Request, 'user'> | null, tablaId: string)
+    => Promise<{ codigo: number; cuerpo: any }>;
+  /** `POST /api/bd/tablas` and `POST /api/bd/tablas/:id/columnas`, for `/api/v1`. */
+  crearTabla?: (req: Pick<Request, 'user'>, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
+  crearColumna?: (req: Pick<Request, 'user'>, tablaId: string, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
 } = {};
+
+/** Runs a route handler without HTTP and hands back what it answered. Used by
+ *  `bdInterno` so that the server-side callers go through the very same
+ *  permission checks and validation as the screen. */
+function internamente(ruta: (req: Request, res: Response) => Promise<any>, req: Pick<Request, 'user'> | null, params: Record<string, string>, body?: any): Promise<{ codigo: number; cuerpo: any }> {
+  return new Promise(resolve => {
+    let codigo = 200;
+    const res: any = {
+      status(c: number) { codigo = c; return res; }, set() { return res; }, setHeader() { return res; },
+      json(cuerpo: any) { resolve({ codigo, cuerpo }); return res; },
+    };
+    ruta({ user: req?.user ?? null, headers: (req as any)?.headers || {}, params, query: {}, body: body ?? {} } as any, res)
+      .catch((e: any) => resolve({ codigo: 500, cuerpo: { error: e?.message || 'Error interno.' } }));
+  });
+}
 
 export function registerBdRoutes(app: Express, db: any) {
   /** Toda ruta de escritura comprueba el rol. Saltarse esto ya dejó un agujero
@@ -274,7 +297,8 @@ export function registerBdRoutes(app: Express, db: any) {
       const texto = bloques.find(b => typeof b?.texto === 'string' && b.texto.trim())?.texto || '';
       out[w.id] = {
         titulo: w.title || '',
-        imagen: cfg.portada || img,
+        // Una portada de vídeo no vale como imagen de tarjeta: entonces, la primera imagen de la página.
+        imagen: (esVideoPortada(cfg.portada) ? null : cfg.portada) || img,
         icono: cfg.icono || null,
         resumen: String(texto).replace(/[*`#>\[\]]/g, '').slice(0, 160),
         // La descripción que su autor escribió bajo el título (2026-10-01):
@@ -334,7 +358,7 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
-  app.get('/api/bd/tablas/:id', async (req: Request, res: Response) => {
+  const leerTablaRuta = async (req: Request, res: Response) => {
     try {
       const permiso = await puedeConTabla(req, req.params.id, false);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
@@ -344,10 +368,13 @@ export function registerBdRoutes(app: Express, db: any) {
       try { await ponerAlDia(req.params.id); } catch (e: any) { console.error('[bd] recurrencias:', e?.message || e); }
 
       const columnas = await columnasDe(req.params.id);
+      // LAS ENTRADAS OCULTAS (2026-10-18): solo las recibe quien puede editar la tabla.
+      const veOcultas = !('error' in await puedeConTabla(req, req.params.id, true));
       const f = await db.execute(sql`
-        SELECT id, valores, pagina_id, orden, recurrencia, created_at, updated_at
+        SELECT id, valores, pagina_id, orden, recurrencia, procedencia, oculta, created_at, updated_at
         FROM bd_filas
         WHERE tabla_id = ${req.params.id} AND archived_at IS NULL AND deleted_at IS NULL
+          AND (oculta = false OR ${veOcultas})
         ORDER BY orden, created_at
       `);
 
@@ -392,8 +419,12 @@ export function registerBdRoutes(app: Express, db: any) {
             id: fila.id,
             pagina_id: fila.pagina_id,
             pagina: fila.pagina_id ? tarjetas[fila.pagina_id] || null : null,
+            oculta: !!fila.oculta,
             orden: fila.orden,
             recurrencia: fila.recurrencia || null,
+            // Where each value came from (migration 0153). Empty object when nobody said.
+            procedencia: fila.procedencia || {},
+            updated_at: fila.updated_at,
             celdas,
             archivos,
             // Los nombres de lo apuntado, aparte: la celda guarda identificadores
@@ -422,10 +453,14 @@ export function registerBdRoutes(app: Express, db: any) {
         `);
         const colsDestino = (await columnasDe(destino)).filter((x: any) => mostrar.includes(x.id));
         const tarjetasOtras = await tarjetasDe((otras.rows as any[]).map(o => o.pagina_id).filter(Boolean));
+        // A community note shown through a link (an offer showing its
+        // distributor's «Atención al cliente») is not in `valores`: it is
+        // computed from the votes (`bd/comunidad.ts`).
+        const notas = await notasComunidad(db, colsDestino, (otras.rows as any[]).map(o => o.id));
         const porId = new Map<string, any>();
         for (const o of otras.rows as any[]) {
           const t = o.pagina_id ? tarjetasOtras[o.pagina_id] : null;
-          const celdas = celdasDe(o.valores || {}, colsDestino);
+          const celdas = { ...celdasDe(o.valores || {}, colsDestino), ...(notas[o.id] || {}) };
           porId.set(o.id, {
             imagen: mostrar.includes('imagen') ? t?.imagen || null : undefined,
             texto: mostrar.includes('texto') ? (t?.descripcion || t?.resumen || null) : undefined,
@@ -458,7 +493,7 @@ export function registerBdRoutes(app: Express, db: any) {
       try {
         const compras = await sincronizarTienda(db, {
           tablaId: req.params.id, duenoId: permiso.tabla.creador_user_id, columnas: columnas as any[], colTitulo,
-          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos })),
+          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos, apuntados: f.apuntados })),
         });
         for (const f of preparadas) for (const c of columnasCompra) {
           f.celdas[c.id] = compras[f.id] ? { estado: 'ok', valor: compras[f.id] as any } : { estado: 'vacia' };
@@ -559,12 +594,17 @@ export function registerBdRoutes(app: Express, db: any) {
         filas: visibles,
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.get('/api/bd/tablas/:id', leerTablaRuta);
+  // The same read from inside the server (2026-10-18, Wikiproducts W1: the
+  // product sheet is written into the HTML before any JavaScript runs). It goes
+  // through the route itself, permissions included, so the two cannot drift.
+  bdInterno.leerTabla = (req, tablaId) => internamente(leerTablaRuta, req, { id: tablaId });
 
   /** Crear una tabla. Nace con una columna de texto: una tabla sin ninguna
    *  columna no se puede ni mirar, y obligar a crear la primera a mano es una
    *  pantalla vacía como primera impresión. */
-  app.post('/api/bd/tablas', async (req: Request, res: Response) => {
+  const crearTablaRuta = async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
       const d = req.body || {};
@@ -592,7 +632,8 @@ export function registerBdRoutes(app: Express, db: any) {
       await registrarHistorial(db, { entidad: 'bd_tabla', tabla: 'bd_tablas', id, operacion: 'create', previo: null, actor: req.user!.id });
       res.json({ id });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.post('/api/bd/tablas', crearTablaRuta);
 
   // ── LAS COLUMNAS ──────────────────────────────────────────────────────────
 
@@ -716,7 +757,7 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
-  app.post('/api/bd/tablas/:id/columnas', async (req: Request, res: Response) => {
+  const crearColumnaRuta = async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
       const permiso = await puedeConTabla(req, req.params.id, true);
@@ -772,7 +813,10 @@ export function registerBdRoutes(app: Express, db: any) {
       }
       res.json({ id, reciproca_id, aviso });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.post('/api/bd/tablas/:id/columnas', crearColumnaRuta);
+  bdInterno.crearTabla = (req, cuerpo) => internamente(crearTablaRuta, req, {}, cuerpo);
+  bdInterno.crearColumna = (req, tablaId, cuerpo) => internamente(crearColumnaRuta, req, { id: tablaId }, cuerpo);
 
   /** Renombrar una columna, cambiar sus opciones o su orden.
    *
@@ -1609,6 +1653,21 @@ export function registerBdRoutes(app: Express, db: any) {
    *  en %) y no en la tabla: es cómo se ve SU imagen. Escribe quien puede
    *  escribir en la tabla, que es quien ve el botón. Sólo toca esa clave:
    *  el resto de la página no viaja ni se pisa. */
+  /** Ocultar o enseñar una entrada al público: `{ oculta: true | false }`. Solo quien edita la tabla. */
+  app.put('/api/bd/filas/:id/oculta', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT tabla_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa entrada no existe.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const oculta = req.body?.oculta === true;
+      await db.execute(sql`UPDATE bd_filas SET oculta = ${oculta}, updated_at = now() WHERE id = ${req.params.id}`);
+      res.json({ oculta });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.put('/api/bd/filas/:id/encuadre', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;

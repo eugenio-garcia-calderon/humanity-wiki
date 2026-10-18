@@ -17,85 +17,19 @@ import BotonCompra from './BotonCompra';
 // división entre cero se viera igual que una celda sin rellenar, un total mal
 // calculado pasaría por un total pendiente de rellenar.
 
-export type Celda =
-  | { estado: 'vacia' }
-  | { estado: 'ok'; valor: any }
-  | { estado: 'sin_calcular' }
-  | { estado: 'error'; mensaje: string };
-
-export type Columna = {
-  id: string; nombre: string; tipo: string;
-  opciones?: Array<{ id: string; label: string; color?: string | null }>;
-  config?: any;
-};
+export type { Celda, Columna } from '../../utils/formatoCelda';
+import type { Celda, Columna } from '../../utils/formatoCelda';
 
 /** Los tipos que no se escriben a mano: se calculan o se eligen de una lista. */
 const CALCULADOS = new Set(['formula', 'agregado', 'condicional']);
 const APUNTAN = new Set(['persona', 'proyecto', 'publicacion', 'relacion']);
 const FICHEROS = new Set(['imagen', 'video', 'documento']);
 
-/** Cómo se LEE un valor ya guardado. El formato vive aquí y no en el servidor
- *  porque es cosa de quien mira: el mismo 0,15 es «15 %» para una persona y un
- *  número para una suma. */
-export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; archivos?: any[] }): string {
-  if (c.estado !== 'ok') return '';
-  const v = c.valor;
-  // The buy button as text (cards, lists): its price. The button itself is
-  // drawn by the grid and the gallery.
-  if (col.tipo === 'compra') {
-    return v?.precio_centimos == null ? '' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: v.moneda || 'EUR' }).format(v.precio_centimos / 100);
-  }
+// The read-only formatting moved to `utils/formatoCelda.ts` (2026-10-18) so the
+// server can write the same text into the HTML of a published page.
+import { formatear, textoComunidad } from '../../utils/formatoCelda';
+export { formatear, textoComunidad };
 
-  // UNA COLUMNA CALCULADA NO TIENE TIPO PROPIO, así que no sabría cómo
-  // enseñarse: multiplicar euros por unidades daba «360000» pelado. Se mira el
-  // formato que haya elegido quien la creó, y si no eligió ninguno, al menos se
-  // separan los miles — un número de siete cifras sin separar no lo lee nadie.
-  if (CALCULADOS.has(col.tipo)) {
-    if (typeof v === 'boolean') return v ? 'Sí' : 'No';
-    if (typeof v !== 'number') return String(v);
-    const f = col.config?.formato;
-    if (f === 'moneda') {
-      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: col.config?.moneda || 'EUR' }).format(v);
-    }
-    if (f === 'porcentaje') {
-      return new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 2 }).format(v);
-    }
-    if (f === 'duracion') {
-      const h = Math.floor(v / 3600), m = Math.floor((v % 3600) / 60);
-      return `${h}:${String(m).padStart(2, '0')}`;
-    }
-    return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 4 }).format(v);
-  }
-
-  switch (col.tipo) {
-    case 'moneda': {
-      const m = col.config?.moneda || 'EUR';
-      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: m }).format(Number(v));
-    }
-    case 'porcentaje':
-      return new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: col.config?.decimales ?? 2 }).format(Number(v));
-    case 'numero':
-      return new Intl.NumberFormat('es-ES', { maximumFractionDigits: col.config?.decimales ?? 10 }).format(Number(v));
-    case 'duracion': {
-      const s = Number(v); const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60);
-      return col.config?.formato === 'h:mm:ss'
-        ? `${h}:${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-        : `${h}:${String(m).padStart(2, '0')}`;
-    }
-    case 'fecha':
-      // Se parte la cadena en vez de usar `new Date`: construir una fecha desde
-      // «2026-07-14» la interpreta en UTC y en España se ve el día 13.
-      return String(v).split('-').reverse().join('/');
-    case 'casilla': return v ? 'Sí' : 'No';
-    case 'seleccion': return col.opciones?.find(o => o.id === v)?.label ?? String(v);
-    case 'seleccion_multiple':
-      return (Array.isArray(v) ? v : [v]).map(id => col.opciones?.find(o => o.id === id)?.label ?? id).join(', ');
-    default:
-      if (APUNTAN.has(col.tipo)) return (extra?.apuntados || []).map(a => a.etiqueta).join(', ');
-      if (FICHEROS.has(col.tipo)) return (extra?.archivos || []).map(a => a.nombre).join(', ');
-      return String(v);
-  }
-}
 
 export default function CeldaTabla({
   celda, columna, apuntados, archivos, editable, onGuardar,
@@ -115,7 +49,7 @@ export default function CeldaTabla({
 
   useEffect(() => { if (editando) ref.current?.focus(); }, [editando]);
 
-  const puedeEditar = editable && !CALCULADOS.has(columna.tipo);
+  const puedeEditar = editable && !CALCULADOS.has(columna.tipo) && columna.tipo !== 'comunidad';
 
   const guardar = async (valor: any) => {
     setGuardando(true); setFallo(null);
@@ -143,6 +77,18 @@ export default function CeldaTabla({
         <Loader2 className="w-3.5 h-3.5 animate-spin" />
         <span className="text-xs">Calculando…</span>
       </div>
+    );
+  }
+
+  // ── NOTA DE LA COMUNIDAD (2026-10-18): it is voted in the row's page, with
+  //    the «Valoración» block, never typed into the cell.
+  if (columna.tipo === 'comunidad') {
+    const hay = celda.estado === 'ok';
+    return (
+      <span className={cn('flex items-center gap-1 px-2 py-1.5 text-xs', hay ? 'font-bold text-slate-700' : 'text-slate-400')}>
+        {hay && <Star className="w-3.5 h-3.5 shrink-0 fill-amber-400 text-amber-400" />}
+        <span className="truncate">{textoComunidad(celda)}</span>
+      </span>
     );
   }
 

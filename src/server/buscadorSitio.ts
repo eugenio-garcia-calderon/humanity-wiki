@@ -65,7 +65,7 @@ export function registrarBuscadorSitio(app: Express, db: any) {
           CROSS JOIN LATERAL (
             SELECT f.pagina_id AS hijo FROM bd_filas f
             WHERE blq->>'tipo' = 'basedatos' AND f.tabla_id = blq->>'tabla_id'
-              AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.pagina_id IS NOT NULL
+              AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.pagina_id IS NOT NULL AND f.oculta = false
             UNION ALL
             SELECT blq->>'entityId' WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
           ) h

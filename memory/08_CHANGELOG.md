@@ -8875,8 +8875,65 @@ en mis páginas como proyecto pendiente».
 - El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
 - Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
+
 ### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
 - El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
+
+### 2026-10-18 — Valoraciones de la comunidad por criterio (Wikiproducts W4)
+- Nuevo tipo de propiedad en las bases de datos, grupo «Comunidad»: Calidad, Precio, Garantía, Ecología, Salud, Estética, Ética, Atención al cliente (sólo puntúa quien compró) y Nota media. No se escribe a mano: la celda enseña la media de los votos y cuántos son, o «Sin votos suficientes» con menos de 3.
+- Bloque «Valoración de la comunidad» para la página de una fila: una barra por criterio con su media y sus votos, estrellas para votar (un voto por persona y criterio, se cambia o se quita), la media de compradores verificados aparte y una explicación de cómo se calcula.
+- La galería publicada se ordena por cualquier criterio («ordenar por ética») con el «Ordenar» de siempre. El orden usa una media ajustada (bayesiana) y nunca la comisión; `npx tsx scripts/probar-valoraciones.ts` lo comprueba.
+- Quien compró a través de la plataforma cuenta doble, y sólo él puede puntuar la atención al cliente de un distribuidor. Si devuelve el pedido, deja de contar.
+- Los miembros de un sitio publicado pueden votar si su categoría puede comentar.
+- El HTML que leen los buscadores y las IA ya trae las puntuaciones (media y votos por criterio, o «aún sin votos suficientes»), y la página lleva `AggregateRating` en sus datos estructurados sólo si enseña el bloque y hay votos suficientes (SEO R4).
+- Migración `0152_valoraciones.sql`.
+### 2026-10-18 — Galería agrupada: arrastrar a otra base de datos y a otro grupo (prog8)
+- En una galería agrupada no se podían arrastrar las tarjetas: la vista agrupada desactivaba la edición entera para que no se reordenara. Ahora arrastrar va aparte de reordenar.
+- Una tarjeta de una galería agrupada se puede soltar en otra base de datos y pasa a ella, como ya pasaba sin agrupar.
+- Soltar una tarjeta en otro grupo le da el valor de ese grupo (su categoría, su estado…). Con varios valores, se cambia el de origen por el de destino.
+
+
+### 2026-10-18 — Ficha de producto: plantilla, propiedades, comparador, «la mejor en cada criterio», afirmaciones y retiradas (Wikiproducts W1)
+- Una base de datos puede tener una **plantilla de ficha**: una página normal (se edita con el editor de siempre) cuyos bloques se ponen delante de los de cada fila. Cien productos, un solo diseño. En la propia plantilla se ve con los datos de la fila más completa. `PUT /api/bd/tablas/:id/plantilla`, `PATCH /api/v1/databases/:id {create_template}`.
+- Cinco bloques nuevos que leen «la fila de esta página»: **Propiedades** (tabla, lista, cabecera, texto o pie, por grupo), **Comparador** (de 2 a 4 filas lado a lado, la mejor celda resaltada, se puede compartir con `?comparar=`), **La mejor en cada criterio**, **Afirmaciones verificadas** (cierta / matizable / falsa / sin pruebas, las falsas primero) y **Retiradas y alertas** (distingue «buscado y no hay ninguna, a fecha X» de «todavía no comprobado»).
+- **Cada dato dice de dónde viene**: «Según la marca», «Medido por un tercero», «Calculado» o «El fabricante no lo publica», con su enlace y fecha (columna `bd_filas.procedencia`, migración 0153; `PUT /api/bd/filas/:id/procedencia`; `provenance` en la API v1).
+- **La comisión nunca ordena nada**: ni el comparador ni «la mejor en cada criterio» pueden usarla, aunque alguien la configure para eso. Lo comprueba `scripts/wikiproducts/probar-ficha.ts`, y la ficha lo dice al lector.
+- Para buscadores: la ficha sale entera en el HTML del servidor, con título «Marca Modelo: datos, precio y opiniones», datos estructurados `Product` (con su dirección canónica, precio y, sólo si hay votos reales, nota), migas de pan, la descripción sacada del resumen del producto y `noindex` mientras le falte foto, resumen, 8 datos con fuente, una oferta o la fecha de revisión.
+- La API v1 crea bases de datos y columnas (`POST /api/v1/databases`, `POST /api/v1/databases/:id/columns`) y fija la forma de las direcciones de sus filas (`route`). `scripts/wikiproducts/crear-esquema.mjs` crea las 14 bases de datos de Wikiproducts (`esquema-bd.json`) sin repetir nada.
+- En el móvil, la burbuja de comentar de cada bloque ya no ensancha la página 16 px (salía por fuera de la columna y se podía arrastrar la página de lado). Ahora queda dentro de la columna en pantallas estrechas.
+### 2026-10-18 — Ocultar una entrada entera al público (prog8)
+- En el menú de una tarjeta (clic derecho o ⋯), «Ocultar al publicar»: la entrada deja de verse en la web publicada. Quien edita la sigue viendo, atenuada y con la marca «Oculta», y la vuelve a enseñar con «Mostrar al publicar».
+- El servidor no manda las entradas ocultas a quien no puede editar la tabla (columna `bd_filas.oculta`, migración 0154).
+
+
+### 2026-10-18 — Direcciones legibles para las fichas (Wikiproducts W2, SEO R2)
+- Una base de datos puede llevar una plantilla de dirección (`config.ruta`, p. ej. `powerbanks/{Marca}-{Modelo}`) y cada fila se abre por su nombre: `wikiproducts.humanity.wiki/powerbanks/anker-737-powercore-24k` en vez de `/p/BDF…`. Funciona igual en dominio propio, subdominio y `humanity.wiki/@quien/…`.
+- Dos o tres tramos; el primero no puede ser uno de la aplicación (`p`, `bd`, `buscar`…). `{Columna}` toma el valor de esa columna; una relación (la marca) da el nombre de la fila apuntada. Si falta un dato, la ficha sigue en `/p/:id`.
+- Si la ficha cambia de nombre, la dirección vieja contesta 301 a la nueva para siempre (tabla `direcciones_anteriores`, migración 0158). `/p/:id` de una ficha con dirección legible también lleva a ella con un 301.
+- La dirección se calcula al leer (sitemap, visita a `/p/:id`), al poner la plantilla con `PATCH /api/v1/databases/:id {route}`, y con `POST /api/v1/databases/:id/routes` (con clave de API) o `POST /api/bd/tablas/:id/rutas` (con sesión) para quien carga datos en bloque. El sitemap, la canónica y el HTML del servidor usan ya la dirección legible.
+
+### 2026-10-18 — Las entradas ocultas tampoco salen en el HTML, el sitemap ni el buscador (W2)
+- Una entrada oculta (0154, #599) ya no se veía en la tabla de la pantalla, pero el HTML del servidor (#589), el sitemap, el buscador del sitio y la página pública de la entrada (`/p/:id`) leían las filas sin mirar `oculta`: quien abriera el código de la página o el sitemap la veía. Ahora la página de una entrada oculta deja de heredar «publicada» de la página que enseña su base de datos (`subirDesdePagina`) y las cuatro lecturas la saltan. Quien edita la tabla la sigue viendo en el editor.
+
+### 2026-10-18 — Esquema de Wikiproducts: varias afirmaciones y retiradas por producto (Wikiproducts W1)
+- En las cinco bases de datos de productos, «Afirmaciones» y «Retiradas» admiten varios enlaces (antes sólo uno: la carga de datos fallaba con productos que tienen de 2 a 5). Las baterías domésticas tienen columna «Ruido» (dB, menos es mejor). `scripts/wikiproducts/esquema-bd.json`.
+### 2026-10-18 — Portadas con vídeo (prog8)
+- La portada de una página puede ser un vídeo: pegando un enlace de YouTube o Vimeo (en el campo del diálogo o con ⌘V) o subiendo un archivo de vídeo, arrastrado o elegido. Se reproduce en silencio y en bucle, en el editor y en la página publicada.
+- Las imágenes siguen pasando por el recortador; los vídeos no. Una portada de vídeo no se usa como imagen de tarjeta en las galerías: ahí sale la primera imagen de la página.
+
+### 2026-10-18 — "Where to buy it", visible commission and managed orders (Wikiproducts W5)
+- Offers block (`src/components/bloquesDatos/ofertas/`): on a product sheet, one card per shop with price, shipping, delivered total, lead time, stock, "installation included", the date the price was checked, and the commission that shop pays Wikiproducts. "Añadir a la cesta" and "Ver en la tienda" (`rel="sponsored"` with commission, `nofollow` without).
+- Order comes from `ordenarOfertas` (`src/utils/ofertas.ts`): price plus shipping, then customer-service rating, sold-out last. **It never reads the commission**; `scripts/probar-ofertas.ts` checks it across every permutation of commissions.
+- Offers database: new roles in the property picker (group "Ofertas"): Producto, Distribuidor, Comisión, Enlace a la tienda, Plazo de entrega, Comprobado el, Incluye instalación, plus EAN / GTIN for the product sheet.
+- Cart and "Mi pedido": every line names the shop that serves it and the commission ("La paga la tienda; tú pagas el mismo precio que en ella"). Two shops are two shipments: shipping is summed per shop.
+- Managed order: once paid (card or points) the order is split into one entry per shop (`pedidos_distribuidor`, migration 0157). Comercio → "Pedidos a tiendas" is the queue: what to order, the offer link, the customer's address, the shop's order number and tracking. The customer's order moves only when all its shops move, and the customer is notified at each step.
+- Google Merchant Center feed: `GET /api/ofertas/merchant/<handle>.xml`, one item per product (the offer ranked first), with the EAN when the sheet has one.
+- Security, `server.ts` webhook (fixed in place, nothing added): with `STRIPE_WEBHOOK_SECRET` set, a request **without** a `stripe-signature` header used to skip the check, so anyone could post a "paid" checkout and create orders or memberships. Now it is refused (400). With no secret configured, production no longer trusts the body: it fetches the event from Stripe by its id (`stripe.events.retrieve`), so only events Stripe really sent are processed and existing shops keep working until the secret is set. Eugenio decided the same day to go straight to live Stripe, which is what made this urgent.
+- The Offers block now writes itself into the server HTML (W2's `registrarHtml`, `src/server/ofertas.ts`): shops, prices, shipping, commission and the `rel` of each link are readable without JavaScript. Built as an anonymous visitor, so only offers from published tables appear.
+- Each offer card now shows the shop's customer-service note from the community (W4's `notaAtencionDistribuidores`), and the ordering uses it to break price ties. Under the voter threshold it still says «aún sin votos suficientes».
+### 2026-10-18 — Bloque «Menú de temas» (Humanidad Wiki, fase 1) (prog8)
+- Nuevo bloque para cualquier página: el menú de temas de Explorar, con icono y color por tema, en lista lateral o en rejilla. Cada tema lleva a una página y puede tener subtemas que se despliegan.
+- Nace con los temas de la humanidad (los mismos quince del menú, con su icono y su color) y se edita en el propio bloque: nombre, icono, color, enlace, subtemas y orden. Es el primer paso para que Humanidad Wiki sea una página hecha con Wiki Creator.
 
 ### 2026-10-18 — Chat de ayuda y consultas con expertos en los sitios (Wikiproducts W6)
 - Bloque **«Chat de ayuda»** (`bloquesDatos/chat/`): quien visita una web pregunta, con o sin cuenta (sin cuenta le reconoce una cookie del anfitrión, y puede dejar su correo para que le avisen). El equipo del sitio (quien puede editar la raíz) ve en ese mismo bloque la bandeja con pendientes y resueltas, contesta y marca resuelta. Opción de burbuja flotante. Avisos por la campana (`soporte_mensaje`) y, al visitante sin cuenta, un correo con la primera respuesta sin leer si hay `RESEND_API_KEY`. El visitante no recibe en vivo: el bloque pregunta cada 8 s con la pestaña visible.

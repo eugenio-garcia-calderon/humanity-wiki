@@ -9,6 +9,7 @@ import { numeroSincrono } from './ajustes.js';
 import { anotarLiquidacion } from './liquidaciones.js';
 import { consultaPagadaPorStripe, consultaCaducadaPorStripe } from './expertos.js';
 import { normalizarTelefono } from '../utils/telefono.js';
+import { registrarPedidoGestionado } from './pedidoGestionado.js';
 
 /** El teléfono que recoge Stripe, en la forma del resto de la casa (o nulo). */
 const normalizarTelefonoSeguro = (t: any) => normalizarTelefono(typeof t === 'string' ? t : null);
@@ -643,6 +644,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                           ${precio || prod?.price_cents || 0}, ${v?.id || null}, ${v?.nombre || null})
                 `);
               }
+              await registrarPedidoGestionado(db, idT);   // Wikiproducts: comisión y cola por distribuidor
               // Lo que la plataforma le debe a esta tienda, con su fecha de pago.
               const liq = await anotarLiquidacion(db, {
                 pedidoId: idT, vendedorId: vid, brutoCentimos: brutoT, envioCentimos: envioT,
@@ -697,6 +699,9 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                         ${precio || prod?.price_cents || 0}, ${v?.id || null}, ${v?.nombre || null})
               `);
             }
+            // PEDIDO GESTIONADO (Wikiproducts, 2026-10-18): la comisión de cada
+            // línea y la cola de lo que hay que pedir a cada distribuidor.
+            await registrarPedidoGestionado(db, pedidoId);
             // LA PARTE PAGADA CON PUNTOS (2026-08-22): el comprador ya pagó en
             // euros el resto; ahora los puntos pasan al vendedor por el
             // libro. Si el saldo ya no alcanza (se lo gastó entre abrir el

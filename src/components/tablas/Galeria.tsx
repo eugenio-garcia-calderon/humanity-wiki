@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
 import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -26,6 +26,8 @@ import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 
 type Fila = {
   id: string;
+  /** Oculta al público: solo llega a quien edita. */
+  oculta?: boolean;
   pagina_id?: string | null;
   pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null; encuadre?: { x: number; y: number } | null } | null;
   celdas: Record<string, Celda>;
@@ -59,7 +61,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -71,6 +73,10 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
   /** Quien edita puede recolocar la imagen de cada tarjeta, también en una galería agrupada
    *  (donde `editable` es falso para que no se reordene). Sin valor, lo que diga `editable`. */
   recolocar?: boolean;
+  /** Arrastrar tarjetas a otra base de datos o a otro grupo, aunque no se pueda reordenar (galería agrupada). Sin valor, `editable`. */
+  arrastrable?: boolean;
+  /** En una galería agrupada: soltar aquí una tarjeta de esta misma base la pasa a este grupo. */
+  alSoltarEnGrupo?: (filaId: string) => void;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -211,6 +217,8 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
     try { d = JSON.parse(e.dataTransfer.getData(MIME_FILA)); } catch { d = null; }
     if (!d?.fila || !d.tabla) return;
     e.preventDefault(); e.stopPropagation();
+    // De otro grupo de esta misma base: no se reordena, se cambia de grupo.
+    if (alSoltarEnGrupo && d.tabla === tablaId) { alSoltarEnGrupo(d.fila); return; }
     colocarAjena(d, antes);
   };
   // Esta galería se anuncia como destino posible de «Mover a…».
@@ -247,6 +255,17 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
     ? formatear(f.celdas[columnaTitulo as string] ?? { estado: 'vacia' }, columnas.find(c => c.id === columnaTitulo)!) : '')
     || f.pagina?.titulo || 'Sin título';
 
+  /** Ocultar o volver a enseñar la entrada en la web publicada. Quien edita la sigue viendo, atenuada. */
+  const alternarOculta = async (f: Fila) => {
+    const r = await fetch(`/api/bd/filas/${f.id}/oculta`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oculta: !f.oculta }),
+    });
+    if (!r.ok) { setFallo((await r.json().catch(() => ({}))).error || 'No se pudo cambiar.'); return; }
+    setAviso({ texto: f.oculta ? 'Se verá al publicar' : 'Oculta al publicar' });
+    onCambio();
+  };
+
   const duplicar = async (f: Fila) => {
     setFallo(null); setAviso({ texto: 'Duplicando…' });
     try { await duplicarFila(f.id); onCambio(); setAviso({ texto: 'Entrada duplicada, debajo de la original' }); }
@@ -274,6 +293,7 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
         .then(() => setAviso({ texto: 'Enlace copiado' }), () => setFallo('No se pudo copiar el enlace.'));
     } },
     { etiqueta: 'Duplicar', icono: Copy, onClick: () => duplicar(f) },
+    { etiqueta: f.oculta ? 'Mostrar al publicar' : 'Ocultar al publicar', icono: f.oculta ? Eye : EyeOff, onClick: () => alternarOculta(f) },
     ...(puedeMover ? [
       { etiqueta: 'Mover al principio', icono: ArrowUpToLine, deshabilitada: filasVis[0]?.id === f.id, onClick: () => moverFila(f.id, filasVis[0]?.id ?? null) },
       { etiqueta: 'Mover al final', icono: ArrowDownToLine, deshabilitada: filasVis[filasVis.length - 1]?.id === f.id, onClick: () => moverFila(f.id, null) },
@@ -327,7 +347,7 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
   // propiedades ni mandos grandes: no caben, y taparían la imagen.
   const chica = tamano === 'xs' || tamano === 'xxs';
   const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
-          const conMenu = editable && !sitio && !copia;
+          const conMenu = (arrastrable ?? editable) && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
@@ -405,7 +425,12 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40')}>
+              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
+              {f.oculta && (
+                <span className="absolute left-2 top-2 z-[2] inline-flex items-center gap-1 rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No se ve en la web publicada">
+                  <EyeOff className="h-3 w-3" /> Oculta
+                </span>
+              )}
               {/* Dónde caerá la tarjeta: una barra verde en el lado correspondiente. */}
               {mover && destino?.id === f.id && (
                 <span aria-hidden className={cn('pointer-events-none absolute z-20 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]',
@@ -547,13 +572,13 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
   const rejilla = (
     <div>
       <div className={cn(chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
-        onDragOver={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
+        onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
-        onDrop={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
+        onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
         style={centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filasVis.map(f => tarjeta(f, false, editable && !sitio, ordenable && editable && !sitio))}
+        {filasVis.map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && editable && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}

@@ -386,6 +386,51 @@ hundred products: one query, milliseconds). **Switch when a site passes
 search column kept up to date on write (or Postgres full-text with a Spanish
 config). About half a day now; the same later, plus a backfill.
 
+## 2026-10-18 — A product sheet reads its whole table (Wikiproducts W1)
+
+`fichaDePagina` reads the row's entire table through `GET /api/bd/tablas/:id`
+(the comparator and «best per criterion» need the siblings), on every
+published row page and once more from the browser (`/api/bd/ficha/:id`) when
+the page was not preloaded. Fine for the MVP (tens to a few hundred products
+per category: one read, tens of ms). **Switch past ~2,000 rows per table or
+sheet p95 > 300 ms:** precompute per-column rankings on write and read only
+the current row plus the rows the comparator shows. About a day now, more
+once other blocks depend on the full table.
+
+## 2026-10-18 — Product breadcrumbs guess the parent's path (Wikiproducts W1)
+
+The sheet's `BreadcrumbList` names the parent page as `/{slug}` (or `/p/{id}`)
+and lets `sitios.ts` resolve it against the canonical origin. Right on a
+subdomain; on a custom domain whose root IS that parent, the right path is
+`/`. Fix by passing the parent's canonical into the ampliación (W2) — half
+an hour — once W2's readable-URL follow-up (R2) lands, since it changes the
+paths anyway.
+
+## 2026-10-18 — Client-side links to rows still use `/p/:id` (Wikiproducts W2, R2)
+
+The server HTML, sitemap and canonical use a row's readable URL, but the React
+gallery/table link with `enlacePagina(id)` → `/p/:id`, so in-app navigation shows
+`/p/BDF…` in the address bar (a hard load of it 301s to the readable one).
+Fixing it means passing the row page's slug to the reading components
+(`Rejilla`, `Galeria`) and an `enlaceRuta` in `ContextoSitio`: about an hour
+today, touching files other threads edit often. Do it when the product sheet
+(W1) settles.
+
+## 2026-10-18 — Offers block reads the whole offers table (Wikiproducts W5)
+
+`ofertasDeProducto` (`src/server/ofertas.ts`) reads every row of the offers
+table to show one product's offers, because `sincronizarTienda` archives any
+product it is not handed. Fine for hundreds of offers. With thousands, give
+`sincronizarTienda` a «these rows only, do not archive the rest» mode (about
+1 hour today) or move the sync to the write paths (see 2026-10-06 above).
+
+Also found, not fixed: sending a shop table to the bin leaves its `products`
+rows for sale. The merchant feed filters them out; checkout does not.
+
+Both integrations are wired: the server HTML (W2) and the distributor
+attention score (W4, `notaAtencionDistribuidores`; null under the voter
+threshold, checked only on that null path here).
+
 ## 2026-10-18 — Expert consultations and support chat (Wikiproducts W6)
 
 - **The site's commission goes to the platform account.** With Stripe
