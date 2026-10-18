@@ -104,7 +104,7 @@ export const NUNCA_ORDENA: ReadonlySet<string> = new Set(['comision']);
  *  column's config cannot be changed through the API yet: their loader keys
  *  in `esquema-bd.json` stand in for them. */
 const ROL_POR_CLAVE: Record<string, Rol> = {
-  foto_licencia: 'credito_imagen', tipo: 'subcategoria',
+  foto: 'imagen', foto_licencia: 'credito_imagen', tipo: 'subcategoria',
   // The size a product is compared at: energy for batteries, peak power for panels.
   capacidad_wh: 'tamano', capacidad_total_kwh: 'tamano', potencia_pico_w: 'tamano', potencia_pico_wp: 'tamano',
 };
