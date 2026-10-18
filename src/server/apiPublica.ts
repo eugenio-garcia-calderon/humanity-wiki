@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import crypto from 'node:crypto';
 import { filaAUsuario } from './auth';
 import { bdInterno } from './bd';
+import { asegurarRutas, plantillaValida } from './rutasFila';
 import { visibles } from './espacio';
 import { rolEnPagina, capacidades, puedeEditarPagina, quienDe } from './permisos';
 import { registrarHistorial } from './historial';
@@ -346,6 +347,17 @@ export function registrarApiPublica(app: Express, db: any) {
     } catch (e: any) { console.error('v1 crear columna:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
+  /** Recompute every row's readable address after loading rows in bulk
+   *  (W2, SEO R2). Needs write access, like changing the rows. */
+  app.post('/api/v1/databases/:id/routes', async (req: Request, res: Response) => {
+    try {
+      const t = await conTabla(req, res, true); if (!t) return;
+      const ruta = plantillaValida(t.config?.ruta);
+      if (!ruta) return res.status(400).json({ error: 'Esta base de datos no tiene «route». Ponla con PATCH /api/v1/databases/:id.' });
+      res.json({ id: t.id, route: ruta, routes_updated: await asegurarRutas(db, t.id) });
+    } catch (e: any) { console.error('v1 rutas:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
   /** `{ create_template: true }` or `{ template_page_id: "…" | null }`: the
    *  page every row's page is laid out with (see `bd/plantillaFicha.ts`). */
   app.patch('/api/v1/databases/:id', async (req: Request, res: Response) => {
@@ -361,8 +373,8 @@ export function registrarApiPublica(app: Express, db: any) {
       // W2's sitios.ts reads it. null clears it.
       if (b.route !== undefined) {
         const ruta = b.route === null ? null : String(b.route).trim();
-        if (ruta !== null && (!ruta || ruta.length > 200 || /[\s?#]/.test(ruta) || ruta.startsWith('/'))) {
-          return res.status(400).json({ error: '«route» es una plantilla como «powerbanks/{Marca}-{Modelo}»: sin espacios, sin «/» al principio y de menos de 200 letras.' });
+        if (ruta !== null && (!ruta || ruta.length > 200 || /[\s?#]/.test(ruta) || ruta.startsWith('/') || !plantillaValida(ruta))) {
+          return res.status(400).json({ error: '«route» es una plantilla como «powerbanks/{Marca}-{Modelo}»: sin espacios, sin «/» al principio, de dos o tres tramos, con al menos un {Columna}, sin empezar por un tramo de la aplicación (p, bd, buscar…) y de menos de 200 letras.' });
         }
         await db.execute(sql`
           UPDATE bd_tablas SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{ruta}', ${JSON.stringify(ruta)}::jsonb),
@@ -370,6 +382,8 @@ export function registrarApiPublica(app: Express, db: any) {
           WHERE id = ${t.id}
         `);
         out.route = ruta;
+        // The rows that already exist get their address now (`rutasFila.ts`).
+        if (ruta) out.routes_updated = await asegurarRutas(db, t.id);
       }
       if (b.create_template !== undefined || b.template_page_id !== undefined) {
         const r = await ponerPlantilla(db, req, t.id, b.create_template ? { crear: true } : { pagina_id: b.template_page_id });
