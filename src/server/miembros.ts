@@ -360,6 +360,8 @@ const RUTAS_DE_MIEMBRO: { re: RegExp; metodos: string[]; permiso: Permiso }[] = 
   { re: /^\/api\/publicar\/favoritos(\/|$)/, metodos: ['GET', 'PUT', 'DELETE'], permiso: 'guardar' },
   { re: /^\/api\/publicar\/(comprar|cotizar|cupon\/comprobar)\/?$/, metodos: ['POST'], permiso: 'comprar' },
   { re: /^\/api\/stripe\/checkout\/product\/?$/, metodos: ['POST'], permiso: 'comprar' },
+  // Community ratings (Wikiproducts W4): voting is giving an opinion, like a comment.
+  { re: /^\/api\/valoraciones\/fila\/[^/]+\/?$/, metodos: ['GET', 'PUT'], permiso: 'comentar' },
 ];
 
 export function identidadDeSitio(db: any) {
