@@ -8852,3 +8852,9 @@ en mis páginas como proyecto pendiente».
 - Las opciones de una propiedad de selección (por ejemplo «Estado»: pendiente, en curso, completado) tienen color, con la paleta de Notion: se elige en el editor de la propiedad, junto a cada opción.
 - En la galería, una propiedad de selección se ve solo como su etiqueta de color, sin «Estado:» delante.
 - Quien edita cambia cualquier propiedad visible desde la propia tarjeta, sin abrirla, también si está vacía: la tarjeta enseña el nombre de la propiedad y un hueco para rellenarla.
+
+### 2026-10-18 — Registro de bloques de datos y copia local de Wikiproducts (Wikiproducts W0)
+- Nueve tipos de bloque nuevos declarados de una vez en `src/utils/bloques.ts` (`TIPOS_BLOQUE_DATOS`): propiedad, comparador, alternativas, afirmacion, retirada, valoracion, ofertas, chat, experto. Su configuración va en `bloque.datos`.
+- `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
+- Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
+- `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).

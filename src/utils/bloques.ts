@@ -63,7 +63,42 @@ export type TipoBloque =
   // pinta con KaTeX (`Formula.tsx`). `embed`: contenido de un tercero (Figma,
   // Maps, Spotify…): `url` es la dirección que se pegó y el iframe sale de la
   // lista blanca de `utils/embeds.ts`, nunca de lo guardado tal cual.
-  | 'ecuacion' | 'embed';
+  | 'ecuacion' | 'embed'
+  // 2026-10-18 (Wikiproducts, frente W0). Los bloques que pintan DATOS: ver
+  // `TIPOS_BLOQUE_DATOS` abajo y `src/components/bloquesDatos/registro.tsx`.
+  | TipoBloqueDatos;
+
+/**
+ * ══ LOS BLOQUES DE DATOS (2026-10-18, Wikiproducts) ═══════════════════════
+ * Los que enseñan algo calculado o leído de una base de datos: una propiedad
+ * de la fila, un comparador, la mejor en cada criterio… Se declaran AQUÍ,
+ * todos de una vez, para que el editor (`Documento.tsx`) y la página publicada
+ * (`BloquesLectura.tsx`) los conozcan sin que nadie vuelva a tocar esos dos
+ * ficheros: cada uno vive en su carpeta de `src/components/bloquesDatos/` y
+ * se apunta solo en el registro.
+ *
+ * Declarado no es construido: un tipo de esta lista sin carpeta no sale en el
+ * menú, la página publicada no lo pinta y el editor dice que aún no existe.
+ *
+ * Lo que cada uno configura va en `datos` (ver la interfaz `Bloque`), no en un
+ * campo nuevo de la interfaz: así un bloque nuevo no toca este fichero.
+ */
+export const TIPOS_BLOQUE_DATOS = [
+  'propiedad',     // 3.2  propiedades de la fila actual (tabla técnica, origen)
+  'comparador',    // 3.4  2–4 filas lado a lado, la mejor celda resaltada
+  'alternativas',  // 3.5  la nº 1 en cada criterio de la misma categoría
+  'afirmacion',    // 3.7  afirmación publicitaria + veredicto + fuentes
+  'retirada',      // 3.7  retirada o alerta de seguridad (país, fecha, fuente)
+  'valoracion',    // 3.3  votos 1–5 por criterio, media bayesiana
+  'ofertas',       // 3.6  ofertas por distribuidor con precio y comisión
+  'chat',          // 3.12 chat de atención del sitio
+  'experto',       // 3.12 reservar y pagar una consulta con un experto
+] as const;
+export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
+
+const SET_DATOS = new Set<string>(TIPOS_BLOQUE_DATOS);
+export const esBloqueDatos = (tipo: unknown): tipo is TipoBloqueDatos =>
+  typeof tipo === 'string' && SET_DATOS.has(tipo);
 
 /** Lo que hace un bloque `boton` (2026-10-05, como los botones de Notion). */
 export interface AccionBoton {
@@ -219,6 +254,9 @@ export interface Bloque {
   relacion?: number;
   recorte?: Recorte;
   natural?: [number, number];
+  /** Bloques de datos (2026-10-18): toda su configuración, la que el bloque
+   *  quiera, en un solo objeto JSON. Ver `TIPOS_BLOQUE_DATOS`. */
+  datos?: Record<string, unknown>;
 }
 
 /** La parte de una imagen que se enseña: x, y, ancho y alto de 0 a 1. */
@@ -369,6 +407,31 @@ const filaTabla = (linea: string): string[] | null => {
 };
 const esSeparadorTabla = (linea: string) => /^\|?\s*:?-{2,}/.test(linea.trim()) && /-/.test(linea);
 
+/**
+ * UN BLOQUE DE DATOS EN MARKDOWN (2026-10-18). La API pública (`/api/v1`)
+ * crea las páginas desde markdown, y markdown no tiene forma de decir «aquí va
+ * un comparador». Se escribe así:
+ *
+ *     ```bloque
+ *     {"tipo": "comparador", "datos": {"tabla_id": "…", "filas": ["…", "…"]}}
+ *     ```
+ *
+ * Sólo vale para los tipos de `TIPOS_BLOQUE_DATOS`: por aquí no se cuela una
+ * web insertada ni un botón. Si el JSON no se entiende, la valla se queda en
+ * lo que era —un bloque de código— y quien lo escribió ve lo que mandó.
+ */
+function bloqueDatosDeValla(cuerpo: string): Bloque | null {
+  try {
+    const j = JSON.parse(cuerpo);
+    if (!j || typeof j !== 'object' || !esBloqueDatos(j.tipo)) return null;
+    const datos = j.datos && typeof j.datos === 'object' && !Array.isArray(j.datos) ? j.datos : undefined;
+    return { id: nuevoIdBloque(), tipo: j.tipo, datos };
+  } catch { return null; }
+}
+
+const vallaDeBloqueDatos = (b: Bloque) =>
+  '```bloque\n' + JSON.stringify(b.datos ? { tipo: b.tipo, datos: b.datos } : { tipo: b.tipo }) + '\n```';
+
 /** Markdown → bloques. Tolerante: lo que no reconoce, es un párrafo. */
 export function markdownABloques(md: string): Bloque[] {
   const bloques: Bloque[] = [];
@@ -395,6 +458,9 @@ export function markdownABloques(md: string): Bloque[] {
       i++;
       while (i < lineas.length && !lineas[i].trim().startsWith('```')) { cuerpo.push(lineas[i]); i++; }
       i++; // cierra la valla
+      // Un bloque de datos escrito en markdown (ver `bloqueDatosDeValla`).
+      const deDatos = valla[1] === 'bloque' ? bloqueDatosDeValla(cuerpo.join('\n')) : null;
+      if (deDatos) { bloques.push(deDatos); continue; }
       bloques.push({ id: nuevoIdBloque(), tipo: 'codigo', texto: cuerpo.join('\n'), lenguaje: valla[1] || undefined });
       continue;
     }
@@ -516,7 +582,7 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
         for (const f of filas.slice(1)) salida.push(`| ${f.join(' | ')} |`);
         break;
       }
-      default: salida.push(b.texto || '');
+      default: salida.push(esBloqueDatos(b.tipo) ? vallaDeBloqueDatos(b) : b.texto || '');
     }
     if (b.nivel) {
       const pre = '  '.repeat(b.nivel);
