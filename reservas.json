@@ -77,12 +77,6 @@
       "ruta": "src/AplicacionDeDominio.tsx",
       "motivo": "W2 ruta buscar",
       "desde": "2026-10-18T12:00:47.202Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "W2",
-      "desde": "2026-10-18T12:03:40.754Z"
     }
   ]
 }
