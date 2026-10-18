@@ -588,6 +588,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     cabecera: (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => ReactNode,
     pie?: (celdas: Record<string, any>) => ReactNode,
     nivel = 0, padre: Grupo | null = null, celdasPadre: Record<string, any> = {},
+    /** El «Añadir» junto al título del grupo y no debajo de sus tarjetas (galería). */
+    pieArriba = false,
   ): ReactNode => {
     const col = nivel === 0 ? colAgr : nivel === 1 ? colSub : null;
     if (!col) return <>{pintar(lista, padre || undefined)}{pie?.(celdasPadre)}</>;
@@ -598,10 +600,18 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       const plegado = plegados.has(clave);
       const alternar = () => setPlegados(p => { const n = new Set(p); if (n.has(clave)) n.delete(clave); else n.add(clave); return n; });
       const celdas = { ...celdasPadre, ...(g.vacio ? {} : { [col.id]: valorAlMover({ id: '', celdas: {} }, col, null, g) }) };
+      // El último nivel de grupos lleva su «Añadir» al lado del título.
+      const hoja = !(nivel === 0 ? colSub : null);
+      const arriba = pieArriba && hoja && pie;
       return (
         <Fragment key={clave}>
-          {cabecera(g, nivel, plegado, alternar)}
-          {!plegado && porGrupos(g.filas, pintar, cabecera, pie, nivel + 1, g, celdas)}
+          {arriba ? (
+            <div className="flex flex-wrap items-center gap-1">
+              {cabecera(g, nivel, plegado, alternar)}
+              {pie(celdas)}
+            </div>
+          ) : cabecera(g, nivel, plegado, alternar)}
+          {!plegado && porGrupos(g.filas, pintar, cabecera, arriba ? undefined : pie, nivel + 1, g, celdas, pieArriba)}
         </Fragment>
       );
     });
@@ -1053,11 +1063,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
-              ordenable={editable && !colAgr && !activa.orden_por.length}
+              // Dentro de un grupo también se reordena a mano (2026-10-18, Eugenio):
+              // el orden es el de la tabla, y el grupo enseña su trozo en ese orden.
+              ordenable={editable && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}
               motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
           ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
-          colAgr && editable ? celdas => <div className="max-w-xs"><NuevoElemento onCrear={t => crearCon(t, celdas)} /></div> : undefined)}
+          // «Añadir», pegado al título del grupo (2026-10-18, Eugenio): así se ve
+          // a qué grupo va la tarjeta nueva.
+          colAgr && editable ? celdas => <div className="pt-2"><NuevoElemento texto="Añadir" className="w-auto" onCrear={t => crearCon(t, celdas)} /></div> : undefined,
+          0, null, {}, true)}
           {/* Mostrar más: otra tanda igual a la que se eligió. */}
           {!colAgr && porTanda && filas.length > visiblesGaleria.length && (
             <div className="flex justify-center pt-3">

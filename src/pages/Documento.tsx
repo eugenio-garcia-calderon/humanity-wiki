@@ -36,7 +36,7 @@ import { repintar, ponerCursor } from '../utils/marcadoVivo';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
-import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../components/knowledge/CabeceraPagina';
+import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion, TALLAS_PORTADA, tallaDe } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import { ImagenEditable, ImagenVista } from '../components/knowledge/ImagenBloque';
@@ -4119,7 +4119,21 @@ function EditorPagina() {
             <div className="group/portada relative w-fit max-w-full">
               <MediaPortada src={portada} className="w-full h-56 object-cover rounded-2xl" />
               {editable && (
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
+                <div className="absolute top-2 right-2 flex flex-wrap justify-end gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
+                  {/* TAMAÑO, junto a recortar y cambiar (2026-10-18, Eugenio). */}
+                  <div role="radiogroup" aria-label={tr('Tamaño de la portada')} className="flex items-center gap-0.5 rounded-lg bg-white/90 pl-2 pr-0.5">
+                    <span className="mr-0.5 text-[10px] font-black text-slate-400">{tr('Tamaño')}</span>
+                    {TALLAS_PORTADA.map(([nombre, valor]) => {
+                      const puesta = tallaDe(ajustes.cabecera?.tamano) === nombre;
+                      return (
+                        <button key={nombre} role="radio" aria-checked={puesta} aria-label={`${tr('Tamaño')} ${nombre}`}
+                          onClick={() => { setAjustes(a => ({ ...a, cabecera: { ...(a.cabecera || {}), tamano: valor } })); programarGuardado(); }}
+                          className={cn('min-w-[1.6rem] px-1 py-1 rounded-md text-[10px] font-black', puesta ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>
+                          {nombre}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <button onClick={() => setEligiendoPortada(true)}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     {tr('Cambiar')}

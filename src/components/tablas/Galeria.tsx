@@ -578,7 +578,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         style={centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filasVis.map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && editable && !sitio))}
+        {filasVis.map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && (arrastrable ?? editable) && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}
@@ -619,7 +619,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         <p className="py-6 text-center text-xs text-slate-400">Todavía no hay nada en esta base de datos.</p>
       )}
       <span className="sr-only" role="status" aria-live="polite">{anuncio}</span>
-      {menu && <MenuAcciones x={menu.x} y={menu.y} acciones={accionesDe(menu.fila, ordenable && editable && !sitio && filasVis.length > 1)} onCerrar={() => setMenu(null)} etiqueta={`Acciones de ${nombreDe(menu.fila)}`} />}
+      {menu && <MenuAcciones x={menu.x} y={menu.y} acciones={accionesDe(menu.fila, ordenable && (arrastrable ?? editable) && !sitio && filasVis.length > 1)} onCerrar={() => setMenu(null)} etiqueta={`Acciones de ${nombreDe(menu.fila)}`} />}
       {aviso && (
         <div role="status" aria-live="polite" className="fixed bottom-5 left-1/2 z-[400] flex h-11 max-w-[92vw] -translate-x-1/2 items-center gap-3 rounded-xl bg-slate-900 px-4 text-[13px] font-bold text-white shadow-2xl">
           <span className="truncate">{aviso.texto}</span>

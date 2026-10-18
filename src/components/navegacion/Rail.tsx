@@ -73,7 +73,7 @@ export const HERRAMIENTAS: Herramienta[] = [
   { clave: 'mapas',        get nombre() { return tr('Mapas'); },         icono: MapIcon,      ruta: '/mapas' , conPanel: true },
   { clave: 'tareas',       get nombre() { return tr('Tareas'); },        icono: ListChecks,   ruta: '/tareas' , conPanel: true },
   { clave: 'tablas',       get nombre() { return tr('Tablas'); },        icono: Table2,       ruta: '/tablas' , conPanel: true },
-  { clave: 'publicaciones', get nombre() { return tr('Publicaciones'); }, icono: Compass,     ruta: '/explorar' , conPanel: true },
+  { clave: 'publicaciones', get nombre() { return tr('Publicaciones'); }, icono: Compass,     ruta: '/explorar?mias=1' , conPanel: true },
   { clave: 'comercio',     get nombre() { return tr('Comercio'); },      icono: Store,        ruta: '/comercio' , conPanel: true },
   { clave: 'calendario',   get nombre() { return tr('Calendario'); },    icono: CalendarDays, ruta: '/calendario' , conPanel: true },
   { clave: 'archivos',     get nombre() { return tr('Archivos'); },      icono: Database,     ruta: '/archivos' , conPanel: true },

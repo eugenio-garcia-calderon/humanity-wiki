@@ -24,6 +24,9 @@ const leer = (): Record<string, boolean> => { try { return JSON.parse(localStora
 
 export function IconoElemento({ e }: { e: Pick<Elemento, 'tipo' | 'icono'> }) {
   const { tipo, icono } = e;
+  // Una imagen subida como icono (la de «Luz & Humanidad»): la misma en el menú
+  // que en la cabecera de la página (2026-10-18).
+  if (icono && /^(https?:|\/|data:image\/)/.test(icono)) return <img src={icono} alt="" loading="lazy" className="h-4 w-4 shrink-0 rounded-[3px] object-cover" />;
   if (icono && [...icono].length <= 2 && !/^[\w-]+$/.test(icono)) return <span className="w-4 text-center text-[14px] leading-none shrink-0">{icono}</span>;
   const C = tipo === 'carpeta' ? (icono ? componenteDeTrazo(icono) : FolderKanban) : tipo === 'bd' ? Boxes : FileText;
   return <C className="h-4 w-4 shrink-0" />;

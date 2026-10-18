@@ -170,16 +170,19 @@ export async function enlacesDe(
   for (const e of enlaces) {
     const clave = `${e.clase}:${e.destino_id}`;
     const encontrado = nombres.get(clave);
+    // LO QUE YA NO EXISTE NO SE ENSEÑA (2026-10-18, Eugenio). Antes salía una
+    // ficha roja «(ya no existe)» que además impedía añadir otra: el enlace
+    // muerto seguía contando. Ahora la celda queda como si no estuviera; el
+    // enlace sigue guardado, así que si la entrada se recupera de la papelera
+    // vuelve a aparecer, y al guardar la celda de nuevo desaparece del todo.
+    if (!encontrado) continue;
     (salida[e.fila_origen] ||= {});
     (salida[e.fila_origen][e.columna_id] ||= []).push({
       id: e.destino_id,
       clase: e.clase,
-      // SI LO APUNTADO YA NO ESTÁ, SE DICE. Antes que enseñar un hueco mudo,
-      // que es indistinguible de una celda vacía, se marca `existe: false` y se
-      // pone una etiqueta que lo explica.
-      etiqueta: encontrado ? encontrado.etiqueta : '(ya no existe)',
-      extra: encontrado ? encontrado.extra : null,
-      existe: !!encontrado,
+      etiqueta: encontrado.etiqueta,
+      extra: encontrado.extra,
+      existe: true,
     });
   }
   return salida;

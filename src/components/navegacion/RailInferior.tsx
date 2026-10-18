@@ -54,7 +54,7 @@ import { t } from '../../i18n';
  * escritorio —tablas, comercio, archivos— al final.
  */
 export const HERRAMIENTAS_ABAJO: Herramienta[] = [
-  { clave: 'publicaciones', get nombre() { return t('Publicaciones'); }, icono: Compass,      ruta: '/explorar',    conPanel: true },
+  { clave: 'publicaciones', get nombre() { return t('Publicaciones'); }, icono: Compass,      ruta: '/explorar?mias=1', conPanel: true },
   { clave: 'paginas',       get nombre() { return t('Páginas'); },       icono: FileText,     ruta: '/paginas',     conPanel: true },
   { clave: 'esquemas',      get nombre() { return t('Esquemas'); },      icono: Globe2,       ruta: '/esquemas',    conPanel: true },
   { clave: 'mapas',         get nombre() { return t('Mapas'); },         icono: MapIcon,      ruta: '/mapas',       conPanel: true },

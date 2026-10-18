@@ -116,6 +116,7 @@ const PlantillaHumanidad = lazy(() => import('./pages/PlantillaHumanidad'));
 const Debate = lazy(() => import('./pages/Debate'));
 import Entrada from './pages/Entrada';
 import Explorar from './pages/Explorar';
+import HaciaHumanidadWiki from './components/navegacion/HaciaHumanidadWiki';
 import TresCaminos from './pages/TresCaminos';
 import Bienvenida from './pages/Bienvenida';
 import Login from './pages/Login';
@@ -415,7 +416,9 @@ export default function App() {
                   const Pagina = p.componente!;
                   return <Route key={p.ruta} path={p.ruta} element={<Pagina />} />;
                 })}
-                <Route path="explorar" element={<Explorar />} />
+                {/* Explorar, temas y objetivos llevan a la página Humanidad Wiki cuando
+                    está publicada (2026-10-18, fase 3); si no, lo de siempre. */}
+                <Route path="explorar" element={<HaciaHumanidadWiki respaldo={<Explorar />} />} />
                 {/* Atajo, no una página aparte: si fuera <Explorar mias /> el cambio
                     de ruta desmontaría el componente y perdería la carpeta abierta
                     al tocar el interruptor De la Humanidad/Mías (2026-08-08). */}
@@ -465,7 +468,8 @@ export default function App() {
                 <Route path="retos/:id" element={<ChallengeProfile />} />
                 <Route path="soluciones/:id" element={<SolutionProfile />} />
                                 <Route path="objetivos/:id" element={<ObjectiveDetail />} />
-                <Route path="objetivos" element={<Objectives />} />
+                <Route path="objetivos" element={<HaciaHumanidadWiki respaldo={<Objectives />} />} />
+                <Route path="temas" element={<HaciaHumanidadWiki respaldo={<Objectives />} />} />
                 {/* La página de un subtema del menú (prog8, 2026-08-25). */}
                 {/* Todo lo tuyo, o todo lo público, sobre un tema (2026-10-05). */}
                 <Route path="temas/:id/contenido" element={<FeedTema />} />

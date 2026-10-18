@@ -250,8 +250,8 @@ export function ImagenEditable({ b, onCambio, onNatural, onEditar, subirComprimi
       const blob = await r.blob();
       const antes = blob.size || peso;
       const nombre = (b.url.split('/').pop() || 'imagen').split('?')[0];
-      const { comprimirImagen } = await import('../../utils/prepararImagen');
-      const f = await comprimirImagen(new File([blob], nombre, { type: blob.type || 'image/jpeg' }), 2000, 0.82);
+      const { comprimirHasta } = await import('../../utils/prepararImagen');
+      const f = await comprimirHasta(new File([blob], nombre, { type: blob.type || 'image/jpeg' }));
       if (f.size >= antes * 0.95) { setNota('Ya está todo lo comprimida que puede estar.'); return; }
       const sub = await subirComprimida(f);
       if ('error' in sub) throw new Error(sub.error);

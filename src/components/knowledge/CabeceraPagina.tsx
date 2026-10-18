@@ -77,6 +77,14 @@ export function FilaTitulo({ cabecera, icono, children, centrado }: {
 }
 
 export const TAMANO_POR_DEFECTO = 50;
+/** Los cinco tamaños con nombre de la portada (2026-10-18, Eugenio): el mismo
+ *  `tamano` que la barra, en saltos que se eligen de un toque. */
+export const TALLAS_PORTADA: Array<[string, number]> = [['XS', 20], ['S', 35], ['M', 50], ['L', 65], ['XL', 80]];
+/** La talla más cercana al tamaño guardado (la barra puede dejar cualquier número). */
+export const tallaDe = (tamano: number | undefined) => {
+  const t = acotar(tamano, 20, 80, TAMANO_POR_DEFECTO);
+  return TALLAS_PORTADA.reduce((m, x) => (Math.abs(x[1] - t) < Math.abs(m[1] - t) ? x : m))[0];
+};
 /** Por defecto la imagen a la DERECHA y a la izquierda el icono, el título y
  *  la descripción (Eugenio, 2026-10-01). En un teléfono se apila igual que
  *  cualquier disposición lateral: imagen arriba, texto debajo. */
