@@ -9040,3 +9040,6 @@ en mis páginas como proyecto pendiente».
 - Header photo shows its credit (new role `credito_imagen`, clave `foto_licencia`) as a caption, only when there is a photo, in both React and server HTML. A photo that fails to load hides itself instead of showing alt text.
 - Gallery cards fall back to the row's `imagen`-role column when the page has no cover or image block (`tarjetasDe` in `src/server/bd.ts`).
 - Recalls/claims linked but not readable no longer produce «No conocemos ninguna retirada»: recalls are listed by title, claims block hides.
+## 2026-10-18 — Grupos pequeños, uno al lado del otro (prog8)
+- En una galería agrupada (sin subgrupos), un grupo con **una o dos tarjetas** ocupa solo lo que miden ellas y comparte fila con otros así, cada uno con su título encima de sus tarjetas. Los grupos de tres o más siguen ocupando la fila entera. En el móvil se apilan.
+- `porGrupos` envuelve cada grupo de nivel 0 en una caja de `min-width` = n × ancho máximo de tarjeta (la rejilla decide las columnas por ese ancho) y el contenedor es `flex-wrap`, centrado si los títulos van centrados.
