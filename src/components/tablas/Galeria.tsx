@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Copy, ExternalLink, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
 import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -59,7 +59,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -68,6 +68,9 @@ export default function Galeria({ onGuardarCelda, tablaId, columnas, filas, colu
   ordenable?: boolean;
   /** Quien edita cambia las propiedades visibles desde la tarjeta, sin abrirla (también las vacías). */
   onGuardarCelda?: (filaId: string, columnaId: string, valor: any) => Promise<{ error?: string } | void>;
+  /** Quien edita puede recolocar la imagen de cada tarjeta, también en una galería agrupada
+   *  (donde `editable` es falso para que no se reordene). Sin valor, lo que diga `editable`. */
+  recolocar?: boolean;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -415,7 +418,7 @@ export default function Galeria({ onGuardarCelda, tablaId, columnas, filas, colu
               <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
-                    recolocable={editable && !sitio && !!f.pagina_id && !chica}
+                    recolocable={(recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}
                     onGuardar={async (x, y) => {
                       const r = await fetch(`/api/bd/filas/${f.id}/encuadre`, {
                         method: 'PUT', credentials: 'include',
@@ -608,7 +611,9 @@ export default function Galeria({ onGuardarCelda, tablaId, columnas, filas, colu
  * `object-position` en %, así que vale igual para cualquier tamaño de
  * tarjeta y de pantalla.
  */
-function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
+function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, compacta = false }: {
+  /** Tarjeta pequeña (XS, XXS): el botón va sin texto. */
+  compacta?: boolean;
   src: string;
   encuadre: { x: number; y: number } | null;
   recolocable: boolean;
@@ -653,24 +658,29 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
       {recolocable && !modo && (
         <button type="button"
           onClick={e => { e.stopPropagation(); setPos(encuadre || { x: 50, y: 50 }); setModo(true); }}
-          className="absolute bottom-2 right-2 inline-flex items-center gap-1 h-8 px-2 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
-          <Move className="w-3 h-3" /> Recolocar
+          title="Recolocar la imagen" aria-label="Recolocar la imagen"
+          className={cn('absolute inline-flex items-center gap-1 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity',
+            compacta ? 'bottom-1 right-1 h-6 w-6 justify-center' : 'bottom-2 right-2 h-8 px-2')}>
+          <Move className="w-3 h-3" />{!compacta && ' Recolocar'}
         </button>
       )}
       {modo && (
         <>
-          <span className="absolute top-2 left-2 px-2 py-1 rounded-md bg-slate-900/75 text-white text-[10px] font-bold pointer-events-none">
-            Arrastra la imagen
-          </span>
-          <div className="absolute bottom-2 right-2 flex gap-1" onPointerDown={parar}>
-            <button type="button" onClick={e => { e.stopPropagation(); setModo(false); }}
-              className="h-8 px-2.5 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600">
-              Cancelar
+          {!compacta && (
+            <span className="absolute top-2 left-2 px-2 py-1 rounded-md bg-slate-900/75 text-white text-[10px] font-bold pointer-events-none">
+              Arrastra la imagen
+            </span>
+          )}
+          {/* En una tarjeta pequeña, los dos botones solo con icono: con texto no caben. */}
+          <div className={cn('absolute flex gap-1', compacta ? 'bottom-1 right-1' : 'bottom-2 right-2')} onPointerDown={parar}>
+            <button type="button" onClick={e => { e.stopPropagation(); setModo(false); }} aria-label="Cancelar" title="Cancelar"
+              className={cn('rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600', compacta ? 'h-6 w-6 grid place-items-center' : 'h-8 px-2.5')}>
+              {compacta ? <X className="w-3 h-3" /> : 'Cancelar'}
             </button>
-            <button type="button" disabled={guardando}
+            <button type="button" disabled={guardando} aria-label="Guardar posición" title="Guardar posición"
               onClick={async e => { e.stopPropagation(); setGuardando(true); await onGuardar(pos.x, pos.y); setGuardando(false); setModo(false); }}
-              className="h-8 px-2.5 rounded-lg bg-slate-900 text-white text-[11px] font-bold disabled:opacity-50">
-              {guardando ? 'Guardando…' : 'Guardar posición'}
+              className={cn('rounded-lg bg-slate-900 text-white text-[11px] font-bold disabled:opacity-50', compacta ? 'h-6 w-6 grid place-items-center' : 'h-8 px-2.5')}>
+              {compacta ? <Check className="w-3 h-3" /> : guardando ? 'Guardando…' : 'Guardar posición'}
             </button>
           </div>
         </>

@@ -159,6 +159,7 @@ function MandosMenu({ s, menu, poner, titulo, opciones }: {
           <div className="space-y-1">
             <Interruptor etiqueta="Fijo al bajar la página" valor={m.fijo} onCambio={v => menu({ fijo: v })} />
             <Interruptor etiqueta="Raya de separación" valor={m.borde} onCambio={v => menu({ borde: v })} />
+            <Interruptor etiqueta="Buscador del sitio" valor={!!m.buscador} onCambio={v => menu({ buscador: v })} />
           </div>
 
           <Grupo titulo="Logotipo y nombre">

@@ -91,6 +91,8 @@ const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const FormularioPublico = lazy(() => import('./pages/FormularioPublico'));
 const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnCasa })));
 const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
+const BuscadorEnEspacio = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnEspacio })));
+const BuscadorEnCasa = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnCasa })));
 const BaseDatosEnEspacio = lazy(() => import('./pages/BaseDatosSitio').then(m => ({ default: m.BaseDatosEnEspacio })));
 const BaseDatosEnCasa = lazy(() => import('./pages/BaseDatosSitio').then(m => ({ default: m.BaseDatosEnCasa })));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
@@ -237,6 +239,7 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
           {/* Las subpáginas (elementos de sus bases de datos), dentro del
               subdominio y sin armazón. Ver `SubpaginaSitio`. */}
           <Route path="p/:id" element={<SubpaginaEnEspacio />} />
+          <Route path="buscar" element={<BuscadorEnEspacio />} />
           {/* La página propia de una base de datos, con su nombre en la dirección para los buscadores. */}
           <Route path="bd/:tablaId" element={<BaseDatosEnEspacio />} />
           <Route path="bd/:tablaId/:slug" element={<BaseDatosEnEspacio />} />
@@ -305,6 +308,7 @@ export default function App() {
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />
+              <Route path=":arroba/buscar" element={<BuscadorEnCasa />} />
               {/* La página propia de una base de datos: con o sin el arroba. */}
               <Route path=":arroba/bd/:tablaId" element={<BaseDatosEnCasa />} />
               <Route path=":arroba/bd/:tablaId/:slug" element={<BaseDatosEnCasa />} />

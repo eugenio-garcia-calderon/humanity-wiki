@@ -20,9 +20,25 @@ const DOMINIO = 'humanity.wiki';
 /** Nombres que son de la plataforma y nunca de una persona. */
 const RESERVADOS = new Set(['www', 'api', 'admin', 'app', 'mail', 'ftp', 'cdn', 'static', 'assets']);
 
+/**
+ * ¿Es este subdominio el de un SITIO y no el de una persona? (2026-10-18)
+ * `wikiproducts.humanity.wiki` lleva a una página, como un dominio propio. El
+ * servidor lo sabe y lo deja escrito en el HTML (`window.__SITIO__.resolver`,
+ * `sitios.ts`); aquí sólo se lee. Devuelve el anfitrión con el que preguntar
+ * al servidor (en desarrollo, `algo.localhost` pregunta por `algo.humanity.wiki`).
+ */
+function subdominioDeSitio(h: string): string | null {
+  if (typeof window === 'undefined') return null;
+  if (!h.endsWith('.' + DOMINIO) && !h.endsWith('.localhost')) return null;
+  const r = (window as any).__SITIO__?.resolver;
+  if (!r?.host || typeof r.host !== 'string') return null;
+  return r.host.split('.')[0] === h.split('.')[0] ? r.host : null;
+}
+
 export function subdominioDeUsuario(host?: string): string | null {
   const h = (host ?? (typeof location !== 'undefined' ? location.hostname : '')).toLowerCase();
   if (!h) return null;
+  if (!host && subdominioDeSitio(h)) return null;
 
   // En desarrollo se prueba con `claude-dos.localhost:3001`, que sí funciona en
   // Chrome sin tocar el fichero de hosts. Sin esto, la forma de subdominio solo
@@ -67,6 +83,7 @@ export function dominioPropio(host?: string): string | null {
   }
   const h = (host ?? (typeof location !== 'undefined' ? location.hostname : '')).toLowerCase();
   if (!h) return null;
+  if (!host) { const sitio = subdominioDeSitio(h); if (sitio) return sitio; }
   if (h === DOMINIO || h.endsWith('.' + DOMINIO)) return null;
   // En desarrollo todo es `localhost` o una IP, y ninguna de las dos es el
   // dominio propio de nadie.

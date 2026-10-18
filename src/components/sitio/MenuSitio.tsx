@@ -4,7 +4,7 @@ import {
   Menu as Tres, X, Home, Mail, Phone, MapPin, ShoppingBag, ShoppingCart, Info, Users, Calendar, Star,
   Heart, BookOpen, Briefcase, Camera, Globe, MessageCircle, Send, Newspaper, Leaf, Sparkles, Lightbulb,
   HelpCircle, Image, Video, Music, Gift, Tag, Award, Building2, Rocket, Handshake, Coffee, Store,
-  FileText, Download, ExternalLink, Instagram, Facebook, Linkedin, Youtube, Twitter, Github,
+  FileText, Download, ExternalLink, Instagram, Facebook, Linkedin, Youtube, Twitter, Github, Search,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import {
@@ -52,6 +52,8 @@ export type Rutas = {
   enlacePagina: (id: string) => string;
   /** La página propia de una base de datos: `/bd/:tabla/:nombre`. */
   enlaceBd?: (tabla: string, titulo?: string) => string;
+  /** La página de resultados del buscador del sitio. */
+  enlaceBuscar?: () => string;
   raizId?: string | null;
 };
 
@@ -117,6 +119,26 @@ function Marca({ logo, nombre, tamano, rutas, columna }: {
   );
 }
 
+/**
+ * LA CAJA DE BUSCAR (2026-10-18, Wikiproducts). Un `<form>` de los de toda la
+ * vida: busca aunque el JavaScript no haya llegado, y el servidor la pinta
+ * dentro del HTML con el resto del menú. Lleva la raíz del sitio para que los
+ * resultados sean de este sitio y no de la plataforma.
+ */
+function CajaBuscar({ rutas, s, lleno }: { rutas: Rutas; s: Sitio; lleno?: boolean }) {
+  const mn = s.menu;
+  return (
+    <form role="search" method="get" action={rutas.enlaceBuscar?.() ?? '/buscar'}
+      className={cn('flex items-center gap-2 rounded-lg border px-2.5 h-10 min-w-0', lleno ? 'w-full' : 'w-44 @4xl:w-60')}
+      style={{ borderColor: `${mn.texto}33` }}>
+      <Search className="w-4 h-4 shrink-0 opacity-60" aria-hidden />
+      <input type="search" name="q" required minLength={2} aria-label="Buscar en este sitio" placeholder="Buscar"
+        className="flex-1 min-w-0 bg-transparent outline-none text-sm placeholder:opacity-60" style={{ color: mn.texto }} />
+      {rutas.raizId && <input type="hidden" name="sitio" value={rutas.raizId} />}
+    </form>
+  );
+}
+
 /** La barra de arriba. También es la del teléfono cuando el menú es lateral. */
 function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   s: Sitio; rutas: Rutas; logo?: string; nombre?: string; soloMovil?: boolean; cuenta?: string | null;
@@ -137,7 +159,8 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
             plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:flex' : 'flex flex-wrap')}>
           {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} />)}
         </nav>
-        {plegado !== 'nunca' && mn.enlaces.length > 0 && (
+        {mn.buscador && <div className={cn('shrink-0', plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:block' : 'block')}><CajaBuscar rutas={rutas} s={s} /></div>}
+        {plegado !== 'nunca' && (mn.enlaces.length > 0 || mn.buscador) && (
           <details className={cn('group ml-auto', plegado === 'movil' && '@2xl:hidden')}>
             <summary aria-label="Abrir el menú"
               className="list-none [&::-webkit-details-marker]:hidden cursor-pointer w-11 h-11 grid place-items-center rounded-lg hover:bg-black/5">
@@ -146,6 +169,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
             </summary>
             <div style={{ background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` }}
               className="absolute right-3 left-3 @md:left-auto @md:w-72 top-full mt-1 rounded-2xl border shadow-2xl p-2 flex flex-col gap-1">
+              {mn.buscador && <CajaBuscar rutas={rutas} s={s} lleno />}
               {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
             </div>
           </details>
@@ -164,6 +188,7 @@ function Lateral({ s, rutas, logo, nombre, cuenta }: { s: Sitio; rutas: Rutas; l
       className={cn('hidden @2xl:flex flex-col gap-8 w-64 shrink-0 p-6 self-start sticky top-0 h-screen overflow-y-auto', mn.borde && 'border-r')}>
       {cuenta && <div className="absolute right-3 top-3"><CuentaMenu raiz={cuenta} /></div>}
       <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} columna />
+      {mn.buscador && <CajaBuscar rutas={rutas} s={s} lleno />}
       <nav aria-label="Menú" className="flex flex-col gap-1">
         {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
       </nav>
