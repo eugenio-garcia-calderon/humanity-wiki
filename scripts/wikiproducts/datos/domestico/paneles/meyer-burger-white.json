@@ -1,0 +1,406 @@
+{
+  "slug": "meyer-burger-white",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Meyer Burger White / Meyer Burger Black (heterounión, fabricación europea)",
+  "marca": "Meyer Burger",
+  "modelo": "Meyer Burger White 380–400 Wp (120 semicélulas HJT, vidrio-lámina con fondo blanco); existían también Meyer Burger Black (fondo negro) y Meyer Burger Glass (vidrio-vidrio)",
+  "variante_ficha": "Meyer Burger White 400 (ficha Version 1.0.1, septiembre de 2021, copia en memodo.cz)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se pudo consultar la ficha."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No verificado."
+  },
+  "estado": "descatalogado",
+  "resumen": "Meyer Burger White fue un módulo residencial de 120 semicélulas de heterounión (HJT) con interconexión SmartWire y fondo blanco de la empresa suiza Meyer Burger Technology AG. Según su ficha de 2021, se ofrecía entre 380 y 400 W, con un 21,7 % de eficiencia en la versión superior, 1767 × 1041 mm, 19,7 kg y un coeficiente de temperatura de −0,259 %/°C. La garantía europea, emitida por la filial Meyer Burger (Industries) GmbH, daba 25 años de producto y de rendimiento (92 % al año 25), pero esa filial entró en insolvencia en junio de 2025 y las plantas alemanas pararon en septiembre de 2025 sin encontrar inversor. En marzo de 2026 la estadounidense Swift Solar compró la propiedad intelectual HJT y activos de EE. UU.; no consta que asumiera las garantías de los módulos ya vendidos. El modelo está descatalogado y solo puede quedar stock residual.",
+  "imagen": {
+    "url": null,
+    "fuente": null,
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 400,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha Meyer Burger White, «As of: September 2021, Version 1.0.1» (datos preliminares según la propia ficha), copia archivada por el distribuidor checo Memodo. Tolerancia −0/+5 W."
+    },
+    "gama_potencias_wp": {
+      "valor": "380–400",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha Meyer Burger White, «As of: September 2021, Version 1.0.1» (datos preliminares según la propia ficha), copia archivada por el distribuidor checo Memodo."
+    },
+    "eficiencia_pct": {
+      "valor": 21.7,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Versión 400 W; la de 380 W da 20,7 %."
+    },
+    "tecnologia_celula": {
+      "valor": "HJT (heterounión) con interconexión SmartWire",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha cita «patented SmartWire technology» y células «mono n-Si, heterojunction»."
+    },
+    "tipo_celula": {
+      "valor": "monocristalina tipo n",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "num_celulas": {
+      "valor": 120,
+      "unidad": "semicélulas",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Vidrio-lámina; medidas eléctricas monofaciales."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No aplica: módulo monofacial."
+    },
+    "vidrio": {
+      "valor": "simple, 3,2 mm con antirreflejo; lámina trasera blanca de alta barrera",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "marco": {
+      "valor": "negro (aluminio anodizado)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Sustituye al valor anterior deducido del nombre («plateado»): en la ficha, «White» se refiere a la lámina trasera blanca, no al marco."
+    },
+    "medidas_mm": {
+      "valor": "1767 × 1041 × 35",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 19.7,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.259,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "noct_o_nmot_c": {
+      "valor": 44,
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "NMOT 44 ± 2 °C"
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 2,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía: ≥ 98 % tras el primer año."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.25,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "voc_v": {
+      "valor": 44.7,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "400 W, STC"
+    },
+    "isc_a": {
+      "valor": 11.1,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": "400 W, STC"
+    },
+    "tension_max_sistema_v": {
+      "valor": 1000,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "carga_mecanica_pa": {
+      "valor": "+6000 / −4000 Pa (carga de ensayo, con factor de seguridad 1,5)",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68 (3 diodos, IEC 62790)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "conector": {
+      "valor": "MC4 (IEC 62852)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Sin ofertas con precio a 2026-10-18."
+    },
+    "resultado_pvel": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se comprobó en esta sesión."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se comprobó en esta sesión."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 25,
+      "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "Condiciones de garantía Meyer Burger (Industries) GmbH V 1.3 (06-07-2022), para el EEE, Reino Unido y Suiza: 25 años en módulos vidrio-lámina (White, Black) y 30 años en vidrio-vidrio. La ficha de 2021 también da 25 años."
+    },
+    "rendimiento": {
+      "anios": 25,
+      "porcentaje_final": 92,
+      "primer_anio_pct": 98,
+      "lineal_anual_pct": 0.25,
+      "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "Vidrio-lámina. Para vidrio-vidrio: 99 % el primer año, 0,20 %/año, 93,2 % al año 30. Tolerancia de placa ± 3 %."
+    },
+    "letra_pequena": [
+      "El garante es Meyer Burger (Industries) GmbH (Freiberg), una de las filiales alemanas que pidieron la insolvencia el 2-6-2025. Fuentes: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl ; https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
+      "Desmontaje y reinstalación: Meyer Burger pagaba una cantidad fija de 150 € por instalación y caso, más 25 € por módulo afectado; el resto lo paga el cliente. Transporte solo con consentimiento previo. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "Reclamación por escrito al vendedor en 30 días desde que aparece el defecto, con número de serie, fotos y factura; si el vendedor ya no existe, directamente a Meyer Burger. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "La garantía es para el «cliente final» que pone en marcha los módulos; el documento no regula su transmisión a propietarios posteriores. Ley alemana y tribunales de Dresde. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "El documento no menciona ningún seguro de garantía ni qué ocurre si el propio fabricante quiebra. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "Krannich, que aún ofrece módulos Meyer Burger como «warehouse deals», avisa de que «Meyer Burger Industries GmbH is in insolvency proceedings» y recomienda informarse de las consecuencias para la garantía del fabricante. Fuente: https://shop.krannich-solar.com/de-en/special-offers/warehouse-deals/59639/meyer-burger-glass-385"
+    ],
+    "quien_responde": "No consta que nadie asuma hoy las garantías de fabricante. Las filiales alemanas están en insolvencia (administradores Lucas Flöther y Reinhard Klose) y pararon la producción el 1-9-2025 sin inversor: https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/ La matriz suiza entró en moratoria provisional de deudas, dio por imposible el rescate del grupo y no se opuso a su exclusión de cotización en SIX (17-9-2025): https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html Swift Solar compró en marzo de 2026 la propiedad intelectual HJT y activos de EE. UU.; la noticia no menciona garantías: https://www.pvtime.org/?p=25046 En la práctica, una reclamación de garantía comercial pasaría a ser un crédito concursal. Frente al consumidor en España sigue respondiendo el vendedor por la garantía legal de conformidad (3 años en bienes nuevos vendidos desde 2022)."
+  },
+  "empresa": {
+    "razon_social": "Meyer Burger Technology AG (matriz); filiales alemanas Meyer Burger Industries y Meyer Burger Germany (en insolvencia)",
+    "pais_sede": "Suiza (Thun)",
+    "fundacion": null,
+    "cotiza_en": "SIX Swiss Exchange (estado de cotización actual no verificado)",
+    "web": "https://www.meyerburger.com",
+    "fabricante_celulas": "Meyer Burger (Thalheim, Alemania)",
+    "pais_fabricacion": "Alemania (células); módulos en Freiberg (Alemania) hasta enero de 2024 y en Goodyear (EE. UU.) hasta mayo de 2025",
+    "fabricas_conocidas": [
+      "Thalheim (Sajonia-Anhalt, Alemania): células; filial en insolvencia desde junio de 2025",
+      "Freiberg (Sajonia, Alemania): módulos; cierre anunciado en marzo de 2024",
+      "Hohenstein-Ernstthal (Sajonia, Alemania): ingeniería y desarrollo; filial en insolvencia",
+      "Goodyear (Arizona, EE. UU.): módulos, 1,4 GW; producción terminada el 30 de mayo de 2025"
+    ],
+    "notas": [
+      "En marzo de 2024 Meyer Burger comunicó el cierre de la planta de módulos de Freiberg. Fuentes: https://de.wikipedia.org/wiki/Meyer_Burger ; https://www.heise.de/news/Solarhersteller-Meyer-Burger-kuendigt-Mitarbeitern-und-beschliesst-Aus-in-Freiberg-9667995.html",
+      "En agosto de 2024 abandonó la fábrica de células prevista en Colorado y en septiembre de 2024 cambió de consejero delegado y anunció unos 200 despidos. Fuentes: https://en.wikipedia.org/wiki/Meyer_Burger_Technology ; https://de.wikipedia.org/wiki/Meyer_Burger",
+      "El 30 de mayo de 2025 terminó la producción de módulos en Goodyear (Arizona) «por falta de fondos», con 282 despidos, y la empresa se quedó sin capacidad de fabricación de módulos. Fuente: https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/",
+      "El 2 de junio de 2025 Meyer Burger Industries y Meyer Burger Germany pidieron la insolvencia; afectaba a unos 600 empleados en Thalheim y Hohenstein-Ernstthal. Fuente: https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
+      "Capítulo 11 en EE. UU. el 25 de junio de 2025, según Wikipedia citando a Reuters. Fuente: https://en.wikipedia.org/wiki/Meyer_Burger_Technology",
+      "El origen «alemán» de los módulos depende de la fecha de fabricación: las células se hacían en Thalheim, pero el ensamblaje pasó de Freiberg a Arizona a comienzos de 2024. Fuentes: https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/ ; https://de.wikipedia.org/wiki/Meyer_Burger",
+      "El 1-9-2025 se detuvo la producción en Hohenstein-Ernstthal y Bitterfeld-Wolfen sin haber encontrado inversor; unos 540 empleados afectados. Fuente: https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/",
+      "El 17-9-2025 el consejo de Meyer Burger Technology AG declaró que no había «ninguna posibilidad realista» de rescatar el grupo; las sociedades suizas pasaron a moratoria provisional y la empresa no se opuso a la exclusión de SIX. En EE. UU. un tribunal aprobó la venta de maquinaria a Babacomari Solar North por unos 29 millones de dólares. Fuente: https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html",
+      "En marzo de 2026 Swift Solar (EE. UU.) adquirió la cartera de propiedad intelectual HJT y activos estadounidenses de Meyer Burger. Fuente: https://www.pvtime.org/?p=25046"
+    ],
+    "fuentes": [
+      "https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
+      "https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/",
+      "https://en.wikipedia.org/wiki/Meyer_Burger_Technology",
+      "https://de.wikipedia.org/wiki/Meyer_Burger",
+      "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/",
+      "https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html",
+      "https://www.pvtime.org/?p=25046"
+    ]
+  },
+  "origen": {
+    "pais_marca": "Suiza",
+    "pais_fabricacion": "Alemania (células, Thalheim) y, según la época, módulos en Alemania (Freiberg, hasta 2024) o EE. UU. (Goodyear, 2024–2025)",
+    "fabrica": "Meyer Burger (Industries) GmbH, Freiberg (Alemania), según la ficha de 2021; células de Thalheim",
+    "materiales_principales": [
+      "silicio monocristalino tipo n (HJT)",
+      "vidrio solar 3,2 mm",
+      "lámina trasera blanca",
+      "marco de aluminio anodizado negro"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario. Con el fabricante en insolvencia, conseguir un módulo de sustitución idéntico puede ser difícil."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215:2016",
+      "emisor": "no indicado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730:2016",
+      "emisor": "no indicado",
+      "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "idioma": "en",
+      "fecha": "2021-09 (V1.0.1)"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+      "idioma": "en",
+      "fecha": "2022-07-06 (V 1.3)"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Up to 20 percent more energy yield",
+      "donde": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "veredicto": "sin pruebas",
+      "explicacion": "La ficha no dice frente a qué módulo de referencia ni en qué condiciones; no se encontró un ensayo independiente que lo mida.",
+      "fuentes": [
+        "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Made in Germany. Designed in Switzerland.",
+      "donde": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Era cierto para la producción en Freiberg y Thalheim cuando se publicó la ficha (2021), pero el ensamblaje de módulos pasó a Arizona a comienzos de 2024; el origen depende de la fecha de fabricación.",
+      "fuentes": [
+        "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+        "https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Guaranteed yields for decades",
+      "donde": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La garantía de 25 años existía sobre el papel, pero su emisor, Meyer Burger (Industries) GmbH, está en insolvencia desde 2025 y no consta que otra entidad la haya asumido.",
+      "fuentes": [
+        "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+        "https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/",
+        "https://www.pvtime.org/?p=25046"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18 en buscador web de «Meyer Burger» + recall, safety alert, fire, además de la búsqueda general previa de retiradas de paneles en EU Safety Gate, CPSC, ACCC y Health Canada y prensa sectorial. Solo aparecen noticias de insolvencia y cierre de plantas; ninguna retirada ni alerta de seguridad de módulos Meyer Burger. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "Krannich Solar (warehouse deals)",
+      "tipo": "mayorista",
+      "pais": "Alemania",
+      "url": "https://shop.krannich-solar.com/de-en/special-offers/warehouse-deals/59639/meyer-burger-glass-385",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo (Meyer Burger Glass 385, no la versión White)",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "no indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Sin precio público; el anuncio advierte de la insolvencia del fabricante."
+    }
+  ],
+  "compatibles": [],
+  "pendiente": [
+    "Confirmar si Swift Solar u otra entidad ha asumido las garantías de los módulos vendidos en Europa (ninguna fuente lo afirma a 2026-10-18).",
+    "Ficha oficial definitiva (la consultada se declara preliminar, versión 1.0.1 de 2021) y versión de 405–410 W si existió.",
+    "Stock residual y precios en tiendas españolas o europeas.",
+    "Resultado final de los procedimientos de insolvencia alemanes, del Capítulo 11 y de la moratoria suiza."
+  ],
+  "estado_nota": "Fabricación detenida: módulos en Freiberg hasta comienzos de 2024; las plantas alemanas pararon el 1-9-2025 sin inversor. Puede quedar stock residual en mayoristas (Krannich lo ofrece en «warehouse deals» avisando de la insolvencia)."
+}

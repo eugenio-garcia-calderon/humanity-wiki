@@ -1,0 +1,417 @@
+{
+  "slug": "canadian-solar-tophiku6",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Canadian Solar TOPHiKu6 54 (CS6.1-54TD)",
+  "marca": "Canadian Solar",
+  "modelo": "CS6.1-54TD 445–470 W (familia TOPHiKu6; variantes residenciales afines: CS6R-T 425–450 W y CS6.2-48TD 430–460 W)",
+  "variante_ficha": "CS6.1-54TD-470 (ficha oficial CSI Solar V1.4C25_EN, marzo de 2024; copia en robinsun.es)",
+  "ean": {
+    "valor": null,
+    "unidad": "GTIN",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró."
+  },
+  "estado": "a la venta",
+  "resumen": "La familia TOPHiKu6 de Canadian Solar agrupa módulos con células TOPCon de tipo n; su versión de 108 semicélulas para tejados, CS6.1-54TD, se fabrica en una gama de 445 a 470 W con hasta un 23,0 % de eficiencia en la versión superior, según la ficha de CSI Solar (marzo de 2024). Es un módulo de doble vidrio de 1800 × 1134 mm y 22,7 kg, con un coeficiente de temperatura declarado de −0,29 %/°C y cargas de hasta 5400 Pa de nieve y 2400 Pa de viento. La garantía de rendimiento es de 30 años con un mínimo del 87,4 % al final; la de producto es de 12 años en la garantía general de la serie, y la ficha y algunos mayoristas anuncian 25 años para ciertas instalaciones en tejado, sin que se haya encontrado el documento que lo confirme para este modelo. No se encontró precio público en tiendas españolas en la fecha de consulta.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.solartraders.com/es/producers/canadian-solar/tophiku6",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 470,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha CSI Solar CS6.1-54TD 445–470 W, versiones V1.3_EN (dic. 2023) y V1.4C25_EN (mar. 2024), copia alojada por la tienda española robinsun.es."
+    },
+    "gama_potencias_wp": {
+      "valor": "445–470",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha CSI Solar CS6.1-54TD 445–470 W, versiones V1.3_EN (dic. 2023) y V1.4C25_EN (mar. 2024), copia alojada por la tienda española robinsun.es."
+    },
+    "eficiencia_pct": {
+      "valor": 23.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Versión 470 W; la de 445 W da 21,8 %."
+    },
+    "tecnologia_celula": {
+      "valor": "TOPCon tipo n",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "tipo_celula": {
+      "valor": "monocristalina tipo n",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "semicélulas",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "2 × (9 × 6)"
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no lo declara bifacial; es vidrio-vidrio (1,6 + 1,6 mm). El listado de solartraders lo describe como monofacial."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No aplica: monofacial."
+    },
+    "vidrio": {
+      "valor": "doble vidrio: 1,6 mm delantero (termoendurecido, antirreflejo) + 1,6 mm trasero",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "marco": {
+      "valor": "aluminio anodizado; marco negro bajo pedido (V1.3); variantes «Black Frame» y «Full Black» en catálogos europeos",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "medidas_mm": {
+      "valor": "1800 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 22.7,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.29,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "noct_o_nmot_c": {
+      "valor": 41,
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "NMOT 41 ± 3 °C"
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía de rendimiento: ≥ 99 % el primer año."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.4,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Máximo, años 2 a 30."
+    },
+    "voc_v": {
+      "valor": 39.7,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "470 W, STC"
+    },
+    "isc_a": {
+      "valor": 14.86,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "470 W, STC"
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "IEC/UL; la V1.3 también ofrece opción de 1000 V"
+    },
+    "carga_mecanica_pa": {
+      "valor": "hasta 5400 Pa (nieve) / 2400 Pa (viento)",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha remite al manual de instalación; no dice si son cargas de diseño o de ensayo. El valor anterior de esta entrada («hasta 6000 / 4000», de la página de un distribuidor) no coincide con la ficha oficial y se ha sustituido."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68 (3 diodos de bypass)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "conector": {
+      "valor": "T6, MC4-EVO2 o MC4-EVO2A (V1.4)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No calculable: no se encontró oferta con precio público."
+    },
+    "resultado_pvel": {
+      "valor": "No figura el CS6.1-54TD en la lista visible de Top Performers 2026",
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": "https://scorecard.pvel.com/top-performers/",
+      "fecha": "2026-10-18",
+      "nota": "En la lista 2026 figuran de Canadian Solar los CS6.2-66HB (HJT), CS6.2-48TM, CS6.2-66TM y CS6.2-54TM (TOPCon, monofacial, 480–525 W) en algunas pruebas, pero no el CS6.1-54TD. Canadian Solar sí figura como fabricante Top Performer 2026 de Kiwa PVEL (grupo de 7–8 ensayos), sin modelo indicado: https://scorecard.pvel.com/manufacturers/"
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ningún ensayo independiente publicado para el CS6.1-54TD."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 12,
+      "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía «Limited Warranty Statement, TopHiKu Series» EN-Rev TopHiKu 1.13 (octubre 2023, contratos desde el 1-10-2023): 12 años de producto; 25 años solo para CS6R-XXXT Black Frame/All Black en tejados de Europa y Japón. Esa revisión no cita el CS6.1-54TD. La ficha V1.4 remite a una «garantía limitada de producto de 25 años» para ciertas instalaciones en tejado en ciertas regiones, y sun.store anuncia «25Y Warranty» para el CS6.1-54TD; no se encontró la revisión de la garantía que lo incluya."
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 87.4,
+      "primer_anio_pct": 99,
+      "lineal_anual_pct": 0.4,
+      "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía Rev 1.13 y ficha V1.4: ≥ 99 % el primer año, ≤ 0,4 %/año, ≥ 87,4 % al final del año 30. Coincide con sun.store: https://sun.store/en/product/canadian-tophiku6-cs6.1-54td-465-1500v-mc4-black-frame-25y-warranty-31539"
+    },
+    "letra_pequena": [
+      "El desmontaje, la instalación, la reinstalación y las tasas de residuos electrónicos corren a cargo del comprador salvo acuerdo escrito; CSI Solar paga un transporte de devolución razonable en reclamaciones aceptadas, sin seguros, impuestos ni aduanas. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "Excluye productos con pagos pendientes o sin prueba de compra, módulos trasladados de su ubicación original, instalaciones móviles, exposición extrema a calor, sal o productos químicos, y cambios estéticos (arañazos, manchas, óxido, decoloración, moho). Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "La garantía empieza el día siguiente a la instalación o 90 días después de la entrega, lo que ocurra antes. Las reparaciones o sustituciones no amplían el plazo. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "Reclamación por escrito «sin demora indebida» dentro del plazo de garantía, con números de serie y facturas; si hace falta un laboratorio, debe estar acreditado ISO/IEC 17025 y acordado por ambas partes. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "Responsabilidad total limitada al precio pagado; ley aplicable la del contrato de compra. No se aplica a productos vendidos e instalados en Australia, Nueva Zelanda o China continental. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "No exige registro del producto, según el documento Rev 1.13. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf"
+    ],
+    "quien_responde": "CSI Solar Co., Ltd. (Suzhou, China), del grupo Canadian Solar Inc., emite la garantía; hay direcciones regionales de reclamación para EMEA. El documento no menciona seguro ni insolvencia. Frente al consumidor en España responde también el vendedor."
+  },
+  "empresa": {
+    "razon_social": "Canadian Solar Inc.",
+    "pais_sede": "Canadá (fabricación principalmente en China y otros países asiáticos; sin verificar con fuente en esta investigación)",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://www.canadiansolar.com",
+    "fabricante_celulas": "Canadian Solar (según la marca); el informe Sheffield Hallam señala divulgación incompleta de proveedores de lingotes, obleas y células en 2023",
+    "pais_fabricacion": "No especificado",
+    "fabricas_conocidas": [],
+    "notas": [
+      "El informe «Over-Exposed» (Sheffield Hallam, 2023) clasifica la exposición de Canadian Solar a la región uigur como «alta» para todos sus módulos, por divulgación incompleta de proveedores, proveedores de polisilicio en Mongolia Interior y discrepancias entre su informe anual de 2022 y sus declaraciones a los investigadores. Evaluación de riesgo, no constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ],
+    "fuentes": [
+      "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "https://www.solartraders.com/es/producers/canadian-solar/tophiku6"
+    ]
+  },
+  "origen": {
+    "pais_marca": "Canadá",
+    "pais_fabricacion": "No especificado",
+    "fabrica": null,
+    "materiales_principales": [
+      "silicio monocristalino tipo n"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/es/producers/canadian-solar/tophiku6",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/es/producers/canadian-solar/tophiku6",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61215",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 61730",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61701 (niebla salina)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62716 (amoníaco)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 60068-2-68 (arena)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE, MCS, UKCA, CGC (V1.4)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "idioma": "en",
+      "fecha": "V1.3 (2023-12) y V1.4C25 (2024-03)"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+      "idioma": "en",
+      "fecha": "EN-Rev TopHiKu 1.13 (2023-10)"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Optimized LCOE (coste nivelado de la energía optimizado)",
+      "donde": "https://www.solartraders.com/es/producers/canadian-solar/tophiku6",
+      "veredicto": "sin pruebas",
+      "explicacion": "La página no aporta cifras ni metodología; no se encontró evidencia independiente en ningún sentido.",
+      "fuentes": [
+        "https://www.solartraders.com/es/producers/canadian-solar/tophiku6"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Anti-LeTID and anti-PID performance",
+      "donde": "https://www.solartraders.com/es/producers/canadian-solar/tophiku6",
+      "veredicto": "sin pruebas",
+      "explicacion": "No se encontró ensayo independiente publicado para el CS6.1-54TD; en la lista 2026 de Kiwa PVEL figuran otros modelos de Canadian Solar, no este.",
+      "fuentes": [
+        "https://www.solartraders.com/es/producers/canadian-solar/tophiku6",
+        "https://scorecard.pvel.com/top-performers/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Module power up to 470 W, module efficiency up to 23.0 %",
+      "donde": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Corresponde solo a la versión de 470 W; la gama empieza en 445 W y 21,8 %.",
+      "fuentes": [
+        "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "No. 1 module supplier for quality and performance/price ratio in IHS Module Customer Insight Survey",
+      "donde": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+      "veredicto": "sin pruebas",
+      "explicacion": "La ficha no indica el año ni el alcance de la encuesta y no se encontró el informe de IHS para comprobarlo.",
+      "fuentes": [
+        "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada ni alerta para el Canadian Solar CS6.1-54TD ni para módulos de la marca Canadian Solar. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [],
+  "compatibles": [],
+  "pendiente": [
+    "Revisión del documento de garantía que incluya el CS6.1-54TD y confirme los 25 años de producto en tejados europeos (la Rev 1.13 encontrada no lo cita).",
+    "Confirmar qué modelo residencial TOPHiKu6 se vende realmente en España (CS6.1-54TD, CS6R-T o CS6.2-48TD).",
+    "Ofertas con precio en España o la UE: vicoexport.com y sun.store no muestran precio (registro necesario o sin ofertas) a 2026-10-18.",
+    "Datos de empresa con fuente: fábricas concretas que producen para Europa, y si hubo retenciones UFLPA.",
+    "Si la carga de 5400/2400 Pa es de diseño o de ensayo (la ficha remite al manual de instalación)."
+  ]
+}

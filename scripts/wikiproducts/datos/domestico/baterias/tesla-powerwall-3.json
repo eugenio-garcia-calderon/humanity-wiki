@@ -1,0 +1,465 @@
+{
+  "slug": "tesla-powerwall-3",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Tesla Powerwall 3",
+  "marca": "Tesla",
+  "modelo": "Powerwall 3 (13,5 kWh, con inversor solar híbrido integrado) y Powerwall 3 Expansion (13,5 kWh, sin inversor)",
+  "variante_ficha": "Powerwall 3 monofásico, ficha técnica para Reino Unido «2026 Powerwall 3 Datasheet» (230 V)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No encontrado en la ficha técnica ni en las tiendas consultadas."
+  },
+  "anio_lanzamiento": {
+    "valor": 2025,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.motor.es/futuro/tesla-powerwall-3-espana-2025108662.html",
+    "fecha": "2026-10-18",
+    "nota": "Año de comercialización en España según prensa (junio de 2025, «ya se encuentra a la venta en España»). Lanzamiento en EE. UU. anterior; fecha exacta pendiente."
+  },
+  "estado": "a la venta",
+  "resumen": "Batería doméstica de Tesla con 13,5 kWh utilizables y un inversor solar híbrido integrado de tres seguidores MPPT, lo que permite conectar paneles directamente sin inversor aparte. Según la marca, admite hasta 4 unidades y 3 módulos de ampliación (Expansion) hasta 94,5 kWh, y funciona en interior y exterior con protección IP55/IP67. La garantía europea es de 10 años, pero en España la capacidad garantizada al final es el 70 % y la cobertura completa depende de mantener la batería conectada a internet. Tesla no publica en la ficha técnica la química de las celdas ni su fabricante. No consta su participación en el ensayo independiente de la HTW Berlin.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.tesla.com/es_es/powerwall",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha registrado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha técnica solo publica la energía utilizable."
+    },
+    "capacidad_util_kwh": {
+      "valor": 13.5,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantizada al inicio de vida, 25 °C, carga/descarga a 5 kW."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "13,5 – 94,5",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Hasta 7 unidades: 4 Powerwall 3 + 3 Expansion."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Unidades completas de 13,5 kWh (no módulos pequeños)."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Con Powerwall 3 adicionales o con Powerwall 3 Expansion (hasta 3 Expansion detrás de un Powerwall 3, solo en montaje en suelo)."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 94.5,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "7 unidades × 13,5 kWh."
+    },
+    "potencia_continua_kw": {
+      "valor": 11.04,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Texto publicado: «3,68 – 11,04». Máximo configurable. Salida AC en red, seleccionable por pasos (16–48 A a 230 V). La carga de la batería está limitada a 5 kW (8 kW con Expansion)."
+    },
+    "potencia_pico_kw": {
+      "valor": 15.4,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "64 A; corriente de arranque de motores 185 A LRA."
+    },
+    "quimica": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha técnica de Tesla no indica la química. Fuentes de terceros (p. ej. solarcalculator.com.au) la describen como LFP, sin confirmación del fabricante."
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Tesla no publica el proveedor de celdas del Powerwall 3."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha no da un número de ciclos; la garantía declara «ciclos ilimitados» en autoconsumo/control programado/respaldo y 37,8 MWh en otros usos."
+    },
+    "profundidad_descarga_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada como cifra; la ficha se expresa en energía utilizable (13,5 kWh)."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": 89,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tesla la expresa como «solar → batería → casa/red» en un «caso de uso típico». Solar directo a casa/red: 97,5 % (ponderada UE). No es una eficiencia de ida y vuelta AC-AC en sentido estricto."
+    },
+    "tension": {
+      "valor": "Entrada FV 60–550 V CC (MPPT 60–480 V); salida 230 V CA monofásica",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tesla no publica la tensión interna de la batería."
+    },
+    "acoplamiento": {
+      "valor": "híbrido con inversor integrado (también admite acoplamiento AC)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "3 MPPT, hasta 20 kW FV en STC."
+    },
+    "inversor_integrado": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Inversor solar integrado; 3 MPPT de 30 A (Isc 38 A)."
+    },
+    "inversores_compatibles": {
+      "valor": "No necesita inversor aparte; para respaldo requiere Backup Gateway 2 de Tesla.",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "respaldo_apagones": {
+      "valor": "sí, con Backup Gateway 2 (vivienda completa o circuitos, según instalación)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha indica que el Backup Gateway 2 es necesario en configuraciones con respaldo; no detalla si cubre toda la casa."
+    },
+    "instalacion": {
+      "valor": "interior y exterior; suelo o pared",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip": {
+      "valor": "IP55 (conjunto); IP67 batería y electrónica; IP55 compartimento de cableado",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "rango_temperatura_c": {
+      "valor": "-20 a 50",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Puede reducir potencia por encima de 40 °C."
+    },
+    "peso_kg": {
+      "valor": 130,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Powerwall 3. Expansion: 110 kg (118,5 kg en pared con cubierta y soporte)."
+    },
+    "medidas_mm": {
+      "valor": "1105 × 609 × 193",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Expansion: 1105 × 609 × 168 mm."
+    },
+    "ruido_db": {
+      "valor": "< 50 típico; < 62 máximo",
+      "unidad": "dB(A) a 1 m",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "garantia_energia_mwh": {
+      "valor": 37.8,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Solo limita usos distintos de autoconsumo solar, control programado y respaldo; en esos usos la garantía es por 10 años con ciclos ilimitados."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 692.17,
+      "unidad": "€/kWh",
+      "origen": "calculado",
+      "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-tesla-powerwall-3-ac-1p-135kwh",
+      "fecha": "2026-10-18",
+      "nota": "9.344,23 € (IVA incl., autosolar.es, sin instalación ni Backup Gateway) / 13,5 kWh."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El Powerwall 3 no figura entre los sistemas del informe Stromspeicher-Inspektion 2025 de la HTW Berlin (ver documento). No se encontraron otros ensayos independientes publicados."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía limitada para la «Zona de Garantía Europea», Rev. 1.15, vigente desde el 27-01-2025. Cubre Powerwall 2 AC, Powerwall 3 y Powerwall 3 Expansion."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "fecha": "2026-10-18",
+      "nota": "70 % de 13,5 kWh a los 10 años en España, Italia, Portugal y Eslovenia; 80 % en Alemania, Austria, Bélgica, Francia, Irlanda, Luxemburgo, Países Bajos, Reino Unido y Suiza. No hay curva anual publicada."
+    },
+    "letra_pequena": [
+      "En España la retención garantizada es del 70 % a 10 años, frente al 80 % en otros países europeos (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "La cobertura completa de 10 años exige que Tesla pueda actualizar el firmware por internet y que la batería esté registrada; si no, Tesla garantiza como mínimo 4 años desde la instalación (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "Usos distintos de autoconsumo solar, control programado y respaldo (p. ej. arbitraje o servicios a red) están limitados a 37,8 MWh acumulados medidos a la salida AC (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "Debe comprarse a Tesla o a un Instalador Certificado por Tesla e instalarse en la zona de garantía europea; la instalación, reparación o apertura por terceros excluye la garantía, igual que reubicar la batería sin consentimiento escrito (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "Tesla elige entre reparar, sustituir o reembolsar el valor de mercado de un producto equivalente; la unidad reparada o sustituida no amplía el plazo. La responsabilidad se limita al importe pagado. El documento no trata expresamente la mano de obra ni el transporte (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "La garantía europea de 10 años figura en la ficha técnica como «condicionada a una conexión a internet fiable» (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf)."
+    ],
+    "quien_responde": "Tesla Motors Netherlands B.V. (Burgemeester Stramanweg 122, Ámsterdam) como garante en Europa; las reclamaciones se canalizan primero a través del instalador certificado o de Tesla si se compró directamente. La garantía no dice qué ocurre si Tesla abandona el mercado europeo; quedan las garantías legales del vendedor según la normativa de consumo."
+  },
+  "empresa": {
+    "razon_social": "Tesla, Inc. (garante en Europa: Tesla Motors Netherlands B.V., Ámsterdam)",
+    "pais_sede": "Estados Unidos",
+    "fundacion": 2003,
+    "cotiza_en": "NASDAQ (TSLA)",
+    "web": "https://www.tesla.com/es_es/powerwall",
+    "fabricante_celulas": "No publicado por Tesla",
+    "pais_fabricacion": "No publicado en la ficha técnica",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Tesla retiró unos 10.500 Powerwall 2 en EE. UU. (CPSC, 13-11-2025) y abrió una retirada en Australia (septiembre de 2025) por celdas defectuosas de un proveedor externo; según Tesla y la prensa, el Powerwall 3 no está afectado (https://www.ess-news.com/2025/11/14/tesla-recalls-10500-powerwall-2-battery-systems-in-us-following-safety-hazards/)."
+    ],
+    "fuentes": [
+      "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "https://www.ess-news.com/2025/11/14/tesla-recalls-10500-powerwall-2-battery-systems-in-us-following-safety-hazards/"
+    ]
+  },
+  "origen": {
+    "pais_marca": "Estados Unidos",
+    "pais_fabricacion": null,
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas de iones de litio (química no indicada por Tesla)",
+      "electrónica de potencia (inversor híbrido integrado)",
+      "carcasa con cubierta frontal de vidrio"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado."
+    },
+    "reparabilidad": "Tesla excluye de la garantía cualquier apertura de la carcasa o reparación por personas que no sean instaladores certificados (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf). No se ha encontrado información pública sobre piezas de recambio o sustitución de módulos internos."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62109-1 / -2, IEC 62477-1, IEC 62933-5-2",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 9540A (criterios de incendio a nivel de unidad)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN 38.3",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "RED 2014/53/UE, RoHS 2011/65/UE, REACH",
+      "emisor": "declaración del fabricante",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Versión Reino Unido, «2026 Powerwall 3 Datasheet»."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/fr-fr/Powerwall-3-Datasheet-FR.pdf",
+      "idioma": "fr",
+      "fecha": "2026-10-18"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "idioma": "es",
+      "fecha": "2026-10-18",
+      "nota": "Zona de Garantía Europea, Rev. 1.15, 27-01-2025."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/en-emea/Powerwall-Warranty-EN.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "«Garantía de 10 años» (ficha técnica: «10 years, contingent on a reliable internet connection»).",
+      "donde": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Los 10 años existen, pero en España garantizan solo el 70 % de la capacidad al final (80 % en otros países europeos) y, sin conexión a internet y registro, Tesla solo se compromete a un mínimo de 4 años.",
+      "fuentes": [
+        "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+        "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Eficiencia del 97,5 % de solar a casa/red (ponderada UE).",
+      "donde": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La cifra se refiere a la energía solar que pasa directamente por el inversor sin entrar en la batería. Para la energía que se almacena y luego se usa, la propia ficha da un 89 % en un «caso de uso típico». No hay medición independiente publicada.",
+      "fuentes": [
+        "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Los hogares españoles con paneles y Powerwall 3 «pueden ahorrar hasta 880 € al año» (cifra difundida en el lanzamiento en España).",
+      "donde": "https://www.motor.es/futuro/tesla-powerwall-3-espana-2025108662.html",
+      "veredicto": "sin pruebas",
+      "explicacion": "No se ha publicado el método de cálculo (consumo, tarifa, potencia instalada). Es un límite superior («hasta») que depende de cada vivienda; no se encontró verificación independiente.",
+      "fuentes": [
+        "https://www.motor.es/futuro/tesla-powerwall-3-espana-2025108662.html"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "«Soporta inundaciones de hasta 60 cm de agua» (difundido en el lanzamiento en España).",
+      "donde": "https://www.motor.es/futuro/tesla-powerwall-3-espana-2025108662.html",
+      "veredicto": "sin pruebas",
+      "explicacion": "La ficha técnica declara IP67 para batería y electrónica e IP55 para el conjunto y el compartimento de cableado; no se ha encontrado un ensayo independiente de inmersión del equipo instalado.",
+      "fuentes": [
+        "https://www.motor.es/futuro/tesla-powerwall-3-espana-2025108662.html",
+        "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia, ficha de retirada citada a través de prensa especializada porque la web bloquea la lectura automática), prensa del sector (energy-storage.news, ess-news.com, pv-magazine, solarquotes) y búsquedas en alemán y español de retiradas en Europa. No se encontró ninguna retirada publicada para Europa ni en España; además se revisaron la lista de retiradas del Clean Energy Council (Australia), Health Canada (no se encontró ficha canadiense de la retirada del Powerwall 2) y prensa europea en alemán; la base EU Safety Gate no pudo consultarse directamente con las herramientas disponibles (aplicación web dinámica, acceso bloqueado), por lo que no se puede afirmar su ausencia allí con certeza. Las retiradas de Tesla encontradas (EE. UU. y Australia, 2025) afectan al Powerwall 2, no al Powerwall 3.",
+  "ofertas": [
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "AutoSolar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-tesla-powerwall-3-ac-1p-135kwh",
+      "precio_eur": 9344.23,
+      "iva_incluido": true,
+      "unidad": "por unidad (13,5 kWh)",
+      "envio": "Entrega estimada 26-10-2026 en península con pago con tarjeta",
+      "stock": "no indicado («salvo rotura de stock»)",
+      "nota": "Referencia 1882209 «Tesla Powerwall 3 AC 1P». 7.722,50 € sin IVA. La página no menciona el Backup Gateway 2 ni el requisito de instalador certificado por Tesla para la garantía."
+    },
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": true,
+      "distribuidor": "Holaluz",
+      "tipo": "instalador",
+      "pais": "España",
+      "url": "https://holaluz.com/en/solar-panels/batteries/tesla-powerwall",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "instalación completa",
+      "envio": null,
+      "stock": null,
+      "nota": "Ofrece Powerwall 3 con instalación; la página no publica precio (solo formulario y teléfono)."
+    }
+  ],
+  "compatibles": [
+    "Tesla Backup Gateway 2 (necesario para respaldo)",
+    "Tesla Powerwall 3 Expansion",
+    "paneles fotovoltaicos conectados directamente (3 MPPT)"
+  ],
+  "pendiente": [
+    "Química y fabricante de las celdas (Tesla no los publica).",
+    "País y fábrica de producción del Powerwall 3.",
+    "EAN/GTIN.",
+    "Consulta directa a EU Safety Gate (no fue posible con las herramientas disponibles).",
+    "Precio de instaladores certificados en España con instalación y Backup Gateway.",
+    "Fecha exacta de lanzamiento mundial.",
+    "Se agotó el presupuesto de búsquedas web en esta sesión; conviene una segunda pasada para ofertas adicionales y ensayos independientes."
+  ]
+}

@@ -1,0 +1,4097 @@
+{
+  "subcategoria": "powerbanks",
+  "generado": "2026-10-18",
+  "productos": [
+    {
+      "id": "anker-737-powercore-24k",
+      "nombre": "Anker 737 Power Bank (PowerCore 24K)",
+      "marca_id": "anker",
+      "modelo": "A1289",
+      "subcategoria": "powerbanks",
+      "ean": [
+        {
+          "valor": "0194644098728",
+          "fuente": "https://www.elcorteingles.es/electronica/A51423998-bateria-externa-anker-737-power-bank-powercore-24k-24000-mah/",
+          "fecha": "2026-10-18",
+          "nota": "Ficha de El Corte Inglés, variante A1289011"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2022,
+        "naturaleza": "declarado",
+        "fuente": "https://mezha.ua/en/2022/08/12/anker-released-a-power-bank-capable-of-quickly-charging-not-only-a-smartphone-but-also-a-laptop/amp/",
+        "fecha": "2026-10-18",
+        "nota": "Noticia de lanzamiento de agosto de 2022"
+      },
+      "foto": {
+        "url": "https://cdn.shopify.com/s/files/1/0493/9834/9974/products/A1289011-Anker_737_Power_Bank_PowerCore_24K_1.png?v=1775967275",
+        "fuente": "https://www.anker.com/us/products/a1289"
+      },
+      "resumen": "Batería externa de 24.000 mAh con dos puertos USB-C y uno USB-A, pensada para cargar portátiles además de móviles. Según la marca, entrega hasta 140 W por un USB-C con Power Delivery 3.1 y tiene una pantalla que muestra potencia de entrada y salida. Pesa unos 630 g. Un análisis independiente de techtest.org midió entre 65 y 77 Wh utilizables, según la tensión de salida, frente a 86,4 Wh nominales. No figura en las retiradas de Anker de 2025.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 24000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica la tensión nominal en su ficha; techtest.org cita 86,4 Wh nominales, que corresponde a 3,6 V"
+        },
+        "capacidad_wh": {
+          "valor": 86.4,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://techtest.org/die-anker-737-powercore-24k-powerbank-im-test-mit-140w-usb-c-port-zur-besten-powerbank/",
+          "fecha": "2026-10-18",
+          "nota": "24.000 mAh × 3,6 V / 1000 = 86,4 Wh; techtest.org recoge ese mismo valor nominal"
+        },
+        "potencia_salida_max_w": {
+          "valor": 140,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "Total; por USB-C hasta 28 V⎓5 A con PD 3.1"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 140,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "La ficha indica entrada USB-C hasta 28 V⎓5 A (140 W); techtest.org midió unos 126 W máximos con un cargador de 140 W"
+        },
+        "puertos": {
+          "valor": "2× USB-C (entrada/salida, hasta 140 W), 1× USB-A (hasta 18 W)",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "USB-A: 5V⎓3A / 9V⎓2A / 12V⎓1,5A"
+        },
+        "quimica": {
+          "valor": "Li-ion",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/die-anker-737-powercore-24k-powerbank-im-test-mit-140w-usb-c-port-zur-besten-powerbank/",
+          "fecha": "2026-10-18",
+          "nota": "techtest.org describe seis celdas de litio de 4.000 mAh; la química exacta no se publica"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.63,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "techtest.org pesó 632 g"
+        },
+        "medidas_mm": {
+          "valor": "155,7 × 54,6 × 49,5",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 86.4 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.elcorteingles.es/electronica/A51423998-bateria-externa-anker-737-power-bank-powercore-24k-24000-mah/",
+          "fecha": "2026-10-18",
+          "nota": "Garantía indicada por El Corte Inglés; la web de Anker sólo dice «Hassle-Free Warranty» sin duración"
+        },
+        "energia_util_medida_wh": {
+          "valor": 77.2,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/die-anker-737-powercore-24k-powerbank-im-test-mit-140w-usb-c-port-zur-besten-powerbank/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org: 65,2 Wh a 5 V/2 A hasta 77,2 Wh según la tensión de salida (75–89 % de 86,4 Wh)"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "fecha": "2026-10-18",
+          "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Anker no lo indica en la ficha; sus retiradas de 2025 para otros modelos indican fabricación en China"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No hay manual de reparación ni batería sustituible por el usuario publicados"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "declaracion_ce",
+          "titulo": "Declaración de conformidad A1289 (fechada 27/09/2024, enlazada en la web de Anker UE)",
+          "url": "https://www.anker.com/eu-en/products/a1289",
+          "fecha": "2026-10-18"
+        },
+        {
+          "tipo": "otro",
+          "titulo": "Introduction to the Anker 737 Power Bank 24K (A1289)",
+          "url": "https://service.anker.com/fr/article-description/Introduction-to-the-Anker-737-Power-Bank-24K-A1289",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Up to 140W fast charging",
+          "donde": "https://www.anker.com/us/products/a1289",
+          "veredicto": "matizable",
+          "explicacion": "Los 140 W sólo se alcanzan con cable y dispositivo compatibles con USB PD 3.1, como indica la propia FAQ de la marca; con PD 3.0 el máximo por puerto es inferior.",
+          "fuentes": [
+            {
+              "url": "https://www.anker.com/us/products/a1289",
+              "titulo": "Ficha Anker A1289 (FAQ)",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://techtest.org/die-anker-737-powercore-24k-powerbank-im-test-mit-140w-usb-c-port-zur-besten-powerbank/",
+              "titulo": "techtest.org: Anker 737 im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "24,000mAh",
+          "donde": "https://www.anker.com/us/products/a1289",
+          "veredicto": "matizable",
+          "explicacion": "La cifra se refiere a las celdas a 3,6 V (86,4 Wh). techtest.org midió 65,2–77,2 Wh entregados, es decir, un 75–89 % de la energía nominal, según la tensión de salida.",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/die-anker-737-powercore-24k-powerbank-im-test-mit-140w-usb-c-port-zur-besten-powerbank/",
+              "titulo": "techtest.org: Anker 737 im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1289",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Anker",
+          "nota": "Anker retiró en 2025 otros modelos: PowerCore 10000 A1263 (CPSC 25-338, 12/06/2025, sólo EE. UU.) y A1257, A1647, A1652, A1681, A1689 (CPSC 25-466, 18/09/2025; retirada mundial anunciada en junio de 2025). Este modelo no figura en esas listas. Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1289",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1289",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Anker%20power%20bank",
+          "nota": "Health Canada RA-77650 (27/06/2025) cubre A1647, A1681 y A1689, no este modelo Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1289",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Anker",
+          "nota": "PRA 2025/20571 cubre A1257, A1647, A1681 y A1689, no este modelo Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/anker-power-bank-gen-2-con-pantalla-140w-24000mah-negro",
+          "precio_eur": 95.99,
+          "envio_eur": 0,
+          "plazo": "desconocido",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Leído en la página (P/N A1289011, «Power Bank Anker Gen 2 con Pantalla»); la fecha de entrega mostrada parecía de una copia anterior de la página, comprobar"
+        },
+        {
+          "distribuidor_id": "elcorteingles",
+          "url": "https://www.elcorteingles.es/electronica/A51423998-bateria-externa-anker-737-power-bank-powercore-24k-24000-mah/",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Variante plata; página marcada «AGOTADO», sin precio"
+        },
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/dp/B09VPHVT2Z",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "ASIN tomado de Applesfera (26/05/2023, 119,99 € entonces); la página de Amazon no se pudo leer"
+        }
+      ],
+      "pendiente": [
+        "Precio actual en Amazon.es",
+        "Garantía oficial de Anker en la UE (meses)",
+        "País de fabricación en la etiqueta"
+      ]
+    },
+    {
+      "id": "anker-zolo-20k-30w-cable-usb-c",
+      "nombre": "Anker Zolo Power Bank (20K, 30W, Built-In USB-C Cable)",
+      "marca_id": "anker",
+      "modelo": "A1689",
+      "subcategoria": "powerbanks",
+      "ean": [
+        {
+          "valor": "194644201142",
+          "fuente": "https://www.dateks.lv/en/cenas/power-bank/1192959-anker-power-bank-a1689h21-20000-mah-white",
+          "fecha": "2026-10-18",
+          "nota": "Variante blanca A1689H21 (tienda letona dateks.lv)"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2024,
+        "naturaleza": "declarado",
+        "fuente": "https://www.notebookcheck.net/New-Anker-Zolo-Power-Bank-20K-30W-Built-in-USB-C-cable-now-available.850284.0.html",
+        "fecha": "2026-10-18",
+        "nota": "Notebookcheck informó de su llegada a Amazon Alemania y Francia el 21/06/2024"
+      },
+      "foto": {
+        "url": "https://cdn.shopify.com/s/files/1/0595/4034/0926/files/A1689011_Richimage_TD01_US_V2.png?v=1755756491",
+        "fuente": "https://www.anker.com/eu-en/products/a1689"
+      },
+      "resumen": "Batería externa de 20.000 mAh con un cable USB-C integrado y un puerto USB-C, de la gama Zolo de Anker. Según la marca, entrega hasta 30 W y se recarga a 20 W. Unidades fabricadas entre junio de 2024 y febrero de 2025 están afectadas por una retirada mundial de 2025 por riesgo de sobrecalentamiento e incendio, registrada en EE. UU., Canadá, Reino Unido y Australia; se identifican por el número de serie. La ficha actual de Anker en la UE habla de celdas «mejoradas» con certificación CB y 18 meses de garantía.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 72,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "20.000 mAh × 3,6 V / 1000 = 72 Wh, suponiendo la tensión nominal habitual de 3,6 V; la marca no publica los Wh en la ficha"
+        },
+        "potencia_salida_max_w": {
+          "valor": 30,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "Según Notebookcheck, con varios puertos a la vez el total baja a 15 W"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 20,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        "puertos": {
+          "valor": "1× cable USB-C integrado (30 W), 1× USB-C (30 W)",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/eu-en/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "La versión de 2024 descrita por Notebookcheck tenía además un USB-A de 22,5 W"
+        },
+        "quimica": {
+          "valor": "Li-ion",
+          "naturaleza": "declarado",
+          "fuente": "https://recalls-rappels.canada.ca/en/alert-recall/anker-power-bank-a1647-and-anker-zolo-power-banks-a1681-and-a1689-sold-amazonca",
+          "fecha": "2026-10-18",
+          "nota": "Health Canada: «lithium-ion batteries»"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.318,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "Ficha actual (UK); Notebookcheck daba 353 g para la versión de 2024 y dateks.lv 0,36 kg"
+        },
+        "medidas_mm": {
+          "valor": "119,9 × 73,4 × 31,5",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 72 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": 1.5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "18 meses según la ficha de Anker UK"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró una medición independiente"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "fecha": "2026-10-18",
+          "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-anker-power-banks-a1681-a1689-and-a1647-2507-0045",
+          "fecha": "2026-10-18",
+          "nota": "Alerta de la OPSS británica 2507-0045 y CPSC 25-466"
+        },
+        "fabrica": {
+          "valor": "Celdas de Apex (Wuxi) Co., Ltd (antes Amprius (Wuxi)) en los lotes retirados",
+          "naturaleza": "declarado",
+          "fuente": "https://heise.de/-10463193",
+          "fecha": "2026-10-18",
+          "nota": "Según heise; Anker no confirmó que esas celdas causaran el fallo, pero dijo haber dejado de trabajar con ese proveedor y pasar a ATL"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Cable integrado no sustituible según Notebookcheck; no hay manual de reparación"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "manual",
+          "titulo": "Anker Zolo Power Bank (20K, 30W, Built-In USB-C Cable) – guía de usuario (A1689)",
+          "url": "https://service.anker.com/article-description/Anker-Zolo-Power-Bank-20K-30W-Built-In-USB-C-Cable-%D8%AF%D9%84%D9%8A%D9%84-%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D8%AE%D8%AF%D9%85-A1689",
+          "fecha": "2026-10-18"
+        },
+        {
+          "tipo": "otro",
+          "titulo": "Página de la retirada de Anker en la UE (rc2506)",
+          "url": "https://www.anker.com/eu-en/rc2506",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "20,000mAh can charge an iPhone 15 up to 4 times",
+          "donde": "https://www.anker.com/uk/products/a1689",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Es una cifra de la marca; no se encontró una medición independiente de la energía útil de este modelo que permita comprobarla.",
+          "fuentes": [
+            {
+              "url": "https://www.anker.com/uk/products/a1689",
+              "titulo": "Ficha Anker UK A1689",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "30W two-way fast charging",
+          "donde": "https://www.anker.com/uk/products/a1689",
+          "veredicto": "matizable",
+          "explicacion": "Según la marca, 30 W de salida es el máximo por un solo puerto, pero la recarga de la propia batería es de 20 W y, según Notebookcheck, al usar varios puertos la salida total baja a 15 W.",
+          "fuentes": [
+            {
+              "url": "https://www.anker.com/uk/products/a1689",
+              "titulo": "Ficha Anker UK A1689",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.notebookcheck.net/New-Anker-Zolo-Power-Bank-20K-30W-Built-in-USB-C-cable-now-available.850284.0.html",
+              "titulo": "Notebookcheck, 21/06/2024",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Upgraded, CB-certified battery cells",
+          "donde": "https://www.anker.com/uk/products/a1689",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La ficha no enlaza el certificado CB. Lotes anteriores de este modelo fueron retirados por defectos de las celdas en 2025.",
+          "fuentes": [
+            {
+              "url": "https://heise.de/-10463193",
+              "titulo": "heise: Anker ruft Powerbanks zurück",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [
+        {
+          "pais": "EE. UU.",
+          "organismo": "CPSC",
+          "fecha": "2025-09-18",
+          "motivo": "La batería de iones de litio puede sobrecalentarse, con riesgo de incendio y quemaduras. Según Anker (citado por heise), algunos lotes de celdas llevaban materias primas cambiadas sin autorización por el proveedor.",
+          "referencia": "25-466",
+          "url": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "nota": "Unas 481.000 unidades entre A1257, A1647, A1652, A1681 y A1689; vendidas de agosto de 2023 a junio de 2025; reembolso o tarjeta regalo"
+        },
+        {
+          "pais": "Canadá",
+          "organismo": "Health Canada",
+          "fecha": "2025-06-27",
+          "motivo": "La batería de iones de litio puede sobrecalentarse, con riesgo de incendio y quemaduras. Según Anker (citado por heise), algunos lotes de celdas llevaban materias primas cambiadas sin autorización por el proveedor.",
+          "referencia": "RA-77650",
+          "url": "https://recalls-rappels.canada.ca/en/alert-recall/anker-power-bank-a1647-and-anker-zolo-power-banks-a1681-and-a1689-sold-amazonca",
+          "nota": "11.985 unidades en Canadá (A1647, A1681, A1689) vendidas de diciembre de 2023 a junio de 2025"
+        },
+        {
+          "pais": "Reino Unido",
+          "organismo": "OPSS (Office for Product Safety and Standards)",
+          "fecha": "2025-07-21",
+          "motivo": "La batería de iones de litio puede sobrecalentarse, con riesgo de incendio y quemaduras. Según Anker (citado por heise), algunos lotes de celdas llevaban materias primas cambiadas sin autorización por el proveedor.",
+          "referencia": "2507-0045",
+          "url": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-anker-power-banks-a1681-a1689-and-a1647-2507-0045",
+          "nota": "A1689 fabricadas de junio de 2024 a febrero de 2025; riesgo medio"
+        },
+        {
+          "pais": "Australia",
+          "organismo": "ACCC",
+          "fecha": "2025-08-29",
+          "motivo": "La batería de iones de litio puede sobrecalentarse, con riesgo de incendio y quemaduras. Según Anker (citado por heise), algunos lotes de celdas llevaban materias primas cambiadas sin autorización por el proveedor.",
+          "referencia": "PRA 2025/20571",
+          "url": "https://www.productsafety.gov.au/node/32425",
+          "nota": "Fecha de la última actualización de la ficha"
+        },
+        {
+          "pais": "Unión Europea (retirada voluntaria del fabricante)",
+          "organismo": "Anker Innovations",
+          "fecha": null,
+          "motivo": "La batería de iones de litio puede sobrecalentarse, con riesgo de incendio y quemaduras. Según Anker (citado por heise), algunos lotes de celdas llevaban materias primas cambiadas sin autorización por el proveedor.",
+          "referencia": "rc2506",
+          "url": "https://www.anker.com/eu-en/rc2506",
+          "nota": "Retirada mundial anunciada en junio de 2025 (heise cita el 20/06/2025); comprobar el número de serie en el formulario de Anker. No se encontró la alerta correspondiente en EU Safety Gate"
+        }
+      ],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "retirada encontrada (25-466)",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna alerta encontrada en Safety Gate por búsqueda web; existe la retirada voluntaria de Anker para la UE",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "retirada encontrada (RA-77650)",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Anker%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "retirada encontrada (PRA 2025/20571)",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "anker-tienda-eu",
+          "url": "https://www.anker.com/eu-en/products/a1689",
+          "precio_eur": 36.99,
+          "envio_eur": null,
+          "plazo": "1–2 días hábiles (envío)",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda Anker UE en inglés; no se comprobó el envío a España"
+        }
+      ],
+      "pendiente": [
+        "Oferta en tiendas españolas (Amazon.es no se pudo leer)",
+        "Si las unidades a la venta hoy son posteriores a febrero de 2025 (fuera de la retirada)",
+        "Wh y tensión de celda declarados en la etiqueta"
+      ]
+    },
+    {
+      "id": "xiaomi-33w-power-bank-20000-cable-integrado",
+      "nombre": "Xiaomi 33W Power Bank 20000mAh (Integrated Cable)",
+      "marca_id": "xiaomi",
+      "modelo": "PB2030MI",
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "Xiaomi no publica la fecha de lanzamiento; las unidades retiradas se fabricaron en agosto–septiembre de 2024"
+      },
+      "foto": {
+        "url": "https://i02.appmifile.com/79_operatorx_operatorx_opx/13/04/2025/0d012e501987fffd60b485f91a7f91d7.png",
+        "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/"
+      },
+      "resumen": "Batería externa de 20.000 mAh (dos celdas de 10.000 mAh a 7,4 V, 74 Wh nominales) con cable USB-C integrado, un puerto USB-C y un USB-A. Según la marca, entrega hasta 33 W y su capacidad nominal a 5 V es de 12.000 mAh. Xiaomi retiró en 2025 un lote fabricado entre agosto y septiembre de 2024, en China y después en todo el mundo, y la autoridad británica publicó la retirada en diciembre de 2025; las unidades afectadas se comprueban por número de serie en la web de Xiaomi.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "Dos celdas de 10.000 mAh en serie a 7,4 V (equivalente a 20.000 mAh a 3,7 V)"
+        },
+        "tension_celda_v": {
+          "valor": 7.4,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "Tensión del paquete de dos celdas en serie (3,7 V por celda)"
+        },
+        "capacidad_wh": {
+          "valor": 74,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "Típica 75,48 Wh según la marca"
+        },
+        "potencia_salida_max_w": {
+          "valor": 33,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "USB-C: 11 V⎓3 A = 33 W; la ficha global indica además «33W max» en uso simultáneo"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 30,
+          "unidad": "W",
+          "naturaleza": "calculado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "Entrada máxima declarada 12 V⎓2,5 A = 30 W"
+        },
+        "puertos": {
+          "valor": "1× cable USB-C integrado (33 W), 1× USB-C (33 W), 1× USB-A (22,5 W)",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "Li-ion",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": null,
+          "unidad": "kg",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La ficha oficial no publica el peso"
+        },
+        "medidas_mm": {
+          "valor": "127 × 70,5 × 30,5",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 74 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.powerplanetonline.com/es/xiaomi-33w-power-bank-20000mah-cable-integrado-marron",
+          "fecha": "2026-10-18",
+          "nota": "Garantía indicada por la tienda Powerplanet"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró una medición independiente"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Sede de la marca no verificada con fuente en esta sesión"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-xiaomi-33w-power-bank-20000mah-with-integrated-cable-2510-0232",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Xiaomi no nombra al fabricante de las celdas; Notebookcheck cita «la celda 126280 versión 2.0 de un proveedor»"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": 2,
+          "unidad": "celdas",
+          "naturaleza": "declarado",
+          "fuente": "https://euronics.ee/en/it/it-accessories/power-banks/bhr8851gl/xiaomi-33w-power-bank-20000-mah-integrated-cable-tan-power-bank",
+          "fecha": "2026-10-18",
+          "nota": "Dos celdas de 10.000 mAh, según la ficha de Euronics Estonia"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "Especificaciones oficiales (mi.com global)",
+          "url": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "tipo": "otro",
+          "titulo": "Comprobación de números de serie afectados (Xiaomi Safety Notice)",
+          "url": "https://www.mi.com/global/support/safety-notice/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "tipo": "otro",
+          "titulo": "OPSS 2510-0232, anexo con números de serie",
+          "url": "https://assets.publishing.service.gov.uk/media/6949602d72075a1d4a5089fd/2510-0232-product-recall-xiaomi-power-bank.pdf",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "20000mAh",
+          "donde": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "veredicto": "matizable",
+          "explicacion": "La propia ficha de Xiaomi indica que la capacidad nominal a 5 V es de 12.000 mAh, un 60 % de la cifra anunciada: los 20.000 mAh son de las celdas, no lo que llega al móvil.",
+          "fuentes": [
+            {
+              "url": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+              "titulo": "Ficha oficial Xiaomi",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "33W",
+          "donde": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La ficha declara 11 V⎓3 A (33 W) en los dos puertos USB-C; el USB-A llega a 22,5 W. No se encontró una medición independiente. Revisado 2026-10-18: la coherencia con la propia ficha de la marca no es una comprobación independiente; falta una medición de un tercero.",
+          "fuentes": [
+            {
+              "url": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+              "titulo": "Ficha oficial Xiaomi",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [
+        {
+          "pais": "China (después mundial)",
+          "organismo": "Xiaomi (retirada voluntaria)",
+          "fecha": "2025-08-29",
+          "motivo": "Un lote fabricado entre agosto y septiembre de 2024 lleva celdas de un proveedor con problemas en las materias primas; puede sobrecalentarse, humear, fundirse o incendiarse.",
+          "referencia": "146.891 unidades en China",
+          "url": "https://www.notebookcheck.net/xiaomi-issues-a-recall-of-146-891-units-of-a-power-bank-for-safety-risks.1099917.0.html",
+          "nota": "Notebookcheck informó el 29/08/2025 y actualizó el 31/08/2025 diciendo que la retirada es mundial"
+        },
+        {
+          "pais": "España",
+          "organismo": "Xiaomi España (retirada voluntaria)",
+          "fecha": "2025-09-08",
+          "motivo": "Un lote fabricado entre agosto y septiembre de 2024 lleva celdas de un proveedor con problemas en las materias primas; puede sobrecalentarse, humear, fundirse o incendiarse.",
+          "referencia": "Safety notice PB2030MI",
+          "url": "https://hipertextual.com/tecnologia/esta-bateria-externa-que-xiaomi-vende-en-espana-tiene-un-fallo-de-seguridad-si-tienes-una-te-devuelven-el-dinero/",
+          "nota": "Fecha del artículo de Hipertextual; reembolso o sustitución contactando con Xiaomi España"
+        },
+        {
+          "pais": "Reino Unido",
+          "organismo": "OPSS (Office for Product Safety and Standards)",
+          "fecha": "2025-12-23",
+          "motivo": "Un lote fabricado entre agosto y septiembre de 2024 lleva celdas de un proveedor con problemas en las materias primas; puede sobrecalentarse, humear, fundirse o incendiarse.",
+          "referencia": "2510-0232",
+          "url": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-xiaomi-33w-power-bank-20000mah-with-integrated-cable-2510-0232"
+        },
+        {
+          "pais": "Singapur",
+          "organismo": "Consumer Product Safety Office (Enterprise Singapore)",
+          "fecha": null,
+          "motivo": "Un lote fabricado entre agosto y septiembre de 2024 lleva celdas de un proveedor con problemas en las materias primas; puede sobrecalentarse, humear, fundirse o incendiarse.",
+          "referencia": "PB2030MI",
+          "url": "https://www.consumerproductsafety.gov.sg/files/product-safety-alerts-and-recalls/power-banks/powerbanks_recall_2025_10_27_xiaomi_recalls_batch_of_PB2030MI_model.pdf",
+          "nota": "El nombre del fichero indica 27/10/2025"
+        }
+      ],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Xiaomi",
+          "nota": "El modelo no se vende oficialmente en EE. UU. Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna alerta encontrada por búsqueda web; consta la retirada voluntaria en España",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "powerplanet",
+          "url": "https://www.powerplanetonline.com/es/xiaomi-33w-power-bank-20000mah-cable-integrado-marron",
+          "precio_eur": 24.5,
+          "envio_eur": 2.95,
+          "plazo": "entrega prevista martes 20 de octubre",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Color marrón (tan), ref. BHR8851GL; envío «desde» 2,95 €"
+        },
+        {
+          "distribuidor_id": "xiaomi-tienda-es",
+          "url": "https://www.mi.com/es/product/xiaomi-33w-power-bank-20000mah-integrated-cable/buy/",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Página de compra existe; el precio se carga con JavaScript y no se pudo leer"
+        }
+      ],
+      "pendiente": [
+        "EAN (no publicado por la marca ni por las tiendas consultadas)",
+        "Peso",
+        "Si las unidades a la venta hoy quedan fuera del lote retirado"
+      ]
+    },
+    {
+      "id": "ugreen-nexode-power-bank-20000-130w",
+      "nombre": "UGREEN Nexode Power Bank 20000mAh 130W",
+      "marca_id": "ugreen",
+      "modelo": "35524 (PB721)",
+      "subcategoria": "powerbanks",
+      "ean": [
+        {
+          "valor": "6941876242924",
+          "fuente": "https://www.proshop.de/Powerbank-Akku/UGREEN-130w-Fast-Charging-Power-Bank-20000-mAh/3295927",
+          "fecha": "2026-10-18",
+          "nota": "Ficha de proshop.de, modelo 35524B"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2024,
+        "naturaleza": "declarado",
+        "fuente": "https://www.ugreen.com/en-my/blogs/newsroom-es/ugreen-anade-dos-nuevos-productos-a-su-familia-nexode-power-bank-para-ofrecer-la-maxima-comodidad-de-carga",
+        "fecha": "2026-10-18",
+        "nota": "Nota de prensa de UGREEN de 8/07/2024, con PVP en España de 99,99 €"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+        "nota": "No se pudo extraer la URL de la imagen oficial"
+      },
+      "resumen": "Batería externa de 20.000 mAh (72 Wh) con dos USB-C y un USB-A y una pantalla de estado. Según la marca, el primer USB-C entrega hasta 100 W, la suma llega a 130 W y se recarga a 65 W en unas dos horas. En la prueba de techtest.org entregó entre 54,8 y 64,7 Wh según la carga, y la salida de 100 W bajó a 65 W con un 34 % de batería restante. La marca declara que conserva más del 80 % de capacidad tras 1.000 ciclos.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": 3.6,
+          "unidad": "V",
+          "naturaleza": "calculado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "72 Wh / 20.000 mAh × 1000 = 3,6 V"
+        },
+        "capacidad_wh": {
+          "valor": 72,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": 130,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "USB-C1 100 W + USB-C2 30 W; techtest.org vio que los 100 W bajan a 65 W con un 34 % restante"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 65,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "techtest.org observó caídas a unos 30 W tras 30 minutos de carga, que atribuye a la temperatura"
+        },
+        "puertos": {
+          "valor": "1× USB-C (100 W), 1× USB-C (30 W), 1× USB-A (22,5 W)",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica la química de las celdas"
+        },
+        "ciclos_declarados": {
+          "valor": 1000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ugreen.com/en-my/blogs/newsroom-es/ugreen-anade-dos-nuevos-productos-a-su-familia-nexode-power-bank-para-ofrecer-la-maxima-comodidad-de-carga",
+          "fecha": "2026-10-18",
+          "nota": "Más del 80 % de capacidad tras 1.000 ciclos, según la nota de prensa"
+        },
+        "peso_kg": {
+          "valor": 0.476,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "La misma página da 476 g y 480 g"
+        },
+        "medidas_mm": {
+          "valor": "131 × 54 × 50,8",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 72 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "«Mínimo 2 años» según la tienda UE de UGREEN"
+        },
+        "energia_util_medida_wh": {
+          "valor": 64.7,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/ugreen-nexode-130w-20000mah-powerbank-im-test-leistung-kapazitaet-und-ladezeit-im-ueberblick",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org: 62,4 Wh a 5 V/2 A, 64,7 Wh a 9 V/3 A, 54,8 Wh a 20 V/5 A (74–87 % de la capacidad nominal)"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Sede no verificada con fuente en esta sesión"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "otro",
+          "titulo": "Nota de prensa UGREEN España, 8/07/2024",
+          "url": "https://www.ugreen.com/en-my/blogs/newsroom-es/ugreen-anade-dos-nuevos-productos-a-su-familia-nexode-power-bank-para-ofrecer-la-maxima-comodidad-de-carga",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "130W",
+          "donde": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "veredicto": "matizable",
+          "explicacion": "Es la suma de dos puertos (100 W + 30 W). techtest.org midió que el puerto de 100 W baja a 65 W cuando queda un 34 % de batería.",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/ugreen-nexode-130w-20000mah-powerbank-im-test-leistung-kapazitaet-und-ladezeit-im-ueberblick",
+              "titulo": "techtest.org: UGREEN Nexode 130W 20000mAh im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Charges 16\" MacBook Pro to 43% in 30min & iPhone 15 to 60% simultaneously",
+          "donde": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró una medición independiente de esos tiempos de carga.",
+          "fuentes": [
+            {
+              "url": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+              "titulo": "Tienda UGREEN UE",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "20000mAh (72Wh)",
+          "donde": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "veredicto": "matizable",
+          "explicacion": "techtest.org midió entre 54,8 y 64,7 Wh utilizables, un 74–87 % de los 72 Wh nominales según la carga.",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/ugreen-nexode-130w-20000mah-powerbank-im-test-leistung-kapazitaet-und-ladezeit-im-ueberblick",
+              "titulo": "techtest.org",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=UGREEN",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=UGREEN",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=UGREEN",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=UGREEN",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "ugreen-tienda-eu",
+          "url": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "precio_eur": 59.99,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "La página muestra 59,99 € y también 79,99 € con «-25 %»; precio incoherente en la propia página"
+        }
+      ],
+      "pendiente": [
+        "Oferta en tiendas españolas (Amazon.es, PcComponentes) no verificada",
+        "Química y origen de las celdas",
+        "País de fabricación",
+        "URL de la foto oficial"
+      ]
+    },
+    {
+      "id": "iniu-b41-10000-22-5w",
+      "nombre": "INIU B41 Power Bank (10.000 mAh, 22,5 W)",
+      "marca_id": "iniu",
+      "modelo": "B41 (BI-B41)",
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2021,
+        "naturaleza": "declarado",
+        "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+        "fecha": "2026-10-18",
+        "nota": "La CPSC indica que el BI-B41 se vendía en Amazon.com desde agosto de 2021; la tienda actual lo presenta como «New B41»"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+        "nota": "No se pudo extraer la URL de la imagen"
+      },
+      "resumen": "Batería externa de bolsillo de 10.000 mAh con dos USB-C (entrada y salida) y un USB-A, y salida máxima de 22,5 W según la marca. INIU es una marca con sede comercial en Seattle que vende sobre todo en Amazon y en su tienda online. En diciembre de 2025 la CPSC de EE. UU. publicó la retirada de unas 210.000 unidades del modelo BI-B41 vendidas en Amazon.com entre agosto de 2021 y abril de 2022, con cuatro números de serie concretos, tras 11 incendios notificados. La tienda europea de INIU sigue vendiendo un «New B41».",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 10000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 36,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18",
+          "nota": "10.000 mAh × 3,6 V / 1000 = 36 Wh, suponiendo 3,6 V nominales; la marca no publica los Wh en la tienda"
+        },
+        "potencia_salida_max_w": {
+          "valor": 22.5,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        },
+        "potencia_entrada_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La tienda no publica la potencia de entrada"
+        },
+        "puertos": {
+          "valor": "2× USB-C (entrada/salida), 1× USB-A",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "Li-ion",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18",
+          "nota": "La CPSC habla de batería de iones de litio"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.181,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18",
+          "nota": "6,4 onzas convertidas (×28,35 g); la versión española de la misma tienda dice 8,8 onzas (unos 249 g): dato contradictorio"
+        },
+        "medidas_mm": {
+          "valor": "109 × 66 × 18",
+          "naturaleza": "calculado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18",
+          "nota": "4,3 × 2,6 × 0,7 pulgadas × 25,4"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 36 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La reseña de Mighty Gadget no publica medición de capacidad"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "EE. UU. (sede comercial); fabricante en China",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18",
+          "nota": "La CPSC identifica a INIU (Seattle, Washington) como vendedor y a Shenzhen Topstar Industry Co., Ltd. como fabricante"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": "Shenzhen Topstar Industry Co., Ltd.",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18",
+          "nota": "Fabricante de las unidades retiradas"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "otro",
+          "titulo": "Página de retirada de INIU (iniushop.com/pages/recall-b41, citada por la CPSC)",
+          "url": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "30% smaller and 15% lighter than others with the same capacity",
+          "donde": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La marca no dice con qué productos compara. Su propia tienda da dos pesos distintos (6,4 y 8,8 onzas) para el mismo modelo, y la reseña de Mighty Gadget dice que no es tan ligero como se anuncia, sin dar cifras.",
+          "fuentes": [
+            {
+              "url": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+              "titulo": "Tienda INIU UE (español)",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://mightygadget.co.uk/?p=556534",
+              "titulo": "Mighty Gadget, reseña INIU",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Charges an iPhone 16 to 60% in about 25 minutes",
+          "donde": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró una medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+              "titulo": "Tienda INIU UE",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [
+        {
+          "pais": "EE. UU.",
+          "organismo": "CPSC",
+          "fecha": "2025-12-05",
+          "motivo": "La batería de iones de litio puede sobrecalentarse e incendiarse: 15 informes de sobrecalentamiento, 11 incendios, 3 quemaduras leves y más de 380.000 $ en daños.",
+          "referencia": "26-135",
+          "url": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "nota": "Unas 210.000 unidades del BI-B41 vendidas en Amazon.com de agosto de 2021 a abril de 2022, con números de serie 000G21, 000H21, 000I21 y 000L21. Reembolso completo. No consta que afecte a unidades vendidas en la UE ni al «New B41» actual"
+        }
+      ],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "retirada encontrada (26-135)",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=INIU",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "no comprobado: se agotó el presupuesto de búsquedas",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=INIU"
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "no comprobado: se agotó el presupuesto de búsquedas",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=INIU"
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "no comprobado: se agotó el presupuesto de búsquedas",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=INIU"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "iniu-tienda-eu",
+          "url": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "precio_eur": 22.99,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Versión en español de la tienda UE; la versión italiana mostraba 21,99 €"
+        }
+      ],
+      "pendiente": [
+        "EU Safety Gate, Health Canada y ACCC para INIU",
+        "EAN",
+        "Potencia de entrada",
+        "Peso real (la tienda da 181 g y 249 g)",
+        "Si las unidades actuales usan otras celdas o fabricante que las retiradas"
+      ]
+    },
+    {
+      "id": "xiaomi-power-bank-20000-cable-integrado-22-5w",
+      "nombre": "Xiaomi Power Bank 20000mAh (Integrated Cable)",
+      "marca_id": "xiaomi",
+      "modelo": "PB2020MI",
+      "subcategoria": "powerbanks",
+      "ean": [
+        {
+          "valor": "6932554411817",
+          "fuente": "https://www.proshop.nl/Powerbank/Xiaomi-PB2020MI-power-bank-integrated-cable-Li-Ion-USB-C-USB-225-Watt-Powerbank-Grijs-20000-mAh/3433148",
+          "fecha": "2026-10-18",
+          "nota": "Ref. BHR9738GL; el mismo EAN aparece en dcs.dk"
+        },
+        {
+          "valor": "6932554411817",
+          "fuente": "https://www.dcs.dk/en/p/1003603293",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2025,
+        "naturaleza": "declarado",
+        "fuente": "https://www.notebookcheck.net/Affordable-Xiaomi-Power-Bank-20000-mah-launching-in-more-countries.1080443.0.html",
+        "fecha": "2026-10-18",
+        "nota": "Notebookcheck (5/08/2025) informa de su llegada a la tienda de Xiaomi en España a 20,99 €, semanas después del Reino Unido"
+      },
+      "foto": {
+        "url": "https://i02.appmifile.com/710_operator_sg/09/04/2025/c3d08005cf444ac74aacf20094390b50.jpg",
+        "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/"
+      },
+      "resumen": "Batería externa de 20.000 mAh (74 Wh a 3,7 V) con cable USB-C integrado, un USB-C y un USB-A, y una salida máxima de 22,5 W según la marca. Es un modelo distinto del Xiaomi 33W Power Bank 20000mAh (PB2030MI), que tuvo un lote retirado en 2025. Xiaomi declara una capacidad nominal de 13.000 mAh a 5 V. Llegó a la tienda española de Xiaomi en verano de 2025.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": 3.7,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 74,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": 22.5,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18",
+          "nota": "10 V⎓2,25 A por puerto"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 22.5,
+          "unidad": "W",
+          "naturaleza": "calculado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18",
+          "nota": "Entrada máxima declarada 9 V⎓2,5 A = 22,5 W"
+        },
+        "puertos": {
+          "valor": "1× cable USB-C integrado, 1× USB-C, 1× USB-A (todos hasta 22,5 W)",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "Li-ion",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.342,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "128 × 73 × 32",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 74 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Incluye tarjeta de garantía, sin duración publicada en la ficha"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró una medición independiente"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Sede de la marca no verificada con fuente en esta sesión"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No publicado en las fichas consultadas"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "Especificaciones oficiales (mi.com España)",
+          "url": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "20000mAh",
+          "donde": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "veredicto": "matizable",
+          "explicacion": "La misma ficha de Xiaomi declara 13.000 mAh a 5 V (65 Wh), es decir, el 88 % de los 74 Wh de las celdas según la marca: el dato de 20.000 mAh es de las celdas a 3,7 V.",
+          "fuentes": [
+            {
+              "url": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+              "titulo": "Ficha oficial Xiaomi España",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para PB2020MI",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para PB2020MI",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Xiaomi",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "OPSS (Reino Unido)",
+          "fecha": "2026-10-18",
+          "resultado": "la retirada 2510-0232 es del PB2030MI (33 W), no de este modelo",
+          "url_busqueda": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-xiaomi-33w-power-bank-20000mah-with-integrated-cable-2510-0232",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "xiaomi-tienda-es",
+          "url": "https://www.notebookcheck.net/Affordable-Xiaomi-Power-Bank-20000-mah-launching-in-more-countries.1080443.0.html",
+          "precio_eur": 20.99,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio de lanzamiento en la tienda Xiaomi España citado por Notebookcheck el 5/08/2025, no comprobado hoy en la tienda"
+        },
+        {
+          "distribuidor_id": "proshop-nl",
+          "url": "https://www.proshop.nl/Powerbank/Xiaomi-PB2020MI-power-bank-integrated-cable-Li-Ion-USB-C-USB-225-Watt-Powerbank-Grijs-20000-mAh/3433148",
+          "precio_eur": 26.09,
+          "envio_eur": null,
+          "plazo": "2–3 días hábiles",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda neerlandesa; no se comprobó envío a España"
+        },
+        {
+          "distribuidor_id": "mediamarkt-at",
+          "url": "https://www.mediamarkt.at/de/product/_xiaomi-xiaomi-20000mah-powerbank-with-usb-c-cable-grey-powerbank-20000-mah-grey-166466753.html",
+          "precio_eur": 29.4,
+          "envio_eur": 0,
+          "plazo": "desde el 21/10/2026",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "MediaMarkt Austria, vendido por un tercero (MORELE.NET); no envía a España"
+        }
+      ],
+      "pendiente": [
+        "Precio actual en la tienda Xiaomi España y en tiendas españolas",
+        "Duración de la garantía",
+        "País de fabricación"
+      ]
+    },
+    {
+      "id": "anker-powercore-10000",
+      "nombre": "Anker PowerCore 10000",
+      "marca_id": "anker",
+      "modelo": "A1263",
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "desconocido",
+      "anio_lanzamiento": {
+        "valor": 2016,
+        "naturaleza": "declarado",
+        "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+        "fecha": "2026-10-18",
+        "nota": "La CPSC indica ventas desde junio de 2016"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah"
+      },
+      "resumen": "Batería externa compacta de 10.000 mAh (36 Wh) con una salida de 12 W (5 V/2,4 A). En junio de 2025 la CPSC de EE. UU. publicó la retirada de unos 1,16 millones de unidades vendidas allí entre 2016 y 2022, tras 19 informes de incendios y explosiones. La retirada se limita a unidades vendidas en EE. UU. con ciertos números de serie. En PcComponentes figura sin stock con el número de pieza A1263B.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 10000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": 3.6,
+          "unidad": "V",
+          "naturaleza": "calculado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18",
+          "nota": "36 Wh / 10.000 mAh × 1000 = 3,6 V"
+        },
+        "capacidad_wh": {
+          "valor": 36,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18",
+          "nota": "Según la ficha de PcComponentes"
+        },
+        "potencia_salida_max_w": {
+          "valor": 12,
+          "unidad": "W",
+          "naturaleza": "calculado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18",
+          "nota": "5 V × 2,4 A"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 10,
+          "unidad": "W",
+          "naturaleza": "calculado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18",
+          "nota": "5 V × 2 A"
+        },
+        "puertos": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "PcComponentes no detalla los puertos; sólo una salida de 5 V/2,4 A y una entrada de 5 V/2 A"
+        },
+        "quimica": {
+          "valor": "Li-ion",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.18,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18",
+          "nota": "La ficha dice 180 g y la descripción «menos de 140 gramos»: dato contradictorio"
+        },
+        "medidas_mm": {
+          "valor": "92 × 60 × 22",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 36 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "fecha": "2026-10-18",
+          "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": "Anker Innovations Limited (fabricante según la CPSC)",
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Menos de 140 gramos",
+          "donde": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La misma página de la tienda indica 180 g en la tabla de especificaciones; las dos cifras no pueden ser ciertas a la vez y no se encontró un peso medido por un tercero.",
+          "fuentes": [
+            {
+              "url": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+              "titulo": "PcComponentes: Anker PowerCore Powerbank 10000mAh",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [
+        {
+          "pais": "EE. UU.",
+          "organismo": "CPSC",
+          "fecha": "2025-06-12",
+          "motivo": "La batería de iones de litio puede sobrecalentarse, con riesgo de incendio y quemaduras: 19 informes de incendios y explosiones, 2 quemaduras leves y 11 casos de daños materiales por más de 60.700 $.",
+          "referencia": "25-338",
+          "url": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+          "nota": "Unas 1.158.000 unidades vendidas en EE. UU. (Anker, Amazon, Newegg, eBay) de junio de 2016 a diciembre de 2022; sustitución gratuita. Sólo unidades vendidas en EE. UU. con ciertos números de serie (comprobar en anker.com/product-recalls). Incidentes según Android Authority."
+        }
+      ],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "retirada encontrada (25-338)",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1263",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Anker",
+          "nota": "La página de retirada de Anker en la UE (rc2506) no menciona A1263 Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1263",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Anker%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1263",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "precio_eur": 25.98,
+          "envio_eur": null,
+          "plazo": "sin fecha de entrada",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "P/N A1263B; la sección de especificaciones lo llama «Anker PowerCore Mini»"
+        }
+      ],
+      "pendiente": [
+        "Si Anker sigue fabricándolo (posible descatalogado)",
+        "EAN",
+        "Si el A1263B vendido en España usa las mismas celdas que las unidades retiradas en EE. UU.",
+        "Puertos exactos"
+      ]
+    },
+    {
+      "id": "anker-prime-power-bank-27650-250w",
+      "nombre": "Anker Prime Power Bank (27.650 mAh, 250 W)",
+      "marca_id": "anker",
+      "modelo": "A1340",
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "desconocido",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra"
+      },
+      "resumen": "Batería externa para portátil de 27.650 mAh con dos USB-C y un USB-A y una salida total de 250 W, según la ficha de PcComponentes (P/N A1340011). Su capacidad calculada a 3,6 V queda justo por debajo del límite de 100 Wh para llevarla en cabina. No figura en las retiradas de Anker de 2025. Los datos disponibles son escasos: la ficha de la tienda no publica peso, Wh ni potencia de entrada, y el reparto de potencia por puerto que muestra es incoherente.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 27650,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 99.54,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "fecha": "2026-10-18",
+          "nota": "27.650 mAh × 3,6 V / 1000 = 99,54 Wh, suponiendo 3,6 V nominales"
+        },
+        "potencia_salida_max_w": {
+          "valor": 250,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "fecha": "2026-10-18",
+          "nota": "Total; la tienda indica 65 W, 140 W y 140 W por puerto, lo que no cuadra con dos USB-C y un USB-A: comprobar en la ficha de Anker"
+        },
+        "potencia_entrada_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "puertos": {
+          "valor": "2× USB-C, 1× USB-A",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": null,
+          "unidad": "kg",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "161,7 × 57 × 49,7",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 99.54 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA de 31/03/2026, sólo en equipaje de mano, máximo dos powerbanks por persona y prohibido recargarlos a bordo; la guía indica que la vía 100–160 Wh con permiso no pasará a la 68.ª edición del DGR (1/1/2027)."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "fecha": "2026-10-18",
+          "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "250W",
+          "donde": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró una medición independiente, y el reparto por puerto que publica la tienda es incoherente con los puertos que lista.",
+          "fuentes": [
+            {
+              "url": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+              "titulo": "PcComponentes",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1340",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Anker",
+          "nota": "Anker retiró en 2025 los modelos A1263 (CPSC 25-338) y A1257, A1647, A1652, A1681, A1689 (CPSC 25-466); este no figura. Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1340",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1340",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Anker%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para A1340",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Anker",
+          "nota": "Comprobado mediante búsqueda web de la marca/modelo + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+          "precio_eur": 179.99,
+          "envio_eur": null,
+          "plazo": "sin fecha de entrada",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por PcComponentes; envío gratis desde 50 € según el pie de la web"
+        }
+      ],
+      "pendiente": [
+        "Ficha oficial de Anker (Wh, entrada, peso, reparto por puerto, año)",
+        "EAN",
+        "Medición independiente"
+      ]
+    },
+    {
+      "id": "hiluckey-hi-s025-solar-25000",
+      "nombre": "Hiluckey cargador solar 25000 mAh con 4 paneles plegables (HI-S025)",
+      "marca_id": "hiluckey",
+      "modelo": "HI-S025",
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "La marca no publica la fecha. Ya existía en 2019: OutdoorGearLab lo analizó el 11/11/2019 y techtest.org el 21/04/2020; la versión actual tiene USB-C."
+      },
+      "foto": {
+        "url": null,
+        "fuente": null
+      },
+      "resumen": "Batería externa de 25.000 mAh, según la marca, con un panel solar fijo en la carcasa y tres paneles plegables más. La versión vendida en 2023–2026 tiene un USB-C de entrada y salida y dos USB-A, según reseñas que citan el anuncio; la unidad de 2020 analizada por techtest.org cargaba por microUSB. techtest.org midió 54,1 Wh utilizables, unos 14.600 mAh a 3,7 V, frente a los 25.000 mAh anunciados, y una potencia solar de unos 2,5 W a pleno sol. Con esa potencia, rellenar la batería sólo con el sol requiere del orden de 20 horas o más de sol directo. No figura en retiradas de seguridad consultadas.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 25000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
+          "fecha": "2026-10-18",
+          "nota": "Cifra del anuncio citada por the-gadgeteer (mayo de 2026) y por techtest.org (2020)"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica la tensión nominal"
+        },
+        "capacidad_wh": {
+          "valor": 92.5,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18",
+          "nota": "25.000 mAh × 3,7 V / 1000 = 92,5 Wh nominales, suponiendo 3,7 V (no publicado). techtest.org midió 54,1 Wh entregados"
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Los anuncios citan «QC 3.0 3A» sin vatios; techtest.org cita 2× USB-A a 5 V/2,1 A en la versión de 2020"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 10,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18",
+          "nota": "Versión de 2020: entrada microUSB 5 V/2 A (10 W), según techtest.org. La entrada de la versión USB-C actual no se encontró"
+        },
+        "puertos": {
+          "valor": "1× USB-C (entrada/salida), 2× USB-A (salida)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
+          "fecha": "2026-10-18",
+          "nota": "Versión actual, según the-gadgeteer; la de 2020 tenía microUSB de entrada y 2× USB-A, según techtest.org. Pocketables (2023) indica 3 A por puerto"
+        },
+        "quimica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.53,
+          "unidad": "kg",
+          "naturaleza": "medido",
+          "fuente": "https://www.outdoorgearlab.com/reviews/camping-and-hiking/solar-power-bank/hiluckey-s025",
+          "fecha": "2026-10-18",
+          "nota": "Medido por OutdoorGearLab: 18,7 oz (530 g) en 2019. Pocketables (2023) indica 1,32 lb (unos 600 g) para la versión con USB-C"
+        },
+        "medidas_mm": {
+          "valor": "155,4 × 83 × 33,6",
+          "unidad": null,
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org en la versión de 2020"
+        },
+        "carga_solar": {
+          "valor": "sí; 4 paneles, unos 2,5 W medidos a pleno sol",
+          "unidad": null,
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18",
+          "nota": "techtest.org: panel especificado en 6 W (5 V/1,2 A); midió unos 2,5 W en condiciones óptimas (≈ 675 mAh por hora), quizá 3 W en pleno verano. the-gadgeteer cita una prueba de laboratorio de 542 mAh por hora y una potencia de 5 W. Tiempo calculado para rellenar sólo con el sol: 54 Wh medidos / 2,5 W ≈ 22 h de sol directo, sin contar pérdidas de carga"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 92.5 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA, sólo en equipaje de mano. Cálculo sobre los 92,5 Wh nominales; con la capacidad medida por techtest.org (54 Wh) también queda por debajo de 100 Wh."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la duración de la garantía"
+        },
+        "energia_util_medida_wh": {
+          "valor": 54.071,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org (21/04/2020) en el modelo HI-S025 con microUSB: 54,071 Wh, equivalentes a 14.613 mAh a 3,7 V (58 % de lo anunciado)"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica su razón social ni su sede en las páginas consultadas"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No hay manual de reparación ni batería sustituible por el usuario publicados"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "otro",
+          "titulo": "techtest.org: prueba de powerbanks solares plegables X-DRAGON y Hiluckey (2020)",
+          "url": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "25000mAh",
+          "donde": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
+          "veredicto": "falsa",
+          "explicacion": "En la unidad medida por techtest.org en 2020 se obtuvieron 54,1 Wh, unos 14.600 mAh a 3,7 V, es decir, el 58 % de lo anunciado; el autor lo atribuye a una cifra inflada y no a pérdidas de conversión. No se encontró una medición de la versión actual con USB-C, que podría diferir.",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+              "titulo": "techtest.org: Test ausklappbare Solar-Powerbanks von X-DRAGON und Hiluckey",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Panel solar de 6 W con cuatro paneles plegables",
+          "donde": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "veredicto": "matizable",
+          "explicacion": "La especificación de 6 W (5 V/1,2 A) figura en el producto, según techtest.org, que midió unos 2,5 W a pleno sol en condiciones óptimas. A ese ritmo, recargar la batería entera sólo con el sol supone del orden de 22 horas de sol directo (cálculo: 54 Wh / 2,5 W).",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+              "titulo": "techtest.org (2020)",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
+              "titulo": "the-gadgeteer: 5 solar power banks worth buying for summer 2026",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Hiluckey HI-S025",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Hiluckey",
+          "nota": "La CPSC retiró en 2026 powerbanks solares de otra marca (Super Off-Road, 26-575), no éste. Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Hiluckey HI-S025",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Hiluckey",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Hiluckey HI-S025",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Hiluckey%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Hiluckey HI-S025",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Hiluckey",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/Hiluckey-Cargador-25000mAh-Impermeable-Smartphones/dp/B098LFM1T4",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Enlace tomado de un artículo de Vozpópuli (actualizado el 22/06/2023); Amazon.es bloquea la lectura automática y no se pudo leer precio ni stock"
+        }
+      ],
+      "pendiente": [
+        "Precio actual en Amazon.es",
+        "Especificación de entrada/salida en vatios de la versión con USB-C",
+        "Medición de capacidad de la versión actual con USB-C",
+        "Fabricante, sede y garantía de la marca",
+        "EAN",
+        "Foto oficial"
+      ]
+    },
+    {
+      "id": "riapow-solar-26800-inalambrica",
+      "nombre": "Riapow Solar Power Bank 26800 mAh inalámbrica",
+      "marca_id": "riapow",
+      "modelo": null,
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No se encontró la fecha de lanzamiento"
+      },
+      "foto": {
+        "url": null,
+        "fuente": null
+      },
+      "resumen": "Batería externa de 26.800 mAh, según la marca, con un panel solar integrado en la carcasa, carga inalámbrica Qi y linterna. Según la ficha recogida por PC-WELT, el panel aporta hasta 1,9 W, la salida por cable llega a 22,5 W, la inalámbrica a 5 W, pesa 470 g y tiene protección IP67. Con 1,9 W, rellenar los unos 99 Wh nominales sólo con el sol exigiría más de 50 horas de sol directo, por lo que el panel sirve como complemento. Se vende en Amazon.es; no se encontró una medición independiente de su capacidad.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 26800,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18",
+          "nota": "Datos del fabricante recogidos por PC-WELT (04/06/2025)"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No publicada"
+        },
+        "capacidad_wh": {
+          "valor": 99.16,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18",
+          "nota": "26.800 mAh × 3,7 V / 1000 = 99,16 Wh, suponiendo 3,7 V (no publicado)"
+        },
+        "potencia_salida_max_w": {
+          "valor": 22.5,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18",
+          "nota": "Según la ficha recogida por PC-WELT; el anuncio de Newegg habla de «3.0A» por USB-C"
+        },
+        "potencia_entrada_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la potencia de entrada"
+        },
+        "puertos": {
+          "valor": "2× USB-A, 1× USB-C, carga inalámbrica Qi 5 W",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.47,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí; panel integrado de hasta 1,9 W",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18",
+          "nota": "PC-WELT describe la carga solar como «bastante lenta». Tiempo calculado para rellenar sólo con el sol: 99,16 Wh / 1,9 W ≈ 52 h de sol directo a potencia máxima, sin contar pérdidas"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 99.16 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA, sólo en equipaje de mano. Queda muy cerca del límite y depende de la tensión supuesta (3,7 V); conviene comprobar los Wh impresos en la etiqueta."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "El anuncio de Newegg menciona un «compromiso de calidad de 5 años» sin términos; no se encontró la garantía para la UE"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró ninguna medición independiente"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica su razón social ni su sede en las páginas consultadas"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No hay manual de reparación ni batería sustituible por el usuario publicados"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "With a 26800mAh capacity it can charge the iPhone 16 8 times",
+          "donde": "https://www.newegg.com/p/39G-01GU-000D1",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró una medición independiente de la energía entregada. 26.800 mAh a 3,7 V son unos 99 Wh nominales, y la energía que llega al teléfono es siempre menor por las pérdidas de conversión, pero en este modelo no se ha medido.",
+          "fuentes": [
+            {
+              "url": "https://www.newegg.com/p/39G-01GU-000D1",
+              "titulo": "Anuncio Riapow en Newegg",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Carga solar con panel integrado (hasta 1,9 W)",
+          "donde": "https://www.pcwelt.de/?p=2640940",
+          "veredicto": "matizable",
+          "explicacion": "Con 1,9 W como máximo, la recarga completa sólo con sol exigiría unas 52 horas de sol directo (99,16 Wh / 1,9 W), sin contar pérdidas; el propio PC-WELT la califica de bastante lenta.",
+          "fuentes": [
+            {
+              "url": "https://www.pcwelt.de/?p=2640940",
+              "titulo": "PC-WELT: Solar-Powerbanks (04/06/2025)",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Riapow 26800 mAh",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Riapow",
+          "nota": "La CPSC retiró en 2026 powerbanks solares de otra marca (Super Off-Road, 26-575), no éste. Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Riapow 26800 mAh",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Riapow",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Riapow 26800 mAh",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Riapow%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para Riapow 26800 mAh",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Riapow",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://amzn.to/40Sbfjv",
+          "precio_eur": 30.49,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio de 30,49 € en Amazon ES publicado por 4gnews el 05/08/2025 (enlace corto de afiliado del artículo); no es el precio del 2026-10-18 y Amazon.es no se pudo leer"
+        }
+      ],
+      "pendiente": [
+        "Número de modelo",
+        "Precio actual y URL directa en Amazon.es",
+        "Potencia de entrada y medidas",
+        "Medición independiente de capacidad y de potencia solar",
+        "Fabricante, sede y garantía",
+        "EAN",
+        "Foto oficial"
+      ]
+    },
+    {
+      "id": "cellularline-power-bank-solar-pro-20000",
+      "nombre": "Cellularline Power Bank Solar Pro 20.000 mAh",
+      "marca_id": "cellularline",
+      "modelo": "PBSOLAR20000O",
+      "subcategoria": "powerbanks",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No se encontró la fecha de lanzamiento"
+      },
+      "foto": {
+        "url": "https://www.cellularline.com/medias/PBSOLAR20000O_10_EMOTIONAL_LR.jpg",
+        "fuente": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O"
+      },
+      "resumen": "Batería externa de 20.000 mAh de la marca italiana Cellularline, con un panel solar ETFE de 1,5 W, linterna LED y protección IP54, según la marca. Tiene un USB-C con Power Delivery de 20 W y un USB-A con Quick Charge de 18 W. Con un panel de 1,5 W, rellenar sus unos 74 Wh nominales sólo con el sol exigiría del orden de 50 horas de sol directo, por lo que el panel sirve para recargas parciales. La tienda de la marca la vendía a 69,95 € el 18/10/2026 y también la lista MediaMarkt España.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No publicada"
+        },
+        "capacidad_wh": {
+          "valor": 74,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18",
+          "nota": "20.000 mAh × 3,7 V / 1000 = 74 Wh, suponiendo 3,7 V (no publicado)"
+        },
+        "potencia_salida_max_w": {
+          "valor": 20,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18",
+          "nota": "USB-C PD 20 W; USB-A QC 18 W"
+        },
+        "potencia_entrada_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La ficha no indica la potencia de entrada"
+        },
+        "puertos": {
+          "valor": "1× USB-C PD 20 W, 1× USB-A QC 18 W",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18",
+          "nota": "Incluye cable USB-C a USB-C de 15 cm"
+        },
+        "quimica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": null,
+          "unidad": "kg",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No publicado en la ficha"
+        },
+        "medidas_mm": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí; panel ETFE de 1,5 W",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18",
+          "nota": "Tiempo calculado para rellenar sólo con el sol: 74 Wh / 1,5 W ≈ 49 h de sol directo a potencia máxima, sin contar pérdidas. La marca no publica un tiempo de carga solar"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 74 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA, sólo en equipaje de mano."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La ficha enlaza a «Guaranteed for life» y «ONE4EVER Warranty» sin indicar condiciones"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró ninguna medición independiente"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Italia",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.borsaitaliana.it/borsaitaliana/ufficio-stampa/comunicati-stampa/2019/cellularline.htm",
+          "fecha": "2026-10-18",
+          "nota": "Fundada en Reggio Emilia en 1990, según Borsa Italiana"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No hay manual de reparación ni batería sustituible por el usuario publicados"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "declaracion_ce",
+          "titulo": "Página general de declaraciones de conformidad de Cellularline",
+          "url": "https://www.cellularline.com/es-es/dichiarazione-conformita",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "absorción de energía solar un 20% más rápida",
+          "donde": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La marca no dice respecto a qué se compara ni publica una medición; tampoco se encontró una prueba independiente de la potencia solar de este modelo.",
+          "fuentes": [
+            {
+              "url": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+              "titulo": "Ficha Cellularline PBSOLAR20000O",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Power bank de 20.000 mAh con 1 panel solar integrado",
+          "donde": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "veredicto": "matizable",
+          "explicacion": "La capacidad y el panel están declarados, pero con 1,5 W la recarga solar completa exigiría unas 49 horas de sol directo (74 Wh / 1,5 W), sin contar pérdidas; el panel sirve para recargas parciales. No se encontró una medición independiente de la capacidad.",
+          "fuentes": [
+            {
+              "url": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+              "titulo": "Ficha Cellularline PBSOLAR20000O",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para PBSOLAR20000O",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Cellularline",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para PBSOLAR20000O",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Cellularline",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para PBSOLAR20000O",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Cellularline%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para PBSOLAR20000O",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Cellularline",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "cellularline-tienda-es",
+          "url": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "precio_eur": 69.95,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Leído en la página de la marca; devolución en 14 días según la ficha"
+        },
+        {
+          "distribuidor_id": "mediamarkt-es",
+          "url": "https://www.mediamarkt.es/es/product/_powerbank-cellularline-pbsolar20000o-20000-mah-1x-usb-c-1x-usb-a-20w-solar-naranja-1610704.html",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "La ficha aparece en el buscador; la página no se pudo leer (error al cargar)"
+        }
+      ],
+      "pendiente": [
+        "EAN",
+        "Peso, medidas y potencia de entrada",
+        "Precio en MediaMarkt.es",
+        "Medición independiente de capacidad y de potencia solar",
+        "País de fabricación en la etiqueta"
+      ]
+    },
+    {
+      "id": "samsung-eb-p4520-20000-45w",
+      "nombre": "Samsung Battery Pack 20.000 mAh 45 W (EB-P4520)",
+      "marca_id": "samsung",
+      "modelo": "EB-P4520XUEGEU",
+      "subcategoria": "powerbanks",
+      "ean": [
+        {
+          "valor": "8806095312187",
+          "fuente": "https://www.pcbox.com/eb-p4520xuegeu-bateria-externa-20000-mah-c-rap-45w/p",
+          "fecha": "2026-10-18",
+          "nota": "Ficha de PcBox, variante beige EB-P4520XUEGEU; coincide con la de Ribamundo"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "Samsung no publica la fecha; la ficha española tiene metadatos de mayo de 2024 y techtest.org la probó en agosto de 2024"
+      },
+      "foto": {
+        "url": "https://images.samsung.com/is/image/samsung/p6pim/es/eb-p4520xuegeu/gallery/es-battery-pack-20000mah-eb-p4520-eb-p4520xuegeu-541908661?$1164_776_PNG$",
+        "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/"
+      },
+      "resumen": "Batería externa de 20.000 mAh con tres puertos USB-C, sin USB-A. Según la marca, entrega hasta 45 W cuando sólo hay un dispositivo conectado; techtest.org midió el reparto en 2 × 22 W con dos y 3 × 10 W con tres. techtest.org midió entre 58,9 y 65,9 Wh utilizables según la tensión de salida (80–89 % de lo nominal) y una recarga completa de unas 3 h 32 min a unos 25 W. Pesa unos 400 g. La ficha oficial española aparecía sin stock el 18/10/2026.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Samsung no la publica en la ficha; techtest.org calcula sus porcentajes a 3,7 V"
+        },
+        "capacidad_wh": {
+          "valor": 74,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://techtest.org/samsung-eb-p4520-powerbank-20-000-mah-mit-45w-im-ausfuehrlichen-test/",
+          "fecha": "2026-10-18",
+          "nota": "20.000 mAh × 3,7 V / 1000 = 74 Wh; techtest.org usa la misma referencia de 3,7 V"
+        },
+        "potencia_salida_max_w": {
+          "valor": 45,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18",
+          "nota": "Sólo con un dispositivo conectado. techtest.org: 2 dispositivos 2 × 22 W; 3 dispositivos 3 × 10 W"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 25,
+          "unidad": "W",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/samsung-eb-p4520-powerbank-20-000-mah-mit-45w-im-ausfuehrlichen-test/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org: unos 25 W (la ficha de OCU indica 25 W de entrada máxima; techtest cita 27 W según el fabricante)"
+        },
+        "puertos": {
+          "valor": "3× USB-C (PD 3.0 y PPS)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18",
+          "nota": "Perfiles PD 5V/3A, 9V/3A, 15V/3A, 20V/2,25A según techtest.org"
+        },
+        "quimica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_kg": {
+          "valor": 0.402,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18",
+          "nota": "techtest.org pesó 397 g"
+        },
+        "medidas_mm": {
+          "valor": "152 × 76 × 25,5",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 74 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA, sólo en equipaje de mano."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La ficha enlaza a la información general de garantía de Samsung sin indicar duración"
+        },
+        "energia_util_medida_wh": {
+          "valor": 65.874,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/samsung-eb-p4520-powerbank-20-000-mah-mit-45w-im-ausfuehrlichen-test/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org (04/08/2024): 58,918 Wh a 5V/1A hasta 65,874 Wh a 9V/3A (80–89 % de 74 Wh)"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No verificado en una fuente consultada en esta ronda"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No hay manual de reparación ni batería sustituible por el usuario publicados"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "manual",
+          "titulo": "Manual de usuario v1.3 (18/06/2025), enlazado en la ficha de Samsung España",
+          "url": "https://www.samsung.com/es/support/model/EB-P4520XUEGEU/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "tipo": "otro",
+          "titulo": "Guía de seguridad v2.1 (25/03/2026), enlazada en la ficha de Samsung España",
+          "url": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Carga Súper Rápida 45W",
+          "donde": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "veredicto": "matizable",
+          "explicacion": "La propia ficha aclara que los 45 W sólo están disponibles con un único dispositivo conectado; techtest.org midió 2 × 22 W con dos dispositivos y 3 × 10 W con tres.",
+          "fuentes": [
+            {
+              "url": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+              "titulo": "Samsung España: EB-P4520XUEGEU",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://techtest.org/samsung-eb-p4520-powerbank-20-000-mah-mit-45w-im-ausfuehrlichen-test/",
+              "titulo": "techtest.org: Samsung EB-P4520 im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Batería portátil 20.000 mAh",
+          "donde": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "veredicto": "matizable",
+          "explicacion": "La cifra corresponde a las celdas (unos 74 Wh a 3,7 V). techtest.org midió entre 58,9 y 65,9 Wh entregados, el 80–89 % de lo nominal según la tensión de salida.",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/samsung-eb-p4520-powerbank-20-000-mah-mit-45w-im-ausfuehrlichen-test/",
+              "titulo": "techtest.org: Samsung EB-P4520 im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para EB-P4520",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=Samsung",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para EB-P4520",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=Samsung",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para EB-P4520",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=Samsung%20power%20bank",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para EB-P4520",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=Samsung",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pcbox",
+          "url": "https://www.pcbox.com/eb-p4520xuegeu-bateria-externa-20000-mah-c-rap-45w/p",
+          "precio_eur": 54.4,
+          "envio_eur": null,
+          "plazo": "48/72 h",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Leído en la página: «Producto no disponible actualmente»"
+        },
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.ocu.org/tecnologia/baterias-externas/comparador-powerbanks/samsung-20-000-mah-eb-p4520/264/106607",
+          "precio_eur": 44.99,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio de PcComponentes leído en el comparador de OCU (que lo actualiza dos veces al día), no en la tienda; URL de la tienda no comprobada"
+        },
+        {
+          "distribuidor_id": "mediamarkt-es",
+          "url": "https://www.mediamarkt.es/eu/product/_powerbank-samsung-eb-p4520xuegeu-bateria-externa-20000-mah-usb-tipo-c-3-puertos-carga-rapida-beige-1573090.html",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha encontrada en el buscador; no se leyó la página"
+        }
+      ],
+      "pendiente": [
+        "Precio actual en MediaMarkt.es y Amazon.es",
+        "Garantía en meses",
+        "País de fabricación en la etiqueta",
+        "Química y proveedor de celdas"
+      ]
+    },
+    {
+      "id": "ecoflow-rapid-pro-27650-300w",
+      "nombre": "EcoFlow RAPID Pro Power Bank 27.650 mAh 300 W",
+      "marca_id": "ecoflow",
+      "modelo": "5019301011",
+      "subcategoria": "powerbanks",
+      "ean": [
+        {
+          "valor": "4895251641210",
+          "fuente": "https://www.shopro.lt/72410-power-bank-usb-27650mah-rapid-pro-cable-5019301011-ecoflow-en",
+          "fecha": "2026-10-18",
+          "nota": "Ficha de la tienda lituana Shopro (modelo 5019301011)"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2025,
+        "unidad": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.notebookcheck.org/EcoFlow-lanza-los-bancos-de-energia-de-alta-capacidad-Rapid-Pro-con-cable-integrado-y-descuentos-anticipados.1043230.0.html",
+        "fecha": "2026-10-18",
+        "nota": "Serie RAPID Pro anunciada el 24/06/2025, según Notebookcheck"
+      },
+      "foto": {
+        "url": "https://heyupnow.com/cdn/shop/files/66524f7b-7ef9-4c8c-ac2f-fecb24a1ab63.png",
+        "fuente": "https://heyupnow.com/es-es/products/ecoflow-rapid-pro-power-bank"
+      },
+      "resumen": "Batería externa de 27.650 mAh (99,5 Wh) con cuatro salidas USB-C, una de ellas un cable retráctil de 60 cm, y pantalla en color. Según la marca, suma hasta 300 W de salida, con 140 W por el cable y por un puerto y 65 W por cada uno de los otros dos. techtest.org midió entre 75,1 y 87,5 Wh utilizables (75–88 % de lo nominal), sostuvo 140 W y recargó la batería en unos 53 minutos por el puerto de 140 W con la batería fría. Pesa unos 720 g. Por debajo de 100 Wh, entra en la categoría que IATA admite en cabina sin permiso.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 27650,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.notebookcheck.org/EcoFlow-lanza-los-bancos-de-energia-de-alta-capacidad-Rapid-Pro-con-cable-integrado-y-descuentos-anticipados.1043230.0.html",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": 3.6,
+          "unidad": "V",
+          "naturaleza": "calculado",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "99,56 Wh × 1000 / 27.650 mAh ≈ 3,6 V, a partir de las cifras del fabricante que cita techtest.org"
+        },
+        "capacidad_wh": {
+          "valor": 99.56,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Cifra del fabricante citada por techtest.org; tiendas indican 99,5–99,54 Wh"
+        },
+        "potencia_salida_max_w": {
+          "valor": 300,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Total según el fabricante; 140 W máximo por el cable y por el USB-C 1, 65 W por USB-C 2 y 3"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 140,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Por cable o por el puerto de 140 W; hasta 320 W con la base de carga RAPID Pro opcional, según la marca (no probado por techtest.org)"
+        },
+        "puertos": {
+          "valor": "1× cable USB-C retráctil 140 W, 1× USB-C 140 W, 2× USB-C 65 W; sin USB-A",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "Li-ion (litio ternario)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18",
+          "nota": "Indicado por Solar Power Supply como «Ternary Lithium»; techtest.org no identifica las celdas"
+        },
+        "ciclos_declarados": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La pantalla muestra el número de ciclos, pero no se encontró una cifra declarada"
+        },
+        "peso_kg": {
+          "valor": 0.721,
+          "unidad": "kg",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Pesado por techtest.org; las tiendas indican 700 g"
+        },
+        "medidas_mm": {
+          "valor": "166 × 55 × 59",
+          "unidad": null,
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Según techtest.org"
+        },
+        "carga_solar": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Sólo USB-C; no tiene entrada solar específica"
+        },
+        "apto_avion": {
+          "valor": "sí",
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.iata.org/contentassets/90f8038b0eea42069554b2f4530f49ea/guidance-to-operators---power-banks.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Regla aplicada a 99.56 Wh: < 100 Wh sí; 100–160 Wh con permiso de la aerolínea; > 160 Wh no. Según la guía de IATA, sólo en equipaje de mano."
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18",
+          "nota": "Garantía indicada por Solar Power Supply; Shopro indica 12 meses. No se leyó la garantía oficial de EcoFlow"
+        },
+        "energia_util_medida_wh": {
+          "valor": 87.501,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por techtest.org (10/08/2025): 75,117 Wh a 5V/2A hasta 87,501 Wh a 20V/3A (75–88 %)"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Ver ficha de marca: sede no confirmada con fuente"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No hay manual de reparación ni batería sustituible por el usuario publicados"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "otro",
+          "titulo": "techtest.org: EcoFlow RAPID Pro im Test (10/08/2025)",
+          "url": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Recarga del 0-80% en solo 20 minutos.",
+          "donde": "https://heyupnow.com/es-es/products/ecoflow-rapid-pro-power-bank",
+          "veredicto": "matizable",
+          "explicacion": "La cifra de 20 minutos exige la base de carga RAPID Pro de 320 W, que se vende aparte; con una sola entrada de 140 W la marca indica 40 minutos hasta el 80 %. techtest.org midió una recarga completa de unos 53 minutos con la batería fría y algo más de una hora en caliente, porque la potencia baja a 100 W cuando las celdas llegan a 40 °C.",
+          "fuentes": [
+            {
+              "url": "https://www.notebookcheck.org/EcoFlow-lanza-los-bancos-de-energia-de-alta-capacidad-Rapid-Pro-con-cable-integrado-y-descuentos-anticipados.1043230.0.html",
+              "titulo": "Notebookcheck: EcoFlow lanza los RAPID Pro",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+              "titulo": "techtest.org: EcoFlow RAPID Pro im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "27650mAh / 99,54 Wh",
+          "donde": "https://heyupnow.com/es-es/products/ecoflow-rapid-pro-power-bank",
+          "veredicto": "matizable",
+          "explicacion": "Es la energía de las celdas. techtest.org midió entre 75,1 y 87,5 Wh entregados según la tensión de salida (75–88 %), con la eficiencia más baja a cargas pequeñas.",
+          "fuentes": [
+            {
+              "url": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+              "titulo": "techtest.org: EcoFlow RAPID Pro im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para RAPID Pro 27650",
+          "url_busqueda": "https://www.cpsc.gov/Recalls?search_combined_fields=EcoFlow",
+          "nota": "EcoFlow retiró en EE. UU. la estación DELTA Max 2000 (EFD310) en 2025, no este modelo. Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para RAPID Pro 27650",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search?searchText=EcoFlow",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para RAPID Pro 27650",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en/search/site?search_api_fulltext=EcoFlow%20power%20bank",
+          "nota": "Health Canada RA-78357 (24/10/2025) cubre la DELTA Max 2000 (EFD310), no este modelo. Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        },
+        {
+          "organismo": "ACCC",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para RAPID Pro 27650",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls?search=EcoFlow",
+          "nota": "Comprobado mediante búsqueda web de la marca + «recall» el 2026-10-18; el buscador del organismo no se consultó directamente."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "solarpowersupply-eu",
+          "url": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "precio_eur": 169,
+          "envio_eur": 0,
+          "plazo": "1–5 días según país",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Leído en la página (ref. EF-RAPIDPRO27K-EU); no se confirmó el envío a España"
+        },
+        {
+          "distribuidor_id": "shopro-lt",
+          "url": "https://www.shopro.lt/72410-power-bank-usb-27650mah-rapid-pro-cable-5019301011-ecoflow-en",
+          "precio_eur": 186.18,
+          "envio_eur": null,
+          "plazo": "2–5 días laborables",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda de Lituania; leído en la página; no se comprobó el envío a España"
+        },
+        {
+          "distribuidor_id": "heyupnow-es",
+          "url": "https://heyupnow.com/es-es/products/ecoflow-rapid-pro-power-bank",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Página en español sin precio ni opción de compra (aviso de lanzamiento)"
+        }
+      ],
+      "pendiente": [
+        "Ficha oficial de EcoFlow España/UE y su garantía",
+        "Precio en Amazon.es, PcComponentes o MediaMarkt.es",
+        "Química y fabricante de las celdas",
+        "País de fabricación en la etiqueta"
+      ]
+    }
+  ],
+  "marcas": [
+    {
+      "id": "anker",
+      "nombre": "Anker",
+      "razon_social": "Anker Innovations Limited",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.anker.com",
+      "cotiza": null,
+      "datos_publicos": "La CPSC identifica a Anker Innovations Limited (China) como fabricante de los powerbanks retirados en 2025. Según heise, tras la retirada de junio de 2025 Anker dejó de trabajar con el proveedor de celdas Apex (Wuxi) y pasó a ATL. Anker afirma ser la primera marca mundial de carga móvil por ventas (datos de Euromonitor citados por la propia marca).",
+      "fuentes": [
+        {
+          "url": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://heise.de/-10463193",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "xiaomi",
+      "nombre": "Xiaomi",
+      "razon_social": null,
+      "pais_sede": null,
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.mi.com",
+      "cotiza": null,
+      "datos_publicos": "En 2025 retiró un lote de su powerbank 33W 20000mAh (PB2030MI) fabricado en agosto–septiembre de 2024: 146.891 unidades en China según Notebookcheck, con extensión mundial y a España.",
+      "fuentes": [
+        {
+          "url": "https://www.notebookcheck.net/xiaomi-issues-a-recall-of-146-891-units-of-a-power-bank-for-safety-risks.1099917.0.html",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ugreen",
+      "nombre": "UGREEN",
+      "razon_social": "Ugreen Group Ltd",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2012,
+      "web": "https://eu.ugreen.com",
+      "cotiza": "Bolsa de Shenzhen (SZSE: 301606)",
+      "datos_publicos": "Fabricante de accesorios de carga; vende en España a través de Amazon y de su tienda europea, según su nota de prensa de julio de 2024.",
+      "fuentes": [
+        {
+          "url": "https://www.ugreen.com/en-my/blogs/newsroom-es/ugreen-anade-dos-nuevos-productos-a-su-familia-nexode-power-bank-para-ofrecer-la-maxima-comodidad-de-carga",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Ugreen",
+          "titulo": "Wikipedia: Ugreen",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "iniu",
+      "nombre": "INIU",
+      "razon_social": null,
+      "pais_sede": "EE. UU.",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://iniushop.com",
+      "cotiza": null,
+      "datos_publicos": "La CPSC identifica a INIU (Seattle, Washington) como vendedor y a Shenzhen Topstar Industry Co., Ltd. (China) como fabricante del BI-B41 retirado en diciembre de 2025. La marca dice tener más de 38 millones de usuarios.",
+      "fuentes": [
+        {
+          "url": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "hiluckey",
+      "nombre": "Hiluckey",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No publicado en las páginas consultadas"
+      },
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de powerbanks solares vendida sobre todo en Amazon. No se encontró en las páginas consultadas su razón social, su sede ni una web oficial.",
+      "fuentes": [
+        {
+          "url": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "riapow",
+      "nombre": "Riapow",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No publicado en las páginas consultadas"
+      },
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de powerbanks solares vendida en Amazon (incluido Amazon.es, según 4gnews) y en marketplaces. No se encontró su razón social ni su sede.",
+      "fuentes": [
+        {
+          "url": "https://4gnews.pt/power-bank-solar-de-26-800-mah-carrega-ate-4-dispositivos-e-custa-so-30-na-amazon/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "cellularline",
+      "nombre": "Cellularline",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": "Italia",
+        "unidad": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.borsaitaliana.it/borsaitaliana/ufficio-stampa/comunicati-stampa/2019/cellularline.htm",
+        "fecha": "2026-10-18",
+        "nota": "Reggio Emilia"
+      },
+      "matriz": null,
+      "fundacion": 1990,
+      "web": "https://www.cellularline.com",
+      "cotiza": "Borsa Italiana (segmento STAR desde el 22/07/2019)",
+      "datos_publicos": "Fabricante italiano de accesorios para móviles fundado en Reggio Emilia en 1990, con las marcas Cellularline, AQL e Interphone; pasó de AIM Italia al segmento STAR de Borsa Italiana el 22/07/2019, según la propia Borsa Italiana.",
+      "fuentes": [
+        {
+          "url": "https://www.borsaitaliana.it/borsaitaliana/ufficio-stampa/comunicati-stampa/2019/cellularline.htm",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "samsung",
+      "nombre": "Samsung",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No verificado en una fuente consultada en esta ronda"
+      },
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.samsung.com/es/",
+      "cotiza": null,
+      "datos_publicos": "Vende la EB-P4520 en su tienda española con manual y guía de seguridad descargables. No se recogieron en esta ronda datos corporativos con fuente.",
+      "fuentes": [
+        {
+          "url": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ecoflow",
+      "nombre": "EcoFlow",
+      "razon_social": "EcoFlow Technology Ltd (fabricante); EcoFlow Technology Inc. (importador en EE. UU. y Canadá)",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2017,
+      "web": "https://www.ecoflow.com",
+      "cotiza": null,
+      "datos_publicos": "Copia de la entrada de marcas.json. Las fichas de retirada de Health Canada (2025) citan a EcoFlow Technology Inc. como importador de la DELTA Max 2000. No se confirmó con fuente la sede central.",
+      "fuentes": [
+        {
+          "url": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://media.adeo.com/media/3597680/media.pdf",
+          "titulo": "Declaración UE de conformidad EcoFlow EFWN511-SDE",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://b2bshop.wattstunde.de/en/products/ecoflow-river-3-eb-300-batterie",
+          "titulo": "Wattstunde: ficha RIVER 3 con datos GPSR",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.ecoflow.com/us/about-us",
+          "titulo": "EcoFlow: About us",
+          "fecha": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "distribuidores": [
+    {
+      "id": "pccomponentes",
+      "nombre": "PcComponentes",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.pccomponentes.com",
+      "envio": "Envío y devolución gratis en la ficha del Anker 737; envío gratis desde 50 € según el pie de la web",
+      "devoluciones": "Devolución gratis indicada en la ficha consultada",
+      "fuentes": [
+        {
+          "url": "https://www.pccomponentes.com/anker-power-bank-gen-2-con-pantalla-140w-24000mah-negro",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "elcorteingles",
+      "nombre": "El Corte Inglés",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.elcorteingles.es",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.elcorteingles.es/electronica/A51423998-bateria-externa-anker-737-power-bank-powercore-24k-24000-mah/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "amazon-es",
+      "nombre": "Amazon.es",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.amazon.es",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.amazon.es/dp/B09VPHVT2Z",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Páginas de producto no legibles por la herramienta (robots)"
+    },
+    {
+      "id": "anker-tienda-eu",
+      "nombre": "Tienda oficial Anker UE",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://www.anker.com/eu-en",
+      "envio": "Envío en 1–2 días hábiles según la ficha consultada",
+      "devoluciones": "Garantía de devolución de 30 días según la marca",
+      "fuentes": [
+        {
+          "url": "https://www.anker.com/eu-en/products/a1689",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "powerplanet",
+      "nombre": "Powerplanetonline",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.powerplanetonline.com",
+      "envio": "Desde 2,95 €; recogida en tienda de Murcia",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.powerplanetonline.com/es/xiaomi-33w-power-bank-20000mah-cable-integrado-marron",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "xiaomi-tienda-es",
+      "nombre": "Tienda oficial Xiaomi España",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.mi.com/es",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.mi.com/es/product/xiaomi-33w-power-bank-20000mah-integrated-cable/buy/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ugreen-tienda-eu",
+      "nombre": "Tienda oficial UGREEN UE",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://eu.ugreen.com",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "iniu-tienda-eu",
+      "nombre": "Tienda oficial INIU UE",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://eu-main.iniushop.com",
+      "envio": null,
+      "devoluciones": "Garantía de devolución de 30 días según la marca",
+      "fuentes": [
+        {
+          "url": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "proshop-nl",
+      "nombre": "Proshop (Países Bajos)",
+      "razon_social": null,
+      "pais": "Países Bajos",
+      "cif": null,
+      "web": "https://www.proshop.nl",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.proshop.nl/Powerbank/Xiaomi-PB2020MI-power-bank-integrated-cable-Li-Ion-USB-C-USB-225-Watt-Powerbank-Grijs-20000-mAh/3433148",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mediamarkt-at",
+      "nombre": "MediaMarkt Austria",
+      "razon_social": null,
+      "pais": "Austria",
+      "cif": null,
+      "web": "https://www.mediamarkt.at",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.mediamarkt.at/de/product/_xiaomi-xiaomi-20000mah-powerbank-with-usb-c-cable-grey-powerbank-20000-mah-grey-166466753.html",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mediamarkt-es",
+      "nombre": "MediaMarkt España",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.mediamarkt.es",
+      "envio": "No comprobado en esta ronda (las páginas no cargaron).",
+      "devoluciones": "No comprobado en esta ronda.",
+      "fuentes": [
+        {
+          "url": "https://www.mediamarkt.es/es/product/_powerbank-cellularline-pbsolar20000o-20000-mah-1x-usb-c-1x-usb-a-20w-solar-naranja-1610704.html",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "pcbox",
+      "nombre": "PcBox",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.pcbox.com",
+      "envio": "«Recíbelo en 48/72h» en la ficha; coste no indicado",
+      "devoluciones": "No comprobado",
+      "fuentes": [
+        {
+          "url": "https://www.pcbox.com/eb-p4520xuegeu-bateria-externa-20000-mah-c-rap-45w/p",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "cellularline-tienda-es",
+      "nombre": "Tienda online de Cellularline (España)",
+      "razon_social": null,
+      "pais": "Italia",
+      "cif": null,
+      "web": "https://www.cellularline.com/es-es/",
+      "envio": "No indicado en la ficha",
+      "devoluciones": "14 días desde la entrega, según la ficha",
+      "fuentes": [
+        {
+          "url": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "solarpowersupply-eu",
+      "nombre": "Solar Power Supply",
+      "razon_social": "Solar Power Supply B.V.",
+      "pais": "Países Bajos",
+      "cif": null,
+      "web": "https://solarpowersupply.eu",
+      "envio": "Envío gratis; entrega en 1–5 días según el país",
+      "devoluciones": "No comprobado",
+      "fuentes": [
+        {
+          "url": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "País deducido de la tienda en Den Helder y el teléfono +31, no declarado en la ficha"
+    },
+    {
+      "id": "shopro-lt",
+      "nombre": "Shopro",
+      "razon_social": null,
+      "pais": "Lituania",
+      "cif": null,
+      "web": "https://www.shopro.lt",
+      "envio": "Entrega en 2–5 días laborables indicada en la ficha; envío a España no comprobado",
+      "devoluciones": "No comprobado",
+      "fuentes": [
+        {
+          "url": "https://www.shopro.lt/72410-power-bank-usb-27650mah-rapid-pro-cable-5019301011-ecoflow-en",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "heyupnow-es",
+      "nombre": "Heyup",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://heyupnow.com/es-es",
+      "envio": "No indicado",
+      "devoluciones": "No indicado",
+      "fuentes": [
+        {
+          "url": "https://heyupnow.com/es-es/products/ecoflow-rapid-pro-power-bank",
+          "fecha": "2026-10-18"
+        }
+      ]
+    }
+  ]
+}

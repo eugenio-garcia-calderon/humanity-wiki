@@ -1,0 +1,158 @@
+{
+  "distribuidores": [
+    {
+      "id": "basic-solar-de",
+      "nombre": "basic-solar.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "web": "https://basic-solar.de"
+    },
+    {
+      "id": "aceflex-de",
+      "nombre": "aceflex.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "web": "https://www.aceflex.de"
+    },
+    {
+      "id": "sun",
+      "nombre": "sun.store",
+      "tipo": "mayorista",
+      "pais": "UE (plataforma B2B)",
+      "web": "https://sun.store"
+    },
+    {
+      "id": "krannich-solar",
+      "nombre": "Krannich Solar (Suiza), sección «Restposten» (restos de stock)",
+      "tipo": "mayorista",
+      "pais": "Suiza",
+      "web": "https://shop.krannich-solar.com"
+    },
+    {
+      "id": "7sun-eu",
+      "nombre": "7SUN (7sun.eu)",
+      "tipo": "tienda online",
+      "pais": "UE (tienda en euros; empresa con webs en Alemania y Polonia)",
+      "web": "https://7sun.eu"
+    },
+    {
+      "id": "pvundso-de",
+      "nombre": "pvundso.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "web": "https://pvundso.de"
+    },
+    {
+      "id": "solarplus-es",
+      "nombre": "DamiaSolar (precio citado por solarplus.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "web": "https://solarplus.es"
+    },
+    {
+      "id": "klima-pt",
+      "nombre": "Klima.pt",
+      "tipo": "tienda online",
+      "pais": "Portugal",
+      "web": "https://klima.pt"
+    },
+    {
+      "id": "solartraders",
+      "nombre": "Solartraders",
+      "tipo": "mayorista",
+      "pais": "Alemania (venta UE)",
+      "web": "https://www.solartraders.com"
+    },
+    {
+      "id": "tienda-solar-es",
+      "nombre": "Tienda Solar (tienda-solar.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "web": "https://tienda-solar.es"
+    },
+    {
+      "id": "photovoltaik4all-de",
+      "nombre": "photovoltaik4all",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "web": "https://www.photovoltaik4all.de"
+    },
+    {
+      "id": "allkitsolar",
+      "nombre": "AllKitSolar (allkitsolar.com)",
+      "tipo": "tienda online",
+      "pais": "Francia",
+      "web": "https://allkitsolar.com"
+    },
+    {
+      "id": "autosolar-es",
+      "nombre": "AutoSolar (autosolar.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "web": "https://autosolar.es"
+    },
+    {
+      "id": "cuencasolar-es",
+      "nombre": "Cuenca Solar (cuencasolar.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "web": "https://cuencasolar.es"
+    },
+    {
+      "id": "vicoexport",
+      "nombre": "Vico Export Solar Energy",
+      "tipo": "mayorista",
+      "pais": "España",
+      "web": "https://www.vicoexport.com"
+    },
+    {
+      "id": "fvcomponentes",
+      "nombre": "FV Componentes (Cartagena, Murcia)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "web": "https://fvcomponentes.com"
+    },
+    {
+      "id": "solarboss-ie",
+      "nombre": "Solarboss",
+      "tipo": "tienda online",
+      "pais": "Irlanda",
+      "web": "https://solarboss.ie"
+    },
+    {
+      "id": "wattuneed",
+      "nombre": "Wattuneed",
+      "tipo": "tienda online",
+      "pais": "Francia",
+      "web": "https://www.wattuneed.com"
+    },
+    {
+      "id": "suministrosdelsol",
+      "nombre": "Suministros del Sol",
+      "tipo": "tienda online",
+      "pais": "España",
+      "web": "https://suministrosdelsol.com"
+    },
+    {
+      "id": "offgridtec",
+      "nombre": "Offgridtec",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "web": "https://www.offgridtec.com"
+    },
+    {
+      "id": "nkon-nl",
+      "nombre": "NKON",
+      "tipo": "tienda online",
+      "pais": "Países Bajos",
+      "web": "https://www.nkon.nl"
+    },
+    {
+      "id": "holaluz",
+      "nombre": "Holaluz",
+      "tipo": "instalador",
+      "pais": "España",
+      "web": "https://holaluz.com"
+    }
+  ]
+}

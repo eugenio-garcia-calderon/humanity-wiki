@@ -1,0 +1,436 @@
+{
+  "slug": "byd-battery-box-premium-hvs",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "BYD Battery-Box Premium HVS",
+  "marca": "BYD",
+  "modelo": "HVS 5.1 / 7.7 / 10.2 / 12.8 (2 a 5 módulos de 2,56 kWh); familia hermana HVM 8.3 – 22.1 (módulos de 2,76 kWh); sucesoras HVS+ / HVM+ desde 2025",
+  "variante_ficha": "HVS 10.2 (4 módulos, 10,24 kWh) — ficha técnica ES V1.0 (julio de 2024)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No encontrado en la ficha."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
+    "fecha": "2026-10-18",
+    "nota": "Texto publicado: «hacia 2020». Fecha exacta no publicada. Según un distribuidor alemán, HVS y HVM están en el mercado «desde aproximadamente 2020». No verificado con BYD."
+  },
+  "estado": "a la venta",
+  "resumen": "Batería doméstica de alta tensión de BYD formada por una torre de 2 a 5 módulos de 2,56 kWh de fosfato de hierro y litio (LFP), de 5,12 a 12,8 kWh utilizables, que necesita un inversor híbrido externo compatible. Según la marca, admite hasta tres torres en paralelo y su eficiencia de ida y vuelta es igual o superior al 96 %. La familia hermana HVM usa módulos de 2,76 kWh a menor tensión, y desde 2025 BYD vende las versiones HVS+ y HVM+, con una nueva unidad de control; distribuidores alemanes indican que la HVS original se está agotando. La garantía europea es de 10 años o un límite de energía descargada, con un 60 % de capacidad garantizada. Sistemas con la HVS han participado en el ensayo independiente de la HTW Berlin.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://site.bydbatterybox.com/",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 10.24,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVS 10.2. BYD declara energía utilizable al 100 % de profundidad de descarga, por lo que total y utilizable coinciden en la ficha."
+    },
+    "capacidad_util_kwh": {
+      "valor": 10.24,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVS 10.2, medida en CC con 100 % DoD, 0,2C y 25 °C; «puede variar según el inversor»."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5,12 / 7,68 / 10,24 / 12,8 por torre",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVM: 8,28 – 22,08 kWh (3 a 8 módulos de 2,76 kWh, según 42watt.de)."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Módulos de 2,56 kWh / 102,4 V / 38 kg."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "«Ampliable en cualquier momento» según la ficha; ver afirmaciones."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 38.4,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://site.bydbatterybox.com/",
+      "fecha": "2026-10-18",
+      "nota": "Hasta 3 torres HVS 12.8 en paralelo según la web de BYD."
+    },
+    "potencia_continua_kw": {
+      "valor": 10.24,
+      "unidad": "kW",
+      "origen": "calculado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "25 A continuos (ficha) × 409,6 V nominales (HVS 10.2) = 10,24 kW. Potencia real limitada por el inversor."
+    },
+    "potencia_pico_kw": {
+      "valor": 20.48,
+      "unidad": "kW",
+      "origen": "calculado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "50 A de pico durante 3 s × 409,6 V (HVS 10.2)."
+    },
+    "quimica": {
+      "valor": "LFP (LiFePO4)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "fabricante_celulas": {
+      "valor": "BYD",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://site.bydbatterybox.com/",
+      "fecha": "2026-10-18",
+      "nota": "La web atribuye la batería LFP sin cobalto a BYD, aunque no detalla dónde se fabrican las celdas del HVS."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "BYD no da un número de ciclos en la ficha; la garantía fija 30,82 MWh descargados para el HVS 10.2."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 100,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Condición de medida de la energía utilizable."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": "≥ 96",
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Dato general de la ficha, sin condiciones de medida detalladas; eficiencia de la batería en CC, no del sistema con inversor."
+    },
+    "tension": {
+      "valor": "alta tensión: 409,6 V nominal (320–480 V) en HVS 10.2",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVS 5.1: 204,8 V; 7.7: 307,2 V; 12.8: 512 V."
+    },
+    "acoplamiento": {
+      "valor": "DC (requiere inversor híbrido externo)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversores_compatibles": {
+      "valor": "Inversores de la «Lista de inversores compatibles» de BYD (monofásicos y trifásicos de las principales marcas)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La garantía solo cubre el uso con inversores certificados por BYD de esa lista."
+    },
+    "respaldo_apagones": {
+      "valor": "sí, si el inversor lo permite (modos On Grid + Backup y Off Grid)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "instalacion": {
+      "valor": "interior y exterior; de pie sobre base",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip": {
+      "valor": "IP55",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "rango_temperatura_c": {
+      "valor": "-10 a 50",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Corriente reducida entre -10 °C y +5 °C."
+    },
+    "peso_kg": {
+      "valor": 167,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVS 10.2."
+    },
+    "medidas_mm": {
+      "valor": "1228 × 585 × 298 (alto × ancho × fondo)",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVS 10.2."
+    },
+    "garantia_energia_mwh": {
+      "valor": 30.82,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HVS 10.2. HVS 5.1: 15,41; 7.7: 23,12; 12.8: 38,53 MWh. Equivale a unas 3.000 descargas completas (cálculo: 30,82 MWh / 10,24 kWh ≈ 3.010)."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 487.1,
+      "unidad": "€/kWh",
+      "origen": "calculado",
+      "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-litio-byd-b-box-hvs-premium-102kwh",
+      "fecha": "2026-10-18",
+      "nota": "4.987,92 € (IVA incl., autosolar.es, HVS 10.2 con base y BCU, sin inversor ni instalación) / 10,24 kWh."
+    },
+    "pruebas_independientes": {
+      "valor": "Participó: HVS 12.8 combinada con inversores KOSTAL (PLENTICORE plus G2 10, PLENTICORE G3 M 10, acoplamiento AC) y Fronius Symo GEN24 12.0 Plus SC; HVS 7.7 con Fronius Primo GEN24 6.0 Plus.",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HTW Berlin, Stromspeicher-Inspektion 2025. El índice SPI evalúa el sistema completo (batería + inversor), no la batería sola. Los valores SPI exactos de cada combinación figuran en gráficos que no se pudieron extraer; pendiente."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía limitada Europa ES V1.2 para HVS/HVM instaladas desde el 08-03-2023. Inicio: el primer día tras 6 meses desde la fecha de producción, o 30 días tras la entrega documentada."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 60,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+      "fecha": "2026-10-18",
+      "nota": "60 % de la energía utilizable durante 10 años o hasta alcanzar la energía descargada mínima (30,82 MWh en HVS 10.2), lo que ocurra primero."
+    },
+    "letra_pequena": [
+      "El plazo empieza a contar desde la fabricación (6 meses después) salvo que se documente la entrega; una batería que pase tiempo en almacén pierde parte de la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
+      "Debe instalarse en el mes siguiente a la factura y usarse con un inversor de la lista de compatibles de BYD; con otro inversor no hay garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
+      "El comprador debe dar a BYD o a su socio acceso por internet a los datos de funcionamiento; negarlo excluye la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
+      "Excluye exposición a más de 50 °C o menos de -10 °C, golpes o movimientos tras la instalación, y periodos de inactividad de 6 meses o más; los defectos deben comunicarse en 30 días (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
+      "Fuera de garantía o si no se halla defecto, el comprador paga piezas, mano de obra, desplazamiento e inspección; la responsabilidad se limita al precio pagado (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
+      "Las HVS+ / HVM+ (instaladas desde 01-09-2025) tienen su propia garantía V1.1 con las mismas cifras de 60 % y MWh, emitida a través de BYD Finland Oy (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_ES-62.pdf)."
+    ],
+    "quien_responde": "BYD Smart Device Hungary Kft. como garante (HVS/HVM V1.2), con EFT-Systems GmbH como socio de servicio autorizado. Para HVS+/HVM+ el suministro figura a través de BYD Finland Oy. La garantía no prevé qué ocurre si BYD dejara el mercado europeo."
+  },
+  "empresa": {
+    "razon_social": "BYD Company Ltd. (garante europeo: BYD Smart Device Hungary Kft.)",
+    "pais_sede": "China (Shenzhen, Guangdong)",
+    "fundacion": 1995,
+    "cotiza_en": "Bolsa de Hong Kong (SEHK: 1211, acciones H) y Bolsa de Shenzhen (SZSE: 002594, acciones A)",
+    "web": "https://site.bydbatterybox.com/",
+    "fabricante_celulas": "BYD (LFP)",
+    "pais_fabricacion": "No indicado en ficha ni garantía",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Según 42watt.de (sept. 2026), no consta ninguna retirada por riesgo de incendio de HVS/HVM; las retiradas de BYD encontradas se refieren a coches eléctricos (https://42watt.de/magazin/byd-speicher).",
+      "EFT-Systems advierte de que HVS antiguas con firmware inferior a BMU 3.13 / BMS 3.19 pueden apagarse, sobre todo en invierno; lo corrige el instalador con una actualización (https://42watt.de/magazin/byd-speicher)."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/BYD_Company",
+      "https://site.bydbatterybox.com/",
+      "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+      "https://42watt.de/magazin/byd-speicher"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://en.wikipedia.org/wiki/BYD_Company%20;%20garante:%20https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+      "pais_sede": "https://en.wikipedia.org/wiki/BYD_Company",
+      "fundacion": "https://en.wikipedia.org/wiki/BYD_Company%20(fundada%20por%20Wang%20Chuanfu%20en%20febrero%20de%201995%20como%20fabricante%20de%20baterías)",
+      "cotiza_en": "https://en.wikipedia.org/wiki/BYD_Company"
+    }
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": null,
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas LFP (fosfato de hierro y litio, sin cobalto)",
+      "unidad de control BCU",
+      "carcasa metálica"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Texto publicado: «2–5 módulos de batería + 1 base con BCU»."
+    },
+    "reparabilidad": "Diseño modular: los módulos se suministran por separado y pueden sustituirse o añadirse (https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf). Las reparaciones o modificaciones sin aprobación de BYD o su socio excluyen la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf)."
+  },
+  "certificados": [
+    {
+      "nombre": "VDE-AR-E 2510-50",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62619",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CEC, CE, UN 38.3",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "idioma": "es",
+      "fecha": "2026-10-18",
+      "nota": "V1.0, 03-07-2024 (según nombre de fichero)."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+      "idioma": "es",
+      "fecha": "2026-10-18",
+      "nota": "HVS & HVM Europa V1.2."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_ES-62.pdf",
+      "idioma": "es",
+      "fecha": "2026-10-18",
+      "nota": "HVS+ / HVM+ V1.1, septiembre de 2025 (alojada por un distribuidor)."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Eficiencia de ida y vuelta «≥ 96 %».",
+      "donde": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Es una cifra de la batería sola en CC sin condiciones de medida detalladas en la ficha; la eficiencia que nota el usuario depende del inversor. La HTW Berlin mide sistemas completos y sus resultados varían según la combinación.",
+      "fuentes": [
+        "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Según una inspección independiente de la HTW Berlin, la Battery-Box «is ranked as the battery with the highest efficiency on the market».",
+      "donde": "https://site.bydbatterybox.com/",
+      "veredicto": "matizable",
+      "explicacion": "La HTW Berlin ha ensayado la Battery-Box con buenos resultados en ediciones anteriores, pero clasifica sistemas (batería + inversor) por edición, no «baterías del mercado» en general. En la edición 2025 los primeros puestos se atribuyen a sistemas de varios fabricantes de inversores, algunos con baterías BYD y otros no.",
+      "fuentes": [
+        "https://site.bydbatterybox.com/",
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Diseño modular, «ampliable en cualquier momento».",
+      "donde": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La ampliación con módulos es posible, pero la generación HVS se está sustituyendo por HVS+ con una nueva unidad de control, y un distribuidor indica que no hay compatibilidad hacia atrás con los módulos antiguos (dato no confirmado por BYD). Los módulos añadidos tienen garantía de rendimiento desde la fecha de su factura.",
+      "fuentes": [
+        "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+        "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
+        "https://42watt.de/magazin/byd-speicher",
+        "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: ACCC/productsafety.gov.au y lista de retiradas del Clean Energy Council (Australia; BYD no figura entre las baterías domésticas retiradas), búsquedas en los sitios de la CPSC (EE. UU.) y Health Canada, gov.uk, prensa especializada en alemán («BYD Battery-Box Rückruf») y en inglés, y la revisión de 42watt.de (septiembre de 2026), que no conoce retiradas de HVS/HVM. Las retiradas de BYD encontradas se refieren a coches eléctricos, no a baterías domésticas. La base de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica; acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha. Ninguna retirada conocida de Battery-Box Premium HVS/HVM a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "AutoSolar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-litio-byd-b-box-hvs-premium-102kwh",
+      "precio_eur": 4987.92,
+      "iva_incluido": true,
+      "unidad": "por torre HVS 10.2 (base + BCU + 4 módulos)",
+      "envio": "Entrega estimada 03-11-2026 en península (pago con tarjeta)",
+      "stock": "no indicado («sujeto a stock»)",
+      "nota": "Referencia 1881474. 4.122,25 € sin IVA; anunciado con 30 % de descuento sobre 7.174,09 €. Es la HVS de la generación anterior a HVS+."
+    },
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "sun.store (mercado B2B)",
+      "tipo": "mayorista",
+      "pais": "Polonia (operador de la plataforma)",
+      "url": "https://sun.store/en/product/byd-battery-box-premium-hvs-102-9423",
+      "precio_eur": 3560,
+      "iva_incluido": false,
+      "unidad": "por torre HVS 10.2",
+      "envio": "no indicado",
+      "stock": "3 ofertas con 1–30 unidades",
+      "nota": "«Desde 3.560 €» según los metadatos de la página; no se indica IVA ni vendedor. Orientado a profesionales."
+    }
+  ],
+  "compatibles": [
+    "inversores híbridos de la lista de compatibilidad de BYD (p. ej. KOSTAL PLENTICORE, Fronius GEN24, según los sistemas ensayados por la HTW Berlin)",
+    "BYD Battery-Box Premium HVM (familia hermana; no mezclable en la misma torre)"
+  ],
+  "pendiente": [
+    "Valores SPI exactos de la HTW Berlin 2025 para las combinaciones con HVS (en gráficos del informe).",
+    "País y fábrica de producción de los módulos HVS.",
+    "Fecha de fin de producción del HVS original y compatibilidad confirmada por BYD entre HVS y HVS+.",
+    "Consulta directa a EU Safety Gate."
+  ]
+}

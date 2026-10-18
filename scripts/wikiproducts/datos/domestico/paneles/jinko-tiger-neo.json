@@ -1,0 +1,465 @@
+{
+  "slug": "jinko-tiger-neo",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "JinkoSolar Tiger Neo 3.0 (Tiger Neo III) 48QL6-DV, monofacial vidrio-vidrio",
+  "marca": "JinkoSolar",
+  "modelo": "JKM460N … JKM485N-48QL6-DV (sustituye en catálogo doméstico al Tiger Neo 54HL4R)",
+  "variante_ficha": "JKM475N-48QL6-DV, ficha JKM460-485N-48QL6-DV-F1-EU",
+  "ean": {
+    "valor": null,
+    "unidad": "GTIN",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2024,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.jinkosolar.com/en/site/newsdetail/2258",
+    "fecha": "2026-10-18",
+    "nota": "JinkoSolar anunció la gama Tiger Neo 3.0 el 23 de octubre de 2024."
+  },
+  "estado": "a la venta",
+  "resumen": "El Tiger Neo 3.0 48QL6-DV es un módulo monofacial de JinkoSolar con células TOPCon de tipo n y construcción vidrio-vidrio (2 + 2 mm), pensado para tejados residenciales, con un formato de 1762 × 1134 mm y 24,4 kg. Su ficha europea cubre de 460 a 485 W con eficiencias del 23,02 % al 24,27 % y un coeficiente de temperatura de −0,26 %/°C. La ficha anuncia 30 años de garantía de potencia con 0,35 % de pérdida anual y 88,85 % al año 30, pero el documento de garantía europeo de enero de 2025 que se pudo leer fija 0,40 % anual y 87,4 % para la familia Tiger Neo y no menciona este modelo, por lo que conviene pedir por escrito las condiciones aplicables. Los distribuidores indican 15 o 25 años de garantía de producto según la fuente. En España se vende por unos 90,75 € con IVA en tienda online (unos 0,19 €/Wp).",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.jinkosolar.com/en/site/newsdetail/2258",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 475,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Variante JKM475N, STC; tolerancia 0/+3 %."
+    },
+    "gama_potencias_wp": {
+      "valor": "460–485",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "La nota de prensa de Jinko habla de hasta 495 W para la gama doméstica Tiger Neo 3.0, pero esta ficha europea llega a 485 W."
+    },
+    "eficiencia_pct": {
+      "valor": 23.77,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Variante 475 W; 24,27 % en la de 485 W."
+    },
+    "tecnologia_celula": {
+      "valor": "TOPCon tipo n",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "tipo_celula": {
+      "valor": "monocristalino",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "num_celulas": {
+      "valor": 192,
+      "unidad": "células (48×4)",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Cortes de célula más pequeños que la media célula clásica."
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Monofacial pese a tener vidrio trasero; existe una variante bifacial (BDV) que no es la descrita."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No aplica: monofacial. La nota de prensa cita hasta un 85 % en la versión bifacial."
+    },
+    "vidrio": {
+      "valor": "doble: 2,0 mm frontal antirreflejo + 2,0 mm trasero termoendurecido",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "marco": {
+      "valor": "aluminio anodizado (marco negro en la versión BFR)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "medidas_mm": {
+      "valor": "1762 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "peso_kg": {
+      "valor": 24.4,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Más pesado que los módulos de vidrio simple de tamaño similar (≈21 kg)."
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.26,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,24 %/°C; Isc +0,046 %/°C."
+    },
+    "noct_o_nmot_c": {
+      "valor": null,
+      "unidad": "°C",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha europea no indica NOCT ni NMOT."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.35,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Discrepancia: el documento de garantía europeo REV.EN20250110 indica 0,40 %/año para la familia Tiger Neo (https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405)."
+    },
+    "voc_v": {
+      "valor": 36.42,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Variante 475 W, STC."
+    },
+    "isc_a": {
+      "valor": 15.86,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Variante 475 W, STC. Vmp 31,11 V; Imp 15,27 A."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V CC (IEC)",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Fusible máximo en serie 30 A; clase II; fuego clase C."
+    },
+    "carga_mecanica_pa": {
+      "valor": "6000 frontal / 4000 trasera",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Cargas estáticas."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "conector": {
+      "valor": "JK03M / JK03M2 (MC4-EVO2 bajo pedido, según disponibilidad)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "El conector propio de Jinko puede no ser compatible con MC4 de otros fabricantes: mezclar conectores de marcas distintas suele anular garantías."
+    },
+    "precio_por_wp_eur": {
+      "valor": 0.191,
+      "unidad": "€/Wp (IVA incluido)",
+      "origen": "calculado",
+      "fuente": "https://tienda-solar.es/en/solar-panels/2420-solar-panel-jinko-tiger-neo-iii-475w-jkm475n-48ql6-dv-double-glass",
+      "fecha": "2026-10-18",
+      "nota": "90,75 € / 475 Wp = 0,191 €/Wp. Oferta de tienda-solar.es con IVA, pedido mínimo 6 unidades, sin instalación."
+    },
+    "resultado_pvel": {
+      "valor": "No figura el 48QL6-DV en la lista visible de Top Performers 2026",
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": "https://scorecard.pvel.com/top-performers/",
+      "fecha": "2026-10-18",
+      "nota": "En la lista 2026 aparece la familia JKMxxxN-54HL4-B (monofacial con lámina, tipo n TOPCon) como Top Performer en la prueba LID+LETID, y varios modelos 72HL4 de gran formato; no el 48QL6-DV. Lectura parcial de la tabla."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ningún ensayo independiente publicado sobre el JKM475N-48QL6-DV. Krannich enlaza un certificado de resistencia al granizo en alemán que no se revisó (https://shop.krannich-solar.com/en-de/JKM480N-48QL6-DV-Tiger-Neo-III/0165079)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": null,
+      "fuente": "https://shop.krannich-solar.com/en-de/product-downloads/0165079/JKM480N-48QL6-DV-Tiger-Neo-III/Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Sin confirmar: la ficha de Krannich (2026) y el distribuidor Krannich indican 25 años; tienda-solar.es y photovoltaik4all indican 15 años; la nota de prensa de Jinko habla de «12 o 25 años» según producto. El documento de garantía europeo leído no incluye el 48QL6-DV."
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 88.85,
+      "primer_anio_pct": 99.0,
+      "lineal_anual_pct": 0.35,
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18",
+      "nota": "Según la ficha técnica. El documento de garantía europeo REV.EN20250110 da para Tiger Neo 99 % el año 1, 0,40 %/año y 87,40 % al año 30 (https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405): prevalece lo que diga el documento de garantía que entregue el vendedor."
+    },
+    "letra_pequena": [
+      "El documento de garantía europeo leído (REV.EN20250110, para contratos desde el 10 de enero de 2025) lista Tiger Neo 54HL4R y 48HL4M, pero no el 48QL6-DV; hay que pedir el documento aplicable a este modelo. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "La garantía empieza 180 días después de la fecha de fabricación (codificada en el número de serie) o en la entrega al comprador, lo que ocurra antes. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "Solo válida en países europeos y si los módulos permanecen en la región de venta original; excluye canales no autorizados y falsificaciones. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "El cliente paga desmontaje, reembalaje, reinstalación y eliminación, y los ensayos si no confirman el defecto; Jinko paga el envío de los repuestos. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "Aviso en 30 días a través de cs.jinkosolar.com, con números de serie y prueba de compra; Jinko puede exigir ensayo en laboratorio independiente (TÜV Rheinland, TÜV SÜD…). Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "Excluye entornos marinos y corrosivos y plataformas móviles. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "Si el modelo deja de fabricarse, Jinko entrega el sustituto más parecido disponible; no se dice nada sobre quiebra. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405"
+    ],
+    "quien_responde": "El fabricante (Jinko Solar Co., Ltd.); la ley aplicable es la del contrato de compraventa. No se menciona seguro de respaldo ni qué ocurre si la empresa cesa. Frente al consumidor en España responde también el vendedor."
+  },
+  "empresa": {
+    "razon_social": "Jinko Solar Co., Ltd. (filial de JinkoSolar Holding Co., Ltd.)",
+    "pais_sede": "China (Shangrao, Jiangxi; sede operativa en Shanghái)",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://www.jinkosolar.com",
+    "fabricante_celulas": "JinkoSolar (células TOPCon propias, según la marca); el informe Sheffield Hallam señala ~14,6 GW de células compradas a proveedores no identificados en 2022",
+    "pais_fabricacion": "No especificado en la ficha",
+    "fabricas_conocidas": [
+      "China (Sichuan, Jiangxi, entre otras) y Vietnam, según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ],
+    "notas": [
+      "En julio de 2022 fuentes del sector citadas por pv magazine USA atribuyeron a JinkoSolar el primer envío retenido por la aduana de EE. UU. bajo la ley UFLPA (trabajo forzoso); no fue confirmado oficialmente. Fuente: http://pv-magazine-usa.com/2022/07/01/reports-reveal-which-manufacturer-is-believed-to-have-product-seized-under-uflpa/",
+      "Según Reuters (noviembre de 2022), los productos solares retenidos bajo la UFLPA entre junio y octubre de 2022 eran principalmente de LONGi, Trina y JinkoSolar; JinkoSolar dijo colaborar con la CBP. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "El informe «Over-Exposed» (Sheffield Hallam, 2023) clasifica la exposición de JinkoSolar a la región uigur como «alta» en sus tres cadenas de suministro y señala que no pudo confirmar la venta anunciada de su planta de lingotes en Xinjiang. Evaluación de riesgo, no constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "Litigio global de patentes con LONGi (TOPCon / contacto trasero), cerrado en septiembre de 2025 con licencias cruzadas. Fuente: https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal",
+      "En Australia, Jinko Solar Australia retiró en enero/febrero de 2024 el inversor híbrido SunTank JKS-5HLVS-ABI (no un panel) porque el enchufe de la salida de emergencia podía retirarse sin herramientas y dejar terminales con tensión. Fuente: https://worksafe.nt.gov.au/forms-and-resources/safety-alerts/product-safety-recall-jinko-solar-australia-holdings-co.-pty-ltd-suntank-hybrid-inverter"
+    ],
+    "fuentes": [
+      "https://www.jinkosolar.com/en/site/newsdetail/2258",
+      "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "http://pv-magazine-usa.com/2022/07/01/reports-reveal-which-manufacturer-is-believed-to-have-product-seized-under-uflpa/",
+      "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal",
+      "https://worksafe.nt.gov.au/forms-and-resources/safety-alerts/product-safety-recall-jinko-solar-australia-holdings-co.-pty-ltd-suntank-hybrid-inverter",
+      "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "No especificado en la ficha",
+    "fabrica": null,
+    "materiales_principales": [
+      "silicio monocristalino tipo n",
+      "vidrio de 2,0 mm (dos láminas)",
+      "marco de aluminio anodizado",
+      "caja de conexiones IP68"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado vidrio-vidrio, no reparable por el usuario. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405"
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215:2021",
+      "emisor": null,
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730:2023",
+      "emisor": null,
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61701 (niebla salina), IEC 62716 (amoniaco), IEC 60068, IEC 62804 (PID)",
+      "emisor": null,
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "ISO 9001:2015, ISO 14001:2015, ISO 45001:2018",
+      "emisor": null,
+      "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "JKM460-485N-48QL6-DV-F1-EU, copia de photovoltaik4all.de."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://shop.krannich-solar.com/en-de/product-downloads/0165079/JKM480N-48QL6-DV-Tiger-Neo-III/Datasheet-EN.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Código JKM460-485N-48QL6-DV-F4C2-EN (© 2026), copia de Krannich."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Limited Warranty REV.EN20250110 – Linear – Monofacial module for EU; no lista el 48QL6-DV."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "World's most powerful modules of up to 670 W … Neo DG reaches 495 W",
+      "donde": "https://www.jinkosolar.com/en/site/newsdetail/2258",
+      "veredicto": "matizable",
+      "explicacion": "Los 670 W son del formato de planta solar; para tejado Jinko anunció hasta 495 W, pero la ficha europea del 48QL6-DV llega a 485 W. «El más potente del mundo» es una afirmación de marketing en la fecha del anuncio, no verificable a largo plazo.",
+      "fuentes": [
+        "https://www.jinkosolar.com/en/site/newsdetail/2258",
+        "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Up to 24.8% power conversion efficiency",
+      "donde": "https://www.jinkosolar.com/en/site/newsdetail/2258",
+      "veredicto": "matizable",
+      "explicacion": "La ficha europea del módulo doméstico 48QL6-DV da un máximo del 24,27 % (485 W) y 23,77 % en la variante de 475 W.",
+      "fuentes": [
+        "https://www.jinkosolar.com/en/site/newsdetail/2258",
+        "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Linear power warranty over 30 years: 1% first year, 0.35% annual degradation",
+      "donde": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "veredicto": "matizable",
+      "explicacion": "Es lo que dice la ficha; la nota de prensa de la gama habla de 0,4 % anual y el documento de garantía europeo leído fija 0,40 %/año y 87,4 % al año 30 para Tiger Neo. Lo vinculante es el documento de garantía.",
+      "fuentes": [
+        "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+        "https://www.jinkosolar.com/en/site/newsdetail/2258",
+        "https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Advanced metallization and iterated module encapsulation deliver superior resistance to PID, LID / LeTID, and UV degradation",
+      "donde": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+      "veredicto": "sin pruebas",
+      "explicacion": "No hay ensayo independiente publicado para este modelo. Kiwa PVEL 2025 señala la degradación por UV (UVID) como problema general del sector, y en 2026 sí lista como Top Performer en LID+LETID otra familia de Jinko (54HL4-B), no esta.",
+      "fuentes": [
+        "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+        "https://www.kiwa.com/en-de/insights/stories/inside-kiwa-pvels-2025-pv-module-reliability-scorecard/",
+        "https://scorecard.pvel.com/top-performers/"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada de paneles JinkoSolar. Sí existe una retirada en Australia (2024) de un inversor híbrido de la marca (SunTank JKS-5HLVS-ABI, https://www.productsafety.gov.au/recalls/jinko-solar-australia-holdings-co-pty-ltd-%E2%80%94-suntank-hybrid-inverter-jks-5hlvs-abi), que no afecta a este panel y se recoge en las notas de empresa. Ninguna retirada conocida del panel a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "Tienda Solar (tienda-solar.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/solar-panels/2420-solar-panel-jinko-tiger-neo-iii-475w-jkm475n-48ql6-dv-double-glass",
+      "precio_eur": 90.75,
+      "iva_incluido": true,
+      "unidad": "por módulo (JKM475N-48QL6-DV)",
+      "incluye_instalacion": false,
+      "envio": "No detallado",
+      "stock": "No indicado; pedido mínimo 6 unidades",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "75,00 € sin IVA. La tienda describe el módulo como monofacial."
+    },
+    {
+      "distribuidor": "photovoltaik4all",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.photovoltaik4all.de/pv4all-netz/solarmodule/jinko-solar/jinko-tiger-neo-3-jkm475n-48ql6-dv-475wp-bfr-dg",
+      "precio_eur": 86.0,
+      "iva_incluido": false,
+      "unidad": "por módulo (475 W, marco negro)",
+      "incluye_instalacion": false,
+      "envio": "Por agencia de transporte",
+      "stock": "Disponible de inmediato",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio con IVA 0 % alemán para instalaciones FV domésticas en Alemania; no aplicable a España. Descuentos del 3 % desde 10 uds. y 5 % desde 20."
+    },
+    {
+      "distribuidor": "Krannich Solar",
+      "tipo": "mayorista",
+      "pais": "Alemania",
+      "url": "https://shop.krannich-solar.com/en-de/JKM480N-48QL6-DV-Tiger-Neo-III/0165079",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo (JKM480N-48QL6-DV)",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "Fecha de envío no determinada",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio solo bajo petición (profesionales)."
+    }
+  ],
+  "compatibles": [
+    "Inversores de string y microinversores con entrada de hasta 1500 V CC y corriente de entrada ≥16 A por string (Isc 15,86 A)."
+  ],
+  "pendiente": [
+    "Documento de garantía oficial que cubra el 48QL6-DV (años de producto: 15 o 25; degradación: 0,35 o 0,40 %/año).",
+    "Confirmar si en España se vende más el Tiger Neo 3.0 48QL6 o el Tiger Neo 54HL4R (este último sigue en catálogo de varios distribuidores).",
+    "Revisar el certificado de granizo enlazado por Krannich.",
+    "Razón social exacta de la entidad que emite la garantía en Europa, año de fundación y cotización (NYSE / bolsa de Shanghái) con fuente.",
+    "País de fabricación de los módulos vendidos en España.",
+    "GTIN/EAN."
+  ]
+}

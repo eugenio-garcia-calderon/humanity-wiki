@@ -8960,6 +8960,24 @@ en mis páginas como proyecto pendiente».
 - Sólo en el HTML del servidor, leído como un anónimo. La lectura se deja en la página (sin salir en `window.__SITIO__`) y el bloque «Dónde comprarlo» la reutiliza: una sola lectura de la tabla de ofertas por visita.
 - Las migas de pan apuntan a la portada con `{{inicio}}` cuando la ficha cuelga de ella (W2, #603): en un dominio propio la portada es `/`, no su slug.
 
+### 2026-10-18 — Bloque «Contenido de un tema» (Humanidad Wiki, fase 1) (prog8)
+- Nuevo bloque para cualquier página: todo lo publicado sobre un tema (páginas, bases de datos, publicaciones, carpetas, esquemas, personas y contenido de fuera), por secciones, con «Ver más» y filtro por subtema. Lee lo mismo que la página de contenido de cada tema.
+- En el bloque se elige el tema, el título, cuántas tarjetas por sección y qué secciones se ven.
+
+
+### 2026-10-18 — Los datos de producto y el programa que los carga (Wikiproducts W3a)
+- `scripts/wikiproducts/datos/portatil/`: 58 productos portátiles investigados (13 powerbanks, 10 estaciones de energía, 17 paneles solares portátiles, 18 luces solares), con 129 afirmaciones publicitarias con veredicto, 11 retiradas de seguridad y 77 ofertas. Cada dato lleva fuente, fecha y naturaleza (`declarado`, `medido`, `calculado`, `no_publicado`). Junto a `datos/domestico/` (W3b).
+- `scripts/wikiproducts/cargar.mjs` los escribe por `/api/v1` en las tablas de `crear-esquema.mjs` (que ejecuta antes si faltan): valores, procedencia por celda, marca, afirmaciones y retiradas enlazadas, ofertas con «sin acuerdo» como comisión vacía, y las direcciones `/subcategoria/marca-modelo` al final. Reconoce cada fila por su nombre: repetirlo sólo escribe lo que cambió y nunca borra. `--seco` lo comprueba sin servidor.
+- Probado en la copia local (`local.sh`): 621 filas sin fallos; la segunda carga, 0 cambios.
+- Un importe decimal se envía con coma («0,138»): el tipo «moneda» del servidor lee «0.138» como 138 (punto de millar), también cuando llega como número por la API.
+- Un 404 de verdad también en los dominios propios (SEO R16): `midominio.com/loquesea` sigue enseñando la portada, como se decidió el 2026-08-22, pero contesta 404 con `noindex`, así que los buscadores ya no la guardan como una copia de la portada. `/buscar` y las fichas siguen igual.
+
+### 2026-10-18 — Plantilla «Humanidad Wiki» (Humanidad Wiki, fase 2) (prog8)
+- Nueva página `/plantillas/humanidad-wiki` con el botón «Crear en mi perfil»: crea, con la sesión de quien la pulsa, una página principal «Humanidad Wiki» con el menú de temas y una subpágina por cada tema con su bloque «Contenido de un tema». Nace privada; es una página normal de Wiki Creator que se puede cambiar y replicar.
+- El bloque «Menú de temas», dentro de una web publicada, abre las páginas propias por su dirección pública, que hereda la visibilidad de la página madre.
+
+### 2026-10-18 — "Dónde comprarlo" visible to visitors (Wikiproducts W5 follow-up)
+- The Offers block was empty for anyone not signed in: the offers table is never embedded in a page, so it never inherited a published page's visibility. Now whoever can see the product sheet sees that sheet's offers, provided the offers table belongs to the same owner as the products table. Someone else's table pointing at a public sheet does not get to advertise on it, and the owner's own table is picked first. Test: `node scripts/wikiproducts/probar-ofertas-anonimo.mjs` against the local copy.
 ### 2026-10-18 — Un número con decimales ya no se guarda mil veces mayor (tablas, Wikiproducts W1)
 - Un precio enviado como número por la API (`0.138`) se pasaba a texto y la regla del punto de millar español lo leía como «138». Ahora un número llega tal cual a las columnas de precio y de porcentaje (la de número ya lo hacía).
 - En texto, un punto con un cero delante ya no cuenta como millar: «0.138» es 0,138. «120.000» sigue siendo ciento veinte mil.
