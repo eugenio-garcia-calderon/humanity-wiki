@@ -77,5 +77,26 @@ export async function comprimirImagen(f: File, maxLado = 2000, calidad = 0.82): 
   return new File([blob], otroNombre(f.name || 'imagen', ext), { type: blob.type });
 }
 
+/** (2026-10-18, Eugenio) «Una imagen de 5 MB la deja en 3: que quede en menos
+ *  de un mega.» Lo que pesa como mucho una imagen que se sube. */
+export const OBJETIVO_IMAGEN = 950 * 1024;
+
+/**
+ * Comprime por pasos hasta quedar por debajo de `objetivo`: primero baja la
+ * calidad (no se nota hasta ~0,7) y después el tamaño. Una foto de móvil de
+ * 5 MB sale en la primera o la segunda vuelta, a 2000 px y calidad 0,8.
+ */
+export async function comprimirHasta(f: File, objetivo = OBJETIVO_IMAGEN, maxLado = 2000): Promise<File> {
+  if (f.size <= objetivo) return f;
+  const pasos: Array<[number, number]> = [[maxLado, 0.82], [maxLado, 0.72], [Math.min(maxLado, 1600), 0.72], [Math.min(maxLado, 1280), 0.7], [Math.min(maxLado, 1024), 0.65]];
+  let mejor = f;
+  for (const [lado, calidad] of pasos) {
+    const c = await comprimirImagen(f, lado, calidad);
+    if (c.size < mejor.size) mejor = c;
+    if (mejor.size <= objetivo) break;
+  }
+  return mejor;
+}
+
 export const tamanoLegible = (bytes: number) =>
   bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1).replace('.', ',')} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;

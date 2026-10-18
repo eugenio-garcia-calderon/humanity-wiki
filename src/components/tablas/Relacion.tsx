@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Check, Plus, Search, X, Loader2, FileText } from 'lucide-react';
 import { useSitio } from '../sitio/ContextoSitio';
@@ -88,6 +89,8 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
   const [q, setQ] = useState('');
   const [guardando, setGuardando] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
+  const hoja = useRef<HTMLDivElement>(null);
+  const [donde, setDonde] = useState<{ left: number; top?: number; bottom?: number } | null>(null);
   const destino = columna.config?.tabla_destino as string | undefined;
   const varios = !!columna.config?.varios;
   const elegidos = apuntados.map(a => a.id);
@@ -109,9 +112,34 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
 
   useEffect(() => {
     if (!abierto) return;
-    const fuera = (e: MouseEvent) => { if (caja.current && !caja.current.contains(e.target as Node)) setAbierto(false); };
+    const fuera = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (caja.current?.contains(t) || hoja.current?.contains(t)) return;
+      setAbierto(false);
+    };
     document.addEventListener('mousedown', fuera);
     return () => document.removeEventListener('mousedown', fuera);
+  }, [abierto]);
+
+  // EL DESPLEGABLE VA EN SU PROPIA CAPA (2026-10-18, Eugenio: «la imagen que
+  // está justo debajo oculta el selector»). Dentro de la celda, cualquier cosa
+  // de más abajo con su propia capa —una imagen, una tarjeta— o un contenedor
+  // que recorta lo tapaban. Ahora se pinta encima de todo, pegado a la celda,
+  // y se abre hacia arriba si abajo no cabe.
+  useLayoutEffect(() => {
+    if (!abierto) { setDonde(null); return; }
+    const colocar = () => {
+      const r = caja.current?.getBoundingClientRect();
+      if (!r) return;
+      const left = Math.max(8, Math.min(r.left, window.innerWidth - 264));
+      setDonde(window.innerHeight - r.bottom < 320 && r.top > 320
+        ? { left, bottom: window.innerHeight - r.top + 4 }
+        : { left, top: r.bottom + 4 });
+    };
+    colocar();
+    window.addEventListener('scroll', colocar, true);
+    window.addEventListener('resize', colocar);
+    return () => { window.removeEventListener('scroll', colocar, true); window.removeEventListener('resize', colocar); };
   }, [abierto]);
 
   const alternar = async (id: string) => {
@@ -164,9 +192,19 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
         {!apuntados.length && editable && (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300"><Plus className="w-3 h-3" /> Enlazar</span>
         )}
+        {/* AÑADIR OTRA (2026-10-18, Eugenio): con fichas ya puestas no se veía
+            dónde pulsar para enlazar una más. */}
+        {!!apuntados.length && editable && conImagen && (
+          <button type="button" onClick={e => { e.stopPropagation(); setAbierto(v => !v); }}
+            title={varios ? 'Buscar y enlazar otra entrada' : 'Cambiar la entrada enlazada'} aria-label={varios ? `Enlazar otra entrada en ${columna.nombre}` : `Cambiar ${columna.nombre}`}
+            className="grid h-[54px] w-[54px] shrink-0 place-items-center rounded-xl border border-dashed border-slate-300 text-slate-400 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700">
+            <Plus className="h-4 w-4" />
+          </button>
+        )}
       </div>
-      {abierto && (
-        <div className="absolute left-0 top-full z-30 mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5">
+      {abierto && donde && createPortal(
+        <div ref={hoja} style={donde} onClick={e => e.stopPropagation()}
+          className="fixed z-[10050] w-64 bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5">
           {!destino ? (
             <p className="p-2 text-xs text-slate-500">Esta columna no sabe a qué base de datos apunta. Edítala y elige una.</p>
           ) : fallo && !opciones ? (
@@ -214,7 +252,8 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
               )}
             </>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
