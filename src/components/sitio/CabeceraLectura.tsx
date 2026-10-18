@@ -34,7 +34,7 @@ export function MarcoLectura({ pagina, rutas, children }: {
   const sitio = s?.config ? completarSitio(s.config) : null;
   const conMarco = !!sitio && (sitio.menu.activo || sitio.pie.activo);
   const cuerpo = (
-    <div className={conMarco ? 'bg-white' : 'min-h-screen bg-white'}>
+    <div className={cn('sitio-lectura', conMarco ? 'bg-white' : 'min-h-screen bg-white')}>
       {/* Ancho, letra y tamaño que eligió el autor (2026-10-06, #29). Sin
           elegir, ancho completo y letra de siempre. */}
       <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-[18px] sm:pt-5', anchoDePagina(pagina?.config), clasesDePagina(pagina?.config))}>
@@ -119,6 +119,8 @@ export type DatosPagina = {
   updated_at?: string;
   autor?: { handle?: string; nombre?: string; avatar?: string | null };
   padre?: { id: string; titulo: string; slug: string | null; handle: string } | null;
+  /** El camino desde la portada del sitio hasta la madre, de arriba abajo. */
+  migas?: { id: string; titulo: string; slug: string | null; handle: string }[];
   /** El menú y el pie del sitio, de la página más cercana por encima que los
    *  tenga (ella misma incluida). Lo pone el servidor. */
   sitio?: { config: any; raizId: string; titulo: string; icono: string | null } | null;

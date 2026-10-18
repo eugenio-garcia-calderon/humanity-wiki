@@ -76,3 +76,22 @@ html, body { overscroll-behavior-x: none; }
 /* Menciones y fórmulas mientras se escriben (2026-10-06). */
 .md-mencion { padding: 0 0.25rem; border-radius: 0.25rem; background: rgb(241 245 249); color: rgb(30 41 59); font-weight: 500; }
 .md-formula { font-family: ui-monospace, monospace; font-size: 0.9em; color: rgb(71 85 105); }
+
+/* LO QUE SE LEE EN UN SITIO PUBLICADO (2026-10-18, Wikiproducts W2, ronda 1
+   del evaluador): 124–162 elementos por ficha no llegaban al contraste mínimo
+   (WCAG AA, 4,5:1) y el texto mediano era de 14 px. Dentro del contenido de un
+   sitio publicado (`MarcoLectura`, no el editor ni el menú del autor):
+     · los grises claros (300/400, 2,6:1 sobre blanco) pasan a slate-600 (7,5:1),
+       y el azul y el verde 600 de enlaces y sellos (3,5–4,1:1) a su 700;
+     · nada por debajo de 12 px;
+     · el texto corrido (párrafos, listas, celdas) es de 16 px como mínimo. */
+.sitio-lectura :is(.text-slate-300, .text-slate-400, .text-gray-300, .text-gray-400, .text-zinc-400, .text-neutral-400) {
+  color: var(--color-slate-600, rgb(71 85 105));
+}
+.sitio-lectura :is(.text-sky-500, .text-sky-600) { color: var(--color-sky-700, rgb(0 105 168)); }
+.sitio-lectura :is(.text-emerald-500, .text-emerald-600) { color: var(--color-emerald-700, rgb(0 122 85)); }
+.sitio-lectura :is(.text-\[9px\], .text-\[10px\], .text-\[11px\]) { font-size: 0.75rem; }
+.sitio-lectura :is(.placeholder\:text-slate-400, .placeholder\:text-slate-300)::placeholder { color: var(--color-slate-500, rgb(100 116 139)); }
+.sitio-lectura .text-\[15px\] { font-size: 1rem; }
+.sitio-lectura :is(p, li, dd, dt, td, th, label, blockquote).text-sm { font-size: 1rem; line-height: 1.5rem; }
+

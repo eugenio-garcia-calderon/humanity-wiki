@@ -9092,6 +9092,15 @@ en mis páginas como proyecto pendiente».
 - `comunidad` cells now carry `umbral`; `atencionDistribuidores()` returns note, votes and threshold (the old `notaAtencionDistribuidores` stays as a wrapper).
 - Site members (signed in through a site's «Entrar») can send «Sugerir una corrección»: `POST /api/report` is a member route now, and the form no longer pre-checks `/api/auth/me`, which never sees a site member.
 - Rating block and the shop's customer-service line: body text 16 px, labels and counts 14 px.
+### 2026-10-18 — Buscador tolerante, página de error, miga de pan, secciones y menú por la API (Wikiproducts W2, ronda 1 del evaluador)
+- El buscador de un sitio busca cada palabra por separado (en cualquier orden y parte de la página), sin plural, con sinónimos («placa» encuentra los paneles, «batería externa» los powerbanks) y corrigiendo erratas contra las palabras de los títulos del sitio («powerbak» → «powerbank»; dice «Mostrando resultados de…»). Sin resultados, ofrece las secciones del sitio. Cada resultado enlaza a la dirección legible de la ficha, no a `/p/…`.
+- Una dirección que no existe en un dominio propio dice «Esta página no existe», con el buscador, las secciones y «Ir al inicio», dentro del menú y el pie del sitio. Antes pintaba la portada (el servidor ya contestaba 404 y `noindex`).
+- Miga de pan entera en las páginas de un sitio: Inicio › Energía portátil › Powerbanks › ficha, en vez de sólo «← Powerbanks».
+- Bloque nuevo «Secciones del sitio»: las páginas del sitio con catálogo de fichas, cada una con una imagen y cuántos productos tiene; también en el HTML del servidor. `enlazar-sitio.mjs` lo pone en la portada de Wikiproducts.
+- En el teléfono, la caja de buscar del menú va a la vista, en su fila bajo la barra, y no dentro de las tres rayas.
+- En el contenido de un sitio publicado, los grises claros pasan a un gris que cumple el contraste mínimo y el texto corrido es de 16 px.
+- API: `GET /api/v1/pages/:id/site`, `POST /api/v1/pages/:id/site/menu/links` y `DELETE …/links/:linkId` leen y cambian el menú de un sitio, sólo con destinos dentro del sitio. `enlazar-sitio.mjs` añade así «Expertos» al menú de Wikiproducts en cuanto exista la página «Consultar a un experto».
+
 
 ### 2026-10-18 — Wikiproducts: «Consultar a un experto» en cada ficha y en su propia página (W6)
 - El evaluador no encontró la palabra «experto» en todo el sitio: el bloque de reservar existía pero nada lo ofrecía.

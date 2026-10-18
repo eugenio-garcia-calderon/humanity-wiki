@@ -10,6 +10,7 @@ import { registrarHistorial } from './historial';
 import { markdownABloques, bloquesAMarkdown, nuevoIdBloque, esBloqueDatos } from '../utils/bloques';
 import { guardarProcedencia, ponerPlantilla } from './bd/plantillaFicha';
 import { expertosPorApi } from './expertos';
+import { registrarApiSitio } from './apiSitio';
 import { guardarArchivo } from './uploads';
 
 // ============================================================================
@@ -674,6 +675,9 @@ export function registrarApiPublica(app: Express, db: any) {
       res.json({ id: String(req.params.rowId), database_id: t.id, updated: Object.keys(m.celdas).length, provenance_updated: Object.keys(pr.mapa).length });
     } catch (e: any) { console.error('v1 editar fila:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
+
+  // El menú de un sitio (W2, 2026-10-18): en su propio fichero.
+  registrarApiSitio(app, db);
 
   // Lo que no existe bajo /api/v1 es un 404 de la API, no de la web.
   app.all('/api/v1/*', (_req: Request, res: Response) => res.status(404).json({ error: 'Ese endpoint no existe. Mira /desarrolladores.' }));
