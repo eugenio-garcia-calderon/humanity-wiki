@@ -8901,3 +8901,6 @@ en mis páginas como proyecto pendiente».
 - Para buscadores: la ficha sale entera en el HTML del servidor, con título «Marca Modelo: datos, precio y opiniones», datos estructurados `Product` (con su dirección canónica, precio y, sólo si hay votos reales, nota), migas de pan, la descripción sacada del resumen del producto y `noindex` mientras le falte foto, resumen, 8 datos con fuente, una oferta o la fecha de revisión.
 - La API v1 crea bases de datos y columnas (`POST /api/v1/databases`, `POST /api/v1/databases/:id/columns`) y fija la forma de las direcciones de sus filas (`route`). `scripts/wikiproducts/crear-esquema.mjs` crea las 14 bases de datos de Wikiproducts (`esquema-bd.json`) sin repetir nada.
 - En el móvil, la burbuja de comentar de cada bloque ya no ensancha la página 16 px (salía por fuera de la columna y se podía arrastrar la página de lado). Ahora queda dentro de la columna en pantallas estrechas.
+
+### 2026-10-18 — Esquema de Wikiproducts: varias afirmaciones y retiradas por producto (Wikiproducts W1)
+- En las cinco bases de datos de productos, «Afirmaciones» y «Retiradas» admiten varios enlaces (antes sólo uno: la carga de datos fallaba con productos que tienen de 2 a 5). Las baterías domésticas tienen columna «Ruido» (dB, menos es mejor). `scripts/wikiproducts/esquema-bd.json`.

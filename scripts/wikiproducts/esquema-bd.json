@@ -747,7 +747,8 @@
             "clave": "afirmaciones",
             "ficha": "afirmaciones",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "afirmaciones"
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
           }
         },
         {
@@ -758,7 +759,8 @@
             "clave": "retiradas",
             "ficha": "retiradas",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "retiradas"
+            "tabla_destino_clave": "retiradas",
+            "varios": true
           }
         },
         {
@@ -1251,7 +1253,8 @@
             "clave": "afirmaciones",
             "ficha": "afirmaciones",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "afirmaciones"
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
           }
         },
         {
@@ -1262,7 +1265,8 @@
             "clave": "retiradas",
             "ficha": "retiradas",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "retiradas"
+            "tabla_destino_clave": "retiradas",
+            "varios": true
           }
         },
         {
@@ -1754,7 +1758,8 @@
             "clave": "afirmaciones",
             "ficha": "afirmaciones",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "afirmaciones"
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
           }
         },
         {
@@ -1765,7 +1770,8 @@
             "clave": "retiradas",
             "ficha": "retiradas",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "retiradas"
+            "tabla_destino_clave": "retiradas",
+            "varios": true
           }
         },
         {
@@ -2436,7 +2442,8 @@
             "clave": "afirmaciones",
             "ficha": "afirmaciones",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "afirmaciones"
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
           }
         },
         {
@@ -2447,7 +2454,8 @@
             "clave": "retiradas",
             "ficha": "retiradas",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "retiradas"
+            "tabla_destino_clave": "retiradas",
+            "varios": true
           }
         },
         {
@@ -2988,6 +2996,17 @@
           }
         },
         {
+          "clave": "ruido_db",
+          "nombre": "Ruido",
+          "tipo": "numero",
+          "config": {
+            "clave": "ruido_db",
+            "grupo": "tecnico",
+            "unidad": "dB",
+            "comparar": "menor"
+          }
+        },
+        {
           "clave": "garantia_producto_anios",
           "nombre": "Garantía de producto (años)",
           "tipo": "numero",
@@ -3128,7 +3147,8 @@
             "clave": "afirmaciones",
             "ficha": "afirmaciones",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "afirmaciones"
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
           }
         },
         {
@@ -3139,7 +3159,8 @@
             "clave": "retiradas",
             "ficha": "retiradas",
             "visibilidad": "nunca",
-            "tabla_destino_clave": "retiradas"
+            "tabla_destino_clave": "retiradas",
+            "varios": true
           }
         },
         {
