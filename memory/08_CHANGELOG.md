@@ -9098,3 +9098,6 @@ en mis páginas como proyecto pendiente».
 - `/pedido` (order tracking, `MiPedido`) now exists on the main domain and on site domains, not only on a shop subdomain. The WhatsApp texts that already linked `humanity.wiki/pedido?codigo=…` pointed at a route that did not exist there. Arriving with `?codigo=` and no session no longer shows a false «No hay ningún pedido con ese código y ese correo» before the e-mail is typed; the code is prefilled and the form waits.
 - Uses `enviarCorreo` (Resend). Without `RESEND_API_KEY` nothing is sent, the log says so, and the order and its queue are created as before.
 - Test: `scripts/wikiproducts/probar-correos-pedido.ts` (local only; intercepts the Resend call): two e-mails on payment, none on a repeated webhook, none and no failure without the key.
+
+### 2026-10-18 — «Dónde comprarlo» readable text sizes (Wikiproducts W5)
+- The offers card had 9 texts at 11–12 px. Body text (summary, «sin precio» reason, test-mode and «muy pronto» notes, empty and error states, shop name) is now 16 px; labels and secondary text (customer-service line, shipping, installation, commission, ordering note, link buttons) 14 px. Measured in the browser at 390 and 1280 px: only 14, 16, 18 and 20 px remain, no horizontal scroll. The cart button inside a card (`BotonCompra`, shared with tables) keeps its own sizes.
