@@ -3385,7 +3385,19 @@
           "nota": "Método: búsqueda web por marca + «recall»/«solar panel»; el buscador del organismo no se pudo consultar directamente (bloqueo de robots o carga por JavaScript), así que el resultado depende del índice del buscador."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "anker-tienda-eu",
+          "url": "https://eu.anker.com/products/a2421",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha de la tienda oficial europea de Anker para el A2421. La página sólo muestra «Price Loading» y no dice si hay stock; el único aviso de envío es de 2024 («Orders placed from April 1 onwards will be shipped on May 1, 2024»), así que la ficha puede estar abandonada. Sin precio legible."
+        }
+      ],
       "pendiente": [
         "Precio en tienda española o europea (la tienda oficial mostraba «Price Loading»)",
         "EAN",

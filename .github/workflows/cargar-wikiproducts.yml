@@ -16,6 +16,12 @@ name: Cargar Wikiproducts
 
 on:
   workflow_dispatch:
+    inputs:
+      fotos:
+        description: "Cargar también las fotos de Commons (sólo cuando la ficha enseñe el crédito)"
+        type: choice
+        options: ["no", "si"]
+        default: "no"
 
 concurrency:
   group: deploy-prod
@@ -28,7 +34,10 @@ jobs:
     steps:
       - name: Cargar por SSH
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          WP_FOTOS: ${{ inputs.fotos }}
         with:
+          envs: WP_FOTOS
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}

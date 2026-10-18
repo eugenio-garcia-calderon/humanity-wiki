@@ -258,8 +258,10 @@ function filaProducto(p) {
     ean: (p.ean || []).map(e => e.valor).filter(Boolean).join(' ') || null,
     estado: ESTADOS[sinAcentos(p.estado || '')] || p.estado,
     anio_lanzamiento: p.anio_lanzamiento,
-    foto: p.foto?.url || p.imagen?.url || null,
-    foto_licencia: p.foto?.licencia || p.imagen?.licencia || null,
+    // Only a photo whose licence the server read from Commons (section 3b).
+    // A manufacturer's image URL in the data carries no licence: not loaded.
+    foto: fotoDe.get(p.id)?.url || null,
+    foto_licencia: fotoDe.get(p.id)?.credito || null,
     resumen: p.resumen,
     tipo: p._tipo,
     certificados: p.certificados,
@@ -278,6 +280,58 @@ function filaProducto(p) {
       retiradas: (p.retiradas || []).map(r => ({ tabla: 'retiradas', nombre: tituloRetirada(p, r) })),
     },
   };
+}
+
+// ── 3b. PHOTOS, ONLY WITH A FREE LICENCE (2026-10-18) ───────────────────────
+// `datos/fotos.json` names a Wikimedia Commons file per product. The licence is
+// not taken from the data: it is read here from the Commons API, and only CC0,
+// public domain, CC BY and CC BY-SA pass. The credit («Foto: author, licence,
+// Wikimedia Commons») goes to «Licencia de la foto», which BY and BY-SA require
+// to be shown. Off unless WP_FOTOS=si: the sheet has to print that credit
+// before a photo that needs it goes up.
+const FOTOS = process.env.WP_FOTOS === 'si';
+const LIBRE = /^(cc0|cc-?0|public domain|pd\b.*|cc[- ]by(-sa)?[- ]\d(\.\d)?(\s.*)?)$/i;
+const fotoDe = new Map();
+const fotosRechazadas = [];
+const rutaFotos = path.join(dir, 'datos', 'fotos.json');
+if (existsSync(rutaFotos)) {
+  const pedidas = Object.entries(leer(rutaFotos).fotos || {}).filter(([id]) => productos.some(p => p.id === id));
+  if (!FOTOS) console.log(`  (${pedidas.length} fotos de Commons en fotos.json; no se cargan sin WP_FOTOS=si)`);
+  else if (SECO) console.log(`  (seco: no se consulta Commons para ${pedidas.length} fotos)`);
+  else {
+    const plano = h => String(h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    for (let i = 0; i < pedidas.length; i += 40) {
+      const lote = pedidas.slice(i, i + 40);
+      const titulos = lote.map(([, f]) => `File:${f.commons}`);
+      const u = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&prop=imageinfo'
+        + '&iiprop=url|extmetadata|mime&iiurlwidth=800&titles=' + encodeURIComponent(titulos.join('|'));
+      let j;
+      try {
+        const r = await fetch(u, { headers: { 'User-Agent': 'Wikiproducts/1.0 (https://wikiproducts.humanity.wiki; carga de fotos)' } });
+        j = await r.json();
+      } catch (e) { for (const [id] of lote) fotosRechazadas.push(`${id}: Commons no responde (${e.message})`); continue; }
+      // Commons answers with the normalised title; map it back.
+      const normal = new Map((j.query?.normalized || []).map(n => [n.to, n.from]));
+      for (const pg of j.query?.pages || []) {
+        const pedido = normal.get(pg.title) || pg.title;
+        const par = lote.find(([, f]) => `File:${f.commons}` === pedido);
+        if (!par) continue;
+        const [id] = par;
+        const ii = pg.imageinfo?.[0];
+        const m = ii?.extmetadata || {};
+        const lic = plano(m.LicenseShortName?.value);
+        if (pg.missing || !ii) { fotosRechazadas.push(`${id}: el archivo no existe en Commons («${par[1].commons}»)`); continue; }
+        if (!/^image\//.test(ii.mime || '')) { fotosRechazadas.push(`${id}: no es una imagen (${ii.mime})`); continue; }
+        if (!LIBRE.test(lic)) { fotosRechazadas.push(`${id}: licencia «${lic || 'sin licencia'}» no admitida`); continue; }
+        const autor = corto(plano(m.Artist?.value) || 'autor desconocido', 120);
+        fotoDe.set(id, {
+          url: ii.thumburl || ii.url,
+          credito: `Foto: ${autor}, ${lic}, Wikimedia Commons — ${ii.descriptionurl}`,
+        });
+      }
+    }
+    console.log(`  Fotos de Commons: ${fotoDe.size} con licencia libre, ${fotosRechazadas.length} descartadas.`);
+  }
 }
 
 // In dependency order: what is pointed at goes first.
@@ -542,5 +596,6 @@ contar();
 if (sobran.length) { console.log(`\nFilas en el servidor que estos datos no tienen (no se tocan) (${sobran.length}):`); for (const s of sobran.slice(0, 20)) console.log(`  · ${s}`); }
 if (hecho.fallos.length) { console.log(`\nFallos (${hecho.fallos.length}):`); for (const f of hecho.fallos) console.log(`  ! ${f}`); }
 if (fallosRutas.length) { console.log('\nDirecciones sin recalcular (se calcularán al visitar cada ficha o el sitemap):'); for (const f of fallosRutas) console.log(`  ! ${f}`); }
+if (fotosRechazadas.length) { console.log(`\nFotos descartadas (${fotosRechazadas.length}):`); for (const x of fotosRechazadas) console.log(`  · ${x}`); }
 console.log(`\nHecho: ${hecho.creadas} filas nuevas, ${hecho.cambiadas} cambiadas, ${hecho.iguales} iguales; ${escrituras} escrituras; ${rutas} direcciones puestas al día.`);
 process.exit(hecho.fallos.length ? 1 : 0);
