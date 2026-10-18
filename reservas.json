@@ -83,12 +83,6 @@
       "ruta": "src/utils/subdominio.ts",
       "motivo": "W2: subdominio por sitio (3.9)",
       "desde": "2026-10-18T11:48:23.846Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "W2 entrada",
-      "desde": "2026-10-18T11:54:55.860Z"
     }
   ]
 }
