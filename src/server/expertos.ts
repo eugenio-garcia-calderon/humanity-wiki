@@ -10,6 +10,8 @@ import {
   sitioDeSoporte, esEquipo, clienteActual, clienteParaEscribir, dejarCookie, escribir, origenDe,
 } from './soporte.js';
 import { huecosLibres, limpiarDisponibilidad, zonaValida, reparto } from './expertosAgenda.js';
+import { registrarHtml, esc, enLinea } from './htmlBloques.js';
+import { sitioDePagina } from './sitios.js';
 
 // ============================================================================
 // CONSULTAS DE PAGO CON UN EXPERTO (2026-10-18, W6 de Wikiproducts)
@@ -218,7 +220,46 @@ export async function consultaCaducadaPorStripe(db: any, session: Stripe.Checkou
   `);
 }
 
+// ── EL BLOQUE EN EL HTML DEL SERVIDOR (requisito R1 del plan de SEO) ─────────
+// Lo que un buscador puede leer del bloque «Reservar experto»: quién es cada
+// experto, de qué sabe, cuánto dura y cuánto cuesta la consulta. Lo mismo que
+// enseña la ficha al leerla, nunca más (nada de cuentas ni correos: `publico`).
+// La agenda no se escribe: cambia cada minuto y la pinta React al llegar.
+const fmtPrecio = (c: number, moneda: string) => {
+  try { return (c / 100).toLocaleString('es-ES', { style: 'currency', currency: moneda || 'EUR' }); }
+  catch { return `${(c / 100).toFixed(2)} ${moneda || ''}`.trim(); }
+};
+
+function registrarHtmlExpertos() {
+  registrarHtml('experto', (b, ctx) => {
+    const d = b?.datos || {};
+    const todos: ReturnType<typeof publico>[] = ctx.extra.get('expertos') || [];
+    const ids: string[] = Array.isArray(d.expertos) ? d.expertos.map(String) : [];
+    const lista = ids.length ? todos.filter(e => ids.includes(e.id)) : todos;
+    const titulo = d.titulo ? `<h2>${esc(d.titulo)}</h2>` : '';
+    const intro = d.intro ? `<p>${enLinea(String(d.intro), ctx)}</p>` : '';
+    if (!lista.length) return titulo || intro ? `<section>${titulo}${intro}</section>` : '';
+    const fichas = lista.map(e => {
+      const precio = e.precioCentimos > 0 ? fmtPrecio(e.precioCentimos, e.moneda) : 'Gratis';
+      return `<li><h3>${esc(e.nombre)}</h3>`
+        + (e.especialidad ? `<p>${esc(e.especialidad)}</p>` : '')
+        + (e.bio ? `<p>${enLinea(e.bio, ctx)}</p>` : '')
+        + `<p>${esc(e.duracionMin)} min · ${esc(precio)}</p></li>`;
+    }).join('');
+    return `<section>${titulo}${intro}<ul>${fichas}</ul></section>`;
+  }, async (db, bloques, ctx) => {
+    if (!bloques.some(b => b?.tipo === 'experto') || !ctx.pagina?.id) return;
+    const raiz = (await sitioDePagina(db, String(ctx.pagina.id)))?.raizId || String(ctx.pagina.id);
+    const r = await db.execute(sql`
+      SELECT * FROM expertos WHERE raiz_id = ${raiz} AND archived_at IS NULL AND activo
+      ORDER BY orden, created_at LIMIT 50
+    `);
+    ctx.extra.set('expertos', (r.rows as any[]).map(publico));
+  });
+}
+
 export function registrarExpertos(app: Express, db: any) {
+  registrarHtmlExpertos();
   /** El experto de esta ruta, si existe y es de un sitio que quien llama puede ver. */
   const expertoVisible = async (req: Request, id: string) => {
     const e = (await db.execute(sql`SELECT * FROM expertos WHERE id = ${id} AND archived_at IS NULL`)).rows[0] as any;
