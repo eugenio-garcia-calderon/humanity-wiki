@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Upload, ClipboardPaste, Loader2, ImagePlus } from 'lucide-react';
+import { X, Upload, ClipboardPaste, Loader2, ImagePlus, Link2 } from 'lucide-react';
+import { reproductorPortada } from '../../utils/videoPortada';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -31,7 +32,7 @@ const esMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigat
 // what does work there instead of promising what does not.
 const esTactil = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
 
-export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pie }: {
+export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pie, conVideo = false, onEnlace }: {
   titulo: string;
   /** Devuelve un mensaje de error si no ha ido bien; si no, el diálogo se cierra. */
   onArchivo: (archivo: File) => Promise<string | void> | string | void;
@@ -40,7 +41,21 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
   children?: ReactNode;
   /** Lo que va al final (p. ej. «Quitar»). */
   pie?: ReactNode;
+  /** También vídeos (la portada): archivos de vídeo y enlaces de YouTube o Vimeo. */
+  conVideo?: boolean;
+  /** Con `conVideo`: lo que se hace con un enlace de vídeo pegado. */
+  onEnlace?: (url: string) => Promise<string | void> | string | void;
 }) {
+  const acepta = conVideo ? `${ACEPTA},video/*` : ACEPTA;
+  const vale = (f: File) => esImagen(f) || (conVideo && f.type.startsWith('video/'));
+  const [enlace, setEnlace] = useState('');
+  /** Un enlace de YouTube o Vimeo: se guarda tal cual, sin subir nada. */
+  const usarEnlace = async (url: string) => {
+    if (!reproductorPortada(url.trim())) { setError('Ese enlace no es de YouTube ni de Vimeo. Pega el enlace del vídeo.'); return; }
+    setError(null);
+    const fallo = await onEnlace?.(url.trim());
+    if (fallo) setError(fallo); else onCerrar();
+  };
   const [encima, setEncima] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +66,7 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
 
   const usar = async (f: File | null | undefined) => {
     if (!f) return;
-    if (!esImagen(f)) { setError('Eso no es una imagen. Prueba con un JPG, PNG, WebP o HEIC.'); return; }
+    if (!vale(f)) { setError(conVideo ? 'Eso no es una imagen ni un vídeo. Prueba con un JPG, PNG, MP4 o MOV.' : 'Eso no es una imagen. Prueba con un JPG, PNG, WebP o HEIC.'); return; }
     setError(null); setSubiendo(true);
     try {
       const fallo = await onArchivo(f);
@@ -71,10 +86,12 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
       e.stopImmediatePropagation();
       const datos = e.clipboardData;
       if (!datos) return;
-      const f = Array.from(datos.files).find(esImagen)
-        || Array.from(datos.items).find(i => i.kind === 'file' && i.type.startsWith('image/'))?.getAsFile();
+      const f = Array.from(datos.files).find(vale)
+        || Array.from(datos.items).find(i => i.kind === 'file' && (i.type.startsWith('image/') || (conVideo && i.type.startsWith('video/'))))?.getAsFile();
+      const texto = datos.getData('text/plain')?.trim();
       if (f) { e.preventDefault(); usar(f); }
-      else if (datos.types.includes('text/plain')) setError('En el portapapeles hay texto, no una imagen. Copia la imagen (no su enlace) y vuelve a pegar.');
+      else if (conVideo && texto && reproductorPortada(texto)) { e.preventDefault(); usarEnlace(texto); }
+      else if (datos.types.includes('text/plain')) setError(conVideo ? 'En el portapapeles hay texto, no una imagen ni un enlace de YouTube o Vimeo.' : 'En el portapapeles hay texto, no una imagen. Copia la imagen (no su enlace) y vuelve a pegar.');
     };
     const alTecla = (e: KeyboardEvent) => { if (e.key === 'Escape' && !subiendo) onCerrar(); };
     window.addEventListener('paste', alPegar, true);
@@ -112,7 +129,7 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
     onDragLeave: (e: React.DragEvent) => { e.stopPropagation(); profundidad.current = Math.max(0, profundidad.current - 1); if (!profundidad.current) setEncima(false); },
     onDrop: (e: React.DragEvent) => {
       e.preventDefault(); e.stopPropagation(); profundidad.current = 0; setEncima(false);
-      usar(Array.from(e.dataTransfer.files).find(esImagen) || e.dataTransfer.files[0]);
+      usar(Array.from(e.dataTransfer.files).find(vale) || e.dataTransfer.files[0]);
     },
   };
 
@@ -152,7 +169,7 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
                   </>
                 ) : (
                   <>
-                    <p className="text-sm font-bold text-slate-600">Arrastra una imagen aquí</p>
+                    <p className="text-sm font-bold text-slate-600">{conVideo ? 'Arrastra una imagen o un vídeo aquí' : 'Arrastra una imagen aquí'}</p>
                     <p className="text-xs text-slate-400">
                       o pégala con <kbd className="rounded border border-slate-200 bg-white px-1 font-sans">{esMac ? '⌘' : 'Ctrl'}</kbd>
                       {' + '}<kbd className="rounded border border-slate-200 bg-white px-1 font-sans">V</kbd>
@@ -163,7 +180,7 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
             )}
           </div>
 
-          <input ref={entrada} type="file" accept={ACEPTA} className="hidden"
+          <input ref={entrada} type="file" accept={acepta} className="hidden"
             onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; usar(f); }} />
           <button onClick={() => entrada.current?.click()} disabled={subiendo}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-black text-white shadow hover:bg-emerald-700 disabled:opacity-50">
@@ -173,6 +190,18 @@ export default function SoltarImagen({ titulo, onArchivo, onCerrar, children, pi
             className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
             <ClipboardPaste className="h-4 w-4" /> Pegar del portapapeles
           </button>
+
+          {conVideo && (
+            <form onSubmit={e => { e.preventDefault(); usarEnlace(enlace); }} className="flex gap-2">
+              <label className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-slate-200 px-3 focus-within:border-emerald-400">
+                <Link2 className="h-4 w-4 shrink-0 text-slate-400" />
+                <input value={enlace} onChange={e => setEnlace(e.target.value)} placeholder="Enlace de YouTube o Vimeo"
+                  aria-label="Enlace de un vídeo de YouTube o Vimeo" className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none" />
+              </label>
+              <button type="submit" disabled={!enlace.trim() || subiendo}
+                className="h-11 rounded-2xl bg-slate-900 px-4 text-sm font-bold text-white disabled:opacity-40">Usar</button>
+            </form>
+          )}
 
           {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs font-bold text-rose-700">{error}</p>}
           {pie}

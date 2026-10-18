@@ -8917,3 +8917,6 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — Esquema de Wikiproducts: varias afirmaciones y retiradas por producto (Wikiproducts W1)
 - En las cinco bases de datos de productos, «Afirmaciones» y «Retiradas» admiten varios enlaces (antes sólo uno: la carga de datos fallaba con productos que tienen de 2 a 5). Las baterías domésticas tienen columna «Ruido» (dB, menos es mejor). `scripts/wikiproducts/esquema-bd.json`.
+### 2026-10-18 — Portadas con vídeo (prog8)
+- La portada de una página puede ser un vídeo: pegando un enlace de YouTube o Vimeo (en el campo del diálogo o con ⌘V) o subiendo un archivo de vídeo, arrastrado o elegido. Se reproduce en silencio y en bucle, en el editor y en la página publicada.
+- Las imágenes siguen pasando por el recortador; los vídeos no. Una portada de vídeo no se usa como imagen de tarjeta en las galerías: ahí sale la primera imagen de la página.
