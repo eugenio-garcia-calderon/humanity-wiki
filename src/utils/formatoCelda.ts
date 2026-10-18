@@ -22,11 +22,15 @@ export type Columna = {
 const decimal = (n: number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
 const votosTexto = (n: number) => `${n} ${n === 1 ? 'voto' : 'votos'}`;
 
-/** «4,6 · 12 votos», or «Sin votos suficientes (2 votos)». Used by the cell
+/** «4,6 · 12 votos», or «Aún sin nota · 1 de 3 votos». Used by the cell
  *  and by anything that writes a rating as text. */
 export function textoComunidad(c: Celda): string {
   const votos = Number((c as any).votos) || 0;
-  if (c.estado !== 'ok') return votos ? `Sin votos suficientes (${votosTexto(votos)})` : 'Sin votos todavía';
+  if (c.estado !== 'ok') {
+    // Saying how far it is reads as «help get there», not as an empty sheet.
+    const umbral = Number((c as any).umbral) || 0;
+    return umbral ? `Aún sin nota · ${votos} de ${umbral} votos` : votos ? `Aún sin nota (${votosTexto(votos)})` : 'Aún sin votos';
+  }
   const media = (c as any).media;
   return `${decimal(typeof media === 'number' ? media : Number(c.valor))} · ${votosTexto(votos)}`;
 }

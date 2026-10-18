@@ -10,7 +10,7 @@ import { valoracionPrecargada } from '../precarga';
 // ============================================================================
 // One bar per criterion with the plain mean and the number of votes, and five
 // stars to vote. What is shown follows the server's rules (`bd/comunidad.ts`):
-// below 3 voters no number at all, only «aún sin votos suficientes»; the
+// below 3 voters no number at all, only how far it is («1 de 3 votos»); the
 // adjusted note that orders the gallery is explained, not displayed as THE
 // note, because 3,75 for three people who all gave 5 reads as a mistake.
 
@@ -113,18 +113,20 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h3 className="text-base font-black text-slate-900">Puntuación de la comunidad</h3>
-          <p className="text-xs text-slate-500">
-            {resumen ? `${resumen.ratingCount} ${resumen.ratingCount === 1 ? 'persona ha' : 'personas han'} puntuado` : 'Opiniones de quien lo usa, de 1 a 5'}
+          <p className="text-base text-slate-600">
+            {resumen
+              ? `${resumen.ratingCount} ${resumen.ratingCount === 1 ? 'persona ha' : 'personas han'} puntuado`
+              : `Todavía no tiene nota. Si lo has usado, puntúalo: con ${datos.metodo.umbral} votos por criterio aparece.`}
           </p>
         </div>
         {(general?.media ?? resumen?.ratingValue) != null ? (
           <p className="flex items-baseline gap-1">
             <Star className="h-5 w-5 self-center fill-amber-400 text-amber-400" />
             <span className="text-3xl font-black text-slate-900">{decimal((general?.media ?? resumen!.ratingValue) as number)}</span>
-            <span className="text-sm font-bold text-slate-400">/ 5</span>
+            <span className="text-sm font-bold text-slate-500">/ 5</span>
           </p>
         ) : (
-          <p className="text-sm font-bold text-slate-500">Aún sin votos suficientes</p>
+          <p className="text-base font-bold text-slate-500">Aún sin nota</p>
         )}
       </header>
 
@@ -133,38 +135,46 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
           const mio = mios[c.columna_id] || 0;
           const bloqueado = c.solo_compradores && !datos.comprador_verificado;
           return (
-            <li key={c.columna_id} className="grid grid-cols-1 gap-1 sm:grid-cols-[9rem_1fr_auto] sm:items-center sm:gap-3">
-              <span className="text-sm font-bold text-slate-700">{c.nombre}</span>
+            <li key={c.columna_id} className="grid grid-cols-1 gap-1 sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-3">
+              <span className="text-base font-bold text-slate-700">{c.nombre}</span>
               <div className="min-w-0">
                 {c.suficiente && c.media !== null ? (
                   <div className="flex items-center gap-2">
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100" aria-hidden>
                       <div className="h-full rounded-full bg-amber-400" style={{ width: `${(c.media / 5) * 100}%` }} />
                     </div>
-                    <span className="w-24 shrink-0 text-xs text-slate-600">
+                    <span className="w-32 shrink-0 text-sm text-slate-600">
                       <b className="text-slate-900">{decimal(c.media)}</b> · {votos(c.votos)}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs text-slate-500">
-                    {/* The count is shown even at zero: «sin votos suficientes»
-                        alone hides whether nobody voted or almost enough did. */}
-                    Aún sin votos suficientes ({votos(c.votos || 0)}, hacen falta {c.umbral})
-                  </span>
+                  // Not «no hay votos»: how far it is, so a new sheet reads as
+                  // an invitation and not as an empty page.
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1" aria-hidden>
+                      {Array.from({ length: c.umbral }, (_, i) => (
+                        <span key={i} className={cn('h-2 w-5 rounded-full', i < c.votos ? 'bg-amber-400' : 'bg-slate-200')} />
+                      ))}
+                    </div>
+                    <span className="text-sm text-slate-600">
+                      {c.votos} de {c.umbral} votos
+                      {c.umbral - c.votos > 0 && <span className="text-slate-500"> · {c.umbral - c.votos === 1 ? 'falta 1' : `faltan ${c.umbral - c.votos}`} para la nota</span>}
+                    </span>
+                  </div>
                 )}
                 {c.suficiente && c.verificados > 0 && c.media_verificados !== null && (
-                  <span className="mt-0.5 flex items-center gap-1 text-[11px] text-emerald-700">
+                  <span className="mt-0.5 flex items-center gap-1 text-sm text-emerald-700">
                     <BadgeCheck className="h-3.5 w-3.5" /> Compradores verificados: {decimal(c.media_verificados)} ({c.verificados})
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-1">
-                {datos.sesion && !bloqueado && <span className="text-[11px] font-bold text-slate-400">{mio ? 'Tu nota' : 'Puntúa'}</span>}
+                {datos.sesion && !bloqueado && <span className="text-sm font-bold text-slate-500">{mio ? 'Tu nota' : 'Puntúa'}</span>}
                 {guardando === c.columna_id && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />}
                 {datos.sesion && !bloqueado
                   ? <Estrellas nombre={c.nombre} valor={mio} deshabilitado={guardando !== null} onElegir={n => votar(c, n)} />
                   : bloqueado && datos.sesion
-                    ? <span className="text-[11px] text-slate-400">Lo puntúa quien compró aquí</span>
+                    ? <span className="text-sm text-slate-500">Lo puntúa quien compró aquí</span>
                     : null}
               </div>
             </li>
@@ -173,13 +183,25 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
       </ul>
 
       {!datos.sesion && (
-        <p className="mt-4 text-xs font-bold text-slate-500">Entra con tu cuenta para puntuar. Un voto por persona y criterio; puedes cambiarlo cuando quieras.</p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 p-3">
+          <p className="text-base text-slate-700">
+            <b>¿Lo has usado?</b> Tu nota ayuda a quien viene detrás. Un voto por persona y criterio; puedes cambiarlo cuando quieras.
+          </p>
+          <Button variant="primary" className="gap-1.5" onClick={() => {
+            // The site's account menu (`CuentaMenu`) opens its sign-in panel
+            // and marks the event as handled. Outside a site there is none.
+            const ev = new CustomEvent('sitio:entrar', { cancelable: true });
+            if (window.dispatchEvent(ev)) setAviso('Para puntuar necesitas entrar con tu cuenta en este sitio.');
+          }}>
+            <Star className="h-4 w-4" /> Entrar para puntuar
+          </Button>
+        </div>
       )}
-      {aviso && <p role="alert" className="mt-3 text-xs font-bold text-rose-600">{aviso}</p>}
+      {aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
 
-      <details className="mt-4 text-[11px] text-slate-500">
+      <details className="mt-4 text-sm text-slate-600">
         <summary className="flex cursor-pointer items-center gap-1 font-bold text-slate-500"><Info className="h-3.5 w-3.5" /> Cómo se calcula y cómo se ordena</summary>
-        <p className="mt-1.5 leading-relaxed">
+        <p className="mt-1.5 text-base leading-relaxed">
           Cada persona da una nota de 1 a 5 por criterio. Quien lo compró a través de la plataforma cuenta {datos.metodo.peso_verificado} veces.
           La nota que ves es la media de esos votos, y sólo se enseña con {datos.metodo.umbral} votos o más.
           Para ordenar usamos una media ajustada, que parte de un 3 con el peso de {datos.metodo.peso_previo} votos: así un producto con
