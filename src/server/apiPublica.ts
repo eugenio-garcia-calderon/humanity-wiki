@@ -282,7 +282,21 @@ export function registrarApiPublica(app: Express, db: any) {
   // is how a page joins a site) and the data blocks of `TIPOS_BLOQUE_DATOS`.
   // A leaked key cannot plant a web embed or a button on a published page.
   const VISTAS_BD = new Set(['galeria', 'carrusel', 'tabla']);
-  const bloqueDeEntrada = async (req: Request, paginaId: string, b: any): Promise<{ bloque: any } | { error: string; codigo: number }> => {
+  // (W3a, evaluator round 3) Plain text too: `{type: "text", markdown}` adds
+  // headings, paragraphs and list items where `after` says (a subcategory's
+  // buying guide goes right above its gallery). Only those block types: no
+  // embed, button, image or data block can come in this way. That is no
+  // wider than PATCH /pages/:id, which already takes a whole page of markdown.
+  const TEXTO_AÑADIBLE = new Set(['parrafo', 'titulo2', 'titulo3', 'lista', 'numerada', 'cita']);
+  const bloqueDeEntrada = async (req: Request, paginaId: string, b: any): Promise<{ bloque: any } | { bloques: any[] } | { error: string; codigo: number }> => {
+    if (b?.type === 'text') {
+      const md = String(b.markdown ?? '');
+      if (!md.trim() || md.length > 5000) return { error: '«markdown» tiene que ser un texto de 1 a 5000 caracteres.', codigo: 400 };
+      const bloques = markdownABloques(md);
+      const otro = bloques.find(x => !TEXTO_AÑADIBLE.has(x.tipo) || (x as any).bloques?.length);
+      if (otro) return { error: `Por aquí el texto sólo puede llevar títulos (## o ###), párrafos, listas y citas; sobra un bloque «${otro.tipo}».`, codigo: 400 };
+      return { bloques };
+    }
     const id = nuevoIdBloque();
     if (b?.type === 'database' || b?.tipo === 'basedatos') {
       const tablaId = String(b.database_id ?? b.tabla_id ?? '');
@@ -308,7 +322,7 @@ export function registrarApiPublica(app: Express, db: any) {
       const datos = b.data ?? b.datos;
       return { bloque: { id, tipo: b.type ?? b.tipo, ...(datos && typeof datos === 'object' && !Array.isArray(datos) ? { datos } : {}) } };
     }
-    return { error: 'Por aquí sólo se añaden bloques «database», «subpage» o de datos (comparador, ofertas…). El texto va en «markdown».', codigo: 400 };
+    return { error: 'Por aquí sólo se añaden bloques «database», «subpage», «text» o de datos (comparador, ofertas…).', codigo: 400 };
   };
   const quitarBloque = (lista: any[], id: string): { lista: any[]; quitado: any | null } => {
     let quitado: any = null;
@@ -345,7 +359,8 @@ export function registrarApiPublica(app: Express, db: any) {
     return (await db.execute(sql`SELECT * FROM knowledge_windows WHERE id = ${id}`)).rows[0] as any;
   };
 
-  /** `{ block: {type: "database", database_id, view?} | {type: "subpage", page_id} | {type: "<data block>", data},
+  /** `{ block: {type: "database", database_id, view?} | {type: "subpage", page_id} | {type: "<data block>", data}
+   *     | {type: "text", markdown},
    *     after?: "<block id>" | null }` — at the end unless `after` names a top-level block. */
   app.post('/api/v1/pages/:id/blocks', async (req: Request, res: Response) => {
     try {
@@ -355,9 +370,10 @@ export function registrarApiPublica(app: Express, db: any) {
       const bloques: any[] = Array.isArray(antes.config?.bloques) ? [...antes.config.bloques] : [];
       const tras = req.body?.after ? bloques.findIndex(b => b?.id === String(req.body.after)) : -1;
       if (req.body?.after && tras < 0) return res.status(404).json({ error: 'No hay un bloque con ese «after» en esta página.' });
-      bloques.splice(tras < 0 ? bloques.length : tras + 1, 0, e.bloque);
+      const nuevos = 'bloques' in e ? e.bloques : [e.bloque];
+      bloques.splice(tras < 0 ? bloques.length : tras + 1, 0, ...nuevos);
       const w = await guardarBloques(req, res, antes, bloques); if (!w) return;
-      res.status(201).json({ block: e.bloque, page: paginaPublica(w, { version: w.version }) });
+      res.status(201).json({ block: nuevos[0], blocks: nuevos, page: paginaPublica(w, { version: w.version }) });
     } catch (e: any) { console.error('v1 añadir bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 

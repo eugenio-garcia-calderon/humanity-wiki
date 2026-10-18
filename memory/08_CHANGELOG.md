@@ -9346,3 +9346,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Calidad, Estética y Ética** sólo aparecen con votos: ningún dato nuestro dice lo bonito o lo ético que es un producto, y no se inventa.
 - Seguridad cuenta sólo los productos cuyas retiradas se buscaron (`retiradas_fecha`); empates «y N más». Tras los criterios, las cifras técnicas de antes, sin repetir otro precio ni otra garantía.
 - La nota del pie lo explica cuando hay criterios por datos. La comisión sigue sin poder ser criterio. Pruebas en `scripts/probar-valoraciones.ts` (10).
+## 2026-10-18 — Wikiproducts: «Qué conviene mirar» on each subcategory page (W3a, evaluator round 3)
+
+- Each of the 5 subcategory pages gets a short buying guide: 4–5 points on what to compare (energy in Wh vs mAh, output power, real vs peak watts, usable vs total kWh, the two panel warranties, certificates, flight rules). Neutral, no product named; every figure links its source (IATA, ICAO, PVEducation, Lighting Global, Fraunhofer ISE). Text lives in `scripts/wikiproducts/datos/textos.json` → `guias`.
+- `corregir-textos.mjs` puts each guide right above the gallery and folds it closed in the same run, so a phone still sees products first. A page that already has a «Qué conviene mirar» heading is left alone; to change a guide later, add a `cambio`.
+- `POST /api/v1/pages/:id/blocks` now also takes `{type: "text", markdown}`: headings (##, ###), paragraphs, lists and quotes only; anything else is refused with 400. No wider than `PATCH /api/v1/pages/:id`, which already takes a whole page of markdown.
+- Verified on a local copy: guide inserted above the gallery, folded (closed, 5 items inside), second run skips it, an image in the markdown is refused. Not yet seen on production.
