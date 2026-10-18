@@ -9054,6 +9054,12 @@ en mis páginas como proyecto pendiente».
 - Nuevo tamaño de tarjeta **XXXS** (60 px de mínimo, huecos de 4/8 px, nombre a 9 px), el más pequeño y junto de la galería. Solo para las tarjetas: el tamaño del título empieza en XXS y el del nombre en XS, como antes.
 - Los selectores de tamaño del panel son un poco más estrechos para que quepan los siete.
 
+## 2026-10-18 — Recuadros de los grupos en la galería (prog8)
+- Cada grupo de una galería agrupada va en un **recuadro**: fondo gris suave, borde un punto más oscuro, esquinas redondeadas y una **sombra** ligera para que destaque sobre el blanco. El título va dentro, más grande (`text-[1.375rem]`, extrabold) y con más aire hasta las tarjetas; el contador es una píldora y «Añadir» va a su altura.
+- Dentro del recuadro las **tarjetas son blancas** (con un borde fino), para que no se confundan con el fondo. Fuera de los grupos, las galerías no cambian.
+- **Configuración → Grupos → Color del recuadro**: gris (por defecto), blanco, azul, verde, ámbar, rosa o violeta (`grupo_color`, `COLORES_GRUPO`).
+- El color de una opción de selección sale como un punto junto al título, no tiñendo el texto. En el móvil, el recuadro ocupa todo el ancho.
+- Estética revisada por un agente evaluador (nota inicial 6/10); se aplicaron sus 8 propuestas de estilo.
 ## 2026-10-18 — Wikiproducts W1: evaluator round 1 on the product sheet
 
 - «La mejor en cada criterio»: same type and comparable size (half to double), and the sentence says so; community criteria always show their vote count («0 votos, hacen falta 3»).
