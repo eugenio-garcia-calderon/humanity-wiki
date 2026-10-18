@@ -1,100 +1,10 @@
 {
   "reservas": [
     {
-      "agente": "prog8",
-      "ruta": "src/server/bd.ts",
-      "motivo": "Filtrar, ordenar y buscar en la página publicada de una base de datos",
-      "desde": "2026-10-14T10:24:45.098Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/ventanas/bus.ts",
-      "motivo": "Enlace a otra base de datos abre una ventana",
-      "desde": "2026-10-14T10:34:14.790Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/utils/consola.ts",
-      "motivo": "Consola: reordenar eslabones e icono con selector",
-      "desde": "2026-10-14T10:37:05.682Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/ConsolaCadena.tsx",
-      "motivo": "Consola: reordenar eslabones e icono con selector",
-      "desde": "2026-10-14T10:37:05.682Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/CabeceraPagina.tsx",
-      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
-      "desde": "2026-10-14T11:25:42.788Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/sitio/CabeceraLectura.tsx",
-      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
-      "desde": "2026-10-14T11:25:42.788Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/BloquesLectura.tsx",
-      "motivo": "Cabecera de página compacta con tamaño de título; ocultar mandos de bases de datos en la web",
-      "desde": "2026-10-14T11:25:42.788Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Galería: filas visibles y Mostrar más",
-      "desde": "2026-10-14T11:36:29.774Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/tablas/BarraVista.tsx",
-      "motivo": "Palabra Agrupar junto al icono",
-      "desde": "2026-10-14T12:06:09.869Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/tablas/EditorColumna.tsx",
-      "motivo": "Correcciones del editor de propiedades",
-      "desde": "2026-10-14T12:19:56.542Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/pages/Tablas.tsx",
-      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
-      "desde": "2026-10-14T12:36:11.015Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/tablas/PropiedadesFila.tsx",
-      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
-      "desde": "2026-10-14T12:36:11.015Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/utils/bloques.ts",
-      "motivo": "Flecha abre galería en ventana; tamaño XXXS",
-      "desde": "2026-10-14T12:36:11.015Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/tablas/Galeria.tsx",
-      "motivo": "Imagen completa y cuadrada en la galería",
-      "desde": "2026-10-14T12:42:51.819Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/tablas/Rejilla.tsx",
-      "motivo": "Pop-up de nueva entrada con imagen y descripción",
-      "desde": "2026-10-14T12:56:02.110Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "Copiar, cortar y pegar páginas entre bloques",
-      "desde": "2026-10-14T12:58:30.050Z"
+      "agente": "prog1",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "W2 Wikiproducts: HTML del servidor (SEO R1), URLs legibles",
+      "desde": "2026-10-18T11:17:17.918Z"
     }
   ]
 }
