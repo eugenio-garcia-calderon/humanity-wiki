@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
 import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -26,6 +26,8 @@ import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 
 type Fila = {
   id: string;
+  /** Oculta al público: solo llega a quien edita. */
+  oculta?: boolean;
   pagina_id?: string | null;
   pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null; encuadre?: { x: number; y: number } | null } | null;
   celdas: Record<string, Celda>;
@@ -253,6 +255,17 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
     ? formatear(f.celdas[columnaTitulo as string] ?? { estado: 'vacia' }, columnas.find(c => c.id === columnaTitulo)!) : '')
     || f.pagina?.titulo || 'Sin título';
 
+  /** Ocultar o volver a enseñar la entrada en la web publicada. Quien edita la sigue viendo, atenuada. */
+  const alternarOculta = async (f: Fila) => {
+    const r = await fetch(`/api/bd/filas/${f.id}/oculta`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oculta: !f.oculta }),
+    });
+    if (!r.ok) { setFallo((await r.json().catch(() => ({}))).error || 'No se pudo cambiar.'); return; }
+    setAviso({ texto: f.oculta ? 'Se verá al publicar' : 'Oculta al publicar' });
+    onCambio();
+  };
+
   const duplicar = async (f: Fila) => {
     setFallo(null); setAviso({ texto: 'Duplicando…' });
     try { await duplicarFila(f.id); onCambio(); setAviso({ texto: 'Entrada duplicada, debajo de la original' }); }
@@ -280,6 +293,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         .then(() => setAviso({ texto: 'Enlace copiado' }), () => setFallo('No se pudo copiar el enlace.'));
     } },
     { etiqueta: 'Duplicar', icono: Copy, onClick: () => duplicar(f) },
+    { etiqueta: f.oculta ? 'Mostrar al publicar' : 'Ocultar al publicar', icono: f.oculta ? Eye : EyeOff, onClick: () => alternarOculta(f) },
     ...(puedeMover ? [
       { etiqueta: 'Mover al principio', icono: ArrowUpToLine, deshabilitada: filasVis[0]?.id === f.id, onClick: () => moverFila(f.id, filasVis[0]?.id ?? null) },
       { etiqueta: 'Mover al final', icono: ArrowDownToLine, deshabilitada: filasVis[filasVis.length - 1]?.id === f.id, onClick: () => moverFila(f.id, null) },
@@ -333,7 +347,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   // propiedades ni mandos grandes: no caben, y taparían la imagen.
   const chica = tamano === 'xs' || tamano === 'xxs';
   const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
-          const conMenu = editable && !sitio && !copia;
+          const conMenu = (arrastrable ?? editable) && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
@@ -411,7 +425,12 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40')}>
+              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
+              {f.oculta && (
+                <span className="absolute left-2 top-2 z-[2] inline-flex items-center gap-1 rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No se ve en la web publicada">
+                  <EyeOff className="h-3 w-3" /> Oculta
+                </span>
+              )}
               {/* Dónde caerá la tarjeta: una barra verde en el lado correspondiente. */}
               {mover && destino?.id === f.id && (
                 <span aria-hidden className={cn('pointer-events-none absolute z-20 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]',
