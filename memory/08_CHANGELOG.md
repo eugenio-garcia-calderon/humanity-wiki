@@ -9332,3 +9332,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
   - It returns `en_stock` (a count wins when there is one) and treats `disponible = false` as sold out.
   - The box says «En stock», and the SEO markup says InStock only in that case.
 - Test in `scripts/probar-ofertas.ts`. The column is created by the next full load.
+
+## 2026-10-18 — Plazos de entrega sin fechas que caducan (Wikiproducts W5)
+- Las ofertas que guardaban la fecha que enseñaba la tienda el día que se miró («Recíbelo entre el lunes 26 de octubre y el lunes 2 de noviembre», «22–26/10/2026») pasan a un plazo en días laborables contado desde ese día («6–11 días laborables»); la frase original queda en la nota de la oferta. 20 ofertas de PcComponentes, MediaMarkt y Powerplanet.
+- La caja de compra ya no enseña nunca una fecha concreta como plazo: si llega una, usa el plazo general de la tienda (`plazoReal` en `utils/ofertas.ts`).
