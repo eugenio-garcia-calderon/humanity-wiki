@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProveedorSitio, sitioConAnfitrion } from './components/sitio/ContextoSitio';
 import PaginaDeDominio, { type Resuelto } from './pages/PaginaDeDominio';
 import SubpaginaSitio from './pages/SubpaginaSitio';
+import BuscadorSitio from './components/sitio/BuscadorSitio';
 import { resolverPrecargado } from './utils/precargado';
 
 // ── SIN `lazy` AQUÍ DENTRO (2026-10-01) ──────────────────────────────────────
@@ -78,6 +79,8 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
                 camino llevaba a la misma página; ahora un elemento de una base
                 de datos se abre en `dominio.com/p/…`, sin salir de aquí. */}
             <Route path="p/:id" element={<SubpaginaSitio propio />} />
+            {/* El buscador del sitio (2026-10-18). */}
+            <Route path="buscar" element={<BuscadorSitio />} />
             <Route path="*" element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
           </Routes>
       </ProveedorSitio>
