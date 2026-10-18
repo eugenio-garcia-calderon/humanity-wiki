@@ -65,6 +65,12 @@
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "W6: chat de ayuda fuera del menú, Stripe real",
       "desde": "2026-10-18T11:58:44.729Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/ContextoSitio.tsx",
+      "motivo": "W2 buscador",
+      "desde": "2026-10-18T11:59:04.847Z"
     }
   ]
 }
