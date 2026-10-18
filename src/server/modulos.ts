@@ -60,6 +60,8 @@ import { registerDominiosRoutes } from './dominios.js';
 import { registrarSitios } from './sitios.js';
 import { registrarBuscadorSitio } from './buscadorSitio.js';
 import { registrarRutasFila } from './rutasFila.js';
+import { registrarSeoSitio } from './seoSitio.js';
+import { registrarIndexNow } from './indexNow.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
@@ -238,6 +240,8 @@ export const MODULOS: Modulo[] = [
   // El buscador de cada sitio publicado (Wikiproducts, 2026-10-18).
   { nombre: 'buscadorSitio', montar: (app, db) => registrarBuscadorSitio(app, db) },
   { nombre: 'rutasFila', montar: (app, db) => registrarRutasFila(app, db) },
+  { nombre: 'seoSitio', montar: () => registrarSeoSitio() },
+  { nombre: 'indexNow', montar: (app, db) => registrarIndexNow(app, db) },
   // La consola de la cadena de valor de una web: sólo para quien gestiona la página y sólo desde humanity.wiki.
   { nombre: 'consola', montar: (app, db) => registrarConsola(app, db) },
   // Optimización web de una página publicada: medición real, recomendaciones e indexación (solo quien edita).
