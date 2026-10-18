@@ -32,6 +32,7 @@ export type Oferta = {
   stock: number | null; agotada: boolean; plazo: string | null; enlace: string | null; rel: string;
   comision_pct: number | null; comprobado: string | null; instalacion: boolean | null;
   compra: any | null; nota_distribuidor: number | null;
+  votos_distribuidor?: { votos: number; umbral: number } | null;
 };
 
 const dinero = (c: number, moneda = 'EUR') => new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(c / 100);
@@ -40,7 +41,7 @@ const fecha = (iso: string) => { const d = new Date(`${iso}T12:00:00`); return N
 export function useOfertas(datos: Record<string, unknown>, paginaId?: string) {
   const tabla = typeof datos.tabla_id === 'string' ? datos.tabla_id : '';
   const fila = typeof datos.fila_id === 'string' ? datos.fila_id : '';
-  const [estado, setEstado] = useState<{ cargando: boolean; ofertas: Oferta[]; error: string | null }>({ cargando: true, ofertas: [], error: null });
+  const [estado, setEstado] = useState<{ cargando: boolean; ofertas: Oferta[]; error: string | null; esDueno?: boolean }>({ cargando: true, ofertas: [], error: null });
   useEffect(() => {
     if (!fila && !paginaId) { setEstado({ cargando: false, ofertas: [], error: null }); return; }
     const q = new URLSearchParams();
@@ -53,7 +54,7 @@ export function useOfertas(datos: Record<string, unknown>, paginaId?: string) {
         const j = await r.json().catch(() => ({}));
         if (!vivo) return;
         if (!r.ok) setEstado({ cargando: false, ofertas: [], error: j.error || 'No se han podido leer las ofertas.' });
-        else setEstado({ cargando: false, ofertas: Array.isArray(j.ofertas) ? j.ofertas : [], error: null });
+        else setEstado({ cargando: false, ofertas: Array.isArray(j.ofertas) ? j.ofertas : [], error: null, esDueno: !!j.es_dueno });
       })
       .catch(() => vivo && setEstado({ cargando: false, ofertas: [], error: 'No hay conexión con el servidor.' }));
     return () => { vivo = false; };
@@ -61,10 +62,14 @@ export function useOfertas(datos: Record<string, unknown>, paginaId?: string) {
   return estado;
 }
 
-export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: string }) {
+export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Oferta[]; titulo: string; esDueno?: boolean }) {
   const cobro = useCobro();
   // `null` = still asking: paint neither path to the cart nor the «coming soon» line.
-  const seCompraAqui = cobro === null ? null : cobro.abierto && cobro.con_pasarela;
+  // With a Stripe TEST key every real card is refused at payment (2026-10-18:
+  // production was open with `sk_test`), so visitors get the shop link; only
+  // the owner of the offers keeps the cart, to try the flow with a test card.
+  const enPruebas = !!cobro?.pruebas;
+  const seCompraAqui = cobro === null ? null : cobro.abierto && cobro.con_pasarela && (!enPruebas || esDueno);
   // A buy cell without a price is the seller's to-do («ponle un precio»), never the reader's.
   const conCesta = (o: Oferta) => !!o.compra && !o.agotada && o.precio_centimos !== null;
   const algunaConCesta = ofertas.some(conCesta);
@@ -96,10 +101,13 @@ export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: s
                     <Store className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                     {o.distribuidor || 'Tienda sin nombre'}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-sm text-slate-600">
                     {o.nota_distribuidor !== null
                       ? `Atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`
-                      : 'Atención al cliente: aún sin votos suficientes'}
+                      : o.votos_distribuidor
+                        // A new shop has no note yet: say how far it is, and who can give it.
+                        ? `Atención al cliente: aún sin nota (${o.votos_distribuidor.votos} de ${o.votos_distribuidor.umbral} votos; la puntúa quien compra aquí)`
+                        : 'Atención al cliente: aún sin nota'}
                     {o.plazo && ` · Entrega: ${o.plazo}`}
                     {o.agotada ? ' · Agotado' : o.stock !== null && o.stock <= 5 ? ` · Quedan ${o.stock}` : ''}
                   </p>
@@ -151,6 +159,11 @@ export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: s
         Ordenadas por lo que pagas con el envío; a igual precio, por la atención al cliente de la tienda. La comisión no cambia el orden.
         {seCompraAqui === true && algunaConCesta && ' Si compras aquí, pagas el mismo precio que en la tienda y Wikiproducts hace el pedido por ti.'}
       </p>
+      {seCompraAqui === true && enPruebas && algunaConCesta && (
+        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-snug text-amber-900">
+          <b>Modo de pruebas:</b> solo tú ves «Añadir a la cesta», porque gestionas estas ofertas. El cobro usa una clave de pruebas de Stripe: paga con la tarjeta 4242 4242 4242 4242. Los visitantes ven «Comprar en la tienda».
+        </p>
+      )}
       {seCompraAqui === false && algunaConCesta && (
         <p className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-snug text-sky-900">
           <b>Muy pronto podrás comprar a través de Wikiproducts</b>, al mismo precio que en la tienda. De momento, «Comprar en la tienda» te lleva a su web.
@@ -161,7 +174,7 @@ export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: s
 }
 
 export default function Lectura({ datos, paginaId }: PropsLectura) {
-  const { cargando, ofertas, error } = useOfertas(datos, paginaId);
+  const { cargando, ofertas, error, esDueno } = useOfertas(datos, paginaId);
   const titulo = typeof datos.titulo === 'string' && datos.titulo.trim() ? datos.titulo.trim() : 'Dónde comprarlo';
   if (cargando) return <div className="my-4 h-24 animate-pulse rounded-2xl bg-slate-50" />;
   if (error) return <p className="my-4 text-sm text-slate-400">{error}</p>;
@@ -173,5 +186,5 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
       </section>
     );
   }
-  return <ListaOfertas ofertas={ofertas} titulo={titulo} />;
+  return <ListaOfertas ofertas={ofertas} titulo={titulo} esDueno={esDueno} />;
 }

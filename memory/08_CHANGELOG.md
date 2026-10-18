@@ -9076,6 +9076,23 @@ en mis páginas como proyecto pendiente».
 - «Sugerir una corrección» on every sheet (via the existing report queue).
 - New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).
 
+
+### 2026-10-18 — Offers: no cart for visitors while Stripe runs a test key (Wikiproducts W5)
+- Production answered `GET /api/publicar/cobro` with `{"abierto":true,"pruebas":true,"con_pasarela":true}`: charging open with an `sk_test` key, so a visitor could add a 1.790 € offer to the cart and have their real card refused at payment. Now, with a test key, visitors see «Comprar en la tienda» and the «Muy pronto…» note; only the owner of the offers table (or an admin) keeps «Añadir a la cesta», with an amber «Modo de pruebas» note naming the 4242 test card. `GET /api/ofertas` adds `es_dueno`. With a live key everyone gets the cart, as before.
+- Checked locally in three states: test key as visitor (shop link), test key as owner (cart + note), and a non-test key as visitor (cart).
+
+## 2026-10-18 — Recuadros de grupo: mismo alto, sin imagen ni número (prog8)
+- Los recuadros que comparten fila tienen **el mismo alto** (el contenedor pasa de `items-start` a `items-stretch`).
+- El título del grupo va **sin el número** de tarjetas y **sin la imagen** de lo enlazado. La imagen sigue disponible en Configuración → Grupos → «Imagen del grupo», ahora apagada por defecto (`grupo_imagen === true` para enseñarla).
+
+### 2026-10-18 — Ratings say how many votes are missing (Wikiproducts W4)
+
+- Below the threshold, a criterion no longer reads «Aún sin votos suficientes» with no count: it says «1 de 3 votos · faltan 2 para la nota», with a small progress bar. Same in table cells («Aún sin nota · 1 de 3 votos»), in the shop's customer service inside «Dónde comprarlo», and in the server HTML.
+- A visitor without a session gets an invitation box with an «Entrar para puntuar» button, which opens the site's sign-in panel (`sitio:entrar` event, heard by `CuentaMenu`).
+- `comunidad` cells now carry `umbral`; `atencionDistribuidores()` returns note, votes and threshold (the old `notaAtencionDistribuidores` stays as a wrapper).
+- Site members (signed in through a site's «Entrar») can send «Sugerir una corrección»: `POST /api/report` is a member route now, and the form no longer pre-checks `/api/auth/me`, which never sees a site member.
+- Rating block and the shop's customer-service line: body text 16 px, labels and counts 14 px.
+
 ## 2026-10-18 — Wikiproducts W3a: evaluator round 1 on the data, and the missing photos
 - **Whose word it is.** 894 values whose source is a shop, a regulator, a test lab or the press were labelled «declarado» (as if the brand said it). They are now `tercero`, shown as «Según <host>». 9 independent-test fields that said «no publicado» while citing the search that found nothing now carry that result.
 - **Recalls that belonged to other products.** 8 recall rows on the Anker SOLIX X1, EcoFlow PowerOcean, GoodWe Lynx and Growatt ARK sheets were recalls of *other* products of the same brand: the sheet said «retirado» and «ninguna retirada» at once. They go to the recycle bin (`datos/retirar.json`, through the new `DELETE /api/v1/databases/:id/rows/:rowId`, restorable for 15 days); the note names the brand's other recalls.

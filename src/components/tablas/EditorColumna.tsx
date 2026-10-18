@@ -454,7 +454,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <span className="text-xs font-bold text-slate-600">
                 Sólo puntúa quien lo compró a través de la plataforma
                 <span className="block text-[11px] font-medium text-slate-400">
-                  Se vota en la página de cada fila con el bloque «Valoración». Con menos de 3 votos la celda dice «sin votos suficientes».
+                  Se vota en la página de cada fila con el bloque «Valoración». Con menos de 3 votos no hay nota: la celda dice cuántos lleva («1 de 3 votos»).
                 </span>
               </span>
             </label>
