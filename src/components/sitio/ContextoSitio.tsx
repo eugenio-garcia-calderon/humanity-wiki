@@ -20,6 +20,8 @@ export type Sitio = {
   enlaceBd: (tabla: string, titulo?: string) => string;
   /** La dirección de una página publicada por su nombre corto. */
   enlaceSlug: (slug: string, handle: string) => string;
+  /** La página de resultados del buscador del sitio (2026-10-18). */
+  enlaceBuscar: () => string;
   /** El id de la página que abre el sitio, si se sabe: volver a ella es
    *  volver a la raíz, no a `/p/:id`. */
   raizId?: string | null;
@@ -38,6 +40,7 @@ export const sitioConAnfitrion = (raizId?: string | null): Sitio => ({
   enlacePagina: id => (raizId && id === raizId ? '/' : `/p/${id}`),
   enlaceBd: (t, titulo) => `/bd/${t}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`,
   enlaceSlug: slug => `/${slug}`,
+  enlaceBuscar: () => '/buscar',
   raizId,
 });
 
@@ -46,4 +49,5 @@ export const sitioEnCasa = (handle: string): Sitio => ({
   enlacePagina: id => `/@${handle}/p/${id}`,
   enlaceBd: (t, titulo) => `/@${handle}/bd/${t}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`,
   enlaceSlug: (slug, h) => `/@${h || handle}/${slug}`,
+  enlaceBuscar: () => `/@${handle}/buscar`,
 });

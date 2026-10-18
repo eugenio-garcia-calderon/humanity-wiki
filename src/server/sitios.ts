@@ -799,6 +799,8 @@ export function registrarSitios(app: Express, db: any) {
     if (s.forma === 'casa' && sinArroba === t) return false;
     if (sinArroba[0] === 'p' && sinArroba.length === 2) return true;
     if (sinArroba[0] === 'bd' && (sinArroba.length === 2 || sinArroba.length === 3)) return true;
+    // `buscar` es la página de resultados del buscador del sitio.
+    if (sinArroba.length === 1 && sinArroba[0] === 'buscar') return false;
     if (s.forma === 'subdominio') return t.length === 1 && t[0] !== 'pedido';
     if (s.forma === 'casa') return sinArroba.length === 1;
     return false;

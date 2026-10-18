@@ -8848,3 +8848,8 @@ en mis páginas como proyecto pendiente».
 - Una página publicada puede tener su propio `algo.humanity.wiki` (p. ej. `wikiproducts.humanity.wiki`), no sólo el nombre de su dueño. Se reclama como un dominio propio (`POST /api/dominios` con `dominio: "algo.humanity.wiki"` y la página) y funciona al momento: no hay DNS ni certificado que esperar.
 - Las reglas: un solo nivel, las mismas que un nombre de usuario, no puede ser el nombre de nadie, como mucho 3 por persona, siempre a una página. Al reclamarlo, el nombre queda reservado para que nadie lo coja después como usuario.
 - La dirección canónica de las páginas del sitio pasa a ser ese subdominio, salvo que el sitio tenga un dominio comprado, que gana.
+
+### 2026-10-18 — Buscador dentro de cada sitio publicado (Wikiproducts W2)
+- El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
+- Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
+- No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».

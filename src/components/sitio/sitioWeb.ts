@@ -69,6 +69,9 @@ export type Menu = {
   mostrarNombre: boolean;
   /** Una raya fina debajo (arriba) o al lado (lateral). */
   borde: boolean;
+  /** Una caja para buscar dentro del sitio (2026-10-18). Apagada en los
+   *  sitios que ya existían: su menú no cambia sin que lo decida su autor. */
+  buscador?: boolean;
   enlaces: Enlace[];
 };
 
