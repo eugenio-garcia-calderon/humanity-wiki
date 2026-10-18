@@ -9096,4 +9096,4 @@ en mis páginas como proyecto pendiente».
 
 - Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
 - Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
-- Not touched, owned by other workstreams: «Puntuación de la comunidad» (W4) and «Dónde comprarlo» (W5) still have 11–12 px text.
+- Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
