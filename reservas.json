@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/utils/precargado.ts",
-      "motivo": "W2: R2 direcciones legibles",
-      "desde": "2026-10-18T12:29:59.785Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/SubpaginaSitio.tsx",
       "motivo": "W2: R2 direcciones legibles",
       "desde": "2026-10-18T12:30:02.844Z"
