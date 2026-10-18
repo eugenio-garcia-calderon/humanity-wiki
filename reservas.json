@@ -113,6 +113,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "W6 entrada al final",
       "desde": "2026-10-18T11:44:22.850Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/03_DECISIONS.md",
+      "motivo": "W6",
+      "desde": "2026-10-18T11:44:25.352Z"
     }
   ]
 }
