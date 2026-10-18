@@ -347,8 +347,46 @@ export type VistaAlternativas = {
     esEsta: boolean;
     /** Where the current product stands: «3.º de 12». Null without a value. */
     puesto: { n: number; de: number } | null;
+    /** A rubric criterion (precio, garantía, ecología…): decided by community
+     *  votes once they pass the threshold, else by the data named in `segun`. */
+    base?: 'votos' | 'datos';
+    /** What the data criterion was measured by: «Precio por kWh». */
+    segun?: string | null;
+    /** Other products tied with the winner («y 9 más»). */
+    empates?: number;
   }>;
+  /** True when at least one rubric criterion was decided by data, not votes. */
+  porDatos?: boolean;
 };
+
+// The rubric criteria (plan §2.3: calidad, precio, garantía, ecología, salud,
+// estética, ética) come first. Each is decided by the community's votes when
+// at least two products have a note in it; until then by a measurable figure
+// we already publish, named on screen. A criterion with neither is left out:
+// no figure we have says how ethical or how beautiful a product is.
+type MedidaRubrica = { claves: string[]; grupo?: string } | { retiradas: true };
+/** How a data criterion is named on screen when its column name alone does
+ *  not say why it measures that criterion. */
+const SEGUN: Record<string, string> = {
+  ciclos_declarados: 'ciclos de carga declarados (más ciclos, más años de uso)',
+  degradacion_anual_pct: 'degradación anual (pierde menos potencia cada año)',
+};
+const RUBRICA: Array<{ criterio: string; comunidad: string; medida?: MedidaRubrica }> = [
+  { criterio: 'Calidad', comunidad: 'calidad' },
+  { criterio: 'Precio', comunidad: 'precio', medida: { claves: ['precio_por_kwh', 'precio_por_w', 'precio_desde'], grupo: 'compra' } },
+  { criterio: 'Garantía', comunidad: 'garantia', medida: { claves: ['garantia_anios', 'garantia_producto_anios'], grupo: 'garantia' } },
+  // More charge cycles, or a panel that loses less each year, lasts longer:
+  // fewer replacements and less waste.
+  { criterio: 'Ecología', comunidad: 'ecologia', medida: { claves: ['ciclos_declarados', 'degradacion_anual_pct'] } },
+  { criterio: 'Salud y seguridad', comunidad: 'salud', medida: { retiradas: true } },
+  { criterio: 'Estética', comunidad: 'estetica' },
+  { criterio: 'Ética', comunidad: 'etica' },
+];
+const minusculaInicial = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+/** The block's footnote, one sentence for both painters. */
+export const NOTA_ORDEN = 'El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.';
+export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que precio, garantía, ecología y seguridad se deciden con los datos publicados que se nombran en cada línea; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
 
 /**
  * For each criterion with a direction, the best product of the table
@@ -383,12 +421,74 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
     }
   }
   if (filas.length < 2) return null;
-  const cols = (elegidas(t, datos.columnas) || t.columnas.filter(c =>
-    esComunidad(c) ? c.config?.criterio !== 'media' : listableEn(t)(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
-    .filter(ordenable);
+  const elegidasYa = elegidas(t, datos.columnas);
   const max = Math.max(1, Math.min(12, Number(datos.max) || 8));
   const criterios: VistaAlternativas['criterios'] = [];
+  const usadas = new Set<string>();
+  // 1 · The rubric. Skipped when the page chose its own columns.
+  if (!elegidasYa) for (const r of RUBRICA) {
+    const votos = t.columnas.find(c => criterioDe(c) === r.comunidad);
+    const mv = votos ? mejoresEn(filas, votos) : new Set<string>();
+    if (votos) usadas.add(votos.id);
+    if (votos && mv.size) {
+      const orden = ordenarPor(filas, votos);
+      const g = orden[0];
+      const i = orden.findIndex(x => x.id === actual.id);
+      criterios.push({
+        columnaId: votos.id, criterio: r.criterio, base: 'votos', segun: null, empates: mv.size - 1,
+        ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: `${textoDe(g, votos)} de 5` },
+        esEsta: mv.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+      });
+      continue;
+    }
+    const m = r.medida;
+    if (!m) continue;
+    if ('retiradas' in m) {
+      // Safety: products with no recall or safety alert, among those whose
+      // recalls were actually searched (a product nobody checked is not
+      // «clean», it is unknown).
+      const cRet = t.columnas.find(c => c.tipo === 'relacion' && rolDe(c) === 'retiradas');
+      const cFecha = columnaPorRol(t, 'retiradas_fecha');
+      if (!cRet || !cFecha) continue;
+      const vistas = filas.filter(x => tieneValor(x, cFecha));
+      const n = (x: FilaFicha) => x.apuntados?.[cRet.id]?.length || 0;
+      const limpias = vistas.filter(x => n(x) === 0).sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'));
+      // Everyone clean or everyone recalled: nothing tells them apart.
+      if (vistas.length < 2 || !limpias.length || limpias.length === vistas.length) continue;
+      const esta = limpias.some(x => x.id === actual.id);
+      const g = esta ? actual : limpias[0];
+      criterios.push({
+        columnaId: cRet.id, criterio: r.criterio, base: 'datos', segun: 'retiradas y alertas de seguridad', empates: limpias.length - 1,
+        ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: 'ninguna retirada' },
+        esEsta: esta, puesto: null,
+      });
+      // Where this one stands, said plainly instead of a rank among ties.
+      if (!esta && vistas.some(x => x.id === actual.id)) criterios[criterios.length - 1].ganador.valor = `ninguna retirada; este producto tiene ${plural(n(actual), 'aviso', 'avisos')}`;
+      continue;
+    }
+    const c = m.claves.map(k => t.columnas.find(x => x.config?.clave === k && ordenable(x) && listableEn(t)(x))).find(x => x && mejoresEn(filas, x).size);
+    if (!c) continue;
+    const orden = ordenarPor(filas, c);
+    const mejores = mejoresEn(filas, c);
+    const g = orden[0];
+    const i = orden.findIndex(x => x.id === actual.id);
+    usadas.add(c.id);
+    // The price or warranty already has its line: the other price and
+    // warranty figures would only repeat it lower down.
+    if (m.grupo) for (const x of t.columnas) if (grupoDe(x) === m.grupo) usadas.add(x.id);
+    criterios.push({
+      columnaId: c.id, criterio: r.criterio, base: 'datos',
+      segun: SEGUN[c.config?.clave] || minusculaInicial(etiquetaColumna(c)), empates: mejores.size - 1,
+      ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
+      esEsta: mejores.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+    });
+  }
+  // 2 · Then the technical figures, as before.
+  const cols = (elegidasYa || t.columnas.filter(c =>
+    esComunidad(c) ? c.config?.criterio !== 'media' : listableEn(t)(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
+    .filter(c => ordenable(c) && !usadas.has(c.id));
   for (const c of cols) {
+    if (criterios.length >= max) break;
     const orden = ordenarPor(filas, c);
     // A «best» among fewer than two products is not a comparison, and a tie
     // for first between everyone says nothing.
@@ -402,13 +502,12 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
     });
-    if (criterios.length >= max) break;
   }
   if (!criterios.length) return null;
   const ambito = sub && rango ? `Entre los productos del mismo tipo (${sub}) y tamaño parecido: ${rango}.`
     : sub ? `Entre los productos del mismo tipo: ${sub}.`
     : rango ? `Entre los productos de tamaño parecido: ${rango}.` : null;
-  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, ambito, criterios };
+  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, ambito, criterios, porDatos: criterios.some(c => c.base === 'datos') };
 }
 
 // ── AFIRMACIONES PUBLICITARIAS ──────────────────────────────────────────────
