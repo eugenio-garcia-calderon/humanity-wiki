@@ -9076,8 +9076,15 @@ en mis páginas como proyecto pendiente».
 - «Sugerir una corrección» on every sheet (via the existing report queue).
 - New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).
 
+
+### 2026-10-18 — Offers: no cart for visitors while Stripe runs a test key (Wikiproducts W5)
+- Production answered `GET /api/publicar/cobro` with `{"abierto":true,"pruebas":true,"con_pasarela":true}`: charging open with an `sk_test` key, so a visitor could add a 1.790 € offer to the cart and have their real card refused at payment. Now, with a test key, visitors see «Comprar en la tienda» and the «Muy pronto…» note; only the owner of the offers table (or an admin) keeps «Añadir a la cesta», with an amber «Modo de pruebas» note naming the 4242 test card. `GET /api/ofertas` adds `es_dueno`. With a live key everyone gets the cart, as before.
+- Checked locally in three states: test key as visitor (shop link), test key as owner (cart + note), and a non-test key as visitor (cart).
+
 ### 2026-10-18 — Ratings say how many votes are missing (Wikiproducts W4)
 
 - Below the threshold, a criterion no longer reads «Aún sin votos suficientes» with no count: it says «1 de 3 votos · faltan 2 para la nota», with a small progress bar. Same in table cells («Aún sin nota · 1 de 3 votos»), in the shop's customer service inside «Dónde comprarlo», and in the server HTML.
 - A visitor without a session gets an invitation box with an «Entrar para puntuar» button, which opens the site's sign-in panel (`sitio:entrar` event, heard by `CuentaMenu`).
 - `comunidad` cells now carry `umbral`; `atencionDistribuidores()` returns note, votes and threshold (the old `notaAtencionDistribuidores` stays as a wrapper).
+- Site members (signed in through a site's «Entrar») can send «Sugerir una corrección»: `POST /api/report` is a member route now, and the form no longer pre-checks `/api/auth/me`, which never sees a site member.
+- Rating block and the shop's customer-service line: body text 16 px, labels and counts 14 px.
