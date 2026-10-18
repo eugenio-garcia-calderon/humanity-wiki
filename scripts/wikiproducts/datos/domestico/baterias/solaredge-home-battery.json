@@ -111,12 +111,12 @@
       "nota": "No publicado en ficha ni manual; no se pudo verificar si las celdas proceden de la filial Kokam/Sella 2 de SolarEdge."
     },
     "ciclos_declarados": {
-      "valor": "ilimitados (garantía)",
+      "valor": null,
       "unidad": "ciclos",
       "origen": "declarado",
       "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
       "fecha": "2026-10-18",
-      "nota": "La garantía del modelo 400V no fija tope de ciclos ni de MWh."
+      "nota": "Texto publicado: «ilimitados (garantía)». La garantía no limita los ciclos. La garantía del modelo 400V no fija tope de ciclos ni de MWh."
     },
     "profundidad_descarga_pct": {
       "valor": 100,
@@ -287,9 +287,9 @@
     ],
     "fuentes_por_campo": {
       "razon_social": "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
-      "pais_sede": "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf (oficinas principales: 1 HaMada Street, Herzliya Pituach, Israel; «incorporated in Delaware in 2006»)",
-      "fundacion": "https://en.wikipedia.org/wiki/SolarEdge ; https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
-      "cotiza_en": "https://en.wikipedia.org/wiki/SolarEdge (Nasdaq Global Select: SEDG, salida a bolsa en 2015)"
+      "pais_sede": "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf%20(oficinas%20principales:%201%20HaMada%20Street,%20Herzliya%20Pituach,%20Israel;%20«incorporated%20in%20Delaware%20in%202006»)",
+      "fundacion": "https://en.wikipedia.org/wiki/SolarEdge%20;%20https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
+      "cotiza_en": "https://en.wikipedia.org/wiki/SolarEdge%20(Nasdaq%20Global%20Select:%20SEDG,%20salida%20a%20bolsa%20en%202015)"
     }
   },
   "origen": {

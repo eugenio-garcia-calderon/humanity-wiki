@@ -457,12 +457,12 @@
           "nota": "6 módulos por sistema según la tabla. La misma página anuncia «5-180kWh», cifra que no se explica en la tabla (ver afirmaciones)."
         },
         "potencia_continua_kw": {
-          "valor": "3,68 / 4,6 / 5 / 6 (monofásico); hasta 12 (trifásico)",
+          "valor": 6,
           "unidad": "kW",
           "naturaleza": "declarado",
           "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
           "fecha": "2026-10-18",
-          "nota": "Potencia AC del módulo de potencia. La ficha del distribuidor da 3 kW de carga/descarga máxima por módulo de batería."
+          "nota": "Texto publicado: «3,68 / 4,6 / 5 / 6 (monofásico); hasta 12 (trifásico)». Valor de la variante monofásica de mayor potencia. Potencia AC del módulo de potencia. La ficha del distribuidor da 3 kW de carga/descarga máxima por módulo de batería."
         },
         "potencia_pico_kw": {
           "valor": 10,
@@ -805,12 +805,12 @@
       "ean": [],
       "estado": "a la venta",
       "anio_lanzamiento": {
-        "valor": "hacia 2020",
+        "valor": null,
         "unidad": "año",
         "naturaleza": "declarado",
         "fuente": "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
         "fecha": "2026-10-18",
-        "nota": "Según un distribuidor alemán, HVS y HVM están en el mercado «desde aproximadamente 2020». No verificado con BYD."
+        "nota": "Texto publicado: «hacia 2020». Fecha exacta no publicada. Según un distribuidor alemán, HVS y HVM están en el mercado «desde aproximadamente 2020». No verificado con BYD."
       },
       "foto": {
         "url": null,
@@ -1007,7 +1007,7 @@
           "valor": 30.82,
           "unidad": "MWh",
           "naturaleza": "declarado",
-          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
           "fecha": "2026-10-18",
           "nota": "HVS 10.2. HVS 5.1: 15,41; 7.7: 23,12; 12.8: 38,53 MWh. Equivale a unas 3.000 descargas completas (cálculo: 30,82 MWh / 10,24 kWh ≈ 3.010)."
         },
@@ -1031,7 +1031,7 @@
       "garantias": {
         "producto": {
           "anios": 10,
-          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía limitada Europa ES V1.2 para HVS/HVM instaladas desde el 08-03-2023. Inicio: el primer día tras 6 meses desde la fecha de producción, o 30 días tras la entrega documentada."
         },
@@ -1040,7 +1040,7 @@
           "porcentaje_final": 60,
           "primer_anio_pct": null,
           "lineal_anual_pct": null,
-          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
           "fecha": "2026-10-18",
           "nota": "60 % de la energía utilizable durante 10 años o hasta alcanzar la energía descargada mínima (30,82 MWh en HVS 10.2), lo que ocurra primero."
         },
@@ -1064,12 +1064,12 @@
           "carcasa metálica"
         ],
         "num_componentes": {
-          "valor": "2–5 módulos de batería + 1 base con BCU",
+          "valor": null,
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
           "fecha": "2026-10-18",
-          "nota": ""
+          "nota": "Texto publicado: «2–5 módulos de batería + 1 base con BCU»."
         },
         "reparabilidad": "Diseño modular: los módulos se suministran por separado y pueden sustituirse o añadirse (https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf). Las reparaciones o modificaciones sin aprobación de BYD o su socio excluyen la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
         "fabricante_celulas": "BYD (LFP)",
@@ -1105,7 +1105,7 @@
         },
         {
           "tipo": "garantía",
-          "url": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+          "url": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
           "idioma": "es",
           "fecha": "2026-10-18",
           "nota": "HVS & HVM Europa V1.2."
@@ -1150,7 +1150,7 @@
             "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
             "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
             "https://42watt.de/magazin/byd-speicher",
-            "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf"
+            "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf"
           ],
           "fecha": "2026-10-18"
         }
@@ -1667,12 +1667,12 @@
           "nota": "«Up to 45kWh» encadenando tres inversores; con un solo inversor el máximo es 15,3 kWh."
         },
         "potencia_continua_kw": {
-          "valor": "3 / 3,68 / 4,6 / 5 / 6",
+          "valor": 6,
           "unidad": "kW",
           "naturaleza": "declarado",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
-          "nota": "Potencia AC nominal del inversor monofásico según modelo (EF HD-P1-3K…6K-S1). La ficha no da la potencia de carga/descarga del módulo de batería por separado."
+          "nota": "Texto publicado: «3 / 3,68 / 4,6 / 5 / 6». Valor de la variante de mayor potencia. Potencia AC nominal del inversor monofásico según modelo (EF HD-P1-3K…6K-S1). La ficha no da la potencia de carga/descarga del módulo de batería por separado."
         },
         "potencia_pico_kw": {
           "valor": null,
@@ -1916,7 +1916,7 @@
         },
         {
           "tipo": "garantía",
-          "url": "https://solarproof.com.au/warranty_documents/battery_warranty_EcoFlow Warranty Policy for Home Solar Battery Solutions in Europe V1.3_for end user_EN.pdf",
+          "url": "https://solarproof.com.au/warranty_documents/battery_warranty_EcoFlow%20Warranty%20Policy%20for%20Home%20Solar%20Battery%20Solutions%20in%20Europe%20V1.3_for%20end%20user_EN.pdf",
           "idioma": "en",
           "fecha": "2024-09-29"
         },
@@ -2296,7 +2296,7 @@
           "porcentaje_final": 60,
           "primer_anio_pct": null,
           "lineal_anual_pct": null,
-          "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf",
+          "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía de Australia y Nueva Zelanda (productos activados desde el 12-04-2023): al menos 60 % de 5,0 kWh CC durante 15 años o 6.000 ciclos. No se localizó el documento de garantía específico de España."
         },
@@ -2381,7 +2381,7 @@
         },
         {
           "tipo": "garantía",
-          "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf",
+          "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "idioma": "en",
           "fecha": "2023-04-12",
           "nota": "Australia y Nueva Zelanda; no es la garantía española"
@@ -3600,7 +3600,7 @@
           "valor": 37.36,
           "unidad": "MWh",
           "naturaleza": "declarado",
-          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH-A1 según la garantía australiana (no se ha encontrado la europea). Equivale a unos 3.650 ciclos completos de 10,24 kWh (cálculo propio)."
         },
@@ -3624,7 +3624,7 @@
       "garantias": {
         "producto": {
           "anios": 10,
-          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "El documento dice que el plazo de 10 años «is only applicable for selling and installation in Australia». Las tiendas europeas anuncian 10 años, pero no se ha encontrado el documento de garantía europeo de la batería. Sin monitorización: 3 años."
         },
@@ -3633,7 +3633,7 @@
           "porcentaje_final": 70,
           "primer_anio_pct": null,
           "lineal_anual_pct": null,
-          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "Al menos el 70 % de la energía nominal a los 10 años, dentro del tope de energía de cada modelo (garantía australiana)."
         },
@@ -3692,7 +3692,7 @@
         },
         {
           "tipo": "garantía",
-          "url": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "url": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "idioma": "en",
           "fecha": null
         },
@@ -3710,7 +3710,7 @@
           "veredicto": "matizable",
           "explicacion": "El único documento de garantía de la batería encontrado limita los 10 años a Australia, los reduce a 3 años sin monitorización y fija un tope de energía (37,36 MWh para el ARK 10.2XH). No se ha encontrado la versión europea.",
           "fuentes": [
-            "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf"
+            "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf"
           ],
           "fecha": "2026-10-18"
         },
@@ -3730,7 +3730,7 @@
           "veredicto": "matizable",
           "explicacion": "La ficha da IP65, apto en principio para exterior, pero la garantía australiana excluye la instalación o el uso en exterior sin resguardo adecuado, así como la luz solar directa.",
           "fuentes": [
-            "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf"
+            "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf"
           ],
           "fecha": "2026-10-18"
         }
@@ -4080,12 +4080,12 @@
           "carcasa IP66 con refrigeración por convección natural"
         ],
         "num_componentes": {
-          "valor": "1 módulo de potencia + 1 a 3 módulos de batería",
+          "valor": null,
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
           "fecha": "2026-10-18",
-          "nota": ""
+          "nota": "Texto publicado: «1 módulo de potencia + 1 a 3 módulos de batería»."
         },
         "reparabilidad": "Modular: los módulos de batería y el módulo de potencia se venden por separado (https://www.wattuneed.com/es/bateria-litio/26861-bateria-de-litio-huawei-luna2000-7-e1-69-kwh-350-v-lfp-69-kwh-ip66.html). Las reparaciones no autorizadas excluyen la garantía (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
         "fabricante_celulas": "No publicado",
@@ -4513,12 +4513,12 @@
           "celdas de iones de litio de LG Energy Solution"
         ],
         "num_componentes": {
-          "valor": "1 unidad cerrada (sin módulos ampliables internamente)",
+          "valor": null,
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
           "fecha": "2026-10-18",
-          "nota": "La ampliación es poniendo dos unidades en paralelo."
+          "nota": "Texto publicado: «1 unidad cerrada (sin módulos ampliables internamente)». La ampliación es poniendo dos unidades en paralelo."
         },
         "reparabilidad": "No se encontró información pública. En las retiradas de la RESU 10H el remedio fue la sustitución completa, una actualización de software o el reembolso.",
         "fabricante_celulas": "LG Energy Solution",
@@ -4815,12 +4815,12 @@
           "nota": "El comunicado de 2026 trata de celdas grandes para almacenamiento a escala de red; no confirma que los módulos FH10050 usen celdas propias."
         },
         "ciclos_declarados": {
-          "valor": "> 8.000 (25 °C)",
+          "valor": 8000,
           "unidad": "ciclos",
           "naturaleza": "declarado",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
-          "nota": "Force H3. Force H2: > 5.000 a 95 % DoD (Offgridtec). La garantía no cubre ciclos."
+          "nota": "Texto publicado: «> 8.000 (25 °C)». La marca dice «más de 8.000» a 25 °C. Force H3. Force H2: > 5.000 a 95 % DoD (Offgridtec). La garantía no cubre ciclos."
         },
         "profundidad_descarga_pct": {
           "valor": 95,
@@ -4882,7 +4882,7 @@
           "valor": "interior o exterior protegido (sin sol directo ni heladas, según garantía)",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": ""
         },
@@ -4946,7 +4946,7 @@
       "garantias": {
         "producto": {
           "anios": 7,
-          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía al consumidor Force-H1/H2 para UE y Reino Unido (ref. 4AB16W50091): 7 años desde la instalación o 6 meses tras la fabricación (lo que sea antes); 10 años si se registra en la web de Pylontech. Para Force H3 en Europa no se ha leído el documento (una tienda enlaza «Force H series v1.2 EU»); la versión para EE. UU./Canadá V1.2 da 10 años de producto."
         },
@@ -4955,7 +4955,7 @@
           "porcentaje_final": 50,
           "primer_anio_pct": null,
           "lineal_anual_pct": null,
-          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Mínimo 60 % de la energía nominal durante los 7 años; con la ampliación a 10 años por registro, el mínimo baja al 50 % al final. Sin límite de MWh."
         },
@@ -4979,12 +4979,12 @@
           "carcasa metálica"
         ],
         "num_componentes": {
-          "valor": "1 BMS + 2 a 7 módulos de batería",
+          "valor": null,
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
-          "nota": ""
+          "nota": "Texto publicado: «1 BMS + 2 a 7 módulos de batería»."
         },
         "reparabilidad": "Módulos sustituibles por separado; la garantía excluye mezclar tipos de módulos y reparaciones no autorizadas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).",
         "fabricante_celulas": "Pylontech (producción propia de celdas LFP; ver nota en datos técnicos)",
@@ -5022,7 +5022,7 @@
         },
         {
           "tipo": "garantía",
-          "url": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+          "url": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "idioma": "en",
           "fecha": "2026-10-18",
           "nota": "Force-H1/H2, UE y Reino Unido, ref. 4AB16W50091."
@@ -5036,7 +5036,7 @@
         },
         {
           "tipo": "garantía",
-          "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Pylontech product warranty-Force H serie V1.2 UL24WFH100527_20241101092414A174.pdf",
+          "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Pylontech%20product%20warranty-Force%20H%20serie%20V1.2%20UL24WFH100527_20241101092414A174.pdf",
           "idioma": "en",
           "fecha": "2026-10-18",
           "nota": "Force-H1/H1-V2/H3, EE. UU. y Canadá, V1.2 (UL24WFH100527)."
@@ -5050,7 +5050,7 @@
           "explicacion": "Es un dato de laboratorio a 25 °C. La garantía no está ligada a ciclos y, en la versión UE consultada (H1/H2), dura 7 años o 10 con registro, con un mínimo del 50–60 % de capacidad.",
           "fuentes": [
             "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
-            "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf"
+            "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf"
           ],
           "fecha": "2026-10-18"
         },
@@ -5072,7 +5072,7 @@
           "explicacion": "Coincide con la ficha: 9,69 kWh utilizables de 10,24 kWh nominales (94,6 %, cálculo). Para conservar la garantía UE de la H2 la profundidad de descarga debe ser inferior al 90 %.",
           "fuentes": [
             "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
-            "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf"
+            "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf"
           ],
           "fecha": "2026-10-18"
         }
@@ -5166,20 +5166,20 @@
       "resumen": "SENEC.Home es la gama de baterías domésticas de SENEC GmbH, empresa de Leipzig (Alemania) filial al 100 % del grupo energético EnBW desde 2018. Entre marzo de 2022 y agosto de 2023 se conocieron varios incendios y deflagraciones en sistemas SENEC.Home V2.1, V3 hybrid y Home 4, tras lo cual la empresa apagó o limitó a distancia los equipos afectados (en agosto de 2023, al 70 % de la capacidad). Desde julio de 2024 SENEC sustituye gratuitamente los módulos de celdas NMC/NCA de esas generaciones por módulos LFP, o el sistema completo por una Home P4 en el caso de la Home 4; en octubre de 2025 declaraba más del 90 % del canje completado. En julio de 2026 EnBW anunció que SENEC deja de vender a nuevos clientes y se limita a atender a unos 186.000 clientes existentes, manteniendo las garantías vigentes. Varios tribunales civiles alemanes han fallado a favor de compradores; en mayo de 2026 uno de ellos concluyó, en una sentencia no firme, que los equipos afectados no debieron comercializarse. La última generación, Home P4, usa celdas LFP con 7,1 a 17,75 kWh útiles, según la marca.",
       "datos_tecnicos": {
         "capacidad_total_kwh": {
-          "valor": "7,52–18,8",
+          "valor": null,
           "unidad": "kWh",
           "naturaleza": "declarado",
           "fuente": "https://senec.com/de/produkte/senec-home/p4",
           "fecha": "2026-10-18",
-          "nota": "Capacidad bruta de la Home P4 según configuración."
+          "nota": "Texto publicado: «7,52–18,8». Varía según configuración. Capacidad bruta de la Home P4 según configuración."
         },
         "capacidad_util_kwh": {
-          "valor": "7,1–17,75",
+          "valor": null,
           "unidad": "kWh",
           "naturaleza": "declarado",
           "fuente": "https://senec.com/de/produkte/senec-home/p4",
           "fecha": "2026-10-18",
-          "nota": "Home P4. pv magazine (agosto 2024) citaba 7,1–17,5 kWh; la Home E4 ofrece 9,2 kWh."
+          "nota": "Texto publicado: «7,1–17,75». Varía según configuración. Home P4. pv magazine (agosto 2024) citaba 7,1–17,5 kWh; la Home E4 ofrece 9,2 kWh."
         },
         "gama_capacidades_kwh": {
           "valor": "Home P4: 7,1 a 17,75 kWh útiles; Home E4: 9,2 kWh",
@@ -5662,12 +5662,12 @@
           "nota": "No publicado en ficha ni manual; no se pudo verificar si las celdas proceden de la filial Kokam/Sella 2 de SolarEdge."
         },
         "ciclos_declarados": {
-          "valor": "ilimitados (garantía)",
+          "valor": null,
           "unidad": "ciclos",
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
-          "nota": "La garantía del modelo 400V no fija tope de ciclos ni de MWh."
+          "nota": "Texto publicado: «ilimitados (garantía)». La garantía no limita los ciclos. La garantía del modelo 400V no fija tope de ciclos ni de MWh."
         },
         "profundidad_descarga_pct": {
           "valor": 100,
@@ -6704,12 +6704,12 @@
           "refrigeración por convección natural"
         ],
         "num_componentes": {
-          "valor": "2 a 8 módulos de batería de 3,2 kWh + controlador",
+          "valor": null,
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
-          "nota": "El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
+          "nota": "Texto publicado: «2 a 8 módulos de batería de 3,2 kWh + controlador». El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
         },
         "reparabilidad": "Modular: los módulos y el controlador se venden por separado y se pueden añadir durante la vida útil según la marca (https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256). En el incidente de 2023 la solución fue revisar o cambiar el BMS (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/). La garantía excluye reparaciones sin seguir el manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de).",
         "fabricante_celulas": "No publicado",
@@ -7314,12 +7314,12 @@
           "nota": "7 unidades × 13,5 kWh."
         },
         "potencia_continua_kw": {
-          "valor": "3,68 – 11,04",
+          "valor": 11.04,
           "unidad": "kW",
           "naturaleza": "declarado",
           "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
           "fecha": "2026-10-18",
-          "nota": "Salida AC en red, seleccionable por pasos (16–48 A a 230 V). La carga de la batería está limitada a 5 kW (8 kW con Expansion)."
+          "nota": "Texto publicado: «3,68 – 11,04». Máximo configurable. Salida AC en red, seleccionable por pasos (16–48 A a 230 V). La carga de la batería está limitada a 5 kW (8 kW con Expansion)."
         },
         "potencia_pico_kw": {
           "valor": 15.4,

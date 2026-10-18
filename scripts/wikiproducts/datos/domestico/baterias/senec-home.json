@@ -31,20 +31,20 @@
   },
   "datos_tecnicos": {
     "capacidad_total_kwh": {
-      "valor": "7,52–18,8",
+      "valor": null,
       "unidad": "kWh",
       "origen": "declarado",
       "fuente": "https://senec.com/de/produkte/senec-home/p4",
       "fecha": "2026-10-18",
-      "nota": "Capacidad bruta de la Home P4 según configuración."
+      "nota": "Texto publicado: «7,52–18,8». Varía según configuración. Capacidad bruta de la Home P4 según configuración."
     },
     "capacidad_util_kwh": {
-      "valor": "7,1–17,75",
+      "valor": null,
       "unidad": "kWh",
       "origen": "declarado",
       "fuente": "https://senec.com/de/produkte/senec-home/p4",
       "fecha": "2026-10-18",
-      "nota": "Home P4. pv magazine (agosto 2024) citaba 7,1–17,5 kWh; la Home E4 ofrece 9,2 kWh."
+      "nota": "Texto publicado: «7,1–17,75». Varía según configuración. Home P4. pv magazine (agosto 2024) citaba 7,1–17,5 kWh; la Home E4 ofrece 9,2 kWh."
     },
     "gama_capacidades_kwh": {
       "valor": "Home P4: 7,1 a 17,75 kWh útiles; Home E4: 9,2 kWh",
@@ -293,8 +293,8 @@
     "fuentes_por_campo": {
       "razon_social": "https://de.wikipedia.org/wiki/SENEC",
       "pais_sede": "https://de.wikipedia.org/wiki/SENEC",
-      "fundacion": "https://de.wikipedia.org/wiki/SENEC (fundada en 2009 en Leipzig como Deutsche Energieversorgung GmbH)",
-      "cotiza_en": "https://de.wikipedia.org/wiki/SENEC (filial al 100 % de EnBW desde marzo de 2018)"
+      "fundacion": "https://de.wikipedia.org/wiki/SENEC%20(fundada%20en%202009%20en%20Leipzig%20como%20Deutsche%20Energieversorgung%20GmbH)",
+      "cotiza_en": "https://de.wikipedia.org/wiki/SENEC%20(filial%20al%20100%20%%20de%20EnBW%20desde%20marzo%20de%202018)"
     }
   },
   "origen": {

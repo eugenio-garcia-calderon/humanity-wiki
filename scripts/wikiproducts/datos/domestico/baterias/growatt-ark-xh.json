@@ -218,7 +218,7 @@
       "valor": 37.36,
       "unidad": "MWh",
       "origen": "declarado",
-      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
       "fecha": "2026-10-18",
       "nota": "ARK 10.2XH-A1 según la garantía australiana (no se ha encontrado la europea). Equivale a unos 3.650 ciclos completos de 10,24 kWh (cálculo propio)."
     },
@@ -242,7 +242,7 @@
   "garantias": {
     "producto": {
       "anios": 10,
-      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
       "fecha": "2026-10-18",
       "nota": "El documento dice que el plazo de 10 años «is only applicable for selling and installation in Australia». Las tiendas europeas anuncian 10 años, pero no se ha encontrado el documento de garantía europeo de la batería. Sin monitorización: 3 años."
     },
@@ -251,7 +251,7 @@
       "porcentaje_final": 70,
       "primer_anio_pct": null,
       "lineal_anual_pct": null,
-      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
       "fecha": "2026-10-18",
       "nota": "Al menos el 70 % de la energía nominal a los 10 años, dentro del tope de energía de cada modelo (garantía australiana)."
     },
@@ -329,7 +329,7 @@
     },
     {
       "tipo": "garantía",
-      "url": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "url": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
       "idioma": "en",
       "fecha": null
     },
@@ -347,7 +347,7 @@
       "veredicto": "matizable",
       "explicacion": "El único documento de garantía de la batería encontrado limita los 10 años a Australia, los reduce a 3 años sin monitorización y fija un tope de energía (37,36 MWh para el ARK 10.2XH). No se ha encontrado la versión europea.",
       "fuentes": [
-        "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf"
+        "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf"
       ],
       "fecha": "2026-10-18"
     },
@@ -367,7 +367,7 @@
       "veredicto": "matizable",
       "explicacion": "La ficha da IP65, apto en principio para exterior, pero la garantía australiana excluye la instalación o el uso en exterior sin resguardo adecuado, así como la luz solar directa.",
       "fuentes": [
-        "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf"
+        "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf"
       ],
       "fecha": "2026-10-18"
     }

@@ -79,12 +79,12 @@
       "nota": "6 módulos por sistema según la tabla. La misma página anuncia «5-180kWh», cifra que no se explica en la tabla (ver afirmaciones)."
     },
     "potencia_continua_kw": {
-      "valor": "3,68 / 4,6 / 5 / 6 (monofásico); hasta 12 (trifásico)",
+      "valor": 6,
       "unidad": "kW",
       "origen": "declarado",
       "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
       "fecha": "2026-10-18",
-      "nota": "Potencia AC del módulo de potencia. La ficha del distribuidor da 3 kW de carga/descarga máxima por módulo de batería."
+      "nota": "Texto publicado: «3,68 / 4,6 / 5 / 6 (monofásico); hasta 12 (trifásico)». Valor de la variante monofásica de mayor potencia. Potencia AC del módulo de potencia. La ficha del distribuidor da 3 kW de carga/descarga máxima por módulo de batería."
     },
     "potencia_pico_kw": {
       "valor": 10,

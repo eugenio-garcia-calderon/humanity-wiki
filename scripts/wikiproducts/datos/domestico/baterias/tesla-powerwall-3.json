@@ -79,12 +79,12 @@
       "nota": "7 unidades × 13,5 kWh."
     },
     "potencia_continua_kw": {
-      "valor": "3,68 – 11,04",
+      "valor": 11.04,
       "unidad": "kW",
       "origen": "declarado",
       "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
       "fecha": "2026-10-18",
-      "nota": "Salida AC en red, seleccionable por pasos (16–48 A a 230 V). La carga de la batería está limitada a 5 kW (8 kW con Expansion)."
+      "nota": "Texto publicado: «3,68 – 11,04». Máximo configurable. Salida AC en red, seleccionable por pasos (16–48 A a 230 V). La carga de la batería está limitada a 5 kW (8 kW con Expansion)."
     },
     "potencia_pico_kw": {
       "valor": 15.4,

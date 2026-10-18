@@ -291,7 +291,7 @@
       "razon_social": "https://en.wikipedia.org/wiki/Sungrow",
       "pais_sede": "https://en.wikipedia.org/wiki/Sungrow",
       "fundacion": "https://en.wikipedia.org/wiki/Sungrow",
-      "cotiza_en": "https://en.wikipedia.org/wiki/Sungrow ; https://www.pv-magazine.com/2026/04/28/catl-raises-5-billion-in-share-sale-sungrow-files-for-hong-kong-ipo-for-the-second-time/"
+      "cotiza_en": "https://en.wikipedia.org/wiki/Sungrow%20;%20https://www.pv-magazine.com/2026/04/28/catl-raises-5-billion-in-share-sale-sungrow-files-for-hong-kong-ipo-for-the-second-time/"
     }
   },
   "origen": {
@@ -304,12 +304,12 @@
       "refrigeración por convección natural"
     ],
     "num_componentes": {
-      "valor": "2 a 8 módulos de batería de 3,2 kWh + controlador",
+      "valor": null,
       "unidad": null,
       "origen": "declarado",
       "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
       "fecha": "2026-10-18",
-      "nota": "El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
+      "nota": "Texto publicado: «2 a 8 módulos de batería de 3,2 kWh + controlador». El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
     },
     "reparabilidad": "Modular: los módulos y el controlador se venden por separado y se pueden añadir durante la vida útil según la marca (https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256). En el incidente de 2023 la solución fue revisar o cambiar el BMS (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/). La garantía excluye reparaciones sin seguir el manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de)."
   },

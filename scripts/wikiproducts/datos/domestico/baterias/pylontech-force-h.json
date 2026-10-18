@@ -111,12 +111,12 @@
       "nota": "El comunicado de 2026 trata de celdas grandes para almacenamiento a escala de red; no confirma que los módulos FH10050 usen celdas propias."
     },
     "ciclos_declarados": {
-      "valor": "> 8.000 (25 °C)",
+      "valor": 8000,
       "unidad": "ciclos",
       "origen": "declarado",
       "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
       "fecha": "2026-10-18",
-      "nota": "Force H3. Force H2: > 5.000 a 95 % DoD (Offgridtec). La garantía no cubre ciclos."
+      "nota": "Texto publicado: «> 8.000 (25 °C)». La marca dice «más de 8.000» a 25 °C. Force H3. Force H2: > 5.000 a 95 % DoD (Offgridtec). La garantía no cubre ciclos."
     },
     "profundidad_descarga_pct": {
       "valor": 95,
@@ -178,7 +178,7 @@
       "valor": "interior o exterior protegido (sin sol directo ni heladas, según garantía)",
       "unidad": null,
       "origen": "declarado",
-      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
       "fecha": "2026-10-18",
       "nota": ""
     },
@@ -242,7 +242,7 @@
   "garantias": {
     "producto": {
       "anios": 7,
-      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
       "fecha": "2026-10-18",
       "nota": "Garantía al consumidor Force-H1/H2 para UE y Reino Unido (ref. 4AB16W50091): 7 años desde la instalación o 6 meses tras la fabricación (lo que sea antes); 10 años si se registra en la web de Pylontech. Para Force H3 en Europa no se ha leído el documento (una tienda enlaza «Force H series v1.2 EU»); la versión para EE. UU./Canadá V1.2 da 10 años de producto."
     },
@@ -251,7 +251,7 @@
       "porcentaje_final": 50,
       "primer_anio_pct": null,
       "lineal_anual_pct": null,
-      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
       "fecha": "2026-10-18",
       "nota": "Mínimo 60 % de la energía nominal durante los 7 años; con la ampliación a 10 años por registro, el mínimo baja al 50 % al final. Sin límite de MWh."
     },
@@ -280,7 +280,7 @@
       "Pylontech anunció el 22-09-2026 la producción en masa de celdas LFP propias de 588 Ah y 601 Ah en Hefei para almacenamiento a gran escala (https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html)."
     ],
     "fuentes": [
-      "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
       "https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html"
     ]
   },
@@ -294,12 +294,12 @@
       "carcasa metálica"
     ],
     "num_componentes": {
-      "valor": "1 BMS + 2 a 7 módulos de batería",
+      "valor": null,
       "unidad": null,
       "origen": "declarado",
       "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
       "fecha": "2026-10-18",
-      "nota": ""
+      "nota": "Texto publicado: «1 BMS + 2 a 7 módulos de batería»."
     },
     "reparabilidad": "Módulos sustituibles por separado; la garantía excluye mezclar tipos de módulos y reparaciones no autorizadas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf)."
   },
@@ -333,7 +333,7 @@
     },
     {
       "tipo": "garantía",
-      "url": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "url": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
       "idioma": "en",
       "fecha": "2026-10-18",
       "nota": "Force-H1/H2, UE y Reino Unido, ref. 4AB16W50091."
@@ -347,7 +347,7 @@
     },
     {
       "tipo": "garantía",
-      "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Pylontech product warranty-Force H serie V1.2 UL24WFH100527_20241101092414A174.pdf",
+      "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Pylontech%20product%20warranty-Force%20H%20serie%20V1.2%20UL24WFH100527_20241101092414A174.pdf",
       "idioma": "en",
       "fecha": "2026-10-18",
       "nota": "Force-H1/H1-V2/H3, EE. UU. y Canadá, V1.2 (UL24WFH100527)."
@@ -361,7 +361,7 @@
       "explicacion": "Es un dato de laboratorio a 25 °C. La garantía no está ligada a ciclos y, en la versión UE consultada (H1/H2), dura 7 años o 10 con registro, con un mínimo del 50–60 % de capacidad.",
       "fuentes": [
         "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
-        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf"
+        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf"
       ],
       "fecha": "2026-10-18"
     },
@@ -383,7 +383,7 @@
       "explicacion": "Coincide con la ficha: 9,69 kWh utilizables de 10,24 kWh nominales (94,6 %, cálculo). Para conservar la garantía UE de la H2 la profundidad de descarga debe ser inferior al 90 %.",
       "fuentes": [
         "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
-        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf"
+        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf"
       ],
       "fecha": "2026-10-18"
     }

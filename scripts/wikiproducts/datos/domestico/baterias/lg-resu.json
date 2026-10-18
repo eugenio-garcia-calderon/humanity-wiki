@@ -306,12 +306,12 @@
       "celdas de iones de litio de LG Energy Solution"
     ],
     "num_componentes": {
-      "valor": "1 unidad cerrada (sin módulos ampliables internamente)",
+      "valor": null,
       "unidad": null,
       "origen": "declarado",
       "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
       "fecha": "2026-10-18",
-      "nota": "La ampliación es poniendo dos unidades en paralelo."
+      "nota": "Texto publicado: «1 unidad cerrada (sin módulos ampliables internamente)». La ampliación es poniendo dos unidades en paralelo."
     },
     "reparabilidad": "No se encontró información pública. En las retiradas de la RESU 10H el remedio fue la sustitución completa, una actualización de software o el reembolso."
   },

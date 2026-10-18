@@ -4,12 +4,14 @@ import fs from 'node:fs';
 const VER = new Set(['cierta', 'matizable', 'falsa', 'sin_pruebas']);
 const NAT = new Set(['declarado', 'medido', 'calculado', 'no_publicado']);
 const out = [];
+const esUrl = (u) => { try { return /^https?:$/.test(new URL(u).protocol) && !/\s/.test(u); } catch { return false; } };
 function walk(x, ruta, id) {
   if (Array.isArray(x)) return x.forEach((v, i) => walk(v, `${ruta}[${i}]`, id));
   if (!x || typeof x !== 'object') return;
   if ('valor' in x && x.valor !== null && x.valor !== '') {
     if (!NAT.has(x.naturaleza)) out.push(`${id} ${ruta}: naturaleza «${x.naturaleza}»`);
     if (!x.fuente && x.naturaleza !== 'calculado') out.push(`${id} ${ruta}: sin fuente`);
+    if (x.fuente && !esUrl(x.fuente)) out.push(`${id} ${ruta}: fuente no es una URL válida`);
     if (x.naturaleza === 'calculado' && !x.nota) out.push(`${id} ${ruta}: calculado sin fórmula`);
   }
   for (const [k, v] of Object.entries(x)) walk(v, `${ruta}.${k}`, id);

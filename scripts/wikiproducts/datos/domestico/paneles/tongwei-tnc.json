@@ -145,7 +145,7 @@
       "valor": 1,
       "unidad": "%",
       "origen": "declarado",
-      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
       "fecha": "2026-10-18",
       "nota": "Garantía TNC de doble vidrio."
     },
@@ -153,7 +153,7 @@
       "valor": 0.4,
       "unidad": "%/año",
       "origen": "declarado",
-      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
       "fecha": "2026-10-18",
       "nota": "Años 2 a 30."
     },
@@ -233,7 +233,7 @@
   "garantias": {
     "producto": {
       "anios": 15,
-      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
       "fecha": "2026-10-18",
       "nota": "15 años en la garantía (Australia, 30-05-2025), la ficha Ver.20250801 y el distribuidor español Vico Export. La ficha en alemán de photovoltaik4all dice 25 años y esa misma tienda dice 15 en su tabla: comprobar con el vendedor antes de comprar."
     },
@@ -242,7 +242,7 @@
       "porcentaje_final": 87.4,
       "primer_anio_pct": 99,
       "lineal_anual_pct": 0.4,
-      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
       "fecha": "2026-10-18",
       "nota": "Garantía de potencia TNC doble vidrio."
     },
@@ -315,13 +315,13 @@
     },
     {
       "tipo": "ficha técnica",
-      "url": "https://www.photovoltaik4all.de/media/52/77/37/1781676787/TONGWEI TWMNH-48HE-460 Datenblatt DE.pdf",
+      "url": "https://www.photovoltaik4all.de/media/52/77/37/1781676787/TONGWEI%20TWMNH-48HE-460%20Datenblatt%20DE.pdf",
       "idioma": "de",
       "fecha": null
     },
     {
       "tipo": "garantía",
-      "url": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "url": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
       "idioma": "en",
       "fecha": "2025-05-30"
     }
@@ -353,7 +353,7 @@
       "veredicto": "matizable",
       "explicacion": "La garantía oficial que se pudo leer (Australia, 2025), la ficha Ver.20250801 y el distribuidor español dan 15 años de producto para el TWMNH-48HE; la propia tienda alemana dice 15 años en su tabla técnica. No se encontró una garantía europea que confirme los 25 años, aunque podría existir una versión regional distinta.",
       "fuentes": [
-        "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+        "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
         "https://www.vicoexport.com/en/home-es/solar-panels/tongwei-solar/"
       ],
       "fecha": "2026-10-18"

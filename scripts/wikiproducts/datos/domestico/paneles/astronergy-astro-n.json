@@ -41,7 +41,7 @@
 
   "garantias": {
     "producto": { "anios": 25, "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Según la ficha. El documento de garantía consultado (Australia) remite a un anexo A, no publicado con él, para los años por modelo." },
-    "rendimiento": { "anios": 30, "porcentaje_final": 87.4, "primer_anio_pct": 99, "lineal_anual_pct": 0.4, "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf", "fecha": "2026-10-18", "nota": "Términos para módulos n-type; coinciden con la ficha. Solo cubre la potencia de la cara frontal." },
+    "rendimiento": { "anios": 30, "porcentaje_final": 87.4, "primer_anio_pct": 99, "lineal_anual_pct": 0.4, "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf", "fecha": "2026-10-18", "nota": "Términos para módulos n-type; coinciden con la ficha. Solo cubre la potencia de la cara frontal." },
     "letra_pequena": [
       "Reclamación en un plazo de 30 días naturales desde que se descubre el defecto; si no, se pierde el derecho. Acciones legales dentro de los 6 meses siguientes (garantía Astronergy para Australia, publicada el 09-12-2024).",
       "El cliente paga desmontaje, embalaje, reinstalación, producción perdida y la mayoría de impuestos y aranceles, sea cual sea el resultado de la reclamación; si es válida, Astronergy reembolsa un envío de vuelta «razonable» con un tope pactado de antemano (garantía Australia).",
@@ -86,7 +86,7 @@
   "documentos": [
     { "tipo": "ficha técnica", "url": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "idioma": "en", "fecha": "2025-10" },
     { "tipo": "manual", "url": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Manual.pdf", "idioma": "en", "fecha": null },
-    { "tipo": "garantía", "url": "https://solarproof.com.au//warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf", "idioma": "en", "fecha": "2024-12-09" }
+    { "tipo": "garantía", "url": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf", "idioma": "en", "fecha": "2024-12-09" }
   ],
 
   "afirmaciones": [

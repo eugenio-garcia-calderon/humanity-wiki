@@ -14,12 +14,12 @@
     "nota": "No encontrado en la ficha."
   },
   "anio_lanzamiento": {
-    "valor": "hacia 2020",
+    "valor": null,
     "unidad": "año",
     "origen": "declarado",
     "fuente": "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
     "fecha": "2026-10-18",
-    "nota": "Según un distribuidor alemán, HVS y HVM están en el mercado «desde aproximadamente 2020». No verificado con BYD."
+    "nota": "Texto publicado: «hacia 2020». Fecha exacta no publicada. Según un distribuidor alemán, HVS y HVM están en el mercado «desde aproximadamente 2020». No verificado con BYD."
   },
   "estado": "a la venta",
   "resumen": "Batería doméstica de alta tensión de BYD formada por una torre de 2 a 5 módulos de 2,56 kWh de fosfato de hierro y litio (LFP), de 5,12 a 12,8 kWh utilizables, que necesita un inversor híbrido externo compatible. Según la marca, admite hasta tres torres en paralelo y su eficiencia de ida y vuelta es igual o superior al 96 %. La familia hermana HVM usa módulos de 2,76 kWh a menor tensión, y desde 2025 BYD vende las versiones HVS+ y HVM+, con una nueva unidad de control; distribuidores alemanes indican que la HVS original se está agotando. La garantía europea es de 10 años o un límite de energía descargada, con un 60 % de capacidad garantizada. Sistemas con la HVS han participado en el ensayo independiente de la HTW Berlin.",
@@ -217,7 +217,7 @@
       "valor": 30.82,
       "unidad": "MWh",
       "origen": "declarado",
-      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
       "fecha": "2026-10-18",
       "nota": "HVS 10.2. HVS 5.1: 15,41; 7.7: 23,12; 12.8: 38,53 MWh. Equivale a unas 3.000 descargas completas (cálculo: 30,82 MWh / 10,24 kWh ≈ 3.010)."
     },
@@ -241,7 +241,7 @@
   "garantias": {
     "producto": {
       "anios": 10,
-      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
       "fecha": "2026-10-18",
       "nota": "Garantía limitada Europa ES V1.2 para HVS/HVM instaladas desde el 08-03-2023. Inicio: el primer día tras 6 meses desde la fecha de producción, o 30 días tras la entrega documentada."
     },
@@ -250,7 +250,7 @@
       "porcentaje_final": 60,
       "primer_anio_pct": null,
       "lineal_anual_pct": null,
-      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+      "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
       "fecha": "2026-10-18",
       "nota": "60 % de la energía utilizable durante 10 años o hasta alcanzar la energía descargada mínima (30,82 MWh en HVS 10.2), lo que ocurra primero."
     },
@@ -280,13 +280,13 @@
     "fuentes": [
       "https://en.wikipedia.org/wiki/BYD_Company",
       "https://site.bydbatterybox.com/",
-      "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+      "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
       "https://42watt.de/magazin/byd-speicher"
     ],
     "fuentes_por_campo": {
-      "razon_social": "https://en.wikipedia.org/wiki/BYD_Company ; garante: https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+      "razon_social": "https://en.wikipedia.org/wiki/BYD_Company%20;%20garante:%20https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
       "pais_sede": "https://en.wikipedia.org/wiki/BYD_Company",
-      "fundacion": "https://en.wikipedia.org/wiki/BYD_Company (fundada por Wang Chuanfu en febrero de 1995 como fabricante de baterías)",
+      "fundacion": "https://en.wikipedia.org/wiki/BYD_Company%20(fundada%20por%20Wang%20Chuanfu%20en%20febrero%20de%201995%20como%20fabricante%20de%20baterías)",
       "cotiza_en": "https://en.wikipedia.org/wiki/BYD_Company"
     }
   },
@@ -300,12 +300,12 @@
       "carcasa metálica"
     ],
     "num_componentes": {
-      "valor": "2–5 módulos de batería + 1 base con BCU",
+      "valor": null,
       "unidad": null,
       "origen": "declarado",
       "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
       "fecha": "2026-10-18",
-      "nota": ""
+      "nota": "Texto publicado: «2–5 módulos de batería + 1 base con BCU»."
     },
     "reparabilidad": "Diseño modular: los módulos se suministran por separado y pueden sustituirse o añadirse (https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf). Las reparaciones o modificaciones sin aprobación de BYD o su socio excluyen la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf)."
   },
@@ -339,7 +339,7 @@
     },
     {
       "tipo": "garantía",
-      "url": "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf",
+      "url": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
       "idioma": "es",
       "fecha": "2026-10-18",
       "nota": "HVS & HVM Europa V1.2."
@@ -384,7 +384,7 @@
         "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
         "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
         "https://42watt.de/magazin/byd-speicher",
-        "https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf"
+        "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf"
       ],
       "fecha": "2026-10-18"
     }

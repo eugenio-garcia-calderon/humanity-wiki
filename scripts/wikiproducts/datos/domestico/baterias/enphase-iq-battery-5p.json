@@ -251,7 +251,7 @@
       "porcentaje_final": 60,
       "primer_anio_pct": null,
       "lineal_anual_pct": null,
-      "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf",
+      "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
       "fecha": "2026-10-18",
       "nota": "Garantía de Australia y Nueva Zelanda (productos activados desde el 12-04-2023): al menos 60 % de 5,0 kWh CC durante 15 años o 6.000 ciclos. No se localizó el documento de garantía específico de España."
     },
@@ -289,8 +289,8 @@
     "fuentes_por_campo": {
       "razon_social": "https://en.wikipedia.org/wiki/Enphase_Energy",
       "pais_sede": "https://en.wikipedia.org/wiki/Enphase_Energy",
-      "fundacion": "https://en.wikipedia.org/wiki/Enphase_Energy (establecida en 2006; constituida como Enphase Energy, Inc. a principios de 2007)",
-      "cotiza_en": "https://en.wikipedia.org/wiki/Enphase_Energy (Nasdaq: ENPH desde marzo de 2012)"
+      "fundacion": "https://en.wikipedia.org/wiki/Enphase_Energy%20(establecida%20en%202006;%20constituida%20como%20Enphase%20Energy,%20Inc.%20a%20principios%20de%202007)",
+      "cotiza_en": "https://en.wikipedia.org/wiki/Enphase_Energy%20(Nasdaq:%20ENPH%20desde%20marzo%20de%202012)"
     }
   },
   "origen": {
@@ -361,7 +361,7 @@
     },
     {
       "tipo": "garantía",
-      "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf",
+      "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
       "idioma": "en",
       "fecha": "2023-04-12",
       "nota": "Australia y Nueva Zelanda; no es la garantía española"

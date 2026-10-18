@@ -294,10 +294,10 @@
       "https://www.pv-magazine.com/2024/11/18/lithuania-bans-remote-chinese-access-to-solar-wind-storage-devices/"
     ],
     "fuentes_por_campo": {
-      "razon_social": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf (garante en la garantía europea)",
+      "razon_social": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf%20(garante%20en%20la%20garantía%20europea)",
       "pais_sede": "https://en.wikipedia.org/wiki/Huawei",
-      "fundacion": "https://en.wikipedia.org/wiki/Huawei (fundada en Shenzhen en 1987 por Ren Zhengfei)",
-      "cotiza_en": "https://en.wikipedia.org/wiki/Huawei (tipo «privada»)"
+      "fundacion": "https://en.wikipedia.org/wiki/Huawei%20(fundada%20en%20Shenzhen%20en%201987%20por%20Ren%20Zhengfei)",
+      "cotiza_en": "https://en.wikipedia.org/wiki/Huawei%20(tipo%20«privada»)"
     }
   },
   "origen": {
@@ -310,12 +310,12 @@
       "carcasa IP66 con refrigeración por convección natural"
     ],
     "num_componentes": {
-      "valor": "1 módulo de potencia + 1 a 3 módulos de batería",
+      "valor": null,
       "unidad": null,
       "origen": "declarado",
       "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
       "fecha": "2026-10-18",
-      "nota": ""
+      "nota": "Texto publicado: «1 módulo de potencia + 1 a 3 módulos de batería»."
     },
     "reparabilidad": "Modular: los módulos de batería y el módulo de potencia se venden por separado (https://www.wattuneed.com/es/bateria-litio/26861-bateria-de-litio-huawei-luna2000-7-e1-69-kwh-350-v-lfp-69-kwh-ip66.html). Las reparaciones no autorizadas excluyen la garantía (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf)."
   },

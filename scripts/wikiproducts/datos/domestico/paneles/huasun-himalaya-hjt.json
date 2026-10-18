@@ -281,7 +281,7 @@
       "https://www.huasunsolar.com/about-us.html",
       "https://www.huasunsolar.com",
       "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
-      "https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+      "https://solarproof.com.au/warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
     ]
   },
   "origen": {
@@ -321,7 +321,7 @@
     },
     {
       "tipo": "garantía",
-      "url": "https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "url": "https://solarproof.com.au/warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
       "idioma": "en",
       "fecha": "v1.0 (2022), entregas 2022–2023"
     }
