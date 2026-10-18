@@ -292,6 +292,7 @@ function filaProducto(p) {
 const FOTOS = process.env.WP_FOTOS === 'si';
 const LIBRE = /^(cc0|cc-?0|public domain|pd\b.*|cc[- ]by(-sa)?[- ]\d(\.\d)?(\s.*)?)$/i;
 const fotoDe = new Map();
+const SIEMPRE = new Set(['foto', 'foto_licencia']);
 const fotosRechazadas = [];
 const rutaFotos = path.join(dir, 'datos', 'fotos.json');
 if (existsSync(rutaFotos)) {
@@ -391,7 +392,9 @@ function cuerpoDe(fila) {
     const crudo = fila.campos[clave];
     const r = aCelda(c, crudo);
     if (r.rechazo) informe.rechazos.push(`${fila.tabla} · ${corto(fila.nombre, 50)} · ${c.nombre}: ${r.rechazo}`);
-    else if (r.valor !== null || esDato(crudo)) values[c.nombre] = r.valor;
+    // The photo is always sent, empty too: an image that lost its licence
+    // (or never had one) has to come off the sheet, not stay from a past load.
+    else if (r.valor !== null || esDato(crudo) || SIEMPRE.has(clave)) values[c.nombre] = r.valor;
     const pr = procedenciaDe(crudo);
     // A range («21–22 %») in a number column: the cell stays empty and the
     // published wording travels in the source note, so it is not lost.
