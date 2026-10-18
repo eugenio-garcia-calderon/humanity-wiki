@@ -113,6 +113,8 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
 ];
 
 const CON_OPCIONES = new Set(['seleccion', 'seleccion_multiple']);
+/** Los colores de las etiquetas, los de Notion (2026-10-18). Sin color, gris claro. */
+const COLORES_OPCION: Array<[string, string]> = [['Gris', '#787774'], ['Marrón', '#9f6b53'], ['Naranja', '#d9730d'], ['Amarillo', '#cb912f'], ['Verde', '#448361'], ['Azul', '#337ea9'], ['Morado', '#9065b0'], ['Rosa', '#c14c8a'], ['Rojo', '#d44c47']];
 const VARIOS = new Set(['persona', 'proyecto', 'publicacion', 'relacion', 'imagen', 'video', 'documento']);
 
 const OPERACIONES = [
@@ -152,7 +154,9 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const soloEnlace = (columna?.tipo || tipoInicial) === 'relacion';
   const [nombre, setNombre] = useState(columna?.nombre || '');
   const [tipo, setTipo] = useState(columna?.tipo || tipoInicial || 'texto');
-  const [opciones, setOpciones] = useState<Array<{ id?: string; label: string }>>(columna?.opciones || []);
+  const [opciones, setOpciones] = useState<Array<{ id?: string; label: string; color?: string | null }>>(columna?.opciones || []);
+  /** La opción cuyo selector de color está abierto. */
+  const [colorDe, setColorDe] = useState<number | null>(null);
   const [config, setConfig] = useState<any>(columna?.config || {});
   /** Lo que se escribe en el buscador de tipos. */
   const [buscarTipo, setBuscarTipo] = useState('');
@@ -355,7 +359,13 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <span className="text-[11px] font-black uppercase tracking-wide text-slate-400">Opciones</span>
               <div className="mt-1 space-y-1">
                 {opciones.map((o, i) => (
-                  <div key={o.id || i} className="flex items-center gap-1">
+                  <div key={o.id || i}>
+                  <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => setColorDe(colorDe === i ? null : i)} aria-label={`Color de la opción ${i + 1}`} aria-expanded={colorDe === i}
+                      title="Color de la etiqueta"
+                      className="w-7 h-7 shrink-0 rounded-full border border-slate-200 grid place-items-center hover:ring-2 hover:ring-slate-200">
+                      <span className="w-4 h-4 rounded-full" style={{ backgroundColor: o.color || '#e2e8f0' }} />
+                    </button>
                     <input value={o.label} placeholder={`Opción ${i + 1}`} aria-label={`Opción ${i + 1}`}
                       onChange={e => setOpciones(os => os.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setOpciones(os => [...os, { label: '' }]); } }}
@@ -373,6 +383,19 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       className="w-11 h-11 grid place-items-center text-slate-300 hover:text-rose-600">
                       <Trash2 className="w-4 h-4" />
                     </button>
+                  </div>
+                  {colorDe === i && (
+                    <div role="radiogroup" aria-label={`Color de ${o.label || `la opción ${i + 1}`}`} className="mt-1 ml-8 flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 p-2">
+                      <button type="button" role="radio" aria-checked={!o.color} onClick={() => { setOpciones(os => os.map((x, n) => n === i ? { ...x, color: null } : x)); setColorDe(null); }}
+                        className={cn('h-7 px-2 rounded-md text-[11px] font-bold text-slate-500 bg-white border', !o.color ? 'border-slate-900' : 'border-slate-200')}>Sin color</button>
+                      {COLORES_OPCION.map(([nombre, hex]) => (
+                        <button key={hex} type="button" role="radio" aria-checked={o.color === hex} aria-label={nombre} title={nombre}
+                          onClick={() => { setOpciones(os => os.map((x, n) => n === i ? { ...x, color: hex } : x)); setColorDe(null); }}
+                          className={cn('h-7 px-2 rounded-md text-[11px] font-semibold', o.color === hex && 'ring-2 ring-offset-1 ring-slate-900')}
+                          style={{ backgroundColor: hex + '33', color: hex }}>{nombre}</button>
+                      ))}
+                    </div>
+                  )}
                   </div>
                 ))}
                 <button onClick={() => setOpciones(os => [...os, { label: '' }])}
