@@ -10,6 +10,7 @@ const VELOCIDADES = [{ v: 12, l: '1', t: 'Muy lenta' }, { v: 28, l: '2', t: 'Len
 import type { TamanoGaleria } from '../../utils/bloques';
 import { useSitio } from '../sitio/ContextoSitio';
 import { slugDe } from '../sitio/sitioWeb';
+import { recordarRuta } from '../../utils/rutasLegibles';
 import ConexionesBD, { type Conexion } from './ConexionesBD';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
@@ -238,7 +239,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       const j = await r.json();
       if (mio !== turno.current) return;
       if (!r.ok) { setFallo(j.error || 'No se pudo cargar la tabla.'); setDatos(null); }
-      else setDatos(j);
+      else {
+        // Antes de pintar: los enlaces de las fichas salen ya por su dirección legible.
+        for (const f of (Array.isArray(j?.filas) ? j.filas : [])) recordarRuta(f?.pagina_id, f?.pagina?.ruta);
+        setDatos(j);
+      }
     } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
     if (mio === turno.current) setCargando(false);
   }, [tablaId, activa.id, vistas === null, visitante, editable]); // eslint-disable-line react-hooks/exhaustive-deps

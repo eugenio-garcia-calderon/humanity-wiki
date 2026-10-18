@@ -862,7 +862,7 @@ export function registrarSitios(app: Express, db: any) {
       s.forma === 'dominio' ? resolverDominio(db, s.host) : null,
       yaArmada !== undefined ? yaArmada : w ? (w.virtual ? w : paginaPublica(db, w.id)) : null,
     ]);
-    const pre: { resolver?: any; paginas?: Record<string, any>; rutas?: Record<string, string> } = {};
+    const pre: { resolver?: any; paginas?: Record<string, any>; rutas?: Record<string, string>; legibles?: Record<string, string> } = {};
     if (resuelto) pre.resolver = { host: s.host, ...resuelto };
 
     // La página sólo se manda si es la que se va a pintar: la del dominio
@@ -910,6 +910,32 @@ export function registrarSitios(app: Express, db: any) {
       const sub = typeof legible.config?.subtitulo === 'string' && legible.config.subtitulo.trim()
         ? `<p>${enLinea(legible.config.subtitulo, enlaces)}</p>` : '';
       raiz = `<main><article><h1>${escHtml(titulo)}</h1>${sub}${cuerpo}</article></main>`;
+    }
+
+    // LOS ENLACES A FICHAS, POR SU DIRECCIÓN LEGIBLE (SEO R2/R7). Los bloques
+    // y el menú enlazan por id (`/p/:id`), que sólo redirige a la legible: un
+    // salto de más para el buscador en cada enlace. Se cambian aquí todos de
+    // una vez, y el navegador recibe las mismas en `__SITIO__.legibles` para
+    // armar igual los suyos (`rutasLegibles.ts`).
+    if (raiz) {
+      const ids = [...new Set([...raiz.matchAll(/href="(?:\/@[^/"]+)?\/p\/([^"/?#]+)"/g)].map(m => m[1]))].slice(0, 500);
+      if (ids.length) {
+        try {
+          const r = await db.execute(sql`
+            SELECT id, slug FROM knowledge_windows
+            WHERE id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND slug LIKE '%/%'
+              AND deleted_at IS NULL AND archived_at IS NULL
+          `);
+          const legibles: Record<string, string> = {};
+          for (const x of r.rows as any[]) legibles[x.id] = String(x.slug);
+          if (Object.keys(legibles).length) {
+            const ruta = (slug: string) => slug.split('/').map(encodeURIComponent).join('/');
+            raiz = raiz.replace(/href="(\/@[^/"]+)?\/p\/([^"/?#]+)"/g, (todo, arroba, id) =>
+              legibles[id] ? `href="${arroba || ''}/${ruta(legibles[id])}"` : todo);
+            pre.legibles = legibles;
+          }
+        } catch (e) { console.error('sitios: legibles', e); }
+      }
     }
 
     if (s.forma === 'dominio') {

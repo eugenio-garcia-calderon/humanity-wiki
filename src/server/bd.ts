@@ -284,10 +284,10 @@ export function registerBdRoutes(app: Express, db: any) {
   /** Lo que la galería necesita de la página de cada fila: su portada o la
    *  primera imagen, su icono y un trozo del primer texto. En un viaje. */
   const tarjetasDe = async (paginaIds: string[]) => {
-    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null; encuadre: { x: number; y: number } | null }> = {};
+    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null; encuadre: { x: number; y: number } | null; ruta: string | null }> = {};
     if (!paginaIds.length) return out;
     const r = await db.execute(sql`
-      SELECT id, title, config FROM knowledge_windows
+      SELECT id, title, config, slug FROM knowledge_windows
       WHERE id IN (${sql.join(paginaIds.map(i => sql`${i}`), sql`, `)}) AND deleted_at IS NULL
     `);
     for (const w of r.rows as any[]) {
@@ -306,6 +306,9 @@ export function registerBdRoutes(app: Express, db: any) {
         descripcion: typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? cfg.subtitulo.trim().slice(0, 300) : null,
         // Qué parte de la imagen se ve en la tarjeta (ver `/encuadre`).
         encuadre: cfg.encuadre && Number.isFinite(cfg.encuadre.x) && Number.isFinite(cfg.encuadre.y) ? cfg.encuadre : null,
+        // Su dirección legible, si la tiene (`rutasFila.ts`): un sitio enlaza
+        // la ficha por ella y no por `/p/:id`, que sólo redirige (SEO R2/R7).
+        ruta: typeof w.slug === 'string' && w.slug.includes('/') ? w.slug : null,
       };
     }
     return out;

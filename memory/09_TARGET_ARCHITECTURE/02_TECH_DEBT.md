@@ -416,6 +416,15 @@ Fixing it means passing the row page's slug to the reading components
 today, touching files other threads edit often. Do it when the product sheet
 (W1) settles.
 
+**Paid 2026-10-18 (W2).** Rows carry `pagina.ruta`; `rutasLegibles.ts` keeps the
+known id → path map, seeded from the server HTML (`__SITIO__.legibles`) and from
+each table load, and `enlacePagina` uses it. What remains: on the casa form
+(`humanity.wiki/@quien/…`) the server sends no `__SITIO__`, so React re-renders
+`/p/:id` links there (the server HTML is already rewritten). Readable paths use
+the site's handle, not the page creator's; a row page created by a collaborator
+on someone else's site would get a path that does not resolve. That is the same
+assumption the server HTML and sitemap already make.
+
 ## 2026-10-18 — Offers block reads the whole offers table (Wikiproducts W5)
 
 `ofertasDeProducto` (`src/server/ofertas.ts`) reads every row of the offers
