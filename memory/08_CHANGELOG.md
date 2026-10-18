@@ -8859,6 +8859,7 @@ en mis páginas como proyecto pendiente».
 - Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
 - `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).
 
+
 ### 2026-10-18 — Valoraciones de la comunidad por criterio (Wikiproducts W4)
 - Nuevo tipo de propiedad en las bases de datos, grupo «Comunidad»: Calidad, Precio, Garantía, Ecología, Salud, Estética, Ética, Atención al cliente (sólo puntúa quien compró) y Nota media. No se escribe a mano: la celda enseña la media de los votos y cuántos son, o «Sin votos suficientes» con menos de 3.
 - Bloque «Valoración de la comunidad» para la página de una fila: una barra por criterio con su media y sus votos, estrellas para votar (un voto por persona y criterio, se cambia o se quita), la media de compradores verificados aparte y una explicación de cómo se calcula.
