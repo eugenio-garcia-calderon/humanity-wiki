@@ -47,6 +47,12 @@
       "ruta": "src/index.css",
       "motivo": "W2: contraste y 16 px en sitios publicados",
       "desde": "2026-10-18T16:50:26.502Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "W2: migas y contraste",
+      "desde": "2026-10-18T16:50:29.462Z"
     }
   ]
 }
