@@ -205,7 +205,8 @@
           "config": {
             "clave": "entrega_min_dias",
             "grupo": "compra",
-            "rol": "entrega_min"
+            "rol": "entrega_min",
+            "unidad": "días"
           }
         },
         {
@@ -215,7 +216,8 @@
           "config": {
             "clave": "entrega_max_dias",
             "grupo": "compra",
-            "rol": "entrega_max"
+            "rol": "entrega_max",
+            "unidad": "días"
           }
         },
         {
@@ -247,7 +249,8 @@
           "config": {
             "clave": "devolucion_dias",
             "grupo": "compra",
-            "rol": "devolucion_dias"
+            "rol": "devolucion_dias",
+            "unidad": "días"
           }
         },
         {
