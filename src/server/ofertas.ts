@@ -26,6 +26,7 @@ import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/f
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
 import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision } from '../utils/ofertas.js';
 import { registrarHtml, esc } from './htmlBloques.js';
+import { notaAtencionDistribuidores } from './bd/comunidad.js';
 
 export type OfertaPublica = {
   fila_id: string;
@@ -49,7 +50,7 @@ export type OfertaPublica = {
   instalacion: boolean | null;
   /** Lo que necesita el botón de la cesta; `null` si la tabla no tiene botón. */
   compra: CompraFila | null;
-  /** Nota de atención al cliente del distribuidor (1–5), cuando exista (W4). */
+  /** Nota de atención al cliente del distribuidor (1–5, `bd/comunidad.ts`); `null` sin votos suficientes. */
   nota_distribuidor: number | null;
 };
 
@@ -178,6 +179,10 @@ export async function ofertasDeProducto(
       nota_distribuidor: null,
     };
   });
+  // The distributor's customer-service note (W4), the same adjusted note
+  // that orders the community rankings; null under the voter threshold.
+  const notas = await notaAtencionDistribuidores(db, ofertas.map(x => x.distribuidor_id).filter(Boolean) as string[]);
+  for (const x of ofertas) x.nota_distribuidor = x.distribuidor_id ? notas.get(x.distribuidor_id) ?? null : null;
   return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id };
 }
 
@@ -205,6 +210,7 @@ export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string 
       const total = totalOferta(o);
       partes.push(`${dineroHtml(o.precio_centimos, o.moneda)} (${envio}${total !== null && o.envio_centimos ? `; total ${dineroHtml(total, o.moneda)}` : ''})`);
     } else partes.push('precio no publicado');
+    if (o.nota_distribuidor !== null) partes.push(`atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`);
     if (o.plazo) partes.push(`entrega: ${esc(o.plazo)}`);
     if (o.agotada) partes.push('agotado');
     if (o.instalacion === true) partes.push('incluye instalación');

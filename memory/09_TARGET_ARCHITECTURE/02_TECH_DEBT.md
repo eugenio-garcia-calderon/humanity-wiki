@@ -397,6 +397,6 @@ product it is not handed. Fine for hundreds of offers. With thousands, give
 Also found, not fixed: sending a shop table to the bin leaves its `products`
 rows for sale. The merchant feed filters them out; checkout does not.
 
-Pending integration, not debt: the distributor attention score (W4's
-`notaAtencionDistribuidores`) is wired once W4 is in `main`; until then
-`nota_distribuidor` is always null. (The server HTML is wired.)
+Both integrations are wired: the server HTML (W2) and the distributor
+attention score (W4, `notaAtencionDistribuidores`; null under the voter
+threshold, checked only on that null path here).
