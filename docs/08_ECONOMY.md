@@ -1,6 +1,6 @@
 # 08_ECONOMY.md
 
-# Sistema Económico de Humanity.wiki
+# Sistema Económico de Wiki Creator
 
 ## Objetivo
 

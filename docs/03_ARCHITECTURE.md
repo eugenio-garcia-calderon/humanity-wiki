@@ -1,6 +1,6 @@
 # 03_ARCHITECTURE.md
 
-# Arquitectura de Humanity.wiki
+# Arquitectura de Wiki Creator
 
 ## Objetivo
 

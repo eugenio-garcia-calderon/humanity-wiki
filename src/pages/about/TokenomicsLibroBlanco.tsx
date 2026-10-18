@@ -94,7 +94,7 @@ export default function TokenomicsLibroBlanco() {
         <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-600 mb-3">
           <FileText className="w-3.5 h-3.5" /> Libro blanco
         </p>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight font-display mb-4">El punto de Humanity.wiki, por escrito</h1>
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight font-display mb-4">El punto de Wiki Creator, por escrito</h1>
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-900 leading-relaxed">

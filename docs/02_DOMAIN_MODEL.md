@@ -1,6 +1,6 @@
 # 02_DOMAIN_MODEL.md
 
-# Modelo de Dominio de Humanity.wiki
+# Modelo de Dominio de Wiki Creator
 
 ## Propósito
 

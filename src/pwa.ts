@@ -46,7 +46,7 @@ export function registrarPWA() {
   // `lamieldelasierra.com` sirve esta misma aplicación, así que sin este
   // freno haría tres cosas que no le tocan.
   //
-  //   1. Ofrecerle a un cliente de esa tienda instalar «Humanity.wiki». El
+  //   1. Ofrecerle a un cliente de esa tienda instalar «Wiki Creator». El
   //      nombre no es el suyo y la intención tampoco: entró a comprar miel.
   //   2. Registrar un service worker EN EL ORIGEN DE OTRA PERSONA. Es lo único
   //      que un usuario no puede quitarse recargando, así que un fallo nuestro

@@ -1,6 +1,6 @@
 # 99_CONSTITUTION.md
 
-# Constitución de Humanity.wiki
+# Constitución de Wiki Creator
 
 Versión 1.1
 
