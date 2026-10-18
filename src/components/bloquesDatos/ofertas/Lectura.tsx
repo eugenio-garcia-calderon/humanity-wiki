@@ -25,6 +25,7 @@ export type Oferta = {
   stock: number | null; agotada: boolean; plazo: string | null; enlace: string | null; rel: string;
   comision_pct: number | null; comprobado: string | null; instalacion: boolean | null;
   compra: any | null; nota_distribuidor: number | null;
+  votos_distribuidor?: { votos: number; umbral: number } | null;
 };
 
 const dinero = (c: number, moneda = 'EUR') => new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(c / 100);
@@ -85,7 +86,10 @@ export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: s
                   <p className="mt-0.5 text-xs text-slate-500">
                     {o.nota_distribuidor !== null
                       ? `Atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`
-                      : 'Atención al cliente: aún sin votos suficientes'}
+                      : o.votos_distribuidor
+                        // A new shop has no note yet: say how far it is, and who can give it.
+                        ? `Atención al cliente: aún sin nota (${o.votos_distribuidor.votos} de ${o.votos_distribuidor.umbral} votos; la puntúa quien compra aquí)`
+                        : 'Atención al cliente: aún sin nota'}
                     {o.plazo && ` · Entrega: ${o.plazo}`}
                     {o.agotada ? ' · Agotado' : o.stock !== null && o.stock <= 5 ? ` · Quedan ${o.stock}` : ''}
                   </p>

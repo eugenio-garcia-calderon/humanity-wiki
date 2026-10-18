@@ -9,7 +9,7 @@ import type { PropsLectura } from '../tipos';
 // ============================================================================
 // One bar per criterion with the plain mean and the number of votes, and five
 // stars to vote. What is shown follows the server's rules (`bd/comunidad.ts`):
-// below 3 voters no number at all, only «aún sin votos suficientes»; the
+// below 3 voters no number at all, only how far it is («1 de 3 votos»); the
 // adjusted note that orders the gallery is explained, not displayed as THE
 // note, because 3,75 for three people who all gave 5 reads as a mistake.
 
@@ -106,7 +106,9 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
         <div>
           <h3 className="text-base font-black text-slate-900">Puntuación de la comunidad</h3>
           <p className="text-xs text-slate-500">
-            {resumen ? `${resumen.ratingCount} ${resumen.ratingCount === 1 ? 'persona ha' : 'personas han'} puntuado` : 'Opiniones de quien lo usa, de 1 a 5'}
+            {resumen
+              ? `${resumen.ratingCount} ${resumen.ratingCount === 1 ? 'persona ha' : 'personas han'} puntuado`
+              : `Todavía no tiene nota. Si lo has usado, puntúalo: con ${datos.metodo.umbral} votos por criterio aparece.`}
           </p>
         </div>
         {(general?.media ?? resumen?.ratingValue) != null ? (
@@ -116,7 +118,7 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
             <span className="text-sm font-bold text-slate-400">/ 5</span>
           </p>
         ) : (
-          <p className="text-sm font-bold text-slate-400">Aún sin votos suficientes</p>
+          <p className="text-sm font-bold text-slate-400">Aún sin nota</p>
         )}
       </header>
 
@@ -138,9 +140,19 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs text-slate-400">
-                    Aún sin votos suficientes{c.votos ? ` (${votos(c.votos)}, hacen falta ${c.umbral})` : ''}
-                  </span>
+                  // Not «no hay votos»: how far it is, so a new sheet reads as
+                  // an invitation and not as an empty page.
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1" aria-hidden>
+                      {Array.from({ length: c.umbral }, (_, i) => (
+                        <span key={i} className={cn('h-2 w-5 rounded-full', i < c.votos ? 'bg-amber-400' : 'bg-slate-200')} />
+                      ))}
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {c.votos} de {c.umbral} votos
+                      {c.umbral - c.votos > 0 && <span className="text-slate-400"> · {c.umbral - c.votos === 1 ? 'falta 1' : `faltan ${c.umbral - c.votos}`} para la nota</span>}
+                    </span>
+                  </div>
                 )}
                 {c.suficiente && c.verificados > 0 && c.media_verificados !== null && (
                   <span className="mt-0.5 flex items-center gap-1 text-[11px] text-emerald-700">
@@ -163,7 +175,19 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
       </ul>
 
       {!datos.sesion && (
-        <p className="mt-4 text-xs font-bold text-slate-500">Entra con tu cuenta para puntuar. Un voto por persona y criterio; puedes cambiarlo cuando quieras.</p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 p-3">
+          <p className="text-xs text-slate-700">
+            <b>¿Lo has usado?</b> Tu nota ayuda a quien viene detrás. Un voto por persona y criterio; puedes cambiarlo cuando quieras.
+          </p>
+          <Button variant="primary" className="gap-1.5" onClick={() => {
+            // The site's account menu (`CuentaMenu`) opens its sign-in panel
+            // and marks the event as handled. Outside a site there is none.
+            const ev = new CustomEvent('sitio:entrar', { cancelable: true });
+            if (window.dispatchEvent(ev)) setAviso('Para puntuar necesitas entrar con tu cuenta en este sitio.');
+          }}>
+            <Star className="h-4 w-4" /> Entrar para puntuar
+          </Button>
+        </div>
       )}
       {aviso && <p role="alert" className="mt-3 text-xs font-bold text-rose-600">{aviso}</p>}
 

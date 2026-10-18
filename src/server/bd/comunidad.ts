@@ -34,7 +34,7 @@
 //     cell) is what is SHOWN next to the vote count. Showing 3.75 to someone
 //     whose three voters all gave 5 would read as an error;
 //   · fewer than 3 distinct voters (`umbral`) → the cell is EMPTY, not a
-//     number. The screen says «aún sin votos suficientes».
+//     number. The screen says how far it is («1 de 3 votos»).
 //   · 'media' is the mean of the other criteria's scores, and only when at
 //     least half of them have enough votes.
 //
@@ -149,10 +149,12 @@ export function notaMedia(notas: Array<number | null>): number | null {
 /** A score as a cell: `valor` is the adjusted note that orders. `votos` and
  *  `media` ride along: the screen shows the plain mean and the count, and can
  *  say «2 votos, aún no bastan» on an empty cell. */
-function celdaDe(nota: number | null, votos: number, media: number | null): Celda {
+function celdaDe(nota: number | null, votos: number, media: number | null, umbral: number): Celda {
   const c: any = nota === null ? { estado: 'vacia' } : { estado: 'ok', valor: nota };
   c.votos = votos;
   c.media = media;
+  // How many voters it takes to get a number: the screen says «1 de 3 votos».
+  c.umbral = umbral;
   return c as Celda;
 }
 
@@ -220,7 +222,7 @@ export function celdasComunidad(
   for (const id of filaIds) {
     for (const c of simples) {
       const s = porCol[c.id][id];
-      out[id][c.id] = celdaDe(s?.nota ?? null, s?.votos ?? 0, s?.suficiente ? s.media : null);
+      out[id][c.id] = celdaDe(s?.nota ?? null, s?.votos ?? 0, s?.suficiente ? s.media : null, ajustesDe(c.config).umbral);
     }
     for (const c of mias) {
       if (ajustesDe(c.config).criterio !== 'media') continue;
@@ -228,7 +230,7 @@ export function celdasComunidad(
       const votantes = new Set(votos.filter(v => v.fila_id === id && simples.some(s => s.id === v.columna_id)).map(v => v.user_id));
       const medias = simples.map(s => (porCol[s.id][id]?.suficiente ? porCol[s.id][id].media : null));
       const nota = notaMedia(notas);
-      out[id][c.id] = celdaDe(nota, votantes.size, nota === null ? null : notaMedia(medias));
+      out[id][c.id] = celdaDe(nota, votantes.size, nota === null ? null : notaMedia(medias), ajustesDe(c.config).umbral);
     }
   }
   return out;
@@ -255,13 +257,15 @@ export async function notasComunidad(
 
 
 /**
- * The customer-service note of these distributor rows, for the «Ofertas»
- * block (W5): the adjusted note (the one that orders) or `null` when the row
- * has fewer voters than the threshold, or its table has no `atencion` column.
- * Rows not found are left out of the map.
+ * The customer service of these distributor rows, for the «Ofertas» block
+ * (W5): the adjusted note (the one that orders; `null` under the threshold),
+ * how many people rated it and how many it takes. `null` when the row's table
+ * has no `atencion` column. Rows not found are left out of the map.
  */
-export async function notaAtencionDistribuidores(db: any, filaIds: string[]): Promise<Map<string, number | null>> {
-  const out = new Map<string, number | null>();
+export type Atencion = { nota: number | null; votos: number; umbral: number };
+
+export async function atencionDistribuidores(db: any, filaIds: string[]): Promise<Map<string, Atencion | null>> {
+  const out = new Map<string, Atencion | null>();
   const ids = [...new Set(filaIds.filter(Boolean))];
   if (!ids.length) return out;
   const r = await db.execute(sql`
@@ -277,8 +281,14 @@ export async function notaAtencionDistribuidores(db: any, filaIds: string[]): Pr
   const votos = await votosDe(db, columnas.map(c => c.id));
   const celdas = celdasComunidad(columnas, [...columnaDe.keys()], votos);
   for (const [fila, col] of columnaDe) {
-    const c = col ? celdas[fila]?.[col.id] : null;
-    out.set(fila, c && c.estado === 'ok' ? (c.valor as number) : null);
+    const c: any = col ? celdas[fila]?.[col.id] : null;
+    out.set(fila, c ? { nota: c.estado === 'ok' ? (c.valor as number) : null, votos: c.votos || 0, umbral: c.umbral } : null);
   }
   return out;
+}
+
+/** Only the note, for callers that need nothing else. */
+export async function notaAtencionDistribuidores(db: any, filaIds: string[]): Promise<Map<string, number | null>> {
+  const a = await atencionDistribuidores(db, filaIds);
+  return new Map([...a].map(([k, v]) => [k, v?.nota ?? null]));
 }
