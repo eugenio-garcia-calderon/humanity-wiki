@@ -79,6 +79,10 @@ export type Ficha = {
   /** The tables the current row's relation columns point to, keyed by table id,
    *  with only the rows it points to. */
   relacionadas: Record<string, TablaFicha>;
+  /** The row's shops as the «Dónde comprarlo» block sees them (W5's
+   *  `ofertasDeProducto`, its rule for who may read them): only what the
+   *  header needs. Absent on a template or when they could not be read. */
+  ofertas?: Array<{ precio_centimos: number | null; agotada: boolean }>;
 };
 
 export const ROLES = [
@@ -185,6 +189,8 @@ export function textoDe(fila: FilaFicha | undefined, c: Columna): string {
   }
   const t = formatear(celda, c, { apuntados: fila?.apuntados?.[c.id] });
   if (!t) return '';
+  const ut = c.tipo === 'texto' ? c.config?.unidad || UNIDAD_TEXTO_POR_CLAVE[c.config?.clave] : undefined;
+  if (ut) return conUnidad(t, ut);
   const u = c.config?.unidad;
   // A percentage column already prints «%»; a number with unit «%» does not.
   if (!u || !(c.tipo === 'numero' || c.tipo === 'formula' || c.tipo === 'agregado')) return t;
@@ -192,6 +198,22 @@ export function textoDe(fila: FilaFicha | undefined, c: Columna): string {
   return `${t} ${t === '1' && SINGULAR[u] ? SINGULAR[u] : u}`;
 }
 const SINGULAR: Record<string, string> = { años: 'año', ciclos: 'ciclo', meses: 'mes', horas: 'hora' };
+
+/** Text columns that hold figures, by loader key: «5400 / 2400 (ensayo)» on a
+ *  panel said nothing without its pascals (evaluator round 3). Same reason
+ *  as `ROL_POR_CLAVE`: production column config cannot be patched. */
+const UNIDAD_TEXTO_POR_CLAVE: Record<string, string> = { carga_mecanica_pa: 'Pa', gama_potencias_wp: 'Wp', gama_capacidades_kwh: 'kWh' };
+
+/** The unit after the figures of each «;» part, before its parenthesis:
+ *  «5400 / 2400 Pa (ensayo); 3600 / 1600 Pa (diseño)». A part that already
+ *  has words outside its parenthesis is left as it is. */
+export function conUnidad(texto: string, unidad: string): string {
+  return texto.split(/\s*;\s*/).map(parte => {
+    const m = parte.match(/^([^()]*?)\s*(\(.*\))?$/);
+    if (!m || !/\d/.test(m[1]) || /\p{L}/u.test(m[1])) return parte;
+    return `${m[1]} ${unidad}${m[2] ? ` ${m[2]}` : ''}`;
+  }).join('; ');
+}
 
 /** A column's name as a sheet shows it: without a trailing «(años)» when the
  *  value already carries that unit — «Garantía (años): 1 años» said it twice. */

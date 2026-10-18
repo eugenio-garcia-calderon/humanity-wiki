@@ -5,7 +5,7 @@
 // It checks the rules that must hold whatever the data says, and above all
 // the ethics code: THE COMMISSION NEVER ORDERS ANYTHING (plan §2.3).
 import assert from 'node:assert/strict';
-import { ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, etiquetaColumna, textoDe, procedenciaDe, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
+import { conUnidad, ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, etiquetaColumna, textoDe, procedenciaDe, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
 import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe } from '../../src/components/bloquesDatos/ficha/vistas';
 import { metaFicha, tituloFicha } from '../../src/components/bloquesDatos/ficha/seo';
 import { propiedadHtml, retiradaHtml, comparadorHtml, type Herramientas } from '../../src/components/bloquesDatos/ficha/html';
@@ -302,6 +302,36 @@ prueba('la cifra de una batería doméstica es la capacidad útil, la misma del 
   const util: any = { id: 'util', nombre: 'Capacidad útil', tipo: 'numero', config: { clave: 'capacidad_util_kwh', grupo: 'tecnico', unidad: 'kWh', comparar: 'mayor' } };
   const cols: any[] = [{ id: 't', nombre: 'Nombre', tipo: 'texto', config: {} }, { id: 'm', nombre: 'Marca', tipo: 'relacion', config: { ficha: 'marca' } }, tot, util];
   assert.deepEqual(propiedadesTarjeta(cols, 't'), ['m', 'util']);
+});
+
+prueba('la cabecera sale de las tiendas: una agotada no es «Desde» ni «A la venta»', () => {
+  const pu: any = { id: 'pu', nombre: 'Precio por kWh', tipo: 'formula', config: { ficha: 'precio_unidad', unidad: '€/kWh', comparar: 'menor' } };
+  const est: any = { id: 'est', nombre: 'Estado', tipo: 'texto', config: { ficha: 'estado' } };
+  // The row's aggregate counts every shop: 25 € is the sold-out one.
+  const t: TablaFicha = { ...tabla, columnas: [...tabla.columnas, pu, est], filas: tabla.filas.map(f => (f.id === 'a' ? { ...f, celdas: { ...f.celdas, pre: ok(25), pu: ok(289), est: ok('A la venta') } } : f)) };
+  const cab = (ofertas: any[]) => vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {}, ofertas }, { estilo: 'cabecera' }) as any;
+  let v = cab([{ precio_centimos: 2500, agotada: true }, { precio_centimos: 3000, agotada: false }, { precio_centimos: null, agotada: false }]);
+  assert.match(v.compra.desde, /^30,00\s€$/);
+  assert.deepEqual([v.compra.tiendas, v.compra.agotadas, v.compra.sinPrecio], [1, 1, 1]);
+  // The price per unit follows the header's price, not the sold-out one.
+  assert.equal(v.compra.porUnidad, '347 €/kWh');
+  assert.equal(v.estado, 'A la venta');
+  // Goal Zero: its only priced shop sold out.
+  v = cab([{ precio_centimos: 2995, agotada: true }, { precio_centimos: null, agotada: false }]);
+  assert.equal(v.compra.desde, '');
+  assert.match(v.compra.ultimo, /^29,95\s€$/);
+  assert.equal(v.compra.porUnidad, '');
+  assert.equal(v.estado, '', 'nada de «A la venta» con todo agotado');
+  const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
+  assert.ok(propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {}, ofertas: [{ precio_centimos: 2995, agotada: true }] }, { estilo: 'cabecera' }, h).match(/Último precio visto 29,95\s€ \(agotado\)/));
+});
+
+prueba('las cifras escritas como texto llevan su unidad', () => {
+  assert.equal(conUnidad('5400 / 2400 (ensayo); 3600 / 1600 (diseño)', 'Pa'), '5400 / 2400 Pa (ensayo); 3600 / 1600 Pa (diseño)');
+  assert.equal(conUnidad('475–500', 'Wp'), '475–500 Wp');
+  assert.equal(conUnidad('Hasta 5400 Pa', 'Pa'), 'Hasta 5400 Pa', 'lo que ya dice algo se deja');
+  const c: any = { id: 'cm', nombre: 'Carga mecánica', tipo: 'texto', config: { clave: 'carga_mecanica_pa' } };
+  assert.equal(textoDe({ id: 'x', pagina_id: null, titulo: 'x', celdas: { cm: ok('6000 / 4000') } }, c), '6000 / 4000 Pa');
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);

@@ -11,6 +11,8 @@ import path from 'node:path';
 import { resumirCriterio, celdasComunidad, notaMedia, ajustesDe, type Voto } from '../src/server/bd/comunidad';
 import { ordenarFilas } from '../src/server/bd/vistas';
 import { opinionesDe, textoOpinion } from '../src/utils/opinionesTerceros';
+import { vistaAlternativas } from '../src/components/bloquesDatos/ficha/vistas';
+import type { TablaFicha } from '../src/components/bloquesDatos/ficha/modelo';
 
 let fallos = 0;
 const ok = (cond: boolean, que: string) => {
@@ -104,6 +106,46 @@ ok(notaMedia([4, 5, null]) === 4.5, 'media con 2 de 3 criterios: 4,5');
   const rutas = readFileSync(path.join(import.meta.dirname, '../src/server/valoraciones.ts'), 'utf8');
   const agregado = /const agregado =[\s\S]*?;\n/.exec(rutas)?.[0] || '';
   ok(agregado.length > 0 && !/terceros/.test(agregado), 'el AggregateRating del JSON-LD sale sólo de votos de aquí');
+}
+
+// 10 · «La mejor en cada criterio» con los criterios de la valoración: mientras
+// no hay votos, precio, garantía, ecología y seguridad salen de datos con
+// nombre; calidad, estética y ética no se inventan; la comisión nunca cuenta.
+{
+  const okc = (valor: any) => ({ estado: 'ok' as const, valor });
+  const sinVotos = { estado: 'vacia' } as any;
+  const t: TablaFicha = {
+    id: 'T', titulo: 'Powerbanks', columna_titulo: 'nom', columnas: [
+      { id: 'nom', nombre: 'Nombre', tipo: 'texto', config: {} },
+      { id: 'pk', nombre: 'Precio por kWh', tipo: 'formula', config: { clave: 'precio_por_kwh', grupo: 'compra', ficha: 'precio_unidad', comparar: 'menor', unidad: '€/kWh' } },
+      { id: 'gar', nombre: 'Garantía', tipo: 'numero', config: { clave: 'garantia_anios', grupo: 'garantia', comparar: 'mayor', unidad: 'años' } },
+      { id: 'cic', nombre: 'Ciclos', tipo: 'numero', config: { clave: 'ciclos_declarados', grupo: 'tecnico', comparar: 'mayor' } },
+      { id: 'com', nombre: 'Comisión', tipo: 'porcentaje', config: { grupo: 'compra', ficha: 'comision', comparar: 'mayor' } },
+      { id: 'cal', nombre: 'Calidad', tipo: 'comunidad', config: { criterio: 'calidad' } },
+      { id: 'eti', nombre: 'Ética', tipo: 'comunidad', config: { criterio: 'etica' } },
+      { id: 'ret', nombre: 'Retiradas', tipo: 'relacion', config: { ficha: 'retiradas', tabla_destino: 'R' } },
+      { id: 'retf', nombre: 'Retiradas comprobadas el', tipo: 'fecha', config: { ficha: 'retiradas_fecha', grupo: 'control' } },
+    ],
+    filas: [
+      { id: 'a', pagina_id: 'PA', titulo: 'Anker', celdas: { pk: okc(1500), gar: okc(2), cic: okc(500), com: okc(0.3), cal: sinVotos, eti: sinVotos, retf: okc('2026-10-18') }, apuntados: { ret: [{ id: 'R1' } as any] } },
+      { id: 'b', pagina_id: 'PB', titulo: 'Xiaomi', celdas: { pk: okc(900), gar: okc(2), cic: okc(300), com: okc(0), cal: sinVotos, eti: sinVotos, retf: okc('2026-10-18') } },
+      { id: 'c', pagina_id: 'PC', titulo: 'Baseus', celdas: { pk: okc(1100), gar: okc(3), cic: okc(800), com: okc(0.1), cal: sinVotos, eti: sinVotos, retf: okc('2026-10-18') } },
+    ],
+  };
+  const v = vistaAlternativas({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {} }, {})!;
+  const nombres = v.criterios.map(c => c.criterio);
+  ok(nombres.slice(0, 4).join(',') === 'Precio,Garantía,Ecología,Salud y seguridad', `primero los criterios de la valoración, por datos: ${nombres.join(', ')}`);
+  ok(v.criterios.slice(0, 4).every(c => c.base === 'datos' && !!c.segun) && v.porDatos === true, 'cada uno dice con qué dato se decide');
+  ok(!nombres.includes('Calidad') && !nombres.includes('Ética'), 'calidad y ética, sin votos, no se inventan');
+  ok(!v.criterios.some(c => c.columnaId === 'com'), 'la comisión nunca es un criterio');
+  const precio = v.criterios[0];
+  ok(precio.ganador.nombre === 'Xiaomi' && precio.puesto?.n === 3, `precio: gana el menor €/kWh (Xiaomi) y Anker es 3.º (${precio.ganador.nombre}, ${precio.puesto?.n})`);
+  const seg = v.criterios[3];
+  ok(!seg.esEsta && seg.empates === 1 && /1 aviso/.test(seg.ganador.valor), `seguridad: dos sin retiradas, y este dice que tiene un aviso («${seg.ganador.valor}»)`);
+  // With votes, the community takes over that criterion.
+  const conVotos = { ...t, filas: t.filas.map((f, i) => ({ ...f, celdas: { ...f.celdas, cal: { estado: 'ok', valor: [3.2, 4.1, 3.8][i], media: 4, votos: 5 } as any } })) };
+  const w = vistaAlternativas({ pagina_id: 'PA', fila_id: 'a', tabla: conVotos, relacionadas: {} }, {})!;
+  ok(w.criterios[0].criterio === 'Calidad' && w.criterios[0].base === 'votos' && w.criterios[0].ganador.nombre === 'Xiaomi', 'con votos, la calidad la decide la comunidad');
 }
 
 console.log(fallos ? `\n${fallos} fallo(s)` : '\nTodo bien');

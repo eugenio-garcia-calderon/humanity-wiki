@@ -79,6 +79,13 @@ export function textoComision(pct: number | null | undefined, centimos: number |
     : `Comisión: ${pctTxt} %. La paga la tienda; tú pagas el mismo precio que en ella.`;
 }
 
+/** The commission of ONE cart line, always as an amount (evaluator round 3:
+ *  «la comisión de cada línea a la vista»): «0 €» says there is none, and why. */
+export function textoComisionLinea(pct: number | null | undefined, centimos: number | null | undefined, moneda = 'EUR'): string {
+  if (pct === null || pct === undefined || Number(pct) <= 0 || !centimos) return `Comisión de Wikiproducts: ${dinero(0, moneda)} (sin acuerdo con esta tienda)`;
+  return `Comisión de Wikiproducts: ${dinero(centimos, moneda)} (${Number(pct).toLocaleString('es-ES', { maximumFractionDigits: 2 })} %), la paga la tienda`;
+}
+
 /** El `rel` de un enlace de compra a la tienda. Google pide `sponsored` cuando
  *  el enlace nos reporta dinero (requisito R17 de SEO); sin acuerdo, el enlace
  *  sigue sin pasar autoridad a una tienda que no hemos elegido nosotros. */
@@ -211,3 +218,22 @@ export function lineasCompra(o: ConCondiciones): Array<{ clave: string; texto: s
 
 export const textoCondiciones = (t: CondicionesTienda | null | undefined) =>
   t?.condiciones_url ? `Condiciones de la tienda${t.condiciones_fecha ? ` (consultadas el ${fechaLarga(t.condiciones_fecha)})` : ''}` : null;
+
+/**
+ * What one shop charges to ship a cart's lines from it. Each line's own
+ * shipping (read on the offer) wins when every line has one: the shop sends
+ * one box, so the dearest of them. Otherwise the shop's published rule:
+ * free threshold reached, or its flat cost. `null` = nobody published it.
+ */
+export function envioCompraTienda(
+  propios: Array<number | null>,
+  t: Pick<CondicionesTienda, 'envio_centimos' | 'envio_gratis_desde_centimos'> | null,
+  subtotal: number,
+): { centimos: number | null; origen: 'oferta' | 'tienda' | null } {
+  if (propios.length && propios.every(x => x !== null)) return { centimos: Math.max(...(propios as number[])), origen: 'oferta' };
+  if (!t) return { centimos: null, origen: null };
+  if (t.envio_gratis_desde_centimos === 0 || t.envio_centimos === 0) return { centimos: 0, origen: 'tienda' };
+  if (t.envio_gratis_desde_centimos !== null && subtotal >= t.envio_gratis_desde_centimos) return { centimos: 0, origen: 'tienda' };
+  if (t.envio_centimos !== null) return { centimos: t.envio_centimos, origen: 'tienda' };
+  return { centimos: null, origen: null };
+}

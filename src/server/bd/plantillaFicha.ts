@@ -66,6 +66,8 @@ async function bloquesPlantilla(db: any, paginaId: string | null | undefined): P
 
 export type ResultadoFicha = {
   ficha: Ficha;
+  /** `ofertasDeProducto` for the row, read once for the header and the HTML. */
+  ofertas?: Awaited<ReturnType<typeof ofertasDeProducto>> | null;
   /** The template page's blocks, when the table has one. */
   plantilla: Bloque[] | null;
   plantilla_pagina_id: string | null;
@@ -122,9 +124,16 @@ export async function fichaDePagina(db: any, req: Pick<Request, 'user'> | null, 
     if (t) relacionadas[destino] = t;
   }));
 
+  // The shops, read with the same rule as the «Dónde comprarlo» block: the
+  // header's «Desde» must count only what can be bought (a sold-out shop's
+  // price is not a price, evaluator round 3). The offers table is not readable
+  // on its own by a visitor, so `relacionadas` never carries it.
+  const ofertas = vistaPrevia ? null : await ofertasDeProducto(db, req || ({ user: undefined } as any), { filaId: filaId! });
+  const resumen = ofertas && !('error' in ofertas) ? ofertas.ofertas.map(o => ({ precio_centimos: o.precio_centimos, agotada: o.agotada })) : undefined;
   const plantillaId = tabla.config?.plantilla?.pagina_id || null;
   return {
-    ficha: { pagina_id: paginaId, vista_previa: vistaPrevia || undefined, fila_id: filaId!, tabla, relacionadas },
+    ofertas,
+    ficha: { pagina_id: paginaId, vista_previa: vistaPrevia || undefined, fila_id: filaId!, tabla, relacionadas, ofertas: resumen },
     plantilla: vistaPrevia ? null : await bloquesPlantilla(db, plantillaId),
     plantilla_pagina_id: plantillaId,
   };
@@ -296,7 +305,7 @@ async function ampliarFicha(db: any, req: Request | undefined, pagina: any) {
   // (`ofertas.ts`), so the server HTML reads it once.
   let ofertas: any[] | undefined;
   if (!req) {
-    const o = await ofertasDeProducto(db, { user: undefined } as any, { filaId: r.ficha.fila_id });
+    const o = r.ofertas || await ofertasDeProducto(db, { user: undefined } as any, { filaId: r.ficha.fila_id });
     if (!('error' in o)) {
       ofertas = o.ofertas;
       // Not enumerable: the page itself is written into the HTML for the

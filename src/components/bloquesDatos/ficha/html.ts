@@ -13,6 +13,7 @@ import { etiquetaProcedencia, sitioDe, fechaCorta } from './modelo';
 import {
   vistaPropiedad, vistaComparador, vistaAlternativas, vistaAfirmaciones, vistaRetiradas,
   porDefecto, fraseSinRetiradas, ETIQUETA_VEREDICTO, DESCRIPCION_NATURALEZA, type Valor,
+  NOTA_POR_DATOS, NOTA_ORDEN,
 } from './vistas';
 
 /** What the server lends the writers: escaping, inline markup and the
@@ -54,7 +55,7 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       if (v.modelo) filas.push(['Modelo', h.esc(v.modelo)]);
       filas.push(['Categoría', h.esc(v.subcategoria || v.categoria)]);
       if (v.nota) filas.push(['Valoración de la comunidad', v.nota.media ? `${h.esc(v.nota.media)} de 5 (${v.nota.votos} ${v.nota.votos === 1 ? 'voto' : 'votos'})` : 'Sin valoraciones suficientes todavía']);
-      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}${v.compra.sinPrecio ? ` · ${v.compra.sinPrecio} más sin precio confirmado` : ''}${v.compra.porUnidad ? ` (${h.esc(v.compra.etiquetaUnidad.charAt(0).toLowerCase() + v.compra.etiquetaUnidad.slice(1))}: ${h.esc(v.compra.porUnidad)})` : ''}` : 'Sin precio todavía']);
+      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}${v.compra.agotadas ? ` · ${v.compra.agotadas} ${v.compra.agotadas === 1 ? 'agotada' : 'agotadas'}` : ''}${v.compra.sinPrecio ? ` · ${v.compra.sinPrecio} más sin precio confirmado` : ''}${v.compra.porUnidad ? ` (${h.esc(v.compra.etiquetaUnidad.charAt(0).toLowerCase() + v.compra.etiquetaUnidad.slice(1))}: ${h.esc(v.compra.porUnidad)})` : ''}` : v.compra.ultimo ? `Último precio visto ${h.esc(v.compra.ultimo)} (agotado)` : 'Sin precio todavía']);
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
       for (const l of v.destacados) filas.push([h.esc(l.etiqueta), `${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}`]);
       if (v.gtin) filas.push(['EAN', h.esc(v.gtin)]);
@@ -99,10 +100,12 @@ export function alternativasHtml(f: Ficha | null | undefined, datos: any, h: Her
   if (!v) return '';
   const li = v.criterios.map(c => {
     const quien = c.esEsta ? 'Este producto' : c.ganador.paginaId ? `<a href="${h.esc(h.enlacePagina(c.ganador.paginaId))}">${h.esc(c.ganador.nombre)}</a>` : h.esc(c.ganador.nombre);
-    return `<li>${h.esc(c.criterio)}: ${quien} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
+    const segun = c.base === 'votos' ? ' (según los votos de la comunidad)' : c.base ? ` (según los datos: ${h.esc(c.segun || '')})` : '';
+    const mas = c.empates ? ` y ${c.empates} más` : '';
+    return `<li>${h.esc(c.criterio)}${segun}: ${quien}${mas} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
   }).join('');
   const sub = v.ambito ? `<p>${h.esc(v.ambito)}</p>` : '';
-  return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</small></p></section>`;
+  return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>${h.esc(v.porDatos ? NOTA_POR_DATOS : NOTA_ORDEN)}</small></p></section>`;
 }
 
 export function afirmacionHtml(f: Ficha | null | undefined, datos: any, h: Herramientas): string {

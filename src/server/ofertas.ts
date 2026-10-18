@@ -25,7 +25,7 @@ import { opinionesTerceros, textoOpinion, type OpinionTercero } from './bd/opini
 import { enlacesDe, enlacesInversos, celdaDeEnlaces, CLASE_DE_TIPO, type Apuntado } from './bd/enlaces.js';
 import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/ficheros.js';
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
-import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, textoSinPrecio, lineasCompra, textoCondiciones, textoEnvioTienda, type CondicionesTienda } from '../utils/ofertas.js';
+import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, textoSinPrecio, lineasCompra, textoCondiciones, textoEnvioTienda, envioCompraTienda, type CondicionesTienda } from '../utils/ofertas.js';
 import { registrarHtml, esc } from './htmlBloques.js';
 import { atencionDistribuidores } from './bd/comunidad.js';
 import { paginaVisible } from './sitios.js';
@@ -137,7 +137,7 @@ const ROLES_TIENDA = {
   garantia: ['seleccion', 'texto'], condiciones: ['url'], condiciones_fecha: ['fecha'],
 } as const;
 
-async function condicionesDeTiendas(db: any, ids: string[], dueno: string | null): Promise<Map<string, CondicionesTienda>> {
+export async function condicionesDeTiendas(db: any, ids: string[], dueno: string | null): Promise<Map<string, CondicionesTienda>> {
   const out = new Map<string, CondicionesTienda>();
   const unicos = [...new Set(ids)];
   if (!unicos.length || !dueno) return out;
@@ -187,9 +187,9 @@ export async function ofertasDeProducto(
   o: { filaId?: string | null; paginaId?: string | null; tablaId?: string | null },
 ): Promise<{ ofertas: OfertaPublica[]; tabla_id: string | null; fila_id: string | null } | { error: string; codigo: number }> {
   const f = o.filaId
-    ? await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE id = ${o.filaId} AND deleted_at IS NULL`)
+    ? await db.execute(sql`SELECT id, tabla_id, pagina_id FROM bd_filas WHERE id = ${o.filaId} AND deleted_at IS NULL`)
     : o.paginaId
-      ? await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${o.paginaId} AND deleted_at IS NULL LIMIT 1`)
+      ? await db.execute(sql`SELECT id, tabla_id, pagina_id FROM bd_filas WHERE pagina_id = ${o.paginaId} AND deleted_at IS NULL LIMIT 1`)
       : null;
   const ficha = f?.rows[0] as any;
   // Sin ficha no es un error: el bloque puede estar en una página normal, y
@@ -369,6 +369,63 @@ registrarHtml('ofertas', (b, ctx) => {
     if (!('error' in r)) ctx.extra.set(k, r.ofertas);
   }
 });
+
+// ── THE CART WHEN IT CANNOT BE PAID HERE (evaluator round 3, fix 1) ─────────
+// While payment through Wikiproducts is not open (no live key), the cart is
+// still the multi-shop basket the plan describes: grouped by the shop that
+// really sells each line, with that shop's shipping, the commission of each
+// line, a total per shop and a link to finish the purchase on the shop's own
+// page. Shipping: the offer's own when every line states it (the most
+// expensive one, one box per shop); otherwise the shop's published rule
+// against this shop's subtotal; otherwise unknown, and said so.
+export type LineaTienda = {
+  producto_id: string; variante_id: string | null; nombre: string; cantidad: number;
+  precio_centimos: number; enlace: string | null; comision_pct: number | null; comision_centimos: number | null;
+};
+export type CompraEnTienda = {
+  distribuidor_id: string; distribuidor: string | null; lineas: LineaTienda[];
+  subtotal_centimos: number; envio_centimos: number | null;
+  /** Where the shipping figure comes from: the offer, the shop's rule, or nobody. */
+  envio_origen: 'oferta' | 'tienda' | null;
+  total_centimos: number | null; comision_centimos: number; condiciones_url: string | null;
+};
+
+const sinTienda = (nombre: string, tienda: string | null) =>
+  tienda && nombre.endsWith(` · ${tienda}`) ? nombre.slice(0, -(` · ${tienda}`).length) : nombre;
+
+export async function compraEnTiendas(db: any, lineas: Array<{ p: any; v: any; precio: number; unidades: number }>): Promise<CompraEnTienda[]> {
+  const conTienda = lineas.filter(l => l.p?.distribuidor_id);
+  if (!conTienda.length) return [];
+  // The shop rows are read with the products' owner: same rule as the sheet.
+  const condiciones = new Map<string, CondicionesTienda>();
+  for (const dueno of new Set(conTienda.map(l => l.p.created_by).filter(Boolean))) {
+    const ids = conTienda.filter(l => l.p.created_by === dueno).map(l => String(l.p.distribuidor_id));
+    for (const [k, v] of await condicionesDeTiendas(db, ids, dueno)) condiciones.set(k, v);
+  }
+  const grupos = new Map<string, typeof conTienda>();
+  for (const l of conTienda) grupos.set(l.p.distribuidor_id, [...(grupos.get(l.p.distribuidor_id) || []), l]);
+  return [...grupos.entries()].map(([id, ls]) => {
+    const subtotal = ls.reduce((n, l) => n + l.precio * l.unidades, 0);
+    const t = condiciones.get(id) || null;
+    const propios = ls.map(l => l.p.envio_centimos === null || l.p.envio_centimos === undefined ? null : Number(l.p.envio_centimos));
+    const { centimos: envio, origen } = envioCompraTienda(propios, t, subtotal);
+    const lineasT: LineaTienda[] = ls.map(l => {
+      const pct = l.p.comision_pct === null || l.p.comision_pct === undefined ? null : Number(l.p.comision_pct);
+      return {
+        // The synced product is titled «Producto · Tienda»; the box already names the shop.
+        producto_id: l.p.id, variante_id: l.v?.id || null, nombre: sinTienda(String(l.p.name || ''), l.p.distribuidor_nombre), cantidad: l.unidades, precio_centimos: l.precio,
+        enlace: enlaceSeguro(l.p.oferta_enlace), comision_pct: pct, comision_centimos: comisionDeLinea(l.precio, l.unidades, pct),
+      };
+    });
+    return {
+      distribuidor_id: id, distribuidor: ls[0].p.distribuidor_nombre || null, lineas: lineasT,
+      subtotal_centimos: subtotal, envio_centimos: envio, envio_origen: origen,
+      total_centimos: envio === null ? null : subtotal + envio,
+      comision_centimos: lineasT.reduce((n, l) => n + (l.comision_centimos || 0), 0),
+      condiciones_url: t?.condiciones_url || null,
+    };
+  });
+}
 
 export function registrarOfertas(app: Express, db: any) {
   /**

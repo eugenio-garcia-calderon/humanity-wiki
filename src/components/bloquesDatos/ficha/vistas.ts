@@ -97,9 +97,10 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
  *  Amazon's product pages»): price, community score and the key figures, all
  *  read from the row's own columns, nothing typed for the header. */
 /** `porUnidad`: «0,51 €/W», the price per watt or kWh, '' without one. */
-/** `tiendas`: the shops with a confirmed price, the ones «Desde» is taken
- *  from; `sinPrecio`: the other shops listed. */
-export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; porUnidad: string; etiquetaUnidad: string };
+/** `tiendas`: the shops on sale with a confirmed price, the ones «Desde» is
+ *  taken from; `sinPrecio` and `agotadas`: the other shops listed; `ultimo`:
+ *  the lowest price last seen when every priced shop is sold out. */
+export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; agotadas: number; ultimo: string; porUnidad: string; etiquetaUnidad: string };
 export type Nota = { media: string; votos: number };
 
 export type VistaPropiedad =
@@ -135,7 +136,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     // the column is `visibilidad: nunca` (that only keeps it out of the lists),
     // and only under a photo.
     const cCredito = porRol('credito_imagen');
-    const compra = compraDe(t, fila);
+    const compra = compraDe(f, t, fila);
     const estado = porRol('estado') ? textoDe(fila, porRol('estado')!) : '';
     return {
       estilo,
@@ -203,22 +204,68 @@ export function estadoCon(estado: string, compra: Compra | null): string {
   return estado;
 }
 
-function compraDe(t: TablaFicha, fila: FilaFicha): Compra | null {
+function compraDe(f: Ficha, t: TablaFicha, fila: FilaFicha): Compra | null {
   const min = columnaPorRol(t, 'precio_min');
   if (!min) return null;
   const max = columnaPorRol(t, 'precio_max');
   const n = columnaPorRol(t, 'num_ofertas');
   const cp = columnaPorRol(t, 'ofertas_con_precio');
+  const u = columnaPorRol(t, 'precio_unidad');
+  const etiquetaUnidad = u ? etiquetaColumna(u) : '';
+  const porUnidadDe = (desde: string, precio: number | null) => {
+    if (!u || !desde) return '';
+    const base = numeroDe(fila, min), pu = numeroDe(fila, u);
+    // The formula divides the row's «Precio desde», which counts every shop.
+    // When the header's price is another (a sold-out shop left out), the
+    // price per unit is scaled to it, so the two never disagree.
+    if (precio == null || base == null || pu == null || !base || precio === base) return textoDe(fila, u);
+    const decimales = (String(pu).split('.')[1] || '').length;
+    const v = Number((pu * precio / base).toFixed(decimales));
+    return `${v.toLocaleString('es-ES', { maximumFractionDigits: decimales })}${u.config?.unidad ? ` ${u.config.unidad}` : ''}`;
+  };
+
+  // From the shops themselves when the sheet has them: that is what the
+  // «Dónde comprarlo» block shows, and a sold-out shop's price is not a price
+  // anyone can pay (Goal Zero said «Desde 29,95 € · A la venta» with its only
+  // priced shop sold out, evaluator round 3).
+  const of = ofertasDe(f);
+  if (of && of.total) {
+    const v = of.vendibles, ag = of.agotadas;
+    const desde = v.length ? v[0].texto : '';
+    const hasta = v.length > 1 && v[v.length - 1].texto !== desde ? v[v.length - 1].texto : '';
+    return { desde, hasta, tiendas: v.length, sinPrecio: of.sinPrecio, agotadas: ag.length, ultimo: !v.length && ag.length ? ag[0].texto : '', porUnidad: porUnidadDe(desde, v[0]?.precio ?? null), etiquetaUnidad };
+  }
+
   // A price of 0 is no price: nothing is sold for free here.
   const desde = numeroDe(fila, min) === 0 ? '' : textoDe(fila, min);
   const hasta = max ? textoDe(fila, max) : '';
-  const u = columnaPorRol(t, 'precio_unidad');
   // «Desde 144,20 € en 5 tiendas» when only one of the five had a price
   // (Anker 737, production check): count the priced ones, and say the rest
   // apart. Tables loaded before `ofertas_con_precio` existed count them all.
   const todas = (n && numeroDe(fila, n)) || 0;
   const conPrecio = cp ? numeroDe(fila, cp) ?? 0 : todas;
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), porUnidad: u && desde ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), agotadas: 0, ultimo: '', porUnidad: porUnidadDe(desde, null), etiquetaUnidad };
+}
+
+type PrecioTienda = { precio: number; texto: string };
+/** The row's shops, split the way a buyer sees them: priced and on sale
+ *  (cheapest first), priced but sold out, and without a price. Null when the
+ *  sheet came without them (a template, an editor preview). */
+export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: PrecioTienda[]; sinPrecio: number; total: number } | null {
+  if (!Array.isArray(f.ofertas)) return null;
+  const min = columnaPorRol(f.tabla, 'precio_min');
+  // Written the way «Precio desde» writes its own value.
+  const texto = (n: number) => (min ? textoDe({ id: '', pagina_id: null, titulo: '', celdas: { [min.id]: { estado: 'ok', valor: n } as any } }, min) : '') || `${n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  const vendibles: PrecioTienda[] = [], agotadas: PrecioTienda[] = [];
+  let sinPrecio = 0;
+  for (const o of f.ofertas) {
+    if (o.precio_centimos == null || o.precio_centimos <= 0) { sinPrecio++; continue; }
+    const precio = o.precio_centimos / 100;
+    (o.agotada ? agotadas : vendibles).push({ precio, texto: texto(precio) });
+  }
+  const orden = (x: PrecioTienda, y: PrecioTienda) => x.precio - y.precio;
+  vendibles.sort(orden); agotadas.sort(orden);
+  return { vendibles, agotadas, sinPrecio, total: f.ofertas.length };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {
@@ -347,8 +394,46 @@ export type VistaAlternativas = {
     esEsta: boolean;
     /** Where the current product stands: «3.º de 12». Null without a value. */
     puesto: { n: number; de: number } | null;
+    /** A rubric criterion (precio, garantía, ecología…): decided by community
+     *  votes once they pass the threshold, else by the data named in `segun`. */
+    base?: 'votos' | 'datos';
+    /** What the data criterion was measured by: «Precio por kWh». */
+    segun?: string | null;
+    /** Other products tied with the winner («y 9 más»). */
+    empates?: number;
   }>;
+  /** True when at least one rubric criterion was decided by data, not votes. */
+  porDatos?: boolean;
 };
+
+// The rubric criteria (plan §2.3: calidad, precio, garantía, ecología, salud,
+// estética, ética) come first. Each is decided by the community's votes when
+// at least two products have a note in it; until then by a measurable figure
+// we already publish, named on screen. A criterion with neither is left out:
+// no figure we have says how ethical or how beautiful a product is.
+type MedidaRubrica = { claves: string[]; grupo?: string } | { retiradas: true };
+/** How a data criterion is named on screen when its column name alone does
+ *  not say why it measures that criterion. */
+const SEGUN: Record<string, string> = {
+  ciclos_declarados: 'ciclos de carga declarados (más ciclos, más años de uso)',
+  degradacion_anual_pct: 'degradación anual (pierde menos potencia cada año)',
+};
+const RUBRICA: Array<{ criterio: string; comunidad: string; medida?: MedidaRubrica }> = [
+  { criterio: 'Calidad', comunidad: 'calidad' },
+  { criterio: 'Precio', comunidad: 'precio', medida: { claves: ['precio_por_kwh', 'precio_por_w', 'precio_desde'], grupo: 'compra' } },
+  { criterio: 'Garantía', comunidad: 'garantia', medida: { claves: ['garantia_anios', 'garantia_producto_anios'], grupo: 'garantia' } },
+  // More charge cycles, or a panel that loses less each year, lasts longer:
+  // fewer replacements and less waste.
+  { criterio: 'Ecología', comunidad: 'ecologia', medida: { claves: ['ciclos_declarados', 'degradacion_anual_pct'] } },
+  { criterio: 'Salud y seguridad', comunidad: 'salud', medida: { retiradas: true } },
+  { criterio: 'Estética', comunidad: 'estetica' },
+  { criterio: 'Ética', comunidad: 'etica' },
+];
+const minusculaInicial = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+/** The block's footnote, one sentence for both painters. */
+export const NOTA_ORDEN = 'El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.';
+export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que precio, garantía, ecología y seguridad se deciden con los datos publicados que se nombran en cada línea; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
 
 /**
  * For each criterion with a direction, the best product of the table
@@ -383,12 +468,74 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
     }
   }
   if (filas.length < 2) return null;
-  const cols = (elegidas(t, datos.columnas) || t.columnas.filter(c =>
-    esComunidad(c) ? c.config?.criterio !== 'media' : listableEn(t)(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
-    .filter(ordenable);
+  const elegidasYa = elegidas(t, datos.columnas);
   const max = Math.max(1, Math.min(12, Number(datos.max) || 8));
   const criterios: VistaAlternativas['criterios'] = [];
+  const usadas = new Set<string>();
+  // 1 · The rubric. Skipped when the page chose its own columns.
+  if (!elegidasYa) for (const r of RUBRICA) {
+    const votos = t.columnas.find(c => criterioDe(c) === r.comunidad);
+    const mv = votos ? mejoresEn(filas, votos) : new Set<string>();
+    if (votos) usadas.add(votos.id);
+    if (votos && mv.size) {
+      const orden = ordenarPor(filas, votos);
+      const g = orden[0];
+      const i = orden.findIndex(x => x.id === actual.id);
+      criterios.push({
+        columnaId: votos.id, criterio: r.criterio, base: 'votos', segun: null, empates: mv.size - 1,
+        ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: `${textoDe(g, votos)} de 5` },
+        esEsta: mv.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+      });
+      continue;
+    }
+    const m = r.medida;
+    if (!m) continue;
+    if ('retiradas' in m) {
+      // Safety: products with no recall or safety alert, among those whose
+      // recalls were actually searched (a product nobody checked is not
+      // «clean», it is unknown).
+      const cRet = t.columnas.find(c => c.tipo === 'relacion' && rolDe(c) === 'retiradas');
+      const cFecha = columnaPorRol(t, 'retiradas_fecha');
+      if (!cRet || !cFecha) continue;
+      const vistas = filas.filter(x => tieneValor(x, cFecha));
+      const n = (x: FilaFicha) => x.apuntados?.[cRet.id]?.length || 0;
+      const limpias = vistas.filter(x => n(x) === 0).sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'));
+      // Everyone clean or everyone recalled: nothing tells them apart.
+      if (vistas.length < 2 || !limpias.length || limpias.length === vistas.length) continue;
+      const esta = limpias.some(x => x.id === actual.id);
+      const g = esta ? actual : limpias[0];
+      criterios.push({
+        columnaId: cRet.id, criterio: r.criterio, base: 'datos', segun: 'retiradas y alertas de seguridad', empates: limpias.length - 1,
+        ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: 'ninguna retirada' },
+        esEsta: esta, puesto: null,
+      });
+      // Where this one stands, said plainly instead of a rank among ties.
+      if (!esta && vistas.some(x => x.id === actual.id)) criterios[criterios.length - 1].ganador.valor = `ninguna retirada; este producto tiene ${plural(n(actual), 'aviso', 'avisos')}`;
+      continue;
+    }
+    const c = m.claves.map(k => t.columnas.find(x => x.config?.clave === k && ordenable(x) && listableEn(t)(x))).find(x => x && mejoresEn(filas, x).size);
+    if (!c) continue;
+    const orden = ordenarPor(filas, c);
+    const mejores = mejoresEn(filas, c);
+    const g = orden[0];
+    const i = orden.findIndex(x => x.id === actual.id);
+    usadas.add(c.id);
+    // The price or warranty already has its line: the other price and
+    // warranty figures would only repeat it lower down.
+    if (m.grupo) for (const x of t.columnas) if (grupoDe(x) === m.grupo) usadas.add(x.id);
+    criterios.push({
+      columnaId: c.id, criterio: r.criterio, base: 'datos',
+      segun: SEGUN[c.config?.clave] || minusculaInicial(etiquetaColumna(c)), empates: mejores.size - 1,
+      ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
+      esEsta: mejores.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+    });
+  }
+  // 2 · Then the technical figures, as before.
+  const cols = (elegidasYa || t.columnas.filter(c =>
+    esComunidad(c) ? c.config?.criterio !== 'media' : listableEn(t)(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
+    .filter(c => ordenable(c) && !usadas.has(c.id));
   for (const c of cols) {
+    if (criterios.length >= max) break;
     const orden = ordenarPor(filas, c);
     // A «best» among fewer than two products is not a comparison, and a tie
     // for first between everyone says nothing.
@@ -402,13 +549,12 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
     });
-    if (criterios.length >= max) break;
   }
   if (!criterios.length) return null;
   const ambito = sub && rango ? `Entre los productos del mismo tipo (${sub}) y tamaño parecido: ${rango}.`
     : sub ? `Entre los productos del mismo tipo: ${sub}.`
     : rango ? `Entre los productos de tamaño parecido: ${rango}.` : null;
-  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, ambito, criterios };
+  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, ambito, criterios, porDatos: criterios.some(c => c.base === 'datos') };
 }
 
 // ── AFIRMACIONES PUBLICITARIAS ──────────────────────────────────────────────

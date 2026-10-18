@@ -950,6 +950,16 @@ The evaluator (round 2) scored criterion 4 at 5 because no sheet had any rating,
 
 **Cost of the shortcut.** The figures are copied by hand and go stale; the date is shown so a reader sees how old they are. Refreshing them is a re-run of the research, not automated.
 
+
+## 2026-10-18 — Rubric criteria in «La mejor en cada criterio»: votes first, named data until then (W4)
+
+Evaluator round 3 (fix 5): the alternatives block ranked by technical figures only, so «the best in ecology / in ethics» did not exist. The block now leads with the rubric criteria. Each is decided by community votes once two products have a note, and until then by one published figure that is named on the line: price per unit, warranty years, declared cycles or annual degradation, and recalls among searched products. Quality, aesthetics and ethics show only with votes.
+
+**Alternatives.**
+- A new block. Rejected: two «best in» lists on one sheet.
+- A composite «ecology score» mixing chemistry, repairability and cycles. Rejected: the weights would be our opinion presented as data.
+
+**Cost.** The criterion → column map (`RUBRICA` in `ficha/vistas.ts`) is by `config.clave`, so a new table needs its keys there. That is about 5 minutes per table.
 ## 2026-10-18 — Catalog filters as visitor chips over the existing view filters (W2)
 
 Evaluator round 3 wanted category filters visible. Options: (a) a new block config listing which filters to show, set by the loader; (b) derive them from column roles/keys at render time; (c) open the generic «Filtrar» menu by default. Chose (b): zero loader changes, works for any catalog-like table, and the tramos come from the data (thirds, two significant digits). Filters go through the existing visitor path (`filtros`/`orden` URL params on `/api/bd/tablas/:id`), ANDed with the author's view filters. Cost of moving to (a) later: one config field read by `MandosCatalogo`.
