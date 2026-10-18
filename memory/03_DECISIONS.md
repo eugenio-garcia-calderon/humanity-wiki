@@ -939,3 +939,13 @@ The subcategory guide had to fold on load. Options: (a) `PATCH` the whole block 
 - **Alternatives**: per-offer columns (rejected, duplication); free text on the distributor (the old `envio`/`devoluciones` texto_largo; kept for history, not read by the box, since a sentence cannot be compared or say «unknown» distinctly).
 - **Rule**: conditions are read only from a distributors table with the same owner as the offers table, so a foreign row cannot promise «free returns» on someone's sheet.
 - **Unit**: delivery is shown as plain «días». Shops publish working days, calendar days or neither; the published unit travels in each value's provenance note.
+
+## 2026-10-18 — Third-party ratings are a separate, sourced fact, never a vote (W4)
+
+The evaluator (round 2) scored criterion 4 at 5 because no sheet had any rating, and community ratings cannot be invented. We now show ratings published elsewhere (Trustpilot for shops; the maker's shop or a retailer for products) as a fact with source, link and the day it was read, in a box apart from the community block. They never feed `bd/comunidad.ts`, the ordering or the AggregateRating JSON-LD (Google only accepts ratings collected on the page, and a borrowed one would be a made-up rating to us). Amazon is excluded: robots.txt blocks it and its terms only allow its stars through its API.
+
+**Alternatives.**
+- Mix them into the community score as prior votes. Rejected: the score would stop meaning "what people here said", and a sheet could rank on a figure nobody here gave.
+- A dedicated column type. Rejected for now: a hidden long-text column with JSON plus a validator costs nothing in the column editor. A real type is about 1 h (editor + cell + export) once a second site needs it.
+
+**Cost of the shortcut.** The figures are copied by hand and go stale; the date is shown so a reader sees how old they are. Refreshing them is a re-run of the research, not automated.

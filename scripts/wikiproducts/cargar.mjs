@@ -96,6 +96,17 @@ const marcas = unirPorId(leerLista('marcas.json', 'marcas'));
 // Each shop's delivery, returns and warranty conditions (W5, evaluator round 2)
 // live in their own file and merge into the same rows by id.
 const distribuidores = unirPorId([...leerLista('distribuidores.json', 'distribuidores'), ...leerLista('condiciones-tiendas.json', 'distribuidores')]);
+// Ratings published elsewhere (W4): Trustpilot for a shop, the maker's shop or
+// a retailer for a product, each with its link and the day it was read. One
+// file for both folders, by id, so the research does not touch the product
+// files. They go into a JSON text column the rating and offers blocks read,
+// apart from the community score (`src/server/bd/opinionesTerceros.ts`).
+const RUTA_TERCEROS = path.join(dir, 'datos', 'opiniones-terceros.json');
+const terceros = existsSync(RUTA_TERCEROS) ? leer(RUTA_TERCEROS) : {};
+const tercerosDe = (grupo, id) => {
+  const l = (terceros[grupo]?.[id] || []).map(({ fuente, url, nota, escala, opiniones, fecha }) => ({ fuente, url, nota, escala, opiniones, fecha }));
+  return l.length ? JSON.stringify(l) : null;
+};
 
 // ── 2. FROM A DATA VALUE TO A CELL ──────────────────────────────────────────
 const esDato = x => x && typeof x === 'object' && !Array.isArray(x) && ('valor' in x || 'naturaleza' in x || 'origen' in x);
@@ -219,7 +230,7 @@ function filaMarca(m) {
   return { tabla: 'marcas', nombre: m.nombre, campos: { ...m, datos_publicos: m.datos_publicos, fuentes: fuentesTexto(m.fuentes) } };
 }
 function filaDistribuidor(d) {
-  return { tabla: 'distribuidores', nombre: d.nombre, campos: { ...d, fuentes: fuentesTexto(d.fuentes) } };
+  return { tabla: 'distribuidores', nombre: d.nombre, campos: { ...d, fuentes: fuentesTexto(d.fuentes), opiniones_terceros: tercerosDe('distribuidores', d.id) } };
 }
 function filaAfirmacion(p, a) {
   const fecha = ultimaFecha(a.fuentes || []);
@@ -310,6 +321,7 @@ function filaProducto(p) {
     retiradas_fecha: ultimaFecha(comprobadas),
     revisado: ultimaFecha(Object.values(p.datos_tecnicos || {})) || null,
     pendiente: p.pendiente,
+    opiniones_terceros: tercerosDe('productos', p.id),
   });
   return {
     tabla: p._tabla, nombre: p.nombre, campos, _producto: p._origen + '/' + p.id,
