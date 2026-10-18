@@ -11,6 +11,12 @@
       "ruta": "src/server/apiPublica.ts",
       "motivo": "W2: plegar un título y lo que lleva debajo por la API",
       "desde": "2026-10-18T21:14:16.976Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/wikiproducts/enlazar-sitio.mjs",
+      "motivo": "W2: plegar la guía de cada subcategoría, portada en dos grupos",
+      "desde": "2026-10-18T21:14:21.513Z"
     }
   ]
 }
