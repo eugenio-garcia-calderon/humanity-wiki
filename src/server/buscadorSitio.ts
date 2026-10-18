@@ -22,7 +22,7 @@ import { bloquesDe } from './bloquesSql';
 import { paginaVisible, descripcionDe } from './sitios';
 import { filtrarBloques } from './miembros.js';
 import { registrarHtml, esc } from './htmlBloques.js';
-import { CLASES_TARJETA } from '../components/sitio/tarjetaSeccion';
+import { CLASES_TARJETA, CARGA_INMEDIATA } from '../components/sitio/tarjetaSeccion';
 
 /** Cuántos niveles de página dentro de página (como `sitios.ts`). */
 const PROFUNDIDAD = 8;
@@ -256,8 +256,8 @@ registrarHtml('secciones', (b, ctx) => {
   const lista = ctx.extra.get('secciones') as Awaited<ReturnType<typeof seccionesDe>> | undefined;
   if (!lista?.length) return '';
   const titulo = typeof b?.datos?.titulo === 'string' ? b.datos.titulo.trim() : '';
-  const tarjetas = lista.map(s => `<li><a href="${esc(ctx.enlacePagina(s.id))}" class="${CLASES_TARJETA.enlace}">`
-    + (s.portada ? `<span class="${CLASES_TARJETA.marco}"><img src="${esc(s.portada)}" alt="" width="320" height="240" loading="lazy" class="${CLASES_TARJETA.imagen}"></span>`
+  const tarjetas = lista.map((s, i) => `<li><a href="${esc(ctx.enlacePagina(s.id))}" class="${CLASES_TARJETA.enlace}">`
+    + (s.portada ? `<span class="${CLASES_TARJETA.marco}"><img src="${esc(s.portada)}" alt="" width="320" height="240" loading="${i < CARGA_INMEDIATA ? 'eager' : 'lazy'}" class="${CLASES_TARJETA.imagen}"></span>`
       : `<span class="${CLASES_TARJETA.marco}" aria-hidden="true"></span>`)
     + `<span class="${CLASES_TARJETA.cuerpo}"><span class="${CLASES_TARJETA.titulo}">${esc(s.titulo)}</span>`
     + `<span class="${CLASES_TARJETA.cuenta}">${s.fichas === 1 ? '1 producto' : `${s.fichas} productos`}</span>`

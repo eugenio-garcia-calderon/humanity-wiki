@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
-import { CLASES_TARJETA as C } from './tarjetaSeccion';
+import { CLASES_TARJETA as C, CARGA_INMEDIATA } from './tarjetaSeccion';
 
 // ============================================================================
 // LAS SECCIONES DE UN SITIO, EN TARJETAS (2026-10-18, Wikiproducts W2)
@@ -27,12 +27,12 @@ export default function SeccionesSitio({ secciones, enlace, className = '' }: {
   const a = (s: Seccion) => s.slug && sitio ? sitio.enlaceSlug(s.slug, '') : enlace(s.id);
   return (
     <ul className={`${C.lista} ${className}`}>
-      {secciones.map(s => (
+      {secciones.map((s, i) => (
         <li key={s.id}>
           <Link to={a(s)} className={C.enlace}>
             <span className={C.marco} aria-hidden={s.portada ? undefined : true}>
               {s.portada
-                ? <img src={s.portada} alt="" width={320} height={240} loading="lazy" className={C.imagen} />
+                ? <img src={s.portada} alt="" width={320} height={240} loading={i < CARGA_INMEDIATA ? 'eager' : 'lazy'} className={C.imagen} />
                 : <Package className="w-10 h-10" />}
             </span>
             <span className={C.cuerpo}>
