@@ -109,6 +109,18 @@
           "fuente": "https://solarpowersupply.eu/solar-panels/ecoflow-solar-panels/ecoflow-110w-lightweight-portable-solar-panel",
           "fecha": "2026-10-18",
           "nota": "La ficha no menciona salidas USB."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarpowersupply.eu/solar-panels/ecoflow-solar-panels/ecoflow-110w-lightweight-portable-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "Panel ligero de 110 W y cable XT60 para recargar estaciones EcoFlow pequeñas lejos de un enchufe."
         }
       },
       "origen": {
@@ -366,6 +378,34 @@
           "fuente": "https://www.pccomponentes.com/panel-solar-ecoflow-nextgen-220w-bifacial-portatil-ip68-monocristralino-alta-eficiencia",
           "fecha": "2026-10-18",
           "nota": "No se mencionan salidas USB."
+        },
+        "en_la_caja": {
+          "valor": "Panel solar bifacial de 220 W; funda protectora que hace de soporte; mosquetón; manual de usuario y tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.ferntech.co.nz/ecoflow-220w-bifacial-portable-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "Contenido de la versión original según el distribuidor; la versión NextGen trae en su lugar cable XT60i y bolsa, según la tienda de EcoFlow EE. UU."
+        },
+        "soporte_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.ecoflow.com/us/220w-bifacial-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "En la versión original el soporte es la funda incluida, no el panel; la versión NextGen sí trae soporte integrado de 30–60°."
+        },
+        "ideal_para": {
+          "valor": [
+            "Autocaravana y barco",
+            "Camping y montaña",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.ecoflow.com/us/220w-bifacial-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "220 W bifacial e IP68 para estaciones medianas; su peso pide transportarlo en vehículo."
         }
       },
       "origen": {
@@ -643,6 +683,25 @@
           "naturaleza": "tercero",
           "fuente": "https://www.cliftoncameras.co.uk/uploads/specifications/EcoFlow%20400W%20Portable%20Solar%20Panel%20Specifications.pdf",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar de 400 W; funda de transporte con soporte; cable de MC4 a XT60; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.ecowizard.co.uk/portable-solar-power/ecoflow-400w-portable-solar-panel/",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.cliftoncameras.co.uk/uploads/specifications/EcoFlow%20400W%20Portable%20Solar%20Panel%20Specifications.pdf",
+          "fecha": "2026-10-18",
+          "nota": "400 W y 16 kg: para estaciones grandes que respaldan una vivienda o un vehículo, no para llevar a pie."
         }
       },
       "origen": {
@@ -894,6 +953,33 @@
           "naturaleza": "tercero",
           "fuente": "https://techtest.org/test-das-ecoflow-160w-solarpanel-faltbar-aber-mit-standard-anschluessen/",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar de 160 W; funda de transporte que hace de soporte; cable de MC4 a XT60; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.ecowizard.co.uk/portable-solar-power/ecoflow-160w-portable-foldable-solar-panel/",
+          "fecha": "2026-10-18"
+        },
+        "soporte_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.ecowizard.co.uk/portable-solar-power/ecoflow-160w-portable-foldable-solar-panel/",
+          "fecha": "2026-10-18",
+          "nota": "El soporte es la funda de transporte incluida, no una pata integrada en el panel."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://techtest.org/test-das-ecoflow-160w-solarpanel-faltbar-aber-mit-standard-anschluessen/",
+          "fecha": "2026-10-18",
+          "nota": "160 W con salida MC4 estándar, útil para estaciones de varias marcas en salidas y cortes de luz."
         }
       },
       "origen": {
@@ -1142,6 +1228,42 @@
           "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/solar-panels/jackery-solarsaga-100w-solar-panel",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar SolarSaga 100; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://solarpowersupply.eu/solar-panels/jackery-solarsaga-100w-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "Lista del distribuidor; el manual describe además un adaptador DC8020 a DC7909 que no aparece en esa lista."
+        },
+        "manual_url": {
+          "valor": "https://cdn.solarpowersupply.eu/files/Jackery%20SolarSaga%20100%20User%20Guide.pdf%EF%BC%88%E5%89%AF%E6%9C%AC%EF%BC%89-20260211.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarpowersupply.eu/solar-panels/jackery-solarsaga-100w-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "Guía de Jackery para el modelo JS-100F, alojada por el distribuidor."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.jackery.com/products/jackery-solarsaga-100w-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "La marca anuncia patas de apoyo ajustables; el manual indica desplegar el soporte y apoyarlo en el suelo."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://eu.jackery.com/products/jackery-solarsaga-100w-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "100 W plegables con salida para estaciones Jackery Explorer y puertos USB para cargar el móvil en acampada."
         }
       },
       "origen": {
@@ -1412,6 +1534,42 @@
           "naturaleza": "tercero",
           "fuente": "https://www.wellbots.com/es/products/jackery-solarsaga-200-portable-solar-panel",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar SolarSaga 200; cable de carga solar multifunción; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/Jackery_SolarSaga_200_User_Manual_-_666E.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Lista del manual de Jackery (modelo JS-200E); un distribuidor añade una bolsa de transporte."
+        },
+        "manual_url": {
+          "valor": "https://www.mrsolar.com/content/pdf/jackery/Jackery_SolarSaga_200_User_Manual_-_666E.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/Jackery_SolarSaga_200_User_Manual_-_666E.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de Jackery alojado por un distribuidor estadounidense."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/Jackery_SolarSaga_200_User_Manual_-_666E.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual indica desplegar el soporte del panel y apoyarlo en una superficie plana."
+        },
+        "ideal_para": {
+          "valor": [
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Camping y montaña"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarpowersupply.eu/solar-panels/jackery-solarsaga-200w-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "200 W bifacial de unos 8 kg, para estaciones Explorer grandes transportadas en vehículo."
         }
       },
       "origen": {
@@ -1662,6 +1820,41 @@
           "naturaleza": "declarado",
           "fuente": "https://bluetti.com/wp-content/uploads/2024/07/PV120-User-Manual-EN-DE-V1.0.pdf",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar PV120; cable MC4; manual de usuario y tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://bluetti.com/wp-content/uploads/2024/07/PV120-User-Manual-EN-DE-V1.0.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Lista leída del manual; el texto extraído del PDF no estaba bien maquetado."
+        },
+        "manual_url": {
+          "valor": "https://bluetti.com/wp-content/uploads/2024/07/PV120-User-Manual-EN-DE-V1.0.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://bluetti.com/wp-content/uploads/2024/07/PV120-User-Manual-EN-DE-V1.0.pdf",
+          "fecha": "2026-10-18"
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://checkout.bluettipower.eu/products/bluetti-sp120",
+          "fecha": "2026-10-18",
+          "nota": "La marca indica que se despliegan las patas de apoyo y se ajusta el ángulo."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://bluetti.com/wp-content/uploads/2024/07/PV120-User-Manual-EN-DE-V1.0.pdf",
+          "fecha": "2026-10-18",
+          "nota": "120 W plegables con salida MC4 para recargar una estación portátil fuera de casa; IP65, no apto para dejar bajo la lluvia."
         }
       },
       "origen": {
@@ -1913,6 +2106,41 @@
           "naturaleza": "declarado",
           "fuente": "https://www.bluettipower.eu/products/bluetti-sp200",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar PV200; cable MC4; manual de usuario y tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://bluetti.com/wp-content/uploads/2024/07/PV200-User-Manual-EN-DE-V1.0.pdf",
+          "fecha": "2026-10-18",
+          "nota": "La lista del manual no se extrajo completa; puede faltar algún accesorio."
+        },
+        "manual_url": {
+          "valor": "https://bluetti.com/wp-content/uploads/2024/07/PV200-User-Manual-EN-DE-V1.0.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://bluetti.com/wp-content/uploads/2024/07/PV200-User-Manual-EN-DE-V1.0.pdf",
+          "fecha": "2026-10-18"
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/bluetti-sp200",
+          "fecha": "2026-10-18",
+          "nota": "La marca anuncia patas de apoyo integradas para ajustar el ángulo."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.bluettipower.eu/products/bluetti-sp200",
+          "fecha": "2026-10-18",
+          "nota": "200 W plegables con MC4, pensados para estaciones medianas en acampada, autocaravana o cortes de luz."
         }
       },
       "origen": {
@@ -2179,6 +2407,42 @@
           "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/index.php/solar-panels/bluetti-pv350-350w-solar-panel",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar PV350; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://offgridtec.com/en/bluetti-pv350-foldable-solar-panel.html",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor Offgridtec; la web de la marca solo muestra la caja en imagen."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0558/1199/7864/files/PV350_User_Manaul_EN-DE.pdf?v=1776325287",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://bluettipower.com.au/products/bluetti-pv350-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "Enlazado desde la tienda australiana de Bluetti; el PDF no tiene texto extraíble y no se pudo leer."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.storagereview.com/review/bluetti-pv350-solar-panel-review",
+          "fecha": "2026-10-18",
+          "nota": "La prueba describe cuatro patas abatibles integradas, con ángulo de 35° a 55°."
+        },
+        "ideal_para": {
+          "valor": [
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Camping y montaña"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.storagereview.com/review/bluetti-pv350-solar-panel-review",
+          "fecha": "2026-10-18",
+          "nota": "350 W y casi 15 kg: para estaciones grandes con transporte en vehículo, no para llevar a pie."
         }
       },
       "origen": {
@@ -2455,6 +2719,41 @@
           "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/index.php/solar-panels/anker-solix-ps100-bifacial-portable-solar-panel",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar PS100 Bifacial; 2 cables alargadores solares de 2,5 m; cable de MC4 a XT-60i de 0,5 m; guía rápida; tarjeta de seguridad",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/products/as310011",
+          "fecha": "2026-10-18"
+        },
+        "manual_url": {
+          "valor": "https://lp.ankerjapan.com/hubfs/aoos/manual/AS310QSG.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://lp.ankerjapan.com/hubfs/aoos/manual/AS310QSG.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Es la guía rápida común de PS100, PS200 y PS400, alojada por Anker Japón; no se encontró un manual completo."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/products/as310011",
+          "fecha": "2026-10-18",
+          "nota": "La marca da el peso «incluido el soporte» y la guía indica ajustar el soporte que se despliega con el panel."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.ankersolix.com/eu/products/as310011",
+          "fecha": "2026-10-18",
+          "nota": "100 W en unos 3 kg con IP68: fácil de llevar en salidas para recargar una estación pequeña."
         }
       },
       "origen": {
@@ -2728,6 +3027,41 @@
           "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/index.php/solar-panels/anker-solix-ps200-bifacial-portable-solar-panel",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar PS200 Bifacial; 2 cables alargadores solares de 2,5 m; cable de MC4 a XT-60i de 0,5 m; guía rápida; tarjeta de seguridad",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ankersolix.com/products/as320011",
+          "fecha": "2026-10-18"
+        },
+        "manual_url": {
+          "valor": "https://lp.ankerjapan.com/hubfs/aoos/manual/AS310QSG.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://lp.ankerjapan.com/hubfs/aoos/manual/AS310QSG.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Guía rápida común de PS100, PS200 y PS400 (AS310/AS320/AS340), alojada por Anker Japón."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ankersolix.com/products/as320011",
+          "fecha": "2026-10-18",
+          "nota": "La marca da el peso «incluido el soporte» y la guía describe soportes que se despliegan con el panel."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://eu.ankersolix.com/products/as320011",
+          "fecha": "2026-10-18",
+          "nota": "200 W en unos 5 kg con IP68; su tensión de 57,6 V exige una estación que la admita."
         }
       },
       "origen": {
@@ -3009,6 +3343,34 @@
           "naturaleza": "tercero",
           "fuente": "https://masterfoto.lv/en/solar-portable-panels/2519-anker-625-100w-solar-panel-for-anker-521-535-757.html",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar Anker 625 de 100 W; cable de carga solar; adaptador de XT-60 a DC7909; guía de bienvenida",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.electrocity.ie/product/anker-625-100w-portable-solar-panel/",
+          "fecha": "2026-10-18",
+          "nota": "El servicio técnico de Anker confirma el cable de carga y el adaptador XT-60 a DC7909."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.electrocity.ie/product/anker-625-100w-portable-solar-panel/",
+          "fecha": "2026-10-18",
+          "nota": "La tienda lo describe con un soporte trasero ajustable."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Portátil y tablet"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://masterfoto.lv/en/solar-portable-panels/2519-anker-625-100w-solar-panel-for-anker-521-535-757.html",
+          "fecha": "2026-10-18",
+          "nota": "100 W con salida XT60 para estaciones Anker y USB-C de 15 W para cargar aparatos directamente."
         }
       },
       "origen": {
@@ -3264,6 +3626,25 @@
           "naturaleza": "declarado",
           "fuente": "https://www.anker.com/eu-en/products/a2421",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Cargador solar PowerPort Solar de 21 W; cable micro-USB de 90 cm; guía de bienvenida",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/eu-en/products/a2421",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Uso diario"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.anker.com/eu-en/products/a2421",
+          "fecha": "2026-10-18",
+          "nota": "Cargador de lona ligero con dos USB-A para cargar el móvil al sol durante excursiones, sin estación intermedia."
         }
       },
       "origen": {
@@ -3514,6 +3895,26 @@
           "naturaleza": "tercero",
           "fuente": "https://frontdeskreview.com/product/portable-solar-panels/bigblue-28w/",
           "fecha": "2026-10-18"
+        },
+        "soporte_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.outdoorgearlab.com/reviews/camping-and-hiking/solar-charger/bigblue-3",
+          "fecha": "2026-10-18",
+          "nota": "La prueba señala la falta de patas de apoyo; se cuelga con los mosquetones incluidos."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Uso diario"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://frontdeskreview.com/product/portable-solar-panels/bigblue-28w/",
+          "fecha": "2026-10-18",
+          "nota": "Unos 0,7 kg con salidas USB-A y USB-C para cargar el móvil o una batería externa en ruta."
         }
       },
       "origen": {
@@ -3752,6 +4153,41 @@
           "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/solar-panels/goal-zero-nomad-20-solar-panel-1",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar Nomad 20",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/nomad-20-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "La marca no lista cables aparte: el cable de salida va unido al panel."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0520/1156/5225/files/nomad-20-sku-11910-user-guide-142-d220.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://help.goalzero.com/hc/en-us/articles/38351192271131-Nomad-20-Solar-Panel",
+          "fecha": "2026-10-18"
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/nomad-20-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "La marca anuncia un soporte integrado que encaja en varios ángulos."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Viajes",
+            "Uso diario"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.mec.ca/en/product/6012-170/goal-zero-nomad-20-solar-panel",
+          "fecha": "2026-10-18",
+          "nota": "Algo más de 1 kg con USB de 2,1 A: carga el móvil o baterías pequeñas en excursiones."
         }
       },
       "origen": {
@@ -3987,6 +4423,25 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar SP033 de 200 W; cable MC4 a 5,5 × 2,5 mm; cable MC4 a Anderson; adaptador DC de 8 mm; cable DC de 3,5 × 1,35 mm; cable DC de 5,5 × 2,1 mm; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.fotofabrikas.lt/en/items/Power-Banks/Chargers/8636915.2-Photovoltaic-panel-Allpowers-AP-SP-033-BLA-200W.html?htmlamp",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autocaravana y barco",
+            "Camping y montaña",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.fotofabrikas.lt/en/items/Power-Banks/Chargers/8636915.2-Photovoltaic-panel-Allpowers-AP-SP-033-BLA-200W.html?htmlamp",
+          "fecha": "2026-10-18",
+          "nota": "200 W con cables para estaciones de varias marcas; unos 6 kg, mejor transportado en vehículo."
         }
       },
       "origen": {
@@ -4231,6 +4686,34 @@
           "naturaleza": "tercero",
           "fuente": "https://m.alza.hu/EN/choetech-foldable-solar-charger-100w-black-d6323677.htm",
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Panel solar plegable SC009 de 100 W; 2 cables DC; juego de 10 conectores",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://m.alza.hu/EN/choetech-foldable-solar-charger-100w-black-d6323677.htm",
+          "fecha": "2026-10-18",
+          "nota": "La tienda menciona estos accesorios pero no da una lista cerrada."
+        },
+        "soporte_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://m.alza.hu/EN/choetech-foldable-solar-charger-100w-black-d6323677.htm",
+          "fecha": "2026-10-18",
+          "nota": "La tienda describe cuatro patas de apoyo ajustables entre 0° y 45°."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Portátil y tablet",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://m.alza.hu/EN/choetech-foldable-solar-charger-100w-black-d6323677.htm",
+          "fecha": "2026-10-18",
+          "nota": "Su USB-C Power Delivery de 45 W carga un portátil directamente y la salida DC alimenta una estación."
         }
       },
       "origen": {

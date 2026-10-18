@@ -151,6 +151,74 @@
           "fuente": "https://storagereview.com/review/ecoflow-river-3-review",
           "fecha": "2026-10-18",
           "nota": "Medido por StorageReview (Corinne OBrien, 2024-10-07) descargando con un ventilador de 300 W: 210 Wh hasta el apagado (≈86 % de los 245 Wh nominales; porcentaje calculado por nosotros: 210/245)."
+        },
+        "en_la_caja": {
+          "valor": "Estación EcoFlow RIVER 3; cable de carga CA; cable de carga para coche; manual y tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual oficial de EcoFlow (alojado por un distribuidor)."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Portátil y tablet"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "245 Wh y 300 W en CA: para un fin de semana fuera o el portátil, no para la casa."
+        },
+        "manual_url": {
+          "valor": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de EcoFlow en inglés, alojado por un distribuidor eslovaco."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://www.dateks.lv/en/cenas/power-bank/1164522-ecoflow-power-station-river-3",
+          "fecha": "2026-10-18",
+          "nota": "De 0 a 100 % en una hora por CA, según la tienda Dateks."
+        },
+        "cable_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cables de carga sueltos."
+        },
+        "carga_inalambrica": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual solo lista salidas CA, USB y de mechero."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Modo bypass: con la red conectada alimenta los aparatos y conmuta a batería en menos de 20 ms (10 ms en la versión UPS)."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla con nivel, potencia de entrada y salida y avisos."
         }
       },
       "origen": {
@@ -459,6 +527,58 @@
           "fuente": "https://www.nextpit.de/tests/jackery-solargenerator-300-plus-test",
           "fecha": "2026-10-18",
           "nota": "Medido por nextpit (Thomas Kern, 1-9-2023): 237 Wh entregados; carga completa consumió 327 Wh de la red. El método de descarga no se detalla."
+        },
+        "en_la_caja": {
+          "valor": "Estación Jackery Explorer 300 Plus; adaptador de carga CA; adaptador DC de 7,9 mm a 8 mm",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.currys.co.uk/products/jackery-explorer-300-plus-portable-power-station-10260080.html",
+          "fecha": "2026-10-18",
+          "nota": "Según la tienda Currys; el manual australiano lista además cable CA, cable de 3 m, adaptador DC8020 a USB-C y bolsa (y un panel en el pack solar)."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "288 Wh y 300 W en CA, ligera: portátil, cámara y luces en una escapada."
+        },
+        "manual_url": {
+          "valor": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de Jackery alojado por la tienda australiana BCF."
+        },
+        "tiempo_recarga_h": {
+          "valor": 2,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://www.currys.co.uk/products/jackery-explorer-300-plus-portable-power-station-10260080.html",
+          "fecha": "2026-10-18",
+          "nota": "Por CA, según la tienda Currys."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Modo bypass hasta 300 W; si cae la red pasa a batería en menos de 20 ms (no es un SAI profesional)."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla con potencias, porcentaje y tiempos restantes."
         }
       },
       "origen": {
@@ -748,6 +868,41 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna prueba independiente con medición de energía útil (el artículo de PC-WELT es contenido patrocinado por Bluetti)."
+        },
+        "en_la_caja": {
+          "valor": "Estación BLUETTI Elite 30 V2; cable de carga CA; cable de carga para coche; tornillo de toma de tierra; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.com/products/bluetti-elite-30-v2-portable-power-station-600w-288wh-glacier-blue",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://shop.bluettipower.com/au/product/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "288 Wh y 600 W con USB-C de 140 W: escapadas y trabajo con portátil fuera de casa."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1.17,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://shop.bluettipower.com/au/product/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "BLUETTI indica 70 minutos por CA a 380 W, sin precisar si es hasta el 100 %; el 80 % en 45 minutos con TurboBoost."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://shop.bluettipower.com/au/product/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "SAI con conmutación de 10 ms o menos y 980 W en modo bypass."
         }
       },
       "origen": {
@@ -1024,6 +1179,42 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://iallpowers.eu/products/r600-uk-plug",
+          "fecha": "2026-10-18",
+          "nota": "299 Wh, 600 W y función SAI: pequeño respaldo para router u ordenador y uso en ruta."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://iallpowers.eu/products/r600-uk-plug",
+          "fecha": "2026-10-18",
+          "nota": "De 0 a 100 % en 1 hora (la web no precisa la fuente; la entrada máxima es de 400 W)."
+        },
+        "carga_inalambrica": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://iallpowers.eu/products/r600-uk-plug",
+          "fecha": "2026-10-18",
+          "nota": "Base de carga inalámbrica de 15 W."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://iallpowers.eu/products/r600-uk-plug",
+          "fecha": "2026-10-18",
+          "nota": "Función SAI: alimenta los aparatos mientras está conectada a la red."
         }
       },
       "origen": {
@@ -1285,6 +1476,57 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Estación OUKITEL P800; cable de carga CA; cable MC4; manual de usuario; tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.oukitel.com/es/products/oukitel-p800-portable-power-station-800w-512wh",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://eu.oukitel.com/es/products/oukitel-p800-portable-power-station-800w-512wh",
+          "fecha": "2026-10-18",
+          "nota": "512 Wh y 800 W con conmutación de emergencia: respaldo corto en casa y uso en autocaravana."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0670/1452/5248/files/P800_1.pdf?v=1754387944",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.oukitel.com/es/products/oukitel-p800-portable-power-station-800w-512wh",
+          "fecha": "2026-10-18",
+          "nota": "PDF escaneado, sin texto seleccionable."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://eu.oukitel.com/es/products/oukitel-p800-portable-power-station-800w-512wh",
+          "fecha": "2026-10-18",
+          "nota": "De 0 a 100 % en 1 hora por CA a 500 W."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.oukitel.com/es/products/oukitel-p800-portable-power-station-800w-512wh",
+          "fecha": "2026-10-18",
+          "nota": "Función EPS: alimenta desde la red y pasa a batería en menos de 10 ms."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.oukitel.com/es/products/oukitel-p800-portable-power-station-800w-512wh",
+          "fecha": "2026-10-18",
+          "nota": "La ficha lista una pantalla entre sus partes."
         }
       },
       "origen": {
@@ -1554,6 +1796,57 @@
           "fuente": "https://www.nextpit.de/tests/jackery-explorer-1000-v2-test",
           "fecha": "2026-10-18",
           "nota": "Medido por nextpit (Thomas Kern, 20-9-2024); la carga completa consumió 1.020 Wh de la red."
+        },
+        "en_la_caja": {
+          "valor": "Estación Jackery Explorer 1000 v2; cable de carga CA",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.keanscm.ie/products/jackery-explorer-1000-v2-263-21-0001-000222",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "1.070 Wh y 1.500 W: sostiene nevera, router y luces durante un apagón."
+        },
+        "manual_url": {
+          "valor": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de Jackery alojado por la tienda Mr. Solar."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://www.keanscm.ie/products/jackery-explorer-1000-v2-263-21-0001-000222",
+          "fecha": "2026-10-18",
+          "nota": "1 h con la carga de emergencia activada en la app; carga normal por CA, unas 1,7 h."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Con la red conectada alimenta desde la red y pasa a batería en menos de 20 ms."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla LCD con potencias, porcentaje y tiempo restante."
         }
       },
       "origen": {
@@ -1842,6 +2135,56 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró una prueba independiente con medición de energía útil en esta sesión (límite de búsquedas agotado)."
+        },
+        "en_la_caja": {
+          "valor": "Estación Anker SOLIX C1000; cable de carga CA; cable de carga DC (coche); documento de información importante",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "1.056 Wh, 1.800 W y función SAI: aguanta un apagón con nevera y router."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "tiempo_recarga_h": {
+          "valor": 0.97,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/fr/a1761-station-electrique-portable-pps-1",
+          "fecha": "2026-10-18",
+          "nota": "58 minutos por CA con el modo UltraFast activado en la app (1.300 W)."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "Modo bypass y SAI con conmutación de 20 ms."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla LCD con batería, tiempos estimados y potencias."
         }
       },
       "origen": {
@@ -2140,6 +2483,50 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró medición independiente en esta sesión."
+        },
+        "en_la_caja": {
+          "valor": "Estación DJI Power 1000; cable de alimentación CA DJI Power",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.spheredrones.com.au/product/dji-power-1000au",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor australiano Sphere Drones."
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "1.024 Wh y 2.200 W en CA, con modo bypass: reserva para la casa y para cargar drones en ruta."
+        },
+        "manual_url": {
+          "valor": "https://terra-1-g.djicdn.com/6189933d30024fc1b331bffe4fe41837/power-1000-500/UM/DJI_Power_1000_Power_500_User_Manual_v1.08_en.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/power-1000/downloads",
+          "fecha": "2026-10-18",
+          "nota": "Manual v1.08 en inglés; hay versiones en otros idiomas en la misma página."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1.17,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "70 minutos al 100 % por CA a 1.200 W; 80 % en 50 minutos."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "Salida CA en modo bypass hasta 2.200 W; conmuta a batería en 0,02 s según DJI."
         }
       },
       "origen": {
@@ -2425,6 +2812,57 @@
           "fuente": "https://www.storagereview.com/review/bluetti-ac180-portable-power-station-review",
           "fecha": "2026-10-18",
           "nota": "No hay medición de la AC180P. Como referencia del modelo base AC180 (1.152 Wh), StorageReview (Kevin OBrien, 26-5-2023) midió 1.030 Wh con una carga de 350 W; no es extrapolable sin más a la AC180P."
+        },
+        "en_la_caja": {
+          "valor": "Estación BLUETTI AC180P; cable de carga CA; cable de carga para coche; cable de carga solar; manual de usuario; tarjeta de control de calidad; tarjeta de garantía de 5 años",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://shop.bluettipower.com/uk/products/ac180p-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Camping y montaña",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://shop.bluettipower.com/uk/products/ac180p-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "1.440 Wh y 1.800 W: cubre un apagón con nevera, router y luces."
+        },
+        "manual_url": {
+          "valor": "https://www.notice-facile.com/dl.php?n=1419753&lang=en",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.notice-facile.com/en/manual/1419753/bluetti+ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Copia del manual alojada por Notice-Facile; BLUETTI ofrece la descarga en su tienda sin enlace directo."
+        },
+        "carga_inalambrica": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://shop.bluettipower.com/uk/products/ac180p-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "Base de carga inalámbrica de 15 W."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://shop.bluettipower.com/uk/products/ac180p-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "Admite carga pasante; según el manual, SAI con conmutación de 20 ms o menos."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.notice-facile.com/en/manual/1419753/bluetti+ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla LCD con capacidad, potencias y alertas."
         }
       },
       "origen": {
@@ -2717,6 +3155,65 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró medición independiente en esta sesión."
+        },
+        "en_la_caja": {
+          "valor": "Estación EcoFlow DELTA 3 Max; cable de carga CA; manuales y tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.solarpowersupply.eu/files/EcoFlow%20DELTA%203%20Max%20Portable%20Power%20Station_User%20Manual%20(2)-20260202.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual oficial de EcoFlow alojado por el distribuidor Solar Power Supply."
+        },
+        "ideal_para": {
+          "valor": [
+            "Apagones y emergencias",
+            "Autocaravana y barco"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarpowersupply.eu/index.php/portable-power-stations/ecoflow-delta-3-max-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "2.048 Wh, 2.400 W y SAI de 10 ms: sostiene los aparatos esenciales de una casa durante horas."
+        },
+        "manual_url": {
+          "valor": "https://cdn.solarpowersupply.eu/files/EcoFlow%20DELTA%203%20Max%20Portable%20Power%20Station_User%20Manual%20(2)-20260202.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarpowersupply.eu/index.php/portable-power-stations/ecoflow-delta-3-max-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "Manual de EcoFlow alojado por un distribuidor."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1.13,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://solarpowersupply.eu/index.php/portable-power-stations/ecoflow-delta-3-max-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "68 minutos de 0 a 100 % por CA a 2.300 W, según la tienda; 80 % en 51 minutos."
+        },
+        "carga_inalambrica": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.solarpowersupply.eu/files/EcoFlow%20DELTA%203%20Max%20Portable%20Power%20Station_User%20Manual%20(2)-20260202.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual no recoge carga inalámbrica entre sus salidas."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.solarpowersupply.eu/files/EcoFlow%20DELTA%203%20Max%20Portable%20Power%20Station_User%20Manual%20(2)-20260202.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Modo bypass: alimenta desde la red y pasa a batería en un corte (SAI de menos de 10 ms)."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.solarpowersupply.eu/files/EcoFlow%20DELTA%203%20Max%20Portable%20Power%20Station_User%20Manual%20(2)-20260202.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla con potencias, nivel, tiempos y avisos."
         }
       },
       "origen": {

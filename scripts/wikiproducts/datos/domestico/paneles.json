@@ -255,6 +255,24 @@
           "naturaleza": "declarado",
           "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://aikosolar.com/wp-content/uploads/2024/04/PV-Module-Installation-Manual-Single-Glass-EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2024/04/PV-Module-Installation-Manual-Single-Glass-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación general de AIKO para módulos de vidrio simple (abril de 2024); la variante doble vidrio 3P+ tiene su propio manual."
         }
       },
       "garantias": {
@@ -706,6 +724,24 @@
           "naturaleza": "declarado",
           "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de aleo, no manual: el manual de instalación encontrado (v4.9, 2022) no menciona la serie LEO-N."
         }
       },
       "garantias": {
@@ -1118,6 +1154,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Manual.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Manual.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de Astronergy para el CHSM48RN(DG)/F-BH, alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -1550,6 +1604,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Atersa, no manual, publicada en un foro de usuarios; no se encontró el manual en un enlace directo."
         }
       },
       "garantias": {
@@ -1953,6 +2025,24 @@
           "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://portal.segen.co.uk/reseller/docs/CS_Inst%20Manual_PV%20Modules_EN%20v2.7%20EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://portal.segen.co.uk/reseller/docs/CS_Inst%20Manual_PV%20Modules_EN%20v2.7%20EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación general de CSI Solar (rev. 2.7, febrero de 2025) que incluye el CS6.1-54TD; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -2399,6 +2489,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://shop.solexis.ch/en/documents/file/pv/dmegc%20solar/ma_en_dmegc_%20v.202311.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://shop.solexis.ch/en/documents/file/pv/dmegc%20solar/ma_en_dmegc_%20v.202311.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de DMEGC (versión 202311) que incluye los DMxxxM10RT-B54HBB; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -2847,6 +2955,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.huasunsolar.com/downloads.html",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Huasun, no manual: el manual HJT encontrado (2022) no incluye el HS-182-B108DSN."
         }
       },
       "garantias": {
@@ -3257,6 +3383,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/43215/data_sheet_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de JA Solar para módulos bifaciales de doble vidrio (versión A/19), que incluye JAM54D40/LB y /LR; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -3689,6 +3833,24 @@
           "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN-1.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN-1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de JinkoSolar (V10, enero de 2026) que incluye el JKMxxxN-48QL6-DV; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -4165,6 +4327,24 @@
           "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solar-distribution.baywa-re.de/out/media/16-LR5_54HTH_Hi-MO6_LONGi_Module_Product_Manual_20220324V02.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solar-distribution.baywa-re.de/out/media/16-LR5_54HTH_Hi-MO6_LONGi_Module_Product_Manual_20220324V02.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de producto de LONGi para el LR5-54HTH (marzo de 2022), alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -4594,6 +4774,24 @@
           "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://static.longi.com/LON_Gi_PV_Module_User_Manual_for_DGBG_1_0_260409_114d652c10.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://static.longi.com/LON_Gi_PV_Module_User_Manual_for_DGBG_1_0_260409_114d652c10.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario de LONGi que incluye el LR7-54HVH (Hi-MO X10), en inglés."
         }
       },
       "garantias": {
@@ -5059,6 +5257,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-6-DC-425-440-W.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://sunpowerglobal.com/sites/default/files/2025-05/001-15497_REVAE_SunPowerMaxeon%20Install%20Manual_0.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sunpowerglobal.com/sites/default/files/2025-05/001-15497_REVAE_SunPowerMaxeon%20Install%20Manual_0.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Instrucciones de seguridad e instalación de Maxeon para Europa y otros mercados IEC (rev. AE, marzo de 2025), que cubren Maxeon 7 y Maxeon 6."
         }
       },
       "garantias": {
@@ -5483,6 +5699,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solartraders.com/uploads/production/data_sheet/file/31622/MB_Installation%20guide_(low%20res)EN.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/31622/MB_Installation%20guide_(low%20res)EN.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Instrucciones de instalación y uso de Meyer Burger (v1.0.0, agosto de 2021) para los módulos White, Black y Glass; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -5888,6 +6122,24 @@
           "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://ressupply.com/documents/qcells/Q.TRON-M-G2.X_Series_Installation_Manual.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://ressupply.com/documents/qcells/Q.TRON-M-G2.X_Series_Installation_Manual.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación y uso de Qcells para la serie Q.TRON (BLK) M-G2.X (agosto de 2023), válido para Norteamérica; alojado por una tienda."
         }
       },
       "garantias": {
@@ -6313,6 +6565,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://recgroup.com/sites/default/files/2024-09/IM_RECAlphaIEC_ES.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://recgroup.com/sites/default/files/2024-09/IM_RECAlphaIEC_ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación en español de REC para la gama Alpha (versión IEC); hay una versión inglesa más reciente (IM_RECAlpha_IEC_EN_18, 2026)."
         }
       },
       "garantias": {
@@ -6780,6 +7050,24 @@
           "naturaleza": "declarado",
           "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Risen, no manual: el manual encontrado (2021) no incluye la serie RSM108-10."
         }
       },
       "garantias": {
@@ -7210,6 +7498,24 @@
           "naturaleza": "declarado",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Tongwei, no manual: los manuales encontrados no incluyen el TWMNH-48HE."
         }
       },
       "garantias": {
@@ -7640,6 +7946,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/37183/manual_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37183/manual_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de Trina para el NEG9R.28, alojado por un distribuidor."
         }
       },
       "garantias": {

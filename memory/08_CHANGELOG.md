@@ -9183,3 +9183,6 @@ Eugenio: «inspírate en las landing pages de Amazon… que la información est�
 - **«Unexpected token '<', "<!DOCTYPE"… is not valid JSON».** Salía cuando el servidor o Cloudflare contestaban con una página HTML (archivo demasiado grande 413, despliegue 502/503, tiempo agotado 524, error de Express). Ahora:
   - en el navegador, `Response.prototype.json` (una vez, `utils/respuestasAmables.ts`) convierte esa respuesta en un mensaje claro según el código (p. ej. «El archivo es demasiado grande…», «El servidor se está actualizando…»); las subidas por XHR usan el mismo texto;
   - en el servidor, un manejador de errores para `/api` contesta siempre JSON con un mensaje en lugar de la página de error de Express.
+
+## 2026-10-18 — Wikiproducts W3a: data for the Amazon-style sheet
+- The new columns of W1's sheet (#643) now have data for the 94 products, each with its nature and source: «Ideal para» (94; an editorial call from the specs, `calculado`, the reason in the note), «Manual de instrucciones» (63), «Qué hay en la caja» (51), and per category recharge time (16), indicator (16), pass-through (13), built-in cable (10), wireless charging (6), built-in stand (13 panels), motion sensor (18 lights), monitoring app (15 batteries). Fields without a source stay empty rather than guessed.

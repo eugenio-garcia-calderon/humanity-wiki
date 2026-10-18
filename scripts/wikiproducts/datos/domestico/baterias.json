@@ -272,6 +272,33 @@
           "naturaleza": "tercero",
           "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde; la marca declara función de respaldo ante apagones."
+        },
+        "manual_url": {
+          "valor": "https://solarbatterygroup.com.au/documents/UserManuals/UserManual_SMILE-G3.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarbatterygroup.com.au/documents/UserManuals/UserManual_SMILE-G3.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario de AlphaESS para SMILE-G3-S5 (V01) con batería BAT-10.1P, alojado por un distribuidor australiano."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.key-expo.com/restricted-assets/digital-profiles/01_ATTACHMENTS/KEN26/AlphaESS-Brochure-2026-698c8ed8639c9.pdf.pdf",
+          "fecha": "2026-10-18",
+          "nota": "AlphaCloud de AlphaESS, gratuita, en app y web, según el catálogo 2026 de la marca."
         }
       },
       "garantias": {
@@ -708,6 +735,34 @@
           "naturaleza": "declarado",
           "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica para autoconsumo con respaldo ante apagones que, según la marca, puede cubrir toda la vivienda si la instalación lo prevé."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/40873/manual_x1_b5_h_en_13-08-2025.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/40873/manual_x1_b5_h_en_13-08-2025.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Manual de Anker (en inglés) alojado por un distribuidor."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/40873/manual_x1_b5_h_en_13-08-2025.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "App Anker: el manual indica que envía avisos cuando detecta un fallo del sistema."
         }
       },
       "garantias": {
@@ -1152,6 +1207,41 @@
           "naturaleza": "declarado",
           "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde; la marca declara función de respaldo ante apagones."
+        },
+        "manual_url": {
+          "valor": "https://www.bydbatterybox.com/uploads/downloads/BCU2.0_250918_BYD_Battery-Box_Premium_HVS&HVM_Operating_Manual_V1.2_EN-68cbb20414f24.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bydbatterybox.com/downloads",
+          "fecha": "2026-10-18",
+          "nota": "Manual de funcionamiento HVS/HVM (BCU 2.0, V1.2), en inglés."
+        },
+        "en_la_caja": {
+          "valor": "Unidad de control (BCU); base; módulos de batería (de 2 a 5 en HVS, según modelo); soportes de colgar de la BCU y de pared; conector de comunicación; resistencia terminal; acoplador del cable de potencia; tapón estanco; tornillería; documentación (guía rápida y lista de comprobación)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bydbatterybox.com/uploads/downloads/BCU2.0_250918_BYD_Battery-Box_Premium_HVS&HVM_Operating_Manual_V1.2_EN-68cbb20414f24.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Alcance de entrega del manual; las cantidades no se leen con claridad y los módulos llegan en cajas aparte."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bydbatterybox.com/uploads/downloads/BCU2.0_250918_BYD_Battery-Box_Premium_HVS&HVM_Operating_Manual_V1.2_EN-68cbb20414f24.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App BYD Be Connect 2.0: lee estado y eventos de la batería, aunque está pensada sobre todo para configurar; el seguimiento diario suele hacerse con la app del inversor."
         }
       },
       "garantias": {
@@ -1605,6 +1695,32 @@
           "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "en_la_caja": {
+          "valor": "Cable de comunicación con el inversor (2 m, RJ45); conector RJ45 estanco para la BDU; tornillería M4 y M6; terminales de tierra; conectores de potencia positivo y negativo; cables de potencia rojo y negro (6 mm², 2 m)",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.memodo.cz/mwdownloads/b3ed9ba6013d50d69261be3766efe643",
+          "fecha": "2026-10-18",
+          "nota": "Lista de embalaje de la guía rápida de la serie Tower T, en traducción no oficial al checo de un distribuidor; los módulos y la BDU van en sus propias cajas."
+        },
+        "manual_url": {
+          "valor": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Dyness (Australia), no manual: el manual de usuario está en dyness.com/download pero sin enlace directo."
         }
       },
       "garantias": {
@@ -2040,6 +2156,41 @@
           "naturaleza": "tercero",
           "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde; la marca declara función de respaldo ante apagones."
+        },
+        "manual_url": {
+          "valor": "https://www.bimblesolar.com/docs/EcoFlow PowerOcean Single-Phase Installation Guide (EN) V1.0_20240307_compressed.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bimblesolar.com/docs/EcoFlow PowerOcean Single-Phase Installation Guide (EN) V1.0_20240307_compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Guía de instalación monofásica de EcoFlow (V1.0, marzo de 2024), alojada por un distribuidor."
+        },
+        "en_la_caja": {
+          "valor": "Módulo de batería LFP; base de batería; 4 pies regulables; 2 pernos de expansión; plantilla de marcado; piezas de montaje en T y en L con tornillería",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bimblesolar.com/docs/EcoFlow PowerOcean Single-Phase Installation Guide (EN) V1.0_20240307_compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Contenido de la caja de la batería y la base; el inversor híbrido viene en otra caja con su dongle IoT y conectores."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bimblesolar.com/docs/EcoFlow PowerOcean Single-Phase Installation Guide (EN) V1.0_20240307_compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App EcoFlow para el usuario; el instalador usa EcoFlow Pro."
         }
       },
       "garantias": {
@@ -2518,6 +2669,42 @@
           "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica para autoconsumo con respaldo ante apagones que, según la marca, puede cubrir toda la vivienda si la instalación lo prevé."
+        },
+        "manual_url": {
+          "valor": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Enphase (versión FlexPhase), no manual: no se encontró en un enlace directo el manual de instalación internacional."
+        },
+        "en_la_caja": {
+          "valor": "Batería con seis microinversores integrados; tapa de identificación y cuatro tapas de conductos; soporte inferior de pared y escudo superior; tornillos de fijación, de tierra y de la tapa; seis bridas; conectores de control (con y sin resistencia, más repuestos) y conector de drenaje; guía rápida de instalación; plantilla de taladro",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Apartado «contenido de la caja» de la ficha técnica de Enphase."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Enphase App: seguimiento y control de la batería desde el móvil."
         }
       },
       "garantias": {
@@ -3013,6 +3200,32 @@
           "naturaleza": "declarado",
           "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20260828/ENEP6EP12ManualV1.0.1.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20260828/ENEP6EP12ManualV1.0.1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario e instalación EP6/EP12 de Fox ESS, en inglés."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20260828/ENEP6EP12ManualV1.0.1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App FoxCloud (y web FoxCloud), según el manual."
         }
       },
       "garantias": {
@@ -3457,6 +3670,40 @@
           "naturaleza": "declarado",
           "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://en.goodwe.com/lynxf-g2-series",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://en.goodwe.com/Skippower/downloadFileF?id=1846&mid=60",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=1846&mid=60",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario de GoodWe, en inglés."
+        },
+        "en_la_caja": {
+          "valor": "Unidad de control de potencia (PCU); módulo de batería; base; tapa; caja de conexiones y su tapa; conectores DC positivos y negativos con tapones estancos; pernos de expansión; soportes de bloqueo; terminales de tierra; pies regulables; tornillería M5 y M6; documentación",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=1846&mid=60",
+          "fecha": "2026-10-18",
+          "nota": "Lista de entrega del manual; el número de tapas, cajas de conexiones y tornillos varía según la configuración."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=1846&mid=60",
+          "fecha": "2026-10-18",
+          "nota": "App SEMS+ de GoodWe (a través del inversor); la configuración se hace con SolarGo."
         }
       },
       "garantias": {
@@ -3964,6 +4211,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Growatt en alemán, no manual: no se encontró el manual de la ARK XH en un enlace directo."
         }
       },
       "garantias": {
@@ -4413,6 +4678,32 @@
           "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://solar.huawei.com/admin/asset/v1/pro/view/b30c98b151214383851dadef70b60836.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solar.huawei.com/admin/asset/v1/pro/view/b30c98b151214383851dadef70b60836.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Guía de instalación y puesta en marcha de Huawei Suiza (en alemán, octubre de 2025); no se encontró el manual de usuario en un enlace directo."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solar.huawei.com/admin/asset/v1/pro/view/b30c98b151214383851dadef70b60836.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App FusionSolar de Huawei, con la que también se pone en marcha la batería."
         }
       },
       "garantias": {
@@ -4892,6 +5183,40 @@
           "naturaleza": "declarado",
           "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://lghomebatteryblog.eu/wp-content/uploads/RESU10H-PRIME-HIROSE_IM_220323_low-1.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://lghomebatteryblog.eu/wp-content/uploads/RESU10H-PRIME-HIROSE_IM_220323_low-1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de la RESU10H Prime (versión 2.1), en inglés."
+        },
+        "en_la_caja": {
+          "valor": "Módulos de batería A y B; unidad de control de la batería; placa de conexión de módulos; 2 soportes de módulo; 2 soportes de pie; 2 separadores; pernos M6 y M5; 2 adaptadores de 3/4\"-1\"; 2 tapones; plantilla de taladro",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://lghomebatteryblog.eu/wp-content/uploads/RESU10H-PRIME-HIROSE_IM_220323_low-1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Lista de la RESU10H Prime; las bridas, el soporte de pared y sus pernos son opcionales."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://lghomebatteryblog.eu/wp-content/uploads/RESU10H-PRIME-HIROSE_IM_220323_low-1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App RESU Monitor (RMD) para iOS y Android, con versión web; el manual la presenta sobre todo como herramienta del instalador."
         }
       },
       "garantias": {
@@ -5393,6 +5718,24 @@
           "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de la Force-H3, no manual: no se encontró el manual de la H3 en un enlace directo."
         }
       },
       "garantias": {
@@ -5867,6 +6210,33 @@
           "naturaleza": "declarado",
           "fuente": "https://senec.com/de/unternehmen/download",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://senec.com/de/produkte/senec-home/p4",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde; la marca declara función de respaldo ante apagones."
+        },
+        "manual_url": {
+          "valor": "https://senec.com/sites/default/files/2024-06/TD220-096.11_en-DEU_SENEC.Home_P4_Technical%20data%20sheet.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://senec.com/sites/default/files/2024-06/TD220-096.11_en-DEU_SENEC.Home_P4_Technical%20data%20sheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de SENEC.Home P4 (en inglés), no manual: no se encontró el manual en un enlace directo."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://senec.com/sites/default/files/2024-06/TD220-096.11_en-DEU_SENEC.Home_P4_Technical%20data%20sheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "SENEC.App, gratuita para Android e iOS, según la ficha técnica."
         }
       },
       "garantias": {
@@ -6335,6 +6705,33 @@
           "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde; la marca declara función de respaldo ante apagones."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/21214/manual.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21214/manual.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Guía de instalación y uso de SolarEdge (v1.3, 2021) para la Energy Bank, nombre anterior de la Home Battery 400V; en inglés."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://solarmagazine.nl/nieuws-zonne-energie/i21039/solaredge-lanceert-app-mysolaredge-voor-monitoring-van-zonnepanelen",
+          "fecha": "2026-10-18",
+          "nota": "App mySolarEdge para propietarios; la batería se gestiona desde el inversor SolarEdge y se configura con SetApp."
         }
       },
       "garantias": {
@@ -6808,6 +7205,34 @@
           "naturaleza": "declarado",
           "fuente": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica para autoconsumo con respaldo ante apagones que, según la marca, puede cubrir toda la vivienda si la instalación lo prevé."
+        },
+        "manual_url": {
+          "valor": "https://documents.sonnen.de/s/user-manual-sB10-es",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sonnengroup.com/operating-manual",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario en español de la sonnenBatterie 10 con sonnenProtect 4000; la versión performance tiene el suyo (user-manual-sB10-p-es). No se pudo abrir el PDF para comprobarlo."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://apps.apple.com/de/app/sonnen/id6444147829",
+          "fecha": "2026-10-18",
+          "nota": "App sonnen, publicada por la marca en las tiendas de aplicaciones."
         }
       },
       "garantias": {
@@ -7301,6 +7726,32 @@
           "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/12798/manual.pdf?locale=de",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/12798/manual.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Guía rápida de instalación de Sungrow para la SBR (V1.0, 2021), en inglés, alojada por un distribuidor."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/12798/manual.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "App iSolarCloud de Sungrow, con la que también se configura la batería."
         }
       },
       "garantias": {
@@ -7785,6 +8236,33 @@
           "naturaleza": "declarado",
           "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica que almacena la energía solar sobrante para usarla más tarde; la marca declara función de respaldo ante apagones."
+        },
+        "manual_url": {
+          "valor": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-owners-manual.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-owners-manual.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual del propietario de Powerwall 2 AC, en inglés."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-owners-manual.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App de Tesla: seguimiento del sistema desde el móvil, incluida la reserva para apagones."
         }
       },
       "garantias": {
@@ -8228,6 +8706,34 @@
           "naturaleza": "declarado",
           "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo",
+            "Apagones y emergencias",
+            "Casa entera"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Batería doméstica para autoconsumo con respaldo ante apagones que, según la marca, puede cubrir toda la vivienda si la instalación lo prevé."
+        },
+        "manual_url": {
+          "valor": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/OwnerManual/Print/en-emea-apac/Powerwall-3-Owner-Manual-EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/OwnerManual/Print/en-emea-apac/Powerwall-3-Owner-Manual-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual del propietario para Europa, Oriente Medio y Asia-Pacífico, en inglés."
+        },
+        "app_monitorizacion": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/OwnerManual/Print/en-emea-apac/Powerwall-3-Owner-Manual-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "App de Tesla: muestra en tiempo real producción solar, consumo, red y batería."
         }
       },
       "garantias": {
