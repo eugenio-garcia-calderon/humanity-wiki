@@ -9142,6 +9142,15 @@ en mis páginas como proyecto pendiente».
 - El **Mapa de Indicadores de la Humanidad** sigue en **`/mapa`** (antes redirigía a `/mapas` y perdía los parámetros) y es ahora un **bloque de datos `mapaMundo`** («Mapa de indicadores del mundo»): el mismo mapa en un marco sin menús, con alto elegible, territorio de inicio y «Pantalla completa». La plantilla Humanidad Wiki lo trae; se añade a la página Humanidad Wiki de Eugenio.
 
 
+## 2026-10-18 — Wikiproducts W3a: evaluator round 1 on the data, and the missing photos
+- **Whose word it is.** 894 values whose source is a shop, a regulator, a test lab or the press were labelled «declarado» (as if the brand said it). They are now `tercero`, shown as «Según <host>». 9 independent-test fields that said «no publicado» while citing the search that found nothing now carry that result.
+- **Recalls that belonged to other products.** 8 recall rows on the Anker SOLIX X1, EcoFlow PowerOcean, GoodWe Lynx and Growatt ARK sheets were recalls of *other* products of the same brand: the sheet said «retirado» and «ninguna retirada» at once. They go to the recycle bin (`datos/retirar.json`, through the new `DELETE /api/v1/databases/:id/rows/:rowId`, restorable for 15 days); the note names the brand's other recalls.
+- Country of manufacture for 13 more products, from distributors' customs-origin fields (`tercero`, «puede variar según el lote»).
+- Text ranges keep their unit («-20 a 60 °C»). A sold-out offer has stock 0, not empty.
+- «Cómo trabajamos» now says «cualquiera **con una cuenta** puede sugerir una corrección» (`corregir-textos.mjs` + `PATCH /api/v1/pages/:id/blocks/:blockId`, one text block). The load log prints «Cómo trabajamos», the legal pages and the site's legal holder data, so they can be reviewed without opening production.
+- Photos: `datos/fotos.json` names a maker or distributor page for 36 of the 37 products without a photo and for the 4 whose photo was not the product (aleo, Atersa, SENEC.Home, LONGi Hi-MO X10). 4 products have no page anywhere to take one from.
+- The server load has its own concurrency group, waits for a running deploy, and retries a step if the app container restarts under it.
+
 ### 2026-10-18 — Wikiproducts: visitors can sign in and register (W4)
 
 - Migration `0159_wikiproducts_miembros.sql` turns on members for the site behind `wikiproducts.humanity.wiki`, exactly as «Activar» in the members panel does the first time: open registration, a «Miembros» category (see, comment, save, buy) as default. Only if that site has no members config yet; a no-op on any other database. Eugenio chose «Sí, abierto» on 2026-10-18.

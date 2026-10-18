@@ -97,7 +97,7 @@ const distribuidores = unirPorId(leerLista('distribuidores.json', 'distribuidore
 
 // ── 2. FROM A DATA VALUE TO A CELL ──────────────────────────────────────────
 const esDato = x => x && typeof x === 'object' && !Array.isArray(x) && ('valor' in x || 'naturaleza' in x || 'origen' in x);
-const NATURALEZAS = new Set(['declarado', 'medido', 'calculado', 'no_publicado']);
+const NATURALEZAS = new Set(['declarado', 'medido', 'calculado', 'no_publicado', 'tercero']);
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A URL as the server's check wants it: spaces in a pasted file name are %20. */
@@ -113,7 +113,7 @@ function procedenciaDe(d) {
   const fuente = typeof f === 'string' && /^https?:\/\/\S+$/.test(f) ? f.slice(0, 1000) : null;
   // The server refuses «declarado»/«medido» with no source, and rightly: the
   // value still loads, its provenance does not, and the dry run counts it.
-  if (!fuente && (naturaleza === 'declarado' || naturaleza === 'medido')) return { rechazo: `«${naturaleza}» sin fuente` };
+  if (!fuente && (naturaleza === 'declarado' || naturaleza === 'medido' || naturaleza === 'tercero')) return { rechazo: `«${naturaleza}» sin fuente` };
   const out = { nature: naturaleza, source: fuente, date: typeof d.fecha === 'string' && FECHA.test(d.fecha) ? d.fecha : null };
   if (typeof d.nota === 'string' && d.nota) out.note = d.nota.slice(0, 500);
   return out;
@@ -133,7 +133,10 @@ function aTexto(v, unidad) {
     if (v.url) return [v.titulo || v.title || v.tipo, v.url].filter(Boolean).join(' — ');
     return Object.entries(v).filter(([, x]) => x != null && x !== '').map(([k, x]) => `${k}: ${aTexto(x)}`).join('; ') || null;
   }
-  return String(v);
+  // «-20 a 55» with unit «°C»: a text column prints no unit of its own, so
+  // it goes in the text (ronda 1 del evaluador: a range with no unit).
+  const t = String(v);
+  return unidad && !['texto', 'año', 'años'].includes(unidad) && /\d$/.test(t.trim()) ? `${t.trim()} ${unidad}` : t;
 }
 
 /** The cell value for a column, or {rechazo} saying why it cannot go there. */
@@ -225,6 +228,17 @@ function filaRetirada(p, r) {
     },
   };
 }
+/** Units in stock: a number, 0 when the shop says sold out («Agotado», «Sin
+ *  existencias», «Artículo no disponible»), the count when the text starts
+ *  with one («8 en stock», «5 unidades; entrega…»), else unknown (null). A
+ *  sold-out offer reads «Agotado» on the sheet (W5 #627), not «sin precio». */
+function stockDe(x) {
+  if (typeof x === 'number') return x;
+  const t = String(x ?? '').trim();
+  if (/^(agotado|sin existencias|sin ofertas disponibles|(art[ií]culo )?no disponible)/i.test(t)) return 0;
+  const n = t.match(/^(\d+)\s+(en stock|unidades)\b/i);
+  return n ? Number(n[1]) : null;
+}
 function filaOferta(p, o) {
   const sinAcuerdo = o.comision == null || /sin acuerdo/i.test(String(o.comision));
   return {
@@ -235,7 +249,7 @@ function filaOferta(p, o) {
       comision: sinAcuerdo ? null : o.comision,
       acuerdo: sinAcuerdo ? 'Sin acuerdo' : null,
       // Stock is a number of units; the data has words. Only a number goes in.
-      stock: typeof o.stock === 'number' ? o.stock : null,
+      stock: stockDe(o.stock),
       incluye_instalacion: o.incluye_instalacion,
       nota: o.nota,
     },
@@ -410,6 +424,8 @@ const igual = (a, b, tipo) => {
   if (tipo === 'porcentaje' && a != null && b != null) return Math.abs(Number(a) / 100 - Number(b)) < 1e-9;
   const norm = x => (x === undefined || x === '' || (Array.isArray(x) && !x.length) ? null : Array.isArray(x) ? x.map(y => (y && typeof y === 'object' ? y.id : y)).join('|') : x);
   const na = norm(a), nb = norm(b);
+  // Not Number(null) === 0: «sold out» (0) is not «unknown» (empty).
+  if ((na === null) !== (nb === null)) return false;
   if (typeof na === 'number' || typeof nb === 'number') return Number(na) === Number(nb);
   return String(na) === String(nb);
 };
@@ -521,6 +537,22 @@ for (const c of cuerpos) {
   }
 }
 
+// Rows an earlier load wrote by mistake (`datos/retirar.json`, each with its
+// reason) go to the recycle bin, where they can be restored for 15 days. Only
+// the rows named there: anything else this data lacks is reported, never removed.
+const aRetirar = existsSync(path.join(dir, 'datos', 'retirar.json')) ? leer(path.join(dir, 'datos', 'retirar.json')).filas || [] : [];
+const retiradasAhora = [];
+for (const x of aRetirar) {
+  const t = tablas[x.tabla];
+  const f = t?.filas.get(x.nombre);
+  if (!f) continue;
+  try {
+    await api('DELETE', `/api/v1/databases/${t.id}/rows/${f.id}`);
+    t.filas.delete(x.nombre);
+    retiradasAhora.push(`${tablaDef(x.tabla).titulo} / ${x.nombre}: ${x.motivo}`);
+  } catch (e) { hecho.fallos.push(`retirar ${x.nombre}: ${e.message}`); }
+}
+
 // Rows on the server that this data does not have: reported, never deleted.
 const sobran = [];
 for (const [t, info] of Object.entries(tablas)) {
@@ -539,6 +571,7 @@ for (const t of new Set(productos.map(p => p._tabla))) {
 }
 
 contar();
+if (retiradasAhora.length) { console.log(`\nA la papelera, por error de una carga anterior (${retiradasAhora.length}):`); for (const s of retiradasAhora) console.log(`  − ${s}`); }
 if (sobran.length) { console.log(`\nFilas en el servidor que estos datos no tienen (no se tocan) (${sobran.length}):`); for (const s of sobran.slice(0, 20)) console.log(`  · ${s}`); }
 if (hecho.fallos.length) { console.log(`\nFallos (${hecho.fallos.length}):`); for (const f of hecho.fallos) console.log(`  ! ${f}`); }
 if (fallosRutas.length) { console.log('\nDirecciones sin recalcular (se calcularán al visitar cada ficha o el sitemap):'); for (const f of fallosRutas) console.log(`  ! ${f}`); }

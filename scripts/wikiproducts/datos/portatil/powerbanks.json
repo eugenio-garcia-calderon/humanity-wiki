@@ -19,7 +19,7 @@
       "estado": "a la venta",
       "anio_lanzamiento": {
         "valor": 2022,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://mezha.ua/en/2022/08/12/anker-released-a-power-bank-capable-of-quickly-charging-not-only-a-smartphone-but-also-a-laptop/amp/",
         "fecha": "2026-10-18",
         "nota": "Noticia de lanzamiento de agosto de 2022"
@@ -119,7 +119,7 @@
         "garantia_anios": {
           "valor": 3,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.elcorteingles.es/electronica/A51423998-bateria-externa-anker-737-power-bank-powercore-24k-24000-mah/",
           "fecha": "2026-10-18",
           "nota": "Garantía indicada por El Corte Inglés; la web de Anker sólo dice «Hassle-Free Warranty» sin duración"
@@ -136,7 +136,7 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
           "fecha": "2026-10-18",
           "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
@@ -310,7 +310,7 @@
       "estado": "a la venta",
       "anio_lanzamiento": {
         "valor": 2024,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.notebookcheck.net/New-Anker-Zolo-Power-Bank-20K-30W-Built-in-USB-C-cable-now-available.850284.0.html",
         "fecha": "2026-10-18",
         "nota": "Notebookcheck informó de su llegada a Amazon Alemania y Francia el 21/06/2024"
@@ -367,7 +367,7 @@
         },
         "quimica": {
           "valor": "Li-ion",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://recalls-rappels.canada.ca/en/alert-recall/anker-power-bank-a1647-and-anker-zolo-power-banks-a1681-and-a1689-sold-amazonca",
           "fecha": "2026-10-18",
           "nota": "Health Canada: «lithium-ion batteries»"
@@ -425,21 +425,21 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
           "fecha": "2026-10-18",
           "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
         },
         "pais_fabricacion": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-anker-power-banks-a1681-a1689-and-a1647-2507-0045",
           "fecha": "2026-10-18",
           "nota": "Alerta de la OPSS británica 2507-0045 y CPSC 25-466"
         },
         "fabrica": {
           "valor": "Celdas de Apex (Wuxi) Co., Ltd (antes Amprius (Wuxi)) en los lotes retirados",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://heise.de/-10463193",
           "fecha": "2026-10-18",
           "nota": "Según heise; Anker no confirmó que esas celdas causaran el fallo, pero dijo haber dejado de trabajar con ese proveedor y pasar a ATL"
@@ -729,7 +729,7 @@
         "garantia_anios": {
           "valor": 3,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.powerplanetonline.com/es/xiaomi-33w-power-bank-20000mah-cable-integrado-marron",
           "fecha": "2026-10-18",
           "nota": "Garantía indicada por la tienda Powerplanet"
@@ -753,7 +753,7 @@
         },
         "pais_fabricacion": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-xiaomi-33w-power-bank-20000mah-with-integrated-cable-2510-0232",
           "fecha": "2026-10-18"
         },
@@ -773,7 +773,7 @@
         "num_componentes": {
           "valor": 2,
           "unidad": "celdas",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://euronics.ee/en/it/it-accessories/power-banks/bhr8851gl/xiaomi-33w-power-bank-20000-mah-integrated-cable-tan-power-bank",
           "fecha": "2026-10-18",
           "nota": "Dos celdas de 10.000 mAh, según la ficha de Euronics Estonia"
@@ -1211,7 +1211,7 @@
       "estado": "a la venta",
       "anio_lanzamiento": {
         "valor": 2021,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
         "fecha": "2026-10-18",
         "nota": "La CPSC indica que el BI-B41 se vendía en Amazon.com desde agosto de 2021; la tienda actual lo presenta como «New B41»"
@@ -1268,7 +1268,7 @@
         },
         "quimica": {
           "valor": "Li-ion",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
           "fecha": "2026-10-18",
           "nota": "La CPSC habla de batería de iones de litio"
@@ -1326,20 +1326,20 @@
       "origen": {
         "pais_marca": {
           "valor": "EE. UU. (sede comercial); fabricante en China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
           "fecha": "2026-10-18",
           "nota": "La CPSC identifica a INIU (Seattle, Washington) como vendedor y a Shenzhen Topstar Industry Co., Ltd. como fabricante"
         },
         "pais_fabricacion": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
           "fecha": "2026-10-18"
         },
         "fabrica": {
           "valor": "Shenzhen Topstar Industry Co., Ltd.",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
           "fecha": "2026-10-18",
           "nota": "Fabricante de las unidades retiradas"
@@ -1485,7 +1485,7 @@
       "estado": "a la venta",
       "anio_lanzamiento": {
         "valor": 2025,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.notebookcheck.net/Affordable-Xiaomi-Power-Bank-20000-mah-launching-in-more-countries.1080443.0.html",
         "fecha": "2026-10-18",
         "nota": "Notebookcheck (5/08/2025) informa de su llegada a la tienda de Xiaomi en España a 20,99 €, semanas después del Reino Unido"
@@ -1746,7 +1746,7 @@
       "estado": "desconocido",
       "anio_lanzamiento": {
         "valor": 2016,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
         "fecha": "2026-10-18",
         "nota": "La CPSC indica ventas desde junio de 2016"
@@ -1760,7 +1760,7 @@
         "capacidad_mah": {
           "valor": 10000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
           "fecha": "2026-10-18"
         },
@@ -1775,7 +1775,7 @@
         "capacidad_wh": {
           "valor": 36,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
           "fecha": "2026-10-18",
           "nota": "Según la ficha de PcComponentes"
@@ -1805,7 +1805,7 @@
         },
         "quimica": {
           "valor": "Li-ion",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
           "fecha": "2026-10-18"
         },
@@ -1818,20 +1818,20 @@
         "peso_kg": {
           "valor": 0.18,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
           "fecha": "2026-10-18",
           "nota": "La ficha dice 180 g y la descripción «menos de 140 gramos»: dato contradictorio"
         },
         "medidas_mm": {
           "valor": "92 × 60 × 22",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
           "fecha": "2026-10-18"
         },
         "carga_solar": {
           "valor": "no",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
           "fecha": "2026-10-18"
         },
@@ -1860,20 +1860,20 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
           "fecha": "2026-10-18",
           "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
         },
         "pais_fabricacion": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
           "fecha": "2026-10-18"
         },
         "fabrica": {
           "valor": "Anker Innovations Limited (fabricante según la CPSC)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
           "fecha": "2026-10-18"
         },
@@ -1996,7 +1996,7 @@
         "capacidad_mah": {
           "valor": 27650,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
           "fecha": "2026-10-18"
         },
@@ -2018,7 +2018,7 @@
         "potencia_salida_max_w": {
           "valor": 250,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
           "fecha": "2026-10-18",
           "nota": "Total; la tienda indica 65 W, 140 W y 140 W por puerto, lo que no cuadra con dos USB-C y un USB-A: comprobar en la ficha de Anker"
@@ -2032,7 +2032,7 @@
         },
         "puertos": {
           "valor": "2× USB-C, 1× USB-A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
           "fecha": "2026-10-18"
         },
@@ -2057,13 +2057,13 @@
         },
         "medidas_mm": {
           "valor": "161,7 × 57 × 49,7",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
           "fecha": "2026-10-18"
         },
         "carga_solar": {
           "valor": "no",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
           "fecha": "2026-10-18"
         },
@@ -2092,7 +2092,7 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
           "fecha": "2026-10-18",
           "nota": "La CPSC identifica a Anker Innovations Limited, de China, como fabricante de la marca"
@@ -2219,7 +2219,7 @@
         "capacidad_mah": {
           "valor": 25000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
           "fecha": "2026-10-18",
           "nota": "Cifra del anuncio citada por the-gadgeteer (mayo de 2026) y por techtest.org (2020)"
@@ -2251,7 +2251,7 @@
         "potencia_entrada_max_w": {
           "valor": 10,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
           "fecha": "2026-10-18",
           "nota": "Versión de 2020: entrada microUSB 5 V/2 A (10 W), según techtest.org. La entrada de la versión USB-C actual no se encontró"
@@ -2259,7 +2259,7 @@
         "puertos": {
           "valor": "1× USB-C (entrada/salida), 2× USB-A (salida)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
           "fecha": "2026-10-18",
           "nota": "Versión actual, según the-gadgeteer; la de 2020 tenía microUSB de entrada y 2× USB-A, según techtest.org. Pocketables (2023) indica 3 A por puerto"
@@ -2493,7 +2493,7 @@
         "capacidad_mah": {
           "valor": 26800,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pcwelt.de/?p=2640940",
           "fecha": "2026-10-18",
           "nota": "Datos del fabricante recogidos por PC-WELT (04/06/2025)"
@@ -2517,7 +2517,7 @@
         "potencia_salida_max_w": {
           "valor": 22.5,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pcwelt.de/?p=2640940",
           "fecha": "2026-10-18",
           "nota": "Según la ficha recogida por PC-WELT; el anuncio de Newegg habla de «3.0A» por USB-C"
@@ -2533,7 +2533,7 @@
         "puertos": {
           "valor": "2× USB-A, 1× USB-C, carga inalámbrica Qi 5 W",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pcwelt.de/?p=2640940",
           "fecha": "2026-10-18"
         },
@@ -2554,7 +2554,7 @@
         "peso_kg": {
           "valor": 0.47,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pcwelt.de/?p=2640940",
           "fecha": "2026-10-18"
         },
@@ -2568,7 +2568,7 @@
         "carga_solar": {
           "valor": "sí; panel integrado de hasta 1,9 W",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pcwelt.de/?p=2640940",
           "fecha": "2026-10-18",
           "nota": "PC-WELT describe la carga solar como «bastante lenta». Tiempo calculado para rellenar sólo con el sol: 99,16 Wh / 1,9 W ≈ 52 h de sol directo a potencia máxima, sin contar pérdidas"
@@ -2863,7 +2863,7 @@
         "pais_marca": {
           "valor": "Italia",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.borsaitaliana.it/borsaitaliana/ufficio-stampa/comunicati-stampa/2019/cellularline.htm",
           "fecha": "2026-10-18",
           "nota": "Fundada en Reggio Emilia en 1990, según Borsa Italiana"
@@ -3327,7 +3327,7 @@
       "anio_lanzamiento": {
         "valor": 2025,
         "unidad": null,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.notebookcheck.org/EcoFlow-lanza-los-bancos-de-energia-de-alta-capacidad-Rapid-Pro-con-cable-integrado-y-descuentos-anticipados.1043230.0.html",
         "fecha": "2026-10-18",
         "nota": "Serie RAPID Pro anunciada el 24/06/2025, según Notebookcheck"
@@ -3341,7 +3341,7 @@
         "capacidad_mah": {
           "valor": 27650,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.notebookcheck.org/EcoFlow-lanza-los-bancos-de-energia-de-alta-capacidad-Rapid-Pro-con-cable-integrado-y-descuentos-anticipados.1043230.0.html",
           "fecha": "2026-10-18"
         },
@@ -3356,7 +3356,7 @@
         "capacidad_wh": {
           "valor": 99.56,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
           "fecha": "2026-10-18",
           "nota": "Cifra del fabricante citada por techtest.org; tiendas indican 99,5–99,54 Wh"
@@ -3364,7 +3364,7 @@
         "potencia_salida_max_w": {
           "valor": 300,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
           "fecha": "2026-10-18",
           "nota": "Total según el fabricante; 140 W máximo por el cable y por el USB-C 1, 65 W por USB-C 2 y 3"
@@ -3372,7 +3372,7 @@
         "potencia_entrada_max_w": {
           "valor": 140,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
           "fecha": "2026-10-18",
           "nota": "Por cable o por el puerto de 140 W; hasta 320 W con la base de carga RAPID Pro opcional, según la marca (no probado por techtest.org)"
@@ -3380,14 +3380,14 @@
         "puertos": {
           "valor": "1× cable USB-C retráctil 140 W, 1× USB-C 140 W, 2× USB-C 65 W; sin USB-A",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
           "fecha": "2026-10-18"
         },
         "quimica": {
           "valor": "Li-ion (litio ternario)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
           "fecha": "2026-10-18",
           "nota": "Indicado por Solar Power Supply como «Ternary Lithium»; techtest.org no identifica las celdas"
@@ -3419,7 +3419,7 @@
         "carga_solar": {
           "valor": "no",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
           "fecha": "2026-10-18",
           "nota": "Sólo USB-C; no tiene entrada solar específica"
@@ -3435,7 +3435,7 @@
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
           "fecha": "2026-10-18",
           "nota": "Garantía indicada por Solar Power Supply; Shopro indica 12 meses. No se leyó la garantía oficial de EcoFlow"

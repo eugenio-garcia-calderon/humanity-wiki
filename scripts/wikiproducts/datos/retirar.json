@@ -1,0 +1,13 @@
+{
+  "_comentario": "Filas que una carga anterior escribió por error y que cargar.mjs manda a la papelera (se pueden restaurar durante 15 días). Cada una dice por qué. Una fila que ya no existe se ignora, así que la lista puede quedarse.",
+  "filas": [
+    { "tabla": "retiradas", "nombre": "CPSC · Anker SOLIX X1", "motivo": "Es la retirada de power banks Anker de 2025; no afecta al SOLIX X1 (2026-10-18, ronda 1 del evaluador)." },
+    { "tabla": "retiradas", "nombre": "fabricante · Anker SOLIX X1", "motivo": "Retirada voluntaria de cinco PowerCore; no afecta al SOLIX X1." },
+    { "tabla": "retiradas", "nombre": "CPSC · EcoFlow PowerOcean", "motivo": "Es la retirada de la estación portátil Delta Max 2000; no afecta a PowerOcean." },
+    { "tabla": "retiradas", "nombre": "Health Canada · EcoFlow PowerOcean", "motivo": "Es la retirada de la Delta Max 2000; no afecta a PowerOcean." },
+    { "tabla": "retiradas", "nombre": "ACCC · GoodWe Lynx Home F / Lynx F G2", "motivo": "Es una retirada de inversores GoodWe; no afecta a las baterías Lynx." },
+    { "tabla": "retiradas", "nombre": "ACCC · GoodWe Lynx Home F / Lynx F G2 (2)", "motivo": "Es una retirada de inversores híbridos GoodWe; no afecta a las baterías Lynx." },
+    { "tabla": "retiradas", "nombre": "ACCC / Clean Energy Council · Growatt ARK XH", "motivo": "Es una retirada de inversores Growatt SPH; no afecta a la ARK XH." },
+    { "tabla": "retiradas", "nombre": "ACCC / Clean Energy Council · Growatt ARK XH (2)", "motivo": "Es una retirada del inversor Growatt 8000 MTL-S; no afecta a la ARK XH." }
+  ]
+}

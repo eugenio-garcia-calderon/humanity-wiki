@@ -1,0 +1,12 @@
+{
+  "_comentario": "Frases de las páginas del sitio que se corrigen al cargar (corregir-textos.mjs). Cada cambio dice en qué página, qué texto exacto busca y por qué lo pone. «informe»: páginas cuyo texto se imprime en el registro de la carga, para poder leerlas sin abrir producción.",
+  "cambios": [
+    {
+      "pagina": "Cómo trabajamos",
+      "buscar": "cualquiera puede sugerir una corrección",
+      "cambiar": "cualquiera con una cuenta puede sugerir una corrección",
+      "por_que": "«Sugerir una corrección» pide iniciar sesión, igual que votar (W1, 2026-10-18; ronda 1 del evaluador)."
+    }
+  ],
+  "informe": ["Cómo trabajamos", "Aviso legal", "Política de privacidad", "Contacto"]
+}
