@@ -73,6 +73,8 @@ export type ConfigVista = {
   grupo_titulo?: 's' | 'm' | 'l' | 'xl';
   grupo_alineacion?: 'izquierda' | 'centro';
   grupo_imagen?: boolean;
+  /** El color del recuadro de cada grupo (ver `COLORES_GRUPO` en Rejilla): gris si no se dice. */
+  grupo_color?: string;
   /** Gráfico (ver `Grafico.tsx`). */
   grafico?: {
     tipo?: 'barras' | 'barras_h' | 'lineas' | 'area' | 'circular' | 'anillo' | 'numero';

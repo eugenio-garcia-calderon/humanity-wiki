@@ -62,7 +62,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -81,6 +81,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   /** En una galería agrupada: los valores del grupo, que se escriben en la
    *  entrada que llega de OTRA base de datos para que se quede donde se soltó. */
   celdasAlRecibir?: Record<string, any>;
+  /** Dentro del recuadro de un grupo: tarjetas blancas, que se distingan del fondo. */
+  enCaja?: boolean;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -437,7 +439,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
+              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
+                enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'), arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
               {f.oculta && (
                 <span className="absolute left-2 top-2 z-[2] inline-flex items-center gap-1 rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No se ve en la web publicada">
                   <EyeOff className="h-3 w-3" /> Oculta
