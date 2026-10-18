@@ -1,0 +1,1843 @@
+{
+  "generado": "2026-10-18",
+  "fuente": "W5: condiciones publicadas por cada tienda (evaluador ronda 2, arreglo 3)",
+  "distribuidores": [
+    {
+      "id": "allpowers-tienda-eu",
+      "nombre": "Tienda oficial ALLPOWERS Europa",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La política dice «Free Shipping to most EU countries» sin lista de países; España aparece en el selector como iallpowers.es."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://iallpowers.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tras hasta 48 h de preparación del pedido. Plazo general UE, sin mención específica a España."
+      },
+      "entrega_max_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://iallpowers.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tras hasta 48 h de preparación del pedido. Plazo general UE, sin mención específica a España."
+      },
+      "envio_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://iallpowers.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "«Free shipping on any order»."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://iallpowers.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Envío gratis en cualquier pedido."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://iallpowers.eu/pages/returns-and-refunds-policy",
+        "fecha": "2026-10-18",
+        "nota": "«30-Day Money-Back Guarantee»."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de devoluciones no dice quién paga el envío de vuelta (texto cortado al leerla)."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La política no indica a quién reclamar la garantía; solo enlaza a «Warranty Register» y «Contact Us»."
+      },
+      "condiciones_url": "https://iallpowers.eu/pages/shipping-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "alpinstore",
+      "nombre": "AlpinStore",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.alpinstore.com/fr/content/1-livraison-conditions-de-retour",
+        "fecha": "2026-10-18",
+        "nota": "España aparece en la lista de países con entrega (Mondial Relay)."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Los plazos «se indican al hacer el pedido»; no hay cifra publicada para España."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Los plazos «se indican al hacer el pedido»; no hay cifra publicada para España."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.alpinstore.com/fr/content/3-conditions-generales-de-ventes",
+        "fecha": "2026-10-18",
+        "nota": "Calculado al pagar según peso del paquete y transportista."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 119,
+        "naturaleza": "declarado",
+        "fuente": "https://www.alpinstore.com/fr/content/1-livraison-conditions-de-retour",
+        "fecha": "2026-10-18",
+        "nota": "Envío gratis desde 119 € con Mondial Relay a España."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.alpinstore.com/fr/content/1-livraison-conditions-de-retour",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.alpinstore.com/fr/content/1-livraison-conditions-de-retour",
+        "fecha": "2026-10-18",
+        "nota": "Para España el cliente paga 6 € por la etiqueta de devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.alpinstore.com/fr/content/3-conditions-generales-de-ventes",
+        "fecha": "2026-10-18",
+        "nota": "La garantía legal se reclama a AlpinStore; en la garantía comercial decide el fabricante."
+      },
+      "condiciones_url": "https://www.alpinstore.com/fr/content/1-livraison-conditions-de-retour",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "amazon-es",
+      "nombre": "Amazon.es",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.amazon.es/gp/help/customer/display.html?nodeId=201911090",
+        "fecha": "2026-10-18",
+        "nota": "Según el título de su página de ayuda «Tarifas y opciones de envío a España peninsular»; contenido bloqueado a la lectura automática."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Páginas de ayuda de Amazon.es bloqueadas (robots) y el buscador no devuelve fragmentos."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Páginas de ayuda de Amazon.es bloqueadas (robots) y el buscador no devuelve fragmentos."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de tarifas de envío bloqueada a la lectura automática (robots)."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de tarifas de envío bloqueada a la lectura automática (robots)."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de política de devoluciones bloqueada a la lectura automática (robots)."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de política de devoluciones bloqueada a la lectura automática (robots)."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de garantía legal bloqueada a la lectura automática (robots)."
+      },
+      "condiciones_url": "https://www.amazon.es/gp/help/customer/display.html?nodeId=201911090",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "anker-tienda-eu",
+      "nombre": "Tienda oficial Anker UE",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Envía solo a AT, BE, CZ, DK, HU, LU, PL, PT y NL; España no está en la lista. Datos para esos países."
+      },
+      "entrega_min_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Plazo para los países atendidos (no España)."
+      },
+      "entrega_max_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Plazo para los países atendidos (no España)."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La política solo indica el umbral de envío gratis, no el coste por debajo de él."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 100,
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "«Free shipping on orders over 100€»."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/refund-policy",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "En devoluciones no debidas a defecto, el comprador paga el envío de vuelta."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://www.anker.com/eu-en/policies/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tienda de la propia marca: garantía vía support@anker.com o «Process a warranty»."
+      },
+      "condiciones_url": "https://www.anker.com/eu-en/policies/shipping-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "barrabes",
+      "nombre": "Barrabes",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.barrabes.com/info/condiciones-compra",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones publicadas para Península y Baleares."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "El plazo «depende del producto y destino» y se ve al comprar; en días laborables, sin cifra."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "El plazo «depende del producto y destino» y se ve al comprar; en días laborables, sin cifra."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.barrabes.com/info/condiciones-compra",
+        "fecha": "2026-10-18",
+        "nota": "Calculado en la cesta según destino, volumen y peso."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo «envío gratuito» en muchos productos y recogida gratis en tienda; no hay importe mínimo publicado."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.barrabes.com/info/condiciones-compra",
+        "fecha": "2026-10-18",
+        "nota": "30 días naturales desde la entrega."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.barrabes.com/info/condiciones-compra",
+        "fecha": "2026-10-18",
+        "nota": "«El coste de la devolución corre a cargo del cliente»."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones de compra leídas no tienen sección de garantía legible."
+      },
+      "condiciones_url": "https://www.barrabes.com/info/condiciones-compra",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "bigblue-tienda-eu",
+      "nombre": "Tienda oficial BigBlue (servida para Alemania)",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró la web oficial de la tienda (sin URL en el lote; búsquedas solo devuelven Amazon, eBay y otras tiendas)."
+      }
+    },
+    {
+      "id": "bluetti-tienda-es",
+      "nombre": "Tienda oficial BLUETTI España",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Envía desde almacén en España."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tras 1-3 días laborables de preparación."
+      },
+      "entrega_max_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tras 1-3 días laborables de preparación."
+      },
+      "envio_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Envío gratis a la península; recargo para Baleares y Canarias."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Envío gratis a la península sin importe mínimo publicado."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/pages/politica-de-devolucion-y-reembolso",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/pages/politica-de-devolucion-y-reembolso",
+        "fecha": "2026-10-18",
+        "nota": "Los gastos de devolución se descuentan del reembolso."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://es.bluettipower.eu/en/pages/politica-de-garantia",
+        "fecha": "2026-10-18",
+        "nota": "Tienda de la propia marca: contacto bluetti-es@bluettipower.com."
+      },
+      "condiciones_url": "https://es.bluettipower.eu/en/policies/shipping-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "bluetti-tienda-eu",
+      "nombre": "Tienda oficial BLUETTI Europa",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.bluettipower.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "La política cita España (ES) entre los destinos."
+      },
+      "entrega_min_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://www.bluettipower.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "«Usually» 7-10 días tras 1-3 días laborables de preparación."
+      },
+      "entrega_max_dias": {
+        "valor": 10,
+        "naturaleza": "declarado",
+        "fuente": "https://www.bluettipower.eu/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "«Usually» 7-10 días tras 1-3 días laborables de preparación."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La política de envíos y la portada no publican coste de envío."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La política de envíos y la portada no publican envío gratis ni umbral."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.bluettipower.eu/pages/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Desde la fecha de envío original."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.bluettipower.eu/pages/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Etiqueta prepagada solo para productos defectuosos; si no, paga el cliente."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://www.bluettipower.eu/pages/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tienda de la propia marca: garantía vía sale-eu@bluettipower.com."
+      },
+      "condiciones_url": "https://www.bluettipower.eu/pages/shipping-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "cellularline-tienda-es",
+      "nombre": "Tienda online de Cellularline (España)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/envío-y-limitaciones",
+        "fecha": "2026-10-18",
+        "nota": "Solo península: excluye Baleares, Canarias, Ceuta, Melilla, Andorra y Gibraltar."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/envío-y-limitaciones",
+        "fecha": "2026-10-18"
+      },
+      "entrega_max_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/envío-y-limitaciones",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 7.5,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/envío-y-limitaciones",
+        "fecha": "2026-10-18"
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 39.95,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/envío-y-limitaciones",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/devoluciones-y-reembolsos",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/devoluciones-y-reembolsos",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga los costes directos de devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.cellularline.com/en-es/t%C3%A9rminos-y-condiciones",
+        "fecha": "2026-10-18",
+        "nota": "Garantía legal vía su Servicio de Atención al Cliente; la garantía comercial, el fabricante."
+      },
+      "condiciones_url": "https://www.cellularline.com/en-es/envío-y-limitaciones",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "decathlon-es",
+      "nombre": "Decathlon España (marketplace)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/metodos-gastos-envio_lp-DK0CN0",
+        "fecha": "2026-10-18",
+        "nota": "Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/metodos-gastos-envio_lp-DK0CN0",
+        "fecha": "2026-10-18",
+        "nota": "24/48 h para artículos estándar, de lunes a sábado. Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "entrega_max_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/metodos-gastos-envio_lp-DK0CN0",
+        "fecha": "2026-10-18",
+        "nota": "24/48 h para artículos estándar, de lunes a sábado. Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "envio_eur": {
+        "valor": 3.99,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/metodos-gastos-envio_lp-DK0CN0",
+        "fecha": "2026-10-18",
+        "nota": "Desde 3,99 € en pedidos de menos de 40 €. Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/metodos-gastos-envio_lp-DK0CN0",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis a domicilio: desde 40 € cuesta 0,99 €. Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/CGV_lp-8919JU",
+        "fecha": "2026-10-18",
+        "nota": "30 días para marcas no Decathlon; 60 días para marcas propias. Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/CGV_lp-8919JU",
+        "fecha": "2026-10-18",
+        "nota": "Decathlon asume el transporte de la devolución (salvo voluminosos devueltos en tienda)."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.decathlon.es/es/CGV_lp-8919JU",
+        "fecha": "2026-10-18",
+        "nota": "Decathlon responde de la falta de conformidad 3 años. Productos vendidos por Decathlon, no por vendedores del marketplace."
+      },
+      "condiciones_url": "https://www.decathlon.es/es/metodos-gastos-envio_lp-DK0CN0",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "elcorteingles",
+      "nombre": "El Corte Inglés",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.elcorteingles.es/info/entrega-48h/",
+        "fecha": "2026-10-18",
+        "nota": "Entrega a domicilio en península (servicio 48 h). Vendido por El Corte Inglés."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo publicado «aprox. 48 h» para artículos con el indicador 48 h; plazo estándar en ayuda JS no legible."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo publicado «aprox. 48 h» para artículos con el indicador 48 h; plazo estándar en ayuda JS no legible."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de ayuda de El Corte Inglés solo carga con JavaScript; no legible. Intentado /ayuda/es/envio-y-recogida/envio/gastos-de-envio/."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo publicado para suscriptores Plus (gratis desde 20 €); el umbral general está en ayuda no legible."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de ayuda de El Corte Inglés solo carga con JavaScript; no legible. Intentado /ayuda/es/devolucion-y-reembolso/devolucion-y-cambio/."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo publicado gratis para suscriptores Plus; condiciones generales no legibles."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de ayuda de El Corte Inglés solo carga con JavaScript; no legible. Intentado /ayuda/es/devolucion-y-reembolso/servicios-tecnicos-y-garantias/."
+      },
+      "condiciones_url": "https://www.elcorteingles.es/info/entrega-48h/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "electrocity-ie",
+      "nombre": "ElectroCity",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.electrocity.ie/terms-conditions/",
+        "fecha": "2026-10-18",
+        "nota": "Solo entrega en la República de Irlanda; datos para Irlanda."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://help.electrocity.ie/portal/en/kb/delivery-collection/delivery",
+        "fecha": "2026-10-18",
+        "nota": "Artículos pequeños, Irlanda. Grandes: 3-7 días laborables."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://help.electrocity.ie/portal/en/kb/delivery-collection/delivery",
+        "fecha": "2026-10-18",
+        "nota": "Artículos pequeños, Irlanda. Grandes: 3-7 días laborables."
+      },
+      "envio_eur": {
+        "valor": 6.99,
+        "naturaleza": "declarado",
+        "fuente": "https://help.electrocity.ie/portal/en/kb/delivery-collection/delivery",
+        "fecha": "2026-10-18",
+        "nota": "Artículos pequeños, Irlanda."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 299,
+        "naturaleza": "declarado",
+        "fuente": "https://www.electrocity.ie",
+        "fecha": "2026-10-18",
+        "nota": "Envío gratis en artículos pequeños desde 299 € (con condiciones)."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.electrocity.ie/refunds-and-returns/",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales desde el día siguiente a la entrega."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.electrocity.ie/refunds-and-returns/",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga el mensajero; recogida de grandes 35 €."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.electrocity.ie/terms-conditions/",
+        "fecha": "2026-10-18",
+        "nota": "Por defecto se reclama a ElectroCity como vendedor; la garantía comercial, según el fabricante."
+      },
+      "condiciones_url": "https://www.electrocity.ie/terms-conditions/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "guggenheim-bilbao-tienda",
+      "nombre": "Tienda del Museo Guggenheim Bilbao",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda.guggenheim-bilbao.eus/en/shipping-and-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Entrega en España."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo publica un máximo de 48 h; no da mínimo."
+      },
+      "entrega_max_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda.guggenheim-bilbao.eus/en/shipping-and-delivery",
+        "fecha": "2026-10-18",
+        "nota": "«Within 48 hours maximum» desde que el transportista recoge; salida del almacén en unos 2 días."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de envíos no publica coste para España."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de envíos no menciona envío gratis ni umbral."
+      },
+      "devolucion_dias": {
+        "valor": 15,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda.guggenheim-bilbao.eus/en/returns",
+        "fecha": "2026-10-18",
+        "nota": "Desde la entrega, avisando antes por email."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://tienda.guggenheim-bilbao.eus/en/returns",
+        "fecha": "2026-10-18",
+        "nota": "Solo reembolsan gastos de envío en productos defectuosos o error de la tienda."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://tienda.guggenheim-bilbao.eus/en/returns",
+        "fecha": "2026-10-18",
+        "nota": "Defectos se comunican a la tienda en 15 días; la tienda recoge y repone. Sin sección de garantía aparte."
+      },
+      "condiciones_url": "https://tienda.guggenheim-bilbao.eus/en/shipping-and-delivery",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "heyupnow-es",
+      "nombre": "Heyup",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/es/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones para «European Union & United Kingdom»; España no se menciona aparte."
+      },
+      "entrega_min_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/es/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Más 1-2 días laborables de preparación. heyupnow.com (2022) decía 1-5 días."
+      },
+      "entrega_max_dias": {
+        "valor": 10,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/es/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Más 1-2 días laborables de preparación. heyupnow.com (2022) decía 1-5 días."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/es/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Publicado en dólares: +9,99 $ por pedido sin envío gratis."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/es/policies/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Publicado en dólares: gratis en pedidos que califican desde 89 $."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/policies/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/policies/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Solo pagan la etiqueta de vuelta por defectos de calidad (UE, en 30 días)."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://store.heyupnow.com/policies/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Heyup es la propia marca: reclamar a support@heyupnow.com (la página también dice «contactar con la marca»)."
+      },
+      "condiciones_url": "https://store.heyupnow.com/es/policies/shipping-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "iniu-tienda-eu",
+      "nombre": "Tienda oficial INIU UE",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "España en la lista de países servidos desde almacén local."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Incluye ~1 día laborable de preparación; estimación."
+      },
+      "entrega_max_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Incluye ~1 día laborable de preparación; estimación."
+      },
+      "envio_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Envío gratis en todos los pedidos, oferta por tiempo limitado."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 0,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/shipping-policy",
+        "fecha": "2026-10-18",
+        "nota": "Sin importe mínimo («no minimum spend»), por tiempo limitado."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/return-and-refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Desde la compra."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/return-and-refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Si no es por defecto de calidad, el cliente paga el envío."
+      },
+      "garantia_gestion": {
+        "valor": "La marca",
+        "naturaleza": "declarado",
+        "fuente": "https://eu-main.iniushop.com/pages/return-and-refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "Tienda de la propia marca: reclamación en su página «process a warranty»."
+      },
+      "condiciones_url": "https://eu-main.iniushop.com/pages/shipping-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "leroymerlin-es",
+      "nombre": "Leroy Merlin España (marketplace)",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/servicios/metodos-de-entrega.html",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones de Leroy Merlin como vendedor; los vendedores del marketplace fijan las suyas."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/servicios/metodos-de-entrega.html",
+        "fecha": "2026-10-18",
+        "nota": "Paquetería a domicilio 24h-48h, lunes a sábado."
+      },
+      "entrega_max_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/servicios/metodos-de-entrega.html",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/servicios/metodos-de-entrega.html",
+        "fecha": "2026-10-18",
+        "nota": "Paquetería estándar de 3,90 € a 19,90 € según destino, peso y tamaño; se calcula al pagar."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No se encontró umbral de envío gratis en métodos de entrega, FAQ de pedidos ni condiciones; solo recogida en tienda gratuita."
+      },
+      "devolucion_dias": {
+        "valor": 100,
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/preguntas-frecuentes/devoluciones-y-reembolsos/",
+        "fecha": "2026-10-18",
+        "nota": "100 días naturales para productos de Leroy Merlin; vendedores del marketplace: 14 días desde la entrega."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/preguntas-frecuentes/devoluciones-y-reembolsos/",
+        "fecha": "2026-10-18",
+        "nota": "Gratis solo en tienda física; la recogida a domicilio la paga el cliente por adelantado."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.leroymerlin.es/aviso-legal.html",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones generales: Leroy Merlin responde de las faltas de conformidad durante 3 años."
+      },
+      "condiciones_url": "https://www.leroymerlin.es/preguntas-frecuentes/devoluciones-y-reembolsos/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "masquevideo",
+      "nombre": "Más Que Vídeo Profesional",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las páginas /content/gastos-de-envio y /conditions-of-sale cargan sin texto legible (JS); sin datos de destino."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de gastos de envío sin contenido legible; búsqueda sin resultados."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de gastos de envío sin contenido legible; búsqueda sin resultados."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de gastos de envío sin contenido legible; búsqueda sin resultados."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de gastos de envío sin contenido legible; búsqueda sin resultados."
+      },
+      "devolucion_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de condiciones de venta sin contenido legible; búsqueda sin resultados."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de condiciones de venta sin contenido legible; búsqueda sin resultados."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de condiciones de venta sin contenido legible; búsqueda sin resultados."
+      },
+      "condiciones_url": "https://www.masquevideo.com/es/content/gastos-de-envio",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "masterfoto-lv",
+      "nombre": "Masterfoto",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.masterfoto.lv/lv/content/8-piegade",
+        "fecha": "2026-10-18",
+        "nota": "España figura en la lista de países europeos con DPD y Omniva."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de entregas no da plazo para España; dice que se ve al pagar."
+      },
+      "entrega_max_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de entregas no da plazo para España; dice que se ve al pagar."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.masterfoto.lv/lv/content/8-piegade",
+        "fecha": "2026-10-18",
+        "nota": "Sin precio publicado para España: se calcula al pagar."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.masterfoto.lv/lv/content/8-piegade",
+        "fecha": "2026-10-18",
+        "nota": "Sin envío gratis. El envío gratis desde 150 € es solo a taquillas en Letonia."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.masterfoto.lv/lv/content/11-atteikuma-tiesibas",
+        "fecha": "2026-10-18",
+        "nota": "14 días naturales (kalendāro dienu)."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.masterfoto.lv/lv/content/11-atteikuma-tiesibas",
+        "fecha": "2026-10-18",
+        "nota": "El cliente paga los gastos de devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda o la marca",
+        "naturaleza": "declarado",
+        "fuente": "https://www.masterfoto.lv/lv/content/6-garantija",
+        "fecha": "2026-10-18",
+        "nota": "Servicio técnico indicado en la tarjeta de garantía del fabricante/distribuidor, o la tienda de Riga."
+      },
+      "condiciones_url": "https://www.masterfoto.lv/lv/content/8-piegade",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "mediamarkt-at",
+      "nombre": "MediaMarkt Austria",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/legal/terms",
+        "fecha": "2026-10-18",
+        "nota": "Solo entrega en Austria («Eine Lieferung ins Ausland ist nicht möglich»). Datos para Austria."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/service/lieferung-montage",
+        "fecha": "2026-10-18",
+        "nota": "Pedidos hasta las 17:00 en día laborable: entrega el siguiente día laborable; no garantizado."
+      },
+      "entrega_max_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/service/lieferung-montage",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 6.39,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/service/lieferung-montage",
+        "fecha": "2026-10-18",
+        "nota": "Envío de paquete; los artículos adicionales del mismo pedido van gratis."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 49,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/service/lieferung-montage",
+        "fecha": "2026-10-18",
+        "nota": "Solo para miembros myMediaMarkt y productos vendidos por MediaMarkt; sin umbral general."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/service/umtausch",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/service/umtausch",
+        "fecha": "2026-10-18",
+        "nota": "Gratis usando la etiqueta de devolución del correo de envío."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.at/de/legal/terms",
+        "fecha": "2026-10-18",
+        "nota": "AGB 9.1: la garantía se reclama en cualquier MediaMarkt de Austria o en su centro de devoluciones."
+      },
+      "condiciones_url": "https://www.mediamarkt.at/de/service/lieferung-montage",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "mediamarkt-es",
+      "nombre": "MediaMarkt España",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones de MediaMarkt como vendedor; los vendedores del marketplace tienen las suyas."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "Entrega habitual entre 1 y 3 días laborables desde la confirmación."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "Sin tarifa fija publicada: el transporte se muestra en el paso 2 de la compra."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 49,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "Gratis para productos de más de 49 € y menos de 31 kg (precio del producto, no del pedido)."
+      },
+      "devolucion_dias": {
+        "valor": 60,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "Sección 8: 60 días naturales; el formulario de desistimiento menciona 14 días."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "MediaMarkt se reserva descontar los costes de devolución, a cargo del cliente."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+        "fecha": "2026-10-18",
+        "nota": "Sección 9: dirigirse al punto de venta o pedir la recogida del producto."
+      },
+      "condiciones_url": "https://www.mediamarkt.es/es/legal/condiciones-contratacion",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "pcbox",
+      "nombre": "PcBox",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18"
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18",
+        "nota": "Aproximadamente de 1 a 3 días hábiles."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 3.9,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18",
+        "nota": "Entrega a domicilio para pedidos de menos de 50 €."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 50,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18",
+        "nota": "Excepto pedidos con gran electrodoméstico."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+        "fecha": "2026-10-18",
+        "nota": "Los gastos de devolución corren a cargo del comprador, salvo error de PcBox."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.pcbox.com/pagina/gestion-de-garantia",
+        "fecha": "2026-10-18",
+        "nota": "Formulario de gestión de garantía de PcBox; 3 años de garantía legal."
+      },
+      "condiciones_url": "https://www.pcbox.com/pagina/condiciones-generales-de-venta",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "pccomponentes",
+      "nombre": "PcComponentes",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pccomponentes.com/landings/compromisos",
+        "fecha": "2026-10-18",
+        "nota": "Condiciones para productos vendidos y enviados por PcComponentes, no para vendedores del marketplace."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://help.pccomponentes.com/hc/es-es/articles/19504278450461-Plazos-de-entrega",
+        "fecha": "2026-10-18",
+        "nota": "Entrega estándar en 24 horas hábiles tras la salida del pedido (península)."
+      },
+      "entrega_max_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://help.pccomponentes.com/hc/es-es/articles/19504278450461-Plazos-de-entrega",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pccomponentes.com/condiciones-de-compra",
+        "fecha": "2026-10-18",
+        "nota": "Sin tarifa fija publicada: el coste se muestra por producto y en el resumen del pedido."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 50,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pccomponentes.com/landings/compromisos",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pccomponentes.com/landings/compromisos",
+        "fecha": "2026-10-18",
+        "nota": "30 días naturales desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.pccomponentes.com/landings/compromisos",
+        "fecha": "2026-10-18",
+        "nota": "Gratis solo en productos nuevos y reacondicionados vendidos y entregados por PcComponentes."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.pccomponentes.com/condiciones-de-compra",
+        "fecha": "2026-10-18",
+        "nota": "PcComponentes garantiza 3 años los productos nuevos que vende."
+      },
+      "condiciones_url": "https://www.pccomponentes.com/condiciones-de-compra",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "powerplanet",
+      "nombre": "Powerplanetonline",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/envios",
+        "fecha": "2026-10-18"
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/envios",
+        "fecha": "2026-10-18",
+        "nota": "Opciones desde entrega en 24h hasta 48h o 72h si hay stock."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/envios",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 4.95,
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/envios",
+        "fecha": "2026-10-18",
+        "nota": "Hasta 5 kg; 5,95 € de 5 a 10 kg; desde 7,95 € más de 10 kg."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 50,
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/envios",
+        "fecha": "2026-10-18",
+        "nota": "Solo particulares, envíos de menos de 5 kg con Nacex Express."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/garantias",
+        "fecha": "2026-10-18",
+        "nota": "30 días desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://support.powerplanetonline.com/hc/es/articles/42355597197457--La-devoluci%C3%B3n-tiene-coste",
+        "fecha": "2026-10-18",
+        "nota": "Gratis para consumidor final en España si el envío no supera 10 kg."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.powerplanetonline.com/es/garantias",
+        "fecha": "2026-10-18",
+        "nota": "La garantía se tramita en el portal de soporte de Powerplanet."
+      },
+      "condiciones_url": "https://www.powerplanetonline.com/es/envios",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "proshop-nl",
+      "nombre": "Proshop (Países Bajos)",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Levering.htm",
+        "fecha": "2026-10-18",
+        "nota": "Solo describe entregas por DPD dentro de Países Bajos; no menciona España. Datos para Países Bajos."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Levering.htm",
+        "fecha": "2026-10-18",
+        "nota": "2-3 días laborables una vez el artículo está en stock."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Levering.htm",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 8.99,
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Levering.htm",
+        "fecha": "2026-10-18",
+        "nota": "DPD a domicilio en la mayoría de productos; punto de recogida DPD 6,99 €."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "No publica umbral; solo dice que no cobra envío en todos los productos."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Retour-en-herroepingsrecht.htm",
+        "fecha": "2026-10-18"
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Retour-en-herroepingsrecht.htm",
+        "fecha": "2026-10-18",
+        "nota": "Devolución a cargo del cliente; la etiqueta de Proshop cuesta 9,99 €."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.proshop.nl/Klachten-Garantie-Reparatie.htm",
+        "fecha": "2026-10-18",
+        "nota": "Reclamación por formulario online de Proshop."
+      },
+      "condiciones_url": "https://www.proshop.nl/Levering.htm",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "redmond-electric-ie",
+      "nombre": "Redmond Electric",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://redmondelectric.ie/pages/online-delivery",
+        "fecha": "2026-10-18",
+        "nota": "«Delivery only available to Republic of Ireland Customers». Datos para Irlanda."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://redmondelectric.ie/pages/online-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Artículos pequeños: 2-3 días laborables; grandes electrodomésticos más."
+      },
+      "entrega_max_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://redmondelectric.ie/pages/online-delivery",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://redmondelectric.ie/pages/online-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Por categoría: TV e informática (portátiles) 7,95-9,95 €; pequeño electrodoméstico 4,95 €."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Página de entregas sin umbral; solo menciona envío gratis en artículos seleccionados."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://redmondelectric.ie/policies/refund-policy",
+        "fecha": "2026-10-18",
+        "nota": "30 días tras recibir el artículo para solicitar devolución."
+      },
+      "devolucion_gratis": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La política de devoluciones envía etiqueta pero no dice quién paga."
+      },
+      "garantia_gestion": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Sin página de garantía; la política de devoluciones solo pide contactar si llega defectuoso."
+      },
+      "condiciones_url": "https://redmondelectric.ie/policies/refund-policy",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "shopro-lt",
+      "nombre": "Shopro",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.shopro.lt/taisykles",
+        "fecha": "2026-10-18",
+        "nota": "Entrega por mensajero solo a direcciones en Lituania. Datos para Lituania."
+      },
+      "entrega_min_dias": {
+        "valor": 1,
+        "naturaleza": "declarado",
+        "fuente": "https://www.shopro.lt/pristatymas",
+        "fecha": "2026-10-18",
+        "nota": "1-2 días laborables; ciudades grandes, al día laborable siguiente."
+      },
+      "entrega_max_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://www.shopro.lt/pristatymas",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Ni la página de entrega ni las condiciones indican precio."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Ni la página de entrega ni las condiciones indican umbral."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.shopro.lt/taisykles",
+        "fecha": "2026-10-18",
+        "nota": "14 días desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.shopro.lt/taisykles",
+        "fecha": "2026-10-18",
+        "nota": "Los gastos de devolución corren a cargo del comprador, salvo producto defectuoso."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.shopro.lt/taisykles",
+        "fecha": "2026-10-18",
+        "nota": "Se reclama a la tienda por correo o teléfono; aplica la garantía del fabricante."
+      },
+      "condiciones_url": "https://www.shopro.lt/taisykles",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "solarpowersupply-eu",
+      "nombre": "Solar Power Supply",
+      "envia_a_espana": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Entrega, condiciones y búsqueda no listan países de destino ni mencionan España."
+      },
+      "entrega_min_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://solarpowersupply.eu/delivery",
+        "fecha": "2026-10-18",
+        "nota": "Unidad publicada: días (no especifica). «Delivery within 3-7 days»; no indica si son laborables."
+      },
+      "entrega_max_dias": {
+        "valor": 7,
+        "naturaleza": "declarado",
+        "fuente": "https://solarpowersupply.eu/delivery",
+        "fecha": "2026-10-18",
+        "nota": "Unidad publicada: días (no especifica)."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Solo publica el envío gratis desde 20 €; sin tarifa por debajo."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 20,
+        "naturaleza": "declarado",
+        "fuente": "https://solarpowersupply.eu/delivery",
+        "fecha": "2026-10-18",
+        "nota": "«Free shipping from € 20,-»; no indica a qué países aplica."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://solarpowersupply.eu/terms-and-conditions",
+        "fecha": "2026-10-18",
+        "nota": "Art. 6: al menos 14 días desde el día siguiente a la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://solarpowersupply.eu/terms-and-conditions",
+        "fecha": "2026-10-18",
+        "nota": "Art. 10.2: gratis usando su etiqueta de devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://solarpowersupply.eu/warranty-and-services",
+        "fecha": "2026-10-18",
+        "nota": "Solo indica contactar con su atención al cliente; no detalla el proceso."
+      },
+      "condiciones_url": "https://solarpowersupply.eu/terms-and-conditions",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "speck-sports",
+      "nombre": "Speck Sports",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/page/4-livraison",
+        "fecha": "2026-10-18",
+        "nota": "Tienda francesa. Envía a España peninsular (no a Canarias)."
+      },
+      "entrega_min_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/page/4-livraison",
+        "fecha": "2026-10-18",
+        "nota": "Chronopost a punto de recogida: 4-6 días laborables. DPD a domicilio: 15 €, 2-4 días."
+      },
+      "entrega_max_dias": {
+        "valor": 6,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/page/4-livraison",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 7.99,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/page/4-livraison",
+        "fecha": "2026-10-18",
+        "nota": "Chronopost a punto de recogida, pedidos de menos de 200 €. DPD a domicilio: 15 € siempre."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 200,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/page/4-livraison",
+        "fecha": "2026-10-18",
+        "nota": "Solo Chronopost a punto de recogida; DPD sin envío gratis."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/content/3-conditions-generales-de-vente",
+        "fecha": "2026-10-18",
+        "nota": "14 días desde el día siguiente a la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/content/3-conditions-generales-de-vente",
+        "fecha": "2026-10-18",
+        "nota": "Fuera de Francia metropolitana el cliente paga la devolución."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.speck-sports.com/fr/content/3-conditions-generales-de-vente",
+        "fecha": "2026-10-18",
+        "nota": "Solicitud de SAV a Speck, que la transmite a la marca."
+      },
+      "condiciones_url": "https://www.speck-sports.com/fr/content/3-conditions-generales-de-vente",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "tommie-kelly-ie",
+      "nombre": "Tommie Kelly",
+      "envia_a_espana": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/delivery/",
+        "fecha": "2026-10-18",
+        "nota": "Solo entrega en Irlanda («nationwide delivery across Ireland»). Datos para Irlanda."
+      },
+      "entrega_min_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/delivery/",
+        "fecha": "2026-10-18",
+        "nota": "La mayoría de artículos en stock: 3-5 días laborables."
+      },
+      "entrega_max_dias": {
+        "valor": 5,
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/delivery/",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/delivery/",
+        "fecha": "2026-10-18",
+        "nota": "Precio por categoría; pequeño electrodoméstico 9,99 €; portátiles no aparecen en ninguna."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "La página de entregas no da umbral; solo la recogida en tienda es gratis."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/returns/",
+        "fecha": "2026-10-18",
+        "nota": "14 días tras recibir el pedido, artículos sin abrir."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/returns/",
+        "fecha": "2026-10-18",
+        "nota": "Puede cobrarse la recogida del artículo si no se pide sustituto."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://tommiekelly.ie/returns/",
+        "fecha": "2026-10-18",
+        "nota": "La tienda sustituye los productos defectuosos; puede pedir inspección del fabricante."
+      },
+      "condiciones_url": "https://tommiekelly.ie/returns/",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "ugreen-tienda-eu",
+      "nombre": "Tienda oficial UGREEN UE",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/shipping-delivery",
+        "fecha": "2026-10-18",
+        "nota": "España salvo Baleares, Canarias, Ceuta y Melilla."
+      },
+      "entrega_min_dias": {
+        "valor": 2,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/shipping-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Envío estándar 2-8 días hábiles, más 1-3 de preparación."
+      },
+      "entrega_max_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/shipping-delivery",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": 7.99,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/shipping-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Productos eléctricos (con batería o carga); no eléctricos 3,99 €."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 70,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/shipping-delivery",
+        "fecha": "2026-10-18",
+        "nota": "Productos eléctricos; no eléctricos desde 25 €."
+      },
+      "devolucion_dias": {
+        "valor": 30,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/refund-and-returns",
+        "fecha": "2026-10-18",
+        "nota": "30 días naturales desde la entrega."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/refund-and-returns",
+        "fecha": "2026-10-18",
+        "nota": "Devolución sin defecto a cargo del cliente; por defecto, etiqueta reembolsada hasta 10 $."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://eu.ugreen.com/pages/refund-and-returns",
+        "fecha": "2026-10-18",
+        "nota": "Se contacta con el servicio de la tienda (service.eu@ugreen.com); tienda oficial de la marca."
+      },
+      "condiciones_url": "https://eu.ugreen.com/pages/shipping-delivery",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "varuste-net",
+      "nombre": "Varuste.net",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s1/condiciones-de-pedido-entrega-y-devolución",
+        "fecha": "2026-10-18",
+        "nota": "Envía fuera de Finlandia; el precio por país se ve al pagar. España no se nombra expresamente."
+      },
+      "entrega_min_dias": {
+        "valor": 3,
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s1/condiciones-de-pedido-entrega-y-devolución",
+        "fecha": "2026-10-18",
+        "nota": "Paquete exprés al extranjero: «normalmente 3-8 días laborables»."
+      },
+      "entrega_max_dias": {
+        "valor": 8,
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s1/condiciones-de-pedido-entrega-y-devolución",
+        "fecha": "2026-10-18"
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s100000667/pedidos-entregas",
+        "fecha": "2026-10-18",
+        "nota": "Calculado al pagar según dimensiones y peso del carrito."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las páginas de entrega no publican umbral de envío gratis fuera de Finlandia."
+      },
+      "devolucion_dias": {
+        "valor": 60,
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s1/condiciones-de-pedido-entrega-y-devolución",
+        "fecha": "2026-10-18",
+        "nota": "60 días desde la recepción."
+      },
+      "devolucion_gratis": {
+        "valor": false,
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s1/condiciones-de-pedido-entrega-y-devolución",
+        "fecha": "2026-10-18",
+        "nota": "Devoluciones desde fuera de Finlandia las paga el cliente."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://varuste.net/es/s58/devoluciones",
+        "fecha": "2026-10-18",
+        "nota": "Ante un fallo del producto, contactar con atención al cliente de Varuste."
+      },
+      "condiciones_url": "https://varuste.net/es/s1/condiciones-de-pedido-entrega-y-devolución",
+      "condiciones_fecha": "2026-10-18"
+    },
+    {
+      "id": "xiaomi-tienda-es",
+      "nombre": "Tienda oficial Xiaomi España",
+      "envia_a_espana": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/guidance/terms-of-use/",
+        "fecha": "2026-10-18",
+        "nota": "Solo direcciones en España, excluidas Baleares, Canarias, Ceuta y Melilla."
+      },
+      "entrega_min_dias": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "nota": "Las condiciones solo dan un máximo; la FAQ habla de envío (salida) en 2-6 días laborables."
+      },
+      "entrega_max_dias": {
+        "valor": 4,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/guidance/terms-of-use/",
+        "fecha": "2026-10-18",
+        "nota": "«normalmente durará hasta 4 días» hábiles. La FAQ de envío dice que salen en 2-6 días laborables."
+      },
+      "envio_eur": {
+        "valor": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/faqs/env%C3%ADo-FAQ-espa%C3%B1a/",
+        "fecha": "2026-10-18",
+        "nota": "Pedidos de menos de 20 € pagan envío, pero no se publica el importe."
+      },
+      "envio_gratis_desde_eur": {
+        "valor": 20,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/faqs/env%C3%ADo-FAQ-espa%C3%B1a/",
+        "fecha": "2026-10-18",
+        "nota": "Envío estándar gratis en pedidos superiores a 20 €."
+      },
+      "devolucion_dias": {
+        "valor": 14,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/guidance/terms-of-use/",
+        "fecha": "2026-10-18",
+        "nota": "14 días de desistimiento. La guía de packs y electrodomésticos indica 15 días naturales."
+      },
+      "devolucion_gratis": {
+        "valor": true,
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/guidance/terms-of-use/",
+        "fecha": "2026-10-18",
+        "nota": "Xiaomi cubre el envío de la devolución; puede no cubrirlo en artículos voluminosos."
+      },
+      "garantia_gestion": {
+        "valor": "La tienda",
+        "naturaleza": "declarado",
+        "fuente": "https://www.mi.com/es/support/guidance/terms-of-use/",
+        "fecha": "2026-10-18",
+        "nota": "La tienda es la propia marca: Xiaomi responde de la falta de conformidad (3 años)."
+      },
+      "condiciones_url": "https://www.mi.com/es/support/faqs/env%C3%ADo-FAQ-espa%C3%B1a/",
+      "condiciones_fecha": "2026-10-18"
+    }
+  ]
+}

@@ -9296,6 +9296,19 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Subcategory pages: «Qué conviene mirar» is folded on load so a product shows before scrolling at 390 px. New route `POST /api/v1/pages/:id/blocks/:blockId/fold` (owner key, top-level `titulo1-3` only, idempotent); `enlazar-sitio.mjs` step 1 calls it. Needs a «Cargar Wikiproducts» run to reach production. The server HTML still renders the folded text open (crawlers read it).
 - Not checked on production (unreachable from the cloud session).
 
+## 2026-10-18 — Wikiproducts: new shops with public prices, from W5's search (W3a)
+- Added 12 offers and 6 new shops from `/mnt/project-files/wikiproducto/w5/ofertas-nuevas.json`.
+  - Priced and in stock: JA Solar DeepBlue 4.0 Pro at fvcomponentes, 94,38 €; Tesla Powerwall 2 at Solarmat, 10.399 €, and at Genera tu propia energía, 8.350 €.
+  - PcComponentes' Anker 737 offer was re-read: 144,20 €, not 95,99 €.
+  - The rest are sold out. The price the page still shows stays in the note, never in `precio_eur`.
+- Left out on purpose:
+  - iVerde: its page only gives a price without VAT, which can't be compared with the others.
+  - Vekto (Alpha ESS): the shop sells only to installers, so it isn't a public price. Its price was removed and the note says why.
+## 2026-10-18 — Caja de compra al estilo de Amazon en «Dónde comprarlo» (Wikiproducts W5)
+- Cada oferta enseña ahora, debajo de la tienda: **plazo de entrega**, **envío** (el de la oferta o, si no lo dice, la regla de la tienda: «Envío gratis (pedidos desde 50 €)», «Envío 4,99 €, gratis desde 50 €»), **devoluciones** («Devolución gratuita en 30 días»), **quién gestiona la garantía**, **disponibilidad** y **cuándo se comprobó el precio**, con un enlace a las condiciones de la tienda y la fecha en que se leyeron. Si la tienda no envía a España, se dice.
+- Lo que no se sabe se dice («Plazo de entrega: la tienda no lo publica»), en gris; un plazo cargado como «desconocido» ya no sale como «Entrega: desconocido».
+- Las condiciones son **propiedades de la fila del distribuidor** (11 columnas nuevas en «Distribuidores», encontradas por `rol`), con fuente y fecha de cada valor: `datos/*/condiciones-tiendas.json`, investigadas en la web de las 58 tiendas. Solo se leen de una tabla de distribuidores del mismo dueño que las ofertas.
+- El HTML para buscadores (`ofertasEnHtml`) dice las mismas líneas (`lineasCompra`, compartida).
 ## 2026-10-18 — Production check after #662: gallery title, phone home, search photos, mobile menu (Wikiproducts W2)
 
 - Subcategory pages: on production the products gallery repeated the page title (the table's title) and a second description (the table's) before the first product. New `PATCH /api/v1/pages/:id/blocks/:blockId` body `{hide_title: true}` (database blocks only, idempotent); `enlazar-sitio.mjs` step 1 sets it on each subcategory's products gallery, so it reaches production with the next «Cargar Wikiproducts». The server HTML now also drops the table description when the title is hidden, as the page already did.

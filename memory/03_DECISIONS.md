@@ -933,3 +933,9 @@ Before: a missing column anywhere in the route template left the sheet at `/p/:i
 ## 2026-10-18 — Folding a guide through the API instead of rewriting the page (W2)
 
 The subcategory guide had to fold on load. Options: (a) `PATCH` the whole block list from the loader, (b) let `crear-esquema`/`cargar` write it folded, (c) a narrow `fold` route on API v1. Chose (c): API v1 only edits text, so (a) would have opened a general write path; (b) only covers new pages. The route moves the blocks that follow a top-level heading into it (until the next heading of the same or higher level or a database block), is idempotent and checks ownership with `paginaParaEditar`.
+## 2026-10-18 — Shop conditions live on the distributor row, not on each offer (W5, evaluator round 2)
+- **Decision**: delivery days, shipping rule, returns, warranty handler and the policy link are typed columns of «Distribuidores» (found by `config.rol`: `entrega_min`, `entrega_max`, `envio_tienda`, `envio_gratis_desde`, `devolucion_dias`, `devolucion_gratis`, `garantia`, `envia_espana`, `condiciones`, `condiciones_fecha`). The offer row keeps `plazo`/`envio`, which override the shop's rule when present.
+- **Why**: these are per-shop policies. Copying them into 143 offer rows would mean 143 places to update when a shop changes its returns window.
+- **Alternatives**: per-offer columns (rejected, duplication); free text on the distributor (the old `envio`/`devoluciones` texto_largo; kept for history, not read by the box, since a sentence cannot be compared or say «unknown» distinctly).
+- **Rule**: conditions are read only from a distributors table with the same owner as the offers table, so a foreign row cannot promise «free returns» on someone's sheet.
+- **Unit**: delivery is shown as plain «días». Shops publish working days, calendar days or neither; the published unit travels in each value's provenance note.

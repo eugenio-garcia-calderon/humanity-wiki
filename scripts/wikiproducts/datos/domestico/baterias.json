@@ -442,11 +442,11 @@
           "fecha_comprobacion": "2026-10-18",
           "incluye_instalacion": false,
           "url": "https://www.vekto.nl/alphaess-batterij-3-8kwh-smile-g3-bat-3-8s",
-          "precio_eur": 1790.8,
+          "precio_eur": null,
           "iva_incluido": true,
           "unidad": "por módulo SMILE-G3-BAT-3.8S (3,8 kWh)",
           "stock": "8 en stock («8 op voorraad»)",
-          "nota": "1.480,00 € sin IVA; 1.790,80 € con IVA neerlandés («Incl. btw»). La tienda dice «EXCLUSIEF VOOR INSTALLATEURS & INSTALLATIEBEDRIJVEN»: un particular no puede comprarlo directamente. Sólo el módulo de batería, sin inversor. · Envío: «Bestel ma-vr voor 21:00, ontvang het de volgende dag» (Países Bajos).",
+          "nota": "Sólo para instaladores: no es un precio público y un particular no puede comprarlo aquí. 1.480,00 € sin IVA; 1.790,80 € con IVA neerlandés («Incl. btw»). La tienda dice «EXCLUSIEF VOOR INSTALLATEURS & INSTALLATIEBEDRIJVEN»: un particular no puede comprarlo directamente. Sólo el módulo de batería, sin inversor. · Envío: «Bestel ma-vr voor 21:00, ontvang het de volgende dag» (Países Bajos).",
           "envio_eur": null
         }
       ],
@@ -8413,7 +8413,41 @@
           "nota": "Búsqueda a 2026-10-18: CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia, ficha de retirada citada a través de prensa especializada porque la web bloquea la lectura automática), prensa del sector (energy-storage.news, ess-news.com, pv-magazine, solarquotes) y búsquedas en alemán y español de retiradas en Europa. No se encontró ninguna retirada publicada para Europa ni en España; además se revisaron la lista de retiradas del Clean Energy Council (Australia), Health Canada (no se encontró ficha canadiense de la retirada del Powerwall 2) y prensa europea en alemán; la base EU Safety Gate no pudo consultarse directamente con las herramientas disponibles (aplicación web dinámica, acceso bloqueado), por lo que no se puede afirmar su ausencia allí con certeza."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "solarmat-es",
+          "url": "https://solarmat.es/es/baterias-litio/tesla-powerwall-2.html",
+          "precio_eur": 10399.0,
+          "envio_eur": null,
+          "plazo": "24-48 h",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la ficha «TESLA POWERWALL 2» (ref. SM-2194): «10.399,00 €» (los metadatos dan 8.594,21 € sin impuestos, es decir IVA 21 % incluido). «En Stock», «Envío en 24-48h». El Backup Gateway 2 se vende aparte (1.499,00 €). La página no da número de pieza."
+        },
+        {
+          "distribuidor_id": "generatupropiaenergia-es",
+          "url": "https://www.generatupropiaenergia.es/comprar/bateria-tesla-powerwall-2-ac-13-5kw/",
+          "precio_eur": 8350.0,
+          "envio_eur": 0,
+          "plazo": "24/48 h",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la ficha «Batería TESLA Powerwall 2 AC 13.5Kw»: «8.350,00€», «IMPUESTOS INCLUIDOS»; «ENVÍO GRATIS … a Península y Baleares». El stock se contradice (banner «En stock» y «Unidades disponibles: out of stock») y la tienda pide «Consultar stock antes de hacer el pedido»."
+        },
+        {
+          "distribuidor_id": "ingenierikenergy-es",
+          "url": "https://ingenierikenergy.es/producto/bateria-tesla-powerwall2/",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha «TESLA Powerwall 2 AC - 13,5 kWh» marcada «Sin existencias»; sigue mostrando «7.200,00 € IVA incluido»."
+        }
+      ],
       "compatibles": [
         "Tesla Gateway 2 / Backup Gateway 2",
         "cualquier inversor solar de red (acoplamiento AC)",

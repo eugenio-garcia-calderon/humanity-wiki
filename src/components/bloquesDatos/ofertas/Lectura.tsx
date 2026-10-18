@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ExternalLink, Wrench, Store } from 'lucide-react';
+import { ExternalLink, Wrench, Store, Truck, RotateCcw, ShieldCheck, PackageCheck, CalendarCheck, Globe, type LucideIcon } from 'lucide-react';
 import BotonCompra from '../../tablas/BotonCompra';
 import { useCobro } from '../../../hooks/useCobro';
-import { comisionDeLinea, textoComision, totalOferta, motivoSinPrecio, textoSinPrecio } from '../../../utils/ofertas';
+import { comisionDeLinea, textoComision, totalOferta, motivoSinPrecio, textoSinPrecio, lineasCompra, textoEnvioTienda, textoCondiciones, type CondicionesTienda } from '../../../utils/ofertas';
 import type { PropsLectura } from '../tipos';
 
 // ============================================================================
@@ -33,7 +33,10 @@ export type Oferta = {
   comision_pct: number | null; comprobado: string | null; instalacion: boolean | null;
   compra: any | null; nota_distribuidor: number | null;
   votos_distribuidor?: { votos: number; umbral: number } | null;
+  tienda?: CondicionesTienda | null;
 };
+
+const ICONO: Record<string, LucideIcon> = { entrega: Truck, devolucion: RotateCcw, garantia: ShieldCheck, stock: PackageCheck, comprobado: CalendarCheck, pais: Globe };
 
 const dinero = (c: number, moneda = 'EUR') => new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(c / 100);
 const fecha = (iso: string) => { const d = new Date(`${iso}T12:00:00`); return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }); };
@@ -108,8 +111,6 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                         // A new shop has no note yet: say how far it is, and who can give it.
                         ? `Atención al cliente: aún sin nota (${o.votos_distribuidor.votos} de ${o.votos_distribuidor.umbral} votos; la puntúa quien compra aquí)`
                         : 'Atención al cliente: aún sin nota'}
-                    {o.plazo && ` · Entrega: ${o.plazo}`}
-                    {o.agotada ? ' · Agotado' : o.stock !== null && o.stock <= 5 ? ` · Quedan ${o.stock}` : ''}
                   </p>
                   {o.instalacion === true && (
                     <p className="mt-0.5 flex items-center gap-1 text-sm font-bold text-emerald-700"><Wrench className="h-3.5 w-3.5" aria-hidden /> Incluye instalación</p>
@@ -122,7 +123,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                       <p className="text-sm tabular-nums text-slate-500">
                         {o.envio_centimos === null
                           // Sin envío puesto, la cesta lo cobra a cero (`bd/tienda.ts`): se dice eso, no «consultar».
-                          ? (o.compra ? 'Sin gastos de envío comprando aquí' : 'Envío: lo dice la tienda')
+                          ? (o.compra ? 'Sin gastos de envío comprando aquí' : textoEnvioTienda(o) || 'Envío: lo dice la tienda')
                           : o.envio_centimos === 0 ? 'Envío gratis' : `+ ${dinero(o.envio_centimos, o.moneda)} de envío`}
                         {total !== null && o.envio_centimos ? <> · <b className="text-slate-700">{dinero(total, o.moneda)}</b></> : null}
                       </p>
@@ -133,6 +134,29 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
 
               {o.precio_centimos === null && (
                 <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-base leading-snug text-slate-600">{motivoSinPrecio(o)}</p>
+              )}
+
+              {/* The purchase box (evaluator round 2): delivery, returns,
+                  warranty, stock and the price date, each able to say «unknown». */}
+              <ul className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2">
+                {o.precio_centimos === null && textoEnvioTienda(o) && (
+                  <li className="flex items-start gap-1.5 text-sm leading-snug text-slate-700"><Truck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />{textoEnvioTienda(o)}</li>
+                )}
+                {lineasCompra(o).map(l => {
+                  const Icono = ICONO[l.clave] || PackageCheck;
+                  return (
+                    <li key={l.clave} className={`flex items-start gap-1.5 text-sm leading-snug ${l.sabido ? 'text-slate-700' : 'text-slate-400'}`}>
+                      <Icono className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${l.sabido && l.clave === 'devolucion' ? 'text-emerald-600' : 'text-slate-400'}`} aria-hidden />
+                      {l.texto}
+                    </li>
+                  );
+                })}
+              </ul>
+              {o.tienda?.condiciones_url && (
+                <a href={o.tienda.condiciones_url} target="_blank" rel="nofollow noopener"
+                   className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-slate-500 underline-offset-2 hover:underline">
+                  {textoCondiciones(o.tienda)} <ExternalLink className="h-3 w-3" aria-hidden />
+                </a>
               )}
               <p className="mt-2 text-sm leading-snug text-slate-500">{textoComision(o.comision_pct, comisionUnidad, o.moneda)}</p>
 

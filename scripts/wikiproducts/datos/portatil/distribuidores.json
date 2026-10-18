@@ -575,6 +575,48 @@
           "fecha": "2026-10-18"
         }
       ]
+    },
+    {
+      "id": "beep-es",
+      "nombre": "Beep Informática",
+      "tipo": "Tienda online",
+      "pais": "España",
+      "web": "https://www.beep.es",
+      "fuentes": [
+        {
+          "url": "https://www.beep.es/a1289011-powerbank-anker-737-gen2-display-24k-140w-negro/p",
+          "titulo": "Ficha del producto",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "deporvillage-es",
+      "nombre": "Deporvillage",
+      "tipo": "Tienda online",
+      "pais": "España",
+      "web": "https://www.deporvillage.com",
+      "fuentes": [
+        {
+          "url": "https://www.deporvillage.com/panel-solar-goal-zero-nomad-20",
+          "titulo": "Ficha del producto",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "biolite-tienda-eu",
+      "nombre": "BioLite Europa (tienda oficial)",
+      "tipo": "Tienda online",
+      "pais": "Unión Europea",
+      "web": "https://eu.bioliteenergy.com",
+      "fuentes": [
+        {
+          "url": "https://eu.bioliteenergy.com/products/luci-original-clear",
+          "titulo": "Ficha del producto",
+          "fecha": "2026-10-18"
+        }
+      ]
     }
   ]
 }

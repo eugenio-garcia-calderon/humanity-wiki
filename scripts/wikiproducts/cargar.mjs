@@ -93,7 +93,9 @@ const unirPorId = lista => {
 };
 const leerLista = (f, k) => carpetas.flatMap(c => { const r = path.join(dir, 'datos', c, f); return existsSync(r) ? leer(r)[k] || [] : []; });
 const marcas = unirPorId(leerLista('marcas.json', 'marcas'));
-const distribuidores = unirPorId(leerLista('distribuidores.json', 'distribuidores'));
+// Each shop's delivery, returns and warranty conditions (W5, evaluator round 2)
+// live in their own file and merge into the same rows by id.
+const distribuidores = unirPorId([...leerLista('distribuidores.json', 'distribuidores'), ...leerLista('condiciones-tiendas.json', 'distribuidores')]);
 
 // ── 2. FROM A DATA VALUE TO A CELL ──────────────────────────────────────────
 const esDato = x => x && typeof x === 'object' && !Array.isArray(x) && ('valor' in x || 'naturaleza' in x || 'origen' in x);

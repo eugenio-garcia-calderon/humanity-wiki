@@ -106,3 +106,103 @@ export function motivoSinPrecio(o: { agotada: boolean; comprobado: string | null
     : `No pudimos confirmar el precio en esta tienda${cuando}.`;
 }
 
+
+// ── THE SHOP'S CONDITIONS (2026-10-18, evaluator round 2, fix 3) ────────────
+// An Amazon-style purchase box: delivery, shipping, returns, warranty, stock
+// and when the price was checked. Delivery, returns and warranty belong to the
+// SHOP, not to the product, so they are typed properties of the distributor
+// row («Distribuidores», found by `rol`); the offer row can override delivery
+// and shipping with its own `plazo`/`envio`. Every line below can also say «we
+// don't know», distinguishable from a value — never «Entrega: desconocido».
+
+export type CondicionesTienda = {
+  /** `false` = the shop does not deliver to Spain (its other conditions are for its own country). */
+  envia_a_espana: boolean | null;
+  entrega_min_dias: number | null;
+  entrega_max_dias: number | null;
+  /** Standard shipping when the order is below the free threshold; 0 = always free. */
+  envio_centimos: number | null;
+  /** Order amount from which shipping is free; 0 = always free. */
+  envio_gratis_desde_centimos: number | null;
+  devolucion_dias: number | null;
+  devolucion_gratis: boolean | null;
+  /** «La tienda», «La marca» or «La tienda o la marca». */
+  garantia: string | null;
+  /** The shop's own policy page, and the day it was read. */
+  condiciones_url: string | null;
+  condiciones_fecha: string | null;
+};
+
+type ConCondiciones = {
+  precio_centimos: number | null; envio_centimos: number | null; moneda: string;
+  stock: number | null; agotada: boolean; plazo: string | null; comprobado: string | null;
+  compra?: unknown; tienda?: CondicionesTienda | null;
+};
+
+const dineroCorto = (c: number, moneda = 'EUR') =>
+  new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda, minimumFractionDigits: c % 100 ? 2 : 0 }).format(c / 100);
+
+/** A loaded «desconocido» / «no publicado» is the absence of a value, not one. */
+const plazoReal = (p: string | null) => (p && !/^(desconocido|no publicado|no indicado|n\/?d|-)$/i.test(p.trim()) ? p.trim() : null);
+
+export function textoEntrega(o: ConCondiciones): string | null {
+  const p = plazoReal(o.plazo);
+  if (p) return `Entrega: ${p}`;
+  const t = o.tienda;
+  const a = t?.entrega_min_dias ?? t?.entrega_max_dias ?? null, b = t?.entrega_max_dias ?? a;
+  if (a === null || b === null) return null;
+  // Shops publish working days, calendar days or just «días»; the unit each one
+  // used travels in the value's provenance note, so the box says only «días».
+  return a === b ? `Entrega en ${a} ${a === 1 ? 'día' : 'días'}` : `Entrega en ${a}–${b} días`;
+}
+
+/** Shipping when the offer itself does not say it, from the shop's rule and this price. */
+export function textoEnvioTienda(o: ConCondiciones): string | null {
+  const t = o.tienda;
+  if (!t || o.envio_centimos !== null) return null;
+  const desde = t.envio_gratis_desde_centimos, coste = t.envio_centimos;
+  if (desde === 0 || coste === 0) return 'Envío gratis';
+  if (desde !== null && o.precio_centimos !== null && o.precio_centimos >= desde) return `Envío gratis (pedidos desde ${dineroCorto(desde, o.moneda)})`;
+  if (coste !== null) return `Envío ${dineroCorto(coste, o.moneda)}${desde !== null ? `, gratis desde ${dineroCorto(desde, o.moneda)}` : ''}`;
+  if (desde !== null) return `Envío gratis desde ${dineroCorto(desde, o.moneda)}`;
+  return null;
+}
+
+export function textoDevolucion(t: CondicionesTienda | null | undefined): string | null {
+  if (!t || t.devolucion_dias === null) return null;
+  const d = `${t.devolucion_dias} días`;
+  return t.devolucion_gratis === true ? `Devolución gratuita en ${d}`
+    : t.devolucion_gratis === false ? `Devolución en ${d} (la vuelta la pagas tú)` : `Devolución en ${d}`;
+}
+
+export function textoGarantia(t: CondicionesTienda | null | undefined): string | null {
+  if (!t?.garantia) return null;
+  return `Garantía: la gestiona ${t.garantia.charAt(0).toLowerCase()}${t.garantia.slice(1)}`;
+}
+
+export function textoStock(o: ConCondiciones): string {
+  if (o.agotada) return 'Agotado';
+  if (o.stock === null) return 'Disponibilidad sin confirmar';
+  return o.stock <= 5 ? `Quedan ${o.stock}` : 'En stock';
+}
+
+/**
+ * The purchase box, line by line, in a fixed order. Shipping is not here: it
+ * sits next to the price (`textoEnvioTienda` when the offer does not say it). A line the shop does not
+ * publish says so, so a reader can tell «unknown» from «forgotten».
+ */
+export function lineasCompra(o: ConCondiciones): Array<{ clave: string; texto: string; sabido: boolean }> {
+  const t = o.tienda || null;
+  const l = [
+    ...(t?.envia_a_espana === false ? [{ clave: 'pais', texto: 'No envía a España: estas condiciones son las de su país', falta: '' }] : []),
+    { clave: 'entrega', texto: textoEntrega(o), falta: 'Plazo de entrega: la tienda no lo publica' },
+    { clave: 'devolucion', texto: textoDevolucion(t), falta: 'Devoluciones: la tienda no lo publica' },
+    { clave: 'garantia', texto: textoGarantia(t), falta: 'Garantía: no sabemos quién la gestiona' },
+    { clave: 'stock', texto: textoStock(o), falta: '' },
+    ...(o.precio_centimos !== null && o.comprobado ? [{ clave: 'comprobado', texto: `Precio comprobado el ${fechaLarga(o.comprobado)}`, falta: '' }] : []),
+  ];
+  return l.map(x => ({ clave: x.clave, texto: x.texto || x.falta, sabido: !!x.texto }));
+}
+
+export const textoCondiciones = (t: CondicionesTienda | null | undefined) =>
+  t?.condiciones_url ? `Condiciones de la tienda${t.condiciones_fecha ? ` (consultadas el ${fechaLarga(t.condiciones_fecha)})` : ''}` : null;

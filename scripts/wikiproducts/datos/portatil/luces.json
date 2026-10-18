@@ -1159,6 +1159,28 @@
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
           "nota": "Segunda ficha del Outdoor 2.0 en Amazon.es; precio y stock no legibles."
+        },
+        {
+          "distribuidor_id": "biolite-tienda-eu",
+          "url": "https://eu.bioliteenergy.com/products/luci-original-clear",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda UE de la marca; ficha muestra «€34.95» (Tax included) con botón «Sold out». No indica SKU ni países de envío."
+        },
+        {
+          "distribuidor_id": "barrabes",
+          "url": "https://www.barrabes.com/it/lanterna-biolite-luci-original-clear/product-634781",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha (versión italiana de la web) muestra «34,95 €» pero «questo prodotto è attualmente esaurito». Luci Original Clear."
         }
       ],
       "pendiente": [
@@ -2168,7 +2190,19 @@
           "url_busqueda": "https://www.productsafety.gov.au/recalls"
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "alpinstore",
+          "url": "https://www.alpinstore.com/en/583963-biolite-sunlight-100--gray.html",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda francesa que envía a España (envío gratis desde 119 €); ficha muestra «29.99 €» (antes 34,95 €) pero talla única «Sold out». Ref. BIOLITE_SLA0201 (gris)."
+        }
+      ],
       "pendiente": [
         "Confirmación oficial de descatalogación",
         "Autonomía",
