@@ -10,6 +10,7 @@ import Recibo from '../components/knowledge/Recibo';
 import EditorEnvio from '../components/knowledge/EditorEnvio';
 import DatosFiscales from '../components/knowledge/DatosFiscales';
 import ContratoDeCobro from '../components/knowledge/ContratoDeCobro';
+import ColaDistribuidores from '../components/bloquesDatos/ofertas/ColaDistribuidores';
 
 // ============================================================================
 // COMERCIO — lo que vendes, en un sitio (2026-08-22)
@@ -110,8 +111,17 @@ export default function Comercio() {
     }).catch(() => {});
     setGuardandoVariantes(false); setVariantesDe(null); cargar();
   }
-  const [pestana, setPestana] = useState<'productos' | 'pedidos'>(() =>
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('pestana') === 'pedidos' ? 'pedidos' : 'productos');
+  const [pestana, setPestana] = useState<'productos' | 'pedidos' | 'distribuidores'>(() => {
+    const p = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('pestana') : null;
+    return p === 'pedidos' || p === 'distribuidores' ? p : 'productos';
+  });
+  // PEDIDOS A TIENDAS (Wikiproducts, 2026-10-18): la pestaña sale sólo si se
+  // ha vendido alguna oferta de distribuidor — una tienda normal no la ve.
+  const [colaAbierta, setColaAbierta] = useState<number | null>(null);
+  useEffect(() => {
+    fetch('/api/gestion/pedidos-distribuidor', { credentials: 'include' }).then(r => r.ok ? r.json() : [])
+      .then(j => setColaAbierta(Array.isArray(j) ? j.length : 0)).catch(() => setColaAbierta(0));
+  }, []);
 
   async function cargar() {
     try {
@@ -239,7 +249,8 @@ export default function Comercio() {
 
       <div className="flex gap-1 mb-4 border-b border-slate-100">
         {([['productos', `Lo que vendo (${productos.length})`],
-           ['pedidos', `Pedidos${sinVender ? ` · ${sinVender} sin enviar` : ''}`]] as const).map(([v, t]) => (
+           ['pedidos', `Pedidos${sinVender ? ` · ${sinVender} sin enviar` : ''}`],
+           ...((colaAbierta || pestana === 'distribuidores') ? [['distribuidores', `Pedidos a tiendas${colaAbierta ? ` · ${colaAbierta} abiertos` : ''}`] as const] : [])] as const).map(([v, t]) => (
           <button key={v} onClick={() => setPestana(v)}
             className={`h-11 px-3 text-sm font-bold border-b-2 -mb-px ${pestana === v ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400'}`}>
             {t}
@@ -247,7 +258,7 @@ export default function Comercio() {
         ))}
       </div>
 
-      {pestana === 'productos' ? (
+      {pestana === 'distribuidores' ? <ColaDistribuidores /> : pestana === 'productos' ? (
         <>
         {/* ¿VENDE O NO VENDE? (F9): la pregunta que no se podía contestar. */}
         <div className="mb-3">

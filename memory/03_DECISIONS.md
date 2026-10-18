@@ -723,3 +723,135 @@ a rated table, limited to people who voted.
 **Commission.** `bd/comunidad.ts` receives votes and row ids, never row cells;
 the test fails if the word appears in that file or if 50 random commission
 changes move the order.
+
+## 2026-10-18 — A database's sheet template is a page; sheet blocks decide once and paint twice (Wikiproducts W1)
+
+**Template.** `bd_tablas.config.plantilla.pagina_id` points to an ordinary
+private page. Rejected: a new «layout» object with its own editor (weeks, and a
+second editor to maintain). Cost of the choice: the row page in the editor
+shows only its own blocks, not the template's; the template is edited on its
+own page. On publish, the ampliación (`server/bd/plantillaFicha.ts`) puts the
+template's blocks in front of the row's.
+
+**Decide once.** Every sheet block is drawn by React and again as server HTML
+for crawlers (SEO R1). What each shows (which rows, who is best, which
+sentence for an empty recall list) lives in pure functions
+(`bloquesDatos/ficha/vistas.ts`); both painters only loop over the result.
+Rejected: each painter deciding on its own — they would drift, and Google
+penalises markup that differs from the visible page.
+
+**Roles by config, never by name.** A column says what it is in
+`config.ficha` (sheet role), `config.grupo`, `config.comparar`. W5's offers
+use `config.rol` on the offers table (its contract); the schema sets both
+where they meet (EAN has `ficha: 'gtin'` and `rol: 'gtin'`).
+
+**Offers: one table per category**, each with a «Producto» relation
+(`rol: producto`, `reciproca`) to its product table, as W5 reads them. A single
+offers table would have needed five product columns, four empty per row. The
+products' «price from/to» and «number of offers» are aggregates over that
+relation seen from the product side (`direccion: destino`), so there is one
+list of links, not two that can disagree.
+
+**Provenance per cell** in `bd_filas.procedencia` (jsonb by column id), not a
+side table: it travels with the row, is read in the same query, and adds no
+junction table (CLAUDE.md rule 6).
+
+## 2026-10-18 — Readable row URLs from a per-table template (Wikiproducts W2, SEO R2)
+
+**Context.** Product sheets are database rows, each with its page at `/p/BDF…`.
+SEO R2 asks for `/category/brand-model`. Agreed with W1 (product sheet) and W3
+(data loading) through the coordinator: one product table per subcategory, the
+URL's category is fixed text in the template.
+
+**Chosen.** `bd_tablas.config.ruta` holds a template (`powerbanks/{Marca}-{Modelo}`);
+the resulting path is stored in the row page's existing `knowledge_windows.slug`
+(unique per owner) with `/` inside, and old ones go to a history table
+`direcciones_anteriores` that answers 301 forever. Alternatives rejected: a
+`ruta` column on `bd_filas` (a second address field next to `slug`, two
+lookups), and computing the path on every request without storing it (renames
+could not redirect).
+
+**Computed on read, not on write.** A row is written by five paths (grid, page,
+public API, assistant, recurrences); hooking all of them is how one gets
+forgotten. `asegurarRutas` runs from the sitemap, on a `/p/:id` visit and from
+`POST /api/bd/tablas/:id/rutas`, and writes only what changed. **Cost:** a row
+renamed in the grid keeps its old URL until one of those runs; the old URL
+still works and the sitemap fixes it on the next crawl.
+
+**At least two segments**, the first never an app route (`TRAMOS_RESERVADOS`),
+so a row URL can never shadow an ordinary page (`/my-page`) or an app path.
+On a custom domain an unknown two-segment path still answers 200 with the site's
+root page, as before; on a subdomain and in casa it is a 404.
+
+## 2026-10-18 — Wikiproducts purchases: one seller, a managed order per distributor (W5)
+
+**Context.** Wikiproducts sells products it does not stock: the customer pays
+the shop's retail price on our site and we buy it from the distributor, who
+pays us a commission. The commission must be visible on every line and must
+never decide the order (Eugenio's ethics code).
+
+**Options.** (a) Each distributor a seller with its own Stripe account (the
+existing multi-store cart, one payment per shop). (b) Every offer row belongs
+to the Wikiproducts account: one cart, one payment, and the order is split
+afterwards into one entry per distributor that a person places by hand.
+(c) Affiliate links only, no checkout.
+
+**Chosen: (b), with (c) alongside.** Distributors have no accounts here and
+will not onboard to Stripe Connect for an MVP; (b) reuses cart, checkout,
+reservations, receipts and webhooks untouched. The «Ver en la tienda» link
+keeps (c) for shops we do not buy from. New: `pedidos_distribuidor` (0157),
+offer roles on the existing column types (no new types), commission
+snapshotted on `pedido_lineas` at payment.
+
+**Rules fixed in code.** `ordenarOfertas` takes no commission input that it
+reads; shipping is summed per distributor (one box each, the free threshold
+measured on that shop's part only); a shop entry only moves forward
+(«Incidencia» is the exit, delivered and cancelled are final) and the
+customer's order is deduced from all entries and never goes back.
+
+**Diverges from `docs/`?** Not that we know of; payment option A in Stripe
+test mode is the plan's default, real keys wait for Eugenio.
+
+## 2026-10-18 — Site support chat and paid expert consultations (Wikiproducts W6)
+
+**Own tables, not `mensajes`.** Direct messages are person-to-person and need
+a platform session. A site's support is answered by whoever is on the site's
+team, and most askers have no account. `soporte_conversaciones` +
+`soporte_mensajes` reuse the same notification paths (`avisar`, `telecomHub`).
+Visitors without an account are identified by a random token in an HttpOnly
+cookie on that host; only its sha256 is stored.
+
+**No AI auto-answer yet.** Answering with the model when nobody is online is
+one call per question and, on an encyclopedia that sells «no invented
+claims», a wrong answer is worse than «we'll reply here». Left for Eugenio.
+
+**Expert payments: Connect when the expert has it, else the platform holds
+the money and records the debt on the consultation** (`cobro = 'plataforma'`,
+`neto_experto_centimos`, cleared only with a transfer reference). Not reusing
+`liquidaciones`: it is keyed by `pedido_id` and its unique index is per order.
+Price and commission are read server-side from the expert row and frozen on
+the consultation. The commission is shown to the buyer in euros.
+
+**Double booking is prevented by a partial unique index**
+`(experto_id, inicio) WHERE estado IN ('reservando','pagada','hecha')`, not
+by a check-then-insert. A held slot expires with the 30-minute Stripe session.
+Late payment for a taken slot is refunded automatically.
+
+**Availability is stored in the expert's local time** (`zona_horaria`) and
+converted per day with `Intl`, so DST does not move consultations; no date
+library added.
+
+### 2026-10-18 — W6: help chat hidden, expert payments on live Stripe
+
+**Decision (Eugenio):** do not offer the site help chat for now, and use the
+live Stripe account rather than test mode for expert consultations.
+
+**How:** the `chat` block gets `enMenu: false` (kept in code: expert
+consultations reuse the same conversation server, and blocks already placed
+still render). Live vs test is decided only by `STRIPE_SECRET_KEY` on the
+server, so no code path changes. Re-offering the chat is deleting one line.
+
+**Consequence:** the paid Checkout flow was never exercised against Stripe
+(not reachable from the build environment). The first real booking after the
+merge is the first real test; a low-priced test consultation, refunded from
+the management panel, is the cheapest way to check it.

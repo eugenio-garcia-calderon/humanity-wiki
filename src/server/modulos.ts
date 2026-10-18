@@ -53,11 +53,15 @@ import { registerArchivosRoutes } from './archivos.js';
 import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
+import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
 import { registrarSitios } from './sitios.js';
 import { registrarBuscadorSitio } from './buscadorSitio.js';
+import { registrarRutasFila } from './rutasFila.js';
+import { registrarSeoSitio } from './seoSitio.js';
+import { registrarIndexNow } from './indexNow.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
@@ -105,6 +109,10 @@ import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
 import { registrarEspacio } from './espacio.js';
 import { registrarApiPublica } from './apiPublica.js';
 import { registrarWebhooks } from './webhooks.js';
+import { registrarPedidoGestionadoRutas } from './pedidoGestionado.js';
+import { registrarOfertas } from './ofertas.js';
+import { registrarSoporte } from './soporte.js';
+import { registrarExpertos } from './expertos.js';
 
 /**
  * Un módulo de la API.
@@ -231,6 +239,9 @@ export const MODULOS: Modulo[] = [
   { nombre: 'sitios', montar: (app, db) => registrarSitios(app, db) },
   // El buscador de cada sitio publicado (Wikiproducts, 2026-10-18).
   { nombre: 'buscadorSitio', montar: (app, db) => registrarBuscadorSitio(app, db) },
+  { nombre: 'rutasFila', montar: (app, db) => registrarRutasFila(app, db) },
+  { nombre: 'seoSitio', montar: () => registrarSeoSitio() },
+  { nombre: 'indexNow', montar: (app, db) => registrarIndexNow(app, db) },
   // La consola de la cadena de valor de una web: sólo para quien gestiona la página y sólo desde humanity.wiki.
   { nombre: 'consola', montar: (app, db) => registrarConsola(app, db) },
   // Optimización web de una página publicada: medición real, recomendaciones e indexación (solo quien edita).
@@ -265,6 +276,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
+  {
+    nombre: 'bd/plantillaFicha',
+    montar: (app, db) => registrarPlantillaFicha(app, db),
+    nota: 'DESPUÉS de «bd»: lee las tablas con `bdInterno.leerTabla`, que rellena registerBdRoutes. '
+        + 'Fichas de producto de Wikiproducts: plantilla por base de datos y procedencia de cada dato.',
+  },
   // Community ratings per criterion (Wikiproducts W4). After `bd`: it asks `bdInterno` who may read a table.
   { nombre: 'valoraciones', montar: (app, db) => registrarValoraciones(app, db) },
   { nombre: 'publicar', montar: (app, db) => registerPublicarRoutes(app, db) },
@@ -380,6 +397,13 @@ export const MODULOS: Modulo[] = [
         + 'de 15 días. Vivía en GitHub Actions y no había funcionado nunca (ver el módulo).',
   },
   { nombre: 'espacio', montar: (app, db) => registrarEspacio(app, db), nota: 'Favoritos, recientes y búsqueda avanzada del espacio de trabajo (#14, #15).' },
+  { nombre: 'pedido-gestionado', montar: (app, db) => registrarPedidoGestionadoRutas(app, db), nota: 'Wikiproducts (W5): la cola de pedidos a distribuidores y el feed de ofertas para Google.' },
+  { nombre: 'ofertas', montar: (app, db) => registrarOfertas(app, db), nota: 'Wikiproducts (W5): las ofertas de una ficha de producto, para el bloque «Ofertas».' },
+  // Chat de ayuda de los sitios y consultas de pago con expertos (W6 de Wikiproducts).
+  // Leen la sesión de miembro del sitio por su cuenta (`miembroActual`), así que no
+  // dependen del orden respecto a `miembros`; el aviso de pago les llega desde `stripe.ts`.
+  { nombre: 'soporte', montar: (app, db) => registrarSoporte(app, db) },
+  { nombre: 'expertos', montar: (app, db) => registrarExpertos(app, db) },
 ];
 
 /**

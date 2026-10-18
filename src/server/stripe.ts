@@ -7,7 +7,9 @@ import { avisar } from './avisos.js';
 import { avisarPorWhatsApp } from './whatsapp.js';
 import { numeroSincrono } from './ajustes.js';
 import { anotarLiquidacion } from './liquidaciones.js';
+import { consultaPagadaPorStripe, consultaCaducadaPorStripe } from './expertos.js';
 import { normalizarTelefono } from '../utils/telefono.js';
+import { registrarPedidoGestionado } from './pedidoGestionado.js';
 
 /** El teléfono que recoge Stripe, en la forma del resto de la casa (o nulo). */
 const normalizarTelefonoSeguro = (t: any) => normalizarTelefono(typeof t === 'string' ? t : null);
@@ -415,13 +417,19 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
         UPDATE reservas_stock SET estado = 'liberada', updated_at = now()
         WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
       `);
+      // Una consulta con un experto que no se pagó suelta su hueco en el acto.
+      if (session.metadata?.kind === 'consulta_experto') await consultaCaducadaPorStripe(db, session);
       break;
     }
 
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       const kind = session.metadata?.kind;
-      if (kind === 'product_purchase') {
+      if (kind === 'consulta_experto') {
+        // Una consulta con un experto (W6). Toda la lógica vive en `expertos.ts`
+        // y es idempotente: la vuelta del navegador puede haberla confirmado ya.
+        await consultaPagadaPorStripe(db, session);
+      } else if (kind === 'product_purchase') {
         const productId = session.metadata!.product_id;
         const buyerId = session.metadata!.buyer_id;
         const product = (await db.execute(sql`SELECT * FROM products WHERE id = ${productId}`)).rows[0];
@@ -636,6 +644,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                           ${precio || prod?.price_cents || 0}, ${v?.id || null}, ${v?.nombre || null})
                 `);
               }
+              await registrarPedidoGestionado(db, idT);   // Wikiproducts: comisión y cola por distribuidor
               // Lo que la plataforma le debe a esta tienda, con su fecha de pago.
               const liq = await anotarLiquidacion(db, {
                 pedidoId: idT, vendedorId: vid, brutoCentimos: brutoT, envioCentimos: envioT,
@@ -690,6 +699,9 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                         ${precio || prod?.price_cents || 0}, ${v?.id || null}, ${v?.nombre || null})
               `);
             }
+            // PEDIDO GESTIONADO (Wikiproducts, 2026-10-18): la comisión de cada
+            // línea y la cola de lo que hay que pedir a cada distribuidor.
+            await registrarPedidoGestionado(db, pedidoId);
             // LA PARTE PAGADA CON PUNTOS (2026-08-22): el comprador ya pagó en
             // euros el resto; ahora los puntos pasan al vendedor por el
             // libro. Si el saldo ya no alcanza (se lo gastó entre abrir el

@@ -93,6 +93,8 @@ const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({
 const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
 const BuscadorEnEspacio = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnEspacio })));
 const BuscadorEnCasa = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnCasa })));
+const RutaEnEspacio = lazy(() => import('./pages/RutaSitio').then(m => ({ default: m.RutaEnEspacio })));
+const RutaEnCasa = lazy(() => import('./pages/RutaSitio').then(m => ({ default: m.RutaEnCasa })));
 const BaseDatosEnEspacio = lazy(() => import('./pages/BaseDatosSitio').then(m => ({ default: m.BaseDatosEnEspacio })));
 const BaseDatosEnCasa = lazy(() => import('./pages/BaseDatosSitio').then(m => ({ default: m.BaseDatosEnCasa })));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
@@ -243,6 +245,9 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
           {/* La página propia de una base de datos, con su nombre en la dirección para los buscadores. */}
           <Route path="bd/:tablaId" element={<BaseDatosEnEspacio />} />
           <Route path="bd/:tablaId/:slug" element={<BaseDatosEnEspacio />} />
+          {/* La dirección legible de una ficha: `/powerbanks/anker-737` (SEO R2, `RutaSitio`). */}
+          <Route path=":categoria/:ficha" element={<RutaEnEspacio />} />
+          <Route path=":categoria/:sub/:ficha" element={<RutaEnEspacio />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
@@ -309,6 +314,9 @@ export default function App() {
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />
               <Route path=":arroba/buscar" element={<BuscadorEnCasa />} />
+              {/* La dirección legible de una ficha: `/@quien/powerbanks/anker-737` (SEO R2). */}
+              <Route path=":arroba/:categoria/:ficha" element={<RutaEnCasa />} />
+              <Route path=":arroba/:categoria/:sub/:ficha" element={<RutaEnCasa />} />
               {/* La página propia de una base de datos: con o sin el arroba. */}
               <Route path=":arroba/bd/:tablaId" element={<BaseDatosEnCasa />} />
               <Route path=":arroba/bd/:tablaId/:slug" element={<BaseDatosEnCasa />} />

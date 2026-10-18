@@ -18,6 +18,8 @@ import { formatear } from './Celda';
 
 export type Fila = {
   id: string;
+  /** Oculta al público: solo llega a quien puede editar la tabla. */
+  oculta?: boolean;
   pagina_id?: string | null;
   pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null; encuadre?: { x: number; y: number } | null } | null;
   orden?: number;

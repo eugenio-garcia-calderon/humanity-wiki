@@ -68,6 +68,9 @@ const COMO: Record<string, { icono: any; frase: (n: string, p?: any) => string }
   comentario_resuelto:{ icono: CheckCircle2,   frase: (n, p) => `${n} ha resuelto un hilo en «${p?.titulo || 'una página'}»` },
   pagina_cambiada:    { icono: FileText,       frase: (n, p) => `${n} ha cambiado «${p?.titulo || 'una página'}», que sigues` },
   miembro_pendiente:  { icono: UserPlus,       frase: (n, p) => `${n} pide entrar en tu sitio «${p?.titulo || ''}»` },
+  // Chat de ayuda y expertos de los sitios (W6 Wikiproducts, 2026-10-18).
+  soporte_mensaje:    { icono: Send,           frase: (n, p) => `${n || 'Alguien'} te ha escrito${p?.sitio ? ` de «${p.sitio}»` : ''}` },
+  consulta_reservada: { icono: CheckCircle2,   frase: () => 'Han reservado una consulta con un experto' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -104,6 +107,8 @@ const destinoDe = (a: Aviso): string | null => {
   if (a.entity_type === 'stock') return a.payload?.destino || '/mercado';
   // Un sitio con miembros: al panel de miembros de esa página.
   if (a.entity_type === 'sitio_miembros') return a.payload?.destino || null;
+  // El chat de ayuda: a la página donde está la conversación, ya abierta.
+  if (a.entity_type === 'soporte') return a.payload?.destino || null;
   return null;
 };
 

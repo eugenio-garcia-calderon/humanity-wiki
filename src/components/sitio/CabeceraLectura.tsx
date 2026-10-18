@@ -4,6 +4,8 @@ import { cn } from '../../utils/cn';
 import { anchoDePagina, clasesDePagina } from '../../utils/ajustesPagina';
 import { MarcoSitio, type Rutas } from './MenuSitio';
 import { completarSitio } from './sitioWeb';
+import MediaPortada from '../ui/MediaPortada';
+import { esVideoPortada } from '../../utils/videoPortada';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina } from '../knowledge/CabeceraPagina';
 
 // ============================================================================
@@ -65,7 +67,7 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
         cabecera={cfg.cabecera}
         // `fetchPriority`: es lo primero que se ve, que no espere detrás
         // de los iconos y las imágenes de más abajo.
-        imagen={cfg.portada ? <img src={cfg.portada} alt="" fetchPriority="high" className="rounded-2xl" /> : null}
+        imagen={cfg.portada ? <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} /> : null}
         cuerpo={<>
           <FilaTitulo centrado={!alIzquierda} cabecera={cfg.cabecera} icono={icono ? (
             <div>

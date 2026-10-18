@@ -1,0 +1,4158 @@
+{
+  "version": 1,
+  "nota": "Esquema de las bases de datos de Wikiproducts en Wiki Creator (plan §2.1). Lo crea scripts/wikiproducts/crear-esquema.mjs con la API /api/v1. Cada columna lleva config.clave (la clave de los JSON de datos/), config.grupo (sección de la ficha), config.ficha (su papel en la ficha) y, si se compara, config.comparar (mayor|menor). Los JSON de datos/ mandan sobre los nombres; esto manda sobre las columnas. Las tablas relacionadas van primero porque las de producto apuntan a ellas. Ofertas: una tabla por categoría (contrato de W5, PR #593: config.rol). Las columnas «comunidad» son de W4 (valoraciones/ESQUEMA.md).",
+  "tablas": [
+    {
+      "clave": "marcas",
+      "titulo": "Marcas y empresas",
+      "icono": "🏷️",
+      "descripcion": "Las empresas detrás de cada producto: quién es, dónde tiene la sede y su información pública, con fuentes.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "razon_social",
+          "nombre": "Razón social",
+          "tipo": "texto",
+          "config": {
+            "clave": "razon_social",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "pais_sede",
+          "nombre": "País de la sede",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_sede",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "matriz",
+          "nombre": "Empresa matriz",
+          "tipo": "texto",
+          "config": {
+            "clave": "matriz",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "fundacion",
+          "nombre": "Año de fundación",
+          "tipo": "numero",
+          "config": {
+            "clave": "fundacion",
+            "grupo": "identidad",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "web",
+          "nombre": "Web",
+          "tipo": "url",
+          "config": {
+            "clave": "web",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "cotiza",
+          "nombre": "Cotiza en bolsa",
+          "tipo": "texto",
+          "config": {
+            "clave": "cotiza",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "datos_publicos",
+          "nombre": "Información pública",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "datos_publicos",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "fuentes",
+          "nombre": "Fuentes",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "fuentes",
+            "grupo": "documentos",
+            "ficha": "fuentes"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "distribuidores",
+      "titulo": "Distribuidores",
+      "icono": "🏬",
+      "descripcion": "Tiendas, instaladores y mayoristas que venden los productos, con sus condiciones de envío y devolución.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "tipo",
+          "nombre": "Tipo",
+          "tipo": "seleccion",
+          "opciones": [
+            "Tienda online",
+            "Tienda física",
+            "Instalador",
+            "Mayorista",
+            "Fabricante"
+          ],
+          "config": {
+            "clave": "tipo",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "razon_social",
+          "nombre": "Razón social",
+          "tipo": "texto",
+          "config": {
+            "clave": "razon_social",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "pais",
+          "nombre": "País",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais",
+            "grupo": "identidad",
+            "ficha": "pais"
+          }
+        },
+        {
+          "clave": "cif",
+          "nombre": "CIF",
+          "tipo": "texto",
+          "config": {
+            "clave": "cif",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "web",
+          "nombre": "Web",
+          "tipo": "url",
+          "config": {
+            "clave": "web",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "instalador_certificado",
+          "nombre": "Instalador certificado",
+          "tipo": "casilla",
+          "config": {
+            "clave": "instalador_certificado",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "envio",
+          "nombre": "Envío",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "envio",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "devoluciones",
+          "nombre": "Devoluciones",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "devoluciones",
+            "grupo": "identidad"
+          }
+        },
+        {
+          "clave": "fuentes",
+          "nombre": "Fuentes",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "fuentes",
+            "grupo": "documentos",
+            "ficha": "fuentes"
+          }
+        },
+        {
+          "clave": "comunidad_atencion",
+          "nombre": "Atención al cliente",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_atencion",
+            "criterio": "atencion"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "afirmaciones",
+      "titulo": "Afirmaciones publicitarias",
+      "icono": "🔎",
+      "descripcion": "Lo que dice la publicidad de un producto, contrastado: cierta, matizable, falsa o sin pruebas, siempre con fuentes.",
+      "columnas": [
+        {
+          "clave": "afirmacion",
+          "nombre": "Afirmación",
+          "tipo": "texto",
+          "config": {
+            "clave": "afirmacion"
+          }
+        },
+        {
+          "clave": "donde",
+          "nombre": "Dónde se afirma",
+          "tipo": "url",
+          "config": {
+            "clave": "donde",
+            "ficha": "donde"
+          }
+        },
+        {
+          "clave": "veredicto",
+          "nombre": "Veredicto",
+          "tipo": "seleccion",
+          "opciones": [
+            {
+              "label": "Cierta",
+              "color": "green"
+            },
+            {
+              "label": "Matizable",
+              "color": "yellow"
+            },
+            {
+              "label": "Falsa",
+              "color": "red"
+            },
+            {
+              "label": "Sin pruebas",
+              "color": "gray"
+            }
+          ],
+          "config": {
+            "clave": "veredicto",
+            "ficha": "veredicto"
+          }
+        },
+        {
+          "clave": "explicacion",
+          "nombre": "Explicación",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "explicacion",
+            "ficha": "explicacion"
+          }
+        },
+        {
+          "clave": "fuentes",
+          "nombre": "Fuentes",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "fuentes",
+            "ficha": "fuentes"
+          }
+        },
+        {
+          "clave": "fecha",
+          "nombre": "Fecha de la comprobación",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha",
+            "ficha": "fecha"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "retiradas",
+      "titulo": "Retiradas y alertas de seguridad",
+      "icono": "⚠️",
+      "descripcion": "Retiradas del mercado y alertas de seguridad publicadas por organismos oficiales de cualquier país.",
+      "columnas": [
+        {
+          "clave": "titulo",
+          "nombre": "Título",
+          "tipo": "texto",
+          "config": {
+            "clave": "titulo"
+          }
+        },
+        {
+          "clave": "pais",
+          "nombre": "País",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais",
+            "ficha": "pais"
+          }
+        },
+        {
+          "clave": "organismo",
+          "nombre": "Organismo",
+          "tipo": "texto",
+          "config": {
+            "clave": "organismo",
+            "ficha": "organismo"
+          }
+        },
+        {
+          "clave": "fecha",
+          "nombre": "Fecha",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha",
+            "ficha": "fecha"
+          }
+        },
+        {
+          "clave": "motivo",
+          "nombre": "Motivo",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "motivo",
+            "ficha": "motivo"
+          }
+        },
+        {
+          "clave": "modelos_afectados",
+          "nombre": "Modelos afectados",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "modelos_afectados"
+          }
+        },
+        {
+          "clave": "referencia",
+          "nombre": "Referencia",
+          "tipo": "texto",
+          "config": {
+            "clave": "referencia",
+            "ficha": "referencia"
+          }
+        },
+        {
+          "clave": "url",
+          "nombre": "Enlace oficial",
+          "tipo": "url",
+          "config": {
+            "clave": "url",
+            "ficha": "enlace"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "powerbanks",
+      "titulo": "Powerbanks y baterías portátiles",
+      "icono": "🔋",
+      "subcategoria": "powerbanks",
+      "categoria": "Energía portátil",
+      "descripcion": "Baterías externas de bolsillo, de portátil y estaciones de energía portátiles, con sus datos técnicos citados.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "marca",
+          "nombre": "Marca",
+          "tipo": "relacion",
+          "config": {
+            "clave": "marca",
+            "grupo": "identidad",
+            "ficha": "marca",
+            "tabla_destino_clave": "marcas"
+          }
+        },
+        {
+          "clave": "modelo",
+          "nombre": "Modelo",
+          "tipo": "texto",
+          "config": {
+            "clave": "modelo",
+            "grupo": "identidad",
+            "ficha": "modelo"
+          }
+        },
+        {
+          "clave": "ean",
+          "nombre": "EAN / código de barras",
+          "tipo": "texto",
+          "config": {
+            "clave": "ean",
+            "grupo": "identidad",
+            "ficha": "gtin",
+            "rol": "gtin"
+          }
+        },
+        {
+          "clave": "estado",
+          "nombre": "Estado",
+          "tipo": "seleccion",
+          "opciones": [
+            "A la venta",
+            "Descatalogado",
+            "No se vende en España",
+            "Desconocido"
+          ],
+          "config": {
+            "clave": "estado",
+            "grupo": "identidad",
+            "ficha": "estado"
+          }
+        },
+        {
+          "clave": "anio_lanzamiento",
+          "nombre": "Año de lanzamiento",
+          "tipo": "numero",
+          "config": {
+            "clave": "anio_lanzamiento",
+            "grupo": "identidad",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "foto",
+          "nombre": "Foto",
+          "tipo": "url",
+          "config": {
+            "clave": "foto",
+            "grupo": "identidad",
+            "ficha": "imagen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "foto_licencia",
+          "nombre": "Licencia de la foto",
+          "tipo": "texto",
+          "config": {
+            "clave": "foto_licencia",
+            "grupo": "control",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "resumen",
+          "nombre": "Resumen",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "resumen",
+            "grupo": "identidad",
+            "ficha": "resumen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "tipo",
+          "nombre": "Tipo",
+          "tipo": "seleccion",
+          "opciones": [
+            "Powerbank",
+            "Estación de energía portátil"
+          ],
+          "config": {
+            "clave": "tipo",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "capacidad_mah",
+          "nombre": "Capacidad (mAh)",
+          "tipo": "numero",
+          "config": {
+            "clave": "capacidad_mah",
+            "grupo": "tecnico",
+            "unidad": "mAh",
+            "comparar": "mayor",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "tension_celda_v",
+          "nombre": "Tensión de celda",
+          "tipo": "numero",
+          "config": {
+            "clave": "tension_celda_v",
+            "grupo": "tecnico",
+            "unidad": "V"
+          }
+        },
+        {
+          "clave": "capacidad_wh",
+          "nombre": "Energía nominal",
+          "tipo": "numero",
+          "config": {
+            "clave": "capacidad_wh",
+            "grupo": "tecnico",
+            "unidad": "Wh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "energia_util_medida_wh",
+          "nombre": "Energía útil medida",
+          "tipo": "numero",
+          "config": {
+            "clave": "energia_util_medida_wh",
+            "grupo": "tecnico",
+            "unidad": "Wh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "potencia_salida_max_w",
+          "nombre": "Potencia de salida máxima",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_salida_max_w",
+            "grupo": "tecnico",
+            "unidad": "W",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "potencia_ac_continua_w",
+          "nombre": "Potencia AC continua",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_ac_continua_w",
+            "grupo": "tecnico",
+            "unidad": "W",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "potencia_ac_pico_w",
+          "nombre": "Potencia AC de pico",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_ac_pico_w",
+            "grupo": "tecnico",
+            "unidad": "W",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "potencia_entrada_max_w",
+          "nombre": "Potencia de carga máxima",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_entrada_max_w",
+            "grupo": "tecnico",
+            "unidad": "W",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "puertos",
+          "nombre": "Puertos",
+          "tipo": "texto",
+          "config": {
+            "clave": "puertos",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "quimica",
+          "nombre": "Química",
+          "tipo": "texto",
+          "config": {
+            "clave": "quimica",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ciclos_declarados",
+          "nombre": "Ciclos de carga",
+          "tipo": "numero",
+          "config": {
+            "clave": "ciclos_declarados",
+            "grupo": "tecnico",
+            "unidad": "ciclos",
+            "comparar": "mayor",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "peso_kg",
+          "nombre": "Peso",
+          "tipo": "numero",
+          "config": {
+            "clave": "peso_kg",
+            "grupo": "tecnico",
+            "unidad": "kg",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "medidas_mm",
+          "nombre": "Medidas (mm)",
+          "tipo": "texto",
+          "config": {
+            "clave": "medidas_mm",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "carga_solar",
+          "nombre": "Carga solar",
+          "tipo": "texto",
+          "config": {
+            "clave": "carga_solar",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "apto_avion",
+          "nombre": "Apto para avión",
+          "tipo": "seleccion",
+          "opciones": [
+            "Sí",
+            "Con permiso de la aerolínea",
+            "No"
+          ],
+          "config": {
+            "clave": "apto_avion",
+            "grupo": "tecnico",
+            "nota": "Calculado con la norma de la IATA: menos de 100 Wh sí; de 100 a 160 Wh con permiso; más de 160 Wh no."
+          }
+        },
+        {
+          "clave": "garantia_anios",
+          "nombre": "Garantía (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "pais_marca",
+          "nombre": "País de la marca",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_marca",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "pais_fabricacion",
+          "nombre": "País de fabricación",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_fabricacion",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "fabrica",
+          "nombre": "Fábrica",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabrica",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "materiales_principales",
+          "nombre": "Materiales principales",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "materiales_principales",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "num_componentes",
+          "nombre": "Número de componentes",
+          "tipo": "numero",
+          "config": {
+            "clave": "num_componentes",
+            "grupo": "origen",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "reparabilidad",
+          "nombre": "Reparabilidad",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "reparabilidad",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "certificados",
+          "nombre": "Certificados",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "certificados",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "documentos",
+          "nombre": "Manuales y documentos",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "documentos",
+            "grupo": "documentos",
+            "formato": "enlaces"
+          }
+        },
+        {
+          "clave": "compatibles",
+          "nombre": "Compatible con",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "afirmaciones",
+          "nombre": "Afirmaciones publicitarias",
+          "tipo": "relacion",
+          "config": {
+            "clave": "afirmaciones",
+            "ficha": "afirmaciones",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas",
+          "nombre": "Retiradas y alertas",
+          "tipo": "relacion",
+          "config": {
+            "clave": "retiradas",
+            "ficha": "retiradas",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "retiradas",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas_busqueda",
+          "nombre": "Retiradas: dónde se buscó",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "retiradas_busqueda",
+            "grupo": "control",
+            "ficha": "retiradas_busqueda",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "retiradas_fecha",
+          "nombre": "Retiradas: comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "retiradas_fecha",
+            "grupo": "control",
+            "ficha": "retiradas_fecha",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "precio_desde",
+          "nombre": "Precio desde",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_desde",
+            "grupo": "compra",
+            "ficha": "precio_min",
+            "comparar": "menor",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "minimo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-powerbanks",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "precio_hasta",
+          "nombre": "Precio hasta",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_hasta",
+            "grupo": "compra",
+            "ficha": "precio_max",
+            "visibilidad": "nunca",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "maximo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-powerbanks",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "num_ofertas",
+          "nombre": "Tiendas",
+          "tipo": "agregado",
+          "config": {
+            "clave": "num_ofertas",
+            "grupo": "compra",
+            "ficha": "num_ofertas",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar",
+              "columna_relacion_tabla_clave": "ofertas-powerbanks",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "revisado",
+          "nombre": "Datos revisados el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "revisado",
+            "grupo": "control",
+            "ficha": "revisado",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "pendiente",
+          "nombre": "Pendiente de comprobar",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pendiente",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "interna": true
+          }
+        },
+        {
+          "clave": "comunidad_calidad",
+          "nombre": "Calidad",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_calidad",
+            "criterio": "calidad"
+          }
+        },
+        {
+          "clave": "comunidad_precio",
+          "nombre": "Precio (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_precio",
+            "criterio": "precio"
+          }
+        },
+        {
+          "clave": "comunidad_garantia",
+          "nombre": "Garantía (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_garantia",
+            "criterio": "garantia"
+          }
+        },
+        {
+          "clave": "comunidad_ecologia",
+          "nombre": "Ecología",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_ecologia",
+            "criterio": "ecologia"
+          }
+        },
+        {
+          "clave": "comunidad_salud",
+          "nombre": "Salud",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_salud",
+            "criterio": "salud"
+          }
+        },
+        {
+          "clave": "comunidad_estetica",
+          "nombre": "Estética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_estetica",
+            "criterio": "estetica"
+          }
+        },
+        {
+          "clave": "comunidad_etica",
+          "nombre": "Ética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_etica",
+            "criterio": "etica"
+          }
+        },
+        {
+          "clave": "comunidad_media",
+          "nombre": "Nota media",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_media",
+            "criterio": "media"
+          }
+        }
+      ],
+      "ruta": "powerbanks/{Marca}-{Modelo}"
+    },
+    {
+      "clave": "paneles-solares-portatiles",
+      "titulo": "Paneles solares portátiles",
+      "icono": "☀️",
+      "subcategoria": "paneles-solares-portatiles",
+      "categoria": "Energía portátil",
+      "descripcion": "Paneles solares plegables y portátiles para cargar baterías y dispositivos, con sus datos técnicos citados.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "marca",
+          "nombre": "Marca",
+          "tipo": "relacion",
+          "config": {
+            "clave": "marca",
+            "grupo": "identidad",
+            "ficha": "marca",
+            "tabla_destino_clave": "marcas"
+          }
+        },
+        {
+          "clave": "modelo",
+          "nombre": "Modelo",
+          "tipo": "texto",
+          "config": {
+            "clave": "modelo",
+            "grupo": "identidad",
+            "ficha": "modelo"
+          }
+        },
+        {
+          "clave": "ean",
+          "nombre": "EAN / código de barras",
+          "tipo": "texto",
+          "config": {
+            "clave": "ean",
+            "grupo": "identidad",
+            "ficha": "gtin",
+            "rol": "gtin"
+          }
+        },
+        {
+          "clave": "estado",
+          "nombre": "Estado",
+          "tipo": "seleccion",
+          "opciones": [
+            "A la venta",
+            "Descatalogado",
+            "No se vende en España",
+            "Desconocido"
+          ],
+          "config": {
+            "clave": "estado",
+            "grupo": "identidad",
+            "ficha": "estado"
+          }
+        },
+        {
+          "clave": "anio_lanzamiento",
+          "nombre": "Año de lanzamiento",
+          "tipo": "numero",
+          "config": {
+            "clave": "anio_lanzamiento",
+            "grupo": "identidad",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "foto",
+          "nombre": "Foto",
+          "tipo": "url",
+          "config": {
+            "clave": "foto",
+            "grupo": "identidad",
+            "ficha": "imagen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "foto_licencia",
+          "nombre": "Licencia de la foto",
+          "tipo": "texto",
+          "config": {
+            "clave": "foto_licencia",
+            "grupo": "control",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "resumen",
+          "nombre": "Resumen",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "resumen",
+            "grupo": "identidad",
+            "ficha": "resumen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "potencia_pico_w",
+          "nombre": "Potencia pico",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_pico_w",
+            "grupo": "tecnico",
+            "unidad": "W",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "eficiencia_celula_pct",
+          "nombre": "Eficiencia de la célula",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "eficiencia_celula_pct",
+            "grupo": "tecnico",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "tipo_celula",
+          "nombre": "Tipo de célula",
+          "tipo": "texto",
+          "config": {
+            "clave": "tipo_celula",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "voc_v",
+          "nombre": "Tensión en circuito abierto (Voc)",
+          "tipo": "numero",
+          "config": {
+            "clave": "voc_v",
+            "grupo": "tecnico",
+            "unidad": "V"
+          }
+        },
+        {
+          "clave": "isc_a",
+          "nombre": "Corriente de cortocircuito (Isc)",
+          "tipo": "numero",
+          "config": {
+            "clave": "isc_a",
+            "grupo": "tecnico",
+            "unidad": "A"
+          }
+        },
+        {
+          "clave": "peso_kg",
+          "nombre": "Peso",
+          "tipo": "numero",
+          "config": {
+            "clave": "peso_kg",
+            "grupo": "tecnico",
+            "unidad": "kg",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "medidas_plegado_mm",
+          "nombre": "Medidas plegado (mm)",
+          "tipo": "texto",
+          "config": {
+            "clave": "medidas_plegado_mm",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "medidas_desplegado_mm",
+          "nombre": "Medidas desplegado (mm)",
+          "tipo": "texto",
+          "config": {
+            "clave": "medidas_desplegado_mm",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "conector",
+          "nombre": "Conector",
+          "tipo": "texto",
+          "config": {
+            "clave": "conector",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ip",
+          "nombre": "Protección IP",
+          "tipo": "texto",
+          "config": {
+            "clave": "ip",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "salidas_usb",
+          "nombre": "Salidas USB",
+          "tipo": "texto",
+          "config": {
+            "clave": "salidas_usb",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "garantia_anios",
+          "nombre": "Garantía (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "pais_marca",
+          "nombre": "País de la marca",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_marca",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "pais_fabricacion",
+          "nombre": "País de fabricación",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_fabricacion",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "fabrica",
+          "nombre": "Fábrica",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabrica",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "materiales_principales",
+          "nombre": "Materiales principales",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "materiales_principales",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "num_componentes",
+          "nombre": "Número de componentes",
+          "tipo": "numero",
+          "config": {
+            "clave": "num_componentes",
+            "grupo": "origen",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "reparabilidad",
+          "nombre": "Reparabilidad",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "reparabilidad",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "certificados",
+          "nombre": "Certificados",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "certificados",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "documentos",
+          "nombre": "Manuales y documentos",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "documentos",
+            "grupo": "documentos",
+            "formato": "enlaces"
+          }
+        },
+        {
+          "clave": "compatibles",
+          "nombre": "Compatible con",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "afirmaciones",
+          "nombre": "Afirmaciones publicitarias",
+          "tipo": "relacion",
+          "config": {
+            "clave": "afirmaciones",
+            "ficha": "afirmaciones",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas",
+          "nombre": "Retiradas y alertas",
+          "tipo": "relacion",
+          "config": {
+            "clave": "retiradas",
+            "ficha": "retiradas",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "retiradas",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas_busqueda",
+          "nombre": "Retiradas: dónde se buscó",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "retiradas_busqueda",
+            "grupo": "control",
+            "ficha": "retiradas_busqueda",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "retiradas_fecha",
+          "nombre": "Retiradas: comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "retiradas_fecha",
+            "grupo": "control",
+            "ficha": "retiradas_fecha",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "precio_desde",
+          "nombre": "Precio desde",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_desde",
+            "grupo": "compra",
+            "ficha": "precio_min",
+            "comparar": "menor",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "minimo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "precio_hasta",
+          "nombre": "Precio hasta",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_hasta",
+            "grupo": "compra",
+            "ficha": "precio_max",
+            "visibilidad": "nunca",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "maximo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "num_ofertas",
+          "nombre": "Tiendas",
+          "tipo": "agregado",
+          "config": {
+            "clave": "num_ofertas",
+            "grupo": "compra",
+            "ficha": "num_ofertas",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "revisado",
+          "nombre": "Datos revisados el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "revisado",
+            "grupo": "control",
+            "ficha": "revisado",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "pendiente",
+          "nombre": "Pendiente de comprobar",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pendiente",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "interna": true
+          }
+        },
+        {
+          "clave": "comunidad_calidad",
+          "nombre": "Calidad",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_calidad",
+            "criterio": "calidad"
+          }
+        },
+        {
+          "clave": "comunidad_precio",
+          "nombre": "Precio (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_precio",
+            "criterio": "precio"
+          }
+        },
+        {
+          "clave": "comunidad_garantia",
+          "nombre": "Garantía (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_garantia",
+            "criterio": "garantia"
+          }
+        },
+        {
+          "clave": "comunidad_ecologia",
+          "nombre": "Ecología",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_ecologia",
+            "criterio": "ecologia"
+          }
+        },
+        {
+          "clave": "comunidad_salud",
+          "nombre": "Salud",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_salud",
+            "criterio": "salud"
+          }
+        },
+        {
+          "clave": "comunidad_estetica",
+          "nombre": "Estética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_estetica",
+            "criterio": "estetica"
+          }
+        },
+        {
+          "clave": "comunidad_etica",
+          "nombre": "Ética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_etica",
+            "criterio": "etica"
+          }
+        },
+        {
+          "clave": "comunidad_media",
+          "nombre": "Nota media",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_media",
+            "criterio": "media"
+          }
+        }
+      ],
+      "ruta": "paneles-solares-portatiles/{Marca}-{Modelo}"
+    },
+    {
+      "clave": "luces-solares-portatiles",
+      "titulo": "Luces solares portátiles",
+      "icono": "🔦",
+      "subcategoria": "luces-solares-portatiles",
+      "categoria": "Energía portátil",
+      "descripcion": "Linternas, faroles y lámparas que se cargan con el sol, con sus datos técnicos citados.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "marca",
+          "nombre": "Marca",
+          "tipo": "relacion",
+          "config": {
+            "clave": "marca",
+            "grupo": "identidad",
+            "ficha": "marca",
+            "tabla_destino_clave": "marcas"
+          }
+        },
+        {
+          "clave": "modelo",
+          "nombre": "Modelo",
+          "tipo": "texto",
+          "config": {
+            "clave": "modelo",
+            "grupo": "identidad",
+            "ficha": "modelo"
+          }
+        },
+        {
+          "clave": "ean",
+          "nombre": "EAN / código de barras",
+          "tipo": "texto",
+          "config": {
+            "clave": "ean",
+            "grupo": "identidad",
+            "ficha": "gtin",
+            "rol": "gtin"
+          }
+        },
+        {
+          "clave": "estado",
+          "nombre": "Estado",
+          "tipo": "seleccion",
+          "opciones": [
+            "A la venta",
+            "Descatalogado",
+            "No se vende en España",
+            "Desconocido"
+          ],
+          "config": {
+            "clave": "estado",
+            "grupo": "identidad",
+            "ficha": "estado"
+          }
+        },
+        {
+          "clave": "anio_lanzamiento",
+          "nombre": "Año de lanzamiento",
+          "tipo": "numero",
+          "config": {
+            "clave": "anio_lanzamiento",
+            "grupo": "identidad",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "foto",
+          "nombre": "Foto",
+          "tipo": "url",
+          "config": {
+            "clave": "foto",
+            "grupo": "identidad",
+            "ficha": "imagen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "foto_licencia",
+          "nombre": "Licencia de la foto",
+          "tipo": "texto",
+          "config": {
+            "clave": "foto_licencia",
+            "grupo": "control",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "resumen",
+          "nombre": "Resumen",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "resumen",
+            "grupo": "identidad",
+            "ficha": "resumen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "lumenes_max",
+          "nombre": "Luz máxima",
+          "tipo": "numero",
+          "config": {
+            "clave": "lumenes_max",
+            "grupo": "tecnico",
+            "unidad": "lm",
+            "comparar": "mayor",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "autonomia_h",
+          "nombre": "Autonomía",
+          "tipo": "numero",
+          "config": {
+            "clave": "autonomia_h",
+            "grupo": "tecnico",
+            "unidad": "h",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "bateria_mah",
+          "nombre": "Batería (mAh)",
+          "tipo": "numero",
+          "config": {
+            "clave": "bateria_mah",
+            "grupo": "tecnico",
+            "unidad": "mAh",
+            "comparar": "mayor",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "bateria_wh",
+          "nombre": "Batería (Wh)",
+          "tipo": "numero",
+          "config": {
+            "clave": "bateria_wh",
+            "grupo": "tecnico",
+            "unidad": "Wh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "panel_solar_w",
+          "nombre": "Panel solar",
+          "tipo": "numero",
+          "config": {
+            "clave": "panel_solar_w",
+            "grupo": "tecnico",
+            "unidad": "W",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "carga_usb",
+          "nombre": "Carga por USB",
+          "tipo": "casilla",
+          "config": {
+            "clave": "carga_usb",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "funcion_powerbank",
+          "nombre": "Sirve de powerbank",
+          "tipo": "casilla",
+          "config": {
+            "clave": "funcion_powerbank",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ip",
+          "nombre": "Protección IP",
+          "tipo": "texto",
+          "config": {
+            "clave": "ip",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "modos",
+          "nombre": "Modos de luz",
+          "tipo": "texto",
+          "config": {
+            "clave": "modos",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "peso_g",
+          "nombre": "Peso",
+          "tipo": "numero",
+          "config": {
+            "clave": "peso_g",
+            "grupo": "tecnico",
+            "unidad": "g",
+            "comparar": "menor",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "garantia_anios",
+          "nombre": "Garantía (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "pais_marca",
+          "nombre": "País de la marca",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_marca",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "pais_fabricacion",
+          "nombre": "País de fabricación",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_fabricacion",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "fabrica",
+          "nombre": "Fábrica",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabrica",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "materiales_principales",
+          "nombre": "Materiales principales",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "materiales_principales",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "num_componentes",
+          "nombre": "Número de componentes",
+          "tipo": "numero",
+          "config": {
+            "clave": "num_componentes",
+            "grupo": "origen",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "reparabilidad",
+          "nombre": "Reparabilidad",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "reparabilidad",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "certificados",
+          "nombre": "Certificados",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "certificados",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "documentos",
+          "nombre": "Manuales y documentos",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "documentos",
+            "grupo": "documentos",
+            "formato": "enlaces"
+          }
+        },
+        {
+          "clave": "compatibles",
+          "nombre": "Compatible con",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "afirmaciones",
+          "nombre": "Afirmaciones publicitarias",
+          "tipo": "relacion",
+          "config": {
+            "clave": "afirmaciones",
+            "ficha": "afirmaciones",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas",
+          "nombre": "Retiradas y alertas",
+          "tipo": "relacion",
+          "config": {
+            "clave": "retiradas",
+            "ficha": "retiradas",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "retiradas",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas_busqueda",
+          "nombre": "Retiradas: dónde se buscó",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "retiradas_busqueda",
+            "grupo": "control",
+            "ficha": "retiradas_busqueda",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "retiradas_fecha",
+          "nombre": "Retiradas: comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "retiradas_fecha",
+            "grupo": "control",
+            "ficha": "retiradas_fecha",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "precio_desde",
+          "nombre": "Precio desde",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_desde",
+            "grupo": "compra",
+            "ficha": "precio_min",
+            "comparar": "menor",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "minimo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "precio_hasta",
+          "nombre": "Precio hasta",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_hasta",
+            "grupo": "compra",
+            "ficha": "precio_max",
+            "visibilidad": "nunca",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "maximo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "num_ofertas",
+          "nombre": "Tiendas",
+          "tipo": "agregado",
+          "config": {
+            "clave": "num_ofertas",
+            "grupo": "compra",
+            "ficha": "num_ofertas",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar",
+              "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "revisado",
+          "nombre": "Datos revisados el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "revisado",
+            "grupo": "control",
+            "ficha": "revisado",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "pendiente",
+          "nombre": "Pendiente de comprobar",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pendiente",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "interna": true
+          }
+        },
+        {
+          "clave": "comunidad_calidad",
+          "nombre": "Calidad",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_calidad",
+            "criterio": "calidad"
+          }
+        },
+        {
+          "clave": "comunidad_precio",
+          "nombre": "Precio (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_precio",
+            "criterio": "precio"
+          }
+        },
+        {
+          "clave": "comunidad_garantia",
+          "nombre": "Garantía (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_garantia",
+            "criterio": "garantia"
+          }
+        },
+        {
+          "clave": "comunidad_ecologia",
+          "nombre": "Ecología",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_ecologia",
+            "criterio": "ecologia"
+          }
+        },
+        {
+          "clave": "comunidad_salud",
+          "nombre": "Salud",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_salud",
+            "criterio": "salud"
+          }
+        },
+        {
+          "clave": "comunidad_estetica",
+          "nombre": "Estética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_estetica",
+            "criterio": "estetica"
+          }
+        },
+        {
+          "clave": "comunidad_etica",
+          "nombre": "Ética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_etica",
+            "criterio": "etica"
+          }
+        },
+        {
+          "clave": "comunidad_media",
+          "nombre": "Nota media",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_media",
+            "criterio": "media"
+          }
+        }
+      ],
+      "ruta": "luces-solares-portatiles/{Marca}-{Modelo}"
+    },
+    {
+      "clave": "paneles-solares-domesticos",
+      "titulo": "Paneles solares domésticos",
+      "icono": "🏠",
+      "subcategoria": "paneles-solares-domesticos",
+      "categoria": "Energía solar doméstica",
+      "descripcion": "Módulos fotovoltaicos para tejados y autoconsumo, con potencia, eficiencia, degradación y garantías citadas.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "marca",
+          "nombre": "Marca",
+          "tipo": "relacion",
+          "config": {
+            "clave": "marca",
+            "grupo": "identidad",
+            "ficha": "marca",
+            "tabla_destino_clave": "marcas"
+          }
+        },
+        {
+          "clave": "modelo",
+          "nombre": "Modelo",
+          "tipo": "texto",
+          "config": {
+            "clave": "modelo",
+            "grupo": "identidad",
+            "ficha": "modelo"
+          }
+        },
+        {
+          "clave": "ean",
+          "nombre": "EAN / código de barras",
+          "tipo": "texto",
+          "config": {
+            "clave": "ean",
+            "grupo": "identidad",
+            "ficha": "gtin",
+            "rol": "gtin"
+          }
+        },
+        {
+          "clave": "estado",
+          "nombre": "Estado",
+          "tipo": "seleccion",
+          "opciones": [
+            "A la venta",
+            "Descatalogado",
+            "No se vende en España",
+            "Desconocido"
+          ],
+          "config": {
+            "clave": "estado",
+            "grupo": "identidad",
+            "ficha": "estado"
+          }
+        },
+        {
+          "clave": "anio_lanzamiento",
+          "nombre": "Año de lanzamiento",
+          "tipo": "numero",
+          "config": {
+            "clave": "anio_lanzamiento",
+            "grupo": "identidad",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "foto",
+          "nombre": "Foto",
+          "tipo": "url",
+          "config": {
+            "clave": "foto",
+            "grupo": "identidad",
+            "ficha": "imagen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "foto_licencia",
+          "nombre": "Licencia de la foto",
+          "tipo": "texto",
+          "config": {
+            "clave": "foto_licencia",
+            "grupo": "control",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "resumen",
+          "nombre": "Resumen",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "resumen",
+            "grupo": "identidad",
+            "ficha": "resumen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "potencia_pico_wp",
+          "nombre": "Potencia pico",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_pico_wp",
+            "grupo": "tecnico",
+            "unidad": "Wp",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "gama_potencias_wp",
+          "nombre": "Gama de potencias",
+          "tipo": "texto",
+          "config": {
+            "clave": "gama_potencias_wp",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "eficiencia_pct",
+          "nombre": "Eficiencia del módulo",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "eficiencia_pct",
+            "grupo": "tecnico",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "tecnologia_celula",
+          "nombre": "Tecnología de la célula",
+          "tipo": "texto",
+          "config": {
+            "clave": "tecnologia_celula",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "tipo_celula",
+          "nombre": "Tipo de célula",
+          "tipo": "texto",
+          "config": {
+            "clave": "tipo_celula",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "num_celulas",
+          "nombre": "Número de células",
+          "tipo": "numero",
+          "config": {
+            "clave": "num_celulas",
+            "grupo": "tecnico",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "bifacial",
+          "nombre": "Bifacial",
+          "tipo": "casilla",
+          "config": {
+            "clave": "bifacial",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "bifacialidad_pct",
+          "nombre": "Bifacialidad",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "bifacialidad_pct",
+            "grupo": "tecnico",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "vidrio",
+          "nombre": "Vidrio",
+          "tipo": "texto",
+          "config": {
+            "clave": "vidrio",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "marco",
+          "nombre": "Marco",
+          "tipo": "texto",
+          "config": {
+            "clave": "marco",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "medidas_mm",
+          "nombre": "Medidas (mm)",
+          "tipo": "texto",
+          "config": {
+            "clave": "medidas_mm",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "peso_kg",
+          "nombre": "Peso",
+          "tipo": "numero",
+          "config": {
+            "clave": "peso_kg",
+            "grupo": "tecnico",
+            "unidad": "kg",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "coef_temp_pmax_pct_c",
+          "nombre": "Coeficiente de temperatura (Pmax)",
+          "tipo": "numero",
+          "config": {
+            "clave": "coef_temp_pmax_pct_c",
+            "grupo": "tecnico",
+            "unidad": "%/°C",
+            "comparar": "mayor",
+            "nota": "Negativo: cuanto más cerca de cero, menos potencia pierde con el calor."
+          }
+        },
+        {
+          "clave": "noct_o_nmot_c",
+          "nombre": "Temperatura de operación (NOCT/NMOT)",
+          "tipo": "numero",
+          "config": {
+            "clave": "noct_o_nmot_c",
+            "grupo": "tecnico",
+            "unidad": "°C",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "degradacion_primer_anio_pct",
+          "nombre": "Degradación el primer año",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "degradacion_primer_anio_pct",
+            "grupo": "tecnico",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "degradacion_anual_pct",
+          "nombre": "Degradación anual",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "degradacion_anual_pct",
+            "grupo": "tecnico",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "voc_v",
+          "nombre": "Tensión en circuito abierto (Voc)",
+          "tipo": "numero",
+          "config": {
+            "clave": "voc_v",
+            "grupo": "tecnico",
+            "unidad": "V"
+          }
+        },
+        {
+          "clave": "isc_a",
+          "nombre": "Corriente de cortocircuito (Isc)",
+          "tipo": "numero",
+          "config": {
+            "clave": "isc_a",
+            "grupo": "tecnico",
+            "unidad": "A"
+          }
+        },
+        {
+          "clave": "tension_max_sistema_v",
+          "nombre": "Tensión máxima del sistema",
+          "tipo": "numero",
+          "config": {
+            "clave": "tension_max_sistema_v",
+            "grupo": "tecnico",
+            "unidad": "V"
+          }
+        },
+        {
+          "clave": "carga_mecanica_pa",
+          "nombre": "Carga mecánica",
+          "tipo": "texto",
+          "config": {
+            "clave": "carga_mecanica_pa",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ip_caja_conexiones",
+          "nombre": "Protección IP de la caja de conexiones",
+          "tipo": "texto",
+          "config": {
+            "clave": "ip_caja_conexiones",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "conector",
+          "nombre": "Conector",
+          "tipo": "texto",
+          "config": {
+            "clave": "conector",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "fabricante_celulas",
+          "nombre": "Fabricante de las células",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabricante_celulas",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "precio_por_wp_eur",
+          "nombre": "Precio por Wp",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_por_wp_eur",
+            "grupo": "compra",
+            "comparar": "menor",
+            "decimales": 3,
+            "moneda": "EUR"
+          }
+        },
+        {
+          "clave": "pruebas_independientes",
+          "nombre": "Pruebas independientes",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pruebas_independientes",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "garantia_producto_anios",
+          "nombre": "Garantía de producto (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_producto_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "garantia_rendimiento_anios",
+          "nombre": "Garantía de rendimiento (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_rendimiento_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "garantia_rendimiento_final_pct",
+          "nombre": "Rendimiento garantizado al final",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "garantia_rendimiento_final_pct",
+            "grupo": "garantia",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "garantia_letra_pequena",
+          "nombre": "Letra pequeña de la garantía",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "garantia_letra_pequena",
+            "grupo": "garantia"
+          }
+        },
+        {
+          "clave": "garantia_quien_responde",
+          "nombre": "Quién responde de la garantía",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "garantia_quien_responde",
+            "grupo": "garantia"
+          }
+        },
+        {
+          "clave": "pais_marca",
+          "nombre": "País de la marca",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_marca",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "pais_fabricacion",
+          "nombre": "País de fabricación",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_fabricacion",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "fabrica",
+          "nombre": "Fábrica",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabrica",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "materiales_principales",
+          "nombre": "Materiales principales",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "materiales_principales",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "num_componentes",
+          "nombre": "Número de componentes",
+          "tipo": "numero",
+          "config": {
+            "clave": "num_componentes",
+            "grupo": "origen",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "reparabilidad",
+          "nombre": "Reparabilidad",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "reparabilidad",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "certificados",
+          "nombre": "Certificados",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "certificados",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "documentos",
+          "nombre": "Manuales y documentos",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "documentos",
+            "grupo": "documentos",
+            "formato": "enlaces"
+          }
+        },
+        {
+          "clave": "compatibles",
+          "nombre": "Compatible con",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "afirmaciones",
+          "nombre": "Afirmaciones publicitarias",
+          "tipo": "relacion",
+          "config": {
+            "clave": "afirmaciones",
+            "ficha": "afirmaciones",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas",
+          "nombre": "Retiradas y alertas",
+          "tipo": "relacion",
+          "config": {
+            "clave": "retiradas",
+            "ficha": "retiradas",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "retiradas",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas_busqueda",
+          "nombre": "Retiradas: dónde se buscó",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "retiradas_busqueda",
+            "grupo": "control",
+            "ficha": "retiradas_busqueda",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "retiradas_fecha",
+          "nombre": "Retiradas: comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "retiradas_fecha",
+            "grupo": "control",
+            "ficha": "retiradas_fecha",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "precio_desde",
+          "nombre": "Precio desde",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_desde",
+            "grupo": "compra",
+            "ficha": "precio_min",
+            "comparar": "menor",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "minimo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "precio_hasta",
+          "nombre": "Precio hasta",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_hasta",
+            "grupo": "compra",
+            "ficha": "precio_max",
+            "visibilidad": "nunca",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "maximo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "num_ofertas",
+          "nombre": "Tiendas",
+          "tipo": "agregado",
+          "config": {
+            "clave": "num_ofertas",
+            "grupo": "compra",
+            "ficha": "num_ofertas",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "revisado",
+          "nombre": "Datos revisados el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "revisado",
+            "grupo": "control",
+            "ficha": "revisado",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "pendiente",
+          "nombre": "Pendiente de comprobar",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pendiente",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "interna": true
+          }
+        },
+        {
+          "clave": "comunidad_calidad",
+          "nombre": "Calidad",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_calidad",
+            "criterio": "calidad"
+          }
+        },
+        {
+          "clave": "comunidad_precio",
+          "nombre": "Precio (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_precio",
+            "criterio": "precio"
+          }
+        },
+        {
+          "clave": "comunidad_garantia",
+          "nombre": "Garantía (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_garantia",
+            "criterio": "garantia"
+          }
+        },
+        {
+          "clave": "comunidad_ecologia",
+          "nombre": "Ecología",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_ecologia",
+            "criterio": "ecologia"
+          }
+        },
+        {
+          "clave": "comunidad_salud",
+          "nombre": "Salud",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_salud",
+            "criterio": "salud"
+          }
+        },
+        {
+          "clave": "comunidad_estetica",
+          "nombre": "Estética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_estetica",
+            "criterio": "estetica"
+          }
+        },
+        {
+          "clave": "comunidad_etica",
+          "nombre": "Ética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_etica",
+            "criterio": "etica"
+          }
+        },
+        {
+          "clave": "comunidad_media",
+          "nombre": "Nota media",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_media",
+            "criterio": "media"
+          }
+        }
+      ],
+      "ruta": "paneles-solares-domesticos/{Marca}-{Modelo}"
+    },
+    {
+      "clave": "baterias-domesticas",
+      "titulo": "Baterías domésticas",
+      "icono": "🏡",
+      "subcategoria": "baterias-domesticas",
+      "categoria": "Energía solar doméstica",
+      "descripcion": "Baterías para guardar la energía solar en casa: capacidad útil, potencia, ciclos, eficiencia y garantías citadas.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "marca",
+          "nombre": "Marca",
+          "tipo": "relacion",
+          "config": {
+            "clave": "marca",
+            "grupo": "identidad",
+            "ficha": "marca",
+            "tabla_destino_clave": "marcas"
+          }
+        },
+        {
+          "clave": "modelo",
+          "nombre": "Modelo",
+          "tipo": "texto",
+          "config": {
+            "clave": "modelo",
+            "grupo": "identidad",
+            "ficha": "modelo"
+          }
+        },
+        {
+          "clave": "ean",
+          "nombre": "EAN / código de barras",
+          "tipo": "texto",
+          "config": {
+            "clave": "ean",
+            "grupo": "identidad",
+            "ficha": "gtin",
+            "rol": "gtin"
+          }
+        },
+        {
+          "clave": "estado",
+          "nombre": "Estado",
+          "tipo": "seleccion",
+          "opciones": [
+            "A la venta",
+            "Descatalogado",
+            "No se vende en España",
+            "Desconocido"
+          ],
+          "config": {
+            "clave": "estado",
+            "grupo": "identidad",
+            "ficha": "estado"
+          }
+        },
+        {
+          "clave": "anio_lanzamiento",
+          "nombre": "Año de lanzamiento",
+          "tipo": "numero",
+          "config": {
+            "clave": "anio_lanzamiento",
+            "grupo": "identidad",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "foto",
+          "nombre": "Foto",
+          "tipo": "url",
+          "config": {
+            "clave": "foto",
+            "grupo": "identidad",
+            "ficha": "imagen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "foto_licencia",
+          "nombre": "Licencia de la foto",
+          "tipo": "texto",
+          "config": {
+            "clave": "foto_licencia",
+            "grupo": "control",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "resumen",
+          "nombre": "Resumen",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "resumen",
+            "grupo": "identidad",
+            "ficha": "resumen",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "capacidad_total_kwh",
+          "nombre": "Capacidad total",
+          "tipo": "numero",
+          "config": {
+            "clave": "capacidad_total_kwh",
+            "grupo": "tecnico",
+            "unidad": "kWh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "capacidad_util_kwh",
+          "nombre": "Capacidad útil",
+          "tipo": "numero",
+          "config": {
+            "clave": "capacidad_util_kwh",
+            "grupo": "tecnico",
+            "unidad": "kWh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "gama_capacidades_kwh",
+          "nombre": "Gama de capacidades",
+          "tipo": "texto",
+          "config": {
+            "clave": "gama_capacidades_kwh",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "modular",
+          "nombre": "Modular",
+          "tipo": "casilla",
+          "config": {
+            "clave": "modular",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ampliable",
+          "nombre": "Ampliable",
+          "tipo": "casilla",
+          "config": {
+            "clave": "ampliable",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ampliacion_max_kwh",
+          "nombre": "Ampliable hasta",
+          "tipo": "numero",
+          "config": {
+            "clave": "ampliacion_max_kwh",
+            "grupo": "tecnico",
+            "unidad": "kWh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "potencia_continua_kw",
+          "nombre": "Potencia continua",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_continua_kw",
+            "grupo": "tecnico",
+            "unidad": "kW",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "potencia_pico_kw",
+          "nombre": "Potencia de pico",
+          "tipo": "numero",
+          "config": {
+            "clave": "potencia_pico_kw",
+            "grupo": "tecnico",
+            "unidad": "kW",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "quimica",
+          "nombre": "Química",
+          "tipo": "texto",
+          "config": {
+            "clave": "quimica",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ciclos_declarados",
+          "nombre": "Ciclos declarados",
+          "tipo": "numero",
+          "config": {
+            "clave": "ciclos_declarados",
+            "grupo": "tecnico",
+            "unidad": "ciclos",
+            "comparar": "mayor",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "profundidad_descarga_pct",
+          "nombre": "Profundidad de descarga",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "profundidad_descarga_pct",
+            "grupo": "tecnico",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "eficiencia_ida_vuelta_pct",
+          "nombre": "Eficiencia de ida y vuelta",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "eficiencia_ida_vuelta_pct",
+            "grupo": "tecnico",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "tension",
+          "nombre": "Tensión",
+          "tipo": "texto",
+          "config": {
+            "clave": "tension",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "acoplamiento",
+          "nombre": "Acoplamiento",
+          "tipo": "texto",
+          "config": {
+            "clave": "acoplamiento",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "inversor_integrado",
+          "nombre": "Inversor integrado",
+          "tipo": "casilla",
+          "config": {
+            "clave": "inversor_integrado",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "inversores_compatibles",
+          "nombre": "Inversores compatibles",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "inversores_compatibles",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "respaldo_apagones",
+          "nombre": "Respaldo ante apagones",
+          "tipo": "texto",
+          "config": {
+            "clave": "respaldo_apagones",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "instalacion",
+          "nombre": "Instalación (interior/exterior)",
+          "tipo": "texto",
+          "config": {
+            "clave": "instalacion",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ip",
+          "nombre": "Protección IP",
+          "tipo": "texto",
+          "config": {
+            "clave": "ip",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "rango_temperatura_c",
+          "nombre": "Rango de temperatura",
+          "tipo": "texto",
+          "config": {
+            "clave": "rango_temperatura_c",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "peso_kg",
+          "nombre": "Peso",
+          "tipo": "numero",
+          "config": {
+            "clave": "peso_kg",
+            "grupo": "tecnico",
+            "unidad": "kg",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "medidas_mm",
+          "nombre": "Medidas (mm)",
+          "tipo": "texto",
+          "config": {
+            "clave": "medidas_mm",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "garantia_energia_mwh",
+          "nombre": "Energía garantizada",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_energia_mwh",
+            "grupo": "garantia",
+            "unidad": "MWh",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "fabricante_celulas",
+          "nombre": "Fabricante de las células",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabricante_celulas",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "precio_por_kwh_util_eur",
+          "nombre": "Precio por kWh útil",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_por_kwh_util_eur",
+            "grupo": "compra",
+            "comparar": "menor",
+            "moneda": "EUR"
+          }
+        },
+        {
+          "clave": "pruebas_independientes",
+          "nombre": "Pruebas independientes",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pruebas_independientes",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "ruido_db",
+          "nombre": "Ruido",
+          "tipo": "numero",
+          "config": {
+            "clave": "ruido_db",
+            "grupo": "tecnico",
+            "unidad": "dB",
+            "comparar": "menor"
+          }
+        },
+        {
+          "clave": "garantia_producto_anios",
+          "nombre": "Garantía de producto (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_producto_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "garantia_rendimiento_anios",
+          "nombre": "Garantía de rendimiento (años)",
+          "tipo": "numero",
+          "config": {
+            "clave": "garantia_rendimiento_anios",
+            "grupo": "garantia",
+            "unidad": "años",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "garantia_rendimiento_final_pct",
+          "nombre": "Rendimiento garantizado al final",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "garantia_rendimiento_final_pct",
+            "grupo": "garantia",
+            "comparar": "mayor"
+          }
+        },
+        {
+          "clave": "garantia_letra_pequena",
+          "nombre": "Letra pequeña de la garantía",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "garantia_letra_pequena",
+            "grupo": "garantia"
+          }
+        },
+        {
+          "clave": "garantia_quien_responde",
+          "nombre": "Quién responde de la garantía",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "garantia_quien_responde",
+            "grupo": "garantia"
+          }
+        },
+        {
+          "clave": "pais_marca",
+          "nombre": "País de la marca",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_marca",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "pais_fabricacion",
+          "nombre": "País de fabricación",
+          "tipo": "texto",
+          "config": {
+            "clave": "pais_fabricacion",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "fabrica",
+          "nombre": "Fábrica",
+          "tipo": "texto",
+          "config": {
+            "clave": "fabrica",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "materiales_principales",
+          "nombre": "Materiales principales",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "materiales_principales",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "num_componentes",
+          "nombre": "Número de componentes",
+          "tipo": "numero",
+          "config": {
+            "clave": "num_componentes",
+            "grupo": "origen",
+            "decimales": 0
+          }
+        },
+        {
+          "clave": "reparabilidad",
+          "nombre": "Reparabilidad",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "reparabilidad",
+            "grupo": "origen"
+          }
+        },
+        {
+          "clave": "certificados",
+          "nombre": "Certificados",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "certificados",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "documentos",
+          "nombre": "Manuales y documentos",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "documentos",
+            "grupo": "documentos",
+            "formato": "enlaces"
+          }
+        },
+        {
+          "clave": "compatibles",
+          "nombre": "Compatible con",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "afirmaciones",
+          "nombre": "Afirmaciones publicitarias",
+          "tipo": "relacion",
+          "config": {
+            "clave": "afirmaciones",
+            "ficha": "afirmaciones",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "afirmaciones",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas",
+          "nombre": "Retiradas y alertas",
+          "tipo": "relacion",
+          "config": {
+            "clave": "retiradas",
+            "ficha": "retiradas",
+            "visibilidad": "nunca",
+            "tabla_destino_clave": "retiradas",
+            "varios": true
+          }
+        },
+        {
+          "clave": "retiradas_busqueda",
+          "nombre": "Retiradas: dónde se buscó",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "retiradas_busqueda",
+            "grupo": "control",
+            "ficha": "retiradas_busqueda",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "retiradas_fecha",
+          "nombre": "Retiradas: comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "retiradas_fecha",
+            "grupo": "control",
+            "ficha": "retiradas_fecha",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "precio_desde",
+          "nombre": "Precio desde",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_desde",
+            "grupo": "compra",
+            "ficha": "precio_min",
+            "comparar": "menor",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "minimo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "precio_hasta",
+          "nombre": "Precio hasta",
+          "tipo": "agregado",
+          "config": {
+            "clave": "precio_hasta",
+            "grupo": "compra",
+            "ficha": "precio_max",
+            "visibilidad": "nunca",
+            "formato": "moneda",
+            "moneda": "EUR",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "maximo",
+              "columna_destino_clave": "precio_eur",
+              "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "num_ofertas",
+          "nombre": "Tiendas",
+          "tipo": "agregado",
+          "config": {
+            "clave": "num_ofertas",
+            "grupo": "compra",
+            "ficha": "num_ofertas",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar",
+              "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
+              "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "revisado",
+          "nombre": "Datos revisados el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "revisado",
+            "grupo": "control",
+            "ficha": "revisado",
+            "visibilidad": "nunca"
+          }
+        },
+        {
+          "clave": "pendiente",
+          "nombre": "Pendiente de comprobar",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "pendiente",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "interna": true
+          }
+        },
+        {
+          "clave": "comunidad_calidad",
+          "nombre": "Calidad",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_calidad",
+            "criterio": "calidad"
+          }
+        },
+        {
+          "clave": "comunidad_precio",
+          "nombre": "Precio (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_precio",
+            "criterio": "precio"
+          }
+        },
+        {
+          "clave": "comunidad_garantia",
+          "nombre": "Garantía (opinión)",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_garantia",
+            "criterio": "garantia"
+          }
+        },
+        {
+          "clave": "comunidad_ecologia",
+          "nombre": "Ecología",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_ecologia",
+            "criterio": "ecologia"
+          }
+        },
+        {
+          "clave": "comunidad_salud",
+          "nombre": "Salud",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_salud",
+            "criterio": "salud"
+          }
+        },
+        {
+          "clave": "comunidad_estetica",
+          "nombre": "Estética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_estetica",
+            "criterio": "estetica"
+          }
+        },
+        {
+          "clave": "comunidad_etica",
+          "nombre": "Ética",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_etica",
+            "criterio": "etica"
+          }
+        },
+        {
+          "clave": "comunidad_media",
+          "nombre": "Nota media",
+          "tipo": "comunidad",
+          "config": {
+            "clave": "comunidad_media",
+            "criterio": "media"
+          }
+        }
+      ],
+      "ruta": "baterias-domesticas/{Marca}-{Modelo}"
+    },
+    {
+      "clave": "ofertas-powerbanks",
+      "titulo": "Ofertas · Powerbanks y baterías portátiles",
+      "icono": "🛒",
+      "descripcion": "Cada powerbanks y baterías portátiles en cada distribuidor: precio, envío, plazo, stock y la comisión que cobra Wikiproducts (o «sin acuerdo»). La comisión nunca ordena nada.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "producto",
+          "nombre": "Producto",
+          "tipo": "relacion",
+          "config": {
+            "clave": "producto",
+            "rol": "producto",
+            "reciproca": true,
+            "tabla_destino_clave": "powerbanks"
+          }
+        },
+        {
+          "clave": "distribuidor",
+          "nombre": "Distribuidor",
+          "tipo": "relacion",
+          "config": {
+            "clave": "distribuidor",
+            "ficha": "distribuidor",
+            "tabla_destino_clave": "distribuidores",
+            "rol": "distribuidor"
+          }
+        },
+        {
+          "clave": "precio_eur",
+          "nombre": "Precio",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_eur",
+            "ficha": "precio",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "precio"
+          }
+        },
+        {
+          "clave": "iva_incluido",
+          "nombre": "IVA incluido",
+          "tipo": "casilla",
+          "config": {
+            "clave": "iva_incluido"
+          }
+        },
+        {
+          "clave": "envio_eur",
+          "nombre": "Gastos de envío",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_eur",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "envio"
+          }
+        },
+        {
+          "clave": "plazo",
+          "nombre": "Plazo de entrega",
+          "tipo": "texto",
+          "config": {
+            "clave": "plazo",
+            "rol": "plazo"
+          }
+        },
+        {
+          "clave": "stock",
+          "nombre": "Stock (unidades)",
+          "tipo": "numero",
+          "config": {
+            "clave": "stock",
+            "rol": "stock"
+          }
+        },
+        {
+          "clave": "unidad",
+          "nombre": "Unidad de venta",
+          "tipo": "texto",
+          "config": {
+            "clave": "unidad"
+          }
+        },
+        {
+          "clave": "incluye_instalacion",
+          "nombre": "Incluye instalación",
+          "tipo": "casilla",
+          "config": {
+            "clave": "incluye_instalacion",
+            "rol": "instalacion"
+          }
+        },
+        {
+          "clave": "url",
+          "nombre": "Enlace",
+          "tipo": "url",
+          "config": {
+            "clave": "url",
+            "ficha": "enlace",
+            "rol": "enlace"
+          }
+        },
+        {
+          "clave": "comision",
+          "nombre": "Comisión de Wikiproducts",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "comision",
+            "ficha": "comision",
+            "rol": "comision"
+          }
+        },
+        {
+          "clave": "acuerdo",
+          "nombre": "Acuerdo con el distribuidor",
+          "tipo": "seleccion",
+          "opciones": [
+            "Sin acuerdo",
+            "Con acuerdo"
+          ],
+          "config": {
+            "clave": "acuerdo"
+          }
+        },
+        {
+          "clave": "fecha_comprobacion",
+          "nombre": "Comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha_comprobacion",
+            "ficha": "fecha",
+            "rol": "comprobado"
+          }
+        },
+        {
+          "clave": "nota",
+          "nombre": "Nota",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "nota"
+          }
+        },
+        {
+          "clave": "comprar",
+          "nombre": "Comprar",
+          "tipo": "compra",
+          "config": {
+            "clave": "comprar",
+            "modo": "carrito"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "ofertas-paneles-solares-portatiles",
+      "titulo": "Ofertas · Paneles solares portátiles",
+      "icono": "🛒",
+      "descripcion": "Cada paneles solares portátiles en cada distribuidor: precio, envío, plazo, stock y la comisión que cobra Wikiproducts (o «sin acuerdo»). La comisión nunca ordena nada.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "producto",
+          "nombre": "Producto",
+          "tipo": "relacion",
+          "config": {
+            "clave": "producto",
+            "rol": "producto",
+            "reciproca": true,
+            "tabla_destino_clave": "paneles-solares-portatiles"
+          }
+        },
+        {
+          "clave": "distribuidor",
+          "nombre": "Distribuidor",
+          "tipo": "relacion",
+          "config": {
+            "clave": "distribuidor",
+            "ficha": "distribuidor",
+            "tabla_destino_clave": "distribuidores",
+            "rol": "distribuidor"
+          }
+        },
+        {
+          "clave": "precio_eur",
+          "nombre": "Precio",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_eur",
+            "ficha": "precio",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "precio"
+          }
+        },
+        {
+          "clave": "iva_incluido",
+          "nombre": "IVA incluido",
+          "tipo": "casilla",
+          "config": {
+            "clave": "iva_incluido"
+          }
+        },
+        {
+          "clave": "envio_eur",
+          "nombre": "Gastos de envío",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_eur",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "envio"
+          }
+        },
+        {
+          "clave": "plazo",
+          "nombre": "Plazo de entrega",
+          "tipo": "texto",
+          "config": {
+            "clave": "plazo",
+            "rol": "plazo"
+          }
+        },
+        {
+          "clave": "stock",
+          "nombre": "Stock (unidades)",
+          "tipo": "numero",
+          "config": {
+            "clave": "stock",
+            "rol": "stock"
+          }
+        },
+        {
+          "clave": "unidad",
+          "nombre": "Unidad de venta",
+          "tipo": "texto",
+          "config": {
+            "clave": "unidad"
+          }
+        },
+        {
+          "clave": "incluye_instalacion",
+          "nombre": "Incluye instalación",
+          "tipo": "casilla",
+          "config": {
+            "clave": "incluye_instalacion",
+            "rol": "instalacion"
+          }
+        },
+        {
+          "clave": "url",
+          "nombre": "Enlace",
+          "tipo": "url",
+          "config": {
+            "clave": "url",
+            "ficha": "enlace",
+            "rol": "enlace"
+          }
+        },
+        {
+          "clave": "comision",
+          "nombre": "Comisión de Wikiproducts",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "comision",
+            "ficha": "comision",
+            "rol": "comision"
+          }
+        },
+        {
+          "clave": "acuerdo",
+          "nombre": "Acuerdo con el distribuidor",
+          "tipo": "seleccion",
+          "opciones": [
+            "Sin acuerdo",
+            "Con acuerdo"
+          ],
+          "config": {
+            "clave": "acuerdo"
+          }
+        },
+        {
+          "clave": "fecha_comprobacion",
+          "nombre": "Comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha_comprobacion",
+            "ficha": "fecha",
+            "rol": "comprobado"
+          }
+        },
+        {
+          "clave": "nota",
+          "nombre": "Nota",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "nota"
+          }
+        },
+        {
+          "clave": "comprar",
+          "nombre": "Comprar",
+          "tipo": "compra",
+          "config": {
+            "clave": "comprar",
+            "modo": "carrito"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "ofertas-luces-solares-portatiles",
+      "titulo": "Ofertas · Luces solares portátiles",
+      "icono": "🛒",
+      "descripcion": "Cada luces solares portátiles en cada distribuidor: precio, envío, plazo, stock y la comisión que cobra Wikiproducts (o «sin acuerdo»). La comisión nunca ordena nada.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "producto",
+          "nombre": "Producto",
+          "tipo": "relacion",
+          "config": {
+            "clave": "producto",
+            "rol": "producto",
+            "reciproca": true,
+            "tabla_destino_clave": "luces-solares-portatiles"
+          }
+        },
+        {
+          "clave": "distribuidor",
+          "nombre": "Distribuidor",
+          "tipo": "relacion",
+          "config": {
+            "clave": "distribuidor",
+            "ficha": "distribuidor",
+            "tabla_destino_clave": "distribuidores",
+            "rol": "distribuidor"
+          }
+        },
+        {
+          "clave": "precio_eur",
+          "nombre": "Precio",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_eur",
+            "ficha": "precio",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "precio"
+          }
+        },
+        {
+          "clave": "iva_incluido",
+          "nombre": "IVA incluido",
+          "tipo": "casilla",
+          "config": {
+            "clave": "iva_incluido"
+          }
+        },
+        {
+          "clave": "envio_eur",
+          "nombre": "Gastos de envío",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_eur",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "envio"
+          }
+        },
+        {
+          "clave": "plazo",
+          "nombre": "Plazo de entrega",
+          "tipo": "texto",
+          "config": {
+            "clave": "plazo",
+            "rol": "plazo"
+          }
+        },
+        {
+          "clave": "stock",
+          "nombre": "Stock (unidades)",
+          "tipo": "numero",
+          "config": {
+            "clave": "stock",
+            "rol": "stock"
+          }
+        },
+        {
+          "clave": "unidad",
+          "nombre": "Unidad de venta",
+          "tipo": "texto",
+          "config": {
+            "clave": "unidad"
+          }
+        },
+        {
+          "clave": "incluye_instalacion",
+          "nombre": "Incluye instalación",
+          "tipo": "casilla",
+          "config": {
+            "clave": "incluye_instalacion",
+            "rol": "instalacion"
+          }
+        },
+        {
+          "clave": "url",
+          "nombre": "Enlace",
+          "tipo": "url",
+          "config": {
+            "clave": "url",
+            "ficha": "enlace",
+            "rol": "enlace"
+          }
+        },
+        {
+          "clave": "comision",
+          "nombre": "Comisión de Wikiproducts",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "comision",
+            "ficha": "comision",
+            "rol": "comision"
+          }
+        },
+        {
+          "clave": "acuerdo",
+          "nombre": "Acuerdo con el distribuidor",
+          "tipo": "seleccion",
+          "opciones": [
+            "Sin acuerdo",
+            "Con acuerdo"
+          ],
+          "config": {
+            "clave": "acuerdo"
+          }
+        },
+        {
+          "clave": "fecha_comprobacion",
+          "nombre": "Comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha_comprobacion",
+            "ficha": "fecha",
+            "rol": "comprobado"
+          }
+        },
+        {
+          "clave": "nota",
+          "nombre": "Nota",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "nota"
+          }
+        },
+        {
+          "clave": "comprar",
+          "nombre": "Comprar",
+          "tipo": "compra",
+          "config": {
+            "clave": "comprar",
+            "modo": "carrito"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "ofertas-paneles-solares-domesticos",
+      "titulo": "Ofertas · Paneles solares domésticos",
+      "icono": "🛒",
+      "descripcion": "Cada paneles solares domésticos en cada distribuidor: precio, envío, plazo, stock y la comisión que cobra Wikiproducts (o «sin acuerdo»). La comisión nunca ordena nada.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "producto",
+          "nombre": "Producto",
+          "tipo": "relacion",
+          "config": {
+            "clave": "producto",
+            "rol": "producto",
+            "reciproca": true,
+            "tabla_destino_clave": "paneles-solares-domesticos"
+          }
+        },
+        {
+          "clave": "distribuidor",
+          "nombre": "Distribuidor",
+          "tipo": "relacion",
+          "config": {
+            "clave": "distribuidor",
+            "ficha": "distribuidor",
+            "tabla_destino_clave": "distribuidores",
+            "rol": "distribuidor"
+          }
+        },
+        {
+          "clave": "precio_eur",
+          "nombre": "Precio",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_eur",
+            "ficha": "precio",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "precio"
+          }
+        },
+        {
+          "clave": "iva_incluido",
+          "nombre": "IVA incluido",
+          "tipo": "casilla",
+          "config": {
+            "clave": "iva_incluido"
+          }
+        },
+        {
+          "clave": "envio_eur",
+          "nombre": "Gastos de envío",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_eur",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "envio"
+          }
+        },
+        {
+          "clave": "plazo",
+          "nombre": "Plazo de entrega",
+          "tipo": "texto",
+          "config": {
+            "clave": "plazo",
+            "rol": "plazo"
+          }
+        },
+        {
+          "clave": "stock",
+          "nombre": "Stock (unidades)",
+          "tipo": "numero",
+          "config": {
+            "clave": "stock",
+            "rol": "stock"
+          }
+        },
+        {
+          "clave": "unidad",
+          "nombre": "Unidad de venta",
+          "tipo": "texto",
+          "config": {
+            "clave": "unidad"
+          }
+        },
+        {
+          "clave": "incluye_instalacion",
+          "nombre": "Incluye instalación",
+          "tipo": "casilla",
+          "config": {
+            "clave": "incluye_instalacion",
+            "rol": "instalacion"
+          }
+        },
+        {
+          "clave": "url",
+          "nombre": "Enlace",
+          "tipo": "url",
+          "config": {
+            "clave": "url",
+            "ficha": "enlace",
+            "rol": "enlace"
+          }
+        },
+        {
+          "clave": "comision",
+          "nombre": "Comisión de Wikiproducts",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "comision",
+            "ficha": "comision",
+            "rol": "comision"
+          }
+        },
+        {
+          "clave": "acuerdo",
+          "nombre": "Acuerdo con el distribuidor",
+          "tipo": "seleccion",
+          "opciones": [
+            "Sin acuerdo",
+            "Con acuerdo"
+          ],
+          "config": {
+            "clave": "acuerdo"
+          }
+        },
+        {
+          "clave": "fecha_comprobacion",
+          "nombre": "Comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha_comprobacion",
+            "ficha": "fecha",
+            "rol": "comprobado"
+          }
+        },
+        {
+          "clave": "nota",
+          "nombre": "Nota",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "nota"
+          }
+        },
+        {
+          "clave": "comprar",
+          "nombre": "Comprar",
+          "tipo": "compra",
+          "config": {
+            "clave": "comprar",
+            "modo": "carrito"
+          }
+        }
+      ]
+    },
+    {
+      "clave": "ofertas-baterias-domesticas",
+      "titulo": "Ofertas · Baterías domésticas",
+      "icono": "🛒",
+      "descripcion": "Cada baterías domésticas en cada distribuidor: precio, envío, plazo, stock y la comisión que cobra Wikiproducts (o «sin acuerdo»). La comisión nunca ordena nada.",
+      "columnas": [
+        {
+          "clave": "nombre",
+          "nombre": "Nombre",
+          "tipo": "texto",
+          "config": {
+            "clave": "nombre"
+          }
+        },
+        {
+          "clave": "producto",
+          "nombre": "Producto",
+          "tipo": "relacion",
+          "config": {
+            "clave": "producto",
+            "rol": "producto",
+            "reciproca": true,
+            "tabla_destino_clave": "baterias-domesticas"
+          }
+        },
+        {
+          "clave": "distribuidor",
+          "nombre": "Distribuidor",
+          "tipo": "relacion",
+          "config": {
+            "clave": "distribuidor",
+            "ficha": "distribuidor",
+            "tabla_destino_clave": "distribuidores",
+            "rol": "distribuidor"
+          }
+        },
+        {
+          "clave": "precio_eur",
+          "nombre": "Precio",
+          "tipo": "moneda",
+          "config": {
+            "clave": "precio_eur",
+            "ficha": "precio",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "precio"
+          }
+        },
+        {
+          "clave": "iva_incluido",
+          "nombre": "IVA incluido",
+          "tipo": "casilla",
+          "config": {
+            "clave": "iva_incluido"
+          }
+        },
+        {
+          "clave": "envio_eur",
+          "nombre": "Gastos de envío",
+          "tipo": "moneda",
+          "config": {
+            "clave": "envio_eur",
+            "comparar": "menor",
+            "moneda": "EUR",
+            "rol": "envio"
+          }
+        },
+        {
+          "clave": "plazo",
+          "nombre": "Plazo de entrega",
+          "tipo": "texto",
+          "config": {
+            "clave": "plazo",
+            "rol": "plazo"
+          }
+        },
+        {
+          "clave": "stock",
+          "nombre": "Stock (unidades)",
+          "tipo": "numero",
+          "config": {
+            "clave": "stock",
+            "rol": "stock"
+          }
+        },
+        {
+          "clave": "unidad",
+          "nombre": "Unidad de venta",
+          "tipo": "texto",
+          "config": {
+            "clave": "unidad"
+          }
+        },
+        {
+          "clave": "incluye_instalacion",
+          "nombre": "Incluye instalación",
+          "tipo": "casilla",
+          "config": {
+            "clave": "incluye_instalacion",
+            "rol": "instalacion"
+          }
+        },
+        {
+          "clave": "url",
+          "nombre": "Enlace",
+          "tipo": "url",
+          "config": {
+            "clave": "url",
+            "ficha": "enlace",
+            "rol": "enlace"
+          }
+        },
+        {
+          "clave": "comision",
+          "nombre": "Comisión de Wikiproducts",
+          "tipo": "porcentaje",
+          "config": {
+            "clave": "comision",
+            "ficha": "comision",
+            "rol": "comision"
+          }
+        },
+        {
+          "clave": "acuerdo",
+          "nombre": "Acuerdo con el distribuidor",
+          "tipo": "seleccion",
+          "opciones": [
+            "Sin acuerdo",
+            "Con acuerdo"
+          ],
+          "config": {
+            "clave": "acuerdo"
+          }
+        },
+        {
+          "clave": "fecha_comprobacion",
+          "nombre": "Comprobado el",
+          "tipo": "fecha",
+          "config": {
+            "clave": "fecha_comprobacion",
+            "ficha": "fecha",
+            "rol": "comprobado"
+          }
+        },
+        {
+          "clave": "nota",
+          "nombre": "Nota",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "nota"
+          }
+        },
+        {
+          "clave": "comprar",
+          "nombre": "Comprar",
+          "tipo": "compra",
+          "config": {
+            "clave": "comprar",
+            "modo": "carrito"
+          }
+        }
+      ]
+    }
+  ]
+}

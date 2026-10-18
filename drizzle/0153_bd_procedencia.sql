@@ -1,0 +1,21 @@
+-- ============================================================================
+-- TABLES · WHERE EACH VALUE CAME FROM (2026-10-18, Wikiproducts W1)
+-- ============================================================================
+-- House rule (src/db/CLAUDE.md, «Provenance is mandatory»): nothing simulated
+-- is shown as measured. A product sheet shows each technical value with its
+-- source, its date and its nature («según la marca», «medido por…»,
+-- «calculado», «el fabricante no publica»). That is a fact about ONE CELL, so
+-- it lives next to the row's values, keyed the same way:
+--
+--   {"<column_id>": {"fuente": "https://…", "fecha": "2026-10-18",
+--                    "naturaleza": "declarado" | "medido" | "calculado" | "no_publicado",
+--                    "nota": "optional"}}
+--
+-- A key may exist for an EMPTY cell: «no_publicado» means someone looked and
+-- the manufacturer does not publish it, which is different from «nobody
+-- looked». An absent key means nobody said where the value came from.
+--
+-- Not a column of `valores` because those keys are column ids whose values are
+-- typed cells; mixing metadata into them would make every filter and formula
+-- learn to skip it.
+ALTER TABLE bd_filas ADD COLUMN IF NOT EXISTS procedencia jsonb NOT NULL DEFAULT '{}'::jsonb;

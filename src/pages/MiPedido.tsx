@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Package, PackageOpen, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download, Receipt, MessageCircle } from 'lucide-react';
 import Recibo from '../components/knowledge/Recibo';
+import { textoComision } from '../utils/ofertas';
 
 // ============================================================================
 // ¿DÓNDE ESTÁ LO MÍO? — fase 6 del plan de tiendas (2026-08-22)
@@ -233,8 +234,14 @@ export default function MiPedido() {
               <ul className="mt-4 pt-4 border-t border-slate-100 space-y-2">
                 {pedido.lineas.map((l: any) => (
                   <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-slate-700 min-w-0 truncate">
-                      {l.producto}{l.unidades > 1 && <span className="text-slate-400"> × {l.unidades}</span>}
+                    <span className="text-slate-700 min-w-0">
+                      <span className="block truncate">{l.producto}{l.unidades > 1 && <span className="text-slate-400"> × {l.unidades}</span>}</span>
+                      {/* PEDIDO GESTIONADO (Wikiproducts): de qué tienda sale y lo que esa tienda nos paga. */}
+                      {l.distribuidor && (
+                        <span className="block text-[11px] leading-snug text-slate-500">
+                          Lo sirve {l.distribuidor}. {textoComision(l.comision_pct, l.comision_centimos)}
+                        </span>
+                      )}
                     </span>
                     {l.descarga ? (
                       <a href={l.descarga} className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold">
@@ -248,6 +255,23 @@ export default function MiPedido() {
                   </li>
                 ))}
               </ul>
+            )}
+            {/* CADA TIENDA, CON SU ESTADO (Wikiproducts): un pedido con dos
+                tiendas llega en dos cajas, y cada una va a su ritmo. */}
+            {Array.isArray(pedido.distribuidores) && pedido.distribuidores.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <p className="text-xs font-black uppercase tracking-wide text-slate-400">
+                  {pedido.distribuidores.length === 1 ? 'Lo pedimos a esta tienda' : `Lo pedimos a ${pedido.distribuidores.length} tiendas`}
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {pedido.distribuidores.map((d: any) => (
+                    <li key={d.distribuidor_id} className="rounded-xl bg-slate-50 p-2.5 text-sm">
+                      <p className="font-bold text-slate-800">{d.distribuidor}</p>
+                      <p className="text-xs text-slate-600">{d.estado_texto}{d.seguimiento ? ` · seguimiento ${d.seguimiento}` : ''}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </article>
         )}

@@ -8875,6 +8875,7 @@ en mis páginas como proyecto pendiente».
 - El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
 - Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
+
 ### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
 - El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
 
@@ -8890,3 +8891,67 @@ en mis páginas como proyecto pendiente».
 - En una galería agrupada no se podían arrastrar las tarjetas: la vista agrupada desactivaba la edición entera para que no se reordenara. Ahora arrastrar va aparte de reordenar.
 - Una tarjeta de una galería agrupada se puede soltar en otra base de datos y pasa a ella, como ya pasaba sin agrupar.
 - Soltar una tarjeta en otro grupo le da el valor de ese grupo (su categoría, su estado…). Con varios valores, se cambia el de origen por el de destino.
+
+
+### 2026-10-18 — Ficha de producto: plantilla, propiedades, comparador, «la mejor en cada criterio», afirmaciones y retiradas (Wikiproducts W1)
+- Una base de datos puede tener una **plantilla de ficha**: una página normal (se edita con el editor de siempre) cuyos bloques se ponen delante de los de cada fila. Cien productos, un solo diseño. En la propia plantilla se ve con los datos de la fila más completa. `PUT /api/bd/tablas/:id/plantilla`, `PATCH /api/v1/databases/:id {create_template}`.
+- Cinco bloques nuevos que leen «la fila de esta página»: **Propiedades** (tabla, lista, cabecera, texto o pie, por grupo), **Comparador** (de 2 a 4 filas lado a lado, la mejor celda resaltada, se puede compartir con `?comparar=`), **La mejor en cada criterio**, **Afirmaciones verificadas** (cierta / matizable / falsa / sin pruebas, las falsas primero) y **Retiradas y alertas** (distingue «buscado y no hay ninguna, a fecha X» de «todavía no comprobado»).
+- **Cada dato dice de dónde viene**: «Según la marca», «Medido por un tercero», «Calculado» o «El fabricante no lo publica», con su enlace y fecha (columna `bd_filas.procedencia`, migración 0153; `PUT /api/bd/filas/:id/procedencia`; `provenance` en la API v1).
+- **La comisión nunca ordena nada**: ni el comparador ni «la mejor en cada criterio» pueden usarla, aunque alguien la configure para eso. Lo comprueba `scripts/wikiproducts/probar-ficha.ts`, y la ficha lo dice al lector.
+- Para buscadores: la ficha sale entera en el HTML del servidor, con título «Marca Modelo: datos, precio y opiniones», datos estructurados `Product` (con su dirección canónica, precio y, sólo si hay votos reales, nota), migas de pan, la descripción sacada del resumen del producto y `noindex` mientras le falte foto, resumen, 8 datos con fuente, una oferta o la fecha de revisión.
+- La API v1 crea bases de datos y columnas (`POST /api/v1/databases`, `POST /api/v1/databases/:id/columns`) y fija la forma de las direcciones de sus filas (`route`). `scripts/wikiproducts/crear-esquema.mjs` crea las 14 bases de datos de Wikiproducts (`esquema-bd.json`) sin repetir nada.
+- En el móvil, la burbuja de comentar de cada bloque ya no ensancha la página 16 px (salía por fuera de la columna y se podía arrastrar la página de lado). Ahora queda dentro de la columna en pantallas estrechas.
+### 2026-10-18 — Ocultar una entrada entera al público (prog8)
+- En el menú de una tarjeta (clic derecho o ⋯), «Ocultar al publicar»: la entrada deja de verse en la web publicada. Quien edita la sigue viendo, atenuada y con la marca «Oculta», y la vuelve a enseñar con «Mostrar al publicar».
+- El servidor no manda las entradas ocultas a quien no puede editar la tabla (columna `bd_filas.oculta`, migración 0154).
+
+
+### 2026-10-18 — Direcciones legibles para las fichas (Wikiproducts W2, SEO R2)
+- Una base de datos puede llevar una plantilla de dirección (`config.ruta`, p. ej. `powerbanks/{Marca}-{Modelo}`) y cada fila se abre por su nombre: `wikiproducts.humanity.wiki/powerbanks/anker-737-powercore-24k` en vez de `/p/BDF…`. Funciona igual en dominio propio, subdominio y `humanity.wiki/@quien/…`.
+- Dos o tres tramos; el primero no puede ser uno de la aplicación (`p`, `bd`, `buscar`…). `{Columna}` toma el valor de esa columna; una relación (la marca) da el nombre de la fila apuntada. Si falta un dato, la ficha sigue en `/p/:id`.
+- Si la ficha cambia de nombre, la dirección vieja contesta 301 a la nueva para siempre (tabla `direcciones_anteriores`, migración 0158). `/p/:id` de una ficha con dirección legible también lleva a ella con un 301.
+- La dirección se calcula al leer (sitemap, visita a `/p/:id`), al poner la plantilla con `PATCH /api/v1/databases/:id {route}`, y con `POST /api/v1/databases/:id/routes` (con clave de API) o `POST /api/bd/tablas/:id/rutas` (con sesión) para quien carga datos en bloque. El sitemap, la canónica y el HTML del servidor usan ya la dirección legible.
+
+### 2026-10-18 — Las entradas ocultas tampoco salen en el HTML, el sitemap ni el buscador (W2)
+- Una entrada oculta (0154, #599) ya no se veía en la tabla de la pantalla, pero el HTML del servidor (#589), el sitemap, el buscador del sitio y la página pública de la entrada (`/p/:id`) leían las filas sin mirar `oculta`: quien abriera el código de la página o el sitemap la veía. Ahora la página de una entrada oculta deja de heredar «publicada» de la página que enseña su base de datos (`subirDesdePagina`) y las cuatro lecturas la saltan. Quien edita la tabla la sigue viendo en el editor.
+
+### 2026-10-18 — Esquema de Wikiproducts: varias afirmaciones y retiradas por producto (Wikiproducts W1)
+- En las cinco bases de datos de productos, «Afirmaciones» y «Retiradas» admiten varios enlaces (antes sólo uno: la carga de datos fallaba con productos que tienen de 2 a 5). Las baterías domésticas tienen columna «Ruido» (dB, menos es mejor). `scripts/wikiproducts/esquema-bd.json`.
+### 2026-10-18 — Portadas con vídeo (prog8)
+- La portada de una página puede ser un vídeo: pegando un enlace de YouTube o Vimeo (en el campo del diálogo o con ⌘V) o subiendo un archivo de vídeo, arrastrado o elegido. Se reproduce en silencio y en bucle, en el editor y en la página publicada.
+- Las imágenes siguen pasando por el recortador; los vídeos no. Una portada de vídeo no se usa como imagen de tarjeta en las galerías: ahí sale la primera imagen de la página.
+
+### 2026-10-18 — "Where to buy it", visible commission and managed orders (Wikiproducts W5)
+- Offers block (`src/components/bloquesDatos/ofertas/`): on a product sheet, one card per shop with price, shipping, delivered total, lead time, stock, "installation included", the date the price was checked, and the commission that shop pays Wikiproducts. "Añadir a la cesta" and "Ver en la tienda" (`rel="sponsored"` with commission, `nofollow` without).
+- Order comes from `ordenarOfertas` (`src/utils/ofertas.ts`): price plus shipping, then customer-service rating, sold-out last. **It never reads the commission**; `scripts/probar-ofertas.ts` checks it across every permutation of commissions.
+- Offers database: new roles in the property picker (group "Ofertas"): Producto, Distribuidor, Comisión, Enlace a la tienda, Plazo de entrega, Comprobado el, Incluye instalación, plus EAN / GTIN for the product sheet.
+- Cart and "Mi pedido": every line names the shop that serves it and the commission ("La paga la tienda; tú pagas el mismo precio que en ella"). Two shops are two shipments: shipping is summed per shop.
+- Managed order: once paid (card or points) the order is split into one entry per shop (`pedidos_distribuidor`, migration 0157). Comercio → "Pedidos a tiendas" is the queue: what to order, the offer link, the customer's address, the shop's order number and tracking. The customer's order moves only when all its shops move, and the customer is notified at each step.
+- Google Merchant Center feed: `GET /api/ofertas/merchant/<handle>.xml`, one item per product (the offer ranked first), with the EAN when the sheet has one.
+- Security, `server.ts` webhook (fixed in place, nothing added): with `STRIPE_WEBHOOK_SECRET` set, a request **without** a `stripe-signature` header used to skip the check, so anyone could post a "paid" checkout and create orders or memberships. Now it is refused (400). With no secret configured, production no longer trusts the body: it fetches the event from Stripe by its id (`stripe.events.retrieve`), so only events Stripe really sent are processed and existing shops keep working until the secret is set. Eugenio decided the same day to go straight to live Stripe, which is what made this urgent.
+- The Offers block now writes itself into the server HTML (W2's `registrarHtml`, `src/server/ofertas.ts`): shops, prices, shipping, commission and the `rel` of each link are readable without JavaScript. Built as an anonymous visitor, so only offers from published tables appear.
+- Each offer card now shows the shop's customer-service note from the community (W4's `notaAtencionDistribuidores`), and the ordering uses it to break price ties. Under the voter threshold it still says «aún sin votos suficientes».
+### 2026-10-18 — Bloque «Menú de temas» (Humanidad Wiki, fase 1) (prog8)
+- Nuevo bloque para cualquier página: el menú de temas de Explorar, con icono y color por tema, en lista lateral o en rejilla. Cada tema lleva a una página y puede tener subtemas que se despliegan.
+- Nace con los temas de la humanidad (los mismos quince del menú, con su icono y su color) y se edita en el propio bloque: nombre, icono, color, enlace, subtemas y orden. Es el primer paso para que Humanidad Wiki sea una página hecha con Wiki Creator.
+
+### 2026-10-18 — Chat de ayuda y consultas con expertos en los sitios (Wikiproducts W6)
+- Bloque **«Chat de ayuda»** (`bloquesDatos/chat/`): quien visita una web pregunta, con o sin cuenta (sin cuenta le reconoce una cookie del anfitrión, y puede dejar su correo para que le avisen). El equipo del sitio (quien puede editar la raíz) ve en ese mismo bloque la bandeja con pendientes y resueltas, contesta y marca resuelta. Opción de burbuja flotante. Avisos por la campana (`soporte_mensaje`) y, al visitante sin cuenta, un correo con la primera respuesta sin leer si hay `RESEND_API_KEY`. El visitante no recibe en vivo: el bloque pregunta cada 8 s con la pestaña visible.
+- Bloque **«Reservar experto»** (`bloquesDatos/experto/`): fichas de expertos con precio, duración y la comisión del sitio en euros; agenda semanal en la hora local del experto (cambio de hora incluido), huecos de las próximas tres semanas en la hora de quien mira; reservar y pagar en Stripe (sólo funciona con `STRIPE_SECRET_KEY`; sin ella lo dice). Al pagar se abre una conversación con el experto con la fecha y el enlace de la videollamada. Panel «Gestionar expertos» para el equipo (alta, agenda, consultas, cancelar con devolución, «apuntar pago al experto» con referencia) y «Mi agenda y mis consultas» para el experto con cuenta.
+- Servidor: `src/server/soporte.ts`, `src/server/expertos.ts`, `src/server/expertosAgenda.ts`; migración `0156_expertos_soporte.sql` (expertos, soporte_conversaciones, soporte_mensajes, consultas_experto). Un índice único impide reservar dos veces el mismo hueco. El pago se confirma por el aviso firmado de Stripe (`metadata.kind = 'consulta_experto'`, enganchado en `stripe.ts`) o por la vuelta del navegador preguntando a Stripe; las dos son la misma función idempotente, y un pago que llega con el hueco ya ocupado se devuelve solo.
+- Al vaciar una cuenta (`vaciarCuentas.ts`) se borran el nombre y el correo que dejó en chats y consultas.
+- Pruebas: `npx tsx scripts/probar-expertos-agenda.ts` (11 comprobaciones de la agenda y el reparto). El recorrido completo (chat, bandeja, permisos, reserva gratuita, doble reserva, cancelación, pago tardío) se probó contra la copia local; **el pago real con Stripe no se ha podido probar** (sin clave de pruebas en este entorno).
+
+### 2026-10-18 — W6: chat de ayuda fuera del menú; pagos de expertos con el Stripe real
+- Eugenio: «de momento no añadas lo del chat de ayuda». El bloque «Chat de ayuda» sale del menú de bloques (`enMenu: false`); el código y el servidor se quedan porque la reserva de expertos usa la misma conversación tras pagar. La campana dice «te ha escrito en «sitio»» en vez de «en el chat de ayuda».
+- Eugenio: usar ya el Stripe definitivo, no el de pruebas. No hay cambio de código: cobra con la `STRIPE_SECRET_KEY` que tenga el servidor. Con clave real, cada reserva de pago cobra dinero de verdad en cuanto esto llegue a `main`.
+- El bloque «Reservar experto» se escribe también en el HTML del servidor (`registrarHtml('experto', …)` en `expertos.ts`, SEO R1): título, intro y cada experto con especialidad, bio, duración y precio, lo mismo que enseña la ficha. La agenda no (cambia cada minuto). El chat de ayuda no se registra: está fuera del menú.
+
+
+### 2026-10-18 — Lo que un sitio le dice a Google: datos estructurados, filtros, sitemap y verificación (Wikiproducts W2)
+- La portada de un sitio publicado lleva `WebSite` y `Organization` en JSON-LD, y si su menú tiene buscador, la `SearchAction` que lo abre. Cada página que enseña una base de datos lleva un `ItemList` con sus elementos, en orden y con su dirección (`src/server/seoSitio.ts`). La ficha de producto no: es un `Product` (W1).
+- Una dirección con `?…` (filtros, ordenaciones) sale `noindex,follow`; las marcas de campaña (`utm_…`, `gclid`…) no cuentan.
+- El sitemap pone en cada dirección la fecha de su último cambio real (si se cambió un dato de la fila, esa), no la de hoy; lleva la imagen de portada de cada página; deja fuera lo que es sólo de miembros; y pasadas 50.000 direcciones se parte en `/sitemap-1.xml`, `/sitemap-2.xml`… con un índice en `/sitemap.xml`.
+- En «Menú y pie» → «Datos legales» → «Buscadores» se pegan los códigos de Google Search Console y Bing Webmaster Tools, y salen en todas las páginas del sitio.
+- Las ampliaciones pueden usar `{{inicio}}` en sus datos estructurados: la dirección canónica de la portada del sitio.
+- IndexNow (SEO R12): un sitio con su propia dirección puede encender «Avisar a Bing de cada cambio al momento» («Menú y pie» → «Datos legales»). Cada 15 minutos se avisa a IndexNow (Bing, Yandex, Seznam; ChatGPT y Copilot leen de Bing) de las direcciones del sitemap que cambiaron. La clave se saca del dominio y se publica en `/<clave>.txt`; no es un secreto. Apagado en todos los sitios que ya existían; `INDEXNOW=off` lo apaga para todos (`src/server/indexNow.ts`).
