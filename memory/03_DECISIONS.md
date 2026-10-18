@@ -925,3 +925,7 @@ Members can only be activated with the owner's session (`PUT /api/sitio-miembros
 - `plantillaInicial()` repeats the JSON's order: two lists to keep in step, about 5 minutes to unify when the API can read a file.
 - The script rewrites every data block of a template when the order differs, which is about 28 API writes per table, once.
 
+
+## 2026-10-18 — A row whose last route segment has an empty column gets its title there (W2)
+
+Before: a missing column anywhere in the route template left the sheet at `/p/:id` "until its data is complete". In Wikiproducts some products genuinely have no model code (Riapow, two lights), so they would never get a readable address, and the search linked them to `/p/…`. Now an empty column in the LAST segment falls back to the row's title. In any other segment the old rule stands, because a half address (`/-a1689`) is worse than `/p/:id`. If the data arrives later the address changes, and the old one is kept in `direcciones_anteriores`, which redirects. Alternative rejected: an explicit fallback syntax in the template (`{Modelo|Nombre}`). It is more general, but it costs a parser change and a migration of every template for a case that today has one answer.
