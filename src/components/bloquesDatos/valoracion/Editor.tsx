@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react';
 import type { PropsEditor } from '../tipos';
-import { usarValoraciones, Valoraciones } from './Lectura';
+import { usarValoraciones, Valoraciones, OpinionesFuera } from './Lectura';
 
 // In the editor the block says why it shows nothing, instead of an empty gap:
 // it only has something to show on the page of a database row whose table has
@@ -17,6 +17,7 @@ export default function Editor({ datos, paginaId }: PropsEditor) {
   if (fallo?.codigo === 404) return nota('Va en la página de una fila de una base de datos (la ficha de un producto, de un distribuidor…). Aquí no hay ninguna fila que puntuar.');
   if (fallo) return nota(fallo.texto);
   if (!r) return nota('Cargando…');
-  if (!r.criterios.length) return nota('Añade a su base de datos una o varias propiedades del grupo «Comunidad» (Calidad, Precio, Ética…): cada una es un criterio que la gente puntúa aquí.');
-  return <Valoraciones datos={r} recargar={cargar} />;
+  const fuera = r.terceros?.length ? <OpinionesFuera lista={r.terceros} /> : null;
+  if (!r.criterios.length) return <>{nota('Añade a su base de datos una o varias propiedades del grupo «Comunidad» (Calidad, Precio, Ética…): cada una es un criterio que la gente puntúa aquí.')}{fuera}</>;
+  return <><Valoraciones datos={r} recargar={cargar} />{fuera}</>;
 }

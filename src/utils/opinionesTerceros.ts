@@ -47,6 +47,8 @@ const fechaEs = (f: string) => { const [a, m, d] = f.split('-'); return `${d}/${
 /** The one sentence, the same on screen and in the server HTML:
  *  «Según Trustpilot: 4 de 5, de 16.567 opiniones (consultado el 18/10/2026)». */
 export function textoOpinion(o: OpinionTercero): string {
-  const n = o.opiniones.toLocaleString('es-ES');
+  // Grouped by hand: es-ES leaves four digits ungrouped («7423»), and the
+  // list then reads 16.567 next to 7423.
+  const n = String(o.opiniones).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return `Según ${o.fuente}: ${cifra(o.nota)} de ${cifra(o.escala)}, de ${n} ${o.opiniones === 1 ? 'opinión' : 'opiniones'} (consultado el ${fechaEs(o.fecha)})`;
 }
