@@ -93,8 +93,15 @@ async function startServer() {
 
     try {
       const stripe = getStripe();
-      if (webhookSecret && sig) {
+      // With a secret configured, an unsigned request is a forgery, not a
+      // fallback: before 2026-10-18 omitting the header skipped the check and
+      // anyone could post a "paid" checkout. Unsigned is accepted only on a
+      // development machine with no secret at all.
+      if (webhookSecret) {
+        if (!sig) return res.status(400).send("Webhook Error: missing stripe-signature");
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      } else if (process.env.NODE_ENV === "production") {
+        return res.status(503).send("Webhook Error: STRIPE_WEBHOOK_SECRET is not configured");
       } else {
         const rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : req.body;
         event = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
