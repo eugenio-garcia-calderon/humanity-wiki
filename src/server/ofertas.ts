@@ -24,7 +24,8 @@ import { bdInterno, celdasDe } from './bd.js';
 import { enlacesDe, enlacesInversos, celdaDeEnlaces, CLASE_DE_TIPO, type Apuntado } from './bd/enlaces.js';
 import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/ficheros.js';
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
-import { ordenarOfertas, relEnlaceTienda } from '../utils/ofertas.js';
+import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision } from '../utils/ofertas.js';
+import { registrarHtml, esc } from './htmlBloques.js';
 
 export type OfertaPublica = {
   fila_id: string;
@@ -179,6 +180,59 @@ export async function ofertasDeProducto(
   });
   return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id };
 }
+
+// ── EL HTML PARA LOS BUSCADORES (requisito R1 de SEO) ───────────────────────
+// Lo mismo que pinta `Lectura.tsx`, con las mismas frases, para quien lee la
+// página sin ejecutar JavaScript (los buscadores de IA). Se arma como un
+// anónimo: sólo salen las ofertas de tablas públicas.
+const dineroHtml = (c: number, moneda = 'EUR') => new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(c / 100);
+const claveOfertas = (b: any, paginaId: string | null) => `ofertas:${b?.datos?.fila_id || paginaId || ''}:${b?.datos?.tabla_id || ''}`;
+
+export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string {
+  const cab = `<h2>${esc(titulo)}</h2>`;
+  if (!ofertas.length) return `<section>${cab}<p>Todavía no tenemos registrada ninguna tienda que lo venda.</p></section>`;
+  const conPrecio = ofertas.filter(o => o.precio_centimos !== null && !o.agotada);
+  const moneda = ofertas[0].moneda || 'EUR';
+  const desde = conPrecio.length ? Math.min(...conPrecio.map(o => totalOferta(o)!)) : null;
+  const tiendas = ofertas.length === 1 ? 'una tienda' : `${ofertas.length} tiendas`;
+  const resumen = desde !== null ? `Desde ${dineroHtml(desde, moneda)} con envío, en ${tiendas}.` : `${tiendas[0].toUpperCase()}${tiendas.slice(1)}, sin precio disponible ahora.`;
+  const items = ofertas.map(o => {
+    const partes: string[] = [`<strong>${esc(o.distribuidor || 'Tienda sin nombre')}</strong>`];
+    if (o.precio_centimos !== null) {
+      const envio = o.envio_centimos === null
+        ? (o.compra ? 'sin gastos de envío comprando aquí' : 'envío: lo dice la tienda')
+        : o.envio_centimos === 0 ? 'envío gratis' : `+ ${dineroHtml(o.envio_centimos, o.moneda)} de envío`;
+      const total = totalOferta(o);
+      partes.push(`${dineroHtml(o.precio_centimos, o.moneda)} (${envio}${total !== null && o.envio_centimos ? `; total ${dineroHtml(total, o.moneda)}` : ''})`);
+    } else partes.push('precio no publicado');
+    if (o.plazo) partes.push(`entrega: ${esc(o.plazo)}`);
+    if (o.agotada) partes.push('agotado');
+    if (o.instalacion === true) partes.push('incluye instalación');
+    if (o.comprobado) partes.push(`precio comprobado el ${esc(o.comprobado)}`);
+    const comision = textoComision(o.comision_pct, o.precio_centimos === null ? null : comisionDeLinea(o.precio_centimos, 1, o.comision_pct), o.moneda);
+    const enlace = o.enlace ? ` <a href="${esc(o.enlace)}" rel="${esc(o.rel)}">Ver en la tienda</a>` : '';
+    return `<li>${partes.join(' · ')}. ${esc(comision)}${enlace}</li>`;
+  }).join('');
+  return `<section>${cab}<p>${esc(resumen)}</p><ul>${items}</ul>`
+    + '<p>Ordenadas por lo que pagas con el envío; a igual precio, por la atención al cliente de la tienda. La comisión no cambia el orden.</p></section>';
+}
+
+registrarHtml('ofertas', (b, ctx) => {
+  const r = ctx.extra.get(claveOfertas(b, ctx.pagina?.id ?? null));
+  if (!r) return '';
+  const titulo = typeof b?.datos?.titulo === 'string' && b.datos.titulo.trim() ? b.datos.titulo.trim() : 'Dónde comprarlo';
+  return ofertasEnHtml(r, titulo);
+}, async (db, bloques, ctx) => {
+  const paginaId = ctx.pagina?.id ?? null;
+  for (const b of bloques.filter(x => x?.tipo === 'ofertas')) {
+    const k = claveOfertas(b, paginaId);
+    if (ctx.extra.has(k)) continue;
+    const r = await ofertasDeProducto(db, { user: undefined } as any, {
+      filaId: b?.datos?.fila_id || null, paginaId, tablaId: b?.datos?.tabla_id || null,
+    });
+    if (!('error' in r)) ctx.extra.set(k, r.ofertas);
+  }
+});
 
 export function registrarOfertas(app: Express, db: any) {
   /**

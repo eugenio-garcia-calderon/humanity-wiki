@@ -397,7 +397,6 @@ product it is not handed. Fine for hundreds of offers. With thousands, give
 Also found, not fixed: sending a shop table to the bin leaves its `products`
 rows for sale. The merchant feed filters them out; checkout does not.
 
-Pending integration, not debt: the server HTML of the Offers block (W2's
-`registrarHtml`) and the distributor attention score (W4's
-`notaAtencionDistribuidores`) are wired once those branches are in `main`;
-until then `nota_distribuidor` is always null and the block is client-only.
+Pending integration, not debt: the distributor attention score (W4's
+`notaAtencionDistribuidores`) is wired once W4 is in `main`; until then
+`nota_distribuidor` is always null. (The server HTML is wired.)
