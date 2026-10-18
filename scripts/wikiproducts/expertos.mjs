@@ -2,6 +2,10 @@
 // ============================================================================
 // PAID EXPERT CONSULTATIONS ON THE WIKIPRODUCTS SITE (2026-10-18, W6)
 // ============================================================================
+// NOT RUN TODAY: Eugenio took expert consultations out of the MVP on
+// 2026-10-18, so `cargar-en-servidor.sh` no longer calls this script and the
+// «Expertos» menu link left `sitio.json`. Kept, working, for when they return.
+//
 // The «Reservar experto» block existed but nothing on the site offered it: the
 // evaluator found no «experto» anywhere. This script, through /api/v1 and as
 // the owner of the key:

@@ -9117,3 +9117,9 @@ en mis páginas como proyecto pendiente».
 - Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
 - Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
 - Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
+
+## 2026-10-18 — Wikiproducts W6: expert consultations out of the MVP
+
+- Eugenio: «Quita lo de las consultas de expertos de momento en este MVP». The load (`cargar-en-servidor.sh`) no longer runs `expertos.mjs`, so it creates neither the page «Consultar a un experto», nor the expert, nor the short experts box in the product sheets. The «Expertos» menu link left `sitio.json` (`menu` is now empty).
+- Nothing about experts had reached the production site yet: #635 deployed the code, but the load that would have created the page and the boxes had not run.
+- Kept in the repo, unused: `expertos.mjs`, `expertos.json`, the `experto` block (with its short version) and `PUT /api/v1/pages/:id/experts`. Bringing them back is restoring one line in the load script and one menu entry.
