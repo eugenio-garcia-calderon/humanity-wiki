@@ -30,8 +30,9 @@ export interface MetaPagina {
   indexable?: boolean;
   /** Datos estructurados (schema.org). Se escriben como `application/ld+json`.
    *  La ampliación no sabe por qué dirección se abre la página: un texto que
-   *  sea exactamente `{{canonica}}` se cambia por la dirección canónica, y uno
-   *  que empiece por `/` se completa con el dominio de esa canónica. */
+   *  sea exactamente `{{canonica}}` se cambia por la dirección canónica,
+   *  `{{inicio}}` por la de la portada del sitio, y uno que empiece por `/` se
+   *  completa con el dominio de esa canónica. */
   jsonLd?: object | object[];
   /** `<meta>` extra: `{ property: 'product:price:amount', content: '149.99' }`. */
   metas?: Array<{ property?: string; name?: string; content: string }>;

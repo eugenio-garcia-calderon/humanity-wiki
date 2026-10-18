@@ -551,98 +551,150 @@ export function registrarSitios(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).type('txt').send('No se pudo generar.'); }
   });
 
-  app.get('/sitemap.xml', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const s = sitioDe(req);
-      if (s.forma === 'casa') return next();
-      const urls: Array<{ loc: string; mod: string }> = [];
-      const fecha = (d: any) => new Date(d).toISOString().slice(0, 10);
+  // EL SITEMAP (SEO R11, R12). La fecha de cada dirección es la de su último
+  // cambio real (la de la fila si se cambió un dato, no la de hoy), lleva su
+  // imagen de portada, y pasadas las 50.000 direcciones se parte en trozos
+  // (`/sitemap-1.xml`…) con un índice en `/sitemap.xml`, que es el límite de
+  // Google por fichero.
+  const POR_TROZO = 50_000;
+  type Url = { loc: string; mod: string; img?: string | null };
 
-      /** Las subpáginas de una página, recursivamente, como `/p/:id`. */
-      const subpaginas = async (raiz: string) => {
-        const r = await db.execute(sql`
-          WITH RECURSIVE baja(id, n) AS (
-            SELECT ${raiz}::text, 0
-            UNION
-            SELECT h.hijo, b.n + 1 FROM baja b
-            JOIN knowledge_windows w ON w.id = b.id
-            CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
-            CROSS JOIN LATERAL (
-              SELECT f.pagina_id AS hijo FROM bd_filas f
-              WHERE blq->>'tipo' = 'basedatos' AND f.tabla_id = blq->>'tabla_id'
-                AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL AND f.oculta = false
-              UNION ALL
-              SELECT blq->>'entityId' WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
-            ) h
-            WHERE b.n < ${PROFUNDIDAD}
-          )
-          SELECT w.id, w.updated_at FROM baja b JOIN knowledge_windows w ON w.id = b.id
-          WHERE b.n > 0 AND w.deleted_at IS NULL AND w.archived_at IS NULL
-        `);
-        // La página propia de cada base de datos que enseñan.
-        const ids = [raiz, ...(r.rows as any[]).map(x => x.id)];
-        const bd = await db.execute(sql`
-          SELECT DISTINCT t.id, t.titulo, t.updated_at FROM knowledge_windows w
+  /** Las direcciones del sitio por el que se pregunta; `null` si no es un sitio. */
+  async function urlsDelSitio(req: Request): Promise<Url[] | null> {
+    const s = sitioDe(req);
+    if (s.forma === 'casa') return null;
+    const urls: Url[] = [];
+    const fecha = (d: any) => new Date(d).toISOString().slice(0, 10);
+    const abs = (u: string | null | undefined) => !u ? null
+      : /^https?:\/\//.test(u) ? u : u.startsWith('/') && !u.startsWith('//') ? `https://${s.host}${u}` : null;
+
+    /** Las subpáginas de una página, recursivamente. Devuelve la fecha más
+     *  reciente de todas, que es la de la página que las enseña. */
+    const subpaginas = async (raiz: string): Promise<number> => {
+      const r = await db.execute(sql`
+        WITH RECURSIVE baja(id, n) AS (
+          SELECT ${raiz}::text, 0
+          UNION
+          SELECT h.hijo, b.n + 1 FROM baja b
+          JOIN knowledge_windows w ON w.id = b.id
           CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
-          JOIN bd_tablas t ON t.id = blq->>'tabla_id' AND t.deleted_at IS NULL AND t.archived_at IS NULL
-          WHERE w.id = ANY(string_to_array(${ids.join(',')}, ',')) AND blq->>'tipo' = 'basedatos'
+          CROSS JOIN LATERAL (
+            SELECT f.pagina_id AS hijo FROM bd_filas f
+            WHERE blq->>'tipo' = 'basedatos' AND f.tabla_id = blq->>'tabla_id'
+              AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.pagina_id IS NOT NULL AND f.oculta = false
+            UNION ALL
+            SELECT blq->>'entityId' WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
+          ) h
+          WHERE b.n < ${PROFUNDIDAD}
+            -- Lo que es sólo de miembros no se anuncia (como el buscador del sitio).
+            AND NOT EXISTS (
+              SELECT 1 FROM sitio_restricciones rs
+              WHERE rs.pagina_id = w.id AND (rs.bloque_id = '' OR rs.bloque_id = blq->>'id')
+            )
+        )
+        SELECT DISTINCT ON (w.id) w.id, w.config->>'portada' AS portada,
+          GREATEST(w.updated_at, f.updated_at) AS cambio
+        FROM baja b JOIN knowledge_windows w ON w.id = b.id
+        LEFT JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL
+        WHERE b.n > 0 AND w.deleted_at IS NULL AND w.archived_at IS NULL
+        ORDER BY w.id
+      `);
+      // La página propia de cada base de datos que enseñan.
+      const ids = [raiz, ...(r.rows as any[]).map(x => x.id)];
+      const bd = await db.execute(sql`
+        SELECT DISTINCT t.id, t.titulo, t.updated_at FROM knowledge_windows w
+        CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
+        JOIN bd_tablas t ON t.id = blq->>'tabla_id' AND t.deleted_at IS NULL AND t.archived_at IS NULL
+        WHERE w.id = ANY(string_to_array(${ids.join(',')}, ',')) AND blq->>'tipo' = 'basedatos'
+      `);
+      // Las fichas, con su dirección legible si su tabla tiene plantilla
+      // (SEO R2, `rutasFila.ts`): se pone al día aquí, que es lo que lee Google.
+      for (const t of bd.rows as any[]) await asegurarRutas(db, t.id).catch(e => console.error('sitemap: rutas', e));
+      const slugs = new Map<string, string>();
+      if (r.rows.length) {
+        const q = await db.execute(sql`
+          SELECT id, slug FROM knowledge_windows
+          WHERE id = ANY(string_to_array(${(r.rows as any[]).map(x => x.id).join(',')}, ',')) AND slug LIKE '%/%'
         `);
-        // Las fichas, con su dirección legible si su tabla tiene plantilla
-        // (SEO R2, `rutasFila.ts`): se pone al día aquí, que es lo que lee Google.
-        for (const t of bd.rows as any[]) await asegurarRutas(db, t.id).catch(e => console.error('sitemap: rutas', e));
-        const slugs = new Map<string, string>();
-        if (r.rows.length) {
-          const q = await db.execute(sql`
-            SELECT id, slug FROM knowledge_windows
-            WHERE id = ANY(string_to_array(${(r.rows as any[]).map(x => x.id).join(',')}, ',')) AND slug LIKE '%/%'
-          `);
-          for (const x of q.rows as any[]) slugs.set(x.id, x.slug);
-        }
-        for (const x of r.rows as any[]) {
-          const ruta = slugs.get(x.id);
-          urls.push({ loc: `https://${s.host}/${ruta || `p/${x.id}`}`, mod: fecha(x.updated_at) });
-        }
-        for (const t of bd.rows as any[]) {
-          const n = slugDe(t.titulo);
-          urls.push({ loc: `https://${s.host}/bd/${t.id}${n ? `/${n}` : ''}`, mod: fecha(t.updated_at) });
-        }
-      };
-
-      if (s.forma === 'dominio') {
-        const d = await dominioApunta(db, s.host);
-        if (!d) return res.status(404).type('txt').send('No existe ese fichero.');
-        if (d.entidad_id && d.entidad_tipo === 'pagina') {
-          const w = await datosPagina(db, d.entidad_id);
-          if (w?.publico && w.indexable) {
-            urls.push({ loc: `https://${s.host}/`, mod: fecha(w.updated_at) });
-            await subpaginas(w.id);
-          }
-        } else if (!d.entidad_id) {
-          await paginasDeEspacio(d.handle);
-        }
-      } else {
-        await paginasDeEspacio(s.handle);
+        for (const x of q.rows as any[]) slugs.set(x.id, x.slug);
       }
-
-      async function paginasDeEspacio(handle: string) {
-        const r = await db.execute(sql`
-          SELECT w.id, w.slug, w.updated_at FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
-          WHERE u.handle = ${handle} AND w.kind = 'pagina' AND w.publico = true AND w.indexable = true
-            AND w.slug IS NOT NULL AND w.deleted_at IS NULL AND w.archived_at IS NULL
-        `);
-        urls.push({ loc: `https://${s.host}/`, mod: fecha(Date.now()) });
-        for (const x of r.rows as any[]) {
-          urls.push({ loc: `https://${s.host}/${x.slug}`, mod: fecha(x.updated_at) });
-          await subpaginas(x.id);
-        }
+      let ultimo = 0;
+      for (const x of r.rows as any[]) {
+        const ruta = slugs.get(x.id);
+        ultimo = Math.max(ultimo, new Date(x.cambio).getTime());
+        urls.push({ loc: `https://${s.host}/${ruta || `p/${x.id}`}`, mod: fecha(x.cambio), img: abs(x.portada) });
       }
+      for (const t of bd.rows as any[]) {
+        const n = slugDe(t.titulo);
+        ultimo = Math.max(ultimo, new Date(t.updated_at).getTime());
+        urls.push({ loc: `https://${s.host}/bd/${t.id}${n ? `/${n}` : ''}`, mod: fecha(t.updated_at) });
+      }
+      return ultimo;
+    };
 
-      const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-      res.type('application/xml').send(
-        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-        urls.map(u => `  <url><loc>${esc(u.loc)}</loc><lastmod>${u.mod}</lastmod></url>`).join('\n') +
-        `\n</urlset>\n`,
-      );
+    if (s.forma === 'dominio') {
+      const d = await dominioApunta(db, s.host);
+      if (!d) return null;
+      if (d.entidad_id && d.entidad_tipo === 'pagina') {
+        const w = await datosPagina(db, d.entidad_id);
+        if (w?.publico && w.indexable) {
+          const portada = { loc: `https://${s.host}/`, mod: '', img: abs(w.config?.portada) };
+          urls.push(portada);
+          portada.mod = fecha(Math.max(new Date(w.updated_at).getTime(), await subpaginas(w.id)));
+        }
+      } else if (!d.entidad_id) {
+        await paginasDeEspacio(d.handle);
+      }
+    } else {
+      await paginasDeEspacio(s.handle);
+    }
+
+    async function paginasDeEspacio(handle: string) {
+      const r = await db.execute(sql`
+        SELECT w.id, w.slug, w.updated_at, w.config->>'portada' AS portada FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+        WHERE u.handle = ${handle} AND w.kind = 'pagina' AND w.publico = true AND w.indexable = true
+          AND w.slug IS NOT NULL AND w.deleted_at IS NULL AND w.archived_at IS NULL
+      `);
+      // La portada del espacio cambia cuando cambia algo de lo que enseña, no cada día.
+      const inicio = { loc: `https://${s.host}/`, mod: '' };
+      urls.push(inicio);
+      let ultimo = 0;
+      for (const x of r.rows as any[]) {
+        const pagina = { loc: `https://${s.host}/${x.slug}`, mod: '', img: abs(x.portada) };
+        urls.push(pagina);
+        const t = Math.max(new Date(x.updated_at).getTime(), await subpaginas(x.id));
+        pagina.mod = fecha(t);
+        ultimo = Math.max(ultimo, t);
+      }
+      inicio.mod = fecha(ultimo || Date.now());
+    }
+    return urls;
+  }
+
+  const escXml = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const urlset = (urls: Url[]) =>
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n` +
+    urls.map(u => `  <url><loc>${escXml(u.loc)}</loc><lastmod>${u.mod}</lastmod>` +
+      (u.img ? `<image:image><image:loc>${escXml(u.img)}</image:loc></image:image>` : '') + `</url>`).join('\n') +
+    `\n</urlset>\n`;
+
+  app.get(/^\/sitemap(?:-(\d+))?\.xml$/, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (sitioDe(req).forma === 'casa') return next();
+      const urls = await urlsDelSitio(req);
+      if (!urls) return res.status(404).type('txt').send('No existe ese fichero.');
+      const trozos = Math.max(1, Math.ceil(urls.length / POR_TROZO));
+      const n = req.params[0] ? Number(req.params[0]) : 0;
+      res.type('application/xml');
+      if (!n && trozos === 1) return res.send(urlset(urls));
+      if (!n) {
+        const host = sitioDe(req).host;
+        return res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+          Array.from({ length: trozos }, (_, i) => `  <sitemap><loc>https://${escXml(host)}/sitemap-${i + 1}.xml</loc></sitemap>`).join('\n') +
+          `\n</sitemapindex>\n`);
+      }
+      if (n > trozos) return res.status(404).type('txt').send('No existe ese fichero.');
+      res.send(urlset(urls.slice((n - 1) * POR_TROZO, n * POR_TROZO)));
     } catch (e: any) { console.error(e); res.status(500).type('txt').send('No se pudo generar.'); }
   });
 
@@ -715,10 +767,22 @@ export function registrarSitios(app: Express, db: any) {
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const indexable = m.indexable === false ? false : w.indexable !== false;
+      // FILTROS Y ORDENACIONES FUERA DEL ÍNDICE (SEO R8). Cada combinación de
+      // `?…` es otra dirección con el mismo contenido: una página basura por
+      // cada una. Se siguen sus enlaces, pero no se guarda; la canónica ya
+      // apunta a la dirección sin `?`. Las marcas de campaña no cuentan.
+      const conFiltros = Object.keys(req.query).some(k => !/^(utm_[a-z]+|gclid|fbclid|msclkid|ref)$/i.test(k));
       // Las direcciones de los datos estructurados, contra la canónica (ver `MetaPagina.jsonLd`).
       const origen = (() => { try { return new URL(canonica).origin; } catch { return `https://${s.host}`; } })();
+      // `{{inicio}}`: la canónica de la portada del sitio (las migas de pan de
+      // una ficha, W1). Sólo se calcula si alguien la usa.
+      let inicio = `${origen}/`;
+      if (m.jsonLd && JSON.stringify(m.jsonLd).includes('{{inicio}}') && publica?.sitio?.raizId) {
+        const raiz = publica.sitio.raizId === w.id ? w : await datosPagina(db, publica.sitio.raizId);
+        if (raiz) inicio = (await direccionCanonica(raiz, { autor: { handle: raiz.handle } })) || inicio;
+      }
       const completar = (x: any): any => typeof x === 'string'
-        ? (x === '{{canonica}}' ? canonica : x.startsWith('/') && !x.startsWith('//') ? origen + x : x)
+        ? (x === '{{canonica}}' ? canonica : x === '{{inicio}}' ? inicio : x.startsWith('/') && !x.startsWith('//') ? origen + x : x)
         : Array.isArray(x) ? x.map(completar)
         : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, completar(v)]))
         : x;
@@ -733,7 +797,7 @@ export function registrarSitios(app: Express, db: any) {
         img && `<meta property="og:image" content="${esc(abs(img))}">`,
         `<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`,
         `<link rel="canonical" href="${esc(canonica)}">`,
-        `<meta name="robots" content="${indexable ? 'index,follow' : 'noindex,nofollow'}">`,
+        `<meta name="robots" content="${!indexable ? 'noindex,nofollow' : conFiltros ? 'noindex,follow' : 'index,follow'}">`,
         ...(m.metas || []).filter(x => x && (x.property || x.name)).map(x => x.property
           ? `<meta property="${esc(String(x.property))}" content="${esc(String(x.content ?? ''))}">`
           : `<meta name="${esc(String(x.name))}" content="${esc(String(x.content ?? ''))}">`),

@@ -261,6 +261,16 @@ function MandosLegal({ s, poner, titulo }: { s: Sitio; poner: (n: Sitio) => void
         <Campo valor={t.telefono || ''} placeholder="Teléfono (opcional)" tipo="tel" onCambio={v => titular({ telefono: v || undefined })} />
         <Campo valor={t.registro || ''} placeholder="Datos del Registro Mercantil (si es una sociedad)" onCambio={v => titular({ registro: v || undefined })} />
       </Grupo>
+      <Grupo titulo="Buscadores">
+        <p className="text-[11px] leading-relaxed text-slate-500">
+          Para que Google y Bing te dejen ver cómo encuentran tu web, piden demostrar que es tuya. Pega aquí
+          la etiqueta que te dan, o solo su código: se guarda el código y se pone en todas las páginas de la web.
+        </p>
+        <Campo valor={s.verificacion.google || ''} placeholder="Código de Google Search Console"
+          onCambio={v => poner({ ...s, verificacion: { ...s.verificacion, google: limpiarCodigo(v) } })} />
+        <Campo valor={s.verificacion.bing || ''} placeholder="Código de Bing Webmaster Tools"
+          onCambio={v => poner({ ...s, verificacion: { ...s.verificacion, bing: limpiarCodigo(v) } })} />
+      </Grupo>
       <Grupo titulo="Los textos">
         {(Object.keys(NOMBRES_LEGALES) as DocLegal[]).map(d => {
           const propio = s.textos[d] !== undefined;
@@ -521,6 +531,14 @@ function Interruptor({ etiqueta, valor, onCambio }: { etiqueta: string; valor: b
       </span>
     </button>
   );
+}
+
+/** Quien pega la etiqueta entera (`<meta name="…" content="CÓDIGO" />`)
+ *  se queda con el código; lo demás se tira. Vacío: sin verificación. */
+function limpiarCodigo(v: string): string | undefined {
+  const dentro = /content=["']([^"']+)["']/.exec(v)?.[1] ?? v;
+  const limpio = dentro.trim().replace(/[^A-Za-z0-9_-]/g, '');
+  return limpio || undefined;
 }
 
 function Campo({ valor, placeholder, onCambio, multilinea, tipo = 'text' }: {

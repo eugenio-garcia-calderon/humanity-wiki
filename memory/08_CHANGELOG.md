@@ -8917,3 +8917,10 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — Esquema de Wikiproducts: varias afirmaciones y retiradas por producto (Wikiproducts W1)
 - En las cinco bases de datos de productos, «Afirmaciones» y «Retiradas» admiten varios enlaces (antes sólo uno: la carga de datos fallaba con productos que tienen de 2 a 5). Las baterías domésticas tienen columna «Ruido» (dB, menos es mejor). `scripts/wikiproducts/esquema-bd.json`.
+
+### 2026-10-18 — Lo que un sitio le dice a Google: datos estructurados, filtros, sitemap y verificación (Wikiproducts W2)
+- La portada de un sitio publicado lleva `WebSite` y `Organization` en JSON-LD, y si su menú tiene buscador, la `SearchAction` que lo abre. Cada página que enseña una base de datos lleva un `ItemList` con sus elementos, en orden y con su dirección (`src/server/seoSitio.ts`). La ficha de producto no: es un `Product` (W1).
+- Una dirección con `?…` (filtros, ordenaciones) sale `noindex,follow`; las marcas de campaña (`utm_…`, `gclid`…) no cuentan.
+- El sitemap pone en cada dirección la fecha de su último cambio real (si se cambió un dato de la fila, esa), no la de hoy; lleva la imagen de portada de cada página; deja fuera lo que es sólo de miembros; y pasadas 50.000 direcciones se parte en `/sitemap-1.xml`, `/sitemap-2.xml`… con un índice en `/sitemap.xml`.
+- En «Menú y pie» → «Datos legales» → «Buscadores» se pegan los códigos de Google Search Console y Bing Webmaster Tools, y salen en todas las páginas del sitio.
+- Las ampliaciones pueden usar `{{inicio}}` en sus datos estructurados: la dirección canónica de la portada del sitio.
