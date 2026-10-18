@@ -6,8 +6,12 @@ import type { PropsLectura } from '../tipos';
 import { pedir, euros, parametro } from '../chat/api';
 import Conversacion from '../chat/Conversacion';
 import Gestion from './Gestion';
+import { useSitio } from '../../sitio/ContextoSitio';
 
-export type DatosExperto = { titulo?: string; intro?: string; expertos?: string[] };
+/** `compacto`: la versión para la ficha de un producto (una línea por experto,
+ *  sin panel de gestión, y nada si no hay expertos). `pagina`: la página del
+ *  sitio con todos los expertos, para enlazarla desde la versión compacta. */
+export type DatosExperto = { titulo?: string; intro?: string; expertos?: string[]; compacto?: boolean; pagina?: string };
 
 export type Experto = {
   id: string; nombre: string; especialidad: string | null; bio: string | null; foto: string | null;
@@ -15,6 +19,12 @@ export type Experto = {
   proximo?: string | null; huecosLibres?: number;
 };
 type Hueco = { inicio: string; fin: string };
+type Lista = { sitio: string; equipo: boolean; soyExperto: boolean; pagosActivos: boolean; pagosEnPruebas?: boolean; expertos: Experto[] };
+
+/** ¿Se puede llegar al pago de este experto? Con la clave de pruebas de
+ *  Stripe una tarjeta de verdad se rechaza: sólo el equipo prueba (con 4242). */
+const sePuedePagar = (l: Lista, e: Experto) => !e.precioCentimos || (l.pagosActivos && (!l.pagosEnPruebas || l.equipo));
+const PRONTO = 'Muy pronto podrás reservar y pagar aquí.';
 
 /**
  * EL BLOQUE «RESERVAR EXPERTO» (3.12 del plan de Wikiproducts).
@@ -29,7 +39,7 @@ type Hueco = { inicio: string; fin: string };
 export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
   const d = datos as DatosExperto;
   const ids = (Array.isArray(d.expertos) ? d.expertos : []).filter(x => typeof x === 'string');
-  const [lista, setLista] = useState<{ sitio: string; equipo: boolean; soyExperto: boolean; pagosActivos: boolean; expertos: Experto[] } | null>(null);
+  const [lista, setLista] = useState<Lista | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [elegido, setElegido] = useState<Experto | null>(null);
   const [gestionar, setGestionar] = useState(false);
@@ -65,6 +75,13 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
   }, []);
 
   if (!paginaId) return <p className="text-sm text-slate-400">La reserva de expertos funciona en una página guardada.</p>;
+  if (d.compacto) {
+    // En una ficha, un bloque vacío o con un error es ruido: no sale nada
+    // (salvo al equipo, que tiene que saber por qué no sale).
+    if (error || !lista) return null;
+    if (!lista.expertos.length && !lista.equipo && !vuelta) return null;
+    return <Compacto d={d} lista={lista} paginaId={paginaId} vuelta={vuelta} elegido={elegido} setElegido={setElegido} cargar={cargar} />;
+  }
   if (error) return <p className="rounded-xl border border-slate-200 p-4 text-sm text-slate-500">{error}</p>;
   if (!lista) return <div className="flex h-24 items-center justify-center text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /></div>;
 
@@ -88,6 +105,11 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
 
       {gestionar && <Gestion paginaId={paginaId} onCambio={cargar} />}
 
+      {lista.equipo && lista.pagosActivos && lista.pagosEnPruebas && lista.expertos.some(e => e.precioCentimos > 0) && (
+        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+          Stripe está con una clave de pruebas: los visitantes ven «{PRONTO}» en lugar de reservar. Tú puedes probar el pago con la tarjeta 4242 4242 4242 4242.
+        </p>
+      )}
       {!lista.pagosActivos && lista.expertos.some(e => e.precioCentimos > 0) && (
         <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
           Los pagos todavía no están activados en este servidor: se pueden ver los expertos y sus horarios, pero no reservar consultas de pago.
@@ -119,14 +141,68 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
               {e.bio && <p className="mt-2 line-clamp-4 whitespace-pre-line text-sm text-slate-600">{e.bio}</p>}
               <Comision experto={e} />
               <div className="mt-auto flex items-center gap-2 pt-3">
-                <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres}>Ver horarios</Button>
+                <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres || !sePuedePagar(lista, e)}>Ver horarios</Button>
                 <span className="text-xs text-slate-500">
-                  {e.proximo ? `Próximo hueco: ${new Date(e.proximo).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'Sin huecos libres en las próximas tres semanas'}
+                  {!sePuedePagar(lista, e) && lista.pagosActivos ? PRONTO : e.proximo ? `Próximo hueco: ${new Date(e.proximo).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'Sin huecos libres en las próximas tres semanas'}
                 </span>
               </div>
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+/**
+ * La versión de la ficha de un producto: «¿Dudas antes de comprar?» y una
+ * línea por experto con su precio. Al elegir uno se abre aquí mismo la misma
+ * reserva que en la página de expertos.
+ */
+function Compacto({ d, lista, paginaId, vuelta, elegido, setElegido, cargar }: {
+  d: DatosExperto; lista: Lista; paginaId: string;
+  vuelta: { estado: string; conversacion?: string; mensaje?: string } | null;
+  elegido: Experto | null; setElegido: (e: Experto | null) => void; cargar: () => Promise<void>;
+}) {
+  const sitio = useSitio();
+  // Fuera de un sitio publicado (el editor), la página en la plataforma.
+  const todos = d.pagina ? (sitio ? sitio.enlacePagina(d.pagina) : `/paginas/${encodeURIComponent(d.pagina)}`) : null;
+  return (
+    <section className="space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
+      {vuelta && <AvisoVuelta vuelta={vuelta} />}
+      <div>
+        <h3 className="flex items-center gap-2 font-semibold text-slate-800">
+          <GraduationCap className="h-5 w-5 text-emerald-500" /> {d.titulo || '¿Dudas antes de comprar? Consulta a un experto'}
+        </h3>
+        {d.intro && <p className="mt-1 text-sm text-slate-600">{d.intro}</p>}
+      </div>
+      {!lista.expertos.length ? (
+        <p className="text-sm text-slate-500">
+          Sólo lo ve el equipo: no hay expertos dados de alta, así que este recuadro no sale en la ficha.
+          {todos && <> Dalos de alta en la <a className="underline" href={todos}>página de expertos</a>.</>}
+        </p>
+      ) : elegido ? (
+        <Reserva experto={elegido} paginaId={paginaId} volver={() => { setElegido(null); void cargar(); }} />
+      ) : (
+        <ul className="divide-y divide-emerald-100">
+          {lista.expertos.map(e => (
+            <li key={e.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-slate-800">{e.nombre}{e.especialidad ? <span className="font-normal text-slate-600"> · {e.especialidad}</span> : null}</p>
+                <p className="flex items-center gap-1 text-xs text-slate-500">
+                  <Clock className="h-3.5 w-3.5" /> {e.duracionMin} min · {e.precioCentimos ? euros(e.precioCentimos, e.moneda) : 'Gratis'}
+                  {!e.huecosLibres && ' · sin huecos libres en las próximas tres semanas'}
+                </p>
+              </div>
+              {sePuedePagar(lista, e)
+                ? <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres}>Elegir hora</Button>
+                : <span className="text-xs text-slate-500">{PRONTO}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {todos && lista.expertos.length > 0 && !elegido && (
+        <p className="text-xs"><a className="text-emerald-700 underline" href={todos}>Quiénes son y cómo funcionan las consultas</a></p>
       )}
     </section>
   );

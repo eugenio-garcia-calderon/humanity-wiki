@@ -38,7 +38,7 @@ cd "$RAIZ"
 PUERTO="${PUERTO:-3005}"
 PUERTO_BD="${PUERTO_BD:-5434}"
 CONTENEDOR="wikiproducts-db"
-IMAGEN="imresamu/postgis:17-3.5"   # la oficial no tiene arm64 (ver CLAUDE.md)
+IMAGEN="${IMAGEN:-imresamu/postgis:17-3.5}"   # la oficial no tiene arm64 (ver CLAUDE.md)
 ESTADO="${TMPDIR:-/tmp}/wikiproducts-local"
 ENV_LOCAL="$RAIZ/.env.wikiproducts-local"
 mkdir -p "$ESTADO"

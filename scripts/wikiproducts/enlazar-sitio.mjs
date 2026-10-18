@@ -13,7 +13,12 @@
 //      page each, inside «Cómo trabajamos», so the brand, claims and recalls
 //      linked from a product sheet can be seen too (a link to a table nobody
 //      can read is not shown, `bd.ts` /relaciones);
-//   3. recomputes the readable address of every row (/powerbanks/anker-…).
+//   3. recomputes the readable address of every row (/powerbanks/anker-…);
+//   4. (W2, 2026-10-18) gives the home page a «Secciones del sitio» block: the
+//      five subcategories with a picture and how many products each has;
+//   5. (W2) adds to the site menu the links of `sitio.json` → `menu` that are
+//      missing (POST /api/v1/pages/:id/site/menu/links). A link to a page
+//      that does not exist yet is left for the next run, not a failure.
 //
 // The offers tables need no page: whoever sees a product sheet sees its offers
 // when both tables have the same owner (`ofertas.ts`, W5 #609).
@@ -153,6 +158,56 @@ for (const t of esquema.tablas) {
   catch (e) { if (e.status !== 400) fallos.push(`rutas ${t.clave}: ${e.message}`); }
 }
 console.log(`  ${rutas} direcciones puestas al día`);
+
+// ── 4. The home page shows the site's sections (W2, evaluator round 1) ─────
+console.log('== Portada ==');
+let portada = null;
+try {
+  const m = sitio.portada;
+  if (m) {
+    if (m.id) portada = { id: m.id };
+    for (let cursor = null, n = 0; !portada && n < 20; n++) {
+      const r = await api('GET', `/api/v1/pages?limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`);
+      portada = r.data.find(p => (m.id && p.id === m.id) || (!m.id && normal(p.title) === normal(m.titulo))) || null;
+      cursor = r.next_cursor; if (!cursor) break;
+    }
+    if (!portada) throw new Error(`No encuentro la página «${m.titulo}».`);
+    const p = await api('GET', `/api/v1/pages/${portada.id}`);
+    if (todos(p.blocks).some(b => b?.tipo === 'secciones')) console.log(`  ${p.title}: ya enseñaba las secciones`);
+    else {
+      // Before the first heading: right under the introduction, above the fold.
+      const i = (p.blocks || []).findIndex(b => /^titulo[123]$/.test(b?.tipo || ''));
+      const after = i > 0 ? p.blocks[i - 1].id : null;
+      await api('POST', `/api/v1/pages/${portada.id}/blocks`, { block: { type: 'secciones', data: { titulo: m.bloque_titulo || '' } }, after });
+      const linea = `${p.title}: + bloque «Secciones del sitio»`;
+      console.log(`  + ${linea}`); hechos.push(linea);
+    }
+  }
+} catch (e) { fallos.push(`portada: ${e.message}`); console.log(`  ✗ ${e.message}`); }
+
+// ── 5. The site menu (W2) ───────────────────────────────────────────────────
+console.log('== Menú ==');
+if (sitio.menu?.length && portada) {
+  try {
+    const actual = await api('GET', `/api/v1/pages/${portada.id}/site`);
+    let paginas = null;
+    for (const l of sitio.menu) {
+      if (!paginas) {
+        paginas = [];
+        for (let cursor = null, n = 0; n < 20; n++) {
+          const r = await api('GET', `/api/v1/pages?limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`);
+          paginas.push(...r.data); cursor = r.next_cursor; if (!cursor) break;
+        }
+      }
+      const destino = paginas.find(p => (l.pagina_id && p.id === l.pagina_id) || (!l.pagina_id && normal(p.title) === normal(l.pagina_titulo)));
+      if (!destino) { console.log(`  ${l.texto}: la página «${l.pagina_titulo}» todavía no existe, se deja para la siguiente pasada`); continue; }
+      if (actual.menu.links.some(e => e?.destino?.tipo === 'pagina' && e.destino.id === destino.id)) { console.log(`  ${l.texto}: ya estaba en el menú`); continue; }
+      await api('POST', `/api/v1/pages/${portada.id}/site/menu/links`, { link: { text: l.texto, page_id: destino.id } });
+      const linea = `menú: + «${l.texto}» → ${destino.title}`;
+      console.log(`  + ${linea}`); hechos.push(linea);
+    }
+  } catch (e) { fallos.push(`menú: ${e.message}`); console.log(`  ✗ ${e.message}`); }
+}
 
 console.log(`\nHecho: ${hechos.length} cambios, ${escrituras} escrituras, ${fallos.length} fallos.`);
 if (fallos.length) { for (const f of fallos) console.log(`  ✗ ${f}`); process.exit(1); }
