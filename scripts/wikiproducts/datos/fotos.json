@@ -14,8 +14,167 @@
       "por_que": "No tiene ofertas ni página de producto en sus datos: la ficha del fabricante."
     },
     "choetech-sc009-100w": {
-      "pagina": "https://www.choetech.com/product/sc009-100w-foldable-solar-panel-charger.html",
-      "por_que": "No tiene ofertas ni página de producto en sus datos: la ficha del fabricante (dirección sin comprobar desde aquí)."
+      "pagina": "https://choetech.com/products/100w-usb-foldable-solar-powered-charger-sc009",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "iniu-b41-10000-22-5w": {
+      "pagina": "https://iniushop.com/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "anker-powercore-10000": {
+      "pagina": "https://www.anker.com/eu-pl/products/a1263",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "anker-prime-power-bank-27650-250w": {
+      "pagina": "https://www.anker.com/eu-de/products/a1340-250w-power-bank",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "hiluckey-hi-s025-solar-25000": {
+      "pagina": "https://hiluckey.com/products/hiluckey-solar-charger-25000mah-with-4-solar-panels-3-usb-outputs-1",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "riapow-solar-26800-inalambrica": {
+      "imagen": "https://riapow.com/cdn/shop/files/d5af2f5a51abe850aa3e6ae49910a86e.jpg?v=1664450395&width=3000",
+      "pagina": "https://riapow.com/",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "jackery-explorer-300-plus": {
+      "pagina": "https://eu.jackery.com/products/explorer-300-plus-portable-power-station",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "allpowers-r600": {
+      "pagina": "https://iallpowers.eu/products/allpowers-r600-portable-power-station-600w-299wh-with-lifep04-battery-1",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "oukitel-p800": {
+      "pagina": "https://eu.oukitel.com/products/oukitel-p800-portable-power-station-800w-512wh",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "anker-solix-c1000": {
+      "pagina": "https://www.ankersolix.com/eu/products/a1761-c1000",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "bluetti-ac180p": {
+      "pagina": "https://bluettipower.com/products/ac180p",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "ecoflow-delta-3-max": {
+      "pagina": "https://us.ecoflow.com/products/ecoflow-delta-3-max-portable-power-station-2048wh",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "ecoflow-220w-bifacial": {
+      "pagina": "https://us.ecoflow.com/products/nextgen-220w-bifacial-portable-solar-panel",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "ecoflow-400w": {
+      "pagina": "https://us.ecoflow.com/collections/local-pick-up/products/400w-portable-solar-panel",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "anker-powerport-solar-21w": {
+      "pagina": "https://eu.anker.com/products/a2421",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "biolite-solarhome-620-plus": {
+      "pagina": "https://eu.bioliteenergy.com/products/solarhome-620-plus",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "little-sun-original": {
+      "pagina": "https://littlesun.org/product/little-sun-original",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "coleman-peak1-200-solar": {
+      "pagina": "https://www.evo.com/lanterns/coleman-peak1-200-lumen-solar-rechargeable-lantern",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "canadian-solar-tophiku6": {
+      "imagen": "https://static.csisolar.com/wp-content/uploads/sites/2/2023/08/11160216/TOPHiKu6-detailed-au.png",
+      "pagina": "https://www.csisolar.com/au/tophiku6/",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "dmegc-infinity-rt": {
+      "imagen": "https://www.dmegcsolar.com/upload/img/2024-08/66bdc9da1221d.png",
+      "pagina": "https://www.dmegcsolar.com/product/index.html",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "huasun-himalaya-hjt": {
+      "imagen": "https://b2b.technosun.com/web/image/product.product/38986/image_1024/%5BSOL0476%5D%20Huasun%20Himalaya%20G10%20Black%20Series%20430W%20Bifacial%20Solar%20Panel%20%7C%20HJT%20Tech%20%7C%2034.60V%20%7C?unique=3f4183f",
+      "pagina": "https://b2b.technosun.com/en/shop/sol0476-panel-solar-430w-bifacial-black-tecnologia-hjt-semi-translucido-huasun-himalaya-g10-black-series-3460v-1243a-1722-x-1134-x-30mm-40592",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "longi-hi-mo-6-explorer": {
+      "pagina": "https://www.mg-solar-shop.com/longi-hi-mo6m-explorer-440-wp-glas-foil-solar-panel-lr5-54hth",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "meyer-burger-white": {
+      "pagina": "https://shop.meyerburger.com/products/meyer-burger-white-solarmodul",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "qcells-q-tron-blk-m-g2": {
+      "pagina": "https://www.solarelectricsupply.com/q-cells-q-tron-blk-m-g2-plus-425w-solar-panel",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "trina-vertex-s-plus": {
+      "imagen": "https://www-cdn.trinasolar.com/wwwstorage/sites/7/NEG9R28.png",
+      "pagina": "https://www.trinasolar.com/eu/VertexSPlus/",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "alpha-ess-smile": {
+      "imagen": "https://www.alphaess.com/Public/Uploads/uploadfile/images/20230619/SMILE-G3-high-res.jpg",
+      "pagina": "https://www.alphaess.com/smile-g3-3-6kw-5kw-residential-energy-storage-system",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "anker-solix-x1": {
+      "imagen": "https://cdn.shopify.com/s/files/1/0890/0060/8050/files/Group_1312316465_3840x.png?v=1774256073",
+      "pagina": "https://www.ankersolix.com/uk/x1-energy-storage-system-hes",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "dyness-tower": {
+      "pagina": "https://solarscouts.de/dyness-tower-t10-10-66-kwh-battery-storage-your-ideal-10-kwh-photovoltaic-storage-with-bdu-1-5g",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "fox-ess-ep": {
+      "imagen": "https://www.fox-ess.com/Public/Uploads/uploadfile/images/20251206/EP11pc-20.jpg",
+      "pagina": "https://www.fox-ess.com/products/battery/ep11",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "growatt-ark-xh": {
+      "imagen": "https://latam.growatt.com/upload/image/20220823/648d8293e16b710d6becd1de40b9aac0.png",
+      "pagina": "https://latam.growatt.com/products/ark-xh-battery",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "lg-resu": {
+      "pagina": "https://www.ecowizard.co.uk/battery-storage/lg-chem-10kwh-prime-hv-li-battery/",
+      "por_que": "Su tienda no deja leer la página al servidor, o no tiene og:image: la ficha del fabricante o de otro distribuidor."
+    },
+    "sungrow-sbr": {
+      "imagen": "https://official-oversears-file.sungrowpower.com/page-assets/e22839ec-9eb2-499d-83dc-ef697800cbcf.png",
+      "pagina": "https://www.sungrowpower.com/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "tesla-powerwall-3": {
+      "imagen": "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/1M-Powerwalls-Powerwall-3-Hero-Desktop.png",
+      "pagina": "https://www.tesla.com/powerwall",
+      "por_que": "La página no publica una foto propia en og:image (o es el logo): la imagen principal del producto en esa página."
+    },
+    "aleo-solar": {
+      "imagen": "https://static.wixstatic.com/media/ecbda7_273af02eb472415685afe2b54eda76e6~mv2.png",
+      "pagina": "https://www.aleo-solar.de/en/leo-n",
+      "por_que": "La foto de la carga anterior no era el producto (revisión visual, 2026-10-18): la de esta página sí lo es."
+    },
+    "atersa": {
+      "imagen": "https://www.todoensolar.com/WebRoot/StoreES/Shops/61987244/6657/FECA/0121/F443/C258/0A0C/6D10/5053/Panel_Solar_455W_A-455M_Atersa_GS_PERC.jpg",
+      "pagina": "https://www.todoensolar.com/epages/61987244.sf/en_US/?ObjectPath=%2FShops%2F61987244%2FProducts%2F1009201",
+      "por_que": "La foto de la carga anterior no era el producto (revisión visual, 2026-10-18): la de esta página sí lo es."
+    },
+    "senec-home": {
+      "imagen": "https://senec.com/sites/default/files/styles/section_portrait_medium/public/2024-01/Senec_Home_P4_Front_0.jpg.webp?h=f895e294&itok=2d-NL3ow",
+      "pagina": "https://senec.com/de/produkte/senec-home/p4",
+      "por_que": "La foto de la carga anterior no era el producto (revisión visual, 2026-10-18): la de esta página sí lo es."
+    },
+    "longi-hi-mo-x10-explorer": {
+      "imagen": "https://growenergy.com.au/cdn/shop/files/LR7_54HVH_Grow_Energy_front_view.png?v=1775698739",
+      "pagina": "https://growenergy.com.au/products/hi-mo-x10",
+      "por_que": "La foto de la carga anterior no era el producto (revisión visual, 2026-10-18): la de esta página sí lo es."
     }
   }
 }
