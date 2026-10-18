@@ -931,6 +931,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const panelVisiblesGaleria = editable ? (
     <div className="max-h-72 overflow-y-auto">
       <p className="px-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
+      {/* LA DESCRIPCIÓN, COMO UNA PROPIEDAD MÁS (2026-10-18, Eugenio): es el
+          subtítulo de la página de cada entrada; aquí se elige si sale. */}
+      <div className="flex items-center rounded-md hover:bg-slate-50">
+        <button onClick={() => cambiarVista({ config: { ...activa.config, descripcion: activa.config.descripcion === false } })}
+          className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-8 text-xs font-bold text-slate-600 text-left">
+          {activa.config.descripcion !== false ? <Eye className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+          <span className={cn('flex-1 truncate', activa.config.descripcion === false && 'text-slate-400')}>Descripción</span>
+          <span className="shrink-0 text-[10px] font-bold text-slate-300">texto de la página</span>
+        </button>
+      </div>
       {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
         const puesta = visiblesAhora.includes(c.id);
         return (
@@ -1165,7 +1175,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               enCaja={!!colAgr}
               alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
+              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora} conDescripcion={activa.config.descripcion !== false}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               // Dentro de un grupo también se reordena a mano (2026-10-18, Eugenio):
               // el orden es el de la tabla, y el grupo enseña su trozo en ese orden.

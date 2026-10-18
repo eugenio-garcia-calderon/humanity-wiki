@@ -9251,3 +9251,6 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 ## 2026-10-18 — La cifra de la barra de avance, bien puesta (prog8)
 - La cifra del porcentaje ya **no se parte en dos líneas** («100» arriba y «%» debajo): número y «%» van juntos y sin salto (`whitespace-nowrap`), del **color de su tramo** (naranja, azul o verde).
 - En la tarjeta, la barra va a lo ancho y la cifra a su **derecha**. En la ficha, la cifra es grande con el «%» pequeño pegado y al lado «de avance» o «completado» al 100 %; la barra lleva una sombra interior suave.
+
+## 2026-10-18 — La descripción, como una propiedad más de la tarjeta (prog8)
+- En el panel **Propiedades** de una galería, la **Descripción** (el subtítulo de la página de cada entrada) sale como una propiedad más con su ojo: se elige si se ve o no en las tarjetas. Se guarda en la vista (`config.descripcion === false` la esconde); por defecto, visible como hasta ahora.
