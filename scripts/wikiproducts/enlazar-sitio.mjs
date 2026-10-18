@@ -18,7 +18,10 @@
 //      five subcategories with a picture and how many products each has;
 //   5. (W2) adds to the site menu the links of `sitio.json` → `menu` that are
 //      missing (POST /api/v1/pages/:id/site/menu/links). A link to a page
-//      that does not exist yet is left for the next run, not a failure.
+//      that does not exist yet is left for the next run, not a failure. Then
+//      removes the links of `sitio.json` → `quitar_del_menu` that go to the
+//      home page («Inicio»: the site name already links there, and the link
+//      cost the bar the room it needed at 1,024 px).
 //
 // The offers tables need no page: whoever sees a product sheet sees its offers
 // when both tables have the same owner (`ofertas.ts`, W5 #609).
@@ -187,11 +190,11 @@ try {
 
 // ── 5. The site menu (W2) ───────────────────────────────────────────────────
 console.log('== Menú ==');
-if (sitio.menu?.length && portada) {
+if ((sitio.menu?.length || sitio.quitar_del_menu?.length) && portada) {
   try {
     const actual = await api('GET', `/api/v1/pages/${portada.id}/site`);
     let paginas = null;
-    for (const l of sitio.menu) {
+    for (const l of sitio.menu || []) {
       if (!paginas) {
         paginas = [];
         for (let cursor = null, n = 0; n < 20; n++) {
@@ -205,6 +208,18 @@ if (sitio.menu?.length && portada) {
       await api('POST', `/api/v1/pages/${portada.id}/site/menu/links`, { link: { text: l.texto, page_id: destino.id } });
       const linea = `menú: + «${l.texto}» → ${destino.title}`;
       console.log(`  + ${linea}`); hechos.push(linea);
+    }
+    // Only a link to the home page with that text: a link someone added to a
+    // real page called «Inicio» is not ours to remove.
+    const aPortada = (e) => e?.destino?.tipo === 'inicio' || (e?.destino?.tipo === 'url' && e.destino.url === '/');
+    for (const texto of sitio.quitar_del_menu || []) {
+      const sobran = actual.menu.links.filter(e => aPortada(e) && normal(e.texto) === normal(texto));
+      if (!sobran.length) { console.log(`  ${texto}: no está en el menú`); continue; }
+      for (const e of sobran) {
+        await api('DELETE', `/api/v1/pages/${portada.id}/site/menu/links/${encodeURIComponent(e.id)}`);
+        const linea = `menú: − «${e.texto}» (la portada ya se abre desde el nombre del sitio)`;
+        console.log(`  ${linea}`); hechos.push(linea);
+      }
     }
   } catch (e) { fallos.push(`menú: ${e.message}`); console.log(`  ✗ ${e.message}`); }
 }

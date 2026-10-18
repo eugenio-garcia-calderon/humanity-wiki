@@ -49,11 +49,12 @@
     ]
   },
   "portada": {
-    "_comentario": "La página raíz del sitio (la de wikiproducts.humanity.wiki). enlazar-sitio.mjs le pone el bloque «Secciones del sitio» (W2) antes de su primer título si no lo tiene, y añade a su menú los enlaces de «menu» que falten.",
+    "_comentario": "La página raíz del sitio (la de wikiproducts.humanity.wiki). enlazar-sitio.mjs le pone el bloque «Secciones del sitio» (W2) antes de su primer título si no lo tiene, y añade a su menú los enlaces de «menu» que falten y quita los de «quitar_del_menu» que lleven a la portada.",
     "id": "KWMVDTQQ35QI",
     "titulo": "Wikiproducts",
     "bloque_titulo": "Explora por categoría"
   },
   "_menu_comentario": "Vacío a propósito (Eugenio, 2026-10-18): las consultas con expertos quedan fuera del MVP, así que el enlace «Expertos» → «Consultar a un experto» ya no se añade. Para volver a ponerlo: {\"texto\": \"Expertos\", \"pagina_titulo\": \"Consultar a un experto\"}.",
-  "menu": []
+  "menu": [],
+  "quitar_del_menu": ["Inicio"]
 }

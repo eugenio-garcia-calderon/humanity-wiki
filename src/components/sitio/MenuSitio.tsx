@@ -1,5 +1,5 @@
 import CuentaMenu from './CuentaMenu';
-import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   Menu as Tres, X, Home, Mail, Phone, MapPin, ShoppingBag, ShoppingCart, Info, Users, Calendar, Star,
   Heart, BookOpen, Briefcase, Camera, Globe, MessageCircle, Send, Newspaper, Leaf, Sparkles, Lightbulb,
@@ -25,6 +25,8 @@ import {
 //   · «Teléfono o escritorio» se decide por el ANCHO DEL MARCO (`@container`),
 //     no por el de la pantalla: así la vista previa del creador enseña la
 //     versión de teléfono dentro de una caja de 375 px.
+//   · Una excepción (2026-10-18): la barra mide si sus enlaces caben y, si no,
+//     se pliega también en una pantalla ancha. Ver `useApretado`.
 
 /** Los iconos que se pueden poner en un enlace. Pocos y a propósito: esto va
  *  en lo primero que baja una web publicada, y la lista entera de la
@@ -140,6 +142,50 @@ function CajaBuscar({ rutas, s, lleno }: { rutas: Rutas; s: Sitio; lleno?: boole
 }
 
 /** La barra de arriba. También es la del teléfono cuando el menú es lateral. */
+/**
+ * ¿NO CABE LA BARRA? (2026-10-18). El menú se plegaba sólo por debajo de
+ * 672 px de marco. Con cuatro enlaces largos, la caja de buscar y la píldora
+ * «Entrar», a 1024 px el nombre del sitio quedaba debajo de «Inicio»: el
+ * ancho que hace falta depende de los textos que escribe cada autor, así que
+ * ningún punto fijo vale para todos los sitios.
+ *
+ * Así que se mide. Con la barra abierta: lo que ocupan de verdad los enlaces
+ * frente al hueco que tienen. Si no caben, se pliega (tres rayas, como en el
+ * teléfono) y se recuerda cuánto hacía falta; al ensanchar la ventana hasta
+ * ese ancho, se vuelve a abrir. Sin JavaScript (el HTML del servidor) la
+ * barra sale abierta y los enlaces que no caben se recortan por la derecha
+ * (`overflow-hidden` + `justify-end-safe`): nunca encima del nombre.
+ */
+function useApretado(medir: boolean) {
+  const fila = useRef<HTMLDivElement>(null);
+  const nav = useRef<HTMLElement>(null);
+  const [apretado, setApretado] = useState(false);
+  const necesita = useRef(0);
+  useEffect(() => {
+    const f = fila.current;
+    if (!medir || !f || typeof ResizeObserver === 'undefined') return;
+    const comprobar = () => {
+      const n = nav.current;
+      if (!apretado) {
+        if (!n || !n.offsetParent) return; // plegado por CSS (teléfono): nada que medir
+        const hijos = [...n.children] as HTMLElement[];
+        const contenido = hijos.reduce((t, h) => t + h.offsetWidth, 0) + Math.max(hijos.length - 1, 0) * 4;
+        if (contenido > n.clientWidth + 1) {
+          necesita.current = f.clientWidth - n.clientWidth + contenido;
+          setApretado(true);
+        }
+      } else if (f.clientWidth >= necesita.current) setApretado(false);
+    };
+    comprobar();
+    const ro = new ResizeObserver(comprobar);
+    ro.observe(f);
+    // Las letras web llegan después del primer pintado y cambian los anchos.
+    document.fonts?.ready.then(comprobar).catch(() => {});
+    return () => ro.disconnect();
+  }, [medir, apretado]);
+  return { fila, nav, apretado };
+}
+
 function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   s: Sitio; rutas: Rutas; logo?: string; nombre?: string; soloMovil?: boolean; cuenta?: string | null;
 }) {
@@ -148,20 +194,21 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   // En lateral, la barra sólo existe en el teléfono, y allí siempre plegada.
   const plegado = soloMovil ? 'siempre' : mn.plegado;
   const estilo: CSSProperties = { background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` };
+  const { fila, nav, apretado } = useApretado(plegado === 'movil');
   return (
     <header style={estilo}
       className={cn('w-full z-40', mn.fijo && 'sticky top-0', mn.borde && 'border-b', soloMovil && '@2xl:hidden')}>
-      <div className="relative mx-auto max-w-6xl px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
+      <div ref={fila} className="relative mx-auto max-w-6xl px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
         <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} />
-        <nav aria-label="Menú"
+        <nav ref={nav} aria-label="Menú"
           className={cn('flex-1 items-center gap-1 min-w-0',
-            mn.alineacion === 'centro' ? 'justify-center' : mn.alineacion === 'izquierda' ? 'justify-start' : 'justify-end',
-            plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:flex' : 'flex flex-wrap')}>
+            mn.alineacion === 'centro' ? 'justify-center-safe' : mn.alineacion === 'izquierda' ? 'justify-start' : 'justify-end-safe',
+            plegado === 'siempre' || apretado ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:flex overflow-hidden' : 'flex flex-wrap')}>
           {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} />)}
         </nav>
-        {mn.buscador && <div className={cn('shrink-0', plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:block' : 'block')}><CajaBuscar rutas={rutas} s={s} /></div>}
+        {mn.buscador && <div className={cn('shrink-0', apretado && 'ml-auto', plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:block' : 'block')}><CajaBuscar rutas={rutas} s={s} /></div>}
         {plegado !== 'nunca' && mn.enlaces.length > 0 && (
-          <details className={cn('group ml-auto', plegado === 'movil' && '@2xl:hidden')}>
+          <details className={cn('group', !(apretado && mn.buscador) && 'ml-auto', plegado === 'movil' && !apretado && '@2xl:hidden')}>
             <summary aria-label="Abrir el menú"
               className="list-none [&::-webkit-details-marker]:hidden cursor-pointer w-11 h-11 grid place-items-center rounded-lg hover:bg-black/5">
               <Tres className="w-6 h-6 group-open:hidden" />
