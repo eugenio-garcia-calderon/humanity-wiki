@@ -15,7 +15,10 @@
 //      can read is not shown, `bd.ts` /relaciones);
 //   3. recomputes the readable address of every row (/powerbanks/anker-…);
 //   4. (W2, 2026-10-18) gives the home page a «Secciones del sitio» block: the
-//      five subcategories with a picture and how many products each has;
+//      five subcategories with a picture and how many products each has; gives
+//      each category page the same cards for its own subcategories
+//      (`ambito: 'pagina'`); and drops the old lists' headings and paragraphs,
+//      keeping their subpage links, which the reader hides (`enTarjetas`);
 //   5. (W2) adds to the site menu the links of `sitio.json` → `menu` that are
 //      missing (POST /api/v1/pages/:id/site/menu/links). A link to a page
 //      that does not exist yet is left for the next run, not a failure. Then
@@ -28,8 +31,10 @@
 //
 // Idempotent: a page that already shows its table is left alone, a notice
 // that is gone is not looked for again, a supporting page is found again by
-// the table it shows. It never deletes a page or a row; the only thing it
-// removes is the notice block.
+// the table it shows. It never deletes a page or a row; the only things it
+// removes are the notice block, the old category lists' headings and
+// paragraphs and the menu links of `quitar_del_menu` (pages keep their
+// history, so each removal can be undone).
 //
 //   HW_API_KEY=hw_live_… node scripts/wikiproducts/enlazar-sitio.mjs [--base http://localhost:3000] [--seco]
 //
@@ -162,6 +167,46 @@ for (const t of esquema.tablas) {
 }
 console.log(`  ${rutas} direcciones puestas al día`);
 
+/**
+ * The subpage links of `pagina` that point at `ids` are drawn as section cards
+ * (the reader hides those links; they stay, because they say what hangs from
+ * what). This removes what introduced each link: a «###» heading with the
+ * linked page's title and the paragraph right under it, and then a «##»
+ * heading left with nothing visible under it. With `poner`, it first adds the
+ * cards block (`ambito: 'pagina'`) where the list began. Nothing else is
+ * touched, and every removal stays in the page's history.
+ */
+async function enTarjetas(pagina, ids, poner) {
+  let bl = pagina.blocks || [];
+  const enlaces = bl.filter(b => b?.tipo === 'subpagina' && ids.has(b.entityId));
+  if (!enlaces.length) return;
+  const titulos = new Set(enlaces.map(b => normal(b.pubTitulo)).filter(Boolean));
+  const quitar = new Set();
+  bl.forEach((b, i) => {
+    if (b?.tipo !== 'titulo3' || !titulos.has(normal(b.texto))) return;
+    quitar.add(b.id);
+    if (bl[i + 1]?.tipo === 'parrafo') quitar.add(bl[i + 1].id);
+  });
+  bl.forEach((b, i) => {
+    if (b?.tipo !== 'titulo2') return;
+    let fin = bl.findIndex((x, j) => j > i && /^titulo[12]$/.test(x?.tipo || ''));
+    if (fin < 0) fin = bl.length;
+    const queda = bl.slice(i + 1, fin).filter(x => !quitar.has(x.id));
+    if (queda.length && queda.every(x => x.tipo === 'subpagina' && ids.has(x.entityId))) quitar.add(b.id);
+  });
+  if (poner && !todos(bl).some(b => b?.tipo === 'secciones')) {
+    const desde = bl.findIndex(b => quitar.has(b.id) || (b?.tipo === 'subpagina' && ids.has(b.entityId)));
+    await api('POST', `/api/v1/pages/${pagina.id}/blocks`, { block: { type: 'secciones', data: { titulo: '', ambito: 'pagina' } }, after: desde > 0 ? bl[desde - 1].id : null });
+    const linea = `${pagina.title}: + tarjetas de sus subcategorías`;
+    console.log(`  + ${linea}`); hechos.push(linea);
+  }
+  for (const id of quitar) await api('DELETE', `/api/v1/pages/${pagina.id}/blocks/${encodeURIComponent(id)}`);
+  if (quitar.size) {
+    const linea = `${pagina.title}: − ${quitar.size} títulos y textos de la lista vieja (ya están en las tarjetas)`;
+    console.log(`  ${linea}`); hechos.push(linea);
+  }
+}
+
 // ── 4. The home page shows the site's sections (W2, evaluator round 1) ─────
 console.log('== Portada ==');
 let portada = null;
@@ -185,6 +230,21 @@ try {
       const linea = `${p.title}: + bloque «Secciones del sitio»`;
       console.log(`  + ${linea}`); hechos.push(linea);
     }
+
+    // 4b. Each category (a subpage of the home page whose own subpages are the
+    // subcategories) shows them as cards too, not as a list of links; and the
+    // headings and paragraphs that introduced each link, on the home page and
+    // in each category, go: the cards already carry the name and the text.
+    const subcats = new Set(sitio.subcategorias.map(x => x.pagina));
+    const hijas = (await api('GET', `/api/v1/pages/${portada.id}`)).blocks?.filter(b => b?.tipo === 'subpagina' && b.entityId) || [];
+    const categorias = new Set();
+    for (const h of hijas) {
+      const c = await api('GET', `/api/v1/pages/${h.entityId}`);
+      if (!(c.blocks || []).some(b => b?.tipo === 'subpagina' && subcats.has(b.entityId))) continue;
+      categorias.add(c.id);
+      await enTarjetas(c, subcats, true);
+    }
+    await enTarjetas(await api('GET', `/api/v1/pages/${portada.id}`), categorias, false);
   }
 } catch (e) { fallos.push(`portada: ${e.message}`); console.log(`  ✗ ${e.message}`); }
 

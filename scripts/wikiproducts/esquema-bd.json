@@ -950,6 +950,21 @@
           }
         },
         {
+          "clave": "precio_por_kwh",
+          "nombre": "Precio por kWh",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_por_kwh",
+            "grupo": "compra",
+            "ficha": "precio_unidad",
+            "comparar": "menor",
+            "formula": "REDONDEAR({Precio desde} / {Energía nominal} * 1000; 0)",
+            "unidad": "€/kWh",
+            "explicacion": "El precio más bajo de las tiendas dividido por la energía nominal que declara la marca.",
+            "sin_dato": "Sin precio en ninguna tienda todavía"
+          }
+        },
+        {
           "clave": "revisado",
           "nombre": "Datos revisados el",
           "tipo": "fecha",
@@ -1502,6 +1517,21 @@
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
               "direccion": "destino"
             }
+          }
+        },
+        {
+          "clave": "precio_por_w",
+          "nombre": "Precio por vatio",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_por_w",
+            "grupo": "compra",
+            "ficha": "precio_unidad",
+            "comparar": "menor",
+            "formula": "REDONDEAR({Precio desde} / {Potencia pico}; 2)",
+            "unidad": "€/W",
+            "explicacion": "El precio más bajo de las tiendas dividido por la potencia pico que declara la marca.",
+            "sin_dato": "Sin precio en ninguna tienda todavía"
           }
         },
         {
@@ -2783,6 +2813,21 @@
           }
         },
         {
+          "clave": "precio_por_w",
+          "nombre": "Precio por vatio",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_por_w",
+            "grupo": "compra",
+            "ficha": "precio_unidad",
+            "comparar": "menor",
+            "formula": "REDONDEAR({Precio desde} / {Potencia pico}; 2)",
+            "unidad": "€/Wp",
+            "explicacion": "El precio más bajo de las tiendas dividido por la potencia pico que declara la marca.",
+            "sin_dato": "Sin precio en ninguna tienda todavía"
+          }
+        },
+        {
           "clave": "revisado",
           "nombre": "Datos revisados el",
           "tipo": "fecha",
@@ -3534,6 +3579,21 @@
               "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
               "direccion": "destino"
             }
+          }
+        },
+        {
+          "clave": "precio_por_kwh",
+          "nombre": "Precio por kWh",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_por_kwh",
+            "grupo": "compra",
+            "ficha": "precio_unidad",
+            "comparar": "menor",
+            "formula": "REDONDEAR({Precio desde} / {Capacidad útil}; 0)",
+            "unidad": "€/kWh",
+            "explicacion": "El precio más bajo de las tiendas dividido por la capacidad útil que declara la marca.",
+            "sin_dato": "Sin precio en ninguna tienda todavía"
           }
         },
         {

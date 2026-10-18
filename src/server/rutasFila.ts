@@ -63,16 +63,23 @@ export function rutaDeFila(
 ): string | null {
   const porNombre = new Map(columnas.map(c => [slugDe(c.nombre), c]));
   let falta = false;
-  const tramos = plantilla.split('/').map(tramo => {
+  const partes = plantilla.split('/');
+  const tramos = partes.map((tramo, i) => {
+    let vacio = false;
     const lleno = tramo.replace(/\{([^}]+)\}/g, (_, nombre: string) => {
       const v = valor(nombre);
-      if (!slugDe(v)) falta = true;
+      if (!slugDe(v)) vacio = true;
       return v;
     });
+    // Una columna vacía en el ÚLTIMO tramo (un producto que no tiene código
+    // de modelo, 2026-10-18) no deja la ficha en `/p/:id`: ese tramo pasa a
+    // ser su nombre, `powerbanks/riapow-solar-power-bank-…`. Si el dato llega
+    // después, la dirección cambia y la vieja queda en `direcciones_anteriores`.
+    if (vacio && i === partes.length - 1 && slugDe(titulo)) return slugDe(titulo);
+    // En otro tramo, no: una dirección a medias («/-a1689») es peor que `/p/:id`.
+    if (vacio) falta = true;
     return slugDe(lleno);
   });
-  // Una columna vacía (un producto sin marca todavía) no deja una dirección a
-  // medias: la ficha sigue en `/p/:id` hasta que estén todos sus datos.
   if (falta || tramos.some(t => !t) || TRAMOS_RESERVADOS.has(tramos[0])) return null;
   return tramos.join('/');
 

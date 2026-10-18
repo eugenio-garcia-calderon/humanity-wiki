@@ -343,6 +343,8 @@ function bloqueEnHtml(b: any, ctx: ContextoHtml, hijos: (lista: any[]) => string
       const titulo = ctx.titulos.get(String(b.entityId)) ?? b.pubTitulo;
       // Una subpágina borrada no es un enlace: sería un 404 dentro del sitio.
       if (titulo === undefined) return '';
+      // Ya está en las tarjetas del bloque «secciones» de esta página.
+      if ((ctx.extra.get('subpaginas-en-tarjetas') as Set<string> | undefined)?.has(String(b.entityId))) return '';
       return `<p><a href="${esc(ctx.enlacePagina(String(b.entityId)))}">${esc(titulo || 'Sin título')}</a></p>`;
     }
     case 'marcador': {

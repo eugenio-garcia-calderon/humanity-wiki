@@ -40,7 +40,7 @@ assert.equal(markdownABloques('```bloque\n{"tipo":"chat","datos":[1]}\n```')[0].
 // Un bloque de código normal sigue siendo de código.
 assert.equal(markdownABloques('```js\nconst a = 1;\n```')[0].tipo, 'codigo');
 
-assert.equal(TIPOS_BLOQUE_DATOS.length, 9);
+assert.equal(TIPOS_BLOQUE_DATOS.length, 13); // + menuTemas, contenidoTema, secciones, mapaMundo (2026-10-18)
 assert.ok(TIPOS_BLOQUE_DATOS.every(esBloqueDatos));
 assert.ok(!esBloqueDatos('parrafo'));
 

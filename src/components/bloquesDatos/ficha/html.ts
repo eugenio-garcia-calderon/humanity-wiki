@@ -54,7 +54,7 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       if (v.modelo) filas.push(['Modelo', h.esc(v.modelo)]);
       filas.push(['Categoría', h.esc(v.subcategoria || v.categoria)]);
       if (v.nota) filas.push(['Valoración de la comunidad', v.nota.media ? `${h.esc(v.nota.media)} de 5 (${v.nota.votos} ${v.nota.votos === 1 ? 'voto' : 'votos'})` : 'Sin valoraciones suficientes todavía']);
-      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}` : 'Sin precio todavía']);
+      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}${v.compra.porUnidad ? ` (${h.esc(v.compra.etiquetaUnidad.charAt(0).toLowerCase() + v.compra.etiquetaUnidad.slice(1))}: ${h.esc(v.compra.porUnidad)})` : ''}` : 'Sin precio todavía']);
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
       for (const l of v.destacados) filas.push([h.esc(l.etiqueta), `${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}`]);
       if (v.gtin) filas.push(['EAN', h.esc(v.gtin)]);

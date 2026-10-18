@@ -5,7 +5,7 @@
 // It checks the rules that must hold whatever the data says, and above all
 // the ethics code: THE COMMISSION NEVER ORDERS ANYTHING (plan §2.3).
 import assert from 'node:assert/strict';
-import { ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
+import { ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, etiquetaColumna, textoDe, procedenciaDe, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
 import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe } from '../../src/components/bloquesDatos/ficha/vistas';
 import { metaFicha, tituloFicha } from '../../src/components/bloquesDatos/ficha/seo';
 import { propiedadHtml, retiradaHtml, comparadorHtml, type Herramientas } from '../../src/components/bloquesDatos/ficha/html';
@@ -159,7 +159,7 @@ prueba('el HTML del servidor escapa lo que escribe la gente', () => {
   assert.ok(!html.includes('<b>737'), html);
   assert.ok(html.includes('&lt;b&gt;737'));
   const tabla = propiedadHtml(ficha('a'), { estilo: 'tabla', grupo: 'tecnico' }, h);
-  assert.match(tabla, /<th scope="row">Capacidad \(Wh\)<\/th><td>86,4 Wh <small>\(<a href="https:\/\/anker.com\/737"/);
+  assert.match(tabla, /<th scope="row">Capacidad<\/th><td>86,4 Wh <small>\(<a href="https:\/\/anker.com\/737"/);
 });
 
 prueba('las propiedades no enseñan la comisión ni las notas internas', () => {
@@ -206,10 +206,10 @@ prueba('lo que nadie publica se dice en una frase, no en una fila cada dato', ()
   const sinPeso: TablaFicha = { ...t, filas: t.filas.map(f => (f.id === 'c' ? { ...f, celdas: { ...f.celdas, peso: { estado: 'vacia' } as any } } : f)) };
   const v = vistaPropiedad({ pagina_id: 'PC', fila_id: 'c', tabla: sinPeso, relacionadas: {} }, { estilo: 'tabla', grupo: 'tecnico' }) as any;
   assert.deepEqual(v.lineas.map((l: any) => l.columnaId), ['cap']);
-  assert.deepEqual(v.sinDato, [{ motivo: 'El fabricante no lo publica', etiquetas: ['Peso (kg)'] }]);
+  assert.deepEqual(v.sinDato, [{ motivo: 'El fabricante no lo publica', etiquetas: ['Peso'] }]);
   const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
   const html = propiedadHtml({ pagina_id: 'PC', fila_id: 'c', tabla: sinPeso, relacionadas: {} }, { estilo: 'tabla', grupo: 'tecnico' }, h);
-  assert.ok(html.includes('El fabricante no lo publica: Peso (kg).'));
+  assert.ok(html.includes('El fabricante no lo publica: Peso.'));
 });
 
 prueba('el comparador marca como principales el precio, la nota y las cifras clave', () => {
@@ -217,6 +217,30 @@ prueba('el comparador marca como principales el precio, la nota y las cifras cla
   const v = vistaComparador(t, ['b', 'c'], { actualId: 'a' })!;
   assert.deepEqual(v.lineas.filter(l => l.clave).map(l => l.columnaId).sort(), ['cap', 'med', 'pre']);
   assert.ok(v.lineas.some(l => !l.clave), 'el resto sigue ahí, detrás de «ver todas»');
+});
+
+prueba('la unidad no sale dos veces y «1 año» va en singular', () => {
+  const g: any = { id: 'g', nombre: 'Garantía (años)', tipo: 'numero', config: { unidad: 'años' } };
+  assert.equal(etiquetaColumna(g), 'Garantía');
+  assert.equal(textoDe({ id: 'x', pagina_id: null, titulo: 'x', celdas: { g: { estado: 'ok', valor: 1 } as any } }, g), '1 año');
+  assert.equal(textoDe({ id: 'x', pagina_id: null, titulo: 'x', celdas: { g: { estado: 'ok', valor: 2 } as any } }, g), '2 años');
+  // A parenthesis that is not the unit stays: «Medidas (mm)» is a text.
+  assert.equal(etiquetaColumna({ id: 'm', nombre: 'Medidas (mm)', tipo: 'texto', config: {} } as any), 'Medidas (mm)');
+});
+
+prueba('el precio por vatio es «Calculado», dice cuándo no hay precio y sustituye a la estimación cargada', () => {
+  const pu: any = { id: 'pu', nombre: 'Precio por kWh', tipo: 'formula', config: { ficha: 'precio_unidad', grupo: 'compra', comparar: 'menor', unidad: '€/kWh', explicacion: 'Precio ÷ energía', sin_dato: 'Sin precio en ninguna tienda todavía' } };
+  const est: any = { id: 'est', nombre: 'Precio por kWh útil', tipo: 'moneda', config: { clave: 'precio_por_kwh_util_eur', grupo: 'compra', comparar: 'menor' } };
+  const con = { id: 'x', pagina_id: null, titulo: 'x', celdas: { pu: { estado: 'ok', valor: 514 } as any, est: { estado: 'ok', valor: 400 } as any } };
+  assert.equal(procedenciaDe(con, pu)?.naturaleza, 'calculado');
+  assert.equal(procedenciaDe({ ...con, celdas: {} }, pu)?.etiqueta, 'Sin precio en ninguna tienda todavía');
+  const t: TablaFicha = { ...tabla, columnas: [...tabla.columnas, pu, est], filas: tabla.filas.map(f => ({ ...f, celdas: { ...f.celdas, pu: { estado: 'ok', valor: 500 } as any, est: { estado: 'ok', valor: 400 } as any } })) };
+  const v = vistaComparador(t, ['b'], { actualId: 'a' })!;
+  assert.ok(v.lineas.some(l => l.columnaId === 'pu' && l.clave));
+  assert.ok(!v.lineas.some(l => l.columnaId === 'est'), 'la estimación cargada no compite con el cálculo');
+  const cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.equal(cab.compra.porUnidad, '500 €/kWh');
+  assert.ok(propiedadesTarjeta(t.columnas, 'nom')!.includes('pu'));
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);

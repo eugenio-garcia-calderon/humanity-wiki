@@ -9193,6 +9193,36 @@ Eugenio: «inspírate en las landing pages de Amazon… que la información est�
 
 ## 2026-10-18 — Wikiproducts W3a: data for the Amazon-style sheet
 - The new columns of W1's sheet (#643) now have data for the 94 products, each with its nature and source: «Ideal para» (94; an editorial call from the specs, `calculado`, the reason in the note), «Manual de instrucciones» (63), «Qué hay en la caja» (51), and per category recharge time (16), indicator (16), pass-through (13), built-in cable (10), wireless charging (6), built-in stand (13 panels), motion sensor (18 lights), monitoring app (15 batteries). Fields without a source stay empty rather than guessed.
+## 2026-10-18 — Wikiproducts W1: price per watt and per kWh, units said once
+
+Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en baterías, en paneles, para que sea algo realmente comparable».
+- New formula columns in `esquema-bd.json`, role `precio_unidad`:
+  - powerbanks: «Precio por kWh» = Precio desde ÷ Energía nominal × 1000 (€/kWh, so it compares with home batteries);
+  - home batteries: «Precio por kWh» = Precio desde ÷ Capacidad útil (€/kWh);
+  - portable panels: «Precio por vatio» = Precio desde ÷ Potencia pico (€/W);
+  - home panels: «Precio por vatio» = Precio desde ÷ Potencia pico (€/Wp).
+
+  They are calculated from the cheapest current offer, so nothing has to be loaded, and `crear-esquema.mjs` creates them on the next load run.
+- How the price per unit appears:
+  - its provenance is «Calculado», with how it is worked out in the tooltip (`config.explicacion`);
+  - with no shop, the sheet says «Sin precio en ninguna tienda todavía»;
+  - the header shows it under the price («Precio por kWh: 514 €/kWh»);
+  - the comparator has it among its main lines and marks the cheapest;
+  - «La mejor en cada criterio» ranks by it;
+  - gallery cards show it;
+  - visitors can sort a gallery by it, like any other column.
+- On home tables the loaded estimates «Precio por Wp» and «Precio por kWh útil» are hidden from the sheet when the calculated column exists. A market estimate next to our shops' figure would contradict it.
+- Unit shown once: a column named «Garantía (años)» whose value already says «años» is labelled «Garantía» (`etiquetaColumna`). «1 años» now reads «1 año».
+- Lights: «Batería (Wh)» and «Panel solar (W)» count as key figures, so a light with no runtime or weight still fills its header.
+
+## 2026-10-18 — Category pages and home sections as picture cards; readable address without a model code (Wikiproducts W2)
+
+- Eugenio: «que las categorías sean visualmente más atractivas, no una lista … sino que haya también imágenes». The `secciones` block now draws cards with a large picture (4:3), the name, the product count and, from tablet width, the section's description (`tarjetaSeccion.ts`, shared by `SeccionesSitio.tsx` and the server HTML). The picture is the section page's cover or, failing that, the photo of the first product in gallery order (the photo column, as `bd.ts` reads it). Before this every card fell back to the box icon, because product photos live in a column and not in the page.
+- New `datos.ambito: 'pagina'` on `secciones`: only the sections under that page (`/api/sitio/secciones?desde=`). A category page uses it to show its subcategories.
+- On a page with a `secciones` block, the reader (`BloquesLectura`) and the server HTML no longer draw the subpage links that lead to sections already in the cards. The links stay in the page because the breadcrumbs, sitemap and search walk them.
+- `enlazar-sitio.mjs` step 4b (`enTarjetas`): it adds the cards to each category page and removes, there and on the home page, the «###» heading and paragraph that introduced each such link, plus a «##» heading left with nothing visible. It applies on W3a's next «Cargar Wikiproducts» run. Run twice on the local copy: the first run made the changes, the second changed nothing.
+- `rutasFila.ts`: when a column of the route's LAST segment is empty (the Riapow powerbank has no model code), that segment becomes the row's title, `powerbanks/riapow-solar-power-bank-26800-mah-inalambrica`, instead of leaving the sheet at `/p/:id`. On the local copy, 3 sheets had no address (Riapow and 2 lights); after the change, 0.
+- Checked locally at 390 and 1,280 px on the home and both category pages, using placeholder pictures because the local copy has no product photos: no horizontal scroll and no duplicated links. Not checked on wikiproducts.humanity.wiki.
 
 ## 2026-10-18 — Wikiproducts W3a: read-only export of the public site for the evaluator's copy
 - New workflow «Exportar Wikiproducts» (`exportar-wikiproducts.yml`, by hand): over SSH, `scripts/wikiproducts/exportar-en-servidor.sh` reads the site's public pages (the root, the subcategory pages, «Cómo trabajamos» and every page hanging from them through «Página» blocks), its `sitio_config` / `sitio_categorias` / `sitio_restricciones` rows, its `dominios_paginas` row, and the stored product photos with their row name and credit. The result is the run's artifact `wikiproducts-export` (paginas.json, fotos.json, fotos.tar), kept 14 days.
