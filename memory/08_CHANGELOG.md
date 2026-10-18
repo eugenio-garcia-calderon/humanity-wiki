@@ -8837,6 +8837,22 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — La visibilidad de las propiedades en la galería se aplica (prog8)
 - En una galería, mostrar u ocultar una propiedad desde el panel de Propiedades no tenía efecto en las tarjetas: el panel guardaba la lista en la vista, pero las tarjetas leían otra lista del bloque. Ahora la galería lee y escribe esa misma lista, guardada en la vista.
 
+### 2026-10-18 — Sin «Recientes» en el menú lateral (prog8)
+- El menú lateral ya no enseña la sección de páginas recientes. Los favoritos y el árbol de páginas siguen igual.
+
+### 2026-10-18 — Galería: propiedades en todos los tamaños y nombre en dos líneas (prog8)
+- Las propiedades marcadas como visibles se ven debajo del nombre de cada tarjeta en cualquier tamaño de galería; antes, en XS y XXS no salían.
+- El nombre de la tarjeta ocupa hasta dos líneas en vez de cortarse con «…» en la primera.
+
+### 2026-10-18 — La portada se puede recortar (prog8)
+- Al elegir una imagen de portada se abre un recortador: un marco que se mueve arrastrándolo y cambia de tamaño por sus esquinas, libre o con proporción fija (panorámica 3:1, 16:9, 4:3, cuadrada). Se sube el trozo elegido; también se puede usar sin recortar.
+- Una portada ya puesta tiene «Recortar» junto a «Cambiar» y «Quitar».
+
+### 2026-10-18 — Etiquetas con color y propiedades editables desde la galería (prog8)
+- Las opciones de una propiedad de selección (por ejemplo «Estado»: pendiente, en curso, completado) tienen color, con la paleta de Notion: se elige en el editor de la propiedad, junto a cada opción.
+- En la galería, una propiedad de selección se ve solo como su etiqueta de color, sin «Estado:» delante.
+- Quien edita cambia cualquier propiedad visible desde la propia tarjeta, sin abrirla, también si está vacía: la tarjeta enseña el nombre de la propiedad y un hueco para rellenarla.
+
 ### 2026-10-18 — Las páginas publicadas llevan su contenido en el HTML (Wikiproducts W2)
 - El HTML que descarga quien abre una página publicada (o un buscador) ya lleva el contenido: títulos, párrafos, listas, tablas, imágenes con texto alternativo, enlaces y la tabla de cada base de datos con sus filas enlazadas. Antes sólo llevaba título y descripción; el cuerpo lo pintaba JavaScript, y los buscadores de IA (ChatGPT, Claude, Perplexity) no veían nada más. `src/server/htmlBloques.ts`.
 - Una dirección de página de un sitio que no existe responde 404 (antes 200 con la aplicación vacía).

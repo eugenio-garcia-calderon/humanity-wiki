@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Boxes, ChevronRight, Clock, FileText, FolderKanban, Search, Star } from 'lucide-react';
+import { Boxes, ChevronRight, FileText, FolderKanban, Search, Star } from 'lucide-react';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
 import { anotarReciente, useEspacio, type Elemento } from '../../utils/espacio';
 import { cn } from '../../utils/cn';
@@ -61,7 +61,7 @@ function Seccion({ id, titulo, icono, items, onIr, abiertaPorDefecto }: {
 }
 
 export default function FavoritosRecientes({ onIr, carpetas }: { onIr?: () => void; carpetas: { id: string; slug: string }[] }) {
-  const { favoritos, recientes } = useEspacio();
+  const { favoritos } = useEspacio();
   const aqui = useLocation().pathname;
 
   // Anotar lo que se abre. Solo páginas y carpetas: lo demás del menú (mapas,
@@ -88,7 +88,6 @@ export default function FavoritosRecientes({ onIr, carpetas }: { onIr?: () => vo
         <kbd className="rounded border border-slate-200 px-1 text-[10px] font-bold text-slate-400">⌘K</kbd>
       </button>
       <Seccion id="favoritos" titulo={t('Favoritos')} icono={<Star className="h-3 w-3 text-amber-500" />} items={favoritos} onIr={onIr} abiertaPorDefecto />
-      <Seccion id="recientes" titulo={t('Recientes')} icono={<Clock className="h-3 w-3" />} items={recientes} onIr={onIr} abiertaPorDefecto />
     </div>
   );
 }
