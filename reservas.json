@@ -5,12 +5,6 @@
       "ruta": "drizzle/0159_wikiproducts_miembros.sql",
       "motivo": "W4: activar miembros en el sitio Wikiproducts",
       "desde": "2026-10-18T17:32:15.834Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "scripts/wikiproducts/enlazar-sitio.mjs",
-      "motivo": "W2: plegar la guía de cada subcategoría, portada en dos grupos",
-      "desde": "2026-10-18T21:14:21.513Z"
     }
   ]
 }
