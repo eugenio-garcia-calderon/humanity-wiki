@@ -97,7 +97,9 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
  *  Amazon's product pages»): price, community score and the key figures, all
  *  read from the row's own columns, nothing typed for the header. */
 /** `porUnidad`: «0,51 €/W», the price per watt or kWh, '' without one. */
-export type Compra = { desde: string; hasta: string; tiendas: number; porUnidad: string; etiquetaUnidad: string };
+/** `tiendas`: the shops with a confirmed price, the ones «Desde» is taken
+ *  from; `sinPrecio`: the other shops listed. */
+export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; porUnidad: string; etiquetaUnidad: string };
 export type Nota = { media: string; votos: number };
 
 export type VistaPropiedad =
@@ -140,9 +142,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
       nombre: fila.titulo,
       marca: cMarca && tieneValor(fila, cMarca) ? valorDe(f, fila, cMarca) : null,
       modelo: porRol('modelo') ? textoDe(fila, porRol('modelo')!) : '',
-      // «A la venta» next to «Sin precio todavía» contradicts itself (evaluator
-      // round 2): with no price in any shop, the badge is left out.
-      estado: compra && !compra.desde && /venta/i.test(estado) ? '' : estado,
+      estado: estadoCon(estado, compra),
       imagen,
       credito: imagen && cCredito ? textoDe(fila, cCredito) : '',
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
@@ -189,16 +189,36 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
   return { estilo: esTabla ? 'tabla' : 'lista', titulo: titulo || (grupo && GRUPOS[grupo]) || '', lineas, sinDato };
 }
 
+/** The status badge, read together with the price.
+ *  - «A la venta» with no price in any shop contradicts «Sin precio todavía»
+ *    (evaluator round 2): left out.
+ *  - «Descatalogado» while shops still sell it (Tesla Powerwall 2, production
+ *    check, 2026-10-18) read as «you cannot buy it»: it says both things. */
+export function estadoCon(estado: string, compra: Compra | null): string {
+  if (compra && !compra.desde && /^a la venta/i.test(estado)) return '';
+  if (compra?.desde && /^descatalogad/i.test(estado)) {
+    const n = compra.tiendas || 1;
+    return `Descatalogado por el fabricante · aún a la venta en ${n} ${n === 1 ? 'tienda' : 'tiendas'}`;
+  }
+  return estado;
+}
+
 function compraDe(t: TablaFicha, fila: FilaFicha): Compra | null {
   const min = columnaPorRol(t, 'precio_min');
   if (!min) return null;
   const max = columnaPorRol(t, 'precio_max');
   const n = columnaPorRol(t, 'num_ofertas');
+  const cp = columnaPorRol(t, 'ofertas_con_precio');
   // A price of 0 is no price: nothing is sold for free here.
   const desde = numeroDe(fila, min) === 0 ? '' : textoDe(fila, min);
   const hasta = max ? textoDe(fila, max) : '';
   const u = columnaPorRol(t, 'precio_unidad');
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: (n && numeroDe(fila, n)) || 0, porUnidad: u && desde ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
+  // «Desde 144,20 € en 5 tiendas» when only one of the five had a price
+  // (Anker 737, production check): count the priced ones, and say the rest
+  // apart. Tables loaded before `ofertas_con_precio` existed count them all.
+  const todas = (n && numeroDe(fila, n)) || 0;
+  const conPrecio = cp ? numeroDe(fila, cp) ?? 0 : todas;
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), porUnidad: u && desde ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {

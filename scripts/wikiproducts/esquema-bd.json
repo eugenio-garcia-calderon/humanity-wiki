@@ -1071,6 +1071,24 @@
           }
         },
         {
+          "clave": "ofertas_con_precio",
+          "nombre": "Tiendas con precio",
+          "tipo": "agregado",
+          "config": {
+            "clave": "ofertas_con_precio",
+            "grupo": "compra",
+            "ficha": "ofertas_con_precio",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar_llenas",
+              "columna_relacion_tabla_clave": "ofertas-powerbanks",
+              "direccion": "destino",
+              "columna_destino_clave": "precio_eur"
+            }
+          }
+        },
+        {
           "clave": "precio_por_kwh",
           "nombre": "Precio por kWh",
           "tipo": "formula",
@@ -1652,6 +1670,24 @@
           }
         },
         {
+          "clave": "ofertas_con_precio",
+          "nombre": "Tiendas con precio",
+          "tipo": "agregado",
+          "config": {
+            "clave": "ofertas_con_precio",
+            "grupo": "compra",
+            "ficha": "ofertas_con_precio",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar_llenas",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
+              "direccion": "destino",
+              "columna_destino_clave": "precio_eur"
+            }
+          }
+        },
+        {
           "clave": "precio_por_w",
           "nombre": "Precio por vatio",
           "tipo": "formula",
@@ -2228,6 +2264,24 @@
               "operacion": "contar",
               "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
               "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "ofertas_con_precio",
+          "nombre": "Tiendas con precio",
+          "tipo": "agregado",
+          "config": {
+            "clave": "ofertas_con_precio",
+            "grupo": "compra",
+            "ficha": "ofertas_con_precio",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar_llenas",
+              "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
+              "direccion": "destino",
+              "columna_destino_clave": "precio_eur"
             }
           }
         },
@@ -2963,6 +3017,24 @@
               "operacion": "contar",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
               "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "ofertas_con_precio",
+          "nombre": "Tiendas con precio",
+          "tipo": "agregado",
+          "config": {
+            "clave": "ofertas_con_precio",
+            "grupo": "compra",
+            "ficha": "ofertas_con_precio",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar_llenas",
+              "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
+              "direccion": "destino",
+              "columna_destino_clave": "precio_eur"
             }
           }
         },
@@ -3743,6 +3815,24 @@
               "operacion": "contar",
               "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
               "direccion": "destino"
+            }
+          }
+        },
+        {
+          "clave": "ofertas_con_precio",
+          "nombre": "Tiendas con precio",
+          "tipo": "agregado",
+          "config": {
+            "clave": "ofertas_con_precio",
+            "grupo": "compra",
+            "ficha": "ofertas_con_precio",
+            "visibilidad": "nunca",
+            "agregado": {
+              "columna_relacion_clave": "producto",
+              "operacion": "contar_llenas",
+              "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
+              "direccion": "destino",
+              "columna_destino_clave": "precio_eur"
             }
           }
         },

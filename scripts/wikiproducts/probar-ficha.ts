@@ -271,4 +271,37 @@ prueba('sin precio no hay precio por kWh: ni «0 €/kWh», ni «MEJOR», ni «A
   assert.equal(conPrecio.estado, 'A la venta');
 });
 
+prueba('la cabecera cuenta las tiendas con precio y no esconde que está descatalogado y a la venta', () => {
+  const num: any = { id: 'num', nombre: 'Tiendas', tipo: 'agregado', config: { ficha: 'num_ofertas', visibilidad: 'nunca' } };
+  const cp: any = { id: 'cp', nombre: 'Tiendas con precio', tipo: 'agregado', config: { ficha: 'ofertas_con_precio', visibilidad: 'nunca' } };
+  const est: any = { id: 'est', nombre: 'Estado', tipo: 'texto', config: { ficha: 'estado' } };
+  const conCeldas = (cols: any[], celdas: Record<string, any>): TablaFicha => ({ ...tabla, columnas: [...tabla.columnas, ...cols], filas: tabla.filas.map(f => (f.id === 'a' ? { ...f, celdas: { ...f.celdas, ...celdas } } : f)) });
+  // Anker 737 in production: 5 shops listed, 1 with a price.
+  let cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: conCeldas([num, cp, est], { num: ok(5), cp: ok(1), est: ok('A la venta') }), relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.equal(cab.compra.tiendas, 1);
+  assert.equal(cab.compra.sinPrecio, 4);
+  assert.equal(cab.estado, 'A la venta');
+  const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
+  const html = propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: conCeldas([num, cp, est], { num: ok(5), cp: ok(1) }), relacionadas: {} }, { estilo: 'cabecera' }, h);
+  assert.ok(html.includes('en 1 tienda · 4 más sin precio confirmado'), html);
+  // A table loaded before the column existed keeps counting them all.
+  cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: conCeldas([num], { num: ok(5) }), relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.deepEqual([cab.compra.tiendas, cab.compra.sinPrecio], [5, 0]);
+  // Tesla Powerwall 2: discontinued, still sold in two shops.
+  cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: conCeldas([num, cp, est], { num: ok(2), cp: ok(2), est: ok('Descatalogado') }), relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.equal(cab.estado, 'Descatalogado por el fabricante · aún a la venta en 2 tiendas');
+  // ...and with no price, a bare «Descatalogado» is the truth.
+  const sinPrecio: TablaFicha = { ...conCeldas([num, cp, est], { num: ok(1), cp: ok(0), est: ok('Descatalogado') }) };
+  sinPrecio.filas = sinPrecio.filas.map(f => (f.id === 'a' ? { ...f, celdas: { ...f.celdas, pre: { estado: 'vacia' } as any } } : f));
+  cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: sinPrecio, relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.equal(cab.estado, 'Descatalogado');
+});
+
+prueba('la cifra de una batería doméstica es la capacidad útil, la misma del precio por kWh', () => {
+  const tot: any = { id: 'tot', nombre: 'Capacidad total', tipo: 'numero', config: { clave: 'capacidad_total_kwh', grupo: 'tecnico', unidad: 'kWh', comparar: 'mayor' } };
+  const util: any = { id: 'util', nombre: 'Capacidad útil', tipo: 'numero', config: { clave: 'capacidad_util_kwh', grupo: 'tecnico', unidad: 'kWh', comparar: 'mayor' } };
+  const cols: any[] = [{ id: 't', nombre: 'Nombre', tipo: 'texto', config: {} }, { id: 'm', nombre: 'Marca', tipo: 'relacion', config: { ficha: 'marca' } }, tot, util];
+  assert.deepEqual(propiedadesTarjeta(cols, 't'), ['m', 'util']);
+});
+
 console.log(`\n${n} comprobaciones, todas bien.`);
