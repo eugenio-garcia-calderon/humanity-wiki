@@ -56,6 +56,8 @@ export type ConfigVista = {
   fecha_por?: 'dia' | 'semana' | 'mes' | 'anyo';
   /** Carrusel: cuántos píxeles por segundo avanza la fila (2026-10-06). */
   velocidad?: number;
+  /** La galería: `false` esconde la descripción de la página en la tarjeta (2026-10-18). */
+  descripcion?: boolean;
   /** Qué propiedades se ven en las tarjetas (tablero, lista, calendario). */
   propiedades?: string[];
   /** Calendario y línea de tiempo. */

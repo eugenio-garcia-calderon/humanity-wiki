@@ -63,7 +63,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -84,6 +84,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   celdasAlRecibir?: Record<string, any>;
   /** Dentro del recuadro de un grupo: tarjetas blancas, que se distingan del fondo. */
   enCaja?: boolean;
+  /** La descripción de la página en la tarjeta, como una propiedad más que se enseña o no (2026-10-18). */
+  conDescripcion?: boolean;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -506,7 +508,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
 {!nombreArriba && nombreEl}
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
-                {!chica && f.pagina?.descripcion && (
+                {!chica && conDescripcion && f.pagina?.descripcion && (
                   <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.map(c => {
