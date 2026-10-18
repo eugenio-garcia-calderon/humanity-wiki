@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
 import { useCarrito, aLineasServidor, claveLinea } from '../../hooks/useCarrito';
 import CheckoutPropio, { type LineaPago } from './CheckoutPropio';
+import { textoComision } from '../../utils/ofertas';
 
 // ============================================================================
 // LA CESTA — fase 7 del plan de tiendas (2026-08-22)
@@ -148,7 +149,10 @@ function CompraHecha({ tienda }: { tienda: string }) {
                   {pedido.puntos_usados > 0 && ` · ${Number(pedido.puntos_usados).toLocaleString('es-ES')} puntos`}
                   {pedido.cupon && ` · cupón ${pedido.cupon} (−${dinero(pedido.descuento_centimos)})`}
                 </p>
-                {!pedido.solo_digital && <p className="text-xs text-slate-500">Quien vende lo enviará; el estado lo verás en «¿Dónde está lo mío?».</p>}
+                {!pedido.solo_digital && (Array.isArray(pedido.distribuidores) && pedido.distribuidores.length > 0
+                  // PEDIDO GESTIONADO (Wikiproducts): no lo envía quien cobra, sino cada tienda.
+                  ? <p className="text-xs text-slate-500">Ahora lo pedimos a {pedido.distribuidores.length === 1 ? pedido.distribuidores[0].distribuidor : `${pedido.distribuidores.length} tiendas (${pedido.distribuidores.map((d: any) => d.distribuidor).join(', ')})`} para que te lo envíen. Te avisamos cuando salga; el estado lo verás en «¿Dónde está lo mío?».</p>
+                  : <p className="text-xs text-slate-500">Quien vende lo enviará; el estado lo verás en «¿Dónde está lo mío?».</p>)}
               </div>
             )}
             <div className="mt-5 flex flex-col gap-2">
@@ -238,8 +242,10 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
   const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean;
     zona?: string; zona_nombre?: string; se_envia?: boolean; no_llega?: string | null; envio_estimado?: boolean; recogida_posible?: boolean;
     varias_tiendas?: boolean; con_donacion?: boolean;
-    tiendas?: { vendedor_id: string | null; tienda: string | null; nombre: string | null; lineas: { producto_id: string; variante_id: string | null; cantidad: number }[];
-      subtotal_centimos: number; envio_centimos: number | null; se_envia: boolean; no_llega: string | null; todo_acepta_puntos: boolean }[] } | null>(null);
+    tiendas?: { vendedor_id: string | null; tienda: string | null; nombre: string | null;
+      lineas: { producto_id: string; variante_id: string | null; cantidad: number; distribuidor?: string | null; comision_pct?: number | null; comision_centimos?: number | null }[];
+      subtotal_centimos: number; envio_centimos: number | null; se_envia: boolean; no_llega: string | null; todo_acepta_puntos: boolean;
+      envio_por_distribuidor?: { distribuidor_id: string | null; distribuidor_nombre: string | null; centimos: number | null }[] }[] } | null>(null);
   // Varias tiendas (F11): cuando se paga con puntos se liquidan todas
   // seguidas; con tarjeta, una cada vez. Aquí se cuenta por dónde va.
   const [progresoTiendas, setProgresoTiendas] = useState<string | null>(null);
@@ -298,6 +304,15 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
 
   const dinero = (c: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(c / 100);
+
+  // OFERTAS DE WIKIPRODUCTS (2026-10-18): de qué tienda sale cada línea y qué
+  // nos paga esa tienda por ella. Lo dice la cotización del servidor, nunca la
+  // cesta guardada en el navegador: la comisión es la de hoy.
+  const deOferta = new Map((cotiza?.tiendas || []).flatMap(t => t.lineas)
+    .filter(l => l.distribuidor !== undefined)
+    .map(l => [claveLinea(l) as string, l] as [string, typeof l]));
+  const enviosDist = (cotiza?.tiendas || []).flatMap(t => t.envio_por_distribuidor || []);
+  const comisionTotal = [...deOferta.values()].reduce((n, l) => n + (l.comision_centimos || 0), 0);
 
   /** Lo que acompaña a las líneas en el cobro: cupón, puntos y si se recoge en persona. */
   const extraPago = (puntos: number | null, conCupon: boolean) => ({
@@ -402,6 +417,12 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-slate-800 truncate">{l.nombre}{l.variante_nombre ? <span className="text-slate-500 font-semibold"> · {l.variante_nombre}</span> : null}</p>
                     <p className="text-xs text-slate-400">{l.importe_centimos ? `Donación de ${dinero(l.importe_centimos)}` : `${dinero(l.precio_centimos)} cada uno`}</p>
+                    {deOferta.get(claveLinea(l)) && (
+                      <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
+                        {deOferta.get(claveLinea(l))!.distribuidor && <><b className="text-slate-700">Lo sirve {deOferta.get(claveLinea(l))!.distribuidor}.</b> </>}
+                        {textoComision(deOferta.get(claveLinea(l))!.comision_pct, deOferta.get(claveLinea(l))!.comision_centimos)}
+                      </p>
+                    )}
                   </div>
                   <div className={`flex items-center gap-1 shrink-0 ${l.importe_centimos ? 'hidden' : ''}`}>
                     <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad - 1, l.variante_id)}
@@ -444,6 +465,27 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
                   </ul>
                   <p className="mt-1 text-[11px] text-sky-800">Cada tienda cobra por separado: se pagan una detrás de otra. Lo que ya esté pagado sale de la cesta.</p>
                 </div>
+              )}
+              {enviosDist.length > 1 && (
+                <div className="mt-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50">
+                  <p className="text-xs font-black text-slate-800">Llega en {enviosDist.length} envíos, uno por tienda</p>
+                  <ul className="mt-1 space-y-0.5">
+                    {enviosDist.map(e => (
+                      <li key={e.distribuidor_id || 'propio'} className="text-[11px] text-slate-600 flex justify-between gap-2">
+                        <span className="truncate">{e.distribuidor_nombre || 'Envío propio'}</span>
+                        <span className="tabular-nums shrink-0">{e.centimos ? dinero(e.centimos) : 'gratis'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-1 text-[11px] text-slate-500">Pagas una sola vez; cada tienda manda su caja.</p>
+                </div>
+              )}
+              {deOferta.size > 0 && (
+                <p className="mt-2 text-[11px] text-slate-500">
+                  {comisionTotal > 0
+                    ? `Por esta compra, las tiendas nos pagan ${dinero(comisionTotal)} de comisión. Tú pagas lo mismo que comprando en ellas.`
+                    : 'Ninguna de estas tiendas nos paga comisión. Tú pagas lo mismo que comprando en ellas.'}
+                </p>
               )}
               {progresoTiendas && <p className="mt-2 text-xs font-bold text-slate-700">{progresoTiendas}</p>}
               {cotiza?.con_donacion && <p className="mt-1 text-[11px] text-slate-400">Las donaciones no llevan IVA.</p>}
