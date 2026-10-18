@@ -9060,12 +9060,18 @@ en mis páginas como proyecto pendiente».
 - **Configuración → Grupos → Color del recuadro**: gris (por defecto), blanco, azul, verde, ámbar, rosa o violeta (`grupo_color`, `COLORES_GRUPO`).
 - El color de una opción de selección sale como un punto junto al título, no tiñendo el texto. En el móvil, el recuadro ocupa todo el ancho.
 - Estética revisada por un agente evaluador (nota inicial 6/10); se aplicaron sus 8 propuestas de estilo.
+
+### 2026-10-18 — Cart postal code, honest «no price», and no cart while charging is off (Wikiproducts W5)
+- The cart asked for «el código postal y el país para el precio exacto» and had nowhere to type them. It now has both fields under the shipping line (country is a list: Spain, the EU countries, «Otro país (fuera de la UE)»). Shipping is re-quoted as they are typed (`/api/publicar/cotizar` already took `pais`/`cp`), they are kept in this browser (`humanity:destino`), and the checkout form starts with them. «El envío se calcula al pagar» only shows while there is no shipping figure yet.
+- «Precio no publicado» read as a broken card. A shop without a price now says «Sin precio confirmado» plus why: «No pudimos confirmar el precio en su web el <fecha>: puede estar agotado o haber cambiado. Míralo directamente en la tienda.», and its link reads «Ver el precio en la tienda». The summary says how many shops have no confirmed price. The same sentence goes into the HTML for search engines (`motivoSinPrecio` in `utils/ofertas.ts`). A buy cell with no price no longer shows the seller's «Ponle un precio para venderlo» to readers.
+- While charging is off (`TIENDAS_COBRO` not 1, or no `STRIPE_SECRET_KEY`), an offer no longer offers «Añadir a la cesta» (it led to filling in the address only to get «La compra todavía no está abierta»). It shows «Comprar en la tienda» (the shop's link) and a note: «Muy pronto podrás comprar a través de Wikiproducts». The cart, wherever it opens, replaces «Finalizar compra» with «Todavía no se puede pagar en esta web» while `/api/publicar/comprar` would refuse. Both switch back on their own: `GET /api/publicar/cobro` now also says `con_pasarela`, read once per page by `hooks/useCobro.ts`.
+- Checked locally as an anonymous visitor, with charging on and off: the offer card in both states, and the cart's postal-code field re-pricing shipping to Baleares on «07001». The cart's closed-state notice was not seen rendered (no local page reached a cart once the offer button is hidden); it is checked by reading only.
 ## 2026-10-18 — Wikiproducts W1: evaluator round 1 on the product sheet
 
 - «La mejor en cada criterio»: same type and comparable size (half to double), and the sentence says so; community criteria always show their vote count («0 votos, hacen falta 3»).
 - Comparator: on phones 16 px text, 44×44 remove buttons and picker, narrower fixed label column with a visible edge, a «desliza» hint, and the table scrolls to a product just added. It only offers products of the same type and warns when a link mixes types.
 - Sheet layout no longer jumps while loading (CLS 0.78 → 0.00 measured locally on the Anker Zolo sheet): data-block chunks and community scores are fetched before the first paint (`bloquesDatos/precarga.ts`); a broken header photo keeps its box.
-- Visitors no longer see «Ponle un precio para venderlo»; an offer without a price shows no buy button.
+- Visitors no longer see «Ponle un precio para venderlo» (the buy button now says «Sin precio todavía»).
 - Gallery cards of product tables show brand, key figure with its unit, «Precio desde» and the community score by default.
 - «Sugerir una corrección» on every sheet (via the existing report queue).
 - New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).

@@ -2433,6 +2433,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
     res.json({
       abierto: COBRO_ENCENDIDO,
       pruebas: (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test'),
+      // Whether a card can be charged at all. With the switch on and no key,
+      // only purchases paid entirely in points go through; a Wikiproducts
+      // offer for 1.790 € is not one of those (W5, 2026-10-18).
+      con_pasarela: !!process.env.STRIPE_SECRET_KEY,
     });
   });
 
