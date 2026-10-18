@@ -9178,3 +9178,8 @@ Eugenio: «inspírate en las landing pages de Amazon… que la información est�
 
   `plantilla-ficha.mjs` applies it to each product table's template. It is idempotent and keeps each block's own settings. It runs in `cargar-en-servidor.sh` after `expertos.mjs`, and it **drops the expert booking block** from the sheets: experts are out of the MVP. `plantillaInicial()` gives new tables the same order.
 - Measured on the local copy (Anker Zolo, production build): 9,595 → 8,213 px tall at 390 px and 6,283 → 4,864 px at 1,280 px. CLS is 0 and there is no horizontal scroll. The new properties are empty until W3a loads them.
+
+## 2026-10-18 — Published-site menu folds when its links do not fit (Wikiproducts W2)
+
+- `MenuSitio.tsx`: at 1,024 px the brand «Wikiproducts» overlapped «Inicio» and «Energía portátil». The bar only folded below the `@2xl` container width (672 px), but with four links and the search box it needs ~1,100 px. The bar now measures whether its links fit (`useApretado`, a `ResizeObserver` on the row) and, when they do not, shows the hamburger next to the search box instead; it unfolds again once the row is wide enough for the width it measured.
+- Checked locally on a production build at 900, 1,024, 1,100, 1,280 and back down to 700 px: no overlap and no clipped links at any width. With the current four links it is folded at 900 and 1,024 and open from 1,100. Not checked on wikiproducts.humanity.wiki (unreachable from the container); there the «Entrar» pill and an «Expertos» link would add width, so the bar may stay folded at every desktop width, since the row is capped at 1,152 px.
