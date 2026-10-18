@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/CabeceraLectura.tsx",
-      "motivo": "W2: migas y contraste",
-      "desde": "2026-10-18T16:50:29.462Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/wikiproducts/cargar-en-servidor.sh",
       "motivo": "W6: paso expertos.mjs",
       "desde": "2026-10-18T17:29:24.005Z"
