@@ -8920,3 +8920,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Portadas con vídeo (prog8)
 - La portada de una página puede ser un vídeo: pegando un enlace de YouTube o Vimeo (en el campo del diálogo o con ⌘V) o subiendo un archivo de vídeo, arrastrado o elegido. Se reproduce en silencio y en bucle, en el editor y en la página publicada.
 - Las imágenes siguen pasando por el recortador; los vídeos no. Una portada de vídeo no se usa como imagen de tarjeta en las galerías: ahí sale la primera imagen de la página.
+
+### 2026-10-18 — Bloque «Menú de temas» (Humanidad Wiki, fase 1) (prog8)
+- Nuevo bloque para cualquier página: el menú de temas de Explorar, con icono y color por tema, en lista lateral o en rejilla. Cada tema lleva a una página y puede tener subtemas que se despliegan.
+- Nace con los temas de la humanidad (los mismos quince del menú, con su icono y su color) y se edita en el propio bloque: nombre, icono, color, enlace, subtemas y orden. Es el primer paso para que Humanidad Wiki sea una página hecha con Wiki Creator.
