@@ -32,6 +32,7 @@
 // verdades sobre quién ve qué, y un proyecto que pasa de privado a público
 // arrastra sus tablas sin migrar nada.
 import type { Express, Request, Response } from 'express';
+import { esVideoPortada } from '../utils/videoPortada.js';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
 import { bloquesDe } from './bloquesSql';
@@ -296,7 +297,8 @@ export function registerBdRoutes(app: Express, db: any) {
       const texto = bloques.find(b => typeof b?.texto === 'string' && b.texto.trim())?.texto || '';
       out[w.id] = {
         titulo: w.title || '',
-        imagen: cfg.portada || img,
+        // Una portada de vídeo no vale como imagen de tarjeta: entonces, la primera imagen de la página.
+        imagen: (esVideoPortada(cfg.portada) ? null : cfg.portada) || img,
         icono: cfg.icono || null,
         resumen: String(texto).replace(/[*`#>\[\]]/g, '').slice(0, 160),
         // La descripción que su autor escribió bajo el título (2026-10-01):
@@ -491,7 +493,7 @@ export function registerBdRoutes(app: Express, db: any) {
       try {
         const compras = await sincronizarTienda(db, {
           tablaId: req.params.id, duenoId: permiso.tabla.creador_user_id, columnas: columnas as any[], colTitulo,
-          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos })),
+          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos, apuntados: f.apuntados })),
         });
         for (const f of preparadas) for (const c of columnasCompra) {
           f.celdas[c.id] = compras[f.id] ? { estado: 'ok', valor: compras[f.id] as any } : { estado: 'vacia' };

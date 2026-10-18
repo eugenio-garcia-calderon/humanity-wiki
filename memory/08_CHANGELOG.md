@@ -8917,6 +8917,21 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — Esquema de Wikiproducts: varias afirmaciones y retiradas por producto (Wikiproducts W1)
 - En las cinco bases de datos de productos, «Afirmaciones» y «Retiradas» admiten varios enlaces (antes sólo uno: la carga de datos fallaba con productos que tienen de 2 a 5). Las baterías domésticas tienen columna «Ruido» (dB, menos es mejor). `scripts/wikiproducts/esquema-bd.json`.
+### 2026-10-18 — Portadas con vídeo (prog8)
+- La portada de una página puede ser un vídeo: pegando un enlace de YouTube o Vimeo (en el campo del diálogo o con ⌘V) o subiendo un archivo de vídeo, arrastrado o elegido. Se reproduce en silencio y en bucle, en el editor y en la página publicada.
+- Las imágenes siguen pasando por el recortador; los vídeos no. Una portada de vídeo no se usa como imagen de tarjeta en las galerías: ahí sale la primera imagen de la página.
+
+### 2026-10-18 — "Where to buy it", visible commission and managed orders (Wikiproducts W5)
+- Offers block (`src/components/bloquesDatos/ofertas/`): on a product sheet, one card per shop with price, shipping, delivered total, lead time, stock, "installation included", the date the price was checked, and the commission that shop pays Wikiproducts. "Añadir a la cesta" and "Ver en la tienda" (`rel="sponsored"` with commission, `nofollow` without).
+- Order comes from `ordenarOfertas` (`src/utils/ofertas.ts`): price plus shipping, then customer-service rating, sold-out last. **It never reads the commission**; `scripts/probar-ofertas.ts` checks it across every permutation of commissions.
+- Offers database: new roles in the property picker (group "Ofertas"): Producto, Distribuidor, Comisión, Enlace a la tienda, Plazo de entrega, Comprobado el, Incluye instalación, plus EAN / GTIN for the product sheet.
+- Cart and "Mi pedido": every line names the shop that serves it and the commission ("La paga la tienda; tú pagas el mismo precio que en ella"). Two shops are two shipments: shipping is summed per shop.
+- Managed order: once paid (card or points) the order is split into one entry per shop (`pedidos_distribuidor`, migration 0157). Comercio → "Pedidos a tiendas" is the queue: what to order, the offer link, the customer's address, the shop's order number and tracking. The customer's order moves only when all its shops move, and the customer is notified at each step.
+- Google Merchant Center feed: `GET /api/ofertas/merchant/<handle>.xml`, one item per product (the offer ranked first), with the EAN when the sheet has one.
+- Security, `server.ts` webhook (fixed in place, nothing added): with `STRIPE_WEBHOOK_SECRET` set, a request **without** a `stripe-signature` header used to skip the check, so anyone could post a "paid" checkout and create orders or memberships. Now it is refused (400). With no secret configured, production no longer trusts the body: it fetches the event from Stripe by its id (`stripe.events.retrieve`), so only events Stripe really sent are processed and existing shops keep working until the secret is set. Eugenio decided the same day to go straight to live Stripe, which is what made this urgent.
+- The Offers block now writes itself into the server HTML (W2's `registrarHtml`, `src/server/ofertas.ts`): shops, prices, shipping, commission and the `rel` of each link are readable without JavaScript. Built as an anonymous visitor, so only offers from published tables appear.
+- Each offer card now shows the shop's customer-service note from the community (W4's `notaAtencionDistribuidores`), and the ordering uses it to break price ties. Under the voter threshold it still says «aún sin votos suficientes».
+
 
 ### 2026-10-18 — Lo que un sitio le dice a Google: datos estructurados, filtros, sitemap y verificación (Wikiproducts W2)
 - La portada de un sitio publicado lleva `WebSite` y `Organization` en JSON-LD, y si su menú tiene buscador, la `SearchAction` que lo abre. Cada página que enseña una base de datos lleva un `ItemList` con sus elementos, en orden y con su dirección (`src/server/seoSitio.ts`). La ficha de producto no: es un `Product` (W1).
