@@ -53,6 +53,12 @@
       "ruta": "src/pages/SubpaginaSitio.tsx",
       "motivo": "W2: R2 direcciones legibles",
       "desde": "2026-10-18T12:30:02.844Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/htmlBloques.ts",
+      "motivo": "W2: R2 direcciones legibles",
+      "desde": "2026-10-18T12:30:05.516Z"
     }
   ]
 }
