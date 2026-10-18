@@ -313,6 +313,10 @@ export default function App() {
                   También fuera del Layout, y antes de `:arroba/:slug`, al que
                   se parece. */}
               <Route path="formulario/:token" element={<FormularioPublico />} />
+              {/* Seguir un pedido en el dominio principal (2026-10-18). Los
+                  WhatsApp de compra ya enlazaban `humanity.wiki/pedido?codigo=…`
+                  y esta ruta sólo existía en el subdominio de cada tienda. */}
+              <Route path="pedido" element={<MiPedido />} />
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProveedorSitio, sitioConAnfitrion } from './components/sitio/ContextoSitio';
 import PaginaDeDominio, { type Resuelto } from './pages/PaginaDeDominio';
@@ -7,6 +7,11 @@ import RutaSitio from './pages/RutaSitio';
 import BuscadorSitio from './components/sitio/BuscadorSitio';
 import NoEncontradaSitio from './components/sitio/NoEncontradaSitio';
 import { resolverPrecargado } from './utils/precargado';
+
+// The one exception to «no lazy» below: the order-tracking page. It is opened
+// from an order e-mail, never on a first visit, so it should not make every
+// visitor download it (W5, 2026-10-18).
+const MiPedido = lazy(() => import('./pages/MiPedido'));
 
 // ── SIN `lazy` AQUÍ DENTRO (2026-10-01) ──────────────────────────────────────
 // Este fichero ya llega aparte de la plataforma (`main.tsx` lo importa a
@@ -88,6 +93,9 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
             <Route path="p/:id" element={<SubpaginaSitio propio />} />
             {/* El buscador del sitio (2026-10-18). */}
             <Route path="buscar" element={<BuscadorSitio />} />
+            {/* Seguir un pedido (2026-10-18): el correo de compra de Wikiproducts
+                lleva aquí, `dominio/pedido?codigo=…`. */}
+            <Route path="pedido" element={<Suspense fallback={null}><MiPedido /></Suspense>} />
             {/* La portada: sólo `/`. */}
             <Route index element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
             {/* Una página del sitio por su nombre corto (`/powerbanks`, su
