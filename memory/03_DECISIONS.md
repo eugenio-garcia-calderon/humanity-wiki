@@ -878,6 +878,27 @@ the management panel, is the cheapest way to check it.
   `mejoras`, because the first catalogue went live with no photos and the rule
   kept every sheet out of Google. Diverges from the SEO requirements text.
 
+## 2026-10-18 — Sheet: a fifth provenance nature, and the first paint waits for the sheet's blocks (W1)
+
+- **`tercero` nature.** Values relayed by a shop, the press, a regulator or
+  Wikipedia were stored as `declarado` and read «Según la marca» with a source
+  that was not the brand (1,041 values). They now take `tercero`, shown as
+  «Según <host>». Approved by the coordinator; W3a reclassifies by host.
+  `no_publicado` reads per column (`config.sin_dato`, else a short map by
+  loader clave, else «El fabricante no lo publica»).
+- **Alternatives: same type AND comparable size.** Half to double the row's
+  `tamano` column (energy or peak power), dropped if it leaves fewer than three.
+  Alternative considered: a hand-set «segment» column per product; rejected
+  because nobody fills it in and the size is already in the data.
+- **CLS.** `main.tsx` waits (max 1.5 s, in parallel with the app chunk) for the
+  reading chunks of the data blocks on the page the server sent, and for its
+  community scores; meanwhile the server HTML stays visible. Alternative:
+  importing the sheet blocks eagerly into the entry chunk — rejected, every
+  humanity.wiki page would pay for them. Measured locally: 0.78 → 0.00.
+- **«Sugerir una corrección»** reuses `POST /api/report` (`content_reports`,
+  reviewed at level 3) with the reason prefixed «Corrección sugerida». Needs an
+  account, like voting. A dedicated corrections queue is the right shape once
+  volume justifies it; today the table has zero rows.
 ## 2026-10-18 — Site search tolerance, the 404 page, and the menu over the API (W2)
 - **Search matches word by word, not the whole phrase.** Every word (singularised: `paneles` → `panel`) must appear somewhere in the page's "haystack" (title, table name, visible column values, block text), in any order. Typos are corrected only for words that appear in no title of the site, against that site's own title vocabulary (edit distance 1 for 4–5 letters, 2 from 6), and the correction is shown. Synonyms are a short hard-coded Spanish energy list in `buscadorSitio.ts` (`SINONIMOS`). Alternatives: `pg_trgm` (needs an extension in production and still no synonyms), or full-text search with a Spanish dictionary (stemming, but no typo tolerance). The in-code list is the cheapest that solves «powerbak» and «placa»; per-site synonyms in `config.sitio` are the next step if a second site needs other words.
 - **An unknown address on a custom domain shows a 404 page, not the home page.** This replaces the 2026-08-22 decision («`lamieldelasierra.com/loquesea` shows the honey»): since SEO R16 the server already answered 404 + `noindex`, so the screen contradicted the status code. The home is one click away from the 404 page.

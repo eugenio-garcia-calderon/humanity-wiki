@@ -37,7 +37,8 @@ type Fila = {
 
 /** Ancho mínimo de una tarjeta, en píxeles, por tamaño. */
 export const ANCHO_TARJETA: Record<TamanoGaleria, number> = {
-  xxs: 84, xs: 112, pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
+  // XXXS (2026-10-18, Eugenio): aún más pequeñas y más juntas.
+  xxxs: 60, xxs: 84, xs: 112, pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
 };
 
 /** Cuántas propiedades se enseñan bajo el título. Más no caben sin que la
@@ -58,10 +59,10 @@ const esFilaAjena = (e: React.DragEvent) => Array.from(e.dataTransfer.types || [
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
 const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
-  xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
+  xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -80,6 +81,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   /** En una galería agrupada: los valores del grupo, que se escriben en la
    *  entrada que llega de OTRA base de datos para que se quede donde se soltó. */
   celdasAlRecibir?: Record<string, any>;
+  /** Dentro del recuadro de un grupo: tarjetas blancas, que se distingan del fondo. */
+  enCaja?: boolean;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -355,7 +358,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   /** Una tarjeta. `copia` es la segunda vuelta del carrusel: no se enfoca ni se lee. */
   // XS y XXS (2026-10-08): miniaturas con solo imagen y nombre. Sin descripción,
   // propiedades ni mandos grandes: no caben, y taparían la imagen.
-  const chica = tamano === 'xs' || tamano === 'xxs';
+  const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
+  const minima = tamano === 'xxxs';
   const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
           const conMenu = (arrastrable ?? editable) && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
@@ -363,7 +367,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
           const icono = f.pagina?.icono;
       const pesoClase = pesoNombre === 'fino' ? 'font-light' : pesoNombre === 'normal' ? 'font-semibold' : 'font-bold';
       const nombreEl = (
-                  <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+                  <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (minima ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                     {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                       : icono ? (esUrl(icono)
                         ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
@@ -435,7 +439,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity', arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
+              className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
+                enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'), arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
               {f.oculta && (
                 <span className="absolute left-2 top-2 z-[2] inline-flex items-center gap-1 rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No se ve en la web publicada">
                   <EyeOff className="h-3 w-3" /> Oculta
@@ -492,7 +497,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               {/* CENTRADOS EN UNA PÁGINA (2026-10-02, Eugenio: «el título de cada
                   tarjeta centrado, al igual que la descripción, y no a la
                   izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
-              <div className={cn(chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
+              <div className={cn(minima ? 'px-0 pt-1 pb-0 space-y-0.5' : chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
 {!nombreArriba && nombreEl}
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
@@ -561,7 +566,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });
                   return v ? (
                     <p key={c.id} className={cn('text-slate-500 line-clamp-2 break-words', chica ? 'text-[10px] leading-tight' : 'text-xs')}>
-                      <span className="text-slate-400">{c.nombre}: </span>{v}
+                      <span className="text-slate-500">{c.nombre}: </span>{v}
+                      {/* «72» alone says nothing on a card: the unit the column declares goes with it. */}
+                      {c.config?.unidad && ['numero', 'formula', 'agregado'].includes(c.tipo) ? ` ${c.config.unidad}` : ''}
                     </p>
                   ) : null;
                 })}
@@ -581,7 +588,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   /** La galería entera, sin carrusel: todas las entradas, las filas que hagan falta. */
   const rejilla = (
     <div>
-      <div className={cn(chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
+      <div className={cn(minima ? 'grid gap-x-1 gap-y-2' : chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
         onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
         onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
@@ -595,7 +602,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
             onDrop={arrastrada ? e => { e.preventDefault(); const id = arrastrada; setArrastrada(null); setDestino(null); moverFila(id, null); } : undefined}
             className={cn('aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors', chica ? 'min-h-0' : 'min-h-[9rem]')} aria-label="Nueva página">
             {abriendo === 'nueva' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-            {tamano !== 'xxs' && !(tamano === 'xs') && 'Nueva página'}
+            {!chica && 'Nueva página'}
           </button>
         )}
       </div>

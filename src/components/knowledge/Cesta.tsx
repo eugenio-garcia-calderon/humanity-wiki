@@ -4,6 +4,32 @@ import { ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
 import { useCarrito, aLineasServidor, claveLinea } from '../../hooks/useCarrito';
 import CheckoutPropio, { type LineaPago } from './CheckoutPropio';
 import { textoComision } from '../../utils/ofertas';
+import { useCobro } from '../../hooks/useCobro';
+
+/**
+ * WHERE IT GOES, BEFORE PAYING (W5, 2026-10-18, evaluator round 1). The cart
+ * said «escribe el código postal y el país para el precio exacto» and had no
+ * field to write them in. Two fields are enough to price shipping
+ * (`zonaDe` on the server only reads these two); the full address is still
+ * asked once, at checkout, which starts filled with them.
+ * Kept in this browser so it is not asked again on every page.
+ */
+type Destino = { cp: string; pais: string };
+const CLAVE_DESTINO = 'humanity:destino';
+const leerDestino = (): Destino => {
+  try { const d = JSON.parse(localStorage.getItem(CLAVE_DESTINO) || 'null'); if (d && typeof d.cp === 'string' && typeof d.pais === 'string') return d; } catch { /* no storage */ }
+  return { cp: '', pais: 'ES' };
+};
+/** Spain first, then the EU (the zones the server prices), then «anywhere else». */
+const UE = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','SE'];
+const FUERA_UE = 'XX';
+function paises(): { id: string; nombre: string }[] {
+  let nombre = (c: string) => c;
+  try { const dn = new Intl.DisplayNames(['es'], { type: 'region' }); nombre = c => dn.of(c) || c; } catch { /* old browser: codes */ }
+  return [{ id: 'ES', nombre: nombre('ES') },
+    ...UE.map(id => ({ id, nombre: nombre(id) })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    { id: FUERA_UE, nombre: 'Otro país (fuera de la UE)' }];
+}
 
 // ============================================================================
 // LA CESTA — fase 7 del plan de tiendas (2026-08-22)
@@ -252,15 +278,27 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
   // Recogida en persona (F8, 2026-08-24): si todo lo de la cesta la admite, se
   // puede elegir en vez de envío — sin porte y sin pedir dirección.
   const [recogida, setRecogida] = useState(false);
+  const [destino, setDestinoCrudo] = useState<Destino>(leerDestino);
+  const setDestino = (d: Destino) => { setDestinoCrudo(d); try { localStorage.setItem(CLAVE_DESTINO, JSON.stringify(d)); } catch { /* no storage */ } };
+  // A Spanish postal code only counts once it has its five digits: «0» is not Baleares yet.
+  const cpListo = destino.pais !== 'ES' || /^\d{5}$/.test(destino.cp.trim());
+  const destinoCotiza = cpListo ? `${destino.pais}|${destino.cp.trim()}` : '';
   useEffect(() => {
     if (!abierta || lineas.length === 0) return;
-    fetch('/api/publicar/cotizar', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      // Con el destino que se va escribiendo: el porte depende de la zona, y
-      // enseñarlo al final es la primera causa de carrito abandonado.
-      body: JSON.stringify({ lineas: aLineasServidor(lineas) }),
-    }).then(r => r.json()).then(j => { if (typeof j?.subtotal_centimos === 'number') setCotiza(j); }).catch(() => {});
-  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}:${l.importe_centimos || ''}`).join('|')]);
+    const t = window.setTimeout(() => {
+      fetch('/api/publicar/cotizar', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        // Con el destino que se va escribiendo: el porte depende de la zona, y
+        // enseñarlo al final es la primera causa de carrito abandonado.
+        body: JSON.stringify({ lineas: aLineasServidor(lineas), ...(destinoCotiza ? { pais: destino.pais, cp: destino.cp.trim() || undefined } : {}) }),
+      }).then(r => r.json()).then(j => { if (typeof j?.subtotal_centimos === 'number') setCotiza(j); }).catch(() => {});
+    }, destinoCotiza ? 300 : 0);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}:${l.importe_centimos || ''}`).join('|'), destinoCotiza]);
+  // ¿Se puede pagar aquí hoy? Con el cobro apagado, «Finalizar compra» acababa
+  // en «la compra todavía no está abierta» después de pedir la dirección.
+  const cobro = useCobro();
   // CUPÓN DEL VENDEDOR (2026-08-22): se comprueba contra el servidor antes de
   // pagar, para que la cesta diga el descuento y no lo adivine.
   const [cupon, setCupon] = useState('');
@@ -381,7 +419,7 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
     <>
       {hayConfirmacion && <CompraHecha tienda={tienda} />}
       {pagoAbierto && (
-        <CheckoutPropio lineas={pagoAbierto.lineas} extra={pagoAbierto.extra} onCerrar={() => setPagoAbierto(null)} onPagadoConPuntos={alPagarConPuntos} />
+        <CheckoutPropio lineas={pagoAbierto.lineas} extra={pagoAbierto.extra} destino={destino.pais !== FUERA_UE ? destino : undefined} onCerrar={() => setPagoAbierto(null)} onPagadoConPuntos={alPagarConPuntos} />
       )}
       {!abierta && (
         <button type="button" onClick={() => setAbierta(true)}
@@ -503,8 +541,21 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
               {!recogida && cotiza && cotiza.es_fisico && cotiza.se_envia !== false && cotiza.envio_centimos !== null && (
                 <p className="mt-1 text-[11px] text-slate-400">
                   Envío {cotiza.envio_centimos === 0 ? 'gratis' : dinero(cotiza.envio_centimos)} a {cotiza.zona_nombre || 'tu zona'}
-                  {cotiza.envio_estimado ? ' (escribe el código postal y el país para el precio exacto)' : ''}.
+                  {cotiza.envio_estimado ? ' (escribe aquí debajo tu código postal y tu país para el precio exacto)' : ''}.
                 </p>
+              )}
+              {!recogida && cotiza?.es_fisico && (
+                <div className="mt-2 flex gap-2">
+                  <input value={destino.cp} onChange={e => setDestino({ ...destino, cp: e.target.value.slice(0, 10) })}
+                    inputMode={destino.pais === 'ES' ? 'numeric' : 'text'} autoComplete="shipping postal-code"
+                    placeholder="Código postal" aria-label="Código postal del envío"
+                    className="w-32 h-11 px-3 rounded-lg border border-slate-200 text-sm" />
+                  <select value={destino.pais} onChange={e => setDestino({ ...destino, pais: e.target.value })}
+                    aria-label="País del envío" autoComplete="shipping country"
+                    className="flex-1 min-w-0 h-11 px-2 rounded-lg border border-slate-200 bg-white text-sm">
+                    {paises().map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                  </select>
+                </div>
               )}
               {avisoCesta !== null && (
                 <p className="mt-1 text-[11px] text-slate-400">
@@ -516,9 +567,11 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
               )}
               {/* Se dice ANTES, no en la última pantalla: un total que sube al
                   final es la primera causa de cesta abandonada. */}
-              <p className="mt-1 text-[11px] text-slate-400">
-                El envío se calcula al pagar, cuando sepamos a dónde va.
-              </p>
+              {!(cotiza && (!cotiza.es_fisico || cotiza.envio_centimos !== null)) && (
+                <p className="mt-1 text-[11px] text-slate-400">
+                  El envío se calcula al pagar, cuando sepamos a dónde va.
+                </p>
+              )}
 
               <div className="mt-3">
                 <div className="flex gap-2">
@@ -562,7 +615,15 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
 
               {error && <p className="mt-3 text-xs font-bold text-rose-600">{error}</p>}
 
-              <button type="button" onClick={pagar} disabled={pagando}
+              {/* COBRO APAGADO (2026-10-18): se dice antes de pedir nada, no al
+                  final del formulario. Con el interruptor encendido pero sin
+                  pasarela, solo pasa lo que se paga entero con puntos. */}
+              {cobro && (!cobro.abierto || (!cobro.con_pasarela && !cubreTodo)) ? (
+                <p className="mt-4 p-3 rounded-xl border border-sky-200 bg-sky-50 text-xs leading-snug text-sky-900">
+                  <b>Todavía no se puede pagar en esta web.</b> Muy pronto podrás hacerlo aquí. Tu cesta se queda guardada en este navegador; mientras tanto, puedes comprarlo en la web de cada tienda.
+                </p>
+              ) : (<>
+              <button type="button" onClick={pagar} disabled={pagando || !cobro}
                 className="mt-4 w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-60">
                 {pagando
                   ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {cubreTodo ? 'Pagando con puntos…' : 'Un momento…'}</span>
@@ -571,6 +632,7 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
               <p className="mt-2 text-center text-[11px] text-slate-400">
                 Pago seguro con tarjeta, sin salir de aquí. No hace falta cuenta.
               </p>
+              </>)}
               <button type="button" onClick={vaciar}
                       className="mt-2 w-full h-11 text-xs font-bold text-slate-400 hover:text-slate-600">
                 Vaciar la cesta

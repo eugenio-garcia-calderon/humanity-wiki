@@ -6,6 +6,7 @@ import {iniciarTema} from './utils/tema.ts';
 import {iniciarIdioma, ConIdioma} from './i18n/index.ts';
 import {registrarPWA} from './pwa.ts';
 import {instalarAutoscrollArrastre} from './utils/autoscrollArrastre.ts';
+import {precargarBloquesDePagina} from './components/bloquesDatos/precarga.ts';
 
 instalarAutoscrollArrastre();
 
@@ -36,12 +37,15 @@ iniciarTema();
 iniciarIdioma();
 const DOMINIO_PROPIO = dominioPropio();
 const raiz = createRoot(document.getElementById('root')!);
+// The data blocks of the page the server sent come down WITH the app, not
+// after its first paint: see `components/bloquesDatos/precarga.ts` (CLS).
+const bloques = precargarBloquesDePagina();
 
 if (DOMINIO_PROPIO) {
-  import('./AplicacionDeDominio.tsx').then(({default: AplicacionDeDominio}) =>
+  Promise.all([import('./AplicacionDeDominio.tsx'), bloques]).then(([{default: AplicacionDeDominio}]) =>
     raiz.render(<ConIdioma><AplicacionDeDominio host={DOMINIO_PROPIO} /></ConIdioma>));
 } else {
-  import('./App.tsx').then(({default: App}) => raiz.render(<ConIdioma><App /></ConIdioma>));
+  Promise.all([import('./App.tsx'), bloques]).then(([{default: App}]) => raiz.render(<ConIdioma><App /></ConIdioma>));
 }
 
 // PWA: en producción siempre, en desarrollo solo con `?sw=on`. Ver src/pwa.ts.
