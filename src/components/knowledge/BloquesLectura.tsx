@@ -115,8 +115,10 @@ function ConComentarios({ paginaId, bloqueId, children }: { paginaId: string; bl
         title={abierto ? 'Cerrar los comentarios' : 'Comentar este elemento'}
         aria-label={abierto ? 'Cerrar los comentarios de este elemento' : 'Comentar este elemento'}
         aria-expanded={abierto}
+        // Outside the column only where there is room for it: on a phone,
+        // `-right-9` pushed the page 16 px wider than the screen (2026-10-18).
         className={cn(
-          'absolute -right-9 top-0 grid h-7 w-7 place-items-center rounded-lg text-[10px] transition-all',
+          'absolute right-0 md:-right-9 top-0 grid h-7 w-7 place-items-center rounded-lg text-[10px] transition-all',
           abierto ? 'bg-emerald-600 text-white'
                   : cuantos > 0
                     ? 'bg-slate-100 text-slate-600'

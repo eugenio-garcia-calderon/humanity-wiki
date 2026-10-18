@@ -689,6 +689,73 @@ computed columns are left to React. The row page's own properties are not in
 the public reading view today, so they are not in the HTML either: W1's
 `Propiedad` block will add them, with its writer.
 
+## 2026-10-18 — Community ratings: one criterion = one computed column (`comunidad`)
+
+**Context.** Wikiproducts (plan §2.3, 3.3, 3.10): members rate each product 1-5
+on calidad, precio, garantía, ecología, salud, estética and ética, and each
+distributor on atención al cliente; the gallery sorts by any criterion; the
+ranking must never read commission.
+
+**Options.** (a) A rating block with its own criteria list in `bloque.datos`
+and a separate «sort by criterion» feature in the gallery. (b) A new computed
+column type whose cell is the score, filled on read from a `valoraciones`
+table, like the buy button is filled from `products`.
+
+**Chosen: (b).** Sorting (`?orden=`), filtering, formulas, the public API, the
+comparator and «la mejor en cada criterio» (W1) all read a number in a cell
+with zero new code. The block reads the table's `comunidad` columns as its
+criteria. Pieces: `drizzle/0152_valoraciones.sql`, `src/server/bd/comunidad.ts`
+(the maths, pure), `src/server/valoraciones.ts` (routes), the block in
+`src/components/bloquesDatos/valoracion/`.
+
+**The numbers.** Bayesian with a neutral prior: (5·3 + Σ w·x)/(5 + Σ w),
+verified buyer w = 2, nothing shown under 3 voters. The prior is the scale's
+middle (3), not the table's mean: measured in `scripts/probar-valoraciones.ts`,
+with the table's mean as prior one popular 4.6 product lifts the prior and
+three 5s outrank it (4.75 vs 4.6). The adjusted note ORDERS; the plain mean is
+what is SHOWN, because «3,75» for three people who all gave 5 reads as a bug.
+
+**Verified buyer is read, not stored.** A paid/sent/delivered order of the
+product behind the row, or behind a row that links to it (offer → distributor).
+A refund removes the weight by itself. Cost: one CTE over `pedidos` per read of
+a rated table, limited to people who voted.
+
+**Commission.** `bd/comunidad.ts` receives votes and row ids, never row cells;
+the test fails if the word appears in that file or if 50 random commission
+changes move the order.
+
+## 2026-10-18 — A database's sheet template is a page; sheet blocks decide once and paint twice (Wikiproducts W1)
+
+**Template.** `bd_tablas.config.plantilla.pagina_id` points to an ordinary
+private page. Rejected: a new «layout» object with its own editor (weeks, and a
+second editor to maintain). Cost of the choice: the row page in the editor
+shows only its own blocks, not the template's; the template is edited on its
+own page. On publish, the ampliación (`server/bd/plantillaFicha.ts`) puts the
+template's blocks in front of the row's.
+
+**Decide once.** Every sheet block is drawn by React and again as server HTML
+for crawlers (SEO R1). What each shows (which rows, who is best, which
+sentence for an empty recall list) lives in pure functions
+(`bloquesDatos/ficha/vistas.ts`); both painters only loop over the result.
+Rejected: each painter deciding on its own — they would drift, and Google
+penalises markup that differs from the visible page.
+
+**Roles by config, never by name.** A column says what it is in
+`config.ficha` (sheet role), `config.grupo`, `config.comparar`. W5's offers
+use `config.rol` on the offers table (its contract); the schema sets both
+where they meet (EAN has `ficha: 'gtin'` and `rol: 'gtin'`).
+
+**Offers: one table per category**, each with a «Producto» relation
+(`rol: producto`, `reciproca`) to its product table, as W5 reads them. A single
+offers table would have needed five product columns, four empty per row. The
+products' «price from/to» and «number of offers» are aggregates over that
+relation seen from the product side (`direccion: destino`), so there is one
+list of links, not two that can disagree.
+
+**Provenance per cell** in `bd_filas.procedencia` (jsonb by column id), not a
+side table: it travels with the row, is read in the same query, and adds no
+junction table (CLAUDE.md rule 6).
+
 ## 2026-10-18 — Readable row URLs from a per-table template (Wikiproducts W2, SEO R2)
 
 **Context.** Product sheets are database rows, each with its page at `/p/BDF…`.

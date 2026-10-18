@@ -26,6 +26,7 @@ import { sql } from 'drizzle-orm';
 import { type Celda, error, celdasDe } from './celdas';
 import { compilar, evaluar, AMBIGUO, type Contexto } from './formulas';
 import { calcularAgregado, type ConfigAgregado } from './agregados';
+import { notasComunidad, TIPO_COMUNIDAD } from './comunidad';
 
 export type ColumnaCalc = {
   id: string;
@@ -185,7 +186,7 @@ export async function calcularOtraTabla(
     WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
   `);
   const columnas = c.rows as any[];
-  if (!columnas.some(x => esCalculada(x.tipo))) return {};
+  if (!columnas.some(x => esCalculada(x.tipo) || x.tipo === TIPO_COMUNIDAD)) return {};
 
   const f = await db.execute(sql`
     SELECT id, valores FROM bd_filas
@@ -232,6 +233,11 @@ export async function calcularTabla(
   const porFila: Record<string, Record<string, Celda>> = {};
   for (const f of filas) porFila[f.id] = {};
   const porId = new Map(columnas.map(c => [c.id, c]));
+
+  // COMMUNITY RATINGS (2026-10-18, Wikiproducts): filled from `valoraciones`
+  // BEFORE the formulas, so a formula can read a score. See `comunidad.ts`.
+  const comunidad = await notasComunidad(db, columnas, filas.map(f => f.id));
+  for (const f of filas) Object.assign(porFila[f.id], comunidad[f.id] || {});
 
   // Las que están en ciclo dicen que lo están; las demás se calculan igual.
   if (r.ciclo?.length) {

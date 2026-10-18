@@ -396,6 +396,17 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     if (columnas.find(c => c.id === columnaId)?.tipo === 'relacion') avisarCambio();
   };
 
+  // ARRASTRAR A OTRO GRUPO (2026-10-18): soltar una tarjeta en otro grupo le da el valor de ese grupo
+  // (su categoría, su estado…), sin abrirla. Con varios valores, cambia el de origen por el de destino.
+  const moverAGrupo = async (filaId: string, hacia: Grupo) => {
+    if (!colAgr || !datos) return;
+    const f = datos.filas.find(x => x.id === filaId);
+    if (!f) return;
+    const desde = agruparFilas(datos.filas, colAgr, { ...activa.config, ocultar_vacios: false }).find(g => g.filas.some(x => x.id === filaId)) || null;
+    if (desde && desde.clave === hacia.clave) return;
+    await guardarCeldas(filaId, { [colAgr.id]: valorAlMover(f, colAgr, desde, hacia) });
+  };
+
   // AÑADIR ABRE UN POP-UP (2026-10-14): se escribe el título y se crea; «Ampliar» la crea y la abre en grande.
   const [nuevaEntrada, setNuevaEntrada] = useState(false);
   const [tituloNueva, setTituloNueva] = useState('');
@@ -573,13 +584,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
    */
   const porGrupos = (
     lista: Fila[],
-    pintar: (fs: Fila[]) => ReactNode,
+    pintar: (fs: Fila[], grupo?: Grupo) => ReactNode,
     cabecera: (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => ReactNode,
     pie?: (celdas: Record<string, any>) => ReactNode,
     nivel = 0, padre: Grupo | null = null, celdasPadre: Record<string, any> = {},
   ): ReactNode => {
     const col = nivel === 0 ? colAgr : nivel === 1 ? colSub : null;
-    if (!col) return <>{pintar(lista)}{pie?.(celdasPadre)}</>;
+    if (!col) return <>{pintar(lista, padre || undefined)}{pie?.(celdasPadre)}</>;
     const grupos = agruparFilas(lista, col, nivel === 0 ? activa.config : { ...activa.config, ocultar_vacios: true })
       .filter(g => nivel > 0 || !gruposOcultos.has(g.clave));
     return grupos.map(g => {
@@ -1036,8 +1047,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
-          {porGrupos(colAgr ? filas : visiblesGaleria, fs => (
-            <Galeria onGuardarCelda={editable ? guardar : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
+          {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo) => (
+            <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
+              alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}

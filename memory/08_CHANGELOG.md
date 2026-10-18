@@ -8876,6 +8876,32 @@ en mis páginas como proyecto pendiente».
 - Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
 
+### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
+- El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
+
+### 2026-10-18 — Valoraciones de la comunidad por criterio (Wikiproducts W4)
+- Nuevo tipo de propiedad en las bases de datos, grupo «Comunidad»: Calidad, Precio, Garantía, Ecología, Salud, Estética, Ética, Atención al cliente (sólo puntúa quien compró) y Nota media. No se escribe a mano: la celda enseña la media de los votos y cuántos son, o «Sin votos suficientes» con menos de 3.
+- Bloque «Valoración de la comunidad» para la página de una fila: una barra por criterio con su media y sus votos, estrellas para votar (un voto por persona y criterio, se cambia o se quita), la media de compradores verificados aparte y una explicación de cómo se calcula.
+- La galería publicada se ordena por cualquier criterio («ordenar por ética») con el «Ordenar» de siempre. El orden usa una media ajustada (bayesiana) y nunca la comisión; `npx tsx scripts/probar-valoraciones.ts` lo comprueba.
+- Quien compró a través de la plataforma cuenta doble, y sólo él puede puntuar la atención al cliente de un distribuidor. Si devuelve el pedido, deja de contar.
+- Los miembros de un sitio publicado pueden votar si su categoría puede comentar.
+- El HTML que leen los buscadores y las IA ya trae las puntuaciones (media y votos por criterio, o «aún sin votos suficientes»), y la página lleva `AggregateRating` en sus datos estructurados sólo si enseña el bloque y hay votos suficientes (SEO R4).
+- Migración `0152_valoraciones.sql`.
+### 2026-10-18 — Galería agrupada: arrastrar a otra base de datos y a otro grupo (prog8)
+- En una galería agrupada no se podían arrastrar las tarjetas: la vista agrupada desactivaba la edición entera para que no se reordenara. Ahora arrastrar va aparte de reordenar.
+- Una tarjeta de una galería agrupada se puede soltar en otra base de datos y pasa a ella, como ya pasaba sin agrupar.
+- Soltar una tarjeta en otro grupo le da el valor de ese grupo (su categoría, su estado…). Con varios valores, se cambia el de origen por el de destino.
+
+
+### 2026-10-18 — Ficha de producto: plantilla, propiedades, comparador, «la mejor en cada criterio», afirmaciones y retiradas (Wikiproducts W1)
+- Una base de datos puede tener una **plantilla de ficha**: una página normal (se edita con el editor de siempre) cuyos bloques se ponen delante de los de cada fila. Cien productos, un solo diseño. En la propia plantilla se ve con los datos de la fila más completa. `PUT /api/bd/tablas/:id/plantilla`, `PATCH /api/v1/databases/:id {create_template}`.
+- Cinco bloques nuevos que leen «la fila de esta página»: **Propiedades** (tabla, lista, cabecera, texto o pie, por grupo), **Comparador** (de 2 a 4 filas lado a lado, la mejor celda resaltada, se puede compartir con `?comparar=`), **La mejor en cada criterio**, **Afirmaciones verificadas** (cierta / matizable / falsa / sin pruebas, las falsas primero) y **Retiradas y alertas** (distingue «buscado y no hay ninguna, a fecha X» de «todavía no comprobado»).
+- **Cada dato dice de dónde viene**: «Según la marca», «Medido por un tercero», «Calculado» o «El fabricante no lo publica», con su enlace y fecha (columna `bd_filas.procedencia`, migración 0153; `PUT /api/bd/filas/:id/procedencia`; `provenance` en la API v1).
+- **La comisión nunca ordena nada**: ni el comparador ni «la mejor en cada criterio» pueden usarla, aunque alguien la configure para eso. Lo comprueba `scripts/wikiproducts/probar-ficha.ts`, y la ficha lo dice al lector.
+- Para buscadores: la ficha sale entera en el HTML del servidor, con título «Marca Modelo: datos, precio y opiniones», datos estructurados `Product` (con su dirección canónica, precio y, sólo si hay votos reales, nota), migas de pan, la descripción sacada del resumen del producto y `noindex` mientras le falte foto, resumen, 8 datos con fuente, una oferta o la fecha de revisión.
+- La API v1 crea bases de datos y columnas (`POST /api/v1/databases`, `POST /api/v1/databases/:id/columns`) y fija la forma de las direcciones de sus filas (`route`). `scripts/wikiproducts/crear-esquema.mjs` crea las 14 bases de datos de Wikiproducts (`esquema-bd.json`) sin repetir nada.
+- En el móvil, la burbuja de comentar de cada bloque ya no ensancha la página 16 px (salía por fuera de la columna y se podía arrastrar la página de lado). Ahora queda dentro de la columna en pantallas estrechas.
+
 ### 2026-10-18 — Direcciones legibles para las fichas (Wikiproducts W2, SEO R2)
 - Una base de datos puede llevar una plantilla de dirección (`config.ruta`, p. ej. `powerbanks/{Marca}-{Modelo}`) y cada fila se abre por su nombre: `wikiproducts.humanity.wiki/powerbanks/anker-737-powercore-24k` en vez de `/p/BDF…`. Funciona igual en dominio propio, subdominio y `humanity.wiki/@quien/…`.
 - Dos o tres tramos; el primero no puede ser uno de la aplicación (`p`, `bd`, `buscar`…). `{Columna}` toma el valor de esa columna; una relación (la marca) da el nombre de la fila apuntada. Si falta un dato, la ficha sigue en `/p/:id`.

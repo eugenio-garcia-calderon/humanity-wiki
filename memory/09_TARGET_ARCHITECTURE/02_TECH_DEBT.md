@@ -386,6 +386,26 @@ hundred products: one query, milliseconds). **Switch when a site passes
 search column kept up to date on write (or Postgres full-text with a Spanish
 config). About half a day now; the same later, plus a backfill.
 
+## 2026-10-18 — A product sheet reads its whole table (Wikiproducts W1)
+
+`fichaDePagina` reads the row's entire table through `GET /api/bd/tablas/:id`
+(the comparator and «best per criterion» need the siblings), on every
+published row page and once more from the browser (`/api/bd/ficha/:id`) when
+the page was not preloaded. Fine for the MVP (tens to a few hundred products
+per category: one read, tens of ms). **Switch past ~2,000 rows per table or
+sheet p95 > 300 ms:** precompute per-column rankings on write and read only
+the current row plus the rows the comparator shows. About a day now, more
+once other blocks depend on the full table.
+
+## 2026-10-18 — Product breadcrumbs guess the parent's path (Wikiproducts W1)
+
+The sheet's `BreadcrumbList` names the parent page as `/{slug}` (or `/p/{id}`)
+and lets `sitios.ts` resolve it against the canonical origin. Right on a
+subdomain; on a custom domain whose root IS that parent, the right path is
+`/`. Fix by passing the parent's canonical into the ampliación (W2) — half
+an hour — once W2's readable-URL follow-up (R2) lands, since it changes the
+paths anyway.
+
 ## 2026-10-18 — Client-side links to rows still use `/p/:id` (Wikiproducts W2, R2)
 
 The server HTML, sitemap and canonical use a row's readable URL, but the React
