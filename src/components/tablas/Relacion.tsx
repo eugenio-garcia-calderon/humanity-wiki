@@ -55,11 +55,11 @@ export function FichaConImagen({ a }: { a: Apuntado }) {
 
 /** Una ficha enlazada. Lleva a la página del elemento: dentro del sitio si
  *  se está leyendo una web publicada, al editor si no. */
-export function FichaRelacion({ a, grande = false }: { a: Apuntado; grande?: boolean }) {
+export function FichaRelacion({ a, grande = false, legible = false }: { a: Apuntado; grande?: boolean; /** 14 px, for cards on a published site. */ legible?: boolean }) {
   const sitio = useSitio();
   const pagina = a.extra?.pagina_id as string | undefined;
   const clase = cn('inline-flex items-center gap-1 rounded-lg font-bold max-w-[14rem] transition-colors',
-    grande ? 'px-2 py-1 text-xs' : 'px-2 py-0.5 text-[11px]',
+    legible ? 'px-2 py-1 text-sm' : grande ? 'px-2 py-1 text-xs' : 'px-2 py-0.5 text-[11px]',
     a.existe === false ? 'bg-rose-50 text-rose-500' : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700');
   const dentro = <><FileText className="w-3 h-3 shrink-0 opacity-60" /><span className="truncate">{a.etiqueta || 'Sin título'}</span></>;
   if (!pagina || a.existe === false) return <span className={clase}>{dentro}</span>;

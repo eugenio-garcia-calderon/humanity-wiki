@@ -9112,3 +9112,8 @@ en mis páginas como proyecto pendiente».
 
 ## 2026-10-18 — Propiedades de la ficha, centradas (prog8)
 - En la rejilla de propiedades de la página de un elemento, el **nombre** de cada propiedad y su **valor** van centrados, uno encima del otro; también los números y el dinero, que en la tabla van a la derecha.
+## 2026-10-18 — Wikiproducts W1: readable text size on sheets and cards
+
+- Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
+- Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
+- Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)

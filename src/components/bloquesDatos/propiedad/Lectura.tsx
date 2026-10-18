@@ -29,7 +29,7 @@ function Foto({ src, alt, credito }: { src: string; alt: string; credito: string
   // after the first paint (part of the CLS the evaluator measured).
   if (rota) {
     return (
-      <div className="grid h-48 w-48 shrink-0 place-items-center rounded-2xl border border-slate-100 bg-slate-50 text-center text-xs text-slate-500" role="img" aria-label={`${alt}: foto no disponible`}>
+      <div className="grid h-48 w-48 shrink-0 place-items-center rounded-2xl border border-slate-100 bg-slate-50 text-center text-sm text-slate-500" role="img" aria-label={`${alt}: foto no disponible`}>
         <span className="flex flex-col items-center gap-1"><ImageOff className="h-6 w-6 text-slate-400" aria-hidden />Foto no disponible</span>
       </div>
     );
@@ -37,7 +37,7 @@ function Foto({ src, alt, credito }: { src: string; alt: string; credito: string
   return (
     <figure className="shrink-0">
       <img src={src} alt={alt} loading="eager" onError={() => setRota(true)} className="h-48 w-48 rounded-2xl border border-slate-100 bg-white object-contain p-2" />
-      {credito ? <figcaption className="mt-1 w-48 text-[11px] leading-snug text-slate-500"><TextoConEnlaces texto={credito} /></figcaption> : null}
+      {credito ? <figcaption className="mt-1 w-48 text-sm leading-snug text-slate-500"><TextoConEnlaces texto={credito} /></figcaption> : null}
     </figure>
   );
 }
@@ -56,12 +56,12 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
         {aviso}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           {v.imagen ? <Foto key={v.imagen} src={v.imagen} alt={v.nombre} credito={v.credito} /> : null}
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base">
             {v.marca ? <><dt className="text-slate-500">Marca</dt><dd><ValorConEnlace v={v.marca} /></dd></> : null}
             {v.modelo ? <><dt className="text-slate-500">Modelo</dt><dd className="text-slate-800">{v.modelo}</dd></> : null}
             <dt className="text-slate-500">Categoría</dt><dd className="text-slate-800">{v.categoria}</dd>
-            {v.estado ? <><dt className="text-slate-500">Estado</dt><dd><Badge variant={/venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge></dd></> : null}
-            {v.gtin ? <><dt className="text-slate-500">EAN</dt><dd className="font-mono text-xs text-slate-600">{v.gtin}</dd></> : null}
+            {v.estado ? <><dt className="text-slate-500">Estado</dt><dd><Badge className="!text-sm !normal-case !tracking-normal" variant={/venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge></dd></> : null}
+            {v.gtin ? <><dt className="text-slate-500">EAN</dt><dd className="font-mono text-sm text-slate-600">{v.gtin}</dd></> : null}
           </dl>
         </div>
       </div>
@@ -80,7 +80,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
 
   if (v.estilo === 'pie') {
     return (
-      <footer className="my-3 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500">
+      <footer className="my-3 border-t border-slate-100 pt-3 text-sm leading-relaxed text-slate-500">
         {aviso}
         <p>
           {v.revisado ? <>Datos revisados el {fechaCorta(v.revisado)}. </> : <>Estos datos todavía no tienen fecha de revisión. </>}
@@ -95,7 +95,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
     return (
       <Seccion titulo={v.titulo}>
         {aviso}
-        <ul className="space-y-1.5 text-sm">
+        <ul className="space-y-1.5 text-base">
           {v.lineas.map(l => (
             <li key={l.columnaId} className="flex flex-wrap items-baseline gap-x-2">
               <span className="text-slate-500">{l.etiqueta}:</span>
@@ -112,7 +112,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
     <Seccion titulo={v.titulo}>
       {aviso}
       <div className="overflow-x-auto rounded-xl border border-slate-100">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <tbody>
             {v.lineas.map(l => (
               <tr key={l.columnaId} className="border-b border-slate-100 last:border-0">
