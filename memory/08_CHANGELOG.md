@@ -9286,3 +9286,12 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Comparador en el móvil**: la columna fija mide siempre 7rem y la tabla se desliza de producto en producto (`scroll-snap`), así que ya no asoman trozos de la columna de al lado; el nombre del grupo («PRECIO», «DATOS TÉCNICOS») se queda a la vista al deslizar.
 - **Migas en el móvil**: una línea, solo el nivel de arriba («‹ Powerbanks»); desde `sm`, el camino entero.
 - **Fuente de cada propiedad**: se lee entera, partida en líneas si hace falta, en vez de «Según la marca · …».
+## 2026-10-18 — Evaluator round 2: home groups, mobile listing and search results (Wikiproducts W2)
+
+- Home: the `secciones` block (site scope) groups its cards under the category they hang from — «Energía portátil» (3) and «Energía solar doméstica» (2) — with the group title linking to the category page. One row at ≥1024 px (all five visible without scrolling at 1440×900, checked locally: last card ends at 728 px); compact rows with a 64 px thumbnail on the phone. `seccionesDe` adds `grupo` (earliest root `subpagina` among its vias); `agruparSecciones` in `tarjetaSeccion.ts` only groups with ≥2 groups. Category pages (`ambito:'pagina'`) keep the flat grid.
+- Search results carry the product photo, «desde» price and one key figure with its unit (`completarFichas` in `buscadorSitio.ts`, same `textoDe` as the sheet).
+- Results page shows one search box: the mobile row is not rendered there and the desktop bar box is `invisible`.
+- Mobile menu dropdown is opaque and `z-50` (the search row showed through it).
+- Breadcrumbs: W1's #661 version kept (one level on the phone); this PR's one-line variant dropped in the merge.
+- Subcategory pages: «Qué conviene mirar» is folded on load so a product shows before scrolling at 390 px. New route `POST /api/v1/pages/:id/blocks/:blockId/fold` (owner key, top-level `titulo1-3` only, idempotent); `enlazar-sitio.mjs` step 1 calls it. Needs a «Cargar Wikiproducts» run to reach production. The server HTML still renders the folded text open (crawlers read it).
+- Not checked on production (unreachable from the cloud session).

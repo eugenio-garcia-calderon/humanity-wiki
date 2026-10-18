@@ -26,7 +26,7 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
   return (
     <section>
       {titulo && <h2 className="mb-3 text-xl font-black text-slate-900">{titulo}</h2>}
-      <SeccionesSitio secciones={secciones} enlace={enlace} />
+      <SeccionesSitio secciones={secciones} enlace={enlace} agrupar={datos.ambito !== 'pagina'} />
     </section>
   );
 }
