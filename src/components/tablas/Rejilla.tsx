@@ -1173,7 +1173,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora} conDescripcion={activa.config.descripcion !== false}
               // «Filas que se ven»: filas de tarjetas en CADA grupo (2026-10-18).
-              filasMax={vista === 'carrusel' ? null : porTanda} nombreMas={datos.tabla?.titulo}
+              filasMax={vista === 'carrusel' ? null : porTanda}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               // Dentro de un grupo también se reordena a mano (2026-10-18, Eugenio):
               // el orden es el de la tabla, y el grupo enseña su trozo en ese orden.
