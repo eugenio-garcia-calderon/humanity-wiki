@@ -15,6 +15,7 @@ import ConexionesBD, { type Conexion } from './ConexionesBD';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
+import { propiedadesTarjeta } from '../bloquesDatos/ficha/modelo';
 import { cn } from '../../utils/cn';
 import { tonoDe, COLORES } from '../../utils/coloresBloque';
 import BarraVista, { Desplegable, claseBoton, Cuenta } from './BarraVista';
@@ -820,7 +821,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // Qué propiedades se ven en cada tarjeta: lo que se guarda en la vista (el panel de Propiedades lo escribe ahí).
   // Sin nada guardado, lo que traiga el bloque de la página o, si no, las tres primeras.
   const visiblesAhora: string[] = (esGaleria && Array.isArray(activa.config.propiedades) ? activa.config.propiedades : null)
-    ?? visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
+    ?? visibles ?? propiedadesTarjeta(columnas as any, datos.columna_titulo) ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
   const ajustesGaleria = (
     <div className="space-y-1">
       {onCambiarOcultarMandos && (

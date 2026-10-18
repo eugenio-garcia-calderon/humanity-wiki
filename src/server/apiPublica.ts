@@ -516,7 +516,7 @@ export function registrarApiPublica(app: Express, db: any) {
   });
 
   /** `{"Column name": {source, date, nature, note}}` → by column id, for
-   *  `guardarProcedencia`. Nature: declarado | medido | calculado | no_publicado. */
+   *  `guardarProcedencia`. Nature: declarado | medido | calculado | tercero | no_publicado. */
   const mapearProcedencia = (cols: any[], p: any): { mapa: Record<string, any> } | { error: string } => {
     if (p === undefined) return { mapa: {} };
     const m = mapearValores(cols, p);
