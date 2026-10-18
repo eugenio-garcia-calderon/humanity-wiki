@@ -1047,7 +1047,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "maximo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-powerbanks",
               "direccion": "destino"
             }
@@ -1084,7 +1084,7 @@
               "operacion": "contar_llenas",
               "columna_relacion_tabla_clave": "ofertas-powerbanks",
               "direccion": "destino",
-              "columna_destino_clave": "precio_eur"
+              "columna_destino_clave": "precio_disponible"
             }
           }
         },
@@ -1646,7 +1646,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "maximo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
               "direccion": "destino"
             }
@@ -1683,7 +1683,7 @@
               "operacion": "contar_llenas",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
               "direccion": "destino",
-              "columna_destino_clave": "precio_eur"
+              "columna_destino_clave": "precio_disponible"
             }
           }
         },
@@ -2244,7 +2244,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "maximo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
               "direccion": "destino"
             }
@@ -2281,7 +2281,7 @@
               "operacion": "contar_llenas",
               "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
               "direccion": "destino",
-              "columna_destino_clave": "precio_eur"
+              "columna_destino_clave": "precio_disponible"
             }
           }
         },
@@ -2997,7 +2997,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "maximo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
               "direccion": "destino"
             }
@@ -3034,7 +3034,7 @@
               "operacion": "contar_llenas",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
               "direccion": "destino",
-              "columna_destino_clave": "precio_eur"
+              "columna_destino_clave": "precio_disponible"
             }
           }
         },
@@ -3795,7 +3795,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "maximo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
               "direccion": "destino"
             }
@@ -3832,7 +3832,7 @@
               "operacion": "contar_llenas",
               "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
               "direccion": "destino",
-              "columna_destino_clave": "precio_eur"
+              "columna_destino_clave": "precio_disponible"
             }
           }
         },
