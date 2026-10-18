@@ -94,15 +94,15 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
         <p className="mb-1 text-sm text-slate-500 sm:hidden">Desliza la tabla hacia la izquierda para ver los {v.productos.length} productos.</p>
       ) : null}
       {v && v.productos.length >= 1 ? (
-        <div ref={caja} className="overflow-x-auto rounded-xl border border-slate-100" role="region" aria-label="Comparación" tabIndex={0}>
+        <div ref={caja} className="overflow-x-auto rounded-xl border border-slate-100 snap-x snap-mandatory scroll-pl-28 sm:snap-none sm:scroll-pl-0" role="region" aria-label="Comparación" tabIndex={0}>
           <table className="min-w-full border-collapse text-base">
             <thead>
               <tr>
-                <th scope="col" className="sticky left-0 z-10 w-28 min-w-[7rem] sm:w-auto sm:min-w-[8.5rem] bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left text-xs font-semibold text-slate-400"><span className="sr-only">Dato</span></th>
+                <th scope="col" className="sticky left-0 z-10 w-28 min-w-[7rem] max-w-[7rem] sm:w-auto sm:max-w-none sm:min-w-[8.5rem] bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left text-xs font-semibold text-slate-400"><span className="sr-only">Dato</span></th>
                 {v.productos.map(p => {
                   const href = p.actual ? null : enlace(p.paginaId);
                   return (
-                    <th key={p.id} scope="col" className={cn('min-w-[10rem] sm:min-w-[9.5rem] px-3 py-2 text-left align-bottom', p.actual && 'bg-sky-50/60')}>
+                    <th key={p.id} scope="col" className={cn('snap-start min-w-[10rem] sm:min-w-[9.5rem] px-3 py-2 text-left align-bottom', p.actual && 'bg-sky-50/60')}>
                       {p.imagen ? <img src={p.imagen} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = 'none'; }} className="mb-1 h-16 w-16 rounded-lg object-contain" /> : null}
                       <div className="flex items-start gap-1">
                         {href ? <a href={href} className="font-bold text-sky-700 hover:underline">{p.nombre}</a> : <span className="font-bold text-slate-900">{p.nombre}</span>}
@@ -125,11 +125,15 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
                 return [
                   cabecera ? (
                     <tr key={`g-${l.columnaId}`}>
-                      <th colSpan={v.productos.length + 1} scope="colgroup" className="sticky left-0 bg-slate-50 px-3 py-1.5 text-left text-sm font-bold uppercase tracking-wide text-slate-600">{cabecera}</th>
+                      <th colSpan={v.productos.length + 1} scope="colgroup" className="bg-slate-50 py-1.5 text-left text-sm font-bold uppercase tracking-wide text-slate-600">
+                        {/* The label sticks, not the cell: a sticky cell as wide as the
+                            whole table scrolled away with it and left a grey bar. */}
+                        <span className="sticky left-0 inline-block px-3">{cabecera}</span>
+                      </th>
                     </tr>
                   ) : null,
                   <tr key={l.columnaId} className="border-t border-slate-100">
-                    <th scope="row" className="sticky left-0 z-10 bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left align-top text-sm font-medium text-slate-700 [overflow-wrap:anywhere]">
+                    <th scope="row" className="sticky left-0 z-10 w-28 min-w-[7rem] max-w-[7rem] sm:w-auto sm:max-w-none bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left align-top text-sm font-medium text-slate-700 [overflow-wrap:anywhere]">
                       {l.etiqueta}
                       {l.sentido ? <span className="block text-sm font-normal text-slate-500">{l.sentido === 'mayor' ? 'más es mejor' : 'menos es mejor'}</span> : null}
                     </th>

@@ -9266,3 +9266,10 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Cada propiedad de la ficha tiene **ancho** en columnas de la rejilla: se estira o encoge con el **tirador del borde derecho** (aparece al pasar el ratón) o desde su menú («Ancho: 1, 2, 3… Todo»). Por defecto, 1: las de al lado miden lo mismo y, en la misma fila, igualan su alto. La barra de avance ya no ocupa la fila entera por defecto. `config.ancho_ficha`.
 - **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
 - El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).
+
+## 2026-10-18 — Sin precio, sin «precio por kWh»; comparador y ficha que se leen en el móvil (Wikiproducts W1)
+- **Fórmulas**: `REDONDEAR`, `ABS`, `RAIZ`, `TECHO`, `SUELO` y `POTENCIA` leen sus argumentos por posición. Antes quitaban los vacíos y se corrían: `REDONDEAR(vacío; 2)` daba 2 y `REDONDEAR(vacío * 1000; 0)` daba 0. De ahí salían el «2 €/Wp» de los paneles sin precio y el «0 €/kWh MEJOR» de las baterías domésticas (evaluador, ronda 2). Las fórmulas se calculan al leer, así que el arreglo llega a producción sin volver a cargar datos.
+- **Ficha**: un precio por unidad de 0 o menos cuenta como «sin dato» (no sale, no es «mejor», no ordena). Sin precio, la cabecera no dice «A la venta» junto a «Sin precio todavía» ni muestra precio por unidad.
+- **Comparador en el móvil**: la columna fija mide siempre 7rem y la tabla se desliza de producto en producto (`scroll-snap`), así que ya no asoman trozos de la columna de al lado; el nombre del grupo («PRECIO», «DATOS TÉCNICOS») se queda a la vista al deslizar.
+- **Migas en el móvil**: una línea, solo el nivel de arriba («‹ Powerbanks»); desde `sm`, el camino entero.
+- **Fuente de cada propiedad**: se lee entera, partida en líneas si hace falta, en vez de «Según la marca · …».
