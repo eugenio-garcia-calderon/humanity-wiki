@@ -9117,3 +9117,8 @@ en mis páginas como proyecto pendiente».
 - Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
 - Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
 - Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
+
+## 2026-10-18 — Porcentaje como barra de avance (prog8)
+- Una propiedad **porcentaje** se ve como **barra de avance**: naranja-amarillo (`amber-400`) por debajo del 50 %, azul (`sky-500`) del 50 al 99 % y verde (`emerald-500`) al 100 %. En la galería, fina con la cifra al lado; en la página del elemento, **gruesa y a todo el ancho**, con la cifra grande, como un crowdfunding.
+- Para editarla, un **deslizador de 0 a 100 de 10 en 10** (ratón, dedo o flechas); guarda al soltar.
+- Se puede apagar por columna en su editor («Mostrar como barra de avance», `config.barra === false`) para porcentajes que no son avance (una comisión). Ver `BarraAvance.tsx`.

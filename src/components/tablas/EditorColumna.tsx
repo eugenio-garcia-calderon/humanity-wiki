@@ -460,6 +460,16 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
             </label>
           )}
 
+          {/* ── EL PORCENTAJE, COMO BARRA DE AVANCE (2026-10-18) ──────────── */}
+          {tipo === 'porcentaje' && (
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={config.barra !== false}
+                onChange={e => setConfig((c: any) => ({ ...c, barra: e.target.checked }))} />
+              <span className="text-xs font-bold text-slate-600">Mostrar como barra de avance</span>
+              <span className="text-[11px] text-slate-400">naranja hasta el 50 %, azul hasta el 99 %, verde al 100 %</span>
+            </label>
+          )}
+
           {/* ── ¿UNO O VARIOS? ────────────────────────────────────────────── */}
           {VARIOS.has(tipo) && (
             <label className={cn('flex items-center gap-2', soloEnlace && 'order-4')}>
