@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
+import { ShoppingBag, X, Minus, Plus, Loader2, ExternalLink, Store } from 'lucide-react';
 import { useCarrito, aLineasServidor, claveLinea } from '../../hooks/useCarrito';
 import CheckoutPropio, { type LineaPago } from './CheckoutPropio';
-import { textoComision } from '../../utils/ofertas';
+import { textoComision, textoComisionLinea } from '../../utils/ofertas';
 import { useCobro } from '../../hooks/useCobro';
 
 /**
@@ -218,6 +218,103 @@ export function CestaDeBotones({ tienda }: { tienda: string }) {
   return lidera ? createPortal(<Cesta tienda={tienda} registrar={false} />, document.body) : null;
 }
 
+/**
+ * THE CART BY SHOP (evaluator round 3, fix 1): one box per shop that really
+ * sells the lines, with its subtotal, its shipping (the offer's, or the shop's
+ * published rule, or «la tienda lo calcula»), its total and the commission of
+ * each line; then the grand total. Each line links to its offer on the shop's
+ * page, which is where it is bought while paying here is not open.
+ */
+function CestaPorTiendas({ tiendas, lineas, cambiar, quitar, dinero }: {
+  tiendas: { distribuidor_id: string; distribuidor: string | null; subtotal_centimos: number; envio_centimos: number | null;
+    envio_origen: 'oferta' | 'tienda' | null; total_centimos: number | null; comision_centimos: number; condiciones_url: string | null;
+    lineas: { producto_id: string; variante_id: string | null; nombre: string; cantidad: number; precio_centimos: number; enlace: string | null; comision_pct: number | null; comision_centimos: number | null }[] }[];
+  lineas: { producto_id: string; variante_id?: string | null; variante_nombre?: string | null; cantidad: number }[];
+  cambiar: (pid: string, n: number, vid?: string | null) => void;
+  quitar: (pid: string, vid?: string | null) => void;
+  dinero: (c: number) => string;
+}) {
+  const sinEnvio = tiendas.filter(t => t.envio_centimos === null).length;
+  const total = tiendas.reduce((n, t) => n + t.subtotal_centimos + (t.envio_centimos || 0), 0);
+  const comision = tiendas.reduce((n, t) => n + t.comision_centimos, 0);
+  const variante = (pid: string, vid: string | null) => lineas.find(l => l.producto_id === pid && (l.variante_id || null) === vid)?.variante_nombre;
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-slate-600">
+        {tiendas.length === 1 ? 'Todo sale de una tienda.' : `Llevas cosas de ${tiendas.length} tiendas: cada una manda su caja.`}
+      </p>
+      {tiendas.map(t => (
+        <section key={t.distribuidor_id} aria-label={t.distribuidor || 'Tienda'} className="rounded-2xl border border-slate-200 p-3">
+          <h3 className="flex items-center gap-1.5 text-base font-black text-slate-900">
+            <Store className="h-4 w-4 shrink-0 text-slate-400" aria-hidden /> {t.distribuidor || 'Tienda sin nombre'}
+          </h3>
+          <ul className="mt-2 space-y-3">
+            {t.lineas.map(l => (
+              <li key={`${l.producto_id}|${l.variante_id || ''}`}>
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-base font-bold leading-snug text-slate-800">{l.nombre}{variante(l.producto_id, l.variante_id) ? <span className="font-semibold text-slate-500"> · {variante(l.producto_id, l.variante_id)}</span> : null}</p>
+                    <p className="text-sm tabular-nums text-slate-500">{dinero(l.precio_centimos)} cada uno · <b className="text-slate-700">{dinero(l.precio_centimos * l.cantidad)}</b></p>
+                    <p className="text-sm leading-snug text-slate-500">{textoComisionLinea(l.comision_pct, l.comision_centimos)}</p>
+                  </div>
+                  <button type="button" onClick={() => quitar(l.producto_id, l.variante_id)} aria-label={`Quitar ${l.nombre}`}
+                          className="w-11 h-11 grid place-items-center rounded-lg hover:bg-slate-100 shrink-0">
+                    <X className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad - 1, l.variante_id)} aria-label="Uno menos"
+                            className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
+                      <Minus className="w-3.5 h-3.5 text-slate-600" />
+                    </button>
+                    <span className="w-7 text-center text-base font-bold tabular-nums">{l.cantidad}</span>
+                    <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad + 1, l.variante_id)} aria-label="Uno más"
+                            className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
+                      <Plus className="w-3.5 h-3.5 text-slate-600" />
+                    </button>
+                  </div>
+                  {l.enlace && (
+                    <a href={l.enlace} target="_blank" rel="nofollow noopener"
+                       className="ml-auto inline-flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 text-sm font-bold text-white hover:bg-slate-800">
+                      Completar en {t.distribuidor || 'la tienda'} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <dl className="mt-3 space-y-0.5 border-t border-slate-100 pt-2 text-sm">
+            <div className="flex justify-between gap-2"><dt className="text-slate-500">Subtotal</dt><dd className="tabular-nums text-slate-800">{dinero(t.subtotal_centimos)}</dd></div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-slate-500">Envío{t.envio_origen === 'tienda' ? ' (según sus condiciones)' : ''}</dt>
+              <dd className="tabular-nums text-slate-800">{t.envio_centimos === null ? 'lo calcula la tienda' : t.envio_centimos === 0 ? 'gratis' : dinero(t.envio_centimos)}</dd>
+            </div>
+            <div className="flex justify-between gap-2 font-black text-slate-900">
+              <dt>Total en {t.distribuidor || 'esta tienda'}</dt>
+              <dd className="tabular-nums">{dinero(t.subtotal_centimos + (t.envio_centimos || 0))}{t.envio_centimos === null ? ' + envío' : ''}</dd>
+            </div>
+          </dl>
+        </section>
+      ))}
+      <div className="rounded-2xl bg-slate-50 p-3">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-base font-bold text-slate-700">Total</span>
+          <span className="text-xl font-black tabular-nums text-slate-900">{dinero(total)}</span>
+        </div>
+        {sinEnvio > 0 && (
+          <p className="text-sm text-slate-500">Más el envío de {sinEnvio === 1 ? 'una tienda' : `${sinEnvio} tiendas`} que no lo publica{sinEnvio === 1 ? '' : 'n'}: lo verás al pagar en ella.</p>
+        )}
+        <p className="mt-1 text-sm text-slate-500">
+          {comision > 0
+            ? `Comisión total de Wikiproducts: ${dinero(comision)}, la pagan las tiendas. Tú pagas el mismo precio que en ellas.`
+            : `Comisión total de Wikiproducts: ${dinero(0)}. Ninguna de estas tiendas tiene acuerdo con nosotros; tú pagas el mismo precio que en ellas.`}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Cesta({ tienda, registrar = true }: { tienda: string; registrar?: boolean }) {
   const { lineas, unidades, subtotal, cambiar, quitar, vaciar } = useCarrito(tienda);
   useEffect(() => {
@@ -267,7 +364,10 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
   // todo (2026-08-23); y la dirección, por si entonces hay que enviar algo.
   const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean;
     zona?: string; zona_nombre?: string; se_envia?: boolean; no_llega?: string | null; envio_estimado?: boolean; recogida_posible?: boolean;
-    varias_tiendas?: boolean; con_donacion?: boolean;
+    varias_tiendas?: boolean; con_donacion?: boolean; es_dueno?: boolean;
+    compra_en_tiendas?: { distribuidor_id: string; distribuidor: string | null; subtotal_centimos: number; envio_centimos: number | null;
+      envio_origen: 'oferta' | 'tienda' | null; total_centimos: number | null; comision_centimos: number; condiciones_url: string | null;
+      lineas: { producto_id: string; variante_id: string | null; nombre: string; cantidad: number; precio_centimos: number; enlace: string | null; comision_pct: number | null; comision_centimos: number | null }[] }[];
     tiendas?: { vendedor_id: string | null; tienda: string | null; nombre: string | null;
       lineas: { producto_id: string; variante_id: string | null; cantidad: number; distribuidor?: string | null; comision_pct?: number | null; comision_centimos?: number | null }[];
       subtotal_centimos: number; envio_centimos: number | null; se_envia: boolean; no_llega: string | null; todo_acepta_puntos: boolean;
@@ -342,6 +442,15 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
 
   const dinero = (c: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(c / 100);
+
+  // FINISHED AT EACH SHOP (evaluator round 3, fix 1). While nobody can pay
+  // here — charging closed, no gateway, or a Stripe TEST key for anyone but
+  // the owner — a cart of shop offers is still the multi-shop basket: grouped
+  // by shop, with shipping, commission and totals, and a link per line to buy
+  // it on the shop's own page. Before: «Todavía no se puede pagar», a dead end.
+  const sinPagoAqui = !!cobro && (!cobro.abierto || (!cobro.con_pasarela && !cubreTodo) || (!!cobro.pruebas && !cotiza?.es_dueno));
+  const enTiendas = sinPagoAqui ? (cotiza?.compra_en_tiendas || []) : [];
+  const todoEnTiendas = enTiendas.length > 0 && enTiendas.reduce((n, t) => n + t.lineas.length, 0) === lineas.length;
 
   // OFERTAS DE WIKIPRODUCTS (2026-10-18): de qué tienda sale cada línea y qué
   // nos paga esa tienda por ella. Lo dice la cotización del servidor, nunca la
@@ -449,6 +558,9 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
               </button>
             </div>
 
+            {todoEnTiendas ? (
+              <CestaPorTiendas tiendas={enTiendas} lineas={lineas} cambiar={cambiar} quitar={quitar} dinero={dinero} />
+            ) : (
             <ul className="space-y-3">
               {lineas.map(l => (
                 <li key={claveLinea(l)} className="flex items-center gap-3">
@@ -484,7 +596,9 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
                 </li>
               ))}
             </ul>
+            )}
 
+            {!todoEnTiendas && (<>
             <div className="mt-5 pt-4 border-t border-slate-100">
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-slate-500">Subtotal</span>
@@ -615,12 +729,20 @@ export default function Cesta({ tienda, registrar = true }: { tienda: string; re
 
               {error && <p className="mt-3 text-xs font-bold text-rose-600">{error}</p>}
 
+            </div>
+            </>)}
+            <div className={todoEnTiendas ? 'mt-4' : ''}>
               {/* COBRO APAGADO (2026-10-18): se dice antes de pedir nada, no al
                   final del formulario. Con el interruptor encendido pero sin
-                  pasarela, solo pasa lo que se paga entero con puntos. */}
-              {cobro && (!cobro.abierto || (!cobro.con_pasarela && !cubreTodo)) ? (
-                <p className="mt-4 p-3 rounded-xl border border-sky-200 bg-sky-50 text-xs leading-snug text-sky-900">
-                  <b>Todavía no se puede pagar en esta web.</b> Muy pronto podrás hacerlo aquí. Tu cesta se queda guardada en este navegador; mientras tanto, puedes comprarlo en la web de cada tienda.
+                  pasarela, solo pasa lo que se paga entero con puntos. Con
+                  la clave de PRUEBAS solo paga aquí quien es dueño (para
+                  probarlo); el resto completa la compra en cada tienda. */}
+              {sinPagoAqui ? (
+                <p className="mt-4 p-3 rounded-xl border border-sky-200 bg-sky-50 text-sm leading-snug text-sky-900">
+                  <b>El pago a través de Wikiproducts todavía no está disponible.</b>{' '}
+                  {todoEnTiendas
+                    ? 'Completa la compra en cada tienda con los enlaces de arriba: pagas lo mismo que aquí. Tu cesta se queda guardada en este navegador.'
+                    : 'Tu cesta se queda guardada en este navegador; para comprar, hazlo en la web de cada tienda.'}
                 </p>
               ) : (<>
               <button type="button" onClick={pagar} disabled={pagando || !cobro}

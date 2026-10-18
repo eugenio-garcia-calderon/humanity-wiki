@@ -15,7 +15,7 @@
 //      garantía, stock, fecha del precio) dice «no lo sabemos» de forma
 //      distinguible de un dato, y nunca «Entrega: desconocido».
 import assert from 'node:assert/strict';
-import { ordenarOfertas, comisionDeLinea, textoComision, relEnlaceTienda, lineasCompra, textoEnvioTienda, type CondicionesTienda } from '../src/utils/ofertas';
+import { ordenarOfertas, comisionDeLinea, textoComision, relEnlaceTienda, lineasCompra, textoEnvioTienda, envioCompraTienda, textoComisionLinea, type CondicionesTienda } from '../src/utils/ofertas';
 import { calcularEnvio } from '../src/server/zonasEnvio';
 import { calcularEnvioPorDistribuidor, estadoDeducido } from '../src/server/pedidoGestionado';
 
@@ -152,6 +152,20 @@ ok('el envío de la tienda depende del precio y del umbral de envío gratis', ()
   assert.equal(textoEnvioTienda({ ...oferta, tienda: { ...tienda, envio_gratis_desde_centimos: 0 } }), 'Envío gratis');
   // The offer's own shipping wins: the shop rule is only a fallback.
   assert.equal(textoEnvioTienda({ ...oferta, envio_centimos: 300 }), null);
+});
+ok('la cesta cuenta el envío de cada tienda: el de la oferta manda, si no la regla de la tienda', () => {
+  const regla = { envio_centimos: 499, envio_gratis_desde_centimos: 5000 };
+  assert.deepEqual(envioCompraTienda([0, 300], regla, 2000), { centimos: 300, origen: 'oferta' });
+  assert.deepEqual(envioCompraTienda([null, 300], regla, 2000), { centimos: 499, origen: 'tienda' });
+  assert.deepEqual(envioCompraTienda([null], regla, 5000), { centimos: 0, origen: 'tienda' });
+  assert.deepEqual(envioCompraTienda([null], { envio_centimos: null, envio_gratis_desde_centimos: 0 }, 100), { centimos: 0, origen: 'tienda' });
+  // Unknown is said as unknown, never as free.
+  assert.deepEqual(envioCompraTienda([null], { envio_centimos: null, envio_gratis_desde_centimos: 5000 }, 100), { centimos: null, origen: null });
+  assert.deepEqual(envioCompraTienda([null], null, 100), { centimos: null, origen: null });
+});
+ok('cada línea de la cesta dice su comisión, también cuando es cero', () => {
+  assert.match(textoComisionLinea(null, null, 'EUR'), /^Comisión de Wikiproducts: 0,00\s€ \(sin acuerdo con esta tienda\)$/);
+  assert.match(textoComisionLinea(3, 288, 'EUR'), /^Comisión de Wikiproducts: 2,88\s€ \(3\s?%\), la paga la tienda$/);
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);
