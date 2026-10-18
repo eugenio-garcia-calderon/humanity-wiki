@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "W6 chat y expertos: enganche de pocas líneas",
-      "desde": "2026-10-18T11:35:19.511Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/seguridad/politica.ts",
       "motivo": "W6 chat y expertos: enganche de pocas líneas",
       "desde": "2026-10-18T11:35:21.996Z"
