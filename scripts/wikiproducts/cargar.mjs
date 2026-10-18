@@ -264,6 +264,18 @@ function stockDe(x) {
   const n = t.match(/^(\d+)\s+(en stock|unidades)\b/i);
   return n ? Number(n[1]) : null;
 }
+/** Whether the shop sells it right now, as the data says it in words: true
+ *  for «en stock», «disponible» or a count above 0, false when sold out,
+ *  null when the page does not say or contradicts itself. Separate from
+ *  `stockDe` so «en stock» without a count is not turned into a made-up
+ *  number of units (W5 found in-stock offers reading «sin confirmar»). */
+function disponibleDe(x) {
+  const n = stockDe(x);
+  if (n !== null) return n > 0;
+  const t = String(x ?? '').trim();
+  if (/confirma|dudoso|contradictorio/i.test(t)) return null;
+  return /^(en stock|in stock|disponible)\b/i.test(t) ? true : null;
+}
 function filaOferta(p, o) {
   const sinAcuerdo = o.comision == null || /sin acuerdo/i.test(String(o.comision));
   return {
@@ -275,6 +287,7 @@ function filaOferta(p, o) {
       acuerdo: sinAcuerdo ? 'Sin acuerdo' : null,
       // Stock is a number of units; the data has words. Only a number goes in.
       stock: stockDe(o.stock),
+      disponible: disponibleDe(o.stock),
       incluye_instalacion: o.incluye_instalacion,
       nota: o.nota,
     },

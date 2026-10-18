@@ -41,6 +41,7 @@ export type OfertaLd = {
   moneda: string;
   stock: number | null;
   agotada: boolean;
+  en_stock?: boolean | null;
   enlace: string | null;
 };
 
@@ -57,7 +58,7 @@ export function ofertasLd(ofertas: OfertaLd[], url?: string | null): any[] {
     price: euros(o.precio_centimos!),
     priceCurrency: o.moneda || 'EUR',
     ...(o.agotada ? { availability: 'https://schema.org/OutOfStock' }
-      : o.stock !== null && o.stock > 0 ? { availability: 'https://schema.org/InStock' } : {}),
+      : (o.stock !== null ? o.stock > 0 : o.en_stock) ? { availability: 'https://schema.org/InStock' } : {}),
     ...(o.enlace ? { url: o.enlace } : url ? { url } : {}),
     ...(o.distribuidor ? { seller: { '@type': 'Organization', name: o.distribuidor } } : {}),
     ...(o.envio_centimos !== null ? {

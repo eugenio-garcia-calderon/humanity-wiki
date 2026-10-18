@@ -9321,3 +9321,14 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **No cuentan nunca** en la nota de la comunidad, no ordenan nada y no entran en el `AggregateRating` del JSON-LD. La caja de la comunidad sigue con su estado vacío y su «Entrar para puntuar».
 - El dato: columna `opiniones_terceros` (texto largo con JSON, oculta en la ficha) en las cinco tablas de producto y en Distribuidores, cargada por `cargar.mjs` desde `scripts/wikiproducts/datos/opiniones-terceros.json`. Sólo se enseña una entrada con enlace https, fecha y cifras válidas (`src/utils/opinionesTerceros.ts`). Pruebas en `scripts/probar-valoraciones.ts`.
 - **Amazon no**: su `robots.txt` bloquea la lectura y sus condiciones sólo permiten enseñar sus estrellas por su API. Las cifras de productos salen de tiendas oficiales y tiendas que publican sus opiniones; las de tiendas, de Trustpilot.
+
+## 2026-10-18 — Wikiproducts: «en stock» reads as in stock (W3a, found by W5)
+- An offer whose data said «en stock» without a number of units loaded an empty «Stock (unidades)» cell, so its box read «Disponibilidad sin confirmar». Inventing a count would be worse.
+- The offer tables now have a «Disponible» checkbox (role `disponible`):
+  - `cargar.mjs` (`disponibleDe`) sets it to true for «en stock», «disponible» or a count above zero.
+  - It sets it to false for a sold-out offer.
+  - It leaves it empty for «sin confirmar» or contradictory pages.
+- How the offers API uses it:
+  - It returns `en_stock` (a count wins when there is one) and treats `disponible = false` as sold out.
+  - The box says «En stock», and the SEO markup says InStock only in that case.
+- Test in `scripts/probar-ofertas.ts`. The column is created by the next full load.

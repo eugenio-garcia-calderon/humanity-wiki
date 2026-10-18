@@ -129,6 +129,12 @@ ok('las condiciones de la tienda llenan la caja; «desconocido» no es un plazo'
   assert.match(t.comprobado, /^Precio comprobado el 18 de octubre de 2026$/);
   assert.equal(texto({ ...oferta, plazo: '24-48 h' }).entrega, 'Entrega: 24-48 h');
 });
+ok('«en stock» sin cantidad dice En stock; una cantidad manda sobre él', () => {
+  assert.equal(texto({ ...oferta, en_stock: true }).stock, 'En stock');
+  assert.equal(texto({ ...oferta, en_stock: null }).stock, 'Disponibilidad sin confirmar');
+  assert.equal(texto({ ...oferta, stock: 3, en_stock: true }).stock, 'Quedan 3');
+  assert.equal(texto({ ...oferta, agotada: true, en_stock: false }).stock, 'Agotado');
+});
 ok('sin condiciones, cada línea dice que no se sabe (y se marca como no sabida)', () => {
   const l = lineasCompra({ ...oferta, tienda: null });
   assert.deepEqual(l.filter(x => !x.sabido).map(x => x.clave), ['entrega', 'devolucion', 'garantia']);

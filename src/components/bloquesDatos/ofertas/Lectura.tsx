@@ -30,7 +30,7 @@ import { textoOpinion, type OpinionTercero } from '../../../utils/opinionesTerce
 export type Oferta = {
   fila_id: string; distribuidor_id: string | null; distribuidor: string | null;
   precio_centimos: number | null; envio_centimos: number | null; moneda: string;
-  stock: number | null; agotada: boolean; plazo: string | null; enlace: string | null; rel: string;
+  stock: number | null; agotada: boolean; en_stock?: boolean | null; plazo: string | null; enlace: string | null; rel: string;
   comision_pct: number | null; comprobado: string | null; instalacion: boolean | null;
   compra: any | null; nota_distribuidor: number | null;
   votos_distribuidor?: { votos: number; umbral: number } | null;

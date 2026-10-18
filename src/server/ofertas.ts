@@ -39,6 +39,8 @@ export type OfertaPublica = {
   moneda: string;
   stock: number | null;
   agotada: boolean;
+  /** The shop says it has it, with or without a count («en stock»). `null` = not said. */
+  en_stock: boolean | null;
   plazo: string | null;
   /** La oferta en la web de la tienda, ya filtrada (solo http/https). */
   enlace: string | null;
@@ -239,6 +241,7 @@ export async function ofertasDeProducto(
   const cPrecio = columnaConRol(columnas, 'precio', ['moneda', 'numero']);
   const cEnvio = columnaConRol(columnas, 'envio', ['moneda', 'numero']);
   const cStock = columnaConRol(columnas, 'stock', ['numero']);
+  const cDisponible = columnaConRol(columnas, 'disponible', ['casilla']);
   const cDist = columnaConRol(columnas, 'distribuidor', ['relacion']);
   const cComision = columnaConRol(columnas, 'comision', ['porcentaje', 'numero']);
   const cEnlace = columnaConRol(columnas, 'enlace', ['url']);
@@ -258,6 +261,8 @@ export async function ofertasDeProducto(
       ? Math.round((cComision!.tipo === 'porcentaje' ? pctBruto * 100 : pctBruto) * 100) / 100 : null);
     const stockBruto = cStock ? valorDe(p.celdas[cStock.id]) : null;
     const stock = typeof stockBruto === 'number' ? Math.max(0, Math.round(stockBruto)) : null;
+    const dispBruto = cDisponible ? valorDe(p.celdas[cDisponible.id]) : null;
+    const disponible = typeof dispBruto === 'boolean' ? dispBruto : null;
     const enlace = compra?.oferta?.enlace ?? (cEnlace ? enlaceSeguro(valorDe(p.celdas[cEnlace.id])) : null);
     const comprobado = cComprobado ? valorDe(p.celdas[cComprobado.id]) : null;
     const inst = cInstalacion ? valorDe(p.celdas[cInstalacion.id]) : null;
@@ -269,7 +274,8 @@ export async function ofertasDeProducto(
       envio_centimos: cEnvio ? cent(valorDe(p.celdas[cEnvio.id])) : null,
       moneda,
       stock,
-      agotada: stock === 0,
+      agotada: stock === 0 || disponible === false,
+      en_stock: stock !== null ? stock > 0 : disponible,
       plazo: cPlazo ? (String(valorDe(p.celdas[cPlazo.id]) || '').trim() || null) : null,
       enlace,
       rel: relEnlaceTienda(pct),
