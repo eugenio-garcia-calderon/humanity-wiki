@@ -5,6 +5,12 @@
       "ruta": "src/server/sitios.ts",
       "motivo": "W2 Wikiproducts: HTML del servidor (SEO R1), URLs legibles",
       "desde": "2026-10-18T11:17:17.918Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0156_expertos_soporte.sql",
+      "motivo": "W6 Wikiproducts: chat de soporte y expertos",
+      "desde": "2026-10-18T11:23:50.270Z"
     }
   ]
 }
