@@ -8982,3 +8982,7 @@ en mis páginas como proyecto pendiente».
 - La página de un elemento enseña sus propiedades en una **rejilla** que se adapta al ancho (una casilla por fila en el móvil, tres o cuatro en escritorio), con el nombre encima y el valor debajo, en orden de izquierda a derecha. Es el diseño por defecto; «dos columnas» se lee como rejilla y «Una columna» sigue disponible en «Personalizar diseño».
 - Lo enlazado desde otra base de datos (Áreas, Equipo…) sale con la **imagen de su página** y más grande; sin imagen, su inicial en color. El servidor añade `miniatura` a cada entrada enlazada, mirando el permiso de la tabla de destino.
 - Archivos: `PropiedadesFila.tsx`, `Relacion.tsx` (`FichaConImagen`), `Celda.tsx` (`enFicha`), `server/bd.ts`.
+### 2026-10-18 — Un número con decimales ya no se guarda mil veces mayor (tablas, Wikiproducts W1)
+- Un precio enviado como número por la API (`0.138`) se pasaba a texto y la regla del punto de millar español lo leía como «138». Ahora un número llega tal cual a las columnas de precio y de porcentaje (la de número ya lo hacía).
+- En texto, un punto con un cero delante ya no cuenta como millar: «0.138» es 0,138. «120.000» sigue siendo ciento veinte mil.
+- Prueba: `npx tsx scripts/probar-tipos-numeros.ts` (21 casos).
