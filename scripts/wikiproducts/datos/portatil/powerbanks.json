@@ -3749,13 +3749,13 @@
         {
           "distribuidor_id": "mediamarkt-es",
           "url": "https://www.mediamarkt.es/eu/product/_powerbank-samsung-eb-p4520xuegeu-bateria-externa-20000-mah-usb-tipo-c-3-puertos-carga-rapida-beige-1573090.html",
-          "precio_eur": null,
-          "envio_eur": null,
-          "plazo": "desconocido",
-          "stock": "desconocido",
+          "precio_eur": 47.99,
+          "envio_eur": 2.99,
+          "plazo": "2 días (estimación de la tienda el 18/10/2026)",
+          "stock": "en stock",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Ficha encontrada en el buscador; no se leyó la página"
+          "nota": "Precio leído en la página el 2026-10-18: «47,99 € (IVA incluido, gastos de envío no incluidos) · + 2,99 € envío a domicilio»."
         }
       ],
       "pendiente": [

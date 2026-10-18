@@ -174,14 +174,16 @@ function Casilla({ l, compacta }: { l: Linea; compacta?: boolean }) {
   );
 }
 
-/** `MarcaProcedencia` on one line, for a tile: the whole sentence stays in
- *  the tooltip and behind the link. */
+/** `MarcaProcedencia`, short, for a tile: the label and the source site, in
+ *  full and wrapping — cut to one line it read «Según la marca · …», which
+ *  hid the very thing it is there to say (evaluator round 2). The note and
+ *  the date stay in the tooltip and behind the link. */
 function ProcedenciaCorta({ p }: { p: Procedencia }) {
   const tono = p.naturaleza === 'medido' ? 'text-emerald-700' : p.naturaleza === 'no_publicado' ? 'text-amber-700' : 'text-slate-500';
   const texto = p.etiqueta || '';
   const titulo = [texto, p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ');
   return (
-    <dd className={cn('truncate text-sm font-semibold', tono)} title={titulo}>
+    <dd className={cn('text-sm font-semibold [overflow-wrap:anywhere]', tono)} title={titulo}>
       {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="hover:underline">{texto}</a> : texto}
     </dd>
   );

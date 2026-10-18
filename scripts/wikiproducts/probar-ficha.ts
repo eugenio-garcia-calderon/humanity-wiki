@@ -9,6 +9,7 @@ import { ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiqueta
 import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe } from '../../src/components/bloquesDatos/ficha/vistas';
 import { metaFicha, tituloFicha } from '../../src/components/bloquesDatos/ficha/seo';
 import { propiedadHtml, retiradaHtml, comparadorHtml, type Herramientas } from '../../src/components/bloquesDatos/ficha/html';
+import { calcular } from '../../src/server/bd/formulas';
 
 let n = 0;
 const prueba = (nombre: string, fn: () => void) => {
@@ -241,6 +242,33 @@ prueba('el precio por vatio es «Calculado», dice cuándo no hay precio y susti
   const cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {} }, { estilo: 'cabecera' }) as any;
   assert.equal(cab.compra.porUnidad, '500 €/kWh');
   assert.ok(propiedadesTarjeta(t.columnas, 'nom')!.includes('pu'));
+});
+
+prueba('sin precio no hay precio por kWh: ni «0 €/kWh», ni «MEJOR», ni «A la venta»', () => {
+  // The engine: an empty price gave REDONDEAR(vacío; 2) = 2 and
+  // REDONDEAR(vacío * 1000; 0) = 0 (evaluator round 2, 2026-10-18).
+  const ctx = (precio: any) => ({ celdas: { p: precio, e: ok(250) } as any, porNombre: { 'precio desde': 'p', 'energía nominal': 'e' } });
+  assert.equal(calcular('REDONDEAR({Precio desde} / {Energía nominal}; 2)', ctx({ estado: 'vacia' })).estado, 'vacia');
+  assert.equal(calcular('REDONDEAR({Precio desde} / {Energía nominal} * 1000; 0)', ctx({ estado: 'vacia' })).estado, 'vacia');
+  assert.deepEqual(calcular('REDONDEAR({Precio desde} / {Energía nominal}; 2)', ctx(ok(100))), ok(0.4));
+  // And the sheet, whatever a stale value says: 0 is no price per unit.
+  const pu: any = { id: 'pu', nombre: 'Precio por kWh', tipo: 'formula', config: { ficha: 'precio_unidad', grupo: 'compra', comparar: 'menor', unidad: '€/kWh', explicacion: 'Precio ÷ energía' } };
+  const est: any = { id: 'est', nombre: 'Estado', tipo: 'texto', config: { ficha: 'estado' } };
+  const t: TablaFicha = { ...tabla, columnas: [...tabla.columnas, pu, est], filas: tabla.filas.map(f => ({ ...f, celdas: f.id === 'c'
+    ? { ...f.celdas, pre: { estado: 'vacia' } as any, pu: ok(0), est: ok('A la venta') }
+    : { ...f.celdas, pu: ok(f.id === 'a' ? 600 : 700), est: ok('A la venta') } })) };
+  assert.equal(textoDe(t.filas[2], pu), '');
+  assert.deepEqual([...mejoresEn(t.filas, pu)], ['a']);
+  assert.deepEqual(ordenarPor(t.filas, pu).map(f => f.id), ['a', 'b']);
+  const v = vistaComparador(t, ['a', 'b'], { actualId: 'c' })!;
+  const linea = v.lineas.find(l => l.columnaId === 'pu')!;
+  assert.ok(!linea.celdas.some((c: any) => c.mejor && !c.texto), 'un hueco no puede ser «la mejor»');
+  const cab = vistaPropiedad({ pagina_id: 'PC', fila_id: 'c', tabla: t, relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.equal(cab.compra.desde, '');
+  assert.equal(cab.compra.porUnidad, '');
+  assert.equal(cab.estado, '', '«A la venta» junto a «Sin precio todavía»');
+  const conPrecio = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {} }, { estilo: 'cabecera' }) as any;
+  assert.equal(conPrecio.estado, 'A la venta');
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);
