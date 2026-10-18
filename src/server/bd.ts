@@ -86,6 +86,8 @@ export const bdInterno: {
   /** `POST /api/bd/tablas` and `POST /api/bd/tablas/:id/columnas`, for `/api/v1`. */
   crearTabla?: (req: Pick<Request, 'user'>, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
   crearColumna?: (req: Pick<Request, 'user'>, tablaId: string, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
+  /** `PUT /api/bd/columnas/:id`, for `/api/v1` (W3a, 2026-10-18). */
+  editarColumna?: (req: Pick<Request, 'user'>, columnaId: string, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
 } = {};
 
 /** Runs a route handler without HTTP and hands back what it answered. Used by
@@ -869,7 +871,7 @@ export function registerBdRoutes(app: Express, db: any) {
    *  texto a número obliga a decidir qué pasa con las celdas que no se pueden
    *  convertir, y esa decisión merece su propio trabajo en vez de colarse aquí
    *  y perder datos en silencio. */
-  app.put('/api/bd/columnas/:id', async (req: Request, res: Response) => {
+  const editarColumnaRuta = async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
       const c = await db.execute(sql`SELECT * FROM bd_columnas WHERE id = ${req.params.id} AND archived_at IS NULL`);
@@ -987,7 +989,9 @@ export function registerBdRoutes(app: Express, db: any) {
       // escribió a mano.
       res.json({ ok: true, formulasArregladas });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.put('/api/bd/columnas/:id', editarColumnaRuta);
+  bdInterno.editarColumna = (req, columnaId, cuerpo) => internamente(editarColumnaRuta, req, { id: columnaId }, cuerpo);
 
   /** Quitar una columna. Se archiva, no se borra: sus valores siguen en el
    *  jsonb de cada fila, así que restaurarla los devuelve intactos. Borrarlos

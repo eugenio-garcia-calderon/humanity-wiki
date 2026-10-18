@@ -91,7 +91,7 @@ function columnaParaApi(c, ids, tablaClave) {
 }
 
 const ids = {};
-const creadas = { tablas: 0, columnas: 0 };
+const creadas = { tablas: 0, columnas: 0, cambiadas: 0 };
 
 const existentes = (await api('GET', '/api/v1/databases')).data;
 const fallidas = [];
@@ -113,7 +113,25 @@ for (const pasada of [1, 2]) {
     const porNombre = new Map(def.columns.map(c => [c.name.toLowerCase(), c]));
     for (const c of t.columnas) {
       const ya = porClave.get(c.clave) || porNombre.get(c.nombre.toLowerCase());
-      if (ya) { ids[t.clave].columns[c.clave] = ya.id; continue; }
+      if (ya) {
+        ids[t.clave].columns[c.clave] = ya.id;
+        // (W3a, evaluator round 3) An existing aggregate that reads another
+        // column than the schema says is re-pointed. Only the four fields that
+        // decide what it computes are compared: the rest of a column's config
+        // can be changed from the screen and is not this loader's to undo.
+        if (pasada === 2 && c.tipo === 'agregado') {
+          const cuerpo = columnaParaApi(c, ids, t.clave);
+          const campos = ['columna_relacion', 'columna_destino', 'operacion', 'direccion'];
+          if (cuerpo && campos.some(k => (cuerpo.config[k] ?? null) !== (ya.config?.[k] ?? null))) {
+            try {
+              await api('PATCH', `/api/v1/databases/${tabla.id}/columns/${ya.id}`, { config: { ...ya.config, ...cuerpo.config } });
+              creadas.cambiadas++;
+              console.log(`  ~ ${t.titulo} · ${c.nombre}: ahora resume otra columna`);
+            } catch (e) { fallidas.push(`${t.titulo} · ${c.nombre}: ${e.message}`); }
+          }
+        }
+        continue;
+      }
       const cuerpo = columnaParaApi(c, ids, t.clave);
       if (!cuerpo) { if (pasada === 2) fallidas.push(`${t.titulo} · ${c.nombre}: depende de algo que no existe`); continue; }
       try {
@@ -143,5 +161,5 @@ for (const pasada of [1, 2]) {
 }
 if (fallidas.length) { console.log(`\nNo se han podido crear ${fallidas.length} columnas:`); for (const f of fallidas) console.log(`  ! ${f}`); }
 
-console.log(`\nHecho: ${creadas.tablas} tablas y ${creadas.columnas} columnas nuevas.`);
+console.log(`\nHecho: ${creadas.tablas} tablas y ${creadas.columnas} columnas nuevas; ${creadas.cambiadas} columnas puestas al día.`);
 if (SALIDA) { writeFileSync(SALIDA, JSON.stringify(ids, null, 2)); console.log(`Identificadores en ${SALIDA}`); }

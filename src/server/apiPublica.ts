@@ -555,6 +555,32 @@ export function registrarApiPublica(app: Express, db: any) {
     } catch (e: any) { console.error('v1 crear columna:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
+  /** `{ config, name? }`: change a column's settings (W3a, 2026-10-18). A
+   *  loader that created a column could never correct it afterwards: the
+   *  products' «Precio desde» kept counting sold-out shops because its
+   *  aggregate could not be pointed at another column. Through the screen's
+   *  own route, so a formula is checked for cycles exactly as when it is
+   *  created, and the type can still not be changed. */
+  app.patch('/api/v1/databases/:id/columns/:columnId', async (req: Request, res: Response) => {
+    try {
+      const t = await conTabla(req, res, true); if (!t) return;
+      const c = (await columnasDe(t.id)).find(x => x.id === String(req.params.columnId));
+      if (!c) return res.status(404).json({ error: 'Esta base de datos no tiene una columna con ese id.' });
+      const config = req.body?.config;
+      const nombre = req.body?.name;
+      if ((config === undefined || typeof config !== 'object' || Array.isArray(config) || config === null) && nombre === undefined) {
+        return res.status(400).json({ error: 'Manda «config» (un objeto) y/o «name».' });
+      }
+      const r = await bdInterno.editarColumna!(req, c.id, {
+        ...(config && typeof config === 'object' && !Array.isArray(config) ? { config } : {}),
+        ...(nombre !== undefined ? { nombre: String(nombre) } : {}),
+      });
+      if (r.codigo !== 200) return res.status(r.codigo).json(r.cuerpo);
+      const d = (await columnasDe(t.id)).find(x => x.id === c.id);
+      res.json({ ...columnaPublica(d), formulas_updated: r.cuerpo?.formulasArregladas ?? 0 });
+    } catch (e: any) { console.error('v1 cambiar columna:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
   // ── IMAGES ─────────────────────────────────────────────────────────────────
   /** Store an image and get its address, so a row's photo cell can point at
    *  a copy kept here instead of at somebody else's server (W3a, 2026-10-18:

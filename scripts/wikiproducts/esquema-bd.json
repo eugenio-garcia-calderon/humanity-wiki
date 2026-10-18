@@ -1027,7 +1027,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "minimo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-powerbanks",
               "direccion": "destino"
             }
@@ -1626,7 +1626,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "minimo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-portatiles",
               "direccion": "destino"
             }
@@ -2224,7 +2224,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "minimo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-luces-solares-portatiles",
               "direccion": "destino"
             }
@@ -2977,7 +2977,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "minimo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-paneles-solares-domesticos",
               "direccion": "destino"
             }
@@ -3775,7 +3775,7 @@
             "agregado": {
               "columna_relacion_clave": "producto",
               "operacion": "minimo",
-              "columna_destino_clave": "precio_eur",
+              "columna_destino_clave": "precio_disponible",
               "columna_relacion_tabla_clave": "ofertas-baterias-domesticas",
               "direccion": "destino"
             }
@@ -4054,6 +4054,17 @@
           }
         },
         {
+          "clave": "precio_disponible",
+          "nombre": "Precio si quedan existencias",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_disponible",
+            "visibilidad": "nunca",
+            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+          }
+        },
+        {
           "clave": "unidad",
           "nombre": "Unidad de venta",
           "tipo": "texto",
@@ -4223,6 +4234,17 @@
           "config": {
             "clave": "disponible",
             "rol": "disponible"
+          }
+        },
+        {
+          "clave": "precio_disponible",
+          "nombre": "Precio si quedan existencias",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_disponible",
+            "visibilidad": "nunca",
+            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
           }
         },
         {
@@ -4398,6 +4420,17 @@
           }
         },
         {
+          "clave": "precio_disponible",
+          "nombre": "Precio si quedan existencias",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_disponible",
+            "visibilidad": "nunca",
+            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+          }
+        },
+        {
           "clave": "unidad",
           "nombre": "Unidad de venta",
           "tipo": "texto",
@@ -4570,6 +4603,17 @@
           }
         },
         {
+          "clave": "precio_disponible",
+          "nombre": "Precio si quedan existencias",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_disponible",
+            "visibilidad": "nunca",
+            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+          }
+        },
+        {
           "clave": "unidad",
           "nombre": "Unidad de venta",
           "tipo": "texto",
@@ -4739,6 +4783,17 @@
           "config": {
             "clave": "disponible",
             "rol": "disponible"
+          }
+        },
+        {
+          "clave": "precio_disponible",
+          "nombre": "Precio si quedan existencias",
+          "tipo": "formula",
+          "config": {
+            "clave": "precio_disponible",
+            "visibilidad": "nunca",
+            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
           }
         },
         {
