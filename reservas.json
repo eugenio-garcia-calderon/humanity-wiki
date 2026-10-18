@@ -95,12 +95,6 @@
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "W5 Wikiproducts: distribuidor y comisión por línea en la cesta",
       "desde": "2026-10-18T11:38:06.243Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "W2 entrada",
-      "desde": "2026-10-18T11:40:37.472Z"
     }
   ]
 }
