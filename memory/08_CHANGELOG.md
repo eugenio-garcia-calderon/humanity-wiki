@@ -8833,3 +8833,6 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
 - «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
+
+### 2026-10-18 — La visibilidad de las propiedades en la galería se aplica (prog8)
+- En una galería, mostrar u ocultar una propiedad desde el panel de Propiedades no tenía efecto en las tarjetas: el panel guardaba la lista en la vista, pero las tarjetas leían otra lista del bloque. Ahora la galería lee y escribe esa misma lista, guardada en la vista.
