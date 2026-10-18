@@ -14,7 +14,9 @@
 #      what is missing and changes what differs.
 #   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
 #      a visitor sees none of it (a table inherits visibility from its page).
-#   5. Deletes the key on exit, whether the load worked or not (`trap`).
+#   5. With WP_FOTOS=si, runs `fotos.mjs`: one photo per product, downloaded
+#      from the maker's or a shop's page and stored on this server.
+#   6. Deletes the key on exit, whether the load worked or not (`trap`).
 #
 # The key is never printed, never written to disk and never leaves the server:
 # it lives in this shell's environment and is passed to `docker compose exec`
@@ -49,8 +51,9 @@ else
   # copied into the running container first (a tar stream, nothing on disk).
   $COMPOSE exec -T app sh -c 'rm -rf /tmp/wikiproducts'
   tar -C scripts -cf - wikiproducts | $COMPOSE exec -T app tar -C /tmp -xf -
-  export WP_FOTOS="${WP_FOTOS:-no}"
-  nodo() { $COMPOSE exec -T -e HW_API_KEY -e WP_FOTOS app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}"; }
+  # The photos are stored here and served from the public address.
+  export WP_URL_PUBLICA="${WP_URL_PUBLICA:-https://humanity.wiki}"
+  nodo() { $COMPOSE exec -T -e HW_API_KEY -e WP_URL_PUBLICA app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}"; }
 fi
 
 USUARIO=$(sql "SELECT id FROM users WHERE lower(email) = lower('$EMAIL')")
@@ -86,3 +89,9 @@ nodo cargar.mjs
 
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs
+
+# Only when asked (`fotos=si` in the workflow): it reads a page per product.
+if [ "${WP_FOTOS:-no}" = "si" ]; then
+  echo "== Fotos: una por producto, de la marca o de la tienda, guardada aquí =="
+  nodo fotos.mjs
+fi
