@@ -9352,6 +9352,13 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - `corregir-textos.mjs` puts each guide right above the gallery and folds it closed in the same run, so a phone still sees products first. A page that already has a «Qué conviene mirar» heading is left alone; to change a guide later, add a `cambio`.
 - `POST /api/v1/pages/:id/blocks` now also takes `{type: "text", markdown}`: headings (##, ###), paragraphs, lists and quotes only; anything else is refused with 400. No wider than `PATCH /api/v1/pages/:id`, which already takes a whole page of markdown.
 - Verified on a local copy: guide inserted above the gallery, folded (closed, 5 items inside), second run skips it, an image in the markdown is refused. Not yet seen on production.
+## 2026-10-18 — Ronda 3: cabecera que cuadra con las tiendas, comparador móvil y zonas táctiles (Wikiproducts W1)
+- **Cabecera desde las tiendas**: la ficha trae un resumen de sus ofertas (`ficha.ofertas`: precio y si está agotada), leído con `ofertasDeProducto` y su misma regla de quién puede verlas. «Desde» y «en N tiendas» cuentan solo las que tienen precio y no están agotadas; las agotadas y las sin precio se dicen aparte. Si todas las que tenían precio están agotadas: «Último precio visto 29,95 € (agotado…)», sin «A la venta» ni precio por kWh (Goal Zero). El precio por unidad se escala al precio de la cabecera cuando difiere del de la fila. El HTML del servidor reutiliza la misma lectura.
+- **Unidades en textos con cifras**: «Carga mecánica» (Pa), «Gama de potencias» (Wp) y «Gama de capacidades» (kWh) llevan su unidad tras las cifras de cada parte (`conUnidad`, `UNIDAD_TEXTO_POR_CLAVE`).
+- **Comparador en el móvil**: el producto de la ficha es la columna fija de la izquierda; el nombre de cada dato va en su propia línea encima de los valores; cada columna mide exactamente la mitad de la caja y la tabla encaja de columna en columna, así que no asoman trozos («×», «a ·»).
+- **Zonas táctiles**: enlaces de fuente (`py-3` en línea, sin mover nada), «Dónde se buscó» y sus enlaces, y la miga de pan llegan a 44 px.
+- Sigue pendiente (datos, no código): el comparador, las tarjetas y el orden siguen usando «Precio desde» de la fila, que cuenta también las tiendas agotadas.
+
 
 
 ## 2026-10-18 — Multi-shop cart open to every visitor (Wikiproducts W5, round 3)

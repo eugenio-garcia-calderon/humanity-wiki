@@ -76,10 +76,13 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
                     <p className="text-sm text-slate-600">
                       {v.compra.hasta ? <>hasta {v.compra.hasta} · </> : null}
                       en {v.compra.tiendas || 1} {(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}
+                      {v.compra.agotadas ? <> · {v.compra.agotadas} {v.compra.agotadas === 1 ? 'agotada' : 'agotadas'}</> : null}
                       {v.compra.sinPrecio ? <> · {v.compra.sinPrecio} más sin precio confirmado</> : null}
                     </p>
                     {v.compra.porUnidad ? <p className="text-base font-bold text-slate-800" title="Precio más bajo de las tiendas dividido por la potencia o la energía que declara la marca"><span className="font-normal text-slate-600">{v.compra.etiquetaUnidad}: </span>{v.compra.porUnidad}</p> : null}
                   </>
+                ) : v.compra.ultimo ? (
+                  <p className="text-base font-semibold text-slate-600">Último precio visto <span className="font-bold text-slate-800">{v.compra.ultimo}</span> ({v.compra.agotadas === 1 ? 'agotado en la única tienda que lo tenía' : `agotado en las ${v.compra.agotadas} tiendas que lo tenían`})</p>
                 ) : <p className="text-base font-semibold text-slate-600">Sin precio todavía: ninguna tienda lo vende aquí.</p>}
                 {v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
               </div>
@@ -185,7 +188,7 @@ function ProcedenciaCorta({ p }: { p: Procedencia }) {
   const titulo = [texto, p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ');
   return (
     <dd className={cn('text-sm font-semibold [overflow-wrap:anywhere]', tono)} title={titulo}>
-      {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="hover:underline">{texto}</a> : texto}
+      {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 hover:underline">{texto}</a> : texto}
     </dd>
   );
 }
