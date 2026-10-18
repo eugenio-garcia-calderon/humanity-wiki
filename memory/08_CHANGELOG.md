@@ -9254,3 +9254,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 
 ## 2026-10-18 — La descripción, como una propiedad más de la tarjeta (prog8)
 - En el panel **Propiedades** de una galería, la **Descripción** (el subtítulo de la página de cada entrada) sale como una propiedad más con su ojo: se elige si se ve o no en las tarjetas. Se guarda en la vista (`config.descripcion === false` la esconde); por defecto, visible como hasta ahora.
+
+## 2026-10-18 — «Filas que se ven», por grupo y en filas de tarjetas (prog8)
+- **«Filas que se ven»** cuenta ahora **filas de tarjetas** (no entradas) y, si la galería está agrupada, **en cada grupo**: con «1», una fila en Movilidad y otra en Energía. Cuántas tarjetas caben por fila lo mide la propia rejilla según el ancho (`gridTemplateColumns`, sin las columnas vacías de `auto-fit`).
+- Cada grupo (o la galería sin agrupar) lleva su **«Mostrar más»** con cuántas quedan, que suma otras tantas filas. El corte lo hace `Galeria` (`filasMax`); el carrusel no se corta.
