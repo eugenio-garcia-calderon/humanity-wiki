@@ -83,6 +83,12 @@
       "ruta": "src/server/seguridad/politica.ts",
       "motivo": "W6 chat y expertos: enganche de pocas líneas",
       "desde": "2026-10-18T11:35:21.996Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/vaciarCuentas.ts",
+      "motivo": "W6 chat y expertos: enganche de pocas líneas",
+      "desde": "2026-10-18T11:35:24.499Z"
     }
   ]
 }
