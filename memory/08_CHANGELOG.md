@@ -9118,6 +9118,20 @@ en mis páginas como proyecto pendiente».
 - Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
 - Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
 
+## 2026-10-18 — Porcentaje como barra de avance (prog8)
+- Una propiedad **porcentaje** se ve como **barra de avance**: naranja-amarillo (`amber-400`) por debajo del 50 %, azul (`sky-500`) del 50 al 99 % y verde (`emerald-500`) al 100 %. En la galería, fina con la cifra al lado; en la página del elemento, **gruesa y a todo el ancho**, con la cifra grande, como un crowdfunding.
+- Para editarla, un **deslizador de 0 a 100 de 10 en 10** (ratón, dedo o flechas); guarda al soltar.
+- Se puede apagar por columna en su editor («Mostrar como barra de avance», `config.barra === false`) para porcentajes que no son avance (una comisión). Ver `BarraAvance.tsx`.
+
+### 2026-10-18 — E-mails for a paid managed order (Wikiproducts W5)
+- A paid Wikiproducts order used to reach its manager only through the in-app bell, and an anonymous buyer had only the code on screen. Now `registrarPedidoGestionado` sends, once per order (only when its shop queue rows are new, so a repeated Stripe webhook sends nothing): an e-mail to the owner of the offers table, with what to buy from which shop, the delivery address, the buyer's contact and the link to Comercio → «Pedidos a tiendas»; and one to the buyer, with the code and the tracking link `https://<site>/pedido?codigo=…`: the seller's site domain when they have exactly one active (wikiproducts.humanity.wiki), otherwise the main domain.
+- `/pedido` (order tracking, `MiPedido`) now exists on the main domain and on site domains, not only on a shop subdomain. The WhatsApp texts that already linked `humanity.wiki/pedido?codigo=…` pointed at a route that did not exist there. Arriving with `?codigo=` and no session no longer shows a false «No hay ningún pedido con ese código y ese correo» before the e-mail is typed; the code is prefilled and the form waits.
+- Uses `enviarCorreo` (Resend). Without `RESEND_API_KEY` nothing is sent, the log says so, and the order and its queue are created as before.
+- Test: `scripts/wikiproducts/probar-correos-pedido.ts` (local only; intercepts the Resend call): two e-mails on payment, none on a repeated webhook, none and no failure without the key.
+
+### 2026-10-18 — «Dónde comprarlo» readable text sizes (Wikiproducts W5)
+- The offers card had 9 texts at 11–12 px. Body text (summary, «sin precio» reason, test-mode and «muy pronto» notes, empty and error states, shop name) is now 16 px; labels and secondary text (customer-service line, shipping, installation, commission, ordering note, link buttons) 14 px. Measured in the browser at 390 and 1280 px: only 14, 16, 18 and 20 px remain, no horizontal scroll. The cart button inside a card (`BotonCompra`, shared with tables) keeps its own sizes.
+
 ## 2026-10-18 — Wikiproducts W6: expert consultations out of the MVP
 
 - Eugenio: «Quita lo de las consultas de expertos de momento en este MVP». The load (`cargar-en-servidor.sh`) no longer runs `expertos.mjs`, so it creates neither the page «Consultar a un experto», nor the expert, nor the short experts box in the product sheets. The «Expertos» menu link left `sitio.json` (`menu` is now empty).
