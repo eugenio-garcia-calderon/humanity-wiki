@@ -8875,3 +8875,5 @@ en mis páginas como proyecto pendiente».
 - El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
 - Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
+### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
+- El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
