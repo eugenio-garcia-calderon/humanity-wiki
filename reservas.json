@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/MenuSitio.tsx",
-      "motivo": "W2 ronda 3: 16 px y 44 px",
-      "desde": "2026-10-18T23:24:48.093Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/tablas/Relacion.tsx",
       "motivo": "W2 ronda 3: 16 px y 44 px",
       "desde": "2026-10-18T23:24:50.949Z"
