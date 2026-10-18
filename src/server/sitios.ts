@@ -31,8 +31,11 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import { sql } from 'drizzle-orm';
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolverDominio } from './dominios';
+import { resolverDominio, esSubdominioDeSitio } from './dominios';
 import { cabeceraEnHtml } from './cabeceraSitio';
+import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
+import { ampliar, type MetaPagina } from './ampliarPagina';
+import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
 import { slugDe } from '../components/sitio/sitioWeb';
 import { madresValidas, rolEnPagina, capacidades, quienDe } from './permisos.js';
@@ -164,6 +167,10 @@ export function sitioDe(req: Request): Sitio {
   if (host.endsWith('.' + DOMINIO) || host.endsWith('.localhost')) {
     const primero = host.split('.')[0];
     if (!primero || RESERVADOS.has(primero)) return { forma: 'casa', host };
+    // UN SUBDOMINIO DE SITIO (2026-10-18, `dominios.ts`): se porta como un
+    // dominio propio. En desarrollo, `algo.localhost` hace de `algo.humanity.wiki`.
+    const comoSitio = host.endsWith('.localhost') ? `${primero}.${DOMINIO}` : host;
+    if (esSubdominioDeSitio(comoSitio)) return { forma: 'dominio', host: comoSitio };
     return { forma: 'subdominio', host, handle: primero };
   }
   return { forma: 'dominio', host };
@@ -338,7 +345,7 @@ async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
     `);
     p = sr.rows[0] as any;
   }
-  return {
+  const out: any = {
     id: w.id, titulo: w.title, config: w.config,
     // Una subpágina que no se publicó por su cuenta se indexa si su madre
     // se indexa: lo decide quien publicó el sitio.
@@ -351,6 +358,44 @@ async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
     // para que el navegador vuelva a pedirla con su sesión si viene del HTML.
     miembros: acceso ? { raiz: acceso.sitio.raiz, ocultos } : null,
   };
+  // Los módulos que amplían la página (la plantilla de ficha, W1).
+  await ampliar(db, req, out);
+  return out;
+}
+
+/**
+ * LA DIRECCIÓN CANÓNICA DE UNA PÁGINA (2026-10-18, SEO R3): la de su dominio
+ * propio si su sitio tiene uno activo; si no, la de su subdominio
+ * (`quien.humanity.wiki/…`), que es la que se comparte. `null` si no se puede
+ * saber (y entonces manda la dirección de la visita, como antes).
+ */
+async function canonicaDe(db: any, w: any, publica: any): Promise<string | null> {
+  const handle = w?.handle || publica?.autor?.handle;
+  if (!handle || !publica || publica.muro) return null;
+  // El dominio de la página o el de la más cercana por encima (la portada
+  // del sitio), subiendo por el mismo camino que la visibilidad; o el que
+  // apunta al espacio entero de su dueña.
+  const desde = w.virtual ? publica.padre?.id : w.id;
+  const ruta = (deRaiz: boolean) => w.virtual
+    ? `/bd/${String(w.id).slice(3)}${slugDe(w.title) ? `/${slugDe(w.title)}` : ''}`
+    : deRaiz ? '/' : w.publico && w.slug ? `/${w.slug}` : `/p/${w.id}`;
+  const d = (await db.execute(sql`
+    WITH RECURSIVE sube(id, n) AS (
+      SELECT ${desde || ''}::text, 0
+      UNION
+      SELECT madre.id, s.n + 1 FROM sube s
+      CROSS JOIN LATERAL (${madresValidas(sql`s.id`)}) madre
+      WHERE s.n < ${PROFUNDIDAD}
+    )
+    SELECT d.dominio, d.pagina_id FROM dominios_paginas d JOIN users u ON u.id = d.propietario_user_id
+    LEFT JOIN sube s ON s.id = d.pagina_id
+    WHERE u.handle = ${handle} AND d.estado = 'activo' AND (d.pagina_id IS NULL OR s.id IS NOT NULL)
+    -- Un dominio comprado gana a un subdominio de humanity.wiki: es el definitivo.
+    ORDER BY (d.dominio LIKE ${'%.' + DOMINIO}), (d.pagina_id IS NULL), s.n LIMIT 1
+  `)).rows[0] as any;
+  if (d?.pagina_id) return `https://${d.dominio}${ruta(!w.virtual && w.id === d.pagina_id)}`;
+  if (d) return `https://${d.dominio}${ruta(false)}`;
+  return `https://${handle}.${DOMINIO}${ruta(false)}`;
 }
 
 /** Lo que `vite.config.ts` dejó dicho que necesita la web de un dominio
@@ -406,7 +451,81 @@ export function registrarSitios(app: Express, db: any) {
   app.get('/robots.txt', async (req: Request, res: Response, next: NextFunction) => {
     const s = sitioDe(req);
     if (s.forma === 'casa') return next();
-    res.type('txt').send(`User-agent: *\nAllow: /\nSitemap: https://${s.host}/sitemap.xml\n`);
+    // LOS BUSCADORES DE IA, CON NOMBRE (2026-10-18, SEO R6). `User-agent: *`
+    // ya los deja pasar, pero varios leen sólo su propio grupo, y decirlo
+    // explícito deja escrito que este sitio QUIERE que lo lean y lo citen.
+    // Lo que no se indexa: los resultados del buscador del sitio y las
+    // ordenaciones de una galería (la misma lista mil veces).
+    const bots = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'PerplexityBot', 'Google-Extended', 'Applebot-Extended'];
+    const reglas = 'Allow: /\nDisallow: /buscar\nDisallow: /*?*orden=\n';
+    res.type('txt').send(
+      `User-agent: *\n${reglas}\n` +
+      bots.map(b => `User-agent: ${b}\n${reglas}`).join('\n') +
+      `\nSitemap: https://${s.host}/sitemap.xml\n`,
+    );
+  });
+
+  /**
+   * `/llms.txt` (2026-10-18, SEO R6): qué es este sitio y sus páginas
+   * principales, en Markdown, para los asistentes de IA. Es una convención
+   * nueva y barata; no sustituye al HTML del servidor (R1), lo acompaña.
+   */
+  app.get('/llms.txt', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const s = sitioDe(req);
+      if (s.forma === 'casa') return next();
+      const lineas: string[] = [];
+      const linea = (titulo: string, url: string, desc?: string) =>
+        lineas.push(`- [${titulo.replace(/[\[\]]/g, '')}](${url})${desc ? `: ${desc.replace(/\s+/g, ' ').slice(0, 200)}` : ''}`);
+      let nombre = s.host, resumen = '';
+      // Las bases de datos que la página enseña a cualquiera: sin las de los
+      // bloques de miembros, que un anónimo no ve.
+      const conTablas = async (w: any, base: string) => {
+        const { config } = await filtrarBloques(db, w.id, w.config, null);
+        const ids = new Set<string>();
+        const recorre = (l: any[]) => { for (const b of Array.isArray(l) ? l : []) {
+          if (b?.tipo === 'basedatos' && b.tabla_id) ids.add(String(b.tabla_id));
+          recorre(b?.bloques);
+        } };
+        recorre(config?.bloques);
+        if (!ids.size) return;
+        const bd = await db.execute(sql`
+          SELECT id, titulo, descripcion FROM bd_tablas
+          WHERE id = ANY(string_to_array(${[...ids].join(',')}, ',')) AND deleted_at IS NULL AND archived_at IS NULL
+        `);
+        for (const t of bd.rows as any[]) {
+          const n = slugDe(t.titulo);
+          linea(String(t.titulo || 'Base de datos'), `${base}/bd/${t.id}${n ? `/${n}` : ''}`, t.descripcion || '');
+        }
+      };
+      const base = `https://${s.host}`;
+      const d = s.forma === 'dominio' ? await dominioApunta(db, s.host) : null;
+      if (s.forma === 'dominio' && !d) return res.status(404).type('txt').send('No existe ese fichero.');
+      if (d?.entidad_id && d.entidad_tipo === 'pagina') {
+        const w = await datosPagina(db, d.entidad_id);
+        if (!w?.publico || !w.indexable) return res.status(404).type('txt').send('No existe ese fichero.');
+        nombre = String(w.title || s.host); resumen = descripcionDe(w.config);
+        linea(nombre, `${base}/`, resumen);
+        await conTablas(w, base);
+      } else {
+        const handle = d ? d.handle : (s as any).handle;
+        const r = await db.execute(sql`
+          SELECT w.id, w.slug, w.title, w.config FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+          WHERE u.handle = ${handle} AND w.kind = 'pagina' AND w.publico = true AND w.indexable = true
+            AND w.slug IS NOT NULL AND w.deleted_at IS NULL AND w.archived_at IS NULL
+          ORDER BY w.created_at LIMIT 200
+        `);
+        for (const w of r.rows as any[]) {
+          linea(String(w.title || w.slug), `${base}/${w.slug}`, descripcionDe(w.config));
+          await conTablas(w, base);
+        }
+      }
+      res.type('text/markdown').set('Cache-Control', 'public, max-age=3600').send(
+        `# ${nombre}\n\n${resumen ? `> ${resumen.replace(/\s+/g, ' ')}\n\n` : ''}` +
+        `## Páginas\n\n${lineas.join('\n') || '- (todavía no hay páginas públicas)'}\n\n` +
+        `Todas las direcciones: ${base}/sitemap.xml\n`,
+      );
+    } catch (e: any) { console.error(e); res.status(500).type('txt').send('No se pudo generar.'); }
   });
 
   app.get('/sitemap.xml', async (req: Request, res: Response, next: NextFunction) => {
@@ -506,50 +625,83 @@ export function registrarSitios(app: Express, db: any) {
       // En un dominio propio se reescribe SIEMPRE, haya página o no: aunque
       // apunte a un espacio entero, lo que el navegador va a preguntar ya se
       // sabe aquí (ver más abajo).
-      if (!w && s.forma !== 'dominio') return next();
+      if (!w && s.forma !== 'dominio' && !esDeSitio(req)) return next();
       if (plantilla === null) plantilla = fs.existsSync(indice) ? fs.readFileSync(indice, 'utf8') : '';
       if (!plantilla) return next();
-      if (!w) return res.type('html').set('Cache-Control', 'no-cache').send(await rapido(plantilla, req, s, null));
+      if (!w) {
+        // UN 404 DE VERDAD (2026-10-18, SEO R16). Una dirección con forma de
+        // página del sitio que no lleva a ninguna contestaba 200 con la
+        // aplicación vacía, y un buscador la guardaba como página (fina). El
+        // HTML es el mismo —la aplicación pinta su «no está»—; cambia el
+        // código y se le dice al buscador que no la guarde.
+        const html = await rapido(plantilla, req, s, null);
+        if (!esDeSitio(req)) return res.type('html').set('Cache-Control', 'no-cache').send(html);
+        return res.status(404).type('html').set('Cache-Control', 'no-cache')
+          .send(html.replace('</head>', '    <meta name="robots" content="noindex">\n  </head>'));
+      }
 
       const propio = s.forma !== 'casa';
-      const titulo = String(w.title || '').trim() || 'Sin título';
       // Sin los bloques de miembros: el HTML lo lee cualquiera (y Google).
       w.config = (await filtrarBloques(db, w.id, w.config, null)).config;
-      const desc = descripcionDe(w.config);
-      const img = imagenDe(w.config);
+      // La página tal como se pinta, ampliada por los módulos que se apuntan
+      // (`ampliarPagina.ts`): la ficha de producto cambia título, tipo y robots.
+      const publica = w.virtual ? w : await paginaPublica(db, w.id);
+      const m: MetaPagina = (publica && !publica.muro && publica.meta) || {};
+      const cfg = (publica && !publica.muro ? publica.config : null) || w.config;
+      const titulo = String(m.titulo || w.title || '').trim() || 'Sin título';
+      const desc = (typeof m.descripcion === 'string' && m.descripcion.trim()) || descripcionDe(cfg);
+      const img = imagenDe(cfg);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
       // La de una base de datos lleva su nombre en la dirección, venga como venga la visita.
       const arroba = /^\/(@[^/]+)\//.exec(req.path)?.[1];
       const url = w.virtual
         ? `https://${s.host}${arroba ? `/${arroba}` : ''}/bd/${String(w.id).slice(3)}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`
         : `https://${s.host}${req.path}`;
-      const icono = w.config?.icono;
+      // UNA SOLA DIRECCIÓN POR CONTENIDO (2026-10-18, SEO R3). La misma página
+      // se abre por `humanity.wiki/@quien/…`, por `quien.humanity.wiki/…` y por
+      // su dominio propio; si cada una se declara canónica a sí misma, Google
+      // ve tres copias y reparte la autoridad entre ellas.
+      const canonica = (await direccionCanonica(w, publica)) || url;
+      const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const indexable = m.indexable === false ? false : w.indexable !== false;
+      // Las direcciones de los datos estructurados, contra la canónica (ver `MetaPagina.jsonLd`).
+      const origen = (() => { try { return new URL(canonica).origin; } catch { return `https://${s.host}`; } })();
+      const completar = (x: any): any => typeof x === 'string'
+        ? (x === '{{canonica}}' ? canonica : x.startsWith('/') && !x.startsWith('//') ? origen + x : x)
+        : Array.isArray(x) ? x.map(completar)
+        : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, completar(v)]))
+        : x;
+      const ld = (m.jsonLd ? (Array.isArray(m.jsonLd) ? m.jsonLd : [m.jsonLd]) : []).map(completar);
 
       const meta = [
         `<meta name="description" content="${esc(desc)}">`,
-        `<meta property="og:type" content="website">`,
+        `<meta property="og:type" content="${esc(m.ogType || 'website')}">`,
         `<meta property="og:title" content="${esc(titulo)}">`,
         desc && `<meta property="og:description" content="${esc(desc)}">`,
-        `<meta property="og:url" content="${esc(url)}">`,
+        `<meta property="og:url" content="${esc(canonica)}">`,
         img && `<meta property="og:image" content="${esc(abs(img))}">`,
         `<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`,
-        `<link rel="canonical" href="${esc(url)}">`,
-        `<meta name="robots" content="${w.indexable === false ? 'noindex,nofollow' : 'index,follow'}">`,
+        `<link rel="canonical" href="${esc(canonica)}">`,
+        `<meta name="robots" content="${indexable ? 'index,follow' : 'noindex,nofollow'}">`,
+        ...(m.metas || []).filter(x => x && (x.property || x.name)).map(x => x.property
+          ? `<meta property="${esc(String(x.property))}" content="${esc(String(x.content ?? ''))}">`
+          : `<meta name="${esc(String(x.name))}" content="${esc(String(x.content ?? ''))}">`),
+        ...ld.map(x => `<script type="application/ld+json">${jsonEnScript(x)}</script>`),
       ].filter(Boolean).join('\n    ');
 
       let html = plantilla
-        .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(propio ? titulo : `${titulo} · humanity.wiki`)}</title>`)
-        .replace('</head>', `    ${meta}\n  </head>`);
+        .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${esc(propio ? titulo : `${titulo} · humanity.wiki`)}</title>`)
+        .replace('</head>', () => `    ${meta}\n  </head>`);
       // En un sitio propio, el icono de la pestaña es el de la página. Un emoji
       // se convierte en un SVG; una imagen se usa tal cual.
       if (propio && icono) {
         const href = /^(https?:|\/)/.test(icono)
           ? abs(icono)
           : `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${icono}</text></svg>`)}`;
-        html = html.replace(/<link[^>]+rel="icon"[^>]*>/g, '').replace('</head>', `    <link rel="icon" href="${esc(href)}">\n  </head>`);
+        html = html.replace(/<link[^>]+rel="icon"[^>]*>/g, '').replace('</head>', () => `    <link rel="icon" href="${esc(href)}">\n  </head>`);
       }
-      html = await rapido(html, req, s, w);
+      html = await rapido(html, req, s, w, publica);
       res.type('html').set('Cache-Control', 'no-cache').send(html);
     } catch (e) {
       console.error('sitios: vista previa', e);
@@ -576,15 +728,16 @@ export function registrarSitios(app: Express, db: any) {
    *      bajen todos a la vez; y fuera los de la plataforma, que aquí no se
    *      usan.
    */
-  async function rapido(html: string, req: Request, s: Sitio, w: any | null): Promise<string> {
+  async function rapido(html: string, req: Request, s: Sitio, w: any | null, yaArmada?: any): Promise<string> {
     const esSub = /^\/p\/[^/]+\/?$/.test(req.path) || /\/@[^/]+\/p\/[^/]+\/?$/.test(req.path);
-    if (s.forma !== 'dominio' && !esSub) return html;
+    const precarga = s.forma === 'dominio' || esSub;
 
     // Las dos preguntas a la vez: cada una es un viaje a la base de datos y
-    // el HTML no sale hasta que acaban.
+    // el HTML no sale hasta que acaban. La página de una base de datos ya
+    // viene armada (`baseDatosPublica`): no hay otra que pedir.
     const [resuelto, publica] = await Promise.all([
       s.forma === 'dominio' ? resolverDominio(db, s.host) : null,
-      w ? paginaPublica(db, w.id) : null,
+      yaArmada !== undefined ? yaArmada : w ? (w.virtual ? w : paginaPublica(db, w.id)) : null,
     ]);
     const pre: { resolver?: any; paginas?: Record<string, any> } = {};
     if (resuelto) pre.resolver = { host: s.host, ...resuelto };
@@ -593,14 +746,41 @@ export function registrarSitios(app: Express, db: any) {
     // (cuando apunta a una página) o la subpágina de la dirección.
     const pinta = esSub || (resuelto?.status === 200 && resuelto.body?.tipo !== 'espacio' && resuelto.body?.id === publica?.id);
     const pagina = pinta ? publica : null;
-    if (pagina) pre.paginas = { [pagina.id]: pagina };
+    if (pagina && !pagina.virtual) pre.paginas = { [pagina.id]: pagina };
+
+    // EL CONTENIDO, EN EL HTML (2026-10-18, SEO R1, ver `htmlBloques.ts`).
+    // En TODAS las formas de sitio y para toda página que se pueda leer: la
+    // portada de un sitio, sus subpáginas y la página de una base de datos.
+    // Una página de miembros (`muro`) no lleva nada: no es de cualquiera.
+    const legible = publica && !publica.muro ? publica : null;
+    const raizDominio = s.forma === 'dominio' ? resuelto?.body?.id : null;
+    const enlaces = s.forma === 'casa'
+      ? sitioEnCasa(legible?.autor?.handle || String(/^\/@([^/]+)/.exec(req.path)?.[1] || ''))
+      // Las mismas direcciones que arma el navegador en cada forma
+      // (`AplicacionDeDominio`, `PaginaPublica`, `SubpaginaSitio`).
+      : sitioConAnfitrion(s.forma === 'dominio' ? raizDominio || null : null);
+    let cuerpo = '';
+    if (legible) {
+      try { cuerpo = await cuerpoEnHtml(db, legible, enlaces.enlacePagina); }
+      catch (e) { console.error('sitios: cuerpo', e); }
+    }
 
     // La cabecera, sólo en un dominio propio: en la plataforma la página va
     // dentro de su armazón, y pintarla suelta daría un salto al arrancar.
-    let cabecera = '';
+    let raiz = '';
     if (pagina && s.forma === 'dominio') {
-      try { cabecera = cabeceraEnHtml(pagina, String(req.headers['user-agent'] || ''), resuelto?.body?.id); }
-      catch (e) { console.error('sitios: cabecera', e); }
+      try {
+        raiz = cabeceraEnHtml(pagina, String(req.headers['user-agent'] || ''), resuelto?.body?.id);
+        if (cuerpo) raiz = raiz.replace('</article>', `${cuerpo}</article>`);
+      } catch (e) { console.error('sitios: cabecera', e); }
+    }
+    // En las demás formas, el contenido sin adornos: un `<h1>`, la entradilla
+    // y los bloques. Lo sustituye la página viva al arrancar React.
+    if (!raiz && legible && cuerpo) {
+      const titulo = String(legible.titulo || legible.title || '').trim() || 'Sin título';
+      const sub = typeof legible.config?.subtitulo === 'string' && legible.config.subtitulo.trim()
+        ? `<p>${enLinea(legible.config.subtitulo, enlaces)}</p>` : '';
+      raiz = `<main><article><h1>${escHtml(titulo)}</h1>${sub}${cuerpo}</article></main>`;
     }
 
     if (s.forma === 'dominio') {
@@ -608,10 +788,32 @@ export function registrarSitios(app: Express, db: any) {
       const trozos = trozosDominio().map(f => `<link rel="modulepreload" crossorigin href="${f}">`).join('\n    ');
       if (trozos) html = html.replace('</head>', `    ${trozos}\n  </head>`);
     }
-    return html
-      .replace('</head>', `    <script>window.__SITIO__=${jsonEnScript(pre)}</script>\n  </head>`)
-      .replace('<div id="root"></div>', `<div id="root">${cabecera}</div>`);
+    if (precarga) html = html.replace('</head>', `    <script>window.__SITIO__=${jsonEnScript(pre)}</script>\n  </head>`);
+    // Una función de reemplazo y no una cadena: un `$&` escrito en una
+    // página no debe interpretarse como patrón de `replace`.
+    return raiz ? html.replace('<div id="root"></div>', () => `<div id="root">${raiz}</div>`) : html;
   }
+
+  /**
+   * ¿Tiene esta dirección forma de página de un sitio? Si la tiene y no hay
+   * página, es un 404. Las de la aplicación que comparten forma (`/pedido`
+   * en un subdominio, `App.tsx`) no lo son.
+   */
+  function esDeSitio(req: Request): boolean {
+    const s = sitioDe(req);
+    const t = req.path.split('/').filter(Boolean);
+    const sinArroba = s.forma === 'casa' && t[0]?.startsWith('@') ? t.slice(1) : t;
+    if (s.forma === 'casa' && sinArroba === t) return false;
+    if (sinArroba[0] === 'p' && sinArroba.length === 2) return true;
+    if (sinArroba[0] === 'bd' && (sinArroba.length === 2 || sinArroba.length === 3)) return true;
+    // `buscar` es la página de resultados del buscador del sitio.
+    if (sinArroba.length === 1 && sinArroba[0] === 'buscar') return false;
+    if (s.forma === 'subdominio') return t.length === 1 && t[0] !== 'pedido';
+    if (s.forma === 'casa') return sinArroba.length === 1;
+    return false;
+  }
+
+  const direccionCanonica = (w: any, publica: any) => canonicaDe(db, w, publica).catch(e => { console.error('sitios: canónica', e); return null; });
 
   /** Qué página publicada hay en esta dirección, si hay alguna. */
   async function paginaDeLaDireccion(req: Request): Promise<any | null> {

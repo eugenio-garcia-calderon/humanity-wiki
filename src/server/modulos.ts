@@ -57,6 +57,7 @@ import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
 import { registrarSitios } from './sitios.js';
+import { registrarBuscadorSitio } from './buscadorSitio.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
@@ -228,6 +229,8 @@ export const MODULOS: Modulo[] = [
   // de páginas publicadas. Si no monta, las páginas se siguen viendo: sólo
   // se pierde la vista previa y las subpáginas públicas.
   { nombre: 'sitios', montar: (app, db) => registrarSitios(app, db) },
+  // El buscador de cada sitio publicado (Wikiproducts, 2026-10-18).
+  { nombre: 'buscadorSitio', montar: (app, db) => registrarBuscadorSitio(app, db) },
   // La consola de la cadena de valor de una web: sólo para quien gestiona la página y sólo desde humanity.wiki.
   { nombre: 'consola', montar: (app, db) => registrarConsola(app, db) },
   // Optimización web de una página publicada: medición real, recomendaciones e indexación (solo quien edita).

@@ -657,6 +657,38 @@ by the row on the next read (the row is the source). Variants are by name and
 share the product price/stock. The unverified-seller cap (30) applies: rows
 beyond it show the reason instead of a button.
 
+## 2026-10-18 — Published pages carry their content in the server HTML (Wikiproducts W2, SEO R1/R3/R16)
+
+**Context.** Public pages shipped title + description in the HTML and the body
+only as JSON in `window.__SITIO__`. AI search crawlers (GPTBot, ClaudeBot,
+PerplexityBot) do not run JavaScript, so they saw nothing else. Wikiproducts'
+SEO plan (`/mnt/project-files/wikiproducto/seo/requisitos-tecnicos.md`) makes
+this the top blocker.
+
+**Options.** (a) Full React SSR + `hydrateRoot` of the reading view;
+(b) a separate static block→HTML writer injected into `#root`, replaced by
+`createRoot` when JS boots; (c) prerender per bot (cloaking, rejected).
+
+**Chosen: (b)**, `src/server/htmlBloques.ts`. It already matched how the custom
+domain header worked (`cabeceraSitio.tsx`), needs no change to the client, and
+the reading components fetch their own data (`Rejilla`, `RelacionesPublicas`),
+which makes (a) a rewrite. Same HTML for every visitor; it only writes what the
+page shows when read. **Cost:** two renderers of the same blocks can drift. A
+new block type that wants to be indexable must register a writer
+(`registrarHtml`). Moving to (a) later means making the reading view
+data-in/props-out first.
+
+**Canonical (R3).** Every page now declares one canonical URL: its site's active
+custom domain, else its user subdomain. 301 redirects from the other forms are
+**not** done yet: they change behaviour for every existing site and wait for
+Eugenio's OK.
+
+**Known gaps.** The database table in the HTML ignores the view's filters and
+sort (it lists rows in their stored order, capped at 500); relation, file and
+computed columns are left to React. The row page's own properties are not in
+the public reading view today, so they are not in the HTML either: W1's
+`Propiedad` block will add them, with its writer.
+
 ## 2026-10-18 — Community ratings: one criterion = one computed column (`comunidad`)
 
 **Context.** Wikiproducts (plan §2.3, 3.3, 3.10): members rate each product 1-5

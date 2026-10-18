@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { promises as dns } from 'node:dns';
 import { COMPARTIBLES, compartiblePorTipo } from './compartir.js';
+import { motivoInvalido as motivoNombre } from './publicar';
 
 // ============================================================================
 // DOMINIO PROPIO PARA UNA PÁGINA — como en Notion (2026-08-22)
@@ -51,11 +52,53 @@ export function normalizarDominio(entrada: unknown): string | null {
   return d;
 }
 
+// ── UN SUBDOMINIO PARA UN SITIO (2026-10-18, Wikiproducts W2, plan 3.9) ─────
+// `wikiproducts.humanity.wiki` lleva a UNA página publicada (un sitio), no al
+// espacio de una persona. Hasta hoy el único subdominio era el nombre de cada
+// usuario (`quien.humanity.wiki`), y este fichero los rechazaba todos.
+//
+// Se guarda como un dominio propio más (`dominios_paginas`), porque se
+// comporta igual: un anfitrión que apunta a una página. Lo distinto:
+//   · No hay DNS que comprobar ni certificado que pedir: el comodín
+//     `*.humanity.wiki` y su certificado de origen ya existen (Caddyfile). Nace
+//     `activo`.
+//   · Comparte espacio de nombres con los usuarios: no puede ser el nombre de
+//     nadie, y al reclamarlo se reserva en `handles_reservados` para que nadie
+//     lo coja después como nombre (se quedaría con la dirección del sitio).
+//   · Sólo un nivel (`algo.humanity.wiki`), con las reglas de un nombre.
+const SUFIJO = '.humanity.wiki';
+/** Cuántos subdominios de sitio puede tener una persona. Son un bien escaso. */
+const MAX_SUBDOMINIOS = 3;
+
+export const esSubdominioPlataforma = (d: string) => d.endsWith(SUFIJO);
+
+/**
+ * Los subdominios de sitio reclamados, en memoria: `sitios.ts` decide en cada
+ * petición, sin esperar a la base de datos, si `algo.humanity.wiki` es el
+ * espacio de una persona o un sitio. Se recargan al reclamar o retirar uno y
+ * cada minuto (por si otro proceso los cambió).
+ */
+const subdominiosDeSitio = new Set<string>();
+export function esSubdominioDeSitio(host: string): boolean {
+  return subdominiosDeSitio.has(String(host || '').toLowerCase());
+}
+async function recargarSubdominios(db: any) {
+  const r = await db.execute(sql`
+    SELECT dominio FROM dominios_paginas
+    WHERE dominio LIKE ${'%' + SUFIJO} AND estado IN ('pendiente', 'activo')
+  `);
+  subdominiosDeSitio.clear();
+  for (const x of r.rows as any[]) subdominiosDeSitio.add(String(x.dominio));
+}
+
 /** Por qué no se puede usar este dominio, o `null` si se puede. */
 export function motivoInvalido(d: string): string | null {
   if (RESERVADOS.has(d)) return 'Ese dominio es de la plataforma.';
-  if (d.endsWith('.humanity.wiki')) {
-    return 'Los subdominios de humanity.wiki se piden desde «Compartir», no aquí.';
+  if (esSubdominioPlataforma(d)) {
+    const nombre = d.slice(0, -SUFIJO.length);
+    if (nombre.includes('.')) return `Solo un nivel: nombre${SUFIJO}.`;
+    const malo = motivoNombre(nombre);
+    if (malo) return malo;
   }
   return null;
 }
@@ -77,6 +120,9 @@ function ipPublica(): string {
 }
 
 export function registerDominiosRoutes(app: Express, db: any) {
+  const recargar = () => recargarSubdominios(db).catch(e => console.error('[dominios] subdominios:', e.message));
+  recargar();
+  setInterval(recargar, 60_000).unref?.();
   /**
    * ¿PUEDO EMITIR UN CERTIFICADO PARA ESTE DOMINIO? — lo pregunta Caddy.
    *
@@ -249,6 +295,29 @@ export function registerDominiosRoutes(app: Express, db: any) {
         return res.status(409).json({ error: 'Ese dominio ya está reclamado.' });
       }
 
+      // UN SUBDOMINIO DE SITIO: siempre a una página, nunca el nombre de
+      // nadie, y con tope por persona.
+      const sub = esSubdominioPlataforma(d);
+      if (sub) {
+        if (!entidadId || cTipo !== 'pagina') {
+          return res.status(400).json({ error: `Un subdominio de humanity.wiki lleva a una página publicada: elige cuál.` });
+        }
+        const nombre = d.slice(0, -SUFIJO.length);
+        const cogido = (await db.execute(sql`
+          SELECT 1 FROM users WHERE handle = ${nombre}
+          UNION ALL
+          SELECT 1 FROM handles_reservados WHERE handle = ${nombre} AND motivo <> ${'subdominio de sitio de ' + req.user.id}
+          LIMIT 1
+        `)).rows[0];
+        if (cogido && !ya) return res.status(409).json({ error: 'Ese nombre ya está cogido.' });
+        const n = Number(((await db.execute(sql`
+          SELECT count(*)::int AS n FROM dominios_paginas
+          WHERE propietario_user_id = ${req.user.id} AND dominio LIKE ${'%' + SUFIJO} AND dominio <> ${d}
+            AND estado <> 'retirado'
+        `)).rows[0] as any)?.n || 0);
+        if (n >= MAX_SUBDOMINIOS) return res.status(400).json({ error: `Como mucho ${MAX_SUBDOMINIOS} subdominios de humanity.wiki por persona.` });
+      }
+
       const id = 'DOM' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
       // `pagina_id` se sigue rellenando **sólo** cuando lo que se comparte es
       // una página, para no dejar tirado lo que aún la lee. La pareja
@@ -257,14 +326,27 @@ export function registerDominiosRoutes(app: Express, db: any) {
         INSERT INTO dominios_paginas (id, dominio, propietario_user_id, pagina_id, entidad_tipo, entidad_id, estado)
         VALUES (${id}, ${d}, ${req.user.id},
                 ${cTipo === 'pagina' ? entidadId : null},
-                ${entidadId ? cTipo : null}, ${entidadId}, 'pendiente')
+                ${entidadId ? cTipo : null}, ${entidadId}, ${sub ? 'activo' : 'pendiente'})
         ON CONFLICT (dominio) DO UPDATE
           SET pagina_id    = CASE WHEN ${traeEntidad} THEN ${cTipo === 'pagina' ? entidadId : null} ELSE dominios_paginas.pagina_id END,
               entidad_tipo = CASE WHEN ${traeEntidad} THEN ${entidadId ? cTipo : null} ELSE dominios_paginas.entidad_tipo END,
               entidad_id   = CASE WHEN ${traeEntidad} THEN ${entidadId} ELSE dominios_paginas.entidad_id END,
-              estado = 'pendiente', ultimo_error = NULL, updated_at = now()
+              estado = ${sub ? 'activo' : 'pendiente'}, ultimo_error = NULL, updated_at = now()
           WHERE dominios_paginas.propietario_user_id = ${req.user.id}
       `);
+
+      if (sub) {
+        // Reservado como nombre para siempre, como un nombre abandonado: si se
+        // retira el subdominio, nadie hereda los enlaces que ya circulan.
+        await db.execute(sql`
+          INSERT INTO handles_reservados (handle, motivo)
+          VALUES (${d.slice(0, -SUFIJO.length)}, ${'subdominio de sitio de ' + req.user.id})
+          ON CONFLICT (handle) DO NOTHING
+        `);
+        await db.execute(sql`UPDATE dominios_paginas SET activo_desde = COALESCE(activo_desde, now()) WHERE dominio = ${d}`);
+        await recargar();
+        return res.json({ dominio: d, estado: 'activo', pasos: [`Ya funciona: https://${d}`] });
+      }
 
       res.json({
         dominio: d,
@@ -315,6 +397,10 @@ export function registerDominiosRoutes(app: Express, db: any) {
           AND estado <> 'retirado'
       `)).rows[0] as any;
       if (!fila) return res.status(404).json({ error: 'Ese dominio no es tuyo o no existe.' });
+      // Un subdominio de humanity.wiki no depende de ningún DNS ni certificado suyo.
+      if (esSubdominioPlataforma(fila.dominio)) {
+        return res.json({ dominio: fila.dominio, estado: 'activo', listo: true, resumen: 'Funciona: es un subdominio de humanity.wiki.' });
+      }
 
       // Cada comprobación hace consultas de DNS y una petición HTTPS hacia
       // fuera. Sin freno, el botón es una manera gratis de ponernos a
@@ -366,6 +452,12 @@ export function registerDominiosRoutes(app: Express, db: any) {
         return res.status(400).json({ error: 'Eso no se puede compartir todavía.' });
       }
 
+      // Un subdominio de sitio no puede pasar a apuntar al espacio entero:
+      // en `algo.humanity.wiki` eso sería hacerse pasar por un nombre de usuario.
+      if (!retirar && entidadId !== undefined && tipo !== 'pagina') {
+        const f = (await db.execute(sql`SELECT dominio FROM dominios_paginas WHERE id = ${String(req.params.id)}`)).rows[0] as any;
+        if (f && esSubdominioPlataforma(f.dominio)) return res.status(400).json({ error: 'Un subdominio de humanity.wiki lleva a una página publicada.' });
+      }
       const r = await db.execute(sql`
         UPDATE dominios_paginas SET
           estado = CASE WHEN ${retirar} THEN 'retirado' ELSE estado END,
@@ -377,6 +469,7 @@ export function registerDominiosRoutes(app: Express, db: any) {
         RETURNING dominio, estado, entidad_tipo, entidad_id
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese dominio no es tuyo o no existe.' });
+      if (retirar) await recargar();
       res.json(r.rows[0]);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
