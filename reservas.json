@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/sitios.ts",
-      "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
-      "desde": "2026-10-18T16:47:33.145Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/VistaPagina.tsx",
       "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
       "desde": "2026-10-18T16:47:35.873Z"
