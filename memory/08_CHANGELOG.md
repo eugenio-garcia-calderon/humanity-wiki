@@ -8847,3 +8847,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — La portada se puede recortar (prog8)
 - Al elegir una imagen de portada se abre un recortador: un marco que se mueve arrastrándolo y cambia de tamaño por sus esquinas, libre o con proporción fija (panorámica 3:1, 16:9, 4:3, cuadrada). Se sube el trozo elegido; también se puede usar sin recortar.
 - Una portada ya puesta tiene «Recortar» junto a «Cambiar» y «Quitar».
+
+### 2026-10-18 — Etiquetas con color y propiedades editables desde la galería (prog8)
+- Las opciones de una propiedad de selección (por ejemplo «Estado»: pendiente, en curso, completado) tienen color, con la paleta de Notion: se elige en el editor de la propiedad, junto a cada opción.
+- En la galería, una propiedad de selección se ve solo como su etiqueta de color, sin «Estado:» delante.
+- Quien edita cambia cualquier propiedad visible desde la propia tarjeta, sin abrirla, también si está vacía: la tarjeta enseña el nombre de la propiedad y un hueco para rellenarla.

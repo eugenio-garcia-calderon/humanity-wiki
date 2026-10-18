@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Copy, ExternalLink, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
-import { formatear, type Celda, type Columna } from './Celda';
+import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
 import { cn } from '../../utils/cn';
@@ -59,13 +59,15 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
   velocidad?: number;
   /** Se pueden arrastrar las tarjetas para cambiar el orden de la tabla. */
   ordenable?: boolean;
+  /** Quien edita cambia las propiedades visibles desde la tarjeta, sin abrirla (también las vacías). */
+  onGuardarCelda?: (filaId: string, columnaId: string, valor: any) => Promise<{ error?: string } | void>;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -460,6 +462,37 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line"><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.map(c => {
+                  // EDITAR DESDE LA TARJETA (2026-10-18): quien edita cambia cada propiedad visible
+                  // aquí mismo, esté llena o vacía. El clic no abre la tarjeta.
+                  if (onGuardarCelda && c.tipo !== 'compra') {
+                    const celda = f.celdas[c.id] ?? { estado: 'vacia' as const };
+                    const vacia = celda.estado === 'vacia' && !(f.apuntados?.[c.id] || []).length;
+                    return (
+                      <div key={c.id} className={cn('flex items-center gap-1.5 min-w-0 text-xs', centrada && 'justify-center')}
+                        onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}
+                        onDragStart={e => { e.preventDefault(); e.stopPropagation(); }}>
+                        {vacia && <span className="shrink-0 text-[10px] font-bold text-slate-400">{c.nombre}</span>}
+                        <div className="min-w-0 max-w-full">
+                          <CeldaTabla celda={celda} columna={c} apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                            editable onGuardar={v => onGuardarCelda(f.id, c.id, v)} />
+                        </div>
+                      </div>
+                    );
+                  }
+                  // Las de selección, como etiquetas de su color y sin el nombre de la propiedad.
+                  if (c.tipo === 'seleccion' || c.tipo === 'seleccion_multiple') {
+                    const cs = f.celdas[c.id];
+                    const ids: string[] = cs?.estado === 'ok' ? (Array.isArray(cs.valor) ? cs.valor : [cs.valor]) : [];
+                    const ops = ids.map(id => (c.opciones || []).find(o => o.id === id)).filter((o): o is NonNullable<typeof o> => !!o);
+                    return ops.length ? (
+                      <div key={c.id} className={cn('flex flex-wrap gap-1', centrada && 'justify-center')}>
+                        {ops.map(o => (
+                          <span key={o.id} className="px-1.5 py-0.5 rounded-md text-[11px] font-semibold"
+                            style={{ backgroundColor: (o.color || '#e2e8f0') + '33', color: o.color || '#475569' }}>{o.label}</span>
+                        ))}
+                      </div>
+                    ) : null;
+                  }
                   // Una relación se enseña como fichas que llevan a la página
                   // enlazada: «Movilidad» en la tarjeta del coche volador.
                   if (c.tipo === 'relacion') {
