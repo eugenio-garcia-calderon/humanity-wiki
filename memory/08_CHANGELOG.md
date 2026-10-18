@@ -8834,6 +8834,25 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
 - «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
 
+### 2026-10-18 — La visibilidad de las propiedades en la galería se aplica (prog8)
+- En una galería, mostrar u ocultar una propiedad desde el panel de Propiedades no tenía efecto en las tarjetas: el panel guardaba la lista en la vista, pero las tarjetas leían otra lista del bloque. Ahora la galería lee y escribe esa misma lista, guardada en la vista.
+
+### 2026-10-18 — Sin «Recientes» en el menú lateral (prog8)
+- El menú lateral ya no enseña la sección de páginas recientes. Los favoritos y el árbol de páginas siguen igual.
+
+### 2026-10-18 — Galería: propiedades en todos los tamaños y nombre en dos líneas (prog8)
+- Las propiedades marcadas como visibles se ven debajo del nombre de cada tarjeta en cualquier tamaño de galería; antes, en XS y XXS no salían.
+- El nombre de la tarjeta ocupa hasta dos líneas en vez de cortarse con «…» en la primera.
+
+### 2026-10-18 — La portada se puede recortar (prog8)
+- Al elegir una imagen de portada se abre un recortador: un marco que se mueve arrastrándolo y cambia de tamaño por sus esquinas, libre o con proporción fija (panorámica 3:1, 16:9, 4:3, cuadrada). Se sube el trozo elegido; también se puede usar sin recortar.
+- Una portada ya puesta tiene «Recortar» junto a «Cambiar» y «Quitar».
+
+### 2026-10-18 — Etiquetas con color y propiedades editables desde la galería (prog8)
+- Las opciones de una propiedad de selección (por ejemplo «Estado»: pendiente, en curso, completado) tienen color, con la paleta de Notion: se elige en el editor de la propiedad, junto a cada opción.
+- En la galería, una propiedad de selección se ve solo como su etiqueta de color, sin «Estado:» delante.
+- Quien edita cambia cualquier propiedad visible desde la propia tarjeta, sin abrirla, también si está vacía: la tarjeta enseña el nombre de la propiedad y un hueco para rellenarla.
+
 ### 2026-10-18 — Registro de bloques de datos y copia local de Wikiproducts (Wikiproducts W0)
 - Nueve tipos de bloque nuevos declarados de una vez en `src/utils/bloques.ts` (`TIPOS_BLOQUE_DATOS`): propiedad, comparador, alternativas, afirmacion, retirada, valoracion, ofertas, chat, experto. Su configuración va en `bloque.datos`.
 - `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
