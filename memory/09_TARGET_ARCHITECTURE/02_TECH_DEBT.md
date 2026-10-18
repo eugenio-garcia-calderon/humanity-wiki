@@ -375,3 +375,19 @@ of rows or are read very often, move the sync to the write paths
 (`escribirCeldas`, file upload, row create/delete) behind one helper — about
 half a day today, more once more write paths exist. Comercio does not yet
 mark database-backed products as «se edita en su base de datos».
+
+## 2026-10-18 — Offers block reads the whole offers table (Wikiproducts W5)
+
+`ofertasDeProducto` (`src/server/ofertas.ts`) reads every row of the offers
+table to show one product's offers, because `sincronizarTienda` archives any
+product it is not handed. Fine for hundreds of offers. With thousands, give
+`sincronizarTienda` a «these rows only, do not archive the rest» mode (about
+1 hour today) or move the sync to the write paths (see 2026-10-06 above).
+
+Also found, not fixed: sending a shop table to the bin leaves its `products`
+rows for sale. The merchant feed filters them out; checkout does not.
+
+Pending integration, not debt: the server HTML of the Offers block (W2's
+`registrarHtml`) and the distributor attention score (W4's
+`notaAtencionDistribuidores`) are wired once those branches are in `main`;
+until then `nota_distribuidor` is always null and the block is client-only.

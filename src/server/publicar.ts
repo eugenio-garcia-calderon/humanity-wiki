@@ -27,7 +27,7 @@ import { rutaLocalDeUpload } from './uploads';
 import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos, comisionPuntosBps } from './puntos';
 import { avisar } from './avisos';
 import { avisarPorWhatsApp, enlaceWa, estadoWhatsApp } from './whatsapp.js';
-import { ZONAS, zonaDe, tarifasDe, calcularEnvio, type Zona } from './zonasEnvio.js';
+import { ZONAS, zonaDe, tarifasDe, type Zona } from './zonasEnvio.js';
 import { AJUSTES, ajuste, guardarAjuste, numeroSincrono, olvidarAjustes } from './ajustes.js';
 import { anotarLiquidacion, retenerLiquidacion, cancelarLiquidacion, pagarLiquidaciones, cobroAgregadoActivo } from './liquidaciones.js';
 import { normalizarTelefono } from '../utils/telefono.js';
@@ -36,6 +36,8 @@ import path from 'node:path';
 import { sql } from 'drizzle-orm';
 import { filtrarParaLector } from './miembros.js';
 import { sitioDePagina } from './sitios';
+import { registrarPedidoGestionado, calcularEnvioPorDistribuidor, detalleGestionado } from './pedidoGestionado.js';
+import { comisionDeLinea } from '../utils/ofertas.js';
 
 /** El alfabeto de un subdominio: minúsculas, números y guiones interiores. */
 const FORMATO_HANDLE = /^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])$/;
@@ -1461,7 +1463,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const ids = crudas.map(l => String(l?.producto_id || '')).filter(Boolean);
       if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
       const productos = (await db.execute(sql`
-        SELECT id, name, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos, recogida_en_persona, bd_modo
+        SELECT id, name, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos, recogida_en_persona, bd_modo,
+               distribuidor_id, distribuidor_nombre, comision_pct
         FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       // Con variante, el precio es el de la variante (2026-08-23).
@@ -1481,7 +1484,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // es «desde», para que nadie descubra el porte de verdad al final.
       const zona: Zona = req.body?.pais || req.body?.cp ? zonaDe(req.body.pais, req.body.cp) : 'peninsula';
       const tarifas = await tarifasDe(db, fisicas.map(l => l.p.id));
-      const calc = calcularEnvio(fisicas as any, subtotal, zona, tarifas);
+      const calc = calcularEnvioPorDistribuidor(fisicas as any, subtotal, zona, tarifas);
       const recogidaPosible = fisicas.length > 0 && fisicas.every(l => !!l.p.recogida_en_persona);
       const envio = calc.centimos;
       const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
@@ -1507,7 +1510,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const tiendas = await Promise.all([...porVendedor.entries()].map(async ([vid, ls]) => {
         const sub = ls.reduce((n: number, l: any) => n + l.precio * l.unidades, 0);
         const fis = ls.filter((l: any) => (l.p.kind || '') === 'fisico');
-        const c = calcularEnvio(fis as any, sub, zona, tarifas);
+        const c = calcularEnvioPorDistribuidor(fis as any, sub, zona, tarifas);
         const u = nombresTienda.find(x => x.id === vid);
         return {
           // Para el cobro de un carrito de varias tiendas (cuando se encienda):
@@ -1516,9 +1519,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
           vendedor_id: vid || null,
           tienda: u?.handle || null,
           nombre: u?.nombre || null,
-          lineas: ls.map((l: any) => ({ producto_id: l.p.id, variante_id: l.v?.id || null, cantidad: l.unidades })),
+          lineas: ls.map((l: any) => ({
+            producto_id: l.p.id, variante_id: l.v?.id || null, cantidad: l.unidades,
+            // OFERTAS (Wikiproducts, 2026-10-18): quién lo vende de verdad y
+            // qué nos paga por ello. La cesta lo enseña en cada línea.
+            ...(l.p.distribuidor_id ? {
+              distribuidor_id: l.p.distribuidor_id, distribuidor: l.p.distribuidor_nombre || null,
+              comision_pct: l.p.comision_pct === null ? null : Number(l.p.comision_pct),
+              comision_centimos: comisionDeLinea(l.precio, l.unidades, l.p.comision_pct === null ? null : Number(l.p.comision_pct)),
+            } : {}),
+          })),
           subtotal_centimos: sub,
           envio_centimos: c.centimos,
+          // Una caja y un porte por distribuidor; vacío si no hay ofertas.
+          envio_por_distribuidor: c.por_distribuidor,
           se_envia: c.se_envia,
           no_llega: c.no_llega,
           todo_acepta_puntos: ls.every((l: any) => !!l.p.acepta_puntos),
@@ -1810,7 +1824,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
                billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
-               recogida_en_persona, recogida_donde, bd_modo
+               recogida_en_persona, recogida_donde, bd_modo, distribuidor_id, distribuidor_nombre
         FROM products
         WHERE id = ANY(string_to_array(${idsProductos.join(',')}, ','))
           AND archived_at IS NULL AND status <> 'borrador'
@@ -1927,7 +1941,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const tarifasEnvio = await tarifasDe(db, fisicas.map(l => l.p.id));
       const calculo = quiereRecogida
         ? { centimos: 0, se_envia: true, no_llega: null, zona: zonaDestino, gratis_por_umbral: false }
-        : calcularEnvio(fisicas as any, subtotal, zonaDestino, tarifasEnvio);
+        : calcularEnvioPorDistribuidor(fisicas as any, subtotal, zonaDestino, tarifasEnvio);
       if (!calculo.se_envia) {
         return res.status(409).json({
           error: `«${calculo.no_llega}» no se envía a ese destino. Escribe a quien lo vende: puede que pueda hacer una excepción.`,
@@ -2104,6 +2118,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
             else await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
           }
         }
+        // PEDIDO GESTIONADO (Wikiproducts, 2026-10-18): la comisión de cada
+        // línea y lo que hay que pedir a cada distribuidor. No hace nada si no
+        // hay ofertas de distribuidor en el pedido.
+        await registrarPedidoGestionado(db, pedidoId);
         // EL VENDEDOR SE ENTERA (2026-08-23): hasta hoy vendía y no lo sabía
         // salvo que entrara en Comercio. Un aviso por la campana, con el
         // código, que lleva a su panel de pedidos.
@@ -2556,6 +2574,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       const lineas = (await db.execute(sql`
         SELECT l.id, l.producto_nombre, l.unidades, l.precio_unitario_centimos,
+               l.distribuidor_nombre, l.comision_pct, l.comision_centimos,
                coalesce(pr.kind, 'fisico') AS kind, pr.bd_modo,
                (pr.archivo_digital IS NOT NULL) AS con_archivo
         FROM pedido_lineas l LEFT JOIN products pr ON pr.id = l.producto_id
@@ -2615,7 +2634,14 @@ export function registerPublicarRoutes(app: Express, db: any) {
             ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}${correo ? `?correo=${encodeURIComponent(correo)}` : ''}`
             : null,
           sin_archivo: l.kind === 'digital' && !l.con_archivo,
+          // Pedido gestionado (Wikiproducts): a quién se compra y la comisión
+          // de aquel día. `null` en una línea de una tienda normal.
+          distribuidor: l.distribuidor_nombre || null,
+          comision_pct: l.comision_pct === null || l.comision_pct === undefined ? null : Number(l.comision_pct),
+          comision_centimos: l.comision_centimos === null || l.comision_centimos === undefined ? null : Number(l.comision_centimos),
         })),
+        // Cómo va cada tienda de un pedido gestionado (vacío en uno normal).
+        distribuidores: await detalleGestionado(db, p.id),
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });

@@ -103,6 +103,8 @@ import { registerRellenarPorChatRoutes } from './rellenarPorChat.js';
 import { registrarEspacio } from './espacio.js';
 import { registrarApiPublica } from './apiPublica.js';
 import { registrarWebhooks } from './webhooks.js';
+import { registrarPedidoGestionadoRutas } from './pedidoGestionado.js';
+import { registrarOfertas } from './ofertas.js';
 
 /**
  * Un módulo de la API.
@@ -374,6 +376,8 @@ export const MODULOS: Modulo[] = [
         + 'de 15 días. Vivía en GitHub Actions y no había funcionado nunca (ver el módulo).',
   },
   { nombre: 'espacio', montar: (app, db) => registrarEspacio(app, db), nota: 'Favoritos, recientes y búsqueda avanzada del espacio de trabajo (#14, #15).' },
+  { nombre: 'pedido-gestionado', montar: (app, db) => registrarPedidoGestionadoRutas(app, db), nota: 'Wikiproducts (W5): la cola de pedidos a distribuidores y el feed de ofertas para Google.' },
+  { nombre: 'ofertas', montar: (app, db) => registrarOfertas(app, db), nota: 'Wikiproducts (W5): las ofertas de una ficha de producto, para el bloque «Ofertas».' },
 ];
 
 /**

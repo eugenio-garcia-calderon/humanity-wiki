@@ -51,6 +51,19 @@ export type CompraFila = {
   recompensa: string | null;
   /** Why it cannot be bought, in words for the person looking. */
   motivo?: string;
+  /** OFFER ROLES (2026-10-18, Wikiproducts): set only when the table has the
+   *  column. `comision_pct` null = «sin acuerdo». See `pedidoGestionado.ts`. */
+  oferta?: OfertaFila;
+};
+
+/** What an offer row adds to a product: who really sells it, what they pay
+ *  us, where it is on their site and how long it takes. */
+export type OfertaFila = {
+  distribuidor_id: string | null;
+  distribuidor_nombre: string | null;
+  comision_pct: number | null;
+  enlace: string | null;
+  plazo: string | null;
 };
 
 const rol = (c: any) => c?.config?.rol;
@@ -89,6 +102,36 @@ async function sincronizarVariantes(db: any, productoId: string, nombres: string
   `);
 }
 
+/** Only http(s) links leave the platform: a `javascript:` URL typed into a
+ *  cell must never become the href of a «Ver en la tienda» button. */
+export function enlaceSeguro(v: unknown): string | null {
+  const t = String(v ?? '').trim();
+  if (!t) return null;
+  try { const u = new URL(t); return u.protocol === 'https:' || u.protocol === 'http:' ? u.toString().slice(0, 2000) : null; } catch { return null; }
+}
+
+function leerOferta(
+  fila: { celdas: Record<string, any>; apuntados?: Record<string, Array<{ id: string; etiqueta: string }>> },
+  c: { cDistribuidor: any; cComision: any; cEnlace: any; cPlazo: any },
+): OfertaFila {
+  // The first distributor wins: an offer is one shop's price. Two shops are two rows.
+  const ids = c.cDistribuidor ? valorDe(fila.celdas[c.cDistribuidor.id]) : null;
+  const distId = Array.isArray(ids) && ids.length ? String(ids[0]) : null;
+  const distNombre = distId ? (fila.apuntados?.[c.cDistribuidor.id] || []).find(a => a.id === distId)?.etiqueta || null : null;
+  // A `porcentaje` cell stores 0.04 for 4 %; a plain `numero` stores 4.
+  const bruto = c.cComision ? valorDe(fila.celdas[c.cComision.id]) : null;
+  const pct = typeof bruto === 'number' && Number.isFinite(bruto) && bruto > 0
+    ? Math.min(100, Math.round((c.cComision.tipo === 'porcentaje' ? bruto * 100 : bruto) * 100) / 100)
+    : null;
+  return {
+    distribuidor_id: distId,
+    distribuidor_nombre: distNombre ? String(distNombre).slice(0, 200) : null,
+    comision_pct: pct,
+    enlace: c.cEnlace ? enlaceSeguro(valorDe(fila.celdas[c.cEnlace.id])) : null,
+    plazo: c.cPlazo ? (String(valorDe(fila.celdas[c.cPlazo.id]) || '').trim().slice(0, 120) || null) : null,
+  };
+}
+
 /**
  * Bring the products behind a table's rows in line with the rows, and return
  * what each row's buy button needs. Rows the reader cannot see (filtered out
@@ -96,7 +139,7 @@ async function sincronizarVariantes(db: any, productoId: string, nombres: string
  */
 export async function sincronizarTienda(db: any, args: {
   tablaId: string; duenoId: string; columnas: any[]; colTitulo: string | null;
-  filas: Array<{ id: string; celdas: Record<string, any>; archivos: Record<string, any[]> }>;
+  filas: Array<{ id: string; celdas: Record<string, any>; archivos: Record<string, any[]>; apuntados?: Record<string, Array<{ id: string; etiqueta: string }>> }>;
 }): Promise<Record<string, CompraFila>> {
   const { tablaId, duenoId, columnas, colTitulo, filas } = args;
   const salida: Record<string, CompraFila> = {};
@@ -119,6 +162,15 @@ export async function sincronizarTienda(db: any, args: {
   const modo: CompraFila['modo'] = MODOS.includes(cBoton?.config?.modo) ? cBoton.config.modo : 'carrito';
   const esDonacion = modo === 'donar' || modo === 'recompensa';
   const cRecompensa = columnaConRol(columnas, 'recompensa', ['texto']);
+  // THE OFFER ROLES (2026-10-18, Wikiproducts W5). A table of offers is a shop
+  // whose rows are bought from someone else: «Distribuidor» says who, and
+  // «Comisión» what they pay us for showing it. A table without them is an
+  // ordinary shop and nothing below changes for it.
+  const cDistribuidor = columnaConRol(columnas, 'distribuidor', ['relacion']);
+  const cComision = columnaConRol(columnas, 'comision', ['porcentaje', 'numero']);
+  const cEnlace = columnaConRol(columnas, 'enlace', ['url']);
+  const cPlazo = columnaConRol(columnas, 'plazo', ['texto']);
+  const esOferta = !!(cDistribuidor || cComision);
   // Qué es el producto de detrás: lo que se envía es físico; una donación no se envía ni se descarga
   // (y la recompensa sólo se envía si la base de datos tiene propiedad «Envío»).
   const kind = modo === 'donar' ? 'servicio' : modo === 'recompensa' ? (cEnvio ? 'fisico' : 'servicio') : 'fisico';
@@ -160,8 +212,12 @@ export async function sincronizarTienda(db: any, args: {
     const variantes = (Array.isArray(marcadas) ? marcadas : marcadas ? [marcadas] : [])
       .map((id: string) => opcionLabel.get(id)).filter(Boolean) as string[];
 
-    const base: CompraFila = { producto_id: null, nombre, precio_centimos: precio, moneda, envio_centimos: envio, stock, variantes: [], modo, recompensa: textoRecompensa };
-    const huella = createHash('sha1').update(JSON.stringify([nombre, precio, moneda, envio, stock, imagenes, variantes, modo, textoRecompensa])).digest('hex');
+    const oferta: OfertaFila | undefined = esOferta ? leerOferta(fila, { cDistribuidor, cComision, cEnlace, cPlazo }) : undefined;
+    const base: CompraFila = { producto_id: null, nombre, precio_centimos: precio, moneda, envio_centimos: envio, stock, variantes: [], modo, recompensa: textoRecompensa, ...(oferta ? { oferta } : {}) };
+    // The offer goes into the fingerprint only when there is one, so the
+    // products of an ordinary shop keep their fingerprint and are not rewritten.
+    const huella = createHash('sha1').update(JSON.stringify([nombre, precio, moneda, envio, stock, imagenes, variantes, modo, textoRecompensa, ...(oferta ? [oferta] : [])])).digest('hex');
+    const o = oferta || { distribuidor_id: null, distribuidor_nombre: null, comision_pct: null, enlace: null, plazo: null };
     const actual = ex.get(fila.id);
 
     if (!actual) {
@@ -173,10 +229,12 @@ export async function sincronizarTienda(db: any, args: {
       const r = await db.execute(sql`
         INSERT INTO products (id, name, category, price_cents, currency, kind, modality, stock, images, status,
                               created_by, updated_by, envio_centimos, acepta_puntos, bd_fila_id, bd_tabla_id, bd_huella,
-                              bd_modo, description, iva_pct)
+                              bd_modo, description, iva_pct,
+                              comision_pct, distribuidor_id, distribuidor_nombre, oferta_enlace, oferta_plazo)
         VALUES (${id}, ${nombre}, 'OTROS', ${precio}, ${moneda}, ${kind}, 'unico', ${stock}, ${JSON.stringify(imagenes)}::jsonb,
                 ${precio === null ? 'borrador' : estadoVendible}, ${duenoId}, ${duenoId}, ${envio}, false,
-                ${fila.id}, ${tablaId}, ${huella}, ${modo}, ${textoRecompensa}, ${esDonacion ? 0 : null})
+                ${fila.id}, ${tablaId}, ${huella}, ${modo}, ${textoRecompensa}, ${esDonacion ? 0 : null},
+                ${o.comision_pct}, ${o.distribuidor_id}, ${o.distribuidor_nombre}, ${o.enlace}, ${o.plazo})
         ON CONFLICT (bd_fila_id) WHERE bd_fila_id IS NOT NULL DO NOTHING
         RETURNING id
       `);
@@ -195,6 +253,8 @@ export async function sincronizarTienda(db: any, args: {
                  images = ${JSON.stringify(imagenes)}::jsonb, envio_centimos = ${envio}, bd_huella = ${huella},
                  bd_tabla_id = ${tablaId}, archived_at = NULL, updated_by = ${duenoId}, updated_at = now(),
                  kind = ${kind}, bd_modo = ${modo}, description = ${textoRecompensa},
+                 comision_pct = ${o.comision_pct}, distribuidor_id = ${o.distribuidor_id}, distribuidor_nombre = ${o.distribuidor_nombre},
+                 oferta_enlace = ${o.enlace}, oferta_plazo = ${o.plazo},
                  -- Una donación no lleva IVA. Si deja de serlo, vuelve al IVA que tuviera por defecto el vendedor.
                  iva_pct = CASE WHEN ${esDonacion} THEN 0 WHEN bd_modo IN ('donar', 'recompensa') THEN NULL ELSE iva_pct END,
                  status = CASE WHEN ${precio}::int IS NULL THEN 'borrador'
