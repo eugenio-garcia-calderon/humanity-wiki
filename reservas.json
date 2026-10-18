@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/MenuSitio.tsx",
-      "motivo": "W2: buscador visible en el móvil",
-      "desde": "2026-10-18T16:49:49.476Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/index.css",
       "motivo": "W2: contraste y 16 px en sitios publicados",
       "desde": "2026-10-18T16:50:26.502Z"
