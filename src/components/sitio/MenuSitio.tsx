@@ -7,6 +7,7 @@ import {
   FileText, Download, ExternalLink, Instagram, Facebook, Linkedin, Youtube, Twitter, Github, Search,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useLocation } from 'react-router-dom';
 import {
   type Sitio, type Enlace, type Destino, type DocLegal, type Tamano,
   NOMBRES_LEGALES, textoLegal, textoSobre,
@@ -195,6 +196,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   const plegado = soloMovil ? 'siempre' : mn.plegado;
   const estilo: CSSProperties = { background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` };
   const { fila, nav, apretado } = useApretado(plegado === 'movil');
+  const enBuscar = /\/buscar\/?$/.test(useLocation().pathname);
   return (
     <header style={estilo}
       className={cn('w-full z-40', mn.fijo && 'sticky top-0', mn.borde && 'border-b', soloMovil && '@2xl:hidden')}>
@@ -206,7 +208,9 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
             plegado === 'siempre' || apretado ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:flex overflow-hidden' : 'flex flex-wrap')}>
           {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} />)}
         </nav>
-        {mn.buscador && <div className={cn('shrink-0', apretado && 'ml-auto', plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:block' : 'block')}><CajaBuscar rutas={rutas} s={s} /></div>}
+        {/* En la página de resultados guarda su sitio (los enlaces no saltan)
+            pero no se ve: la caja de la página ya lleva lo que se buscó. */}
+        {mn.buscador && <div aria-hidden={enBuscar || undefined} className={cn('shrink-0', apretado && 'ml-auto', enBuscar && 'invisible', plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:block' : 'block')}><CajaBuscar rutas={rutas} s={s} /></div>}
         {plegado !== 'nunca' && mn.enlaces.length > 0 && (
           <details className={cn('group', !(apretado && mn.buscador) && 'ml-auto', plegado === 'movil' && !apretado && '@2xl:hidden')}>
             <summary aria-label="Abrir el menú"
@@ -214,8 +218,10 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
               <Tres className="w-6 h-6 group-open:hidden" />
               <X className="w-6 h-6 hidden group-open:block" />
             </summary>
-            <div style={{ background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` }}
-              className="absolute right-3 left-3 @md:left-auto @md:w-72 top-full mt-1 rounded-2xl border shadow-2xl p-2 flex flex-col gap-1">
+            {/* Opaco y por encima: sin fondo propio del menú, la caja de buscar
+                de debajo se transparentaba entre los enlaces (ronda 2). */}
+            <div style={{ background: mn.fondo || 'white', color: mn.texto, borderColor: `${mn.texto}1f` }}
+              className="absolute z-50 right-3 left-3 @md:left-auto @md:w-72 top-full mt-1 rounded-2xl border shadow-2xl p-2 flex flex-col gap-1">
               {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
             </div>
           </details>
@@ -226,7 +232,9 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
       {/* EL BUSCADOR A LA VISTA EN EL TELÉFONO (2026-10-18, ronda 1 del
           evaluador). Dentro de las tres rayas nadie lo encontraba: con el
           menú plegado va en su propia fila, debajo de la barra. */}
-      {mn.buscador && plegado !== 'nunca' && (
+      {/* En la página de resultados ya hay una caja, con lo que se buscó
+          dentro: dos seguidas eran una de más (ronda 2 del evaluador). */}
+      {mn.buscador && plegado !== 'nunca' && !enBuscar && (
         <div className={cn('mx-auto max-w-6xl px-5 pb-2.5', plegado === 'movil' && '@2xl:hidden')}>
           <CajaBuscar rutas={rutas} s={s} lleno />
         </div>

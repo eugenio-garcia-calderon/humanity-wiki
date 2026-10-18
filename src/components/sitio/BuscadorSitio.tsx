@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Package, Search } from 'lucide-react';
 import { MarcoLectura, type DatosPagina } from './CabeceraLectura';
 import { Cargando } from './VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from './ContextoSitio';
@@ -17,7 +17,9 @@ import SeccionesSitio, { type Seccion } from './SeccionesSitio';
 // `robots.txt` deja esta página fuera de los buscadores: una página de
 // resultados por cada texto que alguien escriba son infinitas páginas finas.
 
-type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta?: string | null };
+type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta?: string | null;
+  /** Sólo las fichas: su precio «desde» y la cifra que dice cómo es (`completarFichas`). */
+  precio?: string; dato?: { nombre: string; valor: string } };
 type Respuesta = { resultados: Resultado[]; mas?: boolean; corregido?: string | null; secciones?: Seccion[] };
 
 export default function BuscadorSitio() {
@@ -88,15 +90,24 @@ export default function BuscadorSitio() {
           ) : (<>
             {res.corregido && <p className="mb-3 text-base text-slate-700">Mostrando resultados de «{res.corregido}».</p>}
             <ul className="divide-y divide-slate-100">
-              {res.resultados.map(r => (
+              {res.resultados.map((r, i) => (
                 <li key={r.id} className="py-3">
-                  <Link to={enlace(r.id)} className="flex gap-3 items-start group">
-                    {r.portada && <img src={r.portada} alt="" width={56} height={56} loading="lazy" className="w-14 h-14 rounded-lg object-cover shrink-0 bg-slate-100" />}
-                    <div className="min-w-0">
-                      <p className="font-bold text-slate-900 group-hover:underline">{r.titulo}</p>
-                      {r.tabla && <p className="text-sm font-bold text-slate-600">{r.tabla}</p>}
-                      {r.descripcion && <p className="text-base text-slate-700 line-clamp-2">{r.descripcion}</p>}
-                    </div>
+                  <Link to={enlace(r.id)} className="flex gap-3 items-center group">
+                    <span className="w-16 h-16 rounded-lg bg-slate-50 shrink-0 flex items-center justify-center overflow-hidden">
+                      {r.portada
+                        ? <img src={r.portada} alt="" width={64} height={64} loading={i < 4 ? 'eager' : 'lazy'} className="w-full h-full object-contain" />
+                        : <Package className="w-6 h-6 text-slate-400" aria-hidden />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold leading-snug text-slate-900 group-hover:underline line-clamp-2">{r.titulo}</span>
+                      {(r.dato || r.tabla) && (
+                        <span className="block text-sm text-slate-600 truncate">
+                          {r.dato ? `${r.dato.nombre}: ${r.dato.valor}` : r.tabla}
+                        </span>
+                      )}
+                      {!r.dato && !r.precio && r.descripcion && <span className="block text-sm text-slate-700 line-clamp-1">{r.descripcion}</span>}
+                    </span>
+                    {r.precio && <span className="shrink-0 text-right text-base font-black text-slate-900"><span className="block text-xs font-bold text-slate-600">desde</span>{r.precio}</span>}
                   </Link>
                 </li>
               ))}

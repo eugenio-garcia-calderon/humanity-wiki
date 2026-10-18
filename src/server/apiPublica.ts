@@ -361,6 +361,39 @@ export function registrarApiPublica(app: Express, db: any) {
     } catch (e: any) { console.error('v1 añadir bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
+  /** `POST /api/v1/pages/:id/blocks/:blockId/fold` — turns a top-level heading
+   *  into a folding heading (closed) and moves under it the blocks that follow,
+   *  up to the next heading of the same or a higher level, or a database block
+   *  (Wikiproducts W2, evaluator round 2: on the phone a subcategory's buying
+   *  guide pushed every product below the fold). Nothing is deleted: the
+   *  blocks move inside the heading and the page's history keeps the old
+   *  layout. Already folded → 200 with `folded: 0`. */
+  app.post('/api/v1/pages/:id/blocks/:blockId/fold', async (req: Request, res: Response) => {
+    try {
+      const antes = await paginaParaEditar(req, res); if (!antes) return;
+      const bloques: any[] = Array.isArray(antes.config?.bloques) ? [...antes.config.bloques] : [];
+      const i = bloques.findIndex(b => b?.id === String(req.params.blockId));
+      if (i < 0) return res.status(404).json({ error: 'Esa página no tiene, en su primer nivel, un bloque con ese id.' });
+      const t = bloques[i];
+      const nivel = { titulo1: 1, titulo2: 2, titulo3: 3 }[t?.tipo as string];
+      if (!nivel) return res.status(400).json({ error: 'Sólo se pliega un título (#, ## o ###).' });
+      if (t.plegable) return res.json({ block: t, folded: 0 });
+      let fin = i + 1;
+      while (fin < bloques.length) {
+        const b = bloques[fin];
+        const n = { titulo1: 1, titulo2: 2, titulo3: 3 }[b?.tipo as string];
+        if ((n && n <= nivel) || b?.tipo === 'basedatos') break;
+        fin++;
+      }
+      const dentro = bloques.slice(i + 1, fin);
+      if (!dentro.length) return res.status(400).json({ error: 'Debajo de ese título no hay nada que plegar.' });
+      const plegado = { ...t, plegable: true, abierto: false, bloques: [...(Array.isArray(t.bloques) ? t.bloques : []), ...dentro] };
+      bloques.splice(i, fin - i, plegado);
+      const w = await guardarBloques(req, res, antes, bloques); if (!w) return;
+      res.json({ block: plegado, folded: dentro.length, page: paginaPublica(w, { version: w.version }) });
+    } catch (e: any) { console.error('v1 plegar:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
   /** `{ text: "…" }`: rewrite the text of one text block (paragraph, heading,
    *  list item, quote, callout) and nothing else, so a loader can correct a
    *  sentence without rewriting the page through markdown (W3a, 2026-10-18). */

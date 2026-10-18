@@ -102,16 +102,19 @@ export default function VistaPagina({ pagina, propio, pie }: {
     <MarcoLectura pagina={pagina} rutas={rutas}>
       {migas.length > 0 && (
         <nav aria-label="Estás en" className="mb-4">
-          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-slate-600">
+          {/* En UNA línea (ronda 2 del evaluador: tres líneas de migas antes
+              del título en el teléfono). Lo que no cabe se corta con «…», y en
+              el teléfono la página actual no se repite: es el título de debajo. */}
+          <ol className="flex flex-nowrap items-center gap-x-1 overflow-hidden whitespace-nowrap text-sm text-slate-600">
             {migas.map((m, i) => (
-              <li key={m.id} className="flex items-center gap-1">
-                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-2">
+              <li key={m.id} className="flex items-center gap-1 min-w-0">
+                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-2 truncate">
                   {i === 0 && (sitio?.raizId === m.id || pagina.sitio?.raizId === m.id) ? 'Inicio' : (m.titulo || 'Volver')}
                 </Link>
-                <ChevronRight className="w-4 h-4 text-slate-500" aria-hidden />
+                <ChevronRight className="w-4 h-4 shrink-0 text-slate-500" aria-hidden />
               </li>
             ))}
-            <li aria-current="page" className="text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
+            <li aria-current="page" className="hidden sm:block min-w-0 flex-1 text-slate-700 truncate">{pagina.titulo || 'Sin título'}</li>
           </ol>
         </nav>
       )}

@@ -929,3 +929,7 @@ Members can only be activated with the owner's session (`PUT /api/sitio-miembros
 ## 2026-10-18 — A row whose last route segment has an empty column gets its title there (W2)
 
 Before: a missing column anywhere in the route template left the sheet at `/p/:id` "until its data is complete". In Wikiproducts some products genuinely have no model code (Riapow, two lights), so they would never get a readable address, and the search linked them to `/p/…`. Now an empty column in the LAST segment falls back to the row's title. In any other segment the old rule stands, because a half address (`/-a1689`) is worse than `/p/:id`. If the data arrives later the address changes, and the old one is kept in `direcciones_anteriores`, which redirects. Alternative rejected: an explicit fallback syntax in the template (`{Modelo|Nombre}`). It is more general, but it costs a parser change and a migration of every template for a case that today has one answer.
+
+## 2026-10-18 — Folding a guide through the API instead of rewriting the page (W2)
+
+The subcategory guide had to fold on load. Options: (a) `PATCH` the whole block list from the loader, (b) let `crear-esquema`/`cargar` write it folded, (c) a narrow `fold` route on API v1. Chose (c): API v1 only edits text, so (a) would have opened a general write path; (b) only covers new pages. The route moves the blocks that follow a top-level heading into it (until the next heading of the same or higher level or a database block), is idempotent and checks ownership with `paginaParaEditar`.
