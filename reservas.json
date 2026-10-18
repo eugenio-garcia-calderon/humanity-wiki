@@ -35,6 +35,18 @@
       "ruta": "src/server/bd/tienda.ts",
       "motivo": "W5 Wikiproducts: cesta multitienda, pedido gestionado y comisión",
       "desde": "2026-10-18T11:25:35.093Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0153_bd_procedencia.sql",
+      "motivo": "W1 Wikiproducts: provenance per cell + /api/v1 databases/columns",
+      "desde": "2026-10-18T11:26:30.170Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/apiPublica.ts",
+      "motivo": "W1 Wikiproducts: provenance per cell + /api/v1 databases/columns",
+      "desde": "2026-10-18T11:26:30.170Z"
     }
   ]
 }
