@@ -1,0 +1,36 @@
+{
+  "_comentario": "Qué página del sitio wikiproducts.humanity.wiki enseña cada base de datos. Lo lee enlazar-sitio.mjs. Las páginas van por id porque el título lo puede cambiar Eugenio.",
+  "aviso": "se est[aá]n cargando",
+  "subcategorias": [
+    { "tabla": "powerbanks", "pagina": "KWMVDTQNR7D6" },
+    { "tabla": "paneles-solares-portatiles", "pagina": "KWMVDTQO1OM5" },
+    { "tabla": "luces-solares-portatiles", "pagina": "KWMVDTQOC0CI" },
+    { "tabla": "paneles-solares-domesticos", "pagina": "KWMVDTQOMQVL" },
+    { "tabla": "baterias-domesticas", "pagina": "KWMVDTQOX54K" }
+  ],
+  "datos": {
+    "madre_titulo": "Cómo trabajamos",
+    "paginas": [
+      {
+        "tabla": "marcas",
+        "titulo": "Marcas y empresas",
+        "texto": "Las empresas que hay detrás de cada producto de Wikiproducts: dónde tienen la sede, a qué grupo pertenecen y qué información pública hay de ellas. Cada dato lleva su fuente y la fecha en que se consultó."
+      },
+      {
+        "tabla": "distribuidores",
+        "titulo": "Tiendas y distribuidores",
+        "texto": "Las tiendas donde hemos encontrado a la venta los productos de Wikiproducts, con sus condiciones de envío y devolución según las publica cada tienda."
+      },
+      {
+        "tabla": "afirmaciones",
+        "titulo": "Afirmaciones publicitarias comprobadas",
+        "texto": "Lo que dice la publicidad de cada producto, contrastado con fuentes: cierta, matizable, falsa o sin pruebas. Una afirmación que sólo se apoya en la ficha de la propia marca queda como «sin pruebas»."
+      },
+      {
+        "tabla": "retiradas",
+        "titulo": "Retiradas y alertas de seguridad",
+        "texto": "Retiradas del mercado y alertas de seguridad publicadas por organismos oficiales (EU Safety Gate, CPSC de Estados Unidos, Health Canada y ACCC de Australia) que afectan a productos de Wikiproducts, con el enlace a cada aviso original."
+      }
+    ]
+  }
+}
