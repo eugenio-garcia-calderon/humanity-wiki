@@ -8886,3 +8886,7 @@ en mis páginas como proyecto pendiente».
 - Los miembros de un sitio publicado pueden votar si su categoría puede comentar.
 - El HTML que leen los buscadores y las IA ya trae las puntuaciones (media y votos por criterio, o «aún sin votos suficientes»), y la página lleva `AggregateRating` en sus datos estructurados sólo si enseña el bloque y hay votos suficientes (SEO R4).
 - Migración `0152_valoraciones.sql`.
+### 2026-10-18 — Galería agrupada: arrastrar a otra base de datos y a otro grupo (prog8)
+- En una galería agrupada no se podían arrastrar las tarjetas: la vista agrupada desactivaba la edición entera para que no se reordenara. Ahora arrastrar va aparte de reordenar.
+- Una tarjeta de una galería agrupada se puede soltar en otra base de datos y pasa a ella, como ya pasaba sin agrupar.
+- Soltar una tarjeta en otro grupo le da el valor de ese grupo (su categoría, su estado…). Con varios valores, se cambia el de origen por el de destino.
