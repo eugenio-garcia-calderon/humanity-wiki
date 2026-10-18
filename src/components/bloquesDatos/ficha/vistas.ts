@@ -14,7 +14,7 @@ import {
   type Ficha, type FilaFicha, type TablaFicha, type Procedencia,
   columnaPorRol, rolDe, grupoDe, visible, filaActual, tieneValor, textoDe, numeroDe,
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
-  fechaRevision, sitioDe, fechaCorta,
+  fechaRevision, sitioDe, fechaCorta, criterioDe, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia,
 } from './modelo';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
@@ -30,6 +30,7 @@ export const GRUPOS: Record<string, string> = {
   garantia: 'Garantía',
   documentos: 'Documentos y enlaces',
   compra: 'Precio',
+  uso: 'En la caja y usos',
 };
 
 /** Columns no property list ever shows: they have a block of their own (the
@@ -84,10 +85,26 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
   pie: 'Pie (fecha de revisión y fuentes)',
 };
 
+/** The shopper's summary at the top of a sheet (W1, 2026-10-18, «like
+ *  Amazon's product pages»): price, community score and the key figures, all
+ *  read from the row's own columns, nothing typed for the header. */
+export type Compra = { desde: string; hasta: string; tiendas: number };
+export type Nota = { media: string; votos: number };
+
 export type VistaPropiedad =
-  | { estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; credito: string; gtin: string; categoria: string }
+  | {
+    estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; credito: string; gtin: string; categoria: string;
+    subcategoria: string;
+    /** Null when the table has no price columns; `desde` '' = no shop yet. */
+    compra: Compra | null;
+    /** Null when the table has no community score; `media` '' = too few votes. */
+    nota: Nota | null;
+    destacados: Linea[];
+  }
   | { estilo: 'texto'; titulo: string; texto: string; procedencia: Procedencia | null }
-  | { estilo: 'tabla' | 'lista'; titulo: string; lineas: Linea[] }
+  /** `sinDato`: what nobody publishes, one sentence per reason with the
+   *  properties it covers, instead of a row each saying «No publicado». */
+  | { estilo: 'tabla' | 'lista'; titulo: string; lineas: Linea[]; sinDato: Array<{ motivo: string; etiquetas: string[] }> }
   | { estilo: 'pie'; revisado: string | null; fuentes: string[]; editadoEl: string | null };
 
 export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaPropiedad | null {
@@ -117,6 +134,13 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
       credito: imagen && cCredito ? textoDe(fila, cCredito) : '',
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
       categoria: t.titulo,
+      subcategoria: porRol('subcategoria') ? textoDe(fila, porRol('subcategoria')!) : '',
+      compra: compraDe(t, fila),
+      nota: notaDe(t, fila),
+      destacados: columnasDestacadas(t)
+        .filter(c => tieneValor(fila, c))
+        .slice(0, MAX_DESTACADAS)
+        .map(c => ({ columnaId: c.id, etiqueta: c.nombre, valor: valorDe(f, fila, c) })),
     };
   }
 
@@ -135,9 +159,40 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
   const grupo = String(datos.grupo || '');
   const columnas = elegidas(t, datos.columnas)
     || t.columnas.filter(c => listable(c) && (grupo ? grupoDe(c) === grupo : grupoDe(c) && grupoDe(c) !== 'identidad'));
-  const lineas = columnas.map(c => lineaDe(f, fila, c)).filter((x): x is Linea => !!x);
-  if (!lineas.length) return null;
-  return { estilo: estilo === 'lista' ? 'lista' : 'tabla', titulo: titulo || (grupo && GRUPOS[grupo]) || '', lineas };
+  const todas = columnas.map(c => lineaDe(f, fila, c)).filter((x): x is Linea => !!x);
+  if (!todas.length) return null;
+  const esTabla = estilo !== 'lista';
+  // In a table, the «not published» rows fold into one sentence per reason:
+  // on a powerbank they were a third of the rows, each two lines tall.
+  const sinDato: Array<{ motivo: string; etiquetas: string[] }> = [];
+  const lineas = esTabla ? todas.filter(l => {
+    const p = l.valor.procedencia;
+    if (l.valor.texto !== 'No publicado' || p?.naturaleza !== 'no_publicado') return true;
+    const motivo = etiquetaProcedencia({ naturaleza: 'no_publicado' }, t.columnas.find(c => c.id === l.columnaId));
+    const g = sinDato.find(x => x.motivo === motivo);
+    if (g) g.etiquetas.push(l.etiqueta); else sinDato.push({ motivo, etiquetas: [l.etiqueta] });
+    return false;
+  }) : todas;
+  return { estilo: esTabla ? 'tabla' : 'lista', titulo: titulo || (grupo && GRUPOS[grupo]) || '', lineas, sinDato };
+}
+
+function compraDe(t: TablaFicha, fila: FilaFicha): Compra | null {
+  const min = columnaPorRol(t, 'precio_min');
+  if (!min) return null;
+  const max = columnaPorRol(t, 'precio_max');
+  const n = columnaPorRol(t, 'num_ofertas');
+  const desde = textoDe(fila, min);
+  const hasta = max ? textoDe(fila, max) : '';
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: (n && numeroDe(fila, n)) || 0 };
+}
+
+function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {
+  const c = t.columnas.find(x => criterioDe(x) === 'media');
+  if (!c) return null;
+  const celda: any = fila.celdas?.[c.id];
+  const m = Number(celda?.media ?? celda?.valor);
+  const ok = celda?.estado === 'ok' && Number.isFinite(m);
+  return { media: ok ? m.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '', votos: Number(celda?.votos) || 0 };
 }
 
 // ── COMPARADOR ──────────────────────────────────────────────────────────────
@@ -149,7 +204,10 @@ export type VistaComparador = {
   titulo: string;
   productos: Array<{ id: string; nombre: string; paginaId: string | null; imagen: string | null; actual: boolean }>;
   /** One line per attribute, one cell per product, in the same order. */
-  lineas: Array<{ columnaId: string; etiqueta: string; grupo: string; sentido: 'mayor' | 'menor' | null; celdas: CeldaComparada[] }>;
+  lineas: Array<{ columnaId: string; etiqueta: string; grupo: string; sentido: 'mayor' | 'menor' | null; celdas: CeldaComparada[];
+    /** One of the few lines shown before «see all» (price, overall score and
+     *  the sheet header's key figures). The server HTML shows every line. */
+    clave: boolean }>;
   /** Siblings that could be added, for the picker: only those of the same
    *  subcategory as the first product, when the table has subcategories. */
   candidatos: Array<{ id: string; nombre: string }>;
@@ -205,6 +263,7 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
     || t.columnas.filter(c => (listable(c) && ['tecnico', 'garantia', 'origen', 'compra'].includes(grupoDe(c) || '')) || esComunidad(c));
   // Community scores first (what people think), then the price, then the rest.
   const peso = (c: Columna) => (esComunidad(c) ? 0 : grupoDe(c) === 'compra' ? 1 : grupoDe(c) === 'tecnico' ? 2 : 3);
+  const claves = new Set([columnaPorRol(t, 'precio_min'), t.columnas.find(c => criterioDe(c) === 'media'), ...columnasDestacadas(t)].filter(Boolean).map(c => c!.id));
   const lineas = cols
     .filter(c => filas.some(x => tieneValor(x, c)))
     .sort((a, b) => peso(a) - peso(b))
@@ -214,6 +273,7 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
         columnaId: c.id, etiqueta: c.nombre, grupo: esComunidad(c) ? 'Valoración de la comunidad' : GRUPOS[grupoDe(c) || ''] || '',
         sentido: ordenable(c) ? (esComunidad(c) ? 'mayor' as const : c.config?.comparar) : null,
         celdas: filas.map(x => ({ texto: textoDe(x, c) || '—', mejor: mejores.has(x.id), procedencia: procedenciaDe(x, c) })),
+        clave: claves.has(c.id),
       };
     });
   const elegidos = new Set(filas.map(x => x.id));

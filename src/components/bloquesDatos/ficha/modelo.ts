@@ -108,6 +108,26 @@ const ROL_POR_CLAVE: Record<string, Rol> = {
   // The size a product is compared at: energy for batteries, peak power for panels.
   capacidad_wh: 'tamano', capacidad_total_kwh: 'tamano', potencia_pico_w: 'tamano', potencia_pico_wp: 'tamano',
 };
+/** The figures a shopper looks at first, by loader key, in the order the
+ *  sheet's header shows them (W1, 2026-10-18: «inspired by Amazon's product
+ *  pages»). A table takes the ones it has; `config.destacado: true` on any
+ *  column adds it. Same reason as `ROL_POR_CLAVE`: production column config
+ *  cannot be patched through the API. */
+const DESTACADAS_POR_CLAVE = [
+  // portable
+  'capacidad_mah', 'capacidad_wh', 'potencia_salida_max_w', 'lumenes_max', 'autonomia_h', 'potencia_pico_w', 'eficiencia_celula_pct',
+  // home
+  'potencia_pico_wp', 'eficiencia_pct', 'capacidad_util_kwh', 'potencia_continua_kw', 'ciclos_declarados',
+  // everyone
+  'peso_kg', 'peso_g', 'ip', 'apto_avion', 'garantia_anios', 'garantia_producto_anios',
+];
+export const MAX_DESTACADAS = 6;
+export function columnasDestacadas(t: TablaFicha): Columna[] {
+  const marcadas = t.columnas.filter(c => c.config?.destacado === true);
+  const porClave = DESTACADAS_POR_CLAVE.map(k => t.columnas.find(c => c.config?.clave === k)).filter((c): c is Columna => !!c);
+  return [...new Set([...marcadas, ...porClave])].filter(c => visible(c) && c.config?.interna !== true);
+}
+
 export const rolDe = (c: Columna | undefined): string | undefined =>
   c?.config?.ficha || (c?.config?.clave ? ROL_POR_CLAVE[c.config.clave] : undefined);
 export const grupoDe = (c: Columna | undefined): string | undefined => c?.config?.grupo;

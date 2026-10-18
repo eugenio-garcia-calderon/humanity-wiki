@@ -138,23 +138,27 @@ export function fusionarPlantilla(plantilla: Bloque[] | null, propios: Bloque[])
   return [...plantilla, ...reales];
 }
 
-/** The layout a new template is born with: the sheet of plan §2.2, in order.
- *  The offers block (W5) and the ratings block (W4) go in when they exist; a
- *  declared but unbuilt block does not render on a published page. */
+/** The layout a new template is born with. Same order as
+ *  `scripts/wikiproducts/plantilla-ficha.json`, which puts it on existing
+ *  templates (2026-10-18, «like Amazon's product pages»): first what decides
+ *  a purchase — the header with score, price and key figures, the specs, the
+ *  shops — then comparison and opinions, then origin, documents and sources.
+ *  A declared but unbuilt block does not render on a published page. */
 export function plantillaInicial(): Bloque[] {
   const b = (tipo: Bloque['tipo'], datos: Record<string, unknown>): Bloque => ({ id: nuevoIdBloque(), tipo, datos });
   return [
     b('propiedad', { estilo: 'cabecera' }),
     b('propiedad', { estilo: 'texto', rol: 'resumen' }),
-    b('valoracion', {}),
-    b('propiedad', { estilo: 'tabla', grupo: 'tecnico', titulo: 'Datos clave' }),
-    b('propiedad', { estilo: 'tabla', grupo: 'origen', titulo: 'Origen y fabricación' }),
+    b('propiedad', { estilo: 'tabla', grupo: 'tecnico', titulo: 'Características técnicas' }),
+    b('propiedad', { estilo: 'tabla', grupo: 'uso', titulo: 'En la caja y usos' }),
     b('propiedad', { estilo: 'tabla', grupo: 'garantia', titulo: 'Garantía' }),
+    b('ofertas', {}),
+    b('comparador', { modo: 'fila', titulo: 'Comparar con otros' }),
+    b('alternativas', { titulo: 'La mejor en cada criterio' }),
+    b('valoracion', {}),
     b('afirmacion', { modo: 'fila', titulo: 'Afirmaciones publicitarias' }),
     b('retirada', { modo: 'fila', titulo: 'Retiradas y alertas de seguridad' }),
-    b('ofertas', {}),
-    b('alternativas', { titulo: 'La mejor en cada criterio' }),
-    b('comparador', { modo: 'fila', titulo: 'Comparar con otros' }),
+    b('propiedad', { estilo: 'tabla', grupo: 'origen', titulo: 'Origen y fabricación' }),
     b('propiedad', { estilo: 'tabla', grupo: 'documentos', titulo: 'Documentos y enlaces' }),
     b('propiedad', { estilo: 'pie' }),
   ];

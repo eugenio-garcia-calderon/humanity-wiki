@@ -755,6 +755,98 @@
           }
         },
         {
+          "clave": "tiempo_recarga_h",
+          "nombre": "Tiempo de recarga",
+          "tipo": "numero",
+          "config": {
+            "clave": "tiempo_recarga_h",
+            "grupo": "tecnico",
+            "unidad": "h",
+            "comparar": "menor",
+            "decimales": 1
+          }
+        },
+        {
+          "clave": "cable_integrado",
+          "nombre": "Cable integrado",
+          "tipo": "casilla",
+          "config": {
+            "clave": "cable_integrado",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "carga_inalambrica",
+          "nombre": "Carga inalámbrica",
+          "tipo": "casilla",
+          "config": {
+            "clave": "carga_inalambrica",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "carga_pasante",
+          "nombre": "Carga a la vez que se carga",
+          "tipo": "casilla",
+          "config": {
+            "clave": "carga_pasante",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "pantalla",
+          "nombre": "Indicador de batería",
+          "tipo": "seleccion",
+          "opciones": [
+            "Pantalla digital",
+            "LEDs",
+            "Sin indicador"
+          ],
+          "config": {
+            "clave": "pantalla",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "en_la_caja",
+          "nombre": "Qué hay en la caja",
+          "tipo": "texto",
+          "config": {
+            "clave": "en_la_caja",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "ideal_para",
+          "nombre": "Ideal para",
+          "tipo": "seleccion_multiple",
+          "opciones": [
+            "Viajes",
+            "Avión",
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Uso diario",
+            "Portátil y tablet",
+            "Jardín y exterior",
+            "Casa entera",
+            "Autoconsumo"
+          ],
+          "config": {
+            "clave": "ideal_para",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "manual_url",
+          "nombre": "Manual de instrucciones",
+          "tipo": "url",
+          "config": {
+            "clave": "manual_url",
+            "grupo": "documentos"
+          }
+        },
+        {
           "clave": "afirmaciones",
           "nombre": "Afirmaciones publicitarias",
           "tipo": "relacion",
@@ -1262,6 +1354,54 @@
           }
         },
         {
+          "clave": "soporte_integrado",
+          "nombre": "Soporte integrado",
+          "tipo": "casilla",
+          "config": {
+            "clave": "soporte_integrado",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "en_la_caja",
+          "nombre": "Qué hay en la caja",
+          "tipo": "texto",
+          "config": {
+            "clave": "en_la_caja",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "ideal_para",
+          "nombre": "Ideal para",
+          "tipo": "seleccion_multiple",
+          "opciones": [
+            "Viajes",
+            "Avión",
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Uso diario",
+            "Portátil y tablet",
+            "Jardín y exterior",
+            "Casa entera",
+            "Autoconsumo"
+          ],
+          "config": {
+            "clave": "ideal_para",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "manual_url",
+          "nombre": "Manual de instrucciones",
+          "tipo": "url",
+          "config": {
+            "clave": "manual_url",
+            "grupo": "documentos"
+          }
+        },
+        {
           "clave": "afirmaciones",
           "nombre": "Afirmaciones publicitarias",
           "tipo": "relacion",
@@ -1764,6 +1904,54 @@
           "tipo": "texto_largo",
           "config": {
             "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "sensor_movimiento",
+          "nombre": "Sensor de movimiento",
+          "tipo": "casilla",
+          "config": {
+            "clave": "sensor_movimiento",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "en_la_caja",
+          "nombre": "Qué hay en la caja",
+          "tipo": "texto",
+          "config": {
+            "clave": "en_la_caja",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "ideal_para",
+          "nombre": "Ideal para",
+          "tipo": "seleccion_multiple",
+          "opciones": [
+            "Viajes",
+            "Avión",
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Uso diario",
+            "Portátil y tablet",
+            "Jardín y exterior",
+            "Casa entera",
+            "Autoconsumo"
+          ],
+          "config": {
+            "clave": "ideal_para",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "manual_url",
+          "nombre": "Manual de instrucciones",
+          "tipo": "url",
+          "config": {
+            "clave": "manual_url",
             "grupo": "documentos"
           }
         },
@@ -2449,6 +2637,45 @@
           "tipo": "texto_largo",
           "config": {
             "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "en_la_caja",
+          "nombre": "Qué hay en la caja",
+          "tipo": "texto",
+          "config": {
+            "clave": "en_la_caja",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "ideal_para",
+          "nombre": "Ideal para",
+          "tipo": "seleccion_multiple",
+          "opciones": [
+            "Viajes",
+            "Avión",
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Uso diario",
+            "Portátil y tablet",
+            "Jardín y exterior",
+            "Casa entera",
+            "Autoconsumo"
+          ],
+          "config": {
+            "clave": "ideal_para",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "manual_url",
+          "nombre": "Manual de instrucciones",
+          "tipo": "url",
+          "config": {
+            "clave": "manual_url",
             "grupo": "documentos"
           }
         },
@@ -3155,6 +3382,54 @@
           "tipo": "texto_largo",
           "config": {
             "clave": "compatibles",
+            "grupo": "documentos"
+          }
+        },
+        {
+          "clave": "app_monitorizacion",
+          "nombre": "App para el móvil",
+          "tipo": "casilla",
+          "config": {
+            "clave": "app_monitorizacion",
+            "grupo": "tecnico"
+          }
+        },
+        {
+          "clave": "en_la_caja",
+          "nombre": "Qué hay en la caja",
+          "tipo": "texto",
+          "config": {
+            "clave": "en_la_caja",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "ideal_para",
+          "nombre": "Ideal para",
+          "tipo": "seleccion_multiple",
+          "opciones": [
+            "Viajes",
+            "Avión",
+            "Camping y montaña",
+            "Autocaravana y barco",
+            "Apagones y emergencias",
+            "Uso diario",
+            "Portátil y tablet",
+            "Jardín y exterior",
+            "Casa entera",
+            "Autoconsumo"
+          ],
+          "config": {
+            "clave": "ideal_para",
+            "grupo": "uso"
+          }
+        },
+        {
+          "clave": "manual_url",
+          "nombre": "Manual de instrucciones",
+          "tipo": "url",
+          "config": {
+            "clave": "manual_url",
             "grupo": "documentos"
           }
         },

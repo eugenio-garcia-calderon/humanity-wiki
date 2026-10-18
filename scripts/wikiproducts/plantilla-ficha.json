@@ -1,0 +1,19 @@
+{
+  "nota": "El orden de los bloques de la ficha de cada producto (W1, 2026-10-18, «inspírate en las landing pages de Amazon»). Lo aplica plantilla-ficha.mjs a la plantilla de cada tabla de productos; src/server/bd/plantillaFicha.ts (plantillaInicial) da el mismo orden a una tabla nueva. Arriba lo que decide una compra (foto, nota, precio, cifras clave, tiendas), después la comparación y las opiniones, y al final el origen, los documentos y las fuentes.",
+  "bloques": [
+    { "tipo": "propiedad", "datos": { "estilo": "cabecera" } },
+    { "tipo": "propiedad", "datos": { "estilo": "texto", "rol": "resumen" } },
+    { "tipo": "propiedad", "datos": { "estilo": "tabla", "grupo": "tecnico", "titulo": "Características técnicas" } },
+    { "tipo": "propiedad", "datos": { "estilo": "tabla", "grupo": "uso", "titulo": "En la caja y usos" } },
+    { "tipo": "propiedad", "datos": { "estilo": "tabla", "grupo": "garantia", "titulo": "Garantía" } },
+    { "tipo": "ofertas", "datos": {} },
+    { "tipo": "comparador", "datos": { "modo": "fila", "titulo": "Comparar con otros" } },
+    { "tipo": "alternativas", "datos": { "titulo": "La mejor en cada criterio" } },
+    { "tipo": "valoracion", "datos": {} },
+    { "tipo": "afirmacion", "datos": { "modo": "fila", "titulo": "Afirmaciones publicitarias" } },
+    { "tipo": "retirada", "datos": { "modo": "fila", "titulo": "Retiradas y alertas de seguridad" } },
+    { "tipo": "propiedad", "datos": { "estilo": "tabla", "grupo": "origen", "titulo": "Origen y fabricación" } },
+    { "tipo": "propiedad", "datos": { "estilo": "tabla", "grupo": "documentos", "titulo": "Documentos y enlaces" } },
+    { "tipo": "propiedad", "datos": { "estilo": "pie" } }
+  ]
+}

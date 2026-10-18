@@ -9157,6 +9157,27 @@ en mis páginas como proyecto pendiente».
 - Signed out, the site's account button reads «Entrar» next to the icon (`CuentaMenu`), instead of a bare person icon.
 - «Entrar para puntuar» now also opens the floating member bar's sign-in panel (`BarraMiembro`), which is what pages without the site menu show; after signing in there, the rating block asks again (`sitio:sesion`) and shows the stars without a reload.
 - Checked locally: register from «Entrar para puntuar» and vote 4 on a criterion → `PUT` 200.
+## 2026-10-18 — Wikiproducts W1: product sheet as a shop landing page
+
+Eugenio: «inspírate en las landing pages de Amazon… que la información esté más compacta… propiedades dentro de una base de datos».
+- **Header** (`propiedad` estilo `cabecera`): photo on the left. Beside it are brand, type and model, the community score as stars with its vote count, or «Sin valoraciones suficientes todavía», and the «Desde» price with how many shops sell it and the stock status. Below that sit up to six key figures as tiles, the buttons «Ver dónde comprarlo» and «Comparar con otros» (they scroll to those blocks), and the EAN. Every value comes from a column. The key figures are picked by loader key (`DESTACADAS_POR_CLAVE` in `ficha/modelo.ts`) or by `config.destacado: true`.
+- **Property tables** are now a grid of tiles: name, value, and a one-line source. «Not published» rows fold into one sentence per reason, for example «El fabricante no lo publica: Tensión de celda, Ciclos de carga.». The server HTML keeps a real `<table>` and adds the same sentence.
+- **Comparator** shows only the main lines at first: price, overall score and the key figures. A button opens all of them. The server HTML still writes every line.
+- **Recalls**: «Dónde se buscó» is folded.
+- **New properties** in `esquema-bd.json`:
+  - every product table: «Qué hay en la caja», «Ideal para» (multi-select with 10 fixed uses) and «Manual de instrucciones»;
+  - powerbanks: recharge time, built-in cable, wireless charging, pass-through charging and battery indicator;
+  - portable panels: kickstand;
+  - lights: motion sensor;
+  - home batteries: phone app.
+  `cargar.mjs` now writes multi-select cells, as a list or as «a; b».
+- **Block order** of every sheet is set in `scripts/wikiproducts/plantilla-ficha.json`:
+  1. header, summary, specs, box and uses, warranty;
+  2. shops, comparator, best in each criterion, ratings;
+  3. claims, recalls, origin, documents, sources.
+
+  `plantilla-ficha.mjs` applies it to each product table's template. It is idempotent and keeps each block's own settings. It runs in `cargar-en-servidor.sh` after `expertos.mjs`, and it **drops the expert booking block** from the sheets: experts are out of the MVP. `plantillaInicial()` gives new tables the same order.
+- Measured on the local copy (Anker Zolo, production build): 9,595 → 8,213 px tall at 390 px and 6,283 → 4,864 px at 1,280 px. CLS is 0 and there is no horizontal scroll. The new properties are empty until W3a loads them.
 ## 2026-10-18 — Gestor de cargas y adiós al «Unexpected token '<'» (prog8)
 - **Las subidas siguen aunque te vayas de la página.** La portada y las imágenes de una página se suben con el **gestor de cargas** (`utils/cargas.ts`), que vive fuera del editor: puedes ir a otra página, volver o subir más cosas. Abajo sale un **panel** (`GestorCargas.tsx`) con cada archivo, su porcentaje, y «Listo» o el error; se puede plegar. Al terminar, si la página está abierta la pone su editor; si no, el gestor la escribe en el servidor (portada o el bloque por su id, con `version_base` y reintento ante un 409). Al volver a la página a mitad de subida, se ve otra vez su progreso. Recargar la pestaña sí la corta: el navegador pregunta antes.
 - **«Unexpected token '<', "<!DOCTYPE"… is not valid JSON».** Salía cuando el servidor o Cloudflare contestaban con una página HTML (archivo demasiado grande 413, despliegue 502/503, tiempo agotado 524, error de Express). Ahora:
