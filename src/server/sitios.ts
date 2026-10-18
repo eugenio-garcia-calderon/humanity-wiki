@@ -415,6 +415,13 @@ function trozosDominio(): string[] {
   return precargaDominio!;
 }
 
+/** Una dirección del sitemap. `t`: cuándo cambió por última vez. */
+export type UrlSitio = { loc: string; mod: string; t?: number; img?: string | null };
+let urlsDeAnfitrion: ((host: string) => Promise<UrlSitio[] | null>) | null = null;
+/** Las direcciones del sitio de un anfitrión, las mismas del sitemap. Para
+ *  IndexNow (`indexNow.ts`), que no tiene petición de la que sacarlo. */
+export const urlsDelAnfitrion = (host: string) => urlsDeAnfitrion ? urlsDeAnfitrion(host) : Promise.resolve(null);
+
 /** JSON que se puede meter en un `<script>` sin que un `</script>` escrito en
  *  una página lo cierre antes de tiempo. */
 const jsonEnScript = (x: unknown) => JSON.stringify(x)
@@ -557,13 +564,11 @@ export function registrarSitios(app: Express, db: any) {
   // (`/sitemap-1.xml`…) con un índice en `/sitemap.xml`, que es el límite de
   // Google por fichero.
   const POR_TROZO = 50_000;
-  type Url = { loc: string; mod: string; img?: string | null };
-
-  /** Las direcciones del sitio por el que se pregunta; `null` si no es un sitio. */
-  async function urlsDelSitio(req: Request): Promise<Url[] | null> {
-    const s = sitioDe(req);
+  /** Las direcciones del sitio de ese anfitrión; `null` si no es un sitio.
+   *  `t`: el momento del último cambio, para IndexNow (`indexNow.ts`). */
+  async function urlsDelSitio(s: Sitio): Promise<UrlSitio[] | null> {
     if (s.forma === 'casa') return null;
-    const urls: Url[] = [];
+    const urls: UrlSitio[] = [];
     const fecha = (d: any) => new Date(d).toISOString().slice(0, 10);
     const abs = (u: string | null | undefined) => !u ? null
       : /^https?:\/\//.test(u) ? u : u.startsWith('/') && !u.startsWith('//') ? `https://${s.host}${u}` : null;
@@ -622,12 +627,12 @@ export function registrarSitios(app: Express, db: any) {
       for (const x of r.rows as any[]) {
         const ruta = slugs.get(x.id);
         ultimo = Math.max(ultimo, new Date(x.cambio).getTime());
-        urls.push({ loc: `https://${s.host}/${ruta || `p/${x.id}`}`, mod: fecha(x.cambio), img: abs(x.portada) });
+        urls.push({ loc: `https://${s.host}/${ruta || `p/${x.id}`}`, mod: fecha(x.cambio), t: new Date(x.cambio).getTime(), img: abs(x.portada) });
       }
       for (const t of bd.rows as any[]) {
         const n = slugDe(t.titulo);
         ultimo = Math.max(ultimo, new Date(t.updated_at).getTime());
-        urls.push({ loc: `https://${s.host}/bd/${t.id}${n ? `/${n}` : ''}`, mod: fecha(t.updated_at) });
+        urls.push({ loc: `https://${s.host}/bd/${t.id}${n ? `/${n}` : ''}`, mod: fecha(t.updated_at), t: new Date(t.updated_at).getTime() });
       }
       return ultimo;
     };
@@ -638,9 +643,10 @@ export function registrarSitios(app: Express, db: any) {
       if (d.entidad_id && d.entidad_tipo === 'pagina') {
         const w = await datosPagina(db, d.entidad_id);
         if (w?.publico && w.indexable) {
-          const portada = { loc: `https://${s.host}/`, mod: '', img: abs(w.config?.portada) };
+          const portada: UrlSitio = { loc: `https://${s.host}/`, mod: '', img: abs(w.config?.portada) };
           urls.push(portada);
-          portada.mod = fecha(Math.max(new Date(w.updated_at).getTime(), await subpaginas(w.id)));
+          portada.t = Math.max(new Date(w.updated_at).getTime(), await subpaginas(w.id));
+          portada.mod = fecha(portada.t);
         }
       } else if (!d.entidad_id) {
         await paginasDeEspacio(d.handle);
@@ -656,23 +662,26 @@ export function registrarSitios(app: Express, db: any) {
           AND w.slug IS NOT NULL AND w.deleted_at IS NULL AND w.archived_at IS NULL
       `);
       // La portada del espacio cambia cuando cambia algo de lo que enseña, no cada día.
-      const inicio = { loc: `https://${s.host}/`, mod: '' };
+      const inicio: UrlSitio = { loc: `https://${s.host}/`, mod: '' };
       urls.push(inicio);
       let ultimo = 0;
       for (const x of r.rows as any[]) {
-        const pagina = { loc: `https://${s.host}/${x.slug}`, mod: '', img: abs(x.portada) };
+        const pagina: UrlSitio = { loc: `https://${s.host}/${x.slug}`, mod: '', img: abs(x.portada) };
         urls.push(pagina);
         const t = Math.max(new Date(x.updated_at).getTime(), await subpaginas(x.id));
         pagina.mod = fecha(t);
+        pagina.t = t;
         ultimo = Math.max(ultimo, t);
       }
       inicio.mod = fecha(ultimo || Date.now());
+      inicio.t = ultimo || undefined;
     }
     return urls;
   }
+  urlsDeAnfitrion = (host: string) => urlsDelSitio(sitioDe({ headers: { host } } as any));
 
   const escXml = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const urlset = (urls: Url[]) =>
+  const urlset = (urls: UrlSitio[]) =>
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n` +
     urls.map(u => `  <url><loc>${escXml(u.loc)}</loc><lastmod>${u.mod}</lastmod>` +
       (u.img ? `<image:image><image:loc>${escXml(u.img)}</image:loc></image:image>` : '') + `</url>`).join('\n') +
@@ -681,7 +690,7 @@ export function registrarSitios(app: Express, db: any) {
   app.get(/^\/sitemap(?:-(\d+))?\.xml$/, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (sitioDe(req).forma === 'casa') return next();
-      const urls = await urlsDelSitio(req);
+      const urls = await urlsDelSitio(sitioDe(req));
       if (!urls) return res.status(404).type('txt').send('No existe ese fichero.');
       const trozos = Math.max(1, Math.ceil(urls.length / POR_TROZO));
       const n = req.params[0] ? Number(req.params[0]) : 0;

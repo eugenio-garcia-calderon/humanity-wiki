@@ -270,6 +270,12 @@ function MandosLegal({ s, poner, titulo }: { s: Sitio; poner: (n: Sitio) => void
           onCambio={v => poner({ ...s, verificacion: { ...s.verificacion, google: limpiarCodigo(v) } })} />
         <Campo valor={s.verificacion.bing || ''} placeholder="Código de Bing Webmaster Tools"
           onCambio={v => poner({ ...s, verificacion: { ...s.verificacion, bing: limpiarCodigo(v) } })} />
+        <Interruptor etiqueta="Avisar a Bing de cada cambio al momento" valor={!!s.avisarBuscadores}
+          onCambio={v => poner({ ...s, avisarBuscadores: v })} />
+        <p className="text-[11px] leading-relaxed text-slate-500">
+          Cada 15 minutos se avisa a Bing (y a los buscadores que usan IndexNow) de las páginas nuevas o cambiadas,
+          y aparecen allí en minutos en vez de días. Sólo funciona si la web tiene su propia dirección.
+        </p>
       </Grupo>
       <Grupo titulo="Los textos">
         {(Object.keys(NOMBRES_LEGALES) as DocLegal[]).map(d => {
