@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "drizzle/0156_expertos_soporte.sql",
-      "motivo": "W6 Wikiproducts: chat de soporte y expertos",
-      "desde": "2026-10-18T11:23:50.270Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/knowledge/CreadorMenu.tsx",
       "motivo": "W2 buscador",
       "desde": "2026-10-18T11:59:09.996Z"
