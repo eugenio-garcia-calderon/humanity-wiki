@@ -259,7 +259,8 @@ export async function prepararHtml(db: any, bloques: any[], enlacePagina: (id: s
 /** Un bloque `basedatos` como tabla: lo que un buscador puede leer y citar. */
 function tablaEnHtml(t: TablaHtml, b: any, ctx: ContextoHtml): string {
   const cab = !b.tituloOculto && t.titulo ? `<h2>${esc(t.titulo)}</h2>` : '';
-  const desc = t.descripcion ? `<p>${enLinea(t.descripcion, ctx)}</p>` : '';
+  // Como en la página: con el título oculto tampoco va la descripción (`Rejilla`).
+  const desc = !b.tituloOculto && t.descripcion ? `<p>${enLinea(t.descripcion, ctx)}</p>` : '';
   if (!t.filas.length) return `<section>${cab}${desc}</section>`;
   const th = ['Nombre', ...t.columnas.map(c => c.nombre)].map(x => `<th scope="col">${esc(x)}</th>`).join('');
   const filas = t.filas.map(f => {

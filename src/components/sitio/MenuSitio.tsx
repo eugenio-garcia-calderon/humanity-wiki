@@ -199,8 +199,11 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   const enBuscar = /\/buscar\/?$/.test(useLocation().pathname);
   return (
     <header style={estilo}
-      className={cn('w-full z-40', mn.fijo && 'sticky top-0', mn.borde && 'border-b', soloMovil && '@2xl:hidden')}>
-      <div ref={fila} className="relative mx-auto max-w-6xl px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
+      className={cn('w-full z-40', mn.fijo ? 'sticky top-0' : 'relative', mn.borde && 'border-b', soloMovil && '@2xl:hidden')}>
+      {/* El desplegable de las tres rayas se coloca respecto a la cabecera
+          entera, no a esta fila: así cae debajo de la caja de buscar y no la
+          tapa (comprobación en producción tras la ronda 2). */}
+      <div ref={fila} className="mx-auto max-w-6xl px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
         <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} />
         <nav ref={nav} aria-label="Menú"
           className={cn('flex-1 items-center gap-1 min-w-0',

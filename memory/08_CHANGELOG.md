@@ -9309,3 +9309,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Lo que no se sabe se dice («Plazo de entrega: la tienda no lo publica»), en gris; un plazo cargado como «desconocido» ya no sale como «Entrega: desconocido».
 - Las condiciones son **propiedades de la fila del distribuidor** (11 columnas nuevas en «Distribuidores», encontradas por `rol`), con fuente y fecha de cada valor: `datos/*/condiciones-tiendas.json`, investigadas en la web de las 58 tiendas. Solo se leen de una tabla de distribuidores del mismo dueño que las ofertas.
 - El HTML para buscadores (`ofertasEnHtml`) dice las mismas líneas (`lineasCompra`, compartida).
+## 2026-10-18 — Production check after #662: gallery title, phone home, search photos, mobile menu (Wikiproducts W2)
+
+- Subcategory pages: on production the products gallery repeated the page title (the table's title) and a second description (the table's) before the first product. New `PATCH /api/v1/pages/:id/blocks/:blockId` body `{hide_title: true}` (database blocks only, idempotent); `enlazar-sitio.mjs` step 1 sets it on each subcategory's products gallery, so it reaches production with the next «Cargar Wikiproducts». The server HTML now also drops the table description when the title is hidden, as the page already did.
+- Home at 390 px: section cards two per row and smaller (36 px thumbnail, 13 px title, up to 3 lines). Locally the five cards take 324 px from «Explora por categoría»; production's intro is shorter than the local copy's, so they should all fit at 390×844. Not checked on production.
+- Search: the first 8 result photos load eagerly (was 4).
+- Mobile menu dropdown is placed under the whole header, so it no longer covers the search box.

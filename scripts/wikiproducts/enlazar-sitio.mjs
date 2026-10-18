@@ -9,7 +9,8 @@
 //
 //   1. adds to each subcategory page the gallery of its products table,
 //      removes the «se están cargando» notice and folds (closed) each heading
-//      with text under it above the gallery, so a phone sees products first;
+//      with text under it above the gallery, so a phone sees products first,
+//      and hides the gallery's own title and description (the page says both);
 //   2. gives the four supporting tables (brands, shops, ad claims, recalls) a
 //      page each, inside «Cómo trabajamos», so the brand, claims and recalls
 //      linked from a product sheet can be seen too (a link to a table nobody
@@ -139,8 +140,18 @@ for (const s of sitio.subcategorias) {
       const nivel = Number(b.tipo.slice(-1));
       while (i + 1 < galeria && !(/^titulo[123]$/.test(bl[i + 1]?.tipo || '') && Number(bl[i + 1].tipo.slice(-1)) <= nivel)) i++;
     }
-    const linea = `${p.title}: ${puesto ? `+ galería de «${tituloDe(s.tabla)}»` : 'ya enseñaba su tabla'}${quitados ? `, − ${quitados} aviso(s) de carga` : ''}${plegados ? `, ${plegados} guía(s) plegada(s)` : ''}`;
-    console.log(`  ${linea}`); if (puesto || quitados || plegados) hechos.push(linea);
+    // (W2) The gallery repeated the page title (the table's title) and a second
+    // description (the table's) before the first product. The page already
+    // says both: hide them on the products gallery.
+    let sinTitulo = 0;
+    const tabla = idTabla(s.tabla);
+    for (const b of bl) {
+      if (b?.tipo !== 'basedatos' || b.tabla_id !== tabla || b.tituloOculto) continue;
+      await api('PATCH', `/api/v1/pages/${s.pagina}/blocks/${encodeURIComponent(b.id)}`, { hide_title: true });
+      sinTitulo++;
+    }
+    const linea = `${p.title}: ${puesto ? `+ galería de «${tituloDe(s.tabla)}»` : 'ya enseñaba su tabla'}${quitados ? `, − ${quitados} aviso(s) de carga` : ''}${plegados ? `, ${plegados} guía(s) plegada(s)` : ''}${sinTitulo ? ', título repetido de la galería oculto' : ''}`;
+    console.log(`  ${linea}`); if (puesto || quitados || plegados || sinTitulo) hechos.push(linea);
   } catch (e) { fallos.push(`${s.tabla}: ${e.message}`); console.log(`  ✗ ${s.tabla}: ${e.message}`); }
 }
 
