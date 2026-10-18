@@ -408,7 +408,21 @@
           "nota": "Búsqueda el 2026-10-18 en la lista de retiradas del Clean Energy Council (Australia), en gov.uk product safety y en web abierta por «AlphaESS SMILE recall / safety alert / fire». No se ha encontrado ninguna retirada ni alerta de seguridad de AlphaESS SMILE ni de la marca. No se consultaron directamente EU Safety Gate, CPSC ni Health Canada."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "vekto-nl",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://www.vekto.nl/alphaess-batterij-3-8kwh-smile-g3-bat-3-8s",
+          "precio_eur": 1790.8,
+          "iva_incluido": true,
+          "unidad": "por módulo SMILE-G3-BAT-3.8S (3,8 kWh)",
+          "stock": "8 en stock («8 op voorraad»)",
+          "nota": "1.480,00 € sin IVA; 1.790,80 € con IVA neerlandés («Incl. btw»). La tienda dice «EXCLUSIEF VOOR INSTALLATEURS & INSTALLATIEBEDRIJVEN»: un particular no puede comprarlo directamente. Sólo el módulo de batería, sin inversor. · Envío: «Bestel ma-vr voor 21:00, ontvang het de volgende dag» (Países Bajos).",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [
         "Inversores AlphaESS SMILE-G3-S3.6, S5, B5 (AC)",
         "Inversores trifásicos AlphaESS SMILE-G3-T4/5/6/8/10 y T12/15/20"
@@ -857,7 +871,21 @@
           "nota": "Búsqueda el 2026-10-18 en web abierta (CPSC, ACCC/Clean Energy Council, gov.uk product safety, noticias en inglés y alemán) por «Anker SOLIX X1 recall / Rückruf / fire». No se ha encontrado ninguna retirada ni alerta de seguridad del SOLIX X1; las entradas listadas son de power banks de la misma marca. No se consultó directamente la base de EU Safety Gate ni la de Health Canada."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "solartraders",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://www.solartraders.com/es/products/acumulador/modulos-de-acumulacion/anker-solix-x1-b5-h",
+          "precio_eur": null,
+          "iva_incluido": null,
+          "unidad": "por módulo de batería X1-B5-H (5 kWh)",
+          "stock": "no disponible («Artículo no disponible actualmente»)",
+          "nota": "Ficha del módulo X1-B5-H en SolarTraders (versión española). Sin precio visible ni IVA indicado; el artículo figura como no disponible.",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [
         "Módulos de potencia Anker SOLIX X1 monofásicos (X1-H3.68K-S … X1-H6K-S) y trifásicos (hasta X1-H12K-T)",
         "Anker SOLIX Power Dock Pro",
@@ -6057,7 +6085,21 @@
           "nota": "Búsqueda a 2026-10-18: web de SENEC (canje LFP y clientes existentes), pv magazine Alemania, Solarserver, Wikipedia en alemán con sus referencias, búsquedas específicas sobre intervención de autoridades alemanas (KBA, Bundesnetzagentur, vigilancia del mercado, Landesdirektion Sachsen; no se encontró ninguna), prensa italiana (SENEC tiene filial en Italia) y búsquedas generales de retiradas en Australia (Clean Energy Council y ACCC: SENEC no figura), CPSC y Health Canada (SENEC no vende en EE. UU. ni Canadá según las fuentes consultadas). Las tres entradas de «retiradas» son medidas voluntarias del fabricante, no ordenadas por una autoridad. La base de EU Safety Gate no pudo consultarse directamente (aplicación dinámica, acceso bloqueado desde la herramienta)."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "senec-fachpartner-de",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": true,
+          "url": "https://senec.com/en/node/3389",
+          "precio_eur": null,
+          "iva_incluido": null,
+          "unidad": "por sistema (según presupuesto)",
+          "stock": "no aplica",
+          "nota": "Se vende sólo a través de instaladores; el precio es bajo presupuesto. SENEC dice que «collaborates with over 1,200 certified specialist partners throughout Germany» y que «From consultation and a firm offer to installing your SENEC solution, the specialist partner is your local contact». La red es alemana (hay filial en Italia); no se encontró venta en España. Las generaciones V3 hybrid y Home 4 ya no se venden; la oferta actual es la Home P4 / E4.",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [
         "SENEC.PowerPilot (gestión energética)",
         "SENEC.Backup P4",
@@ -7479,7 +7521,34 @@
           "nota": "Búsqueda a 2026-10-18: web abierta por «Sungrow battery recall / SBR recall / Rückruf», lista de retiradas del Clean Energy Council y fichas de productsafety.gov.au (ACCC, Australia: aparecen GoodWe, Growatt, Tesla, LG, Sigenergy y otros, no Sungrow), búsquedas en el sitio de la CPSC (EE. UU.) y de Health Canada, y prensa especializada alemana. No se encontró ninguna retirada ni alerta oficial de la Sungrow SBR. Se encontró un incidente de marzo de 2023 en Alemania (fallo de comunicación de la batería SBR que dejó equipos sin funcionar; Sungrow ofreció revisar o cambiar el BMS), que no fue una retirada ni implicó a autoridades (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/). La base de datos de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica y acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "solartraders",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://www.solartraders.com/es/products/acumulador/sistema-de-acumulacion/sungrow-power-sbr096-v13",
+          "precio_eur": null,
+          "iva_incluido": null,
+          "unidad": "por sistema SBR096 V13 (9,6 kWh)",
+          "stock": "60 unidades en 3 ofertas: 12 «De existencias, ES» y 17 + 31 en Alemania",
+          "nota": "Precio no visible: la primera oferta aparece como «Mejor precio de Solartraders» sin cifra y las otras dos como «Precios sólo para socios». No se indica IVA.",
+          "envio_eur": null
+        },
+        {
+          "distribuidor_id": "basic-solar-de",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://basic-solar.de/shop/speicher/nach-hersteller/sungrow-speicher/sbr128-v12-lithium-ionen-batterie-zubehoer/",
+          "precio_eur": 3899,
+          "iva_incluido": false,
+          "unidad": "por sistema SBR128 V12 (12,8 kWh) con accesorios",
+          "stock": "agotado («Nicht vorrätig», «Ausverkauft»)",
+          "nota": "3.899,00 € «inkl. 0 % MwSt.»: es el tipo de IVA del 0 % alemán para fotovoltaica doméstica en Alemania, no aplicable a una compra desde España. Agotado a la fecha. · Envío: «zzgl. Versandkosten», importe no indicado en la ficha.",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [
         "Inversores híbridos Sungrow de las series SH-RS (monofásicos) y SH-RT (trifásicos), p. ej. SH10RT, según distribuidores; la ficha no publica una lista oficial"
       ],
