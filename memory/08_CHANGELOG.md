@@ -9352,3 +9352,10 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - `corregir-textos.mjs` puts each guide right above the gallery and folds it closed in the same run, so a phone still sees products first. A page that already has a «Qué conviene mirar» heading is left alone; to change a guide later, add a `cambio`.
 - `POST /api/v1/pages/:id/blocks` now also takes `{type: "text", markdown}`: headings (##, ###), paragraphs, lists and quotes only; anything else is refused with 400. No wider than `PATCH /api/v1/pages/:id`, which already takes a whole page of markdown.
 - Verified on a local copy: guide inserted above the gallery, folded (closed, 5 items inside), second run skips it, an image in the markdown is refused. Not yet seen on production.
+
+## 2026-10-18 — Wikiproducts: «Precio desde» no longer counts sold-out shops (W3a, evaluator round 3)
+
+- Each offers table gets a hidden formula column «Precio si quedan existencias»: `SI(SI.VACIO({Disponible}; 1); {Precio})`, the price unless the shop marks it sold out (Disponible false; empty counts as available). The products' existing «Precio desde» aggregate now takes its minimum over it, so the column keeps its id and name, and everything that reads it (sheet, cards, comparator, search results, «La mejor en cada criterio», «Precio por kWh/W/Wp») follows with no code change.
+- `crear-esquema.mjs` re-points an existing aggregate when the schema says it should read another column (it compares relation, target, operation and direction only).
+- New `PATCH /api/v1/databases/:id/columns/:columnId` `{config, name?}`, through the screen's own `PUT /api/bd/columnas/:id` (same cycle check, type still not changeable).
+- Local copy, real data: 20 priced-but-sold-out offers drop out. Goal Zero Crush Light Chroma's «Precio desde» goes from 29,95 € to empty, while Anker 737 stays at 144,20 €. A second run changes nothing. «Precio hasta» and «Tiendas con precio» are unchanged and still count sold-out offers.
