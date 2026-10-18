@@ -89,6 +89,12 @@
       "ruta": "src/components/sitio/MenuSitio.tsx",
       "motivo": "W2: buscador del sitio (3.8)",
       "desde": "2026-10-18T11:56:26.486Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/sitioWeb.ts",
+      "motivo": "W2: buscador del sitio (3.8)",
+      "desde": "2026-10-18T11:56:29.372Z"
     }
   ]
 }
