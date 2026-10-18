@@ -131,6 +131,58 @@
           "fuente": "https://techtest.org/die-anker-737-powercore-24k-powerbank-im-test-mit-140w-usb-c-port-zur-besten-powerbank/",
           "fecha": "2026-10-18",
           "nota": "Medido por techtest.org: 65,2 Wh a 5 V/2 A hasta 77,2 Wh según la tensión de salida (75–89 % de 86,4 Wh)"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank Anker 737; guía de bienvenida",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://us.anker.com/products/A1289",
+          "fecha": "2026-10-18",
+          "nota": "La tienda de Anker en EE. UU. no lista cable; algunos distribuidores (Macfixit, Australia) añaden un cable USB-C a USB-C de 140 W."
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.anker.com/eu-en/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "86,4 Wh (menos de 100 Wh: se admite en cabina) y USB-C de 140 W capaz de cargar un portátil."
+        },
+        "manual_url": {
+          "valor": "https://support.anker.com/s/articleRecommend?otherType=Anker_EN_Extemal_Manual_and_Download&secondType=Manuals&ref=footer",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/us/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "Página general de manuales de Anker; no hay PDF específico enlazado en la ficha."
+        },
+        "tiempo_recarga_h": {
+          "valor": 1,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://service.anker.com/fr/article-description/Introduction-to-the-Anker-737-Power-Bank-24K-A1289",
+          "fecha": "2026-10-18",
+          "nota": "Con un cargador USB-C PD de 140 W; con uno de 96 W, de 1,5 a 2 h."
+        },
+        "cable_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/eu-en/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "Solo puertos USB-C y USB-A."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/eu-en/products/a1289",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla digital inteligente con carga, ciclos y salud de la batería."
         }
       },
       "origen": {
@@ -420,6 +472,48 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró una medición independiente"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank Anker Zolo con cable USB-C integrado; guía de bienvenida",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://uk.anker.com/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Uso diario",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.anker.com/eu-en/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "72 Wh (se admite en cabina) y cable integrado para el móvil sin llevar cables."
+        },
+        "manual_url": {
+          "valor": "https://salesforce-knowledge-download.s3.us-west-2.amazonaws.com/000021060/en_US/000021060.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://service.anker.com/article-description/Anker-Zolo-Power-Bank-20K-30W-Built-In-USB-C-Cable-%D8%AF%D9%84%D9%8A%D9%84-%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D8%AE%D8%AF%D9%85-A1689",
+          "fecha": "2026-10-18"
+        },
+        "tiempo_recarga_h": {
+          "valor": 5.25,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://anker.com.sg/products/anker-powerbank-20000mah-30w-integrated-usb-c-cable-power-bank-portable-charger-high-speed-portable-charger-a1689",
+          "fecha": "2026-10-18",
+          "nota": "Con entrada de 20 W (tienda oficial de Anker en Singapur)."
+        },
+        "cable_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/eu-en/products/a1689",
+          "fecha": "2026-10-18",
+          "nota": "Cable USB-C integrado de unos 15 cm."
         }
       },
       "origen": {
@@ -741,6 +835,41 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró una medición independiente"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank con cable integrado; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Uso diario",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "74 Wh (se admite en cabina) y cable USB-C integrado de 33 W para el móvil."
+        },
+        "cable_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/product/xiaomi-33w-power-bank-20000mah-integrated-cable/specs/",
+          "fecha": "2026-10-18",
+          "nota": "Cable USB-C integrado que sirve de entrada y de salida."
+        },
+        "pantalla": {
+          "valor": "LEDs",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.alza.cz/xiaomi-33w-power-bank-20000mah-integrated-cable-blue-gl-d12895170.htm",
+          "fecha": "2026-10-18",
+          "nota": "La tienda Alza indica «LED indikace stavu» (indicador LED de estado)."
         }
       },
       "origen": {
@@ -1060,6 +1189,50 @@
           "fuente": "https://techtest.org/ugreen-nexode-130w-20000mah-powerbank-im-test-leistung-kapazitaet-und-ladezeit-im-ueberblick",
           "fecha": "2026-10-18",
           "nota": "Medido por techtest.org: 62,4 Wh a 5 V/2 A, 64,7 Wh a 9 V/3 A, 54,8 Wh a 20 V/5 A (74–87 % de la capacidad nominal)"
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "72 Wh (se admite en cabina) y USB-C de 100 W para cargar un portátil."
+        },
+        "tiempo_recarga_h": {
+          "valor": 2,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://techtest.org/ugreen-nexode-130w-20000mah-powerbank-im-test-leistung-kapazitaet-und-ladezeit-im-ueberblick",
+          "fecha": "2026-10-18",
+          "nota": "Medido por Techtest: de 1 h 45 min a 2 h con cargador de 65 W. UGREEN no publica el tiempo."
+        },
+        "cable_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "Dos USB-C y un USB-A, sin cable fijo."
+        },
+        "carga_inalambrica": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "La ficha indica «Wireless Charging: N»."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla TFT con nivel, voltaje, corriente y potencia por puerto."
         }
       },
       "origen": {
@@ -1321,6 +1494,41 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "La reseña de Mighty Gadget no publica medición de capacidad"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank INIU de 10.000 mAh; cable USB-A a USB-C de 0,3 m; funda de viaje; manual de usuario",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Uso diario",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18",
+          "nota": "36 Wh, ligera y fina: para el bolsillo y la cabina del avión."
+        },
+        "cable_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18",
+          "nota": "El cable va suelto en la caja."
+        },
+        "pantalla": {
+          "valor": "LEDs",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.manualslib.tech/guide/814447/iniu-bi-b41-manual.html",
+          "fecha": "2026-10-18",
+          "nota": "Manual del BI-B41 (copia de terceros): cinco luces de nivel."
         }
       },
       "origen": {
@@ -1592,6 +1800,56 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró una medición independiente"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank con cable USB-C integrado; manual de usuario; tarjeta de garantía",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Uso diario",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18",
+          "nota": "74 Wh (se admite en cabina) y cable integrado para cargar el móvil."
+        },
+        "tiempo_recarga_h": {
+          "valor": 5.5,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/support/faq/details/KA-565243/",
+          "fecha": "2026-10-18",
+          "nota": "Con un cargador de 9 V/2,5 A; con uno de 5 V/2 A, unas 10,5 h."
+        },
+        "cable_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/es/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-18"
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/support/faq/details/KA-565243/",
+          "fecha": "2026-10-18",
+          "nota": "La FAQ de Xiaomi dice que se puede cargar el móvil a la vez que se recarga la batería."
+        },
+        "pantalla": {
+          "valor": "LEDs",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/global/support/faq/details/KA-565243/",
+          "fecha": "2026-10-18",
+          "nota": "Cuatro LEDs de nivel de carga."
         }
       },
       "origen": {
@@ -1855,6 +2113,49 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank Anker PowerCore 10000; cable Micro-USB",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://www.paradigit.nl/anker-powercore-10000-mah-zwart/20918151/product",
+          "fecha": "2026-10-18",
+          "nota": "Según la tienda Paradigit (referencia A1263G12); el cable Lightning se vende aparte."
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Uso diario"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+          "fecha": "2026-10-18",
+          "nota": "36 Wh y 12 W: pequeña recarga para el móvil, admitida en cabina."
+        },
+        "tiempo_recarga_h": {
+          "valor": 6.5,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://www.packstack.io/reviews/electronics/anker-powercore-10000",
+          "fecha": "2026-10-18",
+          "nota": "Reseña de PackStack: de 6 a 7 h con un cargador de 5 V/2 A."
+        },
+        "carga_pasante": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.packstack.io/reviews/electronics/anker-powercore-10000",
+          "fecha": "2026-10-18",
+          "nota": "La reseña indica que no admite carga pasante."
+        },
+        "pantalla": {
+          "valor": "LEDs",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://www.paradigit.nl/anker-powercore-10000-mah-zwart/20918151/product",
+          "fecha": "2026-10-18",
+          "nota": "La tienda indica indicador LED."
         }
       },
       "origen": {
@@ -2087,6 +2388,65 @@
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank Anker Prime 27.650 mAh; cable USB-C a USB-C de 140 W (0,6 m); funda de viaje; guía de inicio rápido",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://us.anker.com/collections/affiliate-hot-deals/products/a1340-250w-power-bank",
+          "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.anker.com/products/a1340-250w-power-bank",
+          "fecha": "2026-10-18",
+          "nota": "99,5 Wh (justo por debajo de 100 Wh: se admite en cabina) y dos USB-C de 140 W para portátiles."
+        },
+        "manual_url": {
+          "valor": "https://cdn.shopify.com/s/files/1/0508/1815/4652/files/A1340_Anker_Prime_27650mAh_Power_Bank_250W_QSG.pdf?v=1690286444",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/products/a1340-250w-power-bank",
+          "fecha": "2026-10-18",
+          "nota": "Guía de inicio rápido en PDF."
+        },
+        "tiempo_recarga_h": {
+          "valor": 0.62,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://us.anker.com/collections/affiliate-hot-deals/products/a1340-250w-power-bank",
+          "fecha": "2026-10-18",
+          "nota": "37 minutos con 170 W de entrada usando los dos USB-C a la vez; con un solo cargador de 140 W, unos 43 minutos según la web europea."
+        },
+        "cable_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.anker.com/products/a1340-250w-power-bank",
+          "fecha": "2026-10-18",
+          "nota": "Dos USB-C y un USB-A; el cable va suelto."
+        },
+        "carga_pasante": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://cybershack.com.au/reviews/anker-prime-27650mah-250w-power-bank-a1340-a-marathon-runner-portable-power-review/",
+          "fecha": "2026-10-18",
+          "nota": "La reseña de CyberShack la probó como SAI: alimenta el dispositivo mientras se recarga."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0508/1815/4652/files/A1340_Anker_Prime_27650mAh_Power_Bank_250W_QSG.pdf?v=1690286444",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla con batería restante, tiempo, entrada y salida."
         }
       },
       "origen": {
@@ -2325,6 +2685,34 @@
           "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
           "fecha": "2026-10-18",
           "nota": "Medido por techtest.org (21/04/2020) en el modelo HI-S025 con microUSB: 54,071 Wh, equivalentes a 14.613 mAh a 3,7 V (58 % de lo anunciado)"
+        },
+        "en_la_caja": {
+          "valor": "Batería de 25.000 mAh con cuatro paneles solares plegables",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://outdoorgearlab.com/reviews/camping-and-hiking/solar-charger/hiluckey-s025",
+          "fecha": "2026-10-18",
+          "nota": "Según la reseña de OutdoorGearLab; no detalla cables."
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Jardín y exterior"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18",
+          "nota": "Paneles plegables de unos 2,5 W: recarga de apoyo lejos del enchufe, muy lenta."
+        },
+        "pantalla": {
+          "valor": "LEDs",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://outdoorgearlab.com/reviews/camping-and-hiking/solar-charger/hiluckey-s025",
+          "fecha": "2026-10-18",
+          "nota": "Cinco LEDs de nivel."
         }
       },
       "origen": {
@@ -2596,6 +2984,26 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna medición independiente"
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Apagones y emergencias",
+            "Jardín y exterior"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://4gnews.pt/power-bank-solar-de-26-800-mah-carrega-ate-4-dispositivos-e-custa-so-30-na-amazon/",
+          "fecha": "2026-10-18",
+          "nota": "Panel solar de 1,9 W y linterna: reserva para salidas al aire libre; 99 Wh, justo bajo el límite de cabina."
+        },
+        "carga_inalambrica": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://4gnews.pt/power-bank-solar-de-26-800-mah-carrega-ate-4-dispositivos-e-custa-so-30-na-amazon/",
+          "fecha": "2026-10-18",
+          "nota": "Carga inalámbrica Qi de 5 W."
         }
       },
       "origen": {
@@ -2857,6 +3265,18 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna medición independiente"
+        },
+        "ideal_para": {
+          "valor": [
+            "Camping y montaña",
+            "Jardín y exterior",
+            "Avión"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.cellularline.com/en/Power-and-Holders/Power-Banks/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18",
+          "nota": "Panel ETFE de 1,5 W y linterna para exterior; 74 Wh, admitida en cabina."
         }
       },
       "origen": {
@@ -3140,6 +3560,42 @@
           "fuente": "https://techtest.org/samsung-eb-p4520-powerbank-20-000-mah-mit-45w-im-ausfuehrlichen-test/",
           "fecha": "2026-10-18",
           "nota": "Medido por techtest.org (04/08/2024): 58,918 Wh a 5V/1A hasta 65,874 Wh a 9V/3A (80–89 % de 74 Wh)"
+        },
+        "en_la_caja": {
+          "valor": "Battery Pack de 20.000 mAh; cable USB-C a USB-C de 0,3 m",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18",
+          "nota": "No incluye cargador de pared."
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18",
+          "nota": "74 Wh (se admite en cabina) y 45 W por USB-C, suficiente para tablets y portátiles ligeros."
+        },
+        "manual_url": {
+          "valor": "https://org.downloadcenter.samsung.com/downloadfile/ContentsFile.aspx?CDSite=UNI_ES&OriginYN=N&ModelType=N&ModelName=EB-P4520&CttFileID=10564115&CDCttType=UM&VPath=UM%2F202506%2F20250618125458105%2FEB-P4520_U2510_UG_GLOBAL_Type_Rev.1.3_250617.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/support/model/EB-P4520XUEGEU/",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario v1.3 (PDF)."
+        },
+        "cable_integrado": {
+          "valor": false,
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18",
+          "nota": "Tres USB-C; el cable va suelto."
         }
       },
       "origen": {
@@ -3447,6 +3903,50 @@
           "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
           "fecha": "2026-10-18",
           "nota": "Medido por techtest.org (10/08/2025): 75,117 Wh a 5V/2A hasta 87,501 Wh a 20V/3A (75–88 %)"
+        },
+        "en_la_caja": {
+          "valor": "Powerbank EcoFlow RAPID Pro con cable USB-C retráctil; bolsa de franela",
+          "unidad": "texto",
+          "naturaleza": "tercero",
+          "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18",
+          "nota": "Según la tienda Solar Power Supply."
+        },
+        "ideal_para": {
+          "valor": [
+            "Avión",
+            "Portátil y tablet",
+            "Viajes"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18",
+          "nota": "99,6 Wh (justo bajo 100 Wh: se admite en cabina) y dos USB-C de 140 W para portátiles."
+        },
+        "tiempo_recarga_h": {
+          "valor": 0.9,
+          "unidad": "h",
+          "naturaleza": "tercero",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Medido por Techtest: unos 53 minutos con entrada USB-C de 140 W; con el cargador opcional de 320 W de EcoFlow, cerca de 27 minutos."
+        },
+        "cable_integrado": {
+          "valor": true,
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18",
+          "nota": "Cable USB-C retráctil de 60 cm y 140 W."
+        },
+        "pantalla": {
+          "valor": "Pantalla digital",
+          "unidad": null,
+          "naturaleza": "tercero",
+          "fuente": "https://techtest.org/ecoflow-rapid-pro-powerbank-im-test-27650-mah-und-300-w-im-duell-mit-der-anker-prime-27-650mah/",
+          "fecha": "2026-10-18",
+          "nota": "Pantalla LCD a color con nivel, potencia por puerto, temperatura y ciclos."
         }
       },
       "origen": {

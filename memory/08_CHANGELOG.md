@@ -9191,6 +9191,8 @@ Eugenio: «inspírate en las landing pages de Amazon… que la información est�
 - «Inicio» leaves the Wikiproducts menu: the site name already opens the home page, and the link cost the bar ~70 px. `sitio.json` → `quitar_del_menu: ["Inicio"]`, applied by `enlazar-sitio.mjs` step 5 through `DELETE /api/v1/pages/:id/site/menu/links/:id` on W3a's next «Cargar Wikiproducts» run. It only removes a link with that text that goes to the home page. Run twice on the local copy: removed, then «no está en el menú».
 - Measured locally with three links plus the «Entrar» pill (members on, 94 px): folded at 900 and 1,024 (brand, search, menu button, pill) and open from 1,100 (three links, search, pill); nothing overlaps at any width.
 
+## 2026-10-18 — Wikiproducts W3a: data for the Amazon-style sheet
+- The new columns of W1's sheet (#643) now have data for the 94 products, each with its nature and source: «Ideal para» (94; an editorial call from the specs, `calculado`, the reason in the note), «Manual de instrucciones» (63), «Qué hay en la caja» (51), and per category recharge time (16), indicator (16), pass-through (13), built-in cable (10), wireless charging (6), built-in stand (13 panels), motion sensor (18 lights), monitoring app (15 batteries). Fields without a source stay empty rather than guessed.
 ## 2026-10-18 — Wikiproducts W1: price per watt and per kWh, units said once
 
 Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en baterías, en paneles, para que sea algo realmente comparable».

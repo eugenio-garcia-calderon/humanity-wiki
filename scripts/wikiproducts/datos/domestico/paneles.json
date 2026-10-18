@@ -255,6 +255,24 @@
           "naturaleza": "declarado",
           "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://aikosolar.com/wp-content/uploads/2024/04/PV-Module-Installation-Manual-Single-Glass-EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2024/04/PV-Module-Installation-Manual-Single-Glass-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación general de AIKO para módulos de vidrio simple (abril de 2024); la variante doble vidrio 3P+ tiene su propio manual."
         }
       },
       "garantias": {
@@ -465,7 +483,7 @@
         "valor": 2024,
         "unidad": "año",
         "naturaleza": "declarado",
-        "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_a8e1d794329d4d53b5238258aa790b1e.pdf",
+        "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_a8e1d794329d4d53b5238258aa790b1e.pdf",
         "fecha": "2026-10-18",
         "nota": "Fichas preliminares de julio de 2024. La serie LEO anterior (PERC, 340–410 W) es de 2022 según SolarQuotes."
       },
@@ -480,7 +498,7 @@
           "valor": 435,
           "unidad": "Wp",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "STC; clasificación 0/+4,99 W."
         },
@@ -488,7 +506,7 @@
           "valor": "430–440",
           "unidad": "Wp",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión de 96 medias células: 380–390 W. No hay una variante de 450 W o más."
         },
@@ -496,7 +514,7 @@
           "valor": 21.7,
           "unidad": "%",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante 435 W. Comprobación: 435 / (1,752 × 1,144) = 21,70 %. 430 W: 21,5 %; 440 W: 22,0 %."
         },
@@ -504,7 +522,7 @@
           "valor": "TOPCon, N-type, 10 busbars",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Células de 182 × 91 mm."
         },
@@ -512,7 +530,7 @@
           "valor": "monocristalina",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -520,7 +538,7 @@
           "valor": 108,
           "unidad": "medias células",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -544,7 +562,7 @@
           "valor": "simple (vidrio solar templado de 3,2 mm con antirreflejo) + lámina trasera de polímero blanca",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión LEO-N Black con lámina negra."
         },
@@ -552,7 +570,7 @@
           "valor": "aleación de aluminio negra, 40 mm",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -560,7 +578,7 @@
           "valor": "1752 × 1144 × 40",
           "unidad": "mm",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "2,0 m²."
         },
@@ -568,7 +586,7 @@
           "valor": 22,
           "unidad": "kg",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -576,7 +594,7 @@
           "valor": -0.31,
           "unidad": "%/°C",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Voc −0,24 %/K; Isc +0,029 %/K."
         },
@@ -584,7 +602,7 @@
           "valor": null,
           "unidad": "°C",
           "naturaleza": "no_publicado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "No aparecía en el texto extraído de la ficha."
         },
@@ -592,7 +610,7 @@
           "valor": 1,
           "unidad": "%",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "99 % garantizado el primer año."
         },
@@ -600,7 +618,7 @@
           "valor": 0.4,
           "unidad": "%/año",
           "naturaleza": "calculado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha da 99 % (año 1) y 87,4 % (año 30) con curva lineal: (99 − 87,4) / 29 = 0,4 %/año."
         },
@@ -608,7 +626,7 @@
           "valor": 39.41,
           "unidad": "V",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Vmpp 33,38 V; Impp 13,03 A."
         },
@@ -616,7 +634,7 @@
           "valor": 13.71,
           "unidad": "A",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": null
         },
@@ -624,7 +642,7 @@
           "valor": 1000,
           "unidad": "V DC",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Corriente inversa admisible 25 A. Menos que los 1500 V de muchos módulos actuales; suficiente para una vivienda."
         },
@@ -632,7 +650,7 @@
           "valor": "5400 / 2400 (ensayo); 3600 / 1600 (diseño)",
           "unidad": "Pa (presión/succión)",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Carga de diseño = ensayo / 1,5. Una de las pocas fichas que da ambas cifras."
         },
@@ -640,7 +658,7 @@
           "valor": "IP68",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Caja en tres partes según IEC 62790, 3 diodos de bypass."
         },
@@ -648,7 +666,7 @@
           "valor": "MC4 original (Stäubli), EN 62852; cables de 1200 mm",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha dice «Genuine MC4»; Stäubli es el fabricante de la marca MC4."
         },
@@ -672,7 +690,7 @@
           "valor": 30,
           "unidad": "años",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Según la ficha y la página de atención al cliente, desde la fecha de compra, «según las condiciones del certificado de garantía correspondiente», que no se pudo leer."
         },
@@ -680,7 +698,7 @@
           "valor": 30,
           "unidad": "años",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. El 0,4 % anual es calculado a partir de los puntos inicial y final."
         },
@@ -688,7 +706,7 @@
           "valor": 0.874,
           "unidad": "fracción",
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
         },
@@ -696,7 +714,7 @@
           "valor": "La ficha remite a un certificado de garantía y a unas condiciones publicadas en la web que no se encontraron; no se pudieron comprobar plazos de reclamación, exclusiones ni topes.\nLa ficha promete «100 % de cobertura de costes en caso de garantía», sin precisar si incluye desmontaje, reinstalación y transporte; un resumen de gama de 09/2024 dice que aleo cubre envío de vuelta, reparación o reposición y costes de instalación «razonables», sujeto al certificado.\nLa reclamación se canaliza primero a través del instalador, según la página de atención al cliente de aleo.\nRiesgo principal: la empresa detuvo su única fábrica en 2025 (pv magazine). La garantía de 30 años depende de que aleo solar GmbH o su matriz sigan existiendo y tengan módulos compatibles para sustituir; no se encontró información pública sobre cómo se atenderán las garantías ni sobre un seguro que las respalde.\nEn España la garantía legal frente al vendedor es independiente de la del fabricante.",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
         },
@@ -704,14 +722,32 @@
           "valor": "aleo solar GmbH (Prenzlau, Alemania), propiedad del grupo taiwanés Sino-American Silicon Products a través de Sunrise Global Solar Energy. No se publica aseguradora de garantía; tras el cierre de la producción no hay información pública sobre la continuidad del servicio de garantía.",
           "unidad": null,
           "naturaleza": "declarado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de aleo, no manual: el manual de instalación encontrado (v4.9, 2022) no menciona la serie LEO-N."
         }
       },
       "garantias": {
         "producto": {
           "anios": 30,
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "Según la ficha y la página de atención al cliente, desde la fecha de compra, «según las condiciones del certificado de garantía correspondiente», que no se pudo leer."
         },
@@ -720,7 +756,7 @@
           "porcentaje_final": 87.4,
           "primer_anio_pct": 99,
           "lineal_anual_pct": 0.4,
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18",
           "nota": "El 0,4 % anual es calculado a partir de los puntos inicial y final."
         },
@@ -764,13 +800,13 @@
         {
           "nombre": "IEC 61215:2021, IEC 61730:2023 (incl. IEC 62804 PID, IEC/TS 62782), IEC 62716, IEC 61701",
           "emisor": "no indicado en la ficha",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
         },
         {
           "nombre": "Reacción al fuego clase C (IEC 61730), E (EN 13501-1), B2 (DIN 4102-1)",
           "emisor": "no indicado",
-          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fuente": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "fecha": "2026-10-18"
         }
       ],
@@ -811,7 +847,7 @@
         },
         {
           "afirmacion": "MADE IN GERMANY",
-          "donde": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "donde": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
           "veredicto": "matizable",
           "explicacion": "Cierto para el ensamblaje de los módulos fabricados en Prenzlau hasta 2025; la ficha no dice de dónde proceden las células.",
           "fuentes": [
@@ -821,11 +857,11 @@
         },
         {
           "afirmacion": "100 % Kostenübernahme im Garantiefall",
-          "donde": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_06da123165464040aea26d9300080cd4.pdf",
+          "donde": "https://www.aleo-solar.de/_files/ugd/ecbda7_06da123165464040aea26d9300080cd4.pdf",
           "veredicto": "sin_pruebas",
           "explicacion": "No se pudo leer el certificado de garantía que concreta qué costes cubre; el resumen de gama habla de costes «razonables», lo que sugiere límites.",
           "fuentes": [
-            "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_5a7311926a904ebbb28a5f5d15108707.pdf"
+            "https://www.aleo-solar.de/_files/ugd/ecbda7_5a7311926a904ebbb28a5f5d15108707.pdf"
           ],
           "fecha": "2026-10-18"
         }
@@ -1118,6 +1154,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Manual.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Manual.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de Astronergy para el CHSM48RN(DG)/F-BH, alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -1550,6 +1604,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Atersa, no manual, publicada en un foro de usuarios; no se encontró el manual en un enlace directo."
         }
       },
       "garantias": {
@@ -1953,6 +2025,24 @@
           "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://portal.segen.co.uk/reseller/docs/CS_Inst%20Manual_PV%20Modules_EN%20v2.7%20EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://portal.segen.co.uk/reseller/docs/CS_Inst%20Manual_PV%20Modules_EN%20v2.7%20EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación general de CSI Solar (rev. 2.7, febrero de 2025) que incluye el CS6.1-54TD; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -2399,6 +2489,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://shop.solexis.ch/en/documents/file/pv/dmegc%20solar/ma_en_dmegc_%20v.202311.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://shop.solexis.ch/en/documents/file/pv/dmegc%20solar/ma_en_dmegc_%20v.202311.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de DMEGC (versión 202311) que incluye los DMxxxM10RT-B54HBB; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -2847,6 +2955,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.huasunsolar.com/downloads.html",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Huasun, no manual: el manual HJT encontrado (2022) no incluye el HS-182-B108DSN."
         }
       },
       "garantias": {
@@ -3257,6 +3383,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/43215/data_sheet_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de JA Solar para módulos bifaciales de doble vidrio (versión A/19), que incluye JAM54D40/LB y /LR; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -3689,6 +3833,24 @@
           "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN-1.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/05/Installation_Manual_EN-1.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de JinkoSolar (V10, enero de 2026) que incluye el JKMxxxN-48QL6-DV; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -4165,6 +4327,24 @@
           "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solar-distribution.baywa-re.de/out/media/16-LR5_54HTH_Hi-MO6_LONGi_Module_Product_Manual_20220324V02.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solar-distribution.baywa-re.de/out/media/16-LR5_54HTH_Hi-MO6_LONGi_Module_Product_Manual_20220324V02.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de producto de LONGi para el LR5-54HTH (marzo de 2022), alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -4594,6 +4774,24 @@
           "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://static.longi.com/LON_Gi_PV_Module_User_Manual_for_DGBG_1_0_260409_114d652c10.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://static.longi.com/LON_Gi_PV_Module_User_Manual_for_DGBG_1_0_260409_114d652c10.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de usuario de LONGi que incluye el LR7-54HVH (Hi-MO X10), en inglés."
         }
       },
       "garantias": {
@@ -5059,6 +5257,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-6-DC-425-440-W.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://sunpowerglobal.com/sites/default/files/2025-05/001-15497_REVAE_SunPowerMaxeon%20Install%20Manual_0.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sunpowerglobal.com/sites/default/files/2025-05/001-15497_REVAE_SunPowerMaxeon%20Install%20Manual_0.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Instrucciones de seguridad e instalación de Maxeon para Europa y otros mercados IEC (rev. AE, marzo de 2025), que cubren Maxeon 7 y Maxeon 6."
         }
       },
       "garantias": {
@@ -5483,6 +5699,24 @@
           "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solartraders.com/uploads/production/data_sheet/file/31622/MB_Installation%20guide_(low%20res)EN.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/31622/MB_Installation%20guide_(low%20res)EN.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Instrucciones de instalación y uso de Meyer Burger (v1.0.0, agosto de 2021) para los módulos White, Black y Glass; alojado por un distribuidor."
         }
       },
       "garantias": {
@@ -5888,6 +6122,24 @@
           "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://ressupply.com/documents/qcells/Q.TRON-M-G2.X_Series_Installation_Manual.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://ressupply.com/documents/qcells/Q.TRON-M-G2.X_Series_Installation_Manual.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación y uso de Qcells para la serie Q.TRON (BLK) M-G2.X (agosto de 2023), válido para Norteamérica; alojado por una tienda."
         }
       },
       "garantias": {
@@ -6313,6 +6565,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://recgroup.com/sites/default/files/2024-09/IM_RECAlphaIEC_ES.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://recgroup.com/sites/default/files/2024-09/IM_RECAlphaIEC_ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación en español de REC para la gama Alpha (versión IEC); hay una versión inglesa más reciente (IM_RECAlpha_IEC_EN_18, 2026)."
         }
       },
       "garantias": {
@@ -6780,6 +7050,24 @@
           "naturaleza": "declarado",
           "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Risen, no manual: el manual encontrado (2021) no incluye la serie RSM108-10."
         }
       },
       "garantias": {
@@ -7210,6 +7498,24 @@
           "naturaleza": "declarado",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de Tongwei, no manual: los manuales encontrados no incluyen el TWMNH-48HE."
         }
       },
       "garantias": {
@@ -7640,6 +7946,24 @@
           "naturaleza": "declarado",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
           "fecha": "2026-10-18"
+        },
+        "ideal_para": {
+          "valor": [
+            "Autoconsumo"
+          ],
+          "unidad": null,
+          "naturaleza": "calculado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Panel fotovoltaico de formato residencial pensado para instalaciones de autoconsumo en tejado."
+        },
+        "manual_url": {
+          "valor": "https://www.solartraders.com/uploads/production/data_sheet/file/37183/manual_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37183/manual_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Manual de instalación de Trina para el NEG9R.28, alojado por un distribuidor."
         }
       },
       "garantias": {
