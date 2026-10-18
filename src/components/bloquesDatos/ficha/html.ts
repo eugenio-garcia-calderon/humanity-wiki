@@ -13,6 +13,7 @@ import { etiquetaProcedencia, sitioDe, fechaCorta } from './modelo';
 import {
   vistaPropiedad, vistaComparador, vistaAlternativas, vistaAfirmaciones, vistaRetiradas,
   porDefecto, fraseSinRetiradas, ETIQUETA_VEREDICTO, DESCRIPCION_NATURALEZA, type Valor,
+  NOTA_POR_DATOS, NOTA_ORDEN,
 } from './vistas';
 
 /** What the server lends the writers: escaping, inline markup and the
@@ -99,10 +100,12 @@ export function alternativasHtml(f: Ficha | null | undefined, datos: any, h: Her
   if (!v) return '';
   const li = v.criterios.map(c => {
     const quien = c.esEsta ? 'Este producto' : c.ganador.paginaId ? `<a href="${h.esc(h.enlacePagina(c.ganador.paginaId))}">${h.esc(c.ganador.nombre)}</a>` : h.esc(c.ganador.nombre);
-    return `<li>${h.esc(c.criterio)}: ${quien} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
+    const segun = c.base === 'votos' ? ' (según los votos de la comunidad)' : c.base ? ` (según los datos: ${h.esc(c.segun || '')})` : '';
+    const mas = c.empates ? ` y ${c.empates} más` : '';
+    return `<li>${h.esc(c.criterio)}${segun}: ${quien}${mas} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
   }).join('');
   const sub = v.ambito ? `<p>${h.esc(v.ambito)}</p>` : '';
-  return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</small></p></section>`;
+  return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>${h.esc(v.porDatos ? NOTA_POR_DATOS : NOTA_ORDEN)}</small></p></section>`;
 }
 
 export function afirmacionHtml(f: Ficha | null | undefined, datos: any, h: Herramientas): string {
