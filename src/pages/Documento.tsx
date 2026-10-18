@@ -40,8 +40,11 @@ import { ImagenEditable, ImagenVista } from '../components/knowledge/ImagenBloqu
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown, enFilas,
   AIRE_BASE_DATOS, aplanar, aArbol, normalizarNiveles, finSubarbol, esPlegable, esContenedor,
-  type AccionBoton,
+  type AccionBoton, esBloqueDatos,
 } from '../utils/bloques';
+// Los bloques de datos viven cada uno en su carpeta (2026-10-18): este fichero
+// sólo los consulta aquí. Ver `bloquesDatos/registro.tsx`.
+import { OPCIONES_BLOQUES_DATOS, EditorBloqueDatos, LecturaBloqueDatos, datosIniciales } from '../components/bloquesDatos/registro';
 import { MigasDePan, BotonVista, ConfigBoton, conFecha } from '../components/knowledge/BloquesExtra';
 import { usePresencia, CarasPresencia, type Persona } from '../components/knowledge/PresenciaPagina';
 import { fusionarBloques } from '../utils/colaboracion';
@@ -158,6 +161,8 @@ const TIPOS_MENU: { tipo: TipoMenu; label: string; icon: any; grupo: OpcionBloqu
   // La de texto se queda, y dice lo que es, para quien solo quiera una
   // rejilla de texto en un documento.
   { tipo: 'tabla', label: 'Tabla de texto', icon: Table2, grupo: 'formato' },
+  // ── Datos (2026-10-18): los que se apuntan solos en el registro ──
+  ...OPCIONES_BLOQUES_DATOS,
 ];
 
 /*
@@ -999,7 +1004,7 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto' || tipo === 'video' || tipo === 'mapa') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'embed' || tipo === 'migas' || tipo === 'boton' || tipo === 'sincronizado') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra' || tipo === 'marcador' || tipo === 'web' || tipo === 'embed' || tipo === 'migas' || tipo === 'boton' || tipo === 'sincronizado' || esBloqueDatos(tipo)) { insertar(b.id, tipo); return; }
     const plegable = tipo.startsWith('plegable');
     const real: TipoBloque = plegable ? `titulo${tipo.slice(-1)}` as TipoBloque : tipo as TipoBloque;
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: real, texto: '', plegable: plegable || undefined } : x));
@@ -1044,10 +1049,11 @@ function EditorPagina() {
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
     if (plegable) nuevo.plegable = true;
+    if (esBloqueDatos(tipo)) nuevo.datos = datosIniciales(tipo);
     if (tipo === 'boton') { nuevo.texto = 'Botón'; nuevo.boton = { tipo: 'plantilla' }; setConfigBoton(nuevo.id); }
     if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'embed' && tipo !== 'migas') textosRef.current[nuevo.id] = nuevo.texto ?? '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'embed' && tipo !== 'migas' && !esBloqueDatos(tipo)) textosRef.current[nuevo.id] = nuevo.texto ?? '';
     setBloques(bs => {
       // Sin `tras`, arriba del todo (era así: `-1 + 1`).
       const { pos, nivel } = tras ? puntoInsercion(bs, tras) : { pos: 0, nivel: 0 };
@@ -2948,6 +2954,19 @@ function EditorPagina() {
     const texto = textosRef.current[b.id] ?? b.texto ?? '';
 
     const cuerpo = (() => {
+      // Un bloque de datos se pinta él mismo (ver `bloquesDatos/registro.tsx`).
+      // Quien sólo lee esta pantalla ve lo mismo que en la página publicada.
+      if (esBloqueDatos(b.tipo)) {
+        if (!editable) return <LecturaBloqueDatos bloque={b} paginaId={docId.current || undefined} />;
+        return (
+          <EditorBloqueDatos bloque={b} paginaId={docId.current || undefined} editable={editable}
+            cambiarDatos={c => {
+              guardarHistoria();
+              setBloques(bs => bs.map(x => (x.id === b.id ? { ...x, datos: { ...(x.datos || {}), ...c } } : x)));
+              programarGuardado();
+            }} />
+        );
+      }
       if (b.tipo === 'separador') return <hr className="border-slate-200 my-2" />;
       if (b.tipo === 'subpagina') return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
       // ── MARCADOR Y WEB INSERTADA (2026-10-02) ───────────────────────────
@@ -3618,7 +3637,7 @@ function EditorPagina() {
       return cuerpo();
     })();
 
-    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina', 'pizarra', 'migas', 'boton'].includes(b.tipo);
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina', 'pizarra', 'migas', 'boton'].includes(b.tipo) && !esBloqueDatos(b.tipo);
 
     return (
       <div

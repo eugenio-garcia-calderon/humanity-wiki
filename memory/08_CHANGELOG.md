@@ -8833,3 +8833,9 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
 - «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
+
+### 2026-10-18 — Registro de bloques de datos y copia local de Wikiproducts (Wikiproducts W0)
+- Nueve tipos de bloque nuevos declarados de una vez en `src/utils/bloques.ts` (`TIPOS_BLOQUE_DATOS`): propiedad, comparador, alternativas, afirmacion, retirada, valoracion, ofertas, chat, experto. Su configuración va en `bloque.datos`.
+- `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
+- Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
+- `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).
