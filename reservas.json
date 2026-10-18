@@ -77,6 +77,12 @@
       "ruta": "src/server/dominios.ts",
       "motivo": "W2: subdominio por sitio (3.9)",
       "desde": "2026-10-18T11:48:21.034Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/utils/subdominio.ts",
+      "motivo": "W2: subdominio por sitio (3.9)",
+      "desde": "2026-10-18T11:48:23.846Z"
     }
   ]
 }
