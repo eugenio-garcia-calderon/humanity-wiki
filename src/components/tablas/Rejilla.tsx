@@ -672,7 +672,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     const cfg = activa.config;
     const talla = cfg.grupo_titulo || 'm';
     const centro = (cfg.grupo_alineacion || 'centro') === 'centro';
-    const conImagen = cfg.grupo_imagen !== false && !!g.imagen && !nivel;
+    // (2026-10-18, Eugenio) Sin imagen por defecto: se enciende en Configuración → Grupos.
+    const conImagen = cfg.grupo_imagen === true && !!g.imagen && !nivel;
     const letra = nivel ? 'text-sm' : ({ s: 'text-base', m: 'text-[1.375rem] tracking-tight', l: 'text-2xl tracking-tight', xl: 'text-4xl tracking-tight' } as const)[talla];
     const lado = ({ s: 'h-8 w-8', m: 'h-12 w-12', l: 'h-16 w-16', xl: 'h-24 w-24' } as const)[talla];
     return (
@@ -682,7 +683,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         {/* El color de la opción, como un punto: el título queda en un solo tono. */}
         {g.color && !conImagen && <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: g.color }} />}
         <span className={cn('leading-tight', letra, g.vacio && 'text-slate-400')}>{g.etiqueta}</span>
-        <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">{g.filas.length}</span>
         {plegado ? <ChevronRight className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-300 opacity-0 transition-opacity group-hover/grupo:opacity-100" />}
       </button>
     );
@@ -908,7 +908,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           {APUNTAN.has(colAgr.tipo) && (
             <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
               <span className="text-xs font-bold text-slate-600">Imagen del grupo</span>
-              <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={activa.config.grupo_imagen !== false}
+              <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={activa.config.grupo_imagen === true}
                 onChange={e => cambiarVista({ config: { ...activa.config, grupo_imagen: e.target.checked } })} />
             </label>
           )}
@@ -1157,7 +1157,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
-        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-start gap-5 sm:gap-6', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
+        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-5 sm:gap-6', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
