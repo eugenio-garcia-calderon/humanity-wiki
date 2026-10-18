@@ -724,6 +724,65 @@ a rated table, limited to people who voted.
 the test fails if the word appears in that file or if 50 random commission
 changes move the order.
 
+## 2026-10-18 — A database's sheet template is a page; sheet blocks decide once and paint twice (Wikiproducts W1)
+
+**Template.** `bd_tablas.config.plantilla.pagina_id` points to an ordinary
+private page. Rejected: a new «layout» object with its own editor (weeks, and a
+second editor to maintain). Cost of the choice: the row page in the editor
+shows only its own blocks, not the template's; the template is edited on its
+own page. On publish, the ampliación (`server/bd/plantillaFicha.ts`) puts the
+template's blocks in front of the row's.
+
+**Decide once.** Every sheet block is drawn by React and again as server HTML
+for crawlers (SEO R1). What each shows (which rows, who is best, which
+sentence for an empty recall list) lives in pure functions
+(`bloquesDatos/ficha/vistas.ts`); both painters only loop over the result.
+Rejected: each painter deciding on its own — they would drift, and Google
+penalises markup that differs from the visible page.
+
+**Roles by config, never by name.** A column says what it is in
+`config.ficha` (sheet role), `config.grupo`, `config.comparar`. W5's offers
+use `config.rol` on the offers table (its contract); the schema sets both
+where they meet (EAN has `ficha: 'gtin'` and `rol: 'gtin'`).
+
+**Offers: one table per category**, each with a «Producto» relation
+(`rol: producto`, `reciproca`) to its product table, as W5 reads them. A single
+offers table would have needed five product columns, four empty per row. The
+products' «price from/to» and «number of offers» are aggregates over that
+relation seen from the product side (`direccion: destino`), so there is one
+list of links, not two that can disagree.
+
+**Provenance per cell** in `bd_filas.procedencia` (jsonb by column id), not a
+side table: it travels with the row, is read in the same query, and adds no
+junction table (CLAUDE.md rule 6).
+
+## 2026-10-18 — Readable row URLs from a per-table template (Wikiproducts W2, SEO R2)
+
+**Context.** Product sheets are database rows, each with its page at `/p/BDF…`.
+SEO R2 asks for `/category/brand-model`. Agreed with W1 (product sheet) and W3
+(data loading) through the coordinator: one product table per subcategory, the
+URL's category is fixed text in the template.
+
+**Chosen.** `bd_tablas.config.ruta` holds a template (`powerbanks/{Marca}-{Modelo}`);
+the resulting path is stored in the row page's existing `knowledge_windows.slug`
+(unique per owner) with `/` inside, and old ones go to a history table
+`direcciones_anteriores` that answers 301 forever. Alternatives rejected: a
+`ruta` column on `bd_filas` (a second address field next to `slug`, two
+lookups), and computing the path on every request without storing it (renames
+could not redirect).
+
+**Computed on read, not on write.** A row is written by five paths (grid, page,
+public API, assistant, recurrences); hooking all of them is how one gets
+forgotten. `asegurarRutas` runs from the sitemap, on a `/p/:id` visit and from
+`POST /api/bd/tablas/:id/rutas`, and writes only what changed. **Cost:** a row
+renamed in the grid keeps its old URL until one of those runs; the old URL
+still works and the sitemap fixes it on the next crawl.
+
+**At least two segments**, the first never an app route (`TRAMOS_RESERVADOS`),
+so a row URL can never shadow an ordinary page (`/my-page`) or an app path.
+On a custom domain an unknown two-segment path still answers 200 with the site's
+root page, as before; on a subdomain and in casa it is a 404.
+
 ## 2026-10-18 — Wikiproducts purchases: one seller, a managed order per distributor (W5)
 
 **Context.** Wikiproducts sells products it does not stock: the customer pays

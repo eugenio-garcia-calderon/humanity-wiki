@@ -53,11 +53,13 @@ import { registerArchivosRoutes } from './archivos.js';
 import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
+import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
 import { registrarSitios } from './sitios.js';
 import { registrarBuscadorSitio } from './buscadorSitio.js';
+import { registrarRutasFila } from './rutasFila.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
@@ -233,6 +235,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'sitios', montar: (app, db) => registrarSitios(app, db) },
   // El buscador de cada sitio publicado (Wikiproducts, 2026-10-18).
   { nombre: 'buscadorSitio', montar: (app, db) => registrarBuscadorSitio(app, db) },
+  { nombre: 'rutasFila', montar: (app, db) => registrarRutasFila(app, db) },
   // La consola de la cadena de valor de una web: sólo para quien gestiona la página y sólo desde humanity.wiki.
   { nombre: 'consola', montar: (app, db) => registrarConsola(app, db) },
   // Optimización web de una página publicada: medición real, recomendaciones e indexación (solo quien edita).
@@ -267,6 +270,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
+  {
+    nombre: 'bd/plantillaFicha',
+    montar: (app, db) => registrarPlantillaFicha(app, db),
+    nota: 'DESPUÉS de «bd»: lee las tablas con `bdInterno.leerTabla`, que rellena registerBdRoutes. '
+        + 'Fichas de producto de Wikiproducts: plantilla por base de datos y procedencia de cada dato.',
+  },
   // Community ratings per criterion (Wikiproducts W4). After `bd`: it asks `bdInterno` who may read a table.
   { nombre: 'valoraciones', montar: (app, db) => registrarValoraciones(app, db) },
   { nombre: 'publicar', montar: (app, db) => registerPublicarRoutes(app, db) },
