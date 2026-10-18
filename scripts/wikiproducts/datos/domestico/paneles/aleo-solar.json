@@ -1,0 +1,110 @@
+{
+  "slug": "aleo-solar",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "aleo solar LEO-N (TOPCon, 108 medias células, vidrio-lámina)",
+  "marca": "aleo solar",
+  "modelo": "LEO-N L64S430 / L64S435 / L64S440 (108 medias células, lámina trasera blanca); LEO-N L62S380…390 (96 medias células); versión negra L84S; versión integrada en tejado LEO-N Sol S84T/S82T",
+  "variante_ficha": "LEO-N L64S435 (ficha «LEO-N 430-440 W Premium», sin fecha; resumen de gama 09/2024)",
+  "ean": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://shop.krannich-solar.com/ch-de/angebote/restposten/67791/leo-n-l64s-435w", "fecha": "2026-10-18", "nota": "No se encontró GTIN público; Krannich usa su número de artículo 6358835." },
+  "anio_lanzamiento": { "valor": 2024, "unidad": "año", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_a8e1d794329d4d53b5238258aa790b1e.pdf", "fecha": "2026-10-18", "nota": "Fichas preliminares de julio de 2024. La serie LEO anterior (PERC, 340–410 W) es de 2022 según SolarQuotes." },
+  "estado": "descatalogado",
+  "resumen": "aleo solar es una marca alemana de módulos fotovoltaicos que fabricó en Prenzlau (Brandeburgo) desde 2001 y que pertenece al grupo taiwanés Sino-American Silicon Products. En marzo de 2025 la empresa anunció el cierre de la producción en esa fábrica, su única planta, por la competencia de precios de los fabricantes chinos; la marca mantiene un equipo reducido y su web sigue presentando los módulos como fabricados en Alemania. Su última gama para tejados, LEO-N, usa 108 medias células TOPCon de tipo N con vidrio frontal de 3,2 mm y lámina trasera, de 430 a 440 W, y según la ficha la variante de 435 W tiene un 21,7 % de eficiencia. La marca anunciaba 30 años de garantía de producto y de rendimiento, con un 87,4 % final, por encima de lo habitual en el sector. A fecha 2026-10-18 solo se encontraron existencias residuales en un mayorista suizo.",
+  "imagen": { "url": null, "fuente": "https://www.aleo-solar.de/aufdach", "licencia": "propiedad del fabricante; solo enlace" },
+
+  "datos_tecnicos": {
+    "potencia_pico_wp": { "valor": 435, "unidad": "Wp", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "STC; clasificación 0/+4,99 W." },
+    "gama_potencias_wp": { "valor": "430–440", "unidad": "Wp", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Versión de 96 medias células: 380–390 W. No hay una variante de 450 W o más." },
+    "eficiencia_pct": { "valor": 21.7, "unidad": "%", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Variante 435 W. Comprobación: 435 / (1,752 × 1,144) = 21,70 %. 430 W: 21,5 %; 440 W: 22,0 %." },
+    "tecnologia_celula": { "valor": "TOPCon, N-type, 10 busbars", "unidad": null, "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Células de 182 × 91 mm." },
+    "tipo_celula": { "valor": "monocristalina", "unidad": null, "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": null },
+    "num_celulas": { "valor": 108, "unidad": "medias células", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": null },
+    "bifacial": { "valor": false, "unidad": null, "origen": "declarado", "fuente": "https://shop.krannich-solar.com/ch-de/angebote/restposten/67791/leo-n-l64s-435w", "fecha": "2026-10-18", "nota": "Vidrio-lámina con lámina trasera blanca." },
+    "bifacialidad_pct": { "valor": null, "unidad": "%", "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No aplica: módulo monofacial." },
+    "vidrio": { "valor": "simple (vidrio solar templado de 3,2 mm con antirreflejo) + lámina trasera de polímero blanca", "unidad": null, "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Versión LEO-N Black con lámina negra." },
+    "marco": { "valor": "aleación de aluminio negra, 40 mm", "unidad": null, "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": null },
+    "medidas_mm": { "valor": "1752 × 1144 × 40", "unidad": "mm", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "2,0 m²." },
+    "peso_kg": { "valor": 22, "unidad": "kg", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": null },
+    "coef_temp_pmax_pct_c": { "valor": -0.31, "unidad": "%/°C", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Voc −0,24 %/K; Isc +0,029 %/K." },
+    "noct_o_nmot_c": { "valor": null, "unidad": "°C", "origen": "desconocido", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "No aparecía en el texto extraído de la ficha." },
+    "degradacion_primer_anio_pct": { "valor": 1, "unidad": "%", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "99 % garantizado el primer año." },
+    "degradacion_anual_pct": { "valor": 0.4, "unidad": "%/año", "origen": "calculado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "La ficha da 99 % (año 1) y 87,4 % (año 30) con curva lineal: (99 − 87,4) / 29 = 0,4 %/año." },
+    "voc_v": { "valor": 39.41, "unidad": "V", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Vmpp 33,38 V; Impp 13,03 A." },
+    "isc_a": { "valor": 13.71, "unidad": "A", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": null },
+    "tension_max_sistema_v": { "valor": 1000, "unidad": "V DC", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Corriente inversa admisible 25 A. Menos que los 1500 V de muchos módulos actuales; suficiente para una vivienda." },
+    "carga_mecanica_pa": { "valor": "5400 / 2400 (ensayo); 3600 / 1600 (diseño)", "unidad": "Pa (presión/succión)", "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Carga de diseño = ensayo / 1,5. Una de las pocas fichas que da ambas cifras." },
+    "ip_caja_conexiones": { "valor": "IP68", "unidad": null, "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Caja en tres partes según IEC 62790, 3 diodos de bypass." },
+    "conector": { "valor": "MC4 original (Stäubli), EN 62852; cables de 1200 mm", "unidad": null, "origen": "declarado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "La ficha dice «Genuine MC4»; Stäubli es el fabricante de la marca MC4." },
+    "precio_por_wp_eur": { "valor": null, "unidad": "€/Wp", "origen": "desconocido", "fuente": "https://shop.krannich-solar.com/ch-de/angebote/restposten/67791/leo-n-l64s-435w", "fecha": "2026-10-18", "nota": "No se encontró ninguna oferta con precio público en España ni en la UE." },
+    "resultado_pvel": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No se encontró el LEO-N ni aleo en los Scorecards de Kiwa PVEL consultados." },
+    "pruebas_independientes": { "valor": "Clase de granizo 4 (40 mm) para la serie LEO anterior; para LEO-N figuraba «en proceso»", "unidad": null, "origen": "declarado", "fuente": "https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/", "fecha": "2026-10-18", "nota": "Krannich lista el LEO-N L64S435 con clase de granizo HW 4. No se vio el certificado." }
+  },
+
+  "garantias": {
+    "producto": { "anios": 30, "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "Según la ficha y la página de atención al cliente, desde la fecha de compra, «según las condiciones del certificado de garantía correspondiente», que no se pudo leer." },
+    "rendimiento": { "anios": 30, "porcentaje_final": 87.4, "primer_anio_pct": 99, "lineal_anual_pct": 0.4, "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18", "nota": "El 0,4 % anual es calculado a partir de los puntos inicial y final." },
+    "letra_pequena": [
+      "La ficha remite a un certificado de garantía y a unas condiciones publicadas en la web que no se encontraron; no se pudieron comprobar plazos de reclamación, exclusiones ni topes.",
+      "La ficha promete «100 % de cobertura de costes en caso de garantía», sin precisar si incluye desmontaje, reinstalación y transporte; un resumen de gama de 09/2024 dice que aleo cubre envío de vuelta, reparación o reposición y costes de instalación «razonables», sujeto al certificado.",
+      "La reclamación se canaliza primero a través del instalador, según la página de atención al cliente de aleo.",
+      "Riesgo principal: la empresa detuvo su única fábrica en 2025 (pv magazine). La garantía de 30 años depende de que aleo solar GmbH o su matriz sigan existiendo y tengan módulos compatibles para sustituir; no se encontró información pública sobre cómo se atenderán las garantías ni sobre un seguro que las respalde.",
+      "En España la garantía legal frente al vendedor es independiente de la del fabricante."
+    ],
+    "quien_responde": "aleo solar GmbH (Prenzlau, Alemania), propiedad del grupo taiwanés Sino-American Silicon Products a través de Sunrise Global Solar Energy. No se publica aseguradora de garantía; tras el cierre de la producción no hay información pública sobre la continuidad del servicio de garantía."
+  },
+
+  "empresa": {
+    "razon_social": "aleo solar GmbH",
+    "pais_sede": "Alemania (Prenzlau, Brandeburgo)",
+    "fundacion": 2001,
+    "cotiza_en": "No cotiza; su matriz Sino-American Silicon Products cotiza en Taiwán",
+    "web": "https://www.aleo-solar.de",
+    "fabricante_celulas": null,
+    "pais_fabricacion": "Alemania (Prenzlau) hasta 2025",
+    "fabricas_conocidas": [ "Prenzlau (Brandeburgo, Alemania): producción en cierre ordenado desde marzo de 2025" ],
+    "notas": [
+      "En marzo de 2025 anunció el cierre ordenado de la producción en Prenzlau, su única fábrica, por la sobrecapacidad china y la guerra de precios; afecta a unos 110 empleados. Un equipo reducido se ocupa de la «reorientación estratégica» (pv magazine, 10-03-2025).",
+      "Propiedad de un consorcio liderado por Sunrise Global Solar Energy, filial del grupo taiwanés Sino-American Silicon Products (SAS), que la compró en 2014; Bosch fue accionista mayoritario de 2009 hasta el cierre de su división solar (pv magazine).",
+      "A fecha 2026-10-18 la web de aleo sigue diciendo que fabrica sus módulos en la Uckermark y no menciona el cierre.",
+      "El fabricante y el país de origen de las células no se publican en las fichas consultadas.",
+      "Un retiro de módulos Bosch en EE. UU. (2017, fabricados en Corea) no guarda relación documentada con aleo."
+    ],
+    "fuentes": [ "https://www.pv-magazine.com/2025/03/10/aleo-solar-to-halt-production-at-pv-module-factory-in-germany/", "https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/", "https://www.aleo-solar.de/", "http://pv-magazine-usa.com/2017/04/14/fire-hazard-prompts-bosch-solar-services-voluntary-recall/" ]
+  },
+  "origen": {
+    "pais_marca": "Alemania",
+    "pais_fabricacion": "Alemania (ensamblaje del módulo en Prenzlau); origen de las células no publicado",
+    "fabrica": "aleo solar GmbH, Marius-Eriksen-Straße 1, 17291 Prenzlau",
+    "materiales_principales": [ "silicio monocristalino N-type", "vidrio solar templado de 3,2 mm", "lámina trasera de polímero", "marco de aluminio negro" ],
+    "num_componentes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "El fabricante no lo publica." },
+    "reparabilidad": "Módulo laminado no reparable en la práctica. La ficha declara el producto libre de PFAS."
+  },
+  "certificados": [
+    { "nombre": "IEC 61215:2021, IEC 61730:2023 (incl. IEC 62804 PID, IEC/TS 62782), IEC 62716, IEC 61701", "emisor": "no indicado en la ficha", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18" },
+    { "nombre": "Reacción al fuego clase C (IEC 61730), E (EN 13501-1), B2 (DIN 4102-1)", "emisor": "no indicado", "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "fecha": "2026-10-18" }
+  ],
+  "documentos": [
+    { "tipo": "ficha técnica", "url": "https://www.aleo-solar.de/_files/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "idioma": "en", "fecha": null },
+    { "tipo": "ficha técnica", "url": "https://www.aleo-solar.de/_files/ugd/ecbda7_5a7311926a904ebbb28a5f5d15108707.pdf", "idioma": "en", "fecha": "2024-09" }
+  ],
+
+  "afirmaciones": [
+    { "afirmacion": "Wir fertigen unsere preisgekrönten Photovoltaikmodule im Herzen der Uckermark (nahe Berlin)", "donde": "https://www.aleo-solar.de/", "veredicto": "falsa", "explicacion": "La empresa anunció en marzo de 2025 el cierre de la producción en Prenzlau, su única fábrica. A fecha 2026-10-18 la web sigue usando el presente sin mencionarlo.", "fuentes": [ "https://www.pv-magazine.com/2025/03/10/aleo-solar-to-halt-production-at-pv-module-factory-in-germany/" ], "fecha": "2026-10-18" },
+    { "afirmacion": "30 Jahre Produktgarantie", "donde": "https://www.aleo-solar.de/", "veredicto": "matizable", "explicacion": "Es lo que figura en las fichas, pero las condiciones del certificado no son públicas en la web y, con la producción detenida, el valor práctico de una garantía a 30 años depende de la continuidad de la empresa.", "fuentes": [ "https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/" ], "fecha": "2026-10-18" },
+    { "afirmacion": "MADE IN GERMANY", "donde": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf", "veredicto": "matizable", "explicacion": "Cierto para el ensamblaje de los módulos fabricados en Prenzlau hasta 2025; la ficha no dice de dónde proceden las células.", "fuentes": [ "https://www.pv-magazine.com/2025/03/10/aleo-solar-to-halt-production-at-pv-module-factory-in-germany/" ], "fecha": "2026-10-18" },
+    { "afirmacion": "100 % Kostenübernahme im Garantiefall", "donde": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_06da123165464040aea26d9300080cd4.pdf", "veredicto": "sin pruebas", "explicacion": "No se pudo leer el certificado de garantía que concreta qué costes cubre; el resumen de gama habla de costes «razonables», lo que sugiere límites.", "fuentes": [ "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_5a7311926a904ebbb28a5f5d15108707.pdf" ], "fecha": "2026-10-18" }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 de «aleo solar», «aleo LEO» y «Rückruf aleo» en EU Safety Gate, CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia), Health Canada y prensa sectorial (pv magazine). No se encontró ninguna retirada ni alerta de seguridad para el modelo ni la marca: ninguna conocida a fecha 2026-10-18.",
+
+  "ofertas": [
+    { "distribuidor": "Krannich Solar (Suiza), sección «Restposten» (restos de stock)", "tipo": "mayorista", "pais": "Suiza", "url": "https://shop.krannich-solar.com/ch-de/angebote/restposten/67791/leo-n-l64s-435w", "precio_eur": null, "iva_incluido": null, "unidad": "por módulo (palé de 23)", "incluye_instalacion": false, "envio": null, "stock": "Liquidación; precio solo para clientes registrados", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" }
+  ],
+  "compatibles": [ "Inversores de string domésticos de hasta 1000 V DC; la web de aleo cita como socios a SolarEdge, Fronius, SMA y BYD." ],
+  "pendiente": [
+    "Certificado y condiciones completas de la garantía de 30 años.",
+    "Qué pasa con las garantías tras el cierre de la producción (no hay comunicado público).",
+    "Ofertas con precio en España o la UE.",
+    "Procedencia de las células.",
+    "NMOT y emisor de los certificados."
+  ]
+}

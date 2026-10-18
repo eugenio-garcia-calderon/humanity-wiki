@@ -1,0 +1,767 @@
+{
+  "marcas": [
+    {
+      "id": "aiko",
+      "nombre": "AIKO",
+      "razon_social": "Shanghai Aiko Solar Energy Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": "2009 (según solarquotes.com.au)",
+      "web": "https://aikosolar.com",
+      "cotiza": "Bolsa de Shanghái (600732)",
+      "datos_publicos": [
+        "Maxeon demandó a AIKO y a distribuidores europeos por infracción de patentes de contacto trasero desde noviembre de 2023 (tribunales de Mannheim y Múnich, Tribunal Unificado de Patentes en Düsseldorf, y Países Bajos). El tribunal de La Haya rechazó medidas cautelares contra distribuidores neerlandeses. Fuente: https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/",
+        "En febrero de 2026 ambas empresas cerraron todos los litigios: AIKO obtiene una licencia de cinco años de las patentes de Maxeon fuera de EE. UU. y paga unos 1650 millones de yuanes en plazos, según la prensa china (las cifras en dólares publicadas difieren entre fuentes). Fuentes: https://www2.yicaiglobal.com/news/chinas-aiko-agrees-to-pay-maxeon-usd238-million-to-end-patent-dispute ; https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/",
+        "No se encontraron detenciones aduaneras en EE. UU. por la ley UFLPA (trabajo forzoso) referidas a AIKO en las búsquedas realizadas a 2026-10-18."
+      ],
+      "fuentes": [
+        "https://aikosolar.com/?p=28185",
+        "https://www2.yicaiglobal.com/news/chinas-aiko-agrees-to-pay-maxeon-usd238-million-to-end-patent-dispute",
+        "https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/",
+        "https://www.solarquotes.com.au/blog/maxeon-aiko-patent-mb3337/",
+        "https://www.solarquotes.com.au/blog/aiko-panels-jinan-mb3094/"
+      ]
+    },
+    {
+      "id": "aleo",
+      "nombre": "aleo solar",
+      "razon_social": "aleo solar GmbH",
+      "pais_sede": "Alemania (Prenzlau, Brandeburgo)",
+      "matriz": null,
+      "fundacion": 2001,
+      "web": "https://www.aleo-solar.de",
+      "cotiza": "No cotiza; su matriz Sino-American Silicon Products cotiza en Taiwán",
+      "datos_publicos": [
+        "En marzo de 2025 anunció el cierre ordenado de la producción en Prenzlau, su única fábrica, por la sobrecapacidad china y la guerra de precios; afecta a unos 110 empleados. Un equipo reducido se ocupa de la «reorientación estratégica» (pv magazine, 10-03-2025).",
+        "Propiedad de un consorcio liderado por Sunrise Global Solar Energy, filial del grupo taiwanés Sino-American Silicon Products (SAS), que la compró en 2014; Bosch fue accionista mayoritario de 2009 hasta el cierre de su división solar (pv magazine).",
+        "A fecha 2026-10-18 la web de aleo sigue diciendo que fabrica sus módulos en la Uckermark y no menciona el cierre.",
+        "El fabricante y el país de origen de las células no se publican en las fichas consultadas.",
+        "Un retiro de módulos Bosch en EE. UU. (2017, fabricados en Corea) no guarda relación documentada con aleo."
+      ],
+      "fuentes": [
+        "https://www.pv-magazine.com/2025/03/10/aleo-solar-to-halt-production-at-pv-module-factory-in-germany/",
+        "https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/",
+        "https://www.aleo-solar.de/",
+        "http://pv-magazine-usa.com/2017/04/14/fire-hazard-prompts-bosch-solar-services-voluntary-recall/"
+      ]
+    },
+    {
+      "id": "astronergy",
+      "nombre": "Astronergy",
+      "razon_social": "Chint New Energy Technology Co., Ltd. (marca Astronergy)",
+      "pais_sede": "China (Haining, Zhejiang, según la información pública de la empresa; no verificado en esta sesión)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.astronergy.com",
+      "cotiza": "No se verificó; la marca forma parte del grupo CHINT",
+      "datos_publicos": [
+        "Astronergy es la marca de módulos de Chint New Energy Technology Co., Ltd., según el pie de la ficha técnica; las notas de prensa la presentan como «miembro clave del grupo CHINT».",
+        "Capacidad de módulos declarada de 55 GW a finales de 2023, con planes de llegar a unos 100 GW en 2025 (Canal Solar, julio de 2024).",
+        "Tuvo fábrica de módulos en Fráncfort del Óder (Alemania), sede del emisor de su garantía europea de 2015.",
+        "Tailandia es uno de los cuatro países del sudeste asiático sobre los que EE. UU. impuso derechos antidumping y compensatorios a células y módulos en abril de 2025; la fuente consultada no cita tipos específicos para Astronergy. No afecta a las ventas en la UE.",
+        "No se encontraron detenciones bajo la ley UFLPA de EE. UU. ni demandas relevantes asociadas a Astronergy en las búsquedas a fecha 2026-10-18; esto no equivale a una auditoría."
+      ],
+      "fuentes": [
+        "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
+        "https://canalsolar.com.br/en/astronergy-plans-production-capacity-for-2025/",
+        "https://www.pv-magazine-australia.com/?p=12803",
+        "https://www.pvtime.org/up-to-3403-96-us-imposes-massive-tariffs-on-southeast-asian-solar-cells/",
+        "https://www.solartraders.com/uploads/production/data_sheet/file/26690/Astroergy%20WA%20EN.pdf?locale=da"
+      ]
+    },
+    {
+      "id": "atersa",
+      "nombre": "Atersa",
+      "razon_social": "Aplicaciones Técnicas de la Energía (Atersa), filial de Elecnor S.A.",
+      "pais_sede": "España (Valencia; la ficha da la dirección P.I. El Oliveral, Ribarroja del Turia)",
+      "matriz": null,
+      "fundacion": 1979,
+      "web": "https://www.atersa.com",
+      "cotiza": "No cotiza; su matriz Elecnor S.A. cotiza en la Bolsa de Madrid",
+      "datos_publicos": [
+        "En 2014 Atersa anunció que su gama Optimum (modelos GSE para Europa y GS para otros mercados) se fabricaría «en Taiwán y China como producto OEM», mientras la gama ULTRA seguiría en Almussafes (Energías Renovables, 14-01-2014; Alimarket, 15-01-2014).",
+        "Un portal de comparación (solarplus.es) indica en 2026 que la línea GS Optimum y la línea ES se fabrican en China y la ULTRA y la gama aislada en Almussafes; no se encontró confirmación de la propia Atersa para 2026.",
+        "Elecnor compró Atersa a la multinacional AstroPower en julio de 2004 (Energías Renovables).",
+        "Un informe de Sinovoltaics de 2025 la sitúa como el fabricante nacional más destacado de España, con 344 MW de capacidad en Almussafes (Energías Renovables, 03-07-2025). No se encontró información pública sobre cuántos módulos fabrica realmente en España hoy.",
+        "Las fichas de 2023–2024 dan una dirección en Ribarroja del Turia (Valencia), no en Almussafes; no se encontró explicación pública.",
+        "No se encontraron retiradas, sanciones ni litigios relevantes asociados a Atersa en las búsquedas a fecha 2026-10-18."
+      ],
+      "fuentes": [
+        "https://www.energias-renovables.com/fotovoltaica/atersa-lanza-la-gama-optimum-20140114",
+        "https://www.alimarket.es/construccion/noticia/144389/atersa-lanza-una-nueva-gama-de-modulos-fotovoltaicos",
+        "https://www.energias-renovables.com/fotovoltaica/elecnor-compra-atersa-a-la-multinacinal-astropower",
+        "https://www.energias-renovables.com/fotovoltaica/eclipse-solar-en-europa-20250703",
+        "https://es.wikipedia.org/wiki/Atersa",
+        "https://solarplus.es/marcas/atersa",
+        "https://www.solarweb.net/forosolar/fotovoltaica-sistemas-aislados-la-red/38145-fabricantes-espanoles-placas.html"
+      ]
+    },
+    {
+      "id": "canadian-solar",
+      "nombre": "Canadian Solar",
+      "razon_social": "Canadian Solar Inc.",
+      "pais_sede": "Canadá (fabricación principalmente en China y otros países asiáticos; sin verificar con fuente en esta investigación)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.canadiansolar.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "El informe «Over-Exposed» (Sheffield Hallam, 2023) clasifica la exposición de Canadian Solar a la región uigur como «alta» para todos sus módulos, por divulgación incompleta de proveedores, proveedores de polisilicio en Mongolia Interior y discrepancias entre su informe anual de 2022 y sus declaraciones a los investigadores. Evaluación de riesgo, no constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+      ],
+      "fuentes": [
+        "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "https://www.solartraders.com/es/producers/canadian-solar/tophiku6"
+      ]
+    },
+    {
+      "id": "dmegc",
+      "nombre": "DMEGC Solar",
+      "razon_social": "Hengdian Group DMEGC Magnetics Co., Ltd.",
+      "pais_sede": "China (Dongyang, Zhejiang)",
+      "matriz": null,
+      "fundacion": 1980,
+      "web": "https://www.dmegcsolar.com",
+      "cotiza": "Bolsa de Shenzhen (002056), desde 2006",
+      "datos_publicos": [
+        "Forma parte del conglomerado Hengdian Group; la división solar declara 23,8 GW anuales de capacidad de células y 21 GW de módulos (Intersolar Europe, ficha de expositor).",
+        "La marca declara haber sido Top Performer en el Scorecard de fiabilidad de Kiwa PVEL en 2024 y 2025.",
+        "No se encontraron detenciones públicas bajo la ley UFLPA de EE. UU., insolvencias ni retiradas asociadas a DMEGC en las búsquedas realizadas a fecha 2026-10-18; esto no equivale a una auditoría de la cadena de suministro."
+      ],
+      "fuentes": [
+        "https://www.intersolar.de/exhibitorlist/hengdian-group-dmegc-magnetics-co-ltd-dmegc-solar",
+        "https://www.dmegcsolar.com/upload/img/2026-09/6a98cd4e0d9f0.pdf",
+        "https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard"
+      ]
+    },
+    {
+      "id": "huasun",
+      "nombre": "Huasun",
+      "razon_social": "Anhui Huasun Energy Co., Ltd.",
+      "pais_sede": "China (Xuancheng, Anhui)",
+      "matriz": null,
+      "fundacion": "21 de julio de 2020",
+      "web": "https://www.huasunsolar.com",
+      "cotiza": "No consta en la web oficial",
+      "datos_publicos": [
+        "La marca dice tener «20 GW of HJT production capacity» y ser «the world's largest HJT manufacturer», con más de 13 GW enviados a más de 80 países. Fuente: https://www.huasunsolar.com/about-us.html",
+        "Búsqueda a 2026-10-18 de detenciones UFLPA, litigios o retiradas con el nombre Huasun: no apareció ninguna referencia específica a la marca. Fuente: búsqueda web (pv-magazine, pv-tech).",
+        "La ficha del Himalaya G10 cita a Huasun como fabricante Tier 1 de BloombergNEF y un reaseguro de Ariel Re. Fuente: https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf"
+      ],
+      "fuentes": [
+        "https://www.huasunsolar.com/about-us.html",
+        "https://www.huasunsolar.com",
+        "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+        "https://solarproof.com.au/warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+      ]
+    },
+    {
+      "id": "ja-solar",
+      "nombre": "JA Solar",
+      "razon_social": "JA Solar Technology Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.jasolar.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "El informe «Over-Exposed» (Sheffield Hallam, 2023) clasifica la exposición de JA Solar a la región uigur como «muy alta» para módulos fabricados en China, Vietnam y EE. UU., citando el uso de polisilicio de la planta de Xinte en Xinjiang (≈46 800 t en 2022, ≈37,6 % de su consumo conocido). Evaluación de riesgo, no constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "JA Solar demandó en julio de 2024 a Astronergy ante el Tribunal Unificado de Patentes (Múnich y Hamburgo) por dos patentes TOPCon; la Oficina Europea de Patentes revocó una de ellas en octubre de 2025 y ambas empresas cerraron todos los litigios con licencias cruzadas el 29 de noviembre de 2025. Fuente: http://www.pv-magazine.com/2025/12/01/astronergy-and-ja-solar-end-global-patent-disputes-with-cross-licensing-deal/"
+      ],
+      "fuentes": [
+        "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "http://www.pv-magazine.com/2025/12/01/astronergy-and-ja-solar-end-global-patent-disputes-with-cross-licensing-deal/",
+        "https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro"
+      ]
+    },
+    {
+      "id": "jinko",
+      "nombre": "JinkoSolar",
+      "razon_social": "Jinko Solar Co., Ltd. (filial de JinkoSolar Holding Co., Ltd.)",
+      "pais_sede": "China (Shangrao, Jiangxi; sede operativa en Shanghái)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.jinkosolar.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "En julio de 2022 fuentes del sector citadas por pv magazine USA atribuyeron a JinkoSolar el primer envío retenido por la aduana de EE. UU. bajo la ley UFLPA (trabajo forzoso); no fue confirmado oficialmente. Fuente: http://pv-magazine-usa.com/2022/07/01/reports-reveal-which-manufacturer-is-believed-to-have-product-seized-under-uflpa/",
+        "Según Reuters (noviembre de 2022), los productos solares retenidos bajo la UFLPA entre junio y octubre de 2022 eran principalmente de LONGi, Trina y JinkoSolar; JinkoSolar dijo colaborar con la CBP. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+        "El informe «Over-Exposed» (Sheffield Hallam, 2023) clasifica la exposición de JinkoSolar a la región uigur como «alta» en sus tres cadenas de suministro y señala que no pudo confirmar la venta anunciada de su planta de lingotes en Xinjiang. Evaluación de riesgo, no constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "Litigio global de patentes con LONGi (TOPCon / contacto trasero), cerrado en septiembre de 2025 con licencias cruzadas. Fuente: https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal",
+        "En Australia, Jinko Solar Australia retiró en enero/febrero de 2024 el inversor híbrido SunTank JKS-5HLVS-ABI (no un panel) porque el enchufe de la salida de emergencia podía retirarse sin herramientas y dejar terminales con tensión. Fuente: https://worksafe.nt.gov.au/forms-and-resources/safety-alerts/product-safety-recall-jinko-solar-australia-holdings-co.-pty-ltd-suntank-hybrid-inverter"
+      ],
+      "fuentes": [
+        "https://www.jinkosolar.com/en/site/newsdetail/2258",
+        "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "http://pv-magazine-usa.com/2022/07/01/reports-reveal-which-manufacturer-is-believed-to-have-product-seized-under-uflpa/",
+        "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+        "https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal",
+        "https://worksafe.nt.gov.au/forms-and-resources/safety-alerts/product-safety-recall-jinko-solar-australia-holdings-co.-pty-ltd-suntank-hybrid-inverter",
+        "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
+      ]
+    },
+    {
+      "id": "longi",
+      "nombre": "LONGi",
+      "razon_social": "LONGi Green Energy Technology Co., Ltd.",
+      "pais_sede": "China (Xi'an, Shaanxi)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://eu.longi.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "En noviembre de 2021 la aduana de EE. UU. (CBP) retuvo 40,31 MW de módulos LONGi en aplicación de una orden de retención (WRO) relacionada con el silicio; LONGi declaró poder demostrar la trazabilidad y que los envíos continuaban. Fuente: http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/",
+        "Según fuentes del sector citadas por Reuters (noviembre de 2022), los productos solares retenidos por la CBP bajo la ley UFLPA entre junio y octubre de 2022 eran «principalmente» de LONGi, Trina y JinkoSolar; la CBP no confirmó fabricantes. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+        "El informe «Over-Exposed» de la Universidad Sheffield Hallam (julio de 2023, actualizado en noviembre de 2023) clasifica la exposición de la cadena de suministro de LONGi a la región uigur (XUAR) como «muy alta» para módulos fabricados en China, Malasia y Vietnam, por falta de información sobre proveedores de polisilicio y capacidades por planta. Es una evaluación de riesgo, no una constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "En abril de 2024 la Comisión Europea abrió una investigación por el Reglamento de Subvenciones Extranjeras (FSR) sobre una licitación de un parque solar de 110 MW en Rumanía en la que participaba la filial alemana de LONGi; LONGi se retiró de la licitación en mayo de 2024 y la Comisión anunció el cierre de la investigación. Fuente: https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation",
+        "LONGi y JinkoSolar mantuvieron litigios de patentes (TOPCon frente a contacto trasero) en China, EE. UU., Europa, Japón y Australia; en septiembre de 2025 anunciaron un acuerdo global con licencias cruzadas. Fuente: https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+      ],
+      "fuentes": [
+        "https://eu.longi.com/hi-mo-X10",
+        "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+        "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+        "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+        "http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/",
+        "https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation",
+        "https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+      ]
+    },
+    {
+      "id": "maxeon",
+      "nombre": "Maxeon (SunPower fuera de EE. UU.)",
+      "razon_social": "Maxeon Solar Technologies, Ltd. (Under Judicial Management)",
+      "pais_sede": "Singapur",
+      "matriz": null,
+      "fundacion": "2020 (escisión de SunPower Corporation)",
+      "web": "https://www.maxeon.com",
+      "cotiza": "Nasdaq (MAXN) hasta la suspensión del 1 de mayo de 2026; desde entonces cotiza en el mercado extrabursátil (OTC), con un recurso ante el Nasdaq Hearings Panel",
+      "datos_publicos": [
+        "En el primer semestre de 2025 los ingresos cayeron a 39,0 millones de dólares (371,7 millones un año antes) y la pérdida neta fue de 65,5 millones. Tenía 17,2 millones en caja frente a 172,3 millones de pasivo corriente, y su continuidad como empresa en funcionamiento figura como riesgo. En ese periodo vendió su negocio de generación distribuida fuera de EE. UU. y el de Filipinas, por 83,2 millones netos. Fuente: https://mediaroom.maxeon.com/2025-08-14-Maxeon-Solar-Technologies-Announces-First-Half-of-2025-Financial-Results",
+        "En febrero de 2026 Maxeon describe una reestructuración para centrarse «exclusively on the sales to the U.S. market». Fuente: Form 6-K, https://corp.maxeon.com/node/9541/html",
+        "El tribunal de Singapur la puso bajo administración judicial provisional el 9 de abril de 2026 y nombró jueces administradores el 29 de mayo de 2026. Nasdaq suspendió la cotización el 1 de mayo de 2026; no había presentado el Form 20-F de 2025 ni tenía miembros independientes en el comité de auditoría. Fuentes: https://mediaroom.maxeon.com/index.php?s=20295&item=122545 ; https://www.maxeon.com",
+        "Desde julio de 2024, la aduana de EE. UU. (CBP) retuvo envíos de Maxeon 3, Maxeon 6 y Performance 6 fabricados en México, alegando falta de documentación sobre la ley UFLPA (trabajo forzoso). Maxeon lo niega y lo recurre. Fuentes: https://www.nasdaq.com/articles/maxeon-solar-provides-update-cbp-detention-its-solar-panels ; https://www.mercomindia.com/maxeon-solar-by-us-customs-authority ; https://corp.maxeon.com/node/9541/html",
+        "En febrero de 2026 cerró sus litigios de patentes con AIKO en Europa con una licencia válida fuera de EE. UU., por unos 236 millones de dólares brutos en cinco años (unos 105 millones netos para Maxeon). Fuente: https://corp.maxeon.com/node/9541/html",
+        "TCL Zhonghuan Renewable Energy Technology es el accionista de control de Maxeon, según el Form 6-K de febrero de 2025. El 31-3-2025 sus filiales Lumetech B.V. y TCL Sunpower International compraron el 100 % de las sociedades del negocio de generación distribuida «Rest-of-the-World» de Maxeon, asumieron 90,54 millones de dólares de deuda intragrupo y se quedaron con las marcas SunPower fuera de EE. UU. Fuentes: https://www.sec.gov/Archives/edgar/data/1796898/000179689825000014/form6-kprojectbirch.htm ; https://www.sec.gov/Archives/edgar/data/1796898/000179689825000020/form6-kclosingprojectbirch.htm"
+      ],
+      "fuentes": [
+        "https://www.maxeon.com",
+        "https://www.maxeon.com/warranty",
+        "https://mediaroom.maxeon.com",
+        "https://corp.maxeon.com/node/9541/html",
+        "https://mediaroom.maxeon.com/2025-08-14-Maxeon-Solar-Technologies-Announces-First-Half-of-2025-Financial-Results",
+        "https://www.sec.gov/Archives/edgar/data/1796898/000179689825000014/form6-kprojectbirch.htm",
+        "https://www.sec.gov/Archives/edgar/data/1796898/000179689825000020/form6-kclosingprojectbirch.htm",
+        "https://sunpowerglobal.com/uk/support/installers?page=7",
+        "https://sunpowerglobal.com/us/sites/default/files/2025-02/sp_max7_120c_455_ds_en_a4_mc4_553945.pdf"
+      ]
+    },
+    {
+      "id": "meyer-burger",
+      "nombre": "Meyer Burger",
+      "razon_social": "Meyer Burger Technology AG (matriz); filiales alemanas Meyer Burger Industries y Meyer Burger Germany (en insolvencia)",
+      "pais_sede": "Suiza (Thun)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.meyerburger.com",
+      "cotiza": "SIX Swiss Exchange (estado de cotización actual no verificado)",
+      "datos_publicos": [
+        "En marzo de 2024 Meyer Burger comunicó el cierre de la planta de módulos de Freiberg. Fuentes: https://de.wikipedia.org/wiki/Meyer_Burger ; https://www.heise.de/news/Solarhersteller-Meyer-Burger-kuendigt-Mitarbeitern-und-beschliesst-Aus-in-Freiberg-9667995.html",
+        "En agosto de 2024 abandonó la fábrica de células prevista en Colorado y en septiembre de 2024 cambió de consejero delegado y anunció unos 200 despidos. Fuentes: https://en.wikipedia.org/wiki/Meyer_Burger_Technology ; https://de.wikipedia.org/wiki/Meyer_Burger",
+        "El 30 de mayo de 2025 terminó la producción de módulos en Goodyear (Arizona) «por falta de fondos», con 282 despidos, y la empresa se quedó sin capacidad de fabricación de módulos. Fuente: https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/",
+        "El 2 de junio de 2025 Meyer Burger Industries y Meyer Burger Germany pidieron la insolvencia; afectaba a unos 600 empleados en Thalheim y Hohenstein-Ernstthal. Fuente: https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
+        "Capítulo 11 en EE. UU. el 25 de junio de 2025, según Wikipedia citando a Reuters. Fuente: https://en.wikipedia.org/wiki/Meyer_Burger_Technology",
+        "El origen «alemán» de los módulos depende de la fecha de fabricación: las células se hacían en Thalheim, pero el ensamblaje pasó de Freiberg a Arizona a comienzos de 2024. Fuentes: https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/ ; https://de.wikipedia.org/wiki/Meyer_Burger",
+        "El 1-9-2025 se detuvo la producción en Hohenstein-Ernstthal y Bitterfeld-Wolfen sin haber encontrado inversor; unos 540 empleados afectados. Fuente: https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/",
+        "El 17-9-2025 el consejo de Meyer Burger Technology AG declaró que no había «ninguna posibilidad realista» de rescatar el grupo; las sociedades suizas pasaron a moratoria provisional y la empresa no se opuso a la exclusión de SIX. En EE. UU. un tribunal aprobó la venta de maquinaria a Babacomari Solar North por unos 29 millones de dólares. Fuente: https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html",
+        "En marzo de 2026 Swift Solar (EE. UU.) adquirió la cartera de propiedad intelectual HJT y activos estadounidenses de Meyer Burger. Fuente: https://www.pvtime.org/?p=25046"
+      ],
+      "fuentes": [
+        "https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
+        "https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/",
+        "https://en.wikipedia.org/wiki/Meyer_Burger_Technology",
+        "https://de.wikipedia.org/wiki/Meyer_Burger",
+        "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+        "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
+        "https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/",
+        "https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html",
+        "https://www.pvtime.org/?p=25046"
+      ]
+    },
+    {
+      "id": "qcells",
+      "nombre": "Qcells",
+      "razon_social": "Hanwha Q CELLS Co., Ltd. (marca Qcells), filial de Hanwha Solutions",
+      "pais_sede": "Corea del Sur (Seúl); ingeniería en Thalheim (Alemania)",
+      "matriz": null,
+      "fundacion": "1999, en Bitterfeld-Wolfen (Alemania), según Wikipedia",
+      "web": "https://www.qcells.com",
+      "cotiza": "No cotiza por separado; la matriz Hanwha Solutions cotiza en la Bolsa de Corea (dato de conocimiento general, no verificado en esta sesión)",
+      "datos_publicos": [
+        "Hanwha compró Q-Cells tras su quiebra, en agosto de 2012. Fuente: https://en.wikipedia.org/wiki/Qcells",
+        "En agosto de 2023 el Departamento de Comercio de EE. UU. concluyó que Qcells no eludía los aranceles a productos chinos (caso Auxin). Fuente: https://www.commerce.gov/news/press-releases/2023/08/department-commerce-issues-final-determination-circumvention-inquiries (citado en Wikipedia)",
+        "En julio de 2024 Bloomberg informó de que la planta de Dalton había importado células hechas con obleas chinas de proveedores que se abastecen de polisilicio de empresas de la lista UFLPA, y dijo no tener pruebas de que ese polisilicio estuviera en paneles Qcells. Fuente: https://www.bloomberg.com/news/features/2024-07-09/south-korean-solar-company-secures-us-tax-credits-despite-chinese-labor-question (citado en Wikipedia; no se abrió el artículo)",
+        "En abril de 2025 EE. UU. impuso derechos antidumping y compensatorios a células del sudeste asiático; a Qcells Malasia le correspondió un 0 % antidumping y un 14,64 % compensatorio. Fuente: https://www.pv-tech.org/us-doc-issues-ad-cvd-tariffs-on-southeast-asian-solar-cells/ (citado en Wikipedia)",
+        "Hanwha Solutions es accionista mayoritaria de REC Silicon (polisilicio), que cerró su planta de Moses Lake (EE. UU.) a finales de 2024. REC Silicon no tiene relación con REC Group, el fabricante de paneles. Fuente: https://en.wikipedia.org/wiki/Qcells"
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/Qcells",
+        "https://www.q-cells.eu",
+        "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+        "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
+      ]
+    },
+    {
+      "id": "rec",
+      "nombre": "REC",
+      "razon_social": "REC Solar Pte. Ltd. (Singapur) / REC Solar EMEA GmbH (Europa); grupo REC Solar Holdings AS, filial de Reliance New Energy Solar Ltd.",
+      "pais_sede": "Noruega (sede social) y Singapur (sede operativa)",
+      "matriz": null,
+      "fundacion": "1996",
+      "web": "https://www.recgroup.com",
+      "cotiza": "No cotiza; la matriz Reliance Industries Ltd. cotiza en la Bolsa de Bombay y la NSE de India",
+      "datos_publicos": [
+        "Reliance Industries compró REC en octubre de 2021 a China National Bluestar por 771 millones de dólares, según 42watt.de. Fuente: https://42watt.de/magazin/rec-solar",
+        "En junio de 2025 un pequeño incendio en la fábrica de Tuas obligó a parar las líneas de células; la producción se reanudó semanas después, con casi un mes de parada y retrasos en las entregas. Fuente: https://www.solarpowerworldonline.com/?p=110545",
+        "REC Solar Inc. (EE. UU.), vendida a Duke Energy en 2015, no tiene relación legal ni operativa con REC Group. Fuente: https://42watt.de/magazin/rec-solar",
+        "No se encontraron detenciones UFLPA, procedimientos antidumping ni insolvencias referidas a REC Group en las búsquedas realizadas a 2026-10-18."
+      ],
+      "fuentes": [
+        "https://42watt.de/magazin/rec-solar",
+        "https://www.solarpowerworldonline.com/?p=110545",
+        "https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf"
+      ]
+    },
+    {
+      "id": "risen",
+      "nombre": "Risen Energy",
+      "razon_social": "Risen Energy Co., Ltd.",
+      "pais_sede": "China (Ninghai, Ningbo, Zhejiang)",
+      "matriz": null,
+      "fundacion": 1986,
+      "web": "https://en.risen.com",
+      "cotiza": "Bolsa de Shenzhen (300118), desde 2010",
+      "datos_publicos": [
+        "Pérdidas en 2024: ingresos de 20.240 millones de yuanes (−42,7 %) y pérdida neta de 3.436 millones (42watt.de).",
+        "Pérdidas en 2025: ingresos de 12.584 millones de yuanes (−37,8 %), pérdida atribuible de 2.827 millones, ventas de módulos de 9,83 GW (−45,6 %) y margen bruto del −4,44 % (EnergyTrend, a partir del informe anual publicado el 24-04-2026). Es relevante para la solidez de garantías de 15 a 30 años.",
+        "Abrió sede europea en Madrid en diciembre de 2024 (Energías Renovables).",
+        "Incendio en una zona auxiliar de su planta de células de Meilin en noviembre de 2016, sin víctimas, según la propia empresa (EQ Mag Pro).",
+        "No se encontraron detenciones bajo la ley UFLPA de EE. UU. ni retiradas de producto asociadas a Risen en las búsquedas a fecha 2026-10-18; esto no equivale a una auditoría."
+      ],
+      "fuentes": [
+        "https://42watt.de/magazin/risen-energy",
+        "https://m.energytrend.com/news/20260430-51330.html",
+        "https://www.energias-renovables.com/fotovoltaica/risen-se-lanza-a-la-conquista-del-20241212",
+        "https://www.eqmagpro.com/?p=27129",
+        "https://en.risen.com/assembly/topc"
+      ]
+    },
+    {
+      "id": "tongwei",
+      "nombre": "Tongwei (TW Solar)",
+      "razon_social": "Tongwei Co., Ltd.",
+      "pais_sede": "China (Chengdu, Sichuan)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://en.tongwei.cn/",
+      "cotiza": "Bolsa de Shanghái (600438)",
+      "datos_publicos": [
+        "Resultados de 2025: ingresos de 84.128 millones de yuanes (−8,55 %), pérdida atribuible de 9.553 millones (mayor que en 2024) y 43,25 GW de módulos vendidos (EnergyTrend). La empresa atribuye las pérdidas al exceso de oferta y la caída de precios del polisilicio y las células.",
+        "El informe «Over-Exposed» (Sheffield Hallam University, 2023) recoge que Hoshine Silicon, productor de silicio metalúrgico de Xinjiang, cita a Tongwei entre sus clientes; según Bernreuter Research, la aduana de EE. UU. retuvo ese año módulos de LONGi fabricados con polisilicio de Tongwei. No se encontraron retenciones bajo la UFLPA de módulos con la marca Tongwei.",
+        "No se encontraron retiradas de producto ni demandas relevantes asociadas a módulos Tongwei en las búsquedas a fecha 2026-10-18; esto no equivale a una auditoría."
+      ],
+      "fuentes": [
+        "https://m.energytrend.com/news/20260430-51330.html",
+        "https://filingreader.com/news-wire/shanghai/2026-06-16/tongwei-reports-cny-95bn-loss-as-solar-prices-plummet",
+        "https://www.bernreuter.com/newsroom/polysilicon-news/article/new-report-these-solar-modules-are-tainted-by-forced-labor/",
+        "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf"
+      ]
+    },
+    {
+      "id": "trina",
+      "nombre": "Trina Solar",
+      "razon_social": "Trina Solar Co., Ltd.",
+      "pais_sede": "China (Changzhou, Jiangsu)",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.trinasolar.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "Según Reuters (noviembre de 2022), los productos solares retenidos por la aduana de EE. UU. bajo la ley UFLPA entre junio y octubre de 2022 eran principalmente de LONGi, Trina y JinkoSolar; Trina no respondió a la agencia. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+        "En julio de 2023 Trina respondió al Business & Human Rights Resource Centre sobre el informe «In Broad Daylight» (Sheffield Hallam) afirmando que no tiene fabricación en Xinjiang, que aplica trazabilidad de la cadena y que fue la primera en superar una auditoría tras la entrada en vigor de la UFLPA; es la versión de la empresa, sin verificación independiente. Fuente: https://www.business-humanrights.org/documents/39421/Trina_Solar.pdf",
+        "El informe «Over-Exposed» (Sheffield Hallam, 2023) también evalúa a Trina; no se pudo leer la sección correspondiente en esta investigación. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+      ],
+      "fuentes": [
+        "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+        "https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+        "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+        "https://www.business-humanrights.org/documents/39421/Trina_Solar.pdf",
+        "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+      ]
+    },
+    {
+      "id": "alphaess",
+      "nombre": "AlphaESS",
+      "razon_social": "AlphaESS Co., Ltd.",
+      "pais_sede": "China (Nantong, Jiangsu)",
+      "matriz": null,
+      "fundacion": 2012,
+      "web": "https://www.alphaess.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "Fundada en 2012 en Nantong, con una sede internacional en Singapur. Declara cinco polos productivos y «oltre 300.000 sistemi in funzione in più di 130 Paesi». La lista de fábricas del folleto aparece parcialmente ilegible: Nantong, Ulanqab y Kulim son las que se leen. Fuente: https://www.key-expo.com/restricted-assets/digital-profiles/01_ATTACHMENTS/KEN26/AlphaESS-Brochure-2026-698c8ed8639c9.pdf.pdf",
+        "No se ha encontrado si cotiza en bolsa.",
+        "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos, insolvencias ni retiradas en las búsquedas realizadas."
+      ],
+      "fuentes": [
+        "https://www.key-expo.com/restricted-assets/digital-profiles/01_ATTACHMENTS/KEN26/AlphaESS-Brochure-2026-698c8ed8639c9.pdf.pdf"
+      ]
+    },
+    {
+      "id": "anker",
+      "nombre": "Anker",
+      "razon_social": "Anker Innovations Co., Ltd.",
+      "pais_sede": "China (Changsha, Hunan)",
+      "matriz": null,
+      "fundacion": 2011,
+      "web": "https://www.ankersolix.com",
+      "cotiza": "Bolsa de Shenzhen (SZSE: 300866)",
+      "datos_publicos": [
+        "Fundada en 2011 en Shenzhen por Steven Yang; sede actual en Changsha. Fuente: https://en.wikipedia.org/wiki/Anker",
+        "La marca Anker SOLIX para almacenamiento doméstico nació en 2023. Fuente: https://solarquotes.com.au/battery-storage/reviews/anker-solix-review.html",
+        "Anker ha retirado varios modelos de baterías externas (power banks) por riesgo de incendio desde 2023, entre ellos cinco modelos PowerCore en junio de 2025 por un problema de celdas de un solo proveedor. No afectan al X1. Fuente: https://en.wikipedia.org/wiki/Anker",
+        "No se han encontrado retenciones UFLPA, procedimientos antidumping ni insolvencias relacionadas con este producto en las búsquedas realizadas."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/Anker",
+        "https://solarquotes.com.au/battery-storage/reviews/anker-solix-review.html"
+      ]
+    },
+    {
+      "id": "byd",
+      "nombre": "BYD",
+      "razon_social": "BYD Company Ltd. (garante europeo: BYD Smart Device Hungary Kft.)",
+      "pais_sede": "China (Shenzhen, Guangdong)",
+      "matriz": null,
+      "fundacion": 1995,
+      "web": "https://site.bydbatterybox.com/",
+      "cotiza": "Bolsa de Hong Kong (SEHK: 1211, acciones H) y Bolsa de Shenzhen (SZSE: 002594, acciones A)",
+      "datos_publicos": [
+        "Según 42watt.de (sept. 2026), no consta ninguna retirada por riesgo de incendio de HVS/HVM; las retiradas de BYD encontradas se refieren a coches eléctricos (https://42watt.de/magazin/byd-speicher).",
+        "EFT-Systems advierte de que HVS antiguas con firmware inferior a BMU 3.13 / BMS 3.19 pueden apagarse, sobre todo en invierno; lo corrige el instalador con una actualización (https://42watt.de/magazin/byd-speicher)."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/BYD_Company",
+        "https://site.bydbatterybox.com/",
+        "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+        "https://42watt.de/magazin/byd-speicher"
+      ]
+    },
+    {
+      "id": "dyness",
+      "nombre": "Dyness",
+      "razon_social": "Dyness Digital Energy Technology Co., Ltd.",
+      "pais_sede": "China (Suzhou, Jiangsu)",
+      "matriz": null,
+      "fundacion": 2017,
+      "web": "https://dyness.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "En junio de 2026 presentó un borrador de folleto para salir a la Bolsa de Hong Kong; todavía no cotiza. Su antecesora, Jiangsu Daqin New Energy, se fundó el 17-08-2017. El mayor accionista, el Sr. Liu, tiene el 41,10 % directamente. Fuente: https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
+        "Según Frost & Sullivan, citada en ese folleto, fue la quinta empresa del mundo por envíos de almacenamiento residencial en 2025. Fuente: el mismo folleto.",
+        "La sede corporativa se trasladó a Wuzhong (Suzhou, Jiangsu), según la propia empresa. Fuente: https://dyness.com/news/new-start-signed-dyness-headquarters-is-to-be-located-in-wuzhong-jiangsu",
+        "El extracto consultado del folleto no menciona retiradas ni litigios. No se han encontrado retenciones UFLPA ni procedimientos antidumping específicos."
+      ],
+      "fuentes": [
+        "https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
+        "https://dyness.com/news/new-start-signed-dyness-headquarters-is-to-be-located-in-wuzhong-jiangsu"
+      ]
+    },
+    {
+      "id": "ecoflow",
+      "nombre": "EcoFlow",
+      "razon_social": null,
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2017,
+      "web": "https://www.ecoflow.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "Fundada en 2017; la mayor parte de su base de clientes procede de las estaciones de energía portátiles. Fuente: https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html",
+        "En EE. UU. opera como EcoFlow Technology, Inc. (San Francisco), importador según la CPSC. Fuente: https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard",
+        "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos ni insolvencias relacionadas con este producto en las búsquedas realizadas."
+      ],
+      "fuentes": [
+        "https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html",
+        "https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard"
+      ]
+    },
+    {
+      "id": "enphase",
+      "nombre": "Enphase",
+      "razon_social": "Enphase Energy, Inc.",
+      "pais_sede": "Estados Unidos (Fremont, California)",
+      "matriz": null,
+      "fundacion": 2006,
+      "web": "https://enphase.com/es-es",
+      "cotiza": "Nasdaq (ENPH)",
+      "datos_publicos": [
+        "Establecida en 2006 y con sede en Fremont (California); cotiza en el Nasdaq con el símbolo ENPH desde su salida a bolsa en marzo de 2012 (https://en.wikipedia.org/wiki/Enphase_Energy).",
+        "En julio de 2025 Enphase empezó a enviar en EE. UU. unidades IQ Battery 5P con mayor contenido nacional para cumplir requisitos fiscales federales; no se nombran plantas ni proveedor de celdas (https://solarbuildermag.com/news/enphase-shipping-iq-battery-5p-with-more-domestic-content/).",
+        "La IQ Battery 5P con FlexPhase se lanzó en España y otros seis países europeos el 16 de junio de 2025 (https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering).",
+        "No se encontraron detenciones UFLPA, sanciones ni procedimientos de insolvencia relacionados con este producto."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/Enphase_Energy",
+        "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+        "https://solarbuildermag.com/news/enphase-shipping-iq-battery-5p-with-more-domestic-content/"
+      ]
+    },
+    {
+      "id": "fox-ess",
+      "nombre": "Fox ESS",
+      "razon_social": null,
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.fox-ess.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "Solar Choice la describe como fabricante independiente dirigido por su fundador, con Tsingshan Holding Group entre sus principales accionistas. Tsingshan también controla la fabricante de celdas REPT Battero. Fuente: https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+        "No cotiza: según la misma fuente, prepara su salida a ChiNext (Bolsa de Shenzhen). Fuente: https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+        "Solar Choice cita casos de descarga limitada con frío en otro modelo (EQ4800) en Victoria, Australia. Fuente: la misma.",
+        "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos ni insolvencias en las búsquedas realizadas."
+      ],
+      "fuentes": [
+        "https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+        "https://goingsolaruk.co.uk/fox-ess-battery-review/"
+      ]
+    },
+    {
+      "id": "goodwe",
+      "nombre": "GoodWe",
+      "razon_social": "GoodWe Technologies Co., Ltd.",
+      "pais_sede": "China (Suzhou, Jiangsu)",
+      "matriz": null,
+      "fundacion": 2010,
+      "web": "https://en.goodwe.com",
+      "cotiza": "Bolsa de Shanghái (código 688390), desde el 04-09-2020",
+      "datos_publicos": [
+        "GoodWe afirma que un sistema suyo ha encabezado la clasificación de la HTW Berlin por quinta vez y que fue uno de solo dos fabricantes chinos en la clase de eficiencia más alta (junio 2025) (https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time).",
+        "En Australia, GoodWe ha retirado inversores (no baterías): MS-30 en diciembre de 2023 por un conector de CA extraíble sin herramienta, y EHB/GEH en septiembre de 2025 por exportar a red en modo bypass durante un apagón (https://www.productsafety.gov.au/recalls/goodwe-australia-pty-ltd-%E2%80%94-goodwe-ms-30-solar-inverter; https://www.productsafety.gov.au/node/32458).",
+        "No se encontraron detenciones UFLPA, medidas antidumping específicas sobre baterías GoodWe ni retiradas de baterías Lynx en las búsquedas del 2026-10-18."
+      ],
+      "fuentes": [
+        "https://en.goodwe.com/company-profile",
+        "https://en.goodwe.com/goodwe-listed-on-shanghai-stock-exchange",
+        "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time",
+        "https://en.goodwe.com/lynxf-g2-series"
+      ]
+    },
+    {
+      "id": "growatt",
+      "nombre": "Growatt",
+      "razon_social": "Shenzhen Growatt New Energy Co., Ltd.",
+      "pais_sede": "China (Shenzhen)",
+      "matriz": null,
+      "fundacion": 2011,
+      "web": "https://www.growatt.com",
+      "cotiza": null,
+      "datos_publicos": [
+        "No cotiza: el 16 de junio de 2026 presentó su tercera solicitud de salida a la Bolsa de Hong Kong, tras intentos en 2022 y 2023 que pasaron la audiencia pero no llegaron a la oferta. Fuente: https://www.energytrend.com/news/20260618-51619.html",
+        "Ingresos de 5.233 millones de RMB en 2025, el 63,4 % de ellos en almacenamiento. Fuente: https://www.energytrend.com/news/20260618-51619.html",
+        "En Australia retiró los inversores híbridos SPH3000–6000TL BL-UP (2023), porque el conector EPS se podía quitar a mano, y el inversor 8000 MTL-S (2021), por riesgo de sobrecalentamiento de conectores. Son inversores, no esta batería. Fuente: https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154",
+        "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos ni insolvencias en las búsquedas realizadas."
+      ],
+      "fuentes": [
+        "https://www.energytrend.com/news/20260618-51619.html",
+        "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
+      ]
+    },
+    {
+      "id": "huawei",
+      "nombre": "Huawei",
+      "razon_social": "Huawei Technologies Co., Ltd.",
+      "pais_sede": "China (Longgang, Shenzhen, Guangdong)",
+      "matriz": null,
+      "fundacion": 1987,
+      "web": "https://solar.huawei.com/",
+      "cotiza": "No cotiza en bolsa: empresa privada que se declara propiedad de sus empleados (a través de un comité sindical; Ren Zhengfei tiene en torno al 1 %), condición discutida por algunos académicos",
+      "datos_publicos": [
+        "El 04-05-2026 la Comisión Europea anunció la retirada progresiva de inversores chinos de proveedores de alto riesgo en proyectos energéticos financiados por la UE, por motivos de ciberseguridad; el artículo cita a Huawei y Sungrow como ejemplos de fabricantes chinos, sin afirmar que la medida los nombre. Calendario: contratos nuevos plenamente afectados en abril de 2027. No afecta directamente a la compra privada (https://www.euronews.com/my-europe/2026/05/04/eu-moves-to-ban-high-risk-inverters-from-china-over-cybersecurity-threats).",
+        "SolarPower Europe inició la exclusión de Huawei como socio en abril-mayo de 2025, después de que la Comisión Europea dejara de reunirse con asociaciones que lo tuvieran como miembro por una investigación de corrupción; en octubre de 2025 suspendió el procedimiento y Huawei sigue como socio sin participar en sus actividades. Huawei niega irregularidades (https://www.ess-news.com/?p=5085; https://www.pv-magazine.com/2025/10/10/solarpower-europe-suspends-exclusion-proceedings-for-huawei/).",
+        "Lituania prohibió en noviembre de 2024 el acceso remoto de fabricantes de países considerados amenaza (incluida China) a sistemas de control de instalaciones solares, eólicas y de almacenamiento de más de 100 kW; no afecta a baterías domésticas típicas (https://www.pv-magazine.com/2024/11/18/lithuania-bans-remote-chinese-access-to-solar-wind-storage-devices/)."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/Huawei",
+        "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+        "https://www.euronews.com/my-europe/2026/05/04/eu-moves-to-ban-high-risk-inverters-from-china-over-cybersecurity-threats",
+        "https://www.ess-news.com/?p=5085",
+        "https://www.pv-magazine.com/2025/10/10/solarpower-europe-suspends-exclusion-proceedings-for-huawei/",
+        "https://www.pv-magazine.com/2024/11/18/lithuania-bans-remote-chinese-access-to-solar-wind-storage-devices/"
+      ]
+    },
+    {
+      "id": "lg",
+      "nombre": "LG Energy Solution",
+      "razon_social": "LG Energy Solution, Ltd. (filial europea: LG Energy Solution Europe GmbH; importador en EE. UU.: LG Energy Solution Michigan, Inc.)",
+      "pais_sede": "Corea del Sur (Seúl)",
+      "matriz": null,
+      "fundacion": 2020,
+      "web": "https://www.lgessbattery.com/",
+      "cotiza": "Bolsa de Corea (KRX: 373220), desde enero de 2022",
+      "datos_publicos": [
+        "Escindida de LG Chem como empresa independiente el 1 de diciembre de 2020; empezó a cotizar en la Bolsa de Corea en enero de 2022 (https://en.wikipedia.org/wiki/LG_Energy_Solution).",
+        "Antes LG Chem; las RESU 10H retiradas en EE. UU. se vendieron como «LG Chem RESU 10H» (https://www.cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard).",
+        "Las baterías LG retiradas en Australia pueden estar dentro de sistemas de las marcas SolaX, Opal, Redback, Red Earth, Eguana o VARTA, o sin marca (https://ProductSafety.gov.au/news/consumers-urged-to-immediately-check-for-recalled-lg-solar-batteries-after-government-safety-warning-notice).",
+        "En noviembre de 2022, en Australia se habían retirado o sustituido unas 2.900 baterías, unas 1.400 estaban apagadas o limitadas al 75 % y unas 3.000 seguían sin localizar; se registraron 9 incidentes desde octubre de 2019, con un herido y 3 casos de daños materiales (https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia).",
+        "En Europa, LG retira las RESU de generación anterior (RESU3.3, 6.5, 10, 13, 7H y 10H Type-R/Type-C, 10M) por riesgo de sobrecalentamiento e incendio; la página de retirada tiene versiones para la UE, Alemania, Reino Unido, Francia, España e Italia (https://recall.lgessbattery.com/de/recallnotice.html)."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/LG_Energy_Solution",
+        "https://www.cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard",
+        "https://cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-0",
+        "https://www.cpsc.gov/Recalls/2023/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-Recall-Alert",
+        "https://ProductSafety.gov.au/news/consumers-urged-to-immediately-check-for-recalled-lg-solar-batteries-after-government-safety-warning-notice",
+        "https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia",
+        "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+        "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-resu-ess-home-batteries-lg-ess-battery-division-2103-0025",
+        "https://recall.lgessbattery.com/de/recallnotice.html",
+        "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf"
+      ]
+    },
+    {
+      "id": "pylontech",
+      "nombre": "Pylontech",
+      "razon_social": "Pylon Technologies Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://en.pylontech.com.cn/",
+      "cotiza": "Bolsa de Shanghái, mercado STAR (688063.SH)",
+      "datos_publicos": [
+        "Pylontech anunció el 22-09-2026 la producción en masa de celdas LFP propias de 588 Ah y 601 Ah en Hefei para almacenamiento a gran escala (https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html)."
+      ],
+      "fuentes": [
+        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+        "https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html"
+      ]
+    },
+    {
+      "id": "senec",
+      "nombre": "SENEC",
+      "razon_social": "SENEC GmbH",
+      "pais_sede": "Alemania (Leipzig)",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://senec.com/de",
+      "cotiza": "No cotiza; filial al 100 % de EnBW Energie Baden-Württemberg AG desde marzo de 2018",
+      "datos_publicos": [
+        "Marzo de 2022: tras tres deflagraciones/incendios (uno en Bodnegg, cerca de Ravensburg, sin heridos), SENEC puso en espera a distancia sus sistemas Home V3 hybrid, V3 hybrid duo y V2.1 (https://www.pv-magazine.de/2022/03/10/senec-nimmt-fernabschaltung-seiner-photovoltaik-heimspeicher-vor-sicherheitspruefung-nach-verpuffungen/).",
+        "Marzo de 2023: incendio en Burladingen, citado como antecedente por pv magazine en agosto de 2023 (http://www.pv-magazine.de/2023/08/10/zwei-neue-zwischenfaelle-photovoltaik-heimspeicher-von-senec-erneut-im-konditionierungsbetrieb/); según Wikipedia, siguieron nuevas limitaciones temporales (https://de.wikipedia.org/wiki/SENEC).",
+        "Agosto de 2023: dos nuevos incendios (Franconia Media y Baja Sajonia); desde el 9-08-2023 los equipos de una generación de módulos quedaron limitados al 70 % de la capacidad (http://www.pv-magazine.de/2023/08/10/zwei-neue-zwischenfaelle-photovoltaik-heimspeicher-von-senec-erneut-im-konditionierungsbetrieb/).",
+        "Julio de 2024: comienza el canje gratuito a módulos LFP para V2.1, V3 y Home 4; unos 5.000 sistemas cambiados a finales de agosto de 2024; pv magazine cita seis incidentes con incendio en total (http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/). En octubre de 2025 SENEC declaraba más del 90 % completado (https://senec.com/de/aktuelle-informationen).",
+        "El 14-07-2026 EnBW anunció que, al no encontrar inversor (búsqueda iniciada en febrero de 2026), SENEC deja el negocio con clientes nuevos y el desarrollo de productos; los SENEC.Home E4 y P4 podían pedirse hasta finales de agosto de 2026 y deben instalarse antes de fin de 2026 para contar como clientes existentes. Según EnBW, «el servicio, la garantía legal y las garantías existentes continúan» y se completarán los canjes pendientes (https://www.pv-magazine.de/2026/07/14/enbw-findet-keinen-investor-neukundengeschaeft-von-senec-wird-eingestellt/). SENEC atiende a unos 186.000 clientes existentes (https://senec.com/de/informationen-bestandskundenbetrieb).",
+        "Autoridades: en las fuentes consultadas (pv magazine, Solarserver, Wikipedia en alemán, web de SENEC y búsquedas específicas del 2026-10-18 por KBA, Bundesnetzagentur, vigilancia del mercado y Landesdirektion Sachsen) no consta la intervención de ninguna autoridad alemana; las desconexiones, limitaciones y canjes fueron medidas de la propia empresa. Lo que sí consta es la vía judicial civil (ver nota siguiente).",
+        "Tribunales: desde marzo de 2025 varios tribunales civiles alemanes han fallado contra SENEC o sus distribuidores; consideran defecto material la limitación permanente de la capacidad al 70 % o menos (p. ej. Landgericht Ravensburg, 09-05-2025, Az. 2 O 187/24, que obligó a reparar o sustituir el equipo) (https://www.solarserver.de/2025/06/05/speicher-auch-landgericht-ravensburg-urteilt-gegen-senec/). El 12-05-2026 el Landgericht Ravensburg (Az. 4 O 152/25, no firme) concluyó, sobre una SENEC.Home V3 hybrid duo de 2020, que los equipos presentaban un riesgo grave de incendio y deflagración según la ley de seguridad de productos (ProdSG) y que «no deberían haberse comercializado», y declaró a SENEC responsable de futuros daños personales (https://www.pv-magazine.de/unternehmensmeldungen/gericht-stromspeicher-haetten-ueberhaupt-nicht-auf-den-markt-gebracht-werden-duerfen/)."
+      ],
+      "fuentes": [
+        "https://de.wikipedia.org/wiki/SENEC",
+        "https://senec.com/de/aktuelle-informationen",
+        "https://senec.com/de/informationen-bestandskundenbetrieb",
+        "https://www.solarserver.de/2024/08/27/senec-tauscht-batteriemodule-aus/",
+        "https://www.pv-magazine.de/2026/07/14/enbw-findet-keinen-investor-neukundengeschaeft-von-senec-wird-eingestellt/",
+        "https://www.pv-magazine.de/unternehmensmeldungen/gericht-stromspeicher-haetten-ueberhaupt-nicht-auf-den-markt-gebracht-werden-duerfen/",
+        "https://www.solarserver.de/2025/06/05/speicher-auch-landgericht-ravensburg-urteilt-gegen-senec/"
+      ]
+    },
+    {
+      "id": "solaredge",
+      "nombre": "SolarEdge",
+      "razon_social": "SolarEdge Technologies, Inc. (garantías emitidas por SolarEdge Technologies Ltd.)",
+      "pais_sede": "Israel (Herzliya Pituach); sociedad constituida en Delaware (EE. UU.)",
+      "matriz": null,
+      "fundacion": 2006,
+      "web": "https://www.solaredge.com/es",
+      "cotiza": "Nasdaq (SEDG)",
+      "datos_publicos": [
+        "Las retiradas de baterías LG Chem/LG Energy Solution RESU (Australia, EE. UU.) afectaron a sistemas que a menudo se combinaban con inversores SolarEdge StorEdge, pero eran baterías de LG, no de SolarEdge (https://worksafe.qld.gov.au/news-and-events/newsletters/esafe-newsletters/esafe-editions/esafe-electrical/2022-newsletters/may-2022/help-identify-dangerous-recalled-energy-storage-batteries-which-can-cause-fire).",
+        "La versión V01 de la Home Battery 400V incluía un extintor de nitrato potásico en la carcasa; según SolarQuotes (actualización de septiembre de 2024), SolarEdge lo retiró por considerarlo superior a los requisitos de seguridad obligatorios (https://www.solarquotes.com.au/blog/solaredge-home-battery-review/).",
+        "El 27-11-2024 SolarEdge anunció el cierre de su división de almacenamiento (Energy Storage), que incluía la fabricación de celdas y packs de iones de litio en Corea del Sur (filial Kokam, adquirida mayoritariamente en 2019, y fábrica de celdas de Eumseong abierta en 2022); casi todo el personal afectado debía salir en el primer semestre de 2025. SolarEdge dijo que seguiría vendiendo baterías para el mercado residencial y comercial, sin aclarar de dónde procederían las celdas (https://www.energy-storage.news/solaredge-closes-energy-storage-division-focus-on-core-solar-pv-business/)."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/SolarEdge",
+        "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
+        "https://www.energy-storage.news/solaredge-closes-energy-storage-division-focus-on-core-solar-pv-business/",
+        "https://www.solarquotes.com.au/blog/solaredge-home-battery-review/",
+        "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en"
+      ]
+    },
+    {
+      "id": "sonnen",
+      "nombre": "sonnen",
+      "razon_social": "sonnen GmbH",
+      "pais_sede": "Alemania (Wildpoldsried, Baviera)",
+      "matriz": null,
+      "fundacion": 2010,
+      "web": "https://sonnen.es",
+      "cotiza": "No cotiza. Propiedad de Shell desde 2019; vendida a TIVEN (family office de Gert Purkert, cofundador de AURELIUS), operación completada en agosto de 2026.",
+      "datos_publicos": [
+        "Fundada en 2010 en Wildpoldsried (Alta Algovia) por Christoph Ostermann y Torsten Stiefenhofer; filial al 100 % de Shell desde marzo de 2019 (https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)).",
+        "Shell completó la venta de sonnen a TIVEN el 24 de agosto de 2026; no se publicaron condiciones financieras (https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/).",
+        "Desde febrero de 2026 BayWa r.e. Solar Trade es distribuidor exclusivo en España (https://www.energias-renovables.com/almacenamiento/baywa-distribuidora-exclusiva-de-las-bater-as-20260223).",
+        "En 2019 un tribunal de Múnich declaró conformes a derecho las condiciones de garantía impugnadas por la Verbraucherzentrale NRW (https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/).",
+        "La marca opera una central eléctrica virtual (sonnenCommunity / VPP) que usa las baterías conectadas."
+      ],
+      "fuentes": [
+        "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)",
+        "https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/",
+        "https://www.energias-renovables.com/almacenamiento/baywa-distribuidora-exclusiva-de-las-bater-as-20260223",
+        "https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/"
+      ]
+    },
+    {
+      "id": "sungrow",
+      "nombre": "Sungrow",
+      "razon_social": "Sungrow Power Supply Co., Ltd. (阳光电源股份有限公司)",
+      "pais_sede": "China (Hefei, Anhui)",
+      "matriz": null,
+      "fundacion": 1997,
+      "web": "https://www.sungrowpower.com/en",
+      "cotiza": "Bolsa de Shenzhen (SZSE: 300274). Solicitud de cotización de acciones H en la Bolsa de Hong Kong presentada el 24-04-2026 (segunda tras la de octubre de 2025); no se verificó si ya cotiza allí.",
+      "datos_publicos": [
+        "Fundada en 1997 por Cao Renxian, antiguo profesor de la Universidad Tecnológica de Hefei (https://en.wikipedia.org/wiki/Sungrow).",
+        "Marzo de 2023: Sungrow reconoció un «fallo en la comunicación de la batería SBR» que dejó sin funcionar algunos sistemas, sobre todo en Alemania; ofreció revisar y, si era necesario, sustituir el BMS a través del instalador. No hubo retirada ni intervención de autoridades según la fuente (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/).",
+        "El 04-05-2026 la Comisión Europea anunció la retirada progresiva de inversores de proveedores chinos de alto riesgo en proyectos energéticos financiados por la UE; la prensa cita a Huawei y Sungrow como ejemplos, sin que conste que la medida los nombre. No afecta directamente a la compra privada (https://www.euronews.com/my-europe/2026/05/04/eu-moves-to-ban-high-risk-inverters-from-china-over-cybersecurity-threats).",
+        "No se encontraron detenciones UFLPA, medidas antidumping ni litigios específicos sobre baterías Sungrow en las búsquedas realizadas el 2026-10-18."
+      ],
+      "fuentes": [
+        "https://en.wikipedia.org/wiki/Sungrow",
+        "https://www.pv-magazine.com/2026/04/28/catl-raises-5-billion-in-share-sale-sungrow-files-for-hong-kong-ipo-for-the-second-time/",
+        "https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/",
+        "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+        "https://www.sungrowpower.com/en/ess"
+      ]
+    },
+    {
+      "id": "tesla",
+      "nombre": "Tesla",
+      "razon_social": "Tesla, Inc. (garante en Europa: Tesla Motors Netherlands B.V., Ámsterdam)",
+      "pais_sede": "Estados Unidos",
+      "matriz": null,
+      "fundacion": 2003,
+      "web": "https://www.tesla.com/es_es/powerwall",
+      "cotiza": "NASDAQ (TSLA)",
+      "datos_publicos": [
+        "Retirada en EE. UU. de unos 10.500 Powerwall 2 (CPSC n.º 26-092, 13-11-2025): 22 informes de sobrecalentamiento, 6 de humo y 5 incendios con daños materiales menores, sin heridos (https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death).",
+        "Retirada voluntaria en Australia publicada por la ACCC el 16-09-2025 por celdas de un proveedor externo que pueden fallar y sobrecalentarse (https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/).",
+        "En Australia el Powerwall 2 dejó de estar en la lista de baterías aprobadas del Clean Energy Council a finales de 2025 (https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/).",
+        "Tesla retiró unos 10.500 Powerwall 2 en EE. UU. (CPSC, 13-11-2025) y abrió una retirada en Australia (septiembre de 2025) por celdas defectuosas de un proveedor externo; según Tesla y la prensa, el Powerwall 3 no está afectado (https://www.ess-news.com/2025/11/14/tesla-recalls-10500-powerwall-2-battery-systems-in-us-following-safety-hazards/)."
+      ],
+      "fuentes": [
+        "https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death",
+        "https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/",
+        "https://www.energy-storage.news/?p=86789",
+        "https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/"
+      ]
+    }
+  ]
+}

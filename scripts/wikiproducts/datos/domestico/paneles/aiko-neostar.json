@@ -1,0 +1,447 @@
+{
+  "slug": "aiko-neostar",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "AIKO Neostar 3P54 (y Neostar 2P54) de 54 semicélulas ABC",
+  "marca": "AIKO",
+  "modelo": "Neostar 3P54 Mono-Glass AIKO-A475…A500-MCE54Mw (475–500 W); generación anterior Neostar 2P AIKO-A-MAH54Mw (450–485 W); variante doble vidrio Neostar 3P+54 AIKO-A-MCE54Dw (465–495 W)",
+  "variante_ficha": "AIKO-A490-MCE54Mw (Neostar 3P54 Mono-Glass, ficha V2.1_202502_DsDr_EN)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+    "fecha": "2026-10-18",
+    "nota": "La ficha técnica no publica GTIN/EAN."
+  },
+  "anio_lanzamiento": {
+    "valor": 2025,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+    "fecha": "2026-10-18",
+    "nota": "Se infiere del código de versión de la ficha (202502) y de la fecha de publicación del PDF (07/2025); el fabricante no da una fecha de lanzamiento explícita."
+  },
+  "estado": "a la venta",
+  "resumen": "El Neostar 3P54 es un módulo fotovoltaico de 108 semicélulas (formato de 54 células) del fabricante chino AIKO, con tecnología de contacto trasero ABC (All Back Contact) de tipo n, pensado para tejados residenciales. Según la marca, la gama va de 475 a 500 W con eficiencias del 23,8 % al 25,0 %, y mide 1762 × 1134 × 30 mm con 20,6 kg en la versión de un solo vidrio. La ficha declara 25 años de garantía de producto y 30 de rendimiento con un 88,85 % de potencia final, aunque algunos distribuidores europeos venden variantes con 15 años de garantía de producto ampliable. La generación anterior, Neostar 2P (MAH54Mw), sigue apareciendo en tiendas europeas. AIKO resolvió en febrero de 2026 mediante una licencia de patentes un litigio europeo con Maxeon sobre la tecnología de contacto trasero.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://aikosolar.com/?p=28185",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 490,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante A490 (STC). Tolerancia 0/+3 %."
+    },
+    "gama_potencias_wp": {
+      "valor": "475–500",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Pasos de 5 W: A475, A480, A485, A490, A495, A500. El Neostar 2P anterior iba de 450 a 485 W."
+    },
+    "eficiencia_pct": {
+      "valor": 24.5,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante A490. Por variante: 23,8 / 24,0 / 24,3 / 24,5 / 24,8 / 25,0 % (475→500 W)."
+    },
+    "tecnologia_celula": {
+      "valor": "ABC (All Back Contact, contacto trasero) tipo n",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Algunas tiendas (p. ej. solartraders.com) lo etiquetan por error como «n-type TOPCon»."
+    },
+    "tipo_celula": {
+      "valor": "monocristalina",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "semicélulas (6×18)",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Equivale al formato comercial de 54 células."
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Versión Mono-Glass con lámina trasera; la garantía cubre solo la potencia frontal."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No aplica a la versión de un solo vidrio; la ficha no la indica."
+    },
+    "vidrio": {
+      "valor": "simple, 3,2 mm templado + lámina trasera (backsheet)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La variante 3P+54 (MCE54Dw) es doble vidrio 2,0 + 2,0 mm y pesa 24,2 kg."
+    },
+    "marco": {
+      "valor": "aluminio anodizado negro",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "medidas_mm": {
+      "valor": "1762 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tolerancia ±2 mm."
+    },
+    "peso_kg": {
+      "valor": 20.6,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "±3 %."
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.26,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,22 %/°C; Isc +0,05 %/°C."
+    },
+    "noct_o_nmot_c": {
+      "valor": null,
+      "unidad": "°C",
+      "origen": "desconocido",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha da valores eléctricos en condiciones NOCT (800 W/m², 20 °C, 1 m/s: 371 W) pero no la temperatura NOCT/NMOT de la célula."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Máximo garantizado."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.35,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Años 2 a 30, máximo garantizado."
+    },
+    "voc_v": {
+      "valor": 41.1,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "A490, STC. Vmp 34,70 V."
+    },
+    "isc_a": {
+      "valor": 14.88,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "A490, STC. Imp 14,13 A. Fusible serie máx. 25 A."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Clase de protección II; reacción al fuego IEC clase C."
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 delantera / 2400 trasera",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Carga estática máxima. Ensayo de granizo declarado: 40 mm a 27,5 m/s."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "3 diodos de bypass."
+    },
+    "conector": {
+      "valor": "Stäubli PV-KST4/PV-KBT4-EVO 2A (compatible MC4-EVO2)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Cable 4 mm², ±1200 mm."
+    },
+    "precio_por_wp_eur": {
+      "valor": 0.19,
+      "unidad": "€/Wp",
+      "origen": "calculado",
+      "fuente": "https://basic-solar.de/shop/solarmodule/aiko/aiko-a470-mah54mw-g2-neostar-2p",
+      "fecha": "2026-10-18",
+      "nota": "89,99 € / 470 Wp = 0,191 €/Wp, de la única oferta con IVA indicado encontrada (basic-solar.de, «inkl. 0 % MwSt.», tipo de IVA alemán del 0 % para instalaciones residenciales; en España se aplicaría el 21 %). Corresponde al Neostar 2P (generación anterior), sin existencias; sin envío. No se halló precio público con IVA para el 3P54."
+    },
+    "resultado_pvel": {
+      "valor": "Top Performer en el Kiwa PVEL Scorecard 2025 y 2026 (7 categorías en 2026)",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://www.pv-tech.org/industry-updates/aiko-recognized-as-kiwa-pvel-2026-top-performer/",
+      "fecha": "2026-10-18",
+      "nota": "El reconocimiento de 2026 se refiere al modelo AIKO-Axxx-GRH66Dw (66 células, doble vidrio, de uso comercial/utility), no al Neostar 3P54 residencial. No se encontró qué lista de materiales (BOM) residencial se ensayó."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://www.testbericht.de/produkte/aiko-solar-neostar-3p54-doppelglas-465w-495w-aiko-a-mce54dw",
+      "fecha": "2026-10-18",
+      "nota": "No se encontraron ensayos independientes publicados del Neostar 3P54 (MCE54Mw) concreto; testbericht.de indica «Noch keine Testberichte» para el 3P+54."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 25,
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha del 3P54 y el documento de garantía residencial v1.7.2 dicen 25 años. Pero la ficha del 3P+54 (MCE54Dw) dice «15 años, ampliable a 25», y varios distribuidores europeos (Krannich, basic-solar.de, aceflex.de) venden Neostar 2P/3P con 15 años de garantía de producto."
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 88.85,
+      "primer_anio_pct": 1.0,
+      "lineal_anual_pct": 0.35,
+      "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "90,6 % al año 25. Solo potencia frontal, medida en STC con ±3 % de incertidumbre."
+    },
+    "letra_pequena": [
+      "La garantía de producto varía según canal y versión: 25 años en la ficha del 3P54 y en el documento residencial v1.7.2, 15 años «ampliable a 25» en la ficha del 3P+54 y 15 años en ofertas de Krannich, basic-solar.de y aceflex.de. Conviene comprobar en la factura qué garantía se da. Fuentes: https://www.vpsolar.com/download/catalog/Moduli/AIKO/Neostar-3P-plus-MCE54DW/AIKO_Neostar-3PPlus54_A-MCE54Dw_EN.pdf ; https://shop.krannich-solar.com/en-cz/detail/a343ee339336a379f102dfa41d253175",
+      "El documento de garantía residencial v1.7.2 enumera los modelos cubiertos e indica que los MCE54 solo están incluidos por debajo de 480 W; no queda claro qué documento rige para las variantes de 480–500 W. Fuente: https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+      "Los costes de desmontar, reembalar, instalar o reinstalar los módulos corren a cargo del cliente (art. 4.4.3); AIKO solo asume los costes de ensayo y transporte de inspección si es responsable. Fuente: documento de garantía v1.7.2.",
+      "Solo se presta garantía a productos comprados por canales locales oficiales (art. 5). La reclamación debe hacerse por escrito en los 30 días siguientes a detectar el defecto, con número de serie y prueba de compra (art. 3.2).",
+      "La transmisión a un nuevo propietario exige acuerdo tripartito firmado con AIKO y que los módulos sigan en el lugar original (art. 7); cambiar los módulos de sitio sin permiso escrito anula la garantía.",
+      "La indemnización máxima se limita al importe facturado por los módulos defectuosos y se excluyen pérdidas de producción (art. 6.3). Reparar o sustituir no amplía el plazo (art. 4.4.1).",
+      "El documento no dice qué ocurre si AIKO quiebra o deja el mercado europeo, ni ofrece un seguro de garantía de terceros."
+    ],
+    "quien_responde": "El fabricante (AIKO, a través de su servicio posventa europeo aftersales@aikosolar.com) o el distribuidor autorizado. No se publica ningún seguro de garantía de terceros: si AIKO desapareciera, la garantía dependería de la solvencia del distribuidor."
+  },
+  "empresa": {
+    "razon_social": "Shanghai Aiko Solar Energy Co., Ltd.",
+    "pais_sede": "China",
+    "fundacion": "2009 (según solarquotes.com.au)",
+    "cotiza_en": "Bolsa de Shanghái (600732)",
+    "web": "https://aikosolar.com",
+    "fabricante_celulas": "AIKO (producción propia de células ABC)",
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Zhuhai (Guangdong), China",
+      "Foshan (Guangdong), China",
+      "Yiwu (Zhejiang), China",
+      "Tianjin, China",
+      "Chuzhou (Anhui), China",
+      "Jinan (Shandong), China: planta de módulos BC de 10 GW (fase I)"
+    ],
+    "notas": [
+      "Maxeon demandó a AIKO y a distribuidores europeos por infracción de patentes de contacto trasero desde noviembre de 2023 (tribunales de Mannheim y Múnich, Tribunal Unificado de Patentes en Düsseldorf, y Países Bajos). El tribunal de La Haya rechazó medidas cautelares contra distribuidores neerlandeses. Fuente: https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/",
+      "En febrero de 2026 ambas empresas cerraron todos los litigios: AIKO obtiene una licencia de cinco años de las patentes de Maxeon fuera de EE. UU. y paga unos 1650 millones de yuanes en plazos, según la prensa china (las cifras en dólares publicadas difieren entre fuentes). Fuentes: https://www2.yicaiglobal.com/news/chinas-aiko-agrees-to-pay-maxeon-usd238-million-to-end-patent-dispute ; https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/",
+      "No se encontraron detenciones aduaneras en EE. UU. por la ley UFLPA (trabajo forzoso) referidas a AIKO en las búsquedas realizadas a 2026-10-18."
+    ],
+    "fuentes": [
+      "https://aikosolar.com/?p=28185",
+      "https://www2.yicaiglobal.com/news/chinas-aiko-agrees-to-pay-maxeon-usd238-million-to-end-patent-dispute",
+      "https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/",
+      "https://www.solarquotes.com.au/blog/maxeon-aiko-patent-mb3337/",
+      "https://www.solarquotes.com.au/blog/aiko-panels-jinan-mb3094/"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": "No se indica en la ficha qué planta fabrica cada lote; la ficha dice «Made in China».",
+    "materiales_principales": [
+      "silicio monocristalino tipo n",
+      "vidrio templado 3,2 mm",
+      "lámina trasera polimérica",
+      "marco de aluminio anodizado",
+      "caja de conexiones y cables de cobre"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Como cualquier módulo laminado, no es reparable por el usuario; la garantía prevé reparación, sustitución o reembolso a elección de AIKO (documento de garantía v1.7.2, art. 4)."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215 / IEC 61730",
+      "emisor": "no consta en la ficha",
+      "fuente": "https://aikosolar.com/?p=28185",
+      "fecha": "2026-10-18",
+      "nota": "La web enlaza informes de niebla salina, amoníaco, granizo, arena y polvo, anti-PID y LeTID, sin detallar el organismo emisor en la ficha."
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "idioma": "inglés",
+      "fecha": "2026-10-18",
+      "nota": "V2.1_202502_DsDr_EN"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.vpsolar.com/download/catalog/Moduli/AIKO/Neostar-3P-plus-MCE54DW/AIKO_Neostar-3PPlus54_A-MCE54Dw_EN.pdf",
+      "idioma": "inglés",
+      "fecha": "2026-10-18",
+      "nota": "Variante doble vidrio Neostar 3P+54 (MCE54Dw)."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+      "idioma": "inglés",
+      "fecha": "2026-10-18",
+      "nota": "Garantía módulos residenciales ABC v1.7.2"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Efficiency: up to 25.0%",
+      "donde": "https://aikosolar.com/?p=28185",
+      "veredicto": "matizable",
+      "explicacion": "El 25,0 % corresponde solo a la variante de 500 W; la gama empieza en 23,8 % (475 W) y los modelos más vendidos en tiendas europeas (470–490 W) quedan entre 23,5 % y 24,5 %. Es un valor declarado en STC, no medido por un tercero.",
+      "fuentes": [
+        "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Premium warranty: 25-year product warranty, and 30-year performance warranty",
+      "donde": "https://aikosolar.com/?p=28185",
+      "veredicto": "matizable",
+      "explicacion": "Hay versiones y canales con 15 años de garantía de producto (ampliable a 25 según la ficha del 3P+54), y el documento de garantía residencial solo cita los MCE54 por debajo de 480 W. Además, la mano de obra de desmontaje y reinstalación no está cubierta.",
+      "fuentes": [
+        "https://www.vpsolar.com/download/catalog/Moduli/AIKO/Neostar-3P-plus-MCE54DW/AIKO_Neostar-3PPlus54_A-MCE54Dw_EN.pdf",
+        "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+        "https://basic-solar.de/shop/solarmodule/aiko/aiko-a470-mah54mw-g2-neostar-2p"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "PVEL 2026 Top Performer (Best PV Module Manufacturer)",
+      "donde": "https://aikosolar.com/?p=28185",
+      "veredicto": "matizable",
+      "explicacion": "AIKO fue Top Performer en el Kiwa PVEL Scorecard 2026, pero el modelo ensayado que cita la prensa es el GRH66Dw de 66 células, no el Neostar 3P54 residencial. El scorecard reconoce listas de materiales concretas, no al fabricante en general.",
+      "fuentes": [
+        "https://www.pv-tech.org/industry-updates/aiko-recognized-as-kiwa-pvel-2026-top-performer/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Partial Shading Optimisation",
+      "donde": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
+      "veredicto": "sin pruebas",
+      "explicacion": "La marca atribuye a sus células ABC un mejor comportamiento con sombras parciales, pero no se encontró un ensayo independiente publicado que lo cuantifique para este modelo.",
+      "fuentes": [
+        "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18 en la web de EU Safety Gate (ec.europa.eu/safety-gate), CPSC (cpsc.gov), ACCC (productsafety.gov.au), Health Canada y prensa sectorial (pv-magazine, pv-tech, solarquotes) por «AIKO» y «Neostar». No se encontró ninguna retirada ni alerta de seguridad para módulos AIKO. Las alertas de paneles encontradas (ECORAN GmbH en Australia, SolarWorld y Bosch en EE. UU.) son de otras marcas.",
+  "ofertas": [
+    {
+      "distribuidor": "basic-solar.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://basic-solar.de/shop/solarmodule/aiko/aiko-a470-mah54mw-g2-neostar-2p",
+      "precio_eur": 89.99,
+      "iva_incluido": true,
+      "unidad": "por módulo",
+      "incluye_instalacion": false,
+      "envio": "Gastos de envío aparte (no se indica importe).",
+      "stock": "Agotado («Nicht vorrätig»), entrega en máx. 60 días",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Modelo Neostar 2P A470-MAH54Mw G2 (generación anterior), «inkl. 0 % MwSt.» (IVA alemán del 0 % para FV residencial). Anuncia 15 años de garantía de producto."
+    },
+    {
+      "distribuidor": "aceflex.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.aceflex.de/produkt/aiko-solar-470w-glas-glas-black-frame-aiko-a-mah54dw-neostar-2p/",
+      "precio_eur": 93.18,
+      "iva_incluido": null,
+      "unidad": "por módulo (pedido mínimo 4)",
+      "incluye_instalacion": false,
+      "envio": "Por agencia en palé; coste no indicado.",
+      "stock": "Agotado; restos bajo consulta",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Modelo Neostar 2P+ A470-MAH54Dw (doble vidrio). La página no aclara el IVA; dice que puede aplicarse el 0 % según § 12.3 UStG."
+    },
+    {
+      "distribuidor": "sun.store",
+      "tipo": "mayorista",
+      "pais": "UE (plataforma B2B)",
+      "url": "https://sun.store/en/product/aiko-aiko-a495-mce54mw-neostar-3p54-470-500-1500v-black-frame-48106",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por Wp",
+      "incluye_instalacion": false,
+      "envio": "No indicado",
+      "stock": "962–2886 unidades",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Muestra «desde 0,198 €/Wp» para el A495-MCE54Mw (≈98 € por módulo), sin indicar IVA; plataforma profesional."
+    }
+  ],
+  "compatibles": [
+    "Inversores de string con entrada hasta 1500 V DC (en vivienda, normalmente 600–1000 V)",
+    "Microinversores y optimizadores que admitan Isc ≈ 15 A por módulo",
+    "Conectores Stäubli MC4-EVO2"
+  ],
+  "pendiente": [
+    "Precio con IVA en una tienda española para el Neostar 3P54 (autosolar.es lista el Neostar 3S54 de 475 W solo con «Pide presupuesto»).",
+    "Qué documento de garantía rige para las variantes MCE54 de 480–500 W y para las unidades vendidas con 15 años.",
+    "Certificados IEC 61215/61730 y organismo emisor para el 3P54.",
+    "Resultado PVEL específico del modelo residencial de 54 células.",
+    "EAN/GTIN."
+  ]
+}

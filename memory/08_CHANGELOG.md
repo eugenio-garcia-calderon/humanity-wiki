@@ -8963,3 +8963,10 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Bloque «Contenido de un tema» (Humanidad Wiki, fase 1) (prog8)
 - Nuevo bloque para cualquier página: todo lo publicado sobre un tema (páginas, bases de datos, publicaciones, carpetas, esquemas, personas y contenido de fuera), por secciones, con «Ver más» y filtro por subtema. Lee lo mismo que la página de contenido de cada tema.
 - En el bloque se elige el tema, el título, cuántas tarjetas por sección y qué secciones se ven.
+
+
+### 2026-10-18 — Los datos de producto y el programa que los carga (Wikiproducts W3a)
+- `scripts/wikiproducts/datos/portatil/`: 58 productos portátiles investigados (13 powerbanks, 10 estaciones de energía, 17 paneles solares portátiles, 18 luces solares), con 129 afirmaciones publicitarias con veredicto, 11 retiradas de seguridad y 77 ofertas. Cada dato lleva fuente, fecha y naturaleza (`declarado`, `medido`, `calculado`, `no_publicado`). Junto a `datos/domestico/` (W3b).
+- `scripts/wikiproducts/cargar.mjs` los escribe por `/api/v1` en las tablas de `crear-esquema.mjs` (que ejecuta antes si faltan): valores, procedencia por celda, marca, afirmaciones y retiradas enlazadas, ofertas con «sin acuerdo» como comisión vacía, y las direcciones `/subcategoria/marca-modelo` al final. Reconoce cada fila por su nombre: repetirlo sólo escribe lo que cambió y nunca borra. `--seco` lo comprueba sin servidor.
+- Probado en la copia local (`local.sh`): 621 filas sin fallos; la segunda carga, 0 cambios.
+- Un importe decimal se envía con coma («0,138»): el tipo «moneda» del servidor lee «0.138» como 138 (punto de millar), también cuando llega como número por la API.

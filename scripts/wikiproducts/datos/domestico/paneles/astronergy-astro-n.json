@@ -1,0 +1,115 @@
+{
+  "slug": "astronergy-astro-n",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Astronergy ASTRO N7s (TOPCon, 96 medias células, doble vidrio bifacial)",
+  "marca": "Astronergy",
+  "modelo": "ASTRO N7s CHSM48RN(DG)/F-BH y CHSM48RN(DG)(BLH)/F-BH (todo negro), 450…470 W; generación anterior de 108 medias células CHSM54RNs(DG)/F-BH, 430…465 W",
+  "variante_ficha": "CHSM48RN(DG)(BLH)/F-BH-450 (ASTRO N7s 2.0, todo negro; ficha versión 202510)",
+  "ean": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://7sun.eu/produkt/modul-astroenergy-chsm48rndgblh-450-f-bh-full-black-bifacial-2/", "fecha": "2026-10-18", "nota": "No se encontró GTIN público." },
+  "anio_lanzamiento": { "valor": null, "unidad": "año", "origen": "desconocido", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "La ficha consultada es de octubre de 2025 (versión 202510); la marca no publica la fecha de lanzamiento. En Intersolar Europe 2026 presentó el sucesor ASTRO N7s 3.0 (hasta 475 W) según TaiyangNews." },
+  "estado": "a la venta",
+  "resumen": "ASTRO N7s es la gama de módulos fotovoltaicos para tejados de Astronergy, marca de la empresa china Chint New Energy Technology, del grupo CHINT. La versión 2.0 de 96 medias células TOPCon de tipo N, con doble vidrio de 2 mm y parte trasera bifacial, se ofrece de 450 a 470 W en un formato de 1762 × 1134 mm y 24,5 kg. Según la ficha técnica, la variante de 450 W tiene un 22,5 % de eficiencia, un coeficiente de temperatura de −0,29 %/°C y una bifacialidad del 80 ± 5 %. La marca declara 25 años de garantía de producto y 30 años de rendimiento con un mínimo final del 87,4 %. Algunos distribuidores europeos venden la misma gama con el nombre «Astroenergy».",
+  "imagen": { "url": null, "fuente": "https://7sun.eu/produkt/modul-astroenergy-chsm48rndgblh-450-f-bh-full-black-bifacial-2/", "licencia": "propiedad del fabricante; solo enlace" },
+
+  "datos_tecnicos": {
+    "potencia_pico_wp": { "valor": 450, "unidad": "Wp", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "STC, cara frontal; clasificación 0/+3 %, tolerancia de medida ±3 %." },
+    "gama_potencias_wp": { "valor": "450–470", "unidad": "Wp", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Versión 2.0. Otras fichas de la misma serie anuncian 445–465 W." },
+    "eficiencia_pct": { "valor": 22.5, "unidad": "%", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Variante 450 W. Comprobación: 450 / (1,762 × 1,134) = 22,52 %. La variante de 470 W declara 23,5 %." },
+    "tecnologia_celula": { "valor": "TOPCon, N-type, sin busbar (zero-busbar)", "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": null },
+    "tipo_celula": { "valor": "monocristalina", "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": null },
+    "num_celulas": { "valor": 96, "unidad": "medias células (6×16)", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Células más grandes que las de 108 medias células de la generación CHSM54RNs." },
+    "bifacial": { "valor": true, "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "En tejado inclinado la ganancia por la cara trasera suele ser pequeña." },
+    "bifacialidad_pct": { "valor": 80, "unidad": "%", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "±5 %." },
+    "vidrio": { "valor": "doble (2,0 + 2,0 mm)", "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": null },
+    "marco": { "valor": "aluminio anodizado negro, 30 mm", "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Existe versión con marco plateado." },
+    "medidas_mm": { "valor": "1762 × 1134 × 30", "unidad": "mm", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "2,0 m²." },
+    "peso_kg": { "valor": 24.5, "unidad": "kg", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": null },
+    "coef_temp_pmax_pct_c": { "valor": -0.29, "unidad": "%/°C", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Voc −0,25 %/°C; Isc +0,043 %/°C." },
+    "noct_o_nmot_c": { "valor": null, "unidad": "°C", "origen": "desconocido", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "No aparecía en el texto extraído de la ficha." },
+    "degradacion_primer_anio_pct": { "valor": 1, "unidad": "%", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "≤1,0 % el primer año." },
+    "degradacion_anual_pct": { "valor": 0.4, "unidad": "%/año", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Años 2 a 30." },
+    "voc_v": { "valor": 36.59, "unidad": "V", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Vmpp 30,51 V; Impp 14,75 A." },
+    "isc_a": { "valor": 15.61, "unidad": "A", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Más corriente y menos tensión que un módulo de 108 medias células de la misma potencia; conviene comprobar la corriente máxima de entrada del inversor o microinversor." },
+    "tension_max_sistema_v": { "valor": 1500, "unidad": "V DC", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "IEC/UL. Fusible máx. en serie 30 A." },
+    "carga_mecanica_pa": { "valor": "6000 / 4000", "unidad": "Pa (frontal/trasera, carga de ensayo)", "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Carga máxima de ensayo; la carga de diseño suele ser menor (factor de seguridad 1,5) y depende del montaje." },
+    "ip_caja_conexiones": { "valor": "IP68", "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": null },
+    "conector": { "valor": "MC4-EVO2A (estándar) o HCB40 (opcional); cable de 4 mm² y 1200 mm", "unidad": null, "origen": "declarado", "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Al comprar, conviene confirmar qué conector lleva el lote." },
+    "precio_por_wp_eur": { "valor": 0.138, "unidad": "€/Wp", "origen": "calculado", "fuente": "https://7sun.eu/produkt/modul-astroenergy-chsm48rndgblh-450-f-bh-full-black-bifacial-2/", "fecha": "2026-10-18", "nota": "61,98 € (IVA incl.) / 450 Wp = 0,138 €/Wp. La propia página muestra también 50,39 €, sin aclarar la diferencia, y la disponibilidad no está clara." },
+    "resultado_pvel": { "valor": "Astronergy afirma haber sido «Top Performer» de Kiwa PVEL por novena vez consecutiva (2025)", "unidad": null, "origen": "declarado", "fuente": "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/", "fecha": "2026-10-18", "nota": "Nota de prensa de la marca; no indica qué modelo o lista de materiales se ensayó. No se comprobó en el Scorecard original." },
+    "pruebas_independientes": { "valor": "La marca comunica el premio «Overall Highest Achiever» de RETC para la serie ASTRO N7", "unidad": null, "origen": "declarado", "fuente": "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/", "fecha": "2026-10-18", "nota": "Nota de prensa; no se consultó el informe PVMI de RETC y se refiere a la serie N7 (formato grande), no necesariamente a la N7s doméstica." }
+  },
+
+  "garantias": {
+    "producto": { "anios": 25, "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "fecha": "2026-10-18", "nota": "Según la ficha. El documento de garantía consultado (Australia) remite a un anexo A, no publicado con él, para los años por modelo." },
+    "rendimiento": { "anios": 30, "porcentaje_final": 87.4, "primer_anio_pct": 99, "lineal_anual_pct": 0.4, "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf", "fecha": "2026-10-18", "nota": "Términos para módulos n-type; coinciden con la ficha. Solo cubre la potencia de la cara frontal." },
+    "letra_pequena": [
+      "Reclamación en un plazo de 30 días naturales desde que se descubre el defecto; si no, se pierde el derecho. Acciones legales dentro de los 6 meses siguientes (garantía Astronergy para Australia, publicada el 09-12-2024).",
+      "El cliente paga desmontaje, embalaje, reinstalación, producción perdida y la mayoría de impuestos y aranceles, sea cual sea el resultado de la reclamación; si es válida, Astronergy reembolsa un envío de vuelta «razonable» con un tope pactado de antemano (garantía Australia).",
+      "La garantía empieza en la entrega al cliente directo o seis meses después de la fecha de fabricación, lo que ocurra antes (garantía Australia).",
+      "La garantía de rendimiento solo cubre la potencia frontal; la ganancia bifacial no está garantizada. Tolerancia de medida ±3 % según IEC 60904.",
+      "El documento leído es el de Australia (emisor: Astronergy New Energy Technology (Singapore) Pte. Ltd.). No se encontró la versión europea vigente; la única europea localizada es de 2015 (Astronergy Solarmodule GmbH, Fráncfort del Óder) y ya no aplica a este modelo.",
+      "La ficha indica que la garantía está respaldada por una «aseguradora internacional Tier 1», sin nombrarla; en 2014 la marca anunció una cobertura de Munich Re (EE Power). No se encontró la póliza vigente.",
+      "En Alemania la reclamación se tramita a través del distribuidor o instalador, según Reduco; en España la garantía legal frente al vendedor es independiente de la del fabricante."
+    ],
+    "quien_responde": "Chint New Energy Technology Co., Ltd. y sus filiales regionales (en Australia, Astronergy New Energy Technology (Singapore) Pte. Ltd.). La ficha menciona un seguro de garantía de una aseguradora no nombrada; si existe y está vigente, podría cubrir reclamaciones si el fabricante desaparece."
+  },
+
+  "empresa": {
+    "razon_social": "Chint New Energy Technology Co., Ltd. (marca Astronergy)",
+    "pais_sede": "China (Haining, Zhejiang, según la información pública de la empresa; no verificado en esta sesión)",
+    "fundacion": null,
+    "cotiza_en": "No se verificó; la marca forma parte del grupo CHINT",
+    "web": "https://www.astronergy.com",
+    "fabricante_celulas": "Astronergy (células propias)",
+    "pais_fabricacion": "China; también Tailandia y Turquía",
+    "fabricas_conocidas": [ "9 plantas en China (ciudades no detalladas en la fuente)", "Tailandia (obleas, células y módulos; en producción desde 2016, 5 GW de obleas previstos)", "Turquía (1 GW de módulos y 2 GW de células, 2024)" ],
+    "notas": [
+      "Astronergy es la marca de módulos de Chint New Energy Technology Co., Ltd., según el pie de la ficha técnica; las notas de prensa la presentan como «miembro clave del grupo CHINT».",
+      "Capacidad de módulos declarada de 55 GW a finales de 2023, con planes de llegar a unos 100 GW en 2025 (Canal Solar, julio de 2024).",
+      "Tuvo fábrica de módulos en Fráncfort del Óder (Alemania), sede del emisor de su garantía europea de 2015.",
+      "Tailandia es uno de los cuatro países del sudeste asiático sobre los que EE. UU. impuso derechos antidumping y compensatorios a células y módulos en abril de 2025; la fuente consultada no cita tipos específicos para Astronergy. No afecta a las ventas en la UE.",
+      "No se encontraron detenciones bajo la ley UFLPA de EE. UU. ni demandas relevantes asociadas a Astronergy en las búsquedas a fecha 2026-10-18; esto no equivale a una auditoría."
+    ],
+    "fuentes": [ "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "https://canalsolar.com.br/en/astronergy-plans-production-capacity-for-2025/", "https://www.pv-magazine-australia.com/?p=12803", "https://www.pvtime.org/up-to-3403-96-us-imposes-massive-tariffs-on-southeast-asian-solar-cells/", "https://www.solartraders.com/uploads/production/data_sheet/file/26690/Astroergy%20WA%20EN.pdf?locale=da" ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China o Tailandia (la ficha no indica la planta)",
+    "fabrica": null,
+    "materiales_principales": [ "silicio monocristalino N-type", "vidrio de 2 mm (dos capas)", "marco de aluminio anodizado" ],
+    "num_componentes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "El fabricante no lo publica." },
+    "reparabilidad": "Módulo laminado no reparable en la práctica; la garantía prevé reparación, sustitución o compensación."
+  },
+  "certificados": [
+    { "nombre": "IEC 61215, IEC 61730, ISO 9001/14001/45001, CE (según la ficha de la versión de 48 células citada por Reduco)", "emisor": "no indicado", "fuente": "https://reduco.ai/blog/solar/astronergy-solarmodule-test-erfahrungen", "fecha": "2026-10-18" }
+  ],
+  "documentos": [
+    { "tipo": "ficha técnica", "url": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "idioma": "en", "fecha": "2025-10" },
+    { "tipo": "manual", "url": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Manual.pdf", "idioma": "en", "fecha": null },
+    { "tipo": "garantía", "url": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf", "idioma": "en", "fecha": "2024-12-09" }
+  ],
+
+  "afirmaciones": [
+    { "afirmacion": "Newly upgraded cell technology, ultra-high product energy efficiency", "donde": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "veredicto": "matizable", "explicacion": "La eficiencia declarada (22,5–23,5 %) está en la media de los módulos TOPCon domésticos de 2025–2026; «ultra-high» es una valoración comercial sin referencia comparativa.", "fuentes": [ "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf" ], "fecha": "2026-10-18" },
+    { "afirmacion": "＜ 2 ㎡ area, easy to transport and install", "donde": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf", "veredicto": "matizable", "explicacion": "1762 × 1134 mm son 1,998 m², justo por debajo de 2 m². Pesa 24,5 kg, más que los 21–22 kg de módulos domésticos de vidrio y lámina de tamaño similar, por el doble vidrio de 2 mm.", "fuentes": [ "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf" ], "fecha": "2026-10-18" },
+    { "afirmacion": "ninth consecutive Kiwa PVEL TOP Performer designation", "donde": "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/", "veredicto": "sin pruebas", "explicacion": "No se comprobó en el Scorecard de Kiwa PVEL. Aunque fuera exacto, el reconocimiento se da por lista de materiales ensayada y no implica que cada lote de ASTRO N7s sea igual.", "fuentes": [ "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/" ], "fecha": "2026-10-18" }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 de «Astronergy», «Astroenergy», «Chint» y «CHSM48RN/CHSM54RN» en EU Safety Gate, CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia), Health Canada y prensa sectorial (pv magazine). No se encontró ninguna retirada ni alerta de seguridad para el modelo ni la marca: ninguna conocida a fecha 2026-10-18.",
+
+  "ofertas": [
+    { "distribuidor": "7SUN (7sun.eu)", "tipo": "tienda online", "pais": "UE (tienda en euros; empresa con webs en Alemania y Polonia)", "url": "https://7sun.eu/produkt/modul-astroenergy-chsm48rndgblh-450-f-bh-full-black-bifacial-2/", "precio_eur": 61.98, "iva_incluido": true, "unidad": "por módulo (450 Wp, todo negro)", "incluye_instalacion": false, "envio": "No indicado", "stock": "Dudoso: los metadatos dicen «en stock» pero la página muestra «avisar de disponibilidad»; también aparece un precio de 50,39 €", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" },
+    { "distribuidor": "pvundso.de", "tipo": "tienda online", "pais": "Alemania", "url": "https://pvundso.de/en/product/450W-black-frame-bifacial-solar-module-Astronergy-Astro-N7S-CHSM48RNDG-F-BH/", "precio_eur": 72, "iva_incluido": false, "unidad": "por módulo (450 Wp, marco negro)", "incluye_instalacion": false, "envio": "Aparte; no indica si envía a España", "stock": "Agotado", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" },
+    { "distribuidor": "sun.store", "tipo": "mayorista", "pais": "UE (plataforma B2B)", "url": "https://sun.store/en/product/astroenergy-astro-n7s-20-chsm48rndgblh-f-bh-450-450-470-1500v-full-black-mc4-evo2a-53128", "precio_eur": null, "iva_incluido": false, "unidad": "desde 0,128 €/Wp", "incluye_instalacion": false, "envio": null, "stock": "936–2808 unidades", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" }
+  ],
+  "compatibles": [ "Inversores de string e híbridos domésticos con entrada ≥16 A por MPPT; microinversores que admitan Isc ≈ 15,6 A." ],
+  "pendiente": [
+    "Ninguna oferta encontrada en una tienda española a fecha 2026-10-18.",
+    "Garantía europea vigente y su anexo de modelos (solo se leyó la australiana de 2024).",
+    "Nombre de la aseguradora de la garantía y vigencia de la póliza.",
+    "Si Chint New Energy o su matriz cotizan en bolsa y con qué participación; año de fundación y sede exacta.",
+    "NMOT y certificados IEC con emisor.",
+    "Resultado de Kiwa PVEL en el Scorecard original y alcance del premio RETC.",
+    "Nombre comercial: algunos distribuidores usan «Astroenergy» en vez de «Astronergy»; no se encontró explicación oficial."
+  ]
+}

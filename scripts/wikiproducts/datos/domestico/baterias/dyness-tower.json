@@ -1,0 +1,413 @@
+{
+  "slug": "dyness-tower",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Dyness Tower",
+  "marca": "Dyness",
+  "modelo": "Tower T7 / T10 / T14 / T17 / T21 (2 a 6 módulos HV9637 de 3,55 kWh + unidad de control BDU)",
+  "variante_ficha": "Tower T10 (3 módulos HV9637, 10,66 kWh)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se ha encontrado un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se ha encontrado una fecha fiable. La garantía europea consultada data de abril de 2023, y ya existe una serie sucesora «Tower TS»."
+  },
+  "estado": "a la venta",
+  "resumen": "Dyness Tower es una batería doméstica de alta tensión que se monta apilando de 2 a 6 módulos LFP HV9637 de 3,55 kWh sobre una unidad de control, de 7,1 a 21,3 kWh nominales. Según la ficha de la marca, la energía útil es del 95 % de la nominal (10,13 kWh en el T10) y la batería declara 6.000 ciclos o más; se usa con inversores híbridos de otros fabricantes. La garantía europea es de 10 años con un 70 % de energía útil, pero baja a 5 años si la batería no está comunicada con el inversor, y tiene un tope de energía que equivale a unos 3.000 ciclos completos. La versión T14, con un inversor KOSTAL, formó parte de la Stromspeicher-Inspektion 2025 de la HTW Berlin.",
+  "imagen": {
+    "url": null,
+    "fuente": null,
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "Pendiente de enlazar una imagen oficial verificada."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 10.66,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tower T10. Ficha para Australia (2024-11-12); no se ha leído la ficha europea."
+    },
+    "capacidad_util_kwh": {
+      "valor": 10.127,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "T10. Otras: T7 6,745; T14 13,499; T17 16,872; T21 20,225 kWh."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "7,10 / 10,66 / 14,21 / 17,76 / 21,31",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "T7 a T21 (2 a 6 módulos)."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Hasta 12 torres en paralelo."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 276.48,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Con 12 torres en paralelo; una sola torre llega a 21,31 kWh. Depende de lo que admita el inversor."
+    },
+    "potencia_continua_kw": {
+      "valor": 6.39,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "T10, a 0,6C con comunicación con el inversor. T7 4,26; T14 8,52; T17 10,65; T21 12,78 kW."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No figura en la ficha consultada."
+    },
+    "quimica": {
+      "valor": "LFP (litio-ferrofosfato)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No lo publica la ficha, y el extracto consultado del folleto de salida a bolsa no nombra al proveedor de celdas."
+    },
+    "ciclos_declarados": {
+      "valor": 6000,
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "≥6.000 ciclos a 0,2C, 25 °C y 95 % de profundidad de descarga (condiciones de laboratorio)."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 95,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Recomendada. AutoSolar indica un 80 % recomendado para el módulo."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha solo dice «High system Efficiency», sin cifra."
+    },
+    "tension": {
+      "valor": "alta tensión; 288 V nominal (T10)",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "96 V por módulo: T7 192 V, T14 384 V, T17 480 V, T21 576 V. Capacidad: 37 Ah."
+    },
+    "acoplamiento": {
+      "valor": "DC, con inversor híbrido de alta tensión de otro fabricante",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversores_compatibles": {
+      "valor": "Inversores híbridos de alta tensión con protocolo CAN compatible (p. ej. KOSTAL PLENTICORE plus G2, ensayado por la HTW Berlin)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-PPT-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No se ha leído la lista oficial de compatibilidad de Dyness. La garantía excluye inversores incompatibles."
+    },
+    "respaldo_apagones": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "depende del inversor asociado. La batería no tiene salida propia."
+    },
+    "instalacion": {
+      "valor": "interior (IP54)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La garantía europea exige de 0 a 50 °C, una humedad del 5 al 95 %, una altitud inferior a 4.000 m y ausencia de polvo conductor o gases corrosivos."
+    },
+    "ip": {
+      "valor": "IP54",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "carga 0 a 50; descarga -10 a 50",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 146,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "T10 completo. Módulo HV9637: 41 kg (AutoSolar)."
+    },
+    "medidas_mm": {
+      "valor": "504 × 380 × 900",
+      "unidad": "mm (an × fo × al)",
+      "origen": "declarado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18",
+      "nota": "T10; la altura crece unos 200 mm por módulo."
+    },
+    "garantia_energia_mwh": {
+      "valor": 32.82,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+      "fecha": "2026-10-18",
+      "nota": "T10 según la garantía europea (2023-04-07). Equivale a unos 3.080 ciclos completos de 10,66 kWh (cálculo propio). T7 20,73; T14 41,46; T17 51,86; T21 62,22 MWh."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 338.73,
+      "unidad": "EUR/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://tienda-solar.es/en/lithium-batteries/1260-battery-dyness-tower-t10",
+      "fecha": "2026-10-18",
+      "nota": "3.430,35 € (IVA incluido) / 10,127 kWh útiles. La página no aclara si el precio incluye la unidad de control BDU y la base; si no las incluye, el coste real es mayor. Sin inversor ni instalación."
+    },
+    "pruebas_independientes": {
+      "valor": "Ensayada en la Stromspeicher-Inspektion 2025 (sistema C4: KOSTAL PLENTICORE plus G2 10 + Dyness Tower T14)",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-PPT-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El informe señala que la corriente máxima de 22 A y la tensión de 384 V limitan la potencia de carga y descarga del sistema a unos 1,7 kW menos que el sistema equivalente con batería BYD (relación potencia/capacidad de unos 0,35 kW/kWh). No se ha podido extraer el valor SPI de C4 del texto del informe: pendiente de consultar en solar.htw-berlin.de/inspektor. Mide el conjunto con ese inversor, no la batería sola."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+      "fecha": "2026-10-18",
+      "nota": "Garantía limitada para la UE de Dyness Digital Energy Technology (documento de 2023-04-07), Tower T7 a T21. 10 años desde la puesta en marcha (con límites ligados a la fecha de factura); 5 años para unidades sin conexión de comunicación."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+      "fecha": "2026-10-18",
+      "nota": "70 % de la energía útil inicial durante 10 años desde la factura, o hasta el tope de energía de cada modelo; la garantía supone 1 ciclo completo al día."
+    },
+    "letra_pequena": [
+      "Sin conexión de comunicación con el inversor la garantía es de 5 años, no de 10; algunas tiendas anuncian el Tower con «5 Years Product Warranty». Fuentes: https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371 y https://www.solartraders.com/en/products/batteries/dyness-tower-t7-7-1-kwh",
+      "Tope de energía: 32,82 MWh en el T10, unos 3.080 ciclos completos, frente a los ≥6.000 ciclos de la ficha. Fuente: garantía UE.",
+      "Excluye compras e instalaciones fuera de Europa, el uso con inversores incompatibles, la mezcla con otras baterías y los fallos no comunicados en 2 semanas. Fuente: garantía UE.",
+      "Condiciones de uso: carga y descarga continua de 0,6C como máximo; recargar en 48 horas tras una descarga profunda (0 % SOC); toma de tierra de menos de 1 Ω; no abrir la carcasa. Fuente: garantía UE (anexo 1).",
+      "El comprador adelanta los gastos de prueba; si el producto está en garantía, el vendedor paga el transporte y la prueba. La mano de obra no se menciona. Fuente: garantía UE.",
+      "Dyness recomienda registrarse en su web, aunque el documento no lo presenta como condición. Fuente: garantía UE."
+    ],
+    "quien_responde": "El vendedor recibe la reclamación y Dyness responde como fabricante. La garantía no prevé qué ocurre si Dyness deja el mercado europeo; quedarían los derechos legales frente al vendedor."
+  },
+  "empresa": {
+    "razon_social": "Dyness Digital Energy Technology Co., Ltd.",
+    "pais_sede": "China (Suzhou, Jiangsu)",
+    "fundacion": 2017,
+    "cotiza_en": null,
+    "web": "https://dyness.com",
+    "fabricante_celulas": null,
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Taizhou (China): centro de I+D y fábrica desde 2020; nueva fábrica terminada en 2022"
+    ],
+    "notas": [
+      "En junio de 2026 presentó un borrador de folleto para salir a la Bolsa de Hong Kong; todavía no cotiza. Su antecesora, Jiangsu Daqin New Energy, se fundó el 17-08-2017. El mayor accionista, el Sr. Liu, tiene el 41,10 % directamente. Fuente: https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
+      "Según Frost & Sullivan, citada en ese folleto, fue la quinta empresa del mundo por envíos de almacenamiento residencial en 2025. Fuente: el mismo folleto.",
+      "La sede corporativa se trasladó a Wuzhong (Suzhou, Jiangsu), según la propia empresa. Fuente: https://dyness.com/news/new-start-signed-dyness-headquarters-is-to-be-located-in-wuzhong-jiangsu",
+      "El extracto consultado del folleto no menciona retiradas ni litigios. No se han encontrado retenciones UFLPA ni procedimientos antidumping específicos."
+    ],
+    "fuentes": [
+      "https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
+      "https://dyness.com/news/new-start-signed-dyness-headquarters-is-to-be-located-in-wuzhong-jiangsu"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": "Taizhou (no confirmado para este modelo concreto)",
+    "materiales_principales": [
+      "celdas de litio-ferrofosfato (LFP)"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulos HV9637 sustituibles y vendidos por separado (https://autosolar.es/baterias-litio-alto-voltaje/bateria-de-litio-dyness-tower-hv9637-355kwh). La garantía exige autorización previa por escrito del vendedor para sustituir piezas."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619, IEC 62040, IEC 62477, IEC 60730, IEC 63056, VDE 2510-50, UL 1973",
+      "emisor": "no indicado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN 38.3, CE-EMC, UKCA, acreditación CEC",
+      "emisor": "no indicado",
+      "fuente": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "idioma": "en",
+      "fecha": "2024-11-12"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+      "idioma": "en",
+      "fecha": "2023-04-07"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "≥6000 cycles (0.2C charge/discharge, 25°C, 95% DoD)",
+      "donde": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Es una cifra de laboratorio en condiciones suaves (0,2C, 25 °C). La garantía europea solo cubre hasta 32,82 MWh en el T10, unos 3.080 ciclos completos, y supone un ciclo al día.",
+      "fuentes": [
+        "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Warranty: 10 years",
+      "donde": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Son 10 años solo si la batería está comunicada con el inversor; sin esa conexión, la garantía europea baja a 5 años. También termina antes si se alcanza el tope de energía.",
+      "fuentes": [
+        "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Expandable from 7.1 kWh to 276.48 kWh",
+      "donde": "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Una torre llega como máximo a 21,31 kWh; la cifra máxima exige 12 torres en paralelo y un inversor que lo admita. En el ensayo de la HTW Berlin, la corriente máxima de 22 A limitó la potencia del sistema frente a otras baterías.",
+      "fuentes": [
+        "https://au.dyness.com/Public/Uploads/uploadfile/files/20241112/DynessTowerdatasheeAU.pdf",
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 en la lista de retiradas del Clean Energy Council (Australia), en gov.uk product safety y en web abierta, y lectura del borrador de folleto de salida a bolsa (HKEX, junio de 2026). No se ha encontrado ninguna retirada ni alerta de seguridad de Dyness Tower ni de la marca. No se consultaron directamente EU Safety Gate, CPSC ni Health Canada.",
+  "ofertas": [
+    {
+      "distribuidor": "Tienda Solar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/lithium-batteries/1260-battery-dyness-tower-t10",
+      "precio_eur": 3430.35,
+      "iva_incluido": true,
+      "unidad": "por batería Tower T10 (10,66 kWh); la página no aclara si incluye BDU y base",
+      "incluye_instalacion": false,
+      "envio": "no indicado",
+      "stock": "no indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    },
+    {
+      "distribuidor": "AutoSolar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-de-litio-dyness-tower-hv9637-355kwh",
+      "precio_eur": 877.25,
+      "iva_incluido": true,
+      "unidad": "por módulo HV9637 (3,55 kWh), sin unidad de control BDU",
+      "incluye_instalacion": false,
+      "envio": "Entrega estimada en la península con pago con tarjeta",
+      "stock": "no indicado («salvo rotura de stock»)",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    }
+  ],
+  "compatibles": [
+    "KOSTAL PLENTICORE plus G2 (ensayado por la HTW Berlin con el T14)",
+    "Otros inversores híbridos de alta tensión con protocolo CAN compatible: lista oficial pendiente"
+  ],
+  "pendiente": [
+    "Ficha técnica europea vigente (se usó la australiana de 2024-11-12; el grado IP y los datos podrían diferir).",
+    "Valor SPI y clase de eficiencia del sistema C4 en la Stromspeicher-Inspektion 2025 de la HTW Berlin.",
+    "Lista oficial de inversores compatibles.",
+    "Fabricante de las celdas.",
+    "Precio de la unidad de control BDU, para calcular el coste completo de la torre.",
+    "Relación con la nueva serie Tower TS y si la serie T sigue fabricándose.",
+    "Consulta directa en EU Safety Gate, CPSC y Health Canada."
+  ]
+}
