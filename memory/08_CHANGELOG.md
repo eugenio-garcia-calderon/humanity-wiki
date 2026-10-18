@@ -8839,3 +8839,12 @@ en mis páginas como proyecto pendiente».
 - `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
 - Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
 - `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).
+### 2026-10-18 — La visibilidad de las propiedades en la galería se aplica (prog8)
+- En una galería, mostrar u ocultar una propiedad desde el panel de Propiedades no tenía efecto en las tarjetas: el panel guardaba la lista en la vista, pero las tarjetas leían otra lista del bloque. Ahora la galería lee y escribe esa misma lista, guardada en la vista.
+
+### 2026-10-18 — Las páginas publicadas llevan su contenido en el HTML (Wikiproducts W2)
+- El HTML que descarga quien abre una página publicada (o un buscador) ya lleva el contenido: títulos, párrafos, listas, tablas, imágenes con texto alternativo, enlaces y la tabla de cada base de datos con sus filas enlazadas. Antes sólo llevaba título y descripción; el cuerpo lo pintaba JavaScript, y los buscadores de IA (ChatGPT, Claude, Perplexity) no veían nada más. `src/server/htmlBloques.ts`.
+- Una dirección de página de un sitio que no existe responde 404 (antes 200 con la aplicación vacía).
+- Cada página declara UNA dirección canónica: la de su dominio propio activo si su sitio tiene uno, o la de su subdominio (`quien.humanity.wiki/…`). Antes cada forma de entrar (`humanity.wiki/@quien/…`, subdominio, dominio) se declaraba canónica a sí misma.
+- `robots.txt` de cada sitio nombra a los rastreadores de IA y deja fuera el buscador y las ordenaciones; nuevo `/llms.txt` con las páginas principales del sitio.
+- Enchufes para módulos: `registrarHtml` (cómo se escribe un bloque nuevo en el HTML) y `registrarAmpliacion` (`src/server/ampliarPagina.ts`: título, tipo, robots, `<meta>` y datos estructurados de una página, para la ficha de producto).
