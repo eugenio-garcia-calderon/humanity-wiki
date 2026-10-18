@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "scripts/wikiproducts/enlazar-sitio.mjs",
-      "motivo": "W2: ocultar título de la galería en subcategorías",
-      "desde": "2026-10-18T21:43:06.050Z"
-    }
-  ]
+  "reservas": []
 }
