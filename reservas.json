@@ -65,6 +65,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "W6 chat y expertos: enganche de pocas líneas",
       "desde": "2026-10-18T11:35:11.883Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/avisos.ts",
+      "motivo": "W6 chat y expertos: enganche de pocas líneas",
+      "desde": "2026-10-18T11:35:14.483Z"
     }
   ]
 }
