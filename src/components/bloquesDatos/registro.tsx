@@ -1,4 +1,5 @@
 import { Component, Suspense, type ReactNode } from 'react';
+import { lecturaPrecargada } from './precarga';
 import { AlertTriangle, Construction } from 'lucide-react';
 import { esBloqueDatos, TIPOS_BLOQUE_DATOS, type Bloque, type TipoBloqueDatos } from '../../utils/bloques';
 import type { OpcionBloque } from '../knowledge/SelectorBloques';
@@ -93,7 +94,9 @@ const Cargando = () => <div className="h-16 animate-pulse rounded-xl bg-slate-50
 export function LecturaBloqueDatos({ bloque, paginaId }: { bloque: Bloque; paginaId?: string }) {
   const def = bloqueRegistrado(bloque.tipo);
   if (!def) return null;
-  const { Lectura } = def;
+  // Preloaded before the first paint (`precarga.ts`): painted directly, so
+  // the block never shows its placeholder.
+  const Lectura = lecturaPrecargada(def.tipo) || def.Lectura;
   return (
     <Aislado tipo={def.tipo}>
       <Suspense fallback={<Cargando />}>

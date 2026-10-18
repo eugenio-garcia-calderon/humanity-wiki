@@ -138,7 +138,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                   <a href={o.enlace} target="_blank" rel={o.rel}
                      className={conCesta(o) && seCompraAqui === false
                        ? 'inline-flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-800'
-                       : 'inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50'}>
+                       : 'inline-flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm sm:text-xs font-bold text-slate-700 hover:bg-slate-50'}>
                     {o.precio_centimos === null ? 'Ver el precio en la tienda'
                       : conCesta(o) && seCompraAqui === false ? 'Comprar en la tienda' : 'Ver en la tienda'}
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden />

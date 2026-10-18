@@ -150,8 +150,18 @@ export type VistaComparador = {
   productos: Array<{ id: string; nombre: string; paginaId: string | null; imagen: string | null; actual: boolean }>;
   /** One line per attribute, one cell per product, in the same order. */
   lineas: Array<{ columnaId: string; etiqueta: string; grupo: string; sentido: 'mayor' | 'menor' | null; celdas: CeldaComparada[] }>;
-  /** Siblings that could be added, for the picker. */
+  /** Siblings that could be added, for the picker: only those of the same
+   *  subcategory as the first product, when the table has subcategories. */
   candidatos: Array<{ id: string; nombre: string }>;
+  /** Set when the products are of different types (a link can still bring
+   *  them together): a sentence warning that the figures don't compare. */
+  mezcla: string | null;
+};
+
+/** The subcategory of a row («Powerbank»), '' when the table has none. */
+const subDe = (t: TablaFicha, x: FilaFicha | undefined): string => {
+  const c = columnaPorRol(t, 'subcategoria');
+  return c && x && tieneValor(x, c) ? textoDe(x, c) : '';
 };
 
 /**
@@ -163,7 +173,10 @@ export type VistaComparador = {
  */
 export function porDefecto(t: TablaFicha, actualId: string, n = MAX_COMPARAR - 1): string[] {
   const actual = t.filas.find(x => x.id === actualId);
-  const otras = t.filas.filter(x => x.id !== actualId);
+  // Same type first: a power bank is compared with power banks, never by
+  // default with a 600 W station that happens to share its table.
+  const sub = subDe(t, actual);
+  const otras = t.filas.filter(x => x.id !== actualId && (!sub || subDe(t, x) === sub));
   const ref = [columnaPorRol(t, 'precio_min'), ...t.columnas.filter(c => grupoDe(c) === 'tecnico' && ordenable(c))]
     .find(c => c && actual && numeroDe(actual, c) !== null);
   const base = ref && actual ? numeroDe(actual, ref)! : null;
@@ -204,11 +217,15 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
       };
     });
   const elegidos = new Set(filas.map(x => x.id));
+  const sub = subDe(t, filas[0]);
+  const tipos = [...new Set(filas.map(x => subDe(t, x)).filter(Boolean))];
   return {
     titulo: String(opciones.titulo || '').trim(),
     productos: filas.map(x => ({ id: x.id, nombre: x.titulo, paginaId: x.pagina_id, imagen: x.imagen || imagenDe(t, x), actual: x.id === opciones.actualId })),
     lineas,
-    candidatos: t.filas.filter(x => !elegidos.has(x.id)).map(x => ({ id: x.id, nombre: x.titulo })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    candidatos: t.filas.filter(x => !elegidos.has(x.id) && (!sub || subDe(t, x) === sub))
+      .map(x => ({ id: x.id, nombre: x.titulo })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    mezcla: tipos.length > 1 ? `Estás comparando productos de distinto tipo (${tipos.join(', ')}): sus cifras no se pueden comparar entre sí.` : null,
   };
 }
 
@@ -224,6 +241,9 @@ export type VistaAlternativas = {
   titulo: string;
   /** The subcategory the ranking was made in («Powerbank»), when the table has one. */
   subcategoria: string | null;
+  /** What the ranking was made among, as a sentence: «Entre los productos del
+   *  mismo tipo (Powerbank) y tamaño parecido: Energía nominal de 43 a 172 Wh.» */
+  ambito: string | null;
   criterios: Array<{
     columnaId: string;
     criterio: string;
@@ -249,7 +269,24 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
   // capacity by a 2 kWh power station that shares its table.
   const cSub = columnaPorRol(t, 'subcategoria');
   const sub = cSub && tieneValor(actual, cSub) ? textoDe(actual, cSub) : '';
-  const filas = sub ? t.filas.filter(x => textoDe(x, cSub!) === sub) : t.filas;
+  let filas = sub ? t.filas.filter(x => textoDe(x, cSub!) === sub) : t.filas;
+  // ...and of a COMPARABLE SIZE: a 5 kWh battery module ranked against 15 kWh
+  // systems comes last in everything and teaches nothing. Half to double its
+  // size; if that leaves fewer than three products, the size filter is dropped
+  // rather than showing a ranking of two.
+  const cTam = columnaPorRol(t, 'tamano');
+  const propio = cTam ? numeroDe(actual, cTam) : null;
+  let rango = '';
+  if (cTam && propio && propio > 0) {
+    const desde = propio / 2, hasta = propio * 2;
+    const parecidas = filas.filter(x => { const n = numeroDe(x, cTam); return n !== null && n >= desde && n <= hasta; });
+    if (parecidas.length >= 3) {
+      filas = parecidas;
+      const cifra = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: n < 10 ? 1 : 0 });
+      const unidad = cTam.config?.unidad ? ` ${cTam.config.unidad}` : '';
+      rango = `${cTam.nombre} de ${cifra(desde)} a ${cifra(hasta)}${unidad}`;
+    }
+  }
   if (filas.length < 2) return null;
   const cols = (elegidas(t, datos.columnas) || t.columnas.filter(c =>
     esComunidad(c) ? c.config?.criterio !== 'media' : listable(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
@@ -273,7 +310,10 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
     if (criterios.length >= max) break;
   }
   if (!criterios.length) return null;
-  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, criterios };
+  const ambito = sub && rango ? `Entre los productos del mismo tipo (${sub}) y tamaño parecido: ${rango}.`
+    : sub ? `Entre los productos del mismo tipo: ${sub}.`
+    : rango ? `Entre los productos de tamaño parecido: ${rango}.` : null;
+  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, ambito, criterios };
 }
 
 // ── AFIRMACIONES PUBLICITARIAS ──────────────────────────────────────────────
@@ -409,4 +449,4 @@ export function fraseSinRetiradas(v: VistaRetiradas): string {
 }
 
 /** The sentence under the header of a sheet that is a template preview. */
-export const DESCRIPCION_NATURALEZA = 'Junto a cada dato se indica de dónde viene: lo que dice la marca, lo que midió un tercero o lo que calculamos.';
+export const DESCRIPCION_NATURALEZA = 'Junto a cada dato se indica de dónde viene: lo que dice la marca, lo que midió un tercero, lo que publica otra fuente (una tienda, la prensa, un organismo) o lo que calculamos.';

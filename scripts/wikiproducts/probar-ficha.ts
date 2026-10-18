@@ -5,7 +5,7 @@
 // It checks the rules that must hold whatever the data says, and above all
 // the ethics code: THE COMMISSION NEVER ORDERS ANYTHING (plan §2.3).
 import assert from 'node:assert/strict';
-import { ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
+import { ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
 import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe } from '../../src/components/bloquesDatos/ficha/vistas';
 import { metaFicha, tituloFicha } from '../../src/components/bloquesDatos/ficha/seo';
 import { propiedadHtml, retiradaHtml, comparadorHtml, type Herramientas } from '../../src/components/bloquesDatos/ficha/html';
@@ -165,6 +165,28 @@ prueba('el HTML del servidor escapa lo que escribe la gente', () => {
 prueba('las propiedades no enseñan la comisión ni las notas internas', () => {
   const v = vistaPropiedad(ficha('a'), { estilo: 'tabla' }) as any;
   assert.ok(!v.lineas.some((l: any) => l.columnaId === 'com' || l.columnaId === 'rev'));
+});
+
+prueba('la procedencia se dice según quién la da y qué falta', () => {
+  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://www.pccomponentes.com/x' }), 'Según pccomponentes.com');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'declarado', fuente: 'https://anker.com/x' }), 'Según la marca · anker.com');
+  const pruebas: any = { id: 'p', nombre: 'Pruebas independientes', tipo: 'texto', config: { clave: 'pruebas_independientes' } };
+  assert.equal(etiquetaProcedencia({ naturaleza: 'no_publicado' }, pruebas), 'No hay pruebas independientes publicadas');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'no_publicado' }, { ...pruebas, config: { sin_dato: 'Nadie lo sabe' } }), 'Nadie lo sabe');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'no_publicado' }), 'El fabricante no lo publica');
+});
+
+prueba('las tarjetas de una tabla de productos enseñan marca, cifra, precio y nota', () => {
+  const cols: any[] = [
+    { id: 't', nombre: 'Nombre', tipo: 'texto', config: {} },
+    { id: 'e', nombre: 'EAN', tipo: 'texto', config: { ficha: 'gtin' } },
+    { id: 'm', nombre: 'Marca', tipo: 'relacion', config: { ficha: 'marca' } },
+    { id: 'w', nombre: 'Energía', tipo: 'numero', config: { clave: 'capacidad_wh', grupo: 'tecnico', comparar: 'mayor' } },
+    { id: 'p', nombre: 'Precio desde', tipo: 'agregado', config: { ficha: 'precio_min' } },
+    { id: 'c', nombre: 'Nota', tipo: 'comunidad', config: { criterio: 'media' } },
+  ];
+  assert.deepEqual(propiedadesTarjeta(cols, 't'), ['m', 'w', 'p', 'c']);
+  assert.equal(propiedadesTarjeta([{ id: 'x', nombre: 'X', tipo: 'texto', config: {} } as any], null), null);
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);

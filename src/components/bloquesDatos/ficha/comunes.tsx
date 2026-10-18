@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Info } from 'lucide-react';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { cn } from '../../../utils/cn';
-import { ETIQUETA_NATURALEZA, fechaCorta, sitioDe, type Procedencia } from './modelo';
+import { etiquetaProcedencia, fechaCorta, type Procedencia } from './modelo';
 
 // The small pieces every block of a product sheet uses, so that a section
 // title, a source mark or a link to another product look the same in all of
@@ -25,14 +25,8 @@ export function Seccion({ titulo, children, className }: { titulo?: string; chil
  *  so («Según la marca»): the house tone (plan §2.6). */
 export function MarcaProcedencia({ p }: { p: Procedencia | null }) {
   if (!p?.naturaleza) return null;
-  const host = sitioDe(p.fuente);
-  const tono = p.naturaleza === 'medido' ? 'text-emerald-700' : p.naturaleza === 'no_publicado' ? 'text-amber-700' : 'text-slate-400';
-  const texto = (
-    <>
-      {ETIQUETA_NATURALEZA[p.naturaleza]}
-      {host ? ` · ${host}` : ''}
-    </>
-  );
+  const tono = p.naturaleza === 'medido' ? 'text-emerald-700' : p.naturaleza === 'no_publicado' ? 'text-amber-700' : 'text-slate-500';
+  const texto = <>{p.etiqueta || etiquetaProcedencia(p)}</>;
   return (
     <span className={cn('inline-flex items-center gap-1 text-[11px] font-semibold', tono)} title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>
       {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="hover:underline">{texto}</a> : texto}
