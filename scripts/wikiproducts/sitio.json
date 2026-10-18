@@ -2,11 +2,26 @@
   "_comentario": "Qué página del sitio wikiproducts.humanity.wiki enseña cada base de datos. Lo lee enlazar-sitio.mjs. Las páginas van por id porque el título lo puede cambiar Eugenio.",
   "aviso": "se est[aá]n cargando",
   "subcategorias": [
-    { "tabla": "powerbanks", "pagina": "KWMVDTQNR7D6" },
-    { "tabla": "paneles-solares-portatiles", "pagina": "KWMVDTQO1OM5" },
-    { "tabla": "luces-solares-portatiles", "pagina": "KWMVDTQOC0CI" },
-    { "tabla": "paneles-solares-domesticos", "pagina": "KWMVDTQOMQVL" },
-    { "tabla": "baterias-domesticas", "pagina": "KWMVDTQOX54K" }
+    {
+      "tabla": "powerbanks",
+      "pagina": "KWMVDTQNR7D6"
+    },
+    {
+      "tabla": "paneles-solares-portatiles",
+      "pagina": "KWMVDTQO1OM5"
+    },
+    {
+      "tabla": "luces-solares-portatiles",
+      "pagina": "KWMVDTQOC0CI"
+    },
+    {
+      "tabla": "paneles-solares-domesticos",
+      "pagina": "KWMVDTQOMQVL"
+    },
+    {
+      "tabla": "baterias-domesticas",
+      "pagina": "KWMVDTQOX54K"
+    }
   ],
   "datos": {
     "madre_titulo": "Cómo trabajamos",
@@ -32,5 +47,13 @@
         "texto": "Retiradas del mercado y alertas de seguridad publicadas por organismos oficiales (EU Safety Gate, CPSC de Estados Unidos, Health Canada y ACCC de Australia) que afectan a productos de Wikiproducts, con el enlace a cada aviso original."
       }
     ]
-  }
+  },
+  "portada": {
+    "_comentario": "La página raíz del sitio (la de wikiproducts.humanity.wiki). enlazar-sitio.mjs le pone el bloque «Secciones del sitio» (W2) antes de su primer título si no lo tiene, y añade a su menú los enlaces de «menu» que falten.",
+    "id": "KWMVDTQQ35QI",
+    "titulo": "Wikiproducts",
+    "bloque_titulo": "Explora por categoría"
+  },
+  "_menu_comentario": "Vacío a propósito (Eugenio, 2026-10-18): las consultas con expertos quedan fuera del MVP, así que el enlace «Expertos» → «Consultar a un experto» ya no se añade. Para volver a ponerlo: {\"texto\": \"Expertos\", \"pagina_titulo\": \"Consultar a un experto\"}.",
+  "menu": []
 }

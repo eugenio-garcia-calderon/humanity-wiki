@@ -4,6 +4,8 @@ import { Search } from 'lucide-react';
 import { MarcoLectura, type DatosPagina } from './CabeceraLectura';
 import { Cargando } from './VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from './ContextoSitio';
+import { recordarRuta } from '../../utils/rutasLegibles';
+import SeccionesSitio, { type Seccion } from './SeccionesSitio';
 
 // ============================================================================
 // LOS RESULTADOS DEL BUSCADOR DE UN SITIO — `/buscar?q=…` (2026-10-18)
@@ -15,7 +17,8 @@ import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from './Cont
 // `robots.txt` deja esta página fuera de los buscadores: una página de
 // resultados por cada texto que alguien escriba son infinitas páginas finas.
 
-type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null };
+type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta?: string | null };
+type Respuesta = { resultados: Resultado[]; mas?: boolean; corregido?: string | null; secciones?: Seccion[] };
 
 export default function BuscadorSitio() {
   const sitio = useSitio();
@@ -23,7 +26,7 @@ export default function BuscadorSitio() {
   const q = (params.get('q') || '').trim();
   const raizId = params.get('sitio') || sitio?.raizId || null;
   const [raiz, setRaiz] = useState<DatosPagina | null>(null);
-  const [res, setRes] = useState<{ resultados: Resultado[]; mas?: boolean } | null>(null);
+  const [res, setRes] = useState<Respuesta | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
 
   // La página raíz: de ella salen el menú y el pie.
@@ -44,7 +47,10 @@ export default function BuscadorSitio() {
       .then(async r => {
         const j = await r.json().catch(() => ({}));
         if (!vivo) return;
-        if (!r.ok) setFallo(j.error || 'No se ha podido buscar.'); else setRes(j);
+        if (!r.ok) { setFallo(j.error || 'No se ha podido buscar.'); return; }
+        // Antes de pintar: así cada enlace sale ya por su dirección legible.
+        for (const x of j.resultados || []) recordarRuta(x.id, x.ruta);
+        setRes(j);
       })
       .catch(() => vivo && setFallo('No se ha podido buscar. Inténtalo dentro de un momento.'));
     return () => { vivo = false; };
@@ -63,18 +69,24 @@ export default function BuscadorSitio() {
     <MarcoLectura pagina={raiz} rutas={rutas}>
       <main>
         <form role="search" method="get" className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 h-12 mb-6">
-          <Search className="w-5 h-5 text-slate-400 shrink-0" aria-hidden />
+          <Search className="w-5 h-5 text-slate-500 shrink-0" aria-hidden />
           <input type="search" name="q" defaultValue={q} required minLength={2} autoFocus={!q}
             aria-label="Buscar en este sitio" placeholder="Buscar un producto, una marca, un código de barras…"
-            className="flex-1 min-w-0 bg-transparent outline-none text-base text-slate-800 placeholder:text-slate-400" />
+            className="flex-1 min-w-0 bg-transparent outline-none text-base text-slate-800 placeholder:text-slate-500" />
           {raizId && <input type="hidden" name="sitio" value={raizId} />}
         </form>
         {q.length >= 2 && <h1 className="text-xl font-black text-slate-900 mb-4">Resultados de «{q}»</h1>}
         {fallo ? <p className="text-sm text-rose-600">{fallo}</p>
           : !res ? <Cargando />
-          : q.length < 2 ? <p className="text-sm text-slate-500">Escribe al menos dos letras.</p>
-          : res.resultados.length === 0 ? <p className="text-sm text-slate-500">No hay nada que coincida con «{q}» en este sitio.</p>
-          : (
+          : q.length < 2 ? <p className="text-base text-slate-600">Escribe al menos dos letras.</p>
+          : res.resultados.length === 0 ? (
+            <div>
+              <p className="text-base text-slate-700">No hay nada que coincida con «{q}» en este sitio.</p>
+              <p className="mt-1 text-base text-slate-600">Prueba con otra palabra (una marca, un modelo, «panel», «batería»…) o entra en una sección:</p>
+              {res.secciones && res.secciones.length > 0 && <SeccionesSitio secciones={res.secciones} enlace={enlace} className="mt-4" />}
+            </div>
+          ) : (<>
+            {res.corregido && <p className="mb-3 text-base text-slate-700">Mostrando resultados de «{res.corregido}».</p>}
             <ul className="divide-y divide-slate-100">
               {res.resultados.map(r => (
                 <li key={r.id} className="py-3">
@@ -82,15 +94,15 @@ export default function BuscadorSitio() {
                     {r.portada && <img src={r.portada} alt="" width={56} height={56} loading="lazy" className="w-14 h-14 rounded-lg object-cover shrink-0 bg-slate-100" />}
                     <div className="min-w-0">
                       <p className="font-bold text-slate-900 group-hover:underline">{r.titulo}</p>
-                      {r.tabla && <p className="text-xs font-bold text-slate-400">{r.tabla}</p>}
-                      {r.descripcion && <p className="text-sm text-slate-600 line-clamp-2">{r.descripcion}</p>}
+                      {r.tabla && <p className="text-sm font-bold text-slate-600">{r.tabla}</p>}
+                      {r.descripcion && <p className="text-base text-slate-700 line-clamp-2">{r.descripcion}</p>}
                     </div>
                   </Link>
                 </li>
               ))}
             </ul>
-          )}
-        {res?.mas && <p className="mt-4 text-xs text-slate-400">Hay más resultados: escribe algo más concreto.</p>}
+          </>)}
+        {res?.mas && <p className="mt-4 text-sm text-slate-600">Hay más resultados: escribe algo más concreto.</p>}
       </main>
     </MarcoLectura>
   );

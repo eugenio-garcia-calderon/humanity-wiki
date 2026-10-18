@@ -12,6 +12,10 @@
 #   3. Runs `crear-esquema.mjs --plantillas` and `cargar.mjs` against the app on
 #      127.0.0.1, as that owner. Both are idempotent: a second run only adds
 #      what is missing and changes what differs.
+#   (3b. `expertos.mjs` (W6) is NOT run: Eugenio took expert consultations
+#      out of the MVP on 2026-10-18. The script and `expertos.json` stay in
+#      the repo; to bring them back, restore the step before step 4 and the
+#      «Expertos» link in `sitio.json` → `menu`.)
 #   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
 #      a visitor sees none of it (a table inherits visibility from its page).
 #   5. With WP_FOTOS=si, runs `fotos.mjs`: one photo per product, downloaded
@@ -86,6 +90,9 @@ nodo crear-esquema.mjs --plantillas
 
 echo "== Datos: marcas, distribuidores, productos, afirmaciones, retiradas y ofertas =="
 nodo cargar.mjs
+
+# Expert consultations are out of the MVP (Eugenio, 2026-10-18), so
+# `nodo expertos.mjs` is not run here. See step 3b in the header.
 
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs

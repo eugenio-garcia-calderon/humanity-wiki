@@ -28,7 +28,7 @@ export function MarcaProcedencia({ p }: { p: Procedencia | null }) {
   const tono = p.naturaleza === 'medido' ? 'text-emerald-700' : p.naturaleza === 'no_publicado' ? 'text-amber-700' : 'text-slate-500';
   const texto = <>{p.etiqueta || etiquetaProcedencia(p)}</>;
   return (
-    <span className={cn('inline-flex items-center gap-1 text-[11px] font-semibold', tono)} title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>
+    <span className={cn('inline-flex items-center gap-1 text-sm font-semibold', tono)} title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>
       {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="hover:underline">{texto}</a> : texto}
       {p.nota ? <Info className="w-3 h-3 opacity-60" aria-hidden /> : null}
     </span>

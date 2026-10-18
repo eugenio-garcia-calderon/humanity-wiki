@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { BarraAvance, esBarra } from './BarraAvance';
 import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -360,6 +361,10 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   // propiedades ni mandos grandes: no caben, y taparían la imagen.
   const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
   const minima = tamano === 'xxxs';
+  // On a published site, cards from size S up are read, not managed: names at
+  // 16 px and properties at 14 px (W2's 16 px audit, 2026-10-18; they were 12).
+  // The editor keeps the compact sizes its users already lay pages out with.
+  const legible = !!sitio && !chica;
   const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
           const conMenu = (arrastrable ?? editable) && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
@@ -367,7 +372,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
           const icono = f.pagina?.icono;
       const pesoClase = pesoNombre === 'fino' ? 'font-light' : pesoNombre === 'normal' ? 'font-semibold' : 'font-bold';
       const nombreEl = (
-                  <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (minima ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+                  <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (minima ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : legible ? 'text-base' : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                     {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                       : icono ? (esUrl(icono)
                         ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
@@ -502,7 +507,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
                 {!chica && f.pagina?.descripcion && (
-                  <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line"><TextoEnriquecido texto={f.pagina.descripcion} /></p>
+                  <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.map(c => {
                   // EDITAR DESDE LA TARJETA (2026-10-18): quien edita cambia cada propiedad visible
@@ -515,12 +520,17 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                         onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}
                         onDragStart={e => { e.preventDefault(); e.stopPropagation(); }}>
                         {vacia && <span className="shrink-0 text-[10px] font-bold text-slate-400">{c.nombre}</span>}
-                        <div className="min-w-0 max-w-full">
+                        <div className={cn('min-w-0 max-w-full', esBarra(c) && !vacia && 'w-full')}>
                           <CeldaTabla celda={celda} columna={c} apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
                             editable onGuardar={v => onGuardarCelda(f.id, c.id, v)} />
                         </div>
                       </div>
                     );
+                  }
+                  // Un porcentaje de avance, como su barra (2026-10-18).
+                  if (esBarra(c)) {
+                    const cb = f.celdas[c.id];
+                    return cb?.estado === 'ok' && cb.valor !== null ? <div key={c.id} className="pt-0.5"><BarraAvance fraccion={Number(cb.valor)} /></div> : null;
                   }
                   // Las de selección, como etiquetas de su color y sin el nombre de la propiedad.
                   if (c.tipo === 'seleccion' || c.tipo === 'seleccion_multiple') {
@@ -530,7 +540,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                     return ops.length ? (
                       <div key={c.id} className={cn('flex flex-wrap gap-1', centrada && 'justify-center')}>
                         {ops.map(o => (
-                          <span key={o.id} className="px-1.5 py-0.5 rounded-md text-[11px] font-semibold"
+                          <span key={o.id} className={cn('px-1.5 py-0.5 rounded-md font-semibold', legible ? 'text-sm' : 'text-[11px]')}
                             style={{ backgroundColor: (o.color || '#e2e8f0') + '33', color: o.color || '#475569' }}>{o.label}</span>
                         ))}
                       </div>
@@ -552,7 +562,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                     }
                     return lista.length ? (
                       <div key={c.id} className={cn('flex flex-wrap items-center gap-1 pt-0.5', centrada && 'justify-center')}>
-                        {lista.map((a: any) => <FichaRelacion key={a.id} a={a} />)}
+                        {lista.map((a: any) => <FichaRelacion key={a.id} a={a} legible={legible} />)}
                       </div>
                     ) : null;
                   }
@@ -565,7 +575,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                   const v = formatear(f.celdas[c.id] ?? { estado: 'vacia' }, c,
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });
                   return v ? (
-                    <p key={c.id} className={cn('text-slate-500 line-clamp-2 break-words', chica ? 'text-[10px] leading-tight' : 'text-xs')}>
+                    <p key={c.id} className={cn('text-slate-500 line-clamp-2 break-words', chica ? 'text-[10px] leading-tight' : legible ? 'text-sm' : 'text-xs')}>
                       <span className="text-slate-500">{c.nombre}: </span>{v}
                       {/* «72» alone says nothing on a card: the unit the column declares goes with it. */}
                       {c.config?.unidad && ['numero', 'formula', 'agregado'].includes(c.tipo) ? ` ${c.config.unidad}` : ''}

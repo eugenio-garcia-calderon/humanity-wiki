@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProveedorSitio, sitioConAnfitrion } from './components/sitio/ContextoSitio';
 import PaginaDeDominio, { type Resuelto } from './pages/PaginaDeDominio';
 import SubpaginaSitio from './pages/SubpaginaSitio';
 import RutaSitio from './pages/RutaSitio';
 import BuscadorSitio from './components/sitio/BuscadorSitio';
+import NoEncontradaSitio from './components/sitio/NoEncontradaSitio';
 import { resolverPrecargado } from './utils/precargado';
+
+// The one exception to «no lazy» below: the order-tracking page. It is opened
+// from an order e-mail, never on a first visit, so it should not make every
+// visitor download it (W5, 2026-10-18).
+const MiPedido = lazy(() => import('./pages/MiPedido'));
 
 // ── SIN `lazy` AQUÍ DENTRO (2026-10-01) ──────────────────────────────────────
 // Este fichero ya llega aparte de la plataforma (`main.tsx` lo importa a
@@ -41,6 +47,8 @@ function traducir(status: number, j: any): Resuelto {
 // forma que ya tienen los subdominios, y por el mismo motivo.
 //
 // ── TODO LLEVA A LA MISMA PÁGINA, SALVO LAS SUBPÁGINAS ─────────────────────
+// (Sustituido el 2026-10-18: una dirección que no existe dice que no existe,
+// ver `NoEncontradaSitio`. Lo de abajo es la historia.)
 // Un dominio propio apunta a UNA cosa. Si alguien escribe
 // `lamieldelasierra.com/loquesea`, lo que quiere ver es la miel, no un error.
 // La única excepción son las páginas que cuelgan de ella (los elementos de sus
@@ -71,6 +79,9 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
 
   if (!resuelto) return <Esperando />;
   const raizId = resuelto.estado === 'pagina' ? resuelto.datos?.id : null;
+  // Un dominio que todavía no apunta a nada (o a algo despublicado) lo dice
+  // igual en cualquier dirección: eso lo explica `PaginaDeDominio`.
+  const perdida = raizId ? <NoEncontradaSitio /> : <PaginaDeDominio host={host} resuelto={resuelto} />;
 
   return (
     <BrowserRouter>
@@ -82,14 +93,20 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
             <Route path="p/:id" element={<SubpaginaSitio propio />} />
             {/* El buscador del sitio (2026-10-18). */}
             <Route path="buscar" element={<BuscadorSitio />} />
-            {/* La dirección legible de una ficha: `/powerbanks/anker-737` (SEO R2).
-                Si no es ninguna, lo de siempre: la página del dominio. */}
-            {/* Una página del sitio por su nombre corto: `/powerbanks` (su
-                dirección canónica). Si no es ninguna, la página del dominio. */}
-            <Route path=":pagina" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
-            <Route path=":categoria/:ficha" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
-            <Route path=":categoria/:sub/:ficha" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
-            <Route path="*" element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
+            {/* Seguir un pedido (2026-10-18): el correo de compra de Wikiproducts
+                lleva aquí, `dominio/pedido?codigo=…`. */}
+            <Route path="pedido" element={<Suspense fallback={null}><MiPedido /></Suspense>} />
+            {/* La portada: sólo `/`. */}
+            <Route index element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
+            {/* Una página del sitio por su nombre corto (`/powerbanks`, su
+                dirección canónica) o una ficha por su dirección legible
+                (`/powerbanks/anker-737`, SEO R2). Si no es ninguna: «esta
+                página no existe» (2026-10-18), con el buscador y las
+                secciones, no la portada haciéndose pasar por ella. */}
+            <Route path=":pagina" element={<RutaSitio propio siNo={perdida} />} />
+            <Route path=":categoria/:ficha" element={<RutaSitio propio siNo={perdida} />} />
+            <Route path=":categoria/:sub/:ficha" element={<RutaSitio propio siNo={perdida} />} />
+            <Route path="*" element={perdida} />
           </Routes>
       </ProveedorSitio>
     </BrowserRouter>

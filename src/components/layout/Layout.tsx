@@ -647,8 +647,8 @@ export default function Layout() {
   // pegada abajo, que es justo la «barra extra» que sobraba (Eugenio,
   // 2026-08-20).
   const isGrafosPage = location.pathname === '/red' || /^\/grafos\/.+/.test(location.pathname);
-  // /mapas (el grafo de mapas) es lienzo a sangre con la barra de IA.
-  const isMapasPage = location.pathname === '/mapas';
+  // /mapas es ahora una página normal (la portada de la herramienta, 2026-10-18).
+  const isMapasPage = false;
   // /retos-vistas: el cruce de caminos de un reto con varias vistas (grafos).
   const isRetoVistasPage = location.pathname.startsWith('/retos-vistas');
   // Mi Conocimiento: el lienzo personal — a sangre completa y con barra de IA.
