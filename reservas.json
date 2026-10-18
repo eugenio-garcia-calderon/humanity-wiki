@@ -11,6 +11,12 @@
       "ruta": "drizzle/0156_expertos_soporte.sql",
       "motivo": "W6 Wikiproducts: chat de soporte y expertos",
       "desde": "2026-10-18T11:23:50.270Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0157_pedido_gestionado.sql",
+      "motivo": "W5 Wikiproducts: cesta multitienda, pedido gestionado y comisión",
+      "desde": "2026-10-18T11:25:27.819Z"
     }
   ]
 }
