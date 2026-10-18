@@ -47,6 +47,12 @@
       "ruta": "src/components/sitio/sitioWeb.ts",
       "motivo": "W2: buscador del sitio (3.8)",
       "desde": "2026-10-18T11:56:29.372Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/social/Campana.tsx",
+      "motivo": "W6: chat de ayuda fuera del menú, Stripe real",
+      "desde": "2026-10-18T11:58:39.614Z"
     }
   ]
 }
