@@ -9235,6 +9235,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 ## 2026-10-18 — Recuadros de grupo sin espacio desaprovechado (prog8)
 - Dentro del recuadro de un grupo, las tarjetas **se estiran hasta llenar el ancho** (`auto-fit` con columnas `1fr`) en vez de quedarse centradas con márgenes laterales grandes. Los recuadros pequeños (1–2 tarjetas) tienen un ancho fijo ajustado a sus tarjetas, para que un título largo no los ensanche.
 - Márgenes más ajustados: relleno del recuadro `p-3 sm:p-4` y separación entre recuadros `gap-4`.
+
+## 2026-10-18 — Añadir una propiedad desde la página de una entrada (prog8)
+- Debajo de las propiedades de la página de una entrada, junto a «Enlazar con otra base de datos», sale **«+ Añadir una propiedad»**: abre el mismo editor de columnas (nombre y tipo: texto, número, fecha, estado, porcentaje…) y la columna nueva se crea en la base de datos y aparece al momento.
 ## 2026-10-18 — Wikiproducts: clean photo for the AIKO Neostar panel (W3a)
 - The AIKO row's photo came from a shop's preview image (aceflex): a banner with logo, text and stars. Because AIKO is the first home panel, that banner was also the picture on the «Paneles solares domésticos» card on the home page and on /energia-solar-domestica. `datos/fotos.json` now pins AIKO's own product image (aikosolar.com, Neostar 3P54). The next load with fotos=si replaces it, since a pinned source must match the photo's credit.
 - Same PR: the texts no longer promise what is not true yet.

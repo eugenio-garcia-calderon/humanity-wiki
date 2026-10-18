@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Link2, ArrowUpRight, GripVertical, Pencil, Settings2, MessageSquare, Eye, EyeOff, Copy, Trash2, LayoutTemplate,
-  ChevronRight, ChevronDown, Check, X,
+  ChevronRight, ChevronDown, Check, X, Plus,
 } from 'lucide-react';
 import CeldaTabla, { type Columna } from './Celda';
 import EditorColumna from './EditorColumna';
@@ -57,6 +57,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
 }) {
   const [datos, setDatos] = useState<{ columnas: Columna[]; fila: any; titulo: string | null; diseno: Diseno } | null>(null);
   const [creando, setCreando] = useState(false);
+  const [nuevaPropiedad, setNuevaPropiedad] = useState(false);
   const [editando, setEditando] = useState<Columna | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [submenu, setSubmenu] = useState(false);
@@ -286,11 +287,23 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
       {fallo && <p className="py-1 text-[11px] font-bold text-rose-600">{fallo}</p>}
       {/* ENLAZAR DESDE LA PÁGINA DEL ELEMENTO (2026-10-02): el mismo botón
           que en la galería, para no tener que volver a la tabla. */}
+      {/* AÑADIR UNA PROPIEDAD DESDE AQUÍ (2026-10-18, Eugenio): una columna nueva
+          de la base de datos —texto, fecha, estado, número…— sin volver a la tabla. */}
       {editable && (
-        <button onClick={() => setCreando(true)}
-          className="inline-flex items-center gap-1 h-9 px-1 text-xs font-bold text-slate-400 hover:text-emerald-700">
-          <Link2 className="w-3.5 h-3.5" /> Enlazar con otra base de datos
-        </button>
+        <div className="flex flex-wrap items-center gap-x-3">
+          <button onClick={() => setNuevaPropiedad(true)}
+            className="inline-flex items-center gap-1 h-9 px-1 text-xs font-bold text-slate-400 hover:text-emerald-700">
+            <Plus className="w-3.5 h-3.5" /> Añadir una propiedad
+          </button>
+          <button onClick={() => setCreando(true)}
+            className="inline-flex items-center gap-1 h-9 px-1 text-xs font-bold text-slate-400 hover:text-emerald-700">
+            <Link2 className="w-3.5 h-3.5" /> Enlazar con otra base de datos
+          </button>
+        </div>
+      )}
+      {nuevaPropiedad && (
+        <EditorColumna tablaId={tablaId} columnas={datos.columnas}
+          onCerrar={() => setNuevaPropiedad(false)} onHecho={cargar} />
       )}
       {creando && (
         <EditorColumna tablaId={tablaId} columnas={datos.columnas} tipoInicial="relacion"
