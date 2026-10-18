@@ -7,10 +7,19 @@
 ## Arquitectura
 
 ```
-Usuario → Cloudflare (DNS+CDN+WAF, SSL Full strict) → Hetzner CCX33
+Usuario → Cloudflare (DNS+CDN+WAF, SSL Full strict) → Hetzner CPX42
             └─ Caddy (HTTPS, HTTP/3, cabeceras) → app (Node, dist/server.cjs)
                                                     └─ db (Postgres 17 + PostGIS)
 ```
+
+**La máquina, medida por SSH el 2026-08-23**: Hetzner **CPX42** — 8 núcleos AMD
+EPYC, 16 GB de memoria (15 utilizables) y 301 GB de disco, 69,49 €/mes.
+
+Hasta hoy este fichero decía `CCX33` en cinco sitios, que es otro modelo con
+otras características. No es una errata inofensiva: quien planifica leyendo esto
+planifica sobre una máquina que no existe, y esta misma noche pasó — se estimó el
+reparto de la plataforma entre los ocho núcleos creyendo que había el doble de
+memoria de la que hay.
 
 - `Dockerfile` — imagen multi-stage: `npm run build` (Vite + esbuild) y una
   imagen final mínima con `dist/` y dependencias de producción.
@@ -22,7 +31,7 @@ Usuario → Cloudflare (DNS+CDN+WAF, SSL Full strict) → Hetzner CCX33
 
 ## Bootstrap del servidor (una sola vez)
 
-Como root en el CCX33 recién creado (Ubuntu 24.04):
+Como root en el CPX42 recién creado (Ubuntu 24.04):
 
 ```bash
 # 1. Usuario de despliegue y Docker
@@ -70,15 +79,15 @@ Registros a crear (proxy naranja activado en ambos):
 
 | Tipo | Nombre | Contenido |
 |---|---|---|
-| A | humanity.wiki | IP del CCX33 |
-| A | www | IP del CCX33 |
+| A | humanity.wiki | IP del CPX42 |
+| A | www | IP del CPX42 |
 
 SSL de Cloudflare en **Full (strict)** — Caddy presenta certificado válido.
 
 ## Checklist previo a abrir la beta
 
 - [ ] Nameservers en atom.com → amanda/damiete.ns.cloudflare.com (TÚ)
-- [ ] Servidor Hetzner CCX33 creado con firewall (80/443/SSH) y backups (TÚ)
+- [ ] Servidor Hetzner CPX42 creado con firewall (80/443/SSH) y backups (TÚ)
 - [ ] Secretos DEPLOY_* en GitHub → primer despliegue automático
 - [ ] Verificación de email en el registro (necesita cuenta de Resend) (TÚ+YO)
 - [ ] Rate limiting + páginas legales (YO)
