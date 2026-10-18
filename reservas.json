@@ -65,6 +65,12 @@
       "ruta": "src/server/apiPublica.ts",
       "motivo": "W2: R2 routes recompute from /api/v1",
       "desde": "2026-10-18T12:49:40.043Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/buscadorSitio.ts",
+      "motivo": "W2: entradas ocultas",
+      "desde": "2026-10-18T12:57:40.682Z"
     }
   ]
 }
