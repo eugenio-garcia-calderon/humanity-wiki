@@ -8978,3 +8978,7 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — "Dónde comprarlo" visible to visitors (Wikiproducts W5 follow-up)
 - The Offers block was empty for anyone not signed in: the offers table is never embedded in a page, so it never inherited a published page's visibility. Now whoever can see the product sheet sees that sheet's offers, provided the offers table belongs to the same owner as the products table. Someone else's table pointing at a public sheet does not get to advertise on it, and the owner's own table is picked first. Test: `node scripts/wikiproducts/probar-ofertas-anonimo.mjs` against the local copy.
+## 2026-10-18 — Propiedades de la ficha: rejilla y enlaces con imagen (prog8)
+- La página de un elemento enseña sus propiedades en una **rejilla** que se adapta al ancho (una casilla por fila en el móvil, tres o cuatro en escritorio), con el nombre encima y el valor debajo, en orden de izquierda a derecha. Es el diseño por defecto; «dos columnas» se lee como rejilla y «Una columna» sigue disponible en «Personalizar diseño».
+- Lo enlazado desde otra base de datos (Áreas, Equipo…) sale con la **imagen de su página** y más grande; sin imagen, su inicial en color. El servidor añade `miniatura` a cada entrada enlazada, mirando el permiso de la tabla de destino.
+- Archivos: `PropiedadesFila.tsx`, `Relacion.tsx` (`FichaConImagen`), `Celda.tsx` (`enFicha`), `server/bd.ts`.
