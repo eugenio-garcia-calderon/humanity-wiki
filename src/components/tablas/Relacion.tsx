@@ -16,7 +16,41 @@ import { cn } from '../../utils/cn';
 // están las dos piezas que faltaban: la ficha, que lleva a la página del
 // elemento enlazado, y el selector.
 
-export type Apuntado = { id: string; etiqueta: string; extra?: any; existe?: boolean };
+export type Apuntado = { id: string; etiqueta: string; extra?: any; existe?: boolean; miniatura?: string };
+
+/** El color de la inicial cuando lo enlazado no tiene imagen: siempre el
+ *  mismo para el mismo nombre, para que «Ana» se reconozca de un vistazo. */
+const TONOS = ['bg-emerald-100 text-emerald-700', 'bg-sky-100 text-sky-700', 'bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700', 'bg-violet-100 text-violet-700', 'bg-teal-100 text-teal-700'];
+const tonoDe = (texto: string) => TONOS[[...texto].reduce((n, c) => n + c.charCodeAt(0), 0) % TONOS.length];
+
+/** LA FICHA CON IMAGEN (2026-10-18, Eugenio): en la página de un elemento, lo
+ *  enlazado se ve con la imagen de su página —la de «Movilidad», la cara de
+ *  una persona— y no solo con su nombre. Sin imagen, su inicial. */
+export function FichaConImagen({ a }: { a: Apuntado }) {
+  const sitio = useSitio();
+  const pagina = a.extra?.pagina_id as string | undefined;
+  const nombre = a.etiqueta || 'Sin título';
+  const roto = a.existe === false;
+  const clase = cn('group/ficha inline-flex items-center gap-2.5 rounded-xl border p-1 pr-3 max-w-full transition-colors',
+    roto ? 'border-rose-100 bg-rose-50 text-rose-500' : 'border-slate-200/80 bg-white text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/40');
+  const dentro = (
+    <>
+      {a.miniatura && !roto
+        ? <img src={a.miniatura} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-lg object-cover bg-slate-100" />
+        : <span className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-lg text-base font-black', roto ? 'bg-rose-100' : tonoDe(nombre))}>
+            {nombre.trim().charAt(0).toUpperCase() || '·'}
+          </span>}
+      <span className="min-w-0 text-[13px] font-bold leading-tight line-clamp-2 group-hover/ficha:text-emerald-800">{nombre}</span>
+    </>
+  );
+  if (!pagina || roto) return <span className={clase}>{dentro}</span>;
+  return (
+    <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} className={clase} onClick={e => e.stopPropagation()}>
+      {dentro}
+    </Link>
+  );
+}
 
 /** Una ficha enlazada. Lleva a la página del elemento: dentro del sitio si
  *  se está leyendo una web publicada, al editor si no. */
@@ -40,10 +74,12 @@ export function FichaRelacion({ a, grande = false }: { a: Apuntado; grande?: boo
  * La celda de una relación: las fichas y, para quien puede editar, un
  * selector con buscador de los elementos de la otra base de datos.
  */
-export function CeldaRelacion({ columna, apuntados, editable, onGuardar }: {
+export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImagen = false }: {
   columna: { id: string; nombre: string; config?: any };
   apuntados: Apuntado[];
   editable: boolean;
+  /** Fichas grandes con la imagen de lo enlazado (la página del elemento). */
+  conImagen?: boolean;
   onGuardar: (ids: string[]) => Promise<boolean>;
 }) {
   const [abierto, setAbierto] = useState(false);
@@ -123,8 +159,8 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar }: {
   return (
     <div ref={caja} className="relative">
       <div onClick={() => editable && setAbierto(v => !v)}
-        className={cn('flex flex-wrap items-center gap-1 px-2 py-1.5 min-h-[38px]', editable && 'cursor-pointer')}>
-        {apuntados.map(a => <FichaRelacion key={a.id} a={a} />)}
+        className={cn('flex flex-wrap items-center px-2 py-1.5 min-h-[38px]', conImagen ? 'gap-1.5' : 'gap-1', editable && 'cursor-pointer')}>
+        {apuntados.map(a => conImagen ? <FichaConImagen key={a.id} a={a} /> : <FichaRelacion key={a.id} a={a} />)}
         {!apuntados.length && editable && (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300"><Plus className="w-3 h-3" /> Enlazar</span>
         )}
