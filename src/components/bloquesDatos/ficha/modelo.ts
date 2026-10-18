@@ -88,6 +88,8 @@ export const ROLES = [
   // Inside related tables:
   'veredicto', 'explicacion', 'fuentes', 'fecha', 'donde', 'pais', 'organismo', 'motivo', 'enlace', 'referencia',
   'precio', 'distribuidor', 'comision',
+  // 2026-10-18: «price per watt / per kWh», a formula over the lowest shop price.
+  'precio_unidad',
 ] as const;
 export type Rol = typeof ROLES[number];
 
@@ -115,7 +117,7 @@ const ROL_POR_CLAVE: Record<string, Rol> = {
  *  cannot be patched through the API. */
 const DESTACADAS_POR_CLAVE = [
   // portable
-  'capacidad_mah', 'capacidad_wh', 'potencia_salida_max_w', 'lumenes_max', 'autonomia_h', 'potencia_pico_w', 'eficiencia_celula_pct',
+  'capacidad_mah', 'capacidad_wh', 'potencia_salida_max_w', 'lumenes_max', 'autonomia_h', 'bateria_wh', 'panel_solar_w', 'potencia_pico_w', 'eficiencia_celula_pct',
   // home
   'potencia_pico_wp', 'eficiencia_pct', 'capacidad_util_kwh', 'potencia_continua_kw', 'ciclos_declarados',
   // everyone
@@ -170,7 +172,18 @@ export function textoDe(fila: FilaFicha | undefined, c: Columna): string {
   if (!t) return '';
   const u = c.config?.unidad;
   // A percentage column already prints «%»; a number with unit «%» does not.
-  return u && (c.tipo === 'numero' || c.tipo === 'formula' || c.tipo === 'agregado') ? `${t} ${u}` : t;
+  if (!u || !(c.tipo === 'numero' || c.tipo === 'formula' || c.tipo === 'agregado')) return t;
+  // «1 año», not «1 años» (EcoFlow 220W, 2026-10-18).
+  return `${t} ${t === '1' && SINGULAR[u] ? SINGULAR[u] : u}`;
+}
+const SINGULAR: Record<string, string> = { años: 'año', ciclos: 'ciclo', meses: 'mes', horas: 'hora' };
+
+/** A column's name as a sheet shows it: without a trailing «(años)» when the
+ *  value already carries that unit — «Garantía (años): 1 años» said it twice. */
+export function etiquetaColumna(c: Columna): string {
+  const u = String(c.config?.unidad || '').trim().toLowerCase();
+  const m = c.nombre.match(/^(.*\S)\s*\(([^)]*)\)$/);
+  return u && m && m[2].trim().toLowerCase() === u ? m[1] : c.nombre;
 }
 
 // ── PROVENANCE, AS A SENTENCE ───────────────────────────────────────────────
@@ -211,6 +224,13 @@ export function etiquetaProcedencia(p: Procedencia, c?: Columna): string {
 }
 
 export const procedenciaDe = (fila: FilaFicha | undefined, c: Columna): Procedencia | null => {
+  // A formula that says how it is worked out (`config.explicacion`) is
+  // «Calculado» by construction, and «no price yet» when it has nothing:
+  // a formula cell has no stored provenance of its own.
+  if (c.tipo === 'formula' && typeof c.config?.explicacion === 'string') {
+    if (tieneValor(fila, c)) return { naturaleza: 'calculado', nota: c.config.explicacion, etiqueta: ETIQUETA_NATURALEZA.calculado };
+    return c.config?.sin_dato ? { naturaleza: 'no_publicado', etiqueta: etiquetaProcedencia({ naturaleza: 'no_publicado' }, c) } : null;
+  }
   const p = fila?.procedencia?.[c.id];
   if (!p || typeof p !== 'object') return null;
   // An unknown nature (data newer than this code) shows nothing rather than «undefined».
@@ -258,7 +278,7 @@ export function propiedadesTarjeta(columnas: Columna[], tituloId?: string | null
   if (!marca && !precio) return null;
   const cifra = por('tamano') || columnas.find(c => grupoDe(c) === 'tecnico' && sentidoDe(c) && c.config?.visibilidad !== 'nunca');
   const nota = columnas.find(c => criterioDe(c) === 'media');
-  return [marca, cifra, precio, nota].filter((c): c is Columna => !!c).map(c => c.id);
+  return [marca, cifra, precio, por('precio_unidad'), nota].filter((c): c is Columna => !!c).map(c => c.id);
 }
 
 /** Can this column rank rows? Only numeric ones with a declared direction,
