@@ -376,6 +376,16 @@ of rows or are read very often, move the sync to the write paths
 half a day today, more once more write paths exist. Comercio does not yet
 mark database-backed products as «se edita en su base de datos».
 
+## 2026-10-18 — Site search scans with LIKE (Wikiproducts W2)
+
+`GET /api/sitio/buscar` (`src/server/buscadorSitio.ts`) walks the site tree
+recursively and matches titles, row values and block text with `LIKE '%q%'`
+over `translate(lower(...))`. No index can serve it. Fine for the MVP (a few
+hundred products: one query, milliseconds). **Switch when a site passes
+~10,000 rows or search p95 > 300 ms:** a `pg_trgm` GIN index on a per-page
+search column kept up to date on write (or Postgres full-text with a Spanish
+config). About half a day now; the same later, plus a backfill.
+
 ## 2026-10-18 — Offers block reads the whole offers table (Wikiproducts W5)
 
 `ofertasDeProducto` (`src/server/ofertas.ts`) reads every row of the offers

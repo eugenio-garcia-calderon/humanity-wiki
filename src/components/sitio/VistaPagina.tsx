@@ -91,7 +91,7 @@ export default function VistaPagina({ pagina, propio, pie }: {
     navegar(href);
     window.scrollTo(0, 0);
   };
-  const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, raizId: pagina.sitio.raizId } : undefined;
+  const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, enlaceBuscar: sitio.enlaceBuscar, raizId: pagina.sitio.raizId } : undefined;
 
   return (
     <div onClickCapture={alPinchar}>

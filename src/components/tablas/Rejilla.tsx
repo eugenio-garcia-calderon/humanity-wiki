@@ -726,7 +726,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       </div>
     </div>
   );
-  const visiblesAhora = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
+  // Qué propiedades se ven en cada tarjeta: lo que se guarda en la vista (el panel de Propiedades lo escribe ahí).
+  // Sin nada guardado, lo que traiga el bloque de la página o, si no, las tres primeras.
+  const visiblesAhora: string[] = (esGaleria && Array.isArray(activa.config.propiedades) ? activa.config.propiedades : null)
+    ?? visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
   const ajustesGaleria = (
     <div className="space-y-1">
       {onCambiarOcultarMandos && (
@@ -803,14 +806,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // LAS PROPIEDADES, EN UN SOLO SITIO (2026-10-14): el botón «Propiedades» de la barra
   // enseña cuáles se ven (en la galería, dentro de la tarjeta) y, al pie, crear una
   // propiedad o enlazar con otra base de datos, como en Notion.
-  const panelVisiblesGaleria = onCambiarVisibles ? (
+  const panelVisiblesGaleria = editable ? (
     <div className="max-h-72 overflow-y-auto">
       <p className="px-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
       {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
         const puesta = visiblesAhora.includes(c.id);
         return (
           <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
-            <button onClick={() => onCambiarVisibles(puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id])}
+            <button onClick={() => cambiarVista({ config: { ...activa.config, propiedades: puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id] } })}
               className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-8 text-xs font-bold text-slate-600 text-left">
               {puesta ? <Eye className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
               <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
@@ -1034,9 +1037,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
           {porGrupos(colAgr ? filas : visiblesGaleria, fs => (
-            <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
+            <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visibles}
+              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               ordenable={editable && !colAgr && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}
