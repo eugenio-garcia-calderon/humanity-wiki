@@ -9131,6 +9131,12 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — «Dónde comprarlo» readable text sizes (Wikiproducts W5)
 - The offers card had 9 texts at 11–12 px. Body text (summary, «sin precio» reason, test-mode and «muy pronto» notes, empty and error states, shop name) is now 16 px; labels and secondary text (customer-service line, shipping, installation, commission, ordering note, link buttons) 14 px. Measured in the browser at 390 and 1280 px: only 14, 16, 18 and 20 px remain, no horizontal scroll. The cart button inside a card (`BotonCompra`, shared with tables) keeps its own sizes.
+
+## 2026-10-18 — Wikiproducts W6: expert consultations out of the MVP
+
+- Eugenio: «Quita lo de las consultas de expertos de momento en este MVP». The load (`cargar-en-servidor.sh`) no longer runs `expertos.mjs`, so it creates neither the page «Consultar a un experto», nor the expert, nor the short experts box in the product sheets. The «Expertos» menu link left `sitio.json` (`menu` is now empty).
+- Nothing about experts had reached the production site yet: #635 deployed the code, but the load that would have created the page and the boxes had not run.
+- Kept in the repo, unused: `expertos.mjs`, `expertos.json`, the `experto` block (with its short version) and `PUT /api/v1/pages/:id/experts`. Bringing them back is restoring one line in the load script and one menu entry.
 ## 2026-10-18 — «Mapas» es la herramienta; el mapa del mundo, un bloque (prog8)
 - **`/mapas`** ya no abre el Mapa de Indicadores: es la portada de la herramienta (`MapasPortada.tsx`) con **qué mapas puedes crear** (puntos, indicadores por territorio, con IA, insertarlos en páginas, publicarlos, valoraciones) y los **mapas de la comunidad** (`/api/maps`, sin el principal). «Crear tu mapa» y «Mis mapas».
 - El **Mapa de Indicadores de la Humanidad** sigue en **`/mapa`** (antes redirigía a `/mapas` y perdía los parámetros) y es ahora un **bloque de datos `mapaMundo`** («Mapa de indicadores del mundo»): el mismo mapa en un marco sin menús, con alto elegible, territorio de inicio y «Pantalla completa». La plantilla Humanidad Wiki lo trae; se añade a la página Humanidad Wiki de Eugenio.
