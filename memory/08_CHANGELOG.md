@@ -8858,3 +8858,6 @@ en mis páginas como proyecto pendiente».
 - `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
 - Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
 - `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).
+
+### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
+- El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
