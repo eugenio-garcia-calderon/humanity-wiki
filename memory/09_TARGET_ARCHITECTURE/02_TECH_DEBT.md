@@ -385,3 +385,23 @@ hundred products: one query, milliseconds). **Switch when a site passes
 ~10,000 rows or search p95 > 300 ms:** a `pg_trgm` GIN index on a per-page
 search column kept up to date on write (or Postgres full-text with a Spanish
 config). About half a day now; the same later, plus a backfill.
+
+## 2026-10-18 — A product sheet reads its whole table (Wikiproducts W1)
+
+`fichaDePagina` reads the row's entire table through `GET /api/bd/tablas/:id`
+(the comparator and «best per criterion» need the siblings), on every
+published row page and once more from the browser (`/api/bd/ficha/:id`) when
+the page was not preloaded. Fine for the MVP (tens to a few hundred products
+per category: one read, tens of ms). **Switch past ~2,000 rows per table or
+sheet p95 > 300 ms:** precompute per-column rankings on write and read only
+the current row plus the rows the comparator shows. About a day now, more
+once other blocks depend on the full table.
+
+## 2026-10-18 — JSON-LD without the page's own address (Wikiproducts W1)
+
+The sheet's `Product` JSON-LD goes without `url`, and without a
+`BreadcrumbList`, because the ampliación runs before `sitios.ts` knows the
+host and canonical. Asked W2 for a `{{canonica}}` placeholder (or the
+canonical passed in) and `MetaPagina.descripcion`; until then the
+description comes from `descripcionDe(cfg)`, not from the row's summary.
+Ten minutes on each side once agreed.

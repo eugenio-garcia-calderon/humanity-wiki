@@ -57,7 +57,7 @@ function gtin(valor: string): Record<string, string> {
   return d ? { gtin: d } : {};
 }
 
-export function metaFicha(f: Ficha, opciones: { url: string; sitio?: string | null; migas?: Miga[]; imagenAbsoluta?: (u: string) => string }): MetaFicha {
+export function metaFicha(f: Ficha, opciones: { url?: string | null; sitio?: string | null; migas?: Miga[]; imagenAbsoluta?: (u: string) => string }): MetaFicha {
   const fila = filaActual(f);
   const t = f.tabla;
   const abs = opciones.imagenAbsoluta || ((u: string) => u);
@@ -100,7 +100,7 @@ export function metaFicha(f: Ficha, opciones: { url: string; sitio?: string | nu
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: nombre,
-    url: opciones.url,
+    ...(opciones.url ? { url: opciones.url } : {}),
     ...(marca ? { brand: { '@type': 'Brand', name: marca } } : {}),
     ...(modelo ? { model: modelo, mpn: modelo } : {}),
     ...(codigo ? gtin(codigo) : {}),
@@ -130,11 +130,12 @@ export function metaFicha(f: Ficha, opciones: { url: string; sitio?: string | nu
   }
 
   const jsonLd: any[] = [producto];
-  if (opciones.migas?.length) {
+  // Breadcrumbs need absolute addresses: without the page's own, none.
+  if (opciones.url && opciones.migas?.length) {
     jsonLd.push({
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      itemListElement: [...opciones.migas, { nombre, url: opciones.url }].map((m, i) => ({
+      itemListElement: [...opciones.migas, { nombre, url: opciones.url! }].map((m, i) => ({
         '@type': 'ListItem', position: i + 1, name: m.nombre, item: m.url,
       })),
     });
@@ -150,7 +151,7 @@ export function metaFicha(f: Ficha, opciones: { url: string; sitio?: string | nu
         jsonLd.push({
           '@context': 'https://schema.org', '@type': 'Article', headline: r.titulo,
           ...(cFecha && tieneValor(r, cFecha) ? { datePublished: String((r.celdas[cFecha.id] as any).valor).slice(0, 10) } : {}),
-          about: { '@type': 'Product', name: nombre, url: opciones.url },
+          about: { '@type': 'Product', name: nombre, ...(opciones.url ? { url: opciones.url } : {}) },
         });
       }
     }

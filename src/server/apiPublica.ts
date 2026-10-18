@@ -352,10 +352,31 @@ export function registrarApiPublica(app: Express, db: any) {
     try {
       const t = await conTabla(req, res, true); if (!t) return;
       const b = req.body || {};
-      if (b.create_template === undefined && b.template_page_id === undefined) return res.status(400).json({ error: 'Manda «create_template: true» o «template_page_id».' });
-      const r = await ponerPlantilla(db, req, t.id, b.create_template ? { crear: true } : { pagina_id: b.template_page_id });
-      if (r.codigo !== 200) return res.status(r.codigo).json(r.cuerpo);
-      res.json({ id: t.id, template_page_id: r.cuerpo.pagina_id });
+      if (b.create_template === undefined && b.template_page_id === undefined && b.route === undefined) {
+        return res.status(400).json({ error: 'Manda «create_template: true», «template_page_id» o «route».' });
+      }
+      const out: any = { id: t.id };
+      // `route`: how the address of each row's page is built (W2, SEO R2),
+      // e.g. «powerbanks/{Marca}-{Modelo}». Stored in `bd_tablas.config.ruta`;
+      // W2's sitios.ts reads it. null clears it.
+      if (b.route !== undefined) {
+        const ruta = b.route === null ? null : String(b.route).trim();
+        if (ruta !== null && (!ruta || ruta.length > 200 || /[\s?#]/.test(ruta) || ruta.startsWith('/'))) {
+          return res.status(400).json({ error: '«route» es una plantilla como «powerbanks/{Marca}-{Modelo}»: sin espacios, sin «/» al principio y de menos de 200 letras.' });
+        }
+        await db.execute(sql`
+          UPDATE bd_tablas SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{ruta}', ${JSON.stringify(ruta)}::jsonb),
+            updated_at = now(), updated_by = ${req.user!.id}
+          WHERE id = ${t.id}
+        `);
+        out.route = ruta;
+      }
+      if (b.create_template !== undefined || b.template_page_id !== undefined) {
+        const r = await ponerPlantilla(db, req, t.id, b.create_template ? { crear: true } : { pagina_id: b.template_page_id });
+        if (r.codigo !== 200) return res.status(r.codigo).json(r.cuerpo);
+        out.template_page_id = r.cuerpo.pagina_id;
+      }
+      res.json(out);
     } catch (e: any) { console.error('v1 editar base de datos:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 

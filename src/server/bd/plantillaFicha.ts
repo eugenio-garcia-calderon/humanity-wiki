@@ -29,6 +29,12 @@ import { sql } from 'drizzle-orm';
 import { bdInterno } from '../bd';
 import { nuevoIdBloque, type Bloque } from '../../utils/bloques';
 import { NATURALEZAS, aTablaFicha, type Ficha, type FilaFicha, type TablaFicha, type Procedencia } from '../../components/bloquesDatos/ficha/modelo';
+import { metaFicha } from '../../components/bloquesDatos/ficha/seo';
+import {
+  propiedadHtml, comparadorHtml, alternativasHtml, afirmacionHtml, retiradaHtml, claveTablaComparador, type Herramientas,
+} from '../../components/bloquesDatos/ficha/html';
+import { registrarAmpliacion } from '../ampliarPagina';
+import { registrarHtml, esc, enLinea, hrefSeguro, type ContextoHtml } from '../htmlBloques';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -248,7 +254,67 @@ export async function ponerPlantilla(db: any, req: Pick<Request, 'user'>, tablaI
   return { codigo: 200, cuerpo: { pagina_id: pagina, creada: !!d.crear } };
 }
 
+/**
+ * A published page that is a database row, or a template: give it its sheet
+ * (`pagina.ficha`, which the blocks read in the browser and the HTML writers
+ * read on the server), put the template's blocks in front of the row's own,
+ * and tell `sitios.ts` what goes in the `<head>` (SEO R4, R5, R10, R11).
+ * Runs inside `paginaPublica`, after the page's visibility was decided; the
+ * table is read with the visitor's own permissions (`req` undefined = the
+ * anonymous HTML everybody gets).
+ */
+async function ampliarFicha(db: any, req: Request | undefined, pagina: any) {
+  if (!pagina?.id || pagina.muro || pagina.virtual) return;
+  const r = await fichaDePagina(db, req || null, String(pagina.id));
+  if (!r) return;
+  pagina.ficha = r.ficha;
+  if (r.ficha.vista_previa) {
+    // A template is a working page: never a search result of its own.
+    pagina.meta = { ...(pagina.meta || {}), indexable: false };
+    return;
+  }
+  const propios = Array.isArray(pagina.config?.bloques) ? pagina.config.bloques : [];
+  pagina.config = { ...(pagina.config || {}), bloques: fusionarPlantilla(r.plantilla, propios) };
+  // Without the page's absolute address (asked of W2, see the changelog) the
+  // JSON-LD goes without `url` and without breadcrumbs: better absent than wrong.
+  const m = metaFicha(r.ficha, { url: null, sitio: pagina.sitio?.titulo || null });
+  pagina.meta = {
+    ...(pagina.meta || {}),
+    titulo: m.titulo,
+    descripcion: m.descripcion,
+    ogType: m.ogType,
+    // A page its owner marked not indexable stays so; a thin sheet too (R10).
+    indexable: pagina.indexable === false ? false : m.indexable,
+    jsonLd: m.jsonLd,
+    metas: m.metas,
+  };
+}
+
+const herramientas = (ctx: ContextoHtml): Herramientas => ({
+  esc, hrefSeguro, enlacePagina: ctx.enlacePagina, enLinea: (t: string) => enLinea(t, ctx),
+});
+const fichaDe = (ctx: ContextoHtml): Ficha | null => ctx.pagina?.ficha || ctx.extra.get('pagina')?.ficha || null;
+
+/** A comparator pinned to a database (`fijo`, `url`) needs that table, read
+ *  as an anonymous visitor: this HTML is the one everybody gets. */
+async function precargarComparadores(_db: any, bloques: any[], ctx: ContextoHtml) {
+  const ids = [...new Set(bloques.filter(b => b?.tipo === 'comparador' && b.datos?.modo !== 'fila' && b.datos?.tabla_id).map(b => String(b.datos.tabla_id)))];
+  await Promise.all(ids.map(async id => {
+    const t = await tablaFicha(null, id);
+    if (t) ctx.extra.set(claveTablaComparador(id), t);
+  }));
+}
+
 export function registrarPlantillaFicha(app: Express, db: any) {
+  registrarAmpliacion(ampliarFicha);
+  registrarHtml('propiedad', (b, ctx) => propiedadHtml(fichaDe(ctx), b.datos, herramientas(ctx)));
+  registrarHtml('comparador', (b, ctx) => comparadorHtml(
+    fichaDe(ctx), b.datos?.tabla_id ? ctx.extra.get(claveTablaComparador(String(b.datos.tabla_id))) : null, b.datos, herramientas(ctx),
+  ), precargarComparadores);
+  registrarHtml('alternativas', (b, ctx) => alternativasHtml(fichaDe(ctx), b.datos, herramientas(ctx)));
+  registrarHtml('afirmacion', (b, ctx) => afirmacionHtml(fichaDe(ctx), b.datos, herramientas(ctx)));
+  registrarHtml('retirada', (b, ctx) => retiradaHtml(fichaDe(ctx), b.datos, herramientas(ctx)));
+
   /** The sheet of a page, for the blocks in the browser. */
   app.get('/api/bd/ficha/:paginaId', async (req: Request, res: Response) => {
     try {
