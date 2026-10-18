@@ -69,7 +69,7 @@ const COMO: Record<string, { icono: any; frase: (n: string, p?: any) => string }
   pagina_cambiada:    { icono: FileText,       frase: (n, p) => `${n} ha cambiado «${p?.titulo || 'una página'}», que sigues` },
   miembro_pendiente:  { icono: UserPlus,       frase: (n, p) => `${n} pide entrar en tu sitio «${p?.titulo || ''}»` },
   // Chat de ayuda y expertos de los sitios (W6 Wikiproducts, 2026-10-18).
-  soporte_mensaje:    { icono: Send,           frase: (n, p) => `${n || 'Alguien'} te ha escrito en el chat de ayuda${p?.sitio ? ` de «${p.sitio}»` : ''}` },
+  soporte_mensaje:    { icono: Send,           frase: (n, p) => `${n || 'Alguien'} te ha escrito${p?.sitio ? ` de «${p.sitio}»` : ''}` },
   consulta_reservada: { icono: CheckCircle2,   frase: () => 'Han reservado una consulta con un experto' },
 };
 

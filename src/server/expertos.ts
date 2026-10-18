@@ -53,8 +53,12 @@ import { huecosLibres, limpiarDisponibilidad, zonaValida, reparto } from './expe
 //    persona; para sitios de otros creadores hay que repartirla. Anotado en
 //    la deuda técnica.
 //
-// SÓLO EN MODO PRUEBAS hasta que Eugenio decida la cuenta de Stripe: no hay
-// nada aquí que distinga pruebas de real, lo decide la clave del servidor.
+// MODO REAL: Eugenio decidió el 2026-10-18 usar ya el Stripe definitivo, no el
+// de pruebas. Nada aquí distingue pruebas de real: lo decide la clave
+// `STRIPE_SECRET_KEY` del servidor. Con clave real, cada reserva cobra dinero
+// de verdad. El webhook debe recibir `checkout.session.completed` (ya lo usa la
+// membresía); `checkout.session.expired` es opcional: sin él, el hueco retenido
+// se suelta igual al pasar `expira_at` (`soltarCaducadas`).
 
 const nuevoId = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,}$/i;

@@ -685,3 +685,18 @@ Late payment for a taken slot is refunded automatically.
 **Availability is stored in the expert's local time** (`zona_horaria`) and
 converted per day with `Intl`, so DST does not move consultations; no date
 library added.
+
+### 2026-10-18 — W6: help chat hidden, expert payments on live Stripe
+
+**Decision (Eugenio):** do not offer the site help chat for now, and use the
+live Stripe account rather than test mode for expert consultations.
+
+**How:** the `chat` block gets `enMenu: false` (kept in code: expert
+consultations reuse the same conversation server, and blocks already placed
+still render). Live vs test is decided only by `STRIPE_SECRET_KEY` on the
+server, so no code path changes. Re-offering the chat is deleting one line.
+
+**Consequence:** the paid Checkout flow was never exercised against Stripe
+(not reachable from the build environment). The first real booking after the
+merge is the first real test; a low-priced test consultation, refunded from
+the management panel, is the cheapest way to check it.
