@@ -89,6 +89,12 @@
       "ruta": "src/App.tsx",
       "motivo": "W2 ruta buscar",
       "desde": "2026-10-18T12:00:44.280Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/AplicacionDeDominio.tsx",
+      "motivo": "W2 ruta buscar",
+      "desde": "2026-10-18T12:00:47.202Z"
     }
   ]
 }
