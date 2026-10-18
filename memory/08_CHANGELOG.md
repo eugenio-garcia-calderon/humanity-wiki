@@ -8971,3 +8971,7 @@ en mis páginas como proyecto pendiente».
 - Probado en la copia local (`local.sh`): 621 filas sin fallos; la segunda carga, 0 cambios.
 - Un importe decimal se envía con coma («0,138»): el tipo «moneda» del servidor lee «0.138» como 138 (punto de millar), también cuando llega como número por la API.
 - Un 404 de verdad también en los dominios propios (SEO R16): `midominio.com/loquesea` sigue enseñando la portada, como se decidió el 2026-08-22, pero contesta 404 con `noindex`, así que los buscadores ya no la guardan como una copia de la portada. `/buscar` y las fichas siguen igual.
+
+### 2026-10-18 — Plantilla «Humanidad Wiki» (Humanidad Wiki, fase 2) (prog8)
+- Nueva página `/plantillas/humanidad-wiki` con el botón «Crear en mi perfil»: crea, con la sesión de quien la pulsa, una página principal «Humanidad Wiki» con el menú de temas y una subpágina por cada tema con su bloque «Contenido de un tema». Nace privada; es una página normal de Wiki Creator que se puede cambiar y replicar.
+- El bloque «Menú de temas», dentro de una web publicada, abre las páginas propias por su dirección pública, que hereda la visibilidad de la página madre.
