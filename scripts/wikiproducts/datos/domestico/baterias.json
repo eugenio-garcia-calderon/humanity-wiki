@@ -233,6 +233,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "AlphaESS no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Garantía residencial de AlphaESS para el Reino Unido (fichero de 22-04-2024). Cubre las baterías SMILE-G3-BAT-10.1P, -8.2P y -3.8S y los sistemas S5, S3.6 y B5. Plazo desde la instalación o desde el día 365 tras la fabricación, lo que ocurra antes. No se ha encontrado la versión española."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
+          "fecha": "2026-10-18",
+          "nota": "120 meses. La garantía actúa si el estado de salud cae por debajo del 80 % con menos de 2,92 MWh/kWh (a 25–28 °C) o de 2,39 MWh/kWh (de -10 a 50 °C), o por debajo del 70 % con menos de 3,11 MWh/kWh."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La conexión a internet es obligatoria: sin ella la garantía baja a 3 años. Fuente: https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf\nInstalación y puesta en marcha por un instalador certificado por AlphaESS, con un informe de puesta en marcha firmado por el usuario y el instalador. Fuente: misma garantía.\nLas averías deben comunicarse al instalador en 10 días laborables, y la reclamación presentarse en las 4 semanas siguientes al fallo. Fuente: misma garantía.\nExcluye el transporte (salvo el envío de piezas), los viajes y el alojamiento del técnico, así como los daños por exposición a más de 50 °C, la luz solar directa o una ventilación insuficiente. Fuente: misma garantía.\nLa responsabilidad se limita al precio de compra del producto afectado; se rige por la ley china. Fuente: misma garantía.\nEl documento consultado es británico y no menciona el módulo BAT-9.3S. Fuente: misma garantía.\nUn revendedor británico también indica que la conexión Wi-Fi es obligatoria para la cobertura. Fuente: https://heatable.co.uk/battery-storage/advice/alpha-ess-smile-g3-review",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "AlphaESS como fabricante, a través del instalador, del portal cloud.alphaess.com o de info@alpha-ess.com. La garantía no prevé qué ocurre si AlphaESS deja el mercado europeo; quedarían los derechos legales frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -265,7 +304,13 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China (y Malasia, según la marca)",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Nantong (China); Ulanqab (China); Kulim (Malasia)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.key-expo.com/restricted-assets/digital-profiles/01_ATTACHMENTS/KEN26/AlphaESS-Brochure-2026-698c8ed8639c9.pdf.pdf",
+          "fecha": "2026-10-18"
+        },
         "materiales_principales": [
           "celdas de litio-ferrofosfato (LFP)",
           "dispositivo de aerosol y válvula antiexplosión (según la ficha)"
@@ -278,12 +323,7 @@
           "fecha": "2026-10-18",
           "nota": "El fabricante no lo publica."
         },
-        "reparabilidad": "Módulos de batería independientes, que se conectan en serie y se sustituyen por separado. No se ha encontrado información sobre repuestos a nivel de celda.",
-        "fabricas_conocidas": [
-          "Nantong (China)",
-          "Ulanqab (China)",
-          "Kulim (Malasia)"
-        ]
+        "reparabilidad": "Módulos de batería independientes, que se conectan en serie y se sustituyen por separado. No se ha encontrado información sobre repuestos a nivel de celda."
       },
       "certificados": [
         {
@@ -615,6 +655,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "SOLIX X1 no figura en los ensayos de eficiencia de la HTW Berlin de 2025 ni de 2026; en 2025 la marca Anker SOLIX aparece solo en el análisis de mercado (Solarbank E1600)."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+          "fecha": "2026-10-18",
+          "nota": "Módulo de potencia, módulo de batería y Power Dock Pro: 10 años. Dongle WLAN/móvil: 5 años. Sensores de potencia: 24 meses."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+          "fecha": "2026-10-18",
+          "nota": "Al menos el 80 % de la capacidad inicial durante 120 meses desde la instalación, o hasta 13,17 MWh o 6.000 ciclos, lo que ocurra antes."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Límite de 13,17 MWh por módulo: equivale a unos 2.634 ciclos completos, por debajo de los 6.000 ciclos que también cita la garantía. Fuente: https://www.ankersolix.com/eu/hes-x1-warranty\nCobertura limitada al país de compra; los plazos solo valen para compras en la web oficial o en socios listados. Fuente: misma garantía.\nExcluye instalaciones no realizadas por un instalador certificado. Fuente: misma garantía.\nNo cubre desmontaje, instalación ni diagnóstico. Si la unidad defectuosa no llega en 60 días desde la RMA, Anker factura el precio de lista. Fuente: misma garantía.\nExcluye: batería al 0 % no recargada en 7 días, rechazo de actualizaciones de firmware, traslado del equipo, temperaturas fuera de -20/45 °C, corrosión y óxido, agua de mar. Fuente: misma garantía.\nLa batería no tiene ampliación de garantía disponible. Fuente: misma garantía.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Anker (Anker Innovations) como fabricante, a través de support@ankersolix.com o el socio vendedor. La garantía no prevé qué ocurre si la marca abandona el mercado europeo; quedarían los derechos legales frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -659,8 +738,7 @@
           "fecha": "2026-10-18",
           "nota": "El fabricante no lo publica."
         },
-        "reparabilidad": "Sistema apilable con módulos sustituibles por separado según el diseño descrito por la marca (https://www.ankersolix.com/eu/x1-energy-storage-system-hes). No se ha encontrado información sobre repuestos a nivel de celda.",
-        "fabricas_conocidas": []
+        "reparabilidad": "Sistema apilable con módulos sustituibles por separado según el diseño descrito por la marca (https://www.ankersolix.com/eu/x1-energy-storage-system-hes). No se ha encontrado información sobre repuestos a nivel de celda."
       },
       "certificados": [
         {
@@ -1026,6 +1104,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "HTW Berlin, Stromspeicher-Inspektion 2025. El índice SPI evalúa el sistema completo (batería + inversor), no la batería sola. Los valores SPI exactos de cada combinación figuran en gráficos que no se pudieron extraer; pendiente."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Garantía limitada Europa ES V1.2 para HVS/HVM instaladas desde el 08-03-2023. Inicio: el primer día tras 6 meses desde la fecha de producción, o 30 días tras la entrega documentada."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+          "fecha": "2026-10-18",
+          "nota": "60 % de la energía utilizable durante 10 años o hasta alcanzar la energía descargada mínima (30,82 MWh en HVS 10.2), lo que ocurra primero."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.6,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El plazo empieza a contar desde la fabricación (6 meses después) salvo que se documente la entrega; una batería que pase tiempo en almacén pierde parte de la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).\nDebe instalarse en el mes siguiente a la factura y usarse con un inversor de la lista de compatibles de BYD; con otro inversor no hay garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).\nEl comprador debe dar a BYD o a su socio acceso por internet a los datos de funcionamiento; negarlo excluye la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).\nExcluye exposición a más de 50 °C o menos de -10 °C, golpes o movimientos tras la instalación, y periodos de inactividad de 6 meses o más; los defectos deben comunicarse en 30 días (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).\nFuera de garantía o si no se halla defecto, el comprador paga piezas, mano de obra, desplazamiento e inspección; la responsabilidad se limita al precio pagado (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).\nLas HVS+ / HVM+ (instaladas desde 01-09-2025) tienen su propia garantía V1.1 con las mismas cifras de 60 % y MWh, emitida a través de BYD Finland Oy (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_ES-62.pdf).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "BYD Smart Device Hungary Kft. como garante (HVS/HVM V1.2), con EFT-Systems GmbH como socio de servicio autorizado. Para HVS+/HVM+ el suministro figura a través de BYD Finland Oy. La garantía no prevé qué ocurre si BYD dejara el mercado europeo.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://site.bydbatterybox.com/uploads/downloads/BYD%20Battery-Box%20Premium%20HVS&HVM%20Limited%20Warranty-Europe-ES%20-V1.2-640eeba03eb43.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -1072,8 +1189,7 @@
           "nota": "Texto publicado: «2–5 módulos de batería + 1 base con BCU»."
         },
         "reparabilidad": "Diseño modular: los módulos se suministran por separado y pueden sustituirse o añadirse (https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf). Las reparaciones o modificaciones sin aprobación de BYD o su socio excluyen la garantía (https://site.bydbatterybox.com/uploads/downloads/BYD Battery-Box Premium HVS&HVM Limited Warranty-Europe-ES -V1.2-640eeba03eb43.pdf).",
-        "fabricante_celulas": "BYD (LFP)",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "BYD (LFP)"
       },
       "certificados": [
         {
@@ -1174,9 +1290,9 @@
           "precio_eur": 4987.92,
           "iva_incluido": true,
           "unidad": "por torre HVS 10.2 (base + BCU + 4 módulos)",
-          "envio": "Entrega estimada 03-11-2026 en península (pago con tarjeta)",
           "stock": "no indicado («sujeto a stock»)",
-          "nota": "Referencia 1881474. 4.122,25 € sin IVA; anunciado con 30 % de descuento sobre 7.174,09 €. Es la HVS de la generación anterior a HVS+."
+          "nota": "Referencia 1881474. 4.122,25 € sin IVA; anunciado con 30 % de descuento sobre 7.174,09 €. Es la HVS de la generación anterior a HVS+. · Envío: Entrega estimada 03-11-2026 en península (pago con tarjeta)",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -1187,9 +1303,9 @@
           "precio_eur": 3560,
           "iva_incluido": false,
           "unidad": "por torre HVS 10.2",
-          "envio": "no indicado",
           "stock": "3 ofertas con 1–30 unidades",
-          "nota": "«Desde 3.560 €» según los metadatos de la página; no se indica IVA ni vendedor. Orientado a profesionales."
+          "nota": "«Desde 3.560 €» según los metadatos de la página; no se indica IVA ni vendedor. Orientado a profesionales. · Envío: no indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -1435,6 +1551,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-PPT-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "El informe señala que la corriente máxima de 22 A y la tensión de 384 V limitan la potencia de carga y descarga del sistema a unos 1,7 kW menos que el sistema equivalente con batería BYD (relación potencia/capacidad de unos 0,35 kW/kWh). No se ha podido extraer el valor SPI de C4 del texto del informe: pendiente de consultar en solar.htw-berlin.de/inspektor. Mide el conjunto con ese inversor, no la batería sola."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+          "fecha": "2026-10-18",
+          "nota": "Garantía limitada para la UE de Dyness Digital Energy Technology (documento de 2023-04-07), Tower T7 a T21. 10 años desde la puesta en marcha (con límites ligados a la fecha de factura); 5 años para unidades sin conexión de comunicación."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+          "fecha": "2026-10-18",
+          "nota": "70 % de la energía útil inicial durante 10 años desde la factura, o hasta el tope de energía de cada modelo; la garantía supone 1 ciclo completo al día."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Sin conexión de comunicación con el inversor la garantía es de 5 años, no de 10; algunas tiendas anuncian el Tower con «5 Years Product Warranty». Fuentes: https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371 y https://www.solartraders.com/en/products/batteries/dyness-tower-t7-7-1-kwh\nTope de energía: 32,82 MWh en el T10, unos 3.080 ciclos completos, frente a los ≥6.000 ciclos de la ficha. Fuente: garantía UE.\nExcluye compras e instalaciones fuera de Europa, el uso con inversores incompatibles, la mezcla con otras baterías y los fallos no comunicados en 2 semanas. Fuente: garantía UE.\nCondiciones de uso: carga y descarga continua de 0,6C como máximo; recargar en 48 horas tras una descarga profunda (0 % SOC); toma de tierra de menos de 1 Ω; no abrir la carcasa. Fuente: garantía UE (anexo 1).\nEl comprador adelanta los gastos de prueba; si el producto está en garantía, el vendedor paga el transporte y la prueba. La mano de obra no se menciona. Fuente: garantía UE.\nDyness recomienda registrarse en su web, aunque el documento no lo presenta como condición. Fuente: garantía UE.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El vendedor recibe la reclamación y Dyness responde como fabricante. La garantía no prevé qué ocurre si Dyness deja el mercado europeo; quedarían los derechos legales frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -1466,7 +1621,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": "Taizhou (no confirmado para este modelo concreto)",
+        "fabrica": {
+          "valor": "Taizhou (China): centro de I+D y fábrica desde 2020; nueva fábrica terminada en 2022",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Taizhou (no confirmado para este modelo concreto) Otras fuentes: https://dyness.com/news/new-start-signed-dyness-headquarters-is-to-be-located-in-wuzhong-jiangsu"
+        },
         "materiales_principales": [
           "celdas de litio-ferrofosfato (LFP)"
         ],
@@ -1478,10 +1640,7 @@
           "fecha": "2026-10-18",
           "nota": "El fabricante no lo publica."
         },
-        "reparabilidad": "Módulos HV9637 sustituibles y vendidos por separado (https://autosolar.es/baterias-litio-alto-voltaje/bateria-de-litio-dyness-tower-hv9637-355kwh). La garantía exige autorización previa por escrito del vendedor para sustituir piezas.",
-        "fabricas_conocidas": [
-          "Taizhou (China): centro de I+D y fábrica desde 2020; nueva fábrica terminada en 2022"
-        ]
+        "reparabilidad": "Módulos HV9637 sustituibles y vendidos por separado (https://autosolar.es/baterias-litio-alto-voltaje/bateria-de-litio-dyness-tower-hv9637-355kwh). La garantía exige autorización previa por escrito del vendedor para sustituir piezas."
       },
       "certificados": [
         {
@@ -1561,10 +1720,11 @@
           "iva_incluido": true,
           "unidad": "por batería Tower T10 (10,66 kWh); la página no aclara si incluye BDU y base",
           "incluye_instalacion": false,
-          "envio": "no indicado",
           "stock": "no indicado",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: no indicado"
         },
         {
           "distribuidor_id": "autosolar-es",
@@ -1573,10 +1733,11 @@
           "iva_incluido": true,
           "unidad": "por módulo HV9637 (3,55 kWh), sin unidad de control BDU",
           "incluye_instalacion": false,
-          "envio": "Entrega estimada en la península con pago con tarjeta",
           "stock": "no indicado («salvo rotura de stock»)",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Entrega estimada en la península con pago con tarjeta"
         }
       ],
       "compatibles": [
@@ -1825,6 +1986,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "EcoFlow PowerOcean no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026."
+        },
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Condiciones de garantía del fabricante para la UE, versión B V1.3, vigentes desde el 29-09-2024. Inversor: 15 años. Batería: 15 años o 6.000 ciclos de carga/descarga, lo que ocurra antes."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad nominal mínima del 70 % a los 15 años o 6.000 ciclos, en condiciones normales (-20 a 50 °C)."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Cubre a primeros compradores que adquieren el equipo a través de un instalador y lo ponen en marcha por primera vez; las reclamaciones van primero al instalador (cláusula 1.6 permite acudir a EcoFlow si el instalador no puede). Fuente: https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf\nEl plazo empieza al terminar la instalación o un año después de la salida de fábrica, lo que ocurra antes. Fuente: misma garantía.\nLímite de 6.000 ciclos: lo que ocurra antes entre años y ciclos. Fuente: misma garantía.\nDurante la garantía EcoFlow asume material, reparación y logística (cl. 1.9), pero los gastos de aduana corren a cargo del usuario o el distribuidor (cl. 11.9). Fuente: misma garantía.\nExcluye componentes de terceros incompatibles, modificaciones no autorizadas y fuerza mayor (incendio, inundación, rayo). Fuente: misma garantía.\nSegún SolarQuotes, la garantía de capacidad exige trabajar con un inversor EcoFlow compatible. Fuente: https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html\nSe aplican las condiciones vigentes en la fecha de compra (cl. 4.4–4.5). Fuente: misma garantía.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El instalador en primera instancia y EcoFlow como fabricante (contacto UE: solutionservice.eu@ecoflow.com). La garantía no prevé qué ocurre si EcoFlow deja de operar en Europa; en ese caso quedarían los derechos legales frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -1872,8 +2072,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Cada módulo tiene su propio BMS y es sustituible por separado, según el folleto de la marca (https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf). No se ha encontrado información sobre piezas de repuesto a nivel de celda.",
-        "fabricante_celulas": "CATL (según folleto de 2023)",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "CATL (según folleto de 2023)"
       },
       "certificados": [
         {
@@ -2008,10 +2207,11 @@
           "iva_incluido": true,
           "unidad": "por módulo de batería 5,1 kWh (sin inversor)",
           "incluye_instalacion": false,
-          "envio": "Entrega estimada en la península con pago con tarjeta; coste de envío no indicado",
           "stock": "no indicado («salvo rotura de stock»)",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Entrega estimada en la península con pago con tarjeta; coste de envío no indicado"
         },
         {
           "distribuidor_id": "solarboss-ie",
@@ -2020,10 +2220,11 @@
           "iva_incluido": false,
           "unidad": "por módulo de batería 5 kWh (ref. 5008601004)",
           "incluye_instalacion": false,
-          "envio": "no indicado",
           "stock": "contradictorio: la página muestra «In Stock» y el botón «Sold Out»",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: no indicado"
         }
       ],
       "compatibles": [
@@ -2282,6 +2483,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "Enphase no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026."
+        },
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+          "fecha": "2026-10-18",
+          "nota": "«Limited warranty >60% capacity, up to 15 years or 6000 cycles», lo que antes ocurra; «restrictions apply»."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Garantía de Australia y Nueva Zelanda (productos activados desde el 12-04-2023): al menos 60 % de 5,0 kWh CC durante 15 años o 6.000 ciclos. No se localizó el documento de garantía específico de España."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.6,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La cobertura acaba a los 15 años o a los 6.000 ciclos de descarga, lo que antes ocurra; el umbral de capacidad es 60 %, más bajo que el 70–80 % habitual en otras marcas (ficha DSH-00477-7.0).\nAustralia/Nueva Zelanda: la mano de obra de desinstalación, reinstalación o trabajos eléctricos no está cubierta; excluye firmware no actualizado, perfiles de red alterados y uso comercial (https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf).\nLa transferencia a un nuevo propietario exige que la batería siga en el lugar original, un formulario de cambio de titularidad y el pago de una tasa en 30 días.\nEnphase se reserva el derecho a ceder (novar) la garantía a un tercero cualificado; no se dice qué ocurre en caso de insolvencia.\nEn la generación anterior (AC Battery, Europa) la garantía exigía registro y conexión a internet en 45 días y se anulaba con más de 45 días sin conexión (https://www.solartraders.com/uploads/production/data_sheet/file/20997/warranty.pdf?locale=da); no se verificó si la condición se mantiene para la 5P en Europa.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Enphase Energy, Inc. o su filial europea, a través del instalador o distribuidor autorizado. El documento australiano permite ceder la garantía a un tercero; no aborda la quiebra del fabricante.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -2312,7 +2552,14 @@
       "origen": {
         "pais_marca": "Estados Unidos",
         "pais_fabricacion": "No publicado (versión europea)",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Plantas de fabricación en EE. UU. para las unidades con «contenido nacional» (sin nombre publicado), según Enphase en julio de 2025",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Enphase_Energy",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering https://solarbuildermag.com/news/enphase-shipping-iq-battery-5p-with-more-domestic-content/"
+        },
         "materiales_principales": [
           "celdas LFP",
           "carcasa metálica IP55",
@@ -2327,10 +2574,7 @@
           "nota": "No publicado."
         },
         "reparabilidad": "Sin información pública sobre sustitución de celdas o módulos. La garantía australiana excluye daños por servicio de personas que no sean representantes de Enphase.",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": [
-          "Plantas de fabricación en EE. UU. para las unidades con «contenido nacional» (sin nombre publicado), según Enphase en julio de 2025"
-        ]
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -2447,11 +2691,11 @@
           "iva_incluido": true,
           "unidad": "por unidad (5 kWh)",
           "incluye_instalacion": false,
-          "envio": "No indicado en la ficha",
           "stock": "No indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "2.907,00 € sin IVA."
+          "nota": "2.907,00 € sin IVA. · Envío: No indicado en la ficha",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "wattuneed",
@@ -2461,11 +2705,11 @@
           "iva_incluido": true,
           "unidad": "por unidad (5 kWh)",
           "incluye_instalacion": false,
-          "envio": "No indicado en la ficha",
           "stock": "No indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "IVA francés incluido; 3.526,78 € sin IVA."
+          "nota": "IVA francés incluido; 3.526,78 € sin IVA. · Envío: No indicado en la ficha",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -2475,11 +2719,11 @@
           "iva_incluido": false,
           "unidad": "por unidad (5 kWh)",
           "incluye_instalacion": false,
-          "envio": "No indicado",
           "stock": "Varias ofertas de vendedores terceros",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio «desde»; la página no indica si incluye IVA; marketplace orientado a profesionales. Se asume sin IVA."
+          "nota": "Precio «desde»; la página no indica si incluye IVA; marketplace orientado a profesionales. Se asume sin IVA. · Envío: No indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -2728,6 +2972,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "HTW Berlin, Stromspeicher-Inspektion 2025 (sistema H1, https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf) y 2026 (sistema E1). Son otras baterías e inversores de la marca; los resultados no se aplican directamente al EP5/EP11."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Reino Unido V4.2 (2025-03-13): 60 meses de serie, desde la instalación y como máximo 65 meses desde la fabricación, más 60 meses de ampliación para EP si se registra y se monitoriza con Fox Cloud mediante un datalogger de Fox. Sin registro: 5 años. No se ha encontrado la garantía para España/UE continental."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+          "fecha": "2026-10-18",
+          "nota": "UK V4.2: el 70 % de la energía nominal de la etiqueta a los 10 años o al tope de energía (EP11 33,4 MWh), lo que ocurra antes. En la versión UK V4.0 (2024-05-01) era el 80 % a 5 años con 18,6 MWh, sin ampliación por registro, solo de pago."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Las condiciones del EP han cambiado entre versiones: UK V4.0 (mayo de 2024) daba 5 años y decía «There is no warranty extension for EP5 and EP11 available upon registration», con una ampliación de pago opcional; UK V4.2 (marzo de 2025) da hasta 10 años con registro y Fox Cloud. Se aplica la versión vigente en la fecha de compra. Fuentes: https://www.solartraders.com/uploads/production/data_sheet/file/40436/warranty_ek11_10_36kwh_en_29-07-2025.pdf?locale=nl y https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf\nEl tope de energía cambia por región: 33,4 MWh en Reino Unido (V4.2) frente a unos 38,4 MWh en Australia según Solar Choice. Fuente: https://www.solarchoice.net.au/products/batteries/fox-ess-review/\nSolo pueden reclamar el instalador y el personal autorizado de Fox ESS, salvo que el instalador sea insolvente o el lugar sea remoto. La instalación debe hacerla un instalador acreditado. Fuente: UK V4.2.\nLa política solo se ofrece al comprador original del producto a Fox ESS, y no se menciona la transmisión al revender la vivienda. Fuente: UK V4.2.\nNo aclara quién paga la mano de obra. Si la unidad devuelta no tiene defecto, Fox puede cobrar una tarifa de inspección o el coste completo del reemplazo. La unidad averiada debe devolverse en 30 días. Fuente: UK V4.2.\nExige al menos 300 mm de espacio libre y un ambiente de -10 a 50 °C, y excluye conectores que no sean de Fox. Fuente: UK V4.2.\nLos plazos de registro se contradicen: 36 meses desde la instalación en un punto y desde la fabricación en otro. Fuente: UK V4.2.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El instalador, con Fox ESS como fabricante. Si el instalador es insolvente, la garantía británica permite designar a otro instalador local a cargo del usuario. No prevé qué ocurre si Fox ESS deja el mercado; quedarían los derechos legales frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -2760,7 +3043,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": "Wenzhou (según Solar Choice; no confirmado para el EP)",
+        "fabrica": {
+          "valor": "Wenzhou (China), planta principal según Solar Choice",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+          "fecha": "2026-10-18",
+          "nota": "Wenzhou (según Solar Choice; no confirmado para el EP) Otras fuentes: https://goingsolaruk.co.uk/fox-ess-battery-review/"
+        },
         "materiales_principales": [
           "celdas prismáticas de litio-ferrofosfato (LFP)",
           "dispositivo térmico de extinción por aerosol (según el manual)"
@@ -2774,10 +3064,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Unidad de una sola caja: la garantía prohíbe la reparación no autorizada, y cualquier sustitución debe aprobarla Fox ESS antes. No se ha encontrado información sobre repuestos.",
-        "fabricante_celulas": "REPT Battero (vinculada), según Solar Choice; no confirmado para el EP",
-        "fabricas_conocidas": [
-          "Wenzhou (China), planta principal según Solar Choice"
-        ]
+        "fabricante_celulas": "REPT Battero (vinculada), según Solar Choice; no confirmado para el EP"
       },
       "certificados": [
         {
@@ -2876,11 +3163,11 @@
           "iva_incluido": true,
           "unidad": "por batería EP11 HV (10,36 kWh nominales)",
           "incluye_instalacion": false,
-          "envio": "entrega estimada en península el 05-11-2026 para pedidos antes de las 15 h",
           "stock": "no indicado (aviso genérico de posible rotura de stock)",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio sin IVA 3.652,14 €; código de artículo 1886005. La ficha de la tienda muestra datos contradictorios (204,8 V frente a 384 V, 87 frente a 99 kg): no queda claro si corresponde a la EP11 o a la EP11 Plus."
+          "nota": "Precio sin IVA 3.652,14 €; código de artículo 1886005. La ficha de la tienda muestra datos contradictorios (204,8 V frente a 384 V, 87 frente a 99 kg): no queda claro si corresponde a la EP11 o a la EP11 Plus. · Envío: entrega estimada en península el 05-11-2026 para pedidos antes de las 15 h",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -3129,6 +3416,45 @@
           "fuente": "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time",
           "fecha": "2026-10-18",
           "nota": "Valor declarado por GoodWe en su nota de prensa (junio de 2025), no leído en el informe: SPI (10 kW) del 94,9 % y clase de eficiencia A para el sistema F1 de la Energy Storage Inspection 2025 de la HTW Berlin (inversor GW10K-ET-20 + batería LX F16.0-H-20). La HTW Berlin sí ensayó ese sistema (lo lista entre los sistemas valorados con el SPI, diapositiva 64: https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf), pero en el texto del informe no figura la cifra, que solo aparece en gráficos. Es un resultado del sistema completo, no de la batería sola. En la Stromspeicher-Inspektion 2024 (sistemas H1–H4), el H4 (GW10K-ET-20 + LX F16.0-H-20) dio 15,5 kWh de capacidad útil medida frente a 16,0 kWh declarados; los ciclos completos de H3 y H4 no pudieron hacerse a potencia nominal por reducción de potencia debida a la temperatura; a 150 W de descarga el inversor rondó el 72 % de eficiencia (https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+          "fecha": "2026-10-18",
+          "nota": "Garantía UE y Sudáfrica de la Lynx Home F (Rev 1.5, 05-06-2025), máximo 11 años desde la fabricación. En el mercado global (fuera de UE) la garantía de producto es de 5 años. No se encontró una garantía UE específica de la G2."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+          "fecha": "2026-10-18",
+          "nota": "70 % de la energía útil o la energía mínima suministrada, lo que antes ocurra."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La cobertura de rendimiento termina al alcanzar la energía mínima garantizada (≈2,56 MWh por kWh útil, unos 2.560 ciclos completos), aunque no hayan pasado 10 años (https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73).\nUE: GoodWe puede cubrir el transporte terrestre hasta un límite solo los primeros 5 años; de los años 6 a 10 solo cubre el material; la mano de obra in situ se compensa solo en algunos casos, con autorización previa y tope.\nInstalación por profesionales cualificados en el mes siguiente a la compra y con inversor GoodWe de la lista de compatibilidad; reclamar en un mes desde el fallo (el documento cita también un plazo de dos semanas, contradictorio).\nLas instalaciones transfronterizas requieren aprobación escrita previa de GoodWe.\nLa garantía global de la G2 exige conexión a internet para la monitorización y advierte que su incumplimiento puede anular la garantía (https://en.goodwe.com/Skippower/downloadFileF?id=56&mid=73).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "GoodWe a través del distribuidor o instalador local, con escalado al portal de soporte de GoodWe. Los documentos no tratan la insolvencia del fabricante.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -3174,8 +3500,7 @@
           "nota": "LX F9.6-H-20: 3 módulos de batería + 1 PCU."
         },
         "reparabilidad": "Diseño apilable con módulos de 3,2 kWh y cableado de comunicación precableado («plug & play», según la marca), lo que en principio permite sustituir módulos. GoodWe anuncia diagnóstico y actualización remotos a través del inversor (https://en.goodwe.com/lynxf-g2-series).",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -3350,11 +3675,11 @@
           "iva_incluido": true,
           "unidad": "por módulo Lynx Home F de 3,27 kWh (primera generación, ref. MODLYNXF)",
           "incluye_instalacion": false,
-          "envio": "no indicado",
           "stock": "no indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio sin IVA 1.040,50 € según los metadatos. No incluye PCU ni base."
+          "nota": "Precio sin IVA 1.040,50 € según los metadatos. No incluye PCU ni base. · Envío: no indicado",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "tienda-solar-es",
@@ -3363,11 +3688,11 @@
           "iva_incluido": true,
           "unidad": "por PCU + base Lynx Home F (una por sistema, primera generación, ref. BASELYNXF)",
           "incluye_instalacion": false,
-          "envio": "no indicado",
           "stock": "no indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio sin IVA 917,36 €. Necesaria una por sistema; admite de 2 a 5 módulos."
+          "nota": "Precio sin IVA 917,36 €. Necesaria una por sistema; admite de 2 a 5 módulos. · Envío: no indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -3619,6 +3944,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK XH no figura en los ensayos de la HTW Berlin de 2025 ni de 2026; en 2025 Growatt aparece solo en el análisis de mercado (APX 5.0P)."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El documento dice que el plazo de 10 años «is only applicable for selling and installation in Australia». Las tiendas europeas anuncian 10 años, pero no se ha encontrado el documento de garantía europeo de la batería. Sin monitorización: 3 años."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Al menos el 70 % de la energía nominal a los 10 años, dentro del tope de energía de cada modelo (garantía australiana)."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El plazo de 10 años solo consta para Australia; no se ha encontrado la garantía europea de la batería. Fuente: https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf\nSin monitorización en la plataforma de Growatt, la garantía baja a 3 años, y sin datos acumulados la garantía de rendimiento no es válida. Fuente: misma garantía.\nLa instalación debe hacerse en los 3 meses siguientes a la entrega desde Growatt; el plazo termina como máximo 10 años y 6 meses tras la entrega. Fuente: misma garantía.\nLos defectos deben comunicarse en los 14 días siguientes a la aparición de signos de problema. Fuente: misma garantía.\nExcluye la instalación o el uso en exterior sin resguardo adecuado, el uso con equipos que no sean de Growatt, la luz solar directa, el almacenamiento fuera de -20/40 °C y altitudes por encima de 2.000 m. Fuente: misma garantía.\nNo cubre mano de obra, logística ni lucro cesante; si la inspección no confirma el defecto, el cliente paga la inspección. La pieza de sustitución no reinicia el plazo. Fuente: misma garantía.\nLa garantía de inversores de Growatt (tarjeta GR-WA-01-A-05) tampoco cubre logística ni mano de obra en los últimos cinco años. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/25741/Growatt%20WA%20EN.pdf?locale=en",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Growatt como fabricante, a través de su agente local o de warranty.growatt.com. No se ha encontrado qué ocurre si Growatt deja el mercado europeo; quedarían los derechos legales frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -3651,7 +4015,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Huizhou (China); Vietnam (fábrica en el extranjero)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.energytrend.com/news/20260618-51619.html",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
+        },
         "materiales_principales": [
           "celdas de litio-ferrofosfato (LFP) sin cobalto"
         ],
@@ -3663,11 +4034,7 @@
           "fecha": "2026-10-18",
           "nota": "El fabricante no lo publica."
         },
-        "reparabilidad": "Módulos ARK 2.5H-A1 sustituibles por separado (se venden sueltos: https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-growatt-ark-25h-a1a2-hv). La garantía australiana advierte que las piezas de sustitución pueden no ser compatibles con el sistema existente y excluye esos costes.",
-        "fabricas_conocidas": [
-          "Huizhou (China)",
-          "Vietnam (fábrica en el extranjero)"
-        ]
+        "reparabilidad": "Módulos ARK 2.5H-A1 sustituibles por separado (se venden sueltos: https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-growatt-ark-25h-a1a2-hv). La garantía australiana advierte que las piezas de sustitución pueden no ser compatibles con el sistema existente y excluye esos costes."
       },
       "certificados": [
         {
@@ -3771,10 +4138,11 @@
           "iva_incluido": true,
           "unidad": "por kit ARK XH 10,24 kWh (4 módulos + BMS; base y cable según la página, aunque se contradice)",
           "incluye_instalacion": false,
-          "envio": "Entrega estimada en la península con pago con tarjeta",
           "stock": "no indicado («salvo rotura de stock»)",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Entrega estimada en la península con pago con tarjeta"
         },
         {
           "distribuidor_id": "autosolar-es",
@@ -3783,10 +4151,11 @@
           "iva_incluido": true,
           "unidad": "por módulo ARK 2.5H-A1/A2 (2,56 kWh), sin BMS",
           "incluye_instalacion": false,
-          "envio": "Entrega estimada en la península con pago con tarjeta",
           "stock": "no indicado",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Entrega estimada en la península con pago con tarjeta"
         }
       ],
       "compatibles": [
@@ -4043,6 +4412,45 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "LUNA2000 no figura entre los sistemas ensayados en la Stromspeicher-Inspektion 2025 de la HTW Berlin (solo se menciona en el análisis de mercado)."
+        },
+        "garantia_producto_anios": {
+          "valor": 5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+          "fecha": "2026-10-18",
+          "nota": "S1: garantía básica de 60 meses; avanzada de 180 meses (15 años) si se cumple el requisito de conexión. S0: 120 meses. Inicio: 180 días después del envío. Condiciones UE de 01-03-2024 para EEE y Suiza."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+          "fecha": "2026-10-18",
+          "nota": "60 % de la energía utilizable hasta el fin del plazo o hasta 28,84 MWh por módulo de 6,9 kWh, lo que ocurra primero. Los 15 años solo con la garantía avanzada (conectada)."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.6,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "S1: los 15 años solo se aplican si la batería está registrada en FusionSolar SmartPVMS y no pasa más de 6 meses desconectada de internet; si no, la garantía es de 5 años (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nEl plazo empieza 180 días después del envío desde Huawei, no desde la instalación; la instalación debe hacerse en el mes siguiente a la salida del almacén del distribuidor, entregando el albarán a Huawei (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nInstalador cualificado o socio certificado por Huawei; las averías deben comunicarse en un mes (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nExcluye dejar la batería sin cargar más de un mes (S1), almacenamiento o manejo indebidos y modificaciones; el módulo de potencia tiene garantía independiente del rendimiento de la batería (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nSolo cubre compras a Huawei o a vendedores autorizados en el EEE y Suiza (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Huawei Technologies Co., Ltd. (China). La garantía no prevé qué ocurre si Huawei dejara de operar en el mercado europeo; quedan las garantías legales del vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -4088,8 +4496,7 @@
           "nota": "Texto publicado: «1 módulo de potencia + 1 a 3 módulos de batería»."
         },
         "reparabilidad": "Modular: los módulos de batería y el módulo de potencia se venden por separado (https://www.wattuneed.com/es/bateria-litio/26861-bateria-de-litio-huawei-luna2000-7-e1-69-kwh-350-v-lfp-69-kwh-ip66.html). Las reparaciones no autorizadas excluyen la garantía (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -4203,9 +4610,9 @@
           "precio_eur": 3823,
           "iva_incluido": true,
           "unidad": "por sistema (LUNA2000-10KW-C1 + módulos 7-E1); precio mostrado por defecto, variante no indicada",
-          "envio": "no indicado",
           "stock": "no indicado",
-          "nota": "≈ 3.159,50 € sin IVA según metadatos. El soporte técnico remoto para configuración y la tramitación de garantía se venden aparte."
+          "nota": "≈ 3.159,50 € sin IVA según metadatos. El soporte técnico remoto para configuración y la tramitación de garantía se venden aparte. · Envío: no indicado",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "wattuneed",
@@ -4216,9 +4623,9 @@
           "precio_eur": 4144.17,
           "iva_incluido": true,
           "unidad": "por módulo LUNA2000-7-E1 (sin módulo de potencia)",
-          "envio": "no indicado",
           "stock": "no indicado",
-          "nota": "El módulo de potencia LUNA2000-10KW-C1 se vende aparte por 1.471,77 €; conjunto 7-S1 = 5.615,94 € (cálculo). Tasa Bebat solo para clientes en Bélgica."
+          "nota": "El módulo de potencia LUNA2000-10KW-C1 se vende aparte por 1.471,77 €; conjunto 7-S1 = 5.615,94 € (cálculo). Tasa Bebat solo para clientes en Bélgica. · Envío: no indicado",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "krannich-solar",
@@ -4229,9 +4636,9 @@
           "precio_eur": null,
           "iva_incluido": null,
           "unidad": "por conjunto LUNA2000-7-S1 (7-E1 + 10KW-C1)",
-          "envio": "fecha de envío no determinada",
           "stock": "no indicado",
-          "nota": "Precio solo bajo petición."
+          "nota": "Precio solo bajo petición. · Envío: fecha de envío no determinada",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -4478,6 +4885,45 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "La RESU no figura en la Stromspeicher-Inspektion 2025 de la HTW Berlin (allí aparecen celdas LG solo dentro de un sistema VARTA)."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "«Limited Warranty for the RESU Prime Home Battery» (sin fecha ni versión), válida en 29 países europeos, incluida España (artículo 12). Empieza en la instalación o 12 meses después de la fabricación, lo que antes ocurra."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Retención del 70 % de la energía al final del periodo o al alcanzar la energía mínima (32 MWh para la RESU10H Prime, 54 MWh para la 16H Prime), lo que antes ocurra (artículo 4.1)."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Exige conexión a internet para actualizaciones remotas y registro en la web RESU Monitor (con aceptación de la recogida de datos personales); sin ello LG puede no cubrir el periodo completo, aunque garantiza al menos cinco años (artículo 7) (https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf).\nRequiere instalación y mantenimiento por un «Certified Installer» de LG Energy Solution con cualificación eléctrica; si no, queda excluida (artículos 2.5 y 8).\nNo dice que cubra mano de obra ni transporte; excluye daños en el transporte del vendedor al comprador y la indemnización por daños derivados (artículos 6.3 y 8).\nExcluye productos almacenados o instalados sin cumplir el manual, incluidos los rangos de temperatura del anexo 1 (artículo 8).\nEn las retiradas de la generación anterior, LG aplicó a las unidades conectadas actualizaciones remotas que pueden apagar la batería si detectan riesgo, o limitarla al 75 % de carga en Australia (https://www.cpsc.gov/Recalls/2023/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-Recall-Alert; https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El garante es LG Energy Solution, Ltd. (Corea del Sur); para Europa (salvo Italia) el contacto es el servicio de LG Energy Solution Europe GmbH en Alemania (+49 6196 5719 660) (https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf). El documento no prevé qué ocurre si LG dejara el mercado europeo; quedan las garantías legales del vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -4521,8 +4967,7 @@
           "nota": "Texto publicado: «1 unidad cerrada (sin módulos ampliables internamente)». La ampliación es poniendo dos unidades en paralelo."
         },
         "reparabilidad": "No se encontró información pública. En las retiradas de la RESU 10H el remedio fue la sustitución completa, una actualización de software o el reembolso.",
-        "fabricante_celulas": "LG Energy Solution",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "LG Energy Solution"
       },
       "certificados": [
         {
@@ -4681,11 +5126,11 @@
           "iva_incluido": true,
           "unidad": "por unidad RESU10H Prime (9,6 kWh)",
           "incluye_instalacion": false,
-          "envio": "no indicado",
           "stock": "no indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio sin IVA 5.495 € según los metadatos de la página."
+          "nota": "Precio sin IVA 5.495 € según los metadatos de la página. · Envío: no indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -4941,6 +5386,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "HTW Berlin, Stromspeicher-Inspektion 2025. El SPI evalúa el sistema completo; el valor exacto está en gráficos no extraídos (pendiente)."
+        },
+        "garantia_producto_anios": {
+          "valor": 7,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Garantía al consumidor Force-H1/H2 para UE y Reino Unido (ref. 4AB16W50091): 7 años desde la instalación o 6 meses tras la fabricación (lo que sea antes); 10 años si se registra en la web de Pylontech. Para Force H3 en Europa no se ha leído el documento (una tienda enlaza «Force H series v1.2 EU»); la versión para EE. UU./Canadá V1.2 da 10 años de producto."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Mínimo 60 % de la energía nominal durante los 7 años; con la ampliación a 10 años por registro, el mínimo baja al 50 % al final. Sin límite de MWh."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.5,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La ampliación de 7 a 10 años exige registrar el producto en la web de Pylontech, y entonces el umbral de capacidad baja del 60 % al 50 % (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nLos defectos deben comunicarse en 48 horas desde que se descubren, a través del vendedor autorizado, con tarjeta de garantía original, factura y registros del sistema (https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf).\nExcluye instalaciones por personas que no sean Pylontech o instaladores certificados, y el uso con inversores/PCS/EMS no certificados por Pylontech (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nExige uso en ciclos diarios en almacenamiento fotovoltaico con profundidad de descarga inferior al 90 %; en exterior, protección frente a sol directo y heladas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nSolo repara o sustituye; mano de obra y transporte no se tratan. Si el cliente discute la decisión y el laboratorio externo da la razón a Pylontech, el cliente paga el ensayo (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nLa copia checa de la garantía UE se presenta como traducción no oficial y tiene cláusulas en blanco o truncadas (https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Pylon Technologies Co., Ltd. (Shanghái, China), a través del vendedor autorizado. La garantía no prevé qué ocurre si Pylontech dejara el mercado europeo.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -4972,7 +5456,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Hefei (China): base de producción de celdas LFP grandes desde septiembre de 2026, según comunicado",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html"
+        },
         "materiales_principales": [
           "celdas LFP",
           "BMS FC1000 (H3) / FC0500M (H2)",
@@ -4987,10 +5478,7 @@
           "nota": "Texto publicado: «1 BMS + 2 a 7 módulos de batería»."
         },
         "reparabilidad": "Módulos sustituibles por separado; la garantía excluye mezclar tipos de módulos y reparaciones no autorizadas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).",
-        "fabricante_celulas": "Pylontech (producción propia de celdas LFP; ver nota en datos técnicos)",
-        "fabricas_conocidas": [
-          "Hefei (China): base de producción de celdas LFP grandes desde septiembre de 2026, según comunicado"
-        ]
+        "fabricante_celulas": "Pylontech (producción propia de celdas LFP; ver nota en datos técnicos)"
       },
       "certificados": [
         {
@@ -5096,9 +5584,9 @@
           "precio_eur": 960.95,
           "iva_incluido": true,
           "unidad": "por módulo FH10050 (5,12 kWh)",
-          "envio": "envío aparte; 2–5 días laborables",
           "stock": "disponible",
-          "nota": "IVA alemán del 19 %. Se necesita además el BMS FC1000 (676,73 € con IVA: https://www.offgridtec.com/en/pylontech-bms-for-force-h3-fh10050-fc1000.html)."
+          "nota": "IVA alemán del 19 %. Se necesita además el BMS FC1000 (676,73 € con IVA: https://www.offgridtec.com/en/pylontech-bms-for-force-h3-fh10050-fc1000.html). · Envío: envío aparte; 2–5 días laborables",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "nkon-nl",
@@ -5109,9 +5597,9 @@
           "precio_eur": 959.95,
           "iva_incluido": true,
           "unidad": "por módulo FH10050 (5,12 kWh)",
-          "envio": "según destino",
           "stock": "en stock",
-          "nota": "793,35 € sin IVA. Se necesitan al menos 2 módulos y el BMS FC1000."
+          "nota": "793,35 € sin IVA. Se necesitan al menos 2 módulos y el BMS FC1000. · Envío: según destino",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "offgridtec",
@@ -5122,9 +5610,9 @@
           "precio_eur": 2120.21,
           "iva_incluido": true,
           "unidad": "por sistema Force H2 7,1 kWh (2 módulos FH9637M + BMS FC0500M-40S-V2)",
-          "envio": "envío aparte",
           "stock": "no indicado",
-          "nota": "IVA alemán del 19 %; 298,62 €/kWh nominal (cálculo: 2.120,21 / 7,1)."
+          "nota": "IVA alemán del 19 %; 298,62 €/kWh nominal (cálculo: 2.120,21 / 7,1). · Envío: envío aparte",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -5372,6 +5860,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "SENEC no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. La web de SENEC menciona el sello «Protected by NOVUM» y una prueba TÜV según VDE-AR-E 2510-50, que son certificaciones, no ensayos comparativos."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://senec.com/de/produkte/senec-home/p4",
+          "fecha": "2026-10-18",
+          "nota": "Home P4: «10 años» sin más detalle en la página; hay condiciones distintas para P4 hasta y desde el 15-09-2025, y varias modalidades para la V3 (estándar, ampliación de garantía, valor actual, BHKW/eólica), que no pudieron abrirse."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Umbral de capacidad residual no verificado."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": null,
+          "unidad": "fracción",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El canje de módulos por LFP es una medida de cortesía dentro de la garantía de componentes y no reinicia el periodo: «läuft daher der Garantiezeitraum unverändert weiter» (https://senec.com/de/aktuelle-informationen).\nDurante el «modo de acondicionamiento» (desde el 9-08-2023) los sistemas V2.1/V3 afectados solo almacenan hasta ~70 % de la capacidad y reducen la potencia por encima del 50 % de carga; SENEC paga voluntariamente 1,07 € por día afectado (base 10 kWh) hasta el canje, «sin obligación legal y de forma revocable».\nSENEC pide no desconectar el equipo de internet ni apagarlo; su sistema de vigilancia SmartGuard puede apagar a distancia los equipos con anomalías (https://senec.com/de/smartguard).\nFin de las ventas: SENEC declara que las garantías y derechos legales existentes siguen vigentes y que se mantendrán funciones de seguridad y actualizaciones importantes, pero no nuevas funciones (https://senec.com/de/informationen-bestandskundenbetrieb).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://senec.com/de/unternehmen/download",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "SENEC GmbH (filial de EnBW Energie Baden-Württemberg AG), a través de sus socios instaladores. Tras el cese de ventas a nuevos clientes, la empresa sigue operando para clientes existentes y afirma mantener las garantías; no hay información pública sobre qué pasaría si la filial se liquidara.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://senec.com/de/unternehmen/download",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -5415,8 +5942,7 @@
           "nota": "No publicado."
         },
         "reparabilidad": "En la V3 los módulos de batería se pueden sustituir in situ (canje de unos 1,5 h según SENEC); la Home 4 se cambia por un sistema P4 completo (hasta 3 h) (https://senec.com/de/aktuelle-informationen).",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -5788,6 +6314,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "SolarEdge no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. SolarQuotes estima una eficiencia real de ciclo completo de ~93,3 % frente al 94,5 % pico declarado, pero no es una medición de laboratorio."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Desde la fecha de instalación registrada en el portal de monitorización o 12 meses después del envío, lo que antes ocurra."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Modelo 400V (garantía «Energy Bank», rev. octubre 2021): 70 % al final, ciclos ilimitados. Modelo 48V (Alemania, sept. 2022): 80 % al final o al alcanzar 2,615 MWh por kWh útil."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La batería debe permanecer conectada a un inversor SolarEdge aprobado y a la plataforma de monitorización durante todo el periodo; sin esa conexión SolarEdge declara que no puede atender la garantía, y el comprador acepta actualizaciones remotas de firmware sin aviso (https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en).\nLa temperatura ambiente debe estar entre 0 y 40 °C al menos el 95 % del periodo de garantía.\nMano de obra, desplazamiento y desinstalación/reinstalación excluidos salvo acuerdo previo por escrito; el envío de la unidad para la reparación lo paga el comprador.\nCubre solo el continente donde SolarEdge vendió la unidad; no se puede trasladar ni reinstalar sin consentimiento escrito; transferible a un nuevo propietario si la batería no se mueve.\nResponsabilidad limitada al precio pagado por la unidad; en la versión 48V alemana la compensación en crédito se prorratea sobre 120 meses (https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "SolarEdge Technologies Ltd. (fabricante). Los documentos no dicen qué ocurre en caso de insolvencia.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -5832,8 +6397,7 @@
           "nota": "No publicado."
         },
         "reparabilidad": "Unidad cerrada de 119 kg; la garantía excluye reparaciones no autorizadas y el traslado sin consentimiento. No se publica información sobre sustitución de módulos o celdas.",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -5949,11 +6513,11 @@
           "iva_incluido": true,
           "unidad": "por unidad",
           "incluye_instalacion": false,
-          "envio": "No indicado en la ficha",
           "stock": "No indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "5.640 € sin IVA."
+          "nota": "5.640 € sin IVA. · Envío: No indicado en la ficha",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "solartraders",
@@ -5963,11 +6527,11 @@
           "iva_incluido": null,
           "unidad": "por unidad",
           "incluye_instalacion": false,
-          "envio": "No indicado",
           "stock": "4 unidades en almacén de Alemania",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio visible solo para miembros registrados."
+          "nota": "Precio visible solo para miembros registrados. · Envío: No indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -6217,6 +6781,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "sonnen no figura en los resultados de eficiencia (SPI) de la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026; en 2025 solo participó en la prueba de gestión de energía (capítulo 4)."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+          "fecha": "2026-10-18",
+          "nota": "La ficha remite a «las condiciones de garantía vigentes»; no se localizó el documento de garantía europeo."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la garantía de sonnen Australia (mayo 2022): capacidad no inferior al 80 % de la nominal durante 10 años o 10.000 ciclos completos. En EE. UU. el umbral es 70 %. No se verificó el umbral para España."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Australia: la garantía termina a los 10 años o a los 10.000 ciclos completos, lo que antes ocurra (https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download).\nAustralia: si la unidad está desconectada de internet o no recibe actualizaciones, sonnen no garantiza que esté libre de defectos; EE. UU.: el acceso en línea continuo es condición expresa (https://media.sonnengroup.com/10df77cf-efda-4739-a698-a8e9908cde43-en-download).\nInstalación y reparación solo por sonnen o instaladores certificados; el precinto roto anula la garantía (garantía Australia).\nAustralia: transporte, desplazamiento y mano de obra cubiertos solo hasta 200 AUD; reclamar en 6 meses desde que se detecta el fallo; no transferible sin consentimiento escrito.\nAlemania: el distribuidor Krannich indica «10 años de garantía tras registro en línea» (https://shop.krannich-solar.com/en-de/sonnenBatterie-10-performance-10p-44/0163899).\nEn 2019 el Landgericht München desestimó los 12 puntos de la demanda de la Verbraucherzentrale NRW contra las condiciones de garantía de sonnen, incluida la exigencia de conexión a internet (https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (sonnen GmbH o su filial nacional) a través del instalador certificado. Los documentos consultados no dicen qué ocurre si el fabricante quiebra. Tras la venta de Shell a TIVEN (agosto 2026) no se encontró información pública sobre la continuidad de las garantías.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -6248,7 +6851,14 @@
       "origen": {
         "pais_marca": "Alemania",
         "pais_fabricacion": "Alemania (montaje, según la marca); origen de las celdas no publicado",
-        "fabrica": "Wildpoldsried (Alemania)",
+        "fabrica": {
+          "valor": "Wildpoldsried (Alemania), según la ficha técnica («Made in Germany»)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)",
+          "fecha": "2026-10-18",
+          "nota": "Wildpoldsried (Alemania) Otras fuentes: https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/ https://www.energias-renovables.com/almacenamiento/baywa-distribuidora-exclusiva-de-las-bater-as-20260223 https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/"
+        },
         "materiales_principales": [
           "celdas LFP",
           "armario metálico",
@@ -6263,10 +6873,7 @@
           "nota": "El 10p/44 se compone de unidad de potencia, 2 armarios, 8 módulos de almacenamiento y kits de accesorio/ampliación según Krannich; no hay recuento total publicado."
         },
         "reparabilidad": "Diseño modular: los módulos de batería (sonnenModule, 5,5 kWh) y la unidad de potencia se venden por separado como piezas (https://shop.krannich-solar.com/en-de/sonnenBatterie-10-performance-10p-44/0163899). La reparación debe hacerla un instalador certificado según la garantía.",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": [
-          "Wildpoldsried (Alemania), según la ficha técnica («Made in Germany»)"
-        ]
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -6398,11 +7005,11 @@
           "iva_incluido": false,
           "unidad": "por sistema",
           "incluye_instalacion": false,
-          "envio": "Por agencia como mercancía peligrosa clase 9; coste no indicado; no envía a España según la lista de destinos",
           "stock": "5 unidades; entrega 1–2 semanas",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio sin 19 % de IVA; IVA 0 % aplicable en Alemania a autoconsumo residencial."
+          "nota": "Precio sin 19 % de IVA; IVA 0 % aplicable en Alemania a autoconsumo residencial. · Envío: Por agencia como mercancía peligrosa clase 9; coste no indicado; no envía a España según la lista de destinos",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "aceflex-de",
@@ -6412,11 +7019,11 @@
           "iva_incluido": false,
           "unidad": "por sistema",
           "incluye_instalacion": false,
-          "envio": "Por agencia; coste no indicado",
           "stock": "13 unidades; entrega 1–2 semanas",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio sin 19 % de IVA."
+          "nota": "Precio sin 19 % de IVA. · Envío: Por agencia; coste no indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -6667,6 +7274,45 @@
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf",
           "fecha": "2026-10-18",
           "nota": "Sungrow se menciona en la Stromspeicher-Inspektion 2024 de la HTW Berlin solo en el análisis de mercado; no figura entre los sistemas ensayados en 2024 ni 2025 (https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf)."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "«Limited Manufacturer Warranty for Distribution», Rev. 2.0, válida desde 01-04-2021, para productos vendidos desde el 01-06-2021 a través de distribuidores en los países de la UE (incluida España), Noruega, Suiza y Reino Unido. Batería residencial: 10 años o 4.200 × capacidad nominal (kWh) de energía medida, lo que antes ocurra; máximo 10 años y 6 meses desde la fecha de fabricación. Puede haber versiones posteriores no localizadas."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad disponible > 80 % de la nominal durante 10 años, mientras la energía medida sea < 3.000 × capacidad nominal (kWh). Ensayo de capacidad a 25–28 °C."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La garantía de rendimiento termina al superar 3.000 × capacidad nominal de energía (28,8 MWh en la SBR096, unos 3.000 ciclos completos), aunque no hayan pasado 10 años (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de).\nNo cubre los costes de personal propio del usuario ni de terceros (mano de obra); las visitas fuera de garantía se cobran a 90 €/hora en días laborables (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, cláusulas 4.16 y 6.5).\nTransporte cubierto por Sungrow en la «región A» (países UE listados); no cubierto en territorios de ultramar ni en países no listados (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 2.3.3).\nExcluye el uso con un inversor o convertidor incompatible, la instalación sin seguir el manual y el uso fuera de las temperaturas del manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 4.4, 4.4.1 y 4.13).\nEl documento es de 2021; Sungrow publica garantías por país en https://www.sungrowpower.com/en/warranty-terms-and-conditions-country-list-global-site, donde España aparece sin documento enlazado.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El garante es la matriz china, Sungrow Power Supply Co., Ltd. (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 1.2); la reclamación se tramita a través del instalador y del distribuidor. El documento no prevé qué ocurre si Sungrow dejara el mercado europeo; quedan las garantías legales del vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -6712,8 +7358,7 @@
           "nota": "Texto publicado: «2 a 8 módulos de batería de 3,2 kWh + controlador». El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
         },
         "reparabilidad": "Modular: los módulos y el controlador se venden por separado y se pueden añadir durante la vida útil según la marca (https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256). En el incidente de 2023 la solución fue revisar o cambiar el BMS (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/). La garantía excluye reparaciones sin seguir el manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de).",
-        "fabricante_celulas": "No publicado",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "No publicado"
       },
       "certificados": [
         {
@@ -7080,6 +7725,45 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "No figura en la Stromspeicher-Inspektion 2025 de la HTW Berlin; no se encontraron otros ensayos independientes en esta revisión."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Garantía Zona Europea Rev. 1.15 (27-01-2025), que cubre Powerwall 2 AC; versión anterior específica Rev. 1.11 (11-03-2021) con las mismas cifras."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "70 % de 13,5 kWh a 10 años en España, Italia, Portugal y Eslovenia; 80 % en el centro y norte de Europa."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Cobertura completa condicionada a actualizaciones remotas de firmware y registro; si no, mínimo 4 años (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf; https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea).\nLímite de 37,8 MWh para usos no listados (https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea).\nSolo instaladores certificados por Tesla; abrir la carcasa o reubicar la unidad sin permiso excluye la garantía (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nTesla elige reparar, sustituir o reembolsar el valor de mercado; el plazo no se amplía tras una sustitución; responsabilidad limitada al precio pagado (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nDurante la retirada de 2025, Tesla descargó a distancia las unidades afectadas conectadas a internet hasta su sustitución, lo que deja temporalmente sin servicio la batería (https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Tesla Motors Netherlands B.V. (Ámsterdam) en la Zona de Garantía Europea. Con el producto descatalogado, la sustitución en garantía depende de piezas o equivalentes que Tesla decida suministrar (la garantía le permite reembolsar el valor de mercado de un producto equivalente).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -7110,7 +7794,14 @@
       "origen": {
         "pais_marca": "Estados Unidos",
         "pais_fabricacion": "Estados Unidos",
-        "fabrica": "Reno, Nevada (según CPSC)",
+        "fabrica": {
+          "valor": "Tesla, Inc., Reno (Nevada, EE. UU.), según la ficha de retirada de la CPSC",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death",
+          "fecha": "2026-10-18",
+          "nota": "Reno, Nevada (según CPSC) Otras fuentes: https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/ https://www.energy-storage.news/?p=86789 https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/"
+        },
         "materiales_principales": [
           "celdas de iones de litio (NMC según prensa)",
           "inversor de batería integrado",
@@ -7125,10 +7816,7 @@
           "nota": "No publicado."
         },
         "reparabilidad": "La garantía excluye aperturas o reparaciones por terceros no certificados (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf). En la retirada de 2025 el remedio fue la sustitución completa de la unidad, no la reparación (https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death).",
-        "fabricante_celulas": "No publicado por Tesla; prensa: celdas NMC desarrolladas con Panasonic",
-        "fabricas_conocidas": [
-          "Tesla, Inc., Reno (Nevada, EE. UU.), según la ficha de retirada de la CPSC"
-        ]
+        "fabricante_celulas": "No publicado por Tesla; prensa: celdas NMC desarrolladas con Panasonic"
       },
       "certificados": [
         {
@@ -7480,6 +8168,45 @@
           "fuente": null,
           "fecha": "2026-10-18",
           "nota": "El Powerwall 3 no figura entre los sistemas del informe Stromspeicher-Inspektion 2025 de la HTW Berlin (ver documento). No se encontraron otros ensayos independientes publicados."
+        },
+        "garantia_producto_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Garantía limitada para la «Zona de Garantía Europea», Rev. 1.15, vigente desde el 27-01-2025. Cubre Powerwall 2 AC, Powerwall 3 y Powerwall 3 Expansion."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 10,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "70 % de 13,5 kWh a los 10 años en España, Italia, Portugal y Eslovenia; 80 % en Alemania, Austria, Bélgica, Francia, Irlanda, Luxemburgo, Países Bajos, Reino Unido y Suiza. No hay curva anual publicada."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.7,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "En España la retención garantizada es del 70 % a 10 años, frente al 80 % en otros países europeos (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nLa cobertura completa de 10 años exige que Tesla pueda actualizar el firmware por internet y que la batería esté registrada; si no, Tesla garantiza como mínimo 4 años desde la instalación (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nUsos distintos de autoconsumo solar, control programado y respaldo (p. ej. arbitraje o servicios a red) están limitados a 37,8 MWh acumulados medidos a la salida AC (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nDebe comprarse a Tesla o a un Instalador Certificado por Tesla e instalarse en la zona de garantía europea; la instalación, reparación o apertura por terceros excluye la garantía, igual que reubicar la batería sin consentimiento escrito (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nTesla elige entre reparar, sustituir o reembolsar el valor de mercado de un producto equivalente; la unidad reparada o sustituida no amplía el plazo. La responsabilidad se limita al importe pagado. El documento no trata expresamente la mano de obra ni el transporte (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).\nLa garantía europea de 10 años figura en la ficha técnica como «condicionada a una conexión a internet fiable» (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Tesla Motors Netherlands B.V. (Burgemeester Stramanweg 122, Ámsterdam) como garante en Europa; las reclamaciones se canalizan primero a través del instalador certificado o de Tesla si se compró directamente. La garantía no dice qué ocurre si Tesla abandona el mercado europeo; quedan las garantías legales del vendedor según la normativa de consumo.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -7526,8 +8253,7 @@
           "nota": "No publicado."
         },
         "reparabilidad": "Tesla excluye de la garantía cualquier apertura de la carcasa o reparación por personas que no sean instaladores certificados (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf). No se ha encontrado información pública sobre piezas de recambio o sustitución de módulos internos.",
-        "fabricante_celulas": "No publicado por Tesla",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "No publicado por Tesla"
       },
       "certificados": [
         {
@@ -7652,9 +8378,9 @@
           "precio_eur": 9344.23,
           "iva_incluido": true,
           "unidad": "por unidad (13,5 kWh)",
-          "envio": "Entrega estimada 26-10-2026 en península con pago con tarjeta",
           "stock": "no indicado («salvo rotura de stock»)",
-          "nota": "Referencia 1882209 «Tesla Powerwall 3 AC 1P». 7.722,50 € sin IVA. La página no menciona el Backup Gateway 2 ni el requisito de instalador certificado por Tesla para la garantía."
+          "nota": "Referencia 1882209 «Tesla Powerwall 3 AC 1P». 7.722,50 € sin IVA. La página no menciona el Backup Gateway 2 ni el requisito de instalador certificado por Tesla para la garantía. · Envío: Entrega estimada 26-10-2026 en península con pago con tarjeta",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "holaluz",
@@ -7665,9 +8391,9 @@
           "precio_eur": null,
           "iva_incluido": null,
           "unidad": "instalación completa",
-          "envio": null,
           "stock": null,
-          "nota": "Ofrece Powerwall 3 con instalación; la página no publica precio (solo formulario y teléfono)."
+          "nota": "Ofrece Powerwall 3 con instalación; la página no publica precio (solo formulario y teléfono).",
+          "envio_eur": null
         }
       ],
       "compatibles": [

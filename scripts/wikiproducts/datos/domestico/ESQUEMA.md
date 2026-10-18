@@ -139,3 +139,9 @@ que se diga. `comision`: «sin acuerdo» mientras no haya acuerdo (plan §0.6).
   `precio` ← `precio_eur` (mirar `iva_incluido` y `unidad`), `envio` ← `envio`, `stock` ← `stock`,
   `comision` ← vacío si «sin acuerdo», `enlace` ← `url`, `plazo` ← `plazo`,
   `comprobado` ← `fecha_comprobacion`, `instalacion` ← `incluye_instalacion`.
+- Columnas de W1 (PR #600): `unir.mjs` aplana `garantias` en `datos_tecnicos.garantia_producto_anios`,
+  `garantia_rendimiento_anios`, `garantia_rendimiento_final_pct` (fracción: 0,8 = 80 %),
+  `garantia_letra_pequena` (una condición por línea) y `garantia_quien_responde`;
+  `fabricas_conocidas` → `origen.fabrica`; `resultado_pvel` → `pruebas_independientes` (conserva su
+  naturaleza: un comunicado de la marca sigue siendo «declarado»); en ofertas, `envio` (texto) →
+  `envio_eur` vacío y el texto a `nota`. Los borradores no cambian.

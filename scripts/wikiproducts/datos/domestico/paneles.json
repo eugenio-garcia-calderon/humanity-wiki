@@ -209,21 +209,52 @@
           "fecha": "2026-10-18",
           "nota": "89,99 € / 470 Wp = 0,191 €/Wp, de la única oferta con IVA indicado encontrada (basic-solar.de, «inkl. 0 % MwSt.», tipo de IVA alemán del 0 % para instalaciones residenciales; en España se aplicaría el 21 %). Corresponde al Neostar 2P (generación anterior), sin existencias; sin envío. No se halló precio público con IVA para el 3P54."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Top Performer en el Kiwa PVEL Scorecard 2025 y 2026 (7 categorías en 2026)",
           "unidad": null,
           "naturaleza": "medido",
           "fuente": "https://www.pv-tech.org/industry-updates/aiko-recognized-as-kiwa-pvel-2026-top-performer/",
           "fecha": "2026-10-18",
-          "nota": "El reconocimiento de 2026 se refiere al modelo AIKO-Axxx-GRH66Dw (66 células, doble vidrio, de uso comercial/utility), no al Neostar 3P54 residencial. No se encontró qué lista de materiales (BOM) residencial se ensayó."
+          "nota": "El reconocimiento de 2026 se refiere al modelo AIKO-Axxx-GRH66Dw (66 células, doble vidrio, de uso comercial/utility), no al Neostar 3P54 residencial. No se encontró qué lista de materiales (BOM) residencial se ensayó. No se encontraron ensayos independientes publicados del Neostar 3P54 (MCE54Mw) concreto; testbericht.de indica «Noch keine Testberichte» para el 3P+54."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.testbericht.de/produkte/aiko-solar-neostar-3p54-doppelglas-465w-495w-aiko-a-mce54dw",
+        "garantia_producto_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2025/07/Neostar-3P54-Mono-Glass-475-500W.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se encontraron ensayos independientes publicados del Neostar 3P54 (MCE54Mw) concreto; testbericht.de indica «Noch keine Testberichte» para el 3P+54."
+          "nota": "La ficha del 3P54 y el documento de garantía residencial v1.7.2 dicen 25 años. Pero la ficha del 3P+54 (MCE54Dw) dice «15 años, ampliable a 25», y varios distribuidores europeos (Krannich, basic-solar.de, aceflex.de) venden Neostar 2P/3P con 15 años de garantía de producto."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 1 %. Después, 0.35 %/año. 90,6 % al año 25. Solo potencia frontal, medida en STC con ±3 % de incertidumbre."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8885,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La garantía de producto varía según canal y versión: 25 años en la ficha del 3P54 y en el documento residencial v1.7.2, 15 años «ampliable a 25» en la ficha del 3P+54 y 15 años en ofertas de Krannich, basic-solar.de y aceflex.de. Conviene comprobar en la factura qué garantía se da. Fuentes: https://www.vpsolar.com/download/catalog/Moduli/AIKO/Neostar-3P-plus-MCE54DW/AIKO_Neostar-3PPlus54_A-MCE54Dw_EN.pdf ; https://shop.krannich-solar.com/en-cz/detail/a343ee339336a379f102dfa41d253175\nEl documento de garantía residencial v1.7.2 enumera los modelos cubiertos e indica que los MCE54 solo están incluidos por debajo de 480 W; no queda claro qué documento rige para las variantes de 480–500 W. Fuente: https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf\nLos costes de desmontar, reembalar, instalar o reinstalar los módulos corren a cargo del cliente (art. 4.4.3); AIKO solo asume los costes de ensayo y transporte de inspección si es responsable. Fuente: documento de garantía v1.7.2.\nSolo se presta garantía a productos comprados por canales locales oficiales (art. 5). La reclamación debe hacerse por escrito en los 30 días siguientes a detectar el defecto, con número de serie y prueba de compra (art. 3.2).\nLa transmisión a un nuevo propietario exige acuerdo tripartito firmado con AIKO y que los módulos sigan en el lugar original (art. 7); cambiar los módulos de sitio sin permiso escrito anula la garantía.\nLa indemnización máxima se limita al importe facturado por los módulos defectuosos y se excluyen pérdidas de producción (art. 6.3). Reparar o sustituir no amplía el plazo (art. 4.4.1).\nEl documento no dice qué ocurre si AIKO quiebra o deja el mercado europeo, ni ofrece un seguro de garantía de terceros.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (AIKO, a través de su servicio posventa europeo aftersales@aikosolar.com) o el distribuidor autorizado. No se publica ningún seguro de garantía de terceros: si AIKO desapareciera, la garantía dependería de la solvencia del distribuidor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/wp-content/uploads/2026/07/N-Type-ABC-Module-Warranty_Residential-Modules-1.7.2-EN.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -256,7 +287,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": "No se indica en la ficha qué planta fabrica cada lote; la ficha dice «Made in China».",
+        "fabrica": {
+          "valor": "Zhuhai (Guangdong), China; Foshan (Guangdong), China; Yiwu (Zhejiang), China; Tianjin, China; Chuzhou (Anhui), China; Jinan (Shandong), China: planta de módulos BC de 10 GW (fase I)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://aikosolar.com/?p=28185",
+          "fecha": "2026-10-18",
+          "nota": "No se indica en la ficha qué planta fabrica cada lote; la ficha dice «Made in China». Otras fuentes: https://www2.yicaiglobal.com/news/chinas-aiko-agrees-to-pay-maxeon-usd238-million-to-end-patent-dispute https://www.juve-patent.com/cases/maxeon-and-aiko-settle-solar-panel-dispute/ https://www.solarquotes.com.au/blog/maxeon-aiko-patent-mb3337/ https://www.solarquotes.com.au/blog/aiko-panels-jinan-mb3094/"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n",
           "vidrio templado 3,2 mm",
@@ -273,15 +311,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Como cualquier módulo laminado, no es reparable por el usuario; la garantía prevé reparación, sustitución o reembolso a elección de AIKO (documento de garantía v1.7.2, art. 4).",
-        "fabricante_celulas": "AIKO (producción propia de células ABC)",
-        "fabricas_conocidas": [
-          "Zhuhai (Guangdong), China",
-          "Foshan (Guangdong), China",
-          "Yiwu (Zhejiang), China",
-          "Tianjin, China",
-          "Chuzhou (Anhui), China",
-          "Jinan (Shandong), China: planta de módulos BC de 10 GW (fase I)"
-        ]
+        "fabricante_celulas": "AIKO (producción propia de células ABC)"
       },
       "certificados": [
         {
@@ -376,11 +406,11 @@
           "iva_incluido": true,
           "unidad": "por módulo",
           "incluye_instalacion": false,
-          "envio": "Gastos de envío aparte (no se indica importe).",
           "stock": "Agotado («Nicht vorrätig»), entrega en máx. 60 días",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Modelo Neostar 2P A470-MAH54Mw G2 (generación anterior), «inkl. 0 % MwSt.» (IVA alemán del 0 % para FV residencial). Anuncia 15 años de garantía de producto."
+          "nota": "Modelo Neostar 2P A470-MAH54Mw G2 (generación anterior), «inkl. 0 % MwSt.» (IVA alemán del 0 % para FV residencial). Anuncia 15 años de garantía de producto. · Envío: Gastos de envío aparte (no se indica importe).",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "aceflex-de",
@@ -389,11 +419,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (pedido mínimo 4)",
           "incluye_instalacion": false,
-          "envio": "Por agencia en palé; coste no indicado.",
           "stock": "Agotado; restos bajo consulta",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Modelo Neostar 2P+ A470-MAH54Dw (doble vidrio). La página no aclara el IVA; dice que puede aplicarse el 0 % según § 12.3 UStG."
+          "nota": "Modelo Neostar 2P+ A470-MAH54Dw (doble vidrio). La página no aclara el IVA; dice que puede aplicarse el 0 % según § 12.3 UStG. · Envío: Por agencia en palé; coste no indicado.",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -402,11 +432,11 @@
           "iva_incluido": null,
           "unidad": "por Wp",
           "incluye_instalacion": false,
-          "envio": "No indicado",
           "stock": "962–2886 unidades",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Muestra «desde 0,198 €/Wp» para el A495-MCE54Mw (≈98 € por módulo), sin indicar IVA; plataforma profesional."
+          "nota": "Muestra «desde 0,198 €/Wp» para el A495-MCE54Mw (≈98 € por módulo), sin indicar IVA; plataforma profesional. · Envío: No indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -630,21 +660,52 @@
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna oferta con precio público en España ni en la UE."
         },
-        "resultado_pvel": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "No se encontró el LEO-N ni aleo en los Scorecards de Kiwa PVEL consultados."
-        },
         "pruebas_independientes": {
           "valor": "Clase de granizo 4 (40 mm) para la serie LEO anterior; para LEO-N figuraba «en proceso»",
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/",
           "fecha": "2026-10-18",
-          "nota": "Krannich lista el LEO-N L64S435 con clase de granizo HW 4. No se vio el certificado."
+          "nota": "Krannich lista el LEO-N L64S435 con clase de granizo HW 4. No se vio el certificado. Kiwa PVEL: No se encontró el LEO-N ni aleo en los Scorecards de Kiwa PVEL consultados."
+        },
+        "garantia_producto_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Según la ficha y la página de atención al cliente, desde la fecha de compra, «según las condiciones del certificado de garantía correspondiente», que no se pudo leer."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. El 0,4 % anual es calculado a partir de los puntos inicial y final."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La ficha remite a un certificado de garantía y a unas condiciones publicadas en la web que no se encontraron; no se pudieron comprobar plazos de reclamación, exclusiones ni topes.\nLa ficha promete «100 % de cobertura de costes en caso de garantía», sin precisar si incluye desmontaje, reinstalación y transporte; un resumen de gama de 09/2024 dice que aleo cubre envío de vuelta, reparación o reposición y costes de instalación «razonables», sujeto al certificado.\nLa reclamación se canaliza primero a través del instalador, según la página de atención al cliente de aleo.\nRiesgo principal: la empresa detuvo su única fábrica en 2025 (pv magazine). La garantía de 30 años depende de que aleo solar GmbH o su matriz sigan existiendo y tengan módulos compatibles para sustituir; no se encontró información pública sobre cómo se atenderán las garantías ni sobre un seguro que las respalde.\nEn España la garantía legal frente al vendedor es independiente de la del fabricante.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "aleo solar GmbH (Prenzlau, Alemania), propiedad del grupo taiwanés Sino-American Silicon Products a través de Sunrise Global Solar Energy. No se publica aseguradora de garantía; tras el cierre de la producción no hay información pública sobre la continuidad del servicio de garantía.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://62d256b1-a93f-4dd0-9d81-92f3c238933e.filesusr.com/ugd/ecbda7_7a388197baf34334a93eecdb19810672.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -675,7 +736,14 @@
       "origen": {
         "pais_marca": "Alemania",
         "pais_fabricacion": "Alemania (ensamblaje del módulo en Prenzlau); origen de las células no publicado",
-        "fabrica": "aleo solar GmbH, Marius-Eriksen-Straße 1, 17291 Prenzlau",
+        "fabrica": {
+          "valor": "Prenzlau (Brandeburgo, Alemania): producción en cierre ordenado desde marzo de 2025",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.pv-magazine.com/2025/03/10/aleo-solar-to-halt-production-at-pv-module-factory-in-germany/",
+          "fecha": "2026-10-18",
+          "nota": "aleo solar GmbH, Marius-Eriksen-Straße 1, 17291 Prenzlau Otras fuentes: https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/ https://www.aleo-solar.de/ http://pv-magazine-usa.com/2017/04/14/fire-hazard-prompts-bosch-solar-services-voluntary-recall/"
+        },
         "materiales_principales": [
           "silicio monocristalino N-type",
           "vidrio solar templado de 3,2 mm",
@@ -690,10 +758,7 @@
           "fecha": "2026-10-18",
           "nota": "El fabricante no lo publica."
         },
-        "reparabilidad": "Módulo laminado no reparable en la práctica. La ficha declara el producto libre de PFAS.",
-        "fabricas_conocidas": [
-          "Prenzlau (Brandeburgo, Alemania): producción en cierre ordenado desde marzo de 2025"
-        ]
+        "reparabilidad": "Módulo laminado no reparable en la práctica. La ficha declara el producto libre de PFAS."
       },
       "certificados": [
         {
@@ -782,10 +847,10 @@
           "iva_incluido": null,
           "unidad": "por módulo (palé de 23)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "Liquidación; precio solo para clientes registrados",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -1007,21 +1072,52 @@
           "fecha": "2026-10-18",
           "nota": "61,98 € (IVA incl.) / 450 Wp = 0,138 €/Wp. La propia página muestra también 50,39 €, sin aclarar la diferencia, y la disponibilidad no está clara."
         },
-        "resultado_pvel": {
-          "valor": "Astronergy afirma haber sido «Top Performer» de Kiwa PVEL por novena vez consecutiva (2025)",
-          "unidad": null,
-          "naturaleza": "declarado",
-          "fuente": "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/",
-          "fecha": "2026-10-18",
-          "nota": "Nota de prensa de la marca; no indica qué modelo o lista de materiales se ensayó. No se comprobó en el Scorecard original."
-        },
         "pruebas_independientes": {
           "valor": "La marca comunica el premio «Overall Highest Achiever» de RETC para la serie ASTRO N7",
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/",
           "fecha": "2026-10-18",
-          "nota": "Nota de prensa; no se consultó el informe PVMI de RETC y se refiere a la serie N7 (formato grande), no necesariamente a la N7s doméstica."
+          "nota": "Nota de prensa; no se consultó el informe PVMI de RETC y se refiere a la serie N7 (formato grande), no necesariamente a la N7s doméstica. Kiwa PVEL: Astronergy afirma haber sido «Top Performer» de Kiwa PVEL por novena vez consecutiva (2025) (declarado; https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/)"
+        },
+        "garantia_producto_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Según la ficha. El documento de garantía consultado (Australia) remite a un anexo A, no publicado con él, para los años por modelo."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Términos para módulos n-type; coinciden con la ficha. Solo cubre la potencia de la cara frontal."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Reclamación en un plazo de 30 días naturales desde que se descubre el defecto; si no, se pierde el derecho. Acciones legales dentro de los 6 meses siguientes (garantía Astronergy para Australia, publicada el 09-12-2024).\nEl cliente paga desmontaje, embalaje, reinstalación, producción perdida y la mayoría de impuestos y aranceles, sea cual sea el resultado de la reclamación; si es válida, Astronergy reembolsa un envío de vuelta «razonable» con un tope pactado de antemano (garantía Australia).\nLa garantía empieza en la entrega al cliente directo o seis meses después de la fecha de fabricación, lo que ocurra antes (garantía Australia).\nLa garantía de rendimiento solo cubre la potencia frontal; la ganancia bifacial no está garantizada. Tolerancia de medida ±3 % según IEC 60904.\nEl documento leído es el de Australia (emisor: Astronergy New Energy Technology (Singapore) Pte. Ltd.). No se encontró la versión europea vigente; la única europea localizada es de 2015 (Astronergy Solarmodule GmbH, Fráncfort del Óder) y ya no aplica a este modelo.\nLa ficha indica que la garantía está respaldada por una «aseguradora internacional Tier 1», sin nombrarla; en 2014 la marca anunció una cobertura de Munich Re (EE Power). No se encontró la póliza vigente.\nEn Alemania la reclamación se tramita a través del distribuidor o instalador, según Reduco; en España la garantía legal frente al vendedor es independiente de la del fabricante.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Chint New Energy Technology Co., Ltd. y sus filiales regionales (en Australia, Astronergy New Energy Technology (Singapore) Pte. Ltd.). La ficha menciona un seguro de garantía de una aseguradora no nombrada; si existe y está vigente, podría cubrir reclamaciones si el fabricante desaparece.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -1054,7 +1150,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China o Tailandia (la ficha no indica la planta)",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "9 plantas en China (ciudades no detalladas en la fuente); Tailandia (obleas, células y módulos; en producción desde 2016, 5 GW de obleas previstos); Turquía (1 GW de módulos y 2 GW de células, 2024)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://canalsolar.com.br/en/astronergy-plans-production-capacity-for-2025/ https://www.pv-magazine-australia.com/?p=12803 https://www.pvtime.org/up-to-3403-96-us-imposes-massive-tariffs-on-southeast-asian-solar-cells/ https://www.solartraders.com/uploads/production/data_sheet/file/26690/Astroergy%20WA%20EN.pdf?locale=da"
+        },
         "materiales_principales": [
           "silicio monocristalino N-type",
           "vidrio de 2 mm (dos capas)",
@@ -1069,12 +1172,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable en la práctica; la garantía prevé reparación, sustitución o compensación.",
-        "fabricante_celulas": "Astronergy (células propias)",
-        "fabricas_conocidas": [
-          "9 plantas en China (ciudades no detalladas en la fuente)",
-          "Tailandia (obleas, células y módulos; en producción desde 2016, 5 GW de obleas previstos)",
-          "Turquía (1 GW de módulos y 2 GW de células, 2024)"
-        ]
+        "fabricante_celulas": "Astronergy (células propias)"
       },
       "certificados": [
         {
@@ -1153,10 +1251,11 @@
           "iva_incluido": true,
           "unidad": "por módulo (450 Wp, todo negro)",
           "incluye_instalacion": false,
-          "envio": "No indicado",
           "stock": "Dudoso: los metadatos dicen «en stock» pero la página muestra «avisar de disponibilidad»; también aparece un precio de 50,39 €",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: No indicado"
         },
         {
           "distribuidor_id": "pvundso-de",
@@ -1165,10 +1264,11 @@
           "iva_incluido": false,
           "unidad": "por módulo (450 Wp, marco negro)",
           "incluye_instalacion": false,
-          "envio": "Aparte; no indica si envía a España",
           "stock": "Agotado",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Aparte; no indica si envía a España"
         },
         {
           "distribuidor_id": "sun",
@@ -1177,10 +1277,10 @@
           "iva_incluido": false,
           "unidad": "desde 0,128 €/Wp",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "936–2808 unidades",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -1404,21 +1504,52 @@
           "fecha": "2026-10-18",
           "nota": "139 € (IVA incl.) / 460 Wp = 0,302 €/Wp, para la variante A-460M GS (120 medias células), no para el A-455M GS 144, que figuraba agotado. Precio de DamiaSolar citado por solarplus.es; no se pudo leer la página de DamiaSolar directamente."
         },
-        "resultado_pvel": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "No se encontró Atersa en los Scorecards de Kiwa PVEL consultados."
-        },
         "pruebas_independientes": {
           "valor": null,
           "unidad": null,
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18",
-          "nota": "No se encontraron ensayos independientes publicados."
+          "nota": "No se encontró Atersa en los Scorecards de Kiwa PVEL consultados. No se encontraron ensayos independientes publicados."
+        },
+        "garantia_producto_anios": {
+          "valor": 12,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "«Garantía de producto ATERSA-España», según la ficha de 2023. Solarplus.es habla de 10 años contra defectos; la línea TOPCon A-5xxM indica 15 años."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 98 %. Después, 0.55 %/año. Valores leídos de la gráfica de la ficha (parcialmente ilegible); comprobación: 98 − 24 × 0,55 = 84,8 %."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.848,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "No se pudo leer el documento oficial de garantía: la página atersa.com/garantias bloquea la lectura automática. Plazos de reclamación, costes cubiertos y exclusiones quedan sin verificar.\nGarantía de producto (12 años) y de rendimiento (25 años, ≈84,8 % final) más cortas que las de los módulos TOPCon domésticos de 2025–2026 de otras marcas, que suelen ofrecer 15–30 años de producto y 30 años de rendimiento con ≈87–89 % final.\nLa garantía la presta Atersa, empresa española con sede en Valencia y filial de un grupo cotizado (Elecnor), lo que facilita reclamar en España aunque el módulo se fabrique en China.\nEn España la garantía legal frente al vendedor es independiente de la del fabricante.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Atersa (Aplicaciones Técnicas de la Energía), Ribarroja del Turia (Valencia), filial de Elecnor S.A. No se publica aseguradora de garantía.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -1448,7 +1579,14 @@
       "origen": {
         "pais_marca": "España",
         "pais_fabricacion": "China (línea GS Optimum, fabricación OEM por terceros); la ficha solo dice «ATERSA-España»",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Almussafes (Valencia): más de 20.000 m² y hasta 344 MW de capacidad declarada (Wikipedia; Energías Renovables, 2025); Mauritania (planta inaugurada hacia 2014 para la línea ULTRA, según Energías Renovables); Fábricas OEM de terceros en China y Taiwán para la línea Optimum/GS",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.energias-renovables.com/fotovoltaica/atersa-lanza-la-gama-optimum-20140114",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://www.alimarket.es/construccion/noticia/144389/atersa-lanza-una-nueva-gama-de-modulos-fotovoltaicos https://www.energias-renovables.com/fotovoltaica/elecnor-compra-atersa-a-la-multinacinal-astropower https://www.energias-renovables.com/fotovoltaica/eclipse-solar-en-europa-20250703 https://es.wikipedia.org/wiki/Atersa https://solarplus.es/marcas/atersa https://www.solarweb.net/forosolar/fotovoltaica-sistemas-aislados-la-red/38145-fabricantes-espanoles-placas.html"
+        },
         "materiales_principales": [
           "silicio monocristalino P-type (PERC)",
           "vidrio templado de 3,2 mm",
@@ -1464,12 +1602,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable en la práctica.",
-        "fabricante_celulas": "No publicado. En 2015 usuarios del foro solarweb.net afirmaban haber visto cajas de células Motech (Taiwán) en la fábrica; no verificado.",
-        "fabricas_conocidas": [
-          "Almussafes (Valencia): más de 20.000 m² y hasta 344 MW de capacidad declarada (Wikipedia; Energías Renovables, 2025)",
-          "Mauritania (planta inaugurada hacia 2014 para la línea ULTRA, según Energías Renovables)",
-          "Fábricas OEM de terceros en China y Taiwán para la línea Optimum/GS"
-        ]
+        "fabricante_celulas": "No publicado. En 2015 usuarios del foro solarweb.net afirmaban haber visto cajas de células Motech (Taiwán) en la fábrica; no verificado."
       },
       "certificados": [
         {
@@ -1549,10 +1682,10 @@
           "iva_incluido": true,
           "unidad": "por módulo (A-460M GS, 460 Wp)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "No indicado; el A-455M GS figura agotado",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -1774,21 +1907,52 @@
           "fecha": "2026-10-18",
           "nota": "No calculable: no se encontró oferta con precio público."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "No figura el CS6.1-54TD en la lista visible de Top Performers 2026",
           "unidad": "",
           "naturaleza": "no_publicado",
           "fuente": "https://scorecard.pvel.com/top-performers/",
           "fecha": "2026-10-18",
-          "nota": "En la lista 2026 figuran de Canadian Solar los CS6.2-66HB (HJT), CS6.2-48TM, CS6.2-66TM y CS6.2-54TM (TOPCon, monofacial, 480–525 W) en algunas pruebas, pero no el CS6.1-54TD. Canadian Solar sí figura como fabricante Top Performer 2026 de Kiwa PVEL (grupo de 7–8 ensayos), sin modelo indicado: https://scorecard.pvel.com/manufacturers/"
+          "nota": "En la lista 2026 figuran de Canadian Solar los CS6.2-66HB (HJT), CS6.2-48TM, CS6.2-66TM y CS6.2-54TM (TOPCon, monofacial, 480–525 W) en algunas pruebas, pero no el CS6.1-54TD. Canadian Solar sí figura como fabricante Top Performer 2026 de Kiwa PVEL (grupo de 7–8 ensayos), sin modelo indicado: https://scorecard.pvel.com/manufacturers/ No se encontró ningún ensayo independiente publicado para el CS6.1-54TD."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": "",
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 12,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se encontró ningún ensayo independiente publicado para el CS6.1-54TD."
+          "nota": "Garantía «Limited Warranty Statement, TopHiKu Series» EN-Rev TopHiKu 1.13 (octubre 2023, contratos desde el 1-10-2023): 12 años de producto; 25 años solo para CS6R-XXXT Black Frame/All Black en tejados de Europa y Japón. Esa revisión no cita el CS6.1-54TD. La ficha V1.4 remite a una «garantía limitada de producto de 25 años» para ciertas instalaciones en tejado en ciertas regiones, y sun.store anuncia «25Y Warranty» para el CS6.1-54TD; no se encontró la revisión de la garantía que lo incluya."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Garantía Rev 1.13 y ficha V1.4: ≥ 99 % el primer año, ≤ 0,4 %/año, ≥ 87,4 % al final del año 30. Coincide con sun.store: https://sun.store/en/product/canadian-tophiku6-cs6.1-54td-465-1500v-mc4-black-frame-25y-warranty-31539"
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El desmontaje, la instalación, la reinstalación y las tasas de residuos electrónicos corren a cargo del comprador salvo acuerdo escrito; CSI Solar paga un transporte de devolución razonable en reclamaciones aceptadas, sin seguros, impuestos ni aduanas. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nExcluye productos con pagos pendientes o sin prueba de compra, módulos trasladados de su ubicación original, instalaciones móviles, exposición extrema a calor, sal o productos químicos, y cambios estéticos (arañazos, manchas, óxido, decoloración, moho). Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nLa garantía empieza el día siguiente a la instalación o 90 días después de la entrega, lo que ocurra antes. Las reparaciones o sustituciones no amplían el plazo. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nReclamación por escrito «sin demora indebida» dentro del plazo de garantía, con números de serie y facturas; si hace falta un laboratorio, debe estar acreditado ISO/IEC 17025 y acordado por ambas partes. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nResponsabilidad total limitada al precio pagado; ley aplicable la del contrato de compra. No se aplica a productos vendidos e instalados en Australia, Nueva Zelanda o China continental. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nNo exige registro del producto, según el documento Rev 1.13. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "CSI Solar Co., Ltd. (Suzhou, China), del grupo Canadian Solar Inc., emite la garantía; hay direcciones regionales de reclamación para EMEA. El documento no menciona seguro ni insolvencia. Frente al consumidor en España responde también el vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -1833,8 +1997,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario.",
-        "fabricante_celulas": "Canadian Solar (según la marca); el informe Sheffield Hallam señala divulgación incompleta de proveedores de lingotes, obleas y células en 2023",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "Canadian Solar (según la marca); el informe Sheffield Hallam señala divulgación incompleta de proveedores de lingotes, obleas y células en 2023"
       },
       "certificados": [
         {
@@ -2176,21 +2339,52 @@
           "fecha": "2026-10-18",
           "nota": "73,13 € sin IVA × 1,23 (IVA portugués) = 89,95 € / 450 Wp = 0,20 €/Wp. La tienda solo muestra el precio sin IVA y no precisa si la referencia es la B54HBB o la B54HBT."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Top Performer en el PV Module Reliability Scorecard de Kiwa PVEL 2024 y 2025 (fabricante)",
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard",
           "fecha": "2026-10-18",
-          "nota": "Nota de prensa de la marca; no especifica qué modelo o lista de materiales se ensayó, así que no puede atribuirse a esta variante concreta."
+          "nota": "Nota de prensa de la marca; no especifica qué modelo o lista de materiales se ensayó, así que no puede atribuirse a esta variante concreta. No se encontró un ensayo independiente publicado específico del DM450M10RT-B54HBB (RETC, PVEL por modelo)."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.pv-tech.org/industry-updates/dmegc-solar-recognized-as-top-performer-by-kiwa-pvel/",
+        "garantia_producto_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dmegcsolar.com/upload/img/2024-12/675beb82d7a29.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se encontró un ensayo independiente publicado específico del DM450M10RT-B54HBB (RETC, PVEL por modelo)."
+          "nota": "Garantía limitada DMW-0018 (15-05-2023): 300 meses para módulos vidrio-vidrio N-type de menos de 72 células. La tienda solartraders también indica 25 años."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Desmontaje, retirada, pruebas, embalaje, instalación y reinstalación corren por cuenta del cliente; DMEGC solo paga el envío del módulo de reposición en las mismas condiciones Incoterm de la entrega original (garantía DMW-0018, https://www.dmegcsolar.com/upload/img/2024-12/675beb82d7a29.pdf).\nLa reclamación debe hacerse por escrito en un máximo de 30 días naturales desde que se detecta el defecto, con prueba de compra y números de serie, y no se puede devolver ningún módulo sin autorización previa (DMW-0018).\nLa garantía empieza en la primera instalación o seis meses después de la salida de fábrica, lo que ocurra antes: un panel almacenado en un almacén pierde meses de garantía (DMW-0018).\nSi el laboratorio independiente (TÜV, PI…) no confirma el defecto, el cliente paga los ensayos; DMEGC elige el remedio (reparar, reponer, compensar o reembolsar el valor depreciado) y puede sustituir por otro modelo (DMW-0018).\nLa reventa fuera del país de primera comercialización requiere consentimiento escrito, salvo entre Estados miembros de la UE; la cesión exige notificación y que el módulo siga en su ubicación original (DMW-0018).\nLa versión australiana (DMW-AU-0020) añade exclusiones por compra a revendedor no autorizado por escrito y por uso con microinversores u optimizadores ajenos; no se ha comprobado si la versión europea vigente incluye esas mismas cláusulas (https://www.dmegcsolar.com/upload/img/2025-05/682da0919b470.pdf).\nNo se publica ningún seguro de garantía de terceros: si el fabricante desaparece, el comprador en España conserva solo la garantía legal de conformidad frente al vendedor (3 años para bienes nuevos según el TRLGDCU desde 2022).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante, Hengdian Group DMEGC Magnetics Co., Ltd. (Dongyang, China), a través de sus oficinas regionales (p. ej. DMEGC Germany GmbH). La garantía no cita ninguna aseguradora; en caso de quiebra del fabricante no hay respaldo publicado y quedaría la garantía legal del vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -2222,7 +2416,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China (fábrica concreta del lote no indicada en la ficha)",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Hengdian (Zhejiang); Sihong (Jiangsu); Qixian (Henan); Yibin (Sichuan); Lianyungang (Jiangsu); Indonesia",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.intersolar.de/exhibitorlist/hengdian-group-dmegc-magnetics-co-ltd-dmegc-solar",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://www.dmegcsolar.com/upload/img/2026-09/6a98cd4e0d9f0.pdf https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard"
+        },
         "materiales_principales": [
           "silicio monocristalino N-type",
           "vidrio semitemplado 2 mm (dos capas)",
@@ -2239,15 +2440,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Un módulo laminado no se repara en la práctica: la garantía prevé reposición o compensación. La marca afirma que sus módulos están libres de PFAS y que sus componentes son reciclables (ficha técnica).",
-        "fabricante_celulas": "DMEGC (producción propia de obleas a módulos, según la marca)",
-        "fabricas_conocidas": [
-          "Hengdian (Zhejiang)",
-          "Sihong (Jiangsu)",
-          "Qixian (Henan)",
-          "Yibin (Sichuan)",
-          "Lianyungang (Jiangsu)",
-          "Indonesia"
-        ]
+        "fabricante_celulas": "DMEGC (producción propia de obleas a módulos, según la marca)"
       },
       "certificados": [
         {
@@ -2355,11 +2548,11 @@
           "iva_incluido": false,
           "unidad": "por módulo",
           "incluye_instalacion": false,
-          "envio": "a presupuesto",
           "stock": "Disponible (bajo confirmación)",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Ficha «DM450M10RT 450W (bifacial)», referencia PAS00228; no precisa sufijo B54HBB/B54HBT."
+          "nota": "Ficha «DM450M10RT 450W (bifacial)», referencia PAS00228; no precisa sufijo B54HBB/B54HBT. · Envío: a presupuesto",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "solartraders",
@@ -2368,11 +2561,11 @@
           "iva_incluido": null,
           "unidad": "por módulo",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "Artículo no disponible actualmente",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Sin precio publicado."
+          "nota": "Sin precio publicado.",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -2594,21 +2787,52 @@
           "fecha": "2026-10-18",
           "nota": "Sin ofertas con precio a 2026-10-18 (sun.store: «No hay ofertas disponibles»; solartraders: «Article currently unavailable»)."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Huasun no figura entre los 43 fabricantes «Top Performer» del Scorecard 2026 de Kiwa PVEL.",
           "unidad": null,
           "naturaleza": "medido",
           "fuente": "https://scorecard.pvel.com/manufacturers/",
           "fecha": "2026-10-18",
-          "nota": "No figurar puede significar que no se presentó; no implica un mal resultado."
+          "nota": "No figurar puede significar que no se presentó; no implica un mal resultado. No se comprobó en esta sesión."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se comprobó en esta sesión."
+          "nota": "La ficha Ver. 2.0 da 15 años de producto. La garantía «Roof Market Series» v1.0 para Europa, Australia, Nueva Zelanda, Japón y Corea, válida solo para módulos entregados entre el 1-1-2022 y el 31-12-2023, daba 30 años de producto (HS-182-B108DSN incluido). Los listados de sun.store dan 15 años y solartraders 30. No se encontró el documento de garantía vigente para entregas desde 2024. Fuente garantía 2022–2023: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.3 %/año. Valores de la ficha (≥ 90,3 % al año 30). La garantía 2022–2023 da ≥ 99 % el primer año, ≤ 0,375 %/año de media en los años 2–15 y ≥ 88 % al año 30; sun.store indica 90 % a 25 años y 88 % a 30."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.903,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La garantía «Roof Market Series» v1.0 solo cubre módulos entregados por la fábrica entre el 1-1-2022 y el 31-12-2023 (art. 13); para módulos posteriores hay que pedir el documento vigente. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nNo cubre instalación, desmontaje, reinstalación, aranceles ni transporte; Huasun puede reembolsar un flete de devolución razonable si su servicio al cliente lo aprueba. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nLa reclamación debe notificarse por escrito en 30 días desde que se detecta el problema; el correo electrónico solo no se considera notificación válida. No se pueden devolver módulos sin autorización escrita. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nSi se opta por reembolso, se paga el precio original menos un 3,3 % de depreciación por año; la responsabilidad total se limita al valor de factura de los módulos defectuosos. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nLa garantía empieza en la entrega o seis meses después de salir de fábrica, lo que ocurra antes. Es transferible si los módulos siguen en la misma instalación y la transmisión está documentada. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nLas disputas técnicas las resuelve un laboratorio (TÜV SÜD, Intertek, UL, CQC, CGC) y «Huasun se reserva el derecho de interpretación final»; la ley aplicable es la del contrato de venta. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Anhui Huasun Energy Co., Ltd. (China). La ficha menciona un reaseguro suscrito con Ariel Re, pero no se encontró la póliza ni sus condiciones; el documento de garantía no habla de seguro ni de insolvencia. En la práctica, la primera reclamación se hace al distribuidor o instalador.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -2640,7 +2864,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": "No se indica qué planta fabrica los modelos residenciales.",
+        "fabrica": {
+          "valor": "Xuancheng (Anhui): 500 MW de células y módulos HJT, desde 2021; Dali (Yunnan): células HJT, 2,5 GW (fase I, 2023); Hefei (Anhui): 5 GW de células y módulos HJT (2023); Wuxi (Jiangsu): 3,6 GW de células HJT (2024); Yinchuan (Ningxia): planta de producción, sin más detalle",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.huasunsolar.com/about-us.html",
+          "fecha": "2026-10-18",
+          "nota": "No se indica qué planta fabrica los modelos residenciales. Otras fuentes: https://www.huasunsolar.com https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf https://solarproof.com.au/warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n (HJT)",
           "vidrio templado 2,0 + 1,6 mm",
@@ -2656,14 +2887,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario.",
-        "fabricante_celulas": "Huasun (células HJT propias)",
-        "fabricas_conocidas": [
-          "Xuancheng (Anhui): 500 MW de células y módulos HJT, desde 2021",
-          "Dali (Yunnan): células HJT, 2,5 GW (fase I, 2023)",
-          "Hefei (Anhui): 5 GW de células y módulos HJT (2023)",
-          "Wuxi (Jiangsu): 3,6 GW de células HJT (2024)",
-          "Yinchuan (Ningxia): planta de producción, sin más detalle"
-        ]
+        "fabricante_celulas": "Huasun (células HJT propias)"
       },
       "certificados": [],
       "documentos": [
@@ -2959,21 +3183,52 @@
           "fecha": "2026-10-18",
           "nota": "No calculado: no se encontró ninguna oferta con IVA incluido. Como referencia mayorista, sun.store muestra «desde 0,117 €/Wp» sin indicar si incluye IVA."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "No figura el JAM54D40 en la lista visible de Top Performers 2026",
           "unidad": "",
           "naturaleza": "no_publicado",
           "fuente": "https://scorecard.pvel.com/top-performers/",
           "fecha": "2026-10-18",
-          "nota": "En la lista 2026 aparece el JAM54D45-xxx/LB (bifacial vidrio-vidrio 2,0/2,0, la generación siguiente) en varias pruebas (al menos ciclos térmicos y calor húmedo), no el JAM54D40."
+          "nota": "En la lista 2026 aparece el JAM54D45-xxx/LB (bifacial vidrio-vidrio 2,0/2,0, la generación siguiente) en varias pruebas (al menos ciclos térmicos y calor húmedo), no el JAM54D40. No se encontró ningún ensayo independiente publicado para el JAM54D40."
         },
-        "pruebas_independientes": {
+        "garantia_producto_anios": {
           "valor": null,
-          "unidad": "",
+          "unidad": "años",
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18",
-          "nota": "No se encontró ningún ensayo independiente publicado para el JAM54D40."
+          "nota": "Sin confirmar: solartraders indica 25 años en la página de la variante 455/LB, 15 años en la de 470/LR y 12 años en las preguntas frecuentes de la serie. El PDF de garantía no tiene texto legible. Dos mayoristas más indican 25 años de producto para la variante /LR: sun.store («25 years product warranty», 89,4 % a 25 años y 87,4 % a 30) y Krannich (25 años de producto; 30 de potencia, 99 % el primer año y 0,4 %/año). No se encontró una fuente oficial de JA Solar legible."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Según el distribuidor: 30 años y 87 % (87,4 % en la descripción). Sin confirmar con el documento del fabricante. Primer año 99 % según Krannich: https://shop.krannich-solar.com/en-de/JAM54D40-465-LR/0161820"
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.87,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "No se pudo leer el documento de garantía del fabricante: los PDF alojados por solartraders (https://www.solartraders.com/uploads/production/data_sheet/file/43216/warranty_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es y https://www.solartraders.com/uploads/production/data_sheet/file/38522/warranty_jam54d40_435_lb_tslc_en_07-04-2025.pdf?locale=es) no tienen texto legible por máquina. Antes de comprar, pedir el documento de garantía vigente para España.\nLas propias páginas del distribuidor se contradicen sobre los años de garantía de producto (12, 15 o 25) y de potencia (25 o 30), lo que indica que dependen de la variante y de la versión del documento. Fuente: https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (JA Solar). Sin documento legible no se pudo comprobar si menciona seguro de respaldo o qué ocurre en caso de quiebra. Frente al consumidor en España responde también el vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -3001,7 +3256,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "No especificado",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "China, Vietnam y EE. UU. (desde finales de 2023), según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: http://www.pv-magazine.com/2025/12/01/astronergy-and-ja-solar-end-global-patent-disputes-with-cross-licensing-deal/ https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n",
           "vidrio (dos láminas)",
@@ -3016,10 +3278,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario.",
-        "fabricante_celulas": "JA Solar (según la marca); el informe Sheffield Hallam señala divulgación incompleta de proveedores de polisilicio, obleas y células",
-        "fabricas_conocidas": [
-          "China, Vietnam y EE. UU. (desde finales de 2023), según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
-        ]
+        "fabricante_celulas": "JA Solar (según la marca); el informe Sheffield Hallam señala divulgación incompleta de proveedores de polisilicio, obleas y células"
       },
       "certificados": [
         {
@@ -3111,11 +3370,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (JAM54D40-470/LR)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "23 874 unidades en 8 ofertas de 6 vendedores (actualizado 17-10-2026)",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precios visibles solo para socios."
+          "nota": "Precios visibles solo para socios.",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -3124,11 +3383,11 @@
           "iva_incluido": null,
           "unidad": "por Wp: «desde 0,117 €/Wp» en 3 ofertas (≈ 55 € por módulo de 470 W, cálculo nuestro)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "lotes de 936 a 11 232 unidades",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio orientativo de mayorista para palés; la página no dice si incluye IVA ni el país del vendedor. No es un precio para particulares."
+          "nota": "Precio orientativo de mayorista para palés; la página no dice si incluye IVA ni el país del vendedor. No es un precio para particulares.",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -3350,21 +3609,52 @@
           "fecha": "2026-10-18",
           "nota": "90,75 € / 475 Wp = 0,191 €/Wp. Oferta de tienda-solar.es con IVA, pedido mínimo 6 unidades, sin instalación."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "No figura el 48QL6-DV en la lista visible de Top Performers 2026",
           "unidad": "",
           "naturaleza": "no_publicado",
           "fuente": "https://scorecard.pvel.com/top-performers/",
           "fecha": "2026-10-18",
-          "nota": "En la lista 2026 aparece la familia JKMxxxN-54HL4-B (monofacial con lámina, tipo n TOPCon) como Top Performer en la prueba LID+LETID, y varios modelos 72HL4 de gran formato; no el 48QL6-DV. Lectura parcial de la tabla."
+          "nota": "En la lista 2026 aparece la familia JKMxxxN-54HL4-B (monofacial con lámina, tipo n TOPCon) como Top Performer en la prueba LID+LETID, y varios modelos 72HL4 de gran formato; no el 48QL6-DV. Lectura parcial de la tabla. No se encontró ningún ensayo independiente publicado sobre el JKM475N-48QL6-DV. Krannich enlaza un certificado de resistencia al granizo en alemán que no se revisó (https://shop.krannich-solar.com/en-de/JKM480N-48QL6-DV-Tiger-Neo-III/0165079)."
         },
-        "pruebas_independientes": {
+        "garantia_producto_anios": {
           "valor": null,
-          "unidad": "",
+          "unidad": "años",
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18",
-          "nota": "No se encontró ningún ensayo independiente publicado sobre el JKM475N-48QL6-DV. Krannich enlaza un certificado de resistencia al granizo en alemán que no se revisó (https://shop.krannich-solar.com/en-de/JKM480N-48QL6-DV-Tiger-Neo-III/0165079)."
+          "nota": "Sin confirmar: la ficha de Krannich (2026) y el distribuidor Krannich indican 25 años; tienda-solar.es y photovoltaik4all indican 15 años; la nota de prensa de Jinko habla de «12 o 25 años» según producto. El documento de garantía europeo leído no incluye el 48QL6-DV."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.35 %/año. Según la ficha técnica. El documento de garantía europeo REV.EN20250110 da para Tiger Neo 99 % el año 1, 0,40 %/año y 87,40 % al año 30 (https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405): prevalece lo que diga el documento de garantía que entregue el vendedor."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8885,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El documento de garantía europeo leído (REV.EN20250110, para contratos desde el 10 de enero de 2025) lista Tiger Neo 54HL4R y 48HL4M, pero no el 48QL6-DV; hay que pedir el documento aplicable a este modelo. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nLa garantía empieza 180 días después de la fecha de fabricación (codificada en el número de serie) o en la entrega al comprador, lo que ocurra antes. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nSolo válida en países europeos y si los módulos permanecen en la región de venta original; excluye canales no autorizados y falsificaciones. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nEl cliente paga desmontaje, reembalaje, reinstalación y eliminación, y los ensayos si no confirman el defecto; Jinko paga el envío de los repuestos. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nAviso en 30 días a través de cs.jinkosolar.com, con números de serie y prueba de compra; Jinko puede exigir ensayo en laboratorio independiente (TÜV Rheinland, TÜV SÜD…). Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nExcluye entornos marinos y corrosivos y plataformas móviles. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nSi el modelo deja de fabricarse, Jinko entrega el sustituto más parecido disponible; no se dice nada sobre quiebra. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (Jinko Solar Co., Ltd.); la ley aplicable es la del contrato de compraventa. No se menciona seguro de respaldo ni qué ocurre si la empresa cesa. Frente al consumidor en España responde también el vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -3397,7 +3687,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "No especificado en la ficha",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "China (Sichuan, Jiangxi, entre otras) y Vietnam, según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.jinkosolar.com/en/site/newsdetail/2258",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf http://pv-magazine-usa.com/2022/07/01/reports-reveal-which-manufacturer-is-believed-to-have-product-seized-under-uflpa/ https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal https://worksafe.nt.gov.au/forms-and-resources/safety-alerts/product-safety-recall-jinko-solar-australia-holdings-co.-pty-ltd-suntank-hybrid-inverter https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n",
           "vidrio de 2,0 mm (dos láminas)",
@@ -3413,10 +3710,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado vidrio-vidrio, no reparable por el usuario. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
-        "fabricante_celulas": "JinkoSolar (células TOPCon propias, según la marca); el informe Sheffield Hallam señala ~14,6 GW de células compradas a proveedores no identificados en 2022",
-        "fabricas_conocidas": [
-          "China (Sichuan, Jiangxi, entre otras) y Vietnam, según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
-        ]
+        "fabricante_celulas": "JinkoSolar (células TOPCon propias, según la marca); el informe Sheffield Hallam señala ~14,6 GW de células compradas a proveedores no identificados en 2022"
       },
       "certificados": [
         {
@@ -3532,11 +3826,11 @@
           "iva_incluido": true,
           "unidad": "por módulo (JKM475N-48QL6-DV)",
           "incluye_instalacion": false,
-          "envio": "No detallado",
           "stock": "No indicado; pedido mínimo 6 unidades",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "75,00 € sin IVA. La tienda describe el módulo como monofacial."
+          "nota": "75,00 € sin IVA. La tienda describe el módulo como monofacial. · Envío: No detallado",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "photovoltaik4all-de",
@@ -3545,11 +3839,11 @@
           "iva_incluido": false,
           "unidad": "por módulo (475 W, marco negro)",
           "incluye_instalacion": false,
-          "envio": "Por agencia de transporte",
           "stock": "Disponible de inmediato",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio con IVA 0 % alemán para instalaciones FV domésticas en Alemania; no aplicable a España. Descuentos del 3 % desde 10 uds. y 5 % desde 20."
+          "nota": "Precio con IVA 0 % alemán para instalaciones FV domésticas en Alemania; no aplicable a España. Descuentos del 3 % desde 10 uds. y 5 % desde 20. · Envío: Por agencia de transporte",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "krannich-solar",
@@ -3558,11 +3852,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (JKM480N-48QL6-DV)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "Fecha de envío no determinada",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Precio solo bajo petición (profesionales)."
+          "nota": "Precio solo bajo petición (profesionales).",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -3785,21 +4079,52 @@
           "fecha": "2026-10-18",
           "nota": "94,99 € / 435 Wp = 0,218 €/Wp. Oferta de una tienda francesa; con el IVA español del 21 % sobre los 79,16 € sin impuestos serían 95,78 € (0,220 €/Wp). No se encontró precio publicado en tiendas españolas."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "No figura en la lista visible de Top Performers 2026",
           "unidad": "",
           "naturaleza": "no_publicado",
           "fuente": "https://scorecard.pvel.com/top-performers/",
           "fecha": "2026-10-18",
-          "nota": "En la lista consultada no aparece el LR5-54HTH. Lectura parcial de la tabla; ver pendiente."
+          "nota": "En la lista consultada no aparece el LR5-54HTH. Lectura parcial de la tabla; ver pendiente. No se encontró ningún ensayo independiente publicado sobre el LR5-54HTH."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": "",
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
-          "nota": "No se encontró ningún ensayo independiente publicado sobre el LR5-54HTH."
+          "nota": "Un mayorista español (Amara NZero) comercializa una referencia con sufijo «25 YW», que podría ser una garantía ampliada de 25 años; no confirmado (https://amaranzero.es/en/catalogue/solar/modules/110-0123-longi-lr5-54hth-435w-hi-mo-x6-expl-black-f-mc4-1500v-25-yw)."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 98.5 %. Después, 0.4 %/año. 98,5 % al final del año 1; 0,40 %/año; 88,9 % al año 25 (gráfico de la ficha). En Australia la garantía publicada difiere (97,5 % el año 1 y unos 0,73 %/año según https://www.solarproof.com.au/products/LR5-54HTH-430MHi-MOX6Explorer.php): las condiciones dependen del país."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.889,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "No se pudo leer el documento de garantía específico del LR5-54HTH (el PDF alojado por solartraders no tiene texto legible por máquina: https://www.solartraders.com/uploads/production/data_sheet/file/37564/warranty_lr5_54hth_hi_mo_6_explorer_en_24-11-2024.pdf?locale=de). Las condiciones generales de LONGi para el mercado de generación distribuida que sí se leyeron (Hi-MO X10 y Hi-MO S10) establecen: inicio en la entrega o seis meses después de salir de fábrica, aviso escrito en 30 días, desmontaje y reinstalación a cargo del cliente, y elección del remedio por LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLas condiciones de garantía varían según país: la versión australiana anuncia otra curva de degradación. Fuente: https://www.solarproof.com.au/products/LR5-54HTH-430MHi-MOX6Explorer.php\nLa garantía de potencia es de 25 años y no de 30, a diferencia del Hi-MO X10 Explorer. Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (LONGi). No se ha encontrado mención a seguro de respaldo ni a qué ocurre en caso de quiebra o salida de Europa. Frente al consumidor en España responde también el vendedor (garantía legal de conformidad).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -3828,7 +4153,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "No especificado en la ficha",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde; El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.longi.com/hi-mo-X10",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/ https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo p",
           "vidrio templado de 3,2 mm",
@@ -3845,11 +4177,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario; remedio a criterio del fabricante según las condiciones generales de LONGi.",
-        "fabricante_celulas": "LONGi (células propias de contacto trasero, según la marca)",
-        "fabricas_conocidas": [
-          "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
-          "El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
-        ]
+        "fabricante_celulas": "LONGi (células propias de contacto trasero, según la marca)"
       },
       "certificados": [
         {
@@ -3953,11 +4281,11 @@
           "iva_incluido": true,
           "unidad": "por módulo (435 W)",
           "incluye_instalacion": false,
-          "envio": "No detallado",
           "stock": "La página indica 3091 artículos; pedido mínimo 6 unidades",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "79,16 € sin IVA; IVA francés. Precios por volumen: 90,24 € (10 uds.) y 88,49 € (36 uds.), sin indicar si llevan IVA."
+          "nota": "79,16 € sin IVA; IVA francés. Precios por volumen: 90,24 € (10 uds.) y 88,49 € (36 uds.), sin indicar si llevan IVA. · Envío: No detallado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -4180,21 +4508,52 @@
           "fecha": "2026-10-18",
           "nota": "116,16 € / 490 Wp = 0,237 €/Wp. Oferta de tienda-solar.es con IVA, pedido mínimo 6 unidades, sin instalación."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "No figura en la lista visible de Top Performers 2026",
           "unidad": "",
           "naturaleza": "no_publicado",
           "fuente": "https://scorecard.pvel.com/top-performers/",
           "fecha": "2026-10-18",
-          "nota": "En la lista de Top Performers de Kiwa PVEL (edición 2026) consultada aparecen modelos LONGi LR8-66HYD, LR8-66HGD y LR5-78HBD, pero no el LR7-54HVH. La lectura de la tabla fue parcial; ver pendiente. LONGi fue Top Performer como fabricante en 2025 por octava vez (https://eu.longi.com/press/longi-named-kiwa-pvel-top-performer-for-the-eighth-time), lo que no se refiere a este modelo."
+          "nota": "En la lista de Top Performers de Kiwa PVEL (edición 2026) consultada aparecen modelos LONGi LR8-66HYD, LR8-66HGD y LR5-78HBD, pero no el LR7-54HVH. La lectura de la tabla fue parcial; ver pendiente. LONGi fue Top Performer como fabricante en 2025 por octava vez (https://eu.longi.com/press/longi-named-kiwa-pvel-top-performer-for-the-eighth-time), lo que no se refiere a este modelo. No se encontró ningún ensayo independiente (PVEL, RETC, laboratorio o revista) publicado sobre el LR7-54HVH. El premio The smarter E AWARD 2025 es un galardón de feria, no un ensayo de rendimiento."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": "",
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se encontró ningún ensayo independiente (PVEL, RETC, laboratorio o revista) publicado sobre el LR7-54HVH. El premio The smarter E AWARD 2025 es un galardón de feria, no un ensayo de rendimiento."
+          "nota": "La versión Explorer de 54 células tiene 15 años de producto; la versión Scientist, 25 años."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.35 %/año. ≥99 % al final del año 1; pérdida ≤0,35 %/año; ≥88,85 % (la garantía redondea a 88,9 %) al final del año 30. Solo potencia de la cara frontal, medida en STC por un laboratorio aceptado."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8885,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La garantía empieza en la fecha de entrega al primer cliente o seis meses después de salir de fábrica, lo que ocurra antes: un módulo almacenado meses pierde parte del plazo. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nEl cliente paga desmontaje, reembalaje, instalación y reinstalación; LONGi solo compensa el transporte documentado de reclamaciones aprobadas. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLa reclamación debe comunicarse por escrito en los 30 días siguientes a detectar el problema; los envíos sin número RMA son por cuenta y riesgo del cliente. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLas pruebas de terceros las adelanta el cliente; LONGi las reembolsa solo si confirman un fallo imputable a LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLONGi elige el remedio (reparar, sustituir, añadir módulos o reembolsar el valor residual o la diferencia de potencia a precio de mercado por vatio); las sustituciones no amplían el plazo. Responsabilidad total limitada al precio facturado de los módulos defectuosos. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nExclusiones: instalación que no siga el manual (que LONGi puede actualizar), edificios no aptos, instalaciones móviles y la mayoría de las marinas, tensión superior a la nominal, ambientes corrosivos, placas de características manipuladas o ilegibles. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLa garantía se transmite a un nuevo propietario solo si los módulos siguen en el emplazamiento original, están pagados y el nuevo titular acepta todas las condiciones. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nEl documento no exige registro del producto ni instalador certificado, pero tampoco dice qué ocurre si LONGi o su filial europea dejan de operar. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (LONGi Green Energy Technology). El documento de garantía no menciona seguro de respaldo por terceros ni qué sucede en caso de quiebra o salida del mercado europeo; la ley aplicable es la del contrato de suministro del módulo. Frente al consumidor en España responde además el vendedor por la garantía legal de conformidad.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -4228,7 +4587,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "No especificado en la ficha ni en la web del producto",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde; El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://eu.longi.com/hi-mo-X10",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/ https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+        },
         "materiales_principales": [
           "obleas de silicio monocristalino tipo n (TaiRay, según la marca)",
           "vidrio templado de 3,2 mm",
@@ -4245,11 +4611,7 @@
           "nota": "El fabricante no publica el número de componentes."
         },
         "reparabilidad": "Un módulo laminado no es reparable por el usuario; la garantía solo contempla reparación o sustitución por LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
-        "fabricante_celulas": "LONGi (células propias de contacto trasero, según la marca)",
-        "fabricas_conocidas": [
-          "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
-          "El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
-        ]
+        "fabricante_celulas": "LONGi (células propias de contacto trasero, según la marca)"
       },
       "certificados": [
         {
@@ -4364,11 +4726,11 @@
           "iva_incluido": true,
           "unidad": "por módulo (LR7-54HVH-490M)",
           "incluye_instalacion": false,
-          "envio": "No detallado en la ficha",
           "stock": "No indicado; pedido mínimo 6 unidades",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "96,00 € sin IVA."
+          "nota": "96,00 € sin IVA. · Envío: No detallado en la ficha",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "autosolar-es",
@@ -4377,11 +4739,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (LR7-54HVH-485M)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "No indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "La página no mostraba precio en la consulta; referencia de artículo 1006029."
+          "nota": "La página no mostraba precio en la consulta; referencia de artículo 1006029.",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -4605,21 +4967,52 @@
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna oferta europea con precio público en esta sesión."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Maxeon/SunPower no figura entre los 43 fabricantes «Top Performer» del Scorecard 2026 de Kiwa PVEL.",
           "unidad": null,
           "naturaleza": "medido",
           "fuente": "https://scorecard.pvel.com/manufacturers/",
           "fecha": "2026-10-18",
-          "nota": "No figurar puede significar que no se presentó; no implica un mal resultado."
+          "nota": "No figurar puede significar que no se presentó; no implica un mal resultado. La marca dice estar «backed by extensive third-party testing», pero no se consultó ningún informe independiente concreto."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 40,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
           "fecha": "2026-10-18",
-          "nota": "La marca dice estar «backed by extensive third-party testing», pero no se consultó ningún informe independiente concreto."
+          "nota": "Documento 545700 REV G (1-5-2026), válido SOLO en EE. UU., Canadá y Puerto Rico. 40 años si instala un instalador autorizado o Maxeon Partner y se registra en los 6 meses siguientes; si no, 25 años. No se pudo leer el documento de garantía que se aplica en Europa. Para Europa: la ficha del Maxeon 7 para fuera de EE. UU. anuncia 40 años de producto, potencia y servicio «sujeto a condiciones y no disponible en todos los países», con registro obligatorio para los 40 años (si no, 25). La web de SunPower Global dice que la garantía de 40 años «is available worldwide» y que la disponibilidad del servicio «varies by country and installation provider». No se encontró el PDF de garantía europeo. Fuentes: https://sunpowerglobal.com/us/sites/default/files/2025-02/sp_max7_120c_455_ds_en_a4_mc4_553945.pdf ; https://sunpowerglobal.com/int/warranty-0"
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 40,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 98 %. Después, 0.25 %/año. Modelos SPR-MAXy, garantía de EE. UU. 94 % al año 25 si se registra (92 % si no). primer_anio_pct es la potencia mínima en el año 1."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.8825,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El documento de garantía vigente de Maxeon (REV G, mayo de 2026) dice textualmente que solo cubre módulos «installed in the United States, Canada, or Puerto Rico» y que «is not applicable in other jurisdictions». Un panel instalado en España no está cubierto por ese documento. Fuente: https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf\nLos 40 años exigen instalador autorizado o Maxeon Partner y registro digital en los 6 meses siguientes a la fecha de inicio; si no, la garantía baja a 25 años. Fuente: ídem.\nSi el reembolso se elige en vez de sustituir el panel, se devuelve el precio original los cinco primeros años y después se descuenta un 2,78 % por año. La responsabilidad total no supera el precio pagado a Maxeon. Fuente: ídem.\nEl desmontaje y la reinstalación solo se pagan hasta 250 dólares, en EE. UU., Canadá y Puerto Rico, si instaló un instalador autorizado y Maxeon elige al técnico. Fuente: ídem.\nExcluye, entre otros casos, el granizo y otros fenómenos naturales, la sal marina, mover los paneles sin permiso escrito, comprar por canales no autorizados e instalar modelos -COM o -UPP en viviendas unifamiliares. Fuente: ídem.\nMaxeon está bajo administración judicial en Singapur (provisional desde el 9 de abril de 2026; jueces administradores nombrados por el Tribunal Superior de Singapur el 29 de mayo de 2026). Su web no explica qué supone esto para las reclamaciones de garantía. Fuentes: https://www.maxeon.com ; https://mediaroom.maxeon.com\nPara los paneles SunPower antiguos, cuya titular original quebró en 2024, Maxeon dice que solo da una cobertura limitada: instalaciones anteriores al 5 de agosto de 2024 y registradas antes del 31 de diciembre de 2024. Fuente: https://www.maxeon.com/warranty\nFuera de EE. UU., las garantías pasaron a los compradores del negocio: según el Form 6-K de Maxeon (18-2-2025), ciertas garantías de productos distribuidos fuera de EE. UU. se transfieren y «The Transferees will be fully responsible for any Warranty claims» tras el cierre. La venta se cerró el 31-3-2025 con Lumetech B.V. y TCL Sunpower International Pte. Ltd., filiales de TCL Zhonghuan. Fuentes: https://www.sec.gov/Archives/edgar/data/1796898/000179689825000014/form6-kprojectbirch.htm ; https://www.sec.gov/Archives/edgar/data/1796898/000179689825000020/form6-kclosingprojectbirch.htm\nEn Europa, la web de soporte de SunPower Global indica que las reclamaciones se dirigen «back to the distributor from which the panels were purchased», que las revisa o las escala a TCL SunPower Global. Fuente: https://sunpowerglobal.com/uk/support/installers?page=7\nLa misma operación transfirió a TCL Sunpower las marcas «SunPower» en todos los países salvo EE. UU., por unos 6,74 millones de dólares. Fuente: https://www.sec.gov/Archives/edgar/data/1796898/000179689825000014/form6-kprojectbirch.htm",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Fuera de EE. UU.: las filiales de TCL Zhonghuan que compraron el negocio (Lumetech B.V., Países Bajos, y TCL Sunpower International Pte. Ltd., Singapur), operando como TCL SunPower Global, según los Form 6-K de Maxeon ante la SEC; la reclamación se presenta al distribuidor. No se encontró el documento de garantía europeo que nombre a la entidad garante, ni un seguro de garantía de terceros. En EE. UU., Canadá y Puerto Rico responde Maxeon Solar Technologies, Ltd., bajo administración judicial. Frente al consumidor en España responde también el vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.maxeon.com/s/Maxeon-Limited-Warranty-for-PV-Modules-DC.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -4655,7 +5048,14 @@
       "origen": {
         "pais_marca": "Singapur (marca heredera de SunPower, EE. UU.)",
         "pais_fabricacion": "Filipinas (células) / México (ensamblaje del módulo), según la ficha A4 del Maxeon 7 (2024); para el Maxeon 6 de EE. UU., Malasia / México",
-        "fabrica": "No se nombra la planta; la ficha del Maxeon 7 indica células de Filipinas y ensamblaje en México. Maxeon vendió su negocio de Filipinas en 2025.",
+        "fabrica": {
+          "valor": "Malasia: células (ficha Maxeon 6 DC); México: ensamblaje de módulos (ficha Maxeon 6 DC); Filipinas: negocio vendido en el primer semestre de 2025; Albuquerque (Nuevo México, EE. UU.): fábrica prevista; Maxeon renunció al arrendamiento en noviembre de 2025 y el arrendador la demandó en enero de 2026",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.maxeon.com",
+          "fecha": "2026-10-18",
+          "nota": "No se nombra la planta; la ficha del Maxeon 7 indica células de Filipinas y ensamblaje en México. Maxeon vendió su negocio de Filipinas en 2025. Otras fuentes: https://www.maxeon.com/warranty https://mediaroom.maxeon.com https://corp.maxeon.com/node/9541/html https://mediaroom.maxeon.com/2025-08-14-Maxeon-Solar-Technologies-Announces-First-Half-of-2025-Financial-Results https://www.sec.gov/Archives/edgar/data/1796898/000179689825000014/form6-kprojectbirch.htm https://www.sec.gov/Archives/edgar/data/1796898/000179689825000020/form6-kclosingprojectbirch.htm https://sunpowerglobal.com/uk/support/installers?page=7 https://sunpowerglobal.com/us/sites/default/files/2025-02/sp_max7_120c_455_ds_en_a4_mc4_553945.pdf"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n",
           "base de cobre en la célula (según la marca)",
@@ -4671,13 +5071,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario. La ficha declara la certificación Cradle to Cradle Silver y una etiqueta Declare (ILFI) de transparencia de materiales.",
-        "fabricante_celulas": "Maxeon (células IBC propias)",
-        "fabricas_conocidas": [
-          "Malasia: células (ficha Maxeon 6 DC)",
-          "México: ensamblaje de módulos (ficha Maxeon 6 DC)",
-          "Filipinas: negocio vendido en el primer semestre de 2025",
-          "Albuquerque (Nuevo México, EE. UU.): fábrica prevista; Maxeon renunció al arrendamiento en noviembre de 2025 y el arrendador la demandó en enero de 2026"
-        ]
+        "fabricante_celulas": "Maxeon (células IBC propias)"
       },
       "certificados": [
         {
@@ -4983,21 +5377,52 @@
           "fecha": "2026-10-18",
           "nota": "Sin ofertas con precio a 2026-10-18."
         },
-        "resultado_pvel": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "No se comprobó en esta sesión."
-        },
         "pruebas_independientes": {
           "valor": null,
           "unidad": null,
           "naturaleza": "no_publicado",
           "fuente": null,
           "fecha": "2026-10-18",
-          "nota": "No se comprobó en esta sesión."
+          "nota": "No se comprobó en esta sesión. No se comprobó en esta sesión."
+        },
+        "garantia_producto_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+          "fecha": "2026-10-18",
+          "nota": "Condiciones de garantía Meyer Burger (Industries) GmbH V 1.3 (06-07-2022), para el EEE, Reino Unido y Suiza: 25 años en módulos vidrio-lámina (White, Black) y 30 años en vidrio-vidrio. La ficha de 2021 también da 25 años."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 98 %. Después, 0.25 %/año. Vidrio-lámina. Para vidrio-vidrio: 99 % el primer año, 0,20 %/año, 93,2 % al año 30. Tolerancia de placa ± 3 %."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.92,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "El garante es Meyer Burger (Industries) GmbH (Freiberg), una de las filiales alemanas que pidieron la insolvencia el 2-6-2025. Fuentes: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl ; https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/\nDesmontaje y reinstalación: Meyer Burger pagaba una cantidad fija de 150 € por instalación y caso, más 25 € por módulo afectado; el resto lo paga el cliente. Transporte solo con consentimiento previo. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nReclamación por escrito al vendedor en 30 días desde que aparece el defecto, con número de serie, fotos y factura; si el vendedor ya no existe, directamente a Meyer Burger. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nLa garantía es para el «cliente final» que pone en marcha los módulos; el documento no regula su transmisión a propietarios posteriores. Ley alemana y tribunales de Dresde. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nEl documento no menciona ningún seguro de garantía ni qué ocurre si el propio fabricante quiebra. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nKrannich, que aún ofrece módulos Meyer Burger como «warehouse deals», avisa de que «Meyer Burger Industries GmbH is in insolvency proceedings» y recomienda informarse de las consecuencias para la garantía del fabricante. Fuente: https://shop.krannich-solar.com/de-en/special-offers/warehouse-deals/59639/meyer-burger-glass-385",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "No consta que nadie asuma hoy las garantías de fabricante. Las filiales alemanas están en insolvencia (administradores Lucas Flöther y Reinhard Klose) y pararon la producción el 1-9-2025 sin inversor: https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/ La matriz suiza entró en moratoria provisional de deudas, dio por imposible el rescate del grupo y no se opuso a su exclusión de cotización en SIX (17-9-2025): https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html Swift Solar compró en marzo de 2026 la propiedad intelectual HJT y activos de EE. UU.; la noticia no menciona garantías: https://www.pvtime.org/?p=25046 En la práctica, una reclamación de garantía comercial pasaría a ser un crédito concursal. Frente al consumidor en España sigue respondiendo el vendedor por la garantía legal de conformidad (3 años en bienes nuevos vendidos desde 2022).",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -5029,7 +5454,14 @@
       "origen": {
         "pais_marca": "Suiza",
         "pais_fabricacion": "Alemania (células, Thalheim) y, según la época, módulos en Alemania (Freiberg, hasta 2024) o EE. UU. (Goodyear, 2024–2025)",
-        "fabrica": "Meyer Burger (Industries) GmbH, Freiberg (Alemania), según la ficha de 2021; células de Thalheim",
+        "fabrica": {
+          "valor": "Thalheim (Sajonia-Anhalt, Alemania): células; filial en insolvencia desde junio de 2025; Freiberg (Sajonia, Alemania): módulos; cierre anunciado en marzo de 2024; Hohenstein-Ernstthal (Sajonia, Alemania): ingeniería y desarrollo; filial en insolvencia; Goodyear (Arizona, EE. UU.): módulos, 1,4 GW; producción terminada el 30 de mayo de 2025",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
+          "fecha": "2026-10-18",
+          "nota": "Meyer Burger (Industries) GmbH, Freiberg (Alemania), según la ficha de 2021; células de Thalheim Otras fuentes: https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/ https://en.wikipedia.org/wiki/Meyer_Burger_Technology https://de.wikipedia.org/wiki/Meyer_Burger https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/ https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html https://www.pvtime.org/?p=25046"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n (HJT)",
           "vidrio solar 3,2 mm",
@@ -5045,13 +5477,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario. Con el fabricante en insolvencia, conseguir un módulo de sustitución idéntico puede ser difícil.",
-        "fabricante_celulas": "Meyer Burger (Thalheim, Alemania)",
-        "fabricas_conocidas": [
-          "Thalheim (Sajonia-Anhalt, Alemania): células; filial en insolvencia desde junio de 2025",
-          "Freiberg (Sajonia, Alemania): módulos; cierre anunciado en marzo de 2024",
-          "Hohenstein-Ernstthal (Sajonia, Alemania): ingeniería y desarrollo; filial en insolvencia",
-          "Goodyear (Arizona, EE. UU.): módulos, 1,4 GW; producción terminada el 30 de mayo de 2025"
-        ]
+        "fabricante_celulas": "Meyer Burger (Thalheim, Alemania)"
       },
       "certificados": [
         {
@@ -5133,11 +5559,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (Meyer Burger Glass 385, no la versión White)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "no indicado",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Sin precio público; el anuncio advierte de la insolvencia del fabricante."
+          "nota": "Sin precio público; el anuncio advierte de la insolvencia del fabricante.",
+          "envio_eur": null
         }
       ],
       "compatibles": [],
@@ -5356,21 +5782,52 @@
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna oferta con precio en España ni en la UE a 2026-10-18 (sun.store: «No available offers»; zonnefabriek.nl no publica precio)."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Qcells figura como fabricante «Top Performer» en el Scorecard 2026 de Kiwa PVEL (grupo de 6 ensayos); la página pública no indica qué modelos.",
           "unidad": null,
           "naturaleza": "medido",
           "fuente": "https://scorecard.pvel.com/manufacturers/",
           "fecha": "2026-10-18",
-          "nota": "Distinción a nivel de fabricante; no consta que se refiera al Q.TRON BLK M-G2+."
+          "nota": "Distinción a nivel de fabricante; no consta que se refiera al Q.TRON BLK M-G2+. No se comprobó en esta sesión."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se comprobó en esta sesión."
+          "nota": "Condiciones de garantía Qcells para Q.TRON (BLK) M-G2+ / ML-G2+, rev. 2023-11 (HQCQDC_Warranty_terms_modules_Q.TRON-G2.X+_series_2023-11_Rev01_EN), válidas para módulos vendidos e instalados en la UE, Noruega, Suiza, Reino Unido y otros países listados. Cubre defectos de material y fabricación que afecten de forma significativa a la potencia; excluye cambios estéticos."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 98.5 %. Después, 0.33 %/año. El 90,58 % a 25 años figura en la ficha (Rev06) y en el listado europeo de sun.store; el documento de garantía fija 98,5 % el primer año y un máximo de 0,33 %/año hasta el año 25."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.9058,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "No cubre costes de desmontaje ni de instalación, ni la pérdida de producción: el documento «excluye específicamente» su reembolso. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nEl cliente paga el envío de los módulos a Qcells para su evaluación; Qcells solo asume inspección y transporte si la reclamación se confirma. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nHay que notificar el defecto en 30 días desde que se descubre (y los defectos visibles en 30 días desde la entrega), por el procedimiento RMA y con factura original que muestre fechas de compra y entrega, números de serie y vendedor. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nLas reclamaciones por rotura de vidrio exigen un cálculo de carga estática de la estructura. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nLa garantía se transmite a un nuevo propietario solo si el sistema fotovoltaico completo sigue intacto en su ubicación original. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nExcluye uso móvil (vehículos, barcos), entornos salinos o ácidos, montaje o mantenimiento incorrectos y retirada de etiquetas de serie. Rige la ley alemana y son competentes los tribunales de Leipzig. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nEl documento no exige registro del producto: la garantía empieza en la fecha de entrega al cliente original o, si no se puede documentar, 60 días después de la fecha de fabricación. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El garante en el documento europeo es Hanwha Q CELLS (Qidong) Co., Ltd. (Jiangsu, China); el pie del documento cita a Hanwha Q CELLS GmbH (Bitterfeld-Wolfen, Alemania). El documento no dice nada sobre insolvencia ni sobre un seguro de terceros que respalde la garantía. Su matriz, Hanwha Solutions, es un grupo industrial grande, pero eso no es una garantía contractual.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -5403,7 +5860,14 @@
       "origen": {
         "pais_marca": "Alemania (origen) / Corea del Sur (propietario)",
         "pais_fabricacion": "China (Qidong) para Europa, deducido del emisor de la garantía europea; no confirmado por Qcells en una ficha",
-        "fabrica": "Hanwha Q CELLS (Qidong) Co., Ltd., No.888 Linyang Road, Qidong (Jiangsu, China), según la garantía europea",
+        "fabrica": {
+          "valor": "Qidong, Jiangsu (China): Hanwha Q CELLS (Qidong) Co., Ltd., emisor de la garantía europea de esta serie; Jincheon (Corea del Sur); Cyberjaya (Malasia); Dalton y Cartersville (Georgia, EE. UU.)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Qcells",
+          "fecha": "2026-10-18",
+          "nota": "Hanwha Q CELLS (Qidong) Co., Ltd., No.888 Linyang Road, Qidong (Jiangsu, China), según la garantía europea Otras fuentes: https://www.q-cells.eu https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n",
           "vidrio templado 3,2 mm",
@@ -5419,13 +5883,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario.",
-        "fabricante_celulas": "Qcells (producción propia en Corea, Malasia y EE. UU.)",
-        "fabricas_conocidas": [
-          "Qidong, Jiangsu (China): Hanwha Q CELLS (Qidong) Co., Ltd., emisor de la garantía europea de esta serie",
-          "Jincheon (Corea del Sur)",
-          "Cyberjaya (Malasia)",
-          "Dalton y Cartersville (Georgia, EE. UU.)"
-        ]
+        "fabricante_celulas": "Qcells (producción propia en Corea, Malasia y EE. UU.)"
       },
       "certificados": [
         {
@@ -5735,21 +6193,52 @@
           "fecha": "2026-10-18",
           "nota": "No se encontró ninguna oferta con IVA incluido declarado. Como referencia sin IVA confirmado: aceflex.de 139,99 € / 420 Wp = 0,333 €/Wp (agotado); sun.store «desde 0,200 €/Wp» para el REC410AA (B2B)."
         },
-        "resultado_pvel": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://reduco.ai/blog/solar/rec-alpha-solarmodule-test-erfahrungen",
-          "fecha": "2026-10-18",
-          "nota": "No se encontró un resultado Kiwa PVEL específico del Alpha Pure-R. REC comunicó haber sido «Top Performer» del PVEL Scorecard en 2020 (nota de prensa de la marca, no del modelo actual)."
-        },
         "pruebas_independientes": {
           "valor": "Ensayado por la organización de consumidores australiana CHOICE (REC420AA): potencia medida, electroluminiscencia, fuga en húmedo, inspección visual y PID",
           "unidad": null,
           "naturaleza": "medido",
           "fuente": "https://www.choice.com.au/products/home-improvement/energy-saving/solar/rec-alpha-pure-r-rec420aa",
           "fecha": "2026-10-18",
-          "nota": "Los resultados son solo para socios y no se han podido leer; la ficha de CHOICE es de marzo de 2026. Ensayo de granizo de 45 mm del Pure-RX encargado por REC a Changzhou Huayang (laboratorio vinculado a TÜV SÜD) — encargado por la marca, no independiente (https://www.solarpowerworldonline.com/2025/12/rec-tests-alpha-pure-rx-solar-panels-against-45-mm-hailstones/)."
+          "nota": "Los resultados son solo para socios y no se han podido leer; la ficha de CHOICE es de marzo de 2026. Ensayo de granizo de 45 mm del Pure-RX encargado por REC a Changzhou Huayang (laboratorio vinculado a TÜV SÜD) — encargado por la marca, no independiente (https://www.solarpowerworldonline.com/2025/12/rec-tests-alpha-pure-rx-solar-panels-against-45-mm-hailstones/). Kiwa PVEL: No se encontró un resultado Kiwa PVEL específico del Alpha Pure-R. REC comunicó haber sido «Top Performer» del PVEL Scorecard en 2020 (nota de prensa de la marca, no del modelo actual)."
+        },
+        "garantia_producto_anios": {
+          "valor": 20,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+          "fecha": "2026-10-18",
+          "nota": "20 años desde la compra (máx. 20,5 desde fabricación). 25 años solo con REC ProTrust: instalación por un REC Certified Solar Professional y registro."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 98 %. Después, 0.25 %/año. Medida en STC (IEC 61215) con ±3 % de tolerancia. primer_anio_pct es la potencia mínima garantizada en el año 1, no la pérdida."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.92,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La garantía estándar de producto es de 20 años, no 25. Los 25 años de producto y la cobertura de mano de obra (25 años en sistemas <25 kW; 10 años en 25–500 kW) son del programa REC ProTrust, que exige instalador certificado por REC y registro (app SunSnap o ProPortal). Si uno instala por su cuenta o con instalador no certificado, no aplica. Fuentes: https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf ; https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf\nFuera de ProTrust, la garantía no cubre ni reembolsa la mano de obra de desmontaje ni de reinstalación. REC paga el envío de las piezas sustituidas a sus instalaciones, salvo transporte aéreo. Fuente: Warranty Alpha Rev 8 (02/2026).\nExcluye daños en cables por roce o por bordes afilados, daños por animales, desgaste estético que no afecte a la función, y reparaciones o modificaciones hechas por técnicos no cualificados. Fuente: Warranty Alpha Rev 8.\nPara reclamar hay que avisar «sin demora indebida» tras detectar el defecto, con prueba de compra y número de serie, y obtener un número RMA antes de devolver nada. Fuente: Warranty Alpha Rev 8.\nSolo se transmite al siguiente propietario de la misma instalación, si no se modifica ni se traslada. Excluye módulos con sufijo «Q3». Fuente: Warranty Alpha Rev 8.\nEl documento no dice qué ocurre si REC quiebra, ni menciona seguro de garantía.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "REC Solar EMEA GmbH (Múnich) gestiona las garantías en Europa; también el distribuidor o vendedor original. No se publica seguro de garantía de terceros. REC pertenece al 100 % a Reliance Industries desde 2021, lo que da respaldo financiero pero no es una garantía contractual.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -5781,7 +6270,14 @@
       "origen": {
         "pais_marca": "Noruega",
         "pais_fabricacion": "Singapur",
-        "fabrica": "Tuas, Singapur (la ficha dice «Made in Singapore»)",
+        "fabrica": {
+          "valor": "Tuas (Singapur): células y módulos, ~1,2 GW/año; Jamnagar (India), de Reliance: módulos de 720 Wp para plantas grandes desde mayo de 2026, según 42watt.de; no destinados al mercado residencial",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://42watt.de/magazin/rec-solar",
+          "fecha": "2026-10-18",
+          "nota": "Tuas, Singapur (la ficha dice «Made in Singapore») Otras fuentes: https://www.solarpowerworldonline.com/?p=110545 https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf"
+        },
         "materiales_principales": [
           "silicio monocristalino tipo n",
           "capas de silicio amorfo (heterounión)",
@@ -5799,11 +6295,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado, no reparable por el usuario. La ficha indica que cumple RoHS (sin plomo, IEC 62321) y que REC participa en el sistema de reciclaje Take-e-way (RAEE).",
-        "fabricante_celulas": "REC (producción propia de células HJT en Singapur)",
-        "fabricas_conocidas": [
-          "Tuas (Singapur): células y módulos, ~1,2 GW/año",
-          "Jamnagar (India), de Reliance: módulos de 720 Wp para plantas grandes desde mayo de 2026, según 42watt.de; no destinados al mercado residencial"
-        ]
+        "fabricante_celulas": "REC (producción propia de células HJT en Singapur)"
       },
       "certificados": [
         {
@@ -5927,11 +6419,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (pedido mínimo 4)",
           "incluye_instalacion": false,
-          "envio": "Por agencia, 1–2 semanas; envía a Alemania, Austria, Suiza y otros países europeos",
           "stock": "Agotado; restos bajo consulta",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "REC420AA Pure-R. La página no aclara si el precio lleva IVA; dice que el 0 % solo aplica a instalaciones residenciales y se confirma al pedir."
+          "nota": "REC420AA Pure-R. La página no aclara si el precio lleva IVA; dice que el 0 % solo aplica a instalaciones residenciales y se confirma al pedir. · Envío: Por agencia, 1–2 semanas; envía a Alemania, Austria, Suiza y otros países europeos",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -5940,11 +6432,11 @@
           "iva_incluido": null,
           "unidad": "por Wp",
           "incluye_instalacion": false,
-          "envio": "No indicado",
           "stock": "33–198 unidades, 1 oferta",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "REC410AA Pure-R Full Black: «ab 0,200 €/Wp» (≈82 € por módulo), sin indicar IVA."
+          "nota": "REC410AA Pure-R Full Black: «ab 0,200 €/Wp» (≈82 € por módulo), sin indicar IVA. · Envío: No indicado",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -6168,21 +6660,52 @@
           "fecha": "2026-10-18",
           "nota": "86,48 € (IVA incl.) / 450 Wp = 0,192 €/Wp. Oferta sin existencias en la fecha de consulta."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Risen Energy figura como Top Performer en el Scorecard 2024 de Kiwa PVEL (fabricante, cuatro ediciones 2021–2024)",
           "unidad": null,
           "naturaleza": "medido",
           "fuente": "https://2024modulescorecard.pvel.com/manufacturer_name/risen/",
           "fecha": "2026-10-18",
-          "nota": "La página no indica qué modelo o lista de materiales se ensayó; no puede atribuirse al RSM108-10. No se comprobó la edición 2025 ni la 2026."
+          "nota": "La página no indica qué modelo o lista de materiales se ensayó; no puede atribuirse al RSM108-10. No se comprobó la edición 2025 ni la 2026. No se encontraron ensayos independientes publicados de este modelo concreto."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
           "fecha": "2026-10-18",
-          "nota": "No se encontraron ensayos independientes publicados de este modelo concreto."
+          "nota": "RSM108-10-xxxBNDG en el grupo de 15 años. El texto extraído de la ficha PDF mostraba «5 years», probablemente un error de extracción; manda el documento de garantía."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. El documento no da el porcentaje final; 87,4 % = 99 − 29 × 0,4 (calculado), coincide con la gráfica de la ficha."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Reclamación «inmediata», definida como un plazo de 2 meses desde que se detecta el defecto, con prueba de compra y números de serie (garantía n-type Dual-Glass A1[2026]).\nRisen no paga desmontaje, instalación ni reinstalación; sí paga el envío de vuelta, aduanas y el reenvío del módulo de reposición según el Incoterm pactado. La retirada y eliminación de los módulos sustituidos corre a cargo del comprador salvo que Risen decida recogerlos (A1[2026]).\nLa garantía empieza en la entrega o seis meses después de la salida de fábrica, lo que ocurra antes (A1[2026]).\nSe anula por instalación incorrecta o distinta del manual, reparaciones no autorizadas o estructuras de montaje defectuosas; la responsabilidad total se limita al importe facturado (A1[2026]).\nEn caso de disputa sobre la potencia, el ensayo de un laboratorio independiente lo paga la parte que pierde (A1[2026]).\nNo exige registro del producto ni instalador certificado. La ley aplicable es la del país de instalación; reconoce que prevalecen los derechos legales del consumidor (cita la Directiva 1999/44/CE).\nNo se publica seguro de garantía de terceros. Ante la quiebra o salida del fabricante quedaría solo la garantía legal frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Risen Energy Co., Ltd. (Ninghai, China); en Europa tiene sede en Madrid desde finales de 2024 y filial en Núremberg. Sin aseguradora de garantía publicada.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -6215,7 +6738,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China (planta concreta no indicada en la ficha)",
-        "fabrica": "La ficha solo da la dirección corporativa: Tashan Industry Zone, Meilin, Ninghai, Ningbo",
+        "fabrica": {
+          "valor": "Ningbo / Ninghai (Zhejiang); Yiwu (Zhejiang); Jintan (Jiangsu); Chuzhou (Anhui); Baotou (Mongolia Interior); Nanbin (15 GW, desde 2023); Malasia",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://42watt.de/magazin/risen-energy",
+          "fecha": "2026-10-18",
+          "nota": "La ficha solo da la dirección corporativa: Tashan Industry Zone, Meilin, Ninghai, Ningbo Otras fuentes: https://m.energytrend.com/news/20260430-51330.html https://www.energias-renovables.com/fotovoltaica/risen-se-lanza-a-la-conquista-del-20241212 https://www.eqmagpro.com/?p=27129 https://en.risen.com/assembly/topc"
+        },
         "materiales_principales": [
           "silicio monocristalino N-type",
           "vidrio templado térmicamente (dos capas)",
@@ -6230,16 +6760,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable en la práctica; la garantía prevé reparación, reposición o compensación (garantía A1[2026]).",
-        "fabricante_celulas": "Risen Energy (fabrica células propias)",
-        "fabricas_conocidas": [
-          "Ningbo / Ninghai (Zhejiang)",
-          "Yiwu (Zhejiang)",
-          "Jintan (Jiangsu)",
-          "Chuzhou (Anhui)",
-          "Baotou (Mongolia Interior)",
-          "Nanbin (15 GW, desde 2023)",
-          "Malasia"
-        ]
+        "fabricante_celulas": "Risen Energy (fabrica células propias)"
       },
       "certificados": [
         {
@@ -6318,10 +6839,11 @@
           "iva_incluido": true,
           "unidad": "por módulo (450 Wp)",
           "incluye_instalacion": false,
-          "envio": "Envío gratis en 72 h para pedidos de más de 200 € (pie de página de la tienda)",
           "stock": "Sin existencias",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Envío gratis en 72 h para pedidos de más de 200 € (pie de página de la tienda)"
         },
         {
           "distribuidor_id": "cuencasolar-es",
@@ -6330,10 +6852,10 @@
           "iva_incluido": true,
           "unidad": "por módulo (450 Wp)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "Sin existencias",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -6342,10 +6864,10 @@
           "iva_incluido": null,
           "unidad": "por módulo",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "Sin ofertas disponibles",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -6568,21 +7090,52 @@
           "fecha": "2026-10-18",
           "nota": "No se encontró una oferta con IVA incluido claramente indicado. Referencia: 80 € / 455 Wp = 0,176 €/Wp en photovoltaik4all (Alemania), sin aclarar si aplica el IVA del 0 % alemán para fotovoltaica."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "Tongwei comunica ser «Top Performer» del Scorecard de Kiwa PVEL en 2024, 2025 y 2026 con su serie TNC (siete categorías en 2026)",
           "unidad": null,
           "naturaleza": "declarado",
           "fuente": "https://taiyangnews.info/pressreleases/tongwei-named-2026-kiwa-pvel-top-performer-for-third-consecutive-year",
           "fecha": "2026-10-18",
-          "nota": "Nota de prensa de la marca; no nombra los modelos ensayados. No se comprobó en el Scorecard original."
+          "nota": "Nota de prensa de la marca; no nombra los modelos ensayados. No se comprobó en el Scorecard original. No se encontraron ensayos independientes publicados del TWMNH-48HE."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 15,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
           "fecha": "2026-10-18",
-          "nota": "No se encontraron ensayos independientes publicados del TWMNH-48HE."
+          "nota": "15 años en la garantía (Australia, 30-05-2025), la ficha Ver.20250801 y el distribuidor español Vico Export. La ficha en alemán de photovoltaik4all dice 25 años y esa misma tienda dice 15 en su tabla: comprobar con el vendedor antes de comprar."
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Garantía de potencia TNC doble vidrio."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "Reclamación en un plazo de 30 días naturales desde que se descubre el incumplimiento, por escrito a Tongwei o a un distribuidor autorizado, con fotos de la etiqueta y del código de barras, factura y fecha de entrega (garantía Tongwei para Australia, 30-05-2025).\nEl comprador paga desmontaje, reembalaje y reinstalación; Tongwei no cubre seguro, transporte aéreo, aduanas ni aranceles (garantía Australia).\nLa garantía empieza en la fecha de instalación o el día 90 después de la entrega, lo que ocurra antes: un módulo almacenado más de tres meses pierde parte del plazo (garantía Australia).\nExcluye defectos estéticos (arañazos, manchas, diferencias de color, cambios en imágenes de electroluminiscencia), módulos con pagos pendientes o que no sean de grado A, e instaladores no cualificados según la ley local (garantía Australia).\nEl documento leído es el de Australia; no se encontró la versión europea vigente. No exige registro del producto.\nNo se publica seguro de garantía de terceros. Ante la quiebra o salida del fabricante quedaría solo la garantía legal frente al vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "Tongwei Co., Ltd. (Chengdu, China) o su distribuidor autorizado; en España el distribuidor que se presenta como punto de venta es Vico Export Solar Energy. Sin aseguradora de garantía publicada.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Warranty%20-%20TWMNH-48HE470.pdf",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -6614,7 +7167,14 @@
       "origen": {
         "pais_marca": "China",
         "pais_fabricacion": "China",
-        "fabrica": null,
+        "fabrica": {
+          "valor": "Sede en Chengdu (Sichuan); la ficha no indica la planta de módulos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://m.energytrend.com/news/20260430-51330.html",
+          "fecha": "2026-10-18",
+          "nota": "Otras fuentes: https://filingreader.com/news-wire/shanghai/2026-06-16/tongwei-reports-cny-95bn-loss-as-solar-prices-plummet https://www.bernreuter.com/newsroom/polysilicon-news/article/new-report-these-solar-modules-are-tainted-by-forced-labor/ https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf"
+        },
         "materiales_principales": [
           "silicio monocristalino N-type (polisilicio de producción propia del grupo)",
           "vidrio semitemplado de 2 mm (dos capas)",
@@ -6629,10 +7189,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable en la práctica; la garantía prevé reparación o sustitución.",
-        "fabricante_celulas": "Tongwei (más de 103 GW de células vendidas en 2025); también produce su propio polisilicio",
-        "fabricas_conocidas": [
-          "Sede en Chengdu (Sichuan); la ficha no indica la planta de módulos"
-        ]
+        "fabricante_celulas": "Tongwei (más de 103 GW de células vendidas en 2025); también produce su propio polisilicio"
       },
       "certificados": [
         {
@@ -6712,10 +7269,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (455 Wp)",
           "incluye_instalacion": false,
-          "envio": "Por agencia de transporte; no indica si envía a España",
           "stock": "Disponible de inmediato",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null,
+          "nota": "Envío: Por agencia de transporte; no indica si envía a España"
         },
         {
           "distribuidor_id": "vicoexport",
@@ -6724,10 +7282,10 @@
           "iva_incluido": null,
           "unidad": "por módulo",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "No indicado; precio bajo consulta",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "sun",
@@ -6736,10 +7294,10 @@
           "iva_incluido": null,
           "unidad": "por módulo",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "Sin ofertas disponibles",
           "comision": "sin acuerdo",
-          "fecha_comprobacion": "2026-10-18"
+          "fecha_comprobacion": "2026-10-18",
+          "envio_eur": null
         }
       ],
       "compatibles": [
@@ -6962,21 +7520,52 @@
           "fecha": "2026-10-18",
           "nota": "2674,31 € (IVA incl.) / 36 módulos / 450 Wp = 0,165 €/Wp. Precio por palé completo; en unidades sueltas suele ser mayor."
         },
-        "resultado_pvel": {
+        "pruebas_independientes": {
           "valor": "No figura la NEG9R.28 en la lista visible de Top Performers 2026",
           "unidad": "",
           "naturaleza": "no_publicado",
           "fuente": "https://scorecard.pvel.com/top-performers/",
           "fecha": "2026-10-18",
-          "nota": "En la lista 2026 aparece TSM-xxxNEG9RH.25 (monofacial, vidrio-vidrio 1,6/1,6 mm, otra lista de materiales de la misma familia de tamaño) en la prueba LID+LETID; no la NEG9R.28. La página de solartraders atribuye a la serie el sello «Top Performer» sin precisar modelo ni año."
+          "nota": "En la lista 2026 aparece TSM-xxxNEG9RH.25 (monofacial, vidrio-vidrio 1,6/1,6 mm, otra lista de materiales de la misma familia de tamaño) en la prueba LID+LETID; no la NEG9R.28. La página de solartraders atribuye a la serie el sello «Top Performer» sin precisar modelo ni año. No se encontró ningún ensayo independiente publicado para la NEG9R.28. El récord de eficiencia del 24,24 % de 2022 que cita el distribuidor se refiere a un módulo de laboratorio, no a este producto."
         },
-        "pruebas_independientes": {
-          "valor": null,
-          "unidad": "",
-          "naturaleza": "no_publicado",
-          "fuente": null,
+        "garantia_producto_anios": {
+          "valor": 25,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
           "fecha": "2026-10-18",
-          "nota": "No se encontró ningún ensayo independiente publicado para la NEG9R.28. El récord de eficiencia del 24,24 % de 2022 que cita el distribuidor se refiere a un módulo de laboratorio, no a este producto."
+          "nota": "Según la ficha («Extended Vertex S+ Warranty»). La garantía global Rev. U adjunta no incluye ningún plazo de 25 años (máximo 15) y no se encontró el documento de la garantía ampliada; la página de serie de solartraders llega a mencionar 12 años en sus preguntas frecuentes. Se encontró el «Limited Warranty Supplement» de 25 años de producto de Trina Solar Co., Ltd. (copia en solarquotes.com.au, sin fecha de revisión): vale para módulos instalados en Europa, Australia o Japón y entregados después del 1-4-2022, pero solo nombra los modelos TSM-***NEG9C.27 y TSM-***NEG9.28; el NEG9R.28 de esta ficha no aparece en esa lista. https://www.solarquotes.com.au/wp-content/uploads/2023/05/trina-vertexsplus-warranty.pdf"
+        },
+        "garantia_rendimiento_anios": {
+          "valor": 30,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Coincide con la curva de la garantía global Rev. U para módulos N-type Mono Duomax (≥87,4 % al año 30)."
+        },
+        "garantia_rendimiento_final_pct": {
+          "valor": 0.874,
+          "unidad": "fracción",
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
+        },
+        "garantia_letra_pequena": {
+          "valor": "La garantía global de Trina (PS-M-0135 Rev. U, productos entregados desde el 1 de septiembre de 2022) no se aplica en Alemania ni Turquía, que tienen garantías propias; en España sí aplica si el lugar de instalación figura en su anexo. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nInicio en la fecha de instalación o tres meses después de la entrega, lo que ocurra antes. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nPlazo para reclamar: dos meses desde que se descubre el incumplimiento, por el portal de atención al cliente, con factura y números de serie. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nEl comprador paga desmontaje, manipulación, reembalaje y reinstalación; Trina paga la reparación y el envío del repuesto, pero no seguros, transporte aéreo, aduanas ni almacenaje. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nExclusiones: mantenimiento por técnicos no cualificados, piezas de montaje inadecuadas (incluidas las grapas), estructuras defectuosas, moho o decoloración por efectos externos, importaciones paralelas sin consentimiento (salvo comercio intra-UE). Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nDisputas técnicas: perito designado de mutuo acuerdo cuya decisión es vinculante. Responsabilidad limitada al precio de compra; derechos legales del consumidor no afectados. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nTransferible solo si los módulos siguen en su ubicación original sin haberse desmontado. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de\nEl suplemento de 25 años de producto cubre defectos que «impidan de forma material» la generación; excluye cambios de aspecto (arañazos, manchas, óxido, moho, decoloración) y la rotura de vidrio por causa externa; lo no previsto se rige por la última garantía global publicada en la web de Trina. No menciona registro ni requisitos de instalador. Fuente: https://www.solarquotes.com.au/wp-content/uploads/2023/05/trina-vertexsplus-warranty.pdf",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18",
+          "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
+        },
+        "garantia_quien_responde": {
+          "valor": "El fabricante (Trina Solar). La ley aplicable es la del país de instalación y los tribunales ordinarios de ese país. El documento no menciona seguro de respaldo ni qué ocurre en caso de quiebra. Frente al consumidor responde también el vendedor.",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+          "fecha": "2026-10-18"
         }
       },
       "garantias": {
@@ -7027,8 +7616,7 @@
           "nota": "El fabricante no lo publica."
         },
         "reparabilidad": "Módulo laminado no reparable por el usuario; la garantía prevé reparación, sustitución (también por producto remanufacturado) o compensación a criterio de Trina. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
-        "fabricante_celulas": "Trina Solar (según la marca)",
-        "fabricas_conocidas": []
+        "fabricante_celulas": "Trina Solar (según la marca)"
       },
       "certificados": [
         {
@@ -7131,11 +7719,11 @@
           "iva_incluido": null,
           "unidad": "por módulo (TSM-450NEG9R.28, BFR, MC4-EVO2)",
           "incluye_instalacion": false,
-          "envio": null,
           "stock": "No disponible para pedido en la consulta",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Sin precio público."
+          "nota": "Sin precio público.",
+          "envio_eur": null
         },
         {
           "distribuidor_id": "fvcomponentes",
@@ -7144,11 +7732,11 @@
           "iva_incluido": true,
           "unidad": "por palé de 36 módulos TSM-450NEG9R.28 (≈ 74,29 € por módulo)",
           "incluye_instalacion": false,
-          "envio": "No indicado; entrega estándar 2–4 días laborables, 1–2 semanas si no está en almacén",
           "stock": "«Disponible», sin cantidad; la tienda pide confirmar stock",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "La página indica «TAXES INC.». Domicilio de la tienda según ENF Solar: https://www.enfsolar.com/fv-componentes"
+          "nota": "La página indica «TAXES INC.». Domicilio de la tienda según ENF Solar: https://www.enfsolar.com/fv-componentes · Envío: No indicado; entrega estándar 2–4 días laborables, 1–2 semanas si no está en almacén",
+          "envio_eur": null
         }
       ],
       "compatibles": [
