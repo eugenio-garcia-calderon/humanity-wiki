@@ -71,12 +71,6 @@
       "ruta": "src/pages/MiPedido.tsx",
       "motivo": "W5 Wikiproducts: pedidos a distribuidores",
       "desde": "2026-10-18T11:41:41.174Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
-      "motivo": "W6",
-      "desde": "2026-10-18T11:44:27.817Z"
     }
   ]
 }
