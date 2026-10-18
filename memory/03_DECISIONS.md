@@ -949,3 +949,7 @@ The evaluator (round 2) scored criterion 4 at 5 because no sheet had any rating,
 - A dedicated column type. Rejected for now: a hidden long-text column with JSON plus a validator costs nothing in the column editor. A real type is about 1 h (editor + cell + export) once a second site needs it.
 
 **Cost of the shortcut.** The figures are copied by hand and go stale; the date is shown so a reader sees how old they are. Refreshing them is a re-run of the research, not automated.
+
+## 2026-10-18 — Catalog filters as visitor chips over the existing view filters (W2)
+
+Evaluator round 3 wanted category filters visible. Options: (a) a new block config listing which filters to show, set by the loader; (b) derive them from column roles/keys at render time; (c) open the generic «Filtrar» menu by default. Chose (b): zero loader changes, works for any catalog-like table, and the tramos come from the data (thirds, two significant digits). Filters go through the existing visitor path (`filtros`/`orden` URL params on `/api/bd/tablas/:id`), ANDed with the author's view filters. Cost of moving to (a) later: one config field read by `MandosCatalogo`.

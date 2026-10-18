@@ -20,13 +20,16 @@ import SeccionesSitio, { type Seccion } from './SeccionesSitio';
 type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta?: string | null;
   /** Sólo las fichas: su precio «desde» y la cifra que dice cómo es (`completarFichas`). */
   precio?: string; dato?: { nombre: string; valor: string } };
-type Respuesta = { resultados: Resultado[]; mas?: boolean; corregido?: string | null; secciones?: Seccion[] };
+type Respuesta = { resultados: Resultado[]; mas?: boolean; pagina?: number; por_pagina?: number; corregido?: string | null; secciones?: Seccion[] };
+
+const CLASE_PAGINA = 'inline-flex items-center h-11 px-4 rounded-xl border border-slate-200 text-base font-bold text-slate-800 hover:border-slate-400';
 
 export default function BuscadorSitio() {
   const sitio = useSitio();
   const [params] = useSearchParams();
   const q = (params.get('q') || '').trim();
   const raizId = params.get('sitio') || sitio?.raizId || null;
+  const pagina = Math.max(1, Math.floor(Number(params.get('pagina'))) || 1);
   const [raiz, setRaiz] = useState<DatosPagina | null>(null);
   const [res, setRes] = useState<Respuesta | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -45,7 +48,7 @@ export default function BuscadorSitio() {
     if (q.length < 2) { setRes({ resultados: [] }); return; }
     let vivo = true;
     setRes(null); setFallo(null);
-    fetch(`/api/sitio/buscar?sitio=${encodeURIComponent(raizId)}&q=${encodeURIComponent(q)}`)
+    fetch(`/api/sitio/buscar?sitio=${encodeURIComponent(raizId)}&q=${encodeURIComponent(q)}${pagina > 1 ? `&pagina=${pagina}` : ''}`)
       .then(async r => {
         const j = await r.json().catch(() => ({}));
         if (!vivo) return;
@@ -56,7 +59,8 @@ export default function BuscadorSitio() {
       })
       .catch(() => vivo && setFallo('No se ha podido buscar. Inténtalo dentro de un momento.'));
     return () => { vivo = false; };
-  }, [raizId, q]);
+  }, [raizId, q, pagina]);
+  useEffect(() => { if (pagina > 1) window.scrollTo(0, 0); }, [pagina]);
 
   useEffect(() => {
     const antes = document.title;
@@ -66,6 +70,11 @@ export default function BuscadorSitio() {
 
   const rutas = sitio && raizId ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, enlaceBuscar: sitio.enlaceBuscar, raizId } : undefined;
   const enlace = (id: string) => sitio ? sitio.enlacePagina(id) : `/p/${id}`;
+  const aPagina = (n: number) => {
+    const p = new URLSearchParams(params);
+    if (n > 1) p.set('pagina', String(n)); else p.delete('pagina');
+    return `?${p.toString()}`;
+  };
 
   return (
     <MarcoLectura pagina={raiz} rutas={rutas}>
@@ -74,7 +83,7 @@ export default function BuscadorSitio() {
           <Search className="w-5 h-5 text-slate-500 shrink-0" aria-hidden />
           <input type="search" name="q" defaultValue={q} required minLength={2} autoFocus={!q}
             aria-label="Buscar en este sitio" placeholder="Buscar un producto, una marca, un código de barras…"
-            className="flex-1 min-w-0 bg-transparent outline-none text-base text-slate-800 placeholder:text-slate-500" />
+            className="flex-1 min-w-0 h-11 bg-transparent outline-none text-base text-slate-800 placeholder:text-slate-500" />
           {raizId && <input type="hidden" name="sitio" value={raizId} />}
         </form>
         {q.length >= 2 && <h1 className="text-xl font-black text-slate-900 mb-4">Resultados de «{q}»</h1>}
@@ -101,19 +110,29 @@ export default function BuscadorSitio() {
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold leading-snug text-slate-900 group-hover:underline line-clamp-2">{r.titulo}</span>
                       {(r.dato || r.tabla) && (
-                        <span className="block text-sm text-slate-600 truncate">
+                        <span className="block text-base text-slate-600 truncate">
                           {r.dato ? `${r.dato.nombre}: ${r.dato.valor}` : r.tabla}
                         </span>
                       )}
-                      {!r.dato && !r.precio && r.descripcion && <span className="block text-sm text-slate-700 line-clamp-1">{r.descripcion}</span>}
+                      {!r.dato && !r.precio && r.descripcion && <span className="block text-base text-slate-700 line-clamp-1">{r.descripcion}</span>}
                     </span>
-                    {r.precio && <span className="shrink-0 text-right text-base font-black text-slate-900"><span className="block text-xs font-bold text-slate-600">desde</span>{r.precio}</span>}
+                    {r.precio && <span className="shrink-0 text-right text-base font-black text-slate-900"><span className="block text-sm font-bold text-slate-600">desde</span>{r.precio}</span>}
                   </Link>
                 </li>
               ))}
             </ul>
           </>)}
-        {res?.mas && <p className="mt-4 text-sm text-slate-600">Hay más resultados: escribe algo más concreto.</p>}
+        {/* PÁGINAS (ronda 3 del evaluador): antes, «escribe algo más
+            concreto» y ninguna forma de ver el resto. */}
+        {res && res.resultados.length > 0 && (pagina > 1 || res.mas) && (
+          <nav aria-label="Páginas de resultados" className="mt-6 flex items-center justify-between gap-3">
+            {pagina > 1
+              ? <Link to={aPagina(pagina - 1)} className={CLASE_PAGINA}>← Anteriores</Link> : <span />}
+            <span className="text-base text-slate-600">Página {pagina}</span>
+            {res.mas
+              ? <Link to={aPagina(pagina + 1)} className={CLASE_PAGINA}>Más resultados →</Link> : <span />}
+          </nav>
+        )}
       </main>
     </MarcoLectura>
   );
