@@ -21,6 +21,10 @@ export default function EditorExperto({ bloque, datos, paginaId, editable, cambi
               onChange={e => cambiarDatos({ intro: e.target.value })}
               className="w-full rounded-lg border border-slate-200 px-2 py-1.5 focus:border-emerald-400 focus:outline-none" />
           </label>
+          <label className="flex items-center gap-2 sm:col-span-2">
+            <input type="checkbox" checked={!!d.compacto} onChange={e => cambiarDatos({ compacto: e.target.checked })} />
+            <span className="text-xs text-slate-600">Versión corta, para la ficha de un producto (una línea por experto; si no hay expertos, no sale)</span>
+          </label>
         </div>
       )}
       <ReservarExperto bloque={bloque} datos={d} paginaId={paginaId} />

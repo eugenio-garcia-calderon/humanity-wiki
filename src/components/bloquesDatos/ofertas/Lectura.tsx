@@ -82,7 +82,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
   return (
     <section aria-label={titulo} className="my-4">
       <h2 className="text-xl font-black text-slate-900">{titulo}</h2>
-      <p className="mt-0.5 text-sm text-slate-500">
+      <p className="mt-0.5 text-base text-slate-500">
         {desde !== null
           ? <>Desde <b className="text-slate-800">{dinero(desde, moneda)}</b> con envío, en {ofertas.length === 1 ? 'una tienda' : `${ofertas.length} tiendas`}{sinPrecio ? ` (${textoSinPrecio(sinPrecio)})` : ''}.</>
           : `${ofertas.length === 1 ? 'Una tienda' : `${ofertas.length} tiendas`}, sin precio disponible ahora.`}
@@ -97,7 +97,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
             <li key={o.fila_id} className="rounded-2xl border border-slate-200 bg-white p-3.5">
               <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-sm font-black text-slate-900">
+                  <p className="flex items-center gap-1.5 text-base font-black text-slate-900">
                     <Store className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                     {o.distribuidor || 'Tienda sin nombre'}
                   </p>
@@ -112,14 +112,14 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                     {o.agotada ? ' · Agotado' : o.stock !== null && o.stock <= 5 ? ` · Quedan ${o.stock}` : ''}
                   </p>
                   {o.instalacion === true && (
-                    <p className="mt-0.5 flex items-center gap-1 text-xs font-bold text-emerald-700"><Wrench className="h-3.5 w-3.5" aria-hidden /> Incluye instalación</p>
+                    <p className="mt-0.5 flex items-center gap-1 text-sm font-bold text-emerald-700"><Wrench className="h-3.5 w-3.5" aria-hidden /> Incluye instalación</p>
                   )}
                 </div>
                 <div className="text-right">
                   {o.precio_centimos !== null ? (
                     <>
                       <p className="text-lg font-black tabular-nums text-slate-900">{dinero(o.precio_centimos, o.moneda)}</p>
-                      <p className="text-xs tabular-nums text-slate-500">
+                      <p className="text-sm tabular-nums text-slate-500">
                         {o.envio_centimos === null
                           // Sin envío puesto, la cesta lo cobra a cero (`bd/tienda.ts`): se dice eso, no «consultar».
                           ? (o.compra ? 'Sin gastos de envío comprando aquí' : 'Envío: lo dice la tienda')
@@ -132,9 +132,9 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
               </div>
 
               {o.precio_centimos === null && (
-                <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs leading-snug text-slate-600">{motivoSinPrecio(o)}</p>
+                <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-base leading-snug text-slate-600">{motivoSinPrecio(o)}</p>
               )}
-              <p className="mt-2 text-xs leading-snug text-slate-500">{textoComision(o.comision_pct, comisionUnidad, o.moneda)}</p>
+              <p className="mt-2 text-sm leading-snug text-slate-500">{textoComision(o.comision_pct, comisionUnidad, o.moneda)}</p>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {conCesta(o) && seCompraAqui === true && <BotonCompra datos={o.compra} />}
@@ -142,30 +142,30 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                   <a href={o.enlace} target="_blank" rel={o.rel}
                      className={conCesta(o) && seCompraAqui === false
                        ? 'inline-flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-800'
-                       : 'inline-flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm sm:text-xs font-bold text-slate-700 hover:bg-slate-50'}>
+                       : 'inline-flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-bold text-slate-700 hover:bg-slate-50'}>
                     {o.precio_centimos === null ? 'Ver el precio en la tienda'
                       : conCesta(o) && seCompraAqui === false ? 'Comprar en la tienda' : 'Ver en la tienda'}
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                   </a>
                 )}
-                {!o.enlace && o.precio_centimos !== null && !(conCesta(o) && seCompraAqui) && <span className="text-xs text-slate-400">Esta tienda no tiene venta en línea registrada.</span>}
+                {!o.enlace && o.precio_centimos !== null && !(conCesta(o) && seCompraAqui) && <span className="text-sm text-slate-400">Esta tienda no tiene venta en línea registrada.</span>}
               </div>
             </li>
           );
         })}
       </ul>
 
-      <p className="mt-2 text-[11px] leading-snug text-slate-400">
+      <p className="mt-2 text-sm leading-snug text-slate-400">
         Ordenadas por lo que pagas con el envío; a igual precio, por la atención al cliente de la tienda. La comisión no cambia el orden.
         {seCompraAqui === true && algunaConCesta && ' Si compras aquí, pagas el mismo precio que en la tienda y Wikiproducts hace el pedido por ti.'}
       </p>
       {seCompraAqui === true && enPruebas && algunaConCesta && (
-        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-snug text-amber-900">
+        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-base leading-snug text-amber-900">
           <b>Modo de pruebas:</b> solo tú ves «Añadir a la cesta», porque gestionas estas ofertas. El cobro usa una clave de pruebas de Stripe: paga con la tarjeta 4242 4242 4242 4242. Los visitantes ven «Comprar en la tienda».
         </p>
       )}
       {seCompraAqui === false && algunaConCesta && (
-        <p className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-snug text-sky-900">
+        <p className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-base leading-snug text-sky-900">
           <b>Muy pronto podrás comprar a través de Wikiproducts</b>, al mismo precio que en la tienda. De momento, «Comprar en la tienda» te lleva a su web.
         </p>
       )}
@@ -177,12 +177,12 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
   const { cargando, ofertas, error, esDueno } = useOfertas(datos, paginaId);
   const titulo = typeof datos.titulo === 'string' && datos.titulo.trim() ? datos.titulo.trim() : 'Dónde comprarlo';
   if (cargando) return <div className="my-4 h-24 animate-pulse rounded-2xl bg-slate-50" />;
-  if (error) return <p className="my-4 text-sm text-slate-400">{error}</p>;
+  if (error) return <p className="my-4 text-base text-slate-400">{error}</p>;
   if (!ofertas.length) {
     return (
       <section aria-label={titulo} className="my-4">
         <h2 className="text-xl font-black text-slate-900">{titulo}</h2>
-        <p className="mt-1 text-sm text-slate-500">Todavía no tenemos registrada ninguna tienda que lo venda.</p>
+        <p className="mt-1 text-base text-slate-500">Todavía no tenemos registrada ninguna tienda que lo venda.</p>
       </section>
     );
   }

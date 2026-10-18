@@ -133,7 +133,7 @@ function CajaBuscar({ rutas, s, lleno }: { rutas: Rutas; s: Sitio; lleno?: boole
       style={{ borderColor: `${mn.texto}33` }}>
       <Search className="w-4 h-4 shrink-0 opacity-60" aria-hidden />
       <input type="search" name="q" required minLength={2} aria-label="Buscar en este sitio" placeholder="Buscar"
-        className="flex-1 min-w-0 bg-transparent outline-none text-sm placeholder:opacity-60" style={{ color: mn.texto }} />
+        className="flex-1 min-w-0 bg-transparent outline-none text-base placeholder:opacity-60" style={{ color: mn.texto }} />
       {rutas.raizId && <input type="hidden" name="sitio" value={rutas.raizId} />}
     </form>
   );
@@ -160,7 +160,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
           {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} />)}
         </nav>
         {mn.buscador && <div className={cn('shrink-0', plegado === 'siempre' ? 'hidden' : plegado === 'movil' ? 'hidden @2xl:block' : 'block')}><CajaBuscar rutas={rutas} s={s} /></div>}
-        {plegado !== 'nunca' && (mn.enlaces.length > 0 || mn.buscador) && (
+        {plegado !== 'nunca' && mn.enlaces.length > 0 && (
           <details className={cn('group ml-auto', plegado === 'movil' && '@2xl:hidden')}>
             <summary aria-label="Abrir el menú"
               className="list-none [&::-webkit-details-marker]:hidden cursor-pointer w-11 h-11 grid place-items-center rounded-lg hover:bg-black/5">
@@ -169,7 +169,6 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
             </summary>
             <div style={{ background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` }}
               className="absolute right-3 left-3 @md:left-auto @md:w-72 top-full mt-1 rounded-2xl border shadow-2xl p-2 flex flex-col gap-1">
-              {mn.buscador && <CajaBuscar rutas={rutas} s={s} lleno />}
               {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
             </div>
           </details>
@@ -177,6 +176,14 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
         {/* El icono de cuenta, arriba a la derecha: sólo si la web tiene miembros (2026-10-08). */}
         {cuenta && <CuentaMenu raiz={cuenta} />}
       </div>
+      {/* EL BUSCADOR A LA VISTA EN EL TELÉFONO (2026-10-18, ronda 1 del
+          evaluador). Dentro de las tres rayas nadie lo encontraba: con el
+          menú plegado va en su propia fila, debajo de la barra. */}
+      {mn.buscador && plegado !== 'nunca' && (
+        <div className={cn('mx-auto max-w-6xl px-5 pb-2.5', plegado === 'movil' && '@2xl:hidden')}>
+          <CajaBuscar rutas={rutas} s={s} lleno />
+        </div>
+      )}
     </header>
   );
 }
