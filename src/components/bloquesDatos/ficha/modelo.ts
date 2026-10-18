@@ -84,6 +84,8 @@ export type Ficha = {
 export const ROLES = [
   'marca', 'modelo', 'gtin', 'imagen', 'credito_imagen', 'subcategoria', 'tamano', 'resumen', 'estado',
   'precio_min', 'precio_max', 'num_ofertas', 'revisado',
+  // 2026-10-18: the shops with a confirmed price, out of `num_ofertas`.
+  'ofertas_con_precio',
   'afirmaciones', 'retiradas', 'ofertas', 'retiradas_fecha', 'retiradas_busqueda',
   // Inside related tables:
   'veredicto', 'explicacion', 'fuentes', 'fecha', 'donde', 'pais', 'organismo', 'motivo', 'enlace', 'referencia',
@@ -108,7 +110,11 @@ export const NUNCA_ORDENA: ReadonlySet<string> = new Set(['comision']);
 const ROL_POR_CLAVE: Record<string, Rol> = {
   foto: 'imagen', foto_licencia: 'credito_imagen', tipo: 'subcategoria',
   // The size a product is compared at: energy for batteries, peak power for panels.
-  capacidad_wh: 'tamano', capacidad_total_kwh: 'tamano', potencia_pico_w: 'tamano', potencia_pico_wp: 'tamano',
+  // Home batteries: the USABLE capacity, the one «Precio por kWh» divides by.
+  // With the total, Powerwall 2's card said 14 kWh next to a €/kWh worked out
+  // on 13,5 (production check, 2026-10-18); it is also the figure more of
+  // them publish (16 of 18, against 10 for the total).
+  capacidad_wh: 'tamano', capacidad_util_kwh: 'tamano', potencia_pico_w: 'tamano', potencia_pico_wp: 'tamano',
 };
 /** The figures a shopper looks at first, by loader key, in the order the
  *  sheet's header shows them (W1, 2026-10-18: «inspired by Amazon's product

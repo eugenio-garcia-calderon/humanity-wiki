@@ -9332,3 +9332,8 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
   - It returns `en_stock` (a count wins when there is one) and treats `disponible = false` as sold out.
   - The box says «En stock», and the SEO markup says InStock only in that case.
 - Test in `scripts/probar-ofertas.ts`. The column is created by the next full load.
+
+## 2026-10-18 — Cabecera de la ficha: tiendas con precio, «descatalogado pero a la venta» y capacidad útil (Wikiproducts W1)
+- **Tiendas con precio**: columna nueva `ofertas_con_precio` («Tiendas con precio», agregado `contar_llenas` sobre `precio_eur`, oculta) en las cinco tablas de productos. La cabecera dice «Desde 144,20 € en 1 tienda · 4 más sin precio confirmado» en vez de «en 5 tiendas» cuando solo una tiene precio (Anker 737, revisión en producción). Las tablas cargadas antes de la columna siguen contando todas. **Necesita una carga** (`fotos=no`) para crear la columna.
+- **Descatalogado y a la venta**: si el estado es «Descatalogado» y hay tiendas con precio, la etiqueta dice «Descatalogado por el fabricante · aún a la venta en N tiendas» (Tesla Powerwall 2). Sin precio, sigue diciendo «Descatalogado». La etiqueta verde es solo para «A la venta».
+- **Capacidad útil**: en las baterías domésticas, la cifra de las tarjetas, del buscador y del filtro de alternativas por tamaño es la **capacidad útil**, la misma que usa el precio por kWh (antes, la total: «14 kWh» junto a un €/kWh calculado con 13,5). Además la publican 16 de 18 baterías, frente a 10 que publican la total.

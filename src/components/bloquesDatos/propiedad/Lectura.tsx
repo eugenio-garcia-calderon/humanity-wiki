@@ -76,13 +76,14 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
                     <p className="text-sm text-slate-600">
                       {v.compra.hasta ? <>hasta {v.compra.hasta} · </> : null}
                       en {v.compra.tiendas || 1} {(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}
+                      {v.compra.sinPrecio ? <> · {v.compra.sinPrecio} más sin precio confirmado</> : null}
                     </p>
                     {v.compra.porUnidad ? <p className="text-base font-bold text-slate-800" title="Precio más bajo de las tiendas dividido por la potencia o la energía que declara la marca"><span className="font-normal text-slate-600">{v.compra.etiquetaUnidad}: </span>{v.compra.porUnidad}</p> : null}
                   </>
                 ) : <p className="text-base font-semibold text-slate-600">Sin precio todavía: ninguna tienda lo vende aquí.</p>}
-                {v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
+                {v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
               </div>
-            ) : v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
+            ) : v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
             {v.destacados.length ? <Destacados lineas={v.destacados} /> : null}
             <div className="flex flex-wrap gap-2 pt-1">
               {v.compra?.desde ? (
