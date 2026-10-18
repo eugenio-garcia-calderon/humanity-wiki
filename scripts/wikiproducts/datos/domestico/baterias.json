@@ -29,7 +29,7 @@
         "capacidad_total_kwh": {
           "valor": 9.3,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "SMILE-G3-BAT-9.3S. El modelo anterior BAT-10.1P tenía 10,1 kWh nominales."
@@ -37,7 +37,7 @@
         "capacidad_util_kwh": {
           "valor": 9.3,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha neerlandesa (AlphaESS V2.0, 12-08-2025) distribuida por Vekto: 9,3 / 9,3 kWh. La ficha EN del módulo no da la energía útil, solo un 100 % de DoD. BAT-10.1P: 9,6 kWh útiles (95 %)."
@@ -45,7 +45,7 @@
         "gama_capacidades_kwh": {
           "valor": "9,3 – 37,2 con inversores monofásicos S3.6/S5/B5 (1–4 módulos); hasta 111,6 kWh con trifásicos",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "Módulos 9.3S. También hay módulos de 3,8 kWh y 4,56 kWh."
@@ -53,7 +53,7 @@
         "modular": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -61,7 +61,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -69,7 +69,7 @@
         "ampliacion_max_kwh": {
           "valor": 37.2,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "Con inversor monofásico G3-S3.6/S5/B5 (4 módulos 9.3S). Con trifásicos G3-T4…T20, hasta 12 módulos (111,6 kWh)."
@@ -77,7 +77,7 @@
         "potencia_continua_kw": {
           "valor": 5,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
           "fecha": "2026-10-18",
           "nota": "Potencia nominal del inversor SMILE-G3-S5 (S3.6: 3,68 kW). La ficha del módulo da una corriente de 52,5 A a 96 V y no da la potencia."
@@ -93,7 +93,7 @@
         "quimica": {
           "valor": "LFP (litio-ferrofosfato)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -109,7 +109,7 @@
         "ciclos_declarados": {
           "valor": 10000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
           "fecha": "2026-10-18",
           "nota": "Cifra de la ficha neerlandesa (V2.0, 2025). La ficha EN del 9.3S no da ciclos; la del BAT-10.1P (2023) da 8.000; un revendedor británico da «6,000+». Ver afirmaciones."
@@ -117,7 +117,7 @@
         "profundidad_descarga_pct": {
           "valor": 100,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "BAT-9.3S y 4.5S. BAT-3.8S y 10.1P: 95 %."
@@ -133,7 +133,7 @@
         "tension": {
           "valor": "baja tensión; 96 V nominal (90–105,6 V) por módulo",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "Los módulos se conectan en serie."
@@ -141,7 +141,7 @@
         "acoplamiento": {
           "valor": "híbrido DC (G3-S3.6/S5, T4…T20) o AC (G3-B5)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -149,7 +149,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
           "fecha": "2026-10-18",
           "nota": "Inversor separado del mismo fabricante."
@@ -157,7 +157,7 @@
         "inversores_compatibles": {
           "valor": "AlphaESS SMILE-G3-S3.6 / S5 / B5 (1–4 módulos); G3-T4/5/6/8/10; G3-T12/15/20",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "La garantía excluye inversores incompatibles y piezas de terceros."
@@ -165,7 +165,7 @@
         "respaldo_apagones": {
           "valor": "sí, función de respaldo (UPS) en los inversores",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://docs.vekto.nl/media/vekto/vekto-datasheetsmileg3s3.6s5b5nlv2.0alphaess12082025.pdf",
           "fecha": "2026-10-18",
           "nota": "Potencia de respaldo no legible en la ficha consultada."
@@ -173,7 +173,7 @@
         "instalacion": {
           "valor": "interior o exterior (IP65); suelo, con base opcional",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "La garantía excluye daños por exposición a más de 50 °C o a la luz solar directa."
@@ -181,7 +181,7 @@
         "ip": {
           "valor": "IP65",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "BAT-9.3S y 4.5S. El BAT-3.8S es IP21 (solo interior)."
@@ -189,7 +189,7 @@
         "rango_temperatura_c": {
           "valor": "-20 a 50",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "La garantía de rendimiento exige un ambiente de -10 a 50 °C."
@@ -197,7 +197,7 @@
         "peso_kg": {
           "valor": 81,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "±1 kg; BAT-9.3S."
@@ -205,7 +205,7 @@
         "medidas_mm": {
           "valor": "610 × 210 × 634",
           "unidad": "mm (an × fo × al)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://woba-solar.de/cdn/shop/files/Datenblatt-SMILE-G3-BAT-9.3S-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "±2 mm; BAT-9.3S."
@@ -227,9 +227,9 @@
           "nota": "No se ha encontrado una oferta minorista con IVA en España/UE."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "AlphaESS no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026.",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "AlphaESS no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026."
@@ -237,7 +237,7 @@
         "garantia_producto_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía residencial de AlphaESS para el Reino Unido (fichero de 22-04-2024). Cubre las baterías SMILE-G3-BAT-10.1P, -8.2P y -3.8S y los sistemas S5, S3.6 y B5. Plazo desde la instalación o desde el día 365 tras la fabricación, lo que ocurra antes. No se ha encontrado la versión española."
@@ -245,7 +245,7 @@
         "garantia_rendimiento_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
           "fecha": "2026-10-18",
           "nota": "120 meses. La garantía actúa si el estado de salud cae por debajo del 80 % con menos de 2,92 MWh/kWh (a 25–28 °C) o de 2,39 MWh/kWh (de -10 a 50 °C), o por debajo del 70 % con menos de 3,11 MWh/kWh."
@@ -253,7 +253,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.7,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -261,7 +261,7 @@
         "garantia_letra_pequena": {
           "valor": "La conexión a internet es obligatoria: sin ella la garantía baja a 3 años. Fuente: https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf\nInstalación y puesta en marcha por un instalador certificado por AlphaESS, con un informe de puesta en marcha firmado por el usuario y el instalador. Fuente: misma garantía.\nLas averías deben comunicarse al instalador en 10 días laborables, y la reclamación presentarse en las 4 semanas siguientes al fallo. Fuente: misma garantía.\nExcluye el transporte (salvo el envío de piezas), los viajes y el alojamiento del técnico, así como los daños por exposición a más de 50 °C, la luz solar directa o una ventilación insuficiente. Fuente: misma garantía.\nLa responsabilidad se limita al precio de compra del producto afectado; se rige por la ley china. Fuente: misma garantía.\nEl documento consultado es británico y no menciona el módulo BAT-9.3S. Fuente: misma garantía.\nUn revendedor británico también indica que la conexión Wi-Fi es obligatoria para la cobertura. Fuente: https://heatable.co.uk/battery-storage/advice/alpha-ess-smile-g3-review",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -269,7 +269,7 @@
         "garantia_quien_responde": {
           "valor": "AlphaESS como fabricante, a través del instalador, del portal cloud.alphaess.com o de info@alpha-ess.com. La garantía no prevé qué ocurre si AlphaESS deja el mercado europeo; quedarían los derechos legales frente al vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://static.getpylon.com/warranties/inverters/AlphaESSWarranty_22042024-GB.pdf",
           "fecha": "2026-10-18"
         }
@@ -307,7 +307,7 @@
         "fabrica": {
           "valor": "Nantong (China); Ulanqab (China); Kulim (Malasia)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.key-expo.com/restricted-assets/digital-profiles/01_ATTACHMENTS/KEN26/AlphaESS-Brochure-2026-698c8ed8639c9.pdf.pdf",
           "fecha": "2026-10-18"
         },
@@ -449,7 +449,7 @@
       "anio_lanzamiento": {
         "valor": 2023,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.nacleanenergy.com/energy-storage/anker-solix-showcasing-next-generation-hybrid-category-of-energy-solutions-at-re-2023-to-redefine-power-energy-independence",
         "fecha": "2026-10-18",
         "nota": "Presentado en la feria RE+ de 2023 (EE. UU.); la llegada a Europa fue posterior y no se ha fechado."
@@ -633,7 +633,7 @@
         "peso_kg": {
           "valor": 51,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/en/products/batteries/battery-module/anker-solix-x1-b5-h",
           "fecha": "2026-10-18",
           "nota": "Módulo X1-B5-H. Módulo de potencia: 19 kg."
@@ -641,7 +641,7 @@
         "medidas_mm": {
           "valor": "670 × 360 × 150",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/en/products/batteries/battery-module/anker-solix-x1-b5-h",
           "fecha": "2026-10-18",
           "nota": "Módulo X1-B5-H. Módulo de potencia: 670 × 335 × 150 mm."
@@ -663,9 +663,9 @@
           "nota": "No se ha encontrado ningún precio público con IVA en España/UE, y la capacidad útil no se publica."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "SOLIX X1 no figura en los ensayos de eficiencia de la HTW Berlin de 2025 ni de 2026; en 2025 la marca Anker SOLIX aparece solo en el análisis de mercado (Solarbank E1600).",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "SOLIX X1 no figura en los ensayos de eficiencia de la HTW Berlin de 2025 ni de 2026; en 2025 la marca Anker SOLIX aparece solo en el análisis de mercado (Solarbank E1600)."
@@ -894,7 +894,7 @@
       "anio_lanzamiento": {
         "valor": null,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://basic-solar.de/ratgeber/4-byd-speicher-serien/",
         "fecha": "2026-10-18",
         "nota": "Texto publicado: «hacia 2020». Fecha exacta no publicada. Según un distribuidor alemán, HVS y HVM están en el mercado «desde aproximadamente 2020». No verificado con BYD."
@@ -1490,7 +1490,7 @@
         "inversores_compatibles": {
           "valor": "Inversores híbridos de alta tensión con protocolo CAN compatible (p. ej. KOSTAL PLENTICORE plus G2, ensayado por la HTW Berlin)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-PPT-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "No se ha leído la lista oficial de compatibilidad de Dyness. La garantía excluye inversores incompatibles."
@@ -1546,7 +1546,7 @@
         "garantia_energia_mwh": {
           "valor": 32.82,
           "unidad": "MWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18",
           "nota": "T10 según la garantía europea (2023-04-07). Equivale a unos 3.080 ciclos completos de 10,66 kWh (cálculo propio). T7 20,73; T14 41,46; T17 51,86; T21 62,22 MWh."
@@ -1570,7 +1570,7 @@
         "garantia_producto_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18",
           "nota": "Garantía limitada para la UE de Dyness Digital Energy Technology (documento de 2023-04-07), Tower T7 a T21. 10 años desde la puesta en marcha (con límites ligados a la fecha de factura); 5 años para unidades sin conexión de comunicación."
@@ -1578,7 +1578,7 @@
         "garantia_rendimiento_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18",
           "nota": "70 % de la energía útil inicial durante 10 años desde la factura, o hasta el tope de energía de cada modelo; la garantía supone 1 ciclo completo al día."
@@ -1586,7 +1586,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.7,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -1594,7 +1594,7 @@
         "garantia_letra_pequena": {
           "valor": "Sin conexión de comunicación con el inversor la garantía es de 5 años, no de 10; algunas tiendas anuncian el Tower con «5 Years Product Warranty». Fuentes: https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371 y https://www.solartraders.com/en/products/batteries/dyness-tower-t7-7-1-kwh\nTope de energía: 32,82 MWh en el T10, unos 3.080 ciclos completos, frente a los ≥6.000 ciclos de la ficha. Fuente: garantía UE.\nExcluye compras e instalaciones fuera de Europa, el uso con inversores incompatibles, la mezcla con otras baterías y los fallos no comunicados en 2 semanas. Fuente: garantía UE.\nCondiciones de uso: carga y descarga continua de 0,6C como máximo; recargar en 48 horas tras una descarga profunda (0 % SOC); toma de tierra de menos de 1 Ω; no abrir la carcasa. Fuente: garantía UE (anexo 1).\nEl comprador adelanta los gastos de prueba; si el producto está en garantía, el vendedor paga el transporte y la prueba. La mano de obra no se menciona. Fuente: garantía UE.\nDyness recomienda registrarse en su web, aunque el documento no lo presenta como condición. Fuente: garantía UE.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -1602,7 +1602,7 @@
         "garantia_quien_responde": {
           "valor": "El vendedor recibe la reclamación y Dyness responde como fabricante. La garantía no prevé qué ocurre si Dyness deja el mercado europeo; quedarían los derechos legales frente al vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.de/mwdownloads/d615baf4617659dd8cdee649e59ee371",
           "fecha": "2026-10-18"
         }
@@ -1639,7 +1639,7 @@
         "fabrica": {
           "valor": "Taizhou (China): centro de I+D y fábrica desde 2020; nueva fábrica terminada en 2022",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www1.hkexnews.hk/app/sehk/2026/108686/a134611/sehk26062602791.pdf",
           "fecha": "2026-10-18",
           "nota": "Taizhou (no confirmado para este modelo concreto) Otras fuentes: https://dyness.com/news/new-start-signed-dyness-headquarters-is-to-be-located-in-wuzhong-jiangsu"
@@ -1781,7 +1781,7 @@
       "anio_lanzamiento": {
         "valor": 2023,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf",
         "fecha": "2026-10-18",
         "nota": "Se toma la fecha del folleto comercial más antiguo encontrado (5 de junio de 2023); no es una fecha oficial de lanzamiento."
@@ -1797,7 +1797,7 @@
         "capacidad_total_kwh": {
           "valor": 5.1,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Por módulo EF BD-5.1-S1 (energía nominal)."
@@ -1805,7 +1805,7 @@
         "capacidad_util_kwh": {
           "valor": 4.8,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Por módulo, con un 95 % de profundidad de descarga. 9,7 kWh con 2 módulos y 14,5 kWh con 3."
@@ -1813,7 +1813,7 @@
         "gama_capacidades_kwh": {
           "valor": "5,1 / 10,2 / 15,3 por inversor; hasta unos 45 kWh con tres inversores",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Nominal."
@@ -1821,7 +1821,7 @@
         "modular": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Módulos apilables de 5,1 kWh."
@@ -1829,7 +1829,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1837,7 +1837,7 @@
         "ampliacion_max_kwh": {
           "valor": 45,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "«Up to 45kWh» encadenando tres inversores; con un solo inversor el máximo es 15,3 kWh."
@@ -1845,7 +1845,7 @@
         "potencia_continua_kw": {
           "valor": 6,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Texto publicado: «3 / 3,68 / 4,6 / 5 / 6». Valor de la variante de mayor potencia. Potencia AC nominal del inversor monofásico según modelo (EF HD-P1-3K…6K-S1). La ficha no da la potencia de carga/descarga del módulo de batería por separado."
@@ -1861,7 +1861,7 @@
         "quimica": {
           "valor": "LFP (litio-ferrofosfato)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1869,7 +1869,7 @@
         "fabricante_celulas": {
           "valor": "CATL",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf",
           "fecha": "2026-10-18",
           "nota": "El folleto de 2023 dice «CATL LFP battery». La ficha técnica de 2024 no nombra al fabricante de celdas; no se ha verificado que siga siendo así en las unidades actuales."
@@ -1877,7 +1877,7 @@
         "ciclos_declarados": {
           "valor": 6000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf",
           "fecha": "2026-10-18",
           "nota": "«6,000+ life cycle till degradation to 70%». La ficha 2024 dice «over 6,000 charge cycles». Una tienda española indica a la vez 95 % y 80 % de profundidad de descarga para esa cifra."
@@ -1885,7 +1885,7 @@
         "profundidad_descarga_pct": {
           "valor": 95,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1901,7 +1901,7 @@
         "tension": {
           "valor": "alta tensión; 800 V nominal (720–960 V)",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1909,7 +1909,7 @@
         "acoplamiento": {
           "valor": "DC, con inversor híbrido EcoFlow PowerOcean (la variante DC Fit se acopla a instalaciones existentes)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1917,7 +1917,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Inversor separado del mismo fabricante, obligatorio: la batería no es compatible con inversores de otras marcas."
@@ -1925,7 +1925,7 @@
         "inversores_compatibles": {
           "valor": "Inversores híbridos EcoFlow PowerOcean monofásicos (EF HD-P1-3K…6K-S1) y trifásicos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html",
           "fecha": "2026-10-18",
           "nota": "SolarQuotes señala que la garantía de capacidad exige un inversor EcoFlow compatible."
@@ -1933,7 +1933,7 @@
         "respaldo_apagones": {
           "valor": "sí; salida de respaldo (EPS) de 3.000 a 6.000 VA según inversor",
           "unidad": "VA",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha no aclara si cubre toda la vivienda o solo circuitos de respaldo; depende de la instalación."
@@ -1941,7 +1941,7 @@
         "instalacion": {
           "valor": "interior o exterior; suelo o pared",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-5kwh-ecoflow-powerocean",
           "fecha": "2026-10-18",
           "nota": "Dato de la tienda; la ficha da IP65."
@@ -1949,7 +1949,7 @@
         "ip": {
           "valor": "IP65",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Batería e inversor."
@@ -1957,7 +1957,7 @@
         "rango_temperatura_c": {
           "valor": "-20 a 50",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "El inversor reduce potencia por encima de 40 °C y por debajo de 0 °C."
@@ -1965,7 +1965,7 @@
         "peso_kg": {
           "valor": 55.5,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Módulo EF BD-5.1-S1. Configuración de 1 módulo: 59,2 kg; 2 módulos: 114,7 kg; 3 módulos: 170,2 kg. Inversor: 21,5 kg."
@@ -1973,7 +1973,7 @@
         "medidas_mm": {
           "valor": "680 × 183 × 452",
           "unidad": "mm (an × fo × al)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf",
           "fecha": "2026-10-18",
           "nota": "Configuración de 1 módulo; 2 módulos: 680 × 183 × 849; 3 módulos: 680 × 183 × 1245."
@@ -1995,9 +1995,9 @@
           "nota": "2.068,83 € (IVA incluido, solo el módulo de batería) / 4,8 kWh útiles. No incluye el inversor, que es obligatorio, ni la instalación."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "EcoFlow PowerOcean no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026.",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "EcoFlow PowerOcean no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026."
@@ -2005,7 +2005,7 @@
         "garantia_producto_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
           "fecha": "2026-10-18",
           "nota": "Condiciones de garantía del fabricante para la UE, versión B V1.3, vigentes desde el 29-09-2024. Inversor: 15 años. Batería: 15 años o 6.000 ciclos de carga/descarga, lo que ocurra antes."
@@ -2013,7 +2013,7 @@
         "garantia_rendimiento_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad nominal mínima del 70 % a los 15 años o 6.000 ciclos, en condiciones normales (-20 a 50 °C)."
@@ -2021,7 +2021,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.7,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -2029,7 +2029,7 @@
         "garantia_letra_pequena": {
           "valor": "Cubre a primeros compradores que adquieren el equipo a través de un instalador y lo ponen en marcha por primera vez; las reclamaciones van primero al instalador (cláusula 1.6 permite acudir a EcoFlow si el instalador no puede). Fuente: https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf\nEl plazo empieza al terminar la instalación o un año después de la salida de fábrica, lo que ocurra antes. Fuente: misma garantía.\nLímite de 6.000 ciclos: lo que ocurra antes entre años y ciclos. Fuente: misma garantía.\nDurante la garantía EcoFlow asume material, reparación y logística (cl. 1.9), pero los gastos de aduana corren a cargo del usuario o el distribuidor (cl. 11.9). Fuente: misma garantía.\nExcluye componentes de terceros incompatibles, modificaciones no autorizadas y fuerza mayor (incendio, inundación, rayo). Fuente: misma garantía.\nSegún SolarQuotes, la garantía de capacidad exige trabajar con un inversor EcoFlow compatible. Fuente: https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html\nSe aplican las condiciones vigentes en la fecha de compra (cl. 4.4–4.5). Fuente: misma garantía.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -2037,7 +2037,7 @@
         "garantia_quien_responde": {
           "valor": "El instalador en primera instancia y EcoFlow como fabricante (contacto UE: solutionservice.eu@ecoflow.com). La garantía no prevé qué ocurre si EcoFlow deja de operar en Europa; en ese caso quedarían los derechos legales frente al vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
           "fecha": "2026-10-18"
         }
@@ -2249,7 +2249,7 @@
         {
           "valor": "0768563823077",
           "unidad": "GTIN-13",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.wattuneed.com/en/enphase-lithium-battery/27240-copy-of-enphase-iq-flex-phase-three-phase-5p-3p-int-battery-intelligent-battery-for-all-uses-0768563823077.html",
           "fecha": "2026-10-18",
           "nota": "Publicado por la tienda Wattuneed para IQBATTERY-5P-3P-INT; no comprobado en un documento de Enphase."
@@ -2283,7 +2283,7 @@
         "capacidad_util_kwh": {
           "valor": 5,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Por unidad."
@@ -2323,7 +2323,7 @@
         "potencia_continua_kw": {
           "valor": 3.84,
           "unidad": "kVA",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Configuración por defecto; en trifásico 1,28 kVA por fase. Existen variantes limitadas a 1,65–3,68 kVA para cumplir normas de red."
@@ -2339,7 +2339,7 @@
         "quimica": {
           "valor": "LFP (litio-ferrofosfato)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2355,7 +2355,7 @@
         "ciclos_declarados": {
           "valor": 6000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Tope de la garantía (15 años o 6.000 ciclos, lo que antes ocurra)."
@@ -2371,7 +2371,7 @@
         "eficiencia_ida_vuelta_pct": {
           "valor": 90,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "En alterna (AC); 96 % en continua al inicio de vida."
@@ -2379,7 +2379,7 @@
         "tension": {
           "valor": "Baja tensión: 76,8 V CC nominal (60–87 V); salida 230 V CA (400 V entre fases en trifásico)",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2387,7 +2387,7 @@
         "acoplamiento": {
           "valor": "AC (microinversores IQ8 integrados en la batería)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2395,7 +2395,7 @@
         "inversor_integrado": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Microinversor IQ8T-BAT (IP67)."
@@ -2403,7 +2403,7 @@
         "inversores_compatibles": {
           "valor": "Sistemas Enphase (pasarela IQ Gateway); al ser AC puede añadirse a otras instalaciones, sujeto a la configuración de Enphase",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "La compatibilidad con inversores de otras marcas no se verificó en documentación oficial."
@@ -2411,7 +2411,7 @@
         "respaldo_apagones": {
           "valor": "Sí, solo con IQ System Controller 3 INT (aparte); modo «Full Backup»",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Con FlexPhase, respaldo trifásico según la marca."
@@ -2419,7 +2419,7 @@
         "instalacion": {
           "valor": "interior y exterior",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Mural (soporte incluido) o sobre pedestal (aparte); refrigeración pasiva."
@@ -2427,7 +2427,7 @@
         "ip": {
           "valor": "IP55 (batería); IP67 (microinversor)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2435,7 +2435,7 @@
         "rango_temperatura_c": {
           "valor": "-20 a 50 (carga); -20 a 55 (descarga)",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Reduce potencia al cargar por debajo de 15 °C o por encima de 45 °C, y al descargar por debajo de 5 °C o por encima de 50 °C."
@@ -2443,7 +2443,7 @@
         "peso_kg": {
           "valor": 83,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "Peso total instalado; 69,5 kg de peso de elevación."
@@ -2451,7 +2451,7 @@
         "medidas_mm": {
           "valor": "980 × 550 × 188 (alto × ancho × fondo)",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2473,9 +2473,9 @@
           "nota": "3.517,47 € (IVA incluido) / 5 kWh útiles. No incluye IQ System Controller ni IQ Gateway ni instalación."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "Enphase no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026.",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "Enphase no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026."
@@ -2483,7 +2483,7 @@
         "garantia_producto_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
           "fecha": "2026-10-18",
           "nota": "«Limited warranty >60% capacity, up to 15 years or 6000 cycles», lo que antes ocurra; «restrictions apply»."
@@ -2491,7 +2491,7 @@
         "garantia_rendimiento_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía de Australia y Nueva Zelanda (productos activados desde el 12-04-2023): al menos 60 % de 5,0 kWh CC durante 15 años o 6.000 ciclos. No se localizó el documento de garantía específico de España."
@@ -2499,7 +2499,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.6,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -2507,7 +2507,7 @@
         "garantia_letra_pequena": {
           "valor": "La cobertura acaba a los 15 años o a los 6.000 ciclos de descarga, lo que antes ocurra; el umbral de capacidad es 60 %, más bajo que el 70–80 % habitual en otras marcas (ficha DSH-00477-7.0).\nAustralia/Nueva Zelanda: la mano de obra de desinstalación, reinstalación o trabajos eléctricos no está cubierta; excluye firmware no actualizado, perfiles de red alterados y uso comercial (https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf).\nLa transferencia a un nuevo propietario exige que la batería siga en el lugar original, un formulario de cambio de titularidad y el pago de una tasa en 30 días.\nEnphase se reserva el derecho a ceder (novar) la garantía a un tercero cualificado; no se dice qué ocurre en caso de insolvencia.\nEn la generación anterior (AC Battery, Europa) la garantía exigía registro y conexión a internet en 45 días y se anulaba con más de 45 días sin conexión (https://www.solartraders.com/uploads/production/data_sheet/file/20997/warranty.pdf?locale=da); no se verificó si la condición se mantiene para la 5P en Europa.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -2515,7 +2515,7 @@
         "garantia_quien_responde": {
           "valor": "Enphase Energy, Inc. o su filial europea, a través del instalador o distribuidor autorizado. El documento australiano permite ceder la garantía a un tercero; no aborda la quiebra del fabricante.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase%20IQ%20Battery%205P%205kWh%20Warranty.pdf",
           "fecha": "2026-10-18"
         }
@@ -2557,7 +2557,7 @@
         "fabrica": {
           "valor": "Plantas de fabricación en EE. UU. para las unidades con «contenido nacional» (sin nombre publicado), según Enphase en julio de 2025",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Enphase_Energy",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering https://solarbuildermag.com/news/enphase-shipping-iq-battery-5p-with-more-domestic-content/"
@@ -2770,7 +2770,7 @@
         "capacidad_total_kwh": {
           "valor": 10.36,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "EP11 según la ficha V1.2. El manual de 2026 de la versión EP11 Plus da 11,52 kWh nominales y 10,36 kWh útiles. EP5: 5,18 kWh."
@@ -2786,7 +2786,7 @@
         "gama_capacidades_kwh": {
           "valor": "5,18 (EP5) / 10,36 (EP11) por unidad; hasta 4 unidades en paralelo",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": null
@@ -2794,7 +2794,7 @@
         "modular": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Unidad de una sola caja; se amplía añadiendo unidades completas en paralelo."
@@ -2802,7 +2802,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Según Solar Choice, hace falta una caja de conexiones adicional."
@@ -2810,7 +2810,7 @@
         "ampliacion_max_kwh": {
           "valor": 41.6,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "«Scalable to 41.6 kWh» (4 unidades). 4 × 10,36 = 41,44 kWh (cálculo propio)."
@@ -2834,7 +2834,7 @@
         "quimica": {
           "valor": "LFP (litio-ferrofosfato), celda prismática",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": null
@@ -2842,7 +2842,7 @@
         "fabricante_celulas": {
           "valor": "REPT Battero (empresa vinculada), según Solar Choice",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
           "fecha": "2026-10-18",
           "nota": "Dato de un análisis de terceros, no de la ficha. Solar Choice señala que REPT Battero es una fabricante de celdas vinculada a Fox ESS, ambas con Tsingshan como accionista; no confirma que las celdas del EP sean suyas."
@@ -2850,7 +2850,7 @@
         "ciclos_declarados": {
           "valor": 4000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "≥4.000; la ficha no indica las condiciones de ensayo."
@@ -2858,7 +2858,7 @@
         "profundidad_descarga_pct": {
           "valor": 90,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Solar Choice: 100 % técnico, con un 90 % recomendado en el manual."
@@ -2866,7 +2866,7 @@
         "eficiencia_ida_vuelta_pct": {
           "valor": 95,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "≥95 %. No medido de forma independiente para el EP."
@@ -2874,7 +2874,7 @@
         "tension": {
           "valor": "alta tensión; 384 V nominal (348–438 V) en el EP11; 192 V en el EP5",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": null
@@ -2882,7 +2882,7 @@
         "acoplamiento": {
           "valor": "DC, con inversor híbrido Fox ESS",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": null
@@ -2890,7 +2890,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": null
@@ -2898,7 +2898,7 @@
         "inversores_compatibles": {
           "valor": "Fox ESS H1, KH, H3, H3-Pro y serie US",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "La garantía excluye componentes que no haya suministrado Fox ESS."
@@ -2914,7 +2914,7 @@
         "instalacion": {
           "valor": "interior o exterior; pared",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "La garantía británica exige al menos 300 mm de espacio libre alrededor para la refrigeración."
@@ -2922,7 +2922,7 @@
         "ip": {
           "valor": "IP65",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": null
@@ -2930,7 +2930,7 @@
         "rango_temperatura_c": {
           "valor": "carga 0 a 55; descarga -10 a 55",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Las versiones «(w)» con calefacción integrada llegan de -25 a 55 °C (manual de 2026). La garantía de rendimiento exige un ambiente de -10 a 50 °C."
@@ -2938,7 +2938,7 @@
         "peso_kg": {
           "valor": 99,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "±2 kg; EP11. EP5: 51 kg (manual de 2026)."
@@ -2946,7 +2946,7 @@
         "medidas_mm": {
           "valor": "710 × 625 × 147",
           "unidad": "mm (an × al × fo)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "EP11 V1.2. EP11 Plus: 710 × 640 × 185 mm."
@@ -3048,7 +3048,7 @@
         "fabrica": {
           "valor": "Wenzhou (China), planta principal según Solar Choice",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
           "fecha": "2026-10-18",
           "nota": "Wenzhou (según Solar Choice; no confirmado para el EP) Otras fuentes: https://goingsolaruk.co.uk/fox-ess-battery-review/"
@@ -3721,7 +3721,7 @@
         "capacidad_total_kwh": {
           "valor": 10.24,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH (4 módulos de 2,56 kWh)."
@@ -3729,7 +3729,7 @@
         "capacidad_util_kwh": {
           "valor": 9.21,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH. Otras: 5.1XH 4,6; 7.6XH 6,9; 12.8XH 11,52; 15.3XH 13,81; 17.9XH 16,12; 20.4XH 18,42; 23XH 20,74; 25.6XH 23,04 kWh."
@@ -3737,7 +3737,7 @@
         "gama_capacidades_kwh": {
           "valor": "5,12 – 25,6 (en pasos de 2,56)",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "Monofásico: 2–7 módulos; trifásico: 3–10 módulos."
@@ -3745,7 +3745,7 @@
         "modular": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3753,7 +3753,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3761,7 +3761,7 @@
         "ampliacion_max_kwh": {
           "valor": 25.6,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "10 módulos (trifásico). Con inversor monofásico MIN-XH: 17,92 kWh (7 módulos)."
@@ -3769,7 +3769,7 @@
         "potencia_continua_kw": {
           "valor": 5,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH; aumenta 1,25 kW por módulo (2,5 kW con 2 módulos, 12,5 kW con 10). Corriente máxima: 21 A."
@@ -3777,7 +3777,7 @@
         "potencia_pico_kw": {
           "valor": 10,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH, durante 10 s (42 A)."
@@ -3785,7 +3785,7 @@
         "quimica": {
           "valor": "LFP (litio-ferrofosfato), sin cobalto",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3825,7 +3825,7 @@
         "tension": {
           "valor": "alta tensión; 400 V nominal (360–550 V) en monofásico; 650 V (600–950 V) en las versiones trifásicas grandes",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "Módulo ARK 2.5H-A1: 51,2 V."
@@ -3833,7 +3833,7 @@
         "acoplamiento": {
           "valor": "DC, con inversor híbrido Growatt",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3841,7 +3841,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3849,7 +3849,7 @@
         "inversores_compatibles": {
           "valor": "Growatt MIN-XH (monofásico); según la tienda, también SPH trifásicos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-growatt-ark-25h-a1a2-hv",
           "fecha": "2026-10-18",
           "nota": "La ficha indica MIN-XH. La batería europea solo es compatible con inversores europeos. La garantía australiana excluye el uso con equipos que no sean de Growatt."
@@ -3865,7 +3865,7 @@
         "instalacion": {
           "valor": "pared o suelo (soporte adicional para suelo)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "Aunque es IP65, la garantía australiana excluye la instalación exterior sin resguardo adecuado."
@@ -3873,7 +3873,7 @@
         "ip": {
           "valor": "IP65",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3881,7 +3881,7 @@
         "rango_temperatura_c": {
           "valor": "descarga -10 a 50; carga 0 a 50",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -3889,7 +3889,7 @@
         "peso_kg": {
           "valor": 127,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH completo. Módulo ARK 2.5H-A1: 28 kg."
@@ -3897,7 +3897,7 @@
         "medidas_mm": {
           "valor": "650 × 260 × 1000",
           "unidad": "mm (an × fo × al)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH; la altura crece 185 mm por módulo."
@@ -3905,7 +3905,7 @@
         "garantia_energia_mwh": {
           "valor": 37.36,
           "unidad": "MWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK 10.2XH-A1 según la garantía australiana (no se ha encontrado la europea). Equivale a unos 3.650 ciclos completos de 10,24 kWh (cálculo propio)."
@@ -3919,9 +3919,9 @@
           "nota": "3.895,12 € (IVA incluido, kit ARK XH 10,24 kWh) / 9,21 kWh útiles. Sin inversor ni instalación; la página es contradictoria sobre si incluye base y cable."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "ARK XH no figura en los ensayos de la HTW Berlin de 2025 ni de 2026; en 2025 Growatt aparece solo en el análisis de mercado (APX 5.0P).",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "ARK XH no figura en los ensayos de la HTW Berlin de 2025 ni de 2026; en 2025 Growatt aparece solo en el análisis de mercado (APX 5.0P)."
@@ -3929,7 +3929,7 @@
         "garantia_producto_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "El documento dice que el plazo de 10 años «is only applicable for selling and installation in Australia». Las tiendas europeas anuncian 10 años, pero no se ha encontrado el documento de garantía europeo de la batería. Sin monitorización: 3 años."
@@ -3937,7 +3937,7 @@
         "garantia_rendimiento_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "Al menos el 70 % de la energía nominal a los 10 años, dentro del tope de energía de cada modelo (garantía australiana)."
@@ -3945,7 +3945,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.7,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -3953,7 +3953,7 @@
         "garantia_letra_pequena": {
           "valor": "El plazo de 10 años solo consta para Australia; no se ha encontrado la garantía europea de la batería. Fuente: https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf\nSin monitorización en la plataforma de Growatt, la garantía baja a 3 años, y sin datos acumulados la garantía de rendimiento no es válida. Fuente: misma garantía.\nLa instalación debe hacerse en los 3 meses siguientes a la entrega desde Growatt; el plazo termina como máximo 10 años y 6 meses tras la entrega. Fuente: misma garantía.\nLos defectos deben comunicarse en los 14 días siguientes a la aparición de signos de problema. Fuente: misma garantía.\nExcluye la instalación o el uso en exterior sin resguardo adecuado, el uso con equipos que no sean de Growatt, la luz solar directa, el almacenamiento fuera de -20/40 °C y altitudes por encima de 2.000 m. Fuente: misma garantía.\nNo cubre mano de obra, logística ni lucro cesante; si la inspección no confirma el defecto, el cliente paga la inspección. La pieza de sustitución no reinicia el plazo. Fuente: misma garantía.\nLa garantía de inversores de Growatt (tarjeta GR-WA-01-A-05) tampoco cubre logística ni mano de obra en los últimos cinco años. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/25741/Growatt%20WA%20EN.pdf?locale=en",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -3961,7 +3961,7 @@
         "garantia_quien_responde": {
           "valor": "Growatt como fabricante, a través de su agente local o de warranty.growatt.com. No se ha encontrado qué ocurre si Growatt deja el mercado europeo; quedarían los derechos legales frente al vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt%20Battery_Warranty_10years_ARK_XH_NSW.pdf",
           "fecha": "2026-10-18"
         }
@@ -3999,7 +3999,7 @@
         "fabrica": {
           "valor": "Huizhou (China); Vietnam (fábrica en el extranjero)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.energytrend.com/news/20260618-51619.html",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
@@ -4354,7 +4354,7 @@
         "garantia_energia_mwh": {
           "valor": 28.84,
           "unidad": "MWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18",
           "nota": "Por módulo de 6,9 kWh (S1). S0 (5 kWh): 16,45 MWh."
@@ -4378,7 +4378,7 @@
         "garantia_producto_anios": {
           "valor": 5,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18",
           "nota": "S1: garantía básica de 60 meses; avanzada de 180 meses (15 años) si se cumple el requisito de conexión. S0: 120 meses. Inicio: 180 días después del envío. Condiciones UE de 01-03-2024 para EEE y Suiza."
@@ -4386,7 +4386,7 @@
         "garantia_rendimiento_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18",
           "nota": "60 % de la energía utilizable hasta el fin del plazo o hasta 28,84 MWh por módulo de 6,9 kWh, lo que ocurra primero. Los 15 años solo con la garantía avanzada (conectada)."
@@ -4394,7 +4394,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.6,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -4402,7 +4402,7 @@
         "garantia_letra_pequena": {
           "valor": "S1: los 15 años solo se aplican si la batería está registrada en FusionSolar SmartPVMS y no pasa más de 6 meses desconectada de internet; si no, la garantía es de 5 años (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nEl plazo empieza 180 días después del envío desde Huawei, no desde la instalación; la instalación debe hacerse en el mes siguiente a la salida del almacén del distribuidor, entregando el albarán a Huawei (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nInstalador cualificado o socio certificado por Huawei; las averías deben comunicarse en un mes (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nExcluye dejar la batería sin cargar más de un mes (S1), almacenamiento o manejo indebidos y modificaciones; el módulo de potencia tiene garantía independiente del rendimiento de la batería (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).\nSolo cubre compras a Huawei o a vendedores autorizados en el EEE y Suiza (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -4410,7 +4410,7 @@
         "garantia_quien_responde": {
           "valor": "Huawei Technologies Co., Ltd. (China). La garantía no prevé qué ocurre si Huawei dejara de operar en el mercado europeo; quedan las garantías legales del vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
           "fecha": "2026-10-18"
         }
@@ -4657,7 +4657,7 @@
         "capacidad_util_kwh": {
           "valor": 9.6,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "RESU10H Prime, a 25 °C y 100 % de profundidad de descarga según la ficha V1.4; coincide con la web europea (https://www.lgessbattery.com/eu/home-battery/product-info.lg)."
@@ -4681,7 +4681,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha indica 19,2 kWh con dos RESU10H Prime en paralelo; la web de EE. UU. indica 32 kWh con dos 16H Prime."
@@ -4689,7 +4689,7 @@
         "ampliacion_max_kwh": {
           "valor": 19.2,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "Dos RESU10H Prime en paralelo. Para la 16H Prime, 32 kWh en paralelo según la web de EE. UU. (https://www.lgessbattery.com/us/home-battery/product-info.lg); no verificado para Europa."
@@ -4697,7 +4697,7 @@
         "potencia_continua_kw": {
           "valor": 5,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "RESU10H Prime: 5 kW (14,3 A a 350 V)."
@@ -4705,7 +4705,7 @@
         "potencia_pico_kw": {
           "valor": 7,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "7 kW durante 10 s, solo en descarga (20 A)."
@@ -4713,7 +4713,7 @@
         "quimica": {
           "valor": "iones de litio (química concreta no publicada)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha dice «Lithium ion» y certificación de celda UL1642; no indica si es NMC u otra."
@@ -4737,7 +4737,7 @@
         "profundidad_descarga_pct": {
           "valor": 100,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "Condición de la capacidad útil declarada (25 °C)."
@@ -4753,7 +4753,7 @@
         "tension": {
           "valor": "Alta tensión: carga 420–450 V DC; descarga 350–410 V DC",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -4793,7 +4793,7 @@
         "instalacion": {
           "valor": "interior y exterior; de pie o en pared",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -4801,7 +4801,7 @@
         "ip": {
           "valor": "IP55",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "Coincide con la web europea."
@@ -4809,7 +4809,7 @@
         "rango_temperatura_c": {
           "valor": "carga −10 a 50; descarga −20 a 50 (recomendado 15 a 30)",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -4817,7 +4817,7 @@
         "peso_kg": {
           "valor": 111,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "RESU10H Prime; RESU16H Prime: 159 kg (https://www.lgessbattery.com/eu/home-battery/product-info.lg)."
@@ -4825,7 +4825,7 @@
         "medidas_mm": {
           "valor": "504 × 817 × 295",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
           "fecha": "2026-10-18",
           "nota": "RESU10H Prime; RESU16H Prime: 504 × 1086 × 295 mm (web europea)."
@@ -5124,7 +5124,7 @@
         {
           "valor": "6097316695642",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.nkon.nl/novat/pylontech-force-h3-bms-met-basis-en-kabel.html",
           "fecha": "2026-10-18",
           "nota": "EAN del BMS FC1000 según la tienda NKON; EAN del módulo FH10050 no encontrado."
@@ -5150,7 +5150,7 @@
         "capacidad_total_kwh": {
           "valor": 10.24,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "Force H3 con 2 módulos (nominal)."
@@ -5158,7 +5158,7 @@
         "capacidad_util_kwh": {
           "valor": 9.69,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "Force H3 con 2 módulos."
@@ -5166,7 +5166,7 @@
         "gama_capacidades_kwh": {
           "valor": "H3: 9,69 / 14,73 / 19,48 / 24,32 / 29,17 / 34,01 utilizables (2–7 módulos); H2: 7,1–14,2 nominales por torre (2–4 módulos)",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "H2 según https://www.offgridtec.com/en/pylontech-force-h2-96v-lifepo4-high-voltage-battery-bms-fc0500m-40s-v2.html."
@@ -5174,7 +5174,7 @@
         "modular": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -5182,7 +5182,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "Hasta 7 módulos por torre y hasta 6 grupos en paralelo."
@@ -5214,7 +5214,7 @@
         "quimica": {
           "valor": "LFP (LiFePO4)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
           "fecha": "2026-10-18",
           "nota": "Dato de la tienda Offgridtec; la ficha consultada no lo etiqueta claramente."
@@ -5222,7 +5222,7 @@
         "fabricante_celulas": {
           "valor": "Pylontech (producción propia de celdas LFP)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html",
           "fecha": "2026-10-18",
           "nota": "El comunicado de 2026 trata de celdas grandes para almacenamiento a escala de red; no confirma que los módulos FH10050 usen celdas propias."
@@ -5230,7 +5230,7 @@
         "ciclos_declarados": {
           "valor": 8000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "Texto publicado: «> 8.000 (25 °C)». La marca dice «más de 8.000» a 25 °C. Force H3. Force H2: > 5.000 a 95 % DoD (Offgridtec). La garantía no cubre ciclos."
@@ -5238,7 +5238,7 @@
         "profundidad_descarga_pct": {
           "valor": 95,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "La etiqueta de la ficha es ambigua; NKON indica «95 % DoD»."
@@ -5254,7 +5254,7 @@
         "tension": {
           "valor": "alta tensión: 204,8 V (2 módulos) a 716,8 V (7 módulos) en H3; módulo 102,4 V",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "H2: módulo 96 V."
@@ -5262,7 +5262,7 @@
         "acoplamiento": {
           "valor": "DC (requiere inversor híbrido externo)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -5270,7 +5270,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -5278,7 +5278,7 @@
         "inversores_compatibles": {
           "valor": "Más de 30 marcas de inversores según tiendas (p. ej. KOSTAL, Victron, Growatt, Solis)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
           "fecha": "2026-10-18",
           "nota": "La garantía excluye inversores no certificados por Pylontech."
@@ -5286,7 +5286,7 @@
         "respaldo_apagones": {
           "valor": "depende del inversor",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -5294,7 +5294,7 @@
         "instalacion": {
           "valor": "interior o exterior protegido (sin sol directo ni heladas, según garantía)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -5302,7 +5302,7 @@
         "ip": {
           "valor": "IP65 (H3); IP55 (H2)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "H2 según https://www.offgridtec.com/en/pylontech-force-h2-96v-lifepo4-high-voltage-battery-bms-fc0500m-40s-v2.html."
@@ -5310,7 +5310,7 @@
         "rango_temperatura_c": {
           "valor": "-10 a 55 (carga, H3)",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "H2: 0 a 50 °C según Offgridtec."
@@ -5318,7 +5318,7 @@
         "peso_kg": {
           "valor": 92,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "H3 con 2 módulos."
@@ -5326,7 +5326,7 @@
         "medidas_mm": {
           "valor": "540 × 350 × 530 (ancho × fondo × alto)",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "H3 con 2 módulos; 1380 mm de alto con 7."
@@ -5358,7 +5358,7 @@
         "garantia_producto_anios": {
           "valor": 7,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía al consumidor Force-H1/H2 para UE y Reino Unido (ref. 4AB16W50091): 7 años desde la instalación o 6 meses tras la fabricación (lo que sea antes); 10 años si se registra en la web de Pylontech. Para Force H3 en Europa no se ha leído el documento (una tienda enlaza «Force H series v1.2 EU»); la versión para EE. UU./Canadá V1.2 da 10 años de producto."
@@ -5366,7 +5366,7 @@
         "garantia_rendimiento_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Mínimo 60 % de la energía nominal durante los 7 años; con la ampliación a 10 años por registro, el mínimo baja al 50 % al final. Sin límite de MWh."
@@ -5374,7 +5374,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.5,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -5382,7 +5382,7 @@
         "garantia_letra_pequena": {
           "valor": "La ampliación de 7 a 10 años exige registrar el producto en la web de Pylontech, y entonces el umbral de capacidad baja del 60 % al 50 % (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nLos defectos deben comunicarse en 48 horas desde que se descubren, a través del vendedor autorizado, con tarjeta de garantía original, factura y registros del sistema (https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf).\nExcluye instalaciones por personas que no sean Pylontech o instaladores certificados, y el uso con inversores/PCS/EMS no certificados por Pylontech (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nExige uso en ciclos diarios en almacenamiento fotovoltaico con profundidad de descarga inferior al 90 %; en exterior, protección frente a sol directo y heladas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nSolo repara o sustituye; mano de obra y transporte no se tratan. Si el cliente discute la decisión y el laboratorio externo da la razón a Pylontech, el cliente paga el ensayo (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).\nLa copia checa de la garantía UE se presenta como traducción no oficial y tiene cláusulas en blanco o truncadas (https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf).",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -5390,7 +5390,7 @@
         "garantia_quien_responde": {
           "valor": "Pylon Technologies Co., Ltd. (Shanghái, China), a través del vendedor autorizado. La garantía no prevé qué ocurre si Pylontech dejara el mercado europeo.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18"
         }
@@ -5427,7 +5427,7 @@
         "fabrica": {
           "valor": "Hefei (China): base de producción de celdas LFP grandes desde septiembre de 2026, según comunicado",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer%20Warranty.pdf",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html"
@@ -5440,7 +5440,7 @@
         "num_componentes": {
           "valor": null,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
           "fecha": "2026-10-18",
           "nota": "Texto publicado: «1 BMS + 2 a 7 módulos de batería»."
@@ -5608,7 +5608,7 @@
       "anio_lanzamiento": {
         "valor": 2024,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/",
         "fecha": "2026-10-18",
         "nota": "Año de la Home P4 / E4 (LFP), con entregas desde finales de agosto de 2024. Las V3 hybrid y Home 4 son anteriores; sus años de lanzamiento no se verificaron."
@@ -5640,7 +5640,7 @@
         "gama_capacidades_kwh": {
           "valor": "Home P4: 7,1 a 17,75 kWh útiles; Home E4: 9,2 kWh",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/",
           "fecha": "2026-10-18",
           "nota": "Capacidades de la V3 hybrid y Home 4 no verificadas."
@@ -5688,7 +5688,7 @@
         "quimica": {
           "valor": "LFP (Home P4/E4 y módulos de sustitución); NMC o NCA en los módulos originales de V2.1, V3 y Home 4",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarserver.de/2024/08/27/senec-tauscht-batteriemodule-aus/",
           "fecha": "2026-10-18",
           "nota": "Solarserver: «Die alten Systeme waren mit NMC- oder NCA-Batterien ausgestattet», sin precisar qué química corresponde a cada modelo."
@@ -5822,9 +5822,9 @@
           "nota": "Sin ofertas: SENEC ya no vende baterías a nuevos clientes."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "SENEC no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. La web de SENEC menciona el sello «Protected by NOVUM» y una prueba TÜV según VDE-AR-E 2510-50, que son certificaciones, no ensayos comparativos.",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "SENEC no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. La web de SENEC menciona el sello «Protected by NOVUM» y una prueba TÜV según VDE-AR-E 2510-50, que son certificaciones, no ensayos comparativos."
@@ -6066,7 +6066,7 @@
         {
           "valor": "0768563817625",
           "unidad": "GTIN-13",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.wattuneed.com/en/lithium-battery/25980-battery-solaredge-home-battery-10-kwh-bat-10k1ps0b-01-0768563817625.html",
           "fecha": "2026-10-18",
           "nota": "Publicado por la tienda Wattuneed para BAT-10K1PS0B-01; no comprobado en un documento de SolarEdge."
@@ -6076,7 +6076,7 @@
       "anio_lanzamiento": {
         "valor": 2021,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
         "fecha": "2026-10-18",
         "nota": "La garantía de la «Energy Bank» (nombre inicial del modelo 400V) está revisada en octubre de 2021; la primera ficha europea como «Home Battery 400V» es de abril de 2022. Año exacto de lanzamiento no confirmado."
@@ -6100,7 +6100,7 @@
         "capacidad_util_kwh": {
           "valor": 9.7,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Al 100 % de profundidad de descarga; 9,5 kWh si se usa comunicación RS485 (ficha DS-000164-ENG, abril 2022)."
@@ -6116,7 +6116,7 @@
         "modular": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Unidad única de 9,7 kWh; se amplía añadiendo unidades completas."
@@ -6124,7 +6124,7 @@
         "ampliable": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Hasta 3 por inversor Home Hub/Wave o StorEdge HD-Wave monofásico; conectores de derivación aparte."
@@ -6140,7 +6140,7 @@
         "potencia_continua_kw": {
           "valor": 5,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "14,3 A máx. continuos."
@@ -6148,7 +6148,7 @@
         "potencia_pico_kw": {
           "valor": 7.5,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Durante 10 s en modo respaldo."
@@ -6156,7 +6156,7 @@
         "quimica": {
           "valor": "NMC (litio-níquel-manganeso-cobalto)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarquotes.com.au/blog/solaredge-home-battery-review/",
           "fecha": "2026-10-18",
           "nota": "La ficha no indica la química; el manual (v1.3, nov. 2021) menciona «cobalt lithium nickel oxide» en el aviso Prop 65 y SolarQuotes la describe como NMC."
@@ -6172,7 +6172,7 @@
         "ciclos_declarados": {
           "valor": null,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Texto publicado: «ilimitados (garantía)». La garantía no limita los ciclos. La garantía del modelo 400V no fija tope de ciclos ni de MWh."
@@ -6180,7 +6180,7 @@
         "profundidad_descarga_pct": {
           "valor": 100,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "La energía útil de 9,7 kWh se da «al 100 % de profundidad de descarga»."
@@ -6188,7 +6188,7 @@
         "eficiencia_ida_vuelta_pct": {
           "valor": 94.5,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Valor «pico», no medio."
@@ -6196,7 +6196,7 @@
         "tension": {
           "valor": "Alta tensión: 350–450 V CC",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -6212,7 +6212,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Requiere inversor SolarEdge compatible."
@@ -6220,7 +6220,7 @@
         "inversores_compatibles": {
           "valor": "SolarEdge Home Hub / Home Wave monofásico, StorEdge monofásico con HD-Wave, Home Short String (solo Países Bajos y Polonia)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Solo inversores SolarEdge."
@@ -6228,7 +6228,7 @@
         "respaldo_apagones": {
           "valor": "Sí, sujeto a normativa local; puede requerir componentes adicionales y actualización de firmware",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "SolarQuotes señala que en sistemas trifásicos australianos el respaldo cubre una sola fase."
@@ -6236,7 +6236,7 @@
         "instalacion": {
           "valor": "interior y exterior",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Suelo (soporte aparte) o pared (asas aparte)."
@@ -6244,7 +6244,7 @@
         "ip": {
           "valor": "IP55",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -6252,7 +6252,7 @@
         "rango_temperatura_c": {
           "valor": "-10 a 50 (recomendado 0 a 40 durante al menos el 95 % del periodo de garantía)",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "La recomendación es también condición de garantía."
@@ -6260,7 +6260,7 @@
         "peso_kg": {
           "valor": 119,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -6268,7 +6268,7 @@
         "medidas_mm": {
           "valor": "790 × 1179 × 250 (ancho × alto × fondo)",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -6276,7 +6276,7 @@
         "garantia_energia_mwh": {
           "valor": null,
           "unidad": "MWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "400V: sin límite de energía («unlimited cycles»). 48V (Alemania): 2,615 MWh por kWh de capacidad útil (https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3)."
@@ -6290,9 +6290,9 @@
           "nota": "6.824,40 € (IVA francés incluido) / 9,7 kWh útiles. No incluye inversor ni instalación."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "SolarEdge no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. SolarQuotes estima una eficiencia real de ciclo completo de ~93,3 % frente al 94,5 % pico declarado, pero no es una medición de laboratorio.",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf",
           "fecha": "2026-10-18",
           "nota": "SolarEdge no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. SolarQuotes estima una eficiencia real de ciclo completo de ~93,3 % frente al 94,5 % pico declarado, pero no es una medición de laboratorio."
@@ -6300,7 +6300,7 @@
         "garantia_producto_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Desde la fecha de instalación registrada en el portal de monitorización o 12 meses después del envío, lo que antes ocurra."
@@ -6308,7 +6308,7 @@
         "garantia_rendimiento_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Modelo 400V (garantía «Energy Bank», rev. octubre 2021): 70 % al final, ciclos ilimitados. Modelo 48V (Alemania, sept. 2022): 80 % al final o al alcanzar 2,615 MWh por kWh útil."
@@ -6316,7 +6316,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.7,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -6324,7 +6324,7 @@
         "garantia_letra_pequena": {
           "valor": "La batería debe permanecer conectada a un inversor SolarEdge aprobado y a la plataforma de monitorización durante todo el periodo; sin esa conexión SolarEdge declara que no puede atender la garantía, y el comprador acepta actualizaciones remotas de firmware sin aviso (https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en).\nLa temperatura ambiente debe estar entre 0 y 40 °C al menos el 95 % del periodo de garantía.\nMano de obra, desplazamiento y desinstalación/reinstalación excluidos salvo acuerdo previo por escrito; el envío de la unidad para la reparación lo paga el comprador.\nCubre solo el continente donde SolarEdge vendió la unidad; no se puede trasladar ni reinstalar sin consentimiento escrito; transferible a un nuevo propietario si la batería no se mueve.\nResponsabilidad limitada al precio pagado por la unidad; en la versión 48V alemana la compensación en crédito se prorratea sobre 120 meses (https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3).",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -6332,7 +6332,7 @@
         "garantia_quien_responde": {
           "valor": "SolarEdge Technologies Ltd. (fabricante). Los documentos no dicen qué ocurre en caso de insolvencia.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
           "fecha": "2026-10-18"
         }
@@ -6549,7 +6549,7 @@
       "anio_lanzamiento": {
         "valor": 2020,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.pv-magazine.de/2020/06/17/neue-generation-der-sonnenbatterie-verfuegbar/",
         "fecha": "2026-10-18",
         "nota": "Presentación de la nueva generación sonnenBatterie 10 en junio de 2020; la versión performance es posterior."
@@ -6621,7 +6621,7 @@
         "potencia_pico_kw": {
           "valor": 8.8,
           "unidad": "kVA",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "Sobrecarga de 30 s según la ficha de la versión performance+ (junio 2024); la asignación exacta por modelo no queda clara en la tabla."
@@ -6677,7 +6677,7 @@
         "acoplamiento": {
           "valor": "AC (inversor de batería integrado, conexión en alterna a la instalación existente)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.aceflex.de/produkt/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw/",
           "fecha": "2026-10-18",
           "nota": "Descrito como «AC-Speichersystem» por el distribuidor; la marca también ofrece un inversor híbrido aparte (sonneninverter)."
@@ -6693,7 +6693,7 @@
         "inversores_compatibles": {
           "valor": "Cualquier inversor fotovoltaico, al ser acoplamiento AC",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.aceflex.de/produkt/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw/",
           "fecha": "2026-10-18",
           "nota": null
@@ -6701,7 +6701,7 @@
         "respaldo_apagones": {
           "valor": "Sí, con accesorio opcional: sonnenProtect 8000 (trifásico, toda la casa) en la versión performance; sonnenProtect 4000 (monofásico) en la sonnenBatterie 10",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
           "fecha": "2026-10-18",
           "nota": "Conmutación aprox. 10 s y retorno de hasta 5,5 min con unos 3 s de corte (ficha performance+, junio 2024)."
@@ -6763,9 +6763,9 @@
           "nota": "11.325,37 € / 10 kWh útiles. Precio sin IVA: no se encontró oferta con IVA incluido; en Alemania el IVA aplicable a baterías de autoconsumo residencial es 0 % (§ 12.3 UStG). Con IVA del 19 % serían 1.347,72 €/kWh."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "sonnen no figura en los resultados de eficiencia (SPI) de la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026; en 2025 solo participó en la prueba de gestión de energía (capítulo 4).",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
           "fecha": "2026-10-18",
           "nota": "sonnen no figura en los resultados de eficiencia (SPI) de la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026; en 2025 solo participó en la prueba de gestión de energía (capítulo 4)."
@@ -6842,7 +6842,7 @@
         "fabrica": {
           "valor": "Wildpoldsried (Alemania), según la ficha técnica («Made in Germany»)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)",
           "fecha": "2026-10-18",
           "nota": "Wildpoldsried (Alemania) Otras fuentes: https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/ https://www.energias-renovables.com/almacenamiento/baywa-distribuidora-exclusiva-de-las-bater-as-20260223 https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/"
@@ -7066,7 +7066,7 @@
         "capacidad_util_kwh": {
           "valor": 9.6,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "SBR096, ficha V1.4: condiciones de ensayo 25 °C, 100 % DoD, carga y descarga a 0,2C. La HTW Berlin recuerda que el manual del inversor SH10RT limita el estado de carga a 5–100 % (https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
@@ -7074,7 +7074,7 @@
         "gama_capacidades_kwh": {
           "valor": "6,4 / 9,6 / 12,8 / 16,0 / 19,2 / 22,4 / 25,6",
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "SBR064 a SBR256 (2 a 8 módulos de 3,2 kWh)."
@@ -7082,7 +7082,7 @@
         "modular": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "Módulos de 3,2 kWh y 33 kg; «plug and play», sin cables entre módulos según la web de la marca (https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256)."
@@ -7098,7 +7098,7 @@
         "ampliacion_max_kwh": {
           "valor": 25.6,
           "unidad": "kWh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "Máximo por torre (SBR256, 8 módulos). La ficha de Krannich España indica hasta cuatro unidades en paralelo (https://shop.krannich-solar.com/es-es/baterias/baterias-solares/53971/sungrow-sbr096-v13); no comprobado en la documentación de Sungrow."
@@ -7106,7 +7106,7 @@
         "potencia_continua_kw": {
           "valor": 5.76,
           "unidad": "kW",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "SBR096 (potencia DC nominal; 30 A a 192 V nominales). Escala con el número de módulos: 3,84 kW (SBR064) a 15,36 kW (SBR256). El inversor híbrido puede limitarla."
@@ -7122,7 +7122,7 @@
         "quimica": {
           "valor": "LFP (LiFePO4), celdas prismáticas",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -7146,7 +7146,7 @@
         "profundidad_descarga_pct": {
           "valor": 100,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "«Up to 100 % DoD (settable)». El manual del inversor SH10RT limita el rango operativo a 5–100 % de estado de carga, un 95 % en la práctica (HTW Berlin 2024, cap. 2.1: https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
@@ -7162,7 +7162,7 @@
         "tension": {
           "valor": "Alta tensión: 192 V nominales (SBR096), rango de trabajo 162–219 V; de 128 V (SBR064) a 512 V (SBR256)",
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -7170,7 +7170,7 @@
         "acoplamiento": {
           "valor": "DC (a inversor híbrido Sungrow, p. ej. SH10RT)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf",
           "fecha": "2026-10-18",
           "nota": "La HTW Berlin relaciona la SBR096 con el manual del inversor híbrido SH10RT."
@@ -7178,7 +7178,7 @@
         "inversor_integrado": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -7186,7 +7186,7 @@
         "inversores_compatibles": {
           "valor": "Inversores híbridos Sungrow monofásicos y trifásicos de la serie SH (SH-RS, SH-RT); la ficha no publica una lista",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.vpsolar.com/en/sungrow-sbr-and-sbh-batteries-reliability-and-high-performance/",
           "fecha": "2026-10-18",
           "nota": "Según el distribuidor VP Solar (28-04-2025); con SH-RS admite desde 2 módulos. La ficha V1.4 no incluye lista de compatibilidad."
@@ -7202,7 +7202,7 @@
         "instalacion": {
           "valor": "interior y exterior, sobre suelo",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "VP Solar recomienda instalarla en interior, en un cuarto técnico (https://www.vpsolar.com/en/sungrow-sbr-and-sbh-batteries-reliability-and-high-performance/)."
@@ -7210,7 +7210,7 @@
         "ip": {
           "valor": "IP55",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -7218,7 +7218,7 @@
         "rango_temperatura_c": {
           "valor": "carga 0 a 50; descarga −20 a 50",
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "Humedad 0–95 % sin condensación; altitud máxima 4.000 m; refrigeración por convección natural."
@@ -7226,7 +7226,7 @@
         "peso_kg": {
           "valor": 114,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "SBR096; 33 kg por módulo; de 89 kg (SBR064) a 279 kg (SBR256)."
@@ -7234,7 +7234,7 @@
         "medidas_mm": {
           "valor": "625 × 545 × 330 (an × al × fo)",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "SBR096 según la ficha (mismas medidas que la SBR064); SBR256: 625 × 1195 × 330 mm."
@@ -7256,9 +7256,9 @@
           "nota": "No se encontró ninguna oferta con precio público en España (Krannich, SolarTraders e IBC Solar muestran la SBR096 sin precio o solo para socios; Solarics muestra un precio de marcador «XXX,XX €»)."
         },
         "pruebas_independientes": {
-          "valor": null,
+          "valor": "Sungrow se menciona en la Stromspeicher-Inspektion 2024 de la HTW Berlin solo en el análisis de mercado; no figura entre los sistemas ensayados en 2024 ni 2025 (https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf).",
           "unidad": null,
-          "naturaleza": "no_publicado",
+          "naturaleza": "tercero",
           "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf",
           "fecha": "2026-10-18",
           "nota": "Sungrow se menciona en la Stromspeicher-Inspektion 2024 de la HTW Berlin solo en el análisis de mercado; no figura entre los sistemas ensayados en 2024 ni 2025 (https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf)."
@@ -7266,7 +7266,7 @@
         "garantia_producto_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
           "fecha": "2026-10-18",
           "nota": "«Limited Manufacturer Warranty for Distribution», Rev. 2.0, válida desde 01-04-2021, para productos vendidos desde el 01-06-2021 a través de distribuidores en los países de la UE (incluida España), Noruega, Suiza y Reino Unido. Batería residencial: 10 años o 4.200 × capacidad nominal (kWh) de energía medida, lo que antes ocurra; máximo 10 años y 6 meses desde la fecha de fabricación. Puede haber versiones posteriores no localizadas."
@@ -7274,7 +7274,7 @@
         "garantia_rendimiento_anios": {
           "valor": 10,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
           "fecha": "2026-10-18",
           "nota": "Capacidad disponible > 80 % de la nominal durante 10 años, mientras la energía medida sea < 3.000 × capacidad nominal (kWh). Ensayo de capacidad a 25–28 °C."
@@ -7282,7 +7282,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.8,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -7290,7 +7290,7 @@
         "garantia_letra_pequena": {
           "valor": "La garantía de rendimiento termina al superar 3.000 × capacidad nominal de energía (28,8 MWh en la SBR096, unos 3.000 ciclos completos), aunque no hayan pasado 10 años (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de).\nNo cubre los costes de personal propio del usuario ni de terceros (mano de obra); las visitas fuera de garantía se cobran a 90 €/hora en días laborables (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, cláusulas 4.16 y 6.5).\nTransporte cubierto por Sungrow en la «región A» (países UE listados); no cubierto en territorios de ultramar ni en países no listados (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 2.3.3).\nExcluye el uso con un inversor o convertidor incompatible, la instalación sin seguir el manual y el uso fuera de las temperaturas del manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 4.4, 4.4.1 y 4.13).\nEl documento es de 2021; Sungrow publica garantías por país en https://www.sungrowpower.com/en/warranty-terms-and-conditions-country-list-global-site, donde España aparece sin documento enlazado.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -7298,7 +7298,7 @@
         "garantia_quien_responde": {
           "valor": "El garante es la matriz china, Sungrow Power Supply Co., Ltd. (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 1.2); la reclamación se tramita a través del instalador y del distribuidor. El documento no prevé qué ocurre si Sungrow dejara el mercado europeo; quedan las garantías legales del vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
           "fecha": "2026-10-18"
         }
@@ -7346,7 +7346,7 @@
         "num_componentes": {
           "valor": null,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
           "fecha": "2026-10-18",
           "nota": "Texto publicado: «2 a 8 módulos de batería de 3,2 kWh + controlador». El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
@@ -7818,7 +7818,7 @@
         "fabrica": {
           "valor": "Tesla, Inc., Reno (Nevada, EE. UU.), según la ficha de retirada de la CPSC",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death",
           "fecha": "2026-10-18",
           "nota": "Reno, Nevada (según CPSC) Otras fuentes: https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/ https://www.energy-storage.news/?p=86789 https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/"
@@ -7961,7 +7961,7 @@
       "anio_lanzamiento": {
         "valor": 2025,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.motor.es/futuro/tesla-powerwall-3-espana-2025108662.html",
         "fecha": "2026-10-18",
         "nota": "Año de comercialización en España según prensa (junio de 2025, «ya se encuentra a la venta en España»). Lanzamiento en EE. UU. anterior; fecha exacta pendiente."

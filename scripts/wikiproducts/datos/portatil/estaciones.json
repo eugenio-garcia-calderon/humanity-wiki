@@ -19,7 +19,7 @@
       "estado": "a la venta",
       "anio_lanzamiento": {
         "valor": 2024,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.notebookcheck.com/EcoFlow-River-3-Kompakte-Powerstation-leistet-bis-zu-600-W-bei-nur-3-55-kg-Gewicht.918219.0.html",
         "fecha": "2026-10-18",
         "nota": "Notebookcheck sitúa el lanzamiento en Alemania el 14-11-2024 (PVP 249 €); manual en inglés fechado 2024-09-11."
@@ -34,7 +34,7 @@
         "capacidad_mah": {
           "valor": 12800,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "12,8 Ah a 19,2 V nominales del paquete (no de celda)."
@@ -42,7 +42,7 @@
         "tension_celda_v": {
           "valor": 19.2,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "Tensión nominal del paquete de baterías, no de cada celda."
@@ -50,14 +50,14 @@
         "capacidad_wh": {
           "valor": 245,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         },
         "potencia_salida_max_w": {
           "valor": 550,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "Potencia de salida total declarada sumando todas las salidas."
@@ -65,7 +65,7 @@
         "potencia_ac_continua_w": {
           "valor": 300,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "Onda senoidal pura, 230 V 50 Hz en la versión UE."
@@ -73,7 +73,7 @@
         "potencia_ac_pico_w": {
           "valor": 600,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "600 W es el modo X-Boost (para cargas resistivas), no un pico de arranque; el manual no especifica pico (surge)."
@@ -81,7 +81,7 @@
         "potencia_entrada_max_w": {
           "valor": 305,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "Entrada CA máxima versiones UE/CN/UK/AU; 320 W en EE. UU./JP."
@@ -89,21 +89,21 @@
         "puertos": {
           "valor": "1× CA 230 V (300 W), 1× USB-C PD 100 W, 2× USB-A 12 W, 1× toma de mechero 12,6 V 126 W",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         },
         "quimica": {
           "valor": "LiFePO₄",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         },
         "ciclos_declarados": {
           "valor": 3000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18",
           "nota": "≥80 % de capacidad tras 3.000 ciclos a 0,5C/0,5C y 25 °C."
@@ -111,21 +111,21 @@
         "peso_kg": {
           "valor": 3.5,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         },
         "medidas_mm": {
           "valor": "255 × 212 × 113",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         },
         "carga_solar": {
           "valor": "sí, hasta 110 W (11–30 V, 8 A)",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         },
@@ -139,7 +139,7 @@
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha de MediaMarkt.es; el manual no indica el plazo."
@@ -189,7 +189,7 @@
         "reparabilidad": {
           "valor": "El manual remite al servicio de atención de EcoFlow para reparaciones y piezas; no describe sustitución de batería por el usuario.",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
           "fecha": "2026-10-18"
         }
@@ -342,7 +342,7 @@
         "capacidad_mah": {
           "valor": 22500,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18",
           "nota": "22,5 Ah a 12,8 V nominales del paquete."
@@ -350,7 +350,7 @@
         "tension_celda_v": {
           "valor": 12.8,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18",
           "nota": "Tensión nominal del paquete (4 celdas LFP en serie), no de cada celda."
@@ -358,7 +358,7 @@
         "capacidad_wh": {
           "valor": 288,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18"
         },
@@ -373,7 +373,7 @@
         "potencia_ac_continua_w": {
           "valor": 300,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18",
           "nota": "230 V 50 Hz, onda senoidal pura."
@@ -381,7 +381,7 @@
         "potencia_ac_pico_w": {
           "valor": 600,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18"
         },
@@ -396,7 +396,7 @@
         "puertos": {
           "valor": "1× CA 230 V, 1× USB-A, 1× USB-C (salida), 1× USB-C (entrada/salida, 100 W), 1× toma de mechero 12 V",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18",
           "nota": "Currys indica USB-C de 100 W máx. y USB-A de 15 W."
@@ -404,14 +404,14 @@
         "quimica": {
           "valor": "LiFePO₄",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18"
         },
         "ciclos_declarados": {
           "valor": 3000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18",
           "nota": "Hasta 80 % o más de capacidad. Currys.co.uk publica 1.500 ciclos e «ion de litio», en contradicción con el manual."
@@ -419,21 +419,21 @@
         "peso_kg": {
           "valor": 3.75,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18"
         },
         "medidas_mm": {
           "valor": "230 × 155 × 167",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18"
         },
         "carga_solar": {
           "valor": "sí, por USB-C hasta 100 W (12–27 V, 5 A) con adaptador DC8020–USB-C",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18"
         },
@@ -447,7 +447,7 @@
         "garantia_anios": {
           "valor": 3,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
           "fecha": "2026-10-18",
           "nota": "Manual australiano: 36 meses más 2 años de extensión al registrar el producto. Currys y Argos (Reino Unido) anuncian 5 años. No se comprobó el plazo en la web española."
@@ -464,7 +464,7 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Jackery",
           "fecha": "2026-10-18",
           "nota": "La marca pertenece a Shenzhen Huabao New Energy Co., Ltd. (Wikipedia; no es una fuente de la marca)."
@@ -617,7 +617,7 @@
       "estado": "a la venta",
       "anio_lanzamiento": {
         "valor": 2025,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.notebookcheck.com/Elite-30-V2-startet-als-kompakte-Powerstation-mit-600-Watt-und-Rabatt.1073531.0.html",
         "fecha": "2026-10-18",
         "nota": "Notebookcheck (13-8-2025) informa de su puesta a la venta en la tienda europea de Bluetti."
@@ -715,7 +715,7 @@
         "medidas_mm": {
           "valor": "250 × 178 × 167,5",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.notebookcheck.com/Elite-30-V2-startet-als-kompakte-Powerstation-mit-600-Watt-und-Rabatt.1073531.0.html",
           "fecha": "2026-10-18",
           "nota": "Medidas publicadas por Notebookcheck a partir de datos de la marca; la página de la marca no las muestra."
@@ -753,7 +753,7 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Bluetti",
           "fecha": "2026-10-18",
           "nota": "Wikipedia indica que la empresa se fundó en Shenzhen en 2009; no indica la sede actual."
@@ -907,7 +907,7 @@
         "capacidad_mah": {
           "valor": 12000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Sin tensión indicada; 299 Wh / 12 Ah implicaría unos 25 V de paquete (calculado, no declarado). Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -922,7 +922,7 @@
         "capacidad_wh": {
           "valor": 299,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -937,7 +937,7 @@
         "potencia_ac_continua_w": {
           "valor": 600,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -945,7 +945,7 @@
         "potencia_ac_pico_w": {
           "valor": 1200,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -953,7 +953,7 @@
         "potencia_entrada_max_w": {
           "valor": 400,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -961,7 +961,7 @@
         "puertos": {
           "valor": "2× CA 230 V, 2× USB-C 100 W, 2× USB-A 18 W, 1× toma de mechero 120 W, 1× carga inalámbrica 15 W",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -969,14 +969,14 @@
         "quimica": {
           "valor": "LiFePO₄",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18"
         },
         "ciclos_declarados": {
           "valor": 3500,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18",
           "nota": "Hasta el 80 % de capacidad. Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
@@ -984,7 +984,7 @@
         "peso_kg": {
           "valor": 5.6,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18"
         },
@@ -999,7 +999,7 @@
         "carga_solar": {
           "valor": "sí, hasta 220 W (12–60 V, 8,8 A, XT60)",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
           "fecha": "2026-10-18"
         },
@@ -1169,7 +1169,7 @@
         "capacidad_mah": {
           "valor": 20000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "20 Ah a 25,6 V del paquete. Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1177,7 +1177,7 @@
         "tension_celda_v": {
           "valor": 25.6,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "Tensión nominal del paquete. Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1185,7 +1185,7 @@
         "capacidad_wh": {
           "valor": 512,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1200,7 +1200,7 @@
         "potencia_ac_continua_w": {
           "valor": 800,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1208,7 +1208,7 @@
         "potencia_ac_pico_w": {
           "valor": 1600,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1216,7 +1216,7 @@
         "potencia_entrada_max_w": {
           "valor": 500,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1224,7 +1224,7 @@
         "puertos": {
           "valor": "1× CA (el texto dice 2), 3× USB-A 18 W (una QC 3.0), 1× USB-C PD 100 W, 2× DC 12 V 3 A",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "La ficha se contradice en el número de tomas CA. Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
@@ -1232,14 +1232,14 @@
         "quimica": {
           "valor": "LiFePO₄",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18"
         },
         "ciclos_declarados": {
           "valor": 3500,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18",
           "nota": "La tabla dice más de 3.500 y el texto más de 4.000; no indica el porcentaje de capacidad restante."
@@ -1247,7 +1247,7 @@
         "peso_kg": {
           "valor": 6,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18"
         },
@@ -1261,7 +1261,7 @@
         "carga_solar": {
           "valor": "sí, hasta 200 W (12–50 V, 10 A, conector 5521)",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
           "fecha": "2026-10-18"
         },
@@ -1439,7 +1439,7 @@
         "capacidad_mah": {
           "valor": 30400,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18",
           "nota": "30,4 Ah a 35,2 V nominales del paquete."
@@ -1447,7 +1447,7 @@
         "tension_celda_v": {
           "valor": 35.2,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18",
           "nota": "Tensión nominal del paquete, no de cada celda."
@@ -1455,7 +1455,7 @@
         "capacidad_wh": {
           "valor": 1070,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
@@ -1470,14 +1470,14 @@
         "potencia_ac_continua_w": {
           "valor": 1500,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
         "potencia_ac_pico_w": {
           "valor": 3000,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
@@ -1492,21 +1492,21 @@
         "puertos": {
           "valor": "CA 230 V (2 en el manual australiano; 3 según la ficha de PcComponentes para la versión UE), 1× USB-C 100 W, 1× USB-C 30 W, 1× USB-A 18 W, 1× toma de mechero 12 V 10 A, 2× entrada DC8020",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
         "quimica": {
           "valor": "LiFePO₄",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
         "ciclos_declarados": {
           "valor": 4000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18",
           "nota": "Hasta 70 % o más de capacidad."
@@ -1514,21 +1514,21 @@
         "peso_kg": {
           "valor": 10.8,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
         "medidas_mm": {
           "valor": "327 × 224 × 247",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
         "carga_solar": {
           "valor": "sí, hasta 400 W (2× DC8020, 200 W cada una)",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18"
         },
@@ -1542,7 +1542,7 @@
         "garantia_anios": {
           "valor": 3,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
           "fecha": "2026-10-18",
           "nota": "3 años más 2 de extensión al registrar el producto (manual australiano). La batería sólo queda cubierta si se carga del todo en los 7 días tras la compra y al menos cada 6 meses. alltron.ch indica 24 meses para la versión UE."
@@ -1559,7 +1559,7 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Jackery",
           "fecha": "2026-10-18",
           "nota": "La marca pertenece a Shenzhen Huabao New Energy Co., Ltd. (Wikipedia; no es una fuente de la marca)."
@@ -1567,7 +1567,7 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.buerklin.com/en/p/27A0045/",
           "fecha": "2026-10-18",
           "nota": "País de origen «CN» en la ficha del distribuidor Bürklin, con código arancelario 85076000."
@@ -1780,7 +1780,7 @@
         "puertos": {
           "valor": "6× CA (UE, según PcComponentes), 2× USB-A 12 W, 1× USB-C 100 W, 1× USB-C 30 W, 1× toma de mechero 12 V 10 A",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-solix-c1000-estacion-de-energia-portatil-1056wh-1800w",
           "fecha": "2026-10-18",
           "nota": "La página de la marca dice a la vez «11 puertos» y «9 puertos»."
@@ -1795,7 +1795,7 @@
         "ciclos_declarados": {
           "valor": 3000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/anker-solix-c1000-estacion-de-energia-portatil-1056wh-1800w",
           "fecha": "2026-10-18",
           "nota": "PcComponentes indica >80 % de capacidad; la página de la marca dice 3.000 ciclos sin porcentaje."
@@ -1848,7 +1848,7 @@
         "pais_marca": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Anker_Innovations",
           "fecha": "2026-10-18",
           "nota": "Anker Innovations Co., Ltd., con sede en Changsha (Hunan)."
@@ -2146,7 +2146,7 @@
         "pais_marca": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/DJI",
           "fecha": "2026-10-18",
           "nota": "SZ DJI Technology Co., Ltd., Shenzhen."
@@ -2430,7 +2430,7 @@
       "origen": {
         "pais_marca": {
           "valor": "China",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Bluetti",
           "fecha": "2026-10-18",
           "nota": "Wikipedia indica que la empresa se fundó en Shenzhen en 2009; no indica la sede actual."
@@ -2462,7 +2462,7 @@
         "reparabilidad": {
           "valor": "Ampliable con baterías externas B80, B230 y B300 hasta 4.224 Wh (según la ficha de MediaMarkt); no se encontró información sobre sustitución de la batería interna.",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mediamarkt.es/es/product/_generador-de-energia-ac180p-bluetti-136936193.html",
           "fecha": "2026-10-18"
         }
@@ -2614,7 +2614,7 @@
         "capacidad_wh": {
           "valor": 2048,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18",
           "nota": "Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
@@ -2622,7 +2622,7 @@
         "potencia_salida_max_w": {
           "valor": 2674,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18",
           "nota": "Potencia máxima AC+DC. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
@@ -2630,7 +2630,7 @@
         "potencia_ac_continua_w": {
           "valor": 2400,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18",
           "nota": "Proshop.de describe en el texto 3.000 W continuos y 6.000 W de pico, en contradicción con su propia tabla (2.400 W). Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
@@ -2638,7 +2638,7 @@
         "potencia_ac_pico_w": {
           "valor": 4800,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18",
           "nota": "X-Boost hasta 3.200 W según MediaMarkt.es. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
@@ -2646,7 +2646,7 @@
         "potencia_entrada_max_w": {
           "valor": 2300,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
           "fecha": "2026-10-18",
           "nota": "Desde la red; hasta 2.400 W desde generador, según MediaMarkt.es. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
@@ -2654,7 +2654,7 @@
         "puertos": {
           "valor": "4× CA 230 V, 1× USB-A 18 W, 1× USB-C 100 W, 2× USB-C (30 W combinados), 1× DC 12 V 126 W, 1× toma de mechero 12,6 V 10 A",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
           "fecha": "2026-10-18",
           "nota": "PcComponentes describe 3× USB-C hasta 100 W. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
@@ -2662,14 +2662,14 @@
         "quimica": {
           "valor": "LiFePO₄",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18"
         },
         "ciclos_declarados": {
           "valor": 3000,
           "unidad": "ciclos",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18",
           "nota": "Hasta el 80 % de capacidad."
@@ -2677,21 +2677,21 @@
         "peso_kg": {
           "valor": 20.3,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18"
         },
         "medidas_mm": {
           "valor": "494 × 239 × 305",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18"
         },
         "carga_solar": {
           "valor": "sí, hasta 500 W (11–60 V)",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18"
         },
@@ -2705,7 +2705,7 @@
         "garantia_anios": {
           "valor": 5,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
           "fecha": "2026-10-18",
           "nota": "«3+2 años» en la ficha de PcComponentes; no se comprobaron las condiciones de la extensión."
