@@ -9150,3 +9150,10 @@ en mis páginas como proyecto pendiente».
 - «Cómo trabajamos» now says «cualquiera **con una cuenta** puede sugerir una corrección» (`corregir-textos.mjs` + `PATCH /api/v1/pages/:id/blocks/:blockId`, one text block). The load log prints «Cómo trabajamos», the legal pages and the site's legal holder data, so they can be reviewed without opening production.
 - Photos: `datos/fotos.json` names a maker or distributor page for 36 of the 37 products without a photo and for the 4 whose photo was not the product (aleo, Atersa, SENEC.Home, LONGi Hi-MO X10). 4 products have no page anywhere to take one from.
 - The server load has its own concurrency group, waits for a running deploy, and retries a step if the app container restarts under it.
+
+### 2026-10-18 — Wikiproducts: visitors can sign in and register (W4)
+
+- Migration `0159_wikiproducts_miembros.sql` turns on members for the site behind `wikiproducts.humanity.wiki`, exactly as «Activar» in the members panel does the first time: open registration, a «Miembros» category (see, comment, save, buy) as default. Only if that site has no members config yet; a no-op on any other database. Eugenio chose «Sí, abierto» on 2026-10-18.
+- Signed out, the site's account button reads «Entrar» next to the icon (`CuentaMenu`), instead of a bare person icon.
+- «Entrar para puntuar» now also opens the floating member bar's sign-in panel (`BarraMiembro`), which is what pages without the site menu show; after signing in there, the rating block asks again (`sitio:sesion`) and shows the stars without a reload.
+- Checked locally: register from «Entrar para puntuar» and vote 4 on a criterion → `PUT` 200.

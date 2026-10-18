@@ -904,3 +904,8 @@ the management panel, is the cheapest way to check it.
 - **An unknown address on a custom domain shows a 404 page, not the home page.** This replaces the 2026-08-22 decision («`lamieldelasierra.com/loquesea` shows the honey»): since SEO R16 the server already answered 404 + `noindex`, so the screen contradicted the status code. The home is one click away from the 404 page.
 - **The menu API only accepts destinations inside the site** (a page of the same owner, the home, or a path starting with `/`), like the blocks API: a leaked key cannot plant an external link in a published menu. External links stay an editor-only action.
 - **Contrast and 16 px are fixed with a scoped stylesheet** (`.sitio-lectura` in `index.css`) over the published reading frame, not by editing each block's classes. See the tech-debt entry.
+
+
+## 2026-10-18 — Turning on a site's members from a migration (Wikiproducts)
+
+Members can only be activated with the owner's session (`PUT /api/sitio-miembros/:raiz/config`); the `/api/v1` key does not reach it. For Wikiproducts the activation went into migration 0159, keyed by the site's address and guarded by "no config yet", rather than a new public-API endpoint or a step in `cargar-en-servidor.sh` (owned by W3a). Alternative kept open: a `/api/v1` members endpoint, if other sites need it scripted. Cost of switching later: the migration is a one-off, nothing depends on it.
