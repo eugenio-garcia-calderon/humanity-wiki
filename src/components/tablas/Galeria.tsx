@@ -328,13 +328,13 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
           const icono = f.pagina?.icono;
       const pesoClase = pesoNombre === 'fino' ? 'font-light' : pesoNombre === 'normal' ? 'font-semibold' : 'font-bold';
       const nombreEl = (
-                  <p className={cn('flex items-center gap-1.5 min-w-0', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
+                  <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                     {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                       : icono ? (esUrl(icono)
                         ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
                         : <span className="shrink-0">{icono}</span>)
                       : null}
-                    <span className={cn('truncate', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
+                    <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
                   </p>
       );
           return (
@@ -459,7 +459,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 {!chica && f.pagina?.descripcion && (
                   <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line"><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
-                {!chica && otras.map(c => {
+                {otras.map(c => {
                   // Una relación se enseña como fichas que llevan a la página
                   // enlazada: «Movilidad» en la tarjeta del coche volador.
                   if (c.tipo === 'relacion') {
@@ -489,7 +489,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   const v = formatear(f.celdas[c.id] ?? { estado: 'vacia' }, c,
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });
                   return v ? (
-                    <p key={c.id} className="text-xs text-slate-500 truncate">
+                    <p key={c.id} className={cn('text-slate-500 line-clamp-2 break-words', chica ? 'text-[10px] leading-tight' : 'text-xs')}>
                       <span className="text-slate-400">{c.nombre}: </span>{v}
                     </p>
                   ) : null;
