@@ -142,9 +142,16 @@ export const visible = (c: Columna) => c.config?.visibilidad !== 'nunca';
 export const filaActual = (f: Ficha | null | undefined): FilaFicha | undefined =>
   f?.tabla.filas.find(x => x.id === f.fila_id);
 
+/** A price per unit of 0 or less is no price at all: it means the product has
+ *  no price yet, and a sheet must never call it «la mejor» (evaluator round 2,
+ *  2026-10-18: «0 €/kWh MEJOR» on three batteries with no price). */
+const sinPrecioUnidad = (celda: any, c: Columna): boolean =>
+  rolDe(c) === 'precio_unidad' && !(typeof celda?.valor === 'number' && celda.valor > 0);
+
 export const tieneValor = (fila: FilaFicha | undefined, c: Columna): boolean => {
   const celda = fila?.celdas?.[c.id];
   if (!celda || celda.estado !== 'ok') return false;
+  if (sinPrecioUnidad(celda, c)) return false;
   if (Array.isArray(celda.valor)) return celda.valor.length > 0;
   return celda.valor !== '' && celda.valor !== null;
 };
@@ -153,6 +160,7 @@ export const tieneValor = (fila: FilaFicha | undefined, c: Columna): boolean => 
 export function numeroDe(fila: FilaFicha | undefined, c: Columna): number | null {
   const celda = fila?.celdas?.[c.id];
   if (!celda || celda.estado !== 'ok') return null;
+  if (sinPrecioUnidad(celda, c)) return null;
   if (typeof celda.valor === 'number' && Number.isFinite(celda.valor)) return celda.valor;
   if (c.tipo === 'compra' && celda.valor?.precio_centimos != null) return celda.valor.precio_centimos / 100;
   return null;
@@ -162,6 +170,7 @@ export function numeroDe(fila: FilaFicha | undefined, c: Columna): number | null
 export function textoDe(fila: FilaFicha | undefined, c: Columna): string {
   const celda = fila?.celdas?.[c.id];
   if (!celda) return '';
+  if (celda.estado === 'ok' && sinPrecioUnidad(celda, c)) return '';
   if (esComunidad(c)) {
     if (celda.estado !== 'ok') return '';
     const m = Number((celda as any).media ?? celda.valor);

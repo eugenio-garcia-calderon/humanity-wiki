@@ -183,6 +183,48 @@
       "tipo": "Instalador",
       "pais": "Alemania",
       "web": "https://senec.com/en/node/3389"
+    },
+    {
+      "id": "solarmat-es",
+      "nombre": "Solarmat",
+      "tipo": "Tienda online",
+      "pais": "España",
+      "web": "https://solarmat.es",
+      "fuentes": [
+        {
+          "url": "https://solarmat.es/es/baterias-litio/tesla-powerwall-2.html",
+          "titulo": "Ficha del producto: Tesla Powerwall 2",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "generatupropiaenergia-es",
+      "nombre": "Genera tu propia energía",
+      "tipo": "Tienda online",
+      "pais": "España",
+      "web": "https://www.generatupropiaenergia.es",
+      "fuentes": [
+        {
+          "url": "https://www.generatupropiaenergia.es/comprar/bateria-tesla-powerwall-2-ac-13-5kw/",
+          "titulo": "Ficha del producto: Tesla Powerwall 2 AC 13,5 kWh",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ingenierikenergy-es",
+      "nombre": "Ingenierik Energy",
+      "tipo": "Tienda online",
+      "pais": "España",
+      "web": "https://ingenierikenergy.es",
+      "fuentes": [
+        {
+          "url": "https://ingenierikenergy.es/producto/bateria-tesla-powerwall2/",
+          "titulo": "Ficha del producto: Tesla Powerwall 2 AC 13,5 kWh",
+          "fecha": "2026-10-18"
+        }
+      ]
     }
   ]
 }
