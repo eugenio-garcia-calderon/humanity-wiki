@@ -116,6 +116,26 @@ export async function paginaVisible(db: any, id: string): Promise<boolean> {
   return !!(r.rows[0] as any)?.visible;
 }
 
+/**
+ * ¿Cuelga esta página de esa otra (o es ella)? Se sube por el mismo camino
+ * que la visibilidad y la canónica (`canonicaDe`): si su canónica está en el
+ * dominio de esa raíz, aquí sale que sí.
+ */
+export async function cuelgaDe(db: any, id: string, raizId: string): Promise<boolean> {
+  if (id === raizId) return true;
+  const r = await db.execute(sql`
+    WITH RECURSIVE sube(id, n) AS (
+      SELECT ${id}::text, 0
+      UNION
+      SELECT madre.id, s.n + 1 FROM sube s
+      CROSS JOIN LATERAL (${madresValidas(sql`s.id`)}) madre
+      WHERE s.n < ${PROFUNDIDAD}
+    )
+    SELECT EXISTS (SELECT 1 FROM sube WHERE id = ${raizId}) AS si
+  `);
+  return !!(r.rows[0] as any)?.si;
+}
+
 /** ¿Puede ver cualquiera esta tabla? Sí si está metida en una página que se
  *  ve. La tabla no tiene visibilidad propia: la hereda de dónde se enseña. */
 export async function tablaVisible(db: any, tablaId: string): Promise<boolean> {
@@ -466,7 +486,9 @@ export function registrarSitios(app: Express, db: any) {
       if (!camino.startsWith('/')) return res.status(400).json({ error: 'Falta la dirección.' });
       const t = camino.split('/').filter(Boolean);
       const sinArroba = t[0]?.startsWith('@') ? t.slice(1) : t;
-      if (sinArroba.length < 2 || sinArroba.length > 3) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
+      // Un tramo: una página del sitio por su nombre corto, sólo en un dominio propio.
+      const uno = sinArroba.length === 1 && t.length === 1 && sitioDe(req).forma === 'dominio';
+      if (!uno && (sinArroba.length < 2 || sinArroba.length > 3)) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
       const w = await paginaDeLaDireccion(req, camino);
       if (w?.redirigir) return res.json({ redirigir: w.redirigir });
       if (!w?.porRuta) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
@@ -537,6 +559,44 @@ export function registrarSitios(app: Express, db: any) {
         nombre = String(w.title || s.host); resumen = descripcionDe(w.config);
         linea(nombre, `${base}/`, resumen);
         await conTablas(w, base);
+        // Y las demás páginas del sitio, con sus bases de datos: las que
+        // cuelgan de la portada por bloques «Página» y las del menú. Antes
+        // sólo salían las tablas de la portada, y en un sitio como Wikiproducts
+        // (portada → categorías → subcategorías) eso es casi nada.
+        const vistas = new Set<string>([w.id]);
+        const cola: string[] = [];
+        const apunta = (x: any) => {
+          if (!x || typeof x !== 'object') return;
+          if (Array.isArray(x)) { for (const y of x) apunta(y); return; }
+          if (x.tipo === 'pagina' && typeof x.id === 'string') cola.push(x.id);
+          for (const v of Object.values(x)) if (v && typeof v === 'object') apunta(v);
+        };
+        apunta(w.config?.sitio?.menu);
+        const hijas = async (pw: any) => {
+          const { config } = await filtrarBloques(db, pw.id, pw.config, null);
+          const recorre = (l: any[]) => { for (const b of Array.isArray(l) ? l : []) {
+            if (b?.tipo === 'subpagina' && typeof b.entityId === 'string') cola.push(b.entityId);
+            recorre(b?.bloques);
+            if (Array.isArray(b?.columnas)) for (const c of b.columnas) recorre(c?.bloques);
+          } };
+          recorre(config?.bloques);
+        };
+        await hijas(w);
+        while (cola.length && vistas.size < 200) {
+          const id = cola.shift()!;
+          if (vistas.has(id)) continue;
+          vistas.add(id);
+          const pw = await datosPagina(db, id);
+          if (!pw || !(await paginaVisible(db, pw.id))) continue;
+          // Las de miembros no: no se anuncian en ningún sitio (ver el sitemap).
+          const rs = await db.execute(sql`SELECT 1 FROM sitio_restricciones WHERE pagina_id = ${pw.id} AND bloque_id = '' LIMIT 1`);
+          if (rs.rows.length) continue;
+          const corto = pw.publico && pw.slug && !String(pw.slug).includes('/') && pw.handle === d.handle
+            && !TRAMOS_RESERVADOS.has(String(pw.slug)) && await cuelgaDe(db, pw.id, w.id);
+          linea(String(pw.title || 'Página'), corto ? `${base}/${encodeURIComponent(pw.slug)}` : `${base}/p/${pw.id}`, descripcionDe(pw.config));
+          await conTablas(pw, base);
+          await hijas(pw);
+        }
       } else {
         const handle = d ? d.handle : (s as any).handle;
         const r = await db.execute(sql`
@@ -573,6 +633,9 @@ export function registrarSitios(app: Express, db: any) {
     const abs = (u: string | null | undefined) => !u ? null
       : /^https?:\/\//.test(u) ? u : u.startsWith('/') && !u.startsWith('//') ? `https://${s.host}${u}` : null;
 
+    /** De quién es el sitio: una página suya publicada con nombre corto se
+     *  anuncia por él (`/powerbanks`), que es su canónica (`canonicaDe`). */
+    let duenyo = s.forma === 'subdominio' ? s.handle : '';
     /** Las subpáginas de una página, recursivamente. Devuelve la fecha más
      *  reciente de todas, que es la de la página que las enseña. */
     const subpaginas = async (raiz: string): Promise<number> => {
@@ -618,8 +681,10 @@ export function registrarSitios(app: Express, db: any) {
       const slugs = new Map<string, string>();
       if (r.rows.length) {
         const q = await db.execute(sql`
-          SELECT id, slug FROM knowledge_windows
-          WHERE id = ANY(string_to_array(${(r.rows as any[]).map(x => x.id).join(',')}, ',')) AND slug LIKE '%/%'
+          SELECT w.id, w.slug FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+          WHERE w.id = ANY(string_to_array(${(r.rows as any[]).map(x => x.id).join(',')}, ','))
+            AND (w.slug LIKE '%/%' OR (w.publico AND w.slug <> '' AND u.handle = ${duenyo}
+              AND NOT (w.slug = ANY(string_to_array(${[...TRAMOS_RESERVADOS].join(',')}, ',')))))
         `);
         for (const x of q.rows as any[]) slugs.set(x.id, x.slug);
       }
@@ -640,6 +705,7 @@ export function registrarSitios(app: Express, db: any) {
     if (s.forma === 'dominio') {
       const d = await dominioApunta(db, s.host);
       if (!d) return null;
+      duenyo = d.handle;
       if (d.entidad_id && d.entidad_tipo === 'pagina') {
         const w = await datosPagina(db, d.entidad_id);
         if (w?.publico && w.indexable) {
@@ -676,7 +742,10 @@ export function registrarSitios(app: Express, db: any) {
       inicio.mod = fecha(ultimo || Date.now());
       inicio.t = ultimo || undefined;
     }
-    return urls;
+    // Una página del espacio que además cuelga de otra sale dos veces con la
+    // misma dirección: una basta.
+    const vistas = new Set<string>();
+    return urls.filter(u => !vistas.has(u.loc) && !!vistas.add(u.loc));
   }
   urlsDeAnfitrion = (host: string) => urlsDelSitio(sitioDe({ headers: { host } } as any));
 
@@ -731,6 +800,22 @@ export function registrarSitios(app: Express, db: any) {
         if (r?.slug && String(r.slug).includes('/')) {
           const prefijo = s.forma === 'casa' ? `/@${w.handle}` : '';
           return res.redirect(301, `${prefijo}/${r.slug}${query}`);
+        }
+        // Y una página publicada con nombre corto, a él: es su canónica
+        // (`canonicaDe`), y `/p/:id` sería una segunda dirección del mismo
+        // contenido. Sólo donde ese nombre se abre de verdad.
+        const corto = w.publico && typeof r?.slug === 'string' && r.slug && !r.slug.includes('/') && !TRAMOS_RESERVADOS.has(r.slug) ? r.slug : null;
+        if (corto) {
+          let destino: string | null = null;
+          if (s.forma === 'casa') destino = `/@${w.handle}/${encodeURIComponent(corto)}`;
+          else if (s.forma === 'subdominio') destino = w.handle === s.handle ? `/${encodeURIComponent(corto)}` : null;
+          else if (s.forma === 'dominio') {
+            const d = await dominioApunta(db, s.host);
+            if (d?.entidad_id && d.entidad_tipo === 'pagina') {
+              destino = w.id === d.entidad_id ? '/' : (await cuelgaDe(db, w.id, d.entidad_id)) ? `/${encodeURIComponent(corto)}` : null;
+            }
+          }
+          if (destino) return res.redirect(301, `${destino}${query}`);
         }
       }
       // En un dominio propio se reescribe SIEMPRE, haya página o no: aunque
@@ -922,12 +1007,21 @@ export function registrarSitios(app: Express, db: any) {
       if (ids.length) {
         try {
           const r = await db.execute(sql`
-            SELECT id, slug FROM knowledge_windows
-            WHERE id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND slug LIKE '%/%'
-              AND deleted_at IS NULL AND archived_at IS NULL
+            SELECT w.id, w.slug, w.publico, u.handle FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+            WHERE w.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND w.slug IS NOT NULL AND w.slug <> ''
+              AND w.deleted_at IS NULL AND w.archived_at IS NULL
           `);
           const legibles: Record<string, string> = {};
-          for (const x of r.rows as any[]) legibles[x.id] = String(x.slug);
+          for (const x of r.rows as any[]) {
+            const slug = String(x.slug);
+            if (slug.includes('/')) { legibles[x.id] = slug; continue; }
+            // Una página publicada con nombre corto (`/powerbanks`), donde ese
+            // nombre se abre: en su subdominio, o en el dominio del sitio del
+            // que cuelga. En la casa común, no: allí manda el arroba.
+            if (!x.publico || TRAMOS_RESERVADOS.has(slug) || x.id === raizDominio) continue;
+            if (s.forma === 'subdominio' && x.handle === s.handle) legibles[x.id] = slug;
+            else if (s.forma === 'dominio' && raizDominio && await cuelgaDe(db, x.id, raizDominio)) legibles[x.id] = slug;
+          }
           if (Object.keys(legibles).length) {
             const ruta = (slug: string) => slug.split('/').map(encodeURIComponent).join('/');
             raiz = raiz.replace(/href="(\/@[^/"]+)?\/p\/([^"/?#]+)"/g, (todo, arroba, id) =>
@@ -1041,6 +1135,19 @@ export function registrarSitios(app: Express, db: any) {
       if (tramos.length >= 2) {
         const f = await porRuta(d.handle, tramos, '');
         if (f) return f;
+      }
+      // `dominio.com/powerbanks`: una página del sitio por su nombre corto,
+      // que es la dirección canónica que se le da (`canonicaDe`). Sólo las que
+      // cuelgan de la página a la que apunta el dominio: otra página pública
+      // de la misma dueña no se abre en el dominio de este sitio.
+      if (d.entidad_id && d.entidad_tipo === 'pagina' && tramos.length === 1 && tramos[0] !== 'buscar') {
+        const p = await porSlug(d.handle, tramos[0]);
+        if (p && p.id === d.entidad_id) return { redirigir: '/' };
+        if (p && await cuelgaDe(db, p.id, d.entidad_id)) return { ...p, porRuta: true };
+        if (!p) {
+          const a = await anterior(d.handle, tramos[0], '');
+          if (a) return a;
+        }
       }
       if (d.entidad_id && d.entidad_tipo === 'pagina') {
         const w = await datosPagina(db, d.entidad_id);
