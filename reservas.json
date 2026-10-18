@@ -5,6 +5,12 @@
       "ruta": "src/server/apiPublica.ts",
       "motivo": "W6: PUT /api/v1/pages/:id/experts",
       "desde": "2026-10-18T16:40:39.390Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
+      "desde": "2026-10-18T16:47:25.196Z"
     }
   ]
 }
