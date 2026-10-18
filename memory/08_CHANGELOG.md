@@ -9122,3 +9122,7 @@ en mis páginas como proyecto pendiente».
 - Una propiedad **porcentaje** se ve como **barra de avance**: naranja-amarillo (`amber-400`) por debajo del 50 %, azul (`sky-500`) del 50 al 99 % y verde (`emerald-500`) al 100 %. En la galería, fina con la cifra al lado; en la página del elemento, **gruesa y a todo el ancho**, con la cifra grande, como un crowdfunding.
 - Para editarla, un **deslizador de 0 a 100 de 10 en 10** (ratón, dedo o flechas); guarda al soltar.
 - Se puede apagar por columna en su editor («Mostrar como barra de avance», `config.barra === false`) para porcentajes que no son avance (una comisión). Ver `BarraAvance.tsx`.
+
+## 2026-10-18 — «Mapas» es la herramienta; el mapa del mundo, un bloque (prog8)
+- **`/mapas`** ya no abre el Mapa de Indicadores: es la portada de la herramienta (`MapasPortada.tsx`) con **qué mapas puedes crear** (puntos, indicadores por territorio, con IA, insertarlos en páginas, publicarlos, valoraciones) y los **mapas de la comunidad** (`/api/maps`, sin el principal). «Crear tu mapa» y «Mis mapas».
+- El **Mapa de Indicadores de la Humanidad** sigue en **`/mapa`** (antes redirigía a `/mapas` y perdía los parámetros) y es ahora un **bloque de datos `mapaMundo`** («Mapa de indicadores del mundo»): el mismo mapa en un marco sin menús, con alto elegible, territorio de inicio y «Pantalla completa». La plantilla Humanidad Wiki lo trae; se añade a la página Humanidad Wiki de Eugenio.
