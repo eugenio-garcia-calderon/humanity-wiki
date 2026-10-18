@@ -26,6 +26,8 @@
  * adjunto. Recalcular cualquiera de ellos aquí sería una segunda opinión que
  * un día contradice a la primera.
  */
+import { mensajeAmable } from './respuestasAmables';
+
 export interface ArchivoSubido {
   url: string;
   bytes: number;
@@ -97,7 +99,8 @@ export async function subirArchivo(
     try { r = await enviar(); }
     catch { alProgreso?.(0); await new Promise(res => setTimeout(res, 2000)); r = await enviar(); }
     const j = r.j;
-    if (r.status < 200 || r.status >= 300 || !j?.url) return { error: j?.error || 'No se ha podido subir el archivo.' };
+    // Sin JSON (Cloudflare o el proxy contestaron con una página), el motivo por su código.
+    if (r.status < 200 || r.status >= 300 || !j?.url) return { error: j?.error || (r.status >= 300 ? mensajeAmable(r.status) : 'No se ha podido subir el archivo.') };
     alProgreso?.(1);
     return {
       url: j.url as string,
