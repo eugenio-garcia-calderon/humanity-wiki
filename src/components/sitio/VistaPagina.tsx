@@ -1,6 +1,6 @@
 import { useEffect, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import EnlazanAqui from '../knowledge/EnlazanAqui';
 import { contarPagina, textoLectura } from '../../utils/ajustesPagina';
@@ -70,11 +70,14 @@ export default function VistaPagina({ pagina, propio, pie }: {
     };
   }, [pagina.id, pagina.titulo, pagina.indexable, propio, icono]);
 
-  // Volver a la página madre SIN salir del sitio.
+  // LA MIGA DE PAN (2026-10-18): Inicio › Energía portátil › Powerbanks ›
+  // esta página, sin salir del sitio. Si el servidor no trae el camino
+  // entero, sólo la madre, como antes.
   const padre = pagina.padre;
-  const aPadre = padre && sitio
-    ? (padre.slug ? (sitio.raizId === padre.id ? '/' : sitio.enlaceSlug(padre.slug, padre.handle)) : sitio.enlacePagina(padre.id))
+  const enlaceDe = (m: NonNullable<DatosPagina['padre']>) => sitio
+    ? (sitio.raizId === m.id || pagina.sitio?.raizId === m.id ? '/' : m.slug ? sitio.enlaceSlug(m.slug, m.handle) : sitio.enlacePagina(m.id))
     : null;
+  const migas = sitio ? (pagina.migas?.length ? pagina.migas : padre ? [padre] : []) : [];
 
   // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
   // —el servidor también los pinta—, así que aquí se cogen los que van a
@@ -96,10 +99,20 @@ export default function VistaPagina({ pagina, propio, pie }: {
   return (
     <div onClickCapture={alPinchar}>
     <MarcoLectura pagina={pagina} rutas={rutas}>
-      {aPadre && (
-        <Link to={aPadre} className="inline-flex items-center gap-1 mb-4 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> {padre!.titulo || 'Volver'}
-        </Link>
+      {migas.length > 0 && (
+        <nav aria-label="Estás en" className="mb-4">
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-slate-600">
+            {migas.map((m, i) => (
+              <li key={m.id} className="flex items-center gap-1">
+                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-2">
+                  {i === 0 && (sitio?.raizId === m.id || pagina.sitio?.raizId === m.id) ? 'Inicio' : (m.titulo || 'Volver')}
+                </Link>
+                <ChevronRight className="w-4 h-4 text-slate-500" aria-hidden />
+              </li>
+            ))}
+            <li aria-current="page" className="text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
+          </ol>
+        </nav>
       )}
       <article>
         <CabeceraLectura pagina={pagina} esMovil={esMovil} />
