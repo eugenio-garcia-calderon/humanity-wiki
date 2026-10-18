@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/pages/Comercio.tsx",
-      "motivo": "W5 Wikiproducts: pedidos a distribuidores",
-      "desde": "2026-10-18T11:41:38.555Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/MiPedido.tsx",
       "motivo": "W5 Wikiproducts: pedidos a distribuidores",
       "desde": "2026-10-18T11:41:41.174Z"
