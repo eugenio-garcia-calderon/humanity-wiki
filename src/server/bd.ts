@@ -366,10 +366,13 @@ export function registerBdRoutes(app: Express, db: any) {
       try { await ponerAlDia(req.params.id); } catch (e: any) { console.error('[bd] recurrencias:', e?.message || e); }
 
       const columnas = await columnasDe(req.params.id);
+      // LAS ENTRADAS OCULTAS (2026-10-18): solo las recibe quien puede editar la tabla.
+      const veOcultas = !('error' in await puedeConTabla(req, req.params.id, true));
       const f = await db.execute(sql`
-        SELECT id, valores, pagina_id, orden, recurrencia, procedencia, created_at, updated_at
+        SELECT id, valores, pagina_id, orden, recurrencia, procedencia, oculta, created_at, updated_at
         FROM bd_filas
         WHERE tabla_id = ${req.params.id} AND archived_at IS NULL AND deleted_at IS NULL
+          AND (oculta = false OR ${veOcultas})
         ORDER BY orden, created_at
       `);
 
@@ -414,6 +417,7 @@ export function registerBdRoutes(app: Express, db: any) {
             id: fila.id,
             pagina_id: fila.pagina_id,
             pagina: fila.pagina_id ? tarjetas[fila.pagina_id] || null : null,
+            oculta: !!fila.oculta,
             orden: fila.orden,
             recurrencia: fila.recurrencia || null,
             // Where each value came from (migration 0153). Empty object when nobody said.
@@ -1647,6 +1651,21 @@ export function registerBdRoutes(app: Express, db: any) {
    *  en %) y no en la tabla: es cómo se ve SU imagen. Escribe quien puede
    *  escribir en la tabla, que es quien ve el botón. Sólo toca esa clave:
    *  el resto de la página no viaja ni se pisa. */
+  /** Ocultar o enseñar una entrada al público: `{ oculta: true | false }`. Solo quien edita la tabla. */
+  app.put('/api/bd/filas/:id/oculta', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT tabla_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa entrada no existe.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const oculta = req.body?.oculta === true;
+      await db.execute(sql`UPDATE bd_filas SET oculta = ${oculta}, updated_at = now() WHERE id = ${req.params.id}`);
+      res.json({ oculta });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.put('/api/bd/filas/:id/encuadre', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;

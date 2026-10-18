@@ -21,6 +21,8 @@ type Precargado = {
   resolver?: { host: string; status: number; body: any };
   /** Lo mismo que contesta `/api/sitio/pagina/:id`, por id. */
   paginas?: Record<string, any>;
+  /** La dirección legible de una ficha y su página: `{ '/powerbanks/x': id }`. */
+  rutas?: Record<string, string>;
 };
 
 const datos: Precargado =
@@ -40,4 +42,11 @@ export function paginaPrecargada(id: string | undefined | null): any | null {
   const p = datos.paginas[id];
   delete datos.paginas[id];
   return p;
+}
+
+/** Qué página es esta dirección legible, si vino en el HTML. No se borra al
+ *  leerla, como lo demás: es sólo un id, no una foto que se pueda quedar
+ *  vieja, y en las rutas que cargan aparte el componente se monta dos veces. */
+export function rutaPrecargada(camino: string): string | null {
+  return datos.rutas?.[camino] || null;
 }
