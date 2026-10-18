@@ -84,6 +84,9 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
             <Route path="buscar" element={<BuscadorSitio />} />
             {/* La dirección legible de una ficha: `/powerbanks/anker-737` (SEO R2).
                 Si no es ninguna, lo de siempre: la página del dominio. */}
+            {/* Una página del sitio por su nombre corto: `/powerbanks` (su
+                dirección canónica). Si no es ninguna, la página del dominio. */}
+            <Route path=":pagina" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
             <Route path=":categoria/:ficha" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
             <Route path=":categoria/:sub/:ficha" element={<RutaSitio propio siNo={<PaginaDeDominio host={host} resuelto={resuelto} />} />} />
             <Route path="*" element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
