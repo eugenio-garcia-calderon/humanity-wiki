@@ -1,0 +1,519 @@
+{
+  "slug": "goodwe-lynx-home-f",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "GoodWe Lynx Home F / Lynx F G2",
+  "marca": "GoodWe",
+  "modelo": "Lynx Home F (LX F6.6-H, F9.8-H, F13.1-H, F16.4-H) y Lynx F G2 (LX F6.4-H-20 … LX F28.8-H-20)",
+  "variante_ficha": "Lynx F G2, LX F9.6-H-20 (3 módulos de 3,2 kWh), ficha «GoodWe-Single page-20250124-EN-V2.1»",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2024,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=56&mid=73",
+    "fecha": "2026-10-18",
+    "nota": "Primera garantía de la G2 fechada el 17 de mayo de 2024 (Rev 1.0); el año de lanzamiento de la primera generación Lynx Home F no se verificó."
+  },
+  "estado": "a la venta",
+  "resumen": "La GoodWe Lynx F G2 (sucesora de la Lynx Home F) es una batería doméstica modular de alta tensión con celdas de litio-ferrofosfato (LFP), formada por módulos de 3,2 kWh apilables de 2 a 9 por torre (6,4 a 28,8 kWh útiles). Se conecta en continua a inversores híbridos de la propia marca (series ET, EH, BT, BH y EHB). Según la ficha, admite hasta 8 torres en paralelo y es apta para interior y exterior con protección IP55. En la Stromspeicher-Inspektion 2025 de la HTW Berlin se ensayó la combinación GW10K-ET-20 con LX F16.0-H-20. La garantía europea de la primera generación es de 10 años con un 70 % de capacidad o una energía mínima suministrada, lo que antes ocurra.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://en.goodwe.com/lynxf-g2-series",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha fijado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "La ficha solo da energía útil (100 % DoD, 0,2C, 25 °C, inicio de vida)."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.6,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "LX F9.6-H-20. La ficha advierte que la energía útil puede variar según el inversor. Medición HTW Berlin 2024 para el LX F16.0-H-20: 15,5 kWh útiles frente a 16,0 declarados (https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "G2: 6,4 / 9,6 / 12,8 / 16,0 / 19,2 / 22,4 / 25,6 / 28,8 kWh por torre; primera generación: 6,55 / 9,83 / 13,10 / 16,38 kWh",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "Capacidades de la primera generación tomadas de su garantía (https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73)."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "Módulos LX F3.2-20 (3,2 kWh, 64 V) más una unidad de control (PCU) por torre."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliacion_max_kwh": {
+      "valor": 230,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "8 torres de 28,8 kWh en paralelo; por torre, máximo 28,8 kWh."
+    },
+    "potencia_continua_kw": {
+      "valor": 6.72,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "Potencia nominal del LX F9.6-H-20 (35 A × 192 V); de 4,48 kW (6,4 kWh) a 20,16 kW (28,8 kWh). Se reduce según temperatura y estado de carga. La potencia real depende del inversor."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no publica potencia de pico."
+    },
+    "quimica": {
+      "valor": "LFP (LiFePO4)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "GoodWe no lo publica en la ficha ni en la web del producto."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": "ciclos",
+      "origen": "desconocido",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no da ciclos. La energía mínima garantizada equivale a unos 2.560 ciclos completos (calculado: 16,4 MWh / 6,4 kWh)."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 100,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "Condición de ensayo de la energía útil declarada."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "No publicada en la ficha; la HTW Berlin la mide pero solo la muestra en gráficos."
+    },
+    "tension": {
+      "valor": "Alta tensión: 128–576 V nominales según número de módulos (LX F9.6-H-20: 192 V, rango 172,2–216,6 V)",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "DC (a inversor híbrido GoodWe)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/lynxf-g2-series",
+      "fecha": "2026-10-18",
+      "nota": "La web la presenta como apta para inversores híbridos y de «retrofit»."
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversores_compatibles": {
+      "valor": "GoodWe ET (5–10 kW y 15–30 kW), ET G2, EH, BH, BT, EHB, según modelo y firmware",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Ftp/EN/Downloads/User%20Manual/GW_Battery%20Compatibility%20Overview-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Lista de compatibilidad V029.1 (10-09-2026). El LX F6.4-H-20 solo admite GW12KL-ET y GW18KL-ET de la serie ET 15–30 kW. La garantía exige inversor GoodWe salvo confirmación previa."
+    },
+    "respaldo_apagones": {
+      "valor": "Depende del inversor híbrido GoodWe (salida de respaldo del inversor)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/lynxf-g2-series",
+      "fecha": "2026-10-18",
+      "nota": "La batería no gestiona el respaldo por sí misma; no se verificó el alcance por modelo de inversor."
+    },
+    "instalacion": {
+      "valor": "interior y exterior",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "Montaje en suelo; la garantía exige evitar la luz solar directa."
+    },
+    "ip": {
+      "valor": "IP55",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "0 a 50 (carga); -20 a 50 (descarga)",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": null,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "De 86 kg (2 módulos) a 324 kg (9 módulos); el valor exacto del modelo de 3 módulos no se extrajo."
+    },
+    "medidas_mm": {
+      "valor": "600 × 380 de base; altura de 559 a 1651 según número de módulos",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "garantia_energia_mwh": {
+      "valor": 24.5,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=56&mid=73",
+      "fecha": "2026-10-18",
+      "nota": "LX F9.6-H-20 (garantía G2 mercado global). De 16,4 MWh (6,4 kWh) a 73,6 MWh (28,8 kWh). Primera generación (UE): 16,77 a 41,93 MWh."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 497.15,
+      "unidad": "€/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://tienda-solar.es/en/batteries/1813-goodwe-lynx-home-f-327kwh-battery-module-high-voltage",
+      "fecha": "2026-10-18",
+      "nota": "Primera generación Lynx Home F, no la G2: (3 módulos × 1.259,00 € + base/PCU 1.110,00 €) = 4.887,00 € con IVA (tienda-solar.es) / 9,83 kWh útiles del LX F9.8-H según su ficha (https://rheem.co.nz/assets/technical_documents/Solar/Batteries/4ae119d0d5/GOODWE-Lynx-Home-F-Series-HV-Datasheet.pdf). Sin inversor ni instalación. No se encontró precio público de la G2 en España."
+    },
+    "pruebas_independientes": {
+      "valor": 94.9,
+      "unidad": "% SPI (10 kW)",
+      "origen": "declarado",
+      "fuente": "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time",
+      "fecha": "2026-10-18",
+      "nota": "Valor declarado por GoodWe en su nota de prensa (junio de 2025), no leído en el informe: SPI (10 kW) del 94,9 % y clase de eficiencia A para el sistema F1 de la Energy Storage Inspection 2025 de la HTW Berlin (inversor GW10K-ET-20 + batería LX F16.0-H-20). La HTW Berlin sí ensayó ese sistema (lo lista entre los sistemas valorados con el SPI, diapositiva 64: https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf), pero en el texto del informe no figura la cifra, que solo aparece en gráficos. Es un resultado del sistema completo, no de la batería sola. En la Stromspeicher-Inspektion 2024 (sistemas H1–H4), el H4 (GW10K-ET-20 + LX F16.0-H-20) dio 15,5 kWh de capacidad útil medida frente a 16,0 kWh declarados; los ciclos completos de H3 y H4 no pudieron hacerse a potencia nominal por reducción de potencia debida a la temperatura; a 150 W de descarga el inversor rondó el 72 % de eficiencia (https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+      "fecha": "2026-10-18",
+      "nota": "Garantía UE y Sudáfrica de la Lynx Home F (Rev 1.5, 05-06-2025), máximo 11 años desde la fabricación. En el mercado global (fuera de UE) la garantía de producto es de 5 años. No se encontró una garantía UE específica de la G2."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+      "fecha": "2026-10-18",
+      "nota": "70 % de la energía útil o la energía mínima suministrada, lo que antes ocurra."
+    },
+    "letra_pequena": [
+      "La cobertura de rendimiento termina al alcanzar la energía mínima garantizada (≈2,56 MWh por kWh útil, unos 2.560 ciclos completos), aunque no hayan pasado 10 años (https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73).",
+      "UE: GoodWe puede cubrir el transporte terrestre hasta un límite solo los primeros 5 años; de los años 6 a 10 solo cubre el material; la mano de obra in situ se compensa solo en algunos casos, con autorización previa y tope.",
+      "Instalación por profesionales cualificados en el mes siguiente a la compra y con inversor GoodWe de la lista de compatibilidad; reclamar en un mes desde el fallo (el documento cita también un plazo de dos semanas, contradictorio).",
+      "Las instalaciones transfronterizas requieren aprobación escrita previa de GoodWe.",
+      "La garantía global de la G2 exige conexión a internet para la monitorización y advierte que su incumplimiento puede anular la garantía (https://en.goodwe.com/Skippower/downloadFileF?id=56&mid=73)."
+    ],
+    "quien_responde": "GoodWe a través del distribuidor o instalador local, con escalado al portal de soporte de GoodWe. Los documentos no tratan la insolvencia del fabricante."
+  },
+  "empresa": {
+    "razon_social": "GoodWe Technologies Co., Ltd.",
+    "pais_sede": "China (Suzhou, Jiangsu)",
+    "fundacion": 2010,
+    "cotiza_en": "Bolsa de Shanghái (código 688390), desde el 04-09-2020",
+    "web": "https://en.goodwe.com",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "No publicado en los documentos consultados",
+    "fabricas_conocidas": [],
+    "notas": [
+      "GoodWe afirma que un sistema suyo ha encabezado la clasificación de la HTW Berlin por quinta vez y que fue uno de solo dos fabricantes chinos en la clase de eficiencia más alta (junio 2025) (https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time).",
+      "En Australia, GoodWe ha retirado inversores (no baterías): MS-30 en diciembre de 2023 por un conector de CA extraíble sin herramienta, y EHB/GEH en septiembre de 2025 por exportar a red en modo bypass durante un apagón (https://www.productsafety.gov.au/recalls/goodwe-australia-pty-ltd-%E2%80%94-goodwe-ms-30-solar-inverter; https://www.productsafety.gov.au/node/32458).",
+      "No se encontraron detenciones UFLPA, medidas antidumping específicas sobre baterías GoodWe ni retiradas de baterías Lynx en las búsquedas del 2026-10-18."
+    ],
+    "fuentes": [
+      "https://en.goodwe.com/company-profile",
+      "https://en.goodwe.com/goodwe-listed-on-shanghai-stock-exchange",
+      "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time",
+      "https://en.goodwe.com/lynxf-g2-series"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://en.goodwe.com/company-profile",
+      "pais_sede": "https://en.goodwe.com/company-profile%20(dirección%20de%20contacto:%20No.%2090%20Zijin%20Rd.,%20New%20District,%20Suzhou)",
+      "fundacion": "https://en.goodwe.com/company-profile",
+      "cotiza_en": "https://en.goodwe.com/goodwe-listed-on-shanghai-stock-exchange"
+    }
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "No publicado",
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas LFP",
+      "carcasa metálica IP55",
+      "unidad de control (PCU)"
+    ],
+    "num_componentes": {
+      "valor": 4,
+      "unidad": "componentes",
+      "origen": "calculado",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18",
+      "nota": "LX F9.6-H-20: 3 módulos de batería + 1 PCU."
+    },
+    "reparabilidad": "Diseño apilable con módulos de 3,2 kWh y cableado de comunicación precableado («plug & play», según la marca), lo que en principio permite sustituir módulos. GoodWe anuncia diagnóstico y actualización remotos a través del inversor (https://en.goodwe.com/lynxf-g2-series)."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62040-1",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 63056",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "VDE 2510",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN 38.3",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE / CEC / RCM",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "idioma": "en",
+      "fecha": "2025-01-24",
+      "nota": "Lynx F G2, V2.1"
+    },
+    {
+      "tipo": "manual",
+      "url": "https://en.goodwe.com/Skippower/downloadFileF?id=1846&mid=60",
+      "idioma": "en",
+      "fecha": null,
+      "nota": "Manual de usuario Lynx F G2 (no revisado)"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73",
+      "idioma": "en",
+      "fecha": "2025-06-05",
+      "nota": "Lynx Home F (LX F-H), UE y Sudáfrica, Rev 1.5"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://en.goodwe.com/Skippower/downloadFileF?id=56&mid=73",
+      "idioma": "en",
+      "fecha": "2024-05-17",
+      "nota": "Lynx F G2, mercado global (excluye UE), Rev 1.0"
+    },
+    {
+      "tipo": "certificado",
+      "url": "https://en.goodwe.com/Ftp/EN/Downloads/User%20Manual/GW_Battery%20Compatibility%20Overview-EN.pdf",
+      "idioma": "en",
+      "fecha": "2026-09-10",
+      "nota": "Lista de compatibilidad batería–inversor V029.1 (no es un certificado; se incluye como documento técnico)"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://rheem.co.nz/assets/technical_documents/Solar/Batteries/4ae119d0d5/GOODWE-Lynx-Home-F-Series-HV-Datasheet.pdf",
+      "idioma": "en",
+      "fecha": "2022-06-24",
+      "nota": "Primera generación Lynx Home F (LX F6.6-H a F16.4-H), V1.1 AU, copia de distribuidor: 9,83 kWh útiles en el LX F9.8-H, 25 A, IP55, LFP."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "GoodWe was one of only two Chinese manufacturers in the highest efficiency class.",
+      "donde": "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time",
+      "veredicto": "matizable",
+      "explicacion": "La HTW Berlin ensayó en 2025 el sistema F1 (inversor GW10K-ET-20 + LX F16.0-H-20). El resultado vale para esa combinación concreta y para el sistema completo, no para la batería sola ni para otras capacidades o inversores; el informe muestra el valor en gráficos y no en texto. La cifra concreta del 94,9 % procede de la nota de prensa de GoodWe; no se ha podido leer en el texto del informe.",
+      "fuentes": [
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Up to 8 towers in parallel (230 kWh)",
+      "donde": "https://en.goodwe.com/lynxf-g2-series",
+      "veredicto": "cierta",
+      "explicacion": "Coincide con la ficha técnica (8 torres de hasta 28,8 kWh = 230,4 kWh). Es un dato de configuración declarado; para una vivienda el límite práctico lo marca el inversor.",
+      "fuentes": [
+        "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "reliable lithium iron phosphate (LFP) battery cell technology ensures maximum safety and a longer life cycle",
+      "donde": "https://en.goodwe.com/lynxf-g2-series",
+      "veredicto": "matizable",
+      "explicacion": "La química LFP tiene en general mayor estabilidad térmica y vida en ciclos que la NMC, pero «máxima seguridad» no es medible. La garantía solo asegura el 70 % de capacidad o unos 2.560 ciclos completos equivalentes, y fuera de la UE la garantía de producto es de 5 años.",
+      "fuentes": [
+        "https://en.goodwe.com/Skippower/downloadFileF?id=56&mid=73",
+        "https://en.goodwe.com/Skippower/downloadFileF?id=48&mid=73"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "the state of charge (SOC) no longer plays a role when installing and expanding the system",
+      "donde": "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time",
+      "veredicto": "sin pruebas",
+      "explicacion": "No se encontró documentación técnica ni ensayo independiente sobre la ampliación con módulos de distinto estado de carga o antigüedad.",
+      "fuentes": [
+        "https://en.goodwe.com/goodwe-energy-storage-system-tops-htw-berlin-ranking-for-the-fifth-time"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "LX F16.0-H-20: Usable Energy 16.0 kWh",
+      "donde": "https://en.goodwe.com/Skippower/downloadFileF?id=2030&mid=60",
+      "veredicto": "matizable",
+      "explicacion": "En la Stromspeicher-Inspektion 2024 de la HTW Berlin la combinación GW10K-ET-20 + LX F16.0-H-20 entregó 15,5 kWh útiles, un 3 % menos que lo declarado; la propia ficha advierte que la energía útil puede variar según el inversor.",
+      "fuentes": [
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [
+    {
+      "pais": "Australia",
+      "organismo": "ACCC",
+      "fecha": "2023-12-14",
+      "motivo": "El conector de CA puede retirarse sin herramienta y dejar expuestos terminales con tensión.",
+      "modelos_afectados": "Inversores GoodWe GW5000-MS-30, GW6000-MS-30, GW8500-MS-30, GW10K-MS-30. No afecta a la batería Lynx.",
+      "url": "https://www.productsafety.gov.au/recalls/goodwe-australia-pty-ltd-%E2%80%94-goodwe-ms-30-solar-inverter",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Retirada de la marca, no del producto; actualizada el 24-07-2024."
+    },
+    {
+      "pais": "Australia",
+      "organismo": "ACCC",
+      "fecha": "2025-09-19",
+      "motivo": "Con el interruptor en modo bypass y funcionando en respaldo, el inversor puede exportar energía a la red durante un apagón (riesgo de isla).",
+      "modelos_afectados": "Inversores híbridos GoodWe GW5K-EHB-AU-G11, GW8.6K-EHB-AU-G11, GW9.99K-EHB-AU-G11 (y GE GEH5.0/8.6/10-1U-10). No afecta a la batería Lynx, aunque el EHB es uno de los inversores compatibles.",
+      "url": "https://www.productsafety.gov.au/node/32458",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Fecha según la lista de retiradas del Clean Energy Council (https://cleanenergycouncil.org.au/industry/products/product-recalls). Retirada de la marca, no del producto."
+    }
+  ],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: web abierta por «GoodWe battery recall / Lynx recall», lista de retiradas del Clean Energy Council y fichas de productsafety.gov.au (ACCC, Australia), avisos de WorkSafe QLD, búsquedas en los sitios de la CPSC (EE. UU.), Health Canada y gov.uk. No se encontró ninguna retirada ni alerta de las baterías Lynx Home F ni Lynx F G2. Las dos retiradas listadas son de inversores GoodWe en Australia (marca, no producto). La base de EU Safety Gate no pudo consultarse directamente (aplicación dinámica, acceso bloqueado desde la herramienta).",
+  "ofertas": [
+    {
+      "distribuidor": "tienda-solar.es",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/batteries/1813-goodwe-lynx-home-f-327kwh-battery-module-high-voltage",
+      "precio_eur": 1259,
+      "iva_incluido": true,
+      "unidad": "por módulo Lynx Home F de 3,27 kWh (primera generación, ref. MODLYNXF)",
+      "incluye_instalacion": false,
+      "envio": "no indicado",
+      "stock": "no indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio sin IVA 1.040,50 € según los metadatos. No incluye PCU ni base."
+    },
+    {
+      "distribuidor": "tienda-solar.es",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/batteries/1814-pcu-base-goodwe-lynx-home-f-high-voltage",
+      "precio_eur": 1110,
+      "iva_incluido": true,
+      "unidad": "por PCU + base Lynx Home F (una por sistema, primera generación, ref. BASELYNXF)",
+      "incluye_instalacion": false,
+      "envio": "no indicado",
+      "stock": "no indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio sin IVA 917,36 €. Necesaria una por sistema; admite de 2 a 5 módulos."
+    }
+  ],
+  "compatibles": [
+    "GoodWe ET (5–10 kW, 15–30 kW) y ET G2",
+    "GoodWe EH / BH",
+    "GoodWe BT",
+    "GoodWe EHB"
+  ],
+  "pendiente": [
+    "Oferta con precio público de la Lynx F G2 en España (solo se encontró la primera generación en tienda-solar.es).",
+    "Valor SPI del sistema F1 leído en el propio informe de la HTW Berlin (solo está en gráficos).",
+    "Consulta directa a EU Safety Gate.",
+    "Garantía UE específica de la Lynx F G2 (la encontrada para UE corresponde a la primera generación).",
+    "Fabricante de las celdas y país de fabricación.",
+    "Ciclos declarados y eficiencia de ciclo completo.",
+    "EAN/GTIN.",
+    "Ciclos declarados de la primera generación (la ficha V1.1 no los publica)."
+  ]
+}

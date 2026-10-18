@@ -1,0 +1,412 @@
+{
+  "slug": "ja-solar-deepblue-4-pro",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "JA Solar DeepBlue 4.0 Pro JAM54D40 (108 medias células, vidrio-vidrio)",
+  "marca": "JA Solar",
+  "modelo": "JAM54D40-xxx/LB (435–465 W) y JAM54D40-xxx/LR (445–470 W); también JAM54D40/GB y /MB",
+  "variante_ficha": "JAM54D40-470/LR (marco negro, vidrio-vidrio), datos de la ficha de producto del distribuidor solartraders; la ficha PDF del fabricante no tiene texto legible por máquina",
+  "ean": {
+    "valor": null,
+    "unidad": "GTIN",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró la fecha de lanzamiento."
+  },
+  "estado": "a la venta",
+  "resumen": "El DeepBlue 4.0 Pro JAM54D40 es una familia de módulos de JA Solar para tejados con 108 medias células TOPCon de tipo n y construcción vidrio-vidrio, en formato de 1762 × 1134 mm y unos 22 kg. Según los datos que publica el distribuidor solartraders, la variante JAM54D40-470/LR alcanza 470 W y un 23,52 % de eficiencia, con un coeficiente de temperatura de −0,29 %/°C; la variante /LB llega a 465 W. Los mayoristas sun.store y Krannich indican para la variante /LR, monofacial, 25 años de garantía de producto y 30 de potencia (99 % el primer año y 87,4 % al final), aunque otras páginas de solartraders dan 12 o 15 años; los PDF oficiales de ficha y garantía consultados no tenían texto legible, por lo que esos plazos no se han confirmado con el fabricante. La serie está muy presente en el mercado mayorista europeo (más de 23 000 unidades en oferta en solartraders en octubre de 2026), pero no se encontró precio público para consumidor en España.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 470,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": "Variante JAM54D40-470/LR según la ficha HTML del distribuidor; tolerancia −5/+10 W según la misma página (dato a contrastar con la ficha oficial)."
+    },
+    "gama_potencias_wp": {
+      "valor": "435–470",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro",
+      "fecha": "2026-10-18",
+      "nota": "/LB 435–460 y 440–465 W; /LR 445–470 W, según versiones de ficha listadas por solartraders."
+    },
+    "eficiencia_pct": {
+      "valor": 23.52,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": "Variante 470 W. La variante 455/LB indica 22,77 %. La página de serie de solartraders llega a mencionar «hasta 26 %», cifra que no corresponde a ningún módulo de la serie."
+    },
+    "tecnologia_celula": {
+      "valor": "TOPCon tipo n",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-455-lb-tslc",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "tipo_celula": {
+      "valor": "monocristalino",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-455-lb-tslc",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "medias células",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-455-lb-tslc",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
+      "fecha": "2026-10-18",
+      "nota": "sun.store y Krannich (https://shop.krannich-solar.com/en-de/JAM54D40-465-LR/0161820) describen la variante /LR como monofacial; las variantes /LB son las bifaciales. La URL de solartraders con «bif» parece un error del distribuidor."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No aplica a la variante /LR (monofacial). Para las /LB no se encontró el dato en una fuente legible."
+    },
+    "vidrio": {
+      "valor": "doble (vidrio-vidrio)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": "Espesor no publicado en la página del distribuidor."
+    },
+    "marco": {
+      "valor": "negro, lámina/fondo blanco",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "medidas_mm": {
+      "valor": "1762 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "peso_kg": {
+      "valor": 22.0,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.29,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "noct_o_nmot_c": {
+      "valor": null,
+      "unidad": "°C",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado en sun.store, Krannich ni solartraders; la ficha oficial en PDF no tiene texto legible por máquina."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No disponible en fuentes legibles."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.4,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro",
+      "fecha": "2026-10-18",
+      "nota": "Según la página de serie de solartraders (texto comercial); a confirmar con el documento de garantía."
+    },
+    "voc_v": {
+      "valor": 40.4,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
+      "fecha": "2026-10-18",
+      "nota": "470/LR, STC, según la ficha reproducida por el mayorista sun.store (Vmpp 33,84 V, Impp 13,89 A). Krannich da 40,20 V para la versión 465/LR: https://shop.krannich-solar.com/en-de/JAM54D40-465-LR/0161820"
+    },
+    "isc_a": {
+      "valor": 14.66,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
+      "fecha": "2026-10-18",
+      "nota": "470/LR, STC, según sun.store. Krannich da 14,65 A para la 465/LR."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V CC",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 frontal / 2400 trasera",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip_caja_conexiones": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado en las fuentes legibles."
+    },
+    "conector": {
+      "valor": "Stäubli MC4-EVO2 (referencia del distribuidor)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": "Cable 1200/1200 mm."
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
+      "fecha": "2026-10-18",
+      "nota": "No calculado: no se encontró ninguna oferta con IVA incluido. Como referencia mayorista, sun.store muestra «desde 0,117 €/Wp» sin indicar si incluye IVA."
+    },
+    "resultado_pvel": {
+      "valor": "No figura el JAM54D40 en la lista visible de Top Performers 2026",
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": "https://scorecard.pvel.com/top-performers/",
+      "fecha": "2026-10-18",
+      "nota": "En la lista 2026 aparece el JAM54D45-xxx/LB (bifacial vidrio-vidrio 2,0/2,0, la generación siguiente) en varias pruebas (al menos ciclos térmicos y calor húmedo), no el JAM54D40."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ningún ensayo independiente publicado para el JAM54D40."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": null,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/43216/warranty_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es",
+      "fecha": "2026-10-18",
+      "nota": "Sin confirmar: solartraders indica 25 años en la página de la variante 455/LB, 15 años en la de 470/LR y 12 años en las preguntas frecuentes de la serie. El PDF de garantía no tiene texto legible. Dos mayoristas más indican 25 años de producto para la variante /LR: sun.store («25 years product warranty», 89,4 % a 25 años y 87,4 % a 30) y Krannich (25 años de producto; 30 de potencia, 99 % el primer año y 0,4 %/año). No se encontró una fuente oficial de JA Solar legible."
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 87.0,
+      "primer_anio_pct": 99.0,
+      "lineal_anual_pct": 0.4,
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18",
+      "nota": "Según el distribuidor: 30 años y 87 % (87,4 % en la descripción). Sin confirmar con el documento del fabricante. Primer año 99 % según Krannich: https://shop.krannich-solar.com/en-de/JAM54D40-465-LR/0161820"
+    },
+    "letra_pequena": [
+      "No se pudo leer el documento de garantía del fabricante: los PDF alojados por solartraders (https://www.solartraders.com/uploads/production/data_sheet/file/43216/warranty_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es y https://www.solartraders.com/uploads/production/data_sheet/file/38522/warranty_jam54d40_435_lb_tslc_en_07-04-2025.pdf?locale=es) no tienen texto legible por máquina. Antes de comprar, pedir el documento de garantía vigente para España.",
+      "Las propias páginas del distribuidor se contradicen sobre los años de garantía de producto (12, 15 o 25) y de potencia (25 o 30), lo que indica que dependen de la variante y de la versión del documento. Fuente: https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro"
+    ],
+    "quien_responde": "El fabricante (JA Solar). Sin documento legible no se pudo comprobar si menciona seguro de respaldo o qué ocurre en caso de quiebra. Frente al consumidor en España responde también el vendedor."
+  },
+  "empresa": {
+    "razon_social": "JA Solar Technology Co., Ltd.",
+    "pais_sede": "China",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://www.jasolar.com",
+    "fabricante_celulas": "JA Solar (según la marca); el informe Sheffield Hallam señala divulgación incompleta de proveedores de polisilicio, obleas y células",
+    "pais_fabricacion": "No especificado en las fuentes legibles",
+    "fabricas_conocidas": [
+      "China, Vietnam y EE. UU. (desde finales de 2023), según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ],
+    "notas": [
+      "El informe «Over-Exposed» (Sheffield Hallam, 2023) clasifica la exposición de JA Solar a la región uigur como «muy alta» para módulos fabricados en China, Vietnam y EE. UU., citando el uso de polisilicio de la planta de Xinte en Xinjiang (≈46 800 t en 2022, ≈37,6 % de su consumo conocido). Evaluación de riesgo, no constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "JA Solar demandó en julio de 2024 a Astronergy ante el Tribunal Unificado de Patentes (Múnich y Hamburgo) por dos patentes TOPCon; la Oficina Europea de Patentes revocó una de ellas en octubre de 2025 y ambas empresas cerraron todos los litigios con licencias cruzadas el 29 de noviembre de 2025. Fuente: http://www.pv-magazine.com/2025/12/01/astronergy-and-ja-solar-end-global-patent-disputes-with-cross-licensing-deal/"
+    ],
+    "fuentes": [
+      "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "http://www.pv-magazine.com/2025/12/01/astronergy-and-ja-solar-end-global-patent-disputes-with-cross-licensing-deal/",
+      "https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "No especificado",
+    "fabrica": null,
+    "materiales_principales": [
+      "silicio monocristalino tipo n",
+      "vidrio (dos láminas)",
+      "marco de aluminio negro"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC TS 62941",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "ISO 9001, ISO 14001, ISO 45001",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/43215/data_sheet_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "JAM54D40-470/LR, copia de solartraders fechada 07-04-2026; sin texto legible por máquina."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/43216/warranty_jam54d40_470_lr_bfr_dg_en_07-04-2026.pdf?locale=es",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Copia de solartraders fechada 07-04-2026; sin texto legible por máquina."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/38521/data_sheet_jam54d40_435_lb_tslc_en_07-04-2025.pdf?locale=es",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "JAM54D40-435/LB, copia de solartraders fechada 07-04-2025; sin texto legible."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Eficiencia de hasta el 26 % (texto comercial del distribuidor)",
+      "donde": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-455-lb-tslc",
+      "veredicto": "falsa",
+      "explicacion": "Ninguna variante del JAM54D40 se acerca a esa cifra: la propia página da 22,77 % para la 455/LB y la serie llega al 23,52 % (470/LR). El 26 % podría referirse a eficiencia de célula, que no es comparable. La frase es del distribuidor, no se ha encontrado en una fuente de JA Solar.",
+      "fuentes": [
+        "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-455-lb-tslc",
+        "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Más del 87 % de la potencia original tras 30 años",
+      "donde": "https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro",
+      "veredicto": "sin pruebas",
+      "explicacion": "Es una cifra de garantía, no de degradación medida, y no se pudo cotejar con el documento de garantía del fabricante (PDF ilegible). Las páginas del distribuidor también citan 25 años y 84,8 %.",
+      "fuentes": [
+        "https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro",
+        "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada ni alerta para el JA Solar JAM54D40 ni para módulos de la marca JA Solar. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "Solartraders (mercado mayorista)",
+      "tipo": "mayorista",
+      "pais": "UE (almacenes en Alemania, Países Bajos y Eslovenia)",
+      "url": "https://www.solartraders.com/es/products/modulo/ja-solar-jam54d40-470-lr-bfr-bif-dg",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo (JAM54D40-470/LR)",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "23 874 unidades en 8 ofertas de 6 vendedores (actualizado 17-10-2026)",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precios visibles solo para socios."
+    },
+    {
+      "distribuidor": "sun.store (mercado mayorista B2B)",
+      "tipo": "mayorista",
+      "pais": "UE (vendedores no indicados)",
+      "url": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por Wp: «desde 0,117 €/Wp» en 3 ofertas (≈ 55 € por módulo de 470 W, cálculo nuestro)",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "lotes de 936 a 11 232 unidades",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio orientativo de mayorista para palés; la página no dice si incluye IVA ni el país del vendedor. No es un precio para particulares."
+    }
+  ],
+  "compatibles": [
+    "Inversores de string y microinversores con entrada de hasta 1500 V CC (Voc e Isc pendientes de verificar)."
+  ],
+  "pendiente": [
+    "NOCT/NMOT y bifacialidad de las variantes /LB: requieren una copia legible de la ficha oficial (los PDF de solartraders no tienen texto).",
+    "Años de garantía de producto desde una fuente oficial de JA Solar (tres mayoristas dan 25 años para /LR; solartraders da también 12 y 15 en otras páginas).",
+    "Precio con IVA en una tienda española (Amara NZero y vicoexport exigen registro; sun.store solo da precio mayorista).",
+    "Fecha de lanzamiento, fundación y cotización de JA Solar con fuente.",
+    "Verificar el modelo concreto en la base de datos Top Performers de Kiwa PVEL (JA Solar figura como fabricante Top Performer 2026, grupo de 5 ensayos: https://scorecard.pvel.com/manufacturers/)."
+  ]
+}

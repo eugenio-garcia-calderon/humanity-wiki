@@ -1,0 +1,453 @@
+{
+  "slug": "longi-hi-mo-x10-explorer",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "LONGi Hi-MO X10 Explorer 54 células (108 medias células)",
+  "marca": "LONGi",
+  "modelo": "LR7-54HVH-475M … 490M (algunos distribuidores anuncian la serie hasta 500 W)",
+  "variante_ficha": "LR7-54HVH-490M (marco negro, vidrio simple con lámina trasera), ficha técnica «20241118 BGV02 Draft»",
+  "ean": {
+    "valor": null,
+    "unidad": "GTIN",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público en la ficha ni en las tiendas consultadas."
+  },
+  "anio_lanzamiento": {
+    "valor": 2025,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.longi.com/eu/news/hi-mo-x10-launch-italy/",
+    "fecha": "2026-10-18",
+    "nota": "Presentación en Italia el 4 de febrero de 2025; primeras entregas en Alemania a mediados de mayo de 2025 según pv.de (https://pv.de/en/news/hi-mo-x10-explorer-the-new-back-contact-module-from-longi/)."
+  },
+  "estado": "a la venta",
+  "resumen": "El Hi-MO X10 Explorer es un módulo fotovoltaico monofacial de LONGi para tejados residenciales y comerciales, con 108 medias células de contacto trasero (tecnología HPBC 2.0, sin contactos metálicos en la cara frontal) y un formato de 1800 × 1134 mm. La ficha técnica de noviembre de 2024 cubre potencias de 475 a 490 W con eficiencias del 23,3 % al 24,0 %, y un coeficiente de temperatura de −0,26 %/°C. Según la marca, su optimizador de sombras reduce más de un 70 % la pérdida de potencia por sombreado frente a módulos TOPCon, una cifra que no se ha encontrado contrastada por terceros. La garantía de la versión Explorer es de 15 años de producto y 30 años de potencia lineal; la web europea de LONGi menciona 30 años de garantía de producto, que no corresponde a esta versión según el documento de garantía. No figura en la lista visible de Top Performers de Kiwa PVEL 2026.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://eu.longi.com/hi-mo-X10",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 490,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante LR7-54HVH-490M, STC; tolerancia 0/+3 %."
+    },
+    "gama_potencias_wp": {
+      "valor": "475–490",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha 20241118 BGV02 Draft. sun.store anuncia la serie como 480–500 W (https://sun.store/en/product/longi-lr7-54hvh-485m-480-500-1500v-black-frame-56160); no se ha visto ficha oficial con 495–500 W."
+    },
+    "eficiencia_pct": {
+      "valor": 24.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante 490 W; 23,8 % en la de 485 W y 23,3 % en la de 475 W. El 24,8 % que anuncia LONGi corresponde al formato grande de 670 W, no a este."
+    },
+    "tecnologia_celula": {
+      "valor": "HPBC 2.0 (contacto trasero, back contact), tipo n",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.longi.com/eu/news/hi-mo-x10-launch-italy/",
+      "fecha": "2026-10-18",
+      "nota": "La ficha dice «BC-cell» y obleas TaiRay; la denominación HPBC 2.0 procede de la nota de prensa de LONGi. Algunos distribuidores lo etiquetan erróneamente como TOPCon."
+    },
+    "tipo_celula": {
+      "valor": "monocristalino",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "medias células (6×18)",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante HVH monofacial con lámina trasera; existe una variante bifacial vidrio-vidrio (LR7-54HVD) que no es la descrita aquí."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No aplica: variante monofacial."
+    },
+    "vidrio": {
+      "valor": "simple, 3,2 mm templado con antirreflejo",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "marco": {
+      "valor": "aluminio anodizado (marco negro en la versión comercializada en España)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Color negro según las referencias de tienda («Black frame»)."
+    },
+    "medidas_mm": {
+      "valor": "1800 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "peso_kg": {
+      "valor": 21.6,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.26,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,200 %/°C; Isc +0,050 %/°C."
+    },
+    "noct_o_nmot_c": {
+      "valor": 45,
+      "unidad": "°C (NOCT, ±2)",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Potencia en NOCT de la variante 490 W: 373 W."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha indica «<1 %»; el documento de garantía fija ≥99 % al final del año 1."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.35,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Años 2 a 30."
+    },
+    "voc_v": {
+      "valor": 40.52,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante 490 W, STC."
+    },
+    "isc_a": {
+      "valor": 15.33,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante 490 W, STC. Vmp 33,51 V; Imp 14,63 A."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V CC (IEC)",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Fusible máximo en serie 25 A; clase II; reacción al fuego IEC clase C."
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 frontal / 2400 trasera",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Granizo de 25 mm a 23 m/s."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tres diodos de derivación."
+    },
+    "conector": {
+      "valor": "MC4 (según la referencia del distribuidor)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://pre.amaranzero.es/en/products/solar/modules/110-0125-longi-lr7-54hvh-490w-hi-mo-x10-exp-black-f-mc4-1500v",
+      "fecha": "2026-10-18",
+      "nota": "La ficha técnica no especifica el conector; cable de 4 mm²."
+    },
+    "precio_por_wp_eur": {
+      "valor": 0.237,
+      "unidad": "€/Wp (IVA incluido)",
+      "origen": "calculado",
+      "fuente": "https://tienda-solar.es/en/solar-panels/2524-solar-panel-longi-hi-mo-x10-490wp-premium-monocrystalline-module-lr7-54hvh-with-bc-cells",
+      "fecha": "2026-10-18",
+      "nota": "116,16 € / 490 Wp = 0,237 €/Wp. Oferta de tienda-solar.es con IVA, pedido mínimo 6 unidades, sin instalación."
+    },
+    "resultado_pvel": {
+      "valor": "No figura en la lista visible de Top Performers 2026",
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": "https://scorecard.pvel.com/top-performers/",
+      "fecha": "2026-10-18",
+      "nota": "En la lista de Top Performers de Kiwa PVEL (edición 2026) consultada aparecen modelos LONGi LR8-66HYD, LR8-66HGD y LR5-78HBD, pero no el LR7-54HVH. La lectura de la tabla fue parcial; ver pendiente. LONGi fue Top Performer como fabricante en 2025 por octava vez (https://eu.longi.com/press/longi-named-kiwa-pvel-top-performer-for-the-eighth-time), lo que no se refiere a este modelo."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ningún ensayo independiente (PVEL, RETC, laboratorio o revista) publicado sobre el LR7-54HVH. El premio The smarter E AWARD 2025 es un galardón de feria, no un ensayo de rendimiento."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 15,
+      "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La versión Explorer de 54 células tiene 15 años de producto; la versión Scientist, 25 años."
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 88.85,
+      "primer_anio_pct": 99.0,
+      "lineal_anual_pct": 0.35,
+      "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "fecha": "2026-10-18",
+      "nota": "≥99 % al final del año 1; pérdida ≤0,35 %/año; ≥88,85 % (la garantía redondea a 88,9 %) al final del año 30. Solo potencia de la cara frontal, medida en STC por un laboratorio aceptado."
+    },
+    "letra_pequena": [
+      "La garantía empieza en la fecha de entrega al primer cliente o seis meses después de salir de fábrica, lo que ocurra antes: un módulo almacenado meses pierde parte del plazo. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "El cliente paga desmontaje, reembalaje, instalación y reinstalación; LONGi solo compensa el transporte documentado de reclamaciones aprobadas. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "La reclamación debe comunicarse por escrito en los 30 días siguientes a detectar el problema; los envíos sin número RMA son por cuenta y riesgo del cliente. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "Las pruebas de terceros las adelanta el cliente; LONGi las reembolsa solo si confirman un fallo imputable a LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "LONGi elige el remedio (reparar, sustituir, añadir módulos o reembolsar el valor residual o la diferencia de potencia a precio de mercado por vatio); las sustituciones no amplían el plazo. Responsabilidad total limitada al precio facturado de los módulos defectuosos. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "Exclusiones: instalación que no siga el manual (que LONGi puede actualizar), edificios no aptos, instalaciones móviles y la mayoría de las marinas, tensión superior a la nominal, ambientes corrosivos, placas de características manipuladas o ilegibles. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "La garantía se transmite a un nuevo propietario solo si los módulos siguen en el emplazamiento original, están pagados y el nuevo titular acepta todas las condiciones. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "El documento no exige registro del producto ni instalador certificado, pero tampoco dice qué ocurre si LONGi o su filial europea dejan de operar. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf"
+    ],
+    "quien_responde": "El fabricante (LONGi Green Energy Technology). El documento de garantía no menciona seguro de respaldo por terceros ni qué sucede en caso de quiebra o salida del mercado europeo; la ley aplicable es la del contrato de suministro del módulo. Frente al consumidor en España responde además el vendedor por la garantía legal de conformidad."
+  },
+  "empresa": {
+    "razon_social": "LONGi Green Energy Technology Co., Ltd.",
+    "pais_sede": "China (Xi'an, Shaanxi)",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://eu.longi.com",
+    "fabricante_celulas": "LONGi (células propias de contacto trasero, según la marca)",
+    "pais_fabricacion": "China (la ficha técnica indica la sede de Xi'an; el país de la fábrica concreta no figura en la ficha)",
+    "fabricas_conocidas": [
+      "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ],
+    "notas": [
+      "En noviembre de 2021 la aduana de EE. UU. (CBP) retuvo 40,31 MW de módulos LONGi en aplicación de una orden de retención (WRO) relacionada con el silicio; LONGi declaró poder demostrar la trazabilidad y que los envíos continuaban. Fuente: http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/",
+      "Según fuentes del sector citadas por Reuters (noviembre de 2022), los productos solares retenidos por la CBP bajo la ley UFLPA entre junio y octubre de 2022 eran «principalmente» de LONGi, Trina y JinkoSolar; la CBP no confirmó fabricantes. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "El informe «Over-Exposed» de la Universidad Sheffield Hallam (julio de 2023, actualizado en noviembre de 2023) clasifica la exposición de la cadena de suministro de LONGi a la región uigur (XUAR) como «muy alta» para módulos fabricados en China, Malasia y Vietnam, por falta de información sobre proveedores de polisilicio y capacidades por planta. Es una evaluación de riesgo, no una constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "En abril de 2024 la Comisión Europea abrió una investigación por el Reglamento de Subvenciones Extranjeras (FSR) sobre una licitación de un parque solar de 110 MW en Rumanía en la que participaba la filial alemana de LONGi; LONGi se retiró de la licitación en mayo de 2024 y la Comisión anunció el cierre de la investigación. Fuente: https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation",
+      "LONGi y JinkoSolar mantuvieron litigios de patentes (TOPCon frente a contacto trasero) en China, EE. UU., Europa, Japón y Australia; en septiembre de 2025 anunciaron un acuerdo global con licencias cruzadas. Fuente: https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+    ],
+    "fuentes": [
+      "https://eu.longi.com/hi-mo-X10",
+      "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/",
+      "https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation",
+      "https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "No especificado en la ficha ni en la web del producto",
+    "fabrica": null,
+    "materiales_principales": [
+      "obleas de silicio monocristalino tipo n (TaiRay, según la marca)",
+      "vidrio templado de 3,2 mm",
+      "marco de aluminio anodizado",
+      "lámina trasera",
+      "caja de conexiones IP68 con tres diodos"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no publica el número de componentes."
+    },
+    "reparabilidad": "Un módulo laminado no es reparable por el usuario; la garantía solo contempla reparación o sustitución por LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf"
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215",
+      "emisor": null,
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730",
+      "emisor": null,
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 61730",
+      "emisor": null,
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "ISO 9001:2015, ISO 14001:2015, ISO 45001:2018 (sistemas de gestión de la empresa)",
+      "emisor": null,
+      "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Copia alojada por autosolar.es; versión «20241118 BGV02 Draft»."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Limited Warranty for LONGi Hi-MO X10 Solar Modules (Distributed Generation Market), copia alojada por solarmarkt.ch; nombre de fichero con fecha 20250108."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://eu.longi.com/es/support-and-resources/warranty-documents",
+      "idioma": "es",
+      "fecha": "2026-10-18",
+      "nota": "Página oficial de documentos de garantía de LONGi Europa."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "24.8% module efficiency",
+      "donde": "https://www.longi.com/eu/news/hi-mo-x10-launch-italy/",
+      "veredicto": "matizable",
+      "explicacion": "El 24,8 % corresponde a la versión de gran formato de 670 W. La versión doméstica Explorer de 54 células llega al 24,0 % en su variante superior (490 W) según su propia ficha técnica.",
+      "fuentes": [
+        "https://www.longi.com/eu/news/hi-mo-x10-launch-italy/",
+        "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Shading Optimizer Technology reduces power loss by over 70 % (compared with TOPCon modules)",
+      "donde": "https://pv.de/en/news/hi-mo-x10-explorer-the-new-back-contact-module-from-longi/",
+      "veredicto": "sin pruebas",
+      "explicacion": "Es una cifra del fabricante sin condiciones de ensayo publicadas en las fuentes consultadas. No se ha encontrado ningún ensayo independiente que la confirme o la desmienta; la reducción real depende del patrón de sombra.",
+      "fuentes": [
+        "https://pv.de/en/news/hi-mo-x10-explorer-the-new-back-contact-module-from-longi/",
+        "https://eu.longi.com/hi-mo-X10"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "30-year product and materials warranty",
+      "donde": "https://eu.longi.com/hi-mo-X10",
+      "veredicto": "matizable",
+      "explicacion": "El documento de garantía del Hi-MO X10 asigna a la versión Explorer de 54 células 15 años de producto (25 años a la versión Scientist); los 30 años son de garantía de potencia lineal. La frase de la web no distingue versiones.",
+      "fuentes": [
+        "https://eu.longi.com/hi-mo-X10",
+        "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+        "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "30-year power warranty with only 1% degradation in the first year and 88.85% power retention after 30 years",
+      "donde": "https://eu.longi.com/hi-mo-X10",
+      "veredicto": "cierta",
+      "explicacion": "Coincide con la ficha técnica y con el documento de garantía (≥99 % el año 1, 0,35 %/año, ≥88,9 % al año 30). Es un compromiso contractual, no una medición de degradación real.",
+      "fuentes": [
+        "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
+        "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada ni alerta de seguridad para el LONGi LR7-54HVH ni para módulos de la marca LONGi. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "Tienda Solar (tienda-solar.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/solar-panels/2524-solar-panel-longi-hi-mo-x10-490wp-premium-monocrystalline-module-lr7-54hvh-with-bc-cells",
+      "precio_eur": 116.16,
+      "iva_incluido": true,
+      "unidad": "por módulo (LR7-54HVH-490M)",
+      "incluye_instalacion": false,
+      "envio": "No detallado en la ficha",
+      "stock": "No indicado; pedido mínimo 6 unidades",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "96,00 € sin IVA."
+    },
+    {
+      "distribuidor": "AutoSolar (autosolar.es)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/paneles-de-conexion-a-red/panel-solar-485w-longi-hi-mo-x10-lr7-54hvh-485m",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo (LR7-54HVH-485M)",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "No indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "La página no mostraba precio en la consulta; referencia de artículo 1006029."
+    }
+  ],
+  "compatibles": [
+    "Inversores de string y microinversores con entrada de hasta 1500 V CC y corriente de cortocircuito por string ≥15,5 A (Isc 15,33 A de la variante 490 W). Comprobar el límite de corriente de entrada del inversor u optimizador: los módulos de contacto trasero de alta corriente superan los 15 A."
+  ],
+  "pendiente": [
+    "Confirmar si existe una ficha oficial más reciente con variantes de 495–500 W (sun.store anuncia la serie como 480–500 W).",
+    "Verificar la lista completa de Top Performers de Kiwa PVEL 2026 filtrando por LONGi en el buscador de scorecard.pvel.com; la lectura automática de la tabla fue parcial.",
+    "País y planta de fabricación de los módulos vendidos en España (no figura en la ficha).",
+    "Año de fundación y bolsa de cotización de LONGi (no verificados con fuente en esta investigación).",
+    "GTIN/EAN.",
+    "Precio en más tiendas españolas (autosolar.es no mostraba precio; la búsqueda web se agotó antes de completar este punto).",
+    "Ensayos independientes del efecto del optimizador de sombras."
+  ]
+}

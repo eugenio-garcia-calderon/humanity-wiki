@@ -775,7 +775,7 @@ export function registrarSitios(app: Express, db: any) {
       const canonica = (await direccionCanonica(w, publica)) || url;
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const indexable = m.indexable === false ? false : w.indexable !== false;
+      const indexable = w.perdida ? false : m.indexable === false ? false : w.indexable !== false;
       // FILTROS Y ORDENACIONES FUERA DEL ÍNDICE (SEO R8). Cada combinación de
       // `?…` es otra dirección con el mismo contenido: una página basura por
       // cada una. Se siguen sus enlaces, pero no se guarda; la canónica ya
@@ -825,7 +825,7 @@ export function registrarSitios(app: Express, db: any) {
         html = html.replace(/<link[^>]+rel="icon"[^>]*>/g, '').replace('</head>', () => `    <link rel="icon" href="${esc(href)}">\n  </head>`);
       }
       html = await rapido(html, req, s, w, publica);
-      res.type('html').set('Cache-Control', 'no-cache').send(html);
+      res.status(w.perdida ? 404 : 200).type('html').set('Cache-Control', 'no-cache').send(html);
     } catch (e) {
       console.error('sitios: vista previa', e);
       next();
@@ -1018,7 +1018,12 @@ export function registrarSitios(app: Express, db: any) {
       }
       if (d.entidad_id && d.entidad_tipo === 'pagina') {
         const w = await datosPagina(db, d.entidad_id);
-        return w?.publico ? w : null;
+        if (!w?.publico) return null;
+        // `lamieldelasierra.com/loquesea` sigue enseñando la miel (decisión de
+        // 2026-08-22, `AplicacionDeDominio.tsx`), pero al buscador se le dice
+        // la verdad: esa dirección no existe (SEO R16). `/buscar` sí existe.
+        const perdida = tramos.length > 0 && !(tramos.length === 1 && tramos[0] === 'buscar');
+        return perdida ? { ...w, perdida: true } : w;
       }
       if (!d.entidad_id && tramos.length === 1) return porSlug(d.handle, tramos[0]);
       return null;

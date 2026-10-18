@@ -1,0 +1,421 @@
+{
+  "slug": "fox-ess-ep",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Fox ESS EP11 / EP5",
+  "marca": "Fox ESS",
+  "modelo": "Serie EP de alta tensión: EP5 (5,18 kWh) y EP11 (10,36 kWh); nuevas versiones EP5/EP6/EP11/EP12 Plus (manual de 2026-08)",
+  "variante_ficha": "EP11 (ficha técnica V1.2, 2024-04-15)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se ha encontrado un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No consta. La ficha V1.2 es de abril de 2024 y la garantía británica que ya incluye EP5/EP11 es de mayo de 2024."
+  },
+  "estado": "a la venta",
+  "resumen": "La serie EP de Fox ESS son baterías domésticas LFP de alta tensión de una sola caja para montar en pared: 5,18 kWh (EP5) o 10,36 kWh (EP11) nominales a 192 V o 384 V. Según la ficha de la marca, el EP11 declara una eficiencia de ida y vuelta de al menos el 95 % y 4.000 ciclos o más, y admite hasta 4 unidades en paralelo con los inversores híbridos de Fox ESS. Las condiciones de garantía del EP han cambiado según la región y la versión: en el Reino Unido pasaron de 5 años (2024) a hasta 10 años con registro y monitorización (2025), con un tope de energía distinto en cada mercado. La HTW Berlin ensayó en 2025 y 2026 otros sistemas de Fox ESS con buenos resultados, pero no la serie EP.",
+  "imagen": {
+    "url": null,
+    "fuente": null,
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "Pendiente de enlazar una imagen oficial verificada."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 10.36,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "EP11 según la ficha V1.2. El manual de 2026 de la versión EP11 Plus da 11,52 kWh nominales y 10,36 kWh útiles. EP5: 5,18 kWh."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.32,
+      "unidad": "kWh",
+      "origen": "calculado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "EP11 V1.2: 10,36 kWh × 90 % de DoD. Ojo: Solar Choice y el manual EP11 Plus dan 10,36 kWh útiles; la cifra depende de la versión."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5,18 (EP5) / 10,36 (EP11) por unidad; hasta 4 unidades en paralelo",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "modular": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "Unidad de una sola caja; se amplía añadiendo unidades completas en paralelo."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "Según Solar Choice, hace falta una caja de conexiones adicional."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 41.6,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "«Scalable to 41.6 kWh» (4 unidades). 4 × 10,36 = 41,44 kWh (cálculo propio)."
+    },
+    "potencia_continua_kw": {
+      "valor": 10.4,
+      "unidad": "kW",
+      "origen": "calculado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "27 A × 384 V nominales ≈ 10,4 kW (EP11). La ficha no da la potencia en kW; Solar Choice habla de hasta 10 kW en monofásico. La potencia real la limita el inversor."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "La ficha da una corriente de pico de descarga de 65 A durante 60 s, sin cifra en kW."
+    },
+    "quimica": {
+      "valor": "LFP (litio-ferrofosfato), celda prismática",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": "REPT Battero (empresa vinculada), según Solar Choice",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+      "fecha": "2026-10-18",
+      "nota": "Dato de un análisis de terceros, no de la ficha. Solar Choice señala que REPT Battero es una fabricante de celdas vinculada a Fox ESS, ambas con Tsingshan como accionista; no confirma que las celdas del EP sean suyas."
+    },
+    "ciclos_declarados": {
+      "valor": 4000,
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "≥4.000; la ficha no indica las condiciones de ensayo."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 90,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "Solar Choice: 100 % técnico, con un 90 % recomendado en el manual."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": 95,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "≥95 %. No medido de forma independiente para el EP."
+    },
+    "tension": {
+      "valor": "alta tensión; 384 V nominal (348–438 V) en el EP11; 192 V en el EP5",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "DC, con inversor híbrido Fox ESS",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversores_compatibles": {
+      "valor": "Fox ESS H1, KH, H3, H3-Pro y serie US",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "La garantía excluye componentes que no haya suministrado Fox ESS."
+    },
+    "respaldo_apagones": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "depende del inversor Fox ESS asociado. La batería no tiene salida propia."
+    },
+    "instalacion": {
+      "valor": "interior o exterior; pared",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "La garantía británica exige al menos 300 mm de espacio libre alrededor para la refrigeración."
+    },
+    "ip": {
+      "valor": "IP65",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "carga 0 a 55; descarga -10 a 55",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "Las versiones «(w)» con calefacción integrada llegan de -25 a 55 °C (manual de 2026). La garantía de rendimiento exige un ambiente de -10 a 50 °C."
+    },
+    "peso_kg": {
+      "valor": 99,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "±2 kg; EP11. EP5: 51 kg (manual de 2026)."
+    },
+    "medidas_mm": {
+      "valor": "710 × 625 × 147",
+      "unidad": "mm (an × al × fo)",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18",
+      "nota": "EP11 V1.2. EP11 Plus: 710 × 640 × 185 mm."
+    },
+    "garantia_energia_mwh": {
+      "valor": 33.4,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+      "fecha": "2026-10-18",
+      "nota": "EP11, garantía para Reino Unido V4.2 (2025). Versión UK V4.0 (2024): 18,6 MWh a 5 años. Australia: unos 38,4 MWh según Solar Choice. EP5 (UK V4.2): 16,2 MWh. 33,4 MWh equivalen a unos 3.220 ciclos completos de 10,36 kWh (cálculo propio)."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 474.15,
+      "unidad": "EUR/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-de-litio-fox-ess-ep11-hv-1036-kwh",
+      "fecha": "2026-10-18",
+      "nota": "4.419,09 € (IVA incluido, AutoSolar, sin inversor ni instalación) / 9,32 kWh útiles de la EP11 según la ficha V1.2. Si la tienda sirviera la EP11 Plus (10,36 kWh útiles), serían 426,55 €/kWh."
+    },
+    "pruebas_independientes": {
+      "valor": "La serie EP no ha sido ensayada. Otros sistemas de Fox ESS: SPI (10 kW) 94,8 % en 2025 (H3-10.0-Smart + ECS2900-H6) y 97,0 %, clase A, en 2026 (PQ-H3-Ultra-10.0 + EQ3300-5)",
+      "unidad": "%",
+      "origen": "medido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HTW Berlin, Stromspeicher-Inspektion 2025 (sistema H1, https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf) y 2026 (sistema E1). Son otras baterías e inversores de la marca; los resultados no se aplican directamente al EP5/EP11."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Reino Unido V4.2 (2025-03-13): 60 meses de serie, desde la instalación y como máximo 65 meses desde la fabricación, más 60 meses de ampliación para EP si se registra y se monitoriza con Fox Cloud mediante un datalogger de Fox. Sin registro: 5 años. No se ha encontrado la garantía para España/UE continental."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+      "fecha": "2026-10-18",
+      "nota": "UK V4.2: el 70 % de la energía nominal de la etiqueta a los 10 años o al tope de energía (EP11 33,4 MWh), lo que ocurra antes. En la versión UK V4.0 (2024-05-01) era el 80 % a 5 años con 18,6 MWh, sin ampliación por registro, solo de pago."
+    },
+    "letra_pequena": [
+      "Las condiciones del EP han cambiado entre versiones: UK V4.0 (mayo de 2024) daba 5 años y decía «There is no warranty extension for EP5 and EP11 available upon registration», con una ampliación de pago opcional; UK V4.2 (marzo de 2025) da hasta 10 años con registro y Fox Cloud. Se aplica la versión vigente en la fecha de compra. Fuentes: https://www.solartraders.com/uploads/production/data_sheet/file/40436/warranty_ek11_10_36kwh_en_29-07-2025.pdf?locale=nl y https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+      "El tope de energía cambia por región: 33,4 MWh en Reino Unido (V4.2) frente a unos 38,4 MWh en Australia según Solar Choice. Fuente: https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+      "Solo pueden reclamar el instalador y el personal autorizado de Fox ESS, salvo que el instalador sea insolvente o el lugar sea remoto. La instalación debe hacerla un instalador acreditado. Fuente: UK V4.2.",
+      "La política solo se ofrece al comprador original del producto a Fox ESS, y no se menciona la transmisión al revender la vivienda. Fuente: UK V4.2.",
+      "No aclara quién paga la mano de obra. Si la unidad devuelta no tiene defecto, Fox puede cobrar una tarifa de inspección o el coste completo del reemplazo. La unidad averiada debe devolverse en 30 días. Fuente: UK V4.2.",
+      "Exige al menos 300 mm de espacio libre y un ambiente de -10 a 50 °C, y excluye conectores que no sean de Fox. Fuente: UK V4.2.",
+      "Los plazos de registro se contradicen: 36 meses desde la instalación en un punto y desde la fabricación en otro. Fuente: UK V4.2."
+    ],
+    "quien_responde": "El instalador, con Fox ESS como fabricante. Si el instalador es insolvente, la garantía británica permite designar a otro instalador local a cargo del usuario. No prevé qué ocurre si Fox ESS deja el mercado; quedarían los derechos legales frente al vendedor."
+  },
+  "empresa": {
+    "razon_social": null,
+    "pais_sede": "China",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://www.fox-ess.com",
+    "fabricante_celulas": "REPT Battero (vinculada), según Solar Choice; no confirmado para el EP",
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Wenzhou (China), planta principal según Solar Choice"
+    ],
+    "notas": [
+      "Solar Choice la describe como fabricante independiente dirigido por su fundador, con Tsingshan Holding Group entre sus principales accionistas. Tsingshan también controla la fabricante de celdas REPT Battero. Fuente: https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+      "No cotiza: según la misma fuente, prepara su salida a ChiNext (Bolsa de Shenzhen). Fuente: https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+      "Solar Choice cita casos de descarga limitada con frío en otro modelo (EQ4800) en Victoria, Australia. Fuente: la misma.",
+      "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos ni insolvencias en las búsquedas realizadas."
+    ],
+    "fuentes": [
+      "https://www.solarchoice.net.au/products/batteries/fox-ess-review/",
+      "https://goingsolaruk.co.uk/fox-ess-battery-review/"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": "Wenzhou (según Solar Choice; no confirmado para el EP)",
+    "materiales_principales": [
+      "celdas prismáticas de litio-ferrofosfato (LFP)",
+      "dispositivo térmico de extinción por aerosol (según el manual)"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Unidad de una sola caja: la garantía prohíbe la reparación no autorizada, y cualquier sustitución debe aprobarla Fox ESS antes. No se ha encontrado información sobre repuestos."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619 (seguridad), EN IEC 61000-6-1/-3 (CEM), UN 38.3 (transporte)",
+      "emisor": "no indicado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE, RCM, IEC 62477-1, IEC 62619 (versiones Plus)",
+      "emisor": "no indicado",
+      "fuente": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20260828/ENEP6EP12ManualV1.0.1.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "idioma": "en",
+      "fecha": "2024-04-15"
+    },
+    {
+      "tipo": "manual",
+      "url": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20260828/ENEP6EP12ManualV1.0.1.pdf",
+      "idioma": "en",
+      "fecha": "2026-08"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf",
+      "idioma": "en",
+      "fecha": "2025-03-13"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/40436/warranty_ek11_10_36kwh_en_29-07-2025.pdf?locale=nl",
+      "idioma": "en",
+      "fecha": "2024-05-01"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://au.fox-ess.com/download/upfiles/AU-BATTERY-WARRANTY-V2.6-20251126-.pdf",
+      "idioma": "en",
+      "fecha": "2025-11-26"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Scalable to 41.6 kWh",
+      "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "veredicto": "matizable",
+      "explicacion": "Exige 4 unidades EP11 en paralelo, que según Solar Choice necesitan una caja de conexiones adicional. Con la capacidad de la ficha, 4 × 10,36 dan 41,44 kWh nominales; la energía útil es menor.",
+      "fuentes": [
+        "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+        "https://www.solarchoice.net.au/products/batteries/fox-ess-review/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Cycle life ≥4,000",
+      "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "veredicto": "matizable",
+      "explicacion": "La ficha no indica las condiciones de ensayo. La garantía británica vigente cubre hasta 33,4 MWh en el EP11, unos 3.220 ciclos completos (cálculo propio), por debajo de la cifra anunciada.",
+      "fuentes": [
+        "https://www.fox-ess.com/Public/Uploads/uploadfile/files/20251202/BATTERYWARRANTYUKV4.220250313.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "High Voltage and High Efficiency (round-trip efficiency ≥95%)",
+      "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/34995/FoxESS%20HV%20EP11%20-%20Datasheet.pdf?locale=nl",
+      "veredicto": "sin pruebas",
+      "explicacion": "No hay una medición independiente de la serie EP. La HTW Berlin midió una eficiencia de sistema alta en otras combinaciones de Fox ESS, pero eso no se puede trasladar directamente a esta batería.",
+      "fuentes": [
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf",
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18, a petición expresa de comprobar retiradas en Reino Unido y la UE, en: gov.uk Product Safety Alerts, Reports and Recalls (búsqueda «Battery»; la única retirada de baterías domésticas que aparece es la de LG «ESS Home Batteries», sin relación con Fox ESS), la lista de retiradas del Clean Energy Council y ACCC (Australia: ninguna de Fox ESS), CPSC, y web abierta («Fox ESS battery recall 2025 2026», «safety notice»). No se ha encontrado ninguna retirada ni alerta oficial de baterías Fox ESS. Un análisis británico dice que no hay «major recall issues», sin fuente. No se consultó directamente la base de EU Safety Gate, por lo que conviene repetir la consulta allí antes de publicar «ninguna conocida».",
+  "ofertas": [
+    {
+      "distribuidor": "AutoSolar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/baterias-litio-alto-voltaje/bateria-de-litio-fox-ess-ep11-hv-1036-kwh",
+      "precio_eur": 4419.09,
+      "iva_incluido": true,
+      "unidad": "por batería EP11 HV (10,36 kWh nominales)",
+      "incluye_instalacion": false,
+      "envio": "entrega estimada en península el 05-11-2026 para pedidos antes de las 15 h",
+      "stock": "no indicado (aviso genérico de posible rotura de stock)",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio sin IVA 3.652,14 €; código de artículo 1886005. La ficha de la tienda muestra datos contradictorios (204,8 V frente a 384 V, 87 frente a 99 kg): no queda claro si corresponde a la EP11 o a la EP11 Plus."
+    }
+  ],
+  "compatibles": [
+    "Inversores híbridos Fox ESS H1, KH, H3, H3-Pro y serie US",
+    "Datalogger Fox ESS (necesario para la ampliación de garantía con Fox Cloud)"
+  ],
+  "pendiente": [
+    "Garantía vigente para España/UE continental (solo se encontraron las del Reino Unido y Australia).",
+    "Razón social, año de fundación y sede exacta de Fox ESS (no verificados en fuentes primarias).",
+    "Confirmar quién fabrica las celdas del EP.",
+    "Aclarar la diferencia entre EP11 (10,36 kWh nominales, V1.2) y EP11 Plus (11,52 nominales / 10,36 útiles), y la relación con el EK11.",
+    "Las indicaciones del manual de 2026 sobre el extintor se contradicen (solo polvo seco en un apartado; FM-200 o CO2 en otro).",
+    "Consulta directa en EU Safety Gate y Health Canada.",
+    "Confirmar con AutoSolar qué versión (EP11 o EP11 Plus) vende, dadas las contradicciones de su ficha."
+  ]
+}

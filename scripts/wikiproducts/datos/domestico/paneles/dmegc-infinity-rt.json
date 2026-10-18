@@ -1,0 +1,114 @@
+{
+  "slug": "dmegc-infinity-rt",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "DMEGC Infinity RT 54 células (108 medias células) bifacial vidrio-vidrio Full Black",
+  "marca": "DMEGC Solar",
+  "modelo": "DM440M10RT-B54HBB … DM460M10RT-B54HBB (440–460 W); familia hermana B54HBT (fondo transparente) y 54HBB monofacial",
+  "variante_ficha": "DM450M10RT-B54HBB (ficha EN DS-M10RT-B54HBB-20240730)",
+  "ean": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "fecha": "2026-10-18", "nota": "No se encontró GTIN público en ficha ni tiendas." },
+  "anio_lanzamiento": { "valor": 2024, "unidad": "año", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Ficha fechada el 30-07-2024; año exacto de lanzamiento comercial no confirmado. En julio de 2025 la marca anunció la serie G12RT-B48/G48 (48 células G12R) como sustituta de los M10RT-B54." },
+  "estado": "a la venta",
+  "resumen": "El DMEGC Infinity RT de 54 células es un módulo fotovoltaico de células N-type TOPCon en formato de 108 medias células, bifacial y de doble vidrio, con marco y fondo negros (Full Black), pensado para tejados residenciales. La gama va de 440 a 460 W y, según la ficha del fabricante, la variante de 450 W tiene una eficiencia del 22,5 % y pesa 24,5 kg. Lo fabrica Hengdian Group DMEGC Magnetics, empresa china cotizada en la Bolsa de Shenzhen que produce sus propias células. La marca ofrece 25 años de garantía de producto y 30 años de garantía de rendimiento con un 87,4 % de potencia mínima al final. En 2025 DMEGC anunció la serie G12RT de 48 células como sustituta, por lo que la disponibilidad del modelo de 54 células en tiendas es irregular.",
+  "imagen": { "url": null, "fuente": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "licencia": "propiedad del fabricante; solo enlace" },
+
+  "datos_tecnicos": {
+    "potencia_pico_wp": { "valor": 450, "unidad": "Wp", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "STC; tolerancia 0/+3 %." },
+    "gama_potencias_wp": { "valor": "440–460", "unidad": "Wp", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Escalones de 5 W." },
+    "eficiencia_pct": { "valor": 22.5, "unidad": "%", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Variante 450 W. Coherente con 450 W / (1,762 × 1,134 m²) = 22,52 %." },
+    "tecnologia_celula": { "valor": "TOPCon (N-type)", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Células M10R." },
+    "tipo_celula": { "valor": "monocristalina", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": null },
+    "num_celulas": { "valor": 108, "unidad": "medias células", "origen": "declarado", "fuente": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "fecha": "2026-10-18", "nota": "54 células completas cortadas por la mitad." },
+    "bifacial": { "valor": true, "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "fecha": "2026-10-18", "nota": "Con fondo negro la ganancia trasera real en tejado es limitada; existe versión B54HBT con fondo transparente." },
+    "bifacialidad_pct": { "valor": 80, "unidad": "%", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "±5 %." },
+    "vidrio": { "valor": "doble (2 mm + 2 mm, semitemplado)", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": null },
+    "marco": { "valor": "negro, 30 mm", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "fecha": "2026-10-18", "nota": "Material del marco no indicado en la ficha." },
+    "medidas_mm": { "valor": "1762 × 1134 × 30", "unidad": "mm", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": null },
+    "peso_kg": { "valor": 24.5, "unidad": "kg", "origen": "declarado", "fuente": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "fecha": "2026-10-18", "nota": null },
+    "coef_temp_pmax_pct_c": { "valor": -0.29, "unidad": "%/°C", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Voc −0,25 %/°C; Isc +0,048 %/°C." },
+    "noct_o_nmot_c": { "valor": 42, "unidad": "°C (NMOT)", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "±2 °C. Potencia en NMOT: 339 W." },
+    "degradacion_primer_anio_pct": { "valor": 1, "unidad": "%", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Máximo garantizado (≥99 % el primer año)." },
+    "degradacion_anual_pct": { "valor": 0.4, "unidad": "%/año", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Máximo garantizado, años 2–30." },
+    "voc_v": { "valor": 40.25, "unidad": "V", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "STC, 450 W. Vmp 33,91 V; Imp 13,27 A." },
+    "isc_a": { "valor": 14.17, "unidad": "A", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "STC, 450 W. Fusible máx. en serie 30 A." },
+    "tension_max_sistema_v": { "valor": 1500, "unidad": "V DC", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Existen versiones de 1000 V y 1500 V según conector." },
+    "carga_mecanica_pa": { "valor": "5400 / 2400", "unidad": "Pa (frontal/trasera, carga de ensayo)", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "Carga de diseño: 3600 / 1600 Pa. Granizo: bolas de 30 mm." },
+    "ip_caja_conexiones": { "valor": "IP68", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "3 diodos." },
+    "conector": { "valor": "MC4 / MC4-EVO 2A o PV-ZH202B", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18", "nota": "La tienda solartraders indica Stäubli MC4-EVO2 para su referencia." },
+    "precio_por_wp_eur": { "valor": 0.2, "unidad": "€/Wp", "origen": "calculado", "fuente": "https://klima.pt/en/-solar-modules/28990-photovoltaic-solar-panel-dmegc-dm450m10rt-450w-bifacial-pas00228.html", "fecha": "2026-10-18", "nota": "73,13 € sin IVA × 1,23 (IVA portugués) = 89,95 € / 450 Wp = 0,20 €/Wp. La tienda solo muestra el precio sin IVA y no precisa si la referencia es la B54HBB o la B54HBT." },
+    "resultado_pvel": { "valor": "Top Performer en el PV Module Reliability Scorecard de Kiwa PVEL 2024 y 2025 (fabricante)", "unidad": null, "origen": "declarado", "fuente": "https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard", "fecha": "2026-10-18", "nota": "Nota de prensa de la marca; no especifica qué modelo o lista de materiales se ensayó, así que no puede atribuirse a esta variante concreta." },
+    "pruebas_independientes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://www.pv-tech.org/industry-updates/dmegc-solar-recognized-as-top-performer-by-kiwa-pvel/", "fecha": "2026-10-18", "nota": "No se encontró un ensayo independiente publicado específico del DM450M10RT-B54HBB (RETC, PVEL por modelo)." }
+  },
+
+  "garantias": {
+    "producto": { "anios": 25, "fuente": "https://www.dmegcsolar.com/upload/img/2024-12/675beb82d7a29.pdf", "fecha": "2026-10-18", "nota": "Garantía limitada DMW-0018 (15-05-2023): 300 meses para módulos vidrio-vidrio N-type de menos de 72 células. La tienda solartraders también indica 25 años." },
+    "rendimiento": { "anios": 30, "porcentaje_final": 87.4, "primer_anio_pct": 99, "lineal_anual_pct": 0.4, "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18" },
+    "letra_pequena": [
+      "Desmontaje, retirada, pruebas, embalaje, instalación y reinstalación corren por cuenta del cliente; DMEGC solo paga el envío del módulo de reposición en las mismas condiciones Incoterm de la entrega original (garantía DMW-0018, https://www.dmegcsolar.com/upload/img/2024-12/675beb82d7a29.pdf).",
+      "La reclamación debe hacerse por escrito en un máximo de 30 días naturales desde que se detecta el defecto, con prueba de compra y números de serie, y no se puede devolver ningún módulo sin autorización previa (DMW-0018).",
+      "La garantía empieza en la primera instalación o seis meses después de la salida de fábrica, lo que ocurra antes: un panel almacenado en un almacén pierde meses de garantía (DMW-0018).",
+      "Si el laboratorio independiente (TÜV, PI…) no confirma el defecto, el cliente paga los ensayos; DMEGC elige el remedio (reparar, reponer, compensar o reembolsar el valor depreciado) y puede sustituir por otro modelo (DMW-0018).",
+      "La reventa fuera del país de primera comercialización requiere consentimiento escrito, salvo entre Estados miembros de la UE; la cesión exige notificación y que el módulo siga en su ubicación original (DMW-0018).",
+      "La versión australiana (DMW-AU-0020) añade exclusiones por compra a revendedor no autorizado por escrito y por uso con microinversores u optimizadores ajenos; no se ha comprobado si la versión europea vigente incluye esas mismas cláusulas (https://www.dmegcsolar.com/upload/img/2025-05/682da0919b470.pdf).",
+      "No se publica ningún seguro de garantía de terceros: si el fabricante desaparece, el comprador en España conserva solo la garantía legal de conformidad frente al vendedor (3 años para bienes nuevos según el TRLGDCU desde 2022)."
+    ],
+    "quien_responde": "El fabricante, Hengdian Group DMEGC Magnetics Co., Ltd. (Dongyang, China), a través de sus oficinas regionales (p. ej. DMEGC Germany GmbH). La garantía no cita ninguna aseguradora; en caso de quiebra del fabricante no hay respaldo publicado y quedaría la garantía legal del vendedor."
+  },
+
+  "empresa": {
+    "razon_social": "Hengdian Group DMEGC Magnetics Co., Ltd.",
+    "pais_sede": "China (Dongyang, Zhejiang)",
+    "fundacion": 1980,
+    "cotiza_en": "Bolsa de Shenzhen (002056), desde 2006",
+    "web": "https://www.dmegcsolar.com",
+    "fabricante_celulas": "DMEGC (producción propia de obleas a módulos, según la marca)",
+    "pais_fabricacion": "China; también Indonesia",
+    "fabricas_conocidas": [ "Hengdian (Zhejiang)", "Sihong (Jiangsu)", "Qixian (Henan)", "Yibin (Sichuan)", "Lianyungang (Jiangsu)", "Indonesia" ],
+    "notas": [
+      "Forma parte del conglomerado Hengdian Group; la división solar declara 23,8 GW anuales de capacidad de células y 21 GW de módulos (Intersolar Europe, ficha de expositor).",
+      "La marca declara haber sido Top Performer en el Scorecard de fiabilidad de Kiwa PVEL en 2024 y 2025.",
+      "No se encontraron detenciones públicas bajo la ley UFLPA de EE. UU., insolvencias ni retiradas asociadas a DMEGC en las búsquedas realizadas a fecha 2026-10-18; esto no equivale a una auditoría de la cadena de suministro."
+    ],
+    "fuentes": [ "https://www.intersolar.de/exhibitorlist/hengdian-group-dmegc-magnetics-co-ltd-dmegc-solar", "https://www.dmegcsolar.com/upload/img/2026-09/6a98cd4e0d9f0.pdf", "https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard" ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China (fábrica concreta del lote no indicada en la ficha)",
+    "fabrica": null,
+    "materiales_principales": [ "silicio monocristalino N-type", "vidrio semitemplado 2 mm (dos capas)", "marco de aluminio anodizado negro (material no indicado en ficha)", "encapsulante", "caja de conexiones IP68" ],
+    "num_componentes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "El fabricante no lo publica." },
+    "reparabilidad": "Un módulo laminado no se repara en la práctica: la garantía prevé reposición o compensación. La marca afirma que sus módulos están libres de PFAS y que sus componentes son reciclables (ficha técnica)."
+  },
+  "certificados": [
+    { "nombre": "IEC 61215 / IEC 61730", "emisor": "TÜV Rheinland (según la ficha)", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18" },
+    { "nombre": "IEC 61701 (niebla salina), IEC 62716 (amoniaco), IEC 60068 (arena), IEC TS 63209, IEC TS 63342", "emisor": "no especificado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18" },
+    { "nombre": "ISO 9001, ISO 14001, ISO 45001, ISO 50001, ISO 27001, SA 8000", "emisor": "no especificado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "fecha": "2026-10-18" }
+  ],
+  "documentos": [
+    { "tipo": "ficha técnica", "url": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "idioma": "en", "fecha": "2024-07-30" },
+    { "tipo": "garantía", "url": "https://www.dmegcsolar.com/upload/img/2024-12/675beb82d7a29.pdf", "idioma": "en", "fecha": "2023-05-15" },
+    { "tipo": "garantía", "url": "https://www.dmegcsolar.com/upload/img/2025-05/682da0919b470.pdf", "idioma": "en", "fecha": "2024-01-01" },
+    { "tipo": "ficha técnica", "url": "https://www.dmegcsolar.com/upload/img/2026-09/6a98cd4e0d9f0.pdf", "idioma": "en", "fecha": "2026-09", "nota": "catálogo corporativo, no ficha del modelo" }
+  ],
+
+  "afirmaciones": [
+    { "afirmacion": "30-year linear power warranty", "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "veredicto": "matizable", "explicacion": "Los 30 años son de garantía de rendimiento (87,4 % al final); la garantía de producto, que cubre defectos de fabricación, es de 25 años. Además, la garantía no cubre la mano de obra de desmontaje y reinstalación.", "fuentes": [ "https://www.dmegcsolar.com/upload/img/2024-12/675beb82d7a29.pdf" ], "fecha": "2026-10-18" },
+    { "afirmacion": "Bifacial (bifaciality 80 ± 5 %)", "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "veredicto": "matizable", "explicacion": "La bifacialidad es una medida de la célula, pero en la versión Full Black el fondo es negro y en un tejado coplanar casi no llega luz por detrás, así que la ganancia práctica es pequeña. La versión con fondo transparente (B54HBT) es la que aprovecha la bifacialidad.", "fuentes": [ "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg" ], "fecha": "2026-10-18" },
+    { "afirmacion": "PFAS-free … 100% green production, transparent supply chain", "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/39007/data_sheet_dm450m10rt_b54hbb_fb_bif_dg_en_10-05-2025.pdf?locale=es", "veredicto": "sin pruebas", "explicacion": "La ficha no cita certificado ni auditoría independiente para la ausencia de PFAS ni para la «producción 100 % verde». La marca menciona una certificación ESG SSI Silver de sus plantas, pero no se encontró el informe.", "fuentes": [ "https://www.dmegcsolar.com/news/detail-dmegc-solar-launches-new-full-black-pv-module-balancing-performance-and-reliability.html" ], "fecha": "2026-10-18" },
+    { "afirmacion": "Top Performer en Kiwa PVEL 2025", "donde": "https://www.dmegcsolar.com/news/detail-dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard.html", "veredicto": "matizable", "explicacion": "El reconocimiento de Kiwa PVEL es real para el fabricante, pero se concede por lista de materiales (BOM) y por ensayo concreto; la nota de prensa no dice qué modelo se ensayó, así que no garantiza que este módulo concreto tenga ese resultado.", "fuentes": [ "https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard" ], "fecha": "2026-10-18" }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 de «DMEGC» y «DM450M10RT» en EU Safety Gate, CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia), Health Canada y prensa sectorial (pv-magazine, pv-tech, TaiyangNews). No se encontró ninguna retirada ni alerta de seguridad para el modelo ni la marca: ninguna conocida a fecha 2026-10-18.",
+
+  "ofertas": [
+    { "distribuidor": "Klima.pt", "tipo": "tienda online", "pais": "Portugal", "url": "https://klima.pt/en/-solar-modules/28990-photovoltaic-solar-panel-dmegc-dm450m10rt-450w-bifacial-pas00228.html", "precio_eur": 73.13, "iva_incluido": false, "unidad": "por módulo", "incluye_instalacion": false, "envio": "a presupuesto", "stock": "Disponible (bajo confirmación)", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18", "nota": "Ficha «DM450M10RT 450W (bifacial)», referencia PAS00228; no precisa sufijo B54HBB/B54HBT." },
+    { "distribuidor": "Solartraders", "tipo": "mayorista", "pais": "Alemania (venta UE)", "url": "https://www.solartraders.com/es/products/modulo/dmegc-dm450m10rt-b54hbb-fb-bif-dg", "precio_eur": null, "iva_incluido": null, "unidad": "por módulo", "incluye_instalacion": false, "envio": null, "stock": "Artículo no disponible actualmente", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18", "nota": "Sin precio publicado." }
+  ],
+  "compatibles": [ "Inversores de string y microinversores con entrada ≥14,2 A de cortocircuito por MPPT (Isc 14,17 A)." ],
+  "pendiente": [
+    "Ofertas en tiendas españolas con precio IVA incluido para la referencia exacta B54HBB (ibergy.es lista un DMEGC 455W pero no se pudo leer).",
+    "Garantía europea vigente (2025–2026): solo se leyeron la DMW-0018 (2023, sin ámbito geográfico) y la DMW-AU-0020 (Australia).",
+    "Fábrica concreta (China o Indonesia) de los lotes vendidos en Europa.",
+    "Si el modelo B54 está formalmente descatalogado tras el lanzamiento de la serie G12RT-B48/G48 en 2025.",
+    "Resultado de Kiwa PVEL específico del modelo/BOM."
+  ]
+}
