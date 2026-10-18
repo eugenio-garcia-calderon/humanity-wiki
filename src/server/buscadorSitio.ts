@@ -22,6 +22,7 @@ import { bloquesDe } from './bloquesSql';
 import { paginaVisible, descripcionDe } from './sitios';
 import { filtrarBloques } from './miembros.js';
 import { registrarHtml, esc } from './htmlBloques.js';
+import { CLASES_TARJETA } from '../components/sitio/tarjetaSeccion';
 
 /** Cuántos niveles de página dentro de página (como `sitios.ts`). */
 const PROFUNDIDAD = 8;
@@ -192,6 +193,19 @@ async function vocabularioDe(db: any, raiz: string): Promise<Map<string, number>
  *  una búsqueda no encuentra nada, en la página de error y en la portada. */
 export async function seccionesDe(db: any, raiz: string) {
   const r = await db.execute(sql`${bajaDesde(raiz)}
+    -- Por qué subpágina de la raíz se llega a cada página: una subpágina que
+    -- sólo lleva a secciones ya enseñadas en tarjetas no se repite como enlace.
+    , via(id, primera, n) AS (
+      SELECT h.hijo, h.hijo, 1 FROM knowledge_windows w
+      CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
+      CROSS JOIN LATERAL (SELECT blq->>'entityId' AS hijo) h
+      WHERE w.id = ${raiz} AND blq->>'tipo' = 'subpagina' AND h.hijo IS NOT NULL
+      UNION
+      SELECT blq->>'entityId', v.primera, v.n + 1 FROM via v
+      JOIN knowledge_windows w ON w.id = v.id AND w.deleted_at IS NULL
+      CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
+      WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL AND v.n < ${PROFUNDIDAD}
+    )
     , cat AS (
       SELECT w.id, w.title, w.config, w.slug, w.publico, blq->>'tabla_id' AS tabla_id, MIN(b.n) AS n
       FROM baja b
@@ -204,23 +218,33 @@ export async function seccionesDe(db: any, raiz: string) {
     SELECT c.*,
       (SELECT count(*) FROM bd_filas f WHERE f.tabla_id = c.tabla_id AND f.deleted_at IS NULL
          AND f.archived_at IS NULL AND f.pagina_id IS NOT NULL AND f.oculta = false)::int AS fichas,
-      (SELECT pw.config->>'portada' FROM bd_filas f JOIN knowledge_windows pw ON pw.id = f.pagina_id
-       WHERE f.tabla_id = c.tabla_id AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.oculta = false
-         AND pw.deleted_at IS NULL AND COALESCE(pw.config->>'portada', '') <> ''
-       ORDER BY f.orden LIMIT 1) AS muestra
+      -- La foto del primer producto del catálogo, en el orden de la galería:
+      -- la portada de su ficha o, si no tiene, la columna de foto (W1,
+      -- ficha 'imagen', o la 'foto' del cargador, como en bd.ts).
+      (SELECT u FROM (
+         SELECT f.orden, COALESCE(NULLIF(pw.config->>'portada', ''), NULLIF(trim(f.valores->>k.id), '')) AS u
+         FROM bd_filas f JOIN knowledge_windows pw ON pw.id = f.pagina_id AND pw.deleted_at IS NULL
+         LEFT JOIN bd_columnas k ON k.tabla_id = f.tabla_id AND k.archived_at IS NULL
+           AND (k.config->>'ficha' = 'imagen' OR (k.config->>'ficha' IS NULL AND k.config->>'clave' = 'foto' AND k.tipo = 'url'))
+         WHERE f.tabla_id = c.tabla_id AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.oculta = false
+       ) m WHERE m.u ~ '^(https?://[^[:space:]]+|/[^/][^[:space:]]*)$' ORDER BY m.orden LIMIT 1) AS muestra,
+      (SELECT array_agg(DISTINCT v.primera) FROM via v WHERE v.id = c.id) AS vias
     FROM cat c
     ORDER BY c.n, c.id`);
-  const out: { id: string; titulo: string; descripcion: string; fichas: number; portada: string | null; slug: string | null }[] = [];
+  const out: { id: string; titulo: string; descripcion: string; fichas: number; portada: string | null; slug: string | null; vias: string[] }[] = [];
   const vistos = new Map<string, number>();
   for (const x of r.rows as any[]) {
     const i = vistos.get(x.id);
-    if (i !== undefined) { out[i].fichas += Number(x.fichas) || 0; out[i].portada ||= x.muestra || null; continue; }
+    if (i !== undefined) { out[i].fichas += Number(x.fichas) || 0; out[i].portada ||= x.muestra || null;
+      for (const v of x.vias || []) if (v && !out[i].vias.includes(v)) out[i].vias.push(v);
+      continue; }
     if (!(await paginaVisible(db, x.id))) continue;
     vistos.set(x.id, out.length);
     out.push({ id: x.id, titulo: String(x.title || '').trim() || 'Sin título', descripcion: descripcionDe(x.config),
       fichas: Number(x.fichas) || 0, portada: x.config?.portada || x.muestra || null,
       // Su nombre corto (`powerbanks`), que es su dirección canónica en el sitio.
-      slug: x.publico && typeof x.slug === 'string' && x.slug && !x.slug.includes('/') ? x.slug : null });
+      slug: x.publico && typeof x.slug === 'string' && x.slug && !x.slug.includes('/') ? x.slug : null,
+      vias: Array.isArray(x.vias) ? x.vias.filter(Boolean) : [] });
   }
   return out;
 }
@@ -232,16 +256,23 @@ registrarHtml('secciones', (b, ctx) => {
   const lista = ctx.extra.get('secciones') as Awaited<ReturnType<typeof seccionesDe>> | undefined;
   if (!lista?.length) return '';
   const titulo = typeof b?.datos?.titulo === 'string' ? b.datos.titulo.trim() : '';
-  const tarjetas = lista.map(s => `<li><a href="${esc(ctx.enlacePagina(s.id))}" class="flex gap-3 items-center rounded-xl border border-slate-200 p-3 min-h-[72px]">`
-    + (s.portada ? `<img src="${esc(s.portada)}" alt="" width="64" height="64" loading="lazy" class="w-16 h-16 rounded-lg object-contain bg-slate-50 shrink-0">`
-      : '<span class="w-16 h-16 rounded-lg bg-slate-100 shrink-0" aria-hidden="true"></span>')
-    + `<span class="min-w-0"><span class="block text-base font-bold text-slate-900">${esc(s.titulo)}</span>`
-    + `<span class="block text-sm text-slate-600">${s.fichas === 1 ? '1 producto' : `${s.fichas} productos`}</span></span></a></li>`).join('');
-  return `<section>${titulo ? `<h2 class="mb-3 text-xl font-black text-slate-900">${esc(titulo)}</h2>` : ''}<ul class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">${tarjetas}</ul></section>`;
+  const tarjetas = lista.map(s => `<li><a href="${esc(ctx.enlacePagina(s.id))}" class="${CLASES_TARJETA.enlace}">`
+    + (s.portada ? `<span class="${CLASES_TARJETA.marco}"><img src="${esc(s.portada)}" alt="" width="320" height="240" loading="lazy" class="${CLASES_TARJETA.imagen}"></span>`
+      : `<span class="${CLASES_TARJETA.marco}" aria-hidden="true"></span>`)
+    + `<span class="${CLASES_TARJETA.cuerpo}"><span class="${CLASES_TARJETA.titulo}">${esc(s.titulo)}</span>`
+    + `<span class="${CLASES_TARJETA.cuenta}">${s.fichas === 1 ? '1 producto' : `${s.fichas} productos`}</span>`
+    + (s.descripcion ? `<span class="${CLASES_TARJETA.descripcion}">${esc(s.descripcion)}</span>` : '')
+    + '</span></a></li>').join('');
+  return `<section>${titulo ? `<h2 class="mb-3 text-xl font-black text-slate-900">${esc(titulo)}</h2>` : ''}<ul class="${CLASES_TARJETA.lista}">${tarjetas}</ul></section>`;
 }, async (db, bloques, ctx) => {
-  if (!bloques.some(x => x?.tipo === 'secciones') || ctx.extra.has('secciones')) return;
-  const raiz = ctx.pagina?.sitio?.raizId || ctx.pagina?.id;
-  if (raiz) ctx.extra.set('secciones', await seccionesDe(db, raiz));
+  const bloque = bloques.find(x => x?.tipo === 'secciones');
+  if (!bloque || ctx.extra.has('secciones')) return;
+  // «De esta página» (una categoría: sus subcategorías) o, por defecto, del sitio.
+  const desde = bloque.datos?.ambito === 'pagina' ? ctx.pagina?.id : (ctx.pagina?.sitio?.raizId || ctx.pagina?.id);
+  if (!desde) return;
+  const lista = await seccionesDe(db, desde);
+  ctx.extra.set('secciones', lista);
+  ctx.extra.set('subpaginas-en-tarjetas', new Set(lista.flatMap(s => [s.id, ...s.vias])));
 });
 
 export function registrarBuscadorSitio(app: Express, db: any) {
@@ -249,10 +280,12 @@ export function registrarBuscadorSitio(app: Express, db: any) {
   app.get('/api/sitio/secciones', async (req: Request, res: Response) => {
     try {
       const raiz = String(req.query.sitio || '').trim();
+      // `desde`: las secciones que cuelgan de esa página (una categoría).
+      const desde = String(req.query.desde || '').trim() || raiz;
       if (!raiz) return res.status(400).json({ error: 'Falta el sitio.' });
-      if (!(await paginaVisible(db, raiz))) return res.status(404).json({ error: 'Ese sitio no existe o no está publicado.' });
+      if (!(await paginaVisible(db, raiz)) || (desde !== raiz && !(await paginaVisible(db, desde)))) return res.status(404).json({ error: 'Ese sitio no existe o no está publicado.' });
       res.set('Cache-Control', 'public, max-age=300');
-      res.json({ secciones: await seccionesDe(db, raiz) });
+      res.json({ secciones: await seccionesDe(db, desde) });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

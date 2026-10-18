@@ -1,4 +1,5 @@
-import { createContext, lazy, Suspense, useContext, useEffect, useState } from 'react';
+import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { SubpaginasEnTarjetas } from '../sitio/SeccionesSitio';
 import { enFilas, AIRE_BASE_DATOS, esPlegable, todosLosBloques, esBloqueDatos } from '../../utils/bloques';
 import { LecturaBloqueDatos } from '../bloquesDatos/registro';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
@@ -144,13 +145,31 @@ export default function BloquesLectura({ bloques, comentable, paginaId }: { bloq
   // La primera vez (la página entera) se apunta la raíz para el índice y
   // para las migas de pan, que necesitan saber de qué página son.
   if (!raiz) {
-    return (
-      <Raiz.Provider value={{ todos: todosLosBloques(bloques), paginaId: paginaId || comentable }}>
+    const todos = todosLosBloques(bloques);
+    const dentro = (
+      <Raiz.Provider value={{ todos, paginaId: paginaId || comentable }}>
         <BloquesLectura bloques={bloques} comentable={comentable} />
       </Raiz.Provider>
     );
+    return todos.some(b => b?.tipo === 'secciones') ? <ConTarjetas>{dentro}</ConTarjetas> : dentro;
   }
   return <ListaBloques bloques={bloques} comentable={comentable} nivel={nivel} />;
+}
+
+/** Una página con bloque `secciones`: sus subpáginas que ya salen en las
+ *  tarjetas no se repiten como enlaces (Wikiproducts W2, 2026-10-18). Siguen
+ *  en la página, porque son las que dicen de quién cuelga cada sección (las
+ *  migas, el mapa del sitio); sólo no se pintan dos veces. */
+function ConTarjetas({ children }: { children: ReactNode }) {
+  const [ids, poner] = useState<Set<string> | null>(null);
+  const valor = useMemo(() => ({ ids, poner }), [ids]);
+  return <SubpaginasEnTarjetas.Provider value={valor}>{children}</SubpaginasEnTarjetas.Provider>;
+}
+
+function Subpagina({ id, tituloGuardado }: { id: string; tituloGuardado?: string }) {
+  const t = useContext(SubpaginasEnTarjetas);
+  if (t && (!t.ids || t.ids.has(id))) return null;
+  return <EnlaceSubpagina id={id} tituloGuardado={tituloGuardado} />;
 }
 
 /** Los bloques que pintan ELLOS MISMOS lo que llevan dentro. El resto lo
@@ -449,7 +468,7 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       return b.entityId ? <BloquePizarra id={b.entityId} titulo={b.pubTitulo} vista={b.vista} editable={false} /> : null;
 
     case 'subpagina':
-      return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
+      return b.entityId ? <Subpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
 
     case 'basedatos':
       // La tabla de verdad, en modo mirar. `Rejilla` ya sabe no dejar escribir.
