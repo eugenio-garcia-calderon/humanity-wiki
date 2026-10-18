@@ -11,6 +11,12 @@
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "W2: subpáginas que ya salen en tarjetas de secciones",
       "desde": "2026-10-18T19:03:24.098Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/htmlBloques.ts",
+      "motivo": "W2: subpáginas en tarjetas",
+      "desde": "2026-10-18T19:03:27.219Z"
     }
   ]
 }
