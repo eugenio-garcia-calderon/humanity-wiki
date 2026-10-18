@@ -84,3 +84,25 @@ export function textoComision(pct: number | null | undefined, centimos: number |
  *  sigue sin pasar autoridad a una tienda que no hemos elegido nosotros. */
 export const relEnlaceTienda = (pct: number | null | undefined) =>
   pct !== null && pct !== undefined && Number(pct) > 0 ? 'sponsored noopener' : 'nofollow noopener';
+
+const fechaLarga = (iso: string) => { const d = new Date(`${iso.slice(0, 10)}T12:00:00`); return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }); };
+
+/** «2 sin precio confirmado», for the summary line. */
+export const textoSinPrecio = (n: number) => `${n === 1 ? 'una' : n} sin precio confirmado`;
+
+/**
+ * WHY A SHOP HAS NO PRICE (2026-10-18, evaluator round 1). A bare «Precio no
+ * publicado» read as a broken card. The honest reason is almost always the
+ * same: whoever loaded the data could not read the price on the shop's page
+ * (sold out, or the page would not load) on the day it was checked. So say
+ * that, with the date, and send people to the shop to see it themselves.
+ * The same sentence goes into the HTML for search engines (`server/ofertas.ts`) and the sheet (`Lectura.tsx`).
+ */
+export function motivoSinPrecio(o: { agotada: boolean; comprobado: string | null; enlace: string | null }): string {
+  if (o.agotada) return 'Agotado en esta tienda cuando lo miramos.';
+  const cuando = o.comprobado ? ` el ${fechaLarga(o.comprobado)}` : '';
+  return o.enlace
+    ? `No pudimos confirmar el precio en su web${cuando}: puede estar agotado o haber cambiado. Míralo directamente en la tienda.`
+    : `No pudimos confirmar el precio en esta tienda${cuando}.`;
+}
+

@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Star, BadgeCheck, Info, Loader2 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { Button } from '../../ui/core';
 import type { PropsLectura } from '../tipos';
+import { valoracionPrecargada } from '../precarga';
 
 // ============================================================================
 // BLOQUE «VALORACIÓN DE LA COMUNIDAD» (3.3, Wikiproducts W4, 2026-10-18)
@@ -32,7 +33,10 @@ const votos = (n: number) => `${n} ${n === 1 ? 'voto' : 'votos'}`;
 
 /** The row behind this block: the one named in its data, or the page it sits on. */
 export function usarValoraciones(clave: string | undefined) {
-  const [datos, setDatos] = useState<Respuesta | null>(null);
+  // Read before the first paint when this is the page the server sent
+  // (`precarga.ts`): the block is drawn at its final height from the start.
+  const [inicial] = useState<Respuesta | null>(() => valoracionPrecargada(clave));
+  const [datos, setDatos] = useState<Respuesta | null>(inicial);
   const [fallo, setFallo] = useState<{ codigo: number; texto: string } | null>(null);
   const cargar = useCallback(async () => {
     if (!clave) { setFallo({ codigo: 404, texto: 'Sin ficha' }); return; }
@@ -43,7 +47,11 @@ export function usarValoraciones(clave: string | undefined) {
       setFallo(null); setDatos(j);
     } catch { setFallo({ codigo: 0, texto: 'Sin conexión.' }); }
   }, [clave]);
-  useEffect(() => { cargar(); }, [cargar]);
+  const primera = useRef(!!inicial);
+  useEffect(() => {
+    if (primera.current) { primera.current = false; return; }
+    cargar();
+  }, [cargar]);
   return { datos, fallo, cargar };
 }
 
@@ -118,7 +126,7 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
             <span className="text-sm font-bold text-slate-400">/ 5</span>
           </p>
         ) : (
-          <p className="text-sm font-bold text-slate-400">Aún sin nota</p>
+          <p className="text-sm font-bold text-slate-500">Aún sin nota</p>
         )}
       </header>
 
