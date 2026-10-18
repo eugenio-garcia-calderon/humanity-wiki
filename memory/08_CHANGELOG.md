@@ -9266,3 +9266,17 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Cada propiedad de la ficha tiene **ancho** en columnas de la rejilla: se estira o encoge con el **tirador del borde derecho** (aparece al pasar el ratón) o desde su menú («Ancho: 1, 2, 3… Todo»). Por defecto, 1: las de al lado miden lo mismo y, en la misma fila, igualan su alto. La barra de avance ya no ocupa la fila entera por defecto. `config.ancho_ficha`.
 - **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
 - El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).
+
+## 2026-10-18 — Wikiproducts: offer prices re-checked at the shops (W3a, evaluator round 2)
+- All 38 offers without a price were re-read from the shop's own page. Only one shows a price for the exact model, and it is now loaded: Samsung EB-P4520 at MediaMarkt, 47,99 € plus 2,99 € shipping, in stock.
+- Why the other 37 are still empty:
+  - Amazon refuses automated reading (8).
+  - The price is for members only or given on request (9).
+  - The page shows only a wholesale price per Wp with no VAT (4).
+  - The product is unavailable; the data already said so (6).
+  - The page shows no price (5).
+  - The page is not a product page (2).
+  - The price is rendered by JavaScript (2).
+  - The product has not launched (1).
+  - The page failed to load (1).
+  A shop that only quotes, or only sells to members, has no price to show, so those offers stay «Sin precio confirmado» rather than get an estimate.
