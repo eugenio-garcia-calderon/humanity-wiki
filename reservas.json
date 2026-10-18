@@ -5,6 +5,12 @@
       "ruta": "drizzle/0159_wikiproducts_miembros.sql",
       "motivo": "W4: activar miembros en el sitio Wikiproducts",
       "desde": "2026-10-18T17:32:15.834Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "W2: subpáginas que ya salen en tarjetas de secciones",
+      "desde": "2026-10-18T19:03:24.098Z"
     }
   ]
 }
