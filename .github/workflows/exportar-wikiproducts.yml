@@ -1,0 +1,52 @@
+# ============================================================================
+# Exportar el sitio público de Wikiproducts (2026-10-18, W3a para W7)
+# ============================================================================
+# Se lanza a mano (Actions → «Exportar Wikiproducts» → Run workflow). Entra por
+# SSH con los mismos secretos que el despliegue y ejecuta, en sólo lectura,
+# `scripts/wikiproducts/exportar-en-servidor.sh`: las páginas públicas del
+# sitio, su configuración y las fotos guardadas de los productos. Nada de
+# miembros, pedidos, correos, claves ni .env. No crea ninguna clave.
+# El resultado queda como artefacto «wikiproducts-export» de esta ejecución
+# (14 días), para la copia local del evaluador, que no llega a producción.
+
+name: Exportar Wikiproducts
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: cargar-wikiproducts
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  exportar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Exportar por SSH
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USUARIO: ${{ secrets.DEPLOY_USER }}
+          CLAVE: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$CLAVE" > ~/.ssh/despliegue && chmod 600 ~/.ssh/despliegue
+          mkdir -p export
+          ssh -i ~/.ssh/despliegue -o StrictHostKeyChecking=accept-new -o BatchMode=yes "$USUARIO@$HOST" \
+            'cd /opt/humanity-wiki && echo "Versión desplegada: $(git rev-parse --short HEAD)" >&2 && bash scripts/wikiproducts/exportar-en-servidor.sh' \
+            > export/wikiproducts.tar
+          rm -f ~/.ssh/despliegue
+          tar -C export -xf export/wikiproducts.tar && rm export/wikiproducts.tar
+          ls -la export
+          echo "Fotos en el tar: $(tar -tf export/fotos.tar | grep -c '\.')"
+      - name: Guardar como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: wikiproducts-export
+          path: export/
+          retention-days: 14
+          if-no-files-found: error
