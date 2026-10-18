@@ -83,6 +83,12 @@
       "ruta": "src/utils/subdominio.ts",
       "motivo": "W2: subdominio por sitio (3.9)",
       "desde": "2026-10-18T11:48:23.846Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/MenuSitio.tsx",
+      "motivo": "W2: buscador del sitio (3.8)",
+      "desde": "2026-10-18T11:56:26.486Z"
     }
   ]
 }
