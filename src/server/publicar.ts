@@ -38,6 +38,7 @@ import { filtrarParaLector } from './miembros.js';
 import { sitioDePagina } from './sitios';
 import { registrarPedidoGestionado, calcularEnvioPorDistribuidor, detalleGestionado } from './pedidoGestionado.js';
 import { comisionDeLinea } from '../utils/ofertas.js';
+import { compraEnTiendas } from './ofertas.js';
 
 /** El alfabeto de un subdominio: minúsculas, números y guiones interiores. */
 const FORMATO_HANDLE = /^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])$/;
@@ -1464,7 +1465,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
       const productos = (await db.execute(sql`
         SELECT id, name, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos, recogida_en_persona, bd_modo,
-               distribuidor_id, distribuidor_nombre, comision_pct
+               distribuidor_id, distribuidor_nombre, comision_pct, oferta_enlace
         FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       // Con variante, el precio es el de la variante (2026-08-23).
@@ -1540,7 +1541,16 @@ export function registerPublicarRoutes(app: Express, db: any) {
         };
       }));
 
+      // The cart grouped by the shop that really sells each line, for when it
+      // is finished on each shop's site (Wikiproducts, evaluator round 3).
+      const compraTiendas = await compraEnTiendas(db, lineas);
+      // Whoever owns every product here (or an admin) may try the payment
+      // with a Stripe TEST key; everybody else finishes at each shop.
+      const yo = req.user;
+      const esDueno = !!yo && ((yo.roleLevel ?? 0) >= 4 || lineas.every(l => l.p.created_by === yo.id));
       res.json({
+        compra_en_tiendas: compraTiendas,
+        es_dueno: esDueno,
         subtotal_centimos: subtotal,
         envio_centimos: envio,
         // Cuántas tiendas hay en la cesta y qué toca en cada una.

@@ -118,17 +118,20 @@ function ConComentarios({ paginaId, bloqueId, children }: { paginaId: string; bl
         aria-expanded={abierto}
         // Outside the column only where there is room for it: on a phone,
         // `-right-9` pushed the page 16 px wider than the screen (2026-10-18).
+        // 44 × 44 to tap (evaluator round 3); the bubble inside stays 28 px.
         className={cn(
-          'absolute right-0 md:-right-9 top-0 grid h-7 w-7 place-items-center rounded-lg text-[10px] transition-all',
-          abierto ? 'bg-emerald-600 text-white'
-                  : cuantos > 0
-                    ? 'bg-slate-100 text-slate-600'
-                    : 'text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover/bloq:opacity-100',
+          'group/com absolute -top-2 right-0 md:-right-11 grid h-11 w-11 place-items-center transition-all',
+          !abierto && cuantos === 0 && 'opacity-0 group-hover/bloq:opacity-100 focus-visible:opacity-100',
         )}
       >
-        {/* El número sólo cuando existe: una burbuja con «0» invita menos que
-            una burbuja vacía. */}
-        {cuantos > 0 ? <span className="font-black">{cuantos}</span> : <MessageCircle className="h-3.5 w-3.5" />}
+        <span className={cn('grid h-7 w-7 place-items-center rounded-lg text-[10px]',
+          abierto ? 'bg-emerald-600 text-white'
+                  : cuantos > 0 ? 'bg-slate-100 text-slate-600'
+                  : 'text-slate-300 group-hover/com:bg-slate-100 group-hover/com:text-slate-600')}>
+          {/* El número sólo cuando existe: una burbuja con «0» invita menos que
+              una burbuja vacía. */}
+          {cuantos > 0 ? <span className="font-black">{cuantos}</span> : <MessageCircle className="h-3.5 w-3.5" />}
+        </span>
       </button>
       {abierto && (
         <div className="my-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
@@ -160,6 +163,15 @@ export default function BloquesLectura({ bloques, comentable, paginaId }: { bloq
  *  tarjetas no se repiten como enlaces (Wikiproducts W2, 2026-10-18). Siguen
  *  en la página, porque son las que dicen de quién cuelga cada sección (las
  *  migas, el mapa del sitio); sólo no se pintan dos veces. */
+/** UNA PANTALLA DE ALTO MIENTRAS LA TABLA CARGA (ronda 3 del evaluador: CLS
+ *  de 0,37 en los listados). Con 520 px de hueco, el pie de la página se veía
+ *  y saltaba cuando llegaban las tarjetas. Se suelta en cuanto llegan los
+ *  datos: lo que cambie entonces ya cae por debajo de la pantalla. */
+function ReservaAlto({ children }: { children: (lista: () => void) => ReactNode }) {
+  const [lista, setLista] = useState(false);
+  return <div style={lista ? undefined : { minHeight: '100vh' }}>{children(() => setLista(true))}</div>;
+}
+
 function ConTarjetas({ children }: { children: ReactNode }) {
   const [ids, poner] = useState<Set<string> | null>(null);
   const valor = useMemo(() => ({ ids, poner }), [ids]);
@@ -270,7 +282,7 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
     const dentro: any[] = Array.isArray(b.bloques) ? b.bloques : [];
     return (
       <details open={b.abierto === true} className="group/pl">
-        <summary className="flex items-start gap-1.5 cursor-pointer list-none -ml-1 pl-1 rounded-lg hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+        <summary className="flex items-center gap-1.5 min-h-11 cursor-pointer list-none -ml-1 pl-1 rounded-lg hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
           <ChevronRight className={cn('shrink-0 text-slate-400 transition-transform group-open/pl:rotate-90',
             b.tipo === 'titulo1' ? 'w-6 h-6 mt-5' : b.tipo === 'titulo2' ? 'w-5 h-5 mt-4' : 'w-4 h-4 mt-2.5')} />
           {texto('flex-1 min-w-0')}
@@ -476,7 +488,7 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <CargaEnOrden alto={520}><Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloColor={b.tituloColor} tituloPeso={b.tituloPeso || 'negrita'} nombreArriba={!!b.nombreArriba} pesoNombre={b.pesoNombre || 'negrita'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} ocultarMandosPublica={!!b.ocultarMandosPublica} tituloAlineacion={b.tituloAlineacion || 'centro'} visibles={b.propsGaleria} /></CargaEnOrden> : null;
+        return tablaId ? <ReservaAlto>{lista => <CargaEnOrden alto={520}><Rejilla tablaId={tablaId} onCargada={lista} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloColor={b.tituloColor} tituloPeso={b.tituloPeso || 'negrita'} nombreArriba={!!b.nombreArriba} pesoNombre={b.pesoNombre || 'negrita'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} ocultarMandosPublica={!!b.ocultarMandosPublica} tituloAlineacion={b.tituloAlineacion || 'centro'} visibles={b.propsGaleria} /></CargaEnOrden>}</ReservaAlto> : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────

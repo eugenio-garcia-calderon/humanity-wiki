@@ -16,6 +16,7 @@ import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { propiedadesTarjeta } from '../bloquesDatos/ficha/modelo';
+import MandosCatalogo, { esCatalogo } from '../bloquesDatos/ficha/MandosCatalogo';
 import { cn } from '../../utils/cn';
 import { tonoDe, COLORES } from '../../utils/coloresBloque';
 import BarraVista, { Desplegable, claseBoton, Cuenta } from './BarraVista';
@@ -119,7 +120,7 @@ async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   }
 }
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, onCargada, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -154,6 +155,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   onCambiarTituloAlineacion?: (a: 'centro' | 'izquierda') => void;
   /** Quitar filtrar, ordenar y buscar de la web publicada (bases pequeñas). */
   ocultarMandosPublica?: boolean;
+  /** La primera vez que llegan los datos (quien la contiene suelta su hueco). */
+  onCargada?: () => void;
   onCambiarOcultarMandos?: (v: boolean) => void;
   onCambiarTituloOculto?: (v: boolean) => void;
   /** Color (una clave de `COLORES`, en texto) y grosor del título; quien edita los cambia. */
@@ -255,6 +258,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // Antes de pintar: los enlaces de las fichas salen ya por su dirección legible.
         for (const f of (Array.isArray(j?.filas) ? j.filas : [])) recordarRuta(f?.pagina_id, f?.pagina?.ruta);
         setDatos(j);
+        onCargada?.();
       }
     } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
     if (mio === turno.current) setCargando(false);
@@ -1085,7 +1089,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           interruptor Galería/Tabla, y «Filtrar · Ordenar · Agrupar» se
           guardan en la vista. Solo para quien edita: en la web publicada la
           vista la decide el autor y el visitante no necesita mandos. */}
-      {vistas && !(ocultarMandosPublica && !editable) && (
+      {/* En la web publicada de un catálogo de fichas, el orden y los filtros
+          a la vista (ronda 3 del evaluador, ver `MandosCatalogo`). */}
+      {vistas && !editable && esCatalogo(columnas) && (
+        <MandosCatalogo key={activa.id || activa.forma} columnas={columnas} filas={filas}
+          ordenAutor={activa.orden_por} filtrosAutor={activa.filtros} ordenActual={mostrada.orden_por}
+          onCambiar={cambiarVisitante} />
+      )}
+      {/* Con esos mandos a la vista, los de siempre sobran para quien lee: dos
+          «Ordenar» que no saben el uno del otro. */}
+      {vistas && !(ocultarMandosPublica && !editable) && !(!editable && esCatalogo(columnas)) && (
         <div className={limpia ? 'pb-3' : cn('px-2 py-1.5 border-b border-slate-100', tono.fondo ? 'bg-white/30' : 'bg-white')}>
           <BarraVista vistas={vistas} activa={mostrada} visitante={!editable} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null}
             editable={editable} conocidos={conocidos.current} centrada={limpia}

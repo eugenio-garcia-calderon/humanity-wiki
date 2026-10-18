@@ -433,7 +433,7 @@ const minusculaInicial = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 /** The block's footnote, one sentence for both painters. */
 export const NOTA_ORDEN = 'El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.';
-export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que precio, garantía, ecología y seguridad se deciden con los datos publicados que se nombran en cada línea; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
+export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que las líneas marcadas «Según los datos» se deciden con el dato publicado que nombran; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
 
 /**
  * For each criterion with a direction, the best product of the table
