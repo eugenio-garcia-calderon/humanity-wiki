@@ -6,8 +6,12 @@ import type { PropsLectura } from '../tipos';
 import { pedir, euros, parametro } from '../chat/api';
 import Conversacion from '../chat/Conversacion';
 import Gestion from './Gestion';
+import { useSitio } from '../../sitio/ContextoSitio';
 
-export type DatosExperto = { titulo?: string; intro?: string; expertos?: string[] };
+/** `compacto`: la versión para la ficha de un producto (una línea por experto,
+ *  sin panel de gestión, y nada si no hay expertos). `pagina`: la página del
+ *  sitio con todos los expertos, para enlazarla desde la versión compacta. */
+export type DatosExperto = { titulo?: string; intro?: string; expertos?: string[]; compacto?: boolean; pagina?: string };
 
 export type Experto = {
   id: string; nombre: string; especialidad: string | null; bio: string | null; foto: string | null;
@@ -65,6 +69,13 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
   }, []);
 
   if (!paginaId) return <p className="text-sm text-slate-400">La reserva de expertos funciona en una página guardada.</p>;
+  if (d.compacto) {
+    // En una ficha, un bloque vacío o con un error es ruido: no sale nada
+    // (salvo al equipo, que tiene que saber por qué no sale).
+    if (error || !lista) return null;
+    if (!lista.expertos.length && !lista.equipo && !vuelta) return null;
+    return <Compacto d={d} lista={lista} paginaId={paginaId} vuelta={vuelta} elegido={elegido} setElegido={setElegido} cargar={cargar} />;
+  }
   if (error) return <p className="rounded-xl border border-slate-200 p-4 text-sm text-slate-500">{error}</p>;
   if (!lista) return <div className="flex h-24 items-center justify-center text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /></div>;
 
@@ -127,6 +138,58 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+/**
+ * La versión de la ficha de un producto: «¿Dudas antes de comprar?» y una
+ * línea por experto con su precio. Al elegir uno se abre aquí mismo la misma
+ * reserva que en la página de expertos.
+ */
+function Compacto({ d, lista, paginaId, vuelta, elegido, setElegido, cargar }: {
+  d: DatosExperto; lista: { equipo: boolean; pagosActivos: boolean; expertos: Experto[] }; paginaId: string;
+  vuelta: { estado: string; conversacion?: string; mensaje?: string } | null;
+  elegido: Experto | null; setElegido: (e: Experto | null) => void; cargar: () => Promise<void>;
+}) {
+  const sitio = useSitio();
+  // Fuera de un sitio publicado (el editor), la página en la plataforma.
+  const todos = d.pagina ? (sitio ? sitio.enlacePagina(d.pagina) : `/paginas/${encodeURIComponent(d.pagina)}`) : null;
+  return (
+    <section className="space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
+      {vuelta && <AvisoVuelta vuelta={vuelta} />}
+      <div>
+        <h3 className="flex items-center gap-2 font-semibold text-slate-800">
+          <GraduationCap className="h-5 w-5 text-emerald-500" /> {d.titulo || '¿Dudas antes de comprar? Consulta a un experto'}
+        </h3>
+        {d.intro && <p className="mt-1 text-sm text-slate-600">{d.intro}</p>}
+      </div>
+      {!lista.expertos.length ? (
+        <p className="text-sm text-slate-500">
+          Sólo lo ve el equipo: no hay expertos dados de alta, así que este recuadro no sale en la ficha.
+          {todos && <> Dalos de alta en la <a className="underline" href={todos}>página de expertos</a>.</>}
+        </p>
+      ) : elegido ? (
+        <Reserva experto={elegido} paginaId={paginaId} volver={() => { setElegido(null); void cargar(); }} />
+      ) : (
+        <ul className="divide-y divide-emerald-100">
+          {lista.expertos.map(e => (
+            <li key={e.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-slate-800">{e.nombre}{e.especialidad ? <span className="font-normal text-slate-600"> · {e.especialidad}</span> : null}</p>
+                <p className="flex items-center gap-1 text-xs text-slate-500">
+                  <Clock className="h-3.5 w-3.5" /> {e.duracionMin} min · {e.precioCentimos ? euros(e.precioCentimos, e.moneda) : 'Gratis'}
+                  {!e.huecosLibres && ' · sin huecos libres en las próximas tres semanas'}
+                </p>
+              </div>
+              <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres || (!!e.precioCentimos && !lista.pagosActivos)}>Elegir hora</Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {todos && lista.expertos.length > 0 && !elegido && (
+        <p className="text-xs"><a className="text-emerald-700 underline" href={todos}>Quiénes son y cómo funcionan las consultas</a></p>
       )}
     </section>
   );

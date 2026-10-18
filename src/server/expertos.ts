@@ -236,17 +236,23 @@ function registrarHtmlExpertos() {
     const todos: ReturnType<typeof publico>[] = ctx.extra.get('expertos') || [];
     const ids: string[] = Array.isArray(d.expertos) ? d.expertos.map(String) : [];
     const lista = ids.length ? todos.filter(e => ids.includes(e.id)) : todos;
-    const titulo = d.titulo ? `<h2>${esc(d.titulo)}</h2>` : '';
+    // La versión corta (la de la ficha de un producto) lleva su propio título
+    // por defecto y no sale si no hay expertos, como en el navegador.
+    const tituloTexto = d.titulo || (d.compacto ? '¿Dudas antes de comprar? Consulta a un experto' : 'Pide consejo a un experto');
+    const titulo = `<h2>${esc(tituloTexto)}</h2>`;
     const intro = d.intro ? `<p>${enLinea(String(d.intro), ctx)}</p>` : '';
-    if (!lista.length) return titulo || intro ? `<section>${titulo}${intro}</section>` : '';
+    const enlaceTodos = d.compacto && typeof d.pagina === 'string' && d.pagina
+      ? `<p><a href="${esc(ctx.enlacePagina(d.pagina))}">Quiénes son y cómo funcionan las consultas</a></p>` : '';
+    if (!lista.length) return d.compacto ? '' : `<section>${titulo}${intro}</section>`;
     const fichas = lista.map(e => {
       const precio = e.precioCentimos > 0 ? fmtPrecio(e.precioCentimos, e.moneda) : 'Gratis';
       return `<li><h3>${esc(e.nombre)}</h3>`
         + (e.especialidad ? `<p>${esc(e.especialidad)}</p>` : '')
-        + (e.bio ? `<p>${enLinea(e.bio, ctx)}</p>` : '')
+        // La versión corta no enseña la bio en el navegador: aquí tampoco.
+        + (e.bio && !d.compacto ? `<p>${enLinea(e.bio, ctx)}</p>` : '')
         + `<p>${esc(e.duracionMin)} min · ${esc(precio)}</p></li>`;
     }).join('');
-    return `<section>${titulo}${intro}<ul>${fichas}</ul></section>`;
+    return `<section>${titulo}${intro}<ul>${fichas}</ul>${enlaceTodos}</section>`;
   }, async (db, bloques, ctx) => {
     if (!bloques.some(b => b?.tipo === 'experto') || !ctx.pagina?.id) return;
     const raiz = (await sitioDePagina(db, String(ctx.pagina.id)))?.raizId || String(ctx.pagina.id);
@@ -256,6 +262,147 @@ function registrarHtmlExpertos() {
     `);
     ctx.extra.set('expertos', (r.rows as any[]).map(publico));
   });
+}
+
+/** Valida y normaliza los campos editables de un experto. */
+async function camposExperto(db: any, cuerpo: any, soloPropios: boolean): Promise<{ out: Record<string, any> } | { error: string }> {
+  const out: Record<string, any> = {};
+  const err = (m: string) => ({ error: m });
+  if (!soloPropios) {
+    if ('nombre' in cuerpo) {
+      const n = String(cuerpo.nombre || '').trim();
+      if (!n || n.length > 120) return err('El nombre es obligatorio (120 caracteres como mucho).');
+      out.nombre = n;
+    }
+    if ('especialidad' in cuerpo) out.especialidad = String(cuerpo.especialidad || '').trim().slice(0, 200) || null;
+    if ('precioCentimos' in cuerpo) {
+      const p = Number(cuerpo.precioCentimos);
+      if (!Number.isInteger(p) || p < 0 || p > 10000000) return err('El precio no es válido.');
+      if (p > 0 && p < 100) return err('El precio mínimo es 1 € (o 0 para una consulta gratuita).');
+      out.precio_centimos = p;
+    }
+    if ('moneda' in cuerpo) {
+      const m = String(cuerpo.moneda || 'EUR').toUpperCase();
+      if (!MONEDAS.includes(m)) return err(`La moneda es una de: ${MONEDAS.join(', ')}.`);
+      out.moneda = m;
+    }
+    if ('duracionMin' in cuerpo) {
+      const d = Number(cuerpo.duracionMin);
+      if (!Number.isInteger(d) || d < 15 || d > 240) return err('La duración va de 15 a 240 minutos.');
+      out.duracion_min = d;
+    }
+    if ('comisionBps' in cuerpo) {
+      const b = Number(cuerpo.comisionBps);
+      if (!Number.isInteger(b) || b < 0 || b > 5000) return err('La comisión va del 0 % al 50 %.');
+      out.comision_bps = b;
+    }
+    if ('activo' in cuerpo) out.activo = !!cuerpo.activo;
+    if ('orden' in cuerpo) out.orden = Math.max(0, Math.min(10000, Math.round(Number(cuerpo.orden) || 0)));
+    if ('cuentaEmail' in cuerpo) {
+      const correo = String(cuerpo.cuentaEmail || '').trim().toLowerCase();
+      if (!correo) out.user_id = null;
+      else {
+        const u = (await db.execute(sql`
+          SELECT id FROM users WHERE lower(email) = ${correo} AND archived_at IS NULL AND deleted_at IS NULL
+        `)).rows[0] as any;
+        if (!u) return err('No hay ninguna cuenta con ese correo. Que el experto se registre primero y vuelve a intentarlo.');
+        out.user_id = u.id;
+      }
+    }
+  }
+  if ('bio' in cuerpo) out.bio = String(cuerpo.bio || '').trim().slice(0, 3000) || null;
+  if ('foto' in cuerpo) {
+    const f = String(cuerpo.foto || '').trim();
+    if (f && !/^(https:\/\/|\/uploads\/)/.test(f)) return err('La foto tiene que ser una dirección https o una imagen subida.');
+    out.foto_url = f || null;
+  }
+  if ('zonaHoraria' in cuerpo) {
+    if (!zonaValida(cuerpo.zonaHoraria)) return err('Esa zona horaria no existe (p. ej. Europe/Madrid).');
+    out.zona_horaria = cuerpo.zonaHoraria;
+  }
+  if ('disponibilidad' in cuerpo) {
+    const { franjas, descartadas } = limpiarDisponibilidad(cuerpo.disponibilidad);
+    if (descartadas) return err(`${descartadas} franja(s) de la agenda no son válidas: cada una necesita día, hora de inicio y de fin (HH:MM), y el fin después del inicio.`);
+    out.disponibilidad = JSON.stringify(franjas);
+  }
+  if ('antelacionHoras' in cuerpo) {
+    const h = Number(cuerpo.antelacionHoras);
+    if (!Number.isInteger(h) || h < 0 || h > 720) return err('La antelación va de 0 a 720 horas.');
+    out.antelacion_horas = h;
+  }
+  if ('enlaceReunion' in cuerpo) {
+    const l = String(cuerpo.enlaceReunion || '').trim();
+    if (l && !/^https:\/\//.test(l)) return err('El enlace de la videollamada tiene que empezar por https://');
+    out.enlace_reunion = l.slice(0, 500) || null;
+  }
+  return { out };
+}
+
+/**
+ * PUT /api/v1/pages/:id/experts (montada en `apiPublica.ts`, detrás de su
+ * puerta de claves). Da de alta o pone al día los expertos del sitio de esa
+ * página, por nombre: el script que monta un sitio (`scripts/wikiproducts/
+ * expertos.mjs`) lo puede repetir sin duplicar a nadie. Quien llama tiene que
+ * ser del equipo del sitio, igual que en el panel. Nunca archiva: un experto
+ * que ya no viene en la lista se queda como está (quitarlo es del panel). Con
+ * `only_new: true` sólo da de alta a los que faltan y no toca a los demás.
+ */
+export async function expertosPorApi(db: any, req: Request, paginaId: string, cuerpo: any): Promise<{ codigo: number; cuerpo: any }> {
+  const lista = Array.isArray(cuerpo?.experts) ? cuerpo.experts : null;
+  if (!lista || !lista.length || lista.length > 20) return { codigo: 400, cuerpo: { error: 'Manda «experts»: una lista de 1 a 20 expertos.' } };
+  const s = await sitioDeSoporte(db, req, paginaId);
+  if (!s || !(await esEquipo(db, req, s.raiz))) return { codigo: 403, cuerpo: { error: 'Sólo el equipo del sitio da de alta expertos.' } };
+  // Nombres en inglés en la API, como el resto de /api/v1.
+  const traducir = (x: any) => {
+    const o: Record<string, any> = {};
+    const mapa: Record<string, string> = {
+      name: 'nombre', specialty: 'especialidad', bio: 'bio', photo: 'foto', price_cents: 'precioCentimos',
+      currency: 'moneda', duration_min: 'duracionMin', commission_bps: 'comisionBps', timezone: 'zonaHoraria',
+      availability: 'disponibilidad', notice_hours: 'antelacionHoras', meeting_url: 'enlaceReunion',
+      active: 'activo', order: 'orden', account_email: 'cuentaEmail',
+    };
+    for (const [k, v] of Object.entries(x || {})) if (mapa[k]) o[mapa[k]] = v;
+    return o;
+  };
+  // Todo o nada: una lista a medias dejaría el sitio distinto de su fichero.
+  const validos: Record<string, any>[] = [];
+  for (const [i, x] of lista.entries()) {
+    const v = await camposExperto(db, traducir(x), false);
+    if ('error' in v) return { codigo: 400, cuerpo: { error: `Experto ${i + 1}: ${v.error}` } };
+    if (!v.out.nombre) return { codigo: 400, cuerpo: { error: `Experto ${i + 1}: falta «name».` } };
+    validos.push(v.out);
+  }
+  const hechos = [];
+  for (const f of validos) {
+    const ya = (await db.execute(sql`
+      SELECT id FROM expertos WHERE raiz_id = ${s.raiz} AND lower(nombre) = lower(${f.nombre}) AND archived_at IS NULL
+      ORDER BY created_at LIMIT 1
+    `)).rows[0] as any;
+    // `only_new`: el script de montar el sitio no pisa lo que el equipo
+    // cambió luego en el panel (el precio, la agenda…).
+    if (ya && cuerpo?.only_new) { hechos.push({ id: ya.id, name: f.nombre, created: false, untouched: true }); continue; }
+    if (ya) {
+      const sets = Object.keys(f).map(k => k === 'disponibilidad'
+        ? sql`disponibilidad = ${f[k]}::jsonb`
+        : sql`${sql.raw(k)} = ${f[k]}`);
+      await db.execute(sql`UPDATE expertos SET ${sql.join(sets, sql`, `)}, updated_at = now() WHERE id = ${ya.id}`);
+      hechos.push({ id: ya.id, name: f.nombre, created: false });
+    } else {
+      const id = nuevoId('EXP');
+      await db.execute(sql`
+        INSERT INTO expertos (id, raiz_id, user_id, nombre, especialidad, bio, foto_url, precio_centimos, moneda,
+                              duracion_min, comision_bps, zona_horaria, disponibilidad, antelacion_horas,
+                              enlace_reunion, activo, orden, created_by)
+        VALUES (${id}, ${s.raiz}, ${f.user_id ?? null}, ${f.nombre}, ${f.especialidad ?? null}, ${f.bio ?? null},
+                ${f.foto_url ?? null}, ${f.precio_centimos ?? 0}, ${f.moneda ?? 'EUR'}, ${f.duracion_min ?? 45},
+                ${f.comision_bps ?? 0}, ${f.zona_horaria ?? 'Europe/Madrid'}, ${f.disponibilidad ?? '[]'}::jsonb,
+                ${f.antelacion_horas ?? 24}, ${f.enlace_reunion ?? null}, ${f.activo ?? true}, ${f.orden ?? 0},
+                ${req.user!.id})
+      `);
+      hechos.push({ id, name: f.nombre, created: true });
+    }
+  }
+  return { codigo: 200, cuerpo: { site: s.raiz, experts: hechos } };
 }
 
 export function registrarExpertos(app: Express, db: any) {
@@ -543,79 +690,7 @@ export function registrarExpertos(app: Express, db: any) {
     }
   });
 
-  /** Valida y normaliza los campos editables de un experto. */
-  const campos = async (cuerpo: any, soloPropios: boolean) => {
-    const out: Record<string, any> = {};
-    const err = (m: string) => ({ error: m });
-    if (!soloPropios) {
-      if ('nombre' in cuerpo) {
-        const n = String(cuerpo.nombre || '').trim();
-        if (!n || n.length > 120) return err('El nombre es obligatorio (120 caracteres como mucho).');
-        out.nombre = n;
-      }
-      if ('especialidad' in cuerpo) out.especialidad = String(cuerpo.especialidad || '').trim().slice(0, 200) || null;
-      if ('precioCentimos' in cuerpo) {
-        const p = Number(cuerpo.precioCentimos);
-        if (!Number.isInteger(p) || p < 0 || p > 10000000) return err('El precio no es válido.');
-        if (p > 0 && p < 100) return err('El precio mínimo es 1 € (o 0 para una consulta gratuita).');
-        out.precio_centimos = p;
-      }
-      if ('moneda' in cuerpo) {
-        const m = String(cuerpo.moneda || 'EUR').toUpperCase();
-        if (!MONEDAS.includes(m)) return err(`La moneda es una de: ${MONEDAS.join(', ')}.`);
-        out.moneda = m;
-      }
-      if ('duracionMin' in cuerpo) {
-        const d = Number(cuerpo.duracionMin);
-        if (!Number.isInteger(d) || d < 15 || d > 240) return err('La duración va de 15 a 240 minutos.');
-        out.duracion_min = d;
-      }
-      if ('comisionBps' in cuerpo) {
-        const b = Number(cuerpo.comisionBps);
-        if (!Number.isInteger(b) || b < 0 || b > 5000) return err('La comisión va del 0 % al 50 %.');
-        out.comision_bps = b;
-      }
-      if ('activo' in cuerpo) out.activo = !!cuerpo.activo;
-      if ('orden' in cuerpo) out.orden = Math.max(0, Math.min(10000, Math.round(Number(cuerpo.orden) || 0)));
-      if ('cuentaEmail' in cuerpo) {
-        const correo = String(cuerpo.cuentaEmail || '').trim().toLowerCase();
-        if (!correo) out.user_id = null;
-        else {
-          const u = (await db.execute(sql`
-            SELECT id FROM users WHERE lower(email) = ${correo} AND archived_at IS NULL AND deleted_at IS NULL
-          `)).rows[0] as any;
-          if (!u) return err('No hay ninguna cuenta con ese correo. Que el experto se registre primero y vuelve a intentarlo.');
-          out.user_id = u.id;
-        }
-      }
-    }
-    if ('bio' in cuerpo) out.bio = String(cuerpo.bio || '').trim().slice(0, 3000) || null;
-    if ('foto' in cuerpo) {
-      const f = String(cuerpo.foto || '').trim();
-      if (f && !/^(https:\/\/|\/uploads\/)/.test(f)) return err('La foto tiene que ser una dirección https o una imagen subida.');
-      out.foto_url = f || null;
-    }
-    if ('zonaHoraria' in cuerpo) {
-      if (!zonaValida(cuerpo.zonaHoraria)) return err('Esa zona horaria no existe (p. ej. Europe/Madrid).');
-      out.zona_horaria = cuerpo.zonaHoraria;
-    }
-    if ('disponibilidad' in cuerpo) {
-      const { franjas, descartadas } = limpiarDisponibilidad(cuerpo.disponibilidad);
-      if (descartadas) return err(`${descartadas} franja(s) de la agenda no son válidas: cada una necesita día, hora de inicio y de fin (HH:MM), y el fin después del inicio.`);
-      out.disponibilidad = JSON.stringify(franjas);
-    }
-    if ('antelacionHoras' in cuerpo) {
-      const h = Number(cuerpo.antelacionHoras);
-      if (!Number.isInteger(h) || h < 0 || h > 720) return err('La antelación va de 0 a 720 horas.');
-      out.antelacion_horas = h;
-    }
-    if ('enlaceReunion' in cuerpo) {
-      const l = String(cuerpo.enlaceReunion || '').trim();
-      if (l && !/^https:\/\//.test(l)) return err('El enlace de la videollamada tiene que empezar por https://');
-      out.enlace_reunion = l.slice(0, 500) || null;
-    }
-    return { out };
-  };
+  const campos = (cuerpo: any, soloPropios: boolean) => camposExperto(db, cuerpo, soloPropios);
 
   /** POST /api/expertos/gestion/:pagina — dar de alta un experto (equipo). */
   app.post('/api/expertos/gestion/:pagina', async (req: Request, res: Response) => {

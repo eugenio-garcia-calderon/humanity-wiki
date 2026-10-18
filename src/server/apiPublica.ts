@@ -9,6 +9,7 @@ import { rolEnPagina, capacidades, puedeEditarPagina, quienDe } from './permisos
 import { registrarHistorial } from './historial';
 import { markdownABloques, bloquesAMarkdown, nuevoIdBloque, esBloqueDatos } from '../utils/bloques';
 import { guardarProcedencia, ponerPlantilla } from './bd/plantillaFicha';
+import { expertosPorApi } from './expertos';
 
 // ============================================================================
 // LA API PÚBLICA, /api/v1 (2026-10-06, carril «espacio», #24)
@@ -115,7 +116,7 @@ export function registrarApiPublica(app: Express, db: any) {
     if (!req.path.startsWith('/api/v1')) return next();
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Cache-Control', 'no-store');
     if (req.method === 'OPTIONS') return res.status(204).end();
     try {
@@ -356,6 +357,16 @@ export function registrarApiPublica(app: Express, db: any) {
       const w = await guardarBloques(req, res, antes, bloques); if (!w) return;
       res.status(201).json({ block: e.bloque, page: paginaPublica(w, { version: w.version }) });
     } catch (e: any) { console.error('v1 añadir bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  /** `{ experts: [{ name, specialty?, bio?, price_cents, duration_min?, commission_bps?, timezone?,
+   *     availability?: [{dia, desde, hasta}], notice_hours?, meeting_url?, active? }], only_new? }` — the paid
+   *  experts of the site this page belongs to, matched by name (W6, `expertos.ts`). */
+  app.put('/api/v1/pages/:id/experts', async (req: Request, res: Response) => {
+    try {
+      const r = await expertosPorApi(db, req, String(req.params.id), req.body);
+      res.status(r.codigo).json(r.cuerpo);
+    } catch (e: any) { console.error('v1 expertos:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
   app.delete('/api/v1/pages/:id/blocks/:blockId', async (req: Request, res: Response) => {
