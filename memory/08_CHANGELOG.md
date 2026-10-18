@@ -9228,6 +9228,13 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - New workflow «Exportar Wikiproducts» (`exportar-wikiproducts.yml`, by hand): over SSH, `scripts/wikiproducts/exportar-en-servidor.sh` reads the site's public pages (the root, the subcategory pages, «Cómo trabajamos» and every page hanging from them through «Página» blocks), its `sitio_config` / `sitio_categorias` / `sitio_restricciones` rows, its `dominios_paginas` row, and the stored product photos with their row name and credit. The result is the run's artifact `wikiproducts-export` (paginas.json, fotos.json, fotos.tar), kept 14 days.
 - Read-only, no key created. Not exported: members, their sessions and magic links, orders, users, keys, `.env`; user ids and anything named like a token are dropped from every row (`exportar.mjs`). Only the owner's pages, not deleted, archived or members-only. Same concurrency group as the load, so the two never overlap. Tested against the local copy (`CARGA_MODO=local`).
 
+## 2026-10-18 — Section card photos load immediately (Wikiproducts W2)
+
+- The Mac check after #648 saw the «Baterías domésticas» card blank until its lazy image loaded. The first six section cards (`CARGA_INMEDIATA` in `tarjetaSeccion.ts`) now load their photo eagerly, in React and in the server HTML; the rest stay lazy. Not checked on production.
+
+## 2026-10-18 — Recuadros de grupo sin espacio desaprovechado (prog8)
+- Dentro del recuadro de un grupo, las tarjetas **se estiran hasta llenar el ancho** (`auto-fit` con columnas `1fr`) en vez de quedarse centradas con márgenes laterales grandes. Los recuadros pequeños (1–2 tarjetas) tienen un ancho fijo ajustado a sus tarjetas, para que un título largo no los ensanche.
+- Márgenes más ajustados: relleno del recuadro `p-3 sm:p-4` y separación entre recuadros `gap-4`.
 ## 2026-10-18 — Wikiproducts: clean photo for the AIKO Neostar panel (W3a)
 - The AIKO row's photo came from a shop's preview image (aceflex): a banner with logo, text and stars. Because AIKO is the first home panel, that banner was also the picture on the «Paneles solares domésticos» card on the home page and on /energia-solar-domestica. `datos/fotos.json` now pins AIKO's own product image (aikosolar.com, Neostar 3P54). The next load with fotos=si replaces it, since a pinned source must match the photo's credit.
 - Same PR: the texts no longer promise what is not true yet.

@@ -602,7 +602,11 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
         onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
-        style={centrada
+        // En el recuadro de un grupo, las tarjetas llenan todo el ancho (2026-10-18,
+        // Eugenio: «hay mucho espacio lateral no aprovechado»).
+        style={enCaja
+        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }
+        : centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
         {filasVis.map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && (arrastrable ?? editable) && !sitio))}

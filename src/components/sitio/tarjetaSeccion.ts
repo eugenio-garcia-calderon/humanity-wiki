@@ -16,3 +16,9 @@ export const CLASES_TARJETA = {
   cuenta: 'text-sm text-slate-600',
   descripcion: 'hidden sm:block mt-1 text-sm text-slate-700 line-clamp-2',
 } as const;
+
+/** Las primeras seis tarjetas (dos filas en escritorio, tres en el teléfono)
+ *  cargan su foto enseguida: con `lazy`, «Baterías domésticas» se quedaba en
+ *  blanco a la vista hasta que el navegador decidía pedirla (comprobado en
+ *  producción, 2026-10-18). Un sitio suele tener menos secciones que esto. */
+export const CARGA_INMEDIATA = 6;
