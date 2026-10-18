@@ -9244,3 +9244,6 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
   - «Cómo trabajamos» (via `datos/textos.json`, corregir-textos): the commission and the double vote of verified buyers are now worded as what happens once purchases through Wikiproducts are open. Today every offer says «Sin comisión».
   - Every published site's Cookies template (`sitioWeb.ts`) now says that a member who signs in gets one technical session cookie, `rh_sitio_<root>` (HttpOnly, 30 days), and nothing for tracking.
   - The Privacy template has a «Si te creas una cuenta» section: email, name, hashed password, published ratings, legal basis 6.1.b, kept while the account exists, deletion with the 15-day recycle bin, and published ratings kept without the name.
+
+## 2026-10-18 — Arrastrar las propiedades de la ficha, como los bloques (prog8)
+- Las propiedades de la página de una entrada se reordenan **arrastrándolas por su nombre** o por el tirador ⋮⋮ que aparece a la izquierda al pasar el ratón (antes, solo un tirador diminuto en la esquina). Una **barra verde** marca si caerá antes o después (izquierda/derecha en la rejilla, arriba/abajo en la lista). El orden es el de toda la tabla.
