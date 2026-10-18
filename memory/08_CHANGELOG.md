@@ -8934,3 +8934,8 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Bloque «Menú de temas» (Humanidad Wiki, fase 1) (prog8)
 - Nuevo bloque para cualquier página: el menú de temas de Explorar, con icono y color por tema, en lista lateral o en rejilla. Cada tema lleva a una página y puede tener subtemas que se despliegan.
 - Nace con los temas de la humanidad (los mismos quince del menú, con su icono y su color) y se edita en el propio bloque: nombre, icono, color, enlace, subtemas y orden. Es el primer paso para que Humanidad Wiki sea una página hecha con Wiki Creator.
+
+### 2026-10-18 — Cada tienda, en los datos estructurados de la ficha (Wikiproducts W1, SEO R4)
+- El `AggregateOffer` del JSON-LD `Product` lleva ahora un `Offer` por tienda: precio, moneda, envío (`shippingDetails`), disponibilidad sólo si se sabe el stock, enlace y vendedor. Salen de las mismas ofertas que pinta «Dónde comprarlo» (`ofertasDeProducto`, W5), así que el precio mínimo, el máximo y el número de tiendas cuadran con lo que se ve. Una oferta sin precio publicado no se declara; la comisión nunca.
+- Sólo en el HTML del servidor, leído como un anónimo. La lectura se deja en la página (sin salir en `window.__SITIO__`) y el bloque «Dónde comprarlo» la reutiliza: una sola lectura de la tabla de ofertas por visita.
+- Las migas de pan apuntan a la portada con `{{inicio}}` cuando la ficha cuelga de ella (W2, #603): en un dominio propio la portada es `/`, no su slug.
