@@ -61,7 +61,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -77,6 +77,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   arrastrable?: boolean;
   /** En una galería agrupada: soltar aquí una tarjeta de esta misma base la pasa a este grupo. */
   alSoltarEnGrupo?: (filaId: string) => void;
+  /** En una galería agrupada: los valores del grupo, que se escriben en la
+   *  entrada que llega de OTRA base de datos para que se quede donde se soltó. */
+  celdasAlRecibir?: Record<string, any>;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -194,6 +197,13 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         const r = await fetch(`/api/bd/filas/${d.fila}/mover-a-tabla`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tabla_destino: tablaId, antes_de: antes }) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j.error || 'No se pudo mover la entrada.');
+        // SE QUEDA EN EL GRUPO DONDE SE SOLTÓ (2026-10-18, Eugenio: «se me va a
+        // sin agrupar»). Mover de tabla no sabe de grupos: se escribe aquí el
+        // valor del grupo, ya con la entrada en esta base de datos.
+        if (celdasAlRecibir && Object.keys(celdasAlRecibir).length) {
+          const g = await fetch(`/api/bd/filas/${d.fila}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ celdas: celdasAlRecibir }) });
+          if (!g.ok) setFallo((await g.json().catch(() => ({}))).error || 'Se movió, pero no se pudo poner en ese grupo.');
+        }
         const donde = j.tabla_titulo || tituloTabla || 'esta base de datos';
         const perdidas: string[] = j.perdidas || [];
         // «Deshacer» solo si no se perdió nada: lo perdido no vuelve.
@@ -615,8 +625,15 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
           tarjetas={filasVis.map(f => tarjeta(f))} copias={filasVis.map(f => tarjeta(f, true))}
           pie={botonNueva} todo={rejilla} />
       ) : rejilla}
+      {/* Un grupo vacío también recibe tarjetas de otra base de datos (2026-10-18):
+          sin esto, la rejilla vacía no tiene alto y no hay dónde soltar. */}
       {!filas.length && !editable && (
-        <p className="py-6 text-center text-xs text-slate-400">Todavía no hay nada en esta base de datos.</p>
+        <p onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
+          onDragLeave={() => setEntrando(false)}
+          onDrop={(arrastrable ?? editable) && !sitio ? e => { if (esFilaAjena(e)) recibir(e, null); } : undefined}
+          className={cn('py-6 text-center text-xs text-slate-400 rounded-xl', entrando && 'bg-emerald-50 ring-2 ring-emerald-300 text-emerald-700')}>
+          {entrando ? 'Suéltala aquí' : 'Todavía no hay nada en esta base de datos.'}
+        </p>
       )}
       <span className="sr-only" role="status" aria-live="polite">{anuncio}</span>
       {menu && <MenuAcciones x={menu.x} y={menu.y} acciones={accionesDe(menu.fila, ordenable && (arrastrable ?? editable) && !sitio && filasVis.length > 1)} onCerrar={() => setMenu(null)} etiqueta={`Acciones de ${nombreDe(menu.fila)}`} />}
