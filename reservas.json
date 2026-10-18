@@ -83,6 +83,12 @@
       "ruta": "src/components/knowledge/CreadorMenu.tsx",
       "motivo": "W2 buscador",
       "desde": "2026-10-18T11:59:09.996Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/App.tsx",
+      "motivo": "W2 ruta buscar",
+      "desde": "2026-10-18T12:00:44.280Z"
     }
   ]
 }
