@@ -2,9 +2,9 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0159_wikiproducts_miembros.sql",
-      "motivo": "W4: activar miembros en el sitio Wikiproducts",
-      "desde": "2026-10-18T17:32:15.834Z"
+      "ruta": "src/server/apiPublica.ts",
+      "motivo": "W2: hide_title en PATCH de bloque basedatos",
+      "desde": "2026-10-18T21:43:03.043Z"
     }
   ]
 }
