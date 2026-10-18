@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "W6 expertos en fichas",
-      "desde": "2026-10-18T17:29:21.201Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/wikiproducts/cargar-en-servidor.sh",
       "motivo": "W6: paso expertos.mjs",
       "desde": "2026-10-18T17:29:24.005Z"
