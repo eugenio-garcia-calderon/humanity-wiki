@@ -53,6 +53,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "W6: chat de ayuda fuera del menú, Stripe real",
       "desde": "2026-10-18T11:58:39.614Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "W6: chat de ayuda fuera del menú, Stripe real",
+      "desde": "2026-10-18T11:58:42.310Z"
     }
   ]
 }
