@@ -142,8 +142,13 @@ type ConCondiciones = {
 const dineroCorto = (c: number, moneda = 'EUR') =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda, minimumFractionDigits: c % 100 ? 2 : 0 }).format(c / 100);
 
-/** A loaded «desconocido» / «no publicado» is the absence of a value, not one. */
-const plazoReal = (p: string | null) => (p && !/^(desconocido|no publicado|no indicado|n\/?d|-)$/i.test(p.trim()) ? p.trim() : null);
+/** A loaded «desconocido» / «no publicado» is the absence of a value, not one.
+ *  Neither is a calendar date («entre el 26 de octubre y el 2 de noviembre»):
+ *  it was true the day the shop was read and is wrong a week later, so the box
+ *  falls back to the shop's own range instead (evaluator round 3). */
+// «22/10», «21–23/10/2026», but not a range of hours or days («24-48 h», «2-4 días»).
+const FECHA_CONCRETA = /\d{1,2}\s*[\/-]\s*\d{1,2}(?!\d)(?!\s*(h|horas|d[ií]as)\b)(\s*[\/-]\s*\d{2,4})?|\b\d{1,2}\s+(de\s+)?(ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)[a-z]*\b|\b(lunes|martes|miércoles|jueves|viernes|sábado|domingo)\b/i;
+const plazoReal = (p: string | null) => (p && !/^(desconocido|no publicado|no indicado|n\/?d|-)$/i.test(p.trim()) && !FECHA_CONCRETA.test(p) ? p.trim() : null);
 
 export function textoEntrega(o: ConCondiciones): string | null {
   const p = plazoReal(o.plazo);
