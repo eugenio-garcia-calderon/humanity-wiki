@@ -85,6 +85,10 @@ export async function vaciarCuentas(db: any): Promise<void> {
         // Ninguna puerta abierta: ni sesiones ni enlaces de recuperación vivos.
         await tx.execute(sql`UPDATE sessions SET revoked_at = now() WHERE user_id = ${r.id} AND revoked_at IS NULL`);
         await tx.execute(sql`UPDATE password_resets SET used_at = now() WHERE user_id = ${r.id} AND used_at IS NULL`);
+        // El nombre y el correo que dejó en chats de ayuda y consultas con
+        // expertos (W6): se quedan las conversaciones, no quién era.
+        await tx.execute(sql`UPDATE soporte_conversaciones SET cliente_nombre = NULL, cliente_email = NULL WHERE cliente_user_id = ${r.id}`);
+        await tx.execute(sql`UPDATE consultas_experto SET cliente_nombre = NULL, cliente_email = NULL WHERE cliente_user_id = ${r.id}`);
       });
       console.log(`[cuentas] vaciada ${r.id} (pidió borrarse hace más de ${DIAS} días)`);
     } catch (e: any) {
