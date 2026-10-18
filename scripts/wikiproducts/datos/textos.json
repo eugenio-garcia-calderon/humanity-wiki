@@ -6,7 +6,24 @@
       "buscar": "cualquiera puede sugerir una corrección",
       "cambiar": "cualquiera con una cuenta puede sugerir una corrección",
       "por_que": "«Sugerir una corrección» pide iniciar sesión, igual que votar (W1, 2026-10-18; ronda 1 del evaluador)."
+    },
+    {
+      "pagina": "Cómo trabajamos",
+      "buscar": "Algunas tiendas pagan una comisión cuando alguien compra desde aquí. Esa comisión se muestra, pero",
+      "cambiar": "Hoy no se cobra ninguna comisión, y cada oferta lo dice. Cuando la compra a través de Wikiproducts esté abierta, si una tienda paga una comisión se mostrará, pero",
+      "por_que": "Prometía comisiones que hoy no existen: todas las ofertas dicen «Sin comisión» y la compra en el sitio aún no está abierta (comprobado en producción desde el Mac, 2026-10-18)."
+    },
+    {
+      "pagina": "Cómo trabajamos",
+      "buscar": "Quien compró de verdad cuenta doble.",
+      "cambiar": "Cuando la compra a través de Wikiproducts esté abierta, el voto de quien haya comprado aquí de verdad contará doble.",
+      "por_que": "Sin compras en el sitio todavía no puede haber compradores verificados (2026-10-18)."
     }
   ],
-  "informe": ["Cómo trabajamos", "Aviso legal", "Política de privacidad", "Contacto"]
+  "informe": [
+    "Cómo trabajamos",
+    "Aviso legal",
+    "Política de privacidad",
+    "Contacto"
+  ]
 }

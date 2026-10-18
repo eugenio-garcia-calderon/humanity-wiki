@@ -181,8 +181,11 @@ export function textoSobre(fondo: string): string {
 //
 // LO DE LAS COOKIES ES VERDAD HOY, y por eso puede decirse: medido el
 // 2026-10-02 en luzhumanidad.com, la página publicada no instala ninguna
-// cookie ni guarda nada en el navegador del visitante. Si eso cambia (un
-// contador de visitas, un vídeo incrustado), este texto tiene que cambiar.
+// cookie a quien sólo la visita. Desde que un sitio puede tener miembros
+// (src/server/miembros.ts), quien entra con su cuenta recibe una cookie de
+// sesión `rh_sitio_<raíz>` (HttpOnly, 30 días): técnica, y el texto lo dice.
+// Si eso cambia (un contador de visitas, un vídeo incrustado), este texto
+// tiene que cambiar.
 
 const falta = (v: string | undefined, que: string) => (v && v.trim()) || `[${que}]`;
 
@@ -222,10 +225,13 @@ export function textoLegal(doc: DocLegal, s: Sitio, sitioNombre: string): string
       `${nombre}${t.nif ? `, con NIF/CIF ${t.nif}` : ''}${t.domicilio ? `, con domicilio en ${t.domicilio}` : ''}. Contacto: ${email}.`,
       `## Qué datos tratamos y para qué`,
       `Sólo los que nos facilites al escribirnos o al hacer un pedido (por ejemplo, tu nombre, tu correo o tu dirección de envío), para atender tu consulta o tu pedido. Esta web no elabora perfiles ni toma decisiones automatizadas.`,
+      `## Si te creas una cuenta`,
+      `Guardamos tu correo, el nombre que elijas y tu contraseña, que nunca se guarda tal cual: sólo una huella cifrada que no permite recuperarla. También lo que publiques con tu cuenta, como tus valoraciones. Sirven para que puedas entrar y para mostrar tus aportaciones. La base jurídica es la ejecución de las condiciones de uso que aceptas al registrarte (art. 6.1.b del RGPD).`,
+      `Los guardamos mientras tengas la cuenta. Puedes borrarla cuando quieras, también escribiendo a ${email}: queda 15 días en una papelera por si te arrepientes y después se borran tus datos personales. Lo que hayas publicado, como tus valoraciones, se queda sin tu nombre.`,
       `## Base jurídica`,
-      `Tu consentimiento al contactarnos (art. 6.1.a del RGPD) y, si compras algo, la ejecución del contrato (art. 6.1.b).`,
+      `Tu consentimiento al contactarnos (art. 6.1.a del RGPD), la ejecución del contrato si compras algo o te creas una cuenta (art. 6.1.b).`,
       `## Cuánto tiempo los guardamos`,
-      `El necesario para atenderte y, después, el que exijan las obligaciones legales (por ejemplo, las fiscales).`,
+      `El necesario para atenderte (o, si tienes cuenta, mientras la tengas) y, después, el que exijan las obligaciones legales (por ejemplo, las fiscales).`,
       `## Quién más los ve`,
       `No se ceden a terceros salvo obligación legal. El proveedor que aloja la web trata los datos por cuenta nuestra, dentro de la Unión Europea.`,
       `## Tus derechos`,
@@ -235,7 +241,8 @@ export function textoLegal(doc: DocLegal, s: Sitio, sitioNombre: string): string
 
   return [
     `# Política de cookies`,
-    `Esta web no instala cookies de seguimiento, de análisis ni de publicidad, y no guarda información en tu navegador para identificarte.`,
+    `Esta web no instala cookies de seguimiento, de análisis ni de publicidad.`,
+    `Sólo usa una cookie técnica de sesión, y únicamente si entras con tu cuenta: sirve para que sigas dentro mientras navegas (dura 30 días o hasta que salgas) y no se usa para nada más. Al ser estrictamente necesaria, no requiere tu permiso.`,
     `Si en algún momento se añadiera alguna que no sea estrictamente necesaria, se te pedirá permiso antes, como exige el artículo 22.2 de la LSSI-CE.`,
     `Para cualquier duda: ${email}.`,
   ].join('\n\n');
