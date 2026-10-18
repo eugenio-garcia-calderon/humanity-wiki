@@ -36,7 +36,9 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
 
   const cargar = () => fetch(`${base}/estado`, { credentials: 'include' }).then(r => r.json()).then(setE).catch(() => {});
   useEffect(() => { cargar(); }, [raiz]);
-  const tras = () => { setAbierto(null); cargar(); onCambio(); };
+  // `sitio:sesion`: blocks that depend on who is signed in (the rating block)
+  // ask again, since this bar does not reload the page.
+  const tras = () => { setAbierto(null); cargar(); onCambio(); window.dispatchEvent(new Event('sitio:sesion')); };
   const avisoEnlace = useCanjeEnlace(raiz, tras);
 
   useEffect(() => {
@@ -46,6 +48,17 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
     window.addEventListener('pointerdown', fuera);
     return () => window.removeEventListener('pointerdown', fuera);
   }, [abierto]);
+
+  // A block that needs a session («Entrar para puntuar», `valoracion`) asks for
+  // the sign-in panel. Only while this bar is the one on screen: with the
+  // site's menu on, `CuentaMenu` answers instead.
+  const visible = !conMenu && !!e?.activo && !e?.es_equipo;
+  useEffect(() => {
+    if (!visible) return;
+    const pedir = (ev: Event) => { ev.preventDefault(); setAbierto(e?.yo ? 'menu' : 'entrar'); };
+    window.addEventListener('sitio:entrar', pedir);
+    return () => window.removeEventListener('sitio:entrar', pedir);
+  }, [visible, e]);
 
   // Con el menú encendido, aquí sólo queda el aviso del enlace mágico (el canje sigue siendo cosa de esta pieza).
   if (conMenu) return avisoEnlace ? <p className="fixed bottom-4 left-4 z-[60] max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p> : null;

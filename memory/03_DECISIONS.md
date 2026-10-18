@@ -899,3 +899,7 @@ the management panel, is the cheapest way to check it.
   reviewed at level 3) with the reason prefixed «Corrección sugerida». Needs an
   account, like voting. A dedicated corrections queue is the right shape once
   volume justifies it; today the table has zero rows.
+
+## 2026-10-18 — Turning on a site's members from a migration (Wikiproducts)
+
+Members can only be activated with the owner's session (`PUT /api/sitio-miembros/:raiz/config`); the `/api/v1` key does not reach it. For Wikiproducts the activation went into migration 0159, keyed by the site's address and guarded by "no config yet", rather than a new public-API endpoint or a step in `cargar-en-servidor.sh` (owned by W3a). Alternative kept open: a `/api/v1` members endpoint, if other sites need it scripted. Cost of switching later: the migration is a one-off, nothing depends on it.
