@@ -5,6 +5,12 @@
       "ruta": "drizzle/0159_wikiproducts_miembros.sql",
       "motivo": "W4: activar miembros en el sitio Wikiproducts",
       "desde": "2026-10-18T17:32:15.834Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/MenuSitio.tsx",
+      "motivo": "W2: el menú se pliega cuando sus enlaces no caben",
+      "desde": "2026-10-18T18:34:30.359Z"
     }
   ]
 }
