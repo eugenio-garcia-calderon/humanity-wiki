@@ -6,6 +6,7 @@
       "clave": "marcas",
       "titulo": "Marcas y empresas",
       "icono": "🏷️",
+      "ruta": "marcas/{Nombre}",
       "descripcion": "Las empresas detrás de cada producto: quién es, dónde tiene la sede y su información pública, con fuentes.",
       "columnas": [
         {
@@ -96,6 +97,7 @@
       "clave": "distribuidores",
       "titulo": "Distribuidores",
       "icono": "🏬",
+      "ruta": "tiendas/{Nombre}",
       "descripcion": "Tiendas, instaladores y mayoristas que venden los productos, con sus condiciones de envío y devolución.",
       "columnas": [
         {
@@ -221,6 +223,7 @@
       "clave": "afirmaciones",
       "titulo": "Afirmaciones publicitarias",
       "icono": "🔎",
+      "ruta": "afirmaciones/{Afirmación}",
       "descripcion": "Lo que dice la publicidad de un producto, contrastado: cierta, matizable, falsa o sin pruebas, siempre con fuentes.",
       "columnas": [
         {
@@ -300,6 +303,7 @@
       "clave": "retiradas",
       "titulo": "Retiradas y alertas de seguridad",
       "icono": "⚠️",
+      "ruta": "retiradas/{Título}",
       "descripcion": "Retiradas del mercado y alertas de seguridad publicadas por organismos oficiales de cualquier país.",
       "columnas": [
         {

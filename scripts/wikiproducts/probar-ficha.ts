@@ -99,7 +99,13 @@ prueba('los veredictos se leen de la etiqueta y las falsas salen primero', () =>
 prueba('una ficha delgada no se indexa y dice qué le falta (R10)', () => {
   const q = calidadFicha(ficha('a'));
   assert.equal(q.indexable, false);
-  assert.ok(q.faltan.some(f => /foto/.test(f)) && q.faltan.some(f => /resumen/.test(f)));
+  assert.ok(q.faltan.some(f => /resumen/.test(f)));
+});
+
+prueba('la foto no decide si se indexa: se apunta como mejora (R10, 2026-10-18)', () => {
+  const q = calidadFicha(ficha('a'));
+  assert.ok(!q.faltan.some(f => /foto/.test(f)));
+  assert.ok(q.mejoras.some(f => /foto/.test(f)));
 });
 
 prueba('sin fecha de revisión, la fecha es la del dato más reciente, nunca hoy (R11)', () => {

@@ -661,7 +661,7 @@ export function registrarSitios(app: Express, db: any) {
             )
         )
         SELECT DISTINCT ON (w.id) w.id, w.config->>'portada' AS portada,
-          GREATEST(w.updated_at, f.updated_at) AS cambio
+          GREATEST(w.updated_at, f.updated_at) AS cambio, (f.id IS NOT NULL) AS es_fila
         FROM baja b JOIN knowledge_windows w ON w.id = b.id
         LEFT JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL
         WHERE b.n > 0 AND w.deleted_at IS NULL AND w.archived_at IS NULL
@@ -670,7 +670,7 @@ export function registrarSitios(app: Express, db: any) {
       // La página propia de cada base de datos que enseñan.
       const ids = [raiz, ...(r.rows as any[]).map(x => x.id)];
       const bd = await db.execute(sql`
-        SELECT DISTINCT t.id, t.titulo, t.updated_at FROM knowledge_windows w
+        SELECT DISTINCT t.id, t.titulo, t.updated_at, (t.config->>'ruta') IS NOT NULL AS con_ruta FROM knowledge_windows w
         CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('w')}) blq
         JOIN bd_tablas t ON t.id = blq->>'tabla_id' AND t.deleted_at IS NULL AND t.archived_at IS NULL
         WHERE w.id = ANY(string_to_array(${ids.join(',')}, ',')) AND blq->>'tipo' = 'basedatos'
@@ -688,13 +688,22 @@ export function registrarSitios(app: Express, db: any) {
         `);
         for (const x of q.rows as any[]) slugs.set(x.id, x.slug);
       }
+      // UN SITIO QUE YA USA DIRECCIONES LEGIBLES (alguna de sus tablas tiene
+      // plantilla, `rutasFila.ts`) anuncia sólo lo que tiene dirección propia:
+      // sus páginas y las fichas con dirección legible. Las demás filas (una
+      // oferta, una fila de una tabla auxiliar) siguen abriéndose por `/p/…`,
+      // pero no se le ofrecen a Google como páginas; y la página propia de cada
+      // tabla (`/bd/…`) tampoco, porque repite la página del sitio que la
+      // enseña. Un sitio sin plantillas sigue como antes (2026-10-18).
+      const conRutas = (bd.rows as any[]).some(t => t.con_ruta);
       let ultimo = 0;
       for (const x of r.rows as any[]) {
         const ruta = slugs.get(x.id);
         ultimo = Math.max(ultimo, new Date(x.cambio).getTime());
+        if (conRutas && x.es_fila && !(ruta && ruta.includes('/'))) continue;
         urls.push({ loc: `https://${s.host}/${ruta || `p/${x.id}`}`, mod: fecha(x.cambio), t: new Date(x.cambio).getTime(), img: abs(x.portada) });
       }
-      for (const t of bd.rows as any[]) {
+      if (!conRutas) for (const t of bd.rows as any[]) {
         const n = slugDe(t.titulo);
         ultimo = Math.max(ultimo, new Date(t.updated_at).getTime());
         urls.push({ loc: `https://${s.host}/bd/${t.id}${n ? `/${n}` : ''}`, mod: fecha(t.updated_at), t: new Date(t.updated_at).getTime() });
