@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/tablas/EditorColumna.tsx",
-      "motivo": "W5 Wikiproducts: grupo de propiedades Ofertas",
-      "desde": "2026-10-18T11:33:56.058Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "W5 Wikiproducts: distribuidor y comisión por línea en la cesta",
       "desde": "2026-10-18T11:38:06.243Z"
