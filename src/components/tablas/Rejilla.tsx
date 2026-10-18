@@ -606,7 +606,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       return (
         <Fragment key={clave}>
           {arriba ? (
-            <div className="flex flex-wrap items-center gap-1">
+            <div className={cn('flex flex-wrap items-center gap-1', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
               {cabecera(g, nivel, plegado, alternar)}
               {pie(celdas)}
             </div>
@@ -615,6 +615,25 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </Fragment>
       );
     });
+  };
+  /** El título de un grupo de la galería, con el diseño de la vista: más
+   *  grande, centrado y con la imagen de lo enlazado (2026-10-18, Eugenio). */
+  const cabeceraGaleria = (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => {
+    const cfg = activa.config;
+    const talla = cfg.grupo_titulo || 'm';
+    const centro = (cfg.grupo_alineacion || 'centro') === 'centro';
+    const conImagen = cfg.grupo_imagen !== false && !!g.imagen && !nivel;
+    const letra = nivel ? 'text-sm' : ({ s: 'text-sm', m: 'text-lg', l: 'text-2xl', xl: 'text-4xl' } as const)[talla];
+    const lado = ({ s: 'h-8 w-8', m: 'h-12 w-12', l: 'h-16 w-16', xl: 'h-24 w-24' } as const)[talla];
+    return (
+      <button onClick={alternar} aria-expanded={!plegado}
+        className={cn('group/grupo flex items-center gap-2.5 py-1 font-black text-slate-800', !centro && (nivel ? 'pl-6' : 'pl-2'))}>
+        {conImagen && <img src={g.imagen!} alt="" loading="lazy" className={cn('shrink-0 rounded-xl object-cover bg-slate-100', lado)} />}
+        <span className={cn('leading-tight', letra, g.vacio && 'text-slate-400')} style={g.color ? { color: g.color } : undefined}>{g.etiqueta}</span>
+        <span className="text-xs font-bold text-slate-400">{g.filas.length}</span>
+        {plegado ? <ChevronRight className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-300 opacity-0 transition-opacity group-hover/grupo:opacity-100" />}
+      </button>
+    );
   };
   const etiquetaGrupo = (g: Grupo, nivel: number, plegado: boolean, alternar: () => void) => (
     <button onClick={alternar} className={cn('flex items-center gap-1.5 h-9 text-xs font-black text-slate-600', nivel ? 'pl-6' : 'pl-2')}>
@@ -813,6 +832,23 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         </div>
       )}
       </Grupo>}
+      {colAgr && (
+        <Grupo titulo="Grupos">
+          <Chips etiqueta="Tamaño del título" valor={activa.config.grupo_titulo || 'm'}
+            onCambiar={v => cambiarVista({ config: { ...activa.config, grupo_titulo: v } })}
+            opciones={[['s', 'S'], ['m', 'M'], ['l', 'L'], ['xl', 'XL']]} />
+          <Chips etiqueta="Alineación" valor={activa.config.grupo_alineacion || 'centro'}
+            onCambiar={v => cambiarVista({ config: { ...activa.config, grupo_alineacion: v } })}
+            opciones={[['izquierda', 'Izquierda'], ['centro', 'Centro']]} />
+          {APUNTAN.has(colAgr.tipo) && (
+            <label className="flex items-center justify-between gap-2 px-1 h-9 cursor-pointer">
+              <span className="text-xs font-bold text-slate-600">Imagen del grupo</span>
+              <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={activa.config.grupo_imagen !== false}
+                onChange={e => cambiarVista({ config: { ...activa.config, grupo_imagen: e.target.checked } })} />
+            </label>
+          )}
+        </Grupo>
+      )}
       <Grupo titulo="Tarjetas">
         <Chips etiqueta="Filas que se ven" valor={String(activa.config.filas_mostrar || 'todas')}
           onCambiar={v => cambiarVista({ config: { ...activa.config, filas_mostrar: v } })}
@@ -1068,7 +1104,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               ordenable={editable && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}
               motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
-          ), (g, nivel, plegado, alternar) => <div className="pt-2">{etiquetaGrupo(g, nivel, plegado, alternar)}</div>,
+          ), (g, nivel, plegado, alternar) => <div className={cn('flex pt-4', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>{cabeceraGaleria(g, nivel, plegado, alternar)}</div>,
           // «Añadir», pegado al título del grupo (2026-10-18, Eugenio): así se ve
           // a qué grupo va la tarjeta nueva.
           colAgr && editable ? celdas => <div className="pt-2"><NuevoElemento texto="Añadir" className="w-auto" onCrear={t => crearCon(t, celdas)} /></div> : undefined,
