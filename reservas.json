@@ -23,6 +23,12 @@
       "ruta": "scripts/wikiproducts/sitio.json",
       "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
       "desde": "2026-10-18T16:47:30.440Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
+      "desde": "2026-10-18T16:47:33.145Z"
     }
   ]
 }
