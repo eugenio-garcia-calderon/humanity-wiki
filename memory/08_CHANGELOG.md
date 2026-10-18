@@ -8884,4 +8884,5 @@ en mis páginas como proyecto pendiente».
 - La galería publicada se ordena por cualquier criterio («ordenar por ética») con el «Ordenar» de siempre. El orden usa una media ajustada (bayesiana) y nunca la comisión; `npx tsx scripts/probar-valoraciones.ts` lo comprueba.
 - Quien compró a través de la plataforma cuenta doble, y sólo él puede puntuar la atención al cliente de un distribuidor. Si devuelve el pedido, deja de contar.
 - Los miembros de un sitio publicado pueden votar si su categoría puede comentar.
+- El HTML que leen los buscadores y las IA ya trae las puntuaciones (media y votos por criterio, o «aún sin votos suficientes»), y la página lleva `AggregateRating` en sus datos estructurados sólo si enseña el bloque y hay votos suficientes (SEO R4).
 - Migración `0152_valoraciones.sql`.
