@@ -71,7 +71,7 @@ function lineaDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Linea | nul
   const v = valorDe(f, fila, c);
   if (!v.texto && v.procedencia?.naturaleza !== 'no_publicado') return null;
   if (!v.texto) v.texto = 'No publicado';
-  return { columnaId: c.id, etiqueta: etiquetaColumna(c), valor: v };
+  return { columnaId: c.id, etiqueta: etiquetaColumna(c, f.tabla.columnas), valor: v };
 }
 
 /** Columns chosen by id or by `config.clave`, in the order given. */
@@ -154,7 +154,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
       destacados: columnasDestacadas(t)
         .filter(c => tieneValor(fila, c))
         .slice(0, MAX_DESTACADAS)
-        .map(c => ({ columnaId: c.id, etiqueta: etiquetaColumna(c), valor: valorDe(f, fila, c) })),
+        .map(c => ({ columnaId: c.id, etiqueta: etiquetaColumna(c, t.columnas), valor: valorDe(f, fila, c) })),
     };
   }
 
@@ -352,7 +352,7 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
     .map(c => {
       const mejores = mejoresEn(filas, c);
       return {
-        columnaId: c.id, etiqueta: etiquetaColumna(c), grupo: esComunidad(c) ? 'Valoración de la comunidad' : GRUPOS[grupoDe(c) || ''] || '',
+        columnaId: c.id, etiqueta: etiquetaColumna(c, t.columnas), grupo: esComunidad(c) ? 'Valoración de la comunidad' : GRUPOS[grupoDe(c) || ''] || '',
         sentido: ordenable(c) ? (esComunidad(c) ? 'mayor' as const : c.config?.comparar) : null,
         celdas: filas.map(x => ({ texto: textoDe(x, c) || '—', mejor: mejores.has(x.id), procedencia: procedenciaDe(x, c) })),
         clave: claves.has(c.id),
@@ -544,7 +544,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
     const i = orden.findIndex(x => x.id === actual.id);
     criterios.push({
       columnaId: c.id,
-      criterio: etiquetaColumna(c),
+      criterio: etiquetaColumna(c, t.columnas),
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
       esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
