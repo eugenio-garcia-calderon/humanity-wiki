@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/server/apiPublica.ts",
-      "motivo": "W3a: bloques de página por la API (basedatos/subpagina)",
-      "desde": "2026-10-18T15:35:43.622Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/sitios.ts",
       "motivo": "W2: páginas por su nombre en dominio propio + llms.txt",
       "desde": "2026-10-18T15:54:37.160Z"
