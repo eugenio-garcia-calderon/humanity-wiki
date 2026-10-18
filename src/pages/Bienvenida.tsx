@@ -108,8 +108,8 @@ export default function Bienvenida() {
           que es su casa. */}
       <header className="flex min-h-[33vh] flex-col items-center justify-center py-3 text-center">
         {/* EL NOMBRE, Y DEBAJO LO QUE ES (2026-08-26, Eugenio: «vuelve a poner
-            humanity wiki como nombre del proyecto […] salvo en la portada, que
-            también pon humanity wiki en grande y debajo pon la red de
+            wiki creator como nombre del proyecto […] salvo en la portada, que
+            también pon wiki creator en grande y debajo pon la red de
             conocimiento»).
 
             El nombre es el dominio que se teclea y el que sale en la pestaña:
@@ -118,7 +118,7 @@ export default function Bienvenida() {
             lo que hay debajo del nombre —lo que esto ES— y ahí sí puede
             explicar, porque ya no tiene que identificar. */}
         <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
-          humanity<span className="text-emerald-600">.wiki</span>
+          wiki<span className="text-emerald-600">.creator</span>
         </h1>
         <p className="mt-2 text-sm font-bold uppercase tracking-[0.18em] text-slate-400 sm:text-base">
           La red de conocimiento

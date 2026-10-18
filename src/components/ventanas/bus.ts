@@ -108,7 +108,7 @@ export const abrirLateral = (a: AbrirLateral) =>
 
 /*
  * APARTAR TODAS LAS VENTANAS, SIN CERRAR NINGUNA (2026-08-22, Eugenio: «cuando
- * hago click en Humanity Wiki me lleve a INICIO "/" y ahora no ocurre cuando
+ * hago click en Wiki Creator me lleve a INICIO "/" y ahora no ocurre cuando
  * hay otras pestañas abierto, esto es terrible»).
  *
  * QUÉ PASABA. El logo SÍ navegaba: `navigate('/')` funcionaba perfectamente. Lo

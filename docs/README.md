@@ -1,4 +1,4 @@
-# Documentación normativa de Humanity.wiki
+# Documentación normativa de Wiki Creator
 
 Esta carpeta contiene los documentos que **definen** la plataforma. Tienen
 prioridad sobre cualquier decisión de implementación.

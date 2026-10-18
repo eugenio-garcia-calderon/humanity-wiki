@@ -44,7 +44,7 @@ export interface PaginaInfo {
   enMenu?: boolean;
 }
 
-// 2026-10-05 — Eugenio: «todas las páginas del desplegable de Humanity Wiki
+// 2026-10-05 — Eugenio: «todas las páginas del desplegable de Wiki Creator
 // elimínalas, ya no son útiles; salvo los avisos legales y Sobre Humanity
 // Wiki, que van en el footer». Veracidad, tokenomics, puntuación de
 // territorios, herramientas, servidores, seguridad y usabilidad dejan de
@@ -52,7 +52,7 @@ export interface PaginaInfo {
 // página privada de Eugenio, «Proyectos pendientes»). Las rutas que citan las
 // tiendas de aplicaciones (`/privacidad`, `/borrar-cuenta`) siguen vivas.
 export const PAGINAS_INFO: PaginaInfo[] = [
-  { ruta: 'sobre-red-humana', titulo: 'Sobre Humanity.wiki', icono: Globe },
+  { ruta: 'sobre-red-humana', titulo: 'Sobre Wiki Creator', icono: Globe },
 
   // Cómo borrar tu cuenta. LA EXIGE GOOGLE PLAY: una dirección pública,
   // alcanzable sin la aplicación y sin sesión, que explique el borrado. Sin

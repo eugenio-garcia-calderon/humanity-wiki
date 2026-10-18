@@ -1,6 +1,6 @@
 # 00_VISION.md
 
-# Visión de Humanity.wiki
+# Visión de Wiki Creator
 
 ## Misión
 Permitir comprender retos, coordinar recursos y ejecutar iniciativas.

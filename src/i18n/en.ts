@@ -150,7 +150,7 @@ const en: Record<string, string> = {
   "Claro": "Light",
   "Oscuro": "Dark",
   "Sistema": "System",
-  "Sobre Humanity.Wiki": "About Humanity.Wiki",
+  "Sobre Wiki Creator": "About Wiki Creator",
   "Avisos legales": "Legal notices",
   "Privacidad": "Privacy",
   "Cargando tus páginas…": "Loading your pages…",

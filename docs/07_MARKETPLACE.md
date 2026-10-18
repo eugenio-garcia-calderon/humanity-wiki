@@ -1,6 +1,6 @@
 # 07_MARKETPLACE.md
 
-# Mercado de Humanity.wiki
+# Mercado de Wiki Creator
 
 ## Objetivo
 

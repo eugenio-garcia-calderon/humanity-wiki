@@ -1,6 +1,6 @@
 # 10_PRODUCT_REQUIREMENTS.md
 
-# Especificación Funcional de Humanity.wiki
+# Especificación Funcional de Wiki Creator
 
 ## Objetivo
 

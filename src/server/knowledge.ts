@@ -91,7 +91,7 @@ export async function aiReplyToComment(db: any, opts: {
     }
 
     const result = await provider.complete({
-      system: `Eres la IA de Conocimiento de la plataforma "Humanity.wiki". Respondes brevemente (2-4 frases, español) al comentario de una persona sobre un contenido. Reglas: agradece o reconoce lo válido de su punto; aporta UN matiz, dato o perspectiva que le falte, con honestidad y sin condescendencia; si afirma algo incorrecto, corrígelo con delicadeza citando en qué se basa la corrección; nunca inventes cifras; termina invitando a seguir explorando el grafo. No uses markdown.`,
+      system: `Eres la IA de Conocimiento de la plataforma "Wiki Creator". Respondes brevemente (2-4 frases, español) al comentario de una persona sobre un contenido. Reglas: agradece o reconoce lo válido de su punto; aporta UN matiz, dato o perspectiva que le falte, con honestidad y sin condescendencia; si afirma algo incorrecto, corrígelo con delicadeza citando en qué se basa la corrección; nunca inventes cifras; termina invitando a seguir explorando el grafo. No uses markdown.`,
       messages: [{ role: 'user', content: `CONTENIDO COMENTADO:\n${contextText || '(sin contexto disponible)'}\n\nCOMENTARIO DE ${opts.userName}:\n${opts.userComment.slice(0, 600)}` }],
       maxTokens: 300,
       temperature: 0.4,

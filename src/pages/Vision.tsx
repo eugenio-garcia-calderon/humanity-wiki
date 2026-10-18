@@ -23,7 +23,7 @@ import { cn } from '../utils/cn';
 // del usuario, 2026-08-08): cada párrafo vive en `page_texts` bajo una
 // clave; sin fila, se ve el texto por defecto de aquí abajo.
 //
-// La pestaña «Economía» (mismo día) presenta los Puntos de Humanity.wiki: un
+// La pestaña «Economía» (mismo día) presenta los Puntos de Wiki Creator: un
 // saldo interno con decimales, hoy sin blockchain detrás — "de momento es un
 // sistema de puntos interno" — pensado para pagar dentro de la app y el uso
 // de la IA.
@@ -49,7 +49,7 @@ const ICONOS: Record<string, any> = {
 const DEFECTOS: Record<string, string> = {
   titular: 'Agregar el conocimiento de la humanidad\ny repartir lo que genere entre quienes lo crean',
   parrafo_1: 'Hoy el saber está partido: los datos en un sitio, los mapas en otro, las conversaciones en un tercero, y lo que cada persona sabe encerrado en su cabeza o en su Notion. humanity.wiki junta las tres formas de mirar — el dato en crudo, el conocimiento conectado y el conocimiento situado en el territorio — sobre una sola base.',
-  economia_titular: 'Puntos de Humanity.wiki',
+  economia_titular: 'Puntos de Wiki Creator',
   economia_parrafo_1: 'Todo el mundo empieza con 5.000 puntos al registrarse, y cada persona verificada que use la plataforma al menos 3 días al mes recibe 1.000 puntos fijos cada mes, más una parte variable según su reputación social. Los puntos se gastan dentro de la app — usar la IA, comprar en el Mercado — y tienen decimales: puedes tener 54,23 puntos, y ganas céntimos de punto cuando una publicación pública tuya recibe una visita de otra persona. Cuanto más útil sea lo que compartes, más puntos genera por sí solo.',
   economia_parrafo_2: 'Hoy son un saldo interno, sin nada por detrás salvo la base de datos de la plataforma. El plan es que, más adelante, se conviertan en un token real sobre blockchain — pero eso es el destino, no el punto de partida: primero funcionan aquí dentro, con las mismas reglas que tendrán después.',
 };
@@ -295,7 +295,7 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
 
       {comprando && (
         <EmbeddedCheckoutModal
-          title="Comprar 100 Puntos de Humanity.wiki"
+          title="Comprar 100 Puntos de Wiki Creator"
           onClose={() => { setComprando(false); cargarSaldo(); }}
           createSession={async () => {
             const res = await fetch('/api/stripe/checkout/puntos', { method: 'POST', credentials: 'include' });

@@ -54,7 +54,7 @@ import CapaTelecom from '../telecom/CapaTelecom';
 // ============================================================================
 // Layout — barra superior mínima (2026-08-05, decisión del usuario)
 // ============================================================================
-// Sin menú hamburguesa y sin buscador global: la marca «Humanity Wiki», dos
+// Sin menú hamburguesa y sin buscador global: la marca «Wiki Creator», dos
 // destinos primarios (Mapa y Grafos) y las acciones. Todo lo demás se
 // encuentra con el chat de IA de la parte inferior.
 
@@ -1093,7 +1093,7 @@ export default function Layout() {
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
             Eugenio, 2026-08-21: «vuelve a poner el menú colapsable superior a
-            la izquierda, y el logo de Humanity Wiki a la izquierda del menú
+            la izquierda, y el logo de Wiki Creator a la izquierda del menú
             colapsable». Y sin la palabra «Menú»: tres rayas es el icono más
             reconocido que hay en una pantalla.
 

@@ -105,7 +105,7 @@ export default function TresCaminos() {
             `.wiki` en el mismo `emerald-600` de la barra de arriba: es el verde
             de la marca, y un segundo verde parecido lo estropearía. */}
         <h1 className="text-center text-4xl font-black tracking-tight text-slate-900 sm:text-6xl">
-          humanity<span className="text-emerald-600">.wiki</span>
+          wiki<span className="text-emerald-600">.creator</span>
         </h1>
         <p className="mt-2 text-center text-sm font-bold uppercase tracking-[0.18em] text-slate-400 sm:text-base">
           La red de conocimiento
