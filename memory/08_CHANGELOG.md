@@ -8836,3 +8836,6 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — La visibilidad de las propiedades en la galería se aplica (prog8)
 - En una galería, mostrar u ocultar una propiedad desde el panel de Propiedades no tenía efecto en las tarjetas: el panel guardaba la lista en la vista, pero las tarjetas leían otra lista del bloque. Ahora la galería lee y escribe esa misma lista, guardada en la vista.
+
+### 2026-10-18 — Sin «Recientes» en el menú lateral (prog8)
+- El menú lateral ya no enseña la sección de páginas recientes. Los favoritos y el árbol de páginas siguen igual.
