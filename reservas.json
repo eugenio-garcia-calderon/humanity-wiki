@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/VistaPagina.tsx",
-      "motivo": "W2 buscador",
-      "desde": "2026-10-18T11:59:07.395Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/knowledge/CreadorMenu.tsx",
       "motivo": "W2 buscador",
       "desde": "2026-10-18T11:59:09.996Z"
