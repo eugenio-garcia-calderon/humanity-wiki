@@ -8955,6 +8955,10 @@ en mis páginas como proyecto pendiente».
 - En «Menú y pie» → «Datos legales» → «Buscadores» se pegan los códigos de Google Search Console y Bing Webmaster Tools, y salen en todas las páginas del sitio.
 - Las ampliaciones pueden usar `{{inicio}}` en sus datos estructurados: la dirección canónica de la portada del sitio.
 - IndexNow (SEO R12): un sitio con su propia dirección puede encender «Avisar a Bing de cada cambio al momento» («Menú y pie» → «Datos legales»). Cada 15 minutos se avisa a IndexNow (Bing, Yandex, Seznam; ChatGPT y Copilot leen de Bing) de las direcciones del sitemap que cambiaron. La clave se saca del dominio y se publica en `/<clave>.txt`; no es un secreto. Apagado en todos los sitios que ya existían; `INDEXNOW=off` lo apaga para todos (`src/server/indexNow.ts`).
+### 2026-10-18 — Cada tienda, en los datos estructurados de la ficha (Wikiproducts W1, SEO R4)
+- El `AggregateOffer` del JSON-LD `Product` lleva ahora un `Offer` por tienda: precio, moneda, envío (`shippingDetails`), disponibilidad sólo si se sabe el stock, enlace y vendedor. Salen de las mismas ofertas que pinta «Dónde comprarlo» (`ofertasDeProducto`, W5), así que el precio mínimo, el máximo y el número de tiendas cuadran con lo que se ve. Una oferta sin precio publicado no se declara; la comisión nunca.
+- Sólo en el HTML del servidor, leído como un anónimo. La lectura se deja en la página (sin salir en `window.__SITIO__`) y el bloque «Dónde comprarlo» la reutiliza: una sola lectura de la tabla de ofertas por visita.
+- Las migas de pan apuntan a la portada con `{{inicio}}` cuando la ficha cuelga de ella (W2, #603): en un dominio propio la portada es `/`, no su slug.
 
 ### 2026-10-18 — Bloque «Contenido de un tema» (Humanidad Wiki, fase 1) (prog8)
 - Nuevo bloque para cualquier página: todo lo publicado sobre un tema (páginas, bases de datos, publicaciones, carpetas, esquemas, personas y contenido de fuera), por secciones, con «Ver más» y filtro por subtema. Lee lo mismo que la página de contenido de cada tema.

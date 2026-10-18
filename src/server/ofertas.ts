@@ -233,6 +233,14 @@ registrarHtml('ofertas', (b, ctx) => {
   for (const b of bloques.filter(x => x?.tipo === 'ofertas')) {
     const k = claveOfertas(b, paginaId);
     if (ctx.extra.has(k)) continue;
+    // A product sheet already read its own offers for its markup (W1,
+    // `bd/plantillaFicha.ts`): the same answer, without a second read.
+    const yaLeidas = ctx.pagina?.ofertas_ficha;
+    if (yaLeidas && (!b?.datos?.fila_id || b.datos.fila_id === yaLeidas.fila_id)
+      && (!b?.datos?.tabla_id || b.datos.tabla_id === yaLeidas.tabla_id)) {
+      ctx.extra.set(k, yaLeidas.ofertas);
+      continue;
+    }
     const r = await ofertasDeProducto(db, { user: undefined } as any, {
       filaId: b?.datos?.fila_id || null, paginaId, tablaId: b?.datos?.tabla_id || null,
     });
