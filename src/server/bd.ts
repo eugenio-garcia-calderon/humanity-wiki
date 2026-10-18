@@ -79,7 +79,28 @@ export const bdInterno: {
   /** La pregunta de permisos de siempre, para la API pública (`apiPublica.ts`). */
   puedeConTabla?: (req: Pick<Request, 'user'>, tablaId: string, escribir: boolean)
     => Promise<{ tabla: any } | { error: string; codigo: number }>;
+  /** `GET /api/bd/tablas/:id` without HTTP: definition, columns and computed rows. */
+  leerTabla?: (req: Pick<Request, 'user'> | null, tablaId: string)
+    => Promise<{ codigo: number; cuerpo: any }>;
+  /** `POST /api/bd/tablas` and `POST /api/bd/tablas/:id/columnas`, for `/api/v1`. */
+  crearTabla?: (req: Pick<Request, 'user'>, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
+  crearColumna?: (req: Pick<Request, 'user'>, tablaId: string, cuerpo: any) => Promise<{ codigo: number; cuerpo: any }>;
 } = {};
+
+/** Runs a route handler without HTTP and hands back what it answered. Used by
+ *  `bdInterno` so that the server-side callers go through the very same
+ *  permission checks and validation as the screen. */
+function internamente(ruta: (req: Request, res: Response) => Promise<any>, req: Pick<Request, 'user'> | null, params: Record<string, string>, body?: any): Promise<{ codigo: number; cuerpo: any }> {
+  return new Promise(resolve => {
+    let codigo = 200;
+    const res: any = {
+      status(c: number) { codigo = c; return res; }, set() { return res; }, setHeader() { return res; },
+      json(cuerpo: any) { resolve({ codigo, cuerpo }); return res; },
+    };
+    ruta({ user: req?.user ?? null, headers: (req as any)?.headers || {}, params, query: {}, body: body ?? {} } as any, res)
+      .catch((e: any) => resolve({ codigo: 500, cuerpo: { error: e?.message || 'Error interno.' } }));
+  });
+}
 
 export function registerBdRoutes(app: Express, db: any) {
   /** Toda ruta de escritura comprueba el rol. Saltarse esto ya dejó un agujero
@@ -335,7 +356,7 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
-  app.get('/api/bd/tablas/:id', async (req: Request, res: Response) => {
+  const leerTablaRuta = async (req: Request, res: Response) => {
     try {
       const permiso = await puedeConTabla(req, req.params.id, false);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
@@ -346,7 +367,7 @@ export function registerBdRoutes(app: Express, db: any) {
 
       const columnas = await columnasDe(req.params.id);
       const f = await db.execute(sql`
-        SELECT id, valores, pagina_id, orden, recurrencia, created_at, updated_at
+        SELECT id, valores, pagina_id, orden, recurrencia, procedencia, created_at, updated_at
         FROM bd_filas
         WHERE tabla_id = ${req.params.id} AND archived_at IS NULL AND deleted_at IS NULL
         ORDER BY orden, created_at
@@ -395,6 +416,9 @@ export function registerBdRoutes(app: Express, db: any) {
             pagina: fila.pagina_id ? tarjetas[fila.pagina_id] || null : null,
             orden: fila.orden,
             recurrencia: fila.recurrencia || null,
+            // Where each value came from (migration 0153). Empty object when nobody said.
+            procedencia: fila.procedencia || {},
+            updated_at: fila.updated_at,
             celdas,
             archivos,
             // Los nombres de lo apuntado, aparte: la celda guarda identificadores
@@ -564,12 +588,17 @@ export function registerBdRoutes(app: Express, db: any) {
         filas: visibles,
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.get('/api/bd/tablas/:id', leerTablaRuta);
+  // The same read from inside the server (2026-10-18, Wikiproducts W1: the
+  // product sheet is written into the HTML before any JavaScript runs). It goes
+  // through the route itself, permissions included, so the two cannot drift.
+  bdInterno.leerTabla = (req, tablaId) => internamente(leerTablaRuta, req, { id: tablaId });
 
   /** Crear una tabla. Nace con una columna de texto: una tabla sin ninguna
    *  columna no se puede ni mirar, y obligar a crear la primera a mano es una
    *  pantalla vacía como primera impresión. */
-  app.post('/api/bd/tablas', async (req: Request, res: Response) => {
+  const crearTablaRuta = async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
       const d = req.body || {};
@@ -597,7 +626,8 @@ export function registerBdRoutes(app: Express, db: any) {
       await registrarHistorial(db, { entidad: 'bd_tabla', tabla: 'bd_tablas', id, operacion: 'create', previo: null, actor: req.user!.id });
       res.json({ id });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.post('/api/bd/tablas', crearTablaRuta);
 
   // ── LAS COLUMNAS ──────────────────────────────────────────────────────────
 
@@ -721,7 +751,7 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
-  app.post('/api/bd/tablas/:id/columnas', async (req: Request, res: Response) => {
+  const crearColumnaRuta = async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
       const permiso = await puedeConTabla(req, req.params.id, true);
@@ -777,7 +807,10 @@ export function registerBdRoutes(app: Express, db: any) {
       }
       res.json({ id, reciproca_id, aviso });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
+  };
+  app.post('/api/bd/tablas/:id/columnas', crearColumnaRuta);
+  bdInterno.crearTabla = (req, cuerpo) => internamente(crearTablaRuta, req, {}, cuerpo);
+  bdInterno.crearColumna = (req, tablaId, cuerpo) => internamente(crearColumnaRuta, req, { id: tablaId }, cuerpo);
 
   /** Renombrar una columna, cambiar sus opciones o su orden.
    *
