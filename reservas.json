@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/VistaPagina.tsx",
-      "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
-      "desde": "2026-10-18T16:47:35.873Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/MenuSitio.tsx",
       "motivo": "W2: buscador visible en el móvil",
       "desde": "2026-10-18T16:49:49.476Z"
