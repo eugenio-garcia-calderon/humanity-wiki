@@ -9193,3 +9193,24 @@ Eugenio: «inspírate en las landing pages de Amazon… que la información est�
 
 ## 2026-10-18 — Wikiproducts W3a: data for the Amazon-style sheet
 - The new columns of W1's sheet (#643) now have data for the 94 products, each with its nature and source: «Ideal para» (94; an editorial call from the specs, `calculado`, the reason in the note), «Manual de instrucciones» (63), «Qué hay en la caja» (51), and per category recharge time (16), indicator (16), pass-through (13), built-in cable (10), wireless charging (6), built-in stand (13 panels), motion sensor (18 lights), monitoring app (15 batteries). Fields without a source stay empty rather than guessed.
+## 2026-10-18 — Wikiproducts W1: price per watt and per kWh, units said once
+
+Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en baterías, en paneles, para que sea algo realmente comparable».
+- New formula columns in `esquema-bd.json`, role `precio_unidad`:
+  - powerbanks: «Precio por kWh» = Precio desde ÷ Energía nominal × 1000 (€/kWh, so it compares with home batteries);
+  - home batteries: «Precio por kWh» = Precio desde ÷ Capacidad útil (€/kWh);
+  - portable panels: «Precio por vatio» = Precio desde ÷ Potencia pico (€/W);
+  - home panels: «Precio por vatio» = Precio desde ÷ Potencia pico (€/Wp).
+
+  They are calculated from the cheapest current offer, so nothing has to be loaded, and `crear-esquema.mjs` creates them on the next load run.
+- How the price per unit appears:
+  - its provenance is «Calculado», with how it is worked out in the tooltip (`config.explicacion`);
+  - with no shop, the sheet says «Sin precio en ninguna tienda todavía»;
+  - the header shows it under the price («Precio por kWh: 514 €/kWh»);
+  - the comparator has it among its main lines and marks the cheapest;
+  - «La mejor en cada criterio» ranks by it;
+  - gallery cards show it;
+  - visitors can sort a gallery by it, like any other column.
+- On home tables the loaded estimates «Precio por Wp» and «Precio por kWh útil» are hidden from the sheet when the calculated column exists. A market estimate next to our shops' figure would contradict it.
+- Unit shown once: a column named «Garantía (años)» whose value already says «años» is labelled «Garantía» (`etiquetaColumna`). «1 años» now reads «1 año».
+- Lights: «Batería (Wh)» and «Panel solar (W)» count as key figures, so a light with no runtime or weight still fills its header.

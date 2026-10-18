@@ -14,7 +14,7 @@ import {
   type Ficha, type FilaFicha, type TablaFicha, type Procedencia,
   columnaPorRol, rolDe, grupoDe, visible, filaActual, tieneValor, textoDe, numeroDe,
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
-  fechaRevision, sitioDe, fechaCorta, criterioDe, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia,
+  fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia,
 } from './modelo';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
@@ -36,6 +36,14 @@ export const GRUPOS: Record<string, string> = {
 /** Columns no property list ever shows: they have a block of their own (the
  *  offers, the claims, the recalls, the community score) or are bookkeeping. */
 const CON_BLOQUE_PROPIO = new Set(['afirmaciones', 'retiradas', 'ofertas', 'retiradas_busqueda', 'retiradas_fecha', 'revisado', 'comision']);
+/** Loaded estimates a price-per-unit formula replaces (`precio_unidad`):
+ *  two «price per Wp» side by side, one from a market report and one from
+ *  our shops, would contradict each other on the same sheet. */
+const SUSTITUIDAS = new Set(['precio_por_wp_eur', 'precio_por_kwh_util_eur']);
+const listableEn = (t: TablaFicha) => {
+  const conFormula = !!columnaPorRol(t, 'precio_unidad');
+  return (c: Columna) => listable(c) && !(conFormula && SUSTITUIDAS.has(c.config?.clave));
+};
 const listable = (c: Columna) =>
   visible(c) && !esComunidad(c) && !CON_BLOQUE_PROPIO.has(rolDe(c) || '') && c.config?.interna !== true && grupoDe(c) !== 'control';
 
@@ -63,7 +71,7 @@ function lineaDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Linea | nul
   const v = valorDe(f, fila, c);
   if (!v.texto && v.procedencia?.naturaleza !== 'no_publicado') return null;
   if (!v.texto) v.texto = 'No publicado';
-  return { columnaId: c.id, etiqueta: c.nombre, valor: v };
+  return { columnaId: c.id, etiqueta: etiquetaColumna(c), valor: v };
 }
 
 /** Columns chosen by id or by `config.clave`, in the order given. */
@@ -88,7 +96,8 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
 /** The shopper's summary at the top of a sheet (W1, 2026-10-18, «like
  *  Amazon's product pages»): price, community score and the key figures, all
  *  read from the row's own columns, nothing typed for the header. */
-export type Compra = { desde: string; hasta: string; tiendas: number };
+/** `porUnidad`: «0,51 €/W», the price per watt or kWh, '' without one. */
+export type Compra = { desde: string; hasta: string; tiendas: number; porUnidad: string; etiquetaUnidad: string };
 export type Nota = { media: string; votos: number };
 
 export type VistaPropiedad =
@@ -140,7 +149,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
       destacados: columnasDestacadas(t)
         .filter(c => tieneValor(fila, c))
         .slice(0, MAX_DESTACADAS)
-        .map(c => ({ columnaId: c.id, etiqueta: c.nombre, valor: valorDe(f, fila, c) })),
+        .map(c => ({ columnaId: c.id, etiqueta: etiquetaColumna(c), valor: valorDe(f, fila, c) })),
     };
   }
 
@@ -158,7 +167,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
 
   const grupo = String(datos.grupo || '');
   const columnas = elegidas(t, datos.columnas)
-    || t.columnas.filter(c => listable(c) && (grupo ? grupoDe(c) === grupo : grupoDe(c) && grupoDe(c) !== 'identidad'));
+    || t.columnas.filter(c => listableEn(t)(c) && (grupo ? grupoDe(c) === grupo : grupoDe(c) && grupoDe(c) !== 'identidad'));
   const todas = columnas.map(c => lineaDe(f, fila, c)).filter((x): x is Linea => !!x);
   if (!todas.length) return null;
   const esTabla = estilo !== 'lista';
@@ -183,7 +192,8 @@ function compraDe(t: TablaFicha, fila: FilaFicha): Compra | null {
   const n = columnaPorRol(t, 'num_ofertas');
   const desde = textoDe(fila, min);
   const hasta = max ? textoDe(fila, max) : '';
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: (n && numeroDe(fila, n)) || 0 };
+  const u = columnaPorRol(t, 'precio_unidad');
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: (n && numeroDe(fila, n)) || 0, porUnidad: u ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {
@@ -260,17 +270,17 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
   const filas = orden.map(id => porId.get(id)).filter((x): x is FilaFicha => !!x).slice(0, MAX_COMPARAR);
   if (!filas.length) return null;
   const cols = elegidas(t, opciones.columnas)
-    || t.columnas.filter(c => (listable(c) && ['tecnico', 'garantia', 'origen', 'compra'].includes(grupoDe(c) || '')) || esComunidad(c));
+    || t.columnas.filter(c => (listableEn(t)(c) && ['tecnico', 'garantia', 'origen', 'compra'].includes(grupoDe(c) || '')) || esComunidad(c));
   // Community scores first (what people think), then the price, then the rest.
   const peso = (c: Columna) => (esComunidad(c) ? 0 : grupoDe(c) === 'compra' ? 1 : grupoDe(c) === 'tecnico' ? 2 : 3);
-  const claves = new Set([columnaPorRol(t, 'precio_min'), t.columnas.find(c => criterioDe(c) === 'media'), ...columnasDestacadas(t)].filter(Boolean).map(c => c!.id));
+  const claves = new Set([columnaPorRol(t, 'precio_min'), columnaPorRol(t, 'precio_unidad'), t.columnas.find(c => criterioDe(c) === 'media'), ...columnasDestacadas(t)].filter(Boolean).map(c => c!.id));
   const lineas = cols
     .filter(c => filas.some(x => tieneValor(x, c)))
     .sort((a, b) => peso(a) - peso(b))
     .map(c => {
       const mejores = mejoresEn(filas, c);
       return {
-        columnaId: c.id, etiqueta: c.nombre, grupo: esComunidad(c) ? 'Valoración de la comunidad' : GRUPOS[grupoDe(c) || ''] || '',
+        columnaId: c.id, etiqueta: etiquetaColumna(c), grupo: esComunidad(c) ? 'Valoración de la comunidad' : GRUPOS[grupoDe(c) || ''] || '',
         sentido: ordenable(c) ? (esComunidad(c) ? 'mayor' as const : c.config?.comparar) : null,
         celdas: filas.map(x => ({ texto: textoDe(x, c) || '—', mejor: mejores.has(x.id), procedencia: procedenciaDe(x, c) })),
         clave: claves.has(c.id),
@@ -344,12 +354,12 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       filas = parecidas;
       const cifra = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: n < 10 ? 1 : 0 });
       const unidad = cTam.config?.unidad ? ` ${cTam.config.unidad}` : '';
-      rango = `${cTam.nombre} de ${cifra(desde)} a ${cifra(hasta)}${unidad}`;
+      rango = `${etiquetaColumna(cTam)} de ${cifra(desde)} a ${cifra(hasta)}${unidad}`;
     }
   }
   if (filas.length < 2) return null;
   const cols = (elegidas(t, datos.columnas) || t.columnas.filter(c =>
-    esComunidad(c) ? c.config?.criterio !== 'media' : listable(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
+    esComunidad(c) ? c.config?.criterio !== 'media' : listableEn(t)(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
     .filter(ordenable);
   const max = Math.max(1, Math.min(12, Number(datos.max) || 8));
   const criterios: VistaAlternativas['criterios'] = [];
@@ -362,7 +372,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
     const i = orden.findIndex(x => x.id === actual.id);
     criterios.push({
       columnaId: c.id,
-      criterio: c.nombre,
+      criterio: etiquetaColumna(c),
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
       esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
