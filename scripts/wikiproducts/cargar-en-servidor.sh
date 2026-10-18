@@ -12,11 +12,12 @@
 #   3. Runs `crear-esquema.mjs --plantillas` and `cargar.mjs` against the app on
 #      127.0.0.1, as that owner. Both are idempotent: a second run only adds
 #      what is missing and changes what differs.
+#   3b. Runs `expertos.mjs` (W6): the «Consultar a un experto» page, the
+#      experts of `expertos.json` (once each; then the panel rules) and the
+#      short experts block in every product sheet template. Before step 4,
+#      so the «Expertos» menu link that step adds finds the page.
 #   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
 #      a visitor sees none of it (a table inherits visibility from its page).
-#   4b. Runs `expertos.mjs` (W6): the «Consultar a un experto» page, the
-#      experts of `expertos.json` (once each; then the panel rules) and the
-#      short experts block in every product sheet template.
 #   5. With WP_FOTOS=si, runs `fotos.mjs`: one photo per product, downloaded
 #      from the maker's or a shop's page and stored on this server.
 #   6. Deletes the key on exit, whether the load worked or not (`trap`).
@@ -90,12 +91,14 @@ nodo crear-esquema.mjs --plantillas
 echo "== Datos: marcas, distribuidores, productos, afirmaciones, retiradas y ofertas =="
 nodo cargar.mjs
 
+echo "== Expertos: su página, sus fichas y el recuadro en cada producto =="
+# Before enlazar-sitio.mjs: that one adds the «Expertos» menu link, and only
+# to a page «Consultar a un experto» that already exists. Not fatal: without
+# it the site still loads, it just offers no experts.
+nodo expertos.mjs || echo "AVISO: el paso de expertos ha fallado (arriba dice por qué); el resto de la carga sigue."
+
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs
-
-echo "== Expertos: su página, sus fichas y el recuadro en cada producto =="
-# Not fatal: without it the site still loads, it just offers no experts.
-nodo expertos.mjs || echo "AVISO: el paso de expertos ha fallado (arriba dice por qué); el resto de la carga sigue."
 
 # Only when asked (`fotos=si` in the workflow): it reads a page per product.
 if [ "${WP_FOTOS:-no}" = "si" ]; then
