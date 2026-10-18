@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, ChevronDown, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
 import { BarraAvance, esBarra } from './BarraAvance';
 import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
@@ -63,7 +63,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -84,6 +84,10 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   celdasAlRecibir?: Record<string, any>;
   /** Dentro del recuadro de un grupo: tarjetas blancas, que se distingan del fondo. */
   enCaja?: boolean;
+  /** La descripción de la página en la tarjeta, como una propiedad más que se enseña o no (2026-10-18). */
+  conDescripcion?: boolean;
+  /** «Filas que se ven»: cuántas FILAS DE TARJETAS se enseñan (en cada grupo, si está agrupada); «Mostrar más» suma otras tantas. */
+  filasMax?: number | null;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -128,6 +132,26 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   const [destino, setDestino] = useState<{ id: string; lado: 'antes' | 'despues'; eje: 'h' | 'v' } | null>(null);
   const [ordenLocal, setOrdenLocal] = useState<string[] | null>(null);
   const [ocultas, setOcultas] = useState<Set<string>>(new Set());
+  // FILAS DE TARJETAS, NO ENTRADAS (2026-10-18, Eugenio): «si elijo una fila,
+  // una fila de tarjetas en cada grupo». Cuántas caben por fila depende del
+  // ancho: se mide en la propia rejilla (las columnas con ancho; `auto-fit`
+  // deja a cero las vacías).
+  const rejillaRef = useRef<HTMLDivElement>(null);
+  const [porFila, setPorFila] = useState(0);
+  const [tandasMas, setTandasMas] = useState(0);
+  useEffect(() => { setTandasMas(0); }, [filasMax]);
+  useEffect(() => {
+    const el = rejillaRef.current;
+    if (!el || !filasMax) return;
+    const medir = () => {
+      const n = getComputedStyle(el).gridTemplateColumns.split(' ').filter(t => parseFloat(t) > 0).length;
+      setPorFila(x => (n && n !== x ? n : x));
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [filasMax]);
   const [anuncio, setAnuncio] = useState('');
   useEffect(() => { setOrdenLocal(null); setArrastrada(null); setDestino(null); }, [filas]);
   // Si la tarjeta arrastrada se va a otra base de datos, desaparece de aquí
@@ -400,6 +424,19 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                 setMenu({ fila: f, x: sinPuntero ? r.left + 16 : e.clientX, y: sinPuntero ? r.top + 16 : e.clientY });
               } : undefined}
               draggable={arrastre || undefined}
+              // UN CONTROL DENTRO DE LA TARJETA NO LA ARRASTRA (2026-10-18, Eugenio: «al
+              // mover la barra de porcentaje se mueve la tarjeta»). Si se pulsa en un
+              // deslizador, un campo o un texto editable, la tarjeta deja de ser
+              // arrastrable hasta soltar: así el gesto es del control.
+              onPointerDownCapture={arrastre ? e => {
+                const t = e.target as HTMLElement;
+                if (!t.closest('input, textarea, select, [contenteditable="true"], [data-sin-arrastre]')) return;
+                const tarjetaEl = e.currentTarget;
+                tarjetaEl.setAttribute('draggable', 'false');
+                const devolver = () => { tarjetaEl.setAttribute('draggable', 'true'); window.removeEventListener('pointerup', devolver); window.removeEventListener('pointercancel', devolver); };
+                window.addEventListener('pointerup', devolver);
+                window.addEventListener('pointercancel', devolver);
+              } : undefined}
               onDragStart={arrastre ? e => {
                 setArrastrada(f.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', f.id);
                 e.dataTransfer.setData(MIME_FILA, JSON.stringify({ fila: f.id, tabla: tablaId, nombre: nombreDe(f) }));
@@ -506,7 +543,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
 {!nombreArriba && nombreEl}
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
-                {!chica && f.pagina?.descripcion && (
+                {!chica && conDescripcion && f.pagina?.descripcion && (
                   <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.map(c => {
@@ -595,17 +632,23 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
     </button>
   ) : null;
 
+  // Cuántas tarjetas caben en las filas elegidas.
+  const cuantas = filasMax && porFila ? filasMax * (tandasMas + 1) * porFila : filasVis.length;
   /** La galería entera, sin carrusel: todas las entradas, las filas que hagan falta. */
   const rejilla = (
     <div>
-      <div className={cn(minima ? 'grid gap-x-1 gap-y-2' : chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
+      <div ref={rejillaRef} className={cn(minima ? 'grid gap-x-1 gap-y-2' : chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
         onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
         onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
-        style={centrada
+        // En el recuadro de un grupo, las tarjetas llenan todo el ancho (2026-10-18,
+        // Eugenio: «hay mucho espacio lateral no aprovechado»).
+        style={enCaja
+        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }
+        : centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filasVis.map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && (arrastrable ?? editable) && !sitio))}
+        {filasVis.slice(0, cuantas).map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && (arrastrable ?? editable) && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}
@@ -616,6 +659,14 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
           </button>
         )}
       </div>
+      {cuantas < filasVis.length && (
+        <div className="flex justify-center pt-3">
+          <button type="button" onClick={() => setTandasMas(t => t + 1)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <ChevronDown className="h-3.5 w-3.5" /> Mostrar más
+          </button>
+        </div>
+      )}
       {editable && !ordenable && motivoSinOrden && filas.length > 1 && (
         <p className="mt-3 text-center text-[11px] font-bold text-slate-400">{motivoSinOrden}</p>
       )}

@@ -1,6 +1,6 @@
 import { useEffect, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import EnlazanAqui from '../knowledge/EnlazanAqui';
 import { contarPagina, textoLectura } from '../../utils/ajustesPagina';
@@ -9,6 +9,7 @@ import SugerirCorreccion from '../bloquesDatos/ficha/SugerirCorreccion';
 import { useSitio } from './ContextoSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
+import { cn } from '../../utils/cn';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -102,19 +103,20 @@ export default function VistaPagina({ pagina, propio, pie }: {
     <MarcoLectura pagina={pagina} rutas={rutas}>
       {migas.length > 0 && (
         <nav aria-label="Estás en" className="mb-4">
-          {/* En UNA línea (ronda 2 del evaluador: tres líneas de migas antes
-              del título en el teléfono). Lo que no cabe se corta con «…», y en
-              el teléfono la página actual no se repite: es el título de debajo. */}
-          <ol className="flex flex-nowrap items-center gap-x-1 overflow-hidden whitespace-nowrap text-sm text-slate-600">
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-slate-600">
+            {/* On a phone, one line: only the level just above, the way back.
+                The full trail took three lines before the title (evaluator
+                round 2, 2026-10-18); from `sm` up it is all there. */}
             {migas.map((m, i) => (
-              <li key={m.id} className="flex items-center gap-1 min-w-0">
-                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-2 truncate">
+              <li key={m.id} className={cn('items-center gap-1', i === migas.length - 1 ? 'flex' : 'hidden sm:flex')}>
+                {i === migas.length - 1 ? <ChevronLeft className="w-4 h-4 text-slate-500 sm:hidden" aria-hidden /> : null}
+                <Link to={enlaceDe(m) || '/'} className="font-bold hover:text-slate-900 hover:underline py-2">
                   {i === 0 && (sitio?.raizId === m.id || pagina.sitio?.raizId === m.id) ? 'Inicio' : (m.titulo || 'Volver')}
                 </Link>
-                <ChevronRight className="w-4 h-4 shrink-0 text-slate-500" aria-hidden />
+                <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migas.length - 1 && 'hidden sm:block')} aria-hidden />
               </li>
             ))}
-            <li aria-current="page" className="hidden sm:block min-w-0 flex-1 text-slate-700 truncate">{pagina.titulo || 'Sin título'}</li>
+            <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
           </ol>
         </nav>
       )}

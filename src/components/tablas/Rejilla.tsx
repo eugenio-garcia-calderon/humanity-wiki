@@ -214,9 +214,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [cargando, setCargando] = useState(true);
   /** La búsqueda de la barra: `null` cerrada, '' abierta y vacía. */
   const [busca, setBusca] = useState<string | null>(null);
-  /** Las tandas de «Mostrar más» pedidas. Vuelve a cero al cambiar de vista o de cuántas filas. */
-  const [tandas, setTandas] = useState(0);
-  useEffect(() => { setTandas(0); }, [activa.id, activa.config.filas_mostrar]);
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
@@ -572,11 +569,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // cada celda. Sólo pantalla; la vista guardada no cambia.
   const q = (busca || '').trim().toLocaleLowerCase('es');
   const textoDe = (v: any): string => v == null ? '' : typeof v === 'object' ? Object.values(v).map(textoDe).join(' ') : String(v);
-  // CUÁNTAS FILAS SE VEN EN LA GALERÍA (2026-10-14): lo que eligió el autor, y «Mostrar más» suma otra tanda igual.
+  // CUÁNTAS FILAS SE VEN EN LA GALERÍA (2026-10-14): lo que eligió el autor. Desde el 2026-10-18 son
+  // FILAS DE TARJETAS y cuentan en cada grupo; las corta la galería (`filasMax`), con su «Mostrar más».
   const porTanda = activa.config.filas_mostrar && activa.config.filas_mostrar !== 'todas' ? Number(activa.config.filas_mostrar) : null;
   const filas = q ? datos.filas.filter(f => `${f.pagina?.titulo || ''} ${textoDe(f.celdas)} ${textoDe(f.apuntados)}`.toLocaleLowerCase('es').includes(q)) : datos.filas;
-  // Las filas de la galería: sin agrupar, solo las que caben en lo visto hasta ahora.
-  const visiblesGaleria = porTanda ? filas.slice(0, porTanda * (tandas + 1)) : filas;
   // Las columnas que se ven en ESTA vista. El nombre de la fila nunca se
   // esconde: sin él, una fila de la tabla no se sabe qué es.
   const ocultas = new Set(activa.ocultas.filter(id => id !== datos.columna_titulo));
@@ -634,15 +630,15 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         const n = g.filas.length;
         const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
         const ancho = n <= 2
-          // ×1,5: la rejilla de la galería decide cuántas columnas caben por su ancho MÁXIMO.
-          // + el relleno del recuadro (p-5 y el borde, a cada lado).
-          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.5) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 42
+          // ×1,25 por tarjeta: dentro del recuadro las columnas se estiran hasta llenarlo.
+          // + el relleno del recuadro (p-4 y el borde, a cada lado).
+          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.25) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 34
           : null;
         const caja = (COLORES_GRUPO[activa.config.grupo_color || 'gris'] || COLORES_GRUPO.gris).caja;
         return (
-          <div key={clave} className={cn('min-w-0 rounded-2xl border p-3 sm:p-5 sm:pt-4 max-sm:w-full max-sm:basis-full', caja, SOMBRA_GRUPO,
+          <div key={clave} className={cn('min-w-0 rounded-2xl border p-3 sm:p-4 max-sm:w-full max-sm:basis-full', caja, SOMBRA_GRUPO,
             juntos && ancho ? 'flex-none' : juntos ? 'basis-full' : 'mb-6')}
-            style={juntos && ancho ? { width: 'max-content', minWidth: `min(100%, ${ancho}px)`, maxWidth: '100%' } : undefined}>
+            style={juntos && ancho ? { width: `min(100%, ${ancho}px)` } : undefined}>
             {arriba ? (
               <div className={cn('mb-4 sm:mb-5 flex flex-wrap items-center gap-x-3 gap-y-1', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
                 {cabecera(g, nivel, plegado, alternar)}
@@ -931,6 +927,16 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const panelVisiblesGaleria = editable ? (
     <div className="max-h-72 overflow-y-auto">
       <p className="px-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
+      {/* LA DESCRIPCIÓN, COMO UNA PROPIEDAD MÁS (2026-10-18, Eugenio): es el
+          subtítulo de la página de cada entrada; aquí se elige si sale. */}
+      <div className="flex items-center rounded-md hover:bg-slate-50">
+        <button onClick={() => cambiarVista({ config: { ...activa.config, descripcion: activa.config.descripcion === false } })}
+          className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-8 text-xs font-bold text-slate-600 text-left">
+          {activa.config.descripcion !== false ? <Eye className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+          <span className={cn('flex-1 truncate', activa.config.descripcion === false && 'text-slate-400')}>Descripción</span>
+          <span className="shrink-0 text-[10px] font-bold text-slate-300">texto de la página</span>
+        </button>
+      </div>
       {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
         const puesta = visiblesAhora.includes(c.id);
         return (
@@ -1157,15 +1163,17 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
-        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-5 sm:gap-6', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
-          {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
+        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-4', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
+          {porGrupos(filas, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
               celdasAlRecibir={colAgr && editable ? celdasGrupo : undefined}
               enCaja={!!colAgr}
               alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora}
+              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora} conDescripcion={activa.config.descripcion !== false}
+              // «Filas que se ven»: filas de tarjetas en CADA grupo (2026-10-18).
+              filasMax={vista === 'carrusel' ? null : porTanda}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
               // Dentro de un grupo también se reordena a mano (2026-10-18, Eugenio):
               // el orden es el de la tabla, y el grupo enseña su trozo en ese orden.
@@ -1177,15 +1185,6 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
           // a qué grupo va la tarjeta nueva.
           colAgr && editable ? celdas => <NuevoElemento texto="Añadir" className="w-auto h-7 rounded-full px-2.5 font-semibold text-slate-500 hover:bg-white hover:text-slate-700" onCrear={t => crearCon(t, celdas)} /> : undefined,
           0, null, {}, true)}
-          {/* Mostrar más: otra tanda igual a la que se eligió. */}
-          {!colAgr && porTanda && filas.length > visiblesGaleria.length && (
-            <div className="flex justify-center pt-3">
-              <button onClick={() => setTandas(t => t + 1)}
-                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                <ChevronDown className="w-3.5 h-3.5" /> Mostrar más: {(datos.tabla?.titulo || 'filas').toLowerCase()}
-              </button>
-            </div>
-          )}
         </div>
       ) : esMovil ? (
         <div className="divide-y divide-slate-100" style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>

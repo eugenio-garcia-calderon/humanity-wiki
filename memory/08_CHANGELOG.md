@@ -9232,12 +9232,66 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 
 - The Mac check after #648 saw the «Baterías domésticas» card blank until its lazy image loaded. The first six section cards (`CARGA_INMEDIATA` in `tarjetaSeccion.ts`) now load their photo eagerly, in React and in the server HTML; the rest stay lazy. Not checked on production.
 
+## 2026-10-18 — Recuadros de grupo sin espacio desaprovechado (prog8)
+- Dentro del recuadro de un grupo, las tarjetas **se estiran hasta llenar el ancho** (`auto-fit` con columnas `1fr`) en vez de quedarse centradas con márgenes laterales grandes. Los recuadros pequeños (1–2 tarjetas) tienen un ancho fijo ajustado a sus tarjetas, para que un título largo no los ensanche.
+- Márgenes más ajustados: relleno del recuadro `p-3 sm:p-4` y separación entre recuadros `gap-4`.
+
+## 2026-10-18 — Añadir una propiedad desde la página de una entrada (prog8)
+- Debajo de las propiedades de la página de una entrada, junto a «Enlazar con otra base de datos», sale **«+ Añadir una propiedad»**: abre el mismo editor de columnas (nombre y tipo: texto, número, fecha, estado, porcentaje…) y la columna nueva se crea en la base de datos y aparece al momento.
+## 2026-10-18 — Wikiproducts: clean photo for the AIKO Neostar panel (W3a)
+- The AIKO row's photo came from a shop's preview image (aceflex): a banner with logo, text and stars. Because AIKO is the first home panel, that banner was also the picture on the «Paneles solares domésticos» card on the home page and on /energia-solar-domestica. `datos/fotos.json` now pins AIKO's own product image (aikosolar.com, Neostar 3P54). The next load with fotos=si replaces it, since a pinned source must match the photo's credit.
+- Same PR: the texts no longer promise what is not true yet.
+  - «Cómo trabajamos» (via `datos/textos.json`, corregir-textos): the commission and the double vote of verified buyers are now worded as what happens once purchases through Wikiproducts are open. Today every offer says «Sin comisión».
+  - Every published site's Cookies template (`sitioWeb.ts`) now says that a member who signs in gets one technical session cookie, `rh_sitio_<root>` (HttpOnly, 30 days), and nothing for tracking.
+  - The Privacy template has a «Si te creas una cuenta» section: email, name, hashed password, published ratings, legal basis 6.1.b, kept while the account exists, deletion with the 15-day recycle bin, and published ratings kept without the name.
+
+## 2026-10-18 — Arrastrar las propiedades de la ficha, como los bloques (prog8)
+- Las propiedades de la página de una entrada se reordenan **arrastrándolas por su nombre** o por el tirador ⋮⋮ que aparece a la izquierda al pasar el ratón (antes, solo un tirador diminuto en la esquina). Una **barra verde** marca si caerá antes o después (izquierda/derecha en la rejilla, arriba/abajo en la lista). El orden es el de toda la tabla.
+
+## 2026-10-18 — La cifra de la barra de avance, bien puesta (prog8)
+- La cifra del porcentaje ya **no se parte en dos líneas** («100» arriba y «%» debajo): número y «%» van juntos y sin salto (`whitespace-nowrap`), del **color de su tramo** (naranja, azul o verde).
+- En la tarjeta, la barra va a lo ancho y la cifra a su **derecha**. En la ficha, la cifra es grande con el «%» pequeño pegado y al lado «de avance» o «completado» al 100 %; la barra lleva una sombra interior suave.
+
+## 2026-10-18 — La descripción, como una propiedad más de la tarjeta (prog8)
+- En el panel **Propiedades** de una galería, la **Descripción** (el subtítulo de la página de cada entrada) sale como una propiedad más con su ojo: se elige si se ve o no en las tarjetas. Se guarda en la vista (`config.descripcion === false` la esconde); por defecto, visible como hasta ahora.
+
+## 2026-10-18 — «Filas que se ven», por grupo y en filas de tarjetas (prog8)
+- **«Filas que se ven»** cuenta ahora **filas de tarjetas** (no entradas) y, si la galería está agrupada, **en cada grupo**: con «1», una fila en Movilidad y otra en Energía. Cuántas tarjetas caben por fila lo mide la propia rejilla según el ancho (`gridTemplateColumns`, sin las columnas vacías de `auto-fit`).
+- Cada grupo (o la galería sin agrupar) lleva su **«Mostrar más»** con cuántas quedan, que suma otras tantas filas. El corte lo hace `Galeria` (`filasMax`); el carrusel no se corta.
+
+## 2026-10-18 — El deslizador del porcentaje ya no arrastra la tarjeta (prog8)
+- En la galería, al mover la barra de porcentaje (o usar cualquier campo, selector o texto editable dentro de una tarjeta) se movía la tarjeta entera. Ahora, al pulsar dentro de un control, la tarjeta deja de ser arrastrable hasta soltar (`onPointerDownCapture` en la tarjeta; también vale `data-sin-arrastre`).
+
+## 2026-10-18 — Ancho y tamaño de cada propiedad en la ficha; «Mostrar más» a secas (prog8)
+- Cada propiedad de la ficha tiene **ancho** en columnas de la rejilla: se estira o encoge con el **tirador del borde derecho** (aparece al pasar el ratón) o desde su menú («Ancho: 1, 2, 3… Todo»). Por defecto, 1: las de al lado miden lo mismo y, en la misma fila, igualan su alto. La barra de avance ya no ocupa la fila entera por defecto. `config.ancho_ficha`.
+- **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
+- El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).
+
+## 2026-10-18 — Wikiproducts: offer prices re-checked at the shops (W3a, evaluator round 2)
+- All 38 offers without a price were re-read from the shop's own page. Only one shows a price for the exact model, and it is now loaded: Samsung EB-P4520 at MediaMarkt, 47,99 € plus 2,99 € shipping, in stock.
+- Why the other 37 are still empty:
+  - Amazon refuses automated reading (8).
+  - The price is for members only or given on request (9).
+  - The page shows only a wholesale price per Wp with no VAT (4).
+  - The product is unavailable; the data already said so (6).
+  - The page shows no price (5).
+  - The page is not a product page (2).
+  - The price is rendered by JavaScript (2).
+  - The product has not launched (1).
+  - The page failed to load (1).
+  A shop that only quotes, or only sells to members, has no price to show, so those offers stay «Sin precio confirmado» rather than get an estimate.
+## 2026-10-18 — Sin precio, sin «precio por kWh»; comparador y ficha que se leen en el móvil (Wikiproducts W1)
+- **Fórmulas**: `REDONDEAR`, `ABS`, `RAIZ`, `TECHO`, `SUELO` y `POTENCIA` leen sus argumentos por posición. Antes quitaban los vacíos y se corrían: `REDONDEAR(vacío; 2)` daba 2 y `REDONDEAR(vacío * 1000; 0)` daba 0. De ahí salían el «2 €/Wp» de los paneles sin precio y el «0 €/kWh MEJOR» de las baterías domésticas (evaluador, ronda 2). Las fórmulas se calculan al leer, así que el arreglo llega a producción sin volver a cargar datos.
+- **Ficha**: un precio por unidad de 0 o menos cuenta como «sin dato» (no sale, no es «mejor», no ordena). Sin precio, la cabecera no dice «A la venta» junto a «Sin precio todavía» ni muestra precio por unidad.
+- **Comparador en el móvil**: la columna fija mide siempre 7rem y la tabla se desliza de producto en producto (`scroll-snap`), así que ya no asoman trozos de la columna de al lado; el nombre del grupo («PRECIO», «DATOS TÉCNICOS») se queda a la vista al deslizar.
+- **Migas en el móvil**: una línea, solo el nivel de arriba («‹ Powerbanks»); desde `sm`, el camino entero.
+- **Fuente de cada propiedad**: se lee entera, partida en líneas si hace falta, en vez de «Según la marca · …».
 ## 2026-10-18 — Evaluator round 2: home groups, mobile listing and search results (Wikiproducts W2)
 
 - Home: the `secciones` block (site scope) groups its cards under the category they hang from — «Energía portátil» (3) and «Energía solar doméstica» (2) — with the group title linking to the category page. One row at ≥1024 px (all five visible without scrolling at 1440×900, checked locally: last card ends at 728 px); compact rows with a 64 px thumbnail on the phone. `seccionesDe` adds `grupo` (earliest root `subpagina` among its vias); `agruparSecciones` in `tarjetaSeccion.ts` only groups with ≥2 groups. Category pages (`ambito:'pagina'`) keep the flat grid.
 - Search results carry the product photo, «desde» price and one key figure with its unit (`completarFichas` in `buscadorSitio.ts`, same `textoDe` as the sheet).
 - Results page shows one search box: the mobile row is not rendered there and the desktop bar box is `invisible`.
 - Mobile menu dropdown is opaque and `z-50` (the search row showed through it).
-- Breadcrumbs on one line; the current page is not repeated on the phone.
+- Breadcrumbs: W1's #661 version kept (one level on the phone); this PR's one-line variant dropped in the merge.
 - Subcategory pages: «Qué conviene mirar» is folded on load so a product shows before scrolling at 390 px. New route `POST /api/v1/pages/:id/blocks/:blockId/fold` (owner key, top-level `titulo1-3` only, idempotent); `enlazar-sitio.mjs` step 1 calls it. Needs a «Cargar Wikiproducts» run to reach production. The server HTML still renders the folded text open (crawlers read it).
 - Not checked on production (unreachable from the cloud session).

@@ -187,6 +187,11 @@
       "imagen": "https://contents.mediadecathlon.com/m14417226/k$2e766a00f5e6a6e32937ba7a5f591faf/picture.jpg?format=auto&f=1200x0",
       "pagina": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
       "por_que": "La página de Decathlon no deja leerse desde el servidor: la imagen del producto en su servidor de imágenes, con la ficha para el crédito."
+    },
+    "aiko-neostar": {
+      "imagen": "https://aikosolar.com/wp-content/uploads/2025/03/Neostar-3P54-Dual-Glass-detail.jpg",
+      "pagina": "https://aikosolar.com/?p=28185",
+      "por_que": "Foto de producto del fabricante (Neostar 3P54). La de la tienda (aceflex) era un banner con logo, texto y estrellas."
     }
   }
 }
