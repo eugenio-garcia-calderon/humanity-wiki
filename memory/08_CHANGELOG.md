@@ -9050,3 +9050,6 @@ en mis páginas como proyecto pendiente».
 - New `POST /api/v1/uploads?type=image/…` (write scope, raw bytes, JPEG/PNG/WebP/AVIF/GIF only, no SVG, 10 MB): stores an image in the same store as `/api/uploads` and returns its `/uploads/…` address.
 - New `scripts/wikiproducts/fotos.mjs`: per product, tries `datos/fotos.json` (Commons file, page or image), the image in the data, the shop pages of its offers, then the maker's page (never a home page). Reads `og:image` / `twitter:image` / JSON-LD `Product.image`, downloads it, rejects non-images, files under 4 KB and anything under 250×250 px, stores it and fills «Foto» (absolute `https://humanity.wiki/uploads/…`) and «Licencia de la foto» («Foto: <shop or maker> — <page>»). Skips rows whose photo is already ours from the same page.
 - `cargar.mjs` no longer writes the photo cells. `cargar-en-servidor.sh` runs `fotos.mjs` only when the workflow is dispatched with `fotos=si`.
+## 2026-10-18 — Tarjetas XXXS (prog8)
+- Nuevo tamaño de tarjeta **XXXS** (60 px de mínimo, huecos de 4/8 px, nombre a 9 px), el más pequeño y junto de la galería. Solo para las tarjetas: el tamaño del título empieza en XXS y el del nombre en XS, como antes.
+- Los selectores de tamaño del panel son un poco más estrechos para que quepan los siete.
