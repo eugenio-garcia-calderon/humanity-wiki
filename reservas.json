@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "scripts/wikiproducts/cargar-en-servidor.sh",
-      "motivo": "W6: paso expertos.mjs",
-      "desde": "2026-10-18T17:29:24.005Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "drizzle/0159_wikiproducts_miembros.sql",
       "motivo": "W4: activar miembros en el sitio Wikiproducts",
       "desde": "2026-10-18T17:32:15.834Z"
