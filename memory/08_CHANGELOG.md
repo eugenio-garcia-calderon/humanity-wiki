@@ -9261,3 +9261,8 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 
 ## 2026-10-18 — El deslizador del porcentaje ya no arrastra la tarjeta (prog8)
 - En la galería, al mover la barra de porcentaje (o usar cualquier campo, selector o texto editable dentro de una tarjeta) se movía la tarjeta entera. Ahora, al pulsar dentro de un control, la tarjeta deja de ser arrastrable hasta soltar (`onPointerDownCapture` en la tarjeta; también vale `data-sin-arrastre`).
+
+## 2026-10-18 — Ancho y tamaño de cada propiedad en la ficha; «Mostrar más» a secas (prog8)
+- Cada propiedad de la ficha tiene **ancho** en columnas de la rejilla: se estira o encoge con el **tirador del borde derecho** (aparece al pasar el ratón) o desde su menú («Ancho: 1, 2, 3… Todo»). Por defecto, 1: las de al lado miden lo mismo y, en la misma fila, igualan su alto. La barra de avance ya no ocupa la fila entera por defecto. `config.ancho_ficha`.
+- **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
+- El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).

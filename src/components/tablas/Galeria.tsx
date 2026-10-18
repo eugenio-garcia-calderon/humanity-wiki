@@ -63,7 +63,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, filasMax = null, nombreMas, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -88,8 +88,6 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   conDescripcion?: boolean;
   /** «Filas que se ven»: cuántas FILAS DE TARJETAS se enseñan (en cada grupo, si está agrupada); «Mostrar más» suma otras tantas. */
   filasMax?: number | null;
-  /** Lo que dice el «Mostrar más»: el nombre de la base de datos. */
-  nombreMas?: string;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -665,7 +663,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         <div className="flex justify-center pt-3">
           <button type="button" onClick={() => setTandasMas(t => t + 1)}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-            <ChevronDown className="h-3.5 w-3.5" /> Mostrar más{nombreMas ? `: ${nombreMas.toLowerCase()}` : ''} <span className="text-slate-400">({filasVis.length - cuantas})</span>
+            <ChevronDown className="h-3.5 w-3.5" /> Mostrar más
           </button>
         </div>
       )}
