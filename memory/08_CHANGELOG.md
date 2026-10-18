@@ -8843,3 +8843,8 @@ en mis páginas como proyecto pendiente».
 - Cada página declara UNA dirección canónica: la de su dominio propio activo si su sitio tiene uno, o la de su subdominio (`quien.humanity.wiki/…`). Antes cada forma de entrar (`humanity.wiki/@quien/…`, subdominio, dominio) se declaraba canónica a sí misma.
 - `robots.txt` de cada sitio nombra a los rastreadores de IA y deja fuera el buscador y las ordenaciones; nuevo `/llms.txt` con las páginas principales del sitio.
 - Enchufes para módulos: `registrarHtml` (cómo se escribe un bloque nuevo en el HTML) y `registrarAmpliacion` (`src/server/ampliarPagina.ts`: título, tipo, robots, `<meta>` y datos estructurados de una página, para la ficha de producto).
+
+### 2026-10-18 — Un subdominio de humanity.wiki para un sitio (Wikiproducts W2)
+- Una página publicada puede tener su propio `algo.humanity.wiki` (p. ej. `wikiproducts.humanity.wiki`), no sólo el nombre de su dueño. Se reclama como un dominio propio (`POST /api/dominios` con `dominio: "algo.humanity.wiki"` y la página) y funciona al momento: no hay DNS ni certificado que esperar.
+- Las reglas: un solo nivel, las mismas que un nombre de usuario, no puede ser el nombre de nadie, como mucho 3 por persona, siempre a una página. Al reclamarlo, el nombre queda reservado para que nadie lo coja después como usuario.
+- La dirección canónica de las páginas del sitio pasa a ser ese subdominio, salvo que el sitio tenga un dominio comprado, que gana.
