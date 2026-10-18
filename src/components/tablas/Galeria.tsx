@@ -11,6 +11,7 @@ import type { TamanoGaleria } from '../../utils/bloques';
 import GaleriaCarrusel from './GaleriaCarrusel';
 import MenuAcciones, { type AccionMenu } from './MenuAcciones';
 import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
+import { pedirTurno } from '../../utils/colaImagenes';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -59,13 +60,15 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ prioridad = 0, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
   velocidad?: number;
   /** Se pueden arrastrar las tarjetas para cambiar el orden de la tabla. */
   ordenable?: boolean;
+  /** Posición de su base de datos en la página: las imágenes de arriba cargan antes (ver `colaImagenes`). */
+  prioridad?: number;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -412,7 +415,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               {nombreArriba && <div className="mb-2">{nombreEl}</div>}
               <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
-                  <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
+                  <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null} prioridad={prioridad * 1000 + Math.max(0, filasVis.indexOf(f))}
                     recolocable={editable && !sitio && !!f.pagina_id && !chica}
                     onGuardar={async (x, y) => {
                       const r = await fetch(`/api/bd/filas/${f.id}/encuadre`, {
@@ -575,12 +578,34 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
  * `object-position` en %, así que vale igual para cualquier tamaño de
  * tarjeta y de pantalla.
  */
-function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
+function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, prioridad = 0 }: {
   src: string;
   encuadre: { x: number; y: number } | null;
   recolocable: boolean;
   onGuardar: (x: number, y: number) => Promise<void>;
+  /** Menor, antes: la posición de la base en la página y la de la tarjeta. */
+  prioridad?: number;
 }) {
+  // LA IMAGEN ESPERA SU TURNO (2026-10-18): solo pide descargar cuando está cerca de la pantalla
+  // y cuando le toca según su prioridad. Ver `colaImagenes.ts`.
+  const caja = useRef<HTMLDivElement>(null);
+  const [cerca, setCerca] = useState(false);
+  const [turno, setTurno] = useState(false);
+  const liberar = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    const el = caja.current;
+    if (!el) return;
+    const observador = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) setCerca(true); }, { rootMargin: '400px 0px' });
+    observador.observe(el);
+    return () => observador.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!cerca) return;
+    return pedirTurno(prioridad, libera => { liberar.current = libera; setTurno(true); });
+  }, [cerca, prioridad]);
+  // Si la tarjeta desaparece antes de terminar, su turno vuelve a la cola.
+  useEffect(() => () => { liberar.current?.(); liberar.current = null; }, []);
+  const terminar = () => { liberar.current?.(); liberar.current = null; };
   const [modo, setModo] = useState(false);
   const [pos, setPos] = useState(encuadre || { x: 50, y: 50 });
   const [guardando, setGuardando] = useState(false);
@@ -594,7 +619,7 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
     // el marco la recortaba por `overflow` y `object-position` no tenía nada
     // que mover —por eso «Recolocar» no hacía nada, y además el centro de la
     // imagen quedaba fuera de la parte visible, donde no se podía arrastrar.
-    <div className={cn('absolute inset-0', modo && 'cursor-move touch-none')}
+    <div ref={caja} className={cn('absolute inset-0', modo && 'cursor-move touch-none')}
       onClick={modo ? parar : undefined}
       onMouseDown={modo ? e => e.preventDefault() : undefined}
       onPointerDown={modo ? e => {
@@ -612,8 +637,9 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
         setPos({ x: c(i.x - ((e.clientX - i.px) / i.w) * 100), y: c(i.y - ((e.clientY - i.py) / i.h) * 100) });
       } : undefined}
       onPointerUp={modo ? () => { inicio.current = null; } : undefined}>
-      <img src={src} alt="" loading="lazy" draggable={false}
-        onError={e => { e.currentTarget.style.display = 'none'; }}
+      <img src={turno ? src : undefined} alt="" draggable={false}
+        onLoad={terminar}
+        onError={e => { terminar(); e.currentTarget.style.display = 'none'; }}
         style={{ objectPosition: `${visible.x}% ${visible.y}%` }}
         className={cn('w-full h-full object-cover select-none', !modo && 'group-hover:scale-[1.02] transition-transform')} />
 
