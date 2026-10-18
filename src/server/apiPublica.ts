@@ -7,7 +7,7 @@ import { asegurarRutas, plantillaValida } from './rutasFila';
 import { visibles } from './espacio';
 import { rolEnPagina, capacidades, puedeEditarPagina, quienDe } from './permisos';
 import { registrarHistorial } from './historial';
-import { markdownABloques, bloquesAMarkdown } from '../utils/bloques';
+import { markdownABloques, bloquesAMarkdown, nuevoIdBloque, esBloqueDatos } from '../utils/bloques';
 import { guardarProcedencia, ponerPlantilla } from './bd/plantillaFicha';
 
 // ============================================================================
@@ -115,7 +115,7 @@ export function registrarApiPublica(app: Express, db: any) {
     if (!req.path.startsWith('/api/v1')) return next();
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
     res.setHeader('Cache-Control', 'no-store');
     if (req.method === 'OPTIONS') return res.status(204).end();
     try {
@@ -267,6 +267,105 @@ export function registrarApiPublica(app: Express, db: any) {
       await registrarHistorial(db, { entidad: 'knowledge_windows', tabla: 'knowledge_windows', id, operacion: 'update', previo: antes, actor: yo, agrupar: true });
       res.json(paginaPublica(u.rows[0], { version: (u.rows[0] as any).version }));
     } catch (e: any) { console.error('v1 editar página:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  // ── ONE BLOCK AT A TIME (2026-10-18, Wikiproducts W3a) ───────────────────
+  // Rewriting a whole page through markdown loses what markdown cannot say
+  // (block ids, a gallery's settings, a members-only restriction keyed by
+  // block id). These two touch one block and leave the rest as it is.
+  //
+  // Only blocks that carry no free HTML or address can be ADDED: a database
+  // the key's owner can write, a page of the same owner (a «subpágina», which
+  // is how a page joins a site) and the data blocks of `TIPOS_BLOQUE_DATOS`.
+  // A leaked key cannot plant a web embed or a button on a published page.
+  const VISTAS_BD = new Set(['galeria', 'carrusel', 'tabla']);
+  const bloqueDeEntrada = async (req: Request, paginaId: string, b: any): Promise<{ bloque: any } | { error: string; codigo: number }> => {
+    const id = nuevoIdBloque();
+    if (b?.type === 'database' || b?.tipo === 'basedatos') {
+      const tablaId = String(b.database_id ?? b.tabla_id ?? '');
+      const r = await bdInterno.puedeConTabla!(req, tablaId, true);
+      if ('error' in r) return { error: r.error, codigo: r.codigo };
+      const vista = b.view ?? b.vistaBd;
+      if (vista !== undefined && !VISTAS_BD.has(String(vista))) return { error: '«view» es galeria, carrusel o tabla.', codigo: 400 };
+      return { bloque: { id, tipo: 'basedatos', tabla_id: tablaId, ...(vista ? { vistaBd: String(vista) } : {}) } };
+    }
+    if (b?.type === 'subpage' || b?.tipo === 'subpagina') {
+      const hija = String(b.page_id ?? b.entityId ?? '');
+      if (hija === paginaId) return { error: 'Una página no puede ir dentro de sí misma.', codigo: 400 };
+      const h = (await db.execute(sql`
+        SELECT h.title FROM knowledge_windows h JOIN knowledge_windows m ON m.id = ${paginaId}
+        WHERE h.id = ${hija} AND h.kind = 'pagina' AND h.deleted_at IS NULL AND h.archived_at IS NULL
+          AND h.creator_user_id = m.creator_user_id
+      `)).rows[0] as any;
+      // Same owner, or the link would not count anyway (`madresValidas`).
+      if (!h || !(await puedeEditarPagina(db, quienDe(req), hija))) return { error: 'Esa página no existe o no es de quien es esta.', codigo: 404 };
+      return { bloque: { id, tipo: 'subpagina', entityId: hija, pubTitulo: h.title || 'Sin título' } };
+    }
+    if (esBloqueDatos(b?.type ?? b?.tipo)) {
+      const datos = b.data ?? b.datos;
+      return { bloque: { id, tipo: b.type ?? b.tipo, ...(datos && typeof datos === 'object' && !Array.isArray(datos) ? { datos } : {}) } };
+    }
+    return { error: 'Por aquí sólo se añaden bloques «database», «subpage» o de datos (comparador, ofertas…). El texto va en «markdown».', codigo: 400 };
+  };
+  const quitarBloque = (lista: any[], id: string): { lista: any[]; quitado: any | null } => {
+    let quitado: any = null;
+    const out: any[] = [];
+    for (const b of lista) {
+      if (!quitado && b?.id === id) { quitado = b; continue; }
+      if (!quitado && Array.isArray(b?.bloques)) {
+        const r = quitarBloque(b.bloques, id);
+        if (r.quitado) { quitado = r.quitado; out.push({ ...b, bloques: r.lista }); continue; }
+      }
+      out.push(b);
+    }
+    return { lista: out, quitado };
+  };
+  /** Writes the new block list with the same optimistic version as PATCH. */
+  const guardarBloques = async (req: Request, res: Response, antes: any, bloques: any[]) => {
+    const base = req.body?.version === undefined ? null : Number(req.body.version);
+    const u = await db.execute(sql`
+      UPDATE knowledge_windows SET
+        config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', ${JSON.stringify(bloques)}::jsonb),
+        version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
+      WHERE id = ${antes.id} AND version = ${base ?? antes.version}::int
+      RETURNING id, title, config->>'icono' AS icono, proyecto_id, created_at, updated_at, version
+    `);
+    if (!u.rows.length) { res.status(409).json({ error: 'Otra persona ha guardado esta página mientras tanto. Vuelve a leerla y repite el cambio.' }); return null; }
+    await registrarHistorial(db, { entidad: 'knowledge_windows', tabla: 'knowledge_windows', id: antes.id, operacion: 'update', previo: antes, actor: req.user!.id, agrupar: true });
+    return u.rows[0] as any;
+  };
+  const paginaParaEditar = async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const a = await rolEnPagina(db, quienDe(req), id);
+    if (!a.existe) { res.status(404).json({ error: 'Esa página no existe.' }); return null; }
+    if (!(await puedeEditarPagina(db, quienDe(req), id))) { res.status(403).json({ error: 'No puedes editar esa página.' }); return null; }
+    return (await db.execute(sql`SELECT * FROM knowledge_windows WHERE id = ${id}`)).rows[0] as any;
+  };
+
+  /** `{ block: {type: "database", database_id, view?} | {type: "subpage", page_id} | {type: "<data block>", data},
+   *     after?: "<block id>" | null }` — at the end unless `after` names a top-level block. */
+  app.post('/api/v1/pages/:id/blocks', async (req: Request, res: Response) => {
+    try {
+      const antes = await paginaParaEditar(req, res); if (!antes) return;
+      const e = await bloqueDeEntrada(req, antes.id, req.body?.block);
+      if ('error' in e) return res.status(e.codigo).json({ error: e.error });
+      const bloques: any[] = Array.isArray(antes.config?.bloques) ? [...antes.config.bloques] : [];
+      const tras = req.body?.after ? bloques.findIndex(b => b?.id === String(req.body.after)) : -1;
+      if (req.body?.after && tras < 0) return res.status(404).json({ error: 'No hay un bloque con ese «after» en esta página.' });
+      bloques.splice(tras < 0 ? bloques.length : tras + 1, 0, e.bloque);
+      const w = await guardarBloques(req, res, antes, bloques); if (!w) return;
+      res.status(201).json({ block: e.bloque, page: paginaPublica(w, { version: w.version }) });
+    } catch (e: any) { console.error('v1 añadir bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  app.delete('/api/v1/pages/:id/blocks/:blockId', async (req: Request, res: Response) => {
+    try {
+      const antes = await paginaParaEditar(req, res); if (!antes) return;
+      const r = quitarBloque(Array.isArray(antes.config?.bloques) ? antes.config.bloques : [], String(req.params.blockId));
+      if (!r.quitado) return res.status(404).json({ error: 'Esa página no tiene un bloque con ese id.' });
+      const w = await guardarBloques(req, res, antes, r.lista); if (!w) return;
+      res.json({ removed: r.quitado, page: paginaPublica(w, { version: w.version }) });
+    } catch (e: any) { console.error('v1 quitar bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
   // ── BASES DE DATOS ────────────────────────────────────────────────────────
