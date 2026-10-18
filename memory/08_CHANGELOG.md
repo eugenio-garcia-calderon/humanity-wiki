@@ -9258,3 +9258,6 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 ## 2026-10-18 — «Filas que se ven», por grupo y en filas de tarjetas (prog8)
 - **«Filas que se ven»** cuenta ahora **filas de tarjetas** (no entradas) y, si la galería está agrupada, **en cada grupo**: con «1», una fila en Movilidad y otra en Energía. Cuántas tarjetas caben por fila lo mide la propia rejilla según el ancho (`gridTemplateColumns`, sin las columnas vacías de `auto-fit`).
 - Cada grupo (o la galería sin agrupar) lleva su **«Mostrar más»** con cuántas quedan, que suma otras tantas filas. El corte lo hace `Galeria` (`filasMax`); el carrusel no se corta.
+
+## 2026-10-18 — El deslizador del porcentaje ya no arrastra la tarjeta (prog8)
+- En la galería, al mover la barra de porcentaje (o usar cualquier campo, selector o texto editable dentro de una tarjeta) se movía la tarjeta entera. Ahora, al pulsar dentro de un control, la tarjeta deja de ser arrastrable hasta soltar (`onPointerDownCapture` en la tarjeta; también vale `data-sin-arrastre`).

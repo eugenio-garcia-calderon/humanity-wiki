@@ -426,6 +426,19 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                 setMenu({ fila: f, x: sinPuntero ? r.left + 16 : e.clientX, y: sinPuntero ? r.top + 16 : e.clientY });
               } : undefined}
               draggable={arrastre || undefined}
+              // UN CONTROL DENTRO DE LA TARJETA NO LA ARRASTRA (2026-10-18, Eugenio: «al
+              // mover la barra de porcentaje se mueve la tarjeta»). Si se pulsa en un
+              // deslizador, un campo o un texto editable, la tarjeta deja de ser
+              // arrastrable hasta soltar: así el gesto es del control.
+              onPointerDownCapture={arrastre ? e => {
+                const t = e.target as HTMLElement;
+                if (!t.closest('input, textarea, select, [contenteditable="true"], [data-sin-arrastre]')) return;
+                const tarjetaEl = e.currentTarget;
+                tarjetaEl.setAttribute('draggable', 'false');
+                const devolver = () => { tarjetaEl.setAttribute('draggable', 'true'); window.removeEventListener('pointerup', devolver); window.removeEventListener('pointercancel', devolver); };
+                window.addEventListener('pointerup', devolver);
+                window.addEventListener('pointercancel', devolver);
+              } : undefined}
               onDragStart={arrastre ? e => {
                 setArrastrada(f.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', f.id);
                 e.dataTransfer.setData(MIME_FILA, JSON.stringify({ fila: f.id, tabla: tablaId, nombre: nombreDe(f) }));
