@@ -2,7 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Galeria from './Galeria';
+import Galeria, { ANCHO_TARJETA } from './Galeria';
 import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
 
 /** Las cinco velocidades del carrusel, en píxeles por segundo. */
@@ -608,6 +608,30 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       // El último nivel de grupos lleva su «Añadir» al lado del título.
       const hoja = !(nivel === 0 ? colSub : null);
       const arriba = pieArriba && hoja && pie;
+      // GRUPOS PEQUEÑOS, UNO AL LADO DEL OTRO (2026-10-18, Eugenio): un grupo
+      // de la galería con una o dos tarjetas ocupa solo lo que miden ellas, y
+      // varios así comparten fila, cada uno con su título encima. Los de más
+      // tarjetas siguen ocupando la fila entera.
+      const juntos = pieArriba && nivel === 0 && !colSub;
+      if (juntos) {
+        const n = g.filas.length;
+        const chica = tamano === 'xs' || tamano === 'xxs';
+        const ancho = n <= 2
+          // ×1,5: la rejilla de la galería decide cuántas columnas caben por su ancho MÁXIMO.
+          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.5) + (Math.max(1, n) - 1) * (chica ? 8 : 16)
+          : null;
+        return (
+          <div key={clave} className={cn('min-w-0', ancho ? 'flex-none' : 'basis-full')} style={ancho ? { width: 'max-content', minWidth: `min(100%, ${ancho}px)`, maxWidth: '100%' } : undefined}>
+            {arriba ? (
+              <div className={cn('flex flex-wrap items-center gap-1', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
+                {cabecera(g, nivel, plegado, alternar)}
+                {pie(celdas)}
+              </div>
+            ) : cabecera(g, nivel, plegado, alternar)}
+            {!plegado && porGrupos(g.filas, pintar, cabecera, arriba ? undefined : pie, nivel + 1, g, celdas, pieArriba)}
+          </div>
+        );
+      }
       return (
         <Fragment key={clave}>
           {arriba ? (
@@ -1097,7 +1121,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
-        <div>
+        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-start gap-x-10 gap-y-2', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
