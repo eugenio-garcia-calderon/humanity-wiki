@@ -565,37 +565,65 @@ export function registrarSitios(app: Express, db: any) {
         // (portada → categorías → subcategorías) eso es casi nada.
         const vistas = new Set<string>([w.id]);
         const cola: string[] = [];
-        const apunta = (x: any) => {
-          if (!x || typeof x !== 'object') return;
-          if (Array.isArray(x)) { for (const y of x) apunta(y); return; }
+        const cortos: string[] = [];
+        // Todo lo que enlaza a otra página, esté donde esté: un bloque
+        // «Página» (`entityId`), un destino del menú (`{tipo:'pagina', id}`) o
+        // un enlace escrito como `/paginas/<id>` (texto, menú de temas…). En
+        // producción las categorías de Wikiproducts cuelgan del menú y de
+        // bloques de temas, no sólo de bloques «Página».
+        const apunta = (x: any, n = 0) => {
+          if (n > 12 || !x) return;
+          if (typeof x === 'string') {
+            for (const m of x.matchAll(/\/paginas\/([A-Za-z0-9_-]+)/g)) cola.push(m[1]);
+            return;
+          }
+          if (typeof x !== 'object') return;
+          if (Array.isArray(x)) { for (const y of x) apunta(y, n + 1); return; }
           if (x.tipo === 'pagina' && typeof x.id === 'string') cola.push(x.id);
-          for (const v of Object.values(x)) if (v && typeof v === 'object') apunta(v);
+          if (x.tipo === 'subpagina' && typeof x.entityId === 'string') cola.push(x.entityId);
+          // Un destino del menú escrito como dirección del propio sitio
+          // (`{tipo:'url', url:'/energia-portatil'}`): su nombre corto.
+          if (x.tipo === 'url' && typeof x.url === 'string' && /^\/[a-z0-9-]+\/?$/.test(x.url)) cortos.push(x.url.replace(/\//g, ''));
+          for (const v of Object.values(x)) apunta(v, n + 1);
         };
         apunta(w.config?.sitio?.menu);
         const hijas = async (pw: any) => {
           const { config } = await filtrarBloques(db, pw.id, pw.config, null);
-          const recorre = (l: any[]) => { for (const b of Array.isArray(l) ? l : []) {
-            if (b?.tipo === 'subpagina' && typeof b.entityId === 'string') cola.push(b.entityId);
-            recorre(b?.bloques);
-            if (Array.isArray(b?.columnas)) for (const c of b.columnas) recorre(c?.bloques);
-          } };
-          recorre(config?.bloques);
+          apunta(config?.bloques);
         };
         await hijas(w);
+        // Los nombres cortos, a páginas de la dueña (una consulta).
+        const deCortos = async () => {
+          if (!cortos.length) return;
+          const r = await db.execute(sql`
+            SELECT w.id FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+            WHERE u.handle = ${d.handle} AND w.publico = true AND w.kind = 'pagina'
+              AND w.slug = ANY(string_to_array(${cortos.splice(0).join(',')}, ','))
+              AND w.deleted_at IS NULL AND w.archived_at IS NULL
+          `);
+          for (const x of r.rows as any[]) cola.push(String(x.id));
+        };
+        await deCortos();
         while (cola.length && vistas.size < 200) {
           const id = cola.shift()!;
           if (vistas.has(id)) continue;
           vistas.add(id);
           const pw = await datosPagina(db, id);
-          if (!pw || !(await paginaVisible(db, pw.id))) continue;
+          // Sólo páginas de la dueña del sitio: un enlace a la página de otra
+          // persona no la hace parte de este sitio.
+          if (!pw || pw.handle !== d.handle || !(await paginaVisible(db, pw.id))) continue;
           // Las de miembros no: no se anuncian en ningún sitio (ver el sitemap).
           const rs = await db.execute(sql`SELECT 1 FROM sitio_restricciones WHERE pagina_id = ${pw.id} AND bloque_id = '' LIMIT 1`);
           if (rs.rows.length) continue;
           const corto = pw.publico && pw.slug && !String(pw.slug).includes('/') && pw.handle === d.handle
             && !TRAMOS_RESERVADOS.has(String(pw.slug)) && await cuelgaDe(db, pw.id, w.id);
-          linea(String(pw.title || 'Página'), corto ? `${base}/${encodeURIComponent(pw.slug)}` : `${base}/p/${pw.id}`, descripcionDe(pw.config));
+          const camino = corto ? encodeURIComponent(pw.slug)
+            : pw.slug && String(pw.slug).includes('/') ? String(pw.slug).split('/').map(encodeURIComponent).join('/')
+            : `p/${pw.id}`;
+          linea(String(pw.title || 'Página'), `${base}/${camino}`, descripcionDe(pw.config));
           await conTablas(pw, base);
           await hijas(pw);
+          await deCortos();
         }
       } else {
         const handle = d ? d.handle : (s as any).handle;
@@ -610,7 +638,10 @@ export function registrarSitios(app: Express, db: any) {
           await conTablas(w, base);
         }
       }
-      res.type('text/markdown').set('Cache-Control', 'public, max-age=3600').send(
+      // Cinco minutos y no una hora (2026-10-18): tras un despliegue o un cambio
+      // en el sitio, una hora de copia en el navegador (o en Cloudflare) hizo
+      // creer que el arreglo de esta lista no había llegado.
+      res.type('text/markdown').set('Cache-Control', 'public, max-age=300').send(
         `# ${nombre}\n\n${resumen ? `> ${resumen.replace(/\s+/g, ' ')}\n\n` : ''}` +
         `## Páginas\n\n${lineas.join('\n') || '- (todavía no hay páginas públicas)'}\n\n` +
         `Todas las direcciones: ${base}/sitemap.xml\n`,
