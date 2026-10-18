@@ -22,7 +22,7 @@ export function VistaAfirmaciones({ datos, paginaId, enEditor }: PropsLectura & 
   if (!v) return enEditor ? <p className="text-sm text-slate-400">Sin afirmaciones todavía.</p> : null;
   return (
     <Seccion titulo={v.titulo}>
-      {v.vacia ? <p className="text-sm text-slate-500">{v.vacia}</p> : (
+      {v.vacia ? <p className="text-base text-slate-500">{v.vacia}</p> : (
         <ul className="space-y-3">
           {v.items.map((a, i) => (
             <li key={i} className="rounded-xl border border-slate-100 p-3">
@@ -30,12 +30,12 @@ export function VistaAfirmaciones({ datos, paginaId, enEditor }: PropsLectura & 
                 <q className="font-semibold text-slate-800">{a.texto}</q>
                 <Badge variant={VARIANTE_VEREDICTO[a.veredicto]}>{ETIQUETA_VEREDICTO[a.veredicto]}</Badge>
               </div>
-              {a.explicacion ? <p className="mt-1.5 text-sm leading-relaxed text-slate-700"><TextoConEnlaces texto={a.explicacion} /></p> : null}
-              <p className="mt-1 text-[11px] text-slate-400">
+              {a.explicacion ? <p className="mt-1.5 text-base leading-relaxed text-slate-700"><TextoConEnlaces texto={a.explicacion} /></p> : null}
+              <p className="mt-1 text-sm text-slate-500">
                 {a.donde ? <>Dónde se dice: <a href={a.donde} target="_blank" rel="noopener nofollow" className="hover:underline">{sitioDe(a.donde) || a.donde}</a>. </> : null}
                 {a.fecha ? <>Revisada el {a.fecha}. </> : null}
               </p>
-              {a.fuentes ? <p className="mt-0.5 text-xs text-slate-500">Fuentes: <TextoConEnlaces texto={a.fuentes} /></p> : null}
+              {a.fuentes ? <p className="mt-0.5 text-sm text-slate-500">Fuentes: <TextoConEnlaces texto={a.fuentes} /></p> : null}
             </li>
           ))}
         </ul>
