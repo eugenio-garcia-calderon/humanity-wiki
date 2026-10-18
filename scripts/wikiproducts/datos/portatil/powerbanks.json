@@ -308,13 +308,13 @@
         {
           "distribuidor_id": "pccomponentes",
           "url": "https://www.pccomponentes.com/anker-power-bank-gen-2-con-pantalla-140w-24000mah-negro",
-          "precio_eur": 95.99,
+          "precio_eur": 144.2,
           "envio_eur": 0,
-          "plazo": "desconocido",
+          "plazo": "Recíbelo entre el lunes 26 de octubre y el lunes 2 de noviembre",
           "stock": "en stock",
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
-          "nota": "Leído en la página (P/N A1289011, «Power Bank Anker Gen 2 con Pantalla»); la fecha de entrega mostrada parecía de una copia anterior de la página, comprobar"
+          "nota": "Precio leído en la ficha: «144,20€», «Envío: Gratis», botón «Añadir al carrito». P/N A1289011 (Anker 737, negro)."
         },
         {
           "distribuidor_id": "elcorteingles",
@@ -337,6 +337,28 @@
           "comision": "sin acuerdo",
           "fecha_comprobacion": "2026-10-18",
           "nota": "ASIN tomado de Applesfera (26/05/2023, 119,99 € entonces); la página de Amazon no se pudo leer"
+        },
+        {
+          "distribuidor_id": "pcbox",
+          "url": "https://www.pcbox.com/a1289011-powerbank-anker-737-gen2-display-24k-140w-negro/p",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha muestra «135,47 €» pero «Sin Stock» / «Producto no disponible actualmente». Ref. fabricante A1289011, EAN 0194644098728."
+        },
+        {
+          "distribuidor_id": "beep-es",
+          "url": "https://www.beep.es/a1289011-powerbank-anker-737-gen2-display-24k-140w-negro/p",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha muestra «135,47 €» pero «Sin Stock». Ref. fabricante A1289011, EAN 0194644098728."
         }
       ],
       "pendiente": [

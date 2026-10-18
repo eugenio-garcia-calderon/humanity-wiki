@@ -7,8 +7,10 @@
 // After `cargar.mjs` the tables were full and nobody could see them. This
 // script, through /api/v1 and as the owner of the key:
 //
-//   1. adds to each subcategory page the gallery of its products table and
-//      removes the «se están cargando» notice;
+//   1. adds to each subcategory page the gallery of its products table,
+//      removes the «se están cargando» notice and folds (closed) each heading
+//      with text under it above the gallery, so a phone sees products first,
+//      and hides the gallery's own title and description (the page says both);
 //   2. gives the four supporting tables (brands, shops, ad claims, recalls) a
 //      page each, inside «Cómo trabajamos», so the brand, claims and recalls
 //      linked from a product sheet can be seen too (a link to a table nobody
@@ -118,8 +120,38 @@ for (const s of sitio.subcategorias) {
       await api('DELETE', `/api/v1/pages/${s.pagina}/blocks/${b.id}`);
       quitados++;
     }
-    const linea = `${p.title}: ${puesto ? `+ galería de «${tituloDe(s.tabla)}»` : 'ya enseñaba su tabla'}${quitados ? `, − ${quitados} aviso(s) de carga` : ''}`;
-    console.log(`  ${linea}`); if (puesto || quitados) hechos.push(linea);
+    // (W2, evaluator round 2) On the phone the buying guide («Qué conviene
+    // mirar» and its list) pushed every product below the fold. Each heading
+    // above the gallery that has text under it is folded, closed: one line
+    // until someone opens it. Nothing is deleted, and the server HTML still
+    // carries the text for search engines.
+    let plegados = 0;
+    const r = (puesto || quitados) && !SECO ? await api('GET', `/api/v1/pages/${s.pagina}`) : q;
+    const bl = r.blocks || [];
+    const galeria = bl.findIndex(b => b?.tipo === 'basedatos');
+    for (let i = 0; i < galeria; i++) {
+      const b = bl[i];
+      if (!/^titulo[23]$/.test(b?.tipo || '') || b.plegable) continue;
+      const siguiente = bl[i + 1];
+      if (!siguiente || /^titulo[123]$/.test(siguiente.tipo || '') || siguiente.tipo === 'basedatos') continue;
+      await api('POST', `/api/v1/pages/${s.pagina}/blocks/${encodeURIComponent(b.id)}/fold`, {});
+      plegados++;
+      // What it folded is no longer at the top level: skip it, as the API does.
+      const nivel = Number(b.tipo.slice(-1));
+      while (i + 1 < galeria && !(/^titulo[123]$/.test(bl[i + 1]?.tipo || '') && Number(bl[i + 1].tipo.slice(-1)) <= nivel)) i++;
+    }
+    // (W2) The gallery repeated the page title (the table's title) and a second
+    // description (the table's) before the first product. The page already
+    // says both: hide them on the products gallery.
+    let sinTitulo = 0;
+    const tabla = idTabla(s.tabla);
+    for (const b of bl) {
+      if (b?.tipo !== 'basedatos' || b.tabla_id !== tabla || b.tituloOculto) continue;
+      await api('PATCH', `/api/v1/pages/${s.pagina}/blocks/${encodeURIComponent(b.id)}`, { hide_title: true });
+      sinTitulo++;
+    }
+    const linea = `${p.title}: ${puesto ? `+ galería de «${tituloDe(s.tabla)}»` : 'ya enseñaba su tabla'}${quitados ? `, − ${quitados} aviso(s) de carga` : ''}${plegados ? `, ${plegados} guía(s) plegada(s)` : ''}${sinTitulo ? ', título repetido de la galería oculto' : ''}`;
+    console.log(`  ${linea}`); if (puesto || quitados || plegados || sinTitulo) hechos.push(linea);
   } catch (e) { fallos.push(`${s.tabla}: ${e.message}`); console.log(`  ✗ ${s.tabla}: ${e.message}`); }
 }
 

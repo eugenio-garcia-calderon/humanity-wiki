@@ -9286,6 +9286,35 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Comparador en el móvil**: la columna fija mide siempre 7rem y la tabla se desliza de producto en producto (`scroll-snap`), así que ya no asoman trozos de la columna de al lado; el nombre del grupo («PRECIO», «DATOS TÉCNICOS») se queda a la vista al deslizar.
 - **Migas en el móvil**: una línea, solo el nivel de arriba («‹ Powerbanks»); desde `sm`, el camino entero.
 - **Fuente de cada propiedad**: se lee entera, partida en líneas si hace falta, en vez de «Según la marca · …».
+## 2026-10-18 — Evaluator round 2: home groups, mobile listing and search results (Wikiproducts W2)
+
+- Home: the `secciones` block (site scope) groups its cards under the category they hang from — «Energía portátil» (3) and «Energía solar doméstica» (2) — with the group title linking to the category page. One row at ≥1024 px (all five visible without scrolling at 1440×900, checked locally: last card ends at 728 px); compact rows with a 64 px thumbnail on the phone. `seccionesDe` adds `grupo` (earliest root `subpagina` among its vias); `agruparSecciones` in `tarjetaSeccion.ts` only groups with ≥2 groups. Category pages (`ambito:'pagina'`) keep the flat grid.
+- Search results carry the product photo, «desde» price and one key figure with its unit (`completarFichas` in `buscadorSitio.ts`, same `textoDe` as the sheet).
+- Results page shows one search box: the mobile row is not rendered there and the desktop bar box is `invisible`.
+- Mobile menu dropdown is opaque and `z-50` (the search row showed through it).
+- Breadcrumbs: W1's #661 version kept (one level on the phone); this PR's one-line variant dropped in the merge.
+- Subcategory pages: «Qué conviene mirar» is folded on load so a product shows before scrolling at 390 px. New route `POST /api/v1/pages/:id/blocks/:blockId/fold` (owner key, top-level `titulo1-3` only, idempotent); `enlazar-sitio.mjs` step 1 calls it. Needs a «Cargar Wikiproducts» run to reach production. The server HTML still renders the folded text open (crawlers read it).
+- Not checked on production (unreachable from the cloud session).
+
+## 2026-10-18 — Wikiproducts: new shops with public prices, from W5's search (W3a)
+- Added 12 offers and 6 new shops from `/mnt/project-files/wikiproducto/w5/ofertas-nuevas.json`.
+  - Priced and in stock: JA Solar DeepBlue 4.0 Pro at fvcomponentes, 94,38 €; Tesla Powerwall 2 at Solarmat, 10.399 €, and at Genera tu propia energía, 8.350 €.
+  - PcComponentes' Anker 737 offer was re-read: 144,20 €, not 95,99 €.
+  - The rest are sold out. The price the page still shows stays in the note, never in `precio_eur`.
+- Left out on purpose:
+  - iVerde: its page only gives a price without VAT, which can't be compared with the others.
+  - Vekto (Alpha ESS): the shop sells only to installers, so it isn't a public price. Its price was removed and the note says why.
+## 2026-10-18 — Caja de compra al estilo de Amazon en «Dónde comprarlo» (Wikiproducts W5)
+- Cada oferta enseña ahora, debajo de la tienda: **plazo de entrega**, **envío** (el de la oferta o, si no lo dice, la regla de la tienda: «Envío gratis (pedidos desde 50 €)», «Envío 4,99 €, gratis desde 50 €»), **devoluciones** («Devolución gratuita en 30 días»), **quién gestiona la garantía**, **disponibilidad** y **cuándo se comprobó el precio**, con un enlace a las condiciones de la tienda y la fecha en que se leyeron. Si la tienda no envía a España, se dice.
+- Lo que no se sabe se dice («Plazo de entrega: la tienda no lo publica»), en gris; un plazo cargado como «desconocido» ya no sale como «Entrega: desconocido».
+- Las condiciones son **propiedades de la fila del distribuidor** (11 columnas nuevas en «Distribuidores», encontradas por `rol`), con fuente y fecha de cada valor: `datos/*/condiciones-tiendas.json`, investigadas en la web de las 58 tiendas. Solo se leen de una tabla de distribuidores del mismo dueño que las ofertas.
+- El HTML para buscadores (`ofertasEnHtml`) dice las mismas líneas (`lineasCompra`, compartida).
+## 2026-10-18 — Production check after #662: gallery title, phone home, search photos, mobile menu (Wikiproducts W2)
+
+- Subcategory pages: on production the products gallery repeated the page title (the table's title) and a second description (the table's) before the first product. New `PATCH /api/v1/pages/:id/blocks/:blockId` body `{hide_title: true}` (database blocks only, idempotent); `enlazar-sitio.mjs` step 1 sets it on each subcategory's products gallery, so it reaches production with the next «Cargar Wikiproducts». The server HTML now also drops the table description when the title is hidden, as the page already did.
+- Home at 390 px: section cards two per row and smaller (36 px thumbnail, 13 px title, up to 3 lines). Locally the five cards take 324 px from «Explora por categoría»; production's intro is shorter than the local copy's, so they should all fit at 390×844. Not checked on production.
+- Search: the first 8 result photos load eagerly (was 4).
+- Mobile menu dropdown is placed under the whole header, so it no longer covers the search box.
 
 ## 2026-10-18 — Opiniones en otras webs, aparte de la comunidad (Wikiproducts W4)
 - Las fichas y las tiendas pueden enseñar **lo que publican otros sitios**: «Según Trustpilot: 4 de 5, de 16.567 opiniones (consultado el 18/10/2026)», con enlace. En la ficha, una caja propia **«Opiniones en otras webs»** debajo de la puntuación de la comunidad; en «Dónde comprarlo», una línea «En otras webs: …» bajo la atención al cliente de cada tienda. Las dos salen también en el HTML del servidor.

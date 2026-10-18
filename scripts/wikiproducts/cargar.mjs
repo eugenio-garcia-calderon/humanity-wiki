@@ -93,7 +93,9 @@ const unirPorId = lista => {
 };
 const leerLista = (f, k) => carpetas.flatMap(c => { const r = path.join(dir, 'datos', c, f); return existsSync(r) ? leer(r)[k] || [] : []; });
 const marcas = unirPorId(leerLista('marcas.json', 'marcas'));
-const distribuidores = unirPorId(leerLista('distribuidores.json', 'distribuidores'));
+// Each shop's delivery, returns and warranty conditions (W5, evaluator round 2)
+// live in their own file and merge into the same rows by id.
+const distribuidores = unirPorId([...leerLista('distribuidores.json', 'distribuidores'), ...leerLista('condiciones-tiendas.json', 'distribuidores')]);
 // Ratings published elsewhere (W4): Trustpilot for a shop, the maker's shop or
 // a retailer for a product, each with its link and the day it was read. One
 // file for both folders, by id, so the research does not touch the product

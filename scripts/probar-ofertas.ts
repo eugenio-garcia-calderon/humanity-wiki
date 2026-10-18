@@ -11,8 +11,11 @@
 //   3. Dos tiendas son dos cajas: el envío se suma por distribuidor; una
 //      tienda sin ofertas paga exactamente lo de antes.
 //   4. El pedido del cliente avanza solo cuando avanzan TODAS sus tiendas.
+//   5. La caja de compra de cada oferta (entrega, envío, devoluciones,
+//      garantía, stock, fecha del precio) dice «no lo sabemos» de forma
+//      distinguible de un dato, y nunca «Entrega: desconocido».
 import assert from 'node:assert/strict';
-import { ordenarOfertas, comisionDeLinea, textoComision, relEnlaceTienda } from '../src/utils/ofertas';
+import { ordenarOfertas, comisionDeLinea, textoComision, relEnlaceTienda, lineasCompra, textoEnvioTienda, type CondicionesTienda } from '../src/utils/ofertas';
 import { calcularEnvio } from '../src/server/zonasEnvio';
 import { calcularEnvioPorDistribuidor, estadoDeducido } from '../src/server/pedidoGestionado';
 
@@ -107,6 +110,37 @@ ok('avanza solo cuando avanzan todas sus tiendas', () => {
   assert.equal(estadoDeducido(['entregado', 'entregado']), 'entregado');
   assert.equal(estadoDeducido(['entregado', 'cancelado']), 'entregado');
   assert.equal(estadoDeducido(['incidencia']), 'pagado');
+});
+
+console.log('Caja de compra de cada oferta');
+const tienda: CondicionesTienda = {
+  envia_a_espana: true,
+  entrega_min_dias: 1, entrega_max_dias: 2, envio_centimos: 499, envio_gratis_desde_centimos: 5000,
+  devolucion_dias: 30, devolucion_gratis: true, garantia: 'La tienda', condiciones_url: 'https://x.test/envios', condiciones_fecha: '2026-10-18',
+};
+const oferta = { precio_centimos: 9599, envio_centimos: null, moneda: 'EUR', stock: null, agotada: false, plazo: 'desconocido', comprobado: '2026-10-18', tienda };
+const texto = (o: any) => Object.fromEntries(lineasCompra(o).map(l => [l.clave, l.texto]));
+ok('las condiciones de la tienda llenan la caja; «desconocido» no es un plazo', () => {
+  const t = texto(oferta);
+  assert.equal(t.entrega, 'Entrega en 1–2 días');
+  assert.equal(t.devolucion, 'Devolución gratuita en 30 días');
+  assert.equal(t.garantia, 'Garantía: la gestiona la tienda');
+  assert.equal(t.stock, 'Disponibilidad sin confirmar');
+  assert.match(t.comprobado, /^Precio comprobado el 18 de octubre de 2026$/);
+  assert.equal(texto({ ...oferta, plazo: '24-48 h' }).entrega, 'Entrega: 24-48 h');
+});
+ok('sin condiciones, cada línea dice que no se sabe (y se marca como no sabida)', () => {
+  const l = lineasCompra({ ...oferta, tienda: null });
+  assert.deepEqual(l.filter(x => !x.sabido).map(x => x.clave), ['entrega', 'devolucion', 'garantia']);
+  assert.ok(!l.some(x => /desconocido/i.test(x.texto)));
+});
+ok('el envío de la tienda depende del precio y del umbral de envío gratis', () => {
+  // Intl puts a no-break space before «€».
+  assert.match(textoEnvioTienda(oferta)!, /^Envío gratis \(pedidos desde 50\s€\)$/);
+  assert.match(textoEnvioTienda({ ...oferta, precio_centimos: 2000 })!, /^Envío 4,99\s€, gratis desde 50\s€$/);
+  assert.equal(textoEnvioTienda({ ...oferta, tienda: { ...tienda, envio_gratis_desde_centimos: 0 } }), 'Envío gratis');
+  // The offer's own shipping wins: the shop rule is only a fallback.
+  assert.equal(textoEnvioTienda({ ...oferta, envio_centimos: 300 }), null);
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);

@@ -22,7 +22,11 @@ import { bloquesDe } from './bloquesSql';
 import { paginaVisible, descripcionDe } from './sitios';
 import { filtrarBloques } from './miembros.js';
 import { registrarHtml, esc } from './htmlBloques.js';
-import { CLASES_TARJETA, CARGA_INMEDIATA } from '../components/sitio/tarjetaSeccion';
+import { CLASES_TARJETA, CLASES_COMPACTA, CLASES_GRUPOS, CARGA_INMEDIATA, agruparSecciones } from '../components/sitio/tarjetaSeccion';
+import { celdasDe } from './bd/celdas';
+import { calcularTabla } from './bd/calculo';
+import { rolDe, columnasDestacadas, textoDe, etiquetaColumna } from '../components/bloquesDatos/ficha/modelo';
+import { formatear } from '../utils/formatoCelda';
 
 /** Cuántos niveles de página dentro de página (como `sitios.ts`). */
 const PROFUNDIDAD = 8;
@@ -246,6 +250,28 @@ export async function seccionesDe(db: any, raiz: string) {
       slug: x.publico && typeof x.slug === 'string' && x.slug && !x.slug.includes('/') ? x.slug : null,
       vias: Array.isArray(x.vias) ? x.vias.filter(Boolean) : [] });
   }
+  // EL GRUPO DE CADA SECCIÓN (ronda 2 del evaluador): la subpágina de la raíz
+  // por la que se llega a ella («Energía portátil»), con su título y su
+  // dirección, en el orden en que la raíz las enlaza. La portada agrupa las
+  // tarjetas por aquí; si cada sección es su propio grupo (una categoría
+  // pidiendo las suyas), no hay nada que agrupar.
+  const ids = [...new Set(out.flatMap(o => o.vias))].filter(v => !out.some(o => o.id === v));
+  if (ids.length) {
+    const g = (await db.execute(sql`
+      SELECT w.id, w.title, w.slug, w.publico, (
+        SELECT min(o.n) FROM knowledge_windows r
+        CROSS JOIN LATERAL jsonb_array_elements(${bloquesDe('r')}) WITH ORDINALITY o(b, n)
+        WHERE r.id = ${raiz} AND o.b->>'tipo' = 'subpagina' AND o.b->>'entityId' = w.id) AS orden
+      FROM knowledge_windows w
+      WHERE w.id = ANY(string_to_array(${ids.join(',')}, ',')) AND w.deleted_at IS NULL AND w.archived_at IS NULL
+    `)).rows as any[];
+    const grupos = new Map(g.map(x => [String(x.id), { id: String(x.id), titulo: String(x.title || '').trim() || 'Sin título', orden: Number(x.orden) || 0,
+      slug: x.publico && typeof x.slug === 'string' && x.slug && !x.slug.includes('/') ? x.slug : null }]));
+    for (const o of out) {
+      const mio = o.vias.map(v => grupos.get(v)).filter(Boolean).sort((a, b) => a!.orden - b!.orden)[0];
+      if (mio) (o as any).grupo = { id: mio.id, titulo: mio.titulo, slug: mio.slug, orden: mio.orden };
+    }
+  }
   return out;
 }
 
@@ -256,14 +282,24 @@ registrarHtml('secciones', (b, ctx) => {
   const lista = ctx.extra.get('secciones') as Awaited<ReturnType<typeof seccionesDe>> | undefined;
   if (!lista?.length) return '';
   const titulo = typeof b?.datos?.titulo === 'string' ? b.datos.titulo.trim() : '';
-  const tarjetas = lista.map((s, i) => `<li><a href="${esc(ctx.enlacePagina(s.id))}" class="${CLASES_TARJETA.enlace}">`
-    + (s.portada ? `<span class="${CLASES_TARJETA.marco}"><img src="${esc(s.portada)}" alt="" width="320" height="240" loading="${i < CARGA_INMEDIATA ? 'eager' : 'lazy'}" class="${CLASES_TARJETA.imagen}"></span>`
-      : `<span class="${CLASES_TARJETA.marco}" aria-hidden="true"></span>`)
-    + `<span class="${CLASES_TARJETA.cuerpo}"><span class="${CLASES_TARJETA.titulo}">${esc(s.titulo)}</span>`
-    + `<span class="${CLASES_TARJETA.cuenta}">${s.fichas === 1 ? '1 producto' : `${s.fichas} productos`}</span>`
-    + (s.descripcion ? `<span class="${CLASES_TARJETA.descripcion}">${esc(s.descripcion)}</span>` : '')
-    + '</span></a></li>').join('');
-  return `<section>${titulo ? `<h2 class="mb-3 text-xl font-black text-slate-900">${esc(titulo)}</h2>` : ''}<ul class="${CLASES_TARJETA.lista}">${tarjetas}</ul></section>`;
+  let n = 0;
+  const tarjeta = (s: (typeof lista)[number], K: Record<string, string>) => {
+    const i = n++;
+    return `<li><a href="${esc(ctx.enlacePagina(s.id))}" class="${K.enlace}">`
+      + (s.portada ? `<span class="${K.marco}"><img src="${esc(s.portada)}" alt="" width="320" height="240" loading="${i < CARGA_INMEDIATA ? 'eager' : 'lazy'}" class="${K.imagen}"></span>`
+        : `<span class="${K.marco}" aria-hidden="true"></span>`)
+      + `<span class="${K.cuerpo}"><span class="${K.titulo}">${esc(s.titulo)}</span>`
+      + `<span class="${K.cuenta}">${s.fichas === 1 ? '1 producto' : `${s.fichas} productos`}</span>`
+      + (s.descripcion ? `<span class="${K.descripcion}">${esc(s.descripcion)}</span>` : '')
+      + '</span></a></li>';
+  };
+  const grupos = b?.datos?.ambito !== 'pagina' ? agruparSecciones(lista as any[]) : null;
+  const cuerpo = grupos
+    ? `<div class="${CLASES_GRUPOS.fila}">` + grupos.map(g => `<section class="${CLASES_GRUPOS.grupo}" style="flex-grow:${g.secciones.length};flex-basis:0">`
+        + `<h3 class="${CLASES_GRUPOS.titulo}"><a href="${esc(ctx.enlacePagina(g.id))}" class="${CLASES_GRUPOS.enlaceTitulo}">${esc(g.titulo)}</a></h3>`
+        + `<ul class="${CLASES_GRUPOS.lista}" style="--n:${g.secciones.length}">${g.secciones.map((s: any) => tarjeta(s, CLASES_COMPACTA)).join('')}</ul></section>`).join('') + '</div>'
+    : `<ul class="${CLASES_TARJETA.lista}">${lista.map(s => tarjeta(s, CLASES_TARJETA)).join('')}</ul>`;
+  return `<section>${titulo ? `<h2 class="mb-3 text-xl font-black text-slate-900">${esc(titulo)}</h2>` : ''}${cuerpo}</section>`;
 }, async (db, bloques, ctx) => {
   const bloque = bloques.find(x => x?.tipo === 'secciones');
   if (!bloque || ctx.extra.has('secciones')) return;
@@ -274,6 +310,54 @@ registrarHtml('secciones', (b, ctx) => {
   ctx.extra.set('secciones', lista);
   ctx.extra.set('subpaginas-en-tarjetas', new Set(lista.flatMap(s => [s.id, ...s.vias])));
 });
+
+/**
+ * LO QUE SE VE DE UNA FICHA EN LOS RESULTADOS (ronda 2 del evaluador,
+ * 2026-10-18): «los resultados son solo título + subcategoría, sin foto,
+ * precio ni dato clave». A cada ficha se le pone su foto (la columna de foto si
+ * la página no tiene portada), su precio «desde» y la cifra que dice cómo de
+ * grande es (`tamano`, o la primera destacada con valor), con los mismos roles
+ * que la ficha y las tarjetas de la galería (`ficha/modelo.ts`). Un precio de
+ * 0 no se enseña: es que ninguna tienda lo vende todavía.
+ */
+async function completarFichas(db: any, resultados: any[]) {
+  const porTabla = new Map<string, any[]>();
+  for (const r of resultados) if (r.tablaId) porTabla.set(r.tablaId, [...(porTabla.get(r.tablaId) || []), r]);
+  for (const [tablaId, lista] of porTabla) {
+    try {
+      const columnas = (await db.execute(sql`
+        SELECT id, nombre, tipo, opciones, config FROM bd_columnas
+        WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
+      `)).rows as any[];
+      const filas = (await db.execute(sql`
+        SELECT id, pagina_id, valores FROM bd_filas
+        WHERE tabla_id = ${tablaId} AND deleted_at IS NULL AND archived_at IS NULL
+          AND pagina_id = ANY(string_to_array(${lista.map(r => r.id).join(',')}, ','))
+      `)).rows as any[];
+      const preparadas = filas.map(f => ({ id: f.id, pagina: f.pagina_id, celdas: celdasDe(f.valores || {}, columnas) }));
+      const { porFila } = await calcularTabla(db, { columnas, filas: preparadas });
+      const visibles = columnas.filter(c => c.config?.visibilidad !== 'nunca');
+      const foto = columnas.find(c => rolDe(c) === 'imagen');
+      const precio = visibles.find(c => rolDe(c) === 'precio_min');
+      const cifras = [visibles.find(c => rolDe(c) === 'tamano'), ...columnasDestacadas({ columnas } as any)].filter(Boolean) as any[];
+      for (const f of preparadas) {
+        const r = lista.find(x => x.id === f.pagina); if (!r) continue;
+        const celdas = { ...f.celdas, ...(porFila[f.id] || {}) };
+        const texto = (c: any) => { const v = celdas[c.id]; return v?.estado === 'ok' ? formatear(v, c) : ''; };
+        const cf: any = foto ? celdas[foto.id] : null;
+        const u = cf?.estado === 'ok' ? String(cf.valor ?? '').trim() : '';
+        if (!r.portada && /^(https?:\/\/\S+|\/[^/]\S*)$/.test(u)) r.portada = u;
+        const p: any = precio ? celdas[precio.id] : null;
+        if (precio && p?.estado === 'ok' && Number(p.valor) > 0) r.precio = texto(precio);
+        // Con su unidad, como lo dice la ficha: «Energía nominal: 86,4 Wh».
+        const fila = { celdas } as any;
+        const cifra = cifras.find(c => textoDe(fila, c));
+        if (cifra) r.dato = { nombre: etiquetaColumna(cifra), valor: textoDe(fila, cifra) };
+      }
+    } catch (e) { console.error('buscador: fichas', e); }
+  }
+  for (const r of resultados) delete r.tablaId;
+}
 
 export function registrarBuscadorSitio(app: Express, db: any) {
   // Las secciones del sitio, para la portada y la página de error.
@@ -371,7 +455,7 @@ export function registrarBuscadorSitio(app: Express, db: any) {
         if (!encaja(pajar, lecturas)) continue;
         if (encaja(pajar, lecturas.slice(0, 1))) tal = true;
         resultados.push({
-          id: x.id,
+          id: x.id, tablaId: x.es_ficha ? String(x.tabla_id) : null,
           titulo: String(x.title || '').trim() || 'Sin título',
           descripcion: descripcionDe(config),
           tabla: x.tabla || null,
@@ -381,6 +465,7 @@ export function registrarBuscadorSitio(app: Express, db: any) {
           ruta: typeof x.slug === 'string' && x.slug.includes('/') ? x.slug : null,
         });
       }
+      await completarFichas(db, resultados);
       // Lo mismo para cualquiera que pregunte: se puede guardar un poco.
       // Sin nada que enseñar: por dónde seguir.
       const secciones = resultados.length ? undefined : await seccionesDe(db, raiz);
