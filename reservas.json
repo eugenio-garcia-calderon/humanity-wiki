@@ -11,6 +11,12 @@
       "ruta": "src/server/sitios.ts",
       "motivo": "W2: páginas por su nombre en dominio propio + llms.txt",
       "desde": "2026-10-18T15:54:37.160Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/AplicacionDeDominio.tsx",
+      "motivo": "W2: páginas por su nombre en dominio propio + llms.txt",
+      "desde": "2026-10-18T15:54:40.402Z"
     }
   ]
 }
