@@ -29,6 +29,12 @@
       "ruta": "drizzle/0158_direcciones_anteriores.sql",
       "motivo": "W2: direcciones legibles R2, 301 al renombrar",
       "desde": "2026-10-18T12:06:13.386Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0156_expertos_soporte.sql",
+      "motivo": "W6: migración hasta fusionar #590",
+      "desde": "2026-10-18T12:28:19.677Z"
     }
   ]
 }
