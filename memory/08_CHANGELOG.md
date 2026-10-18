@@ -8901,6 +8901,10 @@ en mis páginas como proyecto pendiente».
 - Para buscadores: la ficha sale entera en el HTML del servidor, con título «Marca Modelo: datos, precio y opiniones», datos estructurados `Product` (con su dirección canónica, precio y, sólo si hay votos reales, nota), migas de pan, la descripción sacada del resumen del producto y `noindex` mientras le falte foto, resumen, 8 datos con fuente, una oferta o la fecha de revisión.
 - La API v1 crea bases de datos y columnas (`POST /api/v1/databases`, `POST /api/v1/databases/:id/columns`) y fija la forma de las direcciones de sus filas (`route`). `scripts/wikiproducts/crear-esquema.mjs` crea las 14 bases de datos de Wikiproducts (`esquema-bd.json`) sin repetir nada.
 - En el móvil, la burbuja de comentar de cada bloque ya no ensancha la página 16 px (salía por fuera de la columna y se podía arrastrar la página de lado). Ahora queda dentro de la columna en pantallas estrechas.
+### 2026-10-18 — Ocultar una entrada entera al público (prog8)
+- En el menú de una tarjeta (clic derecho o ⋯), «Ocultar al publicar»: la entrada deja de verse en la web publicada. Quien edita la sigue viendo, atenuada y con la marca «Oculta», y la vuelve a enseñar con «Mostrar al publicar».
+- El servidor no manda las entradas ocultas a quien no puede editar la tabla (columna `bd_filas.oculta`, migración 0154).
+
 
 ### 2026-10-18 — Direcciones legibles para las fichas (Wikiproducts W2, SEO R2)
 - Una base de datos puede llevar una plantilla de dirección (`config.ruta`, p. ej. `powerbanks/{Marca}-{Modelo}`) y cada fila se abre por su nombre: `wikiproducts.humanity.wiki/powerbanks/anker-737-powercore-24k` en vez de `/p/BDF…`. Funciona igual en dominio propio, subdominio y `humanity.wiki/@quien/…`.
