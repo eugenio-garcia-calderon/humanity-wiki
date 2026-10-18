@@ -9227,3 +9227,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 ## 2026-10-18 — Wikiproducts W3a: read-only export of the public site for the evaluator's copy
 - New workflow «Exportar Wikiproducts» (`exportar-wikiproducts.yml`, by hand): over SSH, `scripts/wikiproducts/exportar-en-servidor.sh` reads the site's public pages (the root, the subcategory pages, «Cómo trabajamos» and every page hanging from them through «Página» blocks), its `sitio_config` / `sitio_categorias` / `sitio_restricciones` rows, its `dominios_paginas` row, and the stored product photos with their row name and credit. The result is the run's artifact `wikiproducts-export` (paginas.json, fotos.json, fotos.tar), kept 14 days.
 - Read-only, no key created. Not exported: members, their sessions and magic links, orders, users, keys, `.env`; user ids and anything named like a token are dropped from every row (`exportar.mjs`). Only the owner's pages, not deleted, archived or members-only. Same concurrency group as the load, so the two never overlap. Tested against the local copy (`CARGA_MODO=local`).
+
+## 2026-10-18 — Section card photos load immediately (Wikiproducts W2)
+
+- The Mac check after #648 saw the «Baterías domésticas» card blank until its lazy image loaded. The first six section cards (`CARGA_INMEDIATA` in `tarjetaSeccion.ts`) now load their photo eagerly, in React and in the server HTML; the rest stay lazy. Not checked on production.
