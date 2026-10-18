@@ -69,7 +69,7 @@ export type ConfigVista = {
   /** EL DISEÑO DE LOS GRUPOS en la galería (2026-10-18, Eugenio): tamaño del
    *  título (por defecto «m», más grande que antes), dónde va (por defecto
    *  centrado) y si se ve la imagen de lo enlazado —la de «Movilidad» al
-   *  agrupar por áreas— (por defecto sí). */
+   *  agrupar por áreas— (por defecto no, desde el 2026-10-18). */
   grupo_titulo?: 's' | 'm' | 'l' | 'xl';
   grupo_alineacion?: 'izquierda' | 'centro';
   grupo_imagen?: boolean;

@@ -89,7 +89,7 @@ export function registrarValoraciones(app: Express, db: any) {
         solo_compradores: aj.solo_compradores,
         umbral: aj.umbral,
         // Below the threshold no number leaves the server, only the count:
-        // the screen says «aún sin votos suficientes».
+        // the screen says how far it is («1 de 3 votos»).
         suficiente: celda?.estado === 'ok',
         nota: celda?.estado === 'ok' ? celda.valor : null,
         media: celda?.estado === 'ok' ? (celda.media ?? null) : null,
@@ -176,7 +176,7 @@ export function registrarValoraciones(app: Express, db: any) {
 
   // ── SERVER HTML AND STRUCTURED DATA (SEO R4) ──────────────────────────────
   // What a search engine or an AI reads before React starts: each criterion
-  // with its mean and vote count, or «aún sin votos suficientes». Built as
+  // with its mean and vote count, or how far it is from one («1 de 3 votos»). Built as
   // nobody (no session), so it says only what any reader may see.
 
   const anonimo = { user: undefined } as Pick<Request, 'user'>;
@@ -190,14 +190,13 @@ export function registrarValoraciones(app: Express, db: any) {
   registrarHtml('valoracion', (b, ctx) => {
     const r = ctx.extra.get('valoracion')?.get(claveDe(b, ctx.pagina) || '');
     if (!r || !r.criterios.length) return '';
-    const general = r.criterios.find((c: any) => c.media_de_criterios);
     const lista = r.criterios.filter((c: any) => !c.media_de_criterios).map((c: any) =>
       `<li>${esc(c.nombre)}: ${c.suficiente && c.media !== null
         ? `${esc(cifra(c.media))} de 5 (${esc(votosTxt(c.votos))})`
-        : `aún sin votos suficientes (${esc(votosTxt(c.votos))})`}</li>`).join('');
+        : `aún sin nota (${esc(c.votos)} de ${esc(c.umbral)} votos)`}</li>`).join('');
     const cabeza = r.agregado
       ? `<p>Nota media: ${esc(cifra(r.agregado.ratingValue))} de 5, de ${esc(r.agregado.ratingCount)} ${r.agregado.ratingCount === 1 ? 'persona' : 'personas'}.</p>`
-      : (general ? '<p>Nota media: aún sin votos suficientes.</p>' : '');
+      : `<p>Aún sin nota: aparece con ${esc(r.criterios[0].umbral)} votos por criterio. Si lo has usado, puntúalo.</p>`;
     return `<section><h2>Puntuación de la comunidad</h2>${cabeza}<ul>${lista}</ul></section>`;
   }, async (_db, bloques, ctx) => {
     const claves = [...new Set(bloques.filter(b => b?.tipo === 'valoracion').map(b => claveDe(b, ctx.pagina)).filter(Boolean) as string[])];
