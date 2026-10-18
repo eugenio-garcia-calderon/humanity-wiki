@@ -385,3 +385,13 @@ hundred products: one query, milliseconds). **Switch when a site passes
 ~10,000 rows or search p95 > 300 ms:** a `pg_trgm` GIN index on a per-page
 search column kept up to date on write (or Postgres full-text with a Spanish
 config). About half a day now; the same later, plus a backfill.
+
+## 2026-10-18 — Client-side links to rows still use `/p/:id` (Wikiproducts W2, R2)
+
+The server HTML, sitemap and canonical use a row's readable URL, but the React
+gallery/table link with `enlacePagina(id)` → `/p/:id`, so in-app navigation shows
+`/p/BDF…` in the address bar (a hard load of it 301s to the readable one).
+Fixing it means passing the row page's slug to the reading components
+(`Rejilla`, `Galeria`) and an `enlaceRuta` in `ContextoSitio`: about an hour
+today, touching files other threads edit often. Do it when the product sheet
+(W1) settles.

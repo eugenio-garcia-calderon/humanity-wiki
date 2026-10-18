@@ -18,8 +18,11 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 // Quién puede verla lo decide el servidor (`sitios.ts`): la página si está
 // publicada, o si lo está la página que contiene su base de datos.
 
-export default function SubpaginaSitio({ propio }: { propio: boolean }) {
-  const { id } = useParams();
+export default function SubpaginaSitio({ propio, idFijo }: { propio: boolean; idFijo?: string }) {
+  const { id: idDeRuta } = useParams();
+  // Por `/p/:id` el id viene en la dirección; por la dirección legible de una
+  // ficha (`/powerbanks/anker-737`) lo trae `RutaSitio`.
+  const id = idFijo || idDeRuta;
   const sitio = useSitio();
   // Al entrar directamente por `/p/:id`, la página ya viene en el HTML. Si es
   // de un sitio con miembros, se vuelve a pedir con la sesión (ver

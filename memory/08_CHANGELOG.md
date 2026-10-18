@@ -8875,3 +8875,9 @@ en mis páginas como proyecto pendiente».
 - El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
 - Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
+
+### 2026-10-18 — Direcciones legibles para las fichas (Wikiproducts W2, SEO R2)
+- Una base de datos puede llevar una plantilla de dirección (`config.ruta`, p. ej. `powerbanks/{Marca}-{Modelo}`) y cada fila se abre por su nombre: `wikiproducts.humanity.wiki/powerbanks/anker-737-powercore-24k` en vez de `/p/BDF…`. Funciona igual en dominio propio, subdominio y `humanity.wiki/@quien/…`.
+- Dos o tres tramos; el primero no puede ser uno de la aplicación (`p`, `bd`, `buscar`…). `{Columna}` toma el valor de esa columna; una relación (la marca) da el nombre de la fila apuntada. Si falta un dato, la ficha sigue en `/p/:id`.
+- Si la ficha cambia de nombre, la dirección vieja contesta 301 a la nueva para siempre (tabla `direcciones_anteriores`, migración 0158). `/p/:id` de una ficha con dirección legible también lleva a ella con un 301.
+- La dirección se calcula al leer (sitemap, visita a `/p/:id`) y con `POST /api/bd/tablas/:id/rutas` para quien carga datos en bloque. El sitemap, la canónica y el HTML del servidor usan ya la dirección legible.

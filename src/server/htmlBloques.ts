@@ -34,6 +34,9 @@ import { formatear } from '../components/tablas/Celda';
 export interface ContextoHtml {
   /** La dirección de una página dentro del sitio por el que se entró. */
   enlacePagina: (id: string) => string;
+  /** La de una ficha con dirección legible (`categoria/producto`, SEO R2,
+   *  `rutasFila.ts`). Sin ella, las fichas van por `enlacePagina`. */
+  enlaceRuta?: (slug: string) => string;
   /** Las bases de datos que enseña la página (por bloque: ver `claveTabla`). */
   tablas: Map<string, TablaHtml>;
   /** Títulos de las subpáginas enlazadas. */
@@ -49,7 +52,7 @@ export interface TablaHtml {
   titulo: string;
   descripcion: string;
   columnas: Array<{ id: string; nombre: string; tipo: string; opciones?: any[]; config?: any }>;
-  filas: Array<{ id: string; paginaId: string | null; nombre: string; portada: string | null; valores: Record<string, any> }>;
+  filas: Array<{ id: string; paginaId: string | null; ruta?: string | null; nombre: string; portada: string | null; valores: Record<string, any> }>;
   /** Cuántas filas tiene en total (se escriben como mucho `MAX_FILAS`). */
   total: number;
 }
@@ -198,7 +201,7 @@ async function tablaHtml(db: any, tablaId: string, b: any): Promise<TablaHtml | 
     SELECT count(*)::int AS n FROM bd_filas WHERE tabla_id = ${tablaId} AND archived_at IS NULL AND deleted_at IS NULL
   `)).rows[0] as any)?.n || 0);
   const filas = (await db.execute(sql`
-    SELECT f.id, f.valores, f.pagina_id, pw.title, pw.config->>'portada' AS portada
+    SELECT f.id, f.valores, f.pagina_id, pw.title, pw.slug, pw.config->>'portada' AS portada
     FROM bd_filas f
     LEFT JOIN knowledge_windows pw ON pw.id = f.pagina_id AND pw.deleted_at IS NULL AND pw.archived_at IS NULL
     WHERE f.tabla_id = ${tablaId} AND f.archived_at IS NULL AND f.deleted_at IS NULL
@@ -211,6 +214,7 @@ async function tablaHtml(db: any, tablaId: string, b: any): Promise<TablaHtml | 
     filas: filas.map(f => ({
       id: f.id,
       paginaId: f.pagina_id || null,
+      ruta: f.slug && String(f.slug).includes('/') ? String(f.slug) : null,
       nombre: String((colTitulo && f.valores?.[colTitulo]) || f.title || '').trim(),
       portada: f.portada || null,
       valores: f.valores || {},
@@ -261,7 +265,8 @@ function tablaEnHtml(t: TablaHtml, b: any, ctx: ContextoHtml): string {
     const nombre = esc(f.nombre || 'Sin título');
     const img = f.portada && hrefSeguro(f.portada)
       ? `<img src="${esc(f.portada)}" alt="${nombre}" loading="lazy" width="64" height="64"> ` : '';
-    const primera = f.paginaId ? `<a href="${esc(ctx.enlacePagina(f.paginaId))}">${img}${nombre}</a>` : `${img}${nombre}`;
+    const href = f.ruta && ctx.enlaceRuta ? ctx.enlaceRuta(f.ruta) : f.paginaId ? ctx.enlacePagina(f.paginaId) : null;
+    const primera = href ? `<a href="${esc(href)}">${img}${nombre}</a>` : `${img}${nombre}`;
     const celdas = t.columnas.map(c => {
       const v = f.valores[c.id];
       const texto = v === undefined || v === null ? '' : formatear({ estado: 'ok', valor: v }, c as any);
@@ -389,9 +394,10 @@ export function bloquesEnHtml(bloques: any[], ctx: ContextoHtml, n = 0): string 
  * ir dentro del `<article>`. `pagina` es lo que contesta `paginaPublica`
  * (`sitios.ts`), ya filtrado para un anónimo.
  */
-export async function cuerpoEnHtml(db: any, pagina: any, enlacePagina: (id: string) => string): Promise<string> {
+export async function cuerpoEnHtml(db: any, pagina: any, enlacePagina: (id: string) => string, enlaceRuta?: (slug: string) => string): Promise<string> {
   const bloques = pagina?.config?.bloques || pagina?.config?.blocks || [];
   if (!Array.isArray(bloques) || !bloques.length) return '';
   const ctx = await prepararHtml(db, bloques, enlacePagina, pagina);
+  ctx.enlaceRuta = enlaceRuta;
   return bloquesEnHtml(bloques, ctx);
 }

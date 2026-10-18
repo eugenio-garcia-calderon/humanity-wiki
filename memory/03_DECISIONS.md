@@ -688,3 +688,30 @@ sort (it lists rows in their stored order, capped at 500); relation, file and
 computed columns are left to React. The row page's own properties are not in
 the public reading view today, so they are not in the HTML either: W1's
 `Propiedad` block will add them, with its writer.
+
+## 2026-10-18 — Readable row URLs from a per-table template (Wikiproducts W2, SEO R2)
+
+**Context.** Product sheets are database rows, each with its page at `/p/BDF…`.
+SEO R2 asks for `/category/brand-model`. Agreed with W1 (product sheet) and W3
+(data loading) through the coordinator: one product table per subcategory, the
+URL's category is fixed text in the template.
+
+**Chosen.** `bd_tablas.config.ruta` holds a template (`powerbanks/{Marca}-{Modelo}`);
+the resulting path is stored in the row page's existing `knowledge_windows.slug`
+(unique per owner) with `/` inside, and old ones go to a history table
+`direcciones_anteriores` that answers 301 forever. Alternatives rejected: a
+`ruta` column on `bd_filas` (a second address field next to `slug`, two
+lookups), and computing the path on every request without storing it (renames
+could not redirect).
+
+**Computed on read, not on write.** A row is written by five paths (grid, page,
+public API, assistant, recurrences); hooking all of them is how one gets
+forgotten. `asegurarRutas` runs from the sitemap, on a `/p/:id` visit and from
+`POST /api/bd/tablas/:id/rutas`, and writes only what changed. **Cost:** a row
+renamed in the grid keeps its old URL until one of those runs; the old URL
+still works and the sitemap fixes it on the next crawl.
+
+**At least two segments**, the first never an app route (`TRAMOS_RESERVADOS`),
+so a row URL can never shadow an ordinary page (`/my-page`) or an app path.
+On a custom domain an unknown two-segment path still answers 200 with the site's
+root page, as before; on a subdomain and in casa it is a 404.
