@@ -19,6 +19,7 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
   if (!v) return enEditor ? <p className="text-sm text-slate-400">Hacen falta al menos dos filas con datos comparables.</p> : null;
   return (
     <Seccion titulo={v.titulo}>
+      {v.subcategoria ? <p className="mb-1.5 text-xs text-slate-500">Entre los productos del mismo tipo: {v.subcategoria}.</p> : null}
       <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
         {v.criterios.map(c => {
           const href = c.esEsta ? null : enlace(c.ganador.paginaId);

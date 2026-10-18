@@ -110,7 +110,9 @@ export default function VistaPagina({ pagina, propio, pie }: {
         })()}
         {/* La página de una base de datos no es una página de verdad: no tiene
             relaciones, ni comentarios, ni quien la enlace. */}
-        {!pagina.virtual && <RelacionesPublicas paginaId={pagina.id} />}
+        {/* A product sheet (W1) already shows its brand, claims, recalls and
+            offers in its own blocks: the generic list would say it twice. */}
+        {!pagina.virtual && !(pagina as any).ficha && <RelacionesPublicas paginaId={pagina.id} />}
         <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
       </article>
