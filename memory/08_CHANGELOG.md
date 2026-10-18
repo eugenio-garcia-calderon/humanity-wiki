@@ -9084,3 +9084,11 @@ en mis páginas como proyecto pendiente».
 ## 2026-10-18 — Recuadros de grupo: mismo alto, sin imagen ni número (prog8)
 - Los recuadros que comparten fila tienen **el mismo alto** (el contenedor pasa de `items-start` a `items-stretch`).
 - El título del grupo va **sin el número** de tarjetas y **sin la imagen** de lo enlazado. La imagen sigue disponible en Configuración → Grupos → «Imagen del grupo», ahora apagada por defecto (`grupo_imagen === true` para enseñarla).
+
+### 2026-10-18 — Ratings say how many votes are missing (Wikiproducts W4)
+
+- Below the threshold, a criterion no longer reads «Aún sin votos suficientes» with no count: it says «1 de 3 votos · faltan 2 para la nota», with a small progress bar. Same in table cells («Aún sin nota · 1 de 3 votos»), in the shop's customer service inside «Dónde comprarlo», and in the server HTML.
+- A visitor without a session gets an invitation box with an «Entrar para puntuar» button, which opens the site's sign-in panel (`sitio:entrar` event, heard by `CuentaMenu`).
+- `comunidad` cells now carry `umbral`; `atencionDistribuidores()` returns note, votes and threshold (the old `notaAtencionDistribuidores` stays as a wrapper).
+- Site members (signed in through a site's «Entrar») can send «Sugerir una corrección»: `POST /api/report` is a member route now, and the form no longer pre-checks `/api/auth/me`, which never sees a site member.
+- Rating block and the shop's customer-service line: body text 16 px, labels and counts 14 px.

@@ -60,10 +60,20 @@ export default function CuentaMenu({ raiz, color, className }: { raiz: string; c
   const [guardados, setGuardados] = useState<any[] | null>(null);
   const [pos, setPos] = useState<{ top: number; right?: number; left?: number } | null>(null);
   const boton = useRef<HTMLButtonElement>(null);
+  const conSesionRef = useRef(false);
   const panel = useRef<HTMLDivElement>(null);
 
   const cargar = () => fetch(`${base}/estado`, { credentials: 'include' }).then(r => r.json()).then(setE).catch(() => {});
   useEffect(() => { cargar(); }, [raiz]);
+
+  // A block that needs a session («Entrar para puntuar», `valoracion`) asks
+  // for the sign-in panel without knowing where this menu is.
+  useEffect(() => {
+    // Already signed in here: the menu opens instead, so a click never does nothing.
+    const pedir = (ev: Event) => { ev.preventDefault(); setAbierto(conSesionRef.current ? 'menu' : 'entrar'); };
+    window.addEventListener('sitio:entrar', pedir);
+    return () => window.removeEventListener('sitio:entrar', pedir);
+  }, []);
 
   // Al abrir: dónde cae el panel (justo debajo del icono, pegado a su lado derecho si cabe) y a quién se cierra.
   useEffect(() => {
@@ -99,6 +109,7 @@ export default function CuentaMenu({ raiz, color, className }: { raiz: string; c
   const nombre = yo?.nombre || yo?.email || equipo?.nombre || null;
   const foto = yo?.avatar || equipo?.avatar || null;
   const conSesion = !!(yo || e?.es_equipo);
+  conSesionRef.current = conSesion;
 
   const recargar = () => window.location.reload();
   const salir = async () => { await fetch(`${base}/salir`, { method: 'POST', credentials: 'include' }); recargar(); };
