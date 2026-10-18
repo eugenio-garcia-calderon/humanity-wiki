@@ -27,6 +27,7 @@ import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from 
 import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision } from '../utils/ofertas.js';
 import { registrarHtml, esc } from './htmlBloques.js';
 import { notaAtencionDistribuidores } from './bd/comunidad.js';
+import { paginaVisible } from './sitios.js';
 
 export type OfertaPublica = {
   fila_id: string;
@@ -59,13 +60,58 @@ const valorDe = (c: any) => (c && c.estado === 'ok' ? c.valor : null);
 /** Las tablas de ofertas de una tabla de productos: las que tienen una
  *  propiedad con el papel «Producto» que apunta a ella. */
 async function tablasDeOfertas(db: any, tablaProductos: string): Promise<string[]> {
+  // The products table owner's own offers first: anyone can point a relation
+  // at a table they can read, and their table must not take this sheet's place.
   const r = await db.execute(sql`
-    SELECT DISTINCT c.tabla_id FROM bd_columnas c JOIN bd_tablas t ON t.id = c.tabla_id
+    SELECT DISTINCT c.tabla_id,
+           (COALESCE(po.creador_user_id, t.creador_user_id) = COALESCE(pp.creador_user_id, tp.creador_user_id)) AS suya
+    FROM bd_columnas c JOIN bd_tablas t ON t.id = c.tabla_id
+    LEFT JOIN proyectos po ON po.id = t.proyecto_id
+    JOIN bd_tablas tp ON tp.id = ${tablaProductos}
+    LEFT JOIN proyectos pp ON pp.id = tp.proyecto_id
     WHERE c.tipo = 'relacion' AND c.archived_at IS NULL AND c.config->>'rol' = 'producto'
       AND c.config->>'tabla_destino' = ${tablaProductos}
       AND t.archived_at IS NULL AND t.deleted_at IS NULL
+    ORDER BY suya DESC NULLS LAST, c.tabla_id
   `);
   return (r.rows as any[]).map(x => x.tabla_id);
+}
+
+// ── WHO MAY READ THE OFFERS OF A SHEET (2026-10-18) ─────────────────────────
+// The offers table is never embedded in a page by itself: it is shown through
+// the «Ofertas» block of the product sheet. So its visibility cannot be the
+// generic table rule (embedded in a published page), or the block is empty for
+// every visitor. Rule:
+//   1. Whoever can read the offers table reads it (owner, admin, public).
+//   2. Otherwise, whoever can read the PRODUCT SHEET reads that sheet's offers
+//      — and only if the offers table belongs to the same owner as the
+//      products table. Someone else's table pointing at a public sheet does
+//      not get to advertise on it.
+// What leaves is always `OfertaPublica`: price, shipping, stock, link, lead
+// time and the commission, which is public by design (ethics code).
+async function duenoDe(db: any, tablaId: string): Promise<string | null> {
+  const r = await db.execute(sql`
+    SELECT t.creador_user_id, t.proyecto_id, p.creador_user_id AS proyecto_creador
+    FROM bd_tablas t LEFT JOIN proyectos p ON p.id = t.proyecto_id
+    WHERE t.id = ${tablaId} AND t.deleted_at IS NULL AND t.archived_at IS NULL
+  `);
+  const t = r.rows[0] as any;
+  return t ? (t.proyecto_id ? t.proyecto_creador : t.creador_user_id) || null : null;
+}
+
+async function permisoOfertas(
+  db: any, req: Pick<Request, 'user'>, ficha: { tabla_id: string; pagina_id: string | null }, tablaId: string,
+): Promise<{ tabla: any } | { error: string; codigo: number }> {
+  const directo = await bdInterno.puedeConTabla!(req as Request, tablaId, false);
+  const fichaVisible = !('error' in await bdInterno.puedeConTabla!(req as Request, ficha.tabla_id, false))
+    || (!!ficha.pagina_id && await paginaVisible(db, ficha.pagina_id));
+  // Reading the offers never reveals a sheet the reader cannot see.
+  if (!fichaVisible) return { error: 'No tienes acceso a esa ficha.', codigo: 403 };
+  if (!('error' in directo)) return directo;
+  const [dO, dP] = await Promise.all([duenoDe(db, tablaId), duenoDe(db, ficha.tabla_id)]);
+  if (!dO || dO !== dP) return directo;
+  const t = (await db.execute(sql`SELECT * FROM bd_tablas WHERE id = ${tablaId}`)).rows[0];
+  return { tabla: t };
 }
 
 /**
@@ -90,21 +136,16 @@ export async function ofertasDeProducto(
 
   const tablaId = o.tablaId || (await tablasDeOfertas(db, ficha.tabla_id))[0] || null;
   if (!tablaId) return { ofertas: [], tabla_id: null, fila_id: ficha.id };
-  const permiso = await bdInterno.puedeConTabla!(req, tablaId, false);
+  const permiso = await permisoOfertas(db, req, ficha, tablaId);
   if ('error' in permiso) return permiso;
-  // Leer la ficha también exige poder leer su tabla: las ofertas de un
-  // producto privado no se enseñan por estar en una tabla pública.
-  if (!o.tablaId || ficha.tabla_id !== tablaId) {
-    const p2 = await bdInterno.puedeConTabla!(req, ficha.tabla_id, false);
-    if ('error' in p2) return p2;
-  }
-
   const columnas = (await db.execute(sql`
     SELECT id, nombre, tipo, opciones, config, orden FROM bd_columnas
     WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
   `)).rows as any[];
   const cProducto = columnaConRol(columnas, 'producto', ['relacion']);
-  if (!cProducto) return { ofertas: [], tabla_id: tablaId, fila_id: ficha.id };
+  // The «Producto» column must point at THIS sheet's table: a table passed by
+  // the client that points elsewhere is not this product's offers.
+  if (!cProducto || cProducto.config?.tabla_destino !== ficha.tabla_id) return { ofertas: [], tabla_id: tablaId, fila_id: ficha.id };
   const colTitulo = columnas.find(c => c.tipo === 'texto')?.id ?? null;
 
   const filas = (await db.execute(sql`

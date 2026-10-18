@@ -8975,3 +8975,6 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Plantilla «Humanidad Wiki» (Humanidad Wiki, fase 2) (prog8)
 - Nueva página `/plantillas/humanidad-wiki` con el botón «Crear en mi perfil»: crea, con la sesión de quien la pulsa, una página principal «Humanidad Wiki» con el menú de temas y una subpágina por cada tema con su bloque «Contenido de un tema». Nace privada; es una página normal de Wiki Creator que se puede cambiar y replicar.
 - El bloque «Menú de temas», dentro de una web publicada, abre las páginas propias por su dirección pública, que hereda la visibilidad de la página madre.
+
+### 2026-10-18 — "Dónde comprarlo" visible to visitors (Wikiproducts W5 follow-up)
+- The Offers block was empty for anyone not signed in: the offers table is never embedded in a page, so it never inherited a published page's visibility. Now whoever can see the product sheet sees that sheet's offers, provided the offers table belongs to the same owner as the products table. Someone else's table pointing at a public sheet does not get to advertise on it, and the owner's own table is picked first. Test: `node scripts/wikiproducts/probar-ofertas-anonimo.mjs` against the local copy.

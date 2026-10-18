@@ -855,3 +855,7 @@ server, so no code path changes. Re-offering the chat is deleting one line.
 (not reachable from the build environment). The first real booking after the
 merge is the first real test; a low-priced test consultation, refunded from
 the management panel, is the cheapest way to check it.
+
+## 2026-10-18 — Offers inherit the product sheet's visibility, same owner only
+
+**Context.** `puedeConTabla` makes a table public only when it is embedded in a published page; an offers table is shown only through the sheet's «Ofertas» block, so visitors saw nothing. **Options.** (a) Ask authors to also embed the offers table somewhere public (leaks every row, every commission, as a table). (b) Treat any table with a «Producto» relation to a visible sheet as visible (lets anyone advertise on someone else's sheet). (c) Visible sheet + same owner for both tables. **Chosen: (c)**, in `permisoOfertas` (`src/server/ofertas.ts`). Only `OfertaPublica` fields leave; the commission is public by design.
