@@ -12,7 +12,9 @@
 #   3. Runs `crear-esquema.mjs --plantillas` and `cargar.mjs` against the app on
 #      127.0.0.1, as that owner. Both are idempotent: a second run only adds
 #      what is missing and changes what differs.
-#   4. Deletes the key on exit, whether the load worked or not (`trap`).
+#   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
+#      a visitor sees none of it (a table inherits visibility from its page).
+#   5. Deletes the key on exit, whether the load worked or not (`trap`).
 #
 # The key is never printed, never written to disk and never leaves the server:
 # it lives in this shell's environment and is passed to `docker compose exec`
@@ -80,3 +82,6 @@ nodo crear-esquema.mjs --plantillas
 
 echo "== Datos: marcas, distribuidores, productos, afirmaciones, retiradas y ofertas =="
 nodo cargar.mjs
+
+echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
+nodo enlazar-sitio.mjs
