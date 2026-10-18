@@ -198,13 +198,14 @@ async function tablaHtml(db: any, tablaId: string, b: any): Promise<TablaHtml | 
   const columnas = (elegidas as any[]).filter(c => !NO.has(c.tipo));
 
   const total = Number(((await db.execute(sql`
-    SELECT count(*)::int AS n FROM bd_filas WHERE tabla_id = ${tablaId} AND archived_at IS NULL AND deleted_at IS NULL
+    SELECT count(*)::int AS n FROM bd_filas WHERE tabla_id = ${tablaId} AND archived_at IS NULL AND deleted_at IS NULL AND oculta = false
   `)).rows[0] as any)?.n || 0);
   const filas = (await db.execute(sql`
     SELECT f.id, f.valores, f.pagina_id, pw.title, pw.slug, pw.config->>'portada' AS portada
     FROM bd_filas f
     LEFT JOIN knowledge_windows pw ON pw.id = f.pagina_id AND pw.deleted_at IS NULL AND pw.archived_at IS NULL
-    WHERE f.tabla_id = ${tablaId} AND f.archived_at IS NULL AND f.deleted_at IS NULL
+    -- Sin las entradas ocultas (0154): este HTML lo lee cualquiera.
+    WHERE f.tabla_id = ${tablaId} AND f.archived_at IS NULL AND f.deleted_at IS NULL AND f.oculta = false
     ORDER BY f.orden, f.created_at LIMIT ${MAX_FILAS}
   `)).rows as any[];
   return {

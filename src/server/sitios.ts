@@ -75,6 +75,10 @@ const subirDesdePagina = (id: string) => sql`
       -- Con el registro desactivado también: lo restringido queda para el
       -- equipo, no se abre de golpe al mundo por apagar un interruptor.
       AND NOT EXISTS (SELECT 1 FROM sitio_restricciones r WHERE r.pagina_id = s.id AND r.bloque_id = '')
+      -- Ni desde la página de una entrada oculta (migración 0154): «que no se
+      -- vea cuando esté publicada». Quien edita la tabla la sigue viendo por
+      -- su rol (laVeQuienPregunta), que no pasa por aquí.
+      AND NOT EXISTS (SELECT 1 FROM bd_filas fo WHERE fo.pagina_id = s.id AND fo.oculta AND fo.deleted_at IS NULL)
   )
   SELECT EXISTS (
     SELECT 1 FROM sube s JOIN knowledge_windows w ON w.id = s.id
@@ -248,7 +252,7 @@ export async function baseDatosPublica(db: any, tablaId: string, req?: Request):
     const filas = (await db.execute(sql`
       SELECT pw.title, pw.config->>'portada' AS portada FROM bd_filas f
       JOIN knowledge_windows pw ON pw.id = f.pagina_id AND pw.deleted_at IS NULL
-      WHERE f.tabla_id = ${tablaId} AND f.deleted_at IS NULL AND f.archived_at IS NULL
+      WHERE f.tabla_id = ${tablaId} AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.oculta = false
       ORDER BY f.orden, f.created_at LIMIT 12
     `)).rows as any[];
     const nombres = filas.map(f => String(f.title || '').trim()).filter(Boolean);
@@ -566,7 +570,7 @@ export function registrarSitios(app: Express, db: any) {
             CROSS JOIN LATERAL (
               SELECT f.pagina_id AS hijo FROM bd_filas f
               WHERE blq->>'tipo' = 'basedatos' AND f.tabla_id = blq->>'tabla_id'
-                AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL
+                AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL AND f.oculta = false
               UNION ALL
               SELECT blq->>'entityId' WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
             ) h
