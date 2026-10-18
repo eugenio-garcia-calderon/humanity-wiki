@@ -8959,3 +8959,7 @@ en mis páginas como proyecto pendiente».
 - El `AggregateOffer` del JSON-LD `Product` lleva ahora un `Offer` por tienda: precio, moneda, envío (`shippingDetails`), disponibilidad sólo si se sabe el stock, enlace y vendedor. Salen de las mismas ofertas que pinta «Dónde comprarlo» (`ofertasDeProducto`, W5), así que el precio mínimo, el máximo y el número de tiendas cuadran con lo que se ve. Una oferta sin precio publicado no se declara; la comisión nunca.
 - Sólo en el HTML del servidor, leído como un anónimo. La lectura se deja en la página (sin salir en `window.__SITIO__`) y el bloque «Dónde comprarlo» la reutiliza: una sola lectura de la tabla de ofertas por visita.
 - Las migas de pan apuntan a la portada con `{{inicio}}` cuando la ficha cuelga de ella (W2, #603): en un dominio propio la portada es `/`, no su slug.
+
+### 2026-10-18 — Bloque «Contenido de un tema» (Humanidad Wiki, fase 1) (prog8)
+- Nuevo bloque para cualquier página: todo lo publicado sobre un tema (páginas, bases de datos, publicaciones, carpetas, esquemas, personas y contenido de fuera), por secciones, con «Ver más» y filtro por subtema. Lee lo mismo que la página de contenido de cada tema.
+- En el bloque se elige el tema, el título, cuántas tarjetas por sección y qué secciones se ven.
