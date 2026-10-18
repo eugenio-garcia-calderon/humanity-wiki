@@ -53,6 +53,12 @@
       "ruta": "src/components/sitio/CabeceraLectura.tsx",
       "motivo": "W2: migas y contraste",
       "desde": "2026-10-18T16:50:29.462Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "W6 expertos en fichas",
+      "desde": "2026-10-18T17:29:21.201Z"
     }
   ]
 }
