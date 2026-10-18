@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "W5 Wikiproducts: cesta multitienda, pedido gestionado y comisión",
-      "desde": "2026-10-18T11:25:32.752Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/bd/tienda.ts",
       "motivo": "W5 Wikiproducts: cesta multitienda, pedido gestionado y comisión",
       "desde": "2026-10-18T11:25:35.093Z"
@@ -77,6 +71,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "W6 chat y expertos: enganche de pocas líneas",
       "desde": "2026-10-18T11:35:16.989Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/stripe.ts",
+      "motivo": "W6 chat y expertos: enganche de pocas líneas",
+      "desde": "2026-10-18T11:35:19.511Z"
     }
   ]
 }
