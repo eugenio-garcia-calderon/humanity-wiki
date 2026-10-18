@@ -103,9 +103,11 @@ async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   }
 }
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
+export default function Rejilla({ prioridad = 0, tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
+  /** Posición de la base en la página: sus imágenes cargan antes si está más arriba. */
+  prioridad?: number;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
   alto?: number;
   /** Galería o tabla (2026-09-30). Sin valor, tabla: es lo que se veía hasta
@@ -1034,7 +1036,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         // página, no con una barra de desplazamiento dentro de otra.
         <div>
           {porGrupos(colAgr ? filas : visiblesGaleria, fs => (
-            <Galeria tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
+            <Galeria prioridad={prioridad} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
               claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visibles}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}

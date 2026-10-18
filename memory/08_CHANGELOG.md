@@ -8833,3 +8833,6 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-14 — Añadir una entrada abre un pop-up con botón de ampliar (prog8)
 - «Añadir» abre un pop-up para escribir el título de la entrada. «Crear» (o Enter) la añade; «Ampliar» la añade y la abre en grande. Antes creaba un «Sin título» al final sin preguntar.
+
+### 2026-10-18 — Las imágenes de las bases de datos cargan por orden de página (prog8)
+- Cada base de datos recibe su posición en la página. Las imágenes de sus tarjetas piden turno en una cola: antes las de las bases de arriba, y dentro de cada base, las de las primeras tarjetas. Solo descargan unas pocas a la vez, para que la página no se vea a medias.
