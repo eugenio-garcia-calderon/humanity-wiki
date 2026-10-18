@@ -144,7 +144,7 @@ async function condicionesDeTiendas(db: any, ids: string[], dueno: string | null
   for (const [tablaId, deTabla] of porTabla) {
     if ((await duenoDe(db, tablaId)) !== dueno) continue;
     const columnas = (await db.execute(sql`
-      SELECT id, tipo, config FROM bd_columnas WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
+      SELECT id, tipo, opciones, config FROM bd_columnas WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
     `)).rows as any[];
     const col = Object.fromEntries(Object.entries(ROLES_TIENDA).map(([r, t]) => [r, columnaConRol(columnas, r, [...t])])) as Record<keyof typeof ROLES_TIENDA, any>;
     if (!Object.values(col).some(Boolean)) continue;
@@ -153,7 +153,10 @@ async function condicionesDeTiendas(db: any, ids: string[], dueno: string | null
       const v = (r: keyof typeof ROLES_TIENDA) => (col[r] ? valorDe(celdas[col[r].id]) : null);
       const n = (r: keyof typeof ROLES_TIENDA) => { const x = v(r); return typeof x === 'number' && Number.isFinite(x) && x >= 0 ? x : null; };
       const cent = (r: keyof typeof ROLES_TIENDA) => { const x = n(r); return x === null ? null : Math.round(x * 100); };
-      const e = v('envia_espana'), g = v('garantia'), b = v('devolucion_gratis'), u = v('condiciones'), d = v('condiciones_fecha');
+      // A «seleccion» cell stores the option id; the box needs its label.
+      const gId = v('garantia');
+      const g = col.garantia?.tipo === 'seleccion' ? (col.garantia.opciones || []).find((o: any) => o?.id === gId)?.label ?? null : gId;
+      const e = v('envia_espana'), b = v('devolucion_gratis'), u = v('condiciones'), d = v('condiciones_fecha');
       out.set(f.id, {
         envia_a_espana: typeof e === 'boolean' ? e : null,
         entrega_min_dias: n('entrega_min'), entrega_max_dias: n('entrega_max'),
