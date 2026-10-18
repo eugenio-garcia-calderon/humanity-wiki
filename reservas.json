@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/vaciarCuentas.ts",
-      "motivo": "W6 chat y expertos: enganche de pocas líneas",
-      "desde": "2026-10-18T11:35:24.499Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "W5 Wikiproducts: distribuidor y comisión por línea en la cesta",
       "desde": "2026-10-18T11:38:06.243Z"
