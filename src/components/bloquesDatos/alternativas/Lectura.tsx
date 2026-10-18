@@ -19,12 +19,12 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
   if (!v) return enEditor ? <p className="text-sm text-slate-400">Hacen falta al menos dos filas con datos comparables.</p> : null;
   return (
     <Seccion titulo={v.titulo}>
-      {v.ambito ? <p className="mb-1.5 text-xs text-slate-500">{v.ambito}</p> : null}
+      {v.ambito ? <p className="mb-1.5 text-sm text-slate-500">{v.ambito}</p> : null}
       <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
         {v.criterios.map(c => {
           const href = c.esEsta ? null : enlace(c.ganador.paginaId);
           return (
-            <li key={c.columnaId} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 px-3 py-2 text-sm">
+            <li key={c.columnaId} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 px-3 py-2 text-base">
               <span className="font-medium text-slate-600">{c.criterio}</span>
               <span className="text-right">
                 {c.esEsta ? (
@@ -35,13 +35,13 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
                   <span className="font-bold text-slate-800">{c.ganador.nombre}</span>
                 )}
                 <span className="ml-1.5 text-slate-500">{c.ganador.valor}</span>
-                {!c.esEsta && c.puesto ? <span className="block text-[11px] text-slate-400">Este producto: {c.puesto.n}.º de {c.puesto.de}</span> : null}
+                {!c.esEsta && c.puesto ? <span className="block text-sm text-slate-500">Este producto: {c.puesto.n}.º de {c.puesto.de}</span> : null}
               </span>
             </li>
           );
         })}
       </ul>
-      <p className="mt-1.5 text-[11px] text-slate-400">El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</p>
+      <p className="mt-1.5 text-sm text-slate-500">El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</p>
     </Seccion>
   );
 }

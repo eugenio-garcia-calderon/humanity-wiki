@@ -25,19 +25,19 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
           {v.items.map((r, i) => (
             <li key={i} className="rounded-xl border border-rose-100 bg-rose-50/40 p-3">
               <p className="flex items-start gap-1.5 font-semibold text-rose-900"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" /> {r.titulo}</p>
-              <p className="mt-0.5 text-xs text-slate-600">{[r.fecha, r.organismo, r.pais].filter(Boolean).join(' · ')}{r.referencia ? ` · Ref. ${r.referencia}` : ''}</p>
-              {r.motivo ? <p className="mt-1.5 text-sm text-slate-700"><TextoConEnlaces texto={r.motivo} /></p> : null}
-              {r.enlace ? <a href={r.enlace} target="_blank" rel="noopener nofollow" className="mt-1 inline-block text-xs text-sky-700 hover:underline">Aviso oficial ({sitioDe(r.enlace)})</a> : null}
+              <p className="mt-0.5 text-sm text-slate-600">{[r.fecha, r.organismo, r.pais].filter(Boolean).join(' · ')}{r.referencia ? ` · Ref. ${r.referencia}` : ''}</p>
+              {r.motivo ? <p className="mt-1.5 text-base text-slate-700"><TextoConEnlaces texto={r.motivo} /></p> : null}
+              {r.enlace ? <a href={r.enlace} target="_blank" rel="noopener nofollow" className="mt-1 inline-block text-sm text-sky-700 hover:underline">Aviso oficial ({sitioDe(r.enlace)})</a> : null}
             </li>
           ))}
         </ul>
       ) : (
-        <p className={v.estado === 'ninguna' ? 'flex items-start gap-1.5 text-sm text-emerald-800' : 'flex items-start gap-1.5 text-sm text-slate-500'}>
+        <p className={v.estado === 'ninguna' ? 'flex items-start gap-1.5 text-base text-emerald-800' : 'flex items-start gap-1.5 text-base text-slate-500'}>
           {v.estado === 'ninguna' ? <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" /> : <ShieldQuestion className="mt-0.5 h-4 w-4 shrink-0" />}
           <span>{fraseSinRetiradas(v)}</span>
         </p>
       )}
-      {v.busqueda && v.estado !== 'sin_comprobar' ? <p className="mt-1 text-[11px] text-slate-400">Dónde se buscó: <TextoConEnlaces texto={v.busqueda} /></p> : null}
+      {v.busqueda && v.estado !== 'sin_comprobar' ? <p className="mt-1 text-sm text-slate-500">Dónde se buscó: <TextoConEnlaces texto={v.busqueda} /></p> : null}
     </Seccion>
   );
 }

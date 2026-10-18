@@ -9,6 +9,8 @@ import { rolEnPagina, capacidades, puedeEditarPagina, quienDe } from './permisos
 import { registrarHistorial } from './historial';
 import { markdownABloques, bloquesAMarkdown, nuevoIdBloque, esBloqueDatos } from '../utils/bloques';
 import { guardarProcedencia, ponerPlantilla } from './bd/plantillaFicha';
+import { expertosPorApi } from './expertos';
+import { registrarApiSitio } from './apiSitio';
 import { guardarArchivo } from './uploads';
 
 // ============================================================================
@@ -116,7 +118,7 @@ export function registrarApiPublica(app: Express, db: any) {
     if (!req.path.startsWith('/api/v1')) return next();
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Cache-Control', 'no-store');
     if (req.method === 'OPTIONS') return res.status(204).end();
     try {
@@ -357,6 +359,16 @@ export function registrarApiPublica(app: Express, db: any) {
       const w = await guardarBloques(req, res, antes, bloques); if (!w) return;
       res.status(201).json({ block: e.bloque, page: paginaPublica(w, { version: w.version }) });
     } catch (e: any) { console.error('v1 añadir bloque:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  /** `{ experts: [{ name, specialty?, bio?, price_cents, duration_min?, commission_bps?, timezone?,
+   *     availability?: [{dia, desde, hasta}], notice_hours?, meeting_url?, active? }], only_new? }` — the paid
+   *  experts of the site this page belongs to, matched by name (W6, `expertos.ts`). */
+  app.put('/api/v1/pages/:id/experts', async (req: Request, res: Response) => {
+    try {
+      const r = await expertosPorApi(db, req, String(req.params.id), req.body);
+      res.status(r.codigo).json(r.cuerpo);
+    } catch (e: any) { console.error('v1 expertos:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
   app.delete('/api/v1/pages/:id/blocks/:blockId', async (req: Request, res: Response) => {
@@ -663,6 +675,9 @@ export function registrarApiPublica(app: Express, db: any) {
       res.json({ id: String(req.params.rowId), database_id: t.id, updated: Object.keys(m.celdas).length, provenance_updated: Object.keys(pr.mapa).length });
     } catch (e: any) { console.error('v1 editar fila:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
+
+  // El menú de un sitio (W2, 2026-10-18): en su propio fichero.
+  registrarApiSitio(app, db);
 
   // Lo que no existe bajo /api/v1 es un 404 de la API, no de la web.
   app.all('/api/v1/*', (_req: Request, res: Response) => res.status(404).json({ error: 'Ese endpoint no existe. Mira /desarrolladores.' }));

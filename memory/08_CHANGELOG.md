@@ -9092,6 +9092,36 @@ en mis páginas como proyecto pendiente».
 - `comunidad` cells now carry `umbral`; `atencionDistribuidores()` returns note, votes and threshold (the old `notaAtencionDistribuidores` stays as a wrapper).
 - Site members (signed in through a site's «Entrar») can send «Sugerir una corrección»: `POST /api/report` is a member route now, and the form no longer pre-checks `/api/auth/me`, which never sees a site member.
 - Rating block and the shop's customer-service line: body text 16 px, labels and counts 14 px.
+### 2026-10-18 — Buscador tolerante, página de error, miga de pan, secciones y menú por la API (Wikiproducts W2, ronda 1 del evaluador)
+- El buscador de un sitio busca cada palabra por separado (en cualquier orden y parte de la página), sin plural, con sinónimos («placa» encuentra los paneles, «batería externa» los powerbanks) y corrigiendo erratas contra las palabras de los títulos del sitio («powerbak» → «powerbank»; dice «Mostrando resultados de…»). Sin resultados, ofrece las secciones del sitio. Cada resultado enlaza a la dirección legible de la ficha, no a `/p/…`.
+- Una dirección que no existe en un dominio propio dice «Esta página no existe», con el buscador, las secciones y «Ir al inicio», dentro del menú y el pie del sitio. Antes pintaba la portada (el servidor ya contestaba 404 y `noindex`).
+- Miga de pan entera en las páginas de un sitio: Inicio › Energía portátil › Powerbanks › ficha, en vez de sólo «← Powerbanks».
+- Bloque nuevo «Secciones del sitio»: las páginas del sitio con catálogo de fichas, cada una con una imagen y cuántos productos tiene; también en el HTML del servidor. `enlazar-sitio.mjs` lo pone en la portada de Wikiproducts.
+- En el teléfono, la caja de buscar del menú va a la vista, en su fila bajo la barra, y no dentro de las tres rayas.
+- En el contenido de un sitio publicado, los grises claros pasan a un gris que cumple el contraste mínimo y el texto corrido es de 16 px.
+- API: `GET /api/v1/pages/:id/site`, `POST /api/v1/pages/:id/site/menu/links` y `DELETE …/links/:linkId` leen y cambian el menú de un sitio, sólo con destinos dentro del sitio. `enlazar-sitio.mjs` añade así «Expertos» al menú de Wikiproducts en cuanto exista la página «Consultar a un experto».
+
+
+### 2026-10-18 — Wikiproducts: «Consultar a un experto» en cada ficha y en su propia página (W6)
+- El evaluador no encontró la palabra «experto» en todo el sitio: el bloque de reservar existía pero nada lo ofrecía.
+- Bloque «Reservar experto» con **versión corta** (`datos.compacto`) para la ficha de un producto: «¿Dudas antes de comprar? Consulta a un experto», una línea por experto con duración y precio y «Elegir hora», que abre la reserva allí mismo. Sin expertos no sale (sólo el equipo ve un aviso). El HTML del servidor sigue la misma regla y no lleva la bio, que la versión corta tampoco enseña.
+- `PUT /api/v1/pages/:id/experts` (en `apiPublica.ts`, lógica en `expertos.ts`): da de alta o pone al día los expertos del sitio por nombre, con la misma validación que el panel y sólo para el equipo del sitio. Con `only_new` no toca a los que ya existen.
+- `scripts/wikiproducts/expertos.mjs` + `expertos.json`, llamado desde `cargar-en-servidor.sh` tras `enlazar-sitio.mjs` (y sin parar la carga si falla): crea la página «Consultar a un experto» bajo la raíz del sitio, da de alta los expertos del fichero una sola vez (después manda el panel) y pone la versión corta del bloque en la plantilla de ficha de cada tabla de productos, tras «Ofertas». Probado dos veces seguidas en la copia local: la segunda no cambia nada.
+- Primer experto (`expertos.json`): Eugenio, consultas de 30 min a 25 €, de lunes a viernes de 18:00 a 20:00 (Madrid), con 24 h de antelación y sin comisión. Era la opción recomendada; se aplicó sin su respuesta porque él no lee los hilos. Precio y horario se cambian en el panel «Gestionar expertos» de la página.
+- Con la clave de PRUEBAS de Stripe (`sk_test`, como está producción hoy) un visitante no llega a un pago que se rechazaría: en lugar de «Elegir hora» / «Ver horarios» ve «Muy pronto podrás reservar y pagar aquí», y `POST /api/expertos/:id/reservar` contesta 503 con lo mismo. El equipo del sitio sí puede reservar y probar con la tarjeta 4242 (y ve un aviso de que está en pruebas). Igual que la cesta (W5, #630).
+
+## 2026-10-18 — Propiedades de la ficha, centradas (prog8)
+- En la rejilla de propiedades de la página de un elemento, el **nombre** de cada propiedad y su **valor** van centrados, uno encima del otro; también los números y el dinero, que en la tabla van a la derecha.
+## 2026-10-18 — Wikiproducts W1: readable text size on sheets and cards
+
+- Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
+- Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
+- Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
+
+## 2026-10-18 — Porcentaje como barra de avance (prog8)
+- Una propiedad **porcentaje** se ve como **barra de avance**: naranja-amarillo (`amber-400`) por debajo del 50 %, azul (`sky-500`) del 50 al 99 % y verde (`emerald-500`) al 100 %. En la galería, fina con la cifra al lado; en la página del elemento, **gruesa y a todo el ancho**, con la cifra grande, como un crowdfunding.
+- Para editarla, un **deslizador de 0 a 100 de 10 en 10** (ratón, dedo o flechas); guarda al soltar.
+- Se puede apagar por columna en su editor («Mostrar como barra de avance», `config.barra === false`) para porcentajes que no son avance (una comisión). Ver `BarraAvance.tsx`.
 
 ### 2026-10-18 — E-mails for a paid managed order (Wikiproducts W5)
 - A paid Wikiproducts order used to reach its manager only through the in-app bell, and an anonymous buyer had only the code on screen. Now `registrarPedidoGestionado` sends, once per order (only when its shop queue rows are new, so a repeated Stripe webhook sends nothing): an e-mail to the owner of the offers table, with what to buy from which shop, the delivery address, the buyer's contact and the link to Comercio → «Pedidos a tiendas»; and one to the buyer, with the code and the tracking link `https://<site>/pedido?codigo=…`: the seller's site domain when they have exactly one active (wikiproducts.humanity.wiki), otherwise the main domain.

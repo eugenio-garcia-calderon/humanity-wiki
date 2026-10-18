@@ -296,11 +296,56 @@ export async function baseDatosPublica(db: any, tablaId: string, req?: Request):
       created_at: w.created_at, updated_at: t.updated_at,
       autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
       padre: { id: w.id, titulo: w.title, slug: w.publico ? w.slug : null, handle: w.handle },
+      migas: await migasDe(db, w, sitio?.raizId),
       sitio,
       miembros: acceso ? { raiz: acceso.sitio.raiz, ocultos: 0 } : null,
     };
   }
   return null;
+}
+
+/** La página madre de una página: la que enseña la base de datos de la que
+ *  es fila o, si no lo es, la que la tiene como subpágina. La publicada antes. */
+async function madreDe(db: any, id: string): Promise<any | null> {
+  const pr = await db.execute(sql`
+    SELECT p.id, p.title, p.slug, p.publico, u.handle
+    FROM bd_filas f
+    JOIN knowledge_windows p ON p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+      AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+    JOIN users u ON u.id = p.creator_user_id
+    WHERE f.pagina_id = ${id} AND f.deleted_at IS NULL
+    ORDER BY p.publico DESC, p.created_at LIMIT 1
+  `);
+  if (pr.rows[0]) return pr.rows[0];
+  const sr = await db.execute(sql`
+    SELECT p.id, p.title, p.slug, p.publico, u.handle FROM knowledge_windows p
+    JOIN users u ON u.id = p.creator_user_id
+    WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+      AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
+    ORDER BY p.publico DESC, p.created_at LIMIT 1
+  `);
+  return sr.rows[0] || null;
+}
+
+/**
+ * LA MIGA DE PAN ENTERA (2026-10-18, ronda 1 del evaluador). Antes sólo se
+ * sabía la madre («← Powerbanks»). Ahora el camino hasta la portada del
+ * sitio, de arriba abajo: Inicio › Energía portátil › Powerbanks. Se sube de
+ * madre en madre y se para en la raíz del sitio; sin sitio, sólo la madre.
+ */
+async function migasDe(db: any, madre: any | null, raizId: string | null | undefined) {
+  const out: { id: string; titulo: string; slug: string | null; handle: string }[] = [];
+  let m = madre;
+  const vistos = new Set<string>();
+  while (m && !vistos.has(m.id) && out.length < PROFUNDIDAD) {
+    vistos.add(m.id);
+    out.unshift({ id: m.id, titulo: m.title, slug: m.publico ? m.slug : null, handle: m.handle });
+    if (!raizId || m.id === raizId) break;
+    m = await madreDe(db, m.id);
+  }
+  // Sin llegar a la raíz no es un camino del sitio: sólo la madre, como antes.
+  if (raizId && out[0]?.id !== raizId) return out.slice(-1);
+  return out;
 }
 
 /** La descripción para buscadores y redes: la que escribió el autor, o el
@@ -350,26 +395,7 @@ async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
   const { config, ocultos } = await filtrarBloques(db, w.id, w.config, acceso);
   w.config = config;
   const sitio = await sitioDePagina(db, w.id);
-  const pr = await db.execute(sql`
-    SELECT p.id, p.title, p.slug, p.publico, u.handle
-    FROM bd_filas f
-    JOIN knowledge_windows p ON p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-      AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
-    JOIN users u ON u.id = p.creator_user_id
-    WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL
-    ORDER BY p.publico DESC, p.created_at LIMIT 1
-  `);
-  let p = pr.rows[0] as any;
-  if (!p) {
-    const sr = await db.execute(sql`
-      SELECT p.id, p.title, p.slug, p.publico, u.handle FROM knowledge_windows p
-      JOIN users u ON u.id = p.creator_user_id
-      WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
-        AND ${bloquesDe('p')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
-      ORDER BY p.publico DESC, p.created_at LIMIT 1
-    `);
-    p = sr.rows[0] as any;
-  }
+  const p = await madreDe(db, w.id);
   const out: any = {
     id: w.id, titulo: w.title, config: w.config,
     // Una subpágina que no se publicó por su cuenta se indexa si su madre
@@ -378,6 +404,7 @@ async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
     created_at: w.created_at, updated_at: w.updated_at,
     autor: { handle: w.handle, nombre: w.display_name || w.name, avatar: w.avatar_url },
     padre: p ? { id: p.id, titulo: p.title, slug: p.publico ? p.slug : null, handle: p.handle } : null,
+    migas: await migasDe(db, p, sitio?.raizId),
     sitio,
     // El sitio con miembros al que pertenece, para la barra de «Entrar» y
     // para que el navegador vuelva a pedirla con su sesión si viene del HTML.
