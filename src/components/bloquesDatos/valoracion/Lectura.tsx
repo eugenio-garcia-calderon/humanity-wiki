@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Star, BadgeCheck, Info, Loader2 } from 'lucide-react';
+import { Star, BadgeCheck, Info, Loader2, ExternalLink } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { Button } from '../../ui/core';
 import type { PropsLectura } from '../tipos';
 import { valoracionPrecargada } from '../precarga';
+import { textoOpinion, type OpinionTercero } from '../../../utils/opinionesTerceros';
 
 // ============================================================================
 // BLOQUE «VALORACIÓN DE LA COMUNIDAD» (3.3, Wikiproducts W4, 2026-10-18)
@@ -25,6 +26,9 @@ export type Respuesta = {
   fila_id: string; criterios: Criterio[]; mios: Record<string, number>;
   sesion: boolean; comprador_verificado: boolean;
   agregado: { ratingValue: number; ratingCount: number } | null;
+  /** Ratings published on other sites, with link and date. Never part of the
+   *  community score (`server/bd/opinionesTerceros.ts`). */
+  terceros?: OpinionTercero[];
   metodo: { peso_previo: number; peso_verificado: number; umbral: number };
 };
 
@@ -217,11 +221,39 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
   );
 }
 
+/** What other sites say, in its own box under ours: another source, another
+ *  colour, and the link to check it. Not stars: stars here mean our votes. */
+export function OpinionesFuera({ lista }: { lista: OpinionTercero[] }) {
+  return (
+    <section className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5" aria-label="Opiniones en otras webs">
+      <h3 className="text-base font-black text-slate-900">Opiniones en otras webs</h3>
+      <p className="text-sm text-slate-600">Lo que publican otros sitios, copiado con su fecha. No cuenta en la puntuación de la comunidad.</p>
+      <ul className="mt-2 space-y-1.5">
+        {lista.map(o => (
+          <li key={o.url} className="text-base text-slate-700">
+            <a href={o.url} target="_blank" rel="nofollow noopener noreferrer"
+              className="inline-flex items-center gap-1 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">
+              {textoOpinion(o)}<ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function Lectura({ datos, paginaId }: PropsLectura) {
   const clave = (typeof datos.fila_id === 'string' && datos.fila_id) || paginaId;
   const { datos: r, fallo, cargar } = usarValoraciones(clave);
   // On a page that is not a row, or a table without criteria, the reader sees
   // nothing: there is nothing to rate here. The editor says why.
-  if (fallo || !r || !r.criterios.length) return null;
-  return <Valoraciones datos={r} recargar={cargar} />;
+  if (fallo || !r) return null;
+  const fuera = r.terceros || [];
+  if (!r.criterios.length && !fuera.length) return null;
+  return (
+    <>
+      {r.criterios.length > 0 && <Valoraciones datos={r} recargar={cargar} />}
+      {fuera.length > 0 && <OpinionesFuera lista={fuera} />}
+    </>
+  );
 }

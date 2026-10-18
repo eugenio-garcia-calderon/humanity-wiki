@@ -9266,3 +9266,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Cada propiedad de la ficha tiene **ancho** en columnas de la rejilla: se estira o encoge con el **tirador del borde derecho** (aparece al pasar el ratón) o desde su menú («Ancho: 1, 2, 3… Todo»). Por defecto, 1: las de al lado miden lo mismo y, en la misma fila, igualan su alto. La barra de avance ya no ocupa la fila entera por defecto. `config.ancho_ficha`.
 - **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
 - El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).
+
+## 2026-10-18 — Opiniones en otras webs, aparte de la comunidad (Wikiproducts W4)
+- Las fichas y las tiendas pueden enseñar **lo que publican otros sitios**: «Según Trustpilot: 4 de 5, de 16.567 opiniones (consultado el 18/10/2026)», con enlace. En la ficha, una caja propia **«Opiniones en otras webs»** debajo de la puntuación de la comunidad; en «Dónde comprarlo», una línea «En otras webs: …» bajo la atención al cliente de cada tienda. Las dos salen también en el HTML del servidor.
+- **No cuentan nunca** en la nota de la comunidad, no ordenan nada y no entran en el `AggregateRating` del JSON-LD. La caja de la comunidad sigue con su estado vacío y su «Entrar para puntuar».
+- El dato: columna `opiniones_terceros` (texto largo con JSON, oculta en la ficha) en las cinco tablas de producto y en Distribuidores, cargada por `cargar.mjs` desde `scripts/wikiproducts/datos/opiniones-terceros.json`. Sólo se enseña una entrada con enlace https, fecha y cifras válidas (`src/utils/opinionesTerceros.ts`). Pruebas en `scripts/probar-valoraciones.ts`.
+- **Amazon no**: su `robots.txt` bloquea la lectura y sus condiciones sólo permiten enseñar sus estrellas por su API. Las cifras de productos salen de tiendas oficiales y tiendas que publican sus opiniones; las de tiendas, de Trustpilot.

@@ -929,3 +929,14 @@ Members can only be activated with the owner's session (`PUT /api/sitio-miembros
 ## 2026-10-18 — A row whose last route segment has an empty column gets its title there (W2)
 
 Before: a missing column anywhere in the route template left the sheet at `/p/:id` "until its data is complete". In Wikiproducts some products genuinely have no model code (Riapow, two lights), so they would never get a readable address, and the search linked them to `/p/…`. Now an empty column in the LAST segment falls back to the row's title. In any other segment the old rule stands, because a half address (`/-a1689`) is worse than `/p/:id`. If the data arrives later the address changes, and the old one is kept in `direcciones_anteriores`, which redirects. Alternative rejected: an explicit fallback syntax in the template (`{Modelo|Nombre}`). It is more general, but it costs a parser change and a migration of every template for a case that today has one answer.
+
+
+## 2026-10-18 — Third-party ratings are a separate, sourced fact, never a vote (W4)
+
+The evaluator (round 2) scored criterion 4 at 5 because no sheet had any rating, and community ratings cannot be invented. We now show ratings published elsewhere (Trustpilot for shops; the maker's shop or a retailer for products) as a fact with source, link and the day it was read, in a box apart from the community block. They never feed `bd/comunidad.ts`, the ordering or the AggregateRating JSON-LD (Google only accepts ratings collected on the page, and a borrowed one would be a made-up rating to us). Amazon is excluded: robots.txt blocks it and its terms only allow its stars through its API.
+
+**Alternatives.**
+- Mix them into the community score as prior votes. Rejected: the score would stop meaning "what people here said", and a sheet could rank on a figure nobody here gave.
+- A dedicated column type. Rejected for now: a hidden long-text column with JSON plus a validator costs nothing in the column editor. A real type is about 1 h (editor + cell + export) once a second site needs it.
+
+**Cost of the shortcut.** The figures are copied by hand and go stale; the date is shown so a reader sees how old they are. Refreshing them is a re-run of the research, not automated.

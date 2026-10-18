@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { resumirCriterio, celdasComunidad, notaMedia, ajustesDe, type Voto } from '../src/server/bd/comunidad';
 import { ordenarFilas } from '../src/server/bd/vistas';
+import { opinionesDe, textoOpinion } from '../src/utils/opinionesTerceros';
 
 let fallos = 0;
 const ok = (cond: boolean, que: string) => {
@@ -81,6 +82,28 @@ ok(notaMedia([4, 5, null]) === 4.5, 'media con 2 de 3 criterios: 4,5');
   ok(!/comisi[oó]n/i.test(fuente), 'src/server/bd/comunidad.ts no menciona «comisión»');
   const firma = /export function celdasComunidad\(([\s\S]*?)\)\s*:/.exec(fuente)?.[1] || '';
   ok(!/celdas/.test(firma), 'celdasComunidad no recibe las celdas de la fila, sólo sus ids y los votos');
+}
+
+// 9 · Opiniones en otras webs: sólo entra lo que trae enlace, fecha y cifras
+// válidas, y nunca se mezcla con la nota de la comunidad.
+{
+  const buena = { fuente: 'Trustpilot', url: 'https://es.trustpilot.com/review/ejemplo.es', nota: 4, escala: 5, opiniones: 16567, fecha: '2026-10-18' };
+  const l = opinionesDe(JSON.stringify([
+    buena,
+    { ...buena, url: 'http://inseguro.es' },
+    { ...buena, fecha: 'ayer' },
+    { ...buena, nota: 7 },
+    { ...buena, opiniones: 0 },
+    { ...buena, fuente: '' },
+  ]));
+  ok(l.length === 1, `de 6 opiniones sólo vale la que trae enlace https, fecha y cifras (${l.length})`);
+  ok(opinionesDe('esto no es JSON').length === 0 && opinionesDe(null).length === 0, 'una celda rota o vacía no enseña nada');
+  ok(textoOpinion(buena) === 'Según Trustpilot: 4 de 5, de 16.567 opiniones (consultado el 18/10/2026)', `la frase dice fuente, escala, cuántas y cuándo: «${textoOpinion(buena)}»`);
+  const fuente = readFileSync(path.join(import.meta.dirname, '../src/server/bd/comunidad.ts'), 'utf8');
+  ok(!/opiniones_?terceros|opinionesTerceros/.test(fuente), 'la nota de la comunidad (bd/comunidad.ts) no lee las opiniones de otras webs');
+  const rutas = readFileSync(path.join(import.meta.dirname, '../src/server/valoraciones.ts'), 'utf8');
+  const agregado = /const agregado =[\s\S]*?;\n/.exec(rutas)?.[0] || '';
+  ok(agregado.length > 0 && !/terceros/.test(agregado), 'el AggregateRating del JSON-LD sale sólo de votos de aquí');
 }
 
 console.log(fallos ? `\n${fallos} fallo(s)` : '\nTodo bien');

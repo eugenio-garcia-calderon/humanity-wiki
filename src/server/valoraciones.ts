@@ -10,6 +10,7 @@ import { bdInterno } from './bd';
 import { TIPO_COMUNIDAD, ajustesDe, votosDe, resumirTabla, celdasComunidad, notaMedia } from './bd/comunidad';
 import { registrarHtml, esc } from './htmlBloques';
 import { registrarAmpliacion } from './ampliarPagina';
+import { opinionesTerceros, textoOpinion, type OpinionTercero } from './bd/opinionesTerceros';
 
 // ── ROUTES ──────────────────────────────────────────────────────────────────
 
@@ -113,7 +114,10 @@ export function registrarValoraciones(app: Express, db: any) {
       ? { '@type': 'AggregateRating', ratingValue: valor, ratingCount: votantes, bestRating: 5, worstRating: 1 }
       : null;
 
-    return { criterios, mios, comprador, agregado };
+    // Ratings published elsewhere: shown apart, never in `agregado`.
+    const terceros: OpinionTercero[] = (await opinionesTerceros(db, [fila.id])).get(fila.id) || [];
+
+    return { criterios, mios, comprador, agregado, terceros };
   }
 
   /** The block's data for the row (row id or its page id). */
@@ -130,6 +134,7 @@ export function registrarValoraciones(app: Express, db: any) {
         sesion: !!req.user,
         comprador_verificado: r.comprador,
         agregado: r.agregado,
+        terceros: r.terceros,
         metodo: {
           formula: '(C·m + Σ peso·nota) / (C + Σ peso)',
           peso_previo: columnas[0] ? ajustesDe(columnas[0].config).peso_previo : 5,
@@ -189,7 +194,12 @@ export function registrarValoraciones(app: Express, db: any) {
 
   registrarHtml('valoracion', (b, ctx) => {
     const r = ctx.extra.get('valoracion')?.get(claveDe(b, ctx.pagina) || '');
-    if (!r || !r.criterios.length) return '';
+    if (!r) return '';
+    const fuera = r.terceros.length
+      ? `<section><h2>Opiniones en otras webs</h2><p>No cuentan en la puntuación de la comunidad.</p><ul>${r.terceros.map((o: OpinionTercero) =>
+        `<li><a href="${esc(o.url)}" rel="nofollow noopener">${esc(textoOpinion(o))}</a></li>`).join('')}</ul></section>`
+      : '';
+    if (!r.criterios.length) return fuera;
     const lista = r.criterios.filter((c: any) => !c.media_de_criterios).map((c: any) =>
       `<li>${esc(c.nombre)}: ${c.suficiente && c.media !== null
         ? `${esc(cifra(c.media))} de 5 (${esc(votosTxt(c.votos))})`
@@ -197,7 +207,7 @@ export function registrarValoraciones(app: Express, db: any) {
     const cabeza = r.agregado
       ? `<p>Nota media: ${esc(cifra(r.agregado.ratingValue))} de 5, de ${esc(r.agregado.ratingCount)} ${r.agregado.ratingCount === 1 ? 'persona' : 'personas'}.</p>`
       : `<p>Aún sin nota: aparece con ${esc(r.criterios[0].umbral)} votos por criterio. Si lo has usado, puntúalo.</p>`;
-    return `<section><h2>Puntuación de la comunidad</h2>${cabeza}<ul>${lista}</ul></section>`;
+    return `<section><h2>Puntuación de la comunidad</h2>${cabeza}<ul>${lista}</ul></section>${fuera}`;
   }, async (_db, bloques, ctx) => {
     const claves = [...new Set(bloques.filter(b => b?.tipo === 'valoracion').map(b => claveDe(b, ctx.pagina)).filter(Boolean) as string[])];
     if (!claves.length) return;

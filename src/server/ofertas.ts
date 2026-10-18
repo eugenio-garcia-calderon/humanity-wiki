@@ -21,6 +21,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { bdInterno, celdasDe } from './bd.js';
+import { opinionesTerceros, textoOpinion, type OpinionTercero } from './bd/opinionesTerceros.js';
 import { enlacesDe, enlacesInversos, celdaDeEnlaces, CLASE_DE_TIPO, type Apuntado } from './bd/enlaces.js';
 import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/ficheros.js';
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
@@ -56,6 +57,9 @@ export type OfertaPublica = {
   /** Cuántas personas puntuaron esa atención y cuántas hacen falta para que
    *  haya nota («1 de 3 votos»). `null` si su tabla no tiene ese criterio. */
   votos_distribuidor: { votos: number; umbral: number } | null;
+  /** The shop's rating elsewhere (Trustpilot…), with link and date. Shown
+   *  apart: it never orders and never counts as the community note. */
+  opiniones_distribuidor: OpinionTercero[];
 };
 
 const valorDe = (c: any) => (c && c.estado === 'ok' ? c.valor : null);
@@ -222,6 +226,7 @@ export async function ofertasDeProducto(
       compra: compra && compra.producto_id && !compra.motivo ? compra : null,
       nota_distribuidor: null,
       votos_distribuidor: null,
+      opiniones_distribuidor: [],
     };
   });
   // The distributor's customer-service note (W4), the same adjusted note
@@ -232,6 +237,8 @@ export async function ofertasDeProducto(
     x.nota_distribuidor = a?.nota ?? null;
     x.votos_distribuidor = a ? { votos: a.votos, umbral: a.umbral } : null;
   }
+  const fuera = await opinionesTerceros(db, ofertas.map(x => x.distribuidor_id).filter(Boolean) as string[]);
+  for (const x of ofertas) x.opiniones_distribuidor = (x.distribuidor_id && fuera.get(x.distribuidor_id)) || [];
   return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id };
 }
 
@@ -262,6 +269,7 @@ export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string 
     } else partes.push(esc(motivoSinPrecio(o).replace(/\.$/, '')));
     if (o.nota_distribuidor !== null) partes.push(`atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`);
     else if (o.votos_distribuidor) partes.push(`atención al cliente: aún sin nota (${o.votos_distribuidor.votos} de ${o.votos_distribuidor.umbral} votos)`);
+    for (const t of o.opiniones_distribuidor || []) partes.push(`la tienda, en otras webs: <a href="${esc(t.url)}" rel="nofollow noopener">${esc(textoOpinion(t))}</a>`);
     if (o.plazo) partes.push(`entrega: ${esc(o.plazo)}`);
     if (o.agotada) partes.push('agotado');
     if (o.instalacion === true) partes.push('incluye instalación');

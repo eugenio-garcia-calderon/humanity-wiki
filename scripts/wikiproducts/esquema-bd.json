@@ -209,6 +209,17 @@
           }
         },
         {
+          "clave": "opiniones_terceros",
+          "nombre": "Opiniones en otras webs",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "opiniones_terceros",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "explicacion": "Notas publicadas por terceros (Trustpilot, la tienda oficial, una tienda), con fuente y fecha, en JSON. Se enseñan aparte y nunca cuentan en la puntuación de la comunidad."
+          }
+        },
+        {
           "clave": "comunidad_atencion",
           "nombre": "Atención al cliente",
           "tipo": "comunidad",
@@ -987,6 +998,17 @@
           }
         },
         {
+          "clave": "opiniones_terceros",
+          "nombre": "Opiniones en otras webs",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "opiniones_terceros",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "explicacion": "Notas publicadas por terceros (Trustpilot, la tienda oficial, una tienda), con fuente y fecha, en JSON. Se enseñan aparte y nunca cuentan en la puntuación de la comunidad."
+          }
+        },
+        {
           "clave": "comunidad_calidad",
           "nombre": "Calidad",
           "tipo": "comunidad",
@@ -1557,6 +1579,17 @@
           }
         },
         {
+          "clave": "opiniones_terceros",
+          "nombre": "Opiniones en otras webs",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "opiniones_terceros",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "explicacion": "Notas publicadas por terceros (Trustpilot, la tienda oficial, una tienda), con fuente y fecha, en JSON. Se enseñan aparte y nunca cuentan en la puntuación de la comunidad."
+          }
+        },
+        {
           "clave": "comunidad_calidad",
           "nombre": "Calidad",
           "tipo": "comunidad",
@@ -2108,6 +2141,17 @@
             "grupo": "control",
             "visibilidad": "nunca",
             "interna": true
+          }
+        },
+        {
+          "clave": "opiniones_terceros",
+          "nombre": "Opiniones en otras webs",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "opiniones_terceros",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "explicacion": "Notas publicadas por terceros (Trustpilot, la tienda oficial, una tienda), con fuente y fecha, en JSON. Se enseñan aparte y nunca cuentan en la puntuación de la comunidad."
           }
         },
         {
@@ -2847,6 +2891,17 @@
             "grupo": "control",
             "visibilidad": "nunca",
             "interna": true
+          }
+        },
+        {
+          "clave": "opiniones_terceros",
+          "nombre": "Opiniones en otras webs",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "opiniones_terceros",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "explicacion": "Notas publicadas por terceros (Trustpilot, la tienda oficial, una tienda), con fuente y fecha, en JSON. Se enseñan aparte y nunca cuentan en la puntuación de la comunidad."
           }
         },
         {
@@ -3616,6 +3671,17 @@
             "grupo": "control",
             "visibilidad": "nunca",
             "interna": true
+          }
+        },
+        {
+          "clave": "opiniones_terceros",
+          "nombre": "Opiniones en otras webs",
+          "tipo": "texto_largo",
+          "config": {
+            "clave": "opiniones_terceros",
+            "grupo": "control",
+            "visibilidad": "nunca",
+            "explicacion": "Notas publicadas por terceros (Trustpilot, la tienda oficial, una tienda), con fuente y fecha, en JSON. Se enseñan aparte y nunca cuentan en la puntuación de la comunidad."
           }
         },
         {

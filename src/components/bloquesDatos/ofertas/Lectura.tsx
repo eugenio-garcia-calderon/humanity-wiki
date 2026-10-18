@@ -4,6 +4,7 @@ import BotonCompra from '../../tablas/BotonCompra';
 import { useCobro } from '../../../hooks/useCobro';
 import { comisionDeLinea, textoComision, totalOferta, motivoSinPrecio, textoSinPrecio } from '../../../utils/ofertas';
 import type { PropsLectura } from '../tipos';
+import { textoOpinion, type OpinionTercero } from '../../../utils/opinionesTerceros';
 
 // ============================================================================
 // «DÓNDE COMPRARLO» — lo que ve quien lee la ficha (Wikiproducts W5)
@@ -33,6 +34,8 @@ export type Oferta = {
   comision_pct: number | null; comprobado: string | null; instalacion: boolean | null;
   compra: any | null; nota_distribuidor: number | null;
   votos_distribuidor?: { votos: number; umbral: number } | null;
+  /** The shop's rating elsewhere, with link and date (W4). Never orders. */
+  opiniones_distribuidor?: OpinionTercero[];
 };
 
 const dinero = (c: number, moneda = 'EUR') => new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(c / 100);
@@ -111,6 +114,16 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                     {o.plazo && ` · Entrega: ${o.plazo}`}
                     {o.agotada ? ' · Agotado' : o.stock !== null && o.stock <= 5 ? ` · Quedan ${o.stock}` : ''}
                   </p>
+                  {(o.opiniones_distribuidor || []).map(t => (
+                    // Another site's rating of the shop, apart from ours: the
+                    // link is the evidence, the date says how old it is.
+                    <p key={t.url} className="mt-0.5 text-sm text-slate-600">
+                      En otras webs:{' '}
+                      <a href={t.url} target="_blank" rel="nofollow noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">
+                        {textoOpinion(t)}<ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+                      </a>
+                    </p>
+                  ))}
                   {o.instalacion === true && (
                     <p className="mt-0.5 flex items-center gap-1 text-sm font-bold text-emerald-700"><Wrench className="h-3.5 w-3.5" aria-hidden /> Incluye instalación</p>
                   )}
