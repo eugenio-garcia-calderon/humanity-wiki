@@ -49,11 +49,35 @@ else
   }
   # The app image only carries dist/ and public/, so the loader and its data are
   # copied into the running container first (a tar stream, nothing on disk).
-  $COMPOSE exec -T app sh -c 'rm -rf /tmp/wikiproducts'
-  tar -C scripts -cf - wikiproducts | $COMPOSE exec -T app tar -C /tmp -xf -
+  copiar() {
+    $COMPOSE exec -T app sh -c 'rm -rf /tmp/wikiproducts'
+    tar -C scripts -cf - wikiproducts | $COMPOSE exec -T app tar -C /tmp -xf -
+  }
+  # When the app container last started: a deploy in the middle of a step
+  # replaces it, and that is the one failure worth trying again.
+  arranque() { docker inspect -f '{{.State.StartedAt}}' "$($COMPOSE ps -q app)" 2>/dev/null || echo ninguno; }
+  esperar_app() {
+    for _ in $(seq 1 60); do
+      $COMPOSE exec -T app node -e "fetch('$BASE/').then(r => process.exit(r.status < 500 ? 0 : 1), () => process.exit(1))" >/dev/null 2>&1 && return 0
+      sleep 10
+    done
+    echo "La aplicación no responde tras 10 minutos."; return 1
+  }
   # The photos are stored here and served from the public address.
   export WP_URL_PUBLICA="${WP_URL_PUBLICA:-https://humanity.wiki}"
-  nodo() { $COMPOSE exec -T -e HW_API_KEY -e WP_URL_PUBLICA app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}"; }
+  nodo() {
+    local rc antes
+    for intento in 1 2 3 4; do
+      antes=$(arranque); rc=0
+      copiar && $COMPOSE exec -T -e HW_API_KEY -e WP_URL_PUBLICA app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}" || rc=$?
+      [ "$rc" = 0 ] && return 0
+      # Its own report of failed rows: repeating it would say the same.
+      [ "$(arranque)" = "$antes" ] && return "$rc"
+      echo "== La aplicación se ha reiniciado a mitad (un despliegue). Espero a que vuelva y repito $1 (intento $((intento + 1))) =="
+      esperar_app || return 1
+    done
+    return "$rc"
+  }
 fi
 
 USUARIO=$(sql "SELECT id FROM users WHERE lower(email) = lower('$EMAIL')")

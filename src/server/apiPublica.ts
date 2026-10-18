@@ -641,6 +641,20 @@ export function registrarApiPublica(app: Express, db: any) {
     } catch (e: any) { console.error('v1 crear fila:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
+  /** Send a row to the recycle bin, as the table's own «Eliminar» does: it
+   *  can be restored for 15 days, and its page goes with it. For a loader that
+   *  wrote a row by mistake (W3a, 2026-10-18: recalls of other products). */
+  app.delete('/api/v1/databases/:id/rows/:rowId', async (req: Request, res: Response) => {
+    try {
+      const t = await conTabla(req, res, true); if (!t) return;
+      const f = (await db.execute(sql`SELECT id, pagina_id FROM bd_filas WHERE id = ${String(req.params.rowId)} AND tabla_id = ${t.id} AND deleted_at IS NULL`)).rows[0] as any;
+      if (!f) return res.status(404).json({ error: 'Esa fila no existe en esta base de datos.' });
+      await db.execute(sql`UPDATE bd_filas SET deleted_at = now(), updated_by = ${req.user!.id} WHERE id = ${f.id}`);
+      if (f.pagina_id) await db.execute(sql`UPDATE knowledge_windows SET deleted_at = now() WHERE id = ${f.pagina_id} AND deleted_at IS NULL`);
+      res.json({ id: f.id, deleted: true, restorable_days: 15 });
+    } catch (e: any) { console.error('v1 borrar fila:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
   app.patch('/api/v1/databases/:id/rows/:rowId', async (req: Request, res: Response) => {
     try {
       const t = await conTabla(req, res, true); if (!t) return;

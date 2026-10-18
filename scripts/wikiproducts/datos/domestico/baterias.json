@@ -843,32 +843,13 @@
           "fecha": "2026-10-18"
         }
       ],
-      "retiradas": [
-        {
-          "pais": "Estados Unidos",
-          "organismo": "CPSC",
-          "fecha": "2025-09",
-          "motivo": "Riesgo de incendio y explosión de las celdas (33 incidentes notificados). Afecta a la misma marca, no al X1.",
-          "modelos_afectados": "Baterías externas (power banks) Anker, unas 481.000 unidades; no al SOLIX X1",
-          "url": "https://www.wkyt.com/2025/09/25/anker-power-banks-recalled-due-fire-burn-risk",
-          "fecha_consulta": "2026-10-18"
-        },
-        {
-          "pais": "Internacional",
-          "organismo": "fabricante",
-          "fecha": "2025-06",
-          "motivo": "Retirada voluntaria por un posible defecto de fabricación en celdas de un proveedor. Afecta a la misma marca, no al X1.",
-          "modelos_afectados": "Cinco modelos de power bank PowerCore; no al SOLIX X1",
-          "url": "https://en.wikipedia.org/wiki/Anker",
-          "fecha_consulta": "2026-10-18"
-        }
-      ],
+      "retiradas": [],
       "retiradas_comprobadas": [
         {
-          "organismo": "varios",
+          "organismo": "Búsqueda web",
           "fecha": "2026-10-18",
-          "resultado": "2 encontrada(s)",
-          "nota": "Búsqueda el 2026-10-18 en web abierta (CPSC, ACCC/Clean Energy Council, gov.uk product safety, noticias en inglés y alemán) por «Anker SOLIX X1 recall / Rückruf / fire». No se ha encontrado ninguna retirada ni alerta de seguridad del SOLIX X1; las entradas listadas son de power banks de la misma marca. No se consultó directamente la base de EU Safety Gate ni la de Health Canada."
+          "resultado": "ninguna encontrada para Anker SOLIX X1",
+          "nota": "Búsqueda el 2026-10-18 en web abierta (CPSC, ACCC/Clean Energy Council, gov.uk product safety, noticias en inglés y alemán) por «Anker SOLIX X1 recall / Rückruf / fire». No se ha encontrado ninguna retirada ni alerta de seguridad del SOLIX X1; La marca sí tiene retiradas de power banks (CPSC, 2025; retirada voluntaria de cinco PowerCore, junio de 2025), que no afectan al SOLIX X1. No se consultó directamente la base de EU Safety Gate ni la de Health Canada."
         }
       ],
       "ofertas": [
@@ -2199,32 +2180,13 @@
           "fecha": "2026-10-18"
         }
       ],
-      "retiradas": [
-        {
-          "pais": "Estados Unidos",
-          "organismo": "CPSC",
-          "fecha": "2025-10-09",
-          "motivo": "Riesgo de sobrecalentamiento e incendio. Afecta a la misma marca, no a PowerOcean.",
-          "modelos_afectados": "EcoFlow Delta Max 2000 (estación de energía portátil), unas 25.030 unidades; no a PowerOcean",
-          "url": "https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard",
-          "fecha_consulta": "2026-10-18"
-        },
-        {
-          "pais": "Canadá",
-          "organismo": "Health Canada",
-          "fecha": null,
-          "motivo": "Riesgo de quemaduras graves e incendio. Afecta a la misma marca, no a PowerOcean.",
-          "modelos_afectados": "EcoFlow Delta Max 2000; no a PowerOcean",
-          "url": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire",
-          "fecha_consulta": "2026-10-18"
-        }
-      ],
+      "retiradas": [],
       "retiradas_comprobadas": [
         {
-          "organismo": "varios",
+          "organismo": "Búsqueda web",
           "fecha": "2026-10-18",
-          "resultado": "2 encontrada(s)",
-          "nota": "Búsqueda el 2026-10-18 en web abierta (CPSC, Health Canada, ACCC/Clean Energy Council, gov.uk product safety, noticias) por «EcoFlow PowerOcean recall / Rückruf / safety notice». No se ha encontrado ninguna retirada ni alerta de seguridad de PowerOcean; las dos entradas listadas son de un producto portátil de la misma marca. No se consultó directamente la base de EU Safety Gate (búsqueda limitada a buscador web), por lo que conviene repetir la consulta allí."
+          "resultado": "ninguna encontrada para EcoFlow PowerOcean",
+          "nota": "Búsqueda el 2026-10-18 en web abierta (CPSC, Health Canada, ACCC/Clean Energy Council, gov.uk product safety, noticias) por «EcoFlow PowerOcean recall / Rückruf / safety notice». No se ha encontrado ninguna retirada ni alerta de seguridad de PowerOcean; La marca sí tiene una retirada de la estación portátil Delta Max 2000 (CPSC y Health Canada), que no afecta a PowerOcean. No se consultó directamente la base de EU Safety Gate (búsqueda limitada a buscador web), por lo que conviene repetir la consulta allí."
         }
       ],
       "ofertas": [
@@ -3665,34 +3627,13 @@
           "fecha": "2026-10-18"
         }
       ],
-      "retiradas": [
-        {
-          "pais": "Australia",
-          "organismo": "ACCC",
-          "fecha": "2023-12-14",
-          "motivo": "El conector de CA puede retirarse sin herramienta y dejar expuestos terminales con tensión.",
-          "modelos_afectados": "Inversores GoodWe GW5000-MS-30, GW6000-MS-30, GW8500-MS-30, GW10K-MS-30. No afecta a la batería Lynx.",
-          "url": "https://www.productsafety.gov.au/recalls/goodwe-australia-pty-ltd-%E2%80%94-goodwe-ms-30-solar-inverter",
-          "fecha_consulta": "2026-10-18",
-          "nota": "Retirada de la marca, no del producto; actualizada el 24-07-2024."
-        },
-        {
-          "pais": "Australia",
-          "organismo": "ACCC",
-          "fecha": "2025-09-19",
-          "motivo": "Con el interruptor en modo bypass y funcionando en respaldo, el inversor puede exportar energía a la red durante un apagón (riesgo de isla).",
-          "modelos_afectados": "Inversores híbridos GoodWe GW5K-EHB-AU-G11, GW8.6K-EHB-AU-G11, GW9.99K-EHB-AU-G11 (y GE GEH5.0/8.6/10-1U-10). No afecta a la batería Lynx, aunque el EHB es uno de los inversores compatibles.",
-          "url": "https://www.productsafety.gov.au/node/32458",
-          "fecha_consulta": "2026-10-18",
-          "nota": "Fecha según la lista de retiradas del Clean Energy Council (https://cleanenergycouncil.org.au/industry/products/product-recalls). Retirada de la marca, no del producto."
-        }
-      ],
+      "retiradas": [],
       "retiradas_comprobadas": [
         {
-          "organismo": "varios",
+          "organismo": "Búsqueda web",
           "fecha": "2026-10-18",
-          "resultado": "2 encontrada(s)",
-          "nota": "Búsqueda a 2026-10-18: web abierta por «GoodWe battery recall / Lynx recall», lista de retiradas del Clean Energy Council y fichas de productsafety.gov.au (ACCC, Australia), avisos de WorkSafe QLD, búsquedas en los sitios de la CPSC (EE. UU.), Health Canada y gov.uk. No se encontró ninguna retirada ni alerta de las baterías Lynx Home F ni Lynx F G2. Las dos retiradas listadas son de inversores GoodWe en Australia (marca, no producto). La base de EU Safety Gate no pudo consultarse directamente (aplicación dinámica, acceso bloqueado desde la herramienta)."
+          "resultado": "ninguna encontrada para GoodWe Lynx Home F / Lynx F G2",
+          "nota": "Búsqueda a 2026-10-18: web abierta por «GoodWe battery recall / Lynx recall», lista de retiradas del Clean Energy Council y fichas de productsafety.gov.au (ACCC, Australia), avisos de WorkSafe QLD, búsquedas en los sitios de la CPSC (EE. UU.), Health Canada y gov.uk. No se encontró ninguna retirada ni alerta de las baterías Lynx Home F ni Lynx F G2. La marca sí tiene dos retiradas de inversores en Australia (ACCC), que no afectan a estas baterías. La base de EU Safety Gate no pudo consultarse directamente (aplicación dinámica, acceso bloqueado desde la herramienta)."
         }
       ],
       "ofertas": [
@@ -4130,32 +4071,13 @@
           "fecha": "2026-10-18"
         }
       ],
-      "retiradas": [
-        {
-          "pais": "Australia",
-          "organismo": "ACCC / Clean Energy Council",
-          "fecha": "2023-11-17",
-          "motivo": "El conector del puerto EPS se puede quitar a mano y deja partes en tensión expuestas. Afecta a inversores de la misma marca, no a la batería ARK XH.",
-          "modelos_afectados": "Inversores Growatt SPH3000TL … SPH6000TL BL-UP; no a la batería ARK XH",
-          "url": "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154",
-          "fecha_consulta": "2026-10-18"
-        },
-        {
-          "pais": "Australia",
-          "organismo": "ACCC / Clean Energy Council",
-          "fecha": "2021-09-17",
-          "motivo": "Conectores incompatibles que pueden sobrecalentarse o fundirse. Afecta a un inversor de la misma marca.",
-          "modelos_afectados": "Inversor Growatt 8000 MTL-S; no a la batería ARK XH",
-          "url": "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154",
-          "fecha_consulta": "2026-10-18"
-        }
-      ],
+      "retiradas": [],
       "retiradas_comprobadas": [
         {
-          "organismo": "varios",
+          "organismo": "Búsqueda web",
           "fecha": "2026-10-18",
-          "resultado": "2 encontrada(s)",
-          "nota": "Búsqueda el 2026-10-18 en la lista de retiradas del Clean Energy Council (Australia), en gov.uk product safety y en web abierta. No se ha encontrado ninguna retirada de la batería ARK XH ni del módulo ARK 2.5H-A1; las entradas listadas son de inversores de la misma marca. No se consultaron directamente EU Safety Gate, CPSC ni Health Canada."
+          "resultado": "ninguna encontrada para Growatt ARK XH",
+          "nota": "Búsqueda el 2026-10-18 en la lista de retiradas del Clean Energy Council (Australia), en gov.uk product safety y en web abierta. No se ha encontrado ninguna retirada de la batería ARK XH ni del módulo ARK 2.5H-A1; La marca sí tiene retiradas de inversores (SPH BL-UP y 8000 MTL-S, Australia), que no afectan a la ARK XH. No se consultaron directamente EU Safety Gate, CPSC ni Health Canada."
         }
       ],
       "ofertas": [
