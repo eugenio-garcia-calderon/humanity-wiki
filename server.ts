@@ -95,13 +95,20 @@ async function startServer() {
       const stripe = getStripe();
       // With a secret configured, an unsigned request is a forgery, not a
       // fallback: before 2026-10-18 omitting the header skipped the check and
-      // anyone could post a "paid" checkout. Unsigned is accepted only on a
-      // development machine with no secret at all.
+      // anyone could post a "paid" checkout. Without a secret, production does
+      // not trust the body either: it asks Stripe for the event by its id, so
+      // only an event Stripe really sent is processed (and shops keep working
+      // while the secret is not configured). Taking the body as-is is left to
+      // a development machine with no secret.
       if (webhookSecret) {
         if (!sig) return res.status(400).send("Webhook Error: missing stripe-signature");
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
       } else if (process.env.NODE_ENV === "production") {
-        return res.status(503).send("Webhook Error: STRIPE_WEBHOOK_SECRET is not configured");
+        const rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : req.body;
+        const claimed = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
+        if (!claimed?.id || typeof claimed.id !== "string") return res.status(400).send("Webhook Error: no event id");
+        // Events from connected accounts live in that account, not ours.
+        event = await stripe.events.retrieve(claimed.id, undefined, typeof claimed.account === "string" ? { stripeAccount: claimed.account } : undefined);
       } else {
         const rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : req.body;
         event = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
