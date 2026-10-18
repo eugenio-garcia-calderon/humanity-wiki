@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "drizzle/0157_pedido_gestionado.sql",
-      "motivo": "W5 Wikiproducts: cesta multitienda, pedido gestionado y comisión",
-      "desde": "2026-10-18T11:25:27.819Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/publicar.ts",
       "motivo": "W5 Wikiproducts: cesta multitienda, pedido gestionado y comisión",
       "desde": "2026-10-18T11:25:30.358Z"
