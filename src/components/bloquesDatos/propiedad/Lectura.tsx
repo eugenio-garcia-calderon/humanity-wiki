@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Badge } from '../../ui/core';
 import TextoConEnlaces from '../../ui/TextoConEnlaces';
 import type { PropsLectura } from '../tipos';
@@ -18,6 +19,20 @@ function ValorConEnlace({ v }: { v: Valor }) {
   return <TextoConEnlaces texto={v.texto} />;
 }
 
+/** The product photo with its credit. A photo that fails to load (a moved
+ *  file, a site that refuses hotlinking) disappears with its caption instead
+ *  of leaving a broken frame with the alt text in it. */
+function Foto({ src, alt, credito }: { src: string; alt: string; credito: string }) {
+  const [rota, setRota] = useState(false);
+  if (rota) return null;
+  return (
+    <figure className="shrink-0">
+      <img src={src} alt={alt} loading="eager" onError={() => setRota(true)} className="h-48 w-48 rounded-2xl border border-slate-100 bg-white object-contain p-2" />
+      {credito ? <figcaption className="mt-1 w-48 text-[11px] leading-snug text-slate-500"><TextoConEnlaces texto={credito} /></figcaption> : null}
+    </figure>
+  );
+}
+
 export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { enEditor?: boolean }) {
   const { ficha, cargando } = useFicha(paginaId);
   if (cargando) return <Cargando />;
@@ -31,9 +46,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
       <div className="my-2">
         {aviso}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          {v.imagen ? (
-            <img src={v.imagen} alt={v.nombre} loading="eager" className="h-48 w-48 shrink-0 rounded-2xl border border-slate-100 bg-white object-contain p-2" />
-          ) : null}
+          {v.imagen ? <Foto key={v.imagen} src={v.imagen} alt={v.nombre} credito={v.credito} /> : null}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             {v.marca ? <><dt className="text-slate-500">Marca</dt><dd><ValorConEnlace v={v.marca} /></dd></> : null}
             {v.modelo ? <><dt className="text-slate-500">Modelo</dt><dd className="text-slate-800">{v.modelo}</dd></> : null}

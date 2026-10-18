@@ -57,7 +57,8 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
       if (v.gtin) filas.push(['EAN', h.esc(v.gtin)]);
       const img = v.imagen && h.hrefSeguro(v.imagen);
-      return `<section>${img ? `<img src="${h.esc(img)}" alt="${h.esc(v.nombre)}">` : ''}<dl>${filas.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></section>`;
+      const foto = img ? `<figure><img src="${h.esc(img)}" alt="${h.esc(v.nombre)}">${v.credito ? `<figcaption>${h.enLinea(v.credito)}</figcaption>` : ''}</figure>` : '';
+      return `<section>${foto}<dl>${filas.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></section>`;
     }
     case 'texto':
       return `<section>${h2(v.titulo, h)}<p>${h.enLinea(v.texto)}${procedencia(v.procedencia, h)}</p></section>`;
@@ -95,7 +96,8 @@ export function alternativasHtml(f: Ficha | null | undefined, datos: any, h: Her
     const quien = c.esEsta ? 'Este producto' : c.ganador.paginaId ? `<a href="${h.esc(h.enlacePagina(c.ganador.paginaId))}">${h.esc(c.ganador.nombre)}</a>` : h.esc(c.ganador.nombre);
     return `<li>${h.esc(c.criterio)}: ${quien} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
   }).join('');
-  return `<section>${h2(v.titulo, h)}<ul>${li}</ul><p><small>El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</small></p></section>`;
+  const sub = v.subcategoria ? `<p>Entre los productos del mismo tipo: ${h.esc(v.subcategoria)}.</p>` : '';
+  return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.</small></p></section>`;
 }
 
 export function afirmacionHtml(f: Ficha | null | undefined, datos: any, h: Herramientas): string {

@@ -85,7 +85,7 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
 };
 
 export type VistaPropiedad =
-  | { estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; gtin: string; categoria: string }
+  | { estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; credito: string; gtin: string; categoria: string }
   | { estilo: 'texto'; titulo: string; texto: string; procedencia: Procedencia | null }
   | { estilo: 'tabla' | 'lista'; titulo: string; lineas: Linea[] }
   | { estilo: 'pie'; revisado: string | null; fuentes: string[]; editadoEl: string | null };
@@ -102,13 +102,19 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     const cMarca = porRol('marca');
     const cImg = porRol('imagen');
     const img = cImg ? textoDe(fila, cImg) : '';
+    const imagen = (URL_SOLA.test(img) || img.startsWith('/') ? img : '') || fila.imagen || null;
+    // CC BY and CC BY-SA photos require a visible credit; shown even though
+    // the column is `visibilidad: nunca` (that only keeps it out of the lists),
+    // and only under a photo.
+    const cCredito = porRol('credito_imagen');
     return {
       estilo,
       nombre: fila.titulo,
       marca: cMarca && tieneValor(fila, cMarca) ? valorDe(f, fila, cMarca) : null,
       modelo: porRol('modelo') ? textoDe(fila, porRol('modelo')!) : '',
       estado: porRol('estado') ? textoDe(fila, porRol('estado')!) : '',
-      imagen: (URL_SOLA.test(img) || img.startsWith('/') ? img : '') || fila.imagen || null,
+      imagen,
+      credito: imagen && cCredito ? textoDe(fila, cCredito) : '',
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
       categoria: t.titulo,
     };
@@ -216,6 +222,8 @@ function imagenDe(t: TablaFicha, x: FilaFicha): string | null {
 
 export type VistaAlternativas = {
   titulo: string;
+  /** The subcategory the ranking was made in («Powerbank»), when the table has one. */
+  subcategoria: string | null;
   criterios: Array<{
     columnaId: string;
     criterio: string;
@@ -236,30 +244,36 @@ export type VistaAlternativas = {
 export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): VistaAlternativas | null {
   const t = f.tabla;
   const actual = filaActual(f);
-  if (!actual || t.filas.length < 2) return null;
+  if (!actual) return null;
+  // The best IN ITS SUBCATEGORY: a 20,000 mAh power bank is not beaten on
+  // capacity by a 2 kWh power station that shares its table.
+  const cSub = columnaPorRol(t, 'subcategoria');
+  const sub = cSub && tieneValor(actual, cSub) ? textoDe(actual, cSub) : '';
+  const filas = sub ? t.filas.filter(x => textoDe(x, cSub!) === sub) : t.filas;
+  if (filas.length < 2) return null;
   const cols = (elegidas(t, datos.columnas) || t.columnas.filter(c =>
     esComunidad(c) ? c.config?.criterio !== 'media' : listable(c) && ['tecnico', 'compra', 'garantia'].includes(grupoDe(c) || '')))
     .filter(ordenable);
   const max = Math.max(1, Math.min(12, Number(datos.max) || 8));
   const criterios: VistaAlternativas['criterios'] = [];
   for (const c of cols) {
-    const orden = ordenarPor(t.filas, c);
+    const orden = ordenarPor(filas, c);
     // A «best» among fewer than two products is not a comparison, and a tie
     // for first between everyone says nothing.
-    if (orden.length < 2 || !mejoresEn(t.filas, c).size) continue;
+    if (orden.length < 2 || !mejoresEn(filas, c).size) continue;
     const g = orden[0];
     const i = orden.findIndex(x => x.id === actual.id);
     criterios.push({
       columnaId: c.id,
       criterio: c.nombre,
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
-      esEsta: mejoresEn(t.filas, c).has(actual.id),
+      esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
     });
     if (criterios.length >= max) break;
   }
   if (!criterios.length) return null;
-  return { titulo: String(datos.titulo || '').trim(), criterios };
+  return { titulo: String(datos.titulo || '').trim(), subcategoria: sub || null, criterios };
 }
 
 // ── AFIRMACIONES PUBLICITARIAS ──────────────────────────────────────────────
@@ -305,6 +319,10 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
   const c = relacionConRol(f, 'afirmaciones', 'veredicto');
   if (!c) return null;
   const rel = relacionadasPor(f, c);
+  // Claims the reader cannot open: neither show them as reviewed nor say
+  // «we have not reviewed any». Say nothing.
+  const apuntadas = filaActual(f)?.apuntados?.[c.id]?.length || 0;
+  if (apuntadas > (rel?.filas.length || 0) && !rel?.filas.length) return null;
   const items = (rel?.filas || []).map(x => {
     const donde = textoRol(rel!.tabla, x, 'donde');
     const fecha = columnaPorRol(rel!.tabla, 'fecha');
@@ -369,6 +387,12 @@ export function vistaRetiradas(f: Ficha | null, datos: Record<string, unknown>):
       enlace: URL_SOLA.test(enlace) ? enlace : null, paginaId: x.pagina_id,
     };
   });
+  // A recall the reader cannot open (its table is not public) still exists:
+  // say its name rather than «no conocemos ninguna».
+  const leidas = new Set((rel?.filas || []).map(x => x.id));
+  for (const a of (c ? fila?.apuntados?.[c.id] || [] : [])) {
+    if (!leidas.has(a.id) && a.etiqueta) items.push({ titulo: a.etiqueta, pais: '', organismo: '', fecha: '', motivo: '', referencia: '', enlace: null, paginaId: null });
+  }
   const cFecha = columnaPorRol(f.tabla, 'retiradas_fecha');
   const cBusq = columnaPorRol(f.tabla, 'retiradas_busqueda');
   const comprobado = cFecha && tieneValor(fila, cFecha) ? textoDe(fila, cFecha) : null;

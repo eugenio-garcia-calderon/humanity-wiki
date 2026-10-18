@@ -9033,6 +9033,13 @@ en mis páginas como proyecto pendiente».
 - Fotos: sólo de Wikimedia Commons, con la licencia leída de la API de Commons al cargar (CC0, dominio público, CC BY o CC BY-SA) y el crédito en «Licencia de la foto». Las 8 imágenes de fabricante que se habían cargado sin licencia se quitan. De 94 productos, sólo 2 tienen en Commons una foto identificable como ese modelo (Jackery Explorer 1000 v2, Tesla Powerwall 2). No se cargan hasta que la ficha enseñe el crédito: la acción «Cargar Wikiproducts» tiene la opción «fotos».
 - `llms.txt` de un dominio propio encuentra las páginas del sitio estén donde estén enlazadas: en cualquier bloque (también dentro de pestañas u otros contenedores), en un enlace `/paginas/…` del texto o del menú de temas, y en un destino del menú escrito como dirección (`/energia-portatil`). Y se guarda 5 minutos en vez de una hora, para que un cambio se vea enseguida.
 
+## 2026-10-18 — Wikiproducts W1: sheet polish (brand once, alternatives by type, photo credit, gallery photo)
+
+- Product sheet no longer repeats the brand: `VistaPagina` skips the generic «Relaciones» list on row pages that carry a sheet (`pagina.ficha`), since the sheet already shows brand, claims, recalls and offers.
+- «La mejor en cada criterio» now compares only rows of the same subcategory (new sheet role `subcategoria`, resolved from loader clave `tipo`), so a power station no longer "wins" on a powerbank sheet. Shows «Entre los productos del mismo tipo: X».
+- Header photo shows its credit (new role `credito_imagen`, clave `foto_licencia`) as a caption, only when there is a photo, in both React and server HTML. A photo that fails to load hides itself instead of showing alt text.
+- Gallery cards fall back to the row's `imagen`-role column when the page has no cover or image block (`tarjetasDe` in `src/server/bd.ts`).
+- Recalls/claims linked but not readable no longer produce «No conocemos ninguna retirada»: recalls are listed by title, claims block hides.
 ## 2026-10-18 — Grupos pequeños, uno al lado del otro (prog8)
 - En una galería agrupada (sin subgrupos), un grupo con **una o dos tarjetas** ocupa solo lo que miden ellas y comparte fila con otros así, cada uno con su título encima de sus tarjetas. Los grupos de tres o más siguen ocupando la fila entera. En el móvil se apilan.
 - `porGrupos` envuelve cada grupo de nivel 0 en una caja de `min-width` = n × ancho máximo de tarjeta (la rejilla decide las columnas por ese ancho) y el contenedor es `flex-wrap`, centrado si los títulos van centrados.
