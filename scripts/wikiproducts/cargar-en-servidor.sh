@@ -12,12 +12,13 @@
 #   3. Runs `crear-esquema.mjs --plantillas` and `cargar.mjs` against the app on
 #      127.0.0.1, as that owner. Both are idempotent: a second run only adds
 #      what is missing and changes what differs.
-#   3b. Runs `expertos.mjs` (W6): the «Consultar a un experto» page, the
-#      experts of `expertos.json` (once each; then the panel rules) and the
-#      short experts block in every product sheet template. Before step 4,
-#      so the «Expertos» menu link that step adds finds the page.
+#   (3b. `expertos.mjs` (W6) is NOT run: Eugenio took expert consultations
+#      out of the MVP on 2026-10-18. The script and `expertos.json` stay in
+#      the repo; to bring them back, restore the step before step 4 and the
+#      «Expertos» link in `sitio.json` → `menu`.)
 #   3c. Runs `plantilla-ficha.mjs` (W1): the order of the blocks of every
-#      product sheet, from `plantilla-ficha.json`.
+#      product sheet, from `plantilla-ficha.json`. It also removes the
+#      expert block that earlier loads put on the templates.
 #   4. Runs `enlazar-sitio.mjs`: each table shown in its page of the site, or
 #      a visitor sees none of it (a table inherits visibility from its page).
 #   5. With WP_FOTOS=si, runs `fotos.mjs`: one photo per product, downloaded
@@ -55,11 +56,35 @@ else
   }
   # The app image only carries dist/ and public/, so the loader and its data are
   # copied into the running container first (a tar stream, nothing on disk).
-  $COMPOSE exec -T app sh -c 'rm -rf /tmp/wikiproducts'
-  tar -C scripts -cf - wikiproducts | $COMPOSE exec -T app tar -C /tmp -xf -
+  copiar() {
+    $COMPOSE exec -T app sh -c 'rm -rf /tmp/wikiproducts'
+    tar -C scripts -cf - wikiproducts | $COMPOSE exec -T app tar -C /tmp -xf -
+  }
+  # When the app container last started: a deploy in the middle of a step
+  # replaces it, and that is the one failure worth trying again.
+  arranque() { docker inspect -f '{{.State.StartedAt}}' "$($COMPOSE ps -q app)" 2>/dev/null || echo ninguno; }
+  esperar_app() {
+    for _ in $(seq 1 60); do
+      $COMPOSE exec -T app node -e "fetch('$BASE/').then(r => process.exit(r.status < 500 ? 0 : 1), () => process.exit(1))" >/dev/null 2>&1 && return 0
+      sleep 10
+    done
+    echo "La aplicación no responde tras 10 minutos."; return 1
+  }
   # The photos are stored here and served from the public address.
   export WP_URL_PUBLICA="${WP_URL_PUBLICA:-https://humanity.wiki}"
-  nodo() { $COMPOSE exec -T -e HW_API_KEY -e WP_URL_PUBLICA app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}"; }
+  nodo() {
+    local rc antes
+    for intento in 1 2 3 4; do
+      antes=$(arranque); rc=0
+      copiar && $COMPOSE exec -T -e HW_API_KEY -e WP_URL_PUBLICA app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}" || rc=$?
+      [ "$rc" = 0 ] && return 0
+      # Its own report of failed rows: repeating it would say the same.
+      [ "$(arranque)" = "$antes" ] && return "$rc"
+      echo "== La aplicación se ha reiniciado a mitad (un despliegue). Espero a que vuelva y repito $1 (intento $((intento + 1))) =="
+      esperar_app || return 1
+    done
+    return "$rc"
+  }
 fi
 
 USUARIO=$(sql "SELECT id FROM users WHERE lower(email) = lower('$EMAIL')")
@@ -93,20 +118,27 @@ nodo crear-esquema.mjs --plantillas
 echo "== Datos: marcas, distribuidores, productos, afirmaciones, retiradas y ofertas =="
 nodo cargar.mjs
 
-echo "== Expertos: su página, sus fichas y el recuadro en cada producto =="
-# Before enlazar-sitio.mjs: that one adds the «Expertos» menu link, and only
-# to a page «Consultar a un experto» that already exists. Not fatal: without
-# it the site still loads, it just offers no experts.
-nodo expertos.mjs || echo "AVISO: el paso de expertos ha fallado (arriba dice por qué); el resto de la carga sigue."
+# Expert consultations are out of the MVP (Eugenio, 2026-10-18), so
+# `nodo expertos.mjs` is not run here. See step 3b in the header.
 
 echo "== Fichas: el orden de los bloques de cada producto =="
-# After expertos.mjs: the layout has no expert block (dropped from the MVP),
-# so this is the last word on the templates. Not fatal: the sheets keep their
-# previous order.
+# The layout has no expert block, so this also takes out the one earlier
+# loads put on the templates. Not fatal: the sheets keep their previous order.
 nodo plantilla-ficha.mjs || echo "AVISO: no se ha podido ordenar la ficha (arriba dice por qué); el resto de la carga sigue."
 
 echo "== Sitio: cada tabla en su página, para que la vea quien visita =="
 nodo enlazar-sitio.mjs
+
+echo "== Textos: frases corregidas en las páginas del sitio, y lo que dicen =="
+nodo corregir-textos.mjs
+
+# The legal notice is built from the site's «Datos legales» (titular and
+# contact): what is empty shows on the page in brackets. Printed, read-only,
+# so it can be checked without opening production. All of it is public.
+echo "== Aviso legal: datos del titular del sitio (lo vacío sale entre corchetes) =="
+sql "SELECT jsonb_pretty(jsonb_build_object('titular', w.config->'sitio'->'titular', 'contacto', w.config->'sitio'->'pie'->'contacto'))
+     FROM dominios_paginas d JOIN knowledge_windows w ON w.id = COALESCE(d.pagina_id, CASE WHEN d.entidad_tipo = 'pagina' THEN d.entidad_id END)
+     WHERE d.dominio = 'wikiproducts.humanity.wiki' LIMIT 1" || echo "(no se ha podido leer)"
 
 # Only when asked (`fotos=si` in the workflow): it reads a page per product.
 if [ "${WP_FOTOS:-no}" = "si" ]; then

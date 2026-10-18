@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Star, ExternalLink, Paperclip, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { CeldaRelacion } from './Relacion';
+import { BarraAvance, SelectorAvance, esBarra } from './BarraAvance';
 import BotonCompra from './BotonCompra';
 
 // ============================================================================
@@ -210,6 +211,22 @@ export default function CeldaTabla({
           );
         })}
         <button onClick={() => setEditando(false)} className="w-full mt-1 px-2 py-1 text-[11px] font-bold text-slate-400 hover:text-slate-600">Cerrar</button>
+      </div>
+    );
+  }
+
+  // ── PORCENTAJE COMO BARRA DE AVANCE (2026-10-18). Ver `BarraAvance.tsx`. ──
+  if (esBarra(columna)) {
+    const fraccion = celda.estado === 'ok' && celda.valor !== null && celda.valor !== '' ? Number(celda.valor) : null;
+    if (editando && puedeEditar) {
+      return <SelectorAvance fraccion={fraccion} grande={enFicha} onGuardar={pct => { guardar(pct); }} onCerrar={() => setEditando(false)} />;
+    }
+    if (fraccion === null || Number.isNaN(fraccion)) return <Vacia onClick={puedeEditar ? () => setEditando(true) : undefined} />;
+    return (
+      <div onClick={() => { if (puedeEditar) setEditando(true); }}
+        className={cn('px-2 py-1.5', puedeEditar && 'cursor-pointer rounded-md hover:bg-slate-50')}
+        title={puedeEditar ? 'Cambiar el porcentaje' : undefined}>
+        <BarraAvance fraccion={fraccion} grande={enFicha} centrada={enFicha} />
       </div>
     );
   }

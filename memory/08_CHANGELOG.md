@@ -9118,6 +9118,38 @@ en mis páginas como proyecto pendiente».
 - Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
 - Not touched, owned by W5: «Dónde comprarlo» still has 11–12 px text. (W4 already raised «Puntuación de la comunidad» in 782a8847.)
 
+## 2026-10-18 — Porcentaje como barra de avance (prog8)
+- Una propiedad **porcentaje** se ve como **barra de avance**: naranja-amarillo (`amber-400`) por debajo del 50 %, azul (`sky-500`) del 50 al 99 % y verde (`emerald-500`) al 100 %. En la galería, fina con la cifra al lado; en la página del elemento, **gruesa y a todo el ancho**, con la cifra grande, como un crowdfunding.
+- Para editarla, un **deslizador de 0 a 100 de 10 en 10** (ratón, dedo o flechas); guarda al soltar.
+- Se puede apagar por columna en su editor («Mostrar como barra de avance», `config.barra === false`) para porcentajes que no son avance (una comisión). Ver `BarraAvance.tsx`.
+
+### 2026-10-18 — E-mails for a paid managed order (Wikiproducts W5)
+- A paid Wikiproducts order used to reach its manager only through the in-app bell, and an anonymous buyer had only the code on screen. Now `registrarPedidoGestionado` sends, once per order (only when its shop queue rows are new, so a repeated Stripe webhook sends nothing): an e-mail to the owner of the offers table, with what to buy from which shop, the delivery address, the buyer's contact and the link to Comercio → «Pedidos a tiendas»; and one to the buyer, with the code and the tracking link `https://<site>/pedido?codigo=…`: the seller's site domain when they have exactly one active (wikiproducts.humanity.wiki), otherwise the main domain.
+- `/pedido` (order tracking, `MiPedido`) now exists on the main domain and on site domains, not only on a shop subdomain. The WhatsApp texts that already linked `humanity.wiki/pedido?codigo=…` pointed at a route that did not exist there. Arriving with `?codigo=` and no session no longer shows a false «No hay ningún pedido con ese código y ese correo» before the e-mail is typed; the code is prefilled and the form waits.
+- Uses `enviarCorreo` (Resend). Without `RESEND_API_KEY` nothing is sent, the log says so, and the order and its queue are created as before.
+- Test: `scripts/wikiproducts/probar-correos-pedido.ts` (local only; intercepts the Resend call): two e-mails on payment, none on a repeated webhook, none and no failure without the key.
+
+### 2026-10-18 — «Dónde comprarlo» readable text sizes (Wikiproducts W5)
+- The offers card had 9 texts at 11–12 px. Body text (summary, «sin precio» reason, test-mode and «muy pronto» notes, empty and error states, shop name) is now 16 px; labels and secondary text (customer-service line, shipping, installation, commission, ordering note, link buttons) 14 px. Measured in the browser at 390 and 1280 px: only 14, 16, 18 and 20 px remain, no horizontal scroll. The cart button inside a card (`BotonCompra`, shared with tables) keeps its own sizes.
+
+## 2026-10-18 — Wikiproducts W6: expert consultations out of the MVP
+
+- Eugenio: «Quita lo de las consultas de expertos de momento en este MVP». The load (`cargar-en-servidor.sh`) no longer runs `expertos.mjs`, so it creates neither the page «Consultar a un experto», nor the expert, nor the short experts box in the product sheets. The «Expertos» menu link left `sitio.json` (`menu` is now empty).
+- Nothing about experts had reached the production site yet: #635 deployed the code, but the load that would have created the page and the boxes had not run.
+- Kept in the repo, unused: `expertos.mjs`, `expertos.json`, the `experto` block (with its short version) and `PUT /api/v1/pages/:id/experts`. Bringing them back is restoring one line in the load script and one menu entry.
+## 2026-10-18 — «Mapas» es la herramienta; el mapa del mundo, un bloque (prog8)
+- **`/mapas`** ya no abre el Mapa de Indicadores: es la portada de la herramienta (`MapasPortada.tsx`) con **qué mapas puedes crear** (puntos, indicadores por territorio, con IA, insertarlos en páginas, publicarlos, valoraciones) y los **mapas de la comunidad** (`/api/maps`, sin el principal). «Crear tu mapa» y «Mis mapas».
+- El **Mapa de Indicadores de la Humanidad** sigue en **`/mapa`** (antes redirigía a `/mapas` y perdía los parámetros) y es ahora un **bloque de datos `mapaMundo`** («Mapa de indicadores del mundo»): el mismo mapa en un marco sin menús, con alto elegible, territorio de inicio y «Pantalla completa». La plantilla Humanidad Wiki lo trae; se añade a la página Humanidad Wiki de Eugenio.
+
+
+## 2026-10-18 — Wikiproducts W3a: evaluator round 1 on the data, and the missing photos
+- **Whose word it is.** 894 values whose source is a shop, a regulator, a test lab or the press were labelled «declarado» (as if the brand said it). They are now `tercero`, shown as «Según <host>». 9 independent-test fields that said «no publicado» while citing the search that found nothing now carry that result.
+- **Recalls that belonged to other products.** 8 recall rows on the Anker SOLIX X1, EcoFlow PowerOcean, GoodWe Lynx and Growatt ARK sheets were recalls of *other* products of the same brand: the sheet said «retirado» and «ninguna retirada» at once. They go to the recycle bin (`datos/retirar.json`, through the new `DELETE /api/v1/databases/:id/rows/:rowId`, restorable for 15 days); the note names the brand's other recalls.
+- Country of manufacture for 13 more products, from distributors' customs-origin fields (`tercero`, «puede variar según el lote»).
+- Text ranges keep their unit («-20 a 60 °C»). A sold-out offer has stock 0, not empty.
+- «Cómo trabajamos» now says «cualquiera **con una cuenta** puede sugerir una corrección» (`corregir-textos.mjs` + `PATCH /api/v1/pages/:id/blocks/:blockId`, one text block). The load log prints «Cómo trabajamos», the legal pages and the site's legal holder data, so they can be reviewed without opening production.
+- Photos: `datos/fotos.json` names a maker or distributor page for 36 of the 37 products without a photo and for the 4 whose photo was not the product (aleo, Atersa, SENEC.Home, LONGi Hi-MO X10). 4 products have no page anywhere to take one from.
+- The server load has its own concurrency group, waits for a running deploy, and retries a step if the app container restarts under it.
 ## 2026-10-18 — Wikiproducts W1: product sheet as a shop landing page
 
 Eugenio: «inspírate en las landing pages de Amazon… que la información esté más compacta… propiedades dentro de una base de datos».

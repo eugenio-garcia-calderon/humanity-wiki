@@ -8,8 +8,11 @@
 # terminar, salga bien o mal. La clave no sale nunca del servidor ni aparece en
 # este registro.
 #
-# Comparte grupo con el despliegue: si hay uno en marcha, esto espera a que
-# acabe, para cargar siempre contra la versión ya desplegada.
+# Tiene su propio grupo: un despliegue que llega a la cola ya no la cancela
+# (2026-10-18, otras sesiones fusionan a main mientras carga). Antes de empezar
+# espera a que acabe cualquier despliegue en marcha, para cargar contra la
+# versión ya desplegada; y si un despliegue reinicia la aplicación a mitad,
+# `cargar-en-servidor.sh` espera a que vuelva y repite el paso.
 # Se puede repetir: la carga es idempotente.
 
 name: Cargar Wikiproducts
@@ -24,14 +27,29 @@ on:
         default: "no"
 
 concurrency:
-  group: deploy-prod
+  group: cargar-wikiproducts
   cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   cargar:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
+      - name: Esperar a que acabe el despliegue en marcha
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 60); do
+            n=$(gh run list -R "$GITHUB_REPOSITORY" --workflow deploy.yml --limit 10 --json status \
+                  --jq '[.[] | select(.status != "completed")] | length')
+            [ "$n" = "0" ] && { echo "Ningún despliegue en marcha."; exit 0; }
+            echo "Hay $n despliegue(s) en marcha o en cola; espero 30 s…"; sleep 30
+          done
+          echo "Sigue habiendo despliegues tras 30 minutos; cargo igualmente."
       - name: Cargar por SSH
         uses: appleboy/ssh-action@v1.2.0
         env:

@@ -183,6 +183,8 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
         onDragLeave={() => setEncima(x => (x === c.id ? null : x))}
         onDrop={e => { e.preventDefault(); soltar(c.id); }}
         className={cn('group/prop relative min-w-0',
+          // La barra de avance ocupa la fila entera, gruesa, como en un crowdfunding.
+          enRejilla && c.tipo === 'porcentaje' && c.config?.barra !== false && 'col-span-full',
           enRejilla && 'rounded-xl px-3 pt-2.5 pb-1 bg-slate-50/70 hover:bg-slate-100/60 transition-colors',
           encima === c.id && (enRejilla ? 'ring-2 ring-emerald-400' : 'border-t-2 border-t-emerald-400'), arrastrando === c.id && 'opacity-40')}>
         <div className={cn(enRejilla ? 'flex flex-col' : 'flex items-start gap-1 py-0.5')}>

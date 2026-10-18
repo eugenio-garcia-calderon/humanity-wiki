@@ -54,11 +54,6 @@
     "titulo": "Wikiproducts",
     "bloque_titulo": "Explora por categoría"
   },
-  "menu": [
-    {
-      "_comentario": "La página de W6. Si todavía no existe, se deja para la siguiente pasada.",
-      "texto": "Expertos",
-      "pagina_titulo": "Consultar a un experto"
-    }
-  ]
+  "_menu_comentario": "Vacío a propósito (Eugenio, 2026-10-18): las consultas con expertos quedan fuera del MVP, así que el enlace «Expertos» → «Consultar a un experto» ya no se añade. Para volver a ponerlo: {\"texto\": \"Expertos\", \"pagina_titulo\": \"Consultar a un experto\"}.",
+  "menu": []
 }
