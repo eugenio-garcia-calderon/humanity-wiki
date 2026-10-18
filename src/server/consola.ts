@@ -8,7 +8,7 @@ import { CONSOLA_POR_DEFECTO, limpiarConsola } from '../utils/consola.js';
 // LA CONSOLA DE UNA WEB (2026-10-08)
 // ============================================================================
 // Eugenio: «la consola es una página privada que nunca se puede hacer pública:
-// se accede con inicio de sesión, si eres administrador, desde Humanity Wiki;
+// se accede con inicio de sesión, si eres administrador, desde Wiki Creator;
 // no desde la URL pública de luzhumanidad.com». Es la cadena de valor del
 // negocio en círculo, cada eslabón con su estado (rojo, amarillo, verde), sus
 // objetivos, tareas, personas y protocolos.

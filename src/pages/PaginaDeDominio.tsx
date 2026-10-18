@@ -13,7 +13,7 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 // Eugenio: «permitir que el usuario ponga su dominio propio en una de sus
 // páginas como hace notion».
 //
-// ── AQUÍ NO SE MENCIONA HUMANITY.WIKI, Y ESE ES EL PUNTO ────────────────────
+// ── AQUÍ NO SE MENCIONA WIKI CREATOR, Y ESE ES EL PUNTO ────────────────────
 // Quien compra un dominio lo compra para que su sitio sea SUYO. Un pie que
 // diga «publicado en humanity.wiki» convierte su web en la página de alguien
 // alojada en otro sitio, que es justo lo que ha pagado por evitar.

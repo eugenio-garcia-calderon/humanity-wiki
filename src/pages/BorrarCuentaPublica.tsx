@@ -50,7 +50,7 @@ export default function BorrarCuentaPublica() {
         <ol className="space-y-3 text-sm text-slate-600 leading-relaxed list-none">
           <li className="flex gap-3">
             <span className="shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-black grid place-items-center">1</span>
-            <span>Entra en tu cuenta, en la aplicación o en <strong>humanity.wiki</strong>.</span>
+            <span>Entra en tu cuenta, en la aplicación o en <strong>Wiki Creator</strong>.</span>
           </li>
           <li className="flex gap-3">
             <span className="shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-black grid place-items-center">2</span>

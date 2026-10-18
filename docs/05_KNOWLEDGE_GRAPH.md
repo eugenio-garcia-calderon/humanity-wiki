@@ -1,6 +1,6 @@
 # 05_KNOWLEDGE_GRAPH.md
 
-# Grafo de Conocimiento de Humanity.wiki
+# Grafo de Conocimiento de Wiki Creator
 
 ## Objetivo
 

@@ -1,4 +1,4 @@
--- PUNTOS DE HUMANITY.WIKI (2026-08-08, user request): un sistema de puntos
+-- PUNTOS DE WIKI CREATOR (2026-08-08, user request): un sistema de puntos
 -- interno — "en un futuro serán puntos tokenizados con blockchain, de
 -- momento es un sistema de puntos interno" — que sirve ya para comprar
 -- dentro de la app y usar la IA, con saldo decimal (céntimos de punto).

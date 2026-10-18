@@ -129,10 +129,10 @@ export default function HazteSocio() {
       <div className="text-center mb-10">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold mb-4">
           <Heart className="w-3.5 h-3.5 fill-emerald-600 text-emerald-600" />
-          <span>Comunidad Humanity.wiki</span>
+          <span>Comunidad Wiki Creator</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-          Hazte Socio de Humanity.wiki
+          Hazte Socio de Wiki Creator
         </h1>
         <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
           Forma parte activa del movimiento planetario para garantizar el acceso libre a las necesidades básicas en todos los territorios.
@@ -286,7 +286,7 @@ export default function HazteSocio() {
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">Pasarela de Pago Segura</h2>
-                <p className="text-xs text-slate-500">Completa tu suscripción directamente sin salir de Humanity.wiki</p>
+                <p className="text-xs text-slate-500">Completa tu suscripción directamente sin salir de Wiki Creator</p>
               </div>
               <button
                 onClick={() => {

@@ -1,6 +1,6 @@
 # 01_PRINCIPLES.md
 
-# Principios de Diseño de Humanity.wiki
+# Principios de Diseño de Wiki Creator
 
 Versión 1.0
 
@@ -116,6 +116,6 @@ Toda iniciativa debe poder medir su impacto mediante indicadores antes y despué
 
 # 14. Evolución continua
 
-Humanity.wiki está diseñada para evolucionar.
+Wiki Creator está diseñada para evolucionar.
 
 Las nuevas funcionalidades deberán integrarse en la arquitectura existente sin romper los principios anteriores.

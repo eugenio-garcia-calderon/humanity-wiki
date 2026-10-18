@@ -10,7 +10,7 @@
 -- Cada apunte de comisión lleva el pedido como entidad, así que la
 -- trazabilidad es la misma que la de cualquier otro movimiento.
 INSERT INTO users (id, email, name, display_name, password_hash, role_level, email_verified, created_by, puntos)
-VALUES ('U_PLATAFORMA', 'plataforma@humanity.wiki', 'Humanity.wiki', 'Humanity.wiki (plataforma)', 'no-entra', 0, true, 'U_PLATAFORMA', 0)
+VALUES ('U_PLATAFORMA', 'plataforma@humanity.wiki', 'Wiki Creator', 'Wiki Creator (plataforma)', 'no-entra', 0, true, 'U_PLATAFORMA', 0)
 ON CONFLICT (id) DO NOTHING;
 
 -- El motivo del apunte de comisión (positivo en la cuenta de la plataforma;

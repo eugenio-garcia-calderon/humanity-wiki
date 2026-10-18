@@ -289,15 +289,15 @@
 - **`AIAssistant.tsx`**: botón "Adjuntar" junto al de Internet, con vista previa (nombre + icono según tipo) y opción de quitar antes de enviar; validación del mismo límite en el cliente para no esperar al servidor con archivos claramente inválidos.
 - **Verificado de extremo a extremo, incluida la interfaz real**: se generó una imagen PNG de prueba (rectángulo rojo a la izquierda, azul a la derecha) y se adjuntó desde el propio panel del asistente en el navegador — la respuesta describe correctamente ambos colores y su disposición; comprobado en la base de datos que `ai_messages.content` solo contiene `[Adjunto: test.png]`, nunca el binario. Probado también el rechazo de tipos no admitidos (`application/x-msdownload`) con mensaje de error claro.
 
-### 2026-08-05 — FASE 11: Grafos de Conocimiento, renombrado a "Humanity.wiki" y reestructuración del layout
-- **Petición del usuario** (con boceto en servilleta + dos capturas de referencia): nueva forma de acceder al conocimiento — lienzos curados de "Ventanas de Conocimiento" conectadas, invocables desde un chat/buscador inferior siempre desplegado; la plataforma pasa a llamarse **Humanity.wiki**. Decisiones fijadas por AskUserQuestion: Grafos como INICIO (/), menú superior global, canvas libre (React Flow), creación abierta a nivel 1.
+### 2026-08-05 — FASE 11: Grafos de Conocimiento, renombrado a "Wiki Creator" y reestructuración del layout
+- **Petición del usuario** (con boceto en servilleta + dos capturas de referencia): nueva forma de acceder al conocimiento — lienzos curados de "Ventanas de Conocimiento" conectadas, invocables desde un chat/buscador inferior siempre desplegado; la plataforma pasa a llamarse **Wiki Creator**. Decisiones fijadas por AskUserQuestion: Grafos como INICIO (/), menú superior global, canvas libre (React Flow), creación abierta a nivel 1.
 - **Modelo de datos** (migraciones 0012 y 0013): `knowledge_graphs` (tema, creador, `trigger_keywords`, estado, vistas), `knowledge_windows` (REUTILIZABLES entre grafos, 13 tipos con CHECK), `graph_windows` (posición x/y por grafo — la memoria espacial), `graph_edges` (7 relaciones tipadas con CHECK: contexto/causa/dato/fuente/**apoya/contradice/matiza** — la controversia mapeada honestamente), `ratings` 0-10 polimórfica, `graph_entity_links` (anclaje al grafo general con trata_sobre/afecta_a/se_apoya_en), y comentarios polimórficos (backfill de 6 filas, publication_id ahora nullable).
 - **Mejores prácticas KG** (petición explícita mid-build, captura de Couchbase): los seis componentes canónicos quedan cubiertos — entidades (NODE_TYPES), identificadores (id+uuid+slug), atributos (config jsonb + auditoría), relaciones (aristas tipadas), **ontología aplicada en BD** (CHECKs, migración 0013) e **inferencia** (grafos relacionados derivados de entidades compartidas, sin enlace manual). Documento normativo nuevo: `docs/12_KNOWLEDGE_GRAPHS.md`.
 - **Backend** `src/server/knowledge.ts`: CRUD de grafos/ventanas/aristas/anclajes, `GET /api/graphs/resolve` (fast-path por keywords normalizadas, SIN gastar IA), `POST /api/rate`, comentarios genéricos `/api/comments`, contadores de vistas, permisos creador-o-admin. Integrado en NODE_TYPES/LINKABLE/ENTITY_TABLES/reindex.
 - **IA**: evento `OPEN_KNOWLEDGE_GRAPH` + acción `CREATE_KNOWLEDGE_GRAPH` (borradores marcados is_ai_generated con hasta 12 ventanas, pendientes de publicación humana); los grafos publicados viajan en el system prompt para enrutado semántico.
 - **Layout global**: menú+marca+buscador+ajustes fusionados en barra superior única; barra inferior eliminada; `?embed=1` renderiza sin chrome (para incrustar el mapa dentro de ventanas). `AIAssistant` gana modo `bar`: chat centrado abajo siempre desplegado en las páginas de Grafos, con chips de grafos coincidentes al escribir y fast-path que abre el grafo sin llamada a la IA.
 - **Páginas**: `/` (índice de grafos con autor/valoración/vistas/ventanas) y `/grafos/:slug` (canvas @xyflow/react 12 — instalado con --legacy-peer-deps por el conflicto preexistente de react-simple-maps con React 19): nodo central, ventanas-miniatura con metadatos, aristas coloreadas por relación (contradice roja y animada), arrastre persistido para el creador, panel lateral derecho con contenido completo + valoración 0-10 + comentarios, chips de ontología y grafos relacionados.
-- **Renombrado**: "Red Humana" → "Humanity.wiki" en 25 archivos de src/docs + index.html (cuyo título seguía siendo "My Google AI Studio App"). Las entradas históricas de este changelog se conservan tal cual.
+- **Renombrado**: "Red Humana" → "Wiki Creator" en 25 archivos de src/docs + index.html (cuyo título seguía siendo "My Google AI Studio App"). Las entradas históricas de este changelog se conservan tal cual.
 - **Grafo demo** `ceuta-frontera-amenazada` (seed idempotente `src/db/seed-grafo-ceuta.ts`): 10 ventanas de 9 tipos, 12 aristas, creado por **Eugenio García-Calderón Huerta** (perfil actualizado); autor-sistema `U_IA_CONOCIMIENTO` firma el contenido redactado por IA (marcado pendiente de revisión); mapa de EOM descargado de la fuente original con crédito a Abel Gil Lobo; cita EXACTA del informe del comité del Senado de EE. UU. con traducción y contexto, conectada con `contradice` al análisis jurídico que presenta también la posición marroquí; vídeo de YouTube embebido; ficha de Wikipedia vía API REST; mapa de indicadores propio incrustado (`/mapa?embed=1&territorio=ceuta`); anclado a T032/O005/O012.
 - **Fallo de atribución encontrado y corregido al verificar**: el canal del vídeo no era "Memorias de Pez" (mi suposición desde el boceto) sino "La Mecedora (Ignacio Sarmiento)" — visible en el embed real. Corregido en seed y BD. Recordatorio de por qué se verifica todo en vivo.
 - **Verificado en navegador**: portada nueva con marca y tarjeta del grafo (★8.5, 4 votos); escribir "Ceuta frontera amenaza" en la barra muestra el chip y abre el lienzo sin IA (resolve score 12, confident); canvas con arista roja animada "réplica jurídica"; panel del documento de EE. UU. con cita+traducción+contexto; voto 9 desde el eslider (POST /api/rate 200, media 9.0→ actualizada en nodo y panel); vídeo real embebido; pregunta a la IA SIN palabras clave literales ("conflicto de soberanía de la ciudad española del norte de África") → emite OPEN_KNOWLEDGE_GRAPH con el slug correcto; /mapa y Muro intactos con el menú arriba; reindexado (545 fragmentos).
@@ -312,7 +312,7 @@
 - **La IA responde a cada comentario humano** (`aiReplyToComment`, en 2º plano, firma U_IA_CONOCIMIENTO): reconoce lo válido, aporta UN matiz o corrección amable con base, nunca se responde a sí misma ni bloquea el comentario. Verificado con un comentario deliberadamente desinformado («EEUU ya reconoce oficialmente que Ceuta es de Marruecos») → la IA respondió distinguiendo el sentido geográfico del reconocimiento formal. En la interfaz, sus comentarios llevan avatar degradado + Sparkles, y la lista se recarga a los 5/12 s del envío.
 - **Verificado de extremo a extremo en navegador**: fusión central + 9 círculos + 21 aristas renderizados; botones Ventana/Conectar visibles para el creador; pop-up de ventana abre/cierra con clic fuera y X; la pregunta del usuario en la barra abre el pop-up correcto con chips de grafos.
 
-### 2026-08-05 — Fase 12: modelos con facturación, límites por nivel, productos en grafos, mapas de usuario, dictado por voz — y renombrado a HUMANITY.WIKI
+### 2026-08-05 — Fase 12: modelos con facturación, límites por nivel, productos en grafos, mapas de usuario, dictado por voz — y renombrado a WIKI CREATOR
 - **Renombrado definitivo**: el usuario compró el dominio **humanity.wiki** — la plataforma pasa a llamarse así en los 32 archivos web/docs, la marca del header es `humanity.wiki`, el `<title>`, package.json (`humanity-wiki`) y el REPOSITORIO de GitHub: ahora es `eugeniogarcia30-cmd/humanity-wiki` (GitHub prohíbe nombres acabados en `.wiki`; la URL antigua redirige automáticamente). Visión declarada: superar a Wikipedia como la página más visitada en 10-20 años. "Grafos de Conocimiento" e "IA de Conocimiento" se conservan como nombres de producto/autor.
 - **Selector de modelo + facturación (petición del usuario)**: catálogo `AI_MODELS` en provider.ts (Haiku 4.5 $1/$5, Sonnet 5 $3/$15, Opus 5 $5/$25, Fable 5 $10/$50 por millón de tokens, en céntimos € con convención 1$≈1€) + `AI_PLATFORM_FEE = 0.5`. El usuario elige modelo en la Configuración del asistente (con precios visibles), el body de /api/ai/chat lleva `model` (validado contra el catálogo), y cada respuesta muestra su coste real: "0,0054 € · Haiku 4.5 · incl. comisión de la plataforma". Tabla `ai_usage_charges` (migración 0016): coste Anthropic + 50% comisión + total por llamada, con `settled_at` para cuando se cobre; `GET /api/ai/usage` devuelve saldo pendiente y últimas llamadas. Verificado en vivo: 2 llamadas Haiku → 1,03 cts pendientes.
 - **Límites por nivel (petición)**: `graphLimitReached()` — nivel 1 (Usuario) máx. 5 grafos y 5 mapas; nivel 2+ (Verificado) sin límite. Aplicado en CREATE_KNOWLEDGE_GRAPH, CREATE_MAP, POST /api/graphs y POST /api/maps con mensaje claro invitando a verificar la cuenta.
@@ -345,7 +345,7 @@
 - **Página Grafos (petición)**: botón grande «Crear grafo» (CreateGraphModal; abierta a nivel 1 — verificado que nunca hubo gate de nivel 2 en backend) y tarjetas con PORTADA: primera imagen del grafo o miniatura del primer vídeo (cover_image/cover_video_id en GET /api/graphs), con degradado+Network de respaldo.
 
 ### 2026-08-06 — Fase 16: barra mínima, páginas-grafo, identidad de RETO y el chat como creador real de grafos
-- **Barra superior mínima (petición)**: fuera el menú hamburguesa y el buscador global; marca «Humanity Wiki» (dos mayúsculas), botones Mapa y Grafos con estado activo, y el chat de IA de abajo como única puerta al resto.
+- **Barra superior mínima (petición)**: fuera el menú hamburguesa y el buscador global; marca «Wiki Creator» (dos mayúsculas), botones Mapa y Grafos con estado activo, y el chat de IA de abajo como única puerta al resto.
 - **La página de Grafos ES un grafo (petición)**: `MetaGraphCanvas` (nuevo, reutilizable) — nodo central «RETOS DE ESPAÑA» (rojo si todos los grafos son retos), cada grafo como tarjeta conectada con portada/chip/stats, nodo «+» punteado y botón flotante «Crear grafo». Clic en tarjeta → el grafo.
 - **Página /mapas como grafo de mapas (petición)**: centro «MAPAS de la Humanidad» (azul), nodo destacado del Mapa de Indicadores de la Humanidad (de Eugenio) → /mapa, los user_maps conectados → /mapas/:slug, nodo «Crear tu mapa» que PRE-RELLENA el chat («Crea un mapa de …», evento window `ai:prefill`). Píldora en /mapa: «Todos los mapas» → /mapas.
 - **Identidad de RETO (petición)**: R021 «Presión sobre la frontera sur» creado y anclado al grafo de Ceuta (local+producción); `is_reto` en GET /api/graphs; chip rojo «Reto» + borde rojo en tarjetas; chip «RETO» con llama y acento rojo en el CENTRO de cada grafo de reto (ambas formas: categoría y fusión). R021 → grafo en CHALLENGE_GRAPH_SLUG.
@@ -529,7 +529,7 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 - **Capa de proveedor extendida a Google Gemini** (`src/server/ai/provider.ts`): `GeminiProvider implements AIProvider` habla por REST con `generativelanguage.googleapis.com/v1beta`; `providerOfModel(model)` enruta por el prefijo `gemini-`. El resto del sistema sigue sin conocer el SDK concreto, tal y como pide `docs/`. Catálogo `AI_MODELS` ampliado con `gemini-flash-latest` y `gemini-pro-latest` — alias «-latest» y no una versión fechada, porque Google bloquea los IDs con fecha para claves nuevas ("no longer available to new users"); comprobado en vivo contra `GET /v1beta/models` con la clave real.
 - **Nano Banana (`gemini-2.5-flash-image`) elegible en el selector de modelos del chat**, con `image: true` en su entrada del catálogo para que el frontend le muestre «por imagen» en vez de un precio por millón de tokens que no le corresponde. `generarImagenNanoBanana(prompt)` es una función aparte de `AIProvider.complete()` (que es texto→texto) porque pide `generationConfig.responseModalities:['IMAGE']` — no encajaba en la interfaz sin forzarla. `POST /api/ai/chat` detecta el modelo elegido antes de tocar el proveedor de texto, genera la imagen, la guarda con `guardarArchivo` (mismo almacén que una imagen pegada a mano) y la devuelve como `imageUrl`; `AIAssistant.tsx` la pinta con un `<img>` dentro de la burbuja de respuesta. Coste no facturado todavía (`ai_usage_charges` con todos los campos de coste a 0, tipo `'imagen'`) — hueco conocido, no un error.
 - **Textos de Visión editables por el administrador**: tabla `page_texts` (`pagina`, `clave`, `valor` — migración 0025) + `GET/PUT /api/textos/:pagina/:clave` en `roadmap.ts` (el PUT exige `requireAdmin`). `TextoEditable` en `Vision.tsx` muestra un lápiz al pasar el ratón solo para `eugenio@lighthumanity.org`, con textarea y Guardar/Cancelar. Se añadió el párrafo de estrategia pedido («agregar todas las herramientas… una sola base de conocimiento universal») como uno de estos textos, no como copia fija.
-- **Sistema de Puntos de Humanity.wiki** (migración 0026): `users.puntos numeric(12,2) DEFAULT 100` — al ser un `ALTER TABLE` con `DEFAULT`, Postgres (PG11+) lo aplica también a las filas ya existentes sin un `UPDATE` aparte («fast default»), así que los 7 usuarios de entonces y cualquiera nuevo arrancan con 100 puntos sin backfill. `movimientos_puntos` es el libro mayor (motivo `regalo_bienvenida`/`compra`/`vista_publicacion`/`gasto_ia`/`ajuste_admin`); `otorgarPuntos()` en `src/server/puntos.ts` es el ÚNICO sitio que toca `users.puntos`, siempre junto con su fila de movimiento. Los puntos llevan decimales: ver una publicación pública ajena abona 0,01 puntos a quien la creó (`POST /api/windows/:id/view`). Compra de 100 puntos por 100€ vía Stripe Checkout embebido (`POST /api/stripe/checkout/puntos`, reutilizando `EmbeddedCheckoutModal`), acreditados solo en el webhook `checkout.session.completed` — nunca al crear la sesión, para no abonar pagos abandonados. Pestaña «Economía» nueva en `/vision` con saldo, botón de compra y movimientos recientes, con sus textos también editables vía `page_texts`.
+- **Sistema de Puntos de Wiki Creator** (migración 0026): `users.puntos numeric(12,2) DEFAULT 100` — al ser un `ALTER TABLE` con `DEFAULT`, Postgres (PG11+) lo aplica también a las filas ya existentes sin un `UPDATE` aparte («fast default»), así que los 7 usuarios de entonces y cualquiera nuevo arrancan con 100 puntos sin backfill. `movimientos_puntos` es el libro mayor (motivo `regalo_bienvenida`/`compra`/`vista_publicacion`/`gasto_ia`/`ajuste_admin`); `otorgarPuntos()` en `src/server/puntos.ts` es el ÚNICO sitio que toca `users.puntos`, siempre junto con su fila de movimiento. Los puntos llevan decimales: ver una publicación pública ajena abona 0,01 puntos a quien la creó (`POST /api/windows/:id/view`). Compra de 100 puntos por 100€ vía Stripe Checkout embebido (`POST /api/stripe/checkout/puntos`, reutilizando `EmbeddedCheckoutModal`), acreditados solo en el webhook `checkout.session.completed` — nunca al crear la sesión, para no abonar pagos abandonados. Pestaña «Economía» nueva en `/vision` con saldo, botón de compra y movimientos recientes, con sus textos también editables vía `page_texts`.
 - **Verificado**: `GET /api/ai/status` devuelve los 7 modelos incluyendo Nano Banana; `POST /api/ai/chat` con `model:"gemini-2.5-flash-image"` genera un PNG real servido en `/uploads/...` (200 OK); en el navegador, elegir Nano Banana en el panel de ajustes del chat cambia el placeholder a «Describe la imagen que quieres generar…» y el resultado aparece inline en la conversación. Pendiente: migrar 0025/0026 a producción y añadir `GEMINI_API_KEY` al `.env.production`.
 
 ### 2026-08-08 — Carpeta que no se pierde, lienzo personal publicable, cuadro de gasto, Explorar compacto
@@ -614,7 +614,7 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 - Dos proyectos reales creados en la BD local durante la prueba («Camión camperizado», «Aldea Regenerativa») — son de verdad del usuario y se quedan.
 
 ### 2026-08-18 — Juego Vital: builder tipo Los Sims, agentes con memoria y chat por interlocutor
-- **El fallo que lo motivó todo** (reportado por el usuario con la conversación delante): al pedirle al robot «hazme la entrevista fundacional», respondía como el asistente genérico de la plataforma — una entrevista sobre territorios y retos. Causa: `/juego` no mandaba NADA en el `context` del asistente, así que el modelo no sabía que estaba dentro de un juego. Arreglado con un bloque de sistema propio (`ctx.juego` en `buildSystemPrompt`): dentro del juego el modelo ya no es «el asistente de Humanity.wiki», es el robot del jugador o el agente con el que habla, con guion de entrevista fundacional (áreas de vida → objetivos/proyectos/principios → inventario vital → personas clave), tono de personaje (2-5 frases, una pregunta al final) y prohibición explícita de inventar la vida del jugador. Verificado con la API real: la misma frase que fallaba ahora abre la entrevista por las áreas de vida y reconoce lo que ya hay en el mapa.
+- **El fallo que lo motivó todo** (reportado por el usuario con la conversación delante): al pedirle al robot «hazme la entrevista fundacional», respondía como el asistente genérico de la plataforma — una entrevista sobre territorios y retos. Causa: `/juego` no mandaba NADA en el `context` del asistente, así que el modelo no sabía que estaba dentro de un juego. Arreglado con un bloque de sistema propio (`ctx.juego` en `buildSystemPrompt`): dentro del juego el modelo ya no es «el asistente de Wiki Creator», es el robot del jugador o el agente con el que habla, con guion de entrevista fundacional (áreas de vida → objetivos/proyectos/principios → inventario vital → personas clave), tono de personaje (2-5 frases, una pregunta al final) y prohibición explícita de inventar la vida del jugador. Verificado con la API real: la misma frase que fallaba ahora abre la entrevista por las áreas de vida y reconoce lo que ya hay en el mapa.
 - **Builder tipo Los Sims** (petición: «que yo pueda crear personas y proyectos como en los SIMS»): barra de construcción permanente a la izquierda del mundo. Te plantas donde quieras y creas ahí una **persona** (alguien real de tu vida) o un **proyecto** — se planta a tus pies, con nombre flotando. Formulario con nombre, rol, descripción y **foto opcional** (reutiliza `/api/uploads`). Crear un proyecto crea además el **proyecto real** en la plataforma con su kanban (pilar «todo es real»).
 - **Cada cosa creada es un AGENTE con memoria propia** (migración 0029 `game_agents`; `src/server/juego.ts` con comprobación de rol y de propiedad en todas las escrituras, archivado en vez de borrado): ficha con «Lo que sabe», campo para **meterle info** que se acumula (`POST /api/juego/agentes/:id/memoria`), y su **propia conversación** (`conversation_id`). Al hablar con él, su memoria viaja en el contexto: responde como él y solo con lo que le has contado. Las personas llevan siempre la etiqueta «Representación creada por ti. No es la persona real ni habla por ella» (salvaguardas de `memory/10_JUEGO_VITAL.md`).
 - **La IA construye el mundo**: nuevo bloque `acciones_juego` en la respuesta del modelo (`{tipo, nombre, rol, descripcion}`, máx. 4). La página las crea llamando al backend —que valida rol y propiedad—, nunca el modelo directamente. Verificado: «mis áreas son Salud, Hogar y familia, Emprendimiento» devolvió las cuatro creaciones correctas.
@@ -1543,7 +1543,7 @@ exactly one step.
 
 ## 2026-08-20 — Task board, phase 1: drag between columns, rename them, a real add button
 
-Three of the nine cards Eugenio filed in his own **Humanity.Wiki** project (a
+Three of the nine cards Eugenio filed in his own **Wiki Creator** project (a
 board that lives in production, not locally).
 
 - **Drag a card from one column to another, like Trello.** HTML5 drag; the whole
@@ -1570,7 +1570,7 @@ arrow was born in `hecho`.
 
 ## 2026-08-20 — Task board, phase 2: edit the text where it is
 
-Two more of the nine cards from Eugenio's **Humanity.Wiki** board: «doble click
+Two more of the nine cards from Eugenio's **Wiki Creator** board: «doble click
 en un texto de una tarjeta para modificar el texto sin necesidad de abrirlo, y
 lo mismo cuando está abierto, sin tener que darle a los 3 puntitos. También
 hacer más grande el pop up».
@@ -1750,7 +1750,7 @@ Router unit tests: 13 cases green.
 
 ## 2026-08-20 — Task board, phase 3: tags, projects, drag-from-menu, and Áreas
 
-The last four cards of Eugenio's **Humanity.Wiki** board.
+The last four cards of Eugenio's **Wiki Creator** board.
 
 **Etiquetas editables, conectadas al filtro, con `@`.** A task's tag IS its
 `grupo` — the same thing the top filter uses and the same thing that names the
@@ -1808,7 +1808,7 @@ in projects that are yours.
 Verified live: created from the list, renamed in place, and advanced its state,
 each confirmed against the database. Test task deleted.
 
-**The Humanity.Wiki board is now complete — all nine cards.**
+**The Wiki Creator board is now complete — all nine cards.**
 
 ## 2026-08-20 — Four bugs Eugenio hit, fixed
 
@@ -1898,7 +1898,7 @@ prompt line: if asked what failed, tell them THIS.
 
 **3. It had no action to create a task.** The catalogue had challenges, maps and
 graphs but nothing for the platform's own daily objects — so «añade una tarea al
-proyecto Humanity.wiki» was impossible. Added `CREATE_TAREA`, `UPDATE_TAREA`,
+proyecto Wiki Creator» was impossible. Added `CREATE_TAREA`, `UPDATE_TAREA`,
 `CREATE_PROYECTO` and `CREATE_PAGINA`, all resolving names the way a person says
 them («en el Camión camperizado») against **that user's own** rows.
 
@@ -3091,7 +3091,7 @@ reactions, saves, reports, notifications and the follow, all back to zero.
 - **Icons 25% bigger on a phone** (22 px in a 34 px target), unchanged above
   640 px where a mouse aims for you. The bar itself is 44 px, down from 52.
 - **The menu button is back on the left**, with the logo to its left, and the
-  words «Menú» and «Humanity Wiki» are gone: three lines is the most recognised
+  words «Menú» and «Wiki Creator» are gone: three lines is the most recognised
   icon on a screen, and the name was taking the width the open windows need.
   Both names stay in `title`/`aria-label`.
 
@@ -7102,9 +7102,9 @@ pega como siempre. El adjunto y la sesión de prueba, borrados.
 
 ### El nombre vuelve a ser humanity.wiki
 
-Eugenio: «vuelve a poner humanity wiki como nombre del proyecto y cambiarlo
+Eugenio: «vuelve a poner wiki creator como nombre del proyecto y cambiarlo
 donde ponga red de conocimiento […] salvo en la portada, que también pon
-humanity wiki en grande y debajo pon la red de conocimiento».
+wiki creator en grande y debajo pon la red de conocimiento».
 
 El reparto es el que dice la frase, y tiene sentido más allá de la orden: **la
 barra identifica y la portada explica**. Arriba va el nombre a secas —que además
@@ -7122,7 +7122,7 @@ productos.
 
 El verde sigue siendo el `emerald-600` de siempre y ahora lo lleva `.wiki`
 (`emerald-400` sobre fondo negro, como antes). `index.html` ya decía
-`Humanity.wiki`: no había que tocarlo, y por eso la barra del navegador era lo
+`Wiki Creator`: no había que tocarlo, y por eso la barra del navegador era lo
 único que llevaba semanas diciendo la verdad.
 
 ## 2026-08-25 — Tres barras, tres preguntas
@@ -7913,7 +7913,7 @@ de datos. Todo son páginas dentro de páginas».
 ## 2026-09-30 — Published pages become real websites (prog8)
 
 Eugenio: when a shared page was opened from its own link it looked clean, but
-clicking a database item dropped the reader into the full Humanity Wiki app;
+clicking a database item dropped the reader into the full Wiki Creator app;
 the author name showed by default. He asked for a deep restructure so the page
 builder works as a white-label website builder, plus five things a serious one
 needs.
@@ -8390,15 +8390,15 @@ estrecho, sin el interruptor de IA y con «Buscar contenido…».
 Eugenio: «el logo como YouTube: a la izquierda, y al desplegar el menú se
 mantiene en su sitio; sólo botón de inicio, sin desplegable; Humanity con H y
 Wiki con W. Las páginas del desplegable, fuera, salvo avisos legales y Sobre
-Humanity Wiki, que van a un footer en todas las páginas. Tokenomics, guárdala
+Wiki Creator, que van a un footer en todas las páginas. Tokenomics, guárdala
 en mis páginas como proyecto pendiente».
 
-- `navegacion/Logo.tsx`: «Humanity.Wiki», home only. Drawn in the top bar when
+- `navegacion/Logo.tsx`: «Wiki Creator», home only. Drawn in the top bar when
   the left menu is folded (or absent) and in the left menu's top row when it is
   open — measured on the same pixel in both states (x 8, y 20). `Rail` now puts
   `junto` first on both sides. The brand dropdown and its state are gone.
 - `layout/PieLegal.tsx`: a fixed 24 px footer between the side menus on every
-  page — Sobre Humanity.Wiki · Avisos legales · Privacidad. `<main>` reserves
+  page — Sobre Wiki Creator · Avisos legales · Privacidad. `<main>` reserves
   its height; the floating IA and Feedback buttons sit above it.
 - `paginasInfo.ts` keeps only Sobre, Avisos legales, Privacidad, Borrar cuenta
   and Administración. No longer mounted: Veracidad, Tokenomics, Puntuación de
@@ -8760,12 +8760,12 @@ en mis páginas como proyecto pendiente».
 - Si la página tiene un dominio propio **activo** (los pendientes aún no sirven la web), la medición va por ese dominio, como la ven sus visitantes. Si no, por la dirección de la página en humanity.wiki. Cada medición guarda a qué dirección corresponde (`destino`, migración `0151`), y la comparación solo se hace con mediciones del mismo sitio.
 - Probado en local: sin dominio, mide la página; con un dominio activo de prueba, intenta medir por ese dominio y avisa cuando no responde. La medición real por un dominio conectado no se ha podido probar aquí.
 
-### 2026-10-13 — Nuevo logo y favicón de Humanity.wiki (prog8)
+### 2026-10-13 — Nuevo logo y favicón de Wiki Creator (prog8)
 - `public/logo.svg` (favicón y logo de los sitios) y los iconos de la app (`public/iconos/`, 180/192/512 y maskable) con el nuevo logo: círculo azul noche, anillo amarillo partido en cuatro arcos y núcleo amarillo.
 - **Redibujado a partir de la imagen enviada en el chat, no del fichero original**: sustituir por el original cuando se tenga.
-- La cabecera de la app sigue siendo solo el texto «Humanity.Wiki»; la marca no aparece ahí.
+- La cabecera de la app sigue siendo solo el texto «Wiki Creator»; la marca no aparece ahí.
 
-### 2026-10-13 — Logo y favicón de Humanity.wiki: el original enviado por Eugenio (prog8)
+### 2026-10-13 — Logo y favicón de Wiki Creator: el original enviado por Eugenio (prog8)
 - `public/logo.png` es el logo original enviado por Eugenio (PNG de 128×128). Sustituye al SVG anterior en el favicón (`index.html`), en el menú lateral, en las notificaciones y en la precarga del service worker. Los iconos de la app (`public/iconos/`) se generan a partir de él, con fondo azul noche; el original es de 128 píxeles, así que los de 512 salen algo suaves.
 - Se quitan los SVG fuente anteriores. Un redibujo hecho por error llegó a producción unos minutos y se revirtió (PR #562).
 

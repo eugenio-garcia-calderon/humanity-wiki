@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// TOKENOMICS DE HUMANITY.WIKI (2026-08-22, Eugenio / Programador 7)
+// TOKENOMICS DE WIKI CREATOR (2026-08-22, Eugenio / Programador 7)
 // ============================================================================
 // The PUBLIC page that explains the platform's point: what exists today, what
 // is declared intention, and what the point will never be. Eugenio asked for
@@ -121,7 +121,7 @@ export default function Tokenomics() {
         <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-600 mb-3">
           <Coins className="w-3.5 h-3.5" /> Tokenomics
         </p>
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight font-display mb-4">El punto de Humanity.wiki</h1>
+        <h1 className="text-4xl font-bold text-slate-900 tracking-tight font-display mb-4">El punto de Wiki Creator</h1>
         <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
           Un <strong className="text-slate-900">crédito de uso</strong> de los servicios de la
           plataforma. Esta página cuenta dos cosas y las separa siempre:
@@ -440,7 +440,7 @@ export default function Tokenomics() {
 
       <div className="pt-2">
         <Link to="/sobre-red-humana" className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
-          Sobre Humanity.wiki <ArrowRight className="w-4 h-4" />
+          Sobre Wiki Creator <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>

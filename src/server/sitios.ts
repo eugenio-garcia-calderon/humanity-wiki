@@ -1,7 +1,7 @@
 // ============================================================================
 // SITIOS PUBLICADOS (2026-09-30)
 // ============================================================================
-// Eugenio: «que Humanity Wiki sea como un constructor de páginas web que
+// Eugenio: «que Wiki Creator sea como un constructor de páginas web que
 // permite ser oculto, donde no hay ninguna referencia a la infraestructura en
 // esa página cuando está publicada y se accede desde un dominio propio, un
 // subdominio o una URL corta. De esta manera puede compartir sin miedo a que
@@ -22,7 +22,7 @@
 //   2. LA VISTA PREVIA AL COMPARTIR. WhatsApp, LinkedIn o Google no ejecutan
 //      JavaScript: leen el HTML tal cual llega. Si el título, la descripción y
 //      la imagen se ponen desde el navegador, el enlace compartido sale como
-//      «Humanity.wiki» con nuestro logo. Aquí se escriben dentro del HTML antes
+//      «Wiki Creator» con nuestro logo. Aquí se escriben dentro del HTML antes
 //      de mandarlo.
 //
 //   3. SITEMAP Y ROBOTS POR DOMINIO. Un sitio con dominio propio necesita que

@@ -331,7 +331,7 @@ async function traer(crudo: string) {
       redirect: 'follow',
       headers: {
         // Un agente honesto: decimos quiénes somos en vez de disfrazarnos.
-        'User-Agent': 'Mozilla/5.0 (compatible; HumanityWiki/1.0; +https://humanity.wiki)',
+        'User-Agent': 'Mozilla/5.0 (compatible; WikiCreator/1.0; +https://humanity.wiki)',
         'Accept': 'text/html,application/xhtml+xml,image/*,*/*;q=0.8',
         'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
       },

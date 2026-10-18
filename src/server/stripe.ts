@@ -233,7 +233,7 @@ export function registerStripeRoutes(app: Express, db: any) {
         line_items: [{
           price_data: {
             currency: 'eur',
-            product_data: { name: 'Apoyo a un creador de Humanity.wiki' },
+            product_data: { name: 'Apoyo a un creador de Wiki Creator' },
             unit_amount: amount_cents,
             ...(recurring ? { recurring: { interval: period === 'anual' ? 'year' : 'month', interval_count: period === 'trimestral' ? 3 : 1 } } : {}),
           },
@@ -265,7 +265,7 @@ export function registerStripeRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
-  // PUNTOS DE HUMANITY.WIKI — comprar más saldo (2026-08-08, petición del usuario)
+  // PUNTOS DE WIKI CREATOR — comprar más saldo (2026-08-08, petición del usuario)
   // ==========================================================================
   /** 100 puntos por 100 €: el paquete que pidió el usuario, de momento el único. */
   const PAQUETE_PUNTOS = { puntos: 100, amount_cents: 10000 };
@@ -280,7 +280,7 @@ export function registerStripeRoutes(app: Express, db: any) {
         line_items: [{
           price_data: {
             currency: 'eur',
-            product_data: { name: `${PAQUETE_PUNTOS.puntos} Puntos de Humanity.wiki` },
+            product_data: { name: `${PAQUETE_PUNTOS.puntos} Puntos de Wiki Creator` },
             unit_amount: PAQUETE_PUNTOS.amount_cents,
           },
           quantity: 1,

@@ -220,7 +220,7 @@ function EditorPagina() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState<string | null>(null);
-  /** Dónde se ve publicada: su dominio propio, o su dirección en Humanity Wiki. */
+  /** Dónde se ve publicada: su dominio propio, o su dirección en Wiki Creator. */
   const [urlPublicada, setUrlPublicada] = useState<string | null>(null);
   /** Si esta página es una fila de una base de datos: de cuál y dónde vive. */
   const [filaDe, setFilaDe] = useState<{ fila_id?: string; tabla_id?: string; tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
