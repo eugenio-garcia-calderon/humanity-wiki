@@ -35,6 +35,12 @@
       "ruta": "drizzle/0156_expertos_soporte.sql",
       "motivo": "W6: migración hasta fusionar #590",
       "desde": "2026-10-18T12:28:19.677Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "W2: R2 direcciones legibles",
+      "desde": "2026-10-18T12:29:57.158Z"
     }
   ]
 }
