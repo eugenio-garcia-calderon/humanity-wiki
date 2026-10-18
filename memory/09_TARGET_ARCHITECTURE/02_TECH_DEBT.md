@@ -463,3 +463,7 @@ threshold, checked only on that null path here).
 - **Cost:** a block that *wants* a light grey on a published site cannot have it (a `hover:` colour on those elements is also overridden). The right fix is to stop using slate-300/400 for text in reading components; that is a grep-and-replace over ~30 files (about an hour now, more as blocks multiply). When that is done, delete the rule.
 ### 2026-10-18 — Order e-mail picks the seller's site by "exactly one active domain" (W5)
 - `correosDelPedido` links to the seller's site only when they own exactly one active domain; with several it falls back to the main domain, because the order does not record which site the buyer was on. Right fix: store the checkout's return host on `pedidos` and link back there; ~30 min (column + webhook + e-mail).
+
+## Shop shipping rule is shown, not counted (W5, 2026-10-18)
+- `textoEnvioTienda` shows «Envío 4,99 €, gratis desde 50 €» when an offer has no `envio` of its own, but `totalOferta` and `ordenarOfertas` still treat that offer's shipping as unknown (counted as 0, sorted after known ones). Accepted because the order rule is the ethics code's and changing it deserves its own PR and test.
+- Right fix: derive `envio_centimos` server-side from the shop rule and the price, flagged as derived, and let the cart use the same value. About 1 h today; grows with every place that reads `envio_centimos` (today 4).
