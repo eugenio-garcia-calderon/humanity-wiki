@@ -19,6 +19,12 @@ export type Experto = {
   proximo?: string | null; huecosLibres?: number;
 };
 type Hueco = { inicio: string; fin: string };
+type Lista = { sitio: string; equipo: boolean; soyExperto: boolean; pagosActivos: boolean; pagosEnPruebas?: boolean; expertos: Experto[] };
+
+/** ¿Se puede llegar al pago de este experto? Con la clave de pruebas de
+ *  Stripe una tarjeta de verdad se rechaza: sólo el equipo prueba (con 4242). */
+const sePuedePagar = (l: Lista, e: Experto) => !e.precioCentimos || (l.pagosActivos && (!l.pagosEnPruebas || l.equipo));
+const PRONTO = 'Muy pronto podrás reservar y pagar aquí.';
 
 /**
  * EL BLOQUE «RESERVAR EXPERTO» (3.12 del plan de Wikiproducts).
@@ -33,7 +39,7 @@ type Hueco = { inicio: string; fin: string };
 export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
   const d = datos as DatosExperto;
   const ids = (Array.isArray(d.expertos) ? d.expertos : []).filter(x => typeof x === 'string');
-  const [lista, setLista] = useState<{ sitio: string; equipo: boolean; soyExperto: boolean; pagosActivos: boolean; expertos: Experto[] } | null>(null);
+  const [lista, setLista] = useState<Lista | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [elegido, setElegido] = useState<Experto | null>(null);
   const [gestionar, setGestionar] = useState(false);
@@ -99,6 +105,11 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
 
       {gestionar && <Gestion paginaId={paginaId} onCambio={cargar} />}
 
+      {lista.equipo && lista.pagosActivos && lista.pagosEnPruebas && lista.expertos.some(e => e.precioCentimos > 0) && (
+        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+          Stripe está con una clave de pruebas: los visitantes ven «{PRONTO}» en lugar de reservar. Tú puedes probar el pago con la tarjeta 4242 4242 4242 4242.
+        </p>
+      )}
       {!lista.pagosActivos && lista.expertos.some(e => e.precioCentimos > 0) && (
         <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
           Los pagos todavía no están activados en este servidor: se pueden ver los expertos y sus horarios, pero no reservar consultas de pago.
@@ -130,9 +141,9 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
               {e.bio && <p className="mt-2 line-clamp-4 whitespace-pre-line text-sm text-slate-600">{e.bio}</p>}
               <Comision experto={e} />
               <div className="mt-auto flex items-center gap-2 pt-3">
-                <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres}>Ver horarios</Button>
+                <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres || !sePuedePagar(lista, e)}>Ver horarios</Button>
                 <span className="text-xs text-slate-500">
-                  {e.proximo ? `Próximo hueco: ${new Date(e.proximo).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'Sin huecos libres en las próximas tres semanas'}
+                  {!sePuedePagar(lista, e) && lista.pagosActivos ? PRONTO : e.proximo ? `Próximo hueco: ${new Date(e.proximo).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'Sin huecos libres en las próximas tres semanas'}
                 </span>
               </div>
             </li>
@@ -149,7 +160,7 @@ export default function ReservarExperto({ datos, paginaId }: PropsLectura) {
  * reserva que en la página de expertos.
  */
 function Compacto({ d, lista, paginaId, vuelta, elegido, setElegido, cargar }: {
-  d: DatosExperto; lista: { equipo: boolean; pagosActivos: boolean; expertos: Experto[] }; paginaId: string;
+  d: DatosExperto; lista: Lista; paginaId: string;
   vuelta: { estado: string; conversacion?: string; mensaje?: string } | null;
   elegido: Experto | null; setElegido: (e: Experto | null) => void; cargar: () => Promise<void>;
 }) {
@@ -183,7 +194,9 @@ function Compacto({ d, lista, paginaId, vuelta, elegido, setElegido, cargar }: {
                   {!e.huecosLibres && ' · sin huecos libres en las próximas tres semanas'}
                 </p>
               </div>
-              <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres || (!!e.precioCentimos && !lista.pagosActivos)}>Elegir hora</Button>
+              {sePuedePagar(lista, e)
+                ? <Button onClick={() => setElegido(e)} disabled={!e.huecosLibres}>Elegir hora</Button>
+                : <span className="text-xs text-slate-500">{PRONTO}</span>}
             </li>
           ))}
         </ul>

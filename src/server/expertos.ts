@@ -65,6 +65,12 @@ import { sitioDePagina } from './sitios.js';
 const nuevoId = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,}$/i;
 const MINUTOS_PARA_PAGAR = 30;
+
+/** Con una clave de PRUEBAS de Stripe, una tarjeta de verdad se rechaza al
+ *  pagar (2026-10-18: producción abrió con `sk_test`). A un visitante no se le
+ *  lleva a un pago que va a fallar; el equipo del sitio sí puede probarlo con
+ *  la tarjeta 4242. Lo mismo que hace la cesta (`/api/publicar/cobro`, W5). */
+const pagosEnPruebas = () => (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test');
 const MONEDAS = ['EUR', 'USD', 'GBP'];
 
 /** Reservar: cinco seguidas gratis por IP y cuenta, después 30 s, 60… hasta
@@ -448,7 +454,7 @@ export function registrarExpertos(app: Express, db: any) {
         SELECT 1 FROM expertos WHERE raiz_id = ${s.raiz} AND user_id = ${req.user.id} AND archived_at IS NULL
       `)).rows.length > 0;
       res.set('Cache-Control', 'private, no-store');
-      res.json({ raiz: s.raiz, sitio: s.nombre, equipo, soyExperto, pagosActivos: !!process.env.STRIPE_SECRET_KEY, expertos });
+      res.json({ raiz: s.raiz, sitio: s.nombre, equipo, soyExperto, pagosActivos: !!process.env.STRIPE_SECRET_KEY, pagosEnPruebas: pagosEnPruebas(), expertos });
     } catch (e: any) {
       console.error('expertos sitio:', e);
       res.status(500).json({ error: e.message });
@@ -498,6 +504,9 @@ export function registrarExpertos(app: Express, db: any) {
       const importe = Number(e.precio_centimos) || 0;
       if (importe > 0 && !process.env.STRIPE_SECRET_KEY) {
         return res.status(503).json({ error: 'Los pagos no están activados en este servidor todavía (falta la clave de Stripe).' });
+      }
+      if (importe > 0 && pagosEnPruebas() && !(await esEquipo(db, req, e.raiz_id))) {
+        return res.status(503).json({ error: 'Muy pronto podrás reservar y pagar aquí. Todavía no se pueden pagar consultas.' });
       }
       void ritmo(db, REGLA_RESERVAR, ipDe(req), c.userId);
 
