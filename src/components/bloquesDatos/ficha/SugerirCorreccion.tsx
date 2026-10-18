@@ -21,16 +21,10 @@ export default function SugerirCorreccion({ paginaId }: { paginaId: string }) {
   const [texto, setTexto] = useState('');
   const [fallo, setFallo] = useState<string | null>(null);
 
-  const abrir = async () => {
-    setEstado('comprobando');
-    try {
-      const r = await fetch('/api/auth/me', { credentials: 'include' });
-      const j = await r.json().catch(() => ({}));
-      setEstado(j?.user ? 'abierto' : 'sinSesion');
-    } catch {
-      setEstado('sinSesion');
-    }
-  };
+  // No session check up front: `/api/auth/me` does not see a site member
+  // (`miembros.ts`, RUTAS_DE_MIEMBRO), so it would turn away exactly the
+  // people a site's «Entrar» signs in. The send answers 401 instead.
+  const abrir = () => setEstado('abierto');
 
   const enviar = async () => {
     const t = texto.trim();
@@ -44,7 +38,8 @@ export default function SugerirCorreccion({ paginaId }: { paginaId: string }) {
         body: JSON.stringify({ entity_type: 'knowledge_windows', entity_id: paginaId, reason: `${PREFIJO}: ${t.slice(0, 2000)}` }),
       });
       const j = await r.json().catch(() => ({}));
-      if (r.status === 401) { setEstado('sinSesion'); return; }
+      // Keep what they wrote: signing in reloads nothing here, they can send again.
+      if (r.status === 401) { setEstado('abierto'); setFallo('Para enviarla tienes que entrar con tu cuenta. Tu texto se queda aquí.'); return; }
       if (!r.ok) throw new Error(j.error || 'No se ha podido enviar.');
       setEstado('hecho');
     } catch (e: any) {

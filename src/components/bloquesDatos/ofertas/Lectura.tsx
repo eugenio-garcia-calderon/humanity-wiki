@@ -97,7 +97,7 @@ export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: s
                     <Store className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                     {o.distribuidor || 'Tienda sin nombre'}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-sm text-slate-600">
                     {o.nota_distribuidor !== null
                       ? `Atención al cliente: ${o.nota_distribuidor.toLocaleString('es-ES', { maximumFractionDigits: 1 })} de 5`
                       : o.votos_distribuidor
