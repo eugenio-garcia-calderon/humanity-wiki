@@ -59,7 +59,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -71,6 +71,10 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
   /** Quien edita puede recolocar la imagen de cada tarjeta, también en una galería agrupada
    *  (donde `editable` es falso para que no se reordene). Sin valor, lo que diga `editable`. */
   recolocar?: boolean;
+  /** Arrastrar tarjetas a otra base de datos o a otro grupo, aunque no se pueda reordenar (galería agrupada). Sin valor, `editable`. */
+  arrastrable?: boolean;
+  /** En una galería agrupada: soltar aquí una tarjeta de esta misma base la pasa a este grupo. */
+  alSoltarEnGrupo?: (filaId: string) => void;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
@@ -211,6 +215,8 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
     try { d = JSON.parse(e.dataTransfer.getData(MIME_FILA)); } catch { d = null; }
     if (!d?.fila || !d.tabla) return;
     e.preventDefault(); e.stopPropagation();
+    // De otro grupo de esta misma base: no se reordena, se cambia de grupo.
+    if (alSoltarEnGrupo && d.tabla === tablaId) { alSoltarEnGrupo(d.fila); return; }
     colocarAjena(d, antes);
   };
   // Esta galería se anuncia como destino posible de «Mover a…».
@@ -547,13 +553,13 @@ export default function Galeria({ onGuardarCelda, recolocar, tablaId, columnas, 
   const rejilla = (
     <div>
       <div className={cn(chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
-        onDragOver={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
+        onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
-        onDrop={editable && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
+        onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
         style={centrada
         ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
-        {filasVis.map(f => tarjeta(f, false, editable && !sitio, ordenable && editable && !sitio))}
+        {filasVis.map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && editable && !sitio))}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}

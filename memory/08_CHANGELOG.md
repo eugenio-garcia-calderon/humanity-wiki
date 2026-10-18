@@ -8877,3 +8877,8 @@ en mis páginas como proyecto pendiente».
 - No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
 ### 2026-10-18 — «Recolocar» vuelve a la galería agrupada y a las tarjetas pequeñas (prog8)
 - El botón para recolocar la imagen de una tarjeta desaparecía en una galería agrupada (se pinta sin edición para que no se reordene) y en los tamaños XS y XXS. Ahora sale siempre a quien edita; en tarjetas pequeñas, con iconos en vez de texto.
+
+### 2026-10-18 — Galería agrupada: arrastrar a otra base de datos y a otro grupo (prog8)
+- En una galería agrupada no se podían arrastrar las tarjetas: la vista agrupada desactivaba la edición entera para que no se reordenara. Ahora arrastrar va aparte de reordenar.
+- Una tarjeta de una galería agrupada se puede soltar en otra base de datos y pasa a ella, como ya pasaba sin agrupar.
+- Soltar una tarjeta en otro grupo le da el valor de ese grupo (su categoría, su estado…). Con varios valores, se cambia el de origen por el de destino.
