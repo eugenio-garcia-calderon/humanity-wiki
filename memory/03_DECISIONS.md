@@ -960,3 +960,6 @@ Evaluator round 3 (fix 5): the alternatives block ranked by technical figures on
 - A composite «ecology score» mixing chemistry, repairability and cycles. Rejected: the weights would be our opinion presented as data.
 
 **Cost.** The criterion → column map (`RUBRICA` in `ficha/vistas.ts`) is by `config.clave`, so a new table needs its keys there. That is about 5 minutes per table.
+## 2026-10-18 — Catalog filters as visitor chips over the existing view filters (W2)
+
+Evaluator round 3 wanted category filters visible. Options: (a) a new block config listing which filters to show, set by the loader; (b) derive them from column roles/keys at render time; (c) open the generic «Filtrar» menu by default. Chose (b): zero loader changes, works for any catalog-like table, and the tramos come from the data (thirds, two significant digits). Filters go through the existing visitor path (`filtros`/`orden` URL params on `/api/bd/tablas/:id`), ANDed with the author's view filters. Cost of moving to (a) later: one config field read by `MandosCatalogo`.

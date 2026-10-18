@@ -30,7 +30,9 @@ import { formatear } from '../utils/formatoCelda';
 
 /** Cuántos niveles de página dentro de página (como `sitios.ts`). */
 const PROFUNDIDAD = 8;
-const MAX_RESULTADOS = 30;
+/** Resultados por página (ronda 3 del evaluador: «escribe algo más concreto»
+ *  no era una forma de ver más; ahora se pasa de página). */
+const POR_PAGINA = 20;
 
 /** Minúsculas y sin acentos, en SQL: «Batería» encuentra «bateria». Sin la
  *  extensión `unaccent`, que pide permisos de superusuario (ver 0141). */
@@ -411,17 +413,20 @@ export function registrarBuscadorSitio(app: Express, db: any) {
         LIMIT 400
       `);
 
-      // QUÉ VA PRIMERO (2026-10-18). Buscar «anker» enseñaba antes las
-      // afirmaciones publicitarias que el producto, porque el orden era sólo
-      // alfabético. Ahora, por escalones:
-      //   0. Las fichas: filas de una tabla con plantilla de ficha (W1).
-      //   1. Aquello a lo que las fichas apuntan: marcas, fabricantes… (las
-      //      tablas destino de sus columnas de relación, no las de vuelta).
-      //   2. Todo lo demás: afirmaciones, retiradas, páginas…
-      // Dentro de cada escalón, los que lo dicen en el título, luego los de una
-      // tabla cuyo nombre lo dice («powerbank» → la tabla Powerbanks) y luego por orden
-      // alfabético. Sale de cómo están hechas las tablas, no de sus nombres:
-      // vale para cualquier sitio, no sólo para Wikiproducts.
+      // QUÉ VA PRIMERO (2026-10-18; por relevancia desde la ronda 3). Antes
+      // mandaba el tipo de página y luego el título: buscando «powerbak»
+      // salían un farol y una lámpara antes que las estaciones. Ahora cada
+      // página suma puntos, y el tipo sólo desempata:
+      //   · todas las palabras en el título (también con los espacios
+      //     quitados: «powerbank» está en «Power Bank»): 100, y la frase tal
+      //     cual se escribió en el título, 30 más;
+      //   · cada palabra que está en el título: 10;
+      //   · el nombre de su tabla lo dice («powerbank» → la tabla Powerbanks): 40;
+      //   · es una ficha (fila de una tabla con plantilla, W1): 5; algo a lo que
+      //     las fichas apuntan (marcas, fabricantes…): 2.
+      // La marca está en el título de cada ficha, así que cuenta como título.
+      // Sale de cómo están hechas las tablas, no de sus nombres: vale para
+      // cualquier sitio, no sólo para Wikiproducts.
       const fichas = [...new Set((r.rows as any[]).filter(x => x.es_ficha).map(x => String(x.tabla_id)))];
       const apuntadas = new Set<string>();
       if (fichas.length) {
@@ -432,21 +437,27 @@ export function registrarBuscadorSitio(app: Express, db: any) {
         `);
         for (const x of c.rows as any[]) if (!fichas.includes(String(x.destino))) apuntadas.add(String(x.destino));
       }
-      const escalon = (x: any) => x.es_ficha ? 0 : x.tabla_id && apuntadas.has(String(x.tabla_id)) ? 1 : 2;
       // Con los espacios quitados también: «powerbank» está en «Power Bank».
       const juntos = (t: any) => { const p = planoJs(String(t || '')); return `${p} ${p.replace(/\s+/g, '')}`; };
+      const frase = planoJs(corregido || q);
       for (const x of r.rows as any[]) {
-        x.en_titulo = encaja(juntos(x.title), lecturas);
-        x.en_tabla = encaja(juntos(x.tabla), lecturas);
+        const titulo = juntos(x.title);
+        const palabras = Math.max(0, ...lecturas.map(l => l.filter(alt => alt.some(a => titulo.includes(a))).length));
+        x.puntos = (encaja(titulo, lecturas) ? 100 : 0) + (titulo.includes(frase) ? 30 : 0) + palabras * 10
+          + (encaja(juntos(x.tabla), lecturas) ? 40 : 0)
+          + (x.es_ficha ? 5 : x.tabla_id && apuntadas.has(String(x.tabla_id)) ? 2 : 0);
       }
-      const filas = (r.rows as any[]).sort((a, b) =>
-        escalon(a) - escalon(b) || Number(b.en_titulo) - Number(a.en_titulo) || Number(b.en_tabla) - Number(a.en_tabla)
+      const filas = (r.rows as any[]).sort((a, b) => b.puntos - a.puntos
         || String(a.title || '').localeCompare(String(b.title || ''), 'es'));
+      const pagina = Math.min(Math.max(1, Math.floor(Number(req.query.pagina)) || 1), 50);
+      const desde = (pagina - 1) * POR_PAGINA;
       const resultados: any[] = [];
       // ¿Algo encontrado tal como se escribió? Entonces no hubo corrección.
       let tal = false;
+      // Se revisan en orden hasta llenar esta página y saber si hay otra.
+      let validos = 0;
       for (const x of filas) {
-        if (resultados.length >= MAX_RESULTADOS) break;
+        if (validos > desde + POR_PAGINA) break;
         if (!(await paginaVisible(db, x.id))) continue;
         // El texto, sin los bloques de miembros: si sólo coincidía ahí, no
         // es un resultado para quien no es miembro.
@@ -454,6 +465,7 @@ export function registrarBuscadorSitio(app: Express, db: any) {
         const pajar = juntos(x.title) + ' ' + planoJs([x.tabla, x.valores, ...textos(config)].filter(Boolean).join(' '));
         if (!encaja(pajar, lecturas)) continue;
         if (encaja(pajar, lecturas.slice(0, 1))) tal = true;
+        if (validos++ < desde || validos > desde + POR_PAGINA) continue;
         resultados.push({
           id: x.id, tablaId: x.es_ficha ? String(x.tabla_id) : null,
           titulo: String(x.title || '').trim() || 'Sin título',
@@ -468,9 +480,9 @@ export function registrarBuscadorSitio(app: Express, db: any) {
       await completarFichas(db, resultados);
       // Lo mismo para cualquiera que pregunte: se puede guardar un poco.
       // Sin nada que enseñar: por dónde seguir.
-      const secciones = resultados.length ? undefined : await seccionesDe(db, raiz);
+      const secciones = resultados.length || pagina > 1 ? undefined : await seccionesDe(db, raiz);
       res.set('Cache-Control', 'public, max-age=60');
-      res.json({ q, corregido: resultados.length && !tal ? corregido : null, resultados, mas: filas.length > resultados.length, secciones });
+      res.json({ q, corregido: resultados.length && !tal ? corregido : null, resultados, pagina, por_pagina: POR_PAGINA, mas: validos > desde + POR_PAGINA, secciones });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 }

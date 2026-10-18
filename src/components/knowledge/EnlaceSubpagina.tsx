@@ -30,7 +30,7 @@ export default function EnlaceSubpagina({ id, tituloGuardado }: { id: string; ti
   const icono = datos?.icono;
   return (
     <Link to={sitio ? sitio.enlacePagina(id) : `/paginas/${id}`}
-      className="flex items-center gap-2 -mx-1 px-1 py-1 rounded-md text-[15px] font-semibold text-slate-800 hover:bg-slate-100 transition-colors">
+      className="flex items-center gap-2 -mx-1 px-1 py-1 min-h-11 rounded-md text-base font-semibold text-slate-800 hover:bg-slate-100 transition-colors">
       {icono
         ? (/^(https?:|\/)/.test(icono)
           ? <img src={icono} alt="" className="w-5 h-5 rounded object-cover" />

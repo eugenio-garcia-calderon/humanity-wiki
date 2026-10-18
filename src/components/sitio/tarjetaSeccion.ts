@@ -47,8 +47,9 @@ export function agruparSecciones<S extends { grupo?: { id: string; titulo: strin
 export const CLASES_GRUPOS = {
   fila: 'flex flex-col gap-3 sm:gap-5 lg:flex-row lg:gap-6',
   grupo: 'min-w-0',
-  titulo: 'mb-1.5 text-base font-black text-slate-900 sm:mb-2 sm:text-lg',
-  enlaceTitulo: 'hover:underline',
+  titulo: 'text-base font-black text-slate-900 sm:mb-1 sm:text-lg',
+  // 44 px de alto para el dedo (ronda 3), sin margen: la altura ya separa.
+  enlaceTitulo: 'inline-flex items-center min-h-11 hover:underline',
   // `--n`: cuántas tarjetas tiene el grupo (lo pone quien pinta).
   // En el teléfono, dos por fila y pequeñas: las cinco caben en la primera
   // pantalla de la portada (ronda 2, comprobación en producción).
