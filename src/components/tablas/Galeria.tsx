@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
+import { BarraAvance, esBarra } from './BarraAvance';
 import CeldaTabla, { formatear, type Celda, type Columna } from './Celda';
 import BotonCompra from './BotonCompra';
 import { FichaRelacion } from './Relacion';
@@ -515,12 +516,17 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                         onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}
                         onDragStart={e => { e.preventDefault(); e.stopPropagation(); }}>
                         {vacia && <span className="shrink-0 text-[10px] font-bold text-slate-400">{c.nombre}</span>}
-                        <div className="min-w-0 max-w-full">
+                        <div className={cn('min-w-0 max-w-full', esBarra(c) && !vacia && 'w-full')}>
                           <CeldaTabla celda={celda} columna={c} apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
                             editable onGuardar={v => onGuardarCelda(f.id, c.id, v)} />
                         </div>
                       </div>
                     );
+                  }
+                  // Un porcentaje de avance, como su barra (2026-10-18).
+                  if (esBarra(c)) {
+                    const cb = f.celdas[c.id];
+                    return cb?.estado === 'ok' && cb.valor !== null ? <div key={c.id} className="pt-0.5"><BarraAvance fraccion={Number(cb.valor)} /></div> : null;
                   }
                   // Las de selección, como etiquetas de su color y sin el nombre de la propiedad.
                   if (c.tipo === 'seleccion' || c.tipo === 'seleccion_multiple') {

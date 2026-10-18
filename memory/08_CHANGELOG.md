@@ -9112,3 +9112,8 @@ en mis páginas como proyecto pendiente».
 
 ## 2026-10-18 — Propiedades de la ficha, centradas (prog8)
 - En la rejilla de propiedades de la página de un elemento, el **nombre** de cada propiedad y su **valor** van centrados, uno encima del otro; también los números y el dinero, que en la tabla van a la derecha.
+
+## 2026-10-18 — Porcentaje como barra de avance (prog8)
+- Una propiedad **porcentaje** se ve como **barra de avance**: naranja-amarillo (`amber-400`) por debajo del 50 %, azul (`sky-500`) del 50 al 99 % y verde (`emerald-500`) al 100 %. En la galería, fina con la cifra al lado; en la página del elemento, **gruesa y a todo el ancho**, con la cifra grande, como un crowdfunding.
+- Para editarla, un **deslizador de 0 a 100 de 10 en 10** (ratón, dedo o flechas); guarda al soltar.
+- Se puede apagar por columna en su editor («Mostrar como barra de avance», `config.barra === false`) para porcentajes que no son avance (una comisión). Ver `BarraAvance.tsx`.
