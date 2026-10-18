@@ -4300,7 +4300,30 @@
           "nota": "Método: búsqueda web por marca + «recall»/«solar panel»; el buscador del organismo no se pudo consultar directamente (bloqueo de robots o carga por JavaScript), así que el resultado depende del índice del buscador."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "deporvillage-es",
+          "url": "https://www.deporvillage.com/panel-solar-goal-zero-nomad-20",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha muestra «179,99 €» con «Este producto no está disponible temporalmente». Referencia GLZ-11910."
+        },
+        {
+          "distribuidor_id": "solarpowersupply-eu",
+          "url": "https://solarpowersupply.eu/goal-zero-nomad-20-solar-panel-1",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda neerlandesa; ficha muestra «€ 179,95» (IVA incl.) pero «Niet meer beschikbaar». Artikelnummer 11910. La ficha no dice si envía a España."
+        }
+      ],
       "pendiente": [
         "Si sigue a la venta (outnorth.com lo daba agotado o descatalogado: https://www.outnorth.com/goal-zero/nomad-20-solar-panel)",
         "Precio en tienda española",
