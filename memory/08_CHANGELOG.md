@@ -9368,3 +9368,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - At checkout, instead of «Finalizar compra», the cart says plainly that payment through Wikiproducts is not available yet and that the purchase is completed at each shop for the same price. The owner with the test key still pays here as before; no key or config was touched.
 - Fixed on the way: offers on a sheet whose table is private but whose page is published were hidden from anonymous readers, because the query never read the sheet's `pagina_id`.
 - `POST /api/publicar/cotizar` also returns `compra_en_tiendas` and `es_dueno`. Tests: `scripts/probar-ofertas.ts` (16), `probar-ofertas-anonimo.mjs`, `probar-correos-pedido.ts`; checked in a browser with no session, 4 products from 3 shops (199,36 €).
+
+## 2026-10-18 — Zonas táctiles de 44 px en la puntuación de la comunidad (Wikiproducts W4)
+- En el móvil, «Entrar para puntuar» medía 32 px de alto y «Cómo se calcula y cómo se ordena» menos de 44: ahora los dos miden al menos 44 px (`min-h-11`). Las estrellas para votar pasan de 32×36 a 44×44, y los enlaces de «Opiniones en otras webs» también tienen 44 px de alto. Medido a 390 px de ancho en la copia local.
+- El pie de «La mejor en cada criterio» ya no enumera precio, garantía, ecología y seguridad: en las luces sólo salen dos y prometía cuatro. Ahora dice que «las líneas marcadas “Según los datos”» se deciden con el dato que nombran.
