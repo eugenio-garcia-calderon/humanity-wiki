@@ -41,6 +41,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "W2: R2 direcciones legibles",
       "desde": "2026-10-18T12:29:57.158Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/utils/precargado.ts",
+      "motivo": "W2: R2 direcciones legibles",
+      "desde": "2026-10-18T12:29:59.785Z"
     }
   ]
 }
