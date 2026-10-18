@@ -334,4 +334,16 @@ prueba('las cifras escritas como texto llevan su unidad', () => {
   assert.equal(textoDe({ id: 'x', pagina_id: null, titulo: 'x', celdas: { cm: ok('6000 / 4000') } }, c), '6000 / 4000 Pa');
 });
 
+prueba('dos datos que solo se distinguen por la unidad no se llaman igual', () => {
+  const mah: any = { id: 'mah', nombre: 'Batería (mAh)', tipo: 'numero', config: { clave: 'bateria_mah', unidad: 'mAh' } };
+  const wh: any = { id: 'wh', nombre: 'Batería (Wh)', tipo: 'numero', config: { clave: 'bateria_wh', unidad: 'Wh' } };
+  assert.equal(etiquetaColumna(mah), 'Batería (capacidad)');
+  assert.equal(etiquetaColumna(wh), 'Batería (energía)');
+  // Without a name of its own, the unit stays when a sibling would collide.
+  const a: any = { id: 'a', nombre: 'Tamaño (cm)', tipo: 'numero', config: { unidad: 'cm' } };
+  const b: any = { id: 'b', nombre: 'Tamaño (pulgadas)', tipo: 'numero', config: { unidad: 'pulgadas' } };
+  assert.equal(etiquetaColumna(a, [a, b]), 'Tamaño (cm)');
+  assert.equal(etiquetaColumna(a, [a]), 'Tamaño');
+});
+
 console.log(`\n${n} comprobaciones, todas bien.`);

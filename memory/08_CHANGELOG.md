@@ -9358,3 +9358,6 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Comparador en el móvil**: el producto de la ficha es la columna fija de la izquierda; el nombre de cada dato va en su propia línea encima de los valores; cada columna mide exactamente la mitad de la caja y la tabla encaja de columna en columna, así que no asoman trozos («×», «a ·»).
 - **Zonas táctiles**: enlaces de fuente (`py-3` en línea, sin mover nada), «Dónde se buscó» y sus enlaces, y la miga de pan llegan a 44 px.
 - Sigue pendiente (datos, no código): el comparador, las tarjetas y el orden siguen usando «Precio desde» de la fila, que cuenta también las tiendas agotadas.
+
+## 2026-10-18 — «Batería (capacidad)» y «Batería (energía)», no dos «Batería» (Wikiproducts W1)
+- Al quitar la unidad del nombre («Batería (mAh)» → «Batería»), las luces solares tenían dos datos llamados igual, uno en mAh y otro en Wh (Goal Zero, revisión en producción). Ahora se llaman «Batería (capacidad)» y «Batería (energía)» (`ETIQUETA_POR_CLAVE`), y en general la unidad se queda en el nombre cuando otra columna de la tabla se llamaría igual sin ella. Solo había este caso en las cinco tablas.
