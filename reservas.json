@@ -29,6 +29,12 @@
       "ruta": "src/utils/precargado.ts",
       "motivo": "W2: enlaces internos por dirección legible (R2/R7)",
       "desde": "2026-10-18T15:32:04.126Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/apiPublica.ts",
+      "motivo": "W3a: bloques de página por la API (basedatos/subpagina)",
+      "desde": "2026-10-18T15:35:43.622Z"
     }
   ]
 }
