@@ -14,7 +14,7 @@ import { cn } from '../../utils/cn';
 // pregunta que se hace el usuario —qué quiero meter aquí— tiene cuatro
 // respuestas en vez de veintiuna.
 
-export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; modo?: string; nombre?: string }> }> = [
+export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; modo?: string; nombre?: string; criterio?: string; soloCompradores?: boolean }> }> = [
   {
     grupo: 'Texto y números',
     tipos: [
@@ -91,6 +91,25 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
       { id: 'texto', rol: 'recompensa', nombre: 'Recompensa', label: 'Recompensa', ayuda: 'Qué recibe quien apoya (para «Donación con recompensa»)' },
     ],
   },
+  // LA NOTA DE LA COMUNIDAD (2026-10-18, Wikiproducts: «calificar los
+  // productos en función de la calidad, precio, garantía, ecología, salud,
+  // estética y ética»). One column per criterion; people vote 1-5 in the row's
+  // page with the «Valoración» block and the cell shows the result. See
+  // `src/server/bd/comunidad.ts`.
+  {
+    grupo: 'Comunidad',
+    tipos: [
+      { id: 'comunidad', criterio: 'calidad', nombre: 'Calidad', label: 'Calidad', ayuda: 'Nota de la comunidad, 1 a 5' },
+      { id: 'comunidad', criterio: 'precio', nombre: 'Precio (opinión)', label: 'Precio', ayuda: 'Si vale lo que cuesta' },
+      { id: 'comunidad', criterio: 'garantia', nombre: 'Garantía', label: 'Garantía' },
+      { id: 'comunidad', criterio: 'ecologia', nombre: 'Ecología', label: 'Ecología' },
+      { id: 'comunidad', criterio: 'salud', nombre: 'Salud', label: 'Salud' },
+      { id: 'comunidad', criterio: 'estetica', nombre: 'Estética', label: 'Estética' },
+      { id: 'comunidad', criterio: 'etica', nombre: 'Ética', label: 'Ética' },
+      { id: 'comunidad', criterio: 'atencion', soloCompradores: true, nombre: 'Atención al cliente', label: 'Atención al cliente', ayuda: 'Sólo puntúa quien compró' },
+      { id: 'comunidad', criterio: 'media', nombre: 'Nota media', label: 'Nota media', ayuda: 'La media de los demás criterios' },
+    ],
+  },
 ];
 
 const CON_OPCIONES = new Set(['seleccion', 'seleccion_multiple']);
@@ -143,11 +162,17 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const [buscarTipo, setBuscarTipo] = useState('');
   /** La rejilla de tipos: abierta al crear, plegada en cuanto se elige uno (como en Notion). */
   const [tiposAbiertos, setTiposAbiertos] = useState(!columna);
-  type TipoElegible = { id: string; label: string; rol?: string; modo?: string; nombre?: string };
+  type TipoElegible = { id: string; label: string; rol?: string; modo?: string; nombre?: string; criterio?: string; soloCompradores?: boolean };
   const elegirTipo = (t: TipoElegible) => {
     setTipo(t.id);
     setTiposAbiertos(false);
-    setConfig((c: any) => { const { rol: _fuera, modo: _modo, ...resto } = c || {}; return { ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}) }; });
+    setConfig((c: any) => {
+      const { rol: _fuera, modo: _modo, criterio: _criterio, solo_compradores: _solo, ...resto } = c || {};
+      return {
+        ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}),
+        ...(t.criterio ? { criterio: t.criterio, solo_compradores: !!t.soloCompradores } : {}),
+      };
+    });
     // The name follows the shop entry while nobody has typed one.
     if (t.nombre && (!nombre.trim() || GRUPOS.some(g => g.tipos.some(x => x.nombre === nombre)))) setNombre(t.nombre);
   };
@@ -273,7 +298,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-black uppercase tracking-wide text-slate-500">Tipo</span>
                 {(() => {
-                  const actual = GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol);
+                  const actual = GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol && (t.id !== 'comunidad' || config.criterio === t.criterio));
                   return actual ? <span className="text-[11px] font-bold text-slate-500 truncate">Elegido: {actual.label}{actual.ayuda ? ` · ${actual.ayuda}` : ''}</span> : null;
                 })()}
               </div>
@@ -300,9 +325,10 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       // A shop entry is a type PLUS a role: «Precio» and «Moneda»
                       // are the same type and must not both light up.
                       const elegido = tipo === t.id && (config.rol || undefined) === t.rol
-                        && (t.id !== 'compra' || (config.modo || 'carrito') === t.modo);
+                        && (t.id !== 'compra' || (config.modo || 'carrito') === t.modo)
+                        && (t.id !== 'comunidad' || config.criterio === t.criterio);
                       return (
-                      <button key={t.id + (t.rol || '')} aria-pressed={elegido} onClick={() => elegirTipo(t)}
+                      <button key={t.id + (t.rol || '') + (t.modo || '') + (t.criterio || '')} aria-pressed={elegido} onClick={() => elegirTipo(t)}
                         className={cn('w-full flex flex-col justify-center gap-0.5 px-2.5 min-h-12 rounded-lg text-left border transition-colors',
                           elegido ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-transparent hover:bg-slate-50')}>
                         <span className="text-xs font-bold">{t.label}</span>
@@ -320,7 +346,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               </div>
               </>) : (
                 <div className="mt-1 flex items-center justify-between gap-2 min-h-11 px-3 rounded-xl border border-emerald-200 bg-emerald-50/60">
-                  <span className="text-sm font-bold text-emerald-800 truncate">{GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol)?.label || tipo}</span>
+                  <span className="text-sm font-bold text-emerald-800 truncate">{GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol && (t.id !== 'comunidad' || config.criterio === t.criterio))?.label || tipo}</span>
                   <button type="button" onClick={() => setTiposAbiertos(true)} className="shrink-0 h-9 px-2 text-xs font-bold text-slate-600 hover:text-slate-900 underline-offset-2 hover:underline">Cambiar</button>
                 </div>
               )}
@@ -400,6 +426,20 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                 ))}
               </div>
             </div>
+          )}
+
+          {/* ── NOTA DE LA COMUNIDAD: quién puede puntuar ──────────────────── */}
+          {tipo === 'comunidad' && config.criterio !== 'media' && (
+            <label className="flex items-start gap-2">
+              <input type="checkbox" className="mt-0.5" checked={!!config.solo_compradores}
+                onChange={e => setConfig((c: any) => ({ ...c, solo_compradores: e.target.checked }))} />
+              <span className="text-xs font-bold text-slate-600">
+                Sólo puntúa quien lo compró a través de la plataforma
+                <span className="block text-[11px] font-medium text-slate-400">
+                  Se vota en la página de cada fila con el bloque «Valoración». Con menos de 3 votos la celda dice «sin votos suficientes».
+                </span>
+              </span>
+            </label>
           )}
 
           {/* ── ¿UNO O VARIOS? ────────────────────────────────────────────── */}

@@ -42,6 +42,10 @@ export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; a
   const v = c.valor;
   // The buy button as text (cards, lists): its price. The button itself is
   // drawn by the grid and the gallery.
+  // Community rating (2026-10-18, Wikiproducts): the plain mean people gave
+  // and how many they are. `valor` is the adjusted note that orders; it is not
+  // what is shown (see `src/server/bd/comunidad.ts`).
+  if (col.tipo === 'comunidad') return textoComunidad(c);
   if (col.tipo === 'compra') {
     return v?.precio_centimos == null ? '' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: v.moneda || 'EUR' }).format(v.precio_centimos / 100);
   }
@@ -97,6 +101,18 @@ export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; a
   }
 }
 
+const decimal = (n: number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
+const votosTexto = (n: number) => `${n} ${n === 1 ? 'voto' : 'votos'}`;
+
+/** «4,6 · 12 votos», or «Sin votos suficientes (2 votos)». Used by the cell
+ *  and by anything that writes a rating as text. */
+export function textoComunidad(c: Celda): string {
+  const votos = Number((c as any).votos) || 0;
+  if (c.estado !== 'ok') return votos ? `Sin votos suficientes (${votosTexto(votos)})` : 'Sin votos todavía';
+  const media = (c as any).media;
+  return `${decimal(typeof media === 'number' ? media : Number(c.valor))} · ${votosTexto(votos)}`;
+}
+
 export default function CeldaTabla({
   celda, columna, apuntados, archivos, editable, onGuardar,
 }: {
@@ -115,7 +131,7 @@ export default function CeldaTabla({
 
   useEffect(() => { if (editando) ref.current?.focus(); }, [editando]);
 
-  const puedeEditar = editable && !CALCULADOS.has(columna.tipo);
+  const puedeEditar = editable && !CALCULADOS.has(columna.tipo) && columna.tipo !== 'comunidad';
 
   const guardar = async (valor: any) => {
     setGuardando(true); setFallo(null);
@@ -143,6 +159,18 @@ export default function CeldaTabla({
         <Loader2 className="w-3.5 h-3.5 animate-spin" />
         <span className="text-xs">Calculando…</span>
       </div>
+    );
+  }
+
+  // ── NOTA DE LA COMUNIDAD (2026-10-18): it is voted in the row's page, with
+  //    the «Valoración» block, never typed into the cell.
+  if (columna.tipo === 'comunidad') {
+    const hay = celda.estado === 'ok';
+    return (
+      <span className={cn('flex items-center gap-1 px-2 py-1.5 text-xs', hay ? 'font-bold text-slate-700' : 'text-slate-400')}>
+        {hay && <Star className="w-3.5 h-3.5 shrink-0 fill-amber-400 text-amber-400" />}
+        <span className="truncate">{textoComunidad(celda)}</span>
+      </span>
     );
   }
 
