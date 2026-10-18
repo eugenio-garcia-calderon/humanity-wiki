@@ -8986,3 +8986,8 @@ en mis páginas como proyecto pendiente».
 - Un precio enviado como número por la API (`0.138`) se pasaba a texto y la regla del punto de millar español lo leía como «138». Ahora un número llega tal cual a las columnas de precio y de porcentaje (la de número ya lo hacía).
 - En texto, un punto con un cero delante ya no cuenta como millar: «0.138» es 0,138. «120.000» sigue siendo ciento veinte mil.
 - Prueba: `npx tsx scripts/probar-tipos-numeros.ts` (21 casos).
+
+## 2026-10-18 — Wiki Creator limpio: herramientas a la derecha y Explorar → Humanidad Wiki (prog8, fase 3)
+- El menú de la derecha ya no lleva los temas: lleva las **herramientas de crear** (Carpetas, Páginas, Esquemas, Mapas, Tareas, Tablas, Calendario, Archivos) y «Crear algo», que abre la hoja de crear. El botón de la barra se llama «Herramientas».
+- `/explorar`, `/temas` y `/objetivos` llevan a la página **Humanidad Wiki** de Eugenio (`KWMVDWJ25K6T`) por su dirección pública `/@quien/p/:id`, **solo cuando está publicada**; mientras sea privada, enseñan lo de siempre. Una dirección con `?` (`/explorar?mias=1`, `?crear=1`, `?papelera=1`…) es una herramienta y no se redirige. `HaciaHumanidadWiki.tsx`.
+- «Publicaciones» (menús) apunta ahora a `/explorar?mias=1`.
