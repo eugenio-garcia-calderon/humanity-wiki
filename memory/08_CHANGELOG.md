@@ -8978,3 +8978,8 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — "Dónde comprarlo" visible to visitors (Wikiproducts W5 follow-up)
 - The Offers block was empty for anyone not signed in: the offers table is never embedded in a page, so it never inherited a published page's visibility. Now whoever can see the product sheet sees that sheet's offers, provided the offers table belongs to the same owner as the products table. Someone else's table pointing at a public sheet does not get to advertise on it, and the owner's own table is picked first. Test: `node scripts/wikiproducts/probar-ofertas-anonimo.mjs` against the local copy.
+
+## 2026-10-18 — Wiki Creator limpio: herramientas a la derecha y Explorar → Humanidad Wiki (prog8, fase 3)
+- El menú de la derecha ya no lleva los temas: lleva las **herramientas de crear** (Carpetas, Páginas, Esquemas, Mapas, Tareas, Tablas, Calendario, Archivos) y «Crear algo», que abre la hoja de crear. El botón de la barra se llama «Herramientas».
+- `/explorar`, `/temas` y `/objetivos` llevan a la página **Humanidad Wiki** de Eugenio (`KWMVDWJ25K6T`) por su dirección pública `/@quien/p/:id`, **solo cuando está publicada**; mientras sea privada, enseñan lo de siempre. Una dirección con `?` (`/explorar?mias=1`, `?crear=1`, `?papelera=1`…) es una herramienta y no se redirige. `HaciaHumanidadWiki.tsx`.
+- «Publicaciones» (menús) apunta ahora a `/explorar?mias=1`.

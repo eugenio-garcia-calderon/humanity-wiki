@@ -57,7 +57,7 @@ const HERRAMIENTAS: NodoMenu[] = [
   { id: 'h-archivos',  label: 'Archivos',  icono: Database,     destino: '/archivos',  abrir: 'ventana' },
   { id: 'h-navegador', label: 'Navegador', icono: Globe,        destino: 'about:inicio' },
   // «Publicaciones», no «Explorar» (Eugenio, 2026-08-20): es lo que hay dentro.
-  { id: 'h-explorar',  label: 'Publicaciones', icono: Compass,  destino: '/explorar',  abrir: 'ventana' },
+  { id: 'h-explorar',  label: 'Publicaciones', icono: Compass,  destino: '/explorar?mias=1', abrir: 'ventana' },
 ];
 
 interface DatosMenu {

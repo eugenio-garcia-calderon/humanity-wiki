@@ -6,13 +6,13 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Folder, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
- PanelLeftOpen, PanelRightOpen, PanelRightClose, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
+ PanelLeftOpen, PanelRightOpen, PanelRightClose, PanelLeftClose, Info, Search, Trash2, LayoutGrid, Phone, Plus,} from 'lucide-react';
 import PieLegal, { ALTO_PIE } from './PieLegal';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
-import Rail, { type Herramienta } from '../navegacion/Rail';
+import Rail, { HERRAMIENTAS, type Herramienta } from '../navegacion/Rail';
 import Panel, { EstilosPanel } from '../navegacion/Panel';
 /*
  * LOS TRES CÍRCULOS SE HAN IDO (2026-08-25). Eugenio: «el anterior menú
@@ -72,6 +72,9 @@ const SECCIONES_COMUN = [
   { to: '/explorar', label: 'Explorar', icon: Compass },
 ];
 const SECCIONES_TUYO: Array<{ to: string; label: string; icon: any }> = [];
+/** Lo que lleva el menú de la derecha: las herramientas con las que se crea. */
+const HERRAMIENTAS_CREAR = HERRAMIENTAS.filter(h =>
+  ['proyectos', 'paginas', 'esquemas', 'mapas', 'tareas', 'tablas', 'calendario', 'archivos'].includes(h.clave));
 const SECCIONES_PIE = [
   { to: '/mercado', label: 'Mercado', icon: Store },
   { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
@@ -331,6 +334,8 @@ export default function Layout() {
   // encima de él (se define abajo, donde ya se sabe si está plegado).
   // The theme you are looking at, so the menu can say so.
   const temaActivo = /^\/temas\/(O\d{3})(\/|$)/.exec(location.pathname)?.[1] ?? null;
+  /** La herramienta en la que estás, para marcarla en el menú de la derecha. */
+  const herramientaActiva = HERRAMIENTAS_CREAR.find(h => location.pathname === h.ruta || location.pathname.startsWith(`${h.ruta}/`))?.clave ?? null;
   const subtemaActivo = new URLSearchParams(location.search).get('subtema');
   // Landing on a subtopic (a shared link): its theme opens in the menu so
   // the marked subtopic can be seen.
@@ -1395,21 +1400,23 @@ export default function Layout() {
             Explorar y el botón de descolapsar». Con el menú abierto no se ve:
             «Explorar» está entonces dentro del menú, junto a su botón de
             plegar. En el teléfono no hay menú derecho: abre la hoja de temas. */}
-        <button
-          onClick={() => {
-            setPorRoce(false);
-            if (esMovil) { setCirculo(c => (c === 'explorar' ? null : 'explorar')); return; }
-            setTemasPlegado(!temasPlegado);
-          }}
-          title={esMovil ? 'Explorar los temas' : temasPlegado ? 'Abrir el menú de temas' : 'Plegar el menú de temas'}
-          aria-label={esMovil ? 'Explorar los temas' : temasPlegado ? 'Abrir el menú de temas' : 'Plegar el menú de temas'}
-          aria-expanded={esMovil ? circulo === 'explorar' : !temasPlegado}
-          className={cn('ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 transition-colors hover:bg-slate-100 hover:text-slate-900',
-            !esMovil && !temasPlegado ? 'text-slate-900' : 'text-slate-600')}>
-          {!esMovil && <Compass className="h-4 w-4" />}
-          <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
-          {esMovil ? <Compass className="h-5 w-5" /> : temasPlegado ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
-        </button>
+        {/* «HERRAMIENTAS» EN LUGAR DE «EXPLORAR» (2026-10-18, Humanidad Wiki
+            fase 3). Los temas se han ido a la página Humanidad Wiki; aquí
+            queda lo que se usa para crear. En el teléfono la barra ya tiene su
+            botón de herramientas (la hoja de crear): aquí solo queda el hueco. */}
+        {esMovil ? <span className="ml-auto" /> : (
+          <button
+            onClick={() => { setPorRoce(false); setTemasPlegado(!temasPlegado); }}
+            title={temasPlegado ? 'Abrir el menú de herramientas' : 'Plegar el menú de herramientas'}
+            aria-label={temasPlegado ? 'Abrir el menú de herramientas' : 'Plegar el menú de herramientas'}
+            aria-expanded={!temasPlegado}
+            className={cn('ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 self-center rounded-lg px-2 transition-colors hover:bg-slate-100 hover:text-slate-900',
+              !temasPlegado ? 'text-slate-900' : 'text-slate-600')}>
+            <LayoutGrid className="h-4 w-4" />
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">{tr('Herramientas')}</span>
+            {temasPlegado ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
+          </button>
+        )}
 
         {!user && !cargandoSesion && (
           <Link to="/login"
@@ -1462,55 +1469,31 @@ export default function Layout() {
             recorte de la página. Lo abre cualquier sitio con `abrirLateral`. */}
         {temasVisible && (
           <div className="flex h-full shrink-0">
+            {/* LAS HERRAMIENTAS DE CREAR, NO LOS TEMAS (2026-10-18, fase 3).
+                Eugenio: Wiki Creator es la herramienta de crear páginas; los
+                temas, objetivos y retos viven en la página Humanidad Wiki,
+                hecha con bloques. El menú de la derecha lleva a cada
+                herramienta, y «Crear algo» abre la hoja con todas. */}
             <Rail
               ladoDerecho
               siempreAbierto
               claro
-              titulo="Temas"
-              items={temasDelMenu}
-              // «EXPLORAR» SE QUEDA ARRIBA (2026-10-05). Eugenio: «que el texto de
-              // explorar, cuando se despliega, no baje a su menú, sino que se quede
-              // en la parte de arriba; más elegante, y libera espacio». El menú
-              // empieza debajo de la barra, así que no tiene fila propia: lo abre
-              // y lo pliega el «Explorar» de la barra, que no se mueve.
+              titulo={tr('Herramientas')}
+              items={HERRAMIENTAS_CREAR}
               sinFilaSuperior
               cabeza={(
-                <>
-                  <FiltroAmbito ambito={ambitoTemas} onCambiar={setAmbitoTemas} conSesion={!!user} />
-                  {/* «Ver todos los temas» en lugar de «Personalizar», y sin
-                      «Nuevo tema» (2026-10-05): abre la hoja con los quince. */}
-                  <button
-                    onClick={() => { setPorRoce(false); setCirculo(c => (c === 'explorar' ? null : 'explorar')); }}
-                    aria-expanded={circulo === 'explorar'}
-                    className={cn('mb-1 flex h-9 w-full shrink-0 items-center gap-3 rounded-xl px-[10px] text-[12px] font-bold transition-colors',
-                      circulo === 'explorar' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
-                  >
-                    <LayoutGrid className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{tr('Ver todos los temas')}</span>
-                  </button>
-                </>
+                <button
+                  onClick={() => { setPorRoce(false); setCirculo(c => (c === 'crear' ? null : 'crear')); }}
+                  aria-expanded={circulo === 'crear'}
+                  className={cn('mb-1 flex h-9 w-full shrink-0 items-center gap-3 rounded-xl px-[10px] text-[12px] font-bold transition-colors',
+                    circulo === 'crear' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{tr('Crear algo')}</span>
+                </button>
               )}
-              personal={user ? {
-                esFavorito: c => !!prefsTemas[c]?.favorito,
-                estaOculto: c => !!prefsTemas[c]?.oculto,
-                marcarFavorito: (c, v) => guardarPref(c, { favorito: v }),
-                ocultar: c => guardarPref(c, { oculto: true }),
-                reordenar: reordenarTemas,
-                ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
-                mostrar: c => guardarPref(c, { oculto: false }),
-              } : undefined}
-              ramas={{
-                de: c => ramas[c] ?? [],
-                hay: c => (cuantasRamas[c] ?? 0) > 0,
-                abierto: c => !!ramasAbiertas[c],
-                alternar: alternarRama,
-                onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
-                // A subtopic opens the theme's feed narrowed to it — same page,
-                // same scope — instead of the old wheel page.
-                ruta: (t, clave) => `/temas/${clave}/contenido?ambito=${ambitoTemas}&subtema=${encodeURIComponent(t.id)}`,
-              }}
-              abierta={temaActivo}
-              onElegir={h => navigate(`/temas/${encodeURIComponent(h.clave)}/contenido?ambito=${ambitoTemas}`)}
+              abierta={herramientaActiva}
+              onElegir={h => navigate(h.ruta)}
               onInicio={() => navigate('/')}
             />
           </div>
