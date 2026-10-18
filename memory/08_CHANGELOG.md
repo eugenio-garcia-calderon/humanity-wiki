@@ -9043,3 +9043,10 @@ en mis páginas como proyecto pendiente».
 ## 2026-10-18 — Grupos pequeños, uno al lado del otro (prog8)
 - En una galería agrupada (sin subgrupos), un grupo con **una o dos tarjetas** ocupa solo lo que miden ellas y comparte fila con otros así, cada uno con su título encima de sus tarjetas. Los grupos de tres o más siguen ocupando la fila entera. En el móvil se apilan.
 - `porGrupos` envuelve cada grupo de nivel 0 en una caja de `min-width` = n × ancho máximo de tarjeta (la rejilla decide las columnas por ese ancho) y el contenedor es `flex-wrap`, centrado si los títulos van centrados.
+
+## 2026-10-18 — Wikiproducts W3a: one photo per product, kept on our server
+
+- Eugenio's decision (2026-10-18): use the photos the maker or the shops publish for each product; Wikiproducts credits them. Replaces the Commons-only rule.
+- New `POST /api/v1/uploads?type=image/…` (write scope, raw bytes, JPEG/PNG/WebP/AVIF/GIF only, no SVG, 10 MB): stores an image in the same store as `/api/uploads` and returns its `/uploads/…` address.
+- New `scripts/wikiproducts/fotos.mjs`: per product, tries `datos/fotos.json` (Commons file, page or image), the image in the data, the shop pages of its offers, then the maker's page (never a home page). Reads `og:image` / `twitter:image` / JSON-LD `Product.image`, downloads it, rejects non-images, files under 4 KB and anything under 250×250 px, stores it and fills «Foto» (absolute `https://humanity.wiki/uploads/…`) and «Licencia de la foto» («Foto: <shop or maker> — <page>»). Skips rows whose photo is already ours from the same page.
+- `cargar.mjs` no longer writes the photo cells. `cargar-en-servidor.sh` runs `fotos.mjs` only when the workflow is dispatched with `fotos=si`.
