@@ -9080,3 +9080,9 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Offers: no cart for visitors while Stripe runs a test key (Wikiproducts W5)
 - Production answered `GET /api/publicar/cobro` with `{"abierto":true,"pruebas":true,"con_pasarela":true}`: charging open with an `sk_test` key, so a visitor could add a 1.790 € offer to the cart and have their real card refused at payment. Now, with a test key, visitors see «Comprar en la tienda» and the «Muy pronto…» note; only the owner of the offers table (or an admin) keeps «Añadir a la cesta», with an amber «Modo de pruebas» note naming the 4242 test card. `GET /api/ofertas` adds `es_dueno`. With a live key everyone gets the cart, as before.
 - Checked locally in three states: test key as visitor (shop link), test key as owner (cart + note), and a non-test key as visitor (cart).
+
+## 2026-10-18 — Wikiproducts W1: readable text size on sheets and cards
+
+- Sheet blocks (propiedad, alternativas, afirmacion, retirada, comparador, provenance labels): body text 16 px, secondary text and labels 14 px (were 14 and 11–12); light grey secondary text darkened to slate-500.
+- Gallery cards on a published site (size S and up): name 16 px, properties, description, tags and relation chips 14 px (were 14 and 12). The editor keeps the compact sizes.
+- Not touched, owned by other workstreams: «Puntuación de la comunidad» (W4) and «Dónde comprarlo» (W5) still have 11–12 px text.
