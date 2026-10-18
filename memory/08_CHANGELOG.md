@@ -9075,3 +9075,8 @@ en mis páginas como proyecto pendiente».
 - Gallery cards of product tables show brand, key figure with its unit, «Precio desde» and the community score by default.
 - «Sugerir una corrección» on every sheet (via the existing report queue).
 - New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).
+
+
+### 2026-10-18 — Offers: no cart for visitors while Stripe runs a test key (Wikiproducts W5)
+- Production answered `GET /api/publicar/cobro` with `{"abierto":true,"pruebas":true,"con_pasarela":true}`: charging open with an `sk_test` key, so a visitor could add a 1.790 € offer to the cart and have their real card refused at payment. Now, with a test key, visitors see «Comprar en la tienda» and the «Muy pronto…» note; only the owner of the offers table (or an admin) keeps «Añadir a la cesta», with an amber «Modo de pruebas» note naming the 4242 test card. `GET /api/ofertas` adds `es_dueno`. With a live key everyone gets the cart, as before.
+- Checked locally in three states: test key as visitor (shop link), test key as owner (cart + note), and a non-test key as visitor (cart).

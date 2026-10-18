@@ -303,7 +303,11 @@ export function registrarOfertas(app: Express, db: any) {
         tablaId: req.query.tabla ? String(req.query.tabla) : null,
       });
       if ('error' in r) return res.status(r.codigo).json({ error: r.error });
-      res.json(r);
+      // Whether the reader owns these offers (or is an admin): with a Stripe
+      // TEST key only they get the cart, to try it; visitors get the shop link.
+      const yo = req.user;
+      const dueno = yo && r.tabla_id ? (yo.roleLevel ?? 0) >= 4 || (await duenoDe(db, r.tabla_id)) === yo.id : false;
+      res.json({ ...r, es_dueno: !!dueno });
     } catch (e: any) { console.error(e); res.status(500).json({ error: 'No se han podido leer las ofertas.' }); }
   });
 }
