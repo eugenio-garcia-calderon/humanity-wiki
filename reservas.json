@@ -23,6 +23,12 @@
       "ruta": "src/server/buscadorSitio.ts",
       "motivo": "W2: orden del buscador",
       "desde": "2026-10-18T16:07:55.042Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/wikiproducts/esquema-bd.json",
+      "motivo": "W2: rutas de tablas secundarias",
+      "desde": "2026-10-18T16:11:06.510Z"
     }
   ]
 }
