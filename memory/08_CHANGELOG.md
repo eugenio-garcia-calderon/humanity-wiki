@@ -9043,3 +9043,7 @@ en mis páginas como proyecto pendiente».
 ## 2026-10-18 — Grupos pequeños, uno al lado del otro (prog8)
 - En una galería agrupada (sin subgrupos), un grupo con **una o dos tarjetas** ocupa solo lo que miden ellas y comparte fila con otros así, cada uno con su título encima de sus tarjetas. Los grupos de tres o más siguen ocupando la fila entera. En el móvil se apilan.
 - `porGrupos` envuelve cada grupo de nivel 0 en una caja de `min-width` = n × ancho máximo de tarjeta (la rejilla decide las columnas por ese ancho) y el contenedor es `flex-wrap`, centrado si los títulos van centrados.
+
+## 2026-10-18 — Tarjetas XXXS (prog8)
+- Nuevo tamaño de tarjeta **XXXS** (60 px de mínimo, huecos de 4/8 px, nombre a 9 px), el más pequeño y junto de la galería. Solo para las tarjetas: el tamaño del título empieza en XXS y el del nombre en XS, como antes.
+- Los selectores de tamaño del panel son un poco más estrechos para que quepan los siete.
