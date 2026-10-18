@@ -366,7 +366,7 @@ export function registerBdRoutes(app: Express, db: any) {
 
       const columnas = await columnasDe(req.params.id);
       const f = await db.execute(sql`
-        SELECT id, valores, pagina_id, orden, recurrencia, created_at, updated_at
+        SELECT id, valores, pagina_id, orden, recurrencia, procedencia, created_at, updated_at
         FROM bd_filas
         WHERE tabla_id = ${req.params.id} AND archived_at IS NULL AND deleted_at IS NULL
         ORDER BY orden, created_at
@@ -415,6 +415,9 @@ export function registerBdRoutes(app: Express, db: any) {
             pagina: fila.pagina_id ? tarjetas[fila.pagina_id] || null : null,
             orden: fila.orden,
             recurrencia: fila.recurrencia || null,
+            // Where each value came from (migration 0153). Empty object when nobody said.
+            procedencia: fila.procedencia || {},
+            updated_at: fila.updated_at,
             celdas,
             archivos,
             // Los nombres de lo apuntado, aparte: la celda guarda identificadores

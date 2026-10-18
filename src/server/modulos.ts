@@ -53,6 +53,7 @@ import { registerArchivosRoutes } from './archivos.js';
 import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
+import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
@@ -261,6 +262,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
+  {
+    nombre: 'bd/plantillaFicha',
+    montar: (app, db) => registrarPlantillaFicha(app, db),
+    nota: 'DESPUÉS de «bd»: lee las tablas con `bdInterno.leerTabla`, que rellena registerBdRoutes. '
+        + 'Fichas de producto de Wikiproducts: plantilla por base de datos y procedencia de cada dato.',
+  },
   { nombre: 'publicar', montar: (app, db) => registerPublicarRoutes(app, db) },
   { nombre: 'navegadorRemoto', montar: app => registerNavegadorRemotoRoutes(app) },
   { nombre: 'finanzas', montar: (app, db) => registerFinanzasRoutes(app, db) },

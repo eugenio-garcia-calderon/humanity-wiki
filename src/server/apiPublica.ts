@@ -7,6 +7,7 @@ import { visibles } from './espacio';
 import { rolEnPagina, capacidades, puedeEditarPagina, quienDe } from './permisos';
 import { registrarHistorial } from './historial';
 import { markdownABloques, bloquesAMarkdown } from '../utils/bloques';
+import { guardarProcedencia, ponerPlantilla } from './bd/plantillaFicha';
 
 // ============================================================================
 // LA API PÚBLICA, /api/v1 (2026-10-06, carril «espacio», #24)
@@ -292,9 +293,80 @@ export function registrarApiPublica(app: Express, db: any) {
     return r.tabla;
   };
   const columnasDe = async (tablaId: string) => (await db.execute(sql`
-    SELECT id, nombre, tipo, opciones FROM bd_columnas WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
+    SELECT id, nombre, tipo, opciones, config FROM bd_columnas WHERE tabla_id = ${tablaId} AND archived_at IS NULL ORDER BY orden, created_at
   `)).rows as any[];
-  const columnaPublica = (c: any) => ({ id: c.id, name: c.nombre, type: c.tipo, options: Array.isArray(c.opciones) && c.opciones.length ? c.opciones.map((o: any) => o.label ?? o) : undefined });
+  // `config` goes out too (2026-10-18): a loader matches its columns by
+  // `config.clave` and reads units from it, instead of guessing by name.
+  const columnaPublica = (c: any) => ({
+    id: c.id, name: c.nombre, type: c.tipo,
+    options: Array.isArray(c.opciones) && c.opciones.length ? c.opciones.map((o: any) => o.label ?? o) : undefined,
+    config: c.config && Object.keys(c.config).length ? c.config : undefined,
+  });
+
+  // ── CREATING DATABASES AND COLUMNS (2026-10-18, Wikiproducts W1) ─────────
+  // Until today a key could fill rows but not create the table they go in, so
+  // a site with five product databases had to be laid out by hand first. Both
+  // go through the screen's own routes (`bdInterno`): same validation (no two
+  // columns with one name, formulas checked, relations only to tables you can
+  // edit) and the same owner.
+  const columnaDeEntrada = (c: any) => ({
+    nombre: c?.name ?? c?.nombre, tipo: c?.type ?? c?.tipo ?? 'texto',
+    opciones: (c?.options ?? c?.opciones ?? []).map((o: any) => (typeof o === 'string' ? { label: o } : { label: o?.label, color: o?.color })),
+    config: c?.config && typeof c.config === 'object' && !Array.isArray(c.config) ? c.config : {},
+  });
+
+  app.post('/api/v1/databases', async (req: Request, res: Response) => {
+    try {
+      const title = String(req.body?.title ?? '').trim();
+      if (!title) return res.status(400).json({ error: 'La base de datos necesita «title».' });
+      const columns = Array.isArray(req.body?.columns) ? req.body.columns.slice(0, 200) : [];
+      const t = await bdInterno.crearTabla!(req, { titulo: title, descripcion: req.body?.description ?? null, icono: req.body?.icon ?? null });
+      if (t.codigo !== 200) return res.status(t.codigo).json(t.cuerpo);
+      const id = t.cuerpo.id as string;
+      // It is born with a «Nombre» text column, the one that titles each row's
+      // page. A column of the request with that name and type is that one.
+      const fallos: Array<{ name: string; error: string }> = [];
+      for (const c of columns) {
+        const e = columnaDeEntrada(c);
+        if (String(e.nombre || '').trim().toLowerCase() === 'nombre' && e.tipo === 'texto') continue;
+        const r = await bdInterno.crearColumna!(req, id, e);
+        if (r.codigo !== 200) fallos.push({ name: String(e.nombre ?? ''), error: r.cuerpo?.error || 'Error.' });
+      }
+      res.status(201).json({ id, title, columns: (await columnasDe(id)).map(columnaPublica), ...(fallos.length ? { failed_columns: fallos } : {}) });
+    } catch (e: any) { console.error('v1 crear base de datos:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  app.post('/api/v1/databases/:id/columns', async (req: Request, res: Response) => {
+    try {
+      const t = await conTabla(req, res, true); if (!t) return;
+      const r = await bdInterno.crearColumna!(req, t.id, columnaDeEntrada(req.body));
+      if (r.codigo !== 200) return res.status(r.codigo).json(r.cuerpo);
+      const c = (await columnasDe(t.id)).find(x => x.id === r.cuerpo.id);
+      res.status(201).json({ ...columnaPublica(c), ...(r.cuerpo.aviso ? { warning: r.cuerpo.aviso } : {}) });
+    } catch (e: any) { console.error('v1 crear columna:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  /** `{ create_template: true }` or `{ template_page_id: "…" | null }`: the
+   *  page every row's page is laid out with (see `bd/plantillaFicha.ts`). */
+  app.patch('/api/v1/databases/:id', async (req: Request, res: Response) => {
+    try {
+      const t = await conTabla(req, res, true); if (!t) return;
+      const b = req.body || {};
+      if (b.create_template === undefined && b.template_page_id === undefined) return res.status(400).json({ error: 'Manda «create_template: true» o «template_page_id».' });
+      const r = await ponerPlantilla(db, req, t.id, b.create_template ? { crear: true } : { pagina_id: b.template_page_id });
+      if (r.codigo !== 200) return res.status(r.codigo).json(r.cuerpo);
+      res.json({ id: t.id, template_page_id: r.cuerpo.pagina_id });
+    } catch (e: any) { console.error('v1 editar base de datos:', e); res.status(500).json({ error: 'Error interno.' }); }
+  });
+
+  /** `{"Column name": {source, date, nature, note}}` → by column id, for
+   *  `guardarProcedencia`. Nature: declarado | medido | calculado | no_publicado. */
+  const mapearProcedencia = (cols: any[], p: any): { mapa: Record<string, any> } | { error: string } => {
+    if (p === undefined) return { mapa: {} };
+    const m = mapearValores(cols, p);
+    if ('error' in m) return { error: m.error.replace('«values»', '«provenance»') };
+    return { mapa: m.celdas };
+  };
 
   app.get('/api/v1/databases/:id', async (req: Request, res: Response) => {
     try {
@@ -318,7 +390,9 @@ export function registrarApiPublica(app: Express, db: any) {
         else if (celda?.estado === 'error') values[c.nombre] = { error: celda.mensaje };
         else values[c.nombre] = null;
       }
-      return { id: f.id, page_id: f.pagina_id || null, values };
+      const provenance: Record<string, any> = {};
+      for (const c of cols) if (f.procedencia?.[c.id]) provenance[c.nombre] = f.procedencia[c.id];
+      return { id: f.id, page_id: f.pagina_id || null, values, ...(Object.keys(provenance).length ? { provenance } : {}) };
     });
     return { columns: cols.map(columnaPublica), rows: filas };
   };
@@ -370,6 +444,8 @@ export function registrarApiPublica(app: Express, db: any) {
       const cols = await columnasDe(t.id);
       const m = mapearValores(cols, req.body?.values ?? {});
       if ('error' in m) return res.status(400).json({ error: m.error });
+      const pr = mapearProcedencia(cols, req.body?.provenance);
+      if ('error' in pr) return res.status(400).json({ error: pr.error });
       const creada = await bdInterno.crearFila!(req, t.id, undefined);
       if ('error' in creada) return res.status(creada.codigo).json({ error: creada.error });
       if (Object.keys(m.celdas).length) {
@@ -381,6 +457,15 @@ export function registrarApiPublica(app: Express, db: any) {
           return res.status(w.codigo).json(w.cuerpo);
         }
       }
+      if (Object.keys(pr.mapa).length) {
+        const p = await guardarProcedencia(db, req, creada.id, pr.mapa);
+        if (p.codigo !== 200) {
+          // Same rule as the values: a row whose sources were rejected does not stay.
+          await db.execute(sql`UPDATE bd_filas SET deleted_at = now() WHERE id = ${creada.id}`);
+          await db.execute(sql`UPDATE knowledge_windows SET deleted_at = now() WHERE id = ${creada.pagina_id}`);
+          return res.status(p.codigo).json(p.cuerpo);
+        }
+      }
       res.status(201).json({ id: creada.id, page_id: creada.pagina_id, database_id: t.id });
     } catch (e: any) { console.error('v1 crear fila:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
@@ -390,11 +475,21 @@ export function registrarApiPublica(app: Express, db: any) {
       const t = await conTabla(req, res, true); if (!t) return;
       const f = (await db.execute(sql`SELECT id FROM bd_filas WHERE id = ${String(req.params.rowId)} AND tabla_id = ${t.id} AND deleted_at IS NULL`)).rows[0];
       if (!f) return res.status(404).json({ error: 'Esa fila no existe en esta base de datos.' });
-      const m = mapearValores(await columnasDe(t.id), req.body?.values);
+      const cols = await columnasDe(t.id);
+      // `values` and/or `provenance`: a loader may fix only the sources.
+      const m = req.body?.values === undefined && req.body?.provenance !== undefined ? { celdas: {} } : mapearValores(cols, req.body?.values);
       if ('error' in m) return res.status(400).json({ error: m.error });
-      const w = await bdInterno.escribirCeldas!(req, String(req.params.rowId), m.celdas);
-      if (w.codigo !== 200) return res.status(w.codigo).json(w.cuerpo);
-      res.json({ id: String(req.params.rowId), database_id: t.id, updated: Object.keys(m.celdas).length });
+      const pr = mapearProcedencia(cols, req.body?.provenance);
+      if ('error' in pr) return res.status(400).json({ error: pr.error });
+      if (Object.keys(m.celdas).length) {
+        const w = await bdInterno.escribirCeldas!(req, String(req.params.rowId), m.celdas);
+        if (w.codigo !== 200) return res.status(w.codigo).json(w.cuerpo);
+      }
+      if (Object.keys(pr.mapa).length) {
+        const p = await guardarProcedencia(db, req, String(req.params.rowId), pr.mapa);
+        if (p.codigo !== 200) return res.status(p.codigo).json(p.cuerpo);
+      }
+      res.json({ id: String(req.params.rowId), database_id: t.id, updated: Object.keys(m.celdas).length, provenance_updated: Object.keys(pr.mapa).length });
     } catch (e: any) { console.error('v1 editar fila:', e); res.status(500).json({ error: 'Error interno.' }); }
   });
 
