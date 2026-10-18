@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from '../../ui/core';
 import { cn } from '../../../utils/cn';
@@ -9,8 +9,10 @@ import { Cargando, MarcaProcedencia, Seccion, SinFila, useEnlaceFila } from '../
 import { CLASE_CAMPO } from '../ficha/editor';
 
 // THE COMPARATOR (plan §3.4). Products are columns and attributes are rows,
-// so that four products still fit on a phone: the attribute names stay put
-// (sticky) and the products scroll sideways INSIDE the block, never the page.
+// and the products scroll sideways INSIDE the block, never the page. On a
+// wide screen the attribute names stay put (sticky); on a phone each name goes
+// on its own line above its values and the sheet's own product is the fixed
+// column, so what it is compared against is always beside it.
 //
 // Modes (`datos.modo`):
 //   fila  on a sheet: the current product plus up to three siblings
@@ -18,6 +20,10 @@ import { CLASE_CAMPO } from '../ficha/editor';
 //   url   a «compare» page: the rows come from the address
 // In `fila` and `url` the choice is kept in the address (`?comparar=a,b`), so
 // a comparison can be shared and a search engine can land on it.
+
+/** The sheet's own product, fixed on the left on a phone. Solid colours
+ *  only: what scrolls under it must not show through. */
+const FIJA = 'max-sm:sticky max-sm:left-0 max-sm:z-10 max-sm:shadow-[1px_0_0_theme(colors.slate.200)]';
 
 function leerConsulta(): string[] {
   if (typeof window === 'undefined') return [];
@@ -53,13 +59,27 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   useEffect(() => setIds(inicial), [inicial]);
   // On a phone only one product column fits beside the labels: whoever adds
   // a product must SEE it, so the table scrolls to the new last column.
-  const caja = useRef<HTMLDivElement>(null);
+  const [caja, setCaja] = useState<HTMLDivElement | null>(null);
   const [anadido, setAnadido] = useState(0);
   // Compact first (2026-10-18): the key lines, and every line on request.
   const [todo, setTodo] = useState(false);
   useEffect(() => {
-    if (anadido && caja.current) caja.current.scrollTo({ left: caja.current.scrollWidth, behavior: 'smooth' });
-  }, [anadido]);
+    if (anadido && caja) caja.scrollTo({ left: caja.scrollWidth, behavior: 'smooth' });
+  }, [anadido, caja]);
+  // On a phone each product column is exactly half the box: the sheet's own
+  // product fixed on the left, one other beside it, and the snap lands on a
+  // whole column. A column cut in half showed a stray «×» and «a ·» from the
+  // product scrolled away (evaluator round 3). 0 = wider screens, CSS decides.
+  const [mitad, setMitad] = useState(0);
+  useEffect(() => {
+    if (!caja || typeof window === 'undefined') return;
+    const medir = () => setMitad(window.matchMedia('(min-width: 640px)').matches ? 0 : Math.floor(caja.clientWidth / 2));
+    medir();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(medir);
+    ro.observe(caja);
+    return () => ro.disconnect();
+  }, [caja]);
 
   if (cf || ct) return <Cargando />;
   if (!tabla) {
@@ -86,29 +106,33 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   const nClave = v ? v.lineas.filter(l => l.clave).length : 0;
   const plegable = !!v && nClave >= 3 && nClave < v.lineas.length;
   const lineas = v ? (plegable && !todo ? v.lineas.filter(l => l.clave) : v.lineas) : [];
+  const hayActual = !!v?.productos.some(p => p.actual);
+  const anchoCol = mitad ? { width: mitad, minWidth: mitad, maxWidth: mitad } : undefined;
 
   return (
     <Seccion titulo={v?.titulo}>
       {v?.mezcla ? <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{v.mezcla}</p> : null}
       {v && v.productos.length > 1 ? (
-        <p className="mb-1 text-sm text-slate-500 sm:hidden">Desliza la tabla hacia la izquierda para ver los {v.productos.length} productos.</p>
+        <p className="mb-1 text-sm text-slate-500 sm:hidden">
+          {hayActual ? `Este producto se queda a la izquierda; desliza la tabla para ver ${v.productos.length === 2 ? 'el otro' : `los otros ${v.productos.length - 1}`}.` : `Desliza la tabla hacia la izquierda para ver los ${v.productos.length} productos.`}
+        </p>
       ) : null}
       {v && v.productos.length >= 1 ? (
-        <div ref={caja} className="overflow-x-auto rounded-xl border border-slate-100 snap-x snap-mandatory scroll-pl-28 sm:snap-none sm:scroll-pl-0" role="region" aria-label="Comparación" tabIndex={0}>
+        <div ref={setCaja} className="overflow-x-auto rounded-xl border border-slate-100 snap-x snap-mandatory sm:snap-none" style={mitad && hayActual ? { scrollPaddingLeft: mitad } : undefined} role="region" aria-label="Comparación" tabIndex={0}>
           <table className="min-w-full border-collapse text-base">
             <thead>
               <tr>
-                <th scope="col" className="sticky left-0 z-10 w-28 min-w-[7rem] max-w-[7rem] sm:w-auto sm:max-w-none sm:min-w-[8.5rem] bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left text-xs font-semibold text-slate-400"><span className="sr-only">Dato</span></th>
+                <th scope="col" className="hidden sm:table-cell sticky left-0 z-10 sm:min-w-[8.5rem] bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left text-xs font-semibold text-slate-400"><span className="sr-only">Dato</span></th>
                 {v.productos.map(p => {
                   const href = p.actual ? null : enlace(p.paginaId);
                   return (
-                    <th key={p.id} scope="col" className={cn('snap-start min-w-[10rem] sm:min-w-[9.5rem] px-3 py-2 text-left align-bottom', p.actual && 'bg-sky-50/60')}>
+                    <th key={p.id} scope="col" style={anchoCol} className={cn('min-w-[10rem] sm:min-w-[9.5rem] px-3 py-2 text-left align-bottom', p.actual ? cn('bg-sky-50', FIJA) : 'snap-start')}>
                       {p.imagen ? <img src={p.imagen} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = 'none'; }} className="mb-1 h-16 w-16 rounded-lg object-contain" /> : null}
                       <div className="flex items-start gap-1">
-                        {href ? <a href={href} className="font-bold text-sky-700 hover:underline">{p.nombre}</a> : <span className="font-bold text-slate-900">{p.nombre}</span>}
+                        {href ? <a href={href} className="font-bold text-sky-700 hover:underline [overflow-wrap:anywhere]">{p.nombre}</a> : <span className="font-bold text-slate-900 [overflow-wrap:anywhere]">{p.nombre}</span>}
                         {!p.actual && modo !== 'fijo' ? (
-                          <Button variant="ghost" className="-mr-2 -mt-2 h-11 w-11 sm:-mr-1 sm:-mt-0.5 sm:h-6 sm:w-6 shrink-0 p-0" aria-label={`Quitar ${p.nombre}`} onClick={() => cambiar(otros.filter(i => i !== p.id))}>
-                            <X className="h-3.5 w-3.5" />
+                          <Button variant="ghost" className="-mr-2 -mt-2 h-11 w-11 shrink-0 p-0" aria-label={`Quitar ${p.nombre}`} onClick={() => cambiar(otros.filter(i => i !== p.id))}>
+                            <X className="h-4 w-4" />
                           </Button>
                         ) : null}
                       </div>
@@ -122,6 +146,7 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
               {lineas.map(l => {
                 const cabecera = l.grupo && l.grupo !== grupoAnterior ? l.grupo : '';
                 grupoAnterior = l.grupo;
+                const sentido = l.sentido ? (l.sentido === 'mayor' ? 'más es mejor' : 'menos es mejor') : '';
                 return [
                   cabecera ? (
                     <tr key={`g-${l.columnaId}`}>
@@ -132,13 +157,20 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
                       </th>
                     </tr>
                   ) : null,
-                  <tr key={l.columnaId} className="border-t border-slate-100">
-                    <th scope="row" className="sticky left-0 z-10 w-28 min-w-[7rem] max-w-[7rem] sm:w-auto sm:max-w-none bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left align-top text-sm font-medium text-slate-700 [overflow-wrap:anywhere]">
+                  // On a phone the label goes on its own line above the values,
+                  // so the sheet's own product can take the fixed column.
+                  <tr key={`e-${l.columnaId}`} className="border-t border-slate-100 sm:hidden">
+                    <th colSpan={v.productos.length} scope="colgroup" className="px-0 pt-2 text-left text-sm font-semibold text-slate-700">
+                      <span className="sticky left-0 inline-block px-3">{l.etiqueta}{sentido ? <span className="font-normal text-slate-500"> · {sentido}</span> : null}</span>
+                    </th>
+                  </tr>,
+                  <tr key={l.columnaId} className="sm:border-t border-slate-100">
+                    <th scope="row" className="hidden sm:table-cell sticky left-0 z-10 bg-white shadow-[1px_0_0_theme(colors.slate.200)] px-3 py-2 text-left align-top text-sm font-medium text-slate-700 [overflow-wrap:anywhere]">
                       {l.etiqueta}
-                      {l.sentido ? <span className="block text-sm font-normal text-slate-500">{l.sentido === 'mayor' ? 'más es mejor' : 'menos es mejor'}</span> : null}
+                      {sentido ? <span className="block text-sm font-normal text-slate-500">{sentido}</span> : null}
                     </th>
                     {l.celdas.map((c, i) => (
-                      <td key={i} className={cn('px-3 py-2 align-top text-slate-800', c.mejor && 'bg-emerald-50 font-semibold text-emerald-800', v.productos[i].actual && !c.mejor && 'bg-sky-50/40')}>
+                      <td key={i} className={cn('px-3 py-2 align-top text-slate-800 [overflow-wrap:anywhere]', c.mejor ? 'bg-emerald-50 font-semibold text-emerald-800' : v.productos[i].actual && 'bg-sky-50', v.productos[i].actual && FIJA)}>
                         {c.texto}
                         {c.mejor ? <span className="ml-1 text-sm font-bold uppercase text-emerald-700">mejor</span> : null}
                         <div><MarcaProcedencia p={c.procedencia} /></div>

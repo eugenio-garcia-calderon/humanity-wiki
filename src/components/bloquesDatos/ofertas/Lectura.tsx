@@ -21,11 +21,13 @@ import { textoOpinion, type OpinionTercero } from '../../../utils/opinionesTerce
 //   · «Ver en la tienda»: el enlace a la oferta en la web del distribuidor,
 //     con `rel="sponsored"` si nos paga comisión y `nofollow` si no.
 //
-// MIENTRAS EL COBRO ESTÉ APAGADO (2026-10-18) el botón de la cesta no se pinta:
-// llevaba a rellenar la dirección para acabar en «la compra todavía no está
-// abierta». En su lugar sale «Comprar en la tienda» y una línea que dice que
-// comprar a través de Wikiproducts llega pronto. Vuelve solo el día que el
-// servidor tenga `TIENDAS_COBRO=1` y la clave de Stripe (`useCobro`).
+// MIENTRAS NO SE PUEDA PAGAR AQUÍ (2026-10-18, ronda 3 del evaluador) «Añadir
+// a la cesta» sale igual para todos: la cesta agrupa por tienda, con envío,
+// comisión y totales, y desde ella se completa la compra en la web de cada
+// tienda (`Cesta.tsx`, `CestaPorTiendas`). Antes el botón se escondía y
+// salía «Muy pronto podrás comprar…», y el recorrido acababa sin cesta.
+// El pago aquí vuelve solo el día que el servidor tenga `TIENDAS_COBRO=1` y
+// la clave de Stripe (`useCobro`); con clave de pruebas, solo para el dueño.
 
 export type Oferta = {
   fila_id: string; distribuidor_id: string | null; distribuidor: string | null;
@@ -174,18 +176,17 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
               <p className="mt-2 text-sm leading-snug text-slate-500">{textoComision(o.comision_pct, comisionUnidad, o.moneda)}</p>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                {conCesta(o) && seCompraAqui === true && <BotonCompra datos={o.compra} />}
+                {/* Everyone fills the cart (evaluator round 3); whether it is paid
+                    here or finished at each shop is the cart's call, not the card's. */}
+                {conCesta(o) && seCompraAqui !== null && <BotonCompra datos={o.compra} />}
                 {o.enlace && (
                   <a href={o.enlace} target="_blank" rel={o.rel}
-                     className={conCesta(o) && seCompraAqui === false
-                       ? 'inline-flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-800'
-                       : 'inline-flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-bold text-slate-700 hover:bg-slate-50'}>
-                    {o.precio_centimos === null ? 'Ver el precio en la tienda'
-                      : conCesta(o) && seCompraAqui === false ? 'Comprar en la tienda' : 'Ver en la tienda'}
+                     className="inline-flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                    {o.precio_centimos === null ? 'Ver el precio en la tienda' : 'Ver en la tienda'}
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                   </a>
                 )}
-                {!o.enlace && o.precio_centimos !== null && !(conCesta(o) && seCompraAqui) && <span className="text-sm text-slate-400">Esta tienda no tiene venta en línea registrada.</span>}
+                {!o.enlace && o.precio_centimos !== null && !conCesta(o) && <span className="text-sm text-slate-400">Esta tienda no tiene venta en línea registrada.</span>}
               </div>
             </li>
           );
@@ -198,12 +199,12 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
       </p>
       {seCompraAqui === true && enPruebas && algunaConCesta && (
         <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-base leading-snug text-amber-900">
-          <b>Modo de pruebas:</b> solo tú ves «Añadir a la cesta», porque gestionas estas ofertas. El cobro usa una clave de pruebas de Stripe: paga con la tarjeta 4242 4242 4242 4242. Los visitantes ven «Comprar en la tienda».
+          <b>Modo de pruebas:</b> solo tú ves «Añadir a la cesta», porque gestionas estas ofertas. El cobro usa una clave de pruebas de Stripe: paga con la tarjeta 4242 4242 4242 4242. Los visitantes llenan la cesta igual y completan la compra en cada tienda.
         </p>
       )}
       {seCompraAqui === false && algunaConCesta && (
         <p className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-base leading-snug text-sky-900">
-          <b>Muy pronto podrás comprar a través de Wikiproducts</b>, al mismo precio que en la tienda. De momento, «Comprar en la tienda» te lleva a su web.
+          Junta en tu cesta productos de varias tiendas: verás el envío, la comisión y el total de cada una. <b>El pago a través de Wikiproducts todavía no está disponible</b>, así que desde la cesta completas la compra en la web de cada tienda, al mismo precio.
         </p>
       )}
     </section>

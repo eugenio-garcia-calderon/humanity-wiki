@@ -97,9 +97,10 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
  *  Amazon's product pages»): price, community score and the key figures, all
  *  read from the row's own columns, nothing typed for the header. */
 /** `porUnidad`: «0,51 €/W», the price per watt or kWh, '' without one. */
-/** `tiendas`: the shops with a confirmed price, the ones «Desde» is taken
- *  from; `sinPrecio`: the other shops listed. */
-export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; porUnidad: string; etiquetaUnidad: string };
+/** `tiendas`: the shops on sale with a confirmed price, the ones «Desde» is
+ *  taken from; `sinPrecio` and `agotadas`: the other shops listed; `ultimo`:
+ *  the lowest price last seen when every priced shop is sold out. */
+export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; agotadas: number; ultimo: string; porUnidad: string; etiquetaUnidad: string };
 export type Nota = { media: string; votos: number };
 
 export type VistaPropiedad =
@@ -135,7 +136,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     // the column is `visibilidad: nunca` (that only keeps it out of the lists),
     // and only under a photo.
     const cCredito = porRol('credito_imagen');
-    const compra = compraDe(t, fila);
+    const compra = compraDe(f, t, fila);
     const estado = porRol('estado') ? textoDe(fila, porRol('estado')!) : '';
     return {
       estilo,
@@ -203,22 +204,68 @@ export function estadoCon(estado: string, compra: Compra | null): string {
   return estado;
 }
 
-function compraDe(t: TablaFicha, fila: FilaFicha): Compra | null {
+function compraDe(f: Ficha, t: TablaFicha, fila: FilaFicha): Compra | null {
   const min = columnaPorRol(t, 'precio_min');
   if (!min) return null;
   const max = columnaPorRol(t, 'precio_max');
   const n = columnaPorRol(t, 'num_ofertas');
   const cp = columnaPorRol(t, 'ofertas_con_precio');
+  const u = columnaPorRol(t, 'precio_unidad');
+  const etiquetaUnidad = u ? etiquetaColumna(u) : '';
+  const porUnidadDe = (desde: string, precio: number | null) => {
+    if (!u || !desde) return '';
+    const base = numeroDe(fila, min), pu = numeroDe(fila, u);
+    // The formula divides the row's «Precio desde», which counts every shop.
+    // When the header's price is another (a sold-out shop left out), the
+    // price per unit is scaled to it, so the two never disagree.
+    if (precio == null || base == null || pu == null || !base || precio === base) return textoDe(fila, u);
+    const decimales = (String(pu).split('.')[1] || '').length;
+    const v = Number((pu * precio / base).toFixed(decimales));
+    return `${v.toLocaleString('es-ES', { maximumFractionDigits: decimales })}${u.config?.unidad ? ` ${u.config.unidad}` : ''}`;
+  };
+
+  // From the shops themselves when the sheet has them: that is what the
+  // «Dónde comprarlo» block shows, and a sold-out shop's price is not a price
+  // anyone can pay (Goal Zero said «Desde 29,95 € · A la venta» with its only
+  // priced shop sold out, evaluator round 3).
+  const of = ofertasDe(f);
+  if (of && of.total) {
+    const v = of.vendibles, ag = of.agotadas;
+    const desde = v.length ? v[0].texto : '';
+    const hasta = v.length > 1 && v[v.length - 1].texto !== desde ? v[v.length - 1].texto : '';
+    return { desde, hasta, tiendas: v.length, sinPrecio: of.sinPrecio, agotadas: ag.length, ultimo: !v.length && ag.length ? ag[0].texto : '', porUnidad: porUnidadDe(desde, v[0]?.precio ?? null), etiquetaUnidad };
+  }
+
   // A price of 0 is no price: nothing is sold for free here.
   const desde = numeroDe(fila, min) === 0 ? '' : textoDe(fila, min);
   const hasta = max ? textoDe(fila, max) : '';
-  const u = columnaPorRol(t, 'precio_unidad');
   // «Desde 144,20 € en 5 tiendas» when only one of the five had a price
   // (Anker 737, production check): count the priced ones, and say the rest
   // apart. Tables loaded before `ofertas_con_precio` existed count them all.
   const todas = (n && numeroDe(fila, n)) || 0;
   const conPrecio = cp ? numeroDe(fila, cp) ?? 0 : todas;
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), porUnidad: u && desde ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), agotadas: 0, ultimo: '', porUnidad: porUnidadDe(desde, null), etiquetaUnidad };
+}
+
+type PrecioTienda = { precio: number; texto: string };
+/** The row's shops, split the way a buyer sees them: priced and on sale
+ *  (cheapest first), priced but sold out, and without a price. Null when the
+ *  sheet came without them (a template, an editor preview). */
+export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: PrecioTienda[]; sinPrecio: number; total: number } | null {
+  if (!Array.isArray(f.ofertas)) return null;
+  const min = columnaPorRol(f.tabla, 'precio_min');
+  // Written the way «Precio desde» writes its own value.
+  const texto = (n: number) => (min ? textoDe({ id: '', pagina_id: null, titulo: '', celdas: { [min.id]: { estado: 'ok', valor: n } as any } }, min) : '') || `${n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  const vendibles: PrecioTienda[] = [], agotadas: PrecioTienda[] = [];
+  let sinPrecio = 0;
+  for (const o of f.ofertas) {
+    if (o.precio_centimos == null || o.precio_centimos <= 0) { sinPrecio++; continue; }
+    const precio = o.precio_centimos / 100;
+    (o.agotada ? agotadas : vendibles).push({ precio, texto: texto(precio) });
+  }
+  const orden = (x: PrecioTienda, y: PrecioTienda) => x.precio - y.precio;
+  vendibles.sort(orden); agotadas.sort(orden);
+  return { vendibles, agotadas, sinPrecio, total: f.ofertas.length };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {
@@ -386,7 +433,7 @@ const minusculaInicial = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 /** The block's footnote, one sentence for both painters. */
 export const NOTA_ORDEN = 'El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.';
-export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que precio, garantía, ecología y seguridad se deciden con los datos publicados que se nombran en cada línea; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
+export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que las líneas marcadas «Según los datos» se deciden con el dato publicado que nombran; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
 
 /**
  * For each criterion with a direction, the best product of the table

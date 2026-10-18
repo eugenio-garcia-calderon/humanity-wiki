@@ -78,7 +78,7 @@ function Estrellas({ valor, onElegir, deshabilitado, nombre }: {
           onMouseEnter={() => setEncima(n)}
           // Pulsar la estrella que ya está puesta quita el voto.
           onClick={() => onElegir?.(valor === n ? null : n)}
-          className="h-9 w-8 !px-0 !py-0 disabled:opacity-40">
+          className="h-11 w-11 !px-0 !py-0 disabled:opacity-40">
           <Star className={cn('h-5 w-5', n <= pintar ? 'fill-amber-400 text-amber-400' : 'text-slate-300')} />
         </Button>
       ))}
@@ -196,7 +196,7 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
           <p className="text-base text-slate-700">
             <b>¿Lo has usado?</b> Tu nota ayuda a quien viene detrás. Un voto por persona y criterio; puedes cambiarlo cuando quieras.
           </p>
-          <Button variant="primary" className="gap-1.5" onClick={() => {
+          <Button variant="primary" className="min-h-11 gap-1.5" onClick={() => {
             // The site's account menu (`CuentaMenu`) opens its sign-in panel
             // and marks the event as handled. Outside a site there is none.
             const ev = new CustomEvent('sitio:entrar', { cancelable: true });
@@ -209,7 +209,7 @@ export function Valoraciones({ datos, recargar }: { datos: Respuesta; recargar: 
       {aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
 
       <details className="mt-4 text-sm text-slate-600">
-        <summary className="flex cursor-pointer items-center gap-1 font-bold text-slate-500"><Info className="h-3.5 w-3.5" /> Cómo se calcula y cómo se ordena</summary>
+        <summary className="flex min-h-11 cursor-pointer items-center gap-1 font-bold text-slate-500"><Info className="h-3.5 w-3.5" /> Cómo se calcula y cómo se ordena</summary>
         <p className="mt-1.5 text-base leading-relaxed">
           Cada persona da una nota de 1 a 5 por criterio. Quien lo compró a través de la plataforma cuenta {datos.metodo.peso_verificado} veces.
           La nota que ves es la media de esos votos, y sólo se enseña con {datos.metodo.umbral} votos o más.
@@ -232,7 +232,7 @@ export function OpinionesFuera({ lista }: { lista: OpinionTercero[] }) {
         {lista.map(o => (
           <li key={o.url} className="text-base text-slate-700">
             <a href={o.url} target="_blank" rel="nofollow noopener noreferrer"
-              className="inline-flex items-center gap-1 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">
+              className="inline-flex min-h-11 items-center gap-1 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">
               {textoOpinion(o)}<ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
             </a>
           </li>

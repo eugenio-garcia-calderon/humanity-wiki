@@ -40,8 +40,8 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
       {/* Folded: one search per agency was a paragraph taller than the recalls. */}
       {v.busqueda && v.estado !== 'sin_comprobar' ? (
         <details className="mt-1 text-sm text-slate-500">
-          <summary className="cursor-pointer py-2 font-semibold text-slate-600">Dónde se buscó</summary>
-          <p className="whitespace-pre-line"><TextoConEnlaces texto={v.busqueda} /></p>
+          <summary className="cursor-pointer py-3 font-semibold text-slate-600">Dónde se buscó</summary>
+          <p className="whitespace-pre-line [&_a]:py-1"><TextoConEnlaces texto={v.busqueda} /></p>
         </details>
       ) : null}
     </Seccion>
