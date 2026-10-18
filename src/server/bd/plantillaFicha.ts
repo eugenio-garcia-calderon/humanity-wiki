@@ -275,9 +275,11 @@ async function ampliarFicha(db: any, req: Request | undefined, pagina: any) {
   }
   const propios = Array.isArray(pagina.config?.bloques) ? pagina.config.bloques : [];
   pagina.config = { ...(pagina.config || {}), bloques: fusionarPlantilla(r.plantilla, propios) };
-  // Without the page's absolute address (asked of W2, see the changelog) the
-  // JSON-LD goes without `url` and without breadcrumbs: better absent than wrong.
-  const m = metaFicha(r.ficha, { url: null, sitio: pagina.sitio?.titulo || null });
+  // `sitios.ts` turns «{{canonica}}» into the page's canonical address and
+  // resolves paths starting with «/» against its origin (W2, 2026-10-18).
+  const padre = pagina.padre;
+  const migas = padre?.id ? [{ nombre: String(padre.titulo || '').trim() || 'Inicio', url: padre.slug ? `/${padre.slug}` : `/p/${padre.id}` }] : [];
+  const m = metaFicha(r.ficha, { url: '{{canonica}}', sitio: pagina.sitio?.titulo || null, migas });
   pagina.meta = {
     ...(pagina.meta || {}),
     titulo: m.titulo,

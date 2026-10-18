@@ -397,11 +397,11 @@ sheet p95 > 300 ms:** precompute per-column rankings on write and read only
 the current row plus the rows the comparator shows. About a day now, more
 once other blocks depend on the full table.
 
-## 2026-10-18 — JSON-LD without the page's own address (Wikiproducts W1)
+## 2026-10-18 — Product breadcrumbs guess the parent's path (Wikiproducts W1)
 
-The sheet's `Product` JSON-LD goes without `url`, and without a
-`BreadcrumbList`, because the ampliación runs before `sitios.ts` knows the
-host and canonical. Asked W2 for a `{{canonica}}` placeholder (or the
-canonical passed in) and `MetaPagina.descripcion`; until then the
-description comes from `descripcionDe(cfg)`, not from the row's summary.
-Ten minutes on each side once agreed.
+The sheet's `BreadcrumbList` names the parent page as `/{slug}` (or `/p/{id}`)
+and lets `sitios.ts` resolve it against the canonical origin. Right on a
+subdomain; on a custom domain whose root IS that parent, the right path is
+`/`. Fix by passing the parent's canonical into the ampliación (W2) — half
+an hour — once W2's readable-URL follow-up (R2) lands, since it changes the
+paths anyway.
