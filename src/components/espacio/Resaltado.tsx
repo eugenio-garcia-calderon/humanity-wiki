@@ -17,6 +17,7 @@ export type TipoResultado = 'pagina' | 'bd' | 'carpeta' | 'persona';
 export const etiquetaTipo = (t_: TipoResultado) => t({ pagina: 'Página', bd: 'Base de datos', carpeta: 'Carpeta', persona: 'Persona' }[t_]);
 
 export function IconoResultado({ tipo, icono }: { tipo: TipoResultado; icono: string | null }) {
+  if (icono && /^(https?:|\/|data:image\/)/.test(icono)) return <img src={icono} alt="" loading="lazy" className="h-5 w-5 shrink-0 rounded object-cover" />;
   if (icono && [...icono].length <= 2 && !/^[\w-]+$/.test(icono)) return <span className="w-5 text-center text-[16px] leading-none shrink-0">{icono}</span>;
   const C = tipo === 'carpeta' ? (icono ? componenteDeTrazo(icono) : FolderKanban) : tipo === 'bd' ? Boxes : tipo === 'persona' ? UserRound : FileText;
   return <C className="h-5 w-5 shrink-0 text-slate-400" />;

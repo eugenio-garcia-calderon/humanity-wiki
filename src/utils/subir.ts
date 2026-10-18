@@ -113,7 +113,7 @@ export async function subirArchivo(
 
 /** HEIC → JPG, reducir si hace falta y, si sigue pesando mucho, preguntar. */
 async function prepararParaSubir(f: File, maxLado?: number): Promise<{ archivo: File } | { error: string }> {
-  const { esHeic, esImagenTratable, heicAJpg, comprimirImagen, LIMITE_IMAGEN } = await import('./prepararImagen');
+  const { esHeic, esImagenTratable, heicAJpg, comprimirImagen, comprimirHasta, LIMITE_IMAGEN } = await import('./prepararImagen');
   let actual = f;
   for (let vueltas = 0; vueltas < 5; vueltas++) {
     if (esHeic(actual)) {
@@ -124,6 +124,8 @@ async function prepararParaSubir(f: File, maxLado?: number): Promise<{ archivo: 
     if (maxLado) {
       try { actual = await comprimirImagen(actual, maxLado, 0.9); } catch { /* se sube tal cual */ }
     }
+    // Por debajo de un mega, siempre y sin preguntar (2026-10-18).
+    try { actual = await comprimirHasta(actual, undefined, maxLado || 2000); } catch { /* se sube tal cual */ }
     if (actual.size <= LIMITE_IMAGEN) return { archivo: actual };
     const { preguntarImagenGrande } = await import('../components/ui/DialogoImagenGrande');
     const e = await preguntarImagenGrande(actual);
@@ -131,8 +133,8 @@ async function prepararParaSubir(f: File, maxLado?: number): Promise<{ archivo: 
     if (e.tipo === 'otro') { actual = e.archivo; continue; }
     if (e.tipo === 'original') return { archivo: actual };
     try {
-      let c = await comprimirImagen(actual, 2000, 0.82);
-      if (c.size > LIMITE_IMAGEN) c = await comprimirImagen(c, 1400, 0.72);
+      let c = await comprimirHasta(actual);
+      if (c.size > LIMITE_IMAGEN) c = await comprimirImagen(c, 1024, 0.6);
       return { archivo: c };
     } catch { return { error: 'No he podido comprimir esa imagen. Elige otra.' }; }
   }

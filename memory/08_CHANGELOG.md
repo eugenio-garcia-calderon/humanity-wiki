@@ -8991,3 +8991,13 @@ en mis páginas como proyecto pendiente».
 - El menú de la derecha ya no lleva los temas: lleva las **herramientas de crear** (Carpetas, Páginas, Esquemas, Mapas, Tareas, Tablas, Calendario, Archivos) y «Crear algo», que abre la hoja de crear. El botón de la barra se llama «Herramientas».
 - `/explorar`, `/temas` y `/objetivos` llevan a la página **Humanidad Wiki** de Eugenio (`KWMVDWJ25K6T`) por su dirección pública `/@quien/p/:id`, **solo cuando está publicada**; mientras sea privada, enseñan lo de siempre. Una dirección con `?` (`/explorar?mias=1`, `?crear=1`, `?papelera=1`…) es una herramienta y no se redirige. `HaciaHumanidadWiki.tsx`.
 - «Publicaciones» (menús) apunta ahora a `/explorar?mias=1`.
+
+## 2026-10-18 — Ocho arreglos de páginas y galerías (prog8)
+- **Icono de la página en el menú izquierdo**: si el icono es una imagen subida, sale también en el árbol, en Favoritos y en el buscador (antes, el dibujo genérico).
+- **Reordenar dentro de un grupo** de una galería agrupada: ya se puede (antes solo se cambiaba de grupo). El orden es el de la tabla.
+- **«Nuevo» → «Añadir»**, junto al título de cada grupo y no debajo de sus tarjetas.
+- **Compresor**: toda imagen que se sube queda por debajo de ~1 MB, sin preguntar (`comprimirHasta`, por pasos de calidad y tamaño). Una de 9 MB sale en 0,5 MB.
+- **Tamaño de la portada**: XS, S, M, L y XL junto a Cambiar/Recortar/Quitar (es el mismo `cabecera.tamano` que la barra).
+- **«+» en las relaciones** de la ficha para buscar y enlazar otra entrada.
+- **El desplegable de una relación** se pinta en su propia capa (portal, `fixed`): ya no lo tapa una imagen ni lo recorta un contenedor; se abre hacia arriba si abajo no cabe.
+- **Entradas borradas**: un enlace a algo que ya no existe no se enseña («(ya no existe)» bloqueaba añadir otra). Si se recupera de la papelera, vuelve a salir.
