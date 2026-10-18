@@ -493,7 +493,7 @@ export function registerBdRoutes(app: Express, db: any) {
       try {
         const compras = await sincronizarTienda(db, {
           tablaId: req.params.id, duenoId: permiso.tabla.creador_user_id, columnas: columnas as any[], colTitulo,
-          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos })),
+          filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas, archivos: f.archivos, apuntados: f.apuntados })),
         });
         for (const f of preparadas) for (const c of columnasCompra) {
           f.celdas[c.id] = compras[f.id] ? { estado: 'ok', valor: compras[f.id] as any } : { estado: 'vacia' };

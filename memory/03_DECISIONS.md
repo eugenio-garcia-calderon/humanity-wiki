@@ -782,3 +782,32 @@ still works and the sitemap fixes it on the next crawl.
 so a row URL can never shadow an ordinary page (`/my-page`) or an app path.
 On a custom domain an unknown two-segment path still answers 200 with the site's
 root page, as before; on a subdomain and in casa it is a 404.
+
+## 2026-10-18 — Wikiproducts purchases: one seller, a managed order per distributor (W5)
+
+**Context.** Wikiproducts sells products it does not stock: the customer pays
+the shop's retail price on our site and we buy it from the distributor, who
+pays us a commission. The commission must be visible on every line and must
+never decide the order (Eugenio's ethics code).
+
+**Options.** (a) Each distributor a seller with its own Stripe account (the
+existing multi-store cart, one payment per shop). (b) Every offer row belongs
+to the Wikiproducts account: one cart, one payment, and the order is split
+afterwards into one entry per distributor that a person places by hand.
+(c) Affiliate links only, no checkout.
+
+**Chosen: (b), with (c) alongside.** Distributors have no accounts here and
+will not onboard to Stripe Connect for an MVP; (b) reuses cart, checkout,
+reservations, receipts and webhooks untouched. The «Ver en la tienda» link
+keeps (c) for shops we do not buy from. New: `pedidos_distribuidor` (0157),
+offer roles on the existing column types (no new types), commission
+snapshotted on `pedido_lineas` at payment.
+
+**Rules fixed in code.** `ordenarOfertas` takes no commission input that it
+reads; shipping is summed per distributor (one box each, the free threshold
+measured on that shop's part only); a shop entry only moves forward
+(«Incidencia» is the exit, delivered and cancelled are final) and the
+customer's order is deduced from all entries and never goes back.
+
+**Diverges from `docs/`?** Not that we know of; payment option A in Stripe
+test mode is the plan's default, real keys wait for Eugenio.

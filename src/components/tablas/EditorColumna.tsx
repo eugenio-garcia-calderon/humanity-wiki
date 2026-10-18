@@ -91,6 +91,24 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
       { id: 'texto', rol: 'recompensa', nombre: 'Recompensa', label: 'Recompensa', ayuda: 'Qué recibe quien apoya (para «Donación con recompensa»)' },
     ],
   },
+  // LAS OFERTAS (2026-10-18, Wikiproducts W5). Una base de datos de ofertas es
+  // una tienda cuyas filas se compran a otro: «Distribuidor» dice a quién y
+  // «Comisión» lo que nos paga por enseñarla (vacía = sin acuerdo). El bloque
+  // «Ofertas» de la ficha y el pedido gestionado leen estos papeles. Ver
+  // `src/server/pedidoGestionado.ts`.
+  {
+    grupo: 'Ofertas',
+    tipos: [
+      { id: 'relacion', rol: 'producto', nombre: 'Producto', label: 'Producto', ayuda: 'La ficha de la que es oferta' },
+      { id: 'relacion', rol: 'distribuidor', nombre: 'Distribuidor', label: 'Distribuidor', ayuda: 'La tienda que lo vende' },
+      { id: 'porcentaje', rol: 'comision', nombre: 'Comisión', label: 'Comisión', ayuda: 'Lo que nos paga la tienda; vacía = sin acuerdo' },
+      { id: 'url', rol: 'enlace', nombre: 'Enlace a la tienda', label: 'Enlace a la tienda', ayuda: 'La oferta en la web del distribuidor' },
+      { id: 'texto', rol: 'plazo', nombre: 'Plazo de entrega', label: 'Plazo de entrega', ayuda: '«1–2 días»' },
+      { id: 'fecha', rol: 'comprobado', nombre: 'Comprobado el', label: 'Comprobado el', ayuda: 'Cuándo se miró el precio por última vez' },
+      { id: 'casilla', rol: 'instalacion', nombre: 'Incluye instalación', label: 'Incluye instalación', ayuda: 'Para paneles y baterías domésticas' },
+      { id: 'texto', rol: 'gtin', nombre: 'EAN / GTIN', label: 'EAN / GTIN', ayuda: 'El código de barras (en la ficha de producto)' },
+    ],
+  },
   // LA NOTA DE LA COMUNIDAD (2026-10-18, Wikiproducts: «calificar los
   // productos en función de la calidad, precio, garantía, ecología, salud,
   // estética y ética»). One column per criterion; people vote 1-5 in the row's

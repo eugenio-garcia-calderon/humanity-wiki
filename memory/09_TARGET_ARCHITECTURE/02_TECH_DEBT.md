@@ -415,3 +415,18 @@ Fixing it means passing the row page's slug to the reading components
 (`Rejilla`, `Galeria`) and an `enlaceRuta` in `ContextoSitio`: about an hour
 today, touching files other threads edit often. Do it when the product sheet
 (W1) settles.
+
+## 2026-10-18 — Offers block reads the whole offers table (Wikiproducts W5)
+
+`ofertasDeProducto` (`src/server/ofertas.ts`) reads every row of the offers
+table to show one product's offers, because `sincronizarTienda` archives any
+product it is not handed. Fine for hundreds of offers. With thousands, give
+`sincronizarTienda` a «these rows only, do not archive the rest» mode (about
+1 hour today) or move the sync to the write paths (see 2026-10-06 above).
+
+Also found, not fixed: sending a shop table to the bin leaves its `products`
+rows for sale. The merchant feed filters them out; checkout does not.
+
+Both integrations are wired: the server HTML (W2) and the distributor
+attention score (W4, `notaAtencionDistribuidores`; null under the voter
+threshold, checked only on that null path here).
