@@ -8955,3 +8955,9 @@ en mis páginas como proyecto pendiente».
 - En «Menú y pie» → «Datos legales» → «Buscadores» se pegan los códigos de Google Search Console y Bing Webmaster Tools, y salen en todas las páginas del sitio.
 - Las ampliaciones pueden usar `{{inicio}}` en sus datos estructurados: la dirección canónica de la portada del sitio.
 - IndexNow (SEO R12): un sitio con su propia dirección puede encender «Avisar a Bing de cada cambio al momento» («Menú y pie» → «Datos legales»). Cada 15 minutos se avisa a IndexNow (Bing, Yandex, Seznam; ChatGPT y Copilot leen de Bing) de las direcciones del sitemap que cambiaron. La clave se saca del dominio y se publica en `/<clave>.txt`; no es un secreto. Apagado en todos los sitios que ya existían; `INDEXNOW=off` lo apaga para todos (`src/server/indexNow.ts`).
+
+### 2026-10-18 — Los datos de producto y el programa que los carga (Wikiproducts W3a)
+- `scripts/wikiproducts/datos/portatil/`: 58 productos portátiles investigados (13 powerbanks, 10 estaciones de energía, 17 paneles solares portátiles, 18 luces solares), con 129 afirmaciones publicitarias con veredicto, 11 retiradas de seguridad y 77 ofertas. Cada dato lleva fuente, fecha y naturaleza (`declarado`, `medido`, `calculado`, `no_publicado`). Junto a `datos/domestico/` (W3b).
+- `scripts/wikiproducts/cargar.mjs` los escribe por `/api/v1` en las tablas de `crear-esquema.mjs` (que ejecuta antes si faltan): valores, procedencia por celda, marca, afirmaciones y retiradas enlazadas, ofertas con «sin acuerdo» como comisión vacía, y las direcciones `/subcategoria/marca-modelo` al final. Reconoce cada fila por su nombre: repetirlo sólo escribe lo que cambió y nunca borra. `--seco` lo comprueba sin servidor.
+- Probado en la copia local (`local.sh`): 621 filas sin fallos; la segunda carga, 0 cambios.
+- Un importe decimal se envía con coma («0,138»): el tipo «moneda» del servidor lee «0.138» como 138 (punto de millar), también cuando llega como número por la API.
