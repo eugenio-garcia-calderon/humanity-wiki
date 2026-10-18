@@ -1,0 +1,483 @@
+{
+  "nota": "Notas publicadas por otros sitios, leídas a mano en la página enlazada el día de «fecha». Se enseñan aparte de la comunidad y nunca cuentan en su nota ni en el orden (src/server/bd/opinionesTerceros.ts). Sin Amazon para productos: su robots.txt bloquea la lectura y sus condiciones sólo permiten sus estrellas por su API. Mínimo: 10 opiniones por tienda, 5 por producto. Claves: id de distribuidores.json y de producto.",
+  "distribuidores": {
+    "aceflex-de": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/www.aceflex.de",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 411,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "allpowers-tienda-eu": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/iallpowers.eu",
+        "nota": 2.4,
+        "escala": 5,
+        "opiniones": 16,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "alpinstore": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/alpinstore.com",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 8426,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "amazon-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/amazon.es",
+        "nota": 1.4,
+        "escala": 5,
+        "opiniones": 7423,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "autosolar-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/autosolar.es",
+        "nota": 3.4,
+        "escala": 5,
+        "opiniones": 1099,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "barrabes": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/barrabes.com",
+        "nota": 4.4,
+        "escala": 5,
+        "opiniones": 7868,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "bluetti-tienda-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/es.bluettipower.eu",
+        "nota": 4.1,
+        "escala": 5,
+        "opiniones": 46,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "bluetti-tienda-eu": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/bluettipower.eu",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 980,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "cellularline-tienda-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/cellularline.com",
+        "nota": 4.2,
+        "escala": 5,
+        "opiniones": 362,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "cuencasolar-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/cuencasolar.es",
+        "nota": 2.0,
+        "escala": 5,
+        "opiniones": 21,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "decathlon-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/decathlon.es",
+        "nota": 1.4,
+        "escala": 5,
+        "opiniones": 2041,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "elcorteingles": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/elcorteingles.es",
+        "nota": 1.2,
+        "escala": 5,
+        "opiniones": 11504,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "electrocity-ie": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/electrocity.ie",
+        "nota": 4.0,
+        "escala": 5,
+        "opiniones": 385,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "fvcomponentes": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/fvcomponentes.com",
+        "nota": 4.1,
+        "escala": 5,
+        "opiniones": 35,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "holaluz": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/holaluz.com",
+        "nota": 4.0,
+        "escala": 5,
+        "opiniones": 8670,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "leroymerlin-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/leroymerlin.es",
+        "nota": 1.3,
+        "escala": 5,
+        "opiniones": 4065,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "mediamarkt-at": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/www.mediamarkt.at",
+        "nota": 4.3,
+        "escala": 5,
+        "opiniones": 16958,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "mediamarkt-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/www.mediamarkt.es",
+        "nota": 3.6,
+        "escala": 5,
+        "opiniones": 53398,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "nkon-nl": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/nkon.nl",
+        "nota": 3.4,
+        "escala": 5,
+        "opiniones": 1866,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "offgridtec": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/offgridtec.com",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 152,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "pcbox": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/pcbox.com",
+        "nota": 4.2,
+        "escala": 5,
+        "opiniones": 324,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "pccomponentes": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/pccomponentes.com",
+        "nota": 4.0,
+        "escala": 5,
+        "opiniones": 16567,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "photovoltaik4all-de": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/www.photovoltaik4all.de",
+        "nota": 4.8,
+        "escala": 5,
+        "opiniones": 870,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "powerplanet": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/powerplanetonline.com",
+        "nota": 4.1,
+        "escala": 5,
+        "opiniones": 16087,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "proshop-nl": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/proshop.nl",
+        "nota": 4.3,
+        "escala": 5,
+        "opiniones": 3426,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "redmond-electric-ie": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/redmondelectric.ie",
+        "nota": 4.6,
+        "escala": 5,
+        "opiniones": 105,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "solarboss-ie": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/solarboss.ie",
+        "nota": 4.4,
+        "escala": 5,
+        "opiniones": 46,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "solartraders": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/solartraders.com",
+        "nota": 4.3,
+        "escala": 5,
+        "opiniones": 20,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "speck-sports": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/speck-sports.com",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 285,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "sun": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/sun.store",
+        "nota": 4.4,
+        "escala": 5,
+        "opiniones": 61,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "tienda-solar-es": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/tienda-solar.es",
+        "nota": 3.4,
+        "escala": 5,
+        "opiniones": 52,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "varuste-net": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/varuste.net",
+        "nota": 4.2,
+        "escala": 5,
+        "opiniones": 1540,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "vekto-nl": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/www.vekto.nl",
+        "nota": 4.8,
+        "escala": 5,
+        "opiniones": 13493,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "wattuneed": [
+      {
+        "fuente": "Trustpilot",
+        "url": "https://es.trustpilot.com/review/wattuneed.com",
+        "nota": 3.3,
+        "escala": 5,
+        "opiniones": 65,
+        "fecha": "2026-10-18"
+      }
+    ]
+  },
+  "productos": {
+    "anker-737-powercore-24k": [
+      {
+        "fuente": "PcComponentes",
+        "url": "https://www.pccomponentes.com/anker-power-bank-gen-2-con-pantalla-140w-24000mah-negro",
+        "nota": 4.8,
+        "escala": 5,
+        "opiniones": 209,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "anker-powercore-10000": [
+      {
+        "fuente": "PcComponentes",
+        "url": "https://www.pccomponentes.com/anker-powercore-powerbank-10000mah",
+        "nota": 4.9,
+        "escala": 5,
+        "opiniones": 16,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "anker-prime-power-bank-27650-250w": [
+      {
+        "fuente": "PcComponentes",
+        "url": "https://www.pccomponentes.com/anker-prime-power-bank-250w-27650mah-negra",
+        "nota": 3.8,
+        "escala": 5,
+        "opiniones": 58,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "anker-solix-c1000": [
+      {
+        "fuente": "PcComponentes",
+        "url": "https://www.pccomponentes.com/anker-solix-c1000-estacion-de-energia-portatil-1056wh-1800w",
+        "nota": 4.8,
+        "escala": 5,
+        "opiniones": 10,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "biolite-luci-original": [
+      {
+        "fuente": "REI Co-op",
+        "url": "https://www.rei.com/product/227375/mpowerd-luci-inflatable-solar-lantern-outdoor-20",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 321,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "ecoflow-400w": [
+      {
+        "fuente": "PcComponentes",
+        "url": "https://www.pccomponentes.com/ecoflow-panel-solar-portatil-y-plegable-400w",
+        "nota": 4.7,
+        "escala": 5,
+        "opiniones": 59,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "ecoflow-delta-3-max": [
+      {
+        "fuente": "PcComponentes",
+        "url": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+        "nota": 4.6,
+        "escala": 5,
+        "opiniones": 5,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "goal-zero-crush-light-chroma": [
+      {
+        "fuente": "REI Co-op",
+        "url": "https://www.rei.com/product/141607",
+        "nota": 4.3,
+        "escala": 5,
+        "opiniones": 127,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "goal-zero-lighthouse-600": [
+      {
+        "fuente": "REI Co-op",
+        "url": "https://www.rei.com/product/188291",
+        "nota": 4.3,
+        "escala": 5,
+        "opiniones": 191,
+        "fecha": "2026-10-18"
+      },
+      {
+        "fuente": "Backcountry",
+        "url": "https://www.backcountry.com/goal-zero-lighthouse-600",
+        "nota": 4.5,
+        "escala": 5,
+        "opiniones": 66,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "goal-zero-nomad-20": [
+      {
+        "fuente": "REI Co-op",
+        "url": "https://www.rei.com/product/180607",
+        "nota": 3.1,
+        "escala": 5,
+        "opiniones": 51,
+        "fecha": "2026-10-18"
+      },
+      {
+        "fuente": "MEC",
+        "url": "https://www.mec.ca/en/product/6012-170/goal-zero-nomad-20-solar-panel",
+        "nota": 2.9,
+        "escala": 5,
+        "opiniones": 22,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "samsung-eb-p4520-20000-45w": [
+      {
+        "fuente": "PcComponentes (Francia)",
+        "url": "https://www.pccomponentes.fr/batterie-portable-samsung-20-000-mah-a-charge-ultra-rapide-45-w-pd3-0-usb-c-beige",
+        "nota": 3.9,
+        "escala": 5,
+        "opiniones": 513,
+        "fecha": "2026-10-18"
+      }
+    ],
+    "xiaomi-33w-power-bank-20000-cable-integrado": [
+      {
+        "fuente": "PowerPlanet",
+        "url": "https://www.powerplanetonline.com/es/xiaomi-33w-power-bank-20000mah-cable-integrado-marron",
+        "nota": 4.8,
+        "escala": 5,
+        "opiniones": 5,
+        "fecha": "2026-10-18"
+      }
+    ]
+  }
+}

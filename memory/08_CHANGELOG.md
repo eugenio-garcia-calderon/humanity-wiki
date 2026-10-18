@@ -9315,3 +9315,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Home at 390 px: section cards two per row and smaller (36 px thumbnail, 13 px title, up to 3 lines). Locally the five cards take 324 px from «Explora por categoría»; production's intro is shorter than the local copy's, so they should all fit at 390×844. Not checked on production.
 - Search: the first 8 result photos load eagerly (was 4).
 - Mobile menu dropdown is placed under the whole header, so it no longer covers the search box.
+
+## 2026-10-18 — Opiniones en otras webs, aparte de la comunidad (Wikiproducts W4)
+- Las fichas y las tiendas pueden enseñar **lo que publican otros sitios**: «Según Trustpilot: 4 de 5, de 16.567 opiniones (consultado el 18/10/2026)», con enlace. En la ficha, una caja propia **«Opiniones en otras webs»** debajo de la puntuación de la comunidad; en «Dónde comprarlo», una línea «En otras webs: …» bajo la atención al cliente de cada tienda. Las dos salen también en el HTML del servidor.
+- **No cuentan nunca** en la nota de la comunidad, no ordenan nada y no entran en el `AggregateRating` del JSON-LD. La caja de la comunidad sigue con su estado vacío y su «Entrar para puntuar».
+- El dato: columna `opiniones_terceros` (texto largo con JSON, oculta en la ficha) en las cinco tablas de producto y en Distribuidores, cargada por `cargar.mjs` desde `scripts/wikiproducts/datos/opiniones-terceros.json`. Sólo se enseña una entrada con enlace https, fecha y cifras válidas (`src/utils/opinionesTerceros.ts`). Pruebas en `scripts/probar-valoraciones.ts`.
+- **Amazon no**: su `robots.txt` bloquea la lectura y sus condiciones sólo permiten enseñar sus estrellas por su API. Las cifras de productos salen de tiendas oficiales y tiendas que publican sus opiniones; las de tiendas, de Trustpilot.
