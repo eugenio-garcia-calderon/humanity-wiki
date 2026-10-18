@@ -28,8 +28,12 @@
 //   config.clave     the stable key the loaders use (`capacidad_wh`).
 import { formatear, type Celda, type Columna } from '../../../utils/formatoCelda';
 
-export type Naturaleza = 'declarado' | 'medido' | 'calculado' | 'no_publicado';
-export const NATURALEZAS: Naturaleza[] = ['declarado', 'medido', 'calculado', 'no_publicado'];
+// 'tercero' (2026-10-18): a value taken from someone who is neither the brand
+// nor a measurement — a shop relaying the spec sheet, the press, a regulator,
+// Wikipedia. Shown as «Según <host>». Before it, those values read «Según la
+// marca» with a source that was not the brand (1,041 of them).
+export type Naturaleza = 'declarado' | 'medido' | 'calculado' | 'tercero' | 'no_publicado';
+export const NATURALEZAS: Naturaleza[] = ['declarado', 'medido', 'calculado', 'tercero', 'no_publicado'];
 
 /** Where one cell's value came from (`bd_filas.procedencia`, migration 0153). */
 export type Procedencia = {
@@ -37,6 +41,8 @@ export type Procedencia = {
   fecha?: string | null;
   naturaleza?: Naturaleza;
   nota?: string | null;
+  /** The sentence to show, worked out for its column by `procedenciaDe`. */
+  etiqueta?: string;
 };
 
 export type Apuntado = { id: string; etiqueta: string; existe?: boolean; clase?: string; extra?: any };
@@ -76,7 +82,7 @@ export type Ficha = {
 };
 
 export const ROLES = [
-  'marca', 'modelo', 'gtin', 'imagen', 'credito_imagen', 'subcategoria', 'resumen', 'estado',
+  'marca', 'modelo', 'gtin', 'imagen', 'credito_imagen', 'subcategoria', 'tamano', 'resumen', 'estado',
   'precio_min', 'precio_max', 'num_ofertas', 'revisado',
   'afirmaciones', 'retiradas', 'ofertas', 'retiradas_fecha', 'retiradas_busqueda',
   // Inside related tables:
@@ -97,7 +103,11 @@ export const NUNCA_ORDENA: ReadonlySet<string> = new Set(['comision']);
 /** Two roles arrived after the schema was created in production, and a
  *  column's config cannot be changed through the API yet: their loader keys
  *  in `esquema-bd.json` stand in for them. */
-const ROL_POR_CLAVE: Record<string, Rol> = { foto_licencia: 'credito_imagen', tipo: 'subcategoria' };
+const ROL_POR_CLAVE: Record<string, Rol> = {
+  foto: 'imagen', foto_licencia: 'credito_imagen', tipo: 'subcategoria',
+  // The size a product is compared at: energy for batteries, peak power for panels.
+  capacidad_wh: 'tamano', capacidad_total_kwh: 'tamano', potencia_pico_w: 'tamano', potencia_pico_wp: 'tamano',
+};
 export const rolDe = (c: Columna | undefined): string | undefined =>
   c?.config?.ficha || (c?.config?.clave ? ROL_POR_CLAVE[c.config.clave] : undefined);
 export const grupoDe = (c: Columna | undefined): string | undefined => c?.config?.grupo;
@@ -150,12 +160,42 @@ export const ETIQUETA_NATURALEZA: Record<Naturaleza, string> = {
   declarado: 'Según la marca',
   medido: 'Medido por un tercero',
   calculado: 'Calculado',
+  tercero: 'Según otra fuente',
   no_publicado: 'El fabricante no lo publica',
 };
 
+/** «Not published» depends on WHAT is missing: an absent independent test is
+ *  not something the manufacturer fails to publish. A column can say it in
+ *  `config.sin_dato`; these are the loader's columns that need it. */
+const SIN_DATO_POR_CLAVE: Record<string, string> = {
+  pruebas_independientes: 'No hay pruebas independientes publicadas',
+  energia_util_medida_wh: 'Nadie ha publicado una medición',
+  precio_por_wp_eur: 'Sin precio publicado',
+  precio_por_kwh_util_eur: 'Sin precio publicado',
+  pais_sede: 'La empresa no lo publica',
+  razon_social: 'La empresa no lo publica',
+};
+
+/** The provenance as one sentence, with the source's host where it adds
+ *  something: «Según la marca · anker.com», «Según pccomponentes.com». */
+export function etiquetaProcedencia(p: Procedencia, c?: Columna): string {
+  const host = sitioDe(p.fuente);
+  if (p.naturaleza === 'tercero') return host ? `Según ${host}` : ETIQUETA_NATURALEZA.tercero;
+  if (p.naturaleza === 'no_publicado') {
+    const propio = typeof c?.config?.sin_dato === 'string' && c.config.sin_dato.trim() ? c.config.sin_dato.trim() : '';
+    const base = propio || (c?.config?.clave && SIN_DATO_POR_CLAVE[c.config.clave]) || ETIQUETA_NATURALEZA.no_publicado;
+    return host ? `${base} · ${host}` : base;
+  }
+  const base = p.naturaleza ? ETIQUETA_NATURALEZA[p.naturaleza] : '';
+  return host ? `${base} · ${host}` : base;
+}
+
 export const procedenciaDe = (fila: FilaFicha | undefined, c: Columna): Procedencia | null => {
   const p = fila?.procedencia?.[c.id];
-  return p && typeof p === 'object' ? p : null;
+  if (!p || typeof p !== 'object') return null;
+  // An unknown nature (data newer than this code) shows nothing rather than «undefined».
+  if (p.naturaleza && !NATURALEZAS.includes(p.naturaleza)) return null;
+  return { ...p, etiqueta: p.naturaleza ? etiquetaProcedencia(p, c) : undefined };
 };
 
 /** The host of a source URL, for a short label («anker.com»). */
@@ -184,6 +224,22 @@ export const sentidoDe = (c: Columna): 'mayor' | 'menor' | null => {
   const s = c.config?.comparar;
   return s === 'mayor' || s === 'menor' ? s : null;
 };
+
+/**
+ * What a gallery card shows when nobody chose: on a product table, the brand,
+ * the figure that says how big it is (or the first comparable technical one),
+ * the «from» price and the community score — the four things a reader scans a
+ * catalogue for. `null` on any other table, which keeps its first columns.
+ */
+export function propiedadesTarjeta(columnas: Columna[], tituloId?: string | null): string[] | null {
+  const por = (r: Rol) => columnas.find(c => c.id !== tituloId && rolDe(c) === r && c.config?.visibilidad !== 'nunca');
+  const marca = por('marca');
+  const precio = por('precio_min');
+  if (!marca && !precio) return null;
+  const cifra = por('tamano') || columnas.find(c => grupoDe(c) === 'tecnico' && sentidoDe(c) && c.config?.visibilidad !== 'nunca');
+  const nota = columnas.find(c => criterioDe(c) === 'media');
+  return [marca, cifra, precio, nota].filter((c): c is Columna => !!c).map(c => c.id);
+}
 
 /** Can this column rank rows? Only numeric ones with a declared direction,
  *  and never the commission. */

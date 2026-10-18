@@ -9050,3 +9050,28 @@ en mis páginas como proyecto pendiente».
 - New `POST /api/v1/uploads?type=image/…` (write scope, raw bytes, JPEG/PNG/WebP/AVIF/GIF only, no SVG, 10 MB): stores an image in the same store as `/api/uploads` and returns its `/uploads/…` address.
 - New `scripts/wikiproducts/fotos.mjs`: per product, tries `datos/fotos.json` (Commons file, page or image), the image in the data, the shop pages of its offers, then the maker's page (never a home page). Reads `og:image` / `twitter:image` / JSON-LD `Product.image`, downloads it, rejects non-images, files under 4 KB and anything under 250×250 px, stores it and fills «Foto» (absolute `https://humanity.wiki/uploads/…`) and «Licencia de la foto» («Foto: <shop or maker> — <page>»). Skips rows whose photo is already ours from the same page.
 - `cargar.mjs` no longer writes the photo cells. `cargar-en-servidor.sh` runs `fotos.mjs` only when the workflow is dispatched with `fotos=si`.
+## 2026-10-18 — Tarjetas XXXS (prog8)
+- Nuevo tamaño de tarjeta **XXXS** (60 px de mínimo, huecos de 4/8 px, nombre a 9 px), el más pequeño y junto de la galería. Solo para las tarjetas: el tamaño del título empieza en XXS y el del nombre en XS, como antes.
+- Los selectores de tamaño del panel son un poco más estrechos para que quepan los siete.
+
+## 2026-10-18 — Recuadros de los grupos en la galería (prog8)
+- Cada grupo de una galería agrupada va en un **recuadro**: fondo gris suave, borde un punto más oscuro, esquinas redondeadas y una **sombra** ligera para que destaque sobre el blanco. El título va dentro, más grande (`text-[1.375rem]`, extrabold) y con más aire hasta las tarjetas; el contador es una píldora y «Añadir» va a su altura.
+- Dentro del recuadro las **tarjetas son blancas** (con un borde fino), para que no se confundan con el fondo. Fuera de los grupos, las galerías no cambian.
+- **Configuración → Grupos → Color del recuadro**: gris (por defecto), blanco, azul, verde, ámbar, rosa o violeta (`grupo_color`, `COLORES_GRUPO`).
+- El color de una opción de selección sale como un punto junto al título, no tiñendo el texto. En el móvil, el recuadro ocupa todo el ancho.
+- Estética revisada por un agente evaluador (nota inicial 6/10); se aplicaron sus 8 propuestas de estilo.
+
+### 2026-10-18 — Cart postal code, honest «no price», and no cart while charging is off (Wikiproducts W5)
+- The cart asked for «el código postal y el país para el precio exacto» and had nowhere to type them. It now has both fields under the shipping line (country is a list: Spain, the EU countries, «Otro país (fuera de la UE)»). Shipping is re-quoted as they are typed (`/api/publicar/cotizar` already took `pais`/`cp`), they are kept in this browser (`humanity:destino`), and the checkout form starts with them. «El envío se calcula al pagar» only shows while there is no shipping figure yet.
+- «Precio no publicado» read as a broken card. A shop without a price now says «Sin precio confirmado» plus why: «No pudimos confirmar el precio en su web el <fecha>: puede estar agotado o haber cambiado. Míralo directamente en la tienda.», and its link reads «Ver el precio en la tienda». The summary says how many shops have no confirmed price. The same sentence goes into the HTML for search engines (`motivoSinPrecio` in `utils/ofertas.ts`). A buy cell with no price no longer shows the seller's «Ponle un precio para venderlo» to readers.
+- While charging is off (`TIENDAS_COBRO` not 1, or no `STRIPE_SECRET_KEY`), an offer no longer offers «Añadir a la cesta» (it led to filling in the address only to get «La compra todavía no está abierta»). It shows «Comprar en la tienda» (the shop's link) and a note: «Muy pronto podrás comprar a través de Wikiproducts». The cart, wherever it opens, replaces «Finalizar compra» with «Todavía no se puede pagar en esta web» while `/api/publicar/comprar` would refuse. Both switch back on their own: `GET /api/publicar/cobro` now also says `con_pasarela`, read once per page by `hooks/useCobro.ts`.
+- Checked locally as an anonymous visitor, with charging on and off: the offer card in both states, and the cart's postal-code field re-pricing shipping to Baleares on «07001». The cart's closed-state notice was not seen rendered (no local page reached a cart once the offer button is hidden); it is checked by reading only.
+## 2026-10-18 — Wikiproducts W1: evaluator round 1 on the product sheet
+
+- «La mejor en cada criterio»: same type and comparable size (half to double), and the sentence says so; community criteria always show their vote count («0 votos, hacen falta 3»).
+- Comparator: on phones 16 px text, 44×44 remove buttons and picker, narrower fixed label column with a visible edge, a «desliza» hint, and the table scrolls to a product just added. It only offers products of the same type and warns when a link mixes types.
+- Sheet layout no longer jumps while loading (CLS 0.78 → 0.00 measured locally on the Anker Zolo sheet): data-block chunks and community scores are fetched before the first paint (`bloquesDatos/precarga.ts`); a broken header photo keeps its box.
+- Visitors no longer see «Ponle un precio para venderlo» (the buy button now says «Sin precio todavía»).
+- Gallery cards of product tables show brand, key figure with its unit, «Precio desde» and the community score by default.
+- «Sugerir una corrección» on every sheet (via the existing report queue).
+- New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).

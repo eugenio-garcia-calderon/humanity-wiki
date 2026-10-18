@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ImageOff } from 'lucide-react';
 import { Badge } from '../../ui/core';
 import TextoConEnlaces from '../../ui/TextoConEnlaces';
 import type { PropsLectura } from '../tipos';
@@ -24,7 +25,15 @@ function ValorConEnlace({ v }: { v: Valor }) {
  *  of leaving a broken frame with the alt text in it. */
 function Foto({ src, alt, credito }: { src: string; alt: string; credito: string }) {
   const [rota, setRota] = useState(false);
-  if (rota) return null;
+  // A photo that fails keeps its box: collapsing it moved the whole sheet up
+  // after the first paint (part of the CLS the evaluator measured).
+  if (rota) {
+    return (
+      <div className="grid h-48 w-48 shrink-0 place-items-center rounded-2xl border border-slate-100 bg-slate-50 text-center text-xs text-slate-500" role="img" aria-label={`${alt}: foto no disponible`}>
+        <span className="flex flex-col items-center gap-1"><ImageOff className="h-6 w-6 text-slate-400" aria-hidden />Foto no disponible</span>
+      </div>
+    );
+  }
   return (
     <figure className="shrink-0">
       <img src={src} alt={alt} loading="eager" onError={() => setRota(true)} className="h-48 w-48 rounded-2xl border border-slate-100 bg-white object-contain p-2" />
