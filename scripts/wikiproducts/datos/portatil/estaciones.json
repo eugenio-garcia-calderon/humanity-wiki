@@ -1,0 +1,3105 @@
+{
+  "subcategoria": "estaciones",
+  "generado": "2026-10-18",
+  "productos": [
+    {
+      "id": "ecoflow-river-3",
+      "nombre": "EcoFlow RIVER 3",
+      "marca_id": "ecoflow",
+      "modelo": "EFR705",
+      "subcategoria": "estaciones",
+      "ean": [
+        {
+          "valor": "4895251625463",
+          "fuente": "https://www.proshop.de/Kraftwerk/EcoFlow-River-3-245Wh/3318665",
+          "fecha": "2026-10-18",
+          "nota": "Variante EFRIVER3-EU-CBox (enchufe UE)."
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2024,
+        "naturaleza": "declarado",
+        "fuente": "https://www.notebookcheck.com/EcoFlow-River-3-Kompakte-Powerstation-leistet-bis-zu-600-W-bei-nur-3-55-kg-Gewicht.918219.0.html",
+        "fecha": "2026-10-18",
+        "nota": "Notebookcheck sitúa el lanzamiento en Alemania el 14-11-2024 (PVP 249 €); manual en inglés fechado 2024-09-11."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://es.ecoflow.com/products/river-3-portable-power-station",
+        "nota": "La página de la marca carga la imagen por JavaScript; no se obtuvo la URL directa."
+      },
+      "resumen": "La RIVER 3 es la estación de energía más pequeña de la gama RIVER de EcoFlow, con una batería LiFePO₄ de 245 Wh y una toma de corriente alterna de 230 V. Según la marca entrega 300 W continuos y hasta 600 W con el modo X-Boost, que reduce la tensión para alimentar aparatos resistivos. Se recarga desde la red a unos 305 W (versión UE), desde placas solares a 110 W o desde el coche a 100 W. Existe una variante con función SAI de 10 ms y otra de 230 Wh (RIVER 3 (230)). Una prueba de StorageReview obtuvo 210 Wh útiles en alterna con una carga de 300 W.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 12800,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "12,8 Ah a 19,2 V nominales del paquete (no de celda)."
+        },
+        "tension_celda_v": {
+          "valor": 19.2,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Tensión nominal del paquete de baterías, no de cada celda."
+        },
+        "capacidad_wh": {
+          "valor": 245,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": 550,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Potencia de salida total declarada sumando todas las salidas."
+        },
+        "potencia_ac_continua_w": {
+          "valor": 300,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Onda senoidal pura, 230 V 50 Hz en la versión UE."
+        },
+        "potencia_ac_pico_w": {
+          "valor": 600,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "600 W es el modo X-Boost (para cargas resistivas), no un pico de arranque; el manual no especifica pico (surge)."
+        },
+        "potencia_entrada_max_w": {
+          "valor": 305,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Entrada CA máxima versiones UE/CN/UK/AU; 320 W en EE. UU./JP."
+        },
+        "puertos": {
+          "valor": "1× CA 230 V (300 W), 1× USB-C PD 100 W, 2× USB-A 12 W, 1× toma de mechero 12,6 V 126 W",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "≥80 % de capacidad tras 3.000 ciclos a 0,5C/0,5C y 25 °C."
+        },
+        "peso_kg": {
+          "valor": 3.5,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "255 × 212 × 113",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 110 W (11–30 V, 8 A)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 245 Wh (manual)."
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha de MediaMarkt.es; el manual no indica el plazo."
+        },
+        "energia_util_medida_wh": {
+          "valor": 210,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://storagereview.com/review/ecoflow-river-3-review",
+          "fecha": "2026-10-18",
+          "nota": "Medido por StorageReview (Corinne OBrien, 2024-10-07) descargando con un ventilador de 300 W: 210 Wh hasta el apagado (≈86 % de los 245 Wh nominales; porcentaje calculado por nosotros: 210/245)."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire",
+          "fecha": "2026-10-18",
+          "nota": "Las fuentes consultadas citan a EcoFlow Technology Ltd como fabricante (Wikipedia) y a EcoFlow Technology Inc. (San Francisco, EE. UU.) como importador; no se confirmó con fuente la sede central (se suele citar Shenzhen, China, pero no se verificó)."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
+          "fecha": "2026-10-18",
+          "nota": "Ni el manual ni MediaMarkt indican el país de fabricación de este modelo."
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "El manual remite al servicio de atención de EcoFlow para reparaciones y piezas; no describe sustitución de batería por el usuario.",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "manual",
+          "titulo": "EcoFlow RIVER 3 Portable Power Station User Manual (EN, 2024-09-11)",
+          "url": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Copia alojada por un distribuidor eslovaco."
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Carga completa en 60 minutos desde la red",
+          "donde": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
+          "veredicto": "cierta",
+          "explicacion": "La prueba de The Solar Lab midió 58 minutos con la unidad templada (1 h 20 min en frío); StorageReview también indica 0–100 % en unos 60 min.",
+          "fuentes": [
+            {
+              "url": "https://www.thesolarlab.com/review/ecoflow-river-3-review",
+              "titulo": "The Solar Lab: EcoFlow River 3 Review",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://storagereview.com/review/ecoflow-river-3-review",
+              "titulo": "StorageReview: EcoFlow RIVER 3 Review",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "600 W de pico con X-Boost",
+          "donde": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
+          "veredicto": "matizable",
+          "explicacion": "X-Boost no es potencia de pico: reduce la tensión para que aparatos resistivos de hasta 600 W funcionen con menos potencia real. La salida nominal es 300 W y el manual no da un valor de pico de arranque; The Solar Lab vio que un frigorífico la apagaba al arrancar.",
+          "fuentes": [
+            {
+              "url": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+              "titulo": "Manual de usuario RIVER 3",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.thesolarlab.com/review/ecoflow-river-3-review",
+              "titulo": "The Solar Lab: EcoFlow River 3 Review",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "245 Wh de capacidad",
+          "donde": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
+          "veredicto": "matizable",
+          "explicacion": "Es la energía nominal de la batería. En alterna se aprovecha menos por las pérdidas del inversor: StorageReview midió 210 Wh y The Solar Lab unos 205 Wh (calculado de 45 min a 273 W).",
+          "fuentes": [
+            {
+              "url": "https://storagereview.com/review/ecoflow-river-3-review",
+              "titulo": "StorageReview",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.thesolarlab.com/review/ecoflow-river-3-review",
+              "titulo": "The Solar Lab",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "Retirada de otro modelo de la marca: EcoFlow DELTA Max 2000 (EFD310), CPSC n.º 26-010, por sobrecalentamiento e incendio; solución por actualización de firmware (https://www.cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard). No afecta a este modelo. Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Un agregador (car-recalls.eu) menciona una retirada en la UE de la EcoFlow RIVER 600 por riesgo de descarga eléctrica; no se pudo abrir ni confirmar la alerta original de Safety Gate. No afecta a este modelo. Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": "Health Canada publicó la misma retirada del DELTA Max 2000 (https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire); no afecta a este modelo. Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "mediamarkt-es",
+          "url": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
+          "precio_eur": 209,
+          "envio_eur": 0,
+          "plazo": "entrega estimada 20-10-2026",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la página (antes 259 €)."
+        }
+      ],
+      "pendiente": [
+        "País de fabricación declarado en la etiqueta",
+        "URL de la foto oficial",
+        "Precio en la tienda oficial es.ecoflow.com (la página no se pudo leer)",
+        "Declaración CE/UN38.3 pública"
+      ]
+    },
+    {
+      "id": "jackery-explorer-300-plus",
+      "nombre": "Jackery Explorer 300 Plus",
+      "marca_id": "jackery",
+      "modelo": "JE-300B",
+      "subcategoria": "estaciones",
+      "ean": [
+        {
+          "valor": "0190074000911",
+          "fuente": "https://galaxus.at/en/s4/product/jackery-explorer-300-plus-293-wh-320-kg-portable-power-stations-38669472",
+          "fecha": "2026-10-18",
+          "nota": "Coincide con el EAN de berger-camping.com (https://www.berger-camping.com/item/jackery-powerstation-explorer-300-plus-392990). Versión UE; la referencia comercial en PcComponentes es JE-60-0304-EUB1A1."
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2023,
+        "naturaleza": "medido",
+        "fuente": "https://www.nextpit.de/tests/jackery-solargenerator-300-plus-test",
+        "fecha": "2026-10-18",
+        "nota": "Prueba de nextpit publicada el 1-9-2023 con precios de lanzamiento; ComputerBase anunció el modelo en la IFA de septiembre de 2023. No es un dato de la marca."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://es.jackery.com",
+        "nota": "No se obtuvo la URL directa de la imagen oficial."
+      },
+      "resumen": "La Explorer 300 Plus es una estación de energía compacta de Jackery con batería LiFePO₄ de 288 Wh y una toma de corriente alterna. Según la marca entrega 300 W continuos con picos de 600 W y conserva más del 80 % de capacidad tras 3.000 ciclos. Se carga desde la red con fuente integrada, por USB-C hasta 100 W (también desde placa solar a través de ese puerto) o desde el coche. Pesa unos 3,75 kg. La revista nextpit midió 237 Wh entregados en una descarga completa.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 22500,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "22,5 Ah a 12,8 V nominales del paquete."
+        },
+        "tension_celda_v": {
+          "valor": 12.8,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Tensión nominal del paquete (4 celdas LFP en serie), no de cada celda."
+        },
+        "capacidad_wh": {
+          "valor": 288,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual no declara una potencia total combinada."
+        },
+        "potencia_ac_continua_w": {
+          "valor": 300,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "230 V 50 Hz, onda senoidal pura."
+        },
+        "potencia_ac_pico_w": {
+          "valor": 600,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "potencia_entrada_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual da la entrada CA en corriente (220–240 V, 10 A máx.) y no en vatios; USB-C admite hasta 100 W."
+        },
+        "puertos": {
+          "valor": "1× CA 230 V, 1× USB-A, 1× USB-C (salida), 1× USB-C (entrada/salida, 100 W), 1× toma de mechero 12 V",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Currys indica USB-C de 100 W máx. y USB-A de 15 W."
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Hasta 80 % o más de capacidad. Currys.co.uk publica 1.500 ciclos e «ion de litio», en contradicción con el manual."
+        },
+        "peso_kg": {
+          "valor": 3.75,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "230 × 155 × 167",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, por USB-C hasta 100 W (12–27 V, 5 A) con adaptador DC8020–USB-C",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 288 Wh (manual)."
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Manual australiano: 36 meses más 2 años de extensión al registrar el producto. Currys y Argos (Reino Unido) anuncian 5 años. No se comprobó el plazo en la web española."
+        },
+        "energia_util_medida_wh": {
+          "valor": 237,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://www.nextpit.de/tests/jackery-solargenerator-300-plus-test",
+          "fecha": "2026-10-18",
+          "nota": "Medido por nextpit (Thomas Kern, 1-9-2023): 237 Wh entregados; carga completa consumió 327 Wh de la red. El método de descarga no se detalla."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Jackery",
+          "fecha": "2026-10-18",
+          "nota": "La marca pertenece a Shenzhen Huabao New Energy Co., Ltd. (Wikipedia; no es una fuente de la marca)."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual no indica el país de fabricación."
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual no describe sustitución de la batería ni piezas de recambio."
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "manual",
+          "titulo": "Jackery Explorer 300 Plus User Manual (versión australiana, alojada por BCF)",
+          "url": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "3000 ciclos a 80%+ de capacidad",
+          "donde": "https://www.pccomponentes.pt/estacao-de-energia-jackery-explorer-300-plus-plus-288wh-1-porta-ac-1-usb-a-2-usb-c-bateria-lifepo4-portatil-e-resistente",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Es un dato del fabricante coherente con la química LiFePO₄, pero no hay ensayo independiente de ciclos; además Currys publica 1.500 ciclos para el mismo producto.",
+          "fuentes": [
+            {
+              "url": "https://www.bcf.com.au/on/demandware.static/-/Library-Sites-bcf-shared-library/default/product-manuals/715295.pdf",
+              "titulo": "Manual Explorer 300 Plus",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.currys.co.uk/products/jackery-explorer-300-plus-portable-power-station-10260080.html",
+              "titulo": "Currys: Jackery Explorer 300 Plus",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "288Wh de capacidad",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-jackery-explorer-300-plus-288wh-4-puertos-lifepo4-carga-rapida-y-solar",
+          "veredicto": "matizable",
+          "explicacion": "Es la energía nominal de la batería; nextpit midió 237 Wh entregados (≈82 %, calculado 237/288) por las pérdidas de conversión.",
+          "fuentes": [
+            {
+              "url": "https://www.nextpit.de/tests/jackery-solargenerator-300-plus-test",
+              "titulo": "nextpit: Jackery Solargenerator 300 Plus im Test",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Carga completa en unas 2 horas desde la red",
+          "donde": "https://www.currys.co.uk/products/jackery-explorer-300-plus-portable-power-station-10260080.html",
+          "veredicto": "cierta",
+          "explicacion": "nextpit informa de unas 2 horas de carga desde un enchufe doméstico.",
+          "fuentes": [
+            {
+              "url": "https://www.nextpit.de/tests/jackery-solargenerator-300-plus-test",
+              "titulo": "nextpit",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/estacion-de-energia-jackery-explorer-300-plus-288wh-4-puertos-lifepo4-carga-rapida-y-solar",
+          "precio_eur": 299,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por PcComponentes; «sin fecha exacta de entrada». Precio leído en la página (PVP tachado 398,99 €)."
+        }
+      ],
+      "pendiente": [
+        "Oferta en stock en tienda española",
+        "Plazo de garantía en es.jackery.com",
+        "País de fabricación",
+        "URL de la foto oficial"
+      ]
+    },
+    {
+      "id": "bluetti-elite-30-v2",
+      "nombre": "BLUETTI Elite 30 V2",
+      "marca_id": "bluetti",
+      "modelo": "Elite 30 V2",
+      "subcategoria": "estaciones",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2025,
+        "naturaleza": "declarado",
+        "fuente": "https://www.notebookcheck.com/Elite-30-V2-startet-als-kompakte-Powerstation-mit-600-Watt-und-Rabatt.1073531.0.html",
+        "fecha": "2026-10-18",
+        "nota": "Notebookcheck (13-8-2025) informa de su puesta a la venta en la tienda europea de Bluetti."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+        "nota": "No se obtuvo la URL directa de la imagen."
+      },
+      "resumen": "La Elite 30 V2 es una estación de energía compacta de Bluetti presentada en 2025, con batería LiFePO₄ de 288 Wh y una toma de corriente alterna. Según la marca entrega 600 W continuos, admite hasta 1.500 W momentáneos con cargas puramente resistivas y conmuta en 10 ms o menos como SAI. Incluye un puerto USB-C de hasta 140 W y acepta hasta 200 W solares. La marca declara un consumo en espera de 4,5 W. No se encontró una medición independiente de su energía útil.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": null,
+          "unidad": "mAh",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "La página de la marca no da Ah ni tensión del paquete. Kaufland.at lista 18.000 mAh, sin indicar la tensión."
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 288,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_continua_w": {
+          "valor": 600,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_pico_w": {
+          "valor": 1500,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "Sólo momentáneo y con cargas puramente resistivas («lifting»), según la marca."
+        },
+        "potencia_entrada_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "La marca no da los vatios de entrada de red; declara carga completa en 70 min y 80 % en 45 min (TurboBoost). Notebookcheck cita «hasta 980 W desde la red», cifra que coincide con la potencia de bypass declarada por la marca y no se ha podido confirmar como potencia de carga."
+        },
+        "puertos": {
+          "valor": "8 salidas en total, entre ellas 1× CA 230 V y 1× USB-C PD 3.1 hasta 140 W; según Notebookcheck, 2× USB-C y 2× USB-A de 15 W",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "La marca no detalla el desglose; el desglose de USB es de Notebookcheck."
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "«3.000+ ciclos»; la página no indica el porcentaje de capacidad restante."
+        },
+        "peso_kg": {
+          "valor": 4.3,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "Notebookcheck publica 4,39 kg."
+        },
+        "medidas_mm": {
+          "valor": "250 × 178 × 167,5",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.notebookcheck.com/Elite-30-V2-startet-als-kompakte-Powerstation-mit-600-Watt-und-Rabatt.1073531.0.html",
+          "fecha": "2026-10-18",
+          "nota": "Medidas publicadas por Notebookcheck a partir de datos de la marca; la página de la marca no las muestra."
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 200 W",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 288 Wh (página de la marca)."
+        },
+        "garantia_anios": {
+          "valor": 5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró ninguna prueba independiente con medición de energía útil (el artículo de PC-WELT es contenido patrocinado por Bluetti)."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Bluetti",
+          "fecha": "2026-10-18",
+          "nota": "Wikipedia indica que la empresa se fundó en Shenzhen en 2009; no indica la sede actual."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "fecha": "2026-10-18",
+          "nota": "No se encontró información sobre sustitución de batería o piezas."
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Recharge to 80% in just 45 minutes",
+          "donde": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró una medición independiente del tiempo de carga; la única fuente adicional es un artículo patrocinado que repite la cifra.",
+          "fuentes": [
+            {
+              "url": "https://www.pcwelt.de/?p=2930444",
+              "titulo": "PC-WELT (contenido patrocinado por Bluetti)",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Up to 50% less self-consumption and only 4,5W standby",
+          "donde": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No hay medición de laboratorio. En el foro oficial de Bluetti un usuario abrió un hilo sobre un consumo en espera elevado de este modelo; es un testimonio, no una medición verificada.",
+          "fuentes": [
+            {
+              "url": "https://community.bluettipower.com/t/follow-up-bluetti-elite-30-v2-with-high-standby-power-consumption-final-results/40206",
+              "titulo": "Foro Bluetti: Elite 30 V2 with high standby power consumption",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Seamless switch with 980W bypass power",
+          "donde": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "veredicto": "matizable",
+          "explicacion": "La propia página declara una conmutación de ≤10 ms, que no es «sin corte» (0 ms); muchos equipos la toleran, pero no todos.",
+          "fuentes": [
+            {
+              "url": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+              "titulo": "BLUETTI Elite 30 V2 (tienda UE)",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "bluetti-tienda-eu",
+          "url": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "precio_eur": 279,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la tienda europea de Bluetti con IVA alemán del 19 %; el precio final se ajusta en la caja según la dirección. La tienda española es.bluettipower.eu no se pudo leer."
+        }
+      ],
+      "pendiente": [
+        "EAN",
+        "Oferta en tienda española",
+        "Capacidad en Ah y tensión",
+        "Medición independiente de energía útil",
+        "Medidas en la ficha oficial"
+      ]
+    },
+    {
+      "id": "allpowers-r600",
+      "nombre": "ALLPOWERS R600",
+      "marca_id": "allpowers",
+      "modelo": "R600",
+      "subcategoria": "estaciones",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible"
+      },
+      "resumen": "La R600 es una estación de energía de Allpowers con batería LiFePO₄ de 299 Wh y dos tomas de corriente alterna. Según la ficha del vendedor entrega 600 W continuos con picos de 1.200 W, se carga desde la red a 400 W y admite hasta 220 W solares por conector XT60. Incluye carga inalámbrica de 15 W y función SAI declarada de menos de 10 ms. Pesa unos 5,6 kg. Los datos proceden de la ficha de un vendedor externo y no se han contrastado con la documentación oficial de la marca.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 12000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Sin tensión indicada; 299 Wh / 12 Ah implicaría unos 25 V de paquete (calculado, no declarado). Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 299,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_continua_w": {
+          "valor": 600,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "potencia_ac_pico_w": {
+          "valor": 1200,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "potencia_entrada_max_w": {
+          "valor": 400,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "puertos": {
+          "valor": "2× CA 230 V, 2× USB-C 100 W, 2× USB-A 18 W, 1× toma de mechero 120 W, 1× carga inalámbrica 15 W",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3500,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Hasta el 80 % de capacidad. Dato de la ficha del vendedor en PcComponentes; la web oficial de Allpowers no se pudo leer."
+        },
+        "peso_kg": {
+          "valor": 5.6,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "193 × 191 × 284",
+          "unidad": "mm",
+          "naturaleza": "calculado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "Convertido por nosotros de 7,6 × 7,5 × 11,2 pulgadas (× 25,4)."
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 220 W (12–60 V, 8,8 A, XT60)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 299 Wh (ficha del vendedor)."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "La ficha no indica la garantía."
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18",
+          "nota": "No se encontró fuente sobre la sede de Allpowers."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Carga completa en menos de una hora",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La ficha no dice con qué fuente de carga; con 400 W de entrada, 299 Wh necesitarían unos 45 min sin pérdidas (calculado), así que es posible, pero no hay medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+              "titulo": "PcComponentes: ALLPOWERS R600",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Función SAI con respuesta inferior a 10 ms",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró una medición independiente del tiempo de conmutación.",
+          "fuentes": [
+            {
+              "url": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+              "titulo": "PcComponentes: ALLPOWERS R600",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «Allpowers recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Allpowers recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «Allpowers recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «Allpowers recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
+          "precio_eur": 249,
+          "envio_eur": 0,
+          "plazo": "26 oct – 2 nov",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por «Wonderful life» (vendedor externo del marketplace de PcComponentes). PVPR 399 €."
+        }
+      ],
+      "pendiente": [
+        "Ficha técnica oficial de Allpowers",
+        "EAN",
+        "Garantía",
+        "Datos de la empresa",
+        "Medición independiente"
+      ]
+    },
+    {
+      "id": "oukitel-p800",
+      "nombre": "OUKITEL P800",
+      "marca_id": "oukitel",
+      "modelo": "P800 (P/N P800E en la ficha)",
+      "subcategoria": "estaciones",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar"
+      },
+      "resumen": "La P800 es una estación de energía de Oukitel con batería LiFePO₄ de 512 Wh (25,6 V, 20 Ah). Según la ficha del vendedor entrega 800 W continuos con picos de 1.600 W, se carga desde la red a 500 W en alrededor de una hora y admite hasta 200 W solares. Declara una conmutación SAI inferior a 10 ms y pesa unos 6 kg. La ficha consultada contiene contradicciones (número de tomas CA, ciclos y la referencia P800/P800E), por lo que estos datos deben contrastarse con la documentación oficial.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 20000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "20 Ah a 25,6 V del paquete. Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "tension_celda_v": {
+          "valor": 25.6,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "Tensión nominal del paquete. Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "capacidad_wh": {
+          "valor": 512,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_continua_w": {
+          "valor": 800,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "potencia_ac_pico_w": {
+          "valor": 1600,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "potencia_entrada_max_w": {
+          "valor": 500,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "puertos": {
+          "valor": "1× CA (el texto dice 2), 3× USB-A 18 W (una QC 3.0), 1× USB-C PD 100 W, 2× DC 12 V 3 A",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "La ficha se contradice en el número de tomas CA. Dato de la ficha del vendedor en PcComponentes; la web oficial de Oukitel no se pudo leer."
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3500,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "La tabla dice más de 3.500 y el texto más de 4.000; no indica el porcentaje de capacidad restante."
+        },
+        "peso_kg": {
+          "valor": 6,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": null,
+          "unidad": "mm",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 200 W (12–50 V, 10 A, conector 5521)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 512 Wh (ficha del vendedor)."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": "años",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18",
+          "nota": "No se encontró fuente sobre la sede de Oukitel."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Más de 4000 ciclos",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "veredicto": "matizable",
+          "explicacion": "La misma ficha da 3.500 ciclos en la tabla técnica y no indica a qué porcentaje de capacidad; no hay ensayo independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+              "titulo": "PcComponentes: OUKITEL P800",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Carga completa en aproximadamente 1 hora a 500 W",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "veredicto": "sin_pruebas",
+          "explicacion": "512 Wh a 500 W serían unos 61 min sin pérdidas (calculado); con pérdidas reales sería algo más. No hay medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+              "titulo": "PcComponentes: OUKITEL P800",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «Oukitel recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Oukitel recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «Oukitel recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «Oukitel recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/estacion-de-energia-oukitel-p800-512wh-1x-ac-3x-usb-bateria-lifepo4-pantalla-lcd-carga-solar",
+          "precio_eur": 219.88,
+          "envio_eur": 0,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido por ALLIANCE LIVING (vendedor externo). PVPR 399 €; otros vendedores desde 225,99 €. La página mostraba una entrega «5–7 de octubre», anterior a la consulta: posible caché; no fiable. La búsqueda de PcComponentes lo listaba a 269,99 €."
+        }
+      ],
+      "pendiente": [
+        "Ficha oficial de Oukitel; aclarar P800 frente a P800E",
+        "EAN",
+        "Garantía",
+        "Medidas",
+        "Datos de la empresa"
+      ]
+    },
+    {
+      "id": "jackery-explorer-1000-v2",
+      "nombre": "Jackery Explorer 1000 v2",
+      "marca_id": "jackery",
+      "modelo": "JE-1000D",
+      "subcategoria": "estaciones",
+      "ean": [
+        {
+          "valor": "6958657300742",
+          "fuente": "https://www.buerklin.com/en/p/27A0045/",
+          "fecha": "2026-10-18",
+          "nota": "Referencia 21-0001-000221 (versión UE). Mismo EAN en alltron.ch (https://alltron.ch/de/product/1800765)."
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2024,
+        "naturaleza": "medido",
+        "fuente": "https://www.nextpit.de/tests/jackery-explorer-1000-v2-test",
+        "fecha": "2026-10-18",
+        "nota": "Prueba de nextpit publicada el 20-9-2024 con PVP de 999 €; no es un dato de la marca."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://es.jackery.com",
+        "nota": "No se obtuvo la URL directa de la imagen oficial."
+      },
+      "resumen": "La Explorer 1000 v2 es una estación de energía de Jackery con batería LiFePO₄ de 1.070 Wh. Según la marca entrega 1.500 W continuos en alterna con picos de 3.000 W, y admite una carga rápida de emergencia desde la red que se activa en la aplicación. Acepta hasta 400 W solares por dos entradas DC8020 y pesa unos 10,8 kg. El manual indica una conmutación de 20 ms ante un corte de red y advierte que no es un SAI de 0 ms. La revista nextpit midió 902 Wh útiles.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 30400,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "30,4 Ah a 35,2 V nominales del paquete."
+        },
+        "tension_celda_v": {
+          "valor": 35.2,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Tensión nominal del paquete, no de cada celda."
+        },
+        "capacidad_wh": {
+          "valor": 1070,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual no da una potencia total combinada."
+        },
+        "potencia_ac_continua_w": {
+          "valor": 1500,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_pico_w": {
+          "valor": 3000,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 1400,
+          "unidad": "W",
+          "naturaleza": "medido",
+          "fuente": "https://www.nextpit.de/tests/jackery-explorer-1000-v2-test",
+          "fecha": "2026-10-18",
+          "nota": "nextpit informa de una carga de red de hasta 1.400 W en modo de carga de emergencia (≈50 min). El manual sólo da 220–240 V, 10 A máx., sin vatios."
+        },
+        "puertos": {
+          "valor": "CA 230 V (2 en el manual australiano; 3 según la ficha de PcComponentes para la versión UE), 1× USB-C 100 W, 1× USB-C 30 W, 1× USB-A 18 W, 1× toma de mechero 12 V 10 A, 2× entrada DC8020",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 4000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Hasta 70 % o más de capacidad."
+        },
+        "peso_kg": {
+          "valor": 10.8,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "327 × 224 × 247",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 400 W (2× DC8020, 200 W cada una)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 1070 Wh (manual)."
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "3 años más 2 de extensión al registrar el producto (manual australiano). La batería sólo queda cubierta si se carga del todo en los 7 días tras la compra y al menos cada 6 meses. alltron.ch indica 24 meses para la versión UE."
+        },
+        "energia_util_medida_wh": {
+          "valor": 902,
+          "unidad": "Wh",
+          "naturaleza": "medido",
+          "fuente": "https://www.nextpit.de/tests/jackery-explorer-1000-v2-test",
+          "fecha": "2026-10-18",
+          "nota": "Medido por nextpit (Thomas Kern, 20-9-2024); la carga completa consumió 1.020 Wh de la red."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Jackery",
+          "fecha": "2026-10-18",
+          "nota": "La marca pertenece a Shenzhen Huabao New Energy Co., Ltd. (Wikipedia; no es una fuente de la marca)."
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.buerklin.com/en/p/27A0045/",
+          "fecha": "2026-10-18",
+          "nota": "País de origen «CN» en la ficha del distribuidor Bürklin, con código arancelario 85076000."
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18",
+          "nota": "El manual no describe sustitución de batería ni piezas de recambio."
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "manual",
+          "titulo": "Jackery Explorer 1000 v2 User Manual (versión australiana, alojado por Mr. Solar)",
+          "url": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Carga rápida en 1 hora",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-jackery-explorer-1000v2-1070wh-3-ac-3-usb-lifepo4-pantalla-lcd-asa-solar",
+          "veredicto": "matizable",
+          "explicacion": "nextpit midió unos 50 minutos a 1.400 W, pero sólo en el modo de carga de emergencia que se activa en la aplicación; el manual advierte que no es para uso habitual.",
+          "fuentes": [
+            {
+              "url": "https://www.nextpit.de/tests/jackery-explorer-1000-v2-test",
+              "titulo": "nextpit: Jackery Explorer 1000 v2 im Test",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+              "titulo": "Manual Explorer 1000 v2",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "1070Wh de capacidad",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-jackery-explorer-1000v2-1070wh-3-ac-3-usb-lifepo4-pantalla-lcd-asa-solar",
+          "veredicto": "matizable",
+          "explicacion": "Es la energía nominal; nextpit midió 902 Wh útiles (≈84 %, calculado 902/1070).",
+          "fuentes": [
+            {
+              "url": "https://www.nextpit.de/tests/jackery-explorer-1000-v2-test",
+              "titulo": "nextpit",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Función de alimentación ininterrumpida (SAI/UPS)",
+          "donde": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "veredicto": "matizable",
+          "explicacion": "El propio manual indica una conmutación de 20 ms, no de 0 ms, y desaconseja usarlo con servidores o estaciones de trabajo.",
+          "fuentes": [
+            {
+              "url": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+              "titulo": "Manual Explorer 1000 v2",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «Jackery recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/estacion-de-energia-jackery-explorer-1000v2-1070wh-3-ac-3-usb-lifepo4-pantalla-lcd-asa-solar",
+          "precio_eur": 698.72,
+          "envio_eur": 0,
+          "plazo": "22–26 de octubre",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por Digital Universe ES (vendedor externo del marketplace de PcComponentes). Precio leído en la página."
+        }
+      ],
+      "pendiente": [
+        "Número de tomas CA de la versión UE (2 o 3) en documentación oficial europea",
+        "Potencia de entrada de red en la ficha oficial",
+        "URL de la foto oficial"
+      ]
+    },
+    {
+      "id": "anker-solix-c1000",
+      "nombre": "Anker SOLIX C1000",
+      "marca_id": "anker",
+      "modelo": "A1761",
+      "subcategoria": "estaciones",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.ankersolix.com/eu/products/a1761-c1000",
+        "fecha": "2026-10-18",
+        "nota": "No se encontró la fecha de lanzamiento con fuente."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.ankersolix.com/eu/products/a1761-c1000",
+        "nota": "No se obtuvo la URL directa de la imagen."
+      },
+      "resumen": "La SOLIX C1000 (modelo A1761) es una estación de energía de Anker con batería LFP de 1.056 Wh, ampliable a 2.112 Wh con una batería adicional. Según la marca entrega 1.800 W continuos en alterna y hasta 2.400 W con la función SurgePad, y se recarga desde la red al 100 % en 58 minutos a 1.300 W en modo UltraFast. Admite hasta 600 W solares por conector XT-60 y pesa 12,9 kg. El manual declara una conmutación de 20 ms ante un corte de red. En tiendas españolas se vende también como C1000X, una variante de color con las mismas especificaciones según los distribuidores.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": null,
+          "unidad": "mAh",
+          "naturaleza": "no_publicado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "El manual no da Ah ni tensión del paquete."
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 1056,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": 2160,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "Máximo en modo bypass (alimentando desde la red); 1.800 W en modo inversor."
+        },
+        "potencia_ac_continua_w": {
+          "valor": 1800,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_pico_w": {
+          "valor": 2400,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "SurgePad: según la marca no es apto para instrumentos de precisión ni aparatos con requisitos estrictos de tensión."
+        },
+        "potencia_entrada_max_w": {
+          "valor": 1300,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18",
+          "nota": "1.000 W en carga normal; 1.300 W con UltraFast."
+        },
+        "puertos": {
+          "valor": "6× CA (UE, según PcComponentes), 2× USB-A 12 W, 1× USB-C 100 W, 1× USB-C 30 W, 1× toma de mechero 12 V 10 A",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-solix-c1000-estacion-de-energia-portatil-1056wh-1800w",
+          "fecha": "2026-10-18",
+          "nota": "La página de la marca dice a la vez «11 puertos» y «9 puertos»."
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/products/a1761-c1000",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/anker-solix-c1000-estacion-de-energia-portatil-1056wh-1800w",
+          "fecha": "2026-10-18",
+          "nota": "PcComponentes indica >80 % de capacidad; la página de la marca dice 3.000 ciclos sin porcentaje."
+        },
+        "peso_kg": {
+          "valor": 12.9,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "376 × 205 × 267",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 600 W (11–60 V, XT-60)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 1056 Wh (manual)."
+        },
+        "garantia_anios": {
+          "valor": 5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.ankersolix.com/eu/products/a1761-c1000",
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró una prueba independiente con medición de energía útil en esta sesión (límite de búsquedas agotado)."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Anker_Innovations",
+          "fecha": "2026-10-18",
+          "nota": "Anker Innovations Co., Ltd., con sede en Changsha (Hunan)."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "Ampliable con batería de expansión hasta 2.112 Wh; el manual no describe sustitución de la batería interna.",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "manual",
+          "titulo": "Anker SOLIX C1000 (A1761) User Guide EN/UK",
+          "url": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "HyperFlash™ AC Recharging, 100% in 58 mins",
+          "donde": "https://www.ankersolix.com/eu/products/a1761-c1000",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Coherente con 1.300 W de entrada (1.056 Wh / 1.300 W ≈ 49 min sin pérdidas, calculado), pero no se encontró una medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+              "titulo": "Manual A1761",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Power 99% of Home Appliances",
+          "donde": "https://www.ankersolix.com/eu/products/a1761-c1000",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La marca no publica la lista ni el método con el que calcula ese porcentaje.",
+          "fuentes": [
+            {
+              "url": "https://www.ankersolix.com/eu/products/a1761-c1000",
+              "titulo": "Anker SOLIX C1000 (UE)",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Up to 2400W Output with SurgePad™",
+          "donde": "https://www.ankersolix.com/eu/products/a1761-c1000",
+          "veredicto": "matizable",
+          "explicacion": "La salida nominal es 1.800 W; SurgePad sólo actúa al superarla y la marca advierte que no sirve para equipos con requisitos estrictos de tensión.",
+          "fuentes": [
+            {
+              "url": "https://www.ankersolix.com/eu/products/a1761-c1000",
+              "titulo": "Anker SOLIX C1000 (UE)",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
+              "titulo": "Manual A1761",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "Retiradas de otros productos de la marca, no de este modelo: power banks Anker (CPSC 2025, más de un millón de unidades: https://www.cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations) y neveras con batería EverFrost (CPSC 2024: https://www.cpsc.gov/Recalls/2024/Anker-EverFrost-Lithium-Ion-Battery-Powered-Coolers-Recalled-Due-to-Battery-Fire-Hazard-Manufactured-by-Anker-Innovations). Comprobado con búsquedas web «Anker recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Anker recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": "Health Canada publicó retiradas de power banks Anker A1647, A1681 y A1689 (https://recalls-rappels.canada.ca/en/alert-recall/anker-power-bank-a1647-and-anker-zolo-power-banks-a1681-and-a1689-sold-amazonca); no afectan a este modelo. Comprobado con búsquedas web «Anker recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": "La ACCC publicó retiradas de power banks Anker A1257, A1647, A1681 y A1689 (https://www.productsafety.gov.au/search-consumer-product-recalls/anker-power-bank-model-a1257-a1647-a1681-a1689-updated); no afectan a este modelo. Comprobado con búsquedas web «Anker recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/anker-solix-c1000-estacion-de-energia-portatil-1056wh-1800w",
+          "precio_eur": 599,
+          "envio_eur": 0,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por PcComponentes (PVPR 699 €). La página mostraba una entrega estimada «miércoles 14 de octubre», anterior a la fecha de consulta: posible caché; no fiable. La descripción mezcla C1000 y C1000X."
+        },
+        {
+          "distribuidor_id": "mediamarkt-es",
+          "url": "https://www.mediamarkt.es/es/product/_estacion-de-energia-anker-solix-c1000x-1056wh-carga-hasta-8-dispositivos-simultaneos-negroazul-1669030.html",
+          "precio_eur": 499,
+          "envio_eur": 0,
+          "plazo": "entrega 20/10/2026",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Variante C1000X (negro/azul). Precio leído en la página (antes 599 €)."
+        }
+      ],
+      "pendiente": [
+        "EAN",
+        "Medición independiente de energía útil",
+        "Fecha de lanzamiento",
+        "País de fabricación",
+        "Confirmar con la marca que C1000X y C1000 son el mismo equipo"
+      ]
+    },
+    {
+      "id": "dji-power-1000",
+      "nombre": "DJI Power 1000",
+      "marca_id": "dji",
+      "modelo": "DYM1000H",
+      "subcategoria": "estaciones",
+      "ean": [],
+      "estado": "desconocido",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.dji.com/es/power-1000/specs",
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.dji.com/es/power-1000",
+        "nota": "No se obtuvo la URL directa de la imagen."
+      },
+      "resumen": "La DJI Power 1000 es la estación de energía de 1.024 Wh del fabricante de drones DJI, con batería LFP. Según la marca entrega 2.200 W continuos (4.400 W de pico) y se recarga desde la red a 1.200 W, al 100 % en unos 70 minutos y al 80 % en unos 50. Tiene dos salidas USB-C de 140 W y puertos SDC para cargar baterías de drones DJI. Pesa unos 13 kg. En 2026 MediaMarkt.es vende la sucesora, Power 1000 V2, y no lista ya esta versión; no se ha podido confirmar si sigue a la venta.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": null,
+          "unidad": "mAh",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 1024,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "potencia_salida_max_w": {
+          "valor": 2600,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "Potencia máxima total de todas las salidas."
+        },
+        "potencia_ac_continua_w": {
+          "valor": 2200,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_pico_w": {
+          "valor": 4400,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "potencia_entrada_max_w": {
+          "valor": 1200,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "Carga a 1.200 W sólo con batería ≥60 % y entre 20 y 35 °C, según la marca; en bypass admite hasta 2.200 W (versión 220–240 V)."
+        },
+        "puertos": {
+          "valor": "2× CA, 2× USB-C PD 3.1 140 W, 2× USB-A 24 W, 1× SDC, 1× SDC Lite",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 4000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "Más del 70 % de capacidad tras 4.000 ciclos."
+        },
+        "peso_kg": {
+          "valor": 13,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "448 × 225 × 230",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí (potencia no indicada en la página)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18",
+          "nota": "PcComponentes vende un adaptador solar MPPT DJI de 400 W para la gama Power."
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 1024 Wh (página de la marca)."
+        },
+        "garantia_anios": {
+          "valor": 5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.dji.com/es/power-1000",
+          "fecha": "2026-10-18",
+          "nota": "«Hasta 5 años de garantía» (nota al pie [8], condiciones no leídas)."
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró medición independiente en esta sesión."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/DJI",
+          "fecha": "2026-10-18",
+          "nota": "SZ DJI Technology Co., Ltd., Shenzhen."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "DJI Power 1000 – Especificaciones",
+          "url": "https://www.dji.com/es/power-1000/specs",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Fully Charged in 70 Mins",
+          "donde": "https://www.dji.com/es/power-1000",
+          "veredicto": "matizable",
+          "explicacion": "La propia ficha condiciona la carga a 1.200 W a que la batería esté por encima del 60 % y a una temperatura de 20–35 °C; fuera de esas condiciones la carga es más lenta. No se encontró medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.dji.com/es/power-1000/specs",
+              "titulo": "DJI Power 1000 – Especificaciones",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "LFP cell with a service life of approx. 10 years",
+          "donde": "https://www.dji.com/es/power-1000",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La ficha declara 4.000 ciclos hasta el 70 %; no hay ensayo independiente de vida útil.",
+          "fuentes": [
+            {
+              "url": "https://www.dji.com/es/power-1000/specs",
+              "titulo": "DJI Power 1000 – Especificaciones",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "23dB",
+          "donde": "https://www.dji.com/es/power-1000",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La marca no indica en qué condiciones de carga ni a qué distancia se mide.",
+          "fuentes": [
+            {
+              "url": "https://www.dji.com/es/power-1000",
+              "titulo": "DJI Power 1000",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «DJI recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «DJI recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «DJI recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «DJI recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "masquevideo",
+          "url": "https://www.masquevideo.com/en/dji-power-1000-portable-power-station-with-battery-capacity-of-1024-wh",
+          "precio_eur": 577.69,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha «DJI POWER 1000» (no menciona V2). Precio leído en la página; no queda claro si incluye IVA (el selector IVA incl./excl. muestra la misma cifra). Stock y envío no indicados."
+        }
+      ],
+      "pendiente": [
+        "Confirmar si sigue a la venta en España (MediaMarkt.es sólo lista la Power 1000 V2 a 424 € y la Power 1000 Mini)",
+        "EAN",
+        "Potencia de entrada solar",
+        "Medición independiente",
+        "Considerar sustituir la ficha por la Power 1000 V2 (no se pudieron leer sus especificaciones oficiales: robots bloqueados)",
+        "MediaMarkt.es vende la Power 1000 V2 (424 €, 2026-10-18), que es otro modelo; si se crea su ficha, la oferta va allí: https://www.mediamarkt.es/es/product/_estacion-de-carga-dji-power-1000-v2-1024-wh-negro-1609584.html"
+      ]
+    },
+    {
+      "id": "bluetti-ac180p",
+      "nombre": "BLUETTI AC180P",
+      "marca_id": "bluetti",
+      "modelo": "P-AC180P-EU-GY-BL-010",
+      "subcategoria": "estaciones",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.bluettipower.eu/products/ac180p",
+        "fecha": "2026-10-18",
+        "nota": "No se encontró la fecha de lanzamiento."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.bluettipower.eu/products/ac180p",
+        "nota": "No se obtuvo la URL directa de la imagen."
+      },
+      "resumen": "La AC180P es una estación de energía de Bluetti con batería LiFePO₄ de 1.440 Wh (40 V, 36 Ah), versión ampliada de la AC180 de 1.152 Wh. Según la marca entrega 1.800 W continuos en dos tomas de 230 V y hasta 2.700 W en modo «Power Lifting» para cargas resistivas. Se carga desde la red hasta 1.440 W en modo Turbo y admite 500 W solares. Pesa unos 16 kg. No se encontró una medición independiente de esta versión; StorageReview midió 1.030 Wh útiles en la AC180 de 1.152 Wh.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": 36000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "36 Ah a 40 V nominales del paquete."
+        },
+        "tension_celda_v": {
+          "valor": 40,
+          "unidad": "V",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Tensión nominal del paquete, no de cada celda."
+        },
+        "capacidad_wh": {
+          "valor": 1440,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Parte del texto de la misma página dice «1.140Wh», en contradicción con la ficha."
+        },
+        "potencia_salida_max_w": {
+          "valor": null,
+          "unidad": "W",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "potencia_ac_continua_w": {
+          "valor": 1800,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "2 tomas 230 V / 7,8 A, onda senoidal pura."
+        },
+        "potencia_ac_pico_w": {
+          "valor": 2700,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Modo Power Lifting: reduce la tensión para cargas resistivas; según la FAQ de MediaMarkt, no apto para aires acondicionados o lavadoras."
+        },
+        "potencia_entrada_max_w": {
+          "valor": 1440,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Modo Turbo; 1.000 W en modo estándar."
+        },
+        "puertos": {
+          "valor": "2× CA 230 V, 1× USB-C 100 W, USB-A 5 V/3 A (número no claro en la ficha), 1× 12 V/10 A, 1× carga inalámbrica 15 W",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3500,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18",
+          "nota": "Hasta el 80 % de la capacidad original."
+        },
+        "peso_kg": {
+          "valor": 16,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "340 × 247 × 317",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 500 W (12–60 V, 10 A)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 1440 Wh (página de la marca)."
+        },
+        "garantia_anios": {
+          "valor": 5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.storagereview.com/review/bluetti-ac180-portable-power-station-review",
+          "fecha": "2026-10-18",
+          "nota": "No hay medición de la AC180P. Como referencia del modelo base AC180 (1.152 Wh), StorageReview (Kevin OBrien, 26-5-2023) midió 1.030 Wh con una carga de 350 W; no es extrapolable sin más a la AC180P."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://en.wikipedia.org/wiki/Bluetti",
+          "fecha": "2026-10-18",
+          "nota": "Wikipedia indica que la empresa se fundó en Shenzhen en 2009; no indica la sede actual."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bluettipower.eu/products/ac180p",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "Ampliable con baterías externas B80, B230 y B300 hasta 4.224 Wh (según la ficha de MediaMarkt); no se encontró información sobre sustitución de la batería interna.",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mediamarkt.es/es/product/_generador-de-energia-ac180p-bluetti-136936193.html",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Turbo Charging with up to 1.440W input, 0-80% recharging only takes 45mins!",
+          "donde": "https://www.bluettipower.eu/products/ac180p",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Es físicamente coherente (80 % de 1.440 Wh ≈ 1.152 Wh a 1.440 W ≈ 48 min sin pérdidas, calculado), pero no se encontró medición independiente de esta versión.",
+          "fuentes": [
+            {
+              "url": "https://www.bluettipower.eu/products/ac180p",
+              "titulo": "BLUETTI AC180P (tienda UE)",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Power Lifting Mode that delivers 2.700W output",
+          "donde": "https://www.bluettipower.eu/products/ac180p",
+          "veredicto": "matizable",
+          "explicacion": "No es potencia de pico real para cualquier aparato: el modo baja la tensión para que cargas resistivas funcionen, y la propia FAQ del producto lo desaconseja para aires acondicionados o lavadoras.",
+          "fuentes": [
+            {
+              "url": "https://www.mediamarkt.es/es/product/_generador-de-energia-ac180p-bluetti-136936193.html",
+              "titulo": "MediaMarkt.es: BLUETTI AC180P",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «Bluetti recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/estacion-de-energia-portatil-bluetti-ac180p-1440-wh-1800-w-lifepo4-2ac-11-salidas-negra",
+          "precio_eur": 719,
+          "envio_eur": 0,
+          "plazo": "estimado martes 20 de octubre",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por PcComponentes. Precio leído en la página (PVPR 769 €)."
+        },
+        {
+          "distribuidor_id": "mediamarkt-es",
+          "url": "https://www.mediamarkt.es/es/product/_generador-de-energia-ac180p-bluetti-136936193.html",
+          "precio_eur": 699,
+          "envio_eur": 0,
+          "plazo": "22–26/10/2026",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido por Lybertek ES (vendedor externo del marketplace de MediaMarkt). Página parcialmente en neerlandés."
+        },
+        {
+          "distribuidor_id": "bluetti-tienda-eu",
+          "url": "https://www.bluettipower.eu/products/ac180p",
+          "precio_eur": 1100,
+          "envio_eur": 0,
+          "plazo": null,
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda europea de Bluetti: botones «Notify Me» y «Pre-Order»; precio con IVA incluido según la página."
+        }
+      ],
+      "pendiente": [
+        "EAN",
+        "Medición independiente de energía útil de la AC180P",
+        "Tiempo de conmutación SAI",
+        "Fecha de lanzamiento"
+      ]
+    },
+    {
+      "id": "ecoflow-delta-3-max",
+      "nombre": "EcoFlow DELTA 3 Max",
+      "marca_id": "ecoflow",
+      "modelo": "EFD3M-G-EU-CBOX",
+      "subcategoria": "estaciones",
+      "ean": [
+        {
+          "valor": "4895251658287",
+          "fuente": "https://www.proshop.de/Kraftwerk/EcoFlow-Delta-3-Max-2048Wh/3419245",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.proshop.de/Kraftwerk/EcoFlow-Delta-3-Max-2048Wh/3419245",
+        "fecha": "2026-10-18",
+        "nota": "No se encontró la fecha de lanzamiento."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://eu.ecoflow.com",
+        "nota": "No se obtuvo la URL directa de la imagen."
+      },
+      "resumen": "La DELTA 3 Max es una estación de energía de EcoFlow con batería LiFePO₄ de 2.048 Wh y cuatro tomas de corriente alterna. Según las fichas de los distribuidores, entrega 2.400 W continuos, hasta 3.200 W en modo X-Boost y 4.800 W de pico, y se recarga desde la red del 0 al 100 % en unos 68 minutos. Admite hasta 500 W solares y otros 500 W desde el alternador del coche, y ofrece función SAI de 10 ms. Pesa unos 20,3 kg. No se encontró una medición independiente de su energía útil.",
+      "datos_tecnicos": {
+        "capacidad_mah": {
+          "valor": null,
+          "unidad": "mAh",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "tension_celda_v": {
+          "valor": null,
+          "unidad": "V",
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "capacidad_wh": {
+          "valor": 2048,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
+        },
+        "potencia_salida_max_w": {
+          "valor": 2674,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "Potencia máxima AC+DC. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
+        },
+        "potencia_ac_continua_w": {
+          "valor": 2400,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "Proshop.de describe en el texto 3.000 W continuos y 6.000 W de pico, en contradicción con su propia tabla (2.400 W). Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
+        },
+        "potencia_ac_pico_w": {
+          "valor": 4800,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "X-Boost hasta 3.200 W según MediaMarkt.es. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
+        },
+        "potencia_entrada_max_w": {
+          "valor": 2300,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
+          "fecha": "2026-10-18",
+          "nota": "Desde la red; hasta 2.400 W desde generador, según MediaMarkt.es. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
+        },
+        "puertos": {
+          "valor": "4× CA 230 V, 1× USB-A 18 W, 1× USB-C 100 W, 2× USB-C (30 W combinados), 1× DC 12 V 126 W, 1× toma de mechero 12,6 V 10 A",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
+          "fecha": "2026-10-18",
+          "nota": "PcComponentes describe 3× USB-C hasta 100 W. Ficha de distribuidor: la página oficial de EcoFlow no se pudo leer (contenido cargado por JavaScript)."
+        },
+        "quimica": {
+          "valor": "LiFePO₄",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "ciclos_declarados": {
+          "valor": 3000,
+          "unidad": "ciclos",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "Hasta el 80 % de capacidad."
+        },
+        "peso_kg": {
+          "valor": 20.3,
+          "unidad": "kg",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "medidas_mm": {
+          "valor": "494 × 239 × 305",
+          "unidad": "mm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "carga_solar": {
+          "valor": "sí, hasta 500 W (11–60 V)",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "apto_avion": {
+          "valor": "no",
+          "naturaleza": "calculado",
+          "fuente": "https://www.faa.gov/hazmat/packsafe/airline-passengers-and-batteries",
+          "fecha": "2026-10-18",
+          "nota": "Regla para pasajeros (FAA, alineada con la tabla 2.3.A de la IATA): <100 Wh sí; 100–160 Wh con aprobación de la aerolínea; >160 Wh no. Capacidad declarada 2048 Wh (ficha de distribuidor)."
+        },
+        "garantia_anios": {
+          "valor": 5,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "«3+2 años» en la ficha de PcComponentes; no se comprobaron las condiciones de la extensión."
+        },
+        "energia_util_medida_wh": {
+          "valor": null,
+          "unidad": "Wh",
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró medición independiente en esta sesión."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire",
+          "fecha": "2026-10-18",
+          "nota": "Las fuentes consultadas citan a EcoFlow Technology Ltd como fabricante (Wikipedia) y a EcoFlow Technology Inc. (San Francisco, EE. UU.) como importador; no se confirmó con fuente la sede central (se suele citar Shenzhen, China, pero no se verificó)."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "fecha": "2026-10-18",
+          "nota": "PcComponentes no indica compatibilidad con baterías de expansión para este modelo; la marca sí vende una batería extra para la variante DELTA 3 Max Plus."
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Recarga 0–100 % en 68 min desde la red",
+          "donde": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Coherente con 2.300 W de entrada (2.048 Wh / 2.300 W ≈ 53 min sin pérdidas, calculado), pero no se encontró medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
+              "titulo": "MediaMarkt.es: EcoFlow Delta 3 Max",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "X-Boost hasta 3200 W",
+          "donde": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
+          "veredicto": "matizable",
+          "explicacion": "En los equipos EcoFlow, X-Boost reduce la tensión para que aparatos resistivos de mayor potencia funcionen; no aumenta la potencia nominal (2.400 W). El manual de la RIVER 3 lo describe así.",
+          "fuentes": [
+            {
+              "url": "https://airsoftpro.sk/import/soubory/EcoFlow RIVER 3 Portable Power Station_User Manual_en_20240911.pdf",
+              "titulo": "Manual EcoFlow RIVER 3 (explica X-Boost)",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "Retirada de otro modelo de la marca: EcoFlow DELTA Max 2000 (EFD310), CPSC n.º 26-010, por sobrecalentamiento e incendio; solución por actualización de firmware (https://www.cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard). No afecta a este modelo. Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Un agregador (car-recalls.eu) menciona una retirada en la UE de la EcoFlow RIVER 600 por riesgo de descarga eléctrica; no se pudo abrir ni confirmar la alerta original de Safety Gate. No afecta a este modelo. Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": "Health Canada publicó la misma retirada del DELTA Max 2000 (https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire); no afecta a este modelo. Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": " Comprobado con búsquedas web «EcoFlow recall» restringidas al dominio del organismo; el buscador del organismo no se pudo leer automáticamente (página con JavaScript o robots)."
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "pccomponentes",
+          "url": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
+          "precio_eur": 1179,
+          "envio_eur": 0,
+          "plazo": "estimado martes 20 de octubre",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por PcComponentes (PVPR 1.290 €; mínimo de 30 días 1.199 €)."
+        },
+        {
+          "distribuidor_id": "mediamarkt-es",
+          "url": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-delta-3-max-2048wh-usb-c-x-boost-9-puertos-salida-negro-y-gris-1625661.html",
+          "precio_eur": 1199,
+          "envio_eur": 0,
+          "plazo": "entrega 20/10/2026",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la página (antes 1.299 €); la página no nombra al vendedor."
+        }
+      ],
+      "pendiente": [
+        "Ficha técnica oficial de EcoFlow (no legible) para confirmar potencias",
+        "Fecha de lanzamiento",
+        "Medición independiente",
+        "País de fabricación"
+      ]
+    }
+  ],
+  "marcas": [
+    {
+      "id": "ecoflow",
+      "nombre": "EcoFlow",
+      "razon_social": "EcoFlow Technology Ltd (fabricante); EcoFlow Technology Inc. (importador en EE. UU. y Canadá)",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2017,
+      "web": "https://www.ecoflow.com",
+      "cotiza": null,
+      "datos_publicos": "Fundada en mayo de 2017 por Bruce Wang, según Wikipedia. Las fichas de retirada de la CPSC y de Health Canada (2025) citan a EcoFlow Technology Inc., de San Francisco, como importador y China como país de fabricación del DELTA Max 2000. No se confirmó con fuente la sede central ni si cotiza en bolsa.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/EcoFlow",
+          "titulo": "Wikipedia: EcoFlow",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire",
+          "titulo": "Health Canada: retirada EcoFlow DELTA Max 2000",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard",
+          "titulo": "CPSC: retirada 26-010",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://media.adeo.com/media/3597680/media.pdf",
+          "titulo": "Declaración UE de conformidad EcoFlow EFWN511-SDE",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://b2bshop.wattstunde.de/en/products/ecoflow-river-3-eb-300-batterie",
+          "titulo": "Wattstunde: ficha RIVER 3 con datos GPSR",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.ecoflow.com/us/about-us",
+          "titulo": "EcoFlow: About us",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "jackery",
+      "nombre": "Jackery",
+      "razon_social": "Shenzhen Huabao New Energy Co., Ltd. (propietaria de la marca)",
+      "pais_sede": "China",
+      "matriz": "Shenzhen Huabao New Energy Co., Ltd.",
+      "fundacion": 2012,
+      "web": "https://www.jackery.com",
+      "cotiza": null,
+      "datos_publicos": "Fundada en 2012 por Zhuo Sun (Sun Zhongwei), según Wikipedia; la marca pertenece a Shenzhen Huabao New Energy. En Australia los manuales citan a Jackery Australia Pty Ltd (Parkdale, Victoria). No se comprobó si la matriz cotiza en bolsa.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Jackery",
+          "titulo": "Wikipedia: Jackery",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "titulo": "Manual Explorer 1000 v2",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "bluetti",
+      "nombre": "BLUETTI",
+      "razon_social": null,
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://www.bluettipower.eu",
+      "cotiza": null,
+      "datos_publicos": "Según Wikipedia, la empresa se fundó en Shenzhen (China) en 2009 y tiene filiales en EE. UU., Reino Unido, Japón y Alemania. Wikipedia no da razón social ni matriz.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bluetti",
+          "titulo": "Wikipedia: Bluetti",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "anker",
+      "nombre": "Anker",
+      "razon_social": "Anker Innovations Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": "Anker Innovations",
+      "fundacion": 2011,
+      "web": "https://www.ankersolix.com",
+      "cotiza": null,
+      "datos_publicos": "Anker Innovations fue fundada en 2011 por Steven Yang en Shenzhen y tiene su sede en Changsha (Hunan), según Wikipedia; SOLIX es su submarca de energía. La CPSC registra en 2024–2025 retiradas de power banks y neveras con batería de la marca (no de sus estaciones). No se verificó con fuente su cotización bursátil.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Anker_Innovations",
+          "titulo": "Wikipedia: Anker Innovations",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+          "titulo": "CPSC: retirada de power banks Anker",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "dji",
+      "nombre": "DJI",
+      "razon_social": "SZ DJI Technology Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2006,
+      "web": "https://www.dji.com",
+      "cotiza": false,
+      "datos_publicos": "Fundada en 2006 por Frank Wang (Wang Tao), con sede en Shenzhen; empresa privada. El Departamento de Comercio de EE. UU. la incluyó en su Entity List en diciembre de 2020, según Wikipedia.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/DJI",
+          "titulo": "Wikipedia: DJI",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "allpowers",
+      "nombre": "ALLPOWERS",
+      "razon_social": "ALLPOWERS INDUSTRIAL INTERNATIONAL LIMITED (según la web de la marca); también figura Shenzhen New Allpowers Co., Ltd. como expositor de la marca",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "No se encontraron datos públicos verificables en esta sesión.",
+      "fuentes": [
+        {
+          "url": "https://iallpowers.eu/pages/about-us",
+          "titulo": "ALLPOWERS EU: About us",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.terrapinn.com/exhibition/future-energy-mena/exhibitor-shenzhen-new-allpowers-coltd.stm",
+          "titulo": "Terrapinn: expositor Shenzhen New Allpowers",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "oukitel",
+      "nombre": "OUKITEL",
+      "razon_social": "Shenzhen Yunji Intelligent Technology Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": "Yunji Group (según Wikipedia)",
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "No se encontraron datos públicos verificables en esta sesión. PcComponentes también lista productos con la marca OSCAL dentro de la búsqueda de Oukitel; no se comprobó la relación entre ambas.",
+      "fuentes": [
+        {
+          "url": "https://www.pccomponentes.com/buscar/?query=oukitel%20estacion",
+          "titulo": "PcComponentes: búsqueda Oukitel",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://euro.oukitel.com/pages/about-oukitel",
+          "titulo": "OUKITEL: About",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Oukitel",
+          "titulo": "Wikipedia: Oukitel",
+          "fecha": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "distribuidores": [
+    {
+      "id": "pccomponentes",
+      "nombre": "PcComponentes",
+      "razon_social": "PC Componentes y Multimedia S.L.U.",
+      "pais": "España",
+      "cif": "B73347494",
+      "web": "https://www.pccomponentes.com",
+      "envio": "Envío gratuito en pedidos desde 50 € según el pie de página; muchas ofertas son de vendedores externos del marketplace (indicado en cada oferta).",
+      "devoluciones": "Las fichas consultadas indican devolución gratuita; no se leyó la política completa.",
+      "fuentes": [
+        {
+          "url": "https://www.pccomponentes.com/aviso-legal",
+          "titulo": "PcComponentes: aviso legal",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mediamarkt-es",
+      "nombre": "MediaMarkt España",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.mediamarkt.es",
+      "envio": "Envío gratuito en las fichas consultadas.",
+      "devoluciones": "Las fichas mencionan una política de devolución de 60 días; no se leyó la política completa. Parte de las ofertas son de vendedores externos del marketplace.",
+      "fuentes": [
+        {
+          "url": "https://www.mediamarkt.es/es/product/_estacion-de-carga-dji-power-1000-v2-1024-wh-negro-1609584.html",
+          "titulo": "MediaMarkt.es: ficha de producto",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "El aviso legal no se pudo leer (error al cargar)."
+    },
+    {
+      "id": "bluetti-tienda-eu",
+      "nombre": "Tienda oficial BLUETTI Europa",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://www.bluettipower.eu",
+      "envio": "Envío gratuito según las fichas consultadas.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "titulo": "BLUETTI Elite 30 V2 (tienda UE)",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Precios mostrados con IVA alemán del 19 %, ajustados en la caja según la dirección. La tienda española es.bluettipower.eu no se pudo leer."
+    },
+    {
+      "id": "masquevideo",
+      "nombre": "Más Que Vídeo Profesional",
+      "razon_social": "More than Professional S.A. (según la descripción del sitio)",
+      "pais": null,
+      "cif": null,
+      "web": "https://www.masquevideo.com",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.masquevideo.com/en/dji-power-1000-portable-power-station-with-battery-capacity-of-1024-wh",
+          "titulo": "Ficha DJI Power 1000",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Web en español con precios en euros; el país no se confirmó en la página leída."
+    }
+  ]
+}

@@ -1,0 +1,674 @@
+{
+  "generado": "2026-10-18",
+  "marcas": [
+    {
+      "id": "allpowers",
+      "nombre": "ALLPOWERS",
+      "razon_social": "ALLPOWERS INDUSTRIAL INTERNATIONAL LIMITED (según la web de la marca); también figura Shenzhen New Allpowers Co., Ltd. como expositor de la marca",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://iallpowers.eu",
+      "cotiza": null,
+      "datos_publicos": "Tienda europea propia (iallpowers.eu). Razón social y sede pendientes de fuente.",
+      "fuentes": [
+        {
+          "url": "https://iallpowers.eu/products/allpowers-sp033-portable-solar-panel-200w-polycrystalline-cells",
+          "titulo": "Tienda ALLPOWERS EU",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://iallpowers.eu/pages/about-us",
+          "titulo": "ALLPOWERS EU: About us",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.terrapinn.com/exhibition/future-energy-mena/exhibitor-shenzhen-new-allpowers-coltd.stm",
+          "titulo": "Terrapinn: expositor Shenzhen New Allpowers",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "anker",
+      "nombre": "Anker",
+      "razon_social": "Anker Innovations Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": "Anker Innovations",
+      "fundacion": 2011,
+      "web": "https://www.ankersolix.com",
+      "cotiza": null,
+      "datos_publicos": "Anker Innovations fue fundada en 2011 por Steven Yang en Shenzhen y tiene su sede en Changsha (Hunan), según Wikipedia; SOLIX es su submarca de energía. La CPSC registra en 2024–2025 retiradas de power banks y neveras con batería de la marca (no de sus estaciones). No se verificó con fuente su cotización bursátil.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Anker_Innovations",
+          "titulo": "Wikipedia: Anker Innovations",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.cpsc.gov/Recalls/2025/More-than-One-Million-Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations",
+          "titulo": "CPSC: retirada de power banks Anker",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.cpsc.gov/Recalls/2025/Anker-Power-Banks-Recalled-Due-to-Fire-and-Burn-Hazards-Manufactured-by-Anker-Innovations-1",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://heise.de/-10463193",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.anker.com/uk/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://recalls-rappels.canada.ca/en/alert-recall/anker-334-maggo-battery-powercore-10k-model-a1642-recalled-due-potential-fire-hazard",
+          "titulo": "Health Canada, retirada Anker A1642",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://eu.ankersolix.com/products/as320011",
+          "titulo": "Anker SOLIX EU",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "bigblue",
+      "nombre": "BigBlue",
+      "razon_social": "BigBlue Energy Inc",
+      "pais_sede": "Estados Unidos",
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Pendiente: no se consultó la web oficial de la marca.",
+      "fuentes": [
+        {
+          "url": "https://frontdeskreview.com/product/portable-solar-panels/bigblue-28w/",
+          "titulo": "frontdeskreview",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.prnewswire.com/de/pressemitteilungen/bigblue-energy-bringt-neues-notstromaggregat-auf-den-markt-858044323.html",
+          "titulo": "PR Newswire: BigBlue Energy, 13-05-2022",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "biolite",
+      "nombre": "BioLite",
+      "razon_social": null,
+      "pais_sede": "Estados Unidos",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://www.bioliteenergy.com",
+      "cotiza": null,
+      "datos_publicos": "Empresa de energía fuera de red fundada en 2009 por Jonathan Cedar y Alec Drummond, con sedes en Nueva York y Nairobi según su nota de prensa. Compró MPOWERD (lámparas Luci) el 20 de junio de 2024 y Goal Zero en abril de 2025.",
+      "fuentes": [
+        {
+          "url": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "titulo": "BioLite x MPOWERD",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "titulo": "GearJunkie",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "bluetti",
+      "nombre": "BLUETTI",
+      "razon_social": null,
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://www.bluettipower.eu",
+      "cotiza": null,
+      "datos_publicos": "Según Wikipedia, la empresa se fundó en Shenzhen (China) en 2009 y tiene filiales en EE. UU., Reino Unido, Japón y Alemania. Wikipedia no da razón social ni matriz.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bluetti",
+          "titulo": "Wikipedia: Bluetti",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.bluettipower.eu/products/bluetti-sp200",
+          "titulo": "Tienda BLUETTI EU",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "cellularline",
+      "nombre": "Cellularline",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": "Italia",
+        "unidad": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.borsaitaliana.it/borsaitaliana/ufficio-stampa/comunicati-stampa/2019/cellularline.htm",
+        "fecha": "2026-10-18",
+        "nota": "Reggio Emilia"
+      },
+      "matriz": null,
+      "fundacion": 1990,
+      "web": "https://www.cellularline.com",
+      "cotiza": "Borsa Italiana (segmento STAR desde el 22/07/2019)",
+      "datos_publicos": "Fabricante italiano de accesorios para móviles fundado en Reggio Emilia en 1990, con las marcas Cellularline, AQL e Interphone; pasó de AIM Italia al segmento STAR de Borsa Italiana el 22/07/2019, según la propia Borsa Italiana.",
+      "fuentes": [
+        {
+          "url": "https://www.borsaitaliana.it/borsaitaliana/ufficio-stampa/comunicati-stampa/2019/cellularline.htm",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "choetech",
+      "nombre": "CHOETECH",
+      "razon_social": "Shenzhen DAK Technology Co., Ltd. (titular de la marca CHOETECH en EE. UU.)",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2013,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Pendiente: no se consultó la web oficial de la marca.",
+      "fuentes": [
+        {
+          "url": "https://m.alza.hu/EN/choetech-foldable-solar-charger-100w-black-d6323677.htm",
+          "titulo": "Alza.hu",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://trademarks.justia.com/owners/shenzhen-dak-technology-co-ltd-2815997",
+          "titulo": "Justia: marcas de Shenzhen DAK Technology",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.digitec.ch/en/brand/choetech-62473",
+          "titulo": "Digitec: marca Choetech",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "coleman",
+      "nombre": "Coleman",
+      "razon_social": "The Coleman Company, Inc.",
+      "pais_sede": "Estados Unidos",
+      "matriz": "Newell Brands",
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de material de acampada. Tiene retiradas en la CPSC y la ACCC de otros productos: faroles de combustible Northstar (2014) y linternas de litio CTAC (2016).",
+      "fuentes": [
+        {
+          "url": "https://www.cpsc.gov/Recalls/2014/Coleman-Recalls-Northstar-Lanterns",
+          "titulo": "CPSC: Coleman Northstar",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://productsafety.gov.au/recalls/coleman-ctac-lithium-ion-flashlights",
+          "titulo": "ACCC: Coleman CTAC",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Coleman_(brand)",
+          "titulo": "Wikipedia: Coleman (brand)",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "d-light",
+      "nombre": "d.light",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.norfund.no/wp-content/uploads/2019/12/d.light-41M-Raised-Press-Release-Dec-14-2018-ID-302472.pdf",
+        "fecha": "2026-10-18",
+        "nota": "La nota de prensa sólo enumera oficinas en Kenia, India, China y EE. UU."
+      },
+      "matriz": null,
+      "fundacion": 2007,
+      "web": "https://www.dlight.com",
+      "cotiza": null,
+      "datos_publicos": "Fabricante de lámparas y sistemas solares para hogares sin red eléctrica. Según Engineering for Change, vende a través de 25.000 puntos de venta en 70 países y fabrica en China.",
+      "fuentes": [
+        {
+          "url": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "titulo": "Engineering for Change, d.light S30",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.norfund.no/wp-content/uploads/2019/12/d.light-41M-Raised-Press-Release-Dec-14-2018-ID-302472.pdf",
+          "titulo": "Nota de prensa d.light, 14-12-2018",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "dji",
+      "nombre": "DJI",
+      "razon_social": "SZ DJI Technology Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2006,
+      "web": "https://www.dji.com",
+      "cotiza": false,
+      "datos_publicos": "Fundada en 2006 por Frank Wang (Wang Tao), con sede en Shenzhen; empresa privada. El Departamento de Comercio de EE. UU. la incluyó en su Entity List en diciembre de 2020, según Wikipedia.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/DJI",
+          "titulo": "Wikipedia: DJI",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ecoflow",
+      "nombre": "EcoFlow",
+      "razon_social": "EcoFlow Technology Ltd (fabricante); EcoFlow Technology Inc. (importador en EE. UU. y Canadá)",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2017,
+      "web": "https://www.ecoflow.com",
+      "cotiza": null,
+      "datos_publicos": "Copia de la entrada de marcas.json. Las fichas de retirada de Health Canada (2025) citan a EcoFlow Technology Inc. como importador de la DELTA Max 2000. No se confirmó con fuente la sede central.",
+      "fuentes": [
+        {
+          "url": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://media.adeo.com/media/3597680/media.pdf",
+          "titulo": "Declaración UE de conformidad EcoFlow EFWN511-SDE",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://b2bshop.wattstunde.de/en/products/ecoflow-river-3-eb-300-batterie",
+          "titulo": "Wattstunde: ficha RIVER 3 con datos GPSR",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.ecoflow.com/us/about-us",
+          "titulo": "EcoFlow: About us",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/EcoFlow",
+          "titulo": "Wikipedia: EcoFlow",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard",
+          "titulo": "CPSC: retirada 26-010",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "goal-zero",
+      "nombre": "Goal Zero",
+      "razon_social": null,
+      "pais_sede": "Estados Unidos",
+      "matriz": "BioLite (desde abril de 2025; antes NRG)",
+      "fundacion": null,
+      "web": "https://goalzero.com",
+      "cotiza": null,
+      "datos_publicos": "Fabricante de estaciones de energía, paneles y luces con sede en Salt Lake City (Utah). BioLite anunció su compra a NRG el 15 de abril de 2025 sin publicar el importe; Goal Zero mantiene su sede y operaciones.",
+      "fuentes": [
+        {
+          "url": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "titulo": "GearJunkie: BioLite acquires Goal Zero",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.cpsc.gov/Recalls/2025/Goal-Zero-Recalls-Solar-Series-Combiner-Cables-for-Solar-Panels-Due-to-Fire-Hazard",
+          "titulo": "CPSC, retirada Goal Zero 25-159",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "hiluckey",
+      "nombre": "Hiluckey",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No publicado en las páginas consultadas"
+      },
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de powerbanks solares vendida sobre todo en Amazon. No se encontró en las páginas consultadas su razón social, su sede ni una web oficial.",
+      "fuentes": [
+        {
+          "url": "https://techtest.org/test-ausklappbare-solar-powerbanks-von-x-dragon-und-hiluckey-wirklich-brauchbar/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://the-gadgeteer.com/2026/05/22/5-solar-power-banks-worth-buying-for-summer-2026/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "iniu",
+      "nombre": "INIU",
+      "razon_social": null,
+      "pais_sede": "EE. UU.",
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://iniushop.com",
+      "cotiza": null,
+      "datos_publicos": "La CPSC identifica a INIU (Seattle, Washington) como vendedor y a Shenzhen Topstar Industry Co., Ltd. (China) como fabricante del BI-B41 retirado en diciembre de 2025. La marca dice tener más de 38 millones de usuarios.",
+      "fuentes": [
+        {
+          "url": "https://cpsc.gov/Recalls/2026/INIU-Recalls-Power-Banks-Due-to-Fire-and-Burn-Hazards-Sold-on-Amazon",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://eu-main.iniushop.com/it/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "jackery",
+      "nombre": "Jackery",
+      "razon_social": "Shenzhen Huabao New Energy Co., Ltd. (propietaria de la marca)",
+      "pais_sede": "China",
+      "matriz": "Shenzhen Huabao New Energy Co., Ltd.",
+      "fundacion": 2012,
+      "web": "https://www.jackery.com",
+      "cotiza": null,
+      "datos_publicos": "Fundada en 2012 por Zhuo Sun (Sun Zhongwei), según Wikipedia; la marca pertenece a Shenzhen Huabao New Energy. En Australia los manuales citan a Jackery Australia Pty Ltd (Parkdale, Victoria). No se comprobó si la matriz cotiza en bolsa.",
+      "fuentes": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Jackery",
+          "titulo": "Wikipedia: Jackery",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.mrsolar.com/content/pdf/jackery/jackery-1000-v2.pdf",
+          "titulo": "Manual Explorer 1000 v2",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.jackery.com/products/solarsaga-100w-solar-panel?aff=273",
+          "titulo": "jackery.com",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "little-sun",
+      "nombre": "Little Sun",
+      "razon_social": "LittleSun GmbH",
+      "pais_sede": "Alemania",
+      "matriz": null,
+      "fundacion": 2012,
+      "web": "https://littlesun.org",
+      "cotiza": null,
+      "datos_publicos": "Proyecto y empresa social del artista Olafur Eliasson y el ingeniero Frederik Ottesen, presentado en julio de 2012 en la Tate Modern de Londres, para llevar energía limpia asequible a comunidades sin red.",
+      "fuentes": [
+        {
+          "url": "https://www.gogla.org/members/little-sun/",
+          "titulo": "GOGLA, ficha de miembro Little Sun",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://littlesun.org/imprint/",
+          "titulo": "Little Sun: Imprint",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://dasauge.com/-littlesun-1",
+          "titulo": "dasauge: LittleSun GmbH",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mesqool",
+      "nombre": "Mesqool",
+      "razon_social": null,
+      "pais_sede": null,
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca que vende en Amazon; no se encontró información societaria.",
+      "fuentes": [
+        {
+          "url": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "titulo": "Amazon.es, anuncio",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mpowerd",
+      "nombre": "MPOWERD",
+      "razon_social": null,
+      "pais_sede": "Estados Unidos",
+      "matriz": "BioLite (desde junio de 2024)",
+      "fundacion": 2012,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Creadora de las lámparas hinchables Luci, cofundada en 2012 por John Salzinger como B Corp. BioLite la compró en junio de 2024 y anunció que la marca MPOWERD desaparecería a partir de enero de 2025, con los productos bajo la marca BioLite.",
+      "fuentes": [
+        {
+          "url": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "titulo": "BioLite x MPOWERD",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://sgbonline.com/biolite-acquires-mpowerd/",
+          "titulo": "SGB: BioLite acquires MPOWERD",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "oukitel",
+      "nombre": "OUKITEL",
+      "razon_social": "Shenzhen Yunji Intelligent Technology Co., Ltd.",
+      "pais_sede": "China",
+      "matriz": "Yunji Group (según Wikipedia)",
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "No se encontraron datos públicos verificables en esta sesión. PcComponentes también lista productos con la marca OSCAL dentro de la búsqueda de Oukitel; no se comprobó la relación entre ambas.",
+      "fuentes": [
+        {
+          "url": "https://www.pccomponentes.com/buscar/?query=oukitel%20estacion",
+          "titulo": "PcComponentes: búsqueda Oukitel",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://euro.oukitel.com/pages/about-oukitel",
+          "titulo": "OUKITEL: About",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Oukitel",
+          "titulo": "Wikipedia: Oukitel",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "riapow",
+      "nombre": "Riapow",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No publicado en las páginas consultadas"
+      },
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de powerbanks solares vendida en Amazon (incluido Amazon.es, según 4gnews) y en marketplaces. No se encontró su razón social ni su sede.",
+      "fuentes": [
+        {
+          "url": "https://4gnews.pt/power-bank-solar-de-26-800-mah-carrega-ate-4-dispositivos-e-custa-so-30-na-amazon/",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.pcwelt.de/?p=2640940",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "samsung",
+      "nombre": "Samsung",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18",
+        "nota": "No verificado en una fuente consultada en esta ronda"
+      },
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.samsung.com/es/",
+      "cotiza": null,
+      "datos_publicos": "Vende la EB-P4520 en su tienda española con manual y guía de seguridad descargables. No se recogieron en esta ronda datos corporativos con fuente.",
+      "fuentes": [
+        {
+          "url": "https://www.samsung.com/es/mobile-accessories/battery-pack-20-000mah-beige-eb-p4520xuegeu/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "sin-marca",
+      "nombre": "Sin marca declarada",
+      "razon_social": null,
+      "pais_sede": null,
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Productos vendidos sin marca. En la ficha de Leroy Merlin ref. 95898880 figuran como contactos de cumplimiento UE PAVELLE y LUMICO.",
+      "fuentes": [
+        {
+          "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "titulo": "Leroy Merlin, ficha 95898880",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "sun-king",
+      "nombre": "Sun King (Greenlight Planet)",
+      "razon_social": "Greenlight Planet Inc.",
+      "pais_sede": "Kenia e India (sede doble según un inversor)",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://sunking.com",
+      "cotiza": null,
+      "datos_publicos": "Marca de Greenlight Planet, fundada en 2009 por tres compañeros de universidad, entre ellos Patrick Walsh. Lanzó la Sun King Pico en noviembre de 2015 a 8 USD. Engineering for Change sitúa la fabricación en Shenzhen (China).",
+      "fuentes": [
+        {
+          "url": "https://www.oilandgas360.com/greenlight-planet-launches-sun-king-picotm-a-solar-powered-light-priced-at-only-8-proclaiming-the-days-of-the-kerosene-lamp-are-numbered/",
+          "titulo": "Nota de prensa Sun King Pico (2015)",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "titulo": "Engineering for Change, Sun King Boom",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://apis.pe/companies/greenlight-planet/",
+          "titulo": "Apis Partners: Greenlight Planet",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ugreen",
+      "nombre": "UGREEN",
+      "razon_social": "Ugreen Group Ltd",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": 2012,
+      "web": "https://eu.ugreen.com",
+      "cotiza": "Bolsa de Shenzhen (SZSE: 301606)",
+      "datos_publicos": "Fabricante de accesorios de carga; vende en España a través de Amazon y de su tienda europea, según su nota de prensa de julio de 2024.",
+      "fuentes": [
+        {
+          "url": "https://www.ugreen.com/en-my/blogs/newsroom-es/ugreen-anade-dos-nuevos-productos-a-su-familia-nexode-power-bank-para-ofrecer-la-maxima-comodidad-de-carga",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Ugreen",
+          "titulo": "Wikipedia: Ugreen",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "wild-land",
+      "nombre": "Wild Land",
+      "razon_social": "Wild Land International, Inc. (según Crunchbase)",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de material de acampada vendida en el marketplace de Decathlon.es por ACCESORIOS 4X4 MISUTONIDA. El EAN del kit empieza por 84, prefijo GS1 asignado en España, lo que indica dónde se registró el código, no dónde se fabricó.",
+      "fuentes": [
+        {
+          "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "titulo": "Decathlon.es, ficha",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.crunchbase.com/organization/wild-land",
+          "titulo": "Crunchbase: Wild Land",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "xiaomi",
+      "nombre": "Xiaomi",
+      "razon_social": null,
+      "pais_sede": null,
+      "matriz": null,
+      "fundacion": null,
+      "web": "https://www.mi.com",
+      "cotiza": null,
+      "datos_publicos": "En 2025 retiró un lote de su powerbank 33W 20000mAh (PB2030MI) fabricado en agosto–septiembre de 2024: 146.891 unidades en China según Notebookcheck, con extensión mundial y a España.",
+      "fuentes": [
+        {
+          "url": "https://www.notebookcheck.net/xiaomi-issues-a-recall-of-146-891-units-of-a-power-bank-for-safety-risks.1099917.0.html",
+          "fecha": "2026-10-18"
+        }
+      ]
+    }
+  ]
+}

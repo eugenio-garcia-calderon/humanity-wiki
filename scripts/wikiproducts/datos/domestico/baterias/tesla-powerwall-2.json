@@ -1,0 +1,411 @@
+{
+  "slug": "tesla-powerwall-2",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Tesla Powerwall 2",
+  "marca": "Tesla",
+  "modelo": "Powerwall 2 AC (13,5 kWh; números de pieza 1092170-xx-y, 2012170-xx-y, 3012170-xx-y)",
+  "variante_ficha": "Powerwall 2 AC, ficha técnica alemana fechada 18-05-2023 (230 V monofásico)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No encontrado."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "Lanzado a finales de la década de 2010; no se ha verificado la fecha exacta con una fuente en esta revisión."
+  },
+  "estado": "descatalogado",
+  "resumen": "Batería doméstica de Tesla de 13,5 kWh utilizables con inversor de batería integrado (acoplamiento AC), sustituida en la gama por el Powerwall 3. Algunos distribuidores la marcan como fin de vida en 2025 y en Australia dejó de venderse a finales de 2025. En 2025 Tesla retiró una parte de las unidades en Australia y unas 10.500 en EE. UU. por celdas de un proveedor externo que pueden sobrecalentarse; según la marca, sustituye gratis las afectadas. La garantía europea es de 10 años, con un 70 % de capacidad garantizada al final en España. La prensa del sector la describe con celdas NMC desarrolladas con Panasonic, dato que Tesla no recoge en su ficha.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.tesla.com/",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha registrado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 14,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "capacidad_util_kwh": {
+      "valor": 13.5,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "gama_capacidades_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha alemana no indica el número máximo de unidades en paralelo."
+    },
+    "modular": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Unidad cerrada de 13,5 kWh; se amplía añadiendo unidades completas."
+    },
+    "ampliable": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Con más unidades Powerwall; número máximo no indicado en la ficha consultada."
+    },
+    "ampliacion_max_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No indicado en la ficha consultada."
+    },
+    "potencia_continua_kw": {
+      "valor": 4.6,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Limitada de 5 kW / 5,8 kVA a 4,6 kW / 4,6 kVA para cumplir requisitos de conexión a red (Alemania)."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No indicada en la ficha alemana."
+    },
+    "quimica": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Tesla solo indica «iones de litio recargable» en la ficha. La prensa especializada (energy-storage.news, https://www.energy-storage.news/?p=86789) la describe como NMC (níquel-manganeso-cobalto); no confirmado por el fabricante."
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Tesla no lo publica. Según energy-storage.news (https://www.energy-storage.news/?p=86789), celdas desarrolladas con Panasonic; el lote defectuoso de 2020–2022 procedía de un «proveedor externo» no identificado (la prensa cita también a CATL y LG Energy Solution como proveedores de Tesla en ese periodo)."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se publica número de ciclos; la garantía declara ciclos ilimitados en autoconsumo/control programado/respaldo."
+    },
+    "profundidad_descarga_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada; la ficha se expresa en energía utilizable."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": 90,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": "«AC-Effizienz» AC → batería → AC al inicio de vida, 25 °C, a 3,3 kW."
+    },
+    "tension": {
+      "valor": "Batería 50 V CC interna; salida 230 V CA monofásica, 50 Hz",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "acoplamiento": {
+      "valor": "AC (inversor de batería integrado, sin entradas FV)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversor_integrado": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Inversor de batería; necesita un inversor solar aparte para los paneles."
+    },
+    "inversores_compatibles": {
+      "valor": "Acoplada en AC: funciona con cualquier inversor solar de red",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "respaldo_apagones": {
+      "valor": "sí, con Tesla Gateway / Backup Gateway",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea",
+      "fecha": "2026-10-18",
+      "nota": "La garantía lista Gateway y Backup Gateway como productos asociados; la cobertura (vivienda o circuitos) depende de la instalación."
+    },
+    "instalacion": {
+      "valor": "interior y exterior",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip": {
+      "valor": "IP67 batería y electrónica; IP56 cableado",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "rango_temperatura_c": {
+      "valor": "-20 a 50",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Óptimo 0–30 °C; potencia reducida posible por debajo de 10 °C."
+    },
+    "peso_kg": {
+      "valor": 114,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "medidas_mm": {
+      "valor": "1150 × 753 × 147",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Unidades fabricadas antes de marzo de 2019 pueden diferir ligeramente."
+    },
+    "garantia_energia_mwh": {
+      "valor": 37.8,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Solo para usos distintos de autoconsumo, control programado y respaldo (en esos usos: ciclos ilimitados)."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": null,
+      "unidad": "€/kWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Sin oferta con precio verificable: producto descatalogado."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No figura en la Stromspeicher-Inspektion 2025 de la HTW Berlin; no se encontraron otros ensayos independientes en esta revisión."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía Zona Europea Rev. 1.15 (27-01-2025), que cubre Powerwall 2 AC; versión anterior específica Rev. 1.11 (11-03-2021) con las mismas cifras."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "fecha": "2026-10-18",
+      "nota": "70 % de 13,5 kWh a 10 años en España, Italia, Portugal y Eslovenia; 80 % en el centro y norte de Europa."
+    },
+    "letra_pequena": [
+      "Cobertura completa condicionada a actualizaciones remotas de firmware y registro; si no, mínimo 4 años (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf; https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea).",
+      "Límite de 37,8 MWh para usos no listados (https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea).",
+      "Solo instaladores certificados por Tesla; abrir la carcasa o reubicar la unidad sin permiso excluye la garantía (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "Tesla elige reparar, sustituir o reembolsar el valor de mercado; el plazo no se amplía tras una sustitución; responsabilidad limitada al precio pagado (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf).",
+      "Durante la retirada de 2025, Tesla descargó a distancia las unidades afectadas conectadas a internet hasta su sustitución, lo que deja temporalmente sin servicio la batería (https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death)."
+    ],
+    "quien_responde": "Tesla Motors Netherlands B.V. (Ámsterdam) en la Zona de Garantía Europea. Con el producto descatalogado, la sustitución en garantía depende de piezas o equivalentes que Tesla decida suministrar (la garantía le permite reembolsar el valor de mercado de un producto equivalente)."
+  },
+  "empresa": {
+    "razon_social": "Tesla, Inc. (garante en Europa: Tesla Motors Netherlands B.V., Ámsterdam)",
+    "pais_sede": "Estados Unidos",
+    "fundacion": 2003,
+    "cotiza_en": "NASDAQ (TSLA)",
+    "web": "https://www.tesla.com/es_es/powerwall",
+    "fabricante_celulas": "No publicado por Tesla; prensa: celdas NMC desarrolladas con Panasonic",
+    "pais_fabricacion": "Estados Unidos",
+    "fabricas_conocidas": [
+      "Tesla, Inc., Reno (Nevada, EE. UU.), según la ficha de retirada de la CPSC"
+    ],
+    "notas": [
+      "Retirada en EE. UU. de unos 10.500 Powerwall 2 (CPSC n.º 26-092, 13-11-2025): 22 informes de sobrecalentamiento, 6 de humo y 5 incendios con daños materiales menores, sin heridos (https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death).",
+      "Retirada voluntaria en Australia publicada por la ACCC el 16-09-2025 por celdas de un proveedor externo que pueden fallar y sobrecalentarse (https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/).",
+      "En Australia el Powerwall 2 dejó de estar en la lista de baterías aprobadas del Clean Energy Council a finales de 2025 (https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/)."
+    ],
+    "fuentes": [
+      "https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death",
+      "https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/",
+      "https://www.energy-storage.news/?p=86789",
+      "https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/"
+    ]
+  },
+  "origen": {
+    "pais_marca": "Estados Unidos",
+    "pais_fabricacion": "Estados Unidos",
+    "fabrica": "Reno, Nevada (según CPSC)",
+    "materiales_principales": [
+      "celdas de iones de litio (NMC según prensa)",
+      "inversor de batería integrado",
+      "refrigeración líquida (no verificado en esta revisión)"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado."
+    },
+    "reparabilidad": "La garantía excluye aperturas o reparaciones por terceros no certificados (https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf). En la retirada de 2025 el remedio fue la sustitución completa de la unidad, no la reparación (https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death)."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62109-1, IEC 62109-2, IEC 62619, UN 38.3",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61000-6-1 / 61000-6-3 (emisiones)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "RoHS, RAEE, Directiva de baterías, REACH",
+      "emisor": "declaración del fabricante",
+      "fuente": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "idioma": "de",
+      "fecha": "2026-10-18",
+      "nota": "Fechada 18-05-2023."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf",
+      "idioma": "es",
+      "fecha": "2026-10-18",
+      "nota": "Rev. 1.15, 27-01-2025."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Powerwall 2 AC, Rev. 1.11, 11-03-2021."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "«AC-Effizienz 90 %» (eficiencia AC → batería → AC).",
+      "donde": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La propia ficha precisa que el 90 % se mide al inicio de vida, a 25 °C y a 3,3 kW; en otras condiciones y con el envejecimiento puede ser menor. No se encontró medición independiente publicada.",
+      "fuentes": [
+        "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-datasheet-de-de.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Garantía de 10 años con «ciclos ilimitados».",
+      "donde": "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea",
+      "veredicto": "matizable",
+      "explicacion": "Los ciclos ilimitados solo valen para autoconsumo solar, control programado y respaldo; para otros usos el límite es 37,8 MWh. En España la capacidad garantizada a 10 años es el 70 %.",
+      "fuentes": [
+        "https://digitalassets.tesla.com/tesla-contents/image/upload/powerwall-2-ac-warranty-en-emea",
+        "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/General/Warranty/es-es/Powerwall-Warranty-ES.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [
+    {
+      "pais": "Australia",
+      "organismo": "ACCC",
+      "fecha": "2025-09-16",
+      "motivo": "Celdas de iones de litio de un proveedor externo que pueden fallar y sobrecalentarse; casos de humo o llamas con daños materiales menores, sin heridos.",
+      "modelos_afectados": "Parte de los Powerwall 2 vendidos entre el 01-11-2020 y el 30-06-2022 (ampliado posteriormente: solarcalculator.com.au cita ventas hasta el 23-08-2025 en la actualización del 13-04-2026). Comprobación en la app de Tesla.",
+      "url": "https://www.productsafety.gov.au/search-consumer-product-recalls/powerwall-2",
+      "fecha_consulta": "2026-10-18",
+      "nota": "La web de la ACCC no permite lectura automática; datos tomados de https://www.solarquotes.com.au/blog/tesla-powerwall-recall-mb3272/, https://www.energy-storage.news/?p=86789 y https://solarcalculator.com.au/battery-storage/tesla-powerwall-2/. Remedio: sustitución gratuita; descarga remota previa."
+    },
+    {
+      "pais": "Estados Unidos",
+      "organismo": "CPSC",
+      "fecha": "2025-11-13",
+      "motivo": "Las celdas pueden hacer que la unidad deje de funcionar y se sobrecaliente, con humo o llama; riesgo de incendio y quemaduras. 22 informes de sobrecalentamiento, 6 de humo, 5 incendios con daños menores, sin heridos.",
+      "modelos_afectados": "Unos 10.500 «Powerwall 2» vendidos de noviembre de 2020 a diciembre de 2022 (recall n.º 26-092). Fabricados en Reno, Nevada.",
+      "url": "https://cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Remedio: sustitución; Tesla descargó a distancia las unidades conectadas."
+    }
+  ],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia, ficha de retirada citada a través de prensa especializada porque la web bloquea la lectura automática), prensa del sector (energy-storage.news, ess-news.com, pv-magazine, solarquotes) y búsquedas en alemán y español de retiradas en Europa. No se encontró ninguna retirada publicada para Europa ni en España; además se revisaron la lista de retiradas del Clean Energy Council (Australia), Health Canada (no se encontró ficha canadiense de la retirada del Powerwall 2) y prensa europea en alemán; la base EU Safety Gate no pudo consultarse directamente con las herramientas disponibles (aplicación web dinámica, acceso bloqueado), por lo que no se puede afirmar su ausencia allí con certeza.",
+  "ofertas": [],
+  "compatibles": [
+    "Tesla Gateway 2 / Backup Gateway 2",
+    "cualquier inversor solar de red (acoplamiento AC)",
+    "Powerwall 3 Expansion (solo en EE. UU. y Australia según basenor.com; no verificado para Europa)"
+  ],
+  "pendiente": [
+    "Fecha exacta de lanzamiento y de fin de venta en Europa/España (un distribuidor alemán la marca como fin de vida en 2025 y sustituida por Powerwall 3: https://www.solarics.de/products/tesla-powerwall-2-135-kwh-batteriespeicher).",
+    "Si alguna unidad vendida en Europa está afectada por el defecto de celdas (no se encontró retirada publicada en Europa).",
+    "Potencia pico y número máximo de unidades en paralelo en la ficha europea.",
+    "Consulta directa a EU Safety Gate.",
+    "Precio de unidades de stock remanente en España (no se encontró oferta con precio)."
+  ]
+}

@@ -1,0 +1,4626 @@
+{
+  "subcategoria": "luces-solares-portatiles",
+  "generado": "2026-10-18",
+  "productos": [
+    {
+      "id": "goal-zero-crush-light-chroma",
+      "nombre": "Goal Zero Crush Light Chroma",
+      "marca_id": "goal-zero",
+      "modelo": "32013",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "0847974006122",
+          "fuente": "https://multitronic.fi/en/products/2273067",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://goalzero.com/products/crush-light-chroma"
+      },
+      "resumen": "Farol plegable de Goal Zero con panel solar integrado en la tapa y luz blanca o de colores. Según la marca, da hasta 60 lúmenes y lleva una batería de polímero de litio de 500 mAh que se carga por el panel o por USB-C. Plegado mide 15 mm de alto y pesa 91 g. No tiene salida para cargar otros aparatos.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 60,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 35,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "Modo bajo (6 lm). Alto: 3 h; medio: 6 h; vela: 3,5 h."
+        },
+        "bateria_mah": {
+          "valor": 500,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "Polímero de litio."
+        },
+        "bateria_wh": {
+          "valor": 1.85,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "La marca indica 1,85 Wh a 3,7 V (500 mAh × 3,7 V = 1,85 Wh)."
+        },
+        "panel_solar_w": {
+          "valor": 0.12,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "Monocristalino, «aprox. 0,12 W»; carga completa con el panel integrado: 20 h."
+        },
+        "carga_usb": {
+          "valor": "sí, USB-C 5 V hasta 0,5 A (2,5 W); 2,5 h",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica grado IP."
+        },
+        "modos": {
+          "valor": "blanco alto/medio/bajo (3000 K), 6 colores, fundido multicolor y vela",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 91,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "fecha": "2026-10-18",
+          "nota": "Sede en Salt Lake City (Utah). BioLite compró Goal Zero en abril de 2025."
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mec.ca/en/product/5064-571/goal-zero-crush-light-chroma-lantern?colour=NO_COLOUR",
+          "fecha": "2026-10-18",
+          "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "plástico ABS y caucho",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.rei.com/product/141607",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica si la batería es sustituible."
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "Ficha de producto Goal Zero (EE. UU.)",
+          "url": "https://goalzero.com/products/crush-light-chroma",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Built-in solar panel: 20 hrs charge time",
+          "donde": "https://goalzero.com/products/crush-light-chroma",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: 0,12 W × 20 h = 2,4 Wh, por encima de los 1,85 Wh de la batería, así que la cifra es coherente sólo si el panel trabaja a su potencia máxima las 20 horas; con sol real eso son varios días.",
+          "fuentes": [
+            {
+              "url": "https://goalzero.com/products/crush-light-chroma",
+              "titulo": "Goal Zero, ficha de Crush Light Chroma",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Low: 35 hrs",
+          "donde": "https://goalzero.com/products/crush-light-chroma",
+          "veredicto": "matizable",
+          "explicacion": "Es la autonomía en el modo bajo de 6 lúmenes; en el modo alto (60 lm) la marca declara 3 h. No hay medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://goalzero.com/products/crush-light-chroma",
+              "titulo": "Goal Zero, ficha de Crush Light Chroma",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "La marca Goal Zero tiene retiradas en la CPSC de otros productos, no de luces: baterías (2015), estaciones de carga Street Charge (n.º 18-703, 2017), fuentes de alimentación (2021), módulos Yeti Link y cables EC8 (2024), cables combinadores solares (2025) y estaciones YETI 3000X (2026). Fuentes: https://www.cpsc.gov/Recalls/2015/Goal-Zero-Recalls-Battery-Packs , https://goalzero.com/pages/product-notification , https://www.cpsc.gov/Recalls/2021/Goal-Zero-Recalls-Power-Supplies-Due-to-Fire-Hazard , https://www.cpsc.gov/Recalls/2025/Goal-Zero-Recalls-Solar-Series-Combiner-Cables-for-Solar-Panels-Due-to-Fire-Hazard , https://www.cpsc.gov/Recalls/2026/Goal-Zero-Recalls-YETI-3000X-Power-Stations-Due-to-Serious-Risk-of-Injury-from-Fire-and-Burn-Hazards"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": "Health Canada publica retiradas de Goal Zero de otros productos (YETI 3000X, cables EC8, módulo Yeti Link): https://recalls-rappels.canada.ca/en/alert-recall/goal-zero-yeti-3000x-power-stations-recalled-due-fire-and-burn-hazards"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/Goalzero-Crush-Light-Chroma-Linterna/dp/B07HFJH6D3",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha encontrada con el buscador; Amazon bloquea la lectura automática, así que no se pudo leer precio ni stock."
+        },
+        {
+          "distribuidor_id": "solarpowersupply-eu",
+          "url": "https://solarpowersupply.eu/goal-zero-crush-light-chroma",
+          "precio_eur": 29.95,
+          "envio_eur": 0,
+          "plazo": "3–7 días",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda europea (Países Bajos). Precio con IVA leído en la página, marcado «Niet meer beschikbaar» (ya no disponible)."
+        }
+      ],
+      "pendiente": [
+        "Precio en España (Amazon.es no legible automáticamente)",
+        "País de fabricación",
+        "Grado IP",
+        "Año de lanzamiento"
+      ]
+    },
+    {
+      "id": "goal-zero-torch-500",
+      "nombre": "Goal Zero Torch 500",
+      "marca_id": "goal-zero",
+      "modelo": "90115",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "847974008065",
+          "fuente": "https://www.galaxus.it/en/s3/product/goal-zero-torch-500-camping-lights-14668619",
+          "fecha": "2026-10-18"
+        },
+        {
+          "valor": "0847974008065",
+          "fuente": "https://pre.barrabespro.sdi.es/en/goal-zero-torch-500-19974.html",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "desconocido",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light"
+      },
+      "resumen": "Linterna de mano de Goal Zero con foco, luz de área y un panel solar de 1,2 W en el cuerpo. Según la marca, lleva una batería de 5200 mAh, da hasta 500 lúmenes con las dos luces encendidas y tiene una salida USB-A para cargar un teléfono. La marca declara protección IP67. En la tienda oficial de EE. UU. y en Galaxus figuraba como agotada el 2026-10-18.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 500,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18",
+          "nota": "Foco y luz de área juntos en alto; cada uno por separado 300 lm."
+        },
+        "autonomia_h": {
+          "valor": 50,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18",
+          "nota": "Foco o luz de área en bajo. Las dos en alto: 2 h."
+        },
+        "bateria_mah": {
+          "valor": 5200,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "bateria_wh": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica la tensión ni los Wh; la química tampoco."
+        },
+        "panel_solar_w": {
+          "valor": 1.2,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18",
+          "nota": "Monocristalino; carga solar integrada 23–46 h."
+        },
+        "carga_usb": {
+          "valor": "sí, USB-C 5 V hasta 1 A (5 W); 4 h",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí, USB-A 5 V hasta 2,1 A (10,5 W)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": "IP67",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "foco, luz de área o ambas; alto/medio/bajo",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 363,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "fecha": "2026-10-18",
+          "nota": "Salt Lake City (Utah)."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "Ficha de producto Goal Zero (EE. UU.)",
+          "url": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Solar (built-in): 23–46 hrs",
+          "donde": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: 1,2 W × 23 h ≈ 27,6 Wh, compatible con una batería de 5200 mAh (unos 19 Wh si la celda es de 3,6–3,7 V, tensión que la marca no publica). Son horas de sol pleno, no horas de día.",
+          "fuentes": [
+            {
+              "url": "https://goalzero.com/products/torch-500-multi-purpose-light",
+              "titulo": "Goal Zero, ficha de Torch 500",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "IP67",
+          "donde": "https://goalzero.com/products/torch-500-multi-purpose-light",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Es una declaración del fabricante; no se encontró informe de ensayo independiente.",
+          "fuentes": [
+            {
+              "url": "https://goalzero.com/products/torch-500-multi-purpose-light",
+              "titulo": "Goal Zero, ficha de Torch 500",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "La marca Goal Zero tiene retiradas en la CPSC de otros productos, no de luces: baterías (2015), estaciones de carga Street Charge (n.º 18-703, 2017), fuentes de alimentación (2021), módulos Yeti Link y cables EC8 (2024), cables combinadores solares (2025) y estaciones YETI 3000X (2026). Fuentes: https://www.cpsc.gov/Recalls/2015/Goal-Zero-Recalls-Battery-Packs , https://goalzero.com/pages/product-notification , https://www.cpsc.gov/Recalls/2021/Goal-Zero-Recalls-Power-Supplies-Due-to-Fire-Hazard , https://www.cpsc.gov/Recalls/2025/Goal-Zero-Recalls-Solar-Series-Combiner-Cables-for-Solar-Panels-Due-to-Fire-Hazard , https://www.cpsc.gov/Recalls/2026/Goal-Zero-Recalls-YETI-3000X-Power-Stations-Due-to-Serious-Risk-of-Injury-from-Fire-and-Burn-Hazards"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": "Health Canada publica retiradas de Goal Zero de otros productos (YETI 3000X, cables EC8, módulo Yeti Link): https://recalls-rappels.canada.ca/en/alert-recall/goal-zero-yeti-3000x-power-stations-recalled-due-fire-and-burn-hazards"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/Goal-Zero-Multi-Purpose-USB-Linterna-Power-Unisex/dp/B08HRKYV9S",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha encontrada con el buscador; no se pudo leer precio ni stock (Amazon bloquea la lectura automática)."
+        },
+        {
+          "distribuidor_id": "solarpowersupply-eu",
+          "url": "https://solarpowersupply.eu/goal-zero-torch-500",
+          "precio_eur": 49.95,
+          "envio_eur": 0,
+          "plazo": "3–7 días",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda europea (Países Bajos). Precio con IVA leído en la página (antes 54,95 €), marcado «Niet meer beschikbaar» (ya no disponible)."
+        }
+      ],
+      "pendiente": [
+        "Química y Wh de la batería",
+        "Precio en España",
+        "País de fabricación",
+        "Si sigue fabricándose (agotada en goalzero.com y Galaxus)"
+      ]
+    },
+    {
+      "id": "goal-zero-lighthouse-600",
+      "nombre": "Goal Zero Lighthouse 600 Lantern & USB Power Hub",
+      "marca_id": "goal-zero",
+      "modelo": "32010",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "847974008003",
+          "fuente": "https://www.bhphotovideo.com/c/product/1584849-REG/goal_zero_32010_lighthouse_600_lantern.html",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub"
+      },
+      "resumen": "Farol de 600 lúmenes con batería de 5200 mAh, manivela y salida USB para cargar otros aparatos. No lleva panel solar integrado: la carga solar requiere un panel aparte (la marca propone el Nomad 10), por lo que forma parte de esta categoría como luz preparada para kit solar. Según la marca, la batería es de iones de litio NMC de 18,98 Wh. La tienda canadiense de la marca lo mostraba agotado; B&H, en stock.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 600,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 320,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "Un solo lado en bajo. Ambos lados en alto: 2,5 h."
+        },
+        "bateria_mah": {
+          "valor": 5200,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "Li-ion NMC, celda de 3,65 V."
+        },
+        "bateria_wh": {
+          "valor": 18.98,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "5200 mAh × 3,65 V = 18,98 Wh."
+        },
+        "panel_solar_w": {
+          "valor": 0,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bhphotovideo.com/c/product/1584849-REG/goal_zero_32010_lighthouse_600_lantern.html",
+          "fecha": "2026-10-18",
+          "nota": "Sin panel integrado («Solar panel: No»); carga solar con panel externo, 6 h con Nomad 10 según la marca."
+        },
+        "carga_usb": {
+          "valor": "sí, 5 V hasta 1 A (5 W); 6 h",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí, USB 5 V hasta 1,5 A (7,5 W)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bhphotovideo.com/c/product/1584849-REG/goal_zero_32010_lighthouse_600_lantern.html",
+          "fecha": "2026-10-18",
+          "nota": "Goal Zero no publica grado IP; B&H indica «Environmental resistance: No»."
+        },
+        "modos": {
+          "valor": "360° o medio farol; alto/bajo; manivela 1 W",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 498,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18",
+          "nota": "B&H indica garantía limitada de 1 año del fabricante; no coinciden."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mec.ca/en/product/6014-155/goal-zero-lighthouse-600-lantern-with-powerbank",
+          "fecha": "2026-10-18",
+          "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "plástico ABS y aluminio",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.rei.com/product/188291",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "Ficha de producto Goal Zero (Canadá)",
+          "url": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Both sides lit, high power: 2.5 hrs",
+          "donde": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: 18,98 Wh / 2,5 h ≈ 7,6 W de consumo medio, coherente con dos LED de 3 W más pérdidas. Sin medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+              "titulo": "Goal Zero, ficha de Lighthouse 600",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Hand crank: 1 minute of cranking gives about 10 minutes of light on low",
+          "donde": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Calculado: 1 W durante 1 minuto son unos 0,017 Wh; a 320 h para 18,98 Wh en bajo (≈0,06 W) darían unos 17 minutos, así que la cifra es plausible, pero no hay medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://goalzero.com/en-ca/products/lighthouse-600-lantern-usb-power-hub",
+              "titulo": "Goal Zero, ficha de Lighthouse 600",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "La marca Goal Zero tiene retiradas en la CPSC de otros productos, no de luces: baterías (2015), estaciones de carga Street Charge (n.º 18-703, 2017), fuentes de alimentación (2021), módulos Yeti Link y cables EC8 (2024), cables combinadores solares (2025) y estaciones YETI 3000X (2026). Fuentes: https://www.cpsc.gov/Recalls/2015/Goal-Zero-Recalls-Battery-Packs , https://goalzero.com/pages/product-notification , https://www.cpsc.gov/Recalls/2021/Goal-Zero-Recalls-Power-Supplies-Due-to-Fire-Hazard , https://www.cpsc.gov/Recalls/2025/Goal-Zero-Recalls-Solar-Series-Combiner-Cables-for-Solar-Panels-Due-to-Fire-Hazard , https://www.cpsc.gov/Recalls/2026/Goal-Zero-Recalls-YETI-3000X-Power-Stations-Due-to-Serious-Risk-of-Injury-from-Fire-and-Burn-Hazards"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en",
+          "nota": "Health Canada publica retiradas de Goal Zero de otros productos (YETI 3000X, cables EC8, módulo Yeti Link): https://recalls-rappels.canada.ca/en/alert-recall/goal-zero-yeti-3000x-power-stations-recalled-due-fire-and-burn-hazards"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "solarpowersupply-eu",
+          "url": "https://solarpowersupply.eu/solar-lights/goal-zero-lighthouse-600-lantern",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda europea con ficha del producto; la página no muestra precio ni stock en la lectura automática."
+        },
+        {
+          "distribuidor_id": "barrabes",
+          "url": "https://www.barrabes.com/en/goal-zero-lighthouse-600/product-128127",
+          "precio_eur": 59.99,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "agotado",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la página (antes 74,99 €); la página dice que está agotado. La URL canónica de la página apunta a otro producto (Lighthouse Micro Charge), comprobar."
+        }
+      ],
+      "pendiente": [
+        "Oferta con precio en una tienda española",
+        "País de fabricación",
+        "Garantía real (2 años en la marca, 1 año en B&H)"
+      ]
+    },
+    {
+      "id": "biolite-luci-original",
+      "nombre": "BioLite Luci Original (antes MPOWERD Luci Outdoor 2.0)",
+      "marca_id": "biolite",
+      "modelo": "Luci Original Clear; MPOWERD 1023-002-001-002 (Outdoor 2.0)",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "855941004651",
+          "fuente": "https://www.campsaver.com/mpowerd-luci-outdoor-2-0-lantern.html",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2012,
+        "unidad": null,
+        "naturaleza": "declarado",
+        "fuente": "https://en.wikipedia.org/wiki/Luci_(lantern)",
+        "fecha": "2026-10-18",
+        "nota": "Año de invención de la gama Luci, no de esta versión concreta."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.bioliteenergy.com/products/luci-original-clear"
+      },
+      "resumen": "Farol hinchable con panel solar en la tapa, creado por MPOWERD y vendido por BioLite desde que la compró en junio de 2024. BioLite lo vende como Luci Original con las mismas cifras que MPOWERD daba para el Luci Outdoor 2.0 (75 lúmenes, 1000 mAh, IP67, 125 g); que sea el mismo aparato es una deducción por las cifras, no una afirmación de la marca. Una tienda estadounidense da el Outdoor 2.0 por descatalogado por MPOWERD. Plegado mide unos 2,5 cm.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 75,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 24,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "Modo bajo; alto: 6 h."
+        },
+        "bateria_mah": {
+          "valor": 1000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "Li-ion."
+        },
+        "bateria_wh": {
+          "valor": 3.7,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "Sólo «high-efficiency monocrystalline», sin potencia."
+        },
+        "carga_usb": {
+          "valor": "sí, USB-C; 3 h (solar: 7 h)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "La ficha sólo lista entradas USB-C y solar."
+        },
+        "ip": {
+          "valor": "IP67",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "bajo, medio, alto, intermitente",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 125,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 1,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18",
+          "nota": "Más «lifetime support»."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "fecha": "2026-10-18",
+          "nota": "BioLite: sedes en Nueva York y Nairobi."
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mec.ca/en/product/6034-890/biolite-luci-original-inflatable-solar-lantern?colour=Matte",
+          "fecha": "2026-10-18",
+          "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "BioLite, Luci Original Clear",
+          "url": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Luci shines bright for up to 24 hours on a single charge.",
+          "donde": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "veredicto": "matizable",
+          "explicacion": "Las 24 h corresponden al modo bajo; la misma ficha da 6 h en alto.",
+          "fuentes": [
+            {
+              "url": "https://www.bioliteenergy.com/products/luci-original-clear",
+              "titulo": "BioLite, Luci Original Clear",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "1,000 mAh (3.7 Wh) Li-ion",
+          "donde": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Calculado: 1000 mAh × 3,7 V = 3,7 Wh; la cifra en Wh es coherente con la de mAh. No es una medición de capacidad real. Revisado 2026-10-18: la coherencia con la propia ficha de la marca no es una comprobación independiente; falta una medición de un tercero.",
+          "fuentes": [
+            {
+              "url": "https://www.bioliteenergy.com/products/luci-original-clear",
+              "titulo": "BioLite, Luci Original Clear",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "So durable that you can hit it with a stick, kick it, throw it, even stand on it",
+          "donde": "https://www.bioliteenergy.com/products/luci-original-clear",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró ningún ensayo de resistencia independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.bioliteenergy.com/products/luci-original-clear",
+              "titulo": "BioLite, Luci Original Clear",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "BioLite retiró en EE. UU. las BaseLantern y BaseLantern XL (n.º 17-716, 30-11-2016, sobrecalentamiento de la batería al cargar), otro modelo: https://www.cpsc.gov/Recalls/2017/BioLite-Recalls-Lanterns"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/MPOWERD-LUCI-Outdoor-2-0-transparente/dp/B074NQLRTF",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Ficha de MPOWERD Luci Outdoor 2.0 encontrada con el buscador; precio y stock no legibles (Amazon bloquea la lectura automática). Puede ser stock antiguo."
+        },
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/MPOWERD-Luci-Outdoor-Hinchable-Solar/dp/B01IIV1OC0",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Segunda ficha del Outdoor 2.0 en Amazon.es; precio y stock no legibles."
+        }
+      ],
+      "pendiente": [
+        "Confirmar con BioLite que Luci Original sustituye al Outdoor 2.0",
+        "EAN de la versión BioLite",
+        "Potencia del panel",
+        "Venta oficial de BioLite en España"
+      ]
+    },
+    {
+      "id": "biolite-luci-charge-150",
+      "nombre": "BioLite Luci Charge 150",
+      "marca_id": "biolite",
+      "modelo": "Luci Charge 150",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.bioliteenergy.com/products/luci-charge-150"
+      },
+      "resumen": "Farol hinchable de la gama Luci con salida USB para cargar otros aparatos. Según BioLite, da hasta 150 lúmenes, lleva una batería de iones de litio de 2000 mAh (7,4 Wh) y tiene protección IP67. Se carga en 2–3 h por USB-C o en 14 h al sol, según la marca. No se encontró oferta en España.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 150,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 50,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18",
+          "nota": "Modo bajo; alto: 6 h."
+        },
+        "bateria_mah": {
+          "valor": 2000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "bateria_wh": {
+          "valor": 7.4,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18",
+          "nota": "Sólo «high-efficiency mono-crystalline»."
+        },
+        "carga_usb": {
+          "valor": "sí, USB-C; 2–3 h (solar: 14 h)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí, 1× USB-C y 1× USB-A de salida",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18",
+          "nota": "La marca no publica la potencia de salida."
+        },
+        "ip": {
+          "valor": "IP67",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "bajo, medio, alto, intermitente",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 173,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 1,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": "texto",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mec.ca/en/product/6034-893/biolite-luci-charge-150-inflatable-solar-lantern?colour=Clear",
+          "fecha": "2026-10-18",
+          "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "BioLite, Luci Charge 150",
+          "url": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Shine bright for up to 50 hours on a single charge.",
+          "donde": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "veredicto": "matizable",
+          "explicacion": "Las 50 h son del modo bajo; en alto la ficha da 6 h. Calculado: 7,4 Wh / 50 h ≈ 0,15 W de consumo en bajo.",
+          "fuentes": [
+            {
+              "url": "https://www.bioliteenergy.com/products/luci-charge-150",
+              "titulo": "BioLite, Luci Charge 150",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "It can withstand up to 150 lbs of pressure.",
+          "donde": "https://www.bioliteenergy.com/products/luci-charge-150",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró un ensayo independiente que lo compruebe.",
+          "fuentes": [
+            {
+              "url": "https://www.bioliteenergy.com/products/luci-charge-150",
+              "titulo": "BioLite, Luci Charge 150",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "BioLite retiró en EE. UU. las BaseLantern y BaseLantern XL (n.º 17-716, 30-11-2016, sobrecalentamiento de la batería al cargar), otro modelo: https://www.cpsc.gov/Recalls/2017/BioLite-Recalls-Lanterns"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "alpinstore",
+          "url": "https://www.alpinstore.com/es/629031-biolite-luci-charge-150-.html",
+          "precio_eur": 53.95,
+          "envio_eur": null,
+          "plazo": "desconocido",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Tienda francesa con página en español y envío a España (gratis desde 119 €). Precio leído en la página (antes 59,95 €, −10 %). La página ofrece «avísenme cuando esté disponible», así que puede estar agotada."
+        }
+      ],
+      "pendiente": [
+        "EAN",
+        "Oferta en España",
+        "Potencia de salida USB",
+        "Relación con el MPOWERD Luci Pro Lux (cifras parecidas: 2000 mAh, 173 g, 14 h solar)"
+      ]
+    },
+    {
+      "id": "mpowerd-luci-pro-lux",
+      "nombre": "MPOWERD Luci Pro Lux",
+      "marca_id": "mpowerd",
+      "modelo": "Luci Pro Lux",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "desconocido",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://v12outdoor.com/products/luci-pro-lux"
+      },
+      "resumen": "Farol hinchable de MPOWERD con batería de 2000 mAh y puerto USB bidireccional para cargar un teléfono. Según las fichas de tienda, da 135 lúmenes y tiene protección IP67. La marca MPOWERD se integró en BioLite en 2025; una tienda finlandesa con envío a la UE lo tenía en stock el 2026-10-18, y una británica, agotado.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 135,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 50,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Bajo; medio 24 h, alto 5 h, intermitente 9 h."
+        },
+        "bateria_mah": {
+          "valor": 2000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Li-ion con protección de sobrecorriente."
+        },
+        "bateria_wh": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": "sí; 2–3 h (solar: 14 h)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí, puerto USB bidireccional",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Potencia de salida no publicada."
+        },
+        "ip": {
+          "valor": "IP67",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "bajo, medio, alto, intermitente",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 173,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://v12outdoor.com/products/luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Varuste.net indica 248 g, probablemente con embalaje (no lo dice)."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "fecha": "2026-10-18",
+          "nota": "Marca de MPOWERD, absorbida por BioLite (junio de 2024)."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Up to 50 hours",
+          "donde": "https://varuste.net/bg/p138352/mpowerd-luci-pro-lux",
+          "veredicto": "matizable",
+          "explicacion": "Es la autonomía en modo bajo; en alto la ficha de V12 Outdoor da 5 h.",
+          "fuentes": [
+            {
+              "url": "https://v12outdoor.com/products/luci-pro-lux",
+              "titulo": "V12 Outdoor, Luci Pro Lux",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "2000 mAh, 5V lithium-ion polymer",
+          "donde": "https://varuste.net/bg/p138352/mpowerd-luci-pro-lux",
+          "veredicto": "matizable",
+          "explicacion": "Una celda de polímero de litio trabaja a unos 3,7 V, no a 5 V; los 5 V son la tensión del puerto USB. La tienda no da Wh.",
+          "fuentes": [
+            {
+              "url": "https://varuste.net/bg/p138352/mpowerd-luci-pro-lux",
+              "titulo": "Varuste.net, Luci Pro Lux",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "BioLite retiró en EE. UU. las BaseLantern y BaseLantern XL (n.º 17-716, 30-11-2016, sobrecalentamiento de la batería al cargar), otro modelo: https://www.cpsc.gov/Recalls/2017/BioLite-Recalls-Lanterns"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "varuste-net",
+          "url": "https://varuste.net/bg/p138352/mpowerd-luci-pro-lux",
+          "precio_eur": 69.9,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio normal con IVA finlandés (25,5 %) leído en la página búlgara de la tienda; hay una promoción de 39,90 etiquetada por error en AUD. Envío a España no indicado."
+        }
+      ],
+      "pendiente": [
+        "Ficha oficial (MPOWERD ya no tiene web propia de producto)",
+        "EAN",
+        "Precio con IVA español",
+        "Garantía"
+      ]
+    },
+    {
+      "id": "mpowerd-luci-base-light",
+      "nombre": "MPOWERD Luci Base Light",
+      "marca_id": "mpowerd",
+      "modelo": "Luci Base Light",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "0850006103003",
+          "fuente": "https://www.speck-sports.com/en/lanterns/35469-177240-lantern-goal-zero-lighthouse-600-powerbank-usb-847974008003.html",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light"
+      },
+      "resumen": "Farol solar de la gama Luci, más grande y no hinchable, con batería de 4000 mAh. Según la ficha de Varuste.net, da hasta 300 lúmenes en modo alto durante 2,5 h y tiene protección IP67. La carga completa tarda 5–6 h por USB o 28 h al sol, según la misma ficha.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 300,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "La misma página dice también «360 lúmenes en luz constante»."
+        },
+        "autonomia_h": {
+          "valor": 50,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "Modo bajo (20 lm); alto (300 lm): 2,5 h."
+        },
+        "bateria_mah": {
+          "valor": 4000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "Iones de litio."
+        },
+        "bateria_wh": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": "sí; 5–6 h (solar: 28 h)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": "IP67",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 372,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "Con embalaje, según la tienda."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "360 lúmenes en luz constante",
+          "donde": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "veredicto": "matizable",
+          "explicacion": "La misma ficha da 300 lúmenes como máximo del modo alto; las dos cifras no cuadran.",
+          "fuentes": [
+            {
+              "url": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+              "titulo": "Varuste.net, Luci Base Light",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "BioLite retiró en EE. UU. las BaseLantern y BaseLantern XL (n.º 17-716, 30-11-2016, sobrecalentamiento de la batería al cargar), otro modelo: https://www.cpsc.gov/Recalls/2017/BioLite-Recalls-Lanterns"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "varuste-net",
+          "url": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "precio_eur": 59.9,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio normal con IVA finlandés (25,5 %); 18 unidades para la tienda online. Gastos de envío a España no indicados."
+        },
+        {
+          "distribuidor_id": "speck-sports",
+          "url": "https://www.speck-sports.com/en/lanterns/35469-177240-lantern-goal-zero-lighthouse-600-powerbank-usb-847974008003.html",
+          "precio_eur": 44.96,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio rebajado (antes 59,95 €) leído en un listado de categoría, no en la ficha del producto."
+        }
+      ],
+      "pendiente": [
+        "Ficha oficial del fabricante",
+        "El EAN sale del número que figura en la URL del listado de Speck Sports, no de un campo etiquetado: confirmar",
+        "Wh, panel, modos, garantía"
+      ]
+    },
+    {
+      "id": "biolite-sunlight-100",
+      "nombre": "BioLite SunLight 100",
+      "marca_id": "biolite",
+      "modelo": "SunLight 100",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "descatalogado",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100"
+      },
+      "resumen": "Luz solar de bolsillo de BioLite con panel de 0,45 W, pie para orientarlo al sol y luz blanca o de colores. Según las fichas de tienda, da 100 lúmenes, lleva una batería de 750 mAh (2,8 Wh) y tiene protección IPX4. Knivesandtools la da por retirada de su catálogo y Evo, por agotada; no aparece en la colección de luces de BioLite consultada el 2026-10-18.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 100,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18"
+        },
+        "bateria_mah": {
+          "valor": 750,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18",
+          "nota": "Li-ion."
+        },
+        "bateria_wh": {
+          "valor": 2.8,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": 0.45,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18",
+          "nota": "Carga solar: 7 h."
+        },
+        "carga_usb": {
+          "valor": "sí, micro-USB",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": "IPX4",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "blanco regulable, color, modo fiesta",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 95,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "fecha": "2026-10-18",
+          "nota": "Knivesandtools indica 100 g."
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
+          "fecha": "2026-10-18",
+          "nota": "Garantía que da la tienda sobre materiales y fabricación."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "batería específica del modelo",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "750 mAh (2.8 Wh) Li-Ion",
+          "donde": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Calculado: 750 mAh × 3,7 V ≈ 2,78 Wh; coherente. Revisado 2026-10-18: la coherencia con la propia ficha de la marca no es una comprobación independiente; falta una medición de un tercero.",
+          "fuentes": [
+            {
+              "url": "https://www.evo.com/products/187365-biolite-sunlight-100",
+              "titulo": "Evo, BioLite SunLight 100",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Solar charge time: 7 hours",
+          "donde": "https://www.evo.com/products/187365-biolite-sunlight-100",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: 0,45 W × 7 h ≈ 3,15 Wh, apenas por encima de los 2,8 Wh de la batería; sólo es posible con el panel a plena potencia todo el tiempo.",
+          "fuentes": [
+            {
+              "url": "https://www.evo.com/products/187365-biolite-sunlight-100",
+              "titulo": "Evo, BioLite SunLight 100",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "BioLite retiró en EE. UU. las BaseLantern y BaseLantern XL (n.º 17-716, 30-11-2016, sobrecalentamiento de la batería al cargar), otro modelo: https://www.cpsc.gov/Recalls/2017/BioLite-Recalls-Lanterns"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [],
+      "pendiente": [
+        "Confirmación oficial de descatalogación",
+        "Autonomía",
+        "EAN"
+      ]
+    },
+    {
+      "id": "biolite-solarhome-620-plus",
+      "nombre": "BioLite SolarHome 620+",
+      "marca_id": "biolite",
+      "modelo": "SHA0401",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "850024316294",
+          "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "descatalogado",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html"
+      },
+      "resumen": "Kit solar de iluminación con un panel de 6 W, una caja de control con batería de 23 Wh, radio FM y reproductor MP3, tres luces (dos colgantes y una de seguridad con sensor de movimiento) y salida USB. CampSaver lo da por descatalogado por BioLite y Knivesandtools por no disponible. Pesa unos 1,6 kg según Knivesandtools.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 400,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "fecha": "2026-10-18",
+          "nota": "Cifra del nombre comercial («400 Lm»); no se indica si es por luz o del conjunto."
+        },
+        "autonomia_h": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "bateria_mah": {
+          "valor": 3600,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+          "fecha": "2026-10-18",
+          "nota": "LiPo."
+        },
+        "bateria_wh": {
+          "valor": 23,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": 6,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí, salida USB 5 V en la caja de control",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "3 luces, una con sensor de movimiento; radio FM y MP3",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 1630,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+          "fecha": "2026-10-18",
+          "nota": "Garantía de la tienda."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "SolarHome System 620+, 400 Lm",
+          "donde": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se publica si son lúmenes por luz o totales ni se encontró medición.",
+          "fuentes": [
+            {
+              "url": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+              "titulo": "CampSaver, BioLite SolarHome 620+",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "3600 mAh LiPo / 23 Wh",
+          "donde": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: 23 Wh / 3,6 Ah ≈ 6,4 V; implicaría dos celdas en serie, lo que ninguna de las dos tiendas dice. Las dos cifras vienen de fuentes distintas.",
+          "fuentes": [
+            {
+              "url": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
+              "titulo": "Knivesandtools, SolarHome 620+",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.campsaver.com/biolite-solarhome-system-620.html",
+              "titulo": "CampSaver, SolarHome 620+",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "BioLite retiró en EE. UU. las BaseLantern y BaseLantern XL (n.º 17-716, 30-11-2016, sobrecalentamiento de la batería al cargar), otro modelo: https://www.cpsc.gov/Recalls/2017/BioLite-Recalls-Lanterns"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [],
+      "pendiente": [
+        "Autonomía por luz",
+        "Lúmenes por luz",
+        "Ficha oficial archivada"
+      ]
+    },
+    {
+      "id": "dlight-s30",
+      "nombre": "d.light S30",
+      "marca_id": "d-light",
+      "modelo": "S30",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.dlight.com/products/s30"
+      },
+      "resumen": "Farol solar de bajo coste de d.light, pensado para hogares sin red eléctrica, sobre todo en África y Asia. Según la ficha de Engineering for Change, da 60 lúmenes, lleva una batería de LiFePO₄ de 450 mAh y un panel integrado de 0,33 Wp, y su precio de venta sugerido es de 9,90 USD. Ha superado los estándares de calidad de Lighting Global (IEC/TS 62257-9-5). No se encontró oferta en España.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 60,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "La ficha no dice si es un valor de ensayo o del fabricante."
+        },
+        "autonomia_h": {
+          "valor": 12,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "Modo estándar tras un día de sol; alto: 3 h."
+        },
+        "bateria_mah": {
+          "valor": 450,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "LiFePO₄, 3,2 V."
+        },
+        "bateria_wh": {
+          "valor": 1.44,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "450 mAh × 3,2 V / 1000 = 1,44 Wh (la ficha da 0,00144 kWh)."
+        },
+        "panel_solar_w": {
+          "valor": 0.33,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "Monocristalino integrado, potencia pico."
+        },
+        "carga_usb": {
+          "valor": "sí, con cargador tipo Nokia (no incluido)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://engineeringforchange.org/?p=48449",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.techxlab.org/solutions/d-light-design-s30",
+          "fecha": "2026-10-18",
+          "nota": "Sólo «weather and dust resistant»."
+        },
+        "modos": {
+          "valor": "bajo y alto",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://engineeringforchange.org/?p=48449",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se consultó una fuente para la sede de d.light."
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://engineeringforchange.org/?p=48449",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": "fábrica con ISO 9001:2015 e ISO 14001:2015 (sin nombre publicado)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://engineeringforchange.org/?p=48449",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "batería no sustituible por el usuario; sustituible con herramientas especiales, anulando la garantía",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18",
+          "nota": "La ficha se contradice: la tabla dice «No» y la sección de piezas dice que puede cambiarse con herramientas especiales."
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "certificado",
+          "titulo": "Engineering for Change: cumplimiento de Lighting Global Quality Standards (IEC/TS 62257-9-5 ed. 3)",
+          "url": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "Up to 8 hours of 365 degree illumination on a single charge",
+          "donde": "https://www.techxlab.org/solutions/d-light-design-s30",
+          "veredicto": "matizable",
+          "explicacion": "Engineering for Change da 12 h en modo estándar y 3 h en alto, así que «8 horas» no coincide con ninguno de los dos; «365 grados» parece una errata de 360.",
+          "fuentes": [
+            {
+              "url": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+              "titulo": "Engineering for Change, d.light S30",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Lifetime well over 5 years (inclusive of battery)",
+          "donde": "https://engineeringforchange.org/?p=48449",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Es una declaración de d.light; la garantía es de 2 años y no se encontró ensayo de vida útil publicado.",
+          "fuentes": [
+            {
+              "url": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+              "titulo": "Engineering for Change, d.light S30",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [],
+      "pendiente": [
+        "Informe de ensayo de Lighting Global/VeraSol con valores medidos (la base de datos VeraSol exige registro)",
+        "Peso",
+        "Sede de d.light",
+        "Venta en España: no se encontró"
+      ]
+    },
+    {
+      "id": "sun-king-pico-plus",
+      "nombre": "Sun King Pico Plus",
+      "marca_id": "sun-king",
+      "modelo": "Pico Plus",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://in.sunking.com/product/pico-plus/"
+      },
+      "resumen": "Lámpara solar de estudio y tarea de Sun King (Greenlight Planet), con panel policristalino integrado de 0,35 W y batería de LiFePO₄ de 1,4 Wh. Según la marca, da 50 lúmenes en modo turbo durante unas 4 horas y hasta 72 horas en modo bajo. Se vende sobre todo en India y África; no se encontró oferta en España.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 50,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://in.sunking.com/product/pico-plus/",
+          "fecha": "2026-10-18",
+          "nota": "Turbo 50, normal 25, bajo 2 lm según Energy XPRT."
+        },
+        "autonomia_h": {
+          "valor": 72,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://in.sunking.com/product/pico-plus/",
+          "fecha": "2026-10-18",
+          "nota": "Modo bajo (2 lm); turbo: unas 4 h."
+        },
+        "bateria_mah": {
+          "valor": 425,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
+          "fecha": "2026-10-18",
+          "nota": "LiFePO₄ 3,3 V."
+        },
+        "bateria_wh": {
+          "valor": 1.4,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://in.sunking.com/product/pico-plus/",
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": 0.35,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://in.sunking.com/product/pico-plus/",
+          "fecha": "2026-10-18",
+          "nota": "Policristalino laminado en PET."
+        },
+        "carga_usb": {
+          "valor": "sí, entrada 5 V / 500 mA",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techxlab.org/solutions/sun-king-pico-plus/",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": "IP64",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techxlab.org/solutions/sun-king-pico-plus/",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": "turbo, normal, bajo",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 120,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
+          "fecha": "2026-10-18",
+          "nota": "Lámpara; el soporte pesa 160 g."
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.oilandgas360.com/greenlight-planet-launches-sun-king-picotm-a-solar-powered-light-priced-at-only-8-proclaiming-the-days-of-the-kerosene-lamp-are-numbered/",
+          "fecha": "2026-10-18",
+          "nota": "Nota de prensa fechada en Chicago; no afirma explícitamente la sede."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "policarbonato y ABS",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techxlab.org/solutions/sun-king-pico-plus/",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Up to 72 hours of light on a single charge",
+          "donde": "https://in.sunking.com/product/pico-plus/",
+          "veredicto": "matizable",
+          "explicacion": "Es la autonomía en modo bajo, de 2 lúmenes según Energy XPRT; a 50 lm la marca da unas 4 h.",
+          "fuentes": [
+            {
+              "url": "https://in.sunking.com/product/pico-plus/",
+              "titulo": "Sun King India, Pico Plus",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
+              "titulo": "Energy XPRT, Pico Plus",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "1.4 Wh lithium ferro-phosphate battery",
+          "donde": "https://in.sunking.com/product/pico-plus/",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Calculado: 425 mAh × 3,3 V ≈ 1,40 Wh, coherente con la capacidad que da Energy XPRT. Revisado 2026-10-18: la coherencia con la propia ficha de la marca no es una comprobación independiente; falta una medición de un tercero.",
+          "fuentes": [
+            {
+              "url": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
+              "titulo": "Energy XPRT, Pico Plus",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [],
+      "pendiente": [
+        "Ensayo VeraSol/Lighting Global (base de datos con registro)",
+        "TechXLab lista por error una batería de 28 Wh NMC: descartada",
+        "Venta en España: no se encontró"
+      ]
+    },
+    {
+      "id": "sun-king-boom",
+      "nombre": "Sun King Boom",
+      "marca_id": "sun-king",
+      "modelo": "Boom",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://sunking.com/product/boom/"
+      },
+      "resumen": "Kit solar de Sun King que combina farol, radio FM, altavoz de 3 W, reproductor MP3 y salida USB para teléfonos, con un panel solar separado y cable de 5 m. Según la marca, lleva una batería de LiFePO₄ de 9,9 Wh y da hasta 160 lúmenes. Engineering for Change indica que cumple los estándares de Lighting Global, que la batería y los LED son sustituibles y que se fabrica en Shenzhen (China). Se vende en África y Asia; no se encontró oferta en España.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 160,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "Turbo 160, normal 75, bajo 25 lm según E4C; la tabla de E4C también da 170 lm."
+        },
+        "autonomia_h": {
+          "valor": 36,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "Modo bajo; 9 h de audio. La tabla de E4C da 2,9–6,6 h de luz por carga sin explicar el modo."
+        },
+        "bateria_mah": {
+          "valor": 3300,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "fecha": "2026-10-18",
+          "nota": "LiFePO₄ 3,3 V."
+        },
+        "bateria_wh": {
+          "valor": 9.9,
+          "unidad": "Wh",
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "Calculado con los datos de E4C: 3300 mAh × 3,3 V = 10,9 Wh; no coincide con 9,9 Wh."
+        },
+        "panel_solar_w": {
+          "valor": 2.7,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "Policristalino con marco de aluminio. E4C da 2,6 Wp en la tabla y 6,7 W en la descripción."
+        },
+        "carga_usb": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí, 1× USB-A 5 V para teléfonos básicos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18",
+          "nota": "Sólo «carcasa de policarbonato resistente al agua»."
+        },
+        "modos": {
+          "valor": "turbo, normal, bajo; radio FM 87,5–108 MHz; MP3 por USB/SD",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 2,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": "Estados Unidos",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.oilandgas360.com/greenlight-planet-launches-sun-king-picotm-a-solar-powered-light-priced-at-only-8-proclaiming-the-days-of-the-kerosene-lamp-are-numbered/",
+          "fecha": "2026-10-18",
+          "nota": "Greenlight Planet; nota de prensa fechada en Chicago."
+        },
+        "pais_fabricacion": {
+          "valor": "China",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": "Shenzhen (Greenlight Planet Inc.)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "policarbonato; soporte metálico",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://sunking.com/product/boom/",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "batería y LED sustituibles por el usuario",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "VeraSol, hoja de especificaciones Sun King Boom (2023)",
+          "url": "https://storage.googleapis.com/data-platform-storage/VS-SSS_glp-skboom-231101.pdf",
+          "fecha": "2026-10-18"
+        },
+        {
+          "tipo": "certificado",
+          "titulo": "Engineering for Change: cumplimiento Lighting Global",
+          "url": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "9.9 Wh lithium iron phosphate battery",
+          "donde": "https://sunking.com/product/boom/",
+          "veredicto": "matizable",
+          "explicacion": "Calculado con la ficha de E4C: 3300 mAh × 3,3 V ≈ 10,9 Wh, un 10 % más que lo declarado; las fuentes no coinciden.",
+          "fuentes": [
+            {
+              "url": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+              "titulo": "Engineering for Change, Sun King Boom",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Up to 36 hours of lighting on low-power mode",
+          "donde": "https://sunking.com/product/boom/",
+          "veredicto": "matizable",
+          "explicacion": "Es el modo bajo (25 lm según E4C); la tabla de E4C da 2,9–6,6 h de luz por carga.",
+          "fuentes": [
+            {
+              "url": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+              "titulo": "Engineering for Change, Sun King Boom",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Lumen maintenance: 100 % after 2,000 hours",
+          "donde": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "veredicto": "sin_pruebas",
+          "explicacion": "E4C lo atribuye a ensayos de Lighting Global, pero el informe de VeraSol no se pudo leer (el PDF no se descargó y la base de datos pide registro).",
+          "fuentes": [
+            {
+              "url": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+              "titulo": "Engineering for Change, Sun King Boom",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [],
+      "pendiente": [
+        "Leer la hoja VeraSol (enlace en documentos) para tener valores medidos",
+        "Peso",
+        "Venta en España: no se encontró"
+      ]
+    },
+    {
+      "id": "little-sun-original",
+      "nombre": "Little Sun Original",
+      "marca_id": "little-sun",
+      "modelo": "Little Sun Original",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2012,
+        "unidad": null,
+        "naturaleza": "declarado",
+        "fuente": "https://www.gogla.org/members/little-sun/",
+        "fecha": "2026-10-18",
+        "nota": "Presentación del proyecto Little Sun en la Tate Modern de Londres, julio de 2012."
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://littlesun.org/product/little-sun-original"
+      },
+      "resumen": "Lámpara solar de mano con forma de sol, diseñada por el artista Olafur Eliasson y el ingeniero Frederik Ottesen. Según la marca, da 20 lúmenes en el nivel más alto durante unas 4 horas y más de 50 horas en el más bajo, con una pila AA de LiFePO₄ y un panel monocristalino de 60 × 60 mm. Pesa 96 g. La ficha técnica de 2016 daba 25 lúmenes y 400 mAh, cifras distintas de las actuales.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 20,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Ficha técnica de 2016: 25 lm."
+        },
+        "autonomia_h": {
+          "valor": 4,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Nivel máximo; en el mínimo (2 lm), más de 50 h."
+        },
+        "bateria_mah": {
+          "valor": 500,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Pila AA LiFePO₄ 3,2 V. Ficha de 2016: 400 mAh."
+        },
+        "bateria_wh": {
+          "valor": 1.6,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "500 mAh × 3,2 V / 1000 = 1,6 Wh (con la ficha de 2016: 1,28 Wh)."
+        },
+        "panel_solar_w": {
+          "valor": 0.5,
+          "unidad": "W",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/wp-content/uploads/2016/04/LS_TechSpecs_Little-Sun-Original_dimmer.pdf",
+          "fecha": "2026-10-18",
+          "nota": "Monocristalino SunPower 60 × 60 mm, 4,4 V. Carga: unas 5 h de sol directo."
+        },
+        "carga_usb": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Sólo carga solar según la ficha."
+        },
+        "funcion_powerbank": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "Sólo «weather and UV resistant»."
+        },
+        "modos": {
+          "valor": "encendido y regulación continua",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 96,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18",
+          "nota": "La página enlaza las condiciones pero no da la duración."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró una fuente con la sede social de Little Sun."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "ABS reciclable",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "pila AA de LiFePO₄ (formato estándar)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/product/little-sun-original",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [
+        {
+          "tipo": "ficha_tecnica",
+          "titulo": "Little Sun Original, especificaciones técnicas (2016)",
+          "url": "https://littlesun.org/wp-content/uploads/2016/04/LS_TechSpecs_Little-Sun-Original_dimmer.pdf",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "afirmaciones": [
+        {
+          "afirmacion": "About 4 hours on the brightest setting, more than 50 hours on the dimmest",
+          "donde": "https://littlesun.org/product/little-sun-original",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: 1,6 Wh / 4 h ≈ 0,4 W en alto, coherente con 20 lm. Las 50 h son a 2 lúmenes.",
+          "fuentes": [
+            {
+              "url": "https://littlesun.org/product/little-sun-original",
+              "titulo": "Little Sun, Original",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Battery rated for about 5 years of daily use",
+          "donde": "https://littlesun.org/product/little-sun-original",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró ensayo de ciclos publicado.",
+          "fuentes": [
+            {
+              "url": "https://littlesun.org/product/little-sun-original",
+              "titulo": "Little Sun, Original",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "25 lm (bright)",
+          "donde": "https://littlesun.org/wp-content/uploads/2016/04/LS_TechSpecs_Little-Sun-Original_dimmer.pdf",
+          "veredicto": "matizable",
+          "explicacion": "La ficha de 2016 da 25 lm y 400 mAh; la página actual, 20 lm y 500 mAh. No se explica el cambio.",
+          "fuentes": [
+            {
+              "url": "https://littlesun.org/wp-content/uploads/2016/04/LS_TechSpecs_Little-Sun-Original_dimmer.pdf",
+              "titulo": "Ficha técnica 2016",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://littlesun.org/product/little-sun-original",
+              "titulo": "Página actual",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "guggenheim-bilbao-tienda",
+          "url": "https://tienda.guggenheim-bilbao.eus/en/lampara-little-sun",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "La tienda del Museo Guggenheim Bilbao tiene ficha de la lámpara; la página no mostró precio ni stock en la lectura automática."
+        }
+      ],
+      "pendiente": [
+        "Razón social y sede de Little Sun",
+        "País de fabricación",
+        "Garantía",
+        "Precio en España"
+      ]
+    },
+    {
+      "id": "little-sun-diamond",
+      "nombre": "Little Sun Diamond",
+      "marca_id": "little-sun",
+      "modelo": "Little Sun Diamond",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": 2017,
+        "unidad": null,
+        "naturaleza": "declarado",
+        "fuente": "https://littlesun.org/little-sun-diamond/",
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://littlesun.org/little-sun-diamond/"
+      },
+      "resumen": "Lámpara solar de bolsillo de Little Sun con lente facetada y un soporte que la convierte en lámpara de lectura, presentada en 2017. Según la marca, unas 5 horas de sol dan unas 5 horas de luz intensa. La tienda Lights.co.uk le atribuye 22 lúmenes y una pila AA de LiFePO₄; Manufactum, 167 lúmenes e IP44. Pesa unos 92–95 g.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 22,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+          "fecha": "2026-10-18",
+          "nota": "Manufactum indica 167 lm; las fuentes no coinciden y la marca no publica la cifra en la página consultada."
+        },
+        "autonomia_h": {
+          "valor": 5,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://littlesun.org/little-sun-diamond/",
+          "fecha": "2026-10-18",
+          "nota": "Luz intensa tras unas 5 h de sol; después, luz suave más tiempo. La tienda del Guggenheim indica más de 50 h en el mínimo."
+        },
+        "bateria_mah": {
+          "valor": 300,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+          "fecha": "2026-10-18",
+          "nota": "LiFePO₄ AA 3,2 V; la tienda escribe «300 mA»."
+        },
+        "bateria_wh": {
+          "valor": 0.96,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+          "fecha": "2026-10-18",
+          "nota": "300 mAh × 3,2 V / 1000 = 0,96 Wh."
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "no",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": "IP44",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.manufactum.com/universal-lamp-littlesun-diamond-a53597/",
+          "fecha": "2026-10-18",
+          "nota": "Dato de Manufactum, no de la marca."
+        },
+        "modos": {
+          "valor": "regulable",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://tienda.guggenheim-bilbao.eus/en/lampara-little-sun-diamond",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 92,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+          "fecha": "2026-10-18",
+          "nota": "La misma página y Manufactum dicen también 95 g."
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se encontró una fuente con la sede social de Little Sun."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "ABS y policarbonato; base de acero pulido",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.manufactum.com/universal-lamp-littlesun-diamond-a53597/",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": "pila AA de LiFePO₄ (formato estándar)",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "167 lm",
+          "donde": "https://www.manufactum.com/universal-lamp-littlesun-diamond-a53597/",
+          "veredicto": "matizable",
+          "explicacion": "Lights.co.uk da 22 lm para el mismo producto. Calculado: con 0,96 Wh y 5 h de luz el consumo medio es de unos 0,19 W, lo que hace difícil una salida de 167 lm durante ese tiempo. Falta la cifra oficial de la marca.",
+          "fuentes": [
+            {
+              "url": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
+              "titulo": "Lights.co.uk, Little Sun Diamond",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.manufactum.com/universal-lamp-littlesun-diamond-a53597/",
+              "titulo": "Manufactum, Little Sun Diamond",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Around five hours of sun charging gives about five hours of bright light",
+          "donde": "https://littlesun.org/little-sun-diamond/",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se encontró medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://littlesun.org/little-sun-diamond/",
+              "titulo": "Little Sun, Diamond",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "guggenheim-bilbao-tienda",
+          "url": "https://tienda.guggenheim-bilbao.eus/en/lampara-little-sun-diamond",
+          "precio_eur": 35,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio para socios: 29,75 €. Stock no indicado."
+        }
+      ],
+      "pendiente": [
+        "Lúmenes oficiales",
+        "Potencia del panel",
+        "Garantía",
+        "EAN"
+      ]
+    },
+    {
+      "id": "coleman-peak1-200-solar",
+      "nombre": "Coleman Peak1 200 Lumen Solar Rechargeable Lantern",
+      "marca_id": "coleman",
+      "modelo": "2177696",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "desconocido",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487"
+      },
+      "resumen": "Farol de la gama Peak1 de Coleman con panel solar integrado y batería de polímero de litio de 1200 mAh. Según las fichas de tienda norteamericanas, da 200 lúmenes en alto durante 5 horas y 10 lúmenes en bajo durante 100 horas, y se carga en 11 horas de sol directo. Las dos tiendas consultadas dan grados de protección distintos (IPX4 e IPX7). No se encontró a la venta en España.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 200,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 100,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18",
+          "nota": "Bajo (10 lm) e intermitente; alto 5 h, medio 15 h."
+        },
+        "bateria_mah": {
+          "valor": 1200,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18",
+          "nota": "Polímero de litio."
+        },
+        "bateria_wh": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18",
+          "nota": "Panel integrado; carga completa en 11 h de sol directo."
+        },
+        "carga_usb": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": "IPX4",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18",
+          "nota": "Public Lands indica IPX7."
+        },
+        "modos": {
+          "valor": "alto, medio, bajo, intermitente",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": 500,
+          "unidad": "g",
+          "naturaleza": "declarado",
+          "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.publiclands.com/p/coleman-peak1-200l-rechargeable-lantern-23colupk1200lrchbcac/23colupk1200lrchbcac",
+          "fecha": "2026-10-18",
+          "nota": "Garantía limitada."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18",
+          "nota": "No se consultó una fuente con la sede de Coleman."
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "IPX7 waterproof",
+          "donde": "https://www.publiclands.com/p/coleman-peak1-200l-rechargeable-lantern-23colupk1200lrchbcac/23colupk1200lrchbcac",
+          "veredicto": "matizable",
+          "explicacion": "Best Buy Canadá indica IPX4 (salpicaduras) para el mismo producto; IPX7 supone inmersión temporal. Las fuentes se contradicen y no hay ficha oficial consultada.",
+          "fuentes": [
+            {
+              "url": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+              "titulo": "Best Buy Canadá",
+              "fecha": "2026-10-18"
+            },
+            {
+              "url": "https://www.publiclands.com/p/coleman-peak1-200l-rechargeable-lantern-23colupk1200lrchbcac/23colupk1200lrchbcac",
+              "titulo": "Public Lands",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Low: 100 hours",
+          "donde": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+          "veredicto": "matizable",
+          "explicacion": "Es el modo de 10 lúmenes; en alto la ficha da 5 h.",
+          "fuentes": [
+            {
+              "url": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
+              "titulo": "Best Buy Canadá",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls",
+          "nota": "Coleman retiró en EE. UU. las linternas de litio CTAC20/40/60 (n.º 16-140, 12-04-2016, riesgo de incendio), otro modelo: https://recreation-law.com/tag/lithium-ion/"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls",
+          "nota": "La ACCC publica la retirada de las linternas Coleman CTAC, otro modelo: https://productsafety.gov.au/recalls/coleman-ctac-lithium-ion-flashlights"
+        }
+      ],
+      "ofertas": [],
+      "pendiente": [
+        "Ficha oficial de Coleman",
+        "Grado IP real",
+        "EAN/UPC",
+        "Venta en España: no se encontró"
+      ]
+    },
+    {
+      "id": "mesqool-farol-solar-manivela",
+      "nombre": "Mesqool farol solar con manivela y powerbank de 3000 mAh",
+      "marca_id": "mesqool",
+      "modelo": null,
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1"
+      },
+      "resumen": "Farol plegable de marca de marketplace con tres formas de carga: panel solar, manivela y USB, y una linterna en la base. Según el título del anuncio en Amazon.es, lleva una batería de 3000 mAh que también sirve de powerbank y es impermeable; el anuncio no da grado IP. Una reseña de blog cita 200 lúmenes para el farol y 350 para la linterna, sin medición propia. Representa un tipo de producto muy común en Amazon.es.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 350,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "fecha": "2026-10-18",
+          "nota": "Linterna; farol de 12 LED ≈ 200 lm. Cifras citadas en una reseña, no en una ficha oficial."
+        },
+        "autonomia_h": {
+          "valor": 35,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "fecha": "2026-10-18",
+          "nota": "Luz principal tras carga completa por USB, según la reseña."
+        },
+        "bateria_mah": {
+          "valor": 3000,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "fecha": "2026-10-18",
+          "nota": "Cifra del título del anuncio; tensión no publicada."
+        },
+        "bateria_wh": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": "sí, 5 V 2 A; unas 2 h",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "fecha": "2026-10-18",
+          "nota": "El título dice «impermeable» sin grado IP."
+        },
+        "modos": {
+          "valor": "farol 360° y linterna; manivela",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Lámpara de luz impermeable",
+          "donde": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "veredicto": "sin_pruebas",
+          "explicacion": "El anuncio no da grado IP, que es lo que define frente a qué protege; sin él la palabra no se puede comprobar.",
+          "fuentes": [
+            {
+              "url": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+              "titulo": "Amazon.es, anuncio Mesqool",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Banco de energía de emergencia de 3000 mAh",
+          "donde": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se publica la tensión de la celda ni la energía útil a 5 V, y no hay medición independiente.",
+          "fuentes": [
+            {
+              "url": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+              "titulo": "Amazon.es, anuncio Mesqool",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "10 minutos de manivela dan 20–30 minutos de luz principal",
+          "donde": "https://techwriteredc.com/mesqool-camping-lantern/",
+          "veredicto": "sin_pruebas",
+          "explicacion": "Cifra de una reseña de blog que no explica cómo la obtuvo.",
+          "fuentes": [
+            {
+              "url": "https://techwriteredc.com/mesqool-camping-lantern/",
+              "titulo": "TechWriterEDC, reseña",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "amazon-es",
+          "url": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "precio_eur": null,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Anuncio encontrado con el buscador; precio y stock no legibles (Amazon bloquea la lectura automática). Vendedor no identificado."
+        }
+      ],
+      "pendiente": [
+        "Fabricante real y país",
+        "Precio",
+        "Modelo",
+        "Grado IP",
+        "EAN"
+      ]
+    },
+    {
+      "id": "wild-land-lampara-panel-solar-4-linternas",
+      "nombre": "Wild Land lámpara con panel solar, 4 linternas y powerbank (700 lm)",
+      "marca_id": "wild-land",
+      "modelo": null,
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [
+        {
+          "valor": "8434860030150",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80"
+      },
+      "resumen": "Kit de iluminación de acampada con panel solar integrado, una luz principal de 700 lúmenes, cuatro linternas desmontables de 100 lúmenes con imán y gancho, y trípode extensible hasta 2 m. Según la ficha del marketplace de Decathlon.es, la batería es de iones de litio de 7,4 V y 7800 mAh y la protección es IP43. Lo vende ACCESORIOS 4X4 MISUTONIDA a través de Decathlon. La ficha no publica la potencia del panel ni la autonomía.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 700,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "Luz principal; más 4 linternas de 100 lm."
+        },
+        "autonomia_h": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        },
+        "bateria_mah": {
+          "valor": 7800,
+          "unidad": "mAh",
+          "naturaleza": "declarado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "Li-ion 7,4 V."
+        },
+        "bateria_wh": {
+          "valor": 57.7,
+          "unidad": "Wh",
+          "naturaleza": "calculado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "7800 mAh × 7,4 V / 1000 = 57,7 Wh."
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": "sí; la tabla indica salida USB 12 V / 3 A",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "Una salida USB estándar es de 5 V; 12 V sólo con USB-C PD, que la ficha no menciona."
+        },
+        "ip": {
+          "valor": "IP43",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        },
+        "modos": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "ABS",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": 5,
+          "unidad": "piezas de luz",
+          "naturaleza": "declarado",
+          "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "fecha": "2026-10-18",
+          "nota": "Luz principal y 4 linternas; sin contar trípode ni panel."
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Función de PowerBank para recargar dispositivos.",
+          "donde": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "veredicto": "matizable",
+          "explicacion": "Calculado: la batería es de unos 57,7 Wh. Pero la ficha da una salida «USB 12 V / 3 A» que no corresponde a un USB estándar de 5 V; falta saber qué conector y qué tensión entrega.",
+          "fuentes": [
+            {
+              "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+              "titulo": "Decathlon.es, ficha del producto",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "Carga automática con panel solar.",
+          "donde": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "veredicto": "sin_pruebas",
+          "explicacion": "La ficha no da la potencia del panel, así que no se puede calcular cuánto tarda en cargar 57,7 Wh.",
+          "fuentes": [
+            {
+              "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+              "titulo": "Decathlon.es, ficha del producto",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "decathlon-es",
+          "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "precio_eur": 309.99,
+          "envio_eur": null,
+          "plazo": null,
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido por ACCESORIOS 4X4 MISUTONIDA (marketplace de Decathlon); devoluciones 30 días al vendedor. Envío no visible en la lectura automática."
+        }
+      ],
+      "pendiente": [
+        "Potencia del panel",
+        "Autonomía",
+        "Peso",
+        "País de la marca Wild Land",
+        "Tipo de salida «12 V / 3 A»"
+      ]
+    },
+    {
+      "id": "linterna-solar-1000lm-leroymerlin-95898880",
+      "nombre": "Linterna solar recargable 1000 lúmenes, 6 modos (sin marca, ref. Leroy Merlin 95898880)",
+      "marca_id": "sin-marca",
+      "modelo": "95898880 (referencia de la tienda)",
+      "subcategoria": "luces-solares-portatiles",
+      "ean": [],
+      "estado": "a la venta",
+      "anio_lanzamiento": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": null,
+        "fecha": "2026-10-18"
+      },
+      "foto": {
+        "url": null,
+        "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html"
+      },
+      "resumen": "Linterna de mano con panel solar y carga USB, con un foco redondo y dos luces laterales COB, vendida sin marca por un vendedor externo en la web de Leroy Merlin. Según la ficha, da 1000 lúmenes, un alcance de 300 m y 3–5 horas de luz continua. El título la llama impermeable, pero la tabla de características de la misma página dice «Resistente al agua: No». Los contactos de cumplimiento UE que figuran son PAVELLE y LUMICO.",
+      "datos_tecnicos": {
+        "lumenes_max": {
+          "valor": 1000,
+          "unidad": "lm",
+          "naturaleza": "declarado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "autonomia_h": {
+          "valor": 5,
+          "unidad": "h",
+          "naturaleza": "declarado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18",
+          "nota": "3–5 h de luz continua; modo no indicado."
+        },
+        "bateria_mah": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "bateria_wh": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "panel_solar_w": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "carga_usb": {
+          "valor": "sí; 2 h",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "funcion_powerbank": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "ip": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18",
+          "nota": "Sin grado IP; la tabla dice «Resistente al agua: No»."
+        },
+        "modos": {
+          "valor": "6: foco alto/bajo/estroboscópico, COB laterales alto/bajo, LED lateral",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "peso_g": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "garantia_anios": {
+          "valor": 3,
+          "unidad": "años",
+          "naturaleza": "declarado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18",
+          "nota": "Garantía legal indicada por la tienda."
+        }
+      },
+      "origen": {
+        "pais_marca": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "pais_fabricacion": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "fabrica": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "materiales_principales": {
+          "valor": "ABS",
+          "unidad": null,
+          "naturaleza": "declarado",
+          "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "fecha": "2026-10-18"
+        },
+        "num_componentes": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        },
+        "reparabilidad": {
+          "valor": null,
+          "unidad": null,
+          "naturaleza": "no_publicado",
+          "fuente": null,
+          "fecha": "2026-10-18"
+        }
+      },
+      "documentos": [],
+      "afirmaciones": [
+        {
+          "afirmacion": "Impermeable, ideal para camping, pesca y cortes de energía",
+          "donde": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "veredicto": "falsa",
+          "explicacion": "La tabla de características de la misma ficha indica «Resistente al agua: No» y no da grado IP; el título contradice la ficha técnica del propio anuncio.",
+          "fuentes": [
+            {
+              "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+              "titulo": "Leroy Merlin, ficha 95898880",
+              "fecha": "2026-10-18"
+            }
+          ]
+        },
+        {
+          "afirmacion": "1000 lúmenes, alcance 300 m",
+          "donde": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "veredicto": "sin_pruebas",
+          "explicacion": "No se publica la capacidad de la batería ni hay medición; sin capacidad no se puede contrastar con las 3–5 h declaradas.",
+          "fuentes": [
+            {
+              "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+              "titulo": "Leroy Merlin, ficha 95898880",
+              "fecha": "2026-10-18"
+            }
+          ]
+        }
+      ],
+      "retiradas": [],
+      "retiradas_comprobadas": [
+        {
+          "organismo": "CPSC (EE. UU.)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.cpsc.gov/Recalls"
+        },
+        {
+          "organismo": "EU Safety Gate",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://ec.europa.eu/safety-gate-alerts/screen/search",
+          "nota": "Comprobado mediante búsqueda web restringida a ec.europa.eu; el buscador de Safety Gate no se pudo consultar directamente (aplicación con JavaScript). Conviene repetir la consulta en el propio buscador."
+        },
+        {
+          "organismo": "Health Canada",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://recalls-rappels.canada.ca/en"
+        },
+        {
+          "organismo": "ACCC (Australia)",
+          "fecha": "2026-10-18",
+          "resultado": "ninguna encontrada para este modelo",
+          "url_busqueda": "https://www.productsafety.gov.au/recalls"
+        }
+      ],
+      "ofertas": [
+        {
+          "distribuidor_id": "leroymerlin-es",
+          "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "precio_eur": 25.66,
+          "envio_eur": 0,
+          "plazo": "desde 10 días",
+          "stock": "desconocido",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Vendido y enviado por Simon Shop (vendedor externo) a través de Leroy Merlin; exclusivo web. Entrega gratuita a domicilio desde 10 días."
+        }
+      ],
+      "pendiente": [
+        "Fabricante real",
+        "Capacidad de batería",
+        "Potencia del panel",
+        "EAN"
+      ]
+    }
+  ],
+  "marcas": [
+    {
+      "id": "goal-zero",
+      "nombre": "Goal Zero",
+      "razon_social": null,
+      "pais_sede": "Estados Unidos",
+      "matriz": "BioLite (desde abril de 2025; antes NRG)",
+      "fundacion": null,
+      "web": "https://goalzero.com",
+      "cotiza": null,
+      "datos_publicos": "Fabricante de estaciones de energía, paneles y luces con sede en Salt Lake City (Utah). BioLite anunció su compra a NRG el 15 de abril de 2025 sin publicar el importe; Goal Zero mantiene su sede y operaciones.",
+      "fuentes": [
+        {
+          "url": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "titulo": "GearJunkie: BioLite acquires Goal Zero",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "biolite",
+      "nombre": "BioLite",
+      "razon_social": null,
+      "pais_sede": "Estados Unidos",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://www.bioliteenergy.com",
+      "cotiza": null,
+      "datos_publicos": "Empresa de energía fuera de red fundada en 2009 por Jonathan Cedar y Alec Drummond, con sedes en Nueva York y Nairobi según su nota de prensa. Compró MPOWERD (lámparas Luci) el 20 de junio de 2024 y Goal Zero en abril de 2025.",
+      "fuentes": [
+        {
+          "url": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "titulo": "BioLite x MPOWERD",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
+          "titulo": "GearJunkie",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mpowerd",
+      "nombre": "MPOWERD",
+      "razon_social": null,
+      "pais_sede": "Estados Unidos",
+      "matriz": "BioLite (desde junio de 2024)",
+      "fundacion": 2012,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Creadora de las lámparas hinchables Luci, cofundada en 2012 por John Salzinger como B Corp. BioLite la compró en junio de 2024 y anunció que la marca MPOWERD desaparecería a partir de enero de 2025, con los productos bajo la marca BioLite.",
+      "fuentes": [
+        {
+          "url": "https://www.bioliteenergy.com/blogs/press/biolite-x-mpowerd",
+          "titulo": "BioLite x MPOWERD",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://sgbonline.com/biolite-acquires-mpowerd/",
+          "titulo": "SGB: BioLite acquires MPOWERD",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "d-light",
+      "nombre": "d.light",
+      "razon_social": null,
+      "pais_sede": {
+        "valor": null,
+        "unidad": null,
+        "naturaleza": "no_publicado",
+        "fuente": "https://www.norfund.no/wp-content/uploads/2019/12/d.light-41M-Raised-Press-Release-Dec-14-2018-ID-302472.pdf",
+        "fecha": "2026-10-18",
+        "nota": "La nota de prensa sólo enumera oficinas en Kenia, India, China y EE. UU."
+      },
+      "matriz": null,
+      "fundacion": 2007,
+      "web": "https://www.dlight.com",
+      "cotiza": null,
+      "datos_publicos": "Fabricante de lámparas y sistemas solares para hogares sin red eléctrica. Según Engineering for Change, vende a través de 25.000 puntos de venta en 70 países y fabrica en China.",
+      "fuentes": [
+        {
+          "url": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
+          "titulo": "Engineering for Change, d.light S30",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.norfund.no/wp-content/uploads/2019/12/d.light-41M-Raised-Press-Release-Dec-14-2018-ID-302472.pdf",
+          "titulo": "Nota de prensa d.light, 14-12-2018",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "sun-king",
+      "nombre": "Sun King (Greenlight Planet)",
+      "razon_social": "Greenlight Planet Inc.",
+      "pais_sede": "Kenia e India (sede doble según un inversor)",
+      "matriz": null,
+      "fundacion": 2009,
+      "web": "https://sunking.com",
+      "cotiza": null,
+      "datos_publicos": "Marca de Greenlight Planet, fundada en 2009 por tres compañeros de universidad, entre ellos Patrick Walsh. Lanzó la Sun King Pico en noviembre de 2015 a 8 USD. Engineering for Change sitúa la fabricación en Shenzhen (China).",
+      "fuentes": [
+        {
+          "url": "https://www.oilandgas360.com/greenlight-planet-launches-sun-king-picotm-a-solar-powered-light-priced-at-only-8-proclaiming-the-days-of-the-kerosene-lamp-are-numbered/",
+          "titulo": "Nota de prensa Sun King Pico (2015)",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
+          "titulo": "Engineering for Change, Sun King Boom",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://apis.pe/companies/greenlight-planet/",
+          "titulo": "Apis Partners: Greenlight Planet",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "little-sun",
+      "nombre": "Little Sun",
+      "razon_social": "LittleSun GmbH",
+      "pais_sede": "Alemania",
+      "matriz": null,
+      "fundacion": 2012,
+      "web": "https://littlesun.org",
+      "cotiza": null,
+      "datos_publicos": "Proyecto y empresa social del artista Olafur Eliasson y el ingeniero Frederik Ottesen, presentado en julio de 2012 en la Tate Modern de Londres, para llevar energía limpia asequible a comunidades sin red.",
+      "fuentes": [
+        {
+          "url": "https://www.gogla.org/members/little-sun/",
+          "titulo": "GOGLA, ficha de miembro Little Sun",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://littlesun.org/imprint/",
+          "titulo": "Little Sun: Imprint",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://dasauge.com/-littlesun-1",
+          "titulo": "dasauge: LittleSun GmbH",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "coleman",
+      "nombre": "Coleman",
+      "razon_social": "The Coleman Company, Inc.",
+      "pais_sede": "Estados Unidos",
+      "matriz": "Newell Brands",
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de material de acampada. Tiene retiradas en la CPSC y la ACCC de otros productos: faroles de combustible Northstar (2014) y linternas de litio CTAC (2016).",
+      "fuentes": [
+        {
+          "url": "https://www.cpsc.gov/Recalls/2014/Coleman-Recalls-Northstar-Lanterns",
+          "titulo": "CPSC: Coleman Northstar",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://productsafety.gov.au/recalls/coleman-ctac-lithium-ion-flashlights",
+          "titulo": "ACCC: Coleman CTAC",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Coleman_(brand)",
+          "titulo": "Wikipedia: Coleman (brand)",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mesqool",
+      "nombre": "Mesqool",
+      "razon_social": null,
+      "pais_sede": null,
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca que vende en Amazon; no se encontró información societaria.",
+      "fuentes": [
+        {
+          "url": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
+          "titulo": "Amazon.es, anuncio",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "wild-land",
+      "nombre": "Wild Land",
+      "razon_social": "Wild Land International, Inc. (según Crunchbase)",
+      "pais_sede": "China",
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Marca de material de acampada vendida en el marketplace de Decathlon.es por ACCESORIOS 4X4 MISUTONIDA. El EAN del kit empieza por 84, prefijo GS1 asignado en España, lo que indica dónde se registró el código, no dónde se fabricó.",
+      "fuentes": [
+        {
+          "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "titulo": "Decathlon.es, ficha",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.crunchbase.com/organization/wild-land",
+          "titulo": "Crunchbase: Wild Land",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "sin-marca",
+      "nombre": "Sin marca declarada",
+      "razon_social": null,
+      "pais_sede": null,
+      "matriz": null,
+      "fundacion": null,
+      "web": null,
+      "cotiza": null,
+      "datos_publicos": "Productos vendidos sin marca. En la ficha de Leroy Merlin ref. 95898880 figuran como contactos de cumplimiento UE PAVELLE y LUMICO.",
+      "fuentes": [
+        {
+          "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "titulo": "Leroy Merlin, ficha 95898880",
+          "fecha": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "distribuidores": [
+    {
+      "id": "amazon-es",
+      "nombre": "Amazon.es",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.amazon.es",
+      "envio": "No comprobado: Amazon.es bloquea la lectura automática.",
+      "devoluciones": "No comprobado.",
+      "fuentes": []
+    },
+    {
+      "id": "decathlon-es",
+      "nombre": "Decathlon España (marketplace)",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.decathlon.es",
+      "envio": "Productos de vendedores externos: envío no visible en la lectura automática.",
+      "devoluciones": "30 días, directamente al vendedor externo (ficha Wild Land).",
+      "fuentes": [
+        {
+          "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "titulo": "Decathlon.es",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "leroymerlin-es",
+      "nombre": "Leroy Merlin España (marketplace)",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.leroymerlin.es",
+      "envio": "Entrega gratuita a domicilio desde 10 días (vendedor externo Simon Shop).",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "titulo": "Leroy Merlin",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "varuste-net",
+      "nombre": "Varuste.net",
+      "razon_social": null,
+      "pais": "Finlandia",
+      "cif": null,
+      "web": "https://varuste.net/es",
+      "envio": "La página enlaza «gastos de envío» sin indicar coste ni plazo a España.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "titulo": "Varuste.net",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "speck-sports",
+      "nombre": "Speck Sports",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://www.speck-sports.com",
+      "envio": "No comprobado.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://www.speck-sports.com/en/lanterns/35469-177240-lantern-goal-zero-lighthouse-600-powerbank-usb-847974008003.html",
+          "titulo": "Speck Sports, listado de faroles",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "solarpowersupply-eu",
+      "nombre": "Solar Power Supply EU",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://solarpowersupply.eu",
+      "envio": "No comprobado.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://solarpowersupply.eu/solar-lights/goal-zero-lighthouse-600-lantern",
+          "titulo": "Solar Power Supply EU",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "guggenheim-bilbao-tienda",
+      "nombre": "Tienda del Museo Guggenheim Bilbao",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://tienda.guggenheim-bilbao.eus",
+      "envio": "La página remite a una sección aparte de envíos, no consultada.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://tienda.guggenheim-bilbao.eus/en/lampara-little-sun-diamond",
+          "titulo": "Tienda Guggenheim Bilbao",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "barrabes",
+      "nombre": "Barrabes",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://www.barrabes.com",
+      "envio": "«Free shipping on many products»; transportistas DPD, GLS, UPS, FedEx, Nacex, Seur y Correos, según la página.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.barrabes.com/en/goal-zero-lighthouse-600/product-128127",
+          "titulo": "Ficha Goal Zero Lighthouse 600",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "No se leyó el aviso legal; país y razón social sin confirmar."
+    },
+    {
+      "id": "alpinstore",
+      "nombre": "AlpinStore",
+      "razon_social": null,
+      "pais": "Francia",
+      "cif": null,
+      "web": "https://www.alpinstore.com",
+      "envio": "Envío gratis desde 119 € a España, según la página.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.alpinstore.com/es/629031-biolite-luci-charge-150-.html",
+          "titulo": "Ficha BioLite Luci Charge 150",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Dirección en la página: 180 Route des Prés Rollier, 74330 Sillingy (Francia)."
+    }
+  ]
+}

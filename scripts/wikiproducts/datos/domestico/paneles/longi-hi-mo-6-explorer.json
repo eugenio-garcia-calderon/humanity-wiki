@@ -1,0 +1,421 @@
+{
+  "slug": "longi-hi-mo-6-explorer",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "LONGi Hi-MO 6 Explorer (Hi-MO X6 Explorer) 54 células (108 medias células)",
+  "marca": "LONGi",
+  "modelo": "LR5-54HTH-420M … 440M (versión marco negro y lámina blanca; la versión totalmente negra es LR5-54HTB)",
+  "variante_ficha": "LR5-54HTH-435M, ficha técnica 20230926V19 (LR5-54HTH 420-440M)",
+  "ean": {
+    "valor": null,
+    "unidad": "GTIN",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2023,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://longi.com/en/distributorbriefing/longi-himo6-marketentry-germany-france",
+    "fecha": "2026-10-18",
+    "nota": "Lanzamiento en Alemania y Francia anunciado el 2 de julio de 2023; LONGi renombró comercialmente el producto como «Hi-MO X6» en octubre de 2023 (https://www.qualenergia.it/articoli/modulo-fotovoltaico-hpbc-longi-mercato-residenziale-cambia-nome/)."
+  },
+  "estado": "a la venta",
+  "resumen": "El Hi-MO 6 Explorer, renombrado comercialmente Hi-MO X6 en octubre de 2023, es un módulo monofacial de LONGi para tejados con 108 medias células HPBC (contacto trasero híbrido de primera generación, tipo p) y un formato de 1722 × 1134 mm. La ficha técnica de septiembre de 2023 cubre de 420 a 440 W, con eficiencias del 21,5 % al 22,5 % y un coeficiente de temperatura de −0,29 %/°C. Ofrece 15 años de garantía de producto y 25 años de garantía de potencia, con una pérdida máxima del 1,5 % el primer año y del 0,40 % anual después, por lo que su compromiso de potencia es inferior al del Hi-MO X10 de la misma marca. Según la marca, produce alrededor de un 5 % más que módulos TOPCon de tipo n, una afirmación sin condiciones de ensayo publicadas. En 2026 se sigue vendiendo en tiendas europeas, aunque algunos mayoristas lo marcan como no disponible.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://longi.com/en/distributorbriefing/longi-himo6-marketentry-germany-france",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 435,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Variante LR5-54HTH-435M, STC; tolerancia 0/+3 %."
+    },
+    "gama_potencias_wp": {
+      "valor": "420–440",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Ficha 20230926V19. Una ficha anterior (V17) cubría 415–435 W (https://pv.de/en/news/new-in-our-product-range-the-hi-mo-6-explorer-series-from-longi-solar/)."
+    },
+    "eficiencia_pct": {
+      "valor": 22.3,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Variante 435 W (≥22,3 %); 22,5 % en la de 440 W. solartraders indica 22,28 % para la 435 W."
+    },
+    "tecnologia_celula": {
+      "valor": "HPBC (contacto trasero híbrido pasivado), tipo p",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://longi.com/en/distributorbriefing/longi-himo6-marketentry-germany-france",
+      "fecha": "2026-10-18",
+      "nota": "LONGi la describe como tecnología posterior a PERC. Algunos distribuidores la etiquetan como «PERC» o «Mono PERC HPBC»."
+    },
+    "tipo_celula": {
+      "valor": "monocristalino",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "medias células (6×18)",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/de/products/module/longi-solar-lr5-54hth-435m-bfr",
+      "fecha": "2026-10-18",
+      "nota": "Vidrio y lámina trasera; monofacial."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No aplica: monofacial."
+    },
+    "vidrio": {
+      "valor": "simple, 3,2 mm templado con antirreflejo",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "marco": {
+      "valor": "aluminio anodizado negro, lámina trasera blanca",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/de/products/module/longi-solar-lr5-54hth-435m-bfr",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "medidas_mm": {
+      "valor": "1722 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "peso_kg": {
+      "valor": 20.8,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.29,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,230 %/°C; Isc +0,050 %/°C."
+    },
+    "noct_o_nmot_c": {
+      "valor": 45,
+      "unidad": "°C (NOCT, ±2)",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Potencia en NOCT de la variante 435 W: 325 W."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1.5,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "«Menos del 1,5 %»."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.4,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Años 2 a 25."
+    },
+    "voc_v": {
+      "valor": 39.33,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Variante 435 W, STC."
+    },
+    "isc_a": {
+      "valor": 14.22,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Variante 435 W, STC. Vmp 33,04 V; Imp 13,17 A."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V CC (IEC/UL)",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Corriente inversa / fusible 25 A; clase II; fuego IEC clase C."
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 presión / 2400 succión",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Granizo de 25 mm a 23 m/s."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "conector": {
+      "valor": "Stäubli MC4 (según el distribuidor)",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/de/products/module/longi-solar-lr5-54hth-435m-bfr",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no nombra el conector; cable de 4 mm², ±1200 mm."
+    },
+    "precio_por_wp_eur": {
+      "valor": 0.218,
+      "unidad": "€/Wp (IVA francés del 20 % incluido)",
+      "origen": "calculado",
+      "fuente": "https://allkitsolar.com/en/panneaux-rigides/15-longi-hi-mo-6-explorer-mono-perc-hpbc-435-wp-black-white.html",
+      "fecha": "2026-10-18",
+      "nota": "94,99 € / 435 Wp = 0,218 €/Wp. Oferta de una tienda francesa; con el IVA español del 21 % sobre los 79,16 € sin impuestos serían 95,78 € (0,220 €/Wp). No se encontró precio publicado en tiendas españolas."
+    },
+    "resultado_pvel": {
+      "valor": "No figura en la lista visible de Top Performers 2026",
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": "https://scorecard.pvel.com/top-performers/",
+      "fecha": "2026-10-18",
+      "nota": "En la lista consultada no aparece el LR5-54HTH. Lectura parcial de la tabla; ver pendiente."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ningún ensayo independiente publicado sobre el LR5-54HTH."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 15,
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "Un mayorista español (Amara NZero) comercializa una referencia con sufijo «25 YW», que podría ser una garantía ampliada de 25 años; no confirmado (https://amaranzero.es/en/catalogue/solar/modules/110-0123-longi-lr5-54hth-435w-hi-mo-x6-expl-black-f-mc4-1500v-25-yw)."
+    },
+    "rendimiento": {
+      "anios": 25,
+      "porcentaje_final": 88.9,
+      "primer_anio_pct": 98.5,
+      "lineal_anual_pct": 0.4,
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18",
+      "nota": "98,5 % al final del año 1; 0,40 %/año; 88,9 % al año 25 (gráfico de la ficha). En Australia la garantía publicada difiere (97,5 % el año 1 y unos 0,73 %/año según https://www.solarproof.com.au/products/LR5-54HTH-430MHi-MOX6Explorer.php): las condiciones dependen del país."
+    },
+    "letra_pequena": [
+      "No se pudo leer el documento de garantía específico del LR5-54HTH (el PDF alojado por solartraders no tiene texto legible por máquina: https://www.solartraders.com/uploads/production/data_sheet/file/37564/warranty_lr5_54hth_hi_mo_6_explorer_en_24-11-2024.pdf?locale=de). Las condiciones generales de LONGi para el mercado de generación distribuida que sí se leyeron (Hi-MO X10 y Hi-MO S10) establecen: inicio en la entrega o seis meses después de salir de fábrica, aviso escrito en 30 días, desmontaje y reinstalación a cargo del cliente, y elección del remedio por LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
+      "Las condiciones de garantía varían según país: la versión australiana anuncia otra curva de degradación. Fuente: https://www.solarproof.com.au/products/LR5-54HTH-430MHi-MOX6Explorer.php",
+      "La garantía de potencia es de 25 años y no de 30, a diferencia del Hi-MO X10 Explorer. Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde"
+    ],
+    "quien_responde": "El fabricante (LONGi). No se ha encontrado mención a seguro de respaldo ni a qué ocurre en caso de quiebra o salida de Europa. Frente al consumidor en España responde también el vendedor (garantía legal de conformidad)."
+  },
+  "empresa": {
+    "razon_social": "LONGi Green Energy Technology Co., Ltd.",
+    "pais_sede": "China (Xi'an, Shaanxi)",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://eu.longi.com",
+    "fabricante_celulas": "LONGi (células propias de contacto trasero, según la marca)",
+    "pais_fabricacion": "China (la ficha técnica indica la sede de Xi'an; el país de la fábrica concreta no figura en la ficha)",
+    "fabricas_conocidas": [
+      "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ],
+    "notas": [
+      "En noviembre de 2021 la aduana de EE. UU. (CBP) retuvo 40,31 MW de módulos LONGi en aplicación de una orden de retención (WRO) relacionada con el silicio; LONGi declaró poder demostrar la trazabilidad y que los envíos continuaban. Fuente: http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/",
+      "Según fuentes del sector citadas por Reuters (noviembre de 2022), los productos solares retenidos por la CBP bajo la ley UFLPA entre junio y octubre de 2022 eran «principalmente» de LONGi, Trina y JinkoSolar; la CBP no confirmó fabricantes. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "El informe «Over-Exposed» de la Universidad Sheffield Hallam (julio de 2023, actualizado en noviembre de 2023) clasifica la exposición de la cadena de suministro de LONGi a la región uigur (XUAR) como «muy alta» para módulos fabricados en China, Malasia y Vietnam, por falta de información sobre proveedores de polisilicio y capacidades por planta. Es una evaluación de riesgo, no una constatación judicial. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "En abril de 2024 la Comisión Europea abrió una investigación por el Reglamento de Subvenciones Extranjeras (FSR) sobre una licitación de un parque solar de 110 MW en Rumanía en la que participaba la filial alemana de LONGi; LONGi se retiró de la licitación en mayo de 2024 y la Comisión anunció el cierre de la investigación. Fuente: https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation",
+      "LONGi y JinkoSolar mantuvieron litigios de patentes (TOPCon frente a contacto trasero) en China, EE. UU., Europa, Japón y Australia; en septiembre de 2025 anunciaron un acuerdo global con licencias cruzadas. Fuente: https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+    ],
+    "fuentes": [
+      "https://eu.longi.com/hi-mo-X10",
+      "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
+      "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "http://www.pv-magazine.com/2021/11/05/us-officials-detained-40-31-mw-of-longi-solar-products-claims-company/",
+      "https://pv-tech.org/longi-withdraws-from-romanian-pv-project-after-eu-investigation",
+      "https://www.pv-magazine-australia.com/2025/09/22/jinkosolar-longi-settle-global-patent-dispute-with-cross-licensing-deal"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "No especificado en la ficha",
+    "fabrica": null,
+    "materiales_principales": [
+      "silicio monocristalino tipo p",
+      "vidrio templado de 3,2 mm",
+      "marco de aluminio anodizado",
+      "lámina trasera",
+      "caja de conexiones IP68"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario; remedio a criterio del fabricante según las condiciones generales de LONGi."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215",
+      "emisor": null,
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730",
+      "emisor": null,
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 61730",
+      "emisor": null,
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "ISO 9001:2015, ISO 14001:2015, ISO 45001:2018 (gestión de la empresa)",
+      "emisor": null,
+      "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+      "idioma": "de/en",
+      "fecha": "2026-10-18",
+      "nota": "Copia alojada por memodo.de; versión 20230926V19, LR5-54HTH 420-440M."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://static.longi.com/20_L_Gi_LE_PM_T_PMD_059_F130_LR_5_54_HTH_415_435_M_30_30_and_15_Frame_Explorer_DG_V17_2ccb21ba87.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Ficha oficial V17 (415-435M) en static.longi.com; PDF sin texto legible por máquina."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/37564/warranty_lr5_54hth_hi_mo_6_explorer_en_24-11-2024.pdf?locale=de",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Copia de solartraders fechada 24-11-2024; sin texto legible por máquina, no se pudo extraer."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "LONGi claims about 5% more electricity generation than TOPCon N-type modules",
+      "donde": "https://pv.de/en/news/new-in-our-product-range-the-hi-mo-6-explorer-series-from-longi-solar/",
+      "veredicto": "sin pruebas",
+      "explicacion": "La cifra procede del fabricante, recogida por un distribuidor, sin condiciones de ensayo. No se encontró ninguna medición independiente que la confirme o desmienta; además el coeficiente de temperatura declarado (−0,29 %/°C) no es mejor que el de varios TOPCon de la competencia (−0,26 a −0,30 %/°C).",
+      "fuentes": [
+        "https://pv.de/en/news/new-in-our-product-range-the-hi-mo-6-explorer-series-from-longi-solar/",
+        "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Module efficiency exceeds 22.6 %",
+      "donde": "https://pv.de/en/news/new-in-our-product-range-the-hi-mo-6-explorer-series-from-longi-solar/",
+      "veredicto": "falsa",
+      "explicacion": "La propia ficha técnica del LR5-54HTH da una eficiencia máxima del 22,5 % (variante 440 W). El 23,2 % corresponde a la versión Scientist, que es otro producto.",
+      "fuentes": [
+        "https://pv.de/en/news/new-in-our-product-range-the-hi-mo-6-explorer-series-from-longi-solar/",
+        "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
+        "https://longi.com/en/distributorbriefing/longi-himo6-marketentry-germany-france"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Module performance is still 88.9% after 25 years",
+      "donde": "https://longi.com/en/distributorbriefing/longi-himo6-marketentry-germany-france",
+      "veredicto": "cierta",
+      "explicacion": "Coincide con la garantía de potencia de la ficha (98,5 % año 1 y 0,40 %/año hasta el año 25). Es un compromiso contractual, no una degradación medida.",
+      "fuentes": [
+        "https://longi.com/en/distributorbriefing/longi-himo6-marketentry-germany-france",
+        "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada ni alerta para el LONGi LR5-54HTH/LR5-54HTB ni para módulos LONGi. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "AllKitSolar (allkitsolar.com)",
+      "tipo": "tienda online",
+      "pais": "Francia",
+      "url": "https://allkitsolar.com/en/panneaux-rigides/15-longi-hi-mo-6-explorer-mono-perc-hpbc-435-wp-black-white.html",
+      "precio_eur": 94.99,
+      "iva_incluido": true,
+      "unidad": "por módulo (435 W)",
+      "incluye_instalacion": false,
+      "envio": "No detallado",
+      "stock": "La página indica 3091 artículos; pedido mínimo 6 unidades",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "79,16 € sin IVA; IVA francés. Precios por volumen: 90,24 € (10 uds.) y 88,49 € (36 uds.), sin indicar si llevan IVA."
+    }
+  ],
+  "compatibles": [
+    "Inversores de string y microinversores con entrada de hasta 1500 V CC y corriente de entrada ≥14,3 A por string."
+  ],
+  "pendiente": [
+    "Leer el documento de garantía específico del LR5-54HTH (PDF sin texto; requiere OCR).",
+    "Confirmar el significado del sufijo «25 YW» de Amara NZero (posible garantía de producto de 25 años).",
+    "Precio en tiendas españolas (no encontrado; la búsqueda web se agotó).",
+    "Confirmar si LONGi mantiene el producto en catálogo europeo o lo ha sustituido por el Hi-MO X10.",
+    "Verificar la lista completa de Top Performers PVEL para LR5-54HTH.",
+    "Año de fundación y cotización bursátil de LONGi con fuente."
+  ]
+}

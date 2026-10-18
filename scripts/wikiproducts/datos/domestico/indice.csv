@@ -1,0 +1,37 @@
+subcategoria,id,nombre,marca,estado,afirmaciones,retiradas,ofertas,precio_min_eur,pendientes
+paneles-solares-domesticos,aiko-neostar,AIKO Neostar 3P54 (y Neostar 2P54) de 54 semicélulas ABC,AIKO,a la venta,4,0,3,89.99,5
+paneles-solares-domesticos,aleo-solar,"aleo solar LEO-N (TOPCon, 108 medias células, vidrio-lámina)",aleo solar,descatalogado,4,0,1,,5
+paneles-solares-domesticos,astronergy-astro-n,"Astronergy ASTRO N7s (TOPCon, 96 medias células, doble vidrio bifacial)",Astronergy,a la venta,3,0,3,61.98,7
+paneles-solares-domesticos,atersa,"Atersa A-xxxM GS (línea GS Optimum, PERC)",Atersa,a la venta,3,0,1,139,5
+paneles-solares-domesticos,canadian-solar-tophiku6,Canadian Solar TOPHiKu6 54 (CS6.1-54TD),Canadian Solar,a la venta,4,0,0,,5
+paneles-solares-domesticos,dmegc-infinity-rt,DMEGC Infinity RT 54 células (108 medias células) bifacial vidrio-vidrio Full Black,DMEGC Solar,a la venta,4,0,2,73.13,5
+paneles-solares-domesticos,huasun-himalaya-hjt,"Huasun Himalaya G10 Black (HJT, 108 semicélulas)",Huasun,a la venta,4,0,0,,7
+paneles-solares-domesticos,ja-solar-deepblue-4-pro,"JA Solar DeepBlue 4.0 Pro JAM54D40 (108 medias células, vidrio-vidrio)",JA Solar,a la venta,2,0,2,,5
+paneles-solares-domesticos,jinko-tiger-neo,"JinkoSolar Tiger Neo 3.0 (Tiger Neo III) 48QL6-DV, monofacial vidrio-vidrio",JinkoSolar,a la venta,4,0,3,86,6
+paneles-solares-domesticos,longi-hi-mo-6-explorer,LONGi Hi-MO 6 Explorer (Hi-MO X6 Explorer) 54 células (108 medias células),LONGi,a la venta,3,0,1,94.99,6
+paneles-solares-domesticos,longi-hi-mo-x10-explorer,LONGi Hi-MO X10 Explorer 54 células (108 medias células),LONGi,a la venta,4,0,2,116.16,7
+paneles-solares-domesticos,maxeon-7,"Maxeon 7 / Maxeon 6 (paneles IBC de Maxeon, antes SunPower)",Maxeon (SunPower fuera de EE. UU.),a la venta,3,0,0,,4
+paneles-solares-domesticos,meyer-burger-white,"Meyer Burger White / Meyer Burger Black (heterounión, fabricación europea)",Meyer Burger,descatalogado,3,0,1,,4
+paneles-solares-domesticos,qcells-q-tron-blk-m-g2,Qcells Q.TRON BLK M-G2+,Qcells,a la venta,3,0,0,,7
+paneles-solares-domesticos,rec-alpha-pure-r,REC Alpha Pure-R (y Alpha Pure-RX),REC,a la venta,4,0,2,139.99,6
+paneles-solares-domesticos,risen-rsm108-topcon,"Risen RSM108-10 BNDG (TOPCon, 108 medias células, marco negro)",Risen Energy,a la venta,3,0,3,86.48,6
+paneles-solares-domesticos,tongwei-tnc,"Tongwei TNC 2.0 TWMNH-48HE (TOPCon, 96 medias células, doble vidrio, todo negro)",Tongwei (TW Solar),a la venta,3,0,3,80,6
+paneles-solares-domesticos,trina-vertex-s-plus,Trina Solar Vertex S+ NEG9R.28 (vidrio-vidrio),Trina Solar,a la venta,3,0,2,2674.31,6
+baterias-domesticas,alpha-ess-smile,AlphaESS SMILE-G3,AlphaESS,a la venta,3,0,0,,7
+baterias-domesticas,anker-solix-x1,Anker SOLIX X1,Anker SOLIX,a la venta,4,2,0,,6
+baterias-domesticas,byd-battery-box-premium-hvs,BYD Battery-Box Premium HVS,BYD,a la venta,3,0,2,3560,4
+baterias-domesticas,dyness-tower,Dyness Tower,Dyness,a la venta,3,0,2,877.25,7
+baterias-domesticas,ecoflow-powerocean,EcoFlow PowerOcean,EcoFlow,a la venta,4,2,2,1680,7
+baterias-domesticas,enphase-iq-battery-5p,Enphase IQ Battery 5P (con FlexPhase),Enphase,a la venta,4,0,3,2107.26,5
+baterias-domesticas,fox-ess-ep,Fox ESS EP11 / EP5,Fox ESS,a la venta,3,0,1,4419.09,7
+baterias-domesticas,goodwe-lynx-home-f,GoodWe Lynx Home F / Lynx F G2,GoodWe,a la venta,5,2,2,1110,8
+baterias-domesticas,growatt-ark-xh,Growatt ARK XH,Growatt,a la venta,3,2,2,847,7
+baterias-domesticas,huawei-luna2000,Huawei LUNA2000 (S1 y S0),Huawei,a la venta,4,0,3,3823,6
+baterias-domesticas,lg-resu,"LG Energy Solution RESU (RESU10H Prime, RESU16H Prime, RESU Flex)",LG Energy Solution,a la venta,2,6,1,6648.95,6
+baterias-domesticas,pylontech-force-h,Pylontech Force H2 / Force H3,Pylontech,a la venta,3,0,3,959.95,7
+baterias-domesticas,senec-home,"SENEC.Home (V3 hybrid, Home 4 y sucesor Home P4)",SENEC,descatalogado,4,3,0,,6
+baterias-domesticas,solaredge-home-battery,SolarEdge Home Battery (400V y 48V),SolarEdge,a la venta,3,0,2,6824.4,6
+baterias-domesticas,sonnenbatterie-10,sonnenBatterie 10 / sonnenBatterie 10 performance,sonnen,a la venta,4,0,2,11325.37,7
+baterias-domesticas,sungrow-sbr,Sungrow SBR (SBR064 – SBR256),Sungrow,descatalogado,4,0,0,,7
+baterias-domesticas,tesla-powerwall-2,Tesla Powerwall 2,Tesla,descatalogado,2,2,0,,5
+baterias-domesticas,tesla-powerwall-3,Tesla Powerwall 3,Tesla,a la venta,4,0,2,9344.23,7

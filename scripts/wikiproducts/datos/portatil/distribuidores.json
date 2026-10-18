@@ -1,0 +1,580 @@
+{
+  "generado": "2026-10-18",
+  "distribuidores": [
+    {
+      "id": "allpowers-tienda-eu",
+      "nombre": "Tienda oficial ALLPOWERS Europa",
+      "razon_social": null,
+      "pais": "UE",
+      "cif": null,
+      "web": "https://iallpowers.eu",
+      "envio": null,
+      "devoluciones": "«30-Day Money-Back Guarantee», según el banner del sitio.",
+      "fuentes": [
+        {
+          "url": "https://iallpowers.eu/products/allpowers-sp033-portable-solar-panel-200w-polycrystalline-cells",
+          "titulo": "Ficha SP033",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "alpinstore",
+      "nombre": "AlpinStore",
+      "razon_social": null,
+      "pais": "Francia",
+      "cif": null,
+      "web": "https://www.alpinstore.com",
+      "envio": "Envío gratis desde 119 € a España, según la página.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.alpinstore.com/es/629031-biolite-luci-charge-150-.html",
+          "titulo": "Ficha BioLite Luci Charge 150",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Dirección en la página: 180 Route des Prés Rollier, 74330 Sillingy (Francia)."
+    },
+    {
+      "id": "amazon-es",
+      "nombre": "Amazon.es",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.amazon.es",
+      "envio": "No comprobado: Amazon.es bloquea la lectura automática.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://www.amazon.es/dp/B09VPHVT2Z",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Páginas de producto no legibles por la herramienta (robots)"
+    },
+    {
+      "id": "anker-tienda-eu",
+      "nombre": "Tienda oficial Anker UE",
+      "razon_social": null,
+      "pais": "UE",
+      "cif": null,
+      "web": "https://www.anker.com/eu-en",
+      "envio": "Envío en 1–2 días hábiles según la ficha consultada",
+      "devoluciones": "Garantía de devolución de 30 días según la marca",
+      "fuentes": [
+        {
+          "url": "https://www.anker.com/eu-en/products/a1689",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://eu.ankersolix.com/products/as320011",
+          "titulo": "Ficha PS200",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "barrabes",
+      "nombre": "Barrabes",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://www.barrabes.com",
+      "envio": "«Free shipping on many products»; transportistas DPD, GLS, UPS, FedEx, Nacex, Seur y Correos, según la página.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.barrabes.com/en/goal-zero-lighthouse-600/product-128127",
+          "titulo": "Ficha Goal Zero Lighthouse 600",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "No se leyó el aviso legal; país y razón social sin confirmar."
+    },
+    {
+      "id": "bigblue-tienda-eu",
+      "nombre": "Tienda oficial BigBlue (servida para Alemania)",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": null,
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://frontdeskreview.com/product/portable-solar-panels/bigblue-28w/",
+          "titulo": "frontdeskreview (dato indirecto)",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "bluetti-tienda-es",
+      "nombre": "Tienda oficial BLUETTI España",
+      "razon_social": null,
+      "pais": "España/UE",
+      "cif": null,
+      "web": "https://es.bluettipower.eu",
+      "envio": "«Envío local gratuito», según la página.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://es.bluettipower.eu/en/products/bluetti-panel-solar-pv200-200w",
+          "titulo": "Ficha PV200",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "bluetti-tienda-eu",
+      "nombre": "Tienda oficial BLUETTI Europa",
+      "razon_social": null,
+      "pais": "UE",
+      "cif": null,
+      "web": "https://www.bluettipower.eu",
+      "envio": "Envío gratuito según las fichas consultadas.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
+          "titulo": "BLUETTI Elite 30 V2 (tienda UE)",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://checkout.bluettipower.eu/products/bluetti-sp120",
+          "titulo": "Ficha PV120",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Precios mostrados con IVA alemán del 19 %, ajustados en la caja según la dirección. La tienda española es.bluettipower.eu no se pudo leer."
+    },
+    {
+      "id": "cellularline-tienda-es",
+      "nombre": "Tienda online de Cellularline (España)",
+      "razon_social": null,
+      "pais": "Italia",
+      "cif": null,
+      "web": "https://www.cellularline.com/es-es/",
+      "envio": "No indicado en la ficha",
+      "devoluciones": "14 días desde la entrega, según la ficha",
+      "fuentes": [
+        {
+          "url": "https://www.cellularline.com/es-es/Alimentaci%C3%B3n-y-Soportes/Bater%C3%ADas-Externa/Power-bank-SOLAR-20000/p/PBSOLAR20000O",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "decathlon-es",
+      "nombre": "Decathlon España (marketplace)",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.decathlon.es",
+      "envio": "Productos de vendedores externos: envío no visible en la lectura automática.",
+      "devoluciones": "30 días, directamente al vendedor externo (ficha Wild Land).",
+      "fuentes": [
+        {
+          "url": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
+          "titulo": "Decathlon.es",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "elcorteingles",
+      "nombre": "El Corte Inglés",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.elcorteingles.es",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.elcorteingles.es/electronica/A51423998-bateria-externa-anker-737-power-bank-powercore-24k-24000-mah/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "electrocity-ie",
+      "nombre": "ElectroCity",
+      "razon_social": null,
+      "pais": "Irlanda",
+      "cif": null,
+      "web": "https://www.electrocity.ie",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.electrocity.ie/product/anker-625-100w-portable-solar-panel/",
+          "titulo": "Ficha Anker 625",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "guggenheim-bilbao-tienda",
+      "nombre": "Tienda del Museo Guggenheim Bilbao",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://tienda.guggenheim-bilbao.eus",
+      "envio": "La página remite a una sección aparte de envíos, no consultada.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://tienda.guggenheim-bilbao.eus/en/lampara-little-sun-diamond",
+          "titulo": "Tienda Guggenheim Bilbao",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "heyupnow-es",
+      "nombre": "Heyup",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://heyupnow.com/es-es",
+      "envio": "No indicado",
+      "devoluciones": "No indicado",
+      "fuentes": [
+        {
+          "url": "https://heyupnow.com/es-es/products/ecoflow-rapid-pro-power-bank",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "iniu-tienda-eu",
+      "nombre": "Tienda oficial INIU UE",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://eu-main.iniushop.com",
+      "envio": null,
+      "devoluciones": "Garantía de devolución de 30 días según la marca",
+      "fuentes": [
+        {
+          "url": "https://eu-main.iniushop.com/es/products/iniu-new-b41-power-bank-fast-charge-22-5w-10000mah-1",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "leroymerlin-es",
+      "nombre": "Leroy Merlin España (marketplace)",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.leroymerlin.es",
+      "envio": "Entrega gratuita a domicilio desde 10 días (vendedor externo Simon Shop).",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
+          "titulo": "Leroy Merlin",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "masquevideo",
+      "nombre": "Más Que Vídeo Profesional",
+      "razon_social": "More than Professional S.A. (según la descripción del sitio)",
+      "pais": null,
+      "cif": null,
+      "web": "https://www.masquevideo.com",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.masquevideo.com/en/dji-power-1000-portable-power-station-with-battery-capacity-of-1024-wh",
+          "titulo": "Ficha DJI Power 1000",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "Web en español con precios en euros; el país no se confirmó en la página leída."
+    },
+    {
+      "id": "masterfoto-lv",
+      "nombre": "Masterfoto",
+      "razon_social": null,
+      "pais": "Letonia",
+      "cif": null,
+      "web": "https://masterfoto.lv",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://masterfoto.lv/en/solar-portable-panels/2519-anker-625-100w-solar-panel-for-anker-521-535-757.html",
+          "titulo": "Ficha Anker 625",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mediamarkt-at",
+      "nombre": "MediaMarkt Austria",
+      "razon_social": null,
+      "pais": "Austria",
+      "cif": null,
+      "web": "https://www.mediamarkt.at",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.mediamarkt.at/de/product/_xiaomi-xiaomi-20000mah-powerbank-with-usb-c-cable-grey-powerbank-20000-mah-grey-166466753.html",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "mediamarkt-es",
+      "nombre": "MediaMarkt España",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.mediamarkt.es",
+      "envio": "Envío gratuito en las fichas consultadas.",
+      "devoluciones": "Las fichas mencionan una política de devolución de 60 días; no se leyó la política completa. Parte de las ofertas son de vendedores externos del marketplace.",
+      "fuentes": [
+        {
+          "url": "https://www.mediamarkt.es/es/product/_estacion-de-carga-dji-power-1000-v2-1024-wh-negro-1609584.html",
+          "titulo": "MediaMarkt.es: ficha de producto",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.mediamarkt.es/es/product/_powerbank-cellularline-pbsolar20000o-20000-mah-1x-usb-c-1x-usb-a-20w-solar-naranja-1610704.html",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.mediamarkt.es/es/product/_paneles-solares-anker-solix-ps100-bifacial-100w-100-w-169123607.html",
+          "titulo": "Ficha Anker PS100",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "El aviso legal no se pudo leer (error al cargar)."
+    },
+    {
+      "id": "pcbox",
+      "nombre": "PcBox",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.pcbox.com",
+      "envio": "«Recíbelo en 48/72h» en la ficha; coste no indicado",
+      "devoluciones": "No comprobado",
+      "fuentes": [
+        {
+          "url": "https://www.pcbox.com/eb-p4520xuegeu-bateria-externa-20000-mah-c-rap-45w/p",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "pccomponentes",
+      "nombre": "PcComponentes",
+      "razon_social": "PC Componentes y Multimedia S.L.U.",
+      "pais": "España",
+      "cif": "B73347494",
+      "web": "https://www.pccomponentes.com",
+      "envio": "Envío gratuito en pedidos desde 50 € según el pie de página; muchas ofertas son de vendedores externos del marketplace (indicado en cada oferta).",
+      "devoluciones": "Las fichas consultadas indican devolución gratuita; no se leyó la política completa.",
+      "fuentes": [
+        {
+          "url": "https://www.pccomponentes.com/aviso-legal",
+          "titulo": "PcComponentes: aviso legal",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.pccomponentes.com/anker-power-bank-gen-2-con-pantalla-140w-24000mah-negro",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://www.pccomponentes.com/panel-solar-ecoflow-nextgen-220w-bifacial-portatil-ip68-monocristralino-alta-eficiencia",
+          "titulo": "Ficha EcoFlow 220W",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "powerplanet",
+      "nombre": "Powerplanetonline",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.powerplanetonline.com",
+      "envio": "Desde 2,95 €; recogida en tienda de Murcia",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.powerplanetonline.com/es/xiaomi-33w-power-bank-20000mah-cable-integrado-marron",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "proshop-nl",
+      "nombre": "Proshop (Países Bajos)",
+      "razon_social": null,
+      "pais": "Países Bajos",
+      "cif": null,
+      "web": "https://www.proshop.nl",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.proshop.nl/Powerbank/Xiaomi-PB2020MI-power-bank-integrated-cable-Li-Ion-USB-C-USB-225-Watt-Powerbank-Grijs-20000-mAh/3433148",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "redmond-electric-ie",
+      "nombre": "Redmond Electric",
+      "razon_social": null,
+      "pais": "Irlanda",
+      "cif": null,
+      "web": "https://redmondelectric.ie",
+      "envio": "Envío calculado al pagar.",
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://redmondelectric.ie/products/solarsaga-200w-solar-panel",
+          "titulo": "Ficha SolarSaga 200W",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "shopro-lt",
+      "nombre": "Shopro",
+      "razon_social": null,
+      "pais": "Lituania",
+      "cif": null,
+      "web": "https://www.shopro.lt",
+      "envio": "Entrega en 2–5 días laborables indicada en la ficha; envío a España no comprobado",
+      "devoluciones": "No comprobado",
+      "fuentes": [
+        {
+          "url": "https://www.shopro.lt/72410-power-bank-usb-27650mah-rapid-pro-cable-5019301011-ecoflow-en",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "solarpowersupply-eu",
+      "nombre": "Solar Power Supply",
+      "razon_social": "Solar Power Supply B.V.",
+      "pais": "Países Bajos",
+      "cif": null,
+      "web": "https://solarpowersupply.eu",
+      "envio": "Envío gratis; entrega en 1–5 días según el país",
+      "devoluciones": "No comprobado",
+      "fuentes": [
+        {
+          "url": "https://solarpowersupply.eu/powerbanks/ecoflow-rapid-pro-powerbank-27650-mah",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://solarpowersupply.eu/index.php/solar-panels/bluetti-pv350-350w-solar-panel",
+          "titulo": "Ficha Bluetti PV350",
+          "fecha": "2026-10-18"
+        },
+        {
+          "url": "https://solarpowersupply.eu/solar-lights/goal-zero-lighthouse-600-lantern",
+          "titulo": "Solar Power Supply EU",
+          "fecha": "2026-10-18"
+        }
+      ],
+      "nota": "País deducido de la tienda en Den Helder y el teléfono +31, no declarado en la ficha"
+    },
+    {
+      "id": "speck-sports",
+      "nombre": "Speck Sports",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://www.speck-sports.com",
+      "envio": "No comprobado.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://www.speck-sports.com/en/lanterns/35469-177240-lantern-goal-zero-lighthouse-600-powerbank-usb-847974008003.html",
+          "titulo": "Speck Sports, listado de faroles",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "tommie-kelly-ie",
+      "nombre": "Tommie Kelly",
+      "razon_social": null,
+      "pais": "Irlanda",
+      "cif": null,
+      "web": "https://tommiekelly.ie",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://tommiekelly.ie/product/ecoflow-160w-portable-solar-panel-efsolar160w",
+          "titulo": "Ficha EcoFlow 160W",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "ugreen-tienda-eu",
+      "nombre": "Tienda oficial UGREEN UE",
+      "razon_social": null,
+      "pais": null,
+      "cif": null,
+      "web": "https://eu.ugreen.com",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://eu.ugreen.com/collections/power-bank/products/ugreen-nexode-power-bank-130w-20000mah",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "varuste-net",
+      "nombre": "Varuste.net",
+      "razon_social": null,
+      "pais": "Finlandia",
+      "cif": null,
+      "web": "https://varuste.net/es",
+      "envio": "La página enlaza «gastos de envío» sin indicar coste ni plazo a España.",
+      "devoluciones": "No comprobado.",
+      "fuentes": [
+        {
+          "url": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "titulo": "Varuste.net",
+          "fecha": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "id": "xiaomi-tienda-es",
+      "nombre": "Tienda oficial Xiaomi España",
+      "razon_social": null,
+      "pais": "España",
+      "cif": null,
+      "web": "https://www.mi.com/es",
+      "envio": null,
+      "devoluciones": null,
+      "fuentes": [
+        {
+          "url": "https://www.mi.com/es/product/xiaomi-33w-power-bank-20000mah-integrated-cable/buy/",
+          "fecha": "2026-10-18"
+        }
+      ]
+    }
+  ]
+}

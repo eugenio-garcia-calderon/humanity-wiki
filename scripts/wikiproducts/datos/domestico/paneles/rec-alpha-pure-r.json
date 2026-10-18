@@ -1,0 +1,456 @@
+{
+  "slug": "rec-alpha-pure-r",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "REC Alpha Pure-R (y Alpha Pure-RX)",
+  "marca": "REC",
+  "modelo": "REC Alpha Pure-R: REC400AA … REC430AA Pure-R (400–430 Wp, 80 semicélulas); serie hermana Alpha Pure-RX: REC450AA … REC470AA Pure-RX (450–470 Wp, 88 semicélulas)",
+  "variante_ficha": "REC430AA Pure-R (ficha Ref. PM-DS-12-06-Rev-4, 20-08-2024, versión europea en inglés)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+    "fecha": "2026-10-18",
+    "nota": "La ficha técnica no publica GTIN/EAN."
+  },
+  "anio_lanzamiento": {
+    "valor": 2022,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.solarserver.de/2022/05/12/intersolar-rec-praesentiert-neues-photovoltaik-modul/",
+    "fecha": "2026-10-18",
+    "nota": "Presentado en Intersolar Europe en mayo de 2022 (fecha del artículo; no se abrió el texto completo). El Pure-RX es posterior (ficha de 2024)."
+  },
+  "estado": "a la venta",
+  "resumen": "El REC Alpha Pure-R es un módulo fotovoltaico de heterounión (HJT) de 80 semicélulas fabricado en Singapur por REC, empresa de origen noruego propiedad del grupo indio Reliance desde 2021. Según la ficha del fabricante, la gama va de 400 a 430 Wp con eficiencias del 20,7 % al 22,3 %, mide 1730 × 1118 × 30 mm y pesa 21,5 kg. La garantía estándar es de 20 años de producto y 25 de rendimiento con un 92 % final; la ampliación a 25 años de producto y la cobertura de mano de obra (REC ProTrust) solo se aplican si instala un profesional certificado por REC y se registra la instalación. Su serie hermana, el Alpha Pure-RX de 88 semicélulas (450–470 Wp), es el modelo de mayor potencia de la gama residencial europea. En 2026 algún mayorista europeo ya cataloga el Pure-R de 420 W como artículo en fin de serie.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 430,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante REC430AA Pure-R, STC. Tolerancia de clasificación 0/+10 W."
+    },
+    "gama_potencias_wp": {
+      "valor": "400–430",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Clases 400, 410, 420, 430 W. Pure-RX: 450–470 W (https://recgroup.com/sites/default/files/2024-08/Web_DS_Alpha_Pure-RX_EN.pdf)."
+    },
+    "eficiencia_pct": {
+      "valor": 22.3,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "REC430AA. Por clase: 20,7 / 21,2 / 21,8 / 22,3 % (400→430 W). Pure-RX: 21,6 / 22,1 / 22,6 % (450→470 W)."
+    },
+    "tecnologia_celula": {
+      "valor": "HJT (heterounión), semicélulas, sin plomo, sin separación entre células («gapless»)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Las células son bifaciales, pero el módulo lleva lámina trasera negra, por lo que no se comercializa como bifacial."
+    },
+    "tipo_celula": {
+      "valor": "monocristalina tipo n",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La HJT de REC se basa en oblea de silicio monocristalino tipo n."
+    },
+    "num_celulas": {
+      "valor": 80,
+      "unidad": "semicélulas",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Pure-RX: 88 semicélulas."
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Lámina trasera negra opaca."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No aplica: el módulo no es bifacial."
+    },
+    "vidrio": {
+      "valor": "simple, 3,2 mm con tratamiento antirreflectante (EN 12150) + lámina trasera polimérica negra",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "marco": {
+      "valor": "aluminio anodizado negro",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "medidas_mm": {
+      "valor": "1730 × 1118 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "1,93 m². Pure-RX: 1728 × 1205 × 30 mm (2,08 m²)."
+    },
+    "peso_kg": {
+      "valor": 21.5,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Pure-RX: 22,7 kg."
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.24,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,24 %/°C; Isc +0,04 %/°C."
+    },
+    "noct_o_nmot_c": {
+      "valor": 44,
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "NMOT 44 ± 2 °C. Potencia en NMOT del REC430AA: 327 W."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 2.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía: potencia mínima del 98 % en el año 1."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.25,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Años 2 a 25, máximo garantizado."
+    },
+    "voc_v": {
+      "valor": 59.7,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "REC430AA, STC. Vmpp 50,5 V. Tensión alta y corriente baja respecto a módulos de 54 células: cambia el número de módulos por string."
+    },
+    "isc_a": {
+      "valor": 8.91,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "REC430AA, STC. Impp 8,52 A. Fusible serie máx. 25 A."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1000,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "carga_mecanica_pa": {
+      "valor": "7000 delantera / 4000 trasera (carga de ensayo)",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La carga de diseño es la de ensayo dividida por 1,5 (≈4667/2667 Pa). Certificado de granizo 35 mm (IEC 61215)."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Caja en 4 partes, 4 diodos de bypass, sin plomo (IEC 62790)."
+    },
+    "conector": {
+      "valor": "Stäubli MC4 PV-KBT4/KST4 (4 mm²)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "IP68 solo conectado. Cable 1,7 m + 1,7 m."
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": "https://www.aceflex.de/produkt/rec-420-alpha-pure-r-mono-hjt/",
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ninguna oferta con IVA incluido declarado. Como referencia sin IVA confirmado: aceflex.de 139,99 € / 420 Wp = 0,333 €/Wp (agotado); sun.store «desde 0,200 €/Wp» para el REC410AA (B2B)."
+    },
+    "resultado_pvel": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://reduco.ai/blog/solar/rec-alpha-solarmodule-test-erfahrungen",
+      "fecha": "2026-10-18",
+      "nota": "No se encontró un resultado Kiwa PVEL específico del Alpha Pure-R. REC comunicó haber sido «Top Performer» del PVEL Scorecard en 2020 (nota de prensa de la marca, no del modelo actual)."
+    },
+    "pruebas_independientes": {
+      "valor": "Ensayado por la organización de consumidores australiana CHOICE (REC420AA): potencia medida, electroluminiscencia, fuga en húmedo, inspección visual y PID",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://www.choice.com.au/products/home-improvement/energy-saving/solar/rec-alpha-pure-r-rec420aa",
+      "fecha": "2026-10-18",
+      "nota": "Los resultados son solo para socios y no se han podido leer; la ficha de CHOICE es de marzo de 2026. Ensayo de granizo de 45 mm del Pure-RX encargado por REC a Changzhou Huayang (laboratorio vinculado a TÜV SÜD) — encargado por la marca, no independiente (https://www.solarpowerworldonline.com/2025/12/rec-tests-alpha-pure-rx-solar-panels-against-45-mm-hailstones/)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 20,
+      "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+      "fecha": "2026-10-18",
+      "nota": "20 años desde la compra (máx. 20,5 desde fabricación). 25 años solo con REC ProTrust: instalación por un REC Certified Solar Professional y registro."
+    },
+    "rendimiento": {
+      "anios": 25,
+      "porcentaje_final": 92.0,
+      "primer_anio_pct": 98.0,
+      "lineal_anual_pct": 0.25,
+      "fuente": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Medida en STC (IEC 61215) con ±3 % de tolerancia. primer_anio_pct es la potencia mínima garantizada en el año 1, no la pérdida."
+    },
+    "letra_pequena": [
+      "La garantía estándar de producto es de 20 años, no 25. Los 25 años de producto y la cobertura de mano de obra (25 años en sistemas <25 kW; 10 años en 25–500 kW) son del programa REC ProTrust, que exige instalador certificado por REC y registro (app SunSnap o ProPortal). Si uno instala por su cuenta o con instalador no certificado, no aplica. Fuentes: https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf ; https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf",
+      "Fuera de ProTrust, la garantía no cubre ni reembolsa la mano de obra de desmontaje ni de reinstalación. REC paga el envío de las piezas sustituidas a sus instalaciones, salvo transporte aéreo. Fuente: Warranty Alpha Rev 8 (02/2026).",
+      "Excluye daños en cables por roce o por bordes afilados, daños por animales, desgaste estético que no afecte a la función, y reparaciones o modificaciones hechas por técnicos no cualificados. Fuente: Warranty Alpha Rev 8.",
+      "Para reclamar hay que avisar «sin demora indebida» tras detectar el defecto, con prueba de compra y número de serie, y obtener un número RMA antes de devolver nada. Fuente: Warranty Alpha Rev 8.",
+      "Solo se transmite al siguiente propietario de la misma instalación, si no se modifica ni se traslada. Excluye módulos con sufijo «Q3». Fuente: Warranty Alpha Rev 8.",
+      "El documento no dice qué ocurre si REC quiebra, ni menciona seguro de garantía."
+    ],
+    "quien_responde": "REC Solar EMEA GmbH (Múnich) gestiona las garantías en Europa; también el distribuidor o vendedor original. No se publica seguro de garantía de terceros. REC pertenece al 100 % a Reliance Industries desde 2021, lo que da respaldo financiero pero no es una garantía contractual."
+  },
+  "empresa": {
+    "razon_social": "REC Solar Pte. Ltd. (Singapur) / REC Solar EMEA GmbH (Europa); grupo REC Solar Holdings AS, filial de Reliance New Energy Solar Ltd.",
+    "pais_sede": "Noruega (sede social) y Singapur (sede operativa)",
+    "fundacion": "1996",
+    "cotiza_en": "No cotiza; la matriz Reliance Industries Ltd. cotiza en la Bolsa de Bombay y la NSE de India",
+    "web": "https://www.recgroup.com",
+    "fabricante_celulas": "REC (producción propia de células HJT en Singapur)",
+    "pais_fabricacion": "Singapur",
+    "fabricas_conocidas": [
+      "Tuas (Singapur): células y módulos, ~1,2 GW/año",
+      "Jamnagar (India), de Reliance: módulos de 720 Wp para plantas grandes desde mayo de 2026, según 42watt.de; no destinados al mercado residencial"
+    ],
+    "notas": [
+      "Reliance Industries compró REC en octubre de 2021 a China National Bluestar por 771 millones de dólares, según 42watt.de. Fuente: https://42watt.de/magazin/rec-solar",
+      "En junio de 2025 un pequeño incendio en la fábrica de Tuas obligó a parar las líneas de células; la producción se reanudó semanas después, con casi un mes de parada y retrasos en las entregas. Fuente: https://www.solarpowerworldonline.com/?p=110545",
+      "REC Solar Inc. (EE. UU.), vendida a Duke Energy en 2015, no tiene relación legal ni operativa con REC Group. Fuente: https://42watt.de/magazin/rec-solar",
+      "No se encontraron detenciones UFLPA, procedimientos antidumping ni insolvencias referidas a REC Group en las búsquedas realizadas a 2026-10-18."
+    ],
+    "fuentes": [
+      "https://42watt.de/magazin/rec-solar",
+      "https://www.solarpowerworldonline.com/?p=110545",
+      "https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf"
+    ]
+  },
+  "origen": {
+    "pais_marca": "Noruega",
+    "pais_fabricacion": "Singapur",
+    "fabrica": "Tuas, Singapur (la ficha dice «Made in Singapore»)",
+    "materiales_principales": [
+      "silicio monocristalino tipo n",
+      "capas de silicio amorfo (heterounión)",
+      "vidrio solar 3,2 mm",
+      "lámina trasera polimérica",
+      "marco de aluminio anodizado",
+      "soldaduras sin plomo"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado, no reparable por el usuario. La ficha indica que cumple RoHS (sin plomo, IEC 62321) y que REC participa en el sistema de reciclaje Take-e-way (RAEE)."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215:2021 / IEC 61215:2016 (granizo 35 mm)",
+      "emisor": "no consta en la ficha",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730:2016 / UL 61730",
+      "emisor": "no consta en la ficha",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62716 (amoníaco), IEC 61701 (niebla salina SM6), ISO 11925-2 (EN 13501-1 clase E)",
+      "emisor": "no consta en la ficha",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62321 (sin plomo, RoHS UE 2015/863); Living Building Challenge",
+      "emisor": "no consta en la ficha",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "ISO 9001, ISO 14001, ISO 45001, IEC 62941",
+      "emisor": "no consta en la ficha",
+      "fuente": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "idioma": "inglés",
+      "fecha": "2026-10-18",
+      "nota": "Pure-R, Ref. PM-DS-12-06-Rev-4"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://rework.recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-ES.pdf",
+      "idioma": "español",
+      "fecha": "2026-10-18",
+      "nota": "No se abrió; enlazada desde los resultados de búsqueda."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://recgroup.com/sites/default/files/2024-08/Web_DS_Alpha_Pure-RX_EN.pdf",
+      "idioma": "inglés",
+      "fecha": "2026-10-18",
+      "nota": "Pure-RX, Ref. PM-DS-12-06-Rev-4.5"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf",
+      "idioma": "inglés y otros",
+      "fecha": "2026-10-18",
+      "nota": "Rev 8 (02/2026), Ref. PM-WARR-12"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "92% MIN. POWER IN YEAR 25",
+      "donde": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "veredicto": "cierta",
+      "explicacion": "Es lo que garantiza el documento de garantía Rev 8 para las series Alpha: 98 % en el año 1, −0,25 %/año, 92 % al año 25. Es un compromiso contractual, no una medición de campo.",
+      "fuentes": [
+        "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "REC ProTrust: 25 years product, 25 years power, 25 years labor",
+      "donde": "https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Los 25 años de producto y mano de obra solo se dan si instala un profesional certificado por REC, en sistemas de menos de 25 kW, y se registra la instalación; la garantía estándar es de 20 años de producto y sin mano de obra.",
+      "fuentes": [
+        "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+        "https://www.recgroup.com/sites/default/files/2026-02/Warranty%20Alpha%20Rev%208.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "As Solar's Most Trusted, REC is committed to high quality, innovation, and a low carbon footprint",
+      "donde": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "veredicto": "sin pruebas",
+      "explicacion": "Es un eslogan de marca. La ficha no indica qué estudio respalda «Most Trusted» ni publica una huella de carbono por módulo verificada por un tercero.",
+      "fuentes": [
+        "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "223 W/M2 POWER DENSITY",
+      "donde": "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Corresponde solo a la clase de 430 W (430 W / 1,93 m²); la de 400 W da 207 W/m². Es un valor declarado en STC.",
+      "fuentes": [
+        "https://recgroup.com/sites/default/files/2024-08/Web_DS%20REC%20Alpha%20Pure-R-EN.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18 en la web de EU Safety Gate (ec.europa.eu/safety-gate), CPSC (cpsc.gov), ACCC (productsafety.gov.au), Health Canada y prensa sectorial, por paneles solares en general; y búsqueda específica de «REC Solar» / «REC Group» + recall, safety alert, fire, junction box. No apareció ninguna retirada ni alerta de módulos REC. El único resultado con «REC» fue la retirada NHTSA 24V-786 (2024) de remolques Brinkley RV, cuyos paneles son de Rich Solar; «REC-2404» es solo el número interno de Brinkley, sin relación con REC Group (https://static.nhtsa.gov/odi/rcl/2024/RCLRPT-24V786-8932.PDF). Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "aceflex.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.aceflex.de/produkt/rec-420-alpha-pure-r-mono-hjt/",
+      "precio_eur": 139.99,
+      "iva_incluido": null,
+      "unidad": "por módulo (pedido mínimo 4)",
+      "incluye_instalacion": false,
+      "envio": "Por agencia, 1–2 semanas; envía a Alemania, Austria, Suiza y otros países europeos",
+      "stock": "Agotado; restos bajo consulta",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "REC420AA Pure-R. La página no aclara si el precio lleva IVA; dice que el 0 % solo aplica a instalaciones residenciales y se confirma al pedir."
+    },
+    {
+      "distribuidor": "sun.store",
+      "tipo": "mayorista",
+      "pais": "UE (plataforma B2B)",
+      "url": "https://sun.store/de/product/rec-rec410aa-pure-r-full-black-1000v-13330",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por Wp",
+      "incluye_instalacion": false,
+      "envio": "No indicado",
+      "stock": "33–198 unidades, 1 oferta",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "REC410AA Pure-R Full Black: «ab 0,200 €/Wp» (≈82 € por módulo), sin indicar IVA."
+    }
+  ],
+  "compatibles": [
+    "Inversores de string de hasta 1000 V DC; por su Voc de ~60 V caben menos módulos por string que con módulos de 54 células",
+    "Microinversores y optimizadores (MLPE) que admitan Voc ~60 V e Isc ~9 A, según la ficha («Compatible with MLPE»)"
+  ],
+  "pendiente": [
+    "Oferta con IVA incluido en una tienda española o europea (no se encontró ninguna con precio público y IVA declarado).",
+    "Confirmar si REC mantiene el Pure-R en catálogo europeo o lo está sustituyendo por el Pure-RX (Siblik lo marca como «lagernder Auslaufartikel»).",
+    "Resultados del ensayo de CHOICE (solo para socios).",
+    "Resultado Kiwa PVEL reciente y específico del modelo.",
+    "Año de fundación (1996) tomado de conocimiento general, sin fuente abierta en esta sesión.",
+    "EAN/GTIN."
+  ]
+}

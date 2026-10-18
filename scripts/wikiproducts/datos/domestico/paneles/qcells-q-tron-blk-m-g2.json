@@ -1,0 +1,401 @@
+{
+  "slug": "qcells-q-tron-blk-m-g2",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Qcells Q.TRON BLK M-G2+",
+  "marca": "Qcells",
+  "modelo": "Q.TRON BLK M-G2+ (108 semicélulas; 415–440 Wp en la ficha norteamericana; 405–430 Wp según el listado europeo de sun.store)",
+  "variante_ficha": "Q.TRON BLK M-G2+ 425 (datos de la ficha Rev06 2025-03 para Norteamérica; valores de 425 W coincidentes con el listado europeo de sun.store)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se pudo consultar la ficha."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No verificado."
+  },
+  "estado": "a la venta",
+  "estado_nota": "Se vende en EE. UU. (ficha 2025-03). En Europa aparece en catálogos de mayoristas (sun.store, sin ofertas activas a 2026-10-18) y Qcells comercializa ya como sucesora la serie Q.TRON BLK S-G3R.12+ (fichas 2024–2025). Es posible que en Europa esté en retirada del catálogo; no se ha confirmado con Qcells.",
+  "resumen": "El Q.TRON BLK M-G2+ es un módulo residencial de 108 semicélulas monocristalinas de tipo n (tecnología Q.ANTUM NEO, de contactos pasivados tipo TOPCon según los distribuidores), con marco y fondo negros, de la marca Qcells, filial de la surcoreana Hanwha Solutions. Según la ficha de la marca, la versión de 425 W mide 1722 × 1134 × 30 mm, pesa 21,2 kg y tiene una eficiencia mínima del 21,8 %. Qcells ofrece 25 años de garantía de producto y de rendimiento, con un mínimo del 90,58 % de la potencia nominal al cabo de 25 años. Las condiciones de garantía para Europa de esta serie las emite Hanwha Q CELLS (Qidong) Co., Ltd., en China, y se rigen por la ley alemana. En Europa la marca promociona ya como sucesora la serie Q.TRON BLK S-G3R.12+.",
+  "imagen": {
+    "url": null,
+    "fuente": null,
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 425,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha Qcells Q.TRON BLK M-G2+ Rev06 2025-03, edición para Norteamérica (DCA_415-440_2025-03_Rev06_NA). No se encontró la ficha europea; el listado europeo de sun.store da los mismos valores para la versión de 425 W. Tolerancia +5/−0 W."
+    },
+    "gama_potencias_wp": {
+      "valor": "415–440",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha norteamericana. El listado europeo de sun.store indica 405–430 Wp para la serie: https://sun.store/en/product/qcells-qtron-blk-m-g2-425-full-black-23670"
+    },
+    "eficiencia_pct": {
+      "valor": 21.8,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Mínima, versión 425 W. La ficha anuncia «hasta 22,5 %», que corresponde solo a la versión de 440 W."
+    },
+    "tecnologia_celula": {
+      "valor": "n-type Q.ANTUM NEO (contactos pasivados, descrita como TOPCon por distribuidores)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha dice «Q.ANTUM NEO half cells, N-type»; el término TOPCon aparece en distribuidores (p. ej. greentechrenewables.com), no en la ficha."
+    },
+    "tipo_celula": {
+      "valor": "monocristalina",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "semicélulas",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "6 × 18"
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Monofacial; trasera de lámina compuesta."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No aplica: módulo monofacial."
+    },
+    "vidrio": {
+      "valor": "simple, 3,2 mm templado con antirreflejo; trasera de lámina compuesta",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "marco": {
+      "valor": "negro (aluminio anodizado)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "medidas_mm": {
+      "valor": "1722 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 21.2,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.3,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "noct_o_nmot_c": {
+      "valor": 43,
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "NMOT 43 ± 3 °C"
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1.5,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía: al menos 98,5 % el primer año."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.33,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Máximo garantizado, años 2 a 25."
+    },
+    "voc_v": {
+      "valor": 39.03,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "425 W, STC"
+    },
+    "isc_a": {
+      "valor": 13.66,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "425 W, STC"
+    },
+    "tension_max_sistema_v": {
+      "valor": 1000,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": "IEC y UL"
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 Pa presión / 2400 Pa succión (carga de diseño); 8100 / 3600 Pa (carga de ensayo)",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP67",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "conector": {
+      "valor": "Stäubli MC4 (IP68)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ninguna oferta con precio en España ni en la UE a 2026-10-18 (sun.store: «No available offers»; zonnefabriek.nl no publica precio)."
+    },
+    "resultado_pvel": {
+      "valor": "Qcells figura como fabricante «Top Performer» en el Scorecard 2026 de Kiwa PVEL (grupo de 6 ensayos); la página pública no indica qué modelos.",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://scorecard.pvel.com/manufacturers/",
+      "fecha": "2026-10-18",
+      "nota": "Distinción a nivel de fabricante; no consta que se refiera al Q.TRON BLK M-G2+."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se comprobó en esta sesión."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 25,
+      "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Condiciones de garantía Qcells para Q.TRON (BLK) M-G2+ / ML-G2+, rev. 2023-11 (HQCQDC_Warranty_terms_modules_Q.TRON-G2.X+_series_2023-11_Rev01_EN), válidas para módulos vendidos e instalados en la UE, Noruega, Suiza, Reino Unido y otros países listados. Cubre defectos de material y fabricación que afecten de forma significativa a la potencia; excluye cambios estéticos."
+    },
+    "rendimiento": {
+      "anios": 25,
+      "porcentaje_final": 90.58,
+      "primer_anio_pct": 98.5,
+      "lineal_anual_pct": 0.33,
+      "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El 90,58 % a 25 años figura en la ficha (Rev06) y en el listado europeo de sun.store; el documento de garantía fija 98,5 % el primer año y un máximo de 0,33 %/año hasta el año 25."
+    },
+    "letra_pequena": [
+      "No cubre costes de desmontaje ni de instalación, ni la pérdida de producción: el documento «excluye específicamente» su reembolso. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "El cliente paga el envío de los módulos a Qcells para su evaluación; Qcells solo asume inspección y transporte si la reclamación se confirma. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "Hay que notificar el defecto en 30 días desde que se descubre (y los defectos visibles en 30 días desde la entrega), por el procedimiento RMA y con factura original que muestre fechas de compra y entrega, números de serie y vendedor. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "Las reclamaciones por rotura de vidrio exigen un cálculo de carga estática de la estructura. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "La garantía se transmite a un nuevo propietario solo si el sistema fotovoltaico completo sigue intacto en su ubicación original. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "Excluye uso móvil (vehículos, barcos), entornos salinos o ácidos, montaje o mantenimiento incorrectos y retirada de etiquetas de serie. Rige la ley alemana y son competentes los tribunales de Leipzig. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "El documento no exige registro del producto: la garantía empieza en la fecha de entrega al cliente original o, si no se puede documentar, 60 días después de la fecha de fabricación. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf"
+    ],
+    "quien_responde": "El garante en el documento europeo es Hanwha Q CELLS (Qidong) Co., Ltd. (Jiangsu, China); el pie del documento cita a Hanwha Q CELLS GmbH (Bitterfeld-Wolfen, Alemania). El documento no dice nada sobre insolvencia ni sobre un seguro de terceros que respalde la garantía. Su matriz, Hanwha Solutions, es un grupo industrial grande, pero eso no es una garantía contractual."
+  },
+  "empresa": {
+    "razon_social": "Hanwha Q CELLS Co., Ltd. (marca Qcells), filial de Hanwha Solutions",
+    "pais_sede": "Corea del Sur (Seúl); ingeniería en Thalheim (Alemania)",
+    "fundacion": "1999, en Bitterfeld-Wolfen (Alemania), según Wikipedia",
+    "cotiza_en": "No cotiza por separado; la matriz Hanwha Solutions cotiza en la Bolsa de Corea (dato de conocimiento general, no verificado en esta sesión)",
+    "web": "https://www.qcells.com",
+    "fabricante_celulas": "Qcells (producción propia en Corea, Malasia y EE. UU.)",
+    "pais_fabricacion": "China (Qidong) para la versión europea, según el emisor de la garantía europea; EE. UU. para la versión norteamericana (ficha «Powering America», opción de contenido nacional)",
+    "fabricas_conocidas": [
+      "Qidong, Jiangsu (China): Hanwha Q CELLS (Qidong) Co., Ltd., emisor de la garantía europea de esta serie",
+      "Jincheon (Corea del Sur)",
+      "Cyberjaya (Malasia)",
+      "Dalton y Cartersville (Georgia, EE. UU.)"
+    ],
+    "notas": [
+      "Hanwha compró Q-Cells tras su quiebra, en agosto de 2012. Fuente: https://en.wikipedia.org/wiki/Qcells",
+      "En agosto de 2023 el Departamento de Comercio de EE. UU. concluyó que Qcells no eludía los aranceles a productos chinos (caso Auxin). Fuente: https://www.commerce.gov/news/press-releases/2023/08/department-commerce-issues-final-determination-circumvention-inquiries (citado en Wikipedia)",
+      "En julio de 2024 Bloomberg informó de que la planta de Dalton había importado células hechas con obleas chinas de proveedores que se abastecen de polisilicio de empresas de la lista UFLPA, y dijo no tener pruebas de que ese polisilicio estuviera en paneles Qcells. Fuente: https://www.bloomberg.com/news/features/2024-07-09/south-korean-solar-company-secures-us-tax-credits-despite-chinese-labor-question (citado en Wikipedia; no se abrió el artículo)",
+      "En abril de 2025 EE. UU. impuso derechos antidumping y compensatorios a células del sudeste asiático; a Qcells Malasia le correspondió un 0 % antidumping y un 14,64 % compensatorio. Fuente: https://www.pv-tech.org/us-doc-issues-ad-cvd-tariffs-on-southeast-asian-solar-cells/ (citado en Wikipedia)",
+      "Hanwha Solutions es accionista mayoritaria de REC Silicon (polisilicio), que cerró su planta de Moses Lake (EE. UU.) a finales de 2024. REC Silicon no tiene relación con REC Group, el fabricante de paneles. Fuente: https://en.wikipedia.org/wiki/Qcells"
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/Qcells",
+      "https://www.q-cells.eu",
+      "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
+    ]
+  },
+  "origen": {
+    "pais_marca": "Alemania (origen) / Corea del Sur (propietario)",
+    "pais_fabricacion": "China (Qidong) para Europa, deducido del emisor de la garantía europea; no confirmado por Qcells en una ficha",
+    "fabrica": "Hanwha Q CELLS (Qidong) Co., Ltd., No.888 Linyang Road, Qidong (Jiangsu, China), según la garantía europea",
+    "materiales_principales": [
+      "silicio monocristalino tipo n",
+      "vidrio templado 3,2 mm",
+      "lámina trasera compuesta",
+      "marco de aluminio anodizado"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215:2016",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730:2016",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 61730-1/-2",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "Quality Controlled PV",
+      "emisor": "TÜV Rheinland",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "Ensayo anti-PID según IEC/TS 62804-1:2015 método A (−1500 V, 96 h)",
+      "emisor": "declarado por Qcells",
+      "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "idioma": "en",
+      "fecha": "2025-03 (Rev06, Norteamérica)"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
+      "idioma": "en",
+      "fecha": "2023-11 (Rev01, Europa y otros)"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Module efficiency up to 22.5 %",
+      "donde": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La ficha da un 22,5 % solo para la versión de 440 W; la de 425 W tiene un 21,8 % mínimo y la de 415 W un 21,3 %.",
+      "fuentes": [
+        "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "High snow (8100 Pa) and wind loads (3600 Pa)",
+      "donde": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "veredicto": "matizable",
+      "explicacion": "8100/3600 Pa son cargas de ensayo; la carga de diseño que la propia ficha da para dimensionar la instalación es 5400/2400 Pa.",
+      "fuentes": [
+        "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "A reliable investment",
+      "donde": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+      "veredicto": "sin pruebas",
+      "explicacion": "Es una afirmación genérica. Qcells figura como fabricante Top Performer en el Scorecard 2026 de Kiwa PVEL, pero no consta un resultado público de este modelo concreto.",
+      "fuentes": [
+        "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
+        "https://scorecard.pvel.com/manufacturers/"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18 en buscador web de «Qcells/Hanwha Q CELLS» + recall, safety alert, fire risk, class action, y en prensa sectorial (pv-magazine); antes, búsqueda general de retiradas de paneles en EU Safety Gate, CPSC, ACCC y Health Canada. No apareció ninguna retirada ni alerta de seguridad de módulos Qcells. Lo que aparece son litigios de patentes que Qcells inició contra otros fabricantes (JinkoSolar, REC, LONGi; Alemania, 2019) en los que Qcells pidió retirar del mercado productos de terceros, no propios. Ninguna retirada conocida a fecha 2026-10-18.",
+  "ofertas": [],
+  "compatibles": [],
+  "pendiente": [
+    "Ficha técnica europea oficial del Q.TRON BLK M-G2+ (los datos proceden de la ficha norteamericana Rev06; el listado europeo de sun.store coincide en la versión de 425 W y da una gama de 405–430 Wp). La gama «430–445 W» del encargo no se encontró en ninguna fuente.",
+    "Ofertas con precio en España o la UE: no se encontró ninguna a 2026-10-18.",
+    "Confirmar con Qcells la planta de fabricación de la versión europea (se deduce de Qidong, China, por el emisor de la garantía).",
+    "Confirmar si el modelo sigue en el catálogo europeo o ha sido sustituido por la serie Q.TRON BLK S-G3R.12+.",
+    "Resultado Kiwa PVEL o RETC a nivel de modelo.",
+    "Retenciones UFLPA de envíos de Qcells: no se ha buscado de forma específica.",
+    "Fecha de fundación: Wikipedia da 1999; conviene contrastarla con otra fuente."
+  ]
+}

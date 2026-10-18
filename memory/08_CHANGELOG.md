@@ -8955,4 +8955,19 @@ en mis páginas como proyecto pendiente».
 - En «Menú y pie» → «Datos legales» → «Buscadores» se pegan los códigos de Google Search Console y Bing Webmaster Tools, y salen en todas las páginas del sitio.
 - Las ampliaciones pueden usar `{{inicio}}` en sus datos estructurados: la dirección canónica de la portada del sitio.
 - IndexNow (SEO R12): un sitio con su propia dirección puede encender «Avisar a Bing de cada cambio al momento» («Menú y pie» → «Datos legales»). Cada 15 minutos se avisa a IndexNow (Bing, Yandex, Seznam; ChatGPT y Copilot leen de Bing) de las direcciones del sitemap que cambiaron. La clave se saca del dominio y se publica en `/<clave>.txt`; no es un secreto. Apagado en todos los sitios que ya existían; `INDEXNOW=off` lo apaga para todos (`src/server/indexNow.ts`).
+### 2026-10-18 — Cada tienda, en los datos estructurados de la ficha (Wikiproducts W1, SEO R4)
+- El `AggregateOffer` del JSON-LD `Product` lleva ahora un `Offer` por tienda: precio, moneda, envío (`shippingDetails`), disponibilidad sólo si se sabe el stock, enlace y vendedor. Salen de las mismas ofertas que pinta «Dónde comprarlo» (`ofertasDeProducto`, W5), así que el precio mínimo, el máximo y el número de tiendas cuadran con lo que se ve. Una oferta sin precio publicado no se declara; la comisión nunca.
+- Sólo en el HTML del servidor, leído como un anónimo. La lectura se deja en la página (sin salir en `window.__SITIO__`) y el bloque «Dónde comprarlo» la reutiliza: una sola lectura de la tabla de ofertas por visita.
+- Las migas de pan apuntan a la portada con `{{inicio}}` cuando la ficha cuelga de ella (W2, #603): en un dominio propio la portada es `/`, no su slug.
+
+### 2026-10-18 — Bloque «Contenido de un tema» (Humanidad Wiki, fase 1) (prog8)
+- Nuevo bloque para cualquier página: todo lo publicado sobre un tema (páginas, bases de datos, publicaciones, carpetas, esquemas, personas y contenido de fuera), por secciones, con «Ver más» y filtro por subtema. Lee lo mismo que la página de contenido de cada tema.
+- En el bloque se elige el tema, el título, cuántas tarjetas por sección y qué secciones se ven.
+
+
+### 2026-10-18 — Los datos de producto y el programa que los carga (Wikiproducts W3a)
+- `scripts/wikiproducts/datos/portatil/`: 58 productos portátiles investigados (13 powerbanks, 10 estaciones de energía, 17 paneles solares portátiles, 18 luces solares), con 129 afirmaciones publicitarias con veredicto, 11 retiradas de seguridad y 77 ofertas. Cada dato lleva fuente, fecha y naturaleza (`declarado`, `medido`, `calculado`, `no_publicado`). Junto a `datos/domestico/` (W3b).
+- `scripts/wikiproducts/cargar.mjs` los escribe por `/api/v1` en las tablas de `crear-esquema.mjs` (que ejecuta antes si faltan): valores, procedencia por celda, marca, afirmaciones y retiradas enlazadas, ofertas con «sin acuerdo» como comisión vacía, y las direcciones `/subcategoria/marca-modelo` al final. Reconoce cada fila por su nombre: repetirlo sólo escribe lo que cambió y nunca borra. `--seco` lo comprueba sin servidor.
+- Probado en la copia local (`local.sh`): 621 filas sin fallos; la segunda carga, 0 cambios.
+- Un importe decimal se envía con coma («0,138»): el tipo «moneda» del servidor lee «0.138» como 138 (punto de millar), también cuando llega como número por la API.
 - Un 404 de verdad también en los dominios propios (SEO R16): `midominio.com/loquesea` sigue enseñando la portada, como se decidió el 2026-08-22, pero contesta 404 con `noindex`, así que los buscadores ya no la guardan como una copia de la portada. `/buscar` y las fichas siguen igual.
