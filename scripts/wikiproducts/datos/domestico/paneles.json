@@ -3566,6 +3566,17 @@
           "fecha_comprobacion": "2026-10-18",
           "nota": "Precio orientativo de mayorista para palés; la página no dice si incluye IVA ni el país del vendedor. No es un precio para particulares.",
           "envio_eur": null
+        },
+        {
+          "distribuidor_id": "fvcomponentes",
+          "url": "https://fvcomponentes.com/en/product/ja-solar-jam54d40lb-460w-bifa-31-120227-jam54d40-460-lb/",
+          "precio_eur": 94.38,
+          "envio_eur": null,
+          "plazo": "2-4 días laborables (plazo general; hasta 1-2 semanas si se pide a fábrica)",
+          "stock": "en stock",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "nota": "Precio leído en la ficha: «94,38 TAXES INC.» (78,00 € sin IVA en el listado de la marca); MPN JAM54D40-460/LB, «Producto disponible para la venta». El título de la ficha dice 465W pero el MPN y la referencia son de 460 W. La ficha del JAM54D40-465/LB (83,29 € sin IVA en el listado) no se pudo leer. AutoSolar (JAM54D40-445/LB) solo dice «Pide presupuesto»: no cuenta."
         }
       ],
       "compatibles": [

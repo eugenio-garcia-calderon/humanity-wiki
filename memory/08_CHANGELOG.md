@@ -9295,3 +9295,12 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Breadcrumbs: W1's #661 version kept (one level on the phone); this PR's one-line variant dropped in the merge.
 - Subcategory pages: «Qué conviene mirar» is folded on load so a product shows before scrolling at 390 px. New route `POST /api/v1/pages/:id/blocks/:blockId/fold` (owner key, top-level `titulo1-3` only, idempotent); `enlazar-sitio.mjs` step 1 calls it. Needs a «Cargar Wikiproducts» run to reach production. The server HTML still renders the folded text open (crawlers read it).
 - Not checked on production (unreachable from the cloud session).
+
+## 2026-10-18 — Wikiproducts: new shops with public prices, from W5's search (W3a)
+- Added 12 offers and 6 new shops from `/mnt/project-files/wikiproducto/w5/ofertas-nuevas.json`.
+  - Priced and in stock: JA Solar DeepBlue 4.0 Pro at fvcomponentes, 94,38 €; Tesla Powerwall 2 at Solarmat, 10.399 €, and at Genera tu propia energía, 8.350 €.
+  - PcComponentes' Anker 737 offer was re-read: 144,20 €, not 95,99 €.
+  - The rest are sold out. The price the page still shows stays in the note, never in `precio_eur`.
+- Left out on purpose:
+  - iVerde: its page only gives a price without VAT, which can't be compared with the others.
+  - Vekto (Alpha ESS): the shop sells only to installers, so it isn't a public price. Its price was removed and the note says why.
