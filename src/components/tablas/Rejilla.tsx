@@ -634,15 +634,15 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         const n = g.filas.length;
         const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
         const ancho = n <= 2
-          // ×1,5: la rejilla de la galería decide cuántas columnas caben por su ancho MÁXIMO.
-          // + el relleno del recuadro (p-5 y el borde, a cada lado).
-          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.5) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 42
+          // ×1,25 por tarjeta: dentro del recuadro las columnas se estiran hasta llenarlo.
+          // + el relleno del recuadro (p-4 y el borde, a cada lado).
+          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.25) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 34
           : null;
         const caja = (COLORES_GRUPO[activa.config.grupo_color || 'gris'] || COLORES_GRUPO.gris).caja;
         return (
-          <div key={clave} className={cn('min-w-0 rounded-2xl border p-3 sm:p-5 sm:pt-4 max-sm:w-full max-sm:basis-full', caja, SOMBRA_GRUPO,
+          <div key={clave} className={cn('min-w-0 rounded-2xl border p-3 sm:p-4 max-sm:w-full max-sm:basis-full', caja, SOMBRA_GRUPO,
             juntos && ancho ? 'flex-none' : juntos ? 'basis-full' : 'mb-6')}
-            style={juntos && ancho ? { width: 'max-content', minWidth: `min(100%, ${ancho}px)`, maxWidth: '100%' } : undefined}>
+            style={juntos && ancho ? { width: `min(100%, ${ancho}px)` } : undefined}>
             {arriba ? (
               <div className={cn('mb-4 sm:mb-5 flex flex-wrap items-center gap-x-3 gap-y-1', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
                 {cabecera(g, nivel, plegado, alternar)}
@@ -1157,7 +1157,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       ) : esGaleria ? (
         // Sin altura máxima: una galería en una página se lee bajando la
         // página, no con una barra de desplazamiento dentro de otra.
-        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-5 sm:gap-6', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
+        <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-4', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(colAgr ? filas : visiblesGaleria, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).

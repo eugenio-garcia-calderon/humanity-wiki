@@ -9231,3 +9231,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 ## 2026-10-18 — Section card photos load immediately (Wikiproducts W2)
 
 - The Mac check after #648 saw the «Baterías domésticas» card blank until its lazy image loaded. The first six section cards (`CARGA_INMEDIATA` in `tarjetaSeccion.ts`) now load their photo eagerly, in React and in the server HTML; the rest stay lazy. Not checked on production.
+
+## 2026-10-18 — Recuadros de grupo sin espacio desaprovechado (prog8)
+- Dentro del recuadro de un grupo, las tarjetas **se estiran hasta llenar el ancho** (`auto-fit` con columnas `1fr`) en vez de quedarse centradas con márgenes laterales grandes. Los recuadros pequeños (1–2 tarjetas) tienen un ancho fijo ajustado a sus tarjetas, para que un título largo no los ensanche.
+- Márgenes más ajustados: relleno del recuadro `p-3 sm:p-4` y separación entre recuadros `gap-4`.
