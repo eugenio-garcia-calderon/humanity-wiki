@@ -9358,3 +9358,6 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Comparador en el móvil**: el producto de la ficha es la columna fija de la izquierda; el nombre de cada dato va en su propia línea encima de los valores; cada columna mide exactamente la mitad de la caja y la tabla encaja de columna en columna, así que no asoman trozos («×», «a ·»).
 - **Zonas táctiles**: enlaces de fuente (`py-3` en línea, sin mover nada), «Dónde se buscó» y sus enlaces, y la miga de pan llegan a 44 px.
 - Sigue pendiente (datos, no código): el comparador, las tarjetas y el orden siguen usando «Precio desde» de la fila, que cuenta también las tiendas agotadas.
+
+## 2026-10-18 — Zonas táctiles de 44 px en la puntuación de la comunidad (Wikiproducts W4)
+- En el móvil, «Entrar para puntuar» medía 32 px de alto y «Cómo se calcula y cómo se ordena» menos de 44: ahora los dos miden al menos 44 px (`min-h-11`). Las estrellas para votar pasan de 32×36 a 44×44, y los enlaces de «Opiniones en otras webs» también tienen 44 px de alto. Medido a 390 px de ancho en la copia local.
