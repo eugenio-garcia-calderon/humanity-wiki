@@ -8839,3 +8839,7 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — Sin «Recientes» en el menú lateral (prog8)
 - El menú lateral ya no enseña la sección de páginas recientes. Los favoritos y el árbol de páginas siguen igual.
+
+### 2026-10-18 — Galería: propiedades en todos los tamaños y nombre en dos líneas (prog8)
+- Las propiedades marcadas como visibles se ven debajo del nombre de cada tarjeta en cualquier tamaño de galería; antes, en XS y XXS no salían.
+- El nombre de la tarjeta ocupa hasta dos líneas en vez de cortarse con «…» en la primera.
