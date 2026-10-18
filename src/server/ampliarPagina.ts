@@ -20,11 +20,18 @@ import type { Request } from 'express';
 export interface MetaPagina {
   /** El `<title>` y `og:title` (en un sitio propio, sin la marca de la plataforma). */
   titulo?: string;
+  /** `meta description` y `og:description`. Si no se dice, el primer párrafo
+   *  de la página (`descripcionDe`). La ficha de producto guarda su resumen en
+   *  un bloque de propiedad, no en un párrafo. */
+  descripcion?: string;
   /** `og:type`: `website` si no se dice. */
   ogType?: string;
   /** `false` escribe `noindex` (p. ej. una ficha que no llega al umbral, R10). */
   indexable?: boolean;
-  /** Datos estructurados (schema.org). Se escriben como `application/ld+json`. */
+  /** Datos estructurados (schema.org). Se escriben como `application/ld+json`.
+   *  La ampliación no sabe por qué dirección se abre la página: un texto que
+   *  sea exactamente `{{canonica}}` se cambia por la dirección canónica, y uno
+   *  que empiece por `/` se completa con el dominio de esa canónica. */
   jsonLd?: object | object[];
   /** `<meta>` extra: `{ property: 'product:price:amount', content: '149.99' }`. */
   metas?: Array<{ property?: string; name?: string; content: string }>;

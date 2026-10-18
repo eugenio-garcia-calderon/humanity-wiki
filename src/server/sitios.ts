@@ -649,7 +649,7 @@ export function registrarSitios(app: Express, db: any) {
       const m: MetaPagina = (publica && !publica.muro && publica.meta) || {};
       const cfg = (publica && !publica.muro ? publica.config : null) || w.config;
       const titulo = String(m.titulo || w.title || '').trim() || 'Sin título';
-      const desc = descripcionDe(cfg);
+      const desc = (typeof m.descripcion === 'string' && m.descripcion.trim()) || descripcionDe(cfg);
       const img = imagenDe(cfg);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
       // La de una base de datos lleva su nombre en la dirección, venga como venga la visita.
@@ -665,7 +665,14 @@ export function registrarSitios(app: Express, db: any) {
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const indexable = m.indexable === false ? false : w.indexable !== false;
-      const ld = m.jsonLd ? (Array.isArray(m.jsonLd) ? m.jsonLd : [m.jsonLd]) : [];
+      // Las direcciones de los datos estructurados, contra la canónica (ver `MetaPagina.jsonLd`).
+      const origen = (() => { try { return new URL(canonica).origin; } catch { return `https://${s.host}`; } })();
+      const completar = (x: any): any => typeof x === 'string'
+        ? (x === '{{canonica}}' ? canonica : x.startsWith('/') && !x.startsWith('//') ? origen + x : x)
+        : Array.isArray(x) ? x.map(completar)
+        : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, completar(v)]))
+        : x;
+      const ld = (m.jsonLd ? (Array.isArray(m.jsonLd) ? m.jsonLd : [m.jsonLd]) : []).map(completar);
 
       const meta = [
         `<meta name="description" content="${esc(desc)}">`,
