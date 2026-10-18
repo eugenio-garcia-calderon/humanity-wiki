@@ -116,7 +116,7 @@
         "pais_marca": {
           "valor": "Estados Unidos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
           "fecha": "2026-10-18",
           "nota": "Sede en Salt Lake City (Utah). BioLite compró Goal Zero en abril de 2025."
@@ -124,7 +124,7 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mec.ca/en/product/5064-571/goal-zero-crush-light-chroma-lantern?colour=NO_COLOUR",
           "fecha": "2026-10-18",
           "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
@@ -139,7 +139,7 @@
         "materiales_principales": {
           "valor": "plástico ABS y caucho",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.rei.com/product/141607",
           "fecha": "2026-10-18"
         },
@@ -374,7 +374,7 @@
         "pais_marca": {
           "valor": "Estados Unidos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
           "fecha": "2026-10-18",
           "nota": "Salt Lake City (Utah)."
@@ -573,7 +573,7 @@
         "panel_solar_w": {
           "valor": 0,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.bhphotovideo.com/c/product/1584849-REG/goal_zero_32010_lighthouse_600_lantern.html",
           "fecha": "2026-10-18",
           "nota": "Sin panel integrado («Solar panel: No»); carga solar con panel externo, 6 h con Nomad 10 según la marca."
@@ -627,14 +627,14 @@
         "pais_marca": {
           "valor": "Estados Unidos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://gearjunkie.com/technology/biolite-acquires-goal-zero",
           "fecha": "2026-10-18"
         },
         "pais_fabricacion": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mec.ca/en/product/6014-155/goal-zero-lighthouse-600-lantern-with-powerbank",
           "fecha": "2026-10-18",
           "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
@@ -649,7 +649,7 @@
         "materiales_principales": {
           "valor": "plástico ABS y aluminio",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.rei.com/product/188291",
           "fecha": "2026-10-18"
         },
@@ -781,7 +781,7 @@
       "anio_lanzamiento": {
         "valor": 2012,
         "unidad": null,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://en.wikipedia.org/wiki/Luci_(lantern)",
         "fecha": "2026-10-18",
         "nota": "Año de invención de la gama Luci, no de esta versión concreta."
@@ -887,7 +887,7 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mec.ca/en/product/6034-890/biolite-luci-original-inflatable-solar-lantern?colour=Matte",
           "fecha": "2026-10-18",
           "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
@@ -1143,7 +1143,7 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": "texto",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.mec.ca/en/product/6034-893/biolite-luci-charge-150-inflatable-solar-lantern?colour=Clear",
           "fecha": "2026-10-18",
           "nota": "«Made in: China» en la tabla de especificaciones del minorista canadiense MEC; dato del vendedor, no de una etiqueta vista."
@@ -1286,14 +1286,14 @@
         "lumenes_max": {
           "valor": 135,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18"
         },
         "autonomia_h": {
           "valor": 50,
           "unidad": "h",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18",
           "nota": "Bajo; medio 24 h, alto 5 h, intermitente 9 h."
@@ -1301,7 +1301,7 @@
         "bateria_mah": {
           "valor": 2000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18",
           "nota": "Li-ion con protección de sobrecorriente."
@@ -1323,14 +1323,14 @@
         "carga_usb": {
           "valor": "sí; 2–3 h (solar: 14 h)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18"
         },
         "funcion_powerbank": {
           "valor": "sí, puerto USB bidireccional",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18",
           "nota": "Potencia de salida no publicada."
@@ -1338,21 +1338,21 @@
         "ip": {
           "valor": "IP67",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18"
         },
         "modos": {
           "valor": "bajo, medio, alto, intermitente",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18"
         },
         "peso_g": {
           "valor": 173,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://v12outdoor.com/products/luci-pro-lux",
           "fecha": "2026-10-18",
           "nota": "Varuste.net indica 248 g, probablemente con embalaje (no lo dice)."
@@ -1375,11 +1375,11 @@
           "nota": "Marca de MPOWERD, absorbida por BioLite (junio de 2024)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p138352/mpowerd-luci-pro-lux",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (varuste.net): «País de origen: China». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,
@@ -1518,7 +1518,7 @@
         "lumenes_max": {
           "valor": 300,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
           "fecha": "2026-10-18",
           "nota": "La misma página dice también «360 lúmenes en luz constante»."
@@ -1526,7 +1526,7 @@
         "autonomia_h": {
           "valor": 50,
           "unidad": "h",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
           "fecha": "2026-10-18",
           "nota": "Modo bajo (20 lm); alto (300 lm): 2,5 h."
@@ -1534,7 +1534,7 @@
         "bateria_mah": {
           "valor": 4000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
           "fecha": "2026-10-18",
           "nota": "Iones de litio."
@@ -1556,7 +1556,7 @@
         "carga_usb": {
           "valor": "sí; 5–6 h (solar: 28 h)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
           "fecha": "2026-10-18"
         },
@@ -1570,7 +1570,7 @@
         "ip": {
           "valor": "IP67",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
           "fecha": "2026-10-18"
         },
@@ -1584,7 +1584,7 @@
         "peso_g": {
           "valor": 372,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
           "fecha": "2026-10-18",
           "nota": "Con embalaje, según la tienda."
@@ -1606,11 +1606,11 @@
           "fecha": "2026-10-18"
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://varuste.net/es/p140567/mpowerd-luci-base-light",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (varuste.net): «País de origen: China». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,
@@ -1740,7 +1740,7 @@
         "lumenes_max": {
           "valor": 100,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18"
         },
@@ -1754,7 +1754,7 @@
         "bateria_mah": {
           "valor": 750,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18",
           "nota": "Li-ion."
@@ -1762,14 +1762,14 @@
         "bateria_wh": {
           "valor": 2.8,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18"
         },
         "panel_solar_w": {
           "valor": 0.45,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18",
           "nota": "Carga solar: 7 h."
@@ -1777,7 +1777,7 @@
         "carga_usb": {
           "valor": "sí, micro-USB",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18"
         },
@@ -1791,21 +1791,21 @@
         "ip": {
           "valor": "IPX4",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18"
         },
         "modos": {
           "valor": "blanco regulable, color, modo fiesta",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18"
         },
         "peso_g": {
           "valor": 95,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.evo.com/products/187365-biolite-sunlight-100",
           "fecha": "2026-10-18",
           "nota": "Knivesandtools indica 100 g."
@@ -1813,7 +1813,7 @@
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
           "fecha": "2026-10-18",
           "nota": "Garantía que da la tienda sobre materiales y fabricación."
@@ -1830,7 +1830,7 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
           "fecha": "2026-10-18"
         },
@@ -1858,7 +1858,7 @@
         "reparabilidad": {
           "valor": "batería específica del modelo",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://knivesandtools.com/en/pt/-biolite-sunlight-100-grey-solar-powered-light.htm",
           "fecha": "2026-10-18"
         }
@@ -1958,7 +1958,7 @@
         "lumenes_max": {
           "valor": 400,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
           "fecha": "2026-10-18",
           "nota": "Cifra del nombre comercial («400 Lm»); no se indica si es por luz o del conjunto."
@@ -1973,7 +1973,7 @@
         "bateria_mah": {
           "valor": 3600,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
           "fecha": "2026-10-18",
           "nota": "LiPo."
@@ -1981,14 +1981,14 @@
         "bateria_wh": {
           "valor": 23,
           "unidad": "Wh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
           "fecha": "2026-10-18"
         },
         "panel_solar_w": {
           "valor": 6,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
           "fecha": "2026-10-18"
         },
@@ -2002,7 +2002,7 @@
         "funcion_powerbank": {
           "valor": "sí, salida USB 5 V en la caja de control",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
           "fecha": "2026-10-18"
         },
@@ -2016,21 +2016,21 @@
         "modos": {
           "valor": "3 luces, una con sensor de movimiento; radio FM y MP3",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.campsaver.com/biolite-solarhome-system-620.html",
           "fecha": "2026-10-18"
         },
         "peso_g": {
           "valor": 1630,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
           "fecha": "2026-10-18"
         },
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
           "fecha": "2026-10-18",
           "nota": "Garantía de la tienda."
@@ -2047,7 +2047,7 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.knivesandtools.com/en/pt/-biolite-solarhome-620-light-system-blue-1.htm",
           "fecha": "2026-10-18"
         },
@@ -2174,7 +2174,7 @@
         "lumenes_max": {
           "valor": 60,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18",
           "nota": "La ficha no dice si es un valor de ensayo o del fabricante."
@@ -2182,7 +2182,7 @@
         "autonomia_h": {
           "valor": 12,
           "unidad": "h",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18",
           "nota": "Modo estándar tras un día de sol; alto: 3 h."
@@ -2190,7 +2190,7 @@
         "bateria_mah": {
           "valor": 450,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18",
           "nota": "LiFePO₄, 3,2 V."
@@ -2206,7 +2206,7 @@
         "panel_solar_w": {
           "valor": 0.33,
           "unidad": "W",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18",
           "nota": "Monocristalino integrado, potencia pico."
@@ -2214,7 +2214,7 @@
         "carga_usb": {
           "valor": "sí, con cargador tipo Nokia (no incluido)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://engineeringforchange.org/?p=48449",
           "fecha": "2026-10-18"
         },
@@ -2236,7 +2236,7 @@
         "modos": {
           "valor": "bajo y alto",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://engineeringforchange.org/?p=48449",
           "fecha": "2026-10-18"
         },
@@ -2250,7 +2250,7 @@
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18"
         }
@@ -2267,14 +2267,14 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://engineeringforchange.org/?p=48449",
           "fecha": "2026-10-18"
         },
         "fabrica": {
           "valor": "fábrica con ISO 9001:2015 e ISO 14001:2015 (sin nombre publicado)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://engineeringforchange.org/?p=48449",
           "fecha": "2026-10-18"
         },
@@ -2295,7 +2295,7 @@
         "reparabilidad": {
           "valor": "batería no sustituible por el usuario; sustituible con herramientas especiales, anulando la garantía",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/d-light-s30/",
           "fecha": "2026-10-18",
           "nota": "La ficha se contradice: la tabla dice «No» y la sección de piezas dice que puede cambiarse con herramientas especiales."
@@ -2413,7 +2413,7 @@
         "bateria_mah": {
           "valor": 425,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
           "fecha": "2026-10-18",
           "nota": "LiFePO₄ 3,3 V."
@@ -2436,7 +2436,7 @@
         "carga_usb": {
           "valor": "sí, entrada 5 V / 500 mA",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techxlab.org/solutions/sun-king-pico-plus/",
           "fecha": "2026-10-18"
         },
@@ -2450,21 +2450,21 @@
         "ip": {
           "valor": "IP64",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techxlab.org/solutions/sun-king-pico-plus/",
           "fecha": "2026-10-18"
         },
         "modos": {
           "valor": "turbo, normal, bajo",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
           "fecha": "2026-10-18"
         },
         "peso_g": {
           "valor": 120,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
           "fecha": "2026-10-18",
           "nota": "Lámpara; el soporte pesa 160 g."
@@ -2472,7 +2472,7 @@
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.energy-xprt.com/products/sun-king-model-pico-plus-brighter-study-and-task-solar-light-556885",
           "fecha": "2026-10-18"
         }
@@ -2481,7 +2481,7 @@
         "pais_marca": {
           "valor": "Estados Unidos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.oilandgas360.com/greenlight-planet-launches-sun-king-picotm-a-solar-powered-light-priced-at-only-8-proclaiming-the-days-of-the-kerosene-lamp-are-numbered/",
           "fecha": "2026-10-18",
           "nota": "Nota de prensa fechada en Chicago; no afirma explícitamente la sede."
@@ -2503,7 +2503,7 @@
         "materiales_principales": {
           "valor": "policarbonato y ABS",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techxlab.org/solutions/sun-king-pico-plus/",
           "fecha": "2026-10-18"
         },
@@ -2631,7 +2631,7 @@
         "bateria_mah": {
           "valor": 3300,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
           "fecha": "2026-10-18",
           "nota": "LiFePO₄ 3,3 V."
@@ -2691,7 +2691,7 @@
         "garantia_anios": {
           "valor": 2,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
           "fecha": "2026-10-18"
         }
@@ -2700,7 +2700,7 @@
         "pais_marca": {
           "valor": "Estados Unidos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.oilandgas360.com/greenlight-planet-launches-sun-king-picotm-a-solar-powered-light-priced-at-only-8-proclaiming-the-days-of-the-kerosene-lamp-are-numbered/",
           "fecha": "2026-10-18",
           "nota": "Greenlight Planet; nota de prensa fechada en Chicago."
@@ -2708,14 +2708,14 @@
         "pais_fabricacion": {
           "valor": "China",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
           "fecha": "2026-10-18"
         },
         "fabrica": {
           "valor": "Shenzhen (Greenlight Planet Inc.)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
           "fecha": "2026-10-18"
         },
@@ -2736,7 +2736,7 @@
         "reparabilidad": {
           "valor": "batería y LED sustituibles por el usuario",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.engineeringforchange.org/solutions/product/sun-king-boom/",
           "fecha": "2026-10-18"
         }
@@ -2842,7 +2842,7 @@
       "anio_lanzamiento": {
         "valor": 2012,
         "unidad": null,
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.gogla.org/members/little-sun/",
         "fecha": "2026-10-18",
         "nota": "Presentación del proyecto Little Sun en la Tate Modern de Londres, julio de 2012."
@@ -2949,11 +2949,11 @@
           "nota": "No se encontró una fuente con la sede social de Little Sun."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://collections.vam.ac.uk/item/O1600748",
+          "fecha": "2026-10-18",
+          "nota": "Según el catálogo (collections.vam.ac.uk): «Location: Designed Denmark, manufactured China.». Puede variar según el lote."
         },
         "fabrica": {
           "valor": null,
@@ -3110,7 +3110,7 @@
         "lumenes_max": {
           "valor": 22,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
           "fecha": "2026-10-18",
           "nota": "Manufactum indica 167 lm; las fuentes no coinciden y la marca no publica la cifra en la página consultada."
@@ -3126,7 +3126,7 @@
         "bateria_mah": {
           "valor": 300,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
           "fecha": "2026-10-18",
           "nota": "LiFePO₄ AA 3,2 V; la tienda escribe «300 mA»."
@@ -3156,14 +3156,14 @@
         "funcion_powerbank": {
           "valor": "no",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
           "fecha": "2026-10-18"
         },
         "ip": {
           "valor": "IP44",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.manufactum.com/universal-lamp-littlesun-diamond-a53597/",
           "fecha": "2026-10-18",
           "nota": "Dato de Manufactum, no de la marca."
@@ -3171,14 +3171,14 @@
         "modos": {
           "valor": "regulable",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://tienda.guggenheim-bilbao.eus/en/lampara-little-sun-diamond",
           "fecha": "2026-10-18"
         },
         "peso_g": {
           "valor": 92,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
           "fecha": "2026-10-18",
           "nota": "La misma página y Manufactum dicen también 95 g."
@@ -3217,7 +3217,7 @@
         "materiales_principales": {
           "valor": "ABS y policarbonato; base de acero pulido",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.manufactum.com/universal-lamp-littlesun-diamond-a53597/",
           "fecha": "2026-10-18"
         },
@@ -3231,7 +3231,7 @@
         "reparabilidad": {
           "valor": "pila AA de LiFePO₄ (formato estándar)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.lights.co.uk/p/little-sun-diamond-led-solar-light-with-stand-6103002.html",
           "fecha": "2026-10-18"
         }
@@ -3342,14 +3342,14 @@
         "lumenes_max": {
           "valor": 200,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
           "fecha": "2026-10-18"
         },
         "autonomia_h": {
           "valor": 100,
           "unidad": "h",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
           "fecha": "2026-10-18",
           "nota": "Bajo (10 lm) e intermitente; alto 5 h, medio 15 h."
@@ -3357,7 +3357,7 @@
         "bateria_mah": {
           "valor": 1200,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
           "fecha": "2026-10-18",
           "nota": "Polímero de litio."
@@ -3394,7 +3394,7 @@
         "ip": {
           "valor": "IPX4",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
           "fecha": "2026-10-18",
           "nota": "Public Lands indica IPX7."
@@ -3402,21 +3402,21 @@
         "modos": {
           "valor": "alto, medio, bajo, intermitente",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
           "fecha": "2026-10-18"
         },
         "peso_g": {
           "valor": 500,
           "unidad": "g",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://bestbuy.ca/en-ca/product/coleman-peak1-200-lumen-solar-rechargeable-lantern-black/18188487",
           "fecha": "2026-10-18"
         },
         "garantia_anios": {
           "valor": 3,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.publiclands.com/p/coleman-peak1-200l-rechargeable-lantern-23colupk1200lrchbcac/23colupk1200lrchbcac",
           "fecha": "2026-10-18",
           "nota": "Garantía limitada."
@@ -3563,7 +3563,7 @@
         "lumenes_max": {
           "valor": 350,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
           "fecha": "2026-10-18",
           "nota": "Linterna; farol de 12 LED ≈ 200 lm. Cifras citadas en una reseña, no en una ficha oficial."
@@ -3571,7 +3571,7 @@
         "autonomia_h": {
           "valor": 35,
           "unidad": "h",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
           "fecha": "2026-10-18",
           "nota": "Luz principal tras carga completa por USB, según la reseña."
@@ -3579,7 +3579,7 @@
         "bateria_mah": {
           "valor": 3000,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
           "fecha": "2026-10-18",
           "nota": "Cifra del título del anuncio; tensión no publicada."
@@ -3601,14 +3601,14 @@
         "carga_usb": {
           "valor": "sí, 5 V 2 A; unas 2 h",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
           "fecha": "2026-10-18"
         },
         "funcion_powerbank": {
           "valor": "sí",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.amazon.es/Recargable-Emergencia-Impermeable-Senderismo-Supervivencia/dp/B09B9S7HL1",
           "fecha": "2026-10-18"
         },
@@ -3623,7 +3623,7 @@
         "modos": {
           "valor": "farol 360° y linterna; manivela",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://techwriteredc.com/mesqool-camping-lantern/",
           "fecha": "2026-10-18"
         },
@@ -3807,7 +3807,7 @@
         "lumenes_max": {
           "valor": 700,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
           "fecha": "2026-10-18",
           "nota": "Luz principal; más 4 linternas de 100 lm."
@@ -3822,7 +3822,7 @@
         "bateria_mah": {
           "valor": 7800,
           "unidad": "mAh",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
           "fecha": "2026-10-18",
           "nota": "Li-ion 7,4 V."
@@ -3852,7 +3852,7 @@
         "funcion_powerbank": {
           "valor": "sí; la tabla indica salida USB 12 V / 3 A",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
           "fecha": "2026-10-18",
           "nota": "Una salida USB estándar es de 5 V; 12 V sólo con USB-C PD, que la ficha no menciona."
@@ -3860,7 +3860,7 @@
         "ip": {
           "valor": "IP43",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
           "fecha": "2026-10-18"
         },
@@ -3911,14 +3911,14 @@
         "materiales_principales": {
           "valor": "ABS",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
           "fecha": "2026-10-18"
         },
         "num_componentes": {
           "valor": 5,
           "unidad": "piezas de luz",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.decathlon.es/es/p/mp/wild-land/lampara-panel-solar-recargable-con-4-linternas-y-powerbank-700-lumenes/_/R-p-bf28aba2-01bb-40ce-a186-70fe7665fa80",
           "fecha": "2026-10-18",
           "nota": "Luz principal y 4 linternas; sin contar trípode ni panel."
@@ -4033,14 +4033,14 @@
         "lumenes_max": {
           "valor": 1000,
           "unidad": "lm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18"
         },
         "autonomia_h": {
           "valor": 5,
           "unidad": "h",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18",
           "nota": "3–5 h de luz continua; modo no indicado."
@@ -4069,7 +4069,7 @@
         "carga_usb": {
           "valor": "sí; 2 h",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18"
         },
@@ -4091,7 +4091,7 @@
         "modos": {
           "valor": "6: foco alto/bajo/estroboscópico, COB laterales alto/bajo, LED lateral",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18"
         },
@@ -4105,7 +4105,7 @@
         "garantia_anios": {
           "valor": 3,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18",
           "nota": "Garantía legal indicada por la tienda."
@@ -4136,7 +4136,7 @@
         "materiales_principales": {
           "valor": "ABS",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.leroymerlin.es/productos/linterna-solar-recargable-1000-lumenes-6-modos-impermeable-ideal-para-camping-pesca-y-cortes-de-energia-95898880.html",
           "fecha": "2026-10-18"
         },

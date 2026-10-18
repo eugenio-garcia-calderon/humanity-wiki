@@ -155,7 +155,16 @@ const TIPOS = { 'image/jpeg': 1, 'image/png': 1, 'image/webp': 1, 'image/avif': 
 const MAX = 8 * 1024 * 1024;
 /** Download an image and check it is one, and big enough to be a product
  *  photo rather than an icon. Returns {bytes, tipo} or a reason. */
+/** Shopify serves any size on request: the original can weigh over 10 MB. */
+function aTamano(u) {
+  try {
+    const x = new URL(u);
+    if (x.hostname === 'cdn.shopify.com' || x.pathname.includes('/cdn/shop/')) { x.searchParams.set('width', '1200'); return x.toString(); }
+  } catch { /* left as it is */ }
+  return u;
+}
 async function descargar(u) {
+  u = aTamano(u);
   if (!segura(u)) return { motivo: 'dirección no pública' };
   const r = await traer(u);
   if (!r.ok) return { motivo: `HTTP ${r.status}` };
@@ -296,7 +305,10 @@ for (const p of lista) {
   const cFoto = nombreCol(p._tabla, 'foto'), cCred = nombreCol(p._tabla, 'foto_licencia');
   const ya = fila.values?.[cFoto], cred = String(fila.values?.[cCred] || '');
   const cs = candidatos(p);
-  if (!FORZAR && nuestra(ya) && cs.some(c => cred.includes(c.pagina || '\u0000') || (c.commons && cred.includes('Wikimedia Commons')))) { res.iguales++; continue; }
+  // A source pinned in fotos.json has to be the one the photo came from, so a
+  // wrong photo is replaced by naming a better page there.
+  const validas = pedidas[p.id] ? cs.slice(0, 1) : cs;
+  if (!FORZAR && nuestra(ya) && validas.some(c => cred.includes(c.pagina || '\u0000') || (c.commons && cred.includes('Wikimedia Commons')))) { res.iguales++; continue; }
   const f = await buscarFoto(p);
   if (!f.bytes) { res.sin.push(`${p.id}: ${f.intentos.length ? f.intentos.join('; ') : 'nada donde buscar'}`); continue; }
   try {

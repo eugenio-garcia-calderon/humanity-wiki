@@ -739,7 +739,7 @@
         "fabrica": {
           "valor": "Prenzlau (Brandeburgo, Alemania): producción en cierre ordenado desde marzo de 2025",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pv-magazine.com/2025/03/10/aleo-solar-to-halt-production-at-pv-module-factory-in-germany/",
           "fecha": "2026-10-18",
           "nota": "aleo solar GmbH, Marius-Eriksen-Straße 1, 17291 Prenzlau Otras fuentes: https://www.solarquotes.com.au/blog/aleo-solar-germany-mb3135/ https://www.aleo-solar.de/ http://pv-magazine-usa.com/2017/04/14/fire-hazard-prompts-bosch-solar-services-voluntary-recall/"
@@ -891,7 +891,7 @@
         "potencia_pico_wp": {
           "valor": 450,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "STC, cara frontal; clasificación 0/+3 %, tolerancia de medida ±3 %."
@@ -899,7 +899,7 @@
         "gama_potencias_wp": {
           "valor": "450–470",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión 2.0. Otras fichas de la misma serie anuncian 445–465 W."
@@ -907,7 +907,7 @@
         "eficiencia_pct": {
           "valor": 22.5,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante 450 W. Comprobación: 450 / (1,762 × 1,134) = 22,52 %. La variante de 470 W declara 23,5 %."
@@ -915,7 +915,7 @@
         "tecnologia_celula": {
           "valor": "TOPCon, N-type, sin busbar (zero-busbar)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -923,7 +923,7 @@
         "tipo_celula": {
           "valor": "monocristalina",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -931,7 +931,7 @@
         "num_celulas": {
           "valor": 96,
           "unidad": "medias células (6×16)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Células más grandes que las de 108 medias células de la generación CHSM54RNs."
@@ -939,7 +939,7 @@
         "bifacial": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "En tejado inclinado la ganancia por la cara trasera suele ser pequeña."
@@ -947,7 +947,7 @@
         "bifacialidad_pct": {
           "valor": 80,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "±5 %."
@@ -955,7 +955,7 @@
         "vidrio": {
           "valor": "doble (2,0 + 2,0 mm)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -963,7 +963,7 @@
         "marco": {
           "valor": "aluminio anodizado negro, 30 mm",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Existe versión con marco plateado."
@@ -971,7 +971,7 @@
         "medidas_mm": {
           "valor": "1762 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "2,0 m²."
@@ -979,7 +979,7 @@
         "peso_kg": {
           "valor": 24.5,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -987,7 +987,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.29,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Voc −0,25 %/°C; Isc +0,043 %/°C."
@@ -1003,7 +1003,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "≤1,0 % el primer año."
@@ -1011,7 +1011,7 @@
         "degradacion_anual_pct": {
           "valor": 0.4,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Años 2 a 30."
@@ -1019,7 +1019,7 @@
         "voc_v": {
           "valor": 36.59,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Vmpp 30,51 V; Impp 14,75 A."
@@ -1027,7 +1027,7 @@
         "isc_a": {
           "valor": 15.61,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Más corriente y menos tensión que un módulo de 108 medias células de la misma potencia; conviene comprobar la corriente máxima de entrada del inversor o microinversor."
@@ -1035,7 +1035,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V DC",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "IEC/UL. Fusible máx. en serie 30 A."
@@ -1043,7 +1043,7 @@
         "carga_mecanica_pa": {
           "valor": "6000 / 4000",
           "unidad": "Pa (frontal/trasera, carga de ensayo)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Carga máxima de ensayo; la carga de diseño suele ser menor (factor de seguridad 1,5) y depende del montaje."
@@ -1051,7 +1051,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1059,7 +1059,7 @@
         "conector": {
           "valor": "MC4-EVO2A (estándar) o HCB40 (opcional); cable de 4 mm² y 1200 mm",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Al comprar, conviene confirmar qué conector lleva el lote."
@@ -1075,7 +1075,7 @@
         "pruebas_independientes": {
           "valor": "La marca comunica el premio «Overall Highest Achiever» de RETC para la serie ASTRO N7",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/",
           "fecha": "2026-10-18",
           "nota": "Nota de prensa; no se consultó el informe PVMI de RETC y se refiere a la serie N7 (formato grande), no necesariamente a la N7s doméstica. Kiwa PVEL: Astronergy afirma haber sido «Top Performer» de Kiwa PVEL por novena vez consecutiva (2025) (declarado; https://www.pv-magazine-australia.com/press-releases/astronergy-sets-pace-with-cutting-edge-solar-products-and-global-partnerships/)"
@@ -1083,7 +1083,7 @@
         "garantia_producto_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Según la ficha. El documento de garantía consultado (Australia) remite a un anexo A, no publicado con él, para los años por modelo."
@@ -1091,7 +1091,7 @@
         "garantia_rendimiento_anios": {
           "valor": 30,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Términos para módulos n-type; coinciden con la ficha. Solo cubre la potencia de la cara frontal."
@@ -1099,7 +1099,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.874,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -1107,7 +1107,7 @@
         "garantia_letra_pequena": {
           "valor": "Reclamación en un plazo de 30 días naturales desde que se descubre el defecto; si no, se pierde el derecho. Acciones legales dentro de los 6 meses siguientes (garantía Astronergy para Australia, publicada el 09-12-2024).\nEl cliente paga desmontaje, embalaje, reinstalación, producción perdida y la mayoría de impuestos y aranceles, sea cual sea el resultado de la reclamación; si es válida, Astronergy reembolsa un envío de vuelta «razonable» con un tope pactado de antemano (garantía Australia).\nLa garantía empieza en la entrega al cliente directo o seis meses después de la fecha de fabricación, lo que ocurra antes (garantía Australia).\nLa garantía de rendimiento solo cubre la potencia frontal; la ganancia bifacial no está garantizada. Tolerancia de medida ±3 % según IEC 60904.\nEl documento leído es el de Australia (emisor: Astronergy New Energy Technology (Singapore) Pte. Ltd.). No se encontró la versión europea vigente; la única europea localizada es de 2015 (Astronergy Solarmodule GmbH, Fráncfort del Óder) y ya no aplica a este modelo.\nLa ficha indica que la garantía está respaldada por una «aseguradora internacional Tier 1», sin nombrarla; en 2014 la marca anunció una cobertura de Munich Re (EE Power). No se encontró la póliza vigente.\nEn Alemania la reclamación se tramita a través del distribuidor o instalador, según Reduco; en España la garantía legal frente al vendedor es independiente de la del fabricante.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -1115,7 +1115,7 @@
         "garantia_quien_responde": {
           "valor": "Chint New Energy Technology Co., Ltd. y sus filiales regionales (en Australia, Astronergy New Energy Technology (Singapore) Pte. Ltd.). La ficha menciona un seguro de garantía de una aseguradora no nombrada; si existe y está vigente, podría cubrir reclamaciones si el fabricante desaparece.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/warranty_documents/panel_warranty_Astronergy-Limited_Warranty-for-Crystalline-PV-Modules_Australia_20250827.pdf",
           "fecha": "2026-10-18"
         }
@@ -1153,7 +1153,7 @@
         "fabrica": {
           "valor": "9 plantas en China (ciudades no detalladas en la fuente); Tailandia (obleas, células y módulos; en producción desde 2016, 5 GW de obleas previstos); Turquía (1 GW de módulos y 2 GW de células, 2024)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://7sun.eu/wp-content/uploads/2026/05/Astroenergy-CHS48RNDG-F-BH-450-470W-Datasheet.pdf",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: https://canalsolar.com.br/en/astronergy-plans-production-capacity-for-2025/ https://www.pv-magazine-australia.com/?p=12803 https://www.pvtime.org/up-to-3403-96-us-imposes-massive-tariffs-on-southeast-asian-solar-cells/ https://www.solartraders.com/uploads/production/data_sheet/file/26690/Astroergy%20WA%20EN.pdf?locale=da"
@@ -1323,7 +1323,7 @@
         "potencia_pico_wp": {
           "valor": 455,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "STC; tolerancia 0/+5 W. Ficha alojada en el foro solarweb.net: la web de Atersa no permite su lectura automática."
@@ -1331,7 +1331,7 @@
         "gama_potencias_wp": {
           "valor": "430–455",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "En pasos de 5 W."
@@ -1339,7 +1339,7 @@
         "eficiencia_pct": {
           "valor": 20.93,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Comprobación: 455 / (2,094 × 1,038) = 20,93 %. La gama va del 19,78 % al 20,93 %."
@@ -1347,7 +1347,7 @@
         "tecnologia_celula": {
           "valor": "PERC, P-type, 9 busbars",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Células M6 de 166 × 83 mm."
@@ -1355,7 +1355,7 @@
         "tipo_celula": {
           "valor": "monocristalina",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1363,7 +1363,7 @@
         "num_celulas": {
           "valor": 144,
           "unidad": "medias células (6×24)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1371,7 +1371,7 @@
         "bifacial": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Vidrio frontal con lámina trasera."
@@ -1387,7 +1387,7 @@
         "vidrio": {
           "valor": "simple (templado de 3,2 mm con antirreflejo)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1395,7 +1395,7 @@
         "marco": {
           "valor": "aluminio anodizado plateado, 35 mm",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1403,7 +1403,7 @@
         "medidas_mm": {
           "valor": "2094 × 1038 × 35",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "2,17 m²: más largo que los módulos domésticos TOPCon de potencia similar (≈1,76 m)."
@@ -1411,7 +1411,7 @@
         "peso_kg": {
           "valor": 24,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "±0,5 kg."
@@ -1419,7 +1419,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.352,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Voc −0,271 %/°C; Isc +0,049 %/°C. Mayor pérdida con calor que los módulos TOPCon (≈ −0,29 %/°C)."
@@ -1427,7 +1427,7 @@
         "noct_o_nmot_c": {
           "valor": 45,
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "±2 °C; la ficha lo llama «Temperatura de Funcionamiento Normal de la Célula»."
@@ -1435,7 +1435,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 2,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "≈98 % el primer año según la gráfica, parcialmente ilegible en la extracción."
@@ -1443,7 +1443,7 @@
         "degradacion_anual_pct": {
           "valor": 0.55,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Lectura de la gráfica de la ficha (≈84,8 % a 25 años); no se pudo leer el documento de garantía."
@@ -1451,7 +1451,7 @@
         "voc_v": {
           "valor": 49.5,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Vmp 41,70 V; Imp 10,92 A."
@@ -1459,7 +1459,7 @@
         "isc_a": {
           "valor": 11.67,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Corriente baja, compatible con casi cualquier inversor o microinversor; tensión alta, que limita el número de módulos por string."
@@ -1467,7 +1467,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V DC (IEC)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Fusible máx. en serie 20 A."
@@ -1475,7 +1475,7 @@
         "carga_mecanica_pa": {
           "valor": "5400 / 2400",
           "unidad": "Pa (frontal/trasera)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Granizo: 25 mm a 23 m/s."
@@ -1483,7 +1483,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "3 diodos."
@@ -1491,7 +1491,7 @@
         "conector": {
           "valor": "compatible MC4; cables de 4 mm² y 1200 mm",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "«Compatible MC4» no es MC4 original; conviene no mezclar marcas de conector."
@@ -1515,7 +1515,7 @@
         "garantia_producto_anios": {
           "valor": 12,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "«Garantía de producto ATERSA-España», según la ficha de 2023. Solarplus.es habla de 10 años contra defectos; la línea TOPCon A-5xxM indica 15 años."
@@ -1523,7 +1523,7 @@
         "garantia_rendimiento_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 98 %. Después, 0.55 %/año. Valores leídos de la gráfica de la ficha (parcialmente ilegible); comprobación: 98 − 24 × 0,55 = 84,8 %."
@@ -1531,7 +1531,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.848,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -1539,7 +1539,7 @@
         "garantia_letra_pequena": {
           "valor": "No se pudo leer el documento oficial de garantía: la página atersa.com/garantias bloquea la lectura automática. Plazos de reclamación, costes cubiertos y exclusiones quedan sin verificar.\nGarantía de producto (12 años) y de rendimiento (25 años, ≈84,8 % final) más cortas que las de los módulos TOPCon domésticos de 2025–2026 de otras marcas, que suelen ofrecer 15–30 años de producto y 30 años de rendimiento con ≈87–89 % final.\nLa garantía la presta Atersa, empresa española con sede en Valencia y filial de un grupo cotizado (Elecnor), lo que facilita reclamar en España aunque el módulo se fabrique en China.\nEn España la garantía legal frente al vendedor es independiente de la del fabricante.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -1547,7 +1547,7 @@
         "garantia_quien_responde": {
           "valor": "Atersa (Aplicaciones Técnicas de la Energía), Ribarroja del Turia (Valencia), filial de Elecnor S.A. No se publica aseguradora de garantía.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf",
           "fecha": "2026-10-18"
         }
@@ -1582,7 +1582,7 @@
         "fabrica": {
           "valor": "Almussafes (Valencia): más de 20.000 m² y hasta 344 MW de capacidad declarada (Wikipedia; Energías Renovables, 2025); Mauritania (planta inaugurada hacia 2014 para la línea ULTRA, según Energías Renovables); Fábricas OEM de terceros en China y Taiwán para la línea Optimum/GS",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.energias-renovables.com/fotovoltaica/atersa-lanza-la-gama-optimum-20140114",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: https://www.alimarket.es/construccion/noticia/144389/atersa-lanza-una-nueva-gama-de-modulos-fotovoltaicos https://www.energias-renovables.com/fotovoltaica/elecnor-compra-atersa-a-la-multinacinal-astropower https://www.energias-renovables.com/fotovoltaica/eclipse-solar-en-europa-20250703 https://es.wikipedia.org/wiki/Atersa https://solarplus.es/marcas/atersa https://www.solarweb.net/forosolar/fotovoltaica-sistemas-aislados-la-red/38145-fabricantes-espanoles-placas.html"
@@ -1726,7 +1726,7 @@
         "potencia_pico_wp": {
           "valor": 470,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha CSI Solar CS6.1-54TD 445–470 W, versiones V1.3_EN (dic. 2023) y V1.4C25_EN (mar. 2024), copia alojada por la tienda española robinsun.es."
@@ -1734,7 +1734,7 @@
         "gama_potencias_wp": {
           "valor": "445–470",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha CSI Solar CS6.1-54TD 445–470 W, versiones V1.3_EN (dic. 2023) y V1.4C25_EN (mar. 2024), copia alojada por la tienda española robinsun.es."
@@ -1742,7 +1742,7 @@
         "eficiencia_pct": {
           "valor": 23,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión 470 W; la de 445 W da 21,8 %."
@@ -1750,7 +1750,7 @@
         "tecnologia_celula": {
           "valor": "TOPCon tipo n",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1758,7 +1758,7 @@
         "tipo_celula": {
           "valor": "monocristalina tipo n",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1766,7 +1766,7 @@
         "num_celulas": {
           "valor": 108,
           "unidad": "semicélulas",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "2 × (9 × 6)"
@@ -1774,7 +1774,7 @@
         "bifacial": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha no lo declara bifacial; es vidrio-vidrio (1,6 + 1,6 mm). El listado de solartraders lo describe como monofacial."
@@ -1790,7 +1790,7 @@
         "vidrio": {
           "valor": "doble vidrio: 1,6 mm delantero (termoendurecido, antirreflejo) + 1,6 mm trasero",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1798,7 +1798,7 @@
         "marco": {
           "valor": "aluminio anodizado; marco negro bajo pedido (V1.3); variantes «Black Frame» y «Full Black» en catálogos europeos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1806,7 +1806,7 @@
         "medidas_mm": {
           "valor": "1800 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1814,7 +1814,7 @@
         "peso_kg": {
           "valor": 22.7,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1822,7 +1822,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.29,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1830,7 +1830,7 @@
         "noct_o_nmot_c": {
           "valor": 41,
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "NMOT 41 ± 3 °C"
@@ -1838,7 +1838,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía de rendimiento: ≥ 99 % el primer año."
@@ -1846,7 +1846,7 @@
         "degradacion_anual_pct": {
           "valor": 0.4,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "Máximo, años 2 a 30."
@@ -1854,7 +1854,7 @@
         "voc_v": {
           "valor": 39.7,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "470 W, STC"
@@ -1862,7 +1862,7 @@
         "isc_a": {
           "valor": 14.86,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "470 W, STC"
@@ -1870,7 +1870,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V DC",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "IEC/UL; la V1.3 también ofrece opción de 1000 V"
@@ -1878,7 +1878,7 @@
         "carga_mecanica_pa": {
           "valor": "hasta 5400 Pa (nieve) / 2400 Pa (viento)",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha remite al manual de instalación; no dice si son cargas de diseño o de ensayo. El valor anterior de esta entrada («hasta 6000 / 4000», de la página de un distribuidor) no coincide con la ficha oficial y se ha sustituido."
@@ -1886,7 +1886,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68 (3 diodos de bypass)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1894,7 +1894,7 @@
         "conector": {
           "valor": "T6, MC4-EVO2 o MC4-EVO2A (V1.4)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://robinsun.es/cdn/shop/files/canadia_black_data.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -1918,7 +1918,7 @@
         "garantia_producto_anios": {
           "valor": 12,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía «Limited Warranty Statement, TopHiKu Series» EN-Rev TopHiKu 1.13 (octubre 2023, contratos desde el 1-10-2023): 12 años de producto; 25 años solo para CS6R-XXXT Black Frame/All Black en tejados de Europa y Japón. Esa revisión no cita el CS6.1-54TD. La ficha V1.4 remite a una «garantía limitada de producto de 25 años» para ciertas instalaciones en tejado en ciertas regiones, y sun.store anuncia «25Y Warranty» para el CS6.1-54TD; no se encontró la revisión de la garantía que lo incluya."
@@ -1926,7 +1926,7 @@
         "garantia_rendimiento_anios": {
           "valor": 30,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.4 %/año. Garantía Rev 1.13 y ficha V1.4: ≥ 99 % el primer año, ≤ 0,4 %/año, ≥ 87,4 % al final del año 30. Coincide con sun.store: https://sun.store/en/product/canadian-tophiku6-cs6.1-54td-465-1500v-mc4-black-frame-25y-warranty-31539"
@@ -1934,7 +1934,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.874,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -1942,7 +1942,7 @@
         "garantia_letra_pequena": {
           "valor": "El desmontaje, la instalación, la reinstalación y las tasas de residuos electrónicos corren a cargo del comprador salvo acuerdo escrito; CSI Solar paga un transporte de devolución razonable en reclamaciones aceptadas, sin seguros, impuestos ni aduanas. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nExcluye productos con pagos pendientes o sin prueba de compra, módulos trasladados de su ubicación original, instalaciones móviles, exposición extrema a calor, sal o productos químicos, y cambios estéticos (arañazos, manchas, óxido, decoloración, moho). Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nLa garantía empieza el día siguiente a la instalación o 90 días después de la entrega, lo que ocurra antes. Las reparaciones o sustituciones no amplían el plazo. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nReclamación por escrito «sin demora indebida» dentro del plazo de garantía, con números de serie y facturas; si hace falta un laboratorio, debe estar acreditado ISO/IEC 17025 y acordado por ambas partes. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nResponsabilidad total limitada al precio pagado; ley aplicable la del contrato de compra. No se aplica a productos vendidos e instalados en Australia, Nueva Zelanda o China continental. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf\nNo exige registro del producto, según el documento Rev 1.13. Fuente: https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -1950,7 +1950,7 @@
         "garantia_quien_responde": {
           "valor": "CSI Solar Co., Ltd. (Suzhou, China), del grupo Canadian Solar Inc., emite la garantía; hay direcciones regionales de reclamación para EMEA. El documento no menciona seguro ni insolvencia. Frente al consumidor en España responde también el vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://mano.elektrum.lt/storage/files/canadiansolar_moduliu_garantija_43b78.pdf",
           "fecha": "2026-10-18"
         }
@@ -2356,7 +2356,7 @@
         "pruebas_independientes": {
           "valor": "Top Performer en el PV Module Reliability Scorecard de Kiwa PVEL 2024 y 2025 (fabricante)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://taiyangnews.info/pressreleases/dmegc-solar-wins-top-performer-in-kiwa-pvel-2025-pv-module-reliability-scorecard",
           "fecha": "2026-10-18",
           "nota": "Nota de prensa de la marca; no especifica qué modelo o lista de materiales se ensayó, así que no puede atribuirse a esta variante concreta. No se encontró un ensayo independiente publicado específico del DM450M10RT-B54HBB (RETC, PVEL por modelo)."
@@ -2620,7 +2620,7 @@
         "potencia_pico_wp": {
           "valor": 440,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha Huasun Himalaya G10 Black Series HS-182-B108DSN 420–440 W, File No. HS-T2-SM-0014 Ver. 2.0 (© 2020-2024), copia alojada por el distribuidor australiano Solarproof. Tolerancia 0/+5 W."
@@ -2628,7 +2628,7 @@
         "gama_potencias_wp": {
           "valor": "420–440",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha Ver. 2.0. El listado europeo de sun.store muestra una gama 430–450 Wp (HS-182-B108DSN450, 23,04 %): https://sun.store/es/product/huasun-hs-182-b108-dsn450-22-kg-16mm-full-black-28786"
@@ -2636,7 +2636,7 @@
         "eficiencia_pct": {
           "valor": 22.53,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión 440 W; la de 420 W da 21,51 %."
@@ -2644,7 +2644,7 @@
         "tecnologia_celula": {
           "valor": "HJT (heterounión), tipo n, semicélula de 182 × 91,75 mm, SMBB",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2652,7 +2652,7 @@
         "tipo_celula": {
           "valor": "monocristalina tipo n",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2660,7 +2660,7 @@
         "num_celulas": {
           "valor": 108,
           "unidad": "semicélulas",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "6 × 18"
@@ -2668,7 +2668,7 @@
         "bifacial": {
           "valor": true,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2676,7 +2676,7 @@
         "bifacialidad_pct": {
           "valor": 90,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Tabla eléctrica: 90 ± 5 %; el texto comercial dice «up to 95%»."
@@ -2684,7 +2684,7 @@
         "vidrio": {
           "valor": "doble vidrio: 2,0 mm delantero / 1,6 mm trasero",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2692,7 +2692,7 @@
         "marco": {
           "valor": "negro (aleación de aluminio anodizado)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2700,7 +2700,7 @@
         "medidas_mm": {
           "valor": "1722 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2708,7 +2708,7 @@
         "peso_kg": {
           "valor": 24.2,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha da «24,2 kg / 21,2 kg» sin decir a qué corresponde cada valor; sun.store y solartraders indican 22 kg en otras variantes. Dato a confirmar."
@@ -2716,7 +2716,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.24,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2724,7 +2724,7 @@
         "noct_o_nmot_c": {
           "valor": 44,
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "NOCT 44 ± 2 °C (la ficha no da NMOT)."
@@ -2732,7 +2732,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía: menos del 1 % el primer año."
@@ -2740,7 +2740,7 @@
         "degradacion_anual_pct": {
           "valor": 0.3,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha: máximo 0,3 %/año desde el año 2. La garantía europea 2022–2023 da en cambio 0,375 %/año de media (años 2–15)."
@@ -2748,7 +2748,7 @@
         "voc_v": {
           "valor": 41.91,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "440 W, STC"
@@ -2756,7 +2756,7 @@
         "isc_a": {
           "valor": 13.05,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "440 W, STC"
@@ -2764,7 +2764,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V DC",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "IEC"
@@ -2772,7 +2772,7 @@
         "carga_mecanica_pa": {
           "valor": "5400 Pa delante / 2400 Pa detrás",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2780,7 +2780,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2788,7 +2788,7 @@
         "conector": {
           "valor": "MC4 original",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -2812,7 +2812,7 @@
         "garantia_producto_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha Ver. 2.0 da 15 años de producto. La garantía «Roof Market Series» v1.0 para Europa, Australia, Nueva Zelanda, Japón y Corea, válida solo para módulos entregados entre el 1-1-2022 y el 31-12-2023, daba 30 años de producto (HS-182-B108DSN incluido). Los listados de sun.store dan 15 años y solartraders 30. No se encontró el documento de garantía vigente para entregas desde 2024. Fuente garantía 2022–2023: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
@@ -2820,7 +2820,7 @@
         "garantia_rendimiento_anios": {
           "valor": 30,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.3 %/año. Valores de la ficha (≥ 90,3 % al año 30). La garantía 2022–2023 da ≥ 99 % el primer año, ≤ 0,375 %/año de media en los años 2–15 y ≥ 88 % al año 30; sun.store indica 90 % a 25 años y 88 % a 30."
@@ -2828,7 +2828,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.903,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -2836,7 +2836,7 @@
         "garantia_letra_pequena": {
           "valor": "La garantía «Roof Market Series» v1.0 solo cubre módulos entregados por la fábrica entre el 1-1-2022 y el 31-12-2023 (art. 13); para módulos posteriores hay que pedir el documento vigente. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nNo cubre instalación, desmontaje, reinstalación, aranceles ni transporte; Huasun puede reembolsar un flete de devolución razonable si su servicio al cliente lo aprueba. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nLa reclamación debe notificarse por escrito en 30 días desde que se detecta el problema; el correo electrónico solo no se considera notificación válida. No se pueden devolver módulos sin autorización escrita. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nSi se opta por reembolso, se paga el precio original menos un 3,3 % de depreciación por año; la responsabilidad total se limita al valor de factura de los módulos defectuosos. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nLa garantía empieza en la entrega o seis meses después de salir de fábrica, lo que ocurra antes. Es transferible si los módulos siguen en la misma instalación y la transmisión está documentada. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf\nLas disputas técnicas las resuelve un laboratorio (TÜV SÜD, Intertek, UL, CQC, CGC) y «Huasun se reserva el derecho de interpretación final»; la ley aplicable es la del contrato de venta. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -2844,7 +2844,7 @@
         "garantia_quien_responde": {
           "valor": "Anhui Huasun Energy Co., Ltd. (China). La ficha menciona un reaseguro suscrito con Ariel Re, pero no se encontró la póliza ni sus condiciones; el documento de garantía no habla de seguro ni de insolvencia. En la práctica, la primera reclamación se hace al distribuidor o instalador.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
           "fecha": "2026-10-18"
         }
@@ -3078,7 +3078,7 @@
         "bifacial": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
           "fecha": "2026-10-18",
           "nota": "sun.store y Krannich (https://shop.krannich-solar.com/en-de/JAM54D40-465-LR/0161820) describen la variante /LR como monofacial; las variantes /LB son las bifaciales. La URL de solartraders con «bif» parece un error del distribuidor."
@@ -3158,7 +3158,7 @@
         "voc_v": {
           "valor": 40.4,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
           "fecha": "2026-10-18",
           "nota": "470/LR, STC, según la ficha reproducida por el mayorista sun.store (Vmpp 33,84 V, Impp 13,89 A). Krannich da 40,20 V para la versión 465/LR: https://shop.krannich-solar.com/en-de/JAM54D40-465-LR/0161820"
@@ -3166,7 +3166,7 @@
         "isc_a": {
           "valor": 14.66,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://sun.store/en/product/ja-solar-jam54d40-470-lr-445-470-1500v-black-frame-mc4-evo2a-56048",
           "fecha": "2026-10-18",
           "nota": "470/LR, STC, según sun.store. Krannich da 14,65 A para la 465/LR."
@@ -3283,11 +3283,17 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/JAM54D40-460-LB/0159081",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "China, Vietnam y EE. UU. (desde finales de 2023), según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: http://www.pv-magazine.com/2025/12/01/astronergy-and-ja-solar-end-global-patent-disputes-with-cross-licensing-deal/ https://www.solartraders.com/es/producers/ja-solar/deep-blue-4-0-pro"
@@ -3456,7 +3462,7 @@
         "potencia_pico_wp": {
           "valor": 475,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Variante JKM475N, STC; tolerancia 0/+3 %."
@@ -3464,7 +3470,7 @@
         "gama_potencias_wp": {
           "valor": "460–485",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "La nota de prensa de Jinko habla de hasta 495 W para la gama doméstica Tiger Neo 3.0, pero esta ficha europea llega a 485 W."
@@ -3472,7 +3478,7 @@
         "eficiencia_pct": {
           "valor": 23.77,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Variante 475 W; 24,27 % en la de 485 W."
@@ -3480,7 +3486,7 @@
         "tecnologia_celula": {
           "valor": "TOPCon tipo n",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3488,7 +3494,7 @@
         "tipo_celula": {
           "valor": "monocristalino",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3496,7 +3502,7 @@
         "num_celulas": {
           "valor": 192,
           "unidad": "células (48×4)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Cortes de célula más pequeños que la media célula clásica."
@@ -3504,7 +3510,7 @@
         "bifacial": {
           "valor": false,
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Monofacial pese a tener vidrio trasero; existe una variante bifacial (BDV) que no es la descrita."
@@ -3520,7 +3526,7 @@
         "vidrio": {
           "valor": "doble: 2,0 mm frontal antirreflejo + 2,0 mm trasero termoendurecido",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3528,7 +3534,7 @@
         "marco": {
           "valor": "aluminio anodizado (marco negro en la versión BFR)",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3536,7 +3542,7 @@
         "medidas_mm": {
           "valor": "1762 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3544,7 +3550,7 @@
         "peso_kg": {
           "valor": 24.4,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Más pesado que los módulos de vidrio simple de tamaño similar (≈21 kg)."
@@ -3552,7 +3558,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.26,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Voc −0,24 %/°C; Isc +0,046 %/°C."
@@ -3568,7 +3574,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3576,7 +3582,7 @@
         "degradacion_anual_pct": {
           "valor": 0.35,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Discrepancia: el documento de garantía europeo REV.EN20250110 indica 0,40 %/año para la familia Tiger Neo (https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405)."
@@ -3584,7 +3590,7 @@
         "voc_v": {
           "valor": 36.42,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Variante 475 W, STC."
@@ -3592,7 +3598,7 @@
         "isc_a": {
           "valor": 15.86,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Variante 475 W, STC. Vmp 31,11 V; Imp 15,27 A."
@@ -3600,7 +3606,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V CC (IEC)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Fusible máximo en serie 30 A; clase II; fuego clase C."
@@ -3608,7 +3614,7 @@
         "carga_mecanica_pa": {
           "valor": "6000 frontal / 4000 trasera",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Cargas estáticas."
@@ -3616,7 +3622,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3624,7 +3630,7 @@
         "conector": {
           "valor": "JK03M / JK03M2 (MC4-EVO2 bajo pedido, según disponibilidad)",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "El conector propio de Jinko puede no ser compatible con MC4 de otros fabricantes: mezclar conectores de marcas distintas suele anular garantías."
@@ -3656,7 +3662,7 @@
         "garantia_rendimiento_anios": {
           "valor": 30,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.35 %/año. Según la ficha técnica. El documento de garantía europeo REV.EN20250110 da para Tiger Neo 99 % el año 1, 0,40 %/año y 87,40 % al año 30 (https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405): prevalece lo que diga el documento de garantía que entregue el vendedor."
@@ -3664,7 +3670,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.8885,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -3672,7 +3678,7 @@
         "garantia_letra_pequena": {
           "valor": "El documento de garantía europeo leído (REV.EN20250110, para contratos desde el 10 de enero de 2025) lista Tiger Neo 54HL4R y 48HL4M, pero no el 48QL6-DV; hay que pedir el documento aplicable a este modelo. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nLa garantía empieza 180 días después de la fecha de fabricación (codificada en el número de serie) o en la entrega al comprador, lo que ocurra antes. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nSolo válida en países europeos y si los módulos permanecen en la región de venta original; excluye canales no autorizados y falsificaciones. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nEl cliente paga desmontaje, reembalaje, reinstalación y eliminación, y los ensayos si no confirman el defecto; Jinko paga el envío de los repuestos. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nAviso en 30 días a través de cs.jinkosolar.com, con números de serie y prueba de compra; Jinko puede exigir ensayo en laboratorio independiente (TÜV Rheinland, TÜV SÜD…). Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nExcluye entornos marinos y corrosivos y plataformas móviles. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405\nSi el modelo deja de fabricarse, Jinko entrega el sustituto más parecido disponible; no se dice nada sobre quiebra. Fuente: https://www.photovoltaik4all.de/media/22/c4/75/1750762769/Tiger%20Neo%20Garantiebedingungen.pdf?ts=1750766405",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -3680,7 +3686,7 @@
         "garantia_quien_responde": {
           "valor": "El fabricante (Jinko Solar Co., Ltd.); la ley aplicable es la del contrato de compraventa. No se menciona seguro de respaldo ni qué ocurre si la empresa cesa. Frente al consumidor en España responde también el vendedor.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.photovoltaik4all.de/media/44/07/8c/1780922626/Jinko%20JKMxxxN-48QL6-DV%20Datenblatt.pdf?ts=1780922626",
           "fecha": "2026-10-18"
         }
@@ -3714,7 +3720,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado en la ficha",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/de-de/JKM475N-48QL6-DV-Tiger-Neo-III/0163792",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat Ursprungsland: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "China (Sichuan, Jiangxi, entre otras) y Vietnam, según el informe Sheffield Hallam. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "unidad": null,
@@ -3926,7 +3938,7 @@
         "potencia_pico_wp": {
           "valor": 435,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Variante LR5-54HTH-435M, STC; tolerancia 0/+3 %."
@@ -3934,7 +3946,7 @@
         "gama_potencias_wp": {
           "valor": "420–440",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Ficha 20230926V19. Una ficha anterior (V17) cubría 415–435 W (https://pv.de/en/news/new-in-our-product-range-the-hi-mo-6-explorer-series-from-longi-solar/)."
@@ -3942,7 +3954,7 @@
         "eficiencia_pct": {
           "valor": 22.3,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Variante 435 W (≥22,3 %); 22,5 % en la de 440 W. solartraders indica 22,28 % para la 435 W."
@@ -3958,7 +3970,7 @@
         "tipo_celula": {
           "valor": "monocristalino",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3966,7 +3978,7 @@
         "num_celulas": {
           "valor": 108,
           "unidad": "medias células (6×18)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3974,7 +3986,7 @@
         "bifacial": {
           "valor": false,
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/de/products/module/longi-solar-lr5-54hth-435m-bfr",
           "fecha": "2026-10-18",
           "nota": "Vidrio y lámina trasera; monofacial."
@@ -3990,7 +4002,7 @@
         "vidrio": {
           "valor": "simple, 3,2 mm templado con antirreflejo",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": ""
@@ -3998,7 +4010,7 @@
         "marco": {
           "valor": "aluminio anodizado negro, lámina trasera blanca",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/de/products/module/longi-solar-lr5-54hth-435m-bfr",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4006,7 +4018,7 @@
         "medidas_mm": {
           "valor": "1722 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4014,7 +4026,7 @@
         "peso_kg": {
           "valor": 20.8,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4022,7 +4034,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.29,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Voc −0,230 %/°C; Isc +0,050 %/°C."
@@ -4030,7 +4042,7 @@
         "noct_o_nmot_c": {
           "valor": 45,
           "unidad": "°C (NOCT, ±2)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Potencia en NOCT de la variante 435 W: 325 W."
@@ -4038,7 +4050,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1.5,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "«Menos del 1,5 %»."
@@ -4046,7 +4058,7 @@
         "degradacion_anual_pct": {
           "valor": 0.4,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Años 2 a 25."
@@ -4054,7 +4066,7 @@
         "voc_v": {
           "valor": 39.33,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Variante 435 W, STC."
@@ -4062,7 +4074,7 @@
         "isc_a": {
           "valor": 14.22,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Variante 435 W, STC. Vmp 33,04 V; Imp 13,17 A."
@@ -4070,7 +4082,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V CC (IEC/UL)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Corriente inversa / fusible 25 A; clase II; fuego IEC clase C."
@@ -4078,7 +4090,7 @@
         "carga_mecanica_pa": {
           "valor": "5400 presión / 2400 succión",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Granizo de 25 mm a 23 m/s."
@@ -4086,7 +4098,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4094,7 +4106,7 @@
         "conector": {
           "valor": "Stäubli MC4 (según el distribuidor)",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/de/products/module/longi-solar-lr5-54hth-435m-bfr",
           "fecha": "2026-10-18",
           "nota": "La ficha no nombra el conector; cable de 4 mm², ±1200 mm."
@@ -4118,7 +4130,7 @@
         "garantia_producto_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Un mayorista español (Amara NZero) comercializa una referencia con sufijo «25 YW», que podría ser una garantía ampliada de 25 años; no confirmado (https://amaranzero.es/en/catalogue/solar/modules/110-0123-longi-lr5-54hth-435w-hi-mo-x6-expl-black-f-mc4-1500v-25-yw)."
@@ -4126,7 +4138,7 @@
         "garantia_rendimiento_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 98.5 %. Después, 0.4 %/año. 98,5 % al final del año 1; 0,40 %/año; 88,9 % al año 25 (gráfico de la ficha). En Australia la garantía publicada difiere (97,5 % el año 1 y unos 0,73 %/año según https://www.solarproof.com.au/products/LR5-54HTH-430MHi-MOX6Explorer.php): las condiciones dependen del país."
@@ -4134,7 +4146,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.889,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -4142,7 +4154,7 @@
         "garantia_letra_pequena": {
           "valor": "No se pudo leer el documento de garantía específico del LR5-54HTH (el PDF alojado por solartraders no tiene texto legible por máquina: https://www.solartraders.com/uploads/production/data_sheet/file/37564/warranty_lr5_54hth_hi_mo_6_explorer_en_24-11-2024.pdf?locale=de). Las condiciones generales de LONGi para el mercado de generación distribuida que sí se leyeron (Hi-MO X10 y Hi-MO S10) establecen: inicio en la entrega o seis meses después de salir de fábrica, aviso escrito en 30 días, desmontaje y reinstalación a cargo del cliente, y elección del remedio por LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLas condiciones de garantía varían según país: la versión australiana anuncia otra curva de degradación. Fuente: https://www.solarproof.com.au/products/LR5-54HTH-430MHi-MOX6Explorer.php\nLa garantía de potencia es de 25 años y no de 30, a diferencia del Hi-MO X10 Explorer. Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -4150,7 +4162,7 @@
         "garantia_quien_responde": {
           "valor": "El fabricante (LONGi). No se ha encontrado mención a seguro de respaldo ni a qué ocurre en caso de quiebra o salida de Europa. Frente al consumidor en España responde también el vendedor (garantía legal de conformidad).",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde",
           "fecha": "2026-10-18"
         }
@@ -4355,7 +4367,7 @@
         "potencia_pico_wp": {
           "valor": 490,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante LR7-54HVH-490M, STC; tolerancia 0/+3 %."
@@ -4363,7 +4375,7 @@
         "gama_potencias_wp": {
           "valor": "475–490",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha 20241118 BGV02 Draft. sun.store anuncia la serie como 480–500 W (https://sun.store/en/product/longi-lr7-54hvh-485m-480-500-1500v-black-frame-56160); no se ha visto ficha oficial con 495–500 W."
@@ -4371,7 +4383,7 @@
         "eficiencia_pct": {
           "valor": 24,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante 490 W; 23,8 % en la de 485 W y 23,3 % en la de 475 W. El 24,8 % que anuncia LONGi corresponde al formato grande de 670 W, no a este."
@@ -4387,7 +4399,7 @@
         "tipo_celula": {
           "valor": "monocristalino",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4395,7 +4407,7 @@
         "num_celulas": {
           "valor": 108,
           "unidad": "medias células (6×18)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4403,7 +4415,7 @@
         "bifacial": {
           "valor": false,
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante HVH monofacial con lámina trasera; existe una variante bifacial vidrio-vidrio (LR7-54HVD) que no es la descrita aquí."
@@ -4419,7 +4431,7 @@
         "vidrio": {
           "valor": "simple, 3,2 mm templado con antirreflejo",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4427,7 +4439,7 @@
         "marco": {
           "valor": "aluminio anodizado (marco negro en la versión comercializada en España)",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Color negro según las referencias de tienda («Black frame»)."
@@ -4435,7 +4447,7 @@
         "medidas_mm": {
           "valor": "1800 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4443,7 +4455,7 @@
         "peso_kg": {
           "valor": 21.6,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": ""
@@ -4451,7 +4463,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.26,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Voc −0,200 %/°C; Isc +0,050 %/°C."
@@ -4459,7 +4471,7 @@
         "noct_o_nmot_c": {
           "valor": 45,
           "unidad": "°C (NOCT, ±2)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Potencia en NOCT de la variante 490 W: 373 W."
@@ -4467,7 +4479,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha indica «<1 %»; el documento de garantía fija ≥99 % al final del año 1."
@@ -4475,7 +4487,7 @@
         "degradacion_anual_pct": {
           "valor": 0.35,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18",
           "nota": "Años 2 a 30."
@@ -4483,7 +4495,7 @@
         "voc_v": {
           "valor": 40.52,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante 490 W, STC."
@@ -4491,7 +4503,7 @@
         "isc_a": {
           "valor": 15.33,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Variante 490 W, STC. Vmp 33,51 V; Imp 14,63 A."
@@ -4499,7 +4511,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V CC (IEC)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Fusible máximo en serie 25 A; clase II; reacción al fuego IEC clase C."
@@ -4507,7 +4519,7 @@
         "carga_mecanica_pa": {
           "valor": "5400 frontal / 2400 trasera",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Granizo de 25 mm a 23 m/s."
@@ -4515,7 +4527,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://cdn.autosolar.es/pdf/fichas-tecnicas/1006029.pdf",
           "fecha": "2026-10-18",
           "nota": "Tres diodos de derivación."
@@ -4523,7 +4535,7 @@
         "conector": {
           "valor": "MC4 (según la referencia del distribuidor)",
           "unidad": "",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://pre.amaranzero.es/en/products/solar/modules/110-0125-longi-lr7-54hvh-490w-hi-mo-x10-exp-black-f-mc4-1500v",
           "fecha": "2026-10-18",
           "nota": "La ficha técnica no especifica el conector; cable de 4 mm²."
@@ -4547,7 +4559,7 @@
         "garantia_producto_anios": {
           "valor": 15,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18",
           "nota": "La versión Explorer de 54 células tiene 15 años de producto; la versión Scientist, 25 años."
@@ -4555,7 +4567,7 @@
         "garantia_rendimiento_anios": {
           "valor": 30,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 99 %. Después, 0.35 %/año. ≥99 % al final del año 1; pérdida ≤0,35 %/año; ≥88,85 % (la garantía redondea a 88,9 %) al final del año 30. Solo potencia de la cara frontal, medida en STC por un laboratorio aceptado."
@@ -4563,7 +4575,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.8885,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -4571,7 +4583,7 @@
         "garantia_letra_pequena": {
           "valor": "La garantía empieza en la fecha de entrega al primer cliente o seis meses después de salir de fábrica, lo que ocurra antes: un módulo almacenado meses pierde parte del plazo. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nEl cliente paga desmontaje, reembalaje, instalación y reinstalación; LONGi solo compensa el transporte documentado de reclamaciones aprobadas. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLa reclamación debe comunicarse por escrito en los 30 días siguientes a detectar el problema; los envíos sin número RMA son por cuenta y riesgo del cliente. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLas pruebas de terceros las adelanta el cliente; LONGi las reembolsa solo si confirman un fallo imputable a LONGi. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLONGi elige el remedio (reparar, sustituir, añadir módulos o reembolsar el valor residual o la diferencia de potencia a precio de mercado por vatio); las sustituciones no amplían el plazo. Responsabilidad total limitada al precio facturado de los módulos defectuosos. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nExclusiones: instalación que no siga el manual (que LONGi puede actualizar), edificios no aptos, instalaciones móviles y la mayoría de las marinas, tensión superior a la nominal, ambientes corrosivos, placas de características manipuladas o ilegibles. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nLa garantía se transmite a un nuevo propietario solo si los módulos siguen en el emplazamiento original, están pagados y el nuevo titular acepta todas las condiciones. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf\nEl documento no exige registro del producto ni instalador certificado, pero tampoco dice qué ocurre si LONGi o su filial europea dejan de operar. Fuente: https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -4579,7 +4591,7 @@
         "garantia_quien_responde": {
           "valor": "El fabricante (LONGi Green Energy Technology). El documento de garantía no menciona seguro de respaldo por terceros ni qué sucede en caso de quiebra o salida del mercado europeo; la ley aplicable es la del contrato de suministro del módulo. Frente al consumidor en España responde además el vendedor por la garantía legal de conformidad.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solarmarkt.ch/herstimg/10-Solarmodule/Longi_Solar/GA_EN_Longi_HiMO_X10_20250108.pdf",
           "fecha": "2026-10-18"
         }
@@ -4614,7 +4626,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado en la ficha ni en la web del producto",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/Hi-MO-X10-Explorer-LR7-54HVH-480M/0158571",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": {
           "valor": "Sede y dirección de fabricante en la ficha: No. 8369 Shangyuan Road, Xi'an Economic and Technological Development Zone, Xi'an (China). Fuente: https://memodo.de/mwdownloads/a1db1dd007225024a35c87e74860ddde; El informe Sheffield Hallam cita capacidad de células y módulos en el Sudeste Asiático (Malasia, Vietnam). Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf",
           "unidad": null,
@@ -5238,7 +5256,7 @@
         "potencia_pico_wp": {
           "valor": 400,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha Meyer Burger White, «As of: September 2021, Version 1.0.1» (datos preliminares según la propia ficha), copia archivada por el distribuidor checo Memodo. Tolerancia −0/+5 W."
@@ -5246,7 +5264,7 @@
         "gama_potencias_wp": {
           "valor": "380–400",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha Meyer Burger White, «As of: September 2021, Version 1.0.1» (datos preliminares según la propia ficha), copia archivada por el distribuidor checo Memodo."
@@ -5254,7 +5272,7 @@
         "eficiencia_pct": {
           "valor": 21.7,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "Versión 400 W; la de 380 W da 20,7 %."
@@ -5262,7 +5280,7 @@
         "tecnologia_celula": {
           "valor": "HJT (heterounión) con interconexión SmartWire",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha cita «patented SmartWire technology» y células «mono n-Si, heterojunction»."
@@ -5270,7 +5288,7 @@
         "tipo_celula": {
           "valor": "monocristalina tipo n",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5278,7 +5296,7 @@
         "num_celulas": {
           "valor": 120,
           "unidad": "semicélulas",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5286,7 +5304,7 @@
         "bifacial": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "Vidrio-lámina; medidas eléctricas monofaciales."
@@ -5302,7 +5320,7 @@
         "vidrio": {
           "valor": "simple, 3,2 mm con antirreflejo; lámina trasera blanca de alta barrera",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5310,7 +5328,7 @@
         "marco": {
           "valor": "negro (aluminio anodizado)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "Sustituye al valor anterior deducido del nombre («plateado»): en la ficha, «White» se refiere a la lámina trasera blanca, no al marco."
@@ -5318,7 +5336,7 @@
         "medidas_mm": {
           "valor": "1767 × 1041 × 35",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5326,7 +5344,7 @@
         "peso_kg": {
           "valor": 19.7,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5334,7 +5352,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.259,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5342,7 +5360,7 @@
         "noct_o_nmot_c": {
           "valor": 44,
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "NMOT 44 ± 2 °C"
@@ -5350,7 +5368,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 2,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía: ≥ 98 % tras el primer año."
@@ -5358,7 +5376,7 @@
         "degradacion_anual_pct": {
           "valor": 0.25,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5366,7 +5384,7 @@
         "voc_v": {
           "valor": 44.7,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "400 W, STC"
@@ -5374,7 +5392,7 @@
         "isc_a": {
           "valor": 11.1,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": "400 W, STC"
@@ -5382,7 +5400,7 @@
         "tension_max_sistema_v": {
           "valor": 1000,
           "unidad": "V DC",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5390,7 +5408,7 @@
         "carga_mecanica_pa": {
           "valor": "+6000 / −4000 Pa (carga de ensayo, con factor de seguridad 1,5)",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5398,7 +5416,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68 (3 diodos, IEC 62790)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5406,7 +5424,7 @@
         "conector": {
           "valor": "MC4 (IEC 62852)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5430,7 +5448,7 @@
         "garantia_producto_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Condiciones de garantía Meyer Burger (Industries) GmbH V 1.3 (06-07-2022), para el EEE, Reino Unido y Suiza: 25 años en módulos vidrio-lámina (White, Black) y 30 años en vidrio-vidrio. La ficha de 2021 también da 25 años."
@@ -5438,7 +5456,7 @@
         "garantia_rendimiento_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 98 %. Después, 0.25 %/año. Vidrio-lámina. Para vidrio-vidrio: 99 % el primer año, 0,20 %/año, 93,2 % al año 30. Tolerancia de placa ± 3 %."
@@ -5446,7 +5464,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.92,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -5454,7 +5472,7 @@
         "garantia_letra_pequena": {
           "valor": "El garante es Meyer Burger (Industries) GmbH (Freiberg), una de las filiales alemanas que pidieron la insolvencia el 2-6-2025. Fuentes: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl ; https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/\nDesmontaje y reinstalación: Meyer Burger pagaba una cantidad fija de 150 € por instalación y caso, más 25 € por módulo afectado; el resto lo paga el cliente. Transporte solo con consentimiento previo. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nReclamación por escrito al vendedor en 30 días desde que aparece el defecto, con número de serie, fotos y factura; si el vendedor ya no existe, directamente a Meyer Burger. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nLa garantía es para el «cliente final» que pone en marcha los módulos; el documento no regula su transmisión a propietarios posteriores. Ley alemana y tribunales de Dresde. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nEl documento no menciona ningún seguro de garantía ni qué ocurre si el propio fabricante quiebra. Fuente: https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl\nKrannich, que aún ofrece módulos Meyer Burger como «warehouse deals», avisa de que «Meyer Burger Industries GmbH is in insolvency proceedings» y recomienda informarse de las consecuencias para la garantía del fabricante. Fuente: https://shop.krannich-solar.com/de-en/special-offers/warehouse-deals/59639/meyer-burger-glass-385",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -5462,7 +5480,7 @@
         "garantia_quien_responde": {
           "valor": "No consta que nadie asuma hoy las garantías de fabricante. Las filiales alemanas están en insolvencia (administradores Lucas Flöther y Reinhard Klose) y pararon la producción el 1-9-2025 sin inversor: https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/ La matriz suiza entró en moratoria provisional de deudas, dio por imposible el rescate del grupo y no se opuso a su exclusión de cotización en SIX (17-9-2025): https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html Swift Solar compró en marzo de 2026 la propiedad intelectual HJT y activos de EE. UU.; la noticia no menciona garantías: https://www.pvtime.org/?p=25046 En la práctica, una reclamación de garantía comercial pasaría a ser un crédito concursal. Frente al consumidor en España sigue respondiendo el vendedor por la garantía legal de conformidad (3 años en bienes nuevos vendidos desde 2022).",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl",
           "fecha": "2026-10-18"
         }
@@ -5499,7 +5517,7 @@
         "fabrica": {
           "valor": "Thalheim (Sajonia-Anhalt, Alemania): células; filial en insolvencia desde junio de 2025; Freiberg (Sajonia, Alemania): módulos; cierre anunciado en marzo de 2024; Hohenstein-Ernstthal (Sajonia, Alemania): ingeniería y desarrollo; filial en insolvencia; Goodyear (Arizona, EE. UU.): módulos, 1,4 GW; producción terminada el 30 de mayo de 2025",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.pv-tech.org/meyer-burger-files-insolvency-of-german-solar-cell-production-plant/",
           "fecha": "2026-10-18",
           "nota": "Meyer Burger (Industries) GmbH, Freiberg (Alemania), según la ficha de 2021; células de Thalheim Otras fuentes: https://www.pv-tech.org/meyer-burger-confirms-end-of-arizona-module-production/ https://en.wikipedia.org/wiki/Meyer_Burger_Technology https://de.wikipedia.org/wiki/Meyer_Burger https://solartraders.com/uploads/production/data_sheet/file/28772/Meyer-Burger_2022_01%20WA%20EN.pdf?locale=nl https://www.memodo.cz/media/pdf/d0/be/9c/ds_meyer_burger_white_en_1d5c15ec23480a21ef836b8914727feb.pdf https://www.moneycab.com/schweiz/meyer-burger-stellt-betrieb-deutscher-standorte-ein/amp/ https://www.bluewin.ch/en/news/meyer-burger-sees-no-chance-of-rescue-2875471.html https://www.pvtime.org/?p=25046"
@@ -5643,7 +5661,7 @@
         "potencia_pico_wp": {
           "valor": 425,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha Qcells Q.TRON BLK M-G2+ Rev06 2025-03, edición para Norteamérica (DCA_415-440_2025-03_Rev06_NA). No se encontró la ficha europea; el listado europeo de sun.store da los mismos valores para la versión de 425 W. Tolerancia +5/−0 W."
@@ -5651,7 +5669,7 @@
         "gama_potencias_wp": {
           "valor": "415–440",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "Ficha norteamericana. El listado europeo de sun.store indica 405–430 Wp para la serie: https://sun.store/en/product/qcells-qtron-blk-m-g2-425-full-black-23670"
@@ -5659,7 +5677,7 @@
         "eficiencia_pct": {
           "valor": 21.8,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "Mínima, versión 425 W. La ficha anuncia «hasta 22,5 %», que corresponde solo a la versión de 440 W."
@@ -5667,7 +5685,7 @@
         "tecnologia_celula": {
           "valor": "n-type Q.ANTUM NEO (contactos pasivados, descrita como TOPCon por distribuidores)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "La ficha dice «Q.ANTUM NEO half cells, N-type»; el término TOPCon aparece en distribuidores (p. ej. greentechrenewables.com), no en la ficha."
@@ -5675,7 +5693,7 @@
         "tipo_celula": {
           "valor": "monocristalina",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5683,7 +5701,7 @@
         "num_celulas": {
           "valor": 108,
           "unidad": "semicélulas",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "6 × 18"
@@ -5691,7 +5709,7 @@
         "bifacial": {
           "valor": false,
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "Monofacial; trasera de lámina compuesta."
@@ -5707,7 +5725,7 @@
         "vidrio": {
           "valor": "simple, 3,2 mm templado con antirreflejo; trasera de lámina compuesta",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5715,7 +5733,7 @@
         "marco": {
           "valor": "negro (aluminio anodizado)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5723,7 +5741,7 @@
         "medidas_mm": {
           "valor": "1722 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5731,7 +5749,7 @@
         "peso_kg": {
           "valor": 21.2,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5739,7 +5757,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.3,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5747,7 +5765,7 @@
         "noct_o_nmot_c": {
           "valor": 43,
           "unidad": "°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "NMOT 43 ± 3 °C"
@@ -5755,7 +5773,7 @@
         "degradacion_primer_anio_pct": {
           "valor": 1.5,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "Garantía: al menos 98,5 % el primer año."
@@ -5763,7 +5781,7 @@
         "degradacion_anual_pct": {
           "valor": 0.33,
           "unidad": "%/año",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "Máximo garantizado, años 2 a 25."
@@ -5771,7 +5789,7 @@
         "voc_v": {
           "valor": 39.03,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "425 W, STC"
@@ -5779,7 +5797,7 @@
         "isc_a": {
           "valor": 13.66,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "425 W, STC"
@@ -5787,7 +5805,7 @@
         "tension_max_sistema_v": {
           "valor": 1000,
           "unidad": "V DC",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": "IEC y UL"
@@ -5795,7 +5813,7 @@
         "carga_mecanica_pa": {
           "valor": "5400 Pa presión / 2400 Pa succión (carga de diseño); 8100 / 3600 Pa (carga de ensayo)",
           "unidad": "Pa",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5803,7 +5821,7 @@
         "ip_caja_conexiones": {
           "valor": "IP67",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5811,7 +5829,7 @@
         "conector": {
           "valor": "Stäubli MC4 (IP68)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf",
           "fecha": "2026-10-18",
           "nota": null
@@ -5835,7 +5853,7 @@
         "garantia_producto_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18",
           "nota": "Condiciones de garantía Qcells para Q.TRON (BLK) M-G2+ / ML-G2+, rev. 2023-11 (HQCQDC_Warranty_terms_modules_Q.TRON-G2.X+_series_2023-11_Rev01_EN), válidas para módulos vendidos e instalados en la UE, Noruega, Suiza, Reino Unido y otros países listados. Cubre defectos de material y fabricación que afecten de forma significativa a la potencia; excluye cambios estéticos."
@@ -5843,7 +5861,7 @@
         "garantia_rendimiento_anios": {
           "valor": 25,
           "unidad": "años",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18",
           "nota": "Pérdida el primer año: 98.5 %. Después, 0.33 %/año. El 90,58 % a 25 años figura en la ficha (Rev06) y en el listado europeo de sun.store; el documento de garantía fija 98,5 % el primer año y un máximo de 0,33 %/año hasta el año 25."
@@ -5851,7 +5869,7 @@
         "garantia_rendimiento_final_pct": {
           "valor": 0.9058,
           "unidad": "fracción",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18",
           "nota": "Capacidad o potencia garantizada al final del plazo (0,8 = 80 %)."
@@ -5859,7 +5877,7 @@
         "garantia_letra_pequena": {
           "valor": "No cubre costes de desmontaje ni de instalación, ni la pérdida de producción: el documento «excluye específicamente» su reembolso. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nEl cliente paga el envío de los módulos a Qcells para su evaluación; Qcells solo asume inspección y transporte si la reclamación se confirma. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nHay que notificar el defecto en 30 días desde que se descubre (y los defectos visibles en 30 días desde la entrega), por el procedimiento RMA y con factura original que muestre fechas de compra y entrega, números de serie y vendedor. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nLas reclamaciones por rotura de vidrio exigen un cálculo de carga estática de la estructura. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nLa garantía se transmite a un nuevo propietario solo si el sistema fotovoltaico completo sigue intacto en su ubicación original. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nExcluye uso móvil (vehículos, barcos), entornos salinos o ácidos, montaje o mantenimiento incorrectos y retirada de etiquetas de serie. Rige la ley alemana y son competentes los tribunales de Leipzig. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf\nEl documento no exige registro del producto: la garantía empieza en la fecha de entrega al cliente original o, si no se puede documentar, 60 días después de la fecha de fabricación. Fuente: https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18",
           "nota": "Cada línea lleva su fuente cuando no es el documento de garantía."
@@ -5867,7 +5885,7 @@
         "garantia_quien_responde": {
           "valor": "El garante en el documento europeo es Hanwha Q CELLS (Qidong) Co., Ltd. (Jiangsu, China); el pie del documento cita a Hanwha Q CELLS GmbH (Bitterfeld-Wolfen, Alemania). El documento no dice nada sobre insolvencia ni sobre un seguro de terceros que respalde la garantía. Su matriz, Hanwha Solutions, es un grupo industrial grande, pero eso no es una garantía contractual.",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf",
           "fecha": "2026-10-18"
         }
@@ -5905,7 +5923,7 @@
         "fabrica": {
           "valor": "Qidong, Jiangsu (China): Hanwha Q CELLS (Qidong) Co., Ltd., emisor de la garantía europea de esta serie; Jincheon (Corea del Sur); Cyberjaya (Malasia); Dalton y Cartersville (Georgia, EE. UU.)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://en.wikipedia.org/wiki/Qcells",
           "fecha": "2026-10-18",
           "nota": "Hanwha Q CELLS (Qidong) Co., Ltd., No.888 Linyang Road, Qidong (Jiangsu, China), según la garantía europea Otras fuentes: https://www.q-cells.eu https://midsummer.ie/pdfs/qcells-hqcqdc-warranty-terms-modules-q.tron-g2.x--series-2023-11-rev01-en.pdf https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
@@ -6053,7 +6071,7 @@
       "anio_lanzamiento": {
         "valor": 2022,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.solarserver.de/2022/05/12/intersolar-rec-praesentiert-neues-photovoltaik-modul/",
         "fecha": "2026-10-18",
         "nota": "Presentado en Intersolar Europe en mayo de 2022 (fecha del artículo; no se abrió el texto completo). El Pure-RX es posterior (ficha de 2024)."
@@ -6329,7 +6347,7 @@
         "fabrica": {
           "valor": "Tuas (Singapur): células y módulos, ~1,2 GW/año; Jamnagar (India), de Reliance: módulos de 720 Wp para plantas grandes desde mayo de 2026, según 42watt.de; no destinados al mercado residencial",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://42watt.de/magazin/rec-solar",
           "fecha": "2026-10-18",
           "nota": "Tuas, Singapur (la ficha dice «Made in Singapore») Otras fuentes: https://www.solarpowerworldonline.com/?p=110545 https://rework.recgroup.com/sites/default/files/documents/rec_warranty_fact_sheet_en_web.pdf"
@@ -6520,7 +6538,7 @@
       "anio_lanzamiento": {
         "valor": 2023,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
         "fecha": "2026-10-18",
         "nota": "Deducido del código de versión de la ficha (H2-2023); la marca no publica una fecha de lanzamiento."
@@ -6535,7 +6553,7 @@
         "potencia_pico_wp": {
           "valor": 450,
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "STC; tolerancia 0/+3 W."
@@ -6543,7 +6561,7 @@
         "gama_potencias_wp": {
           "valor": "430–455",
           "unidad": "Wp",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "En pasos de 5 W. Algunas tiendas citan versiones de hasta 465 W, no confirmadas en una ficha oficial."
@@ -6551,7 +6569,7 @@
         "eficiencia_pct": {
           "valor": 22.1,
           "unidad": "%",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Variante 450 W. Comprobación: 450 / (1,800 × 1,134) = 22,05 %. La gama va del 21,1 % (430 W) al 22,3 % (455 W)."
@@ -6559,7 +6577,7 @@
         "tecnologia_celula": {
           "valor": "TOPCon, N-type, 16 busbars",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "16BB según el código de versión de la ficha."
@@ -6567,7 +6585,7 @@
         "tipo_celula": {
           "valor": "monocristalina",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": null
@@ -6575,7 +6593,7 @@
         "num_celulas": {
           "valor": 108,
           "unidad": "medias células (6×9 + 6×9)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": null
@@ -6599,7 +6617,7 @@
         "vidrio": {
           "valor": "doble (frontal templado térmicamente, bajo en hierro, con antirreflejo; trasero templado térmicamente)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Espesor no indicado. Solartraders lo describe como vidrio/lámina; la garantía lo incluye en la de módulos de doble vidrio."
@@ -6607,7 +6625,7 @@
         "marco": {
           "valor": "aluminio anodizado negro, 30 mm",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": null
@@ -6615,7 +6633,7 @@
         "medidas_mm": {
           "valor": "1800 × 1134 × 30",
           "unidad": "mm",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "2,04 m²."
@@ -6623,7 +6641,7 @@
         "peso_kg": {
           "valor": 22,
           "unidad": "kg",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Autosolar indica 25 kg para un «Risen 450 W Black Frame» con otros datos eléctricos (Voc 39,91 V), probablemente otra serie."
@@ -6631,7 +6649,7 @@
         "coef_temp_pmax_pct_c": {
           "valor": -0.29,
           "unidad": "%/°C",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Voc −0,25 %/°C; Isc +0,046 %/°C."
@@ -6639,7 +6657,7 @@
         "noct_o_nmot_c": {
           "valor": 44,
           "unidad": "°C (NMOT)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "±2 °C. Potencia en NMOT de la variante 450 W: 341 W."
@@ -6663,7 +6681,7 @@
         "voc_v": {
           "valor": 39.05,
           "unidad": "V",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Vmpp 32,44 V; Impp 13,88 A."
@@ -6671,7 +6689,7 @@
         "isc_a": {
           "valor": 14.66,
           "unidad": "A",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": null
@@ -6679,7 +6697,7 @@
         "tension_max_sistema_v": {
           "valor": 1500,
           "unidad": "V DC",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Fusible máx. en serie 30 A."
@@ -6687,7 +6705,7 @@
         "carga_mecanica_pa": {
           "valor": "5400 / 2400",
           "unidad": "Pa (nieve/viento)",
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://solartraders.com/en/products/modules/risen-rsm108-10-450bndg-bfr",
           "fecha": "2026-10-18",
           "nota": "Dato de la ficha de producto del distribuidor solartraders; el texto extraído de la ficha PDF no lo mostraba."
@@ -6695,7 +6713,7 @@
         "ip_caja_conexiones": {
           "valor": "IP68",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "Encapsulada, 3 diodos Schottky."
@@ -6703,7 +6721,7 @@
         "conector": {
           "valor": "Risen Twinsel PV-SY02 (IP68), cables de 4 mm² y 1200 mm",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en",
           "fecha": "2026-10-18",
           "nota": "No es MC4 original; conviene comprobar compatibilidad del conector con el instalador."
@@ -6797,7 +6815,7 @@
         "fabrica": {
           "valor": "Ningbo / Ninghai (Zhejiang); Yiwu (Zhejiang); Jintan (Jiangsu); Chuzhou (Anhui); Baotou (Mongolia Interior); Nanbin (15 GW, desde 2023); Malasia",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://42watt.de/magazin/risen-energy",
           "fecha": "2026-10-18",
           "nota": "La ficha solo da la dirección corporativa: Tashan Industry Zone, Meilin, Ninghai, Ningbo Otras fuentes: https://m.energytrend.com/news/20260430-51330.html https://www.energias-renovables.com/fotovoltaica/risen-se-lanza-a-la-conquista-del-20241212 https://www.eqmagpro.com/?p=27129 https://en.risen.com/assembly/topc"
@@ -6950,7 +6968,7 @@
       "anio_lanzamiento": {
         "valor": 2025,
         "unidad": "año",
-        "naturaleza": "declarado",
+        "naturaleza": "tercero",
         "fuente": "https://www.gramwzielone.pl/energia-sloneczna/20303771/produkty-tnc-2-0-zaprezentowane-po-raz-pierwszy-na-swiecie-moduly-firmy-tongwei-na-targach-enex-2025",
         "fecha": "2026-10-18",
         "nota": "La generación TNC 2.0 se presentó en Europa en la feria ENEX (febrero de 2025, artículo patrocinado); ficha fechada el 01-08-2025."
@@ -6989,7 +7007,7 @@
         "tecnologia_celula": {
           "valor": "TOPCon (TNC 2.0), N-type, células G12R",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://www.gramwzielone.pl/energia-sloneczna/20303771/produkty-tnc-2-0-zaprezentowane-po-raz-pierwszy-na-swiecie-moduly-firmy-tongwei-na-targach-enex-2025",
           "fecha": "2026-10-18",
           "nota": "Formato de célula G12R según la denominación «TNC-G12R 48/54 HD» de la gama."
@@ -7149,7 +7167,7 @@
         "pruebas_independientes": {
           "valor": "Tongwei comunica ser «Top Performer» del Scorecard de Kiwa PVEL en 2024, 2025 y 2026 con su serie TNC (siete categorías en 2026)",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://taiyangnews.info/pressreleases/tongwei-named-2026-kiwa-pvel-top-performer-for-third-consecutive-year",
           "fecha": "2026-10-18",
           "nota": "Nota de prensa de la marca; no nombra los modelos ensayados. No se comprobó en el Scorecard original. No se encontraron ensayos independientes publicados del TWMNH-48HE."
@@ -7226,7 +7244,7 @@
         "fabrica": {
           "valor": "Sede en Chengdu (Sichuan); la ficha no indica la planta de módulos",
           "unidad": null,
-          "naturaleza": "declarado",
+          "naturaleza": "tercero",
           "fuente": "https://m.energytrend.com/news/20260430-51330.html",
           "fecha": "2026-10-18",
           "nota": "Otras fuentes: https://filingreader.com/news-wire/shanghai/2026-06-16/tongwei-reports-cny-95bn-loss-as-solar-prices-plummet https://www.bernreuter.com/newsroom/polysilicon-news/article/new-report-these-solar-modules-are-tainted-by-forced-labor/ https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf"
@@ -7654,7 +7672,13 @@
       },
       "origen": {
         "pais_marca": "China",
-        "pais_fabricacion": "No especificado en la ficha",
+        "pais_fabricacion": {
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://shop.krannich-solar.com/en-de/TSM-460NEG9R.28-Vertex-S/0157659",
+          "fecha": "2026-10-18",
+          "nota": "Según el distribuidor (shop.krannich-solar.com): «Intrastat country of origin: China». Puede variar según el lote."
+        },
         "fabrica": null,
         "materiales_principales": [
           "silicio monocristalino tipo n",
