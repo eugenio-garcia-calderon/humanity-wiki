@@ -27,6 +27,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { avisar } from './avisos';
 import { avisarPorWhatsApp } from './whatsapp.js';
+import { enviarCorreo } from './correo.js';
 import { calcularEnvio, tarifasDe, zonaDe, type CalculoEnvio, type TarifaZona, type Zona } from './zonasEnvio.js';
 import { comisionDeLinea, ordenarOfertas } from '../utils/ofertas.js';
 
@@ -104,7 +105,8 @@ export async function registrarPedidoGestionado(db: any, pedidoId: string): Prom
 
     // 2) Una fila de la cola por distribuidor, con lo que le toca.
     const pedido = (await db.execute(sql`
-      SELECT id, codigo, vendedor_user_id, comprador_user_id, direccion_envio, producto_nombre, entrega_tipo FROM pedidos WHERE id = ${pedidoId}
+      SELECT id, codigo, vendedor_user_id, comprador_user_id, comprador_email, comprador_nombre, telefono_contacto, moneda,
+             direccion_envio, producto_nombre, entrega_tipo FROM pedidos WHERE id = ${pedidoId}
     `)).rows[0] as any;
     if (!pedido) return 0;
     const dir = pedido.direccion_envio || {};
@@ -115,6 +117,7 @@ export async function registrarPedidoGestionado(db: any, pedidoId: string): Prom
 
     let nuevos = 0;
     const nombres: string[] = [];
+    const porTienda: { tienda: string; importe: number; envio: number }[] = [];
     for (const [distId, ls] of grupos) {
       const importe = ls.reduce((n, l) => n + Number(l.precio_unitario_centimos) * Number(l.unidades), 0);
       const fisicas = ls.filter(l => (l.kind || 'fisico') === 'fisico').map(l => ({ p: { id: l.producto_id, name: l.distribuidor_nombre }, unidades: Number(l.unidades) }));
@@ -126,7 +129,7 @@ export async function registrarPedidoGestionado(db: any, pedidoId: string): Prom
         ON CONFLICT (pedido_id, distribuidor_id) DO NOTHING
         RETURNING id
       `);
-      if (r.rows[0]) { nuevos++; nombres.push(ls[0].distribuidor_nombre || 'un distribuidor'); }
+      if (r.rows[0]) { nuevos++; nombres.push(ls[0].distribuidor_nombre || 'un distribuidor'); porTienda.push({ tienda: ls[0].distribuidor_nombre || 'Distribuidor sin nombre', importe, envio }); }
     }
 
     // 3) Quien gestiona se entera de que tiene trabajo: el aviso de «pedido
@@ -139,11 +142,74 @@ export async function registrarPedidoGestionado(db: any, pedidoId: string): Prom
           codigo: pedido.codigo, destino: '/comercio?pestana=distribuidores',
         },
       }).catch(() => {});
+      // Only when the queue rows are new: Stripe repeats webhooks, and the
+      // second delivery must not send the e-mails twice.
+      await correosDelPedido(db, pedido, porTienda).catch(e => console.error(`[pedido gestionado] ${pedido.codigo}: correos:`, e?.message || e));
     }
     return nuevos;
   } catch (e: any) {
     console.error(`[pedido gestionado] ${pedidoId}: no se ha podido preparar la cola (revisar a mano):`, e?.message || e);
     return 0;
+  }
+}
+
+// ── LOS CORREOS DEL PEDIDO (2026-10-18) ─────────────────────────────────────
+// Until now a paid order only reached the owner through the in-app bell, and
+// an anonymous buyer had nothing but the code on the «¡Compra hecha!» screen.
+// With real charging on, a paid order nobody notices is money taken for
+// nothing. So, once per order: one e-mail to whoever manages the queue (what
+// to buy from which shop, and the link to it) and one to the buyer (code and
+// where to follow it). Without `RESEND_API_KEY` nothing is sent and the log
+// says so; the order is never touched by this.
+const dineroCorreo = (c: number, moneda = 'EUR') => new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(c / 100);
+
+async function correosDelPedido(db: any, pedido: any, porTienda: { tienda: string; importe: number; envio: number }[]) {
+  const dominio = process.env.DOMINIO_PUBLICO || 'humanity.wiki';
+  const base = `https://${dominio}`;
+  const moneda = pedido.moneda || 'EUR';
+  const lineas = (await db.execute(sql`
+    SELECT producto_nombre, variante_nombre, unidades, precio_unitario_centimos, distribuidor_nombre
+    FROM pedido_lineas WHERE pedido_id = ${pedido.id} AND distribuidor_id IS NOT NULL ORDER BY distribuidor_nombre, created_at
+  `)).rows as any[];
+  const linea = (l: any) => `  · ${l.producto_nombre}${l.variante_nombre ? ` (${l.variante_nombre})` : ''} × ${l.unidades} — ${dineroCorreo(Number(l.precio_unitario_centimos) * Number(l.unidades), moneda)}`;
+  const bloques = porTienda.map(t => [
+    `${t.tienda}: ${dineroCorreo(t.importe, moneda)}${t.envio ? ` + ${dineroCorreo(t.envio, moneda)} de envío` : ''}`,
+    ...lineas.filter(l => (l.distribuidor_nombre || 'Distribuidor sin nombre') === t.tienda).map(linea),
+  ].join('\n')).join('\n\n');
+  const dir = pedido.direccion_envio || {};
+  const destino = pedido.entrega_tipo === 'recogida' ? 'Lo recoge en persona.'
+    : [dir.name, dir.line1, dir.line2, [dir.postal_code, dir.city].filter(Boolean).join(' '), dir.country].filter(Boolean).join(', ');
+
+  const dueno = (await db.execute(sql`SELECT email, handle FROM users WHERE id = ${pedido.vendedor_user_id}`)).rows[0] as any;
+  // The tracking page (`MiPedido`) lives on the seller's shop subdomain; the
+  // main domain has no `/pedido` route. No handle → no link, just the code.
+  const seguir = dueno?.handle ? `https://${dueno.handle}.${dominio}/pedido?codigo=${encodeURIComponent(pedido.codigo)}` : null;
+  if (dueno?.email) {
+    const ok = await enviarCorreo({
+      para: dueno.email,
+      asunto: `Pedido ${pedido.codigo} pagado: hay que pedirlo a ${porTienda.length} ${porTienda.length === 1 ? 'tienda' : 'tiendas'}`,
+      texto: [
+        `El cliente ya ha pagado el pedido ${pedido.codigo}. Hay que comprarlo a:`, '', bloques, '',
+        `Enviar a: ${destino || 'sin dirección'}`,
+        `Cliente: ${[pedido.comprador_nombre, pedido.comprador_email, pedido.telefono_contacto].filter(Boolean).join(' · ') || 'sin datos'}`, '',
+        `Marca cada tienda como pedida, enviada o entregada aquí: ${base}/comercio?pestana=distribuidores`,
+      ].join('\n'),
+    });
+    if (!ok) console.warn(`[pedido gestionado] ${pedido.codigo}: no se ha enviado el correo a quien gestiona (¿falta RESEND_API_KEY?)`);
+  }
+  if (pedido.comprador_email) {
+    const ok = await enviarCorreo({
+      para: pedido.comprador_email,
+      asunto: `Tu pedido ${pedido.codigo} en Wikiproducts`,
+      texto: [
+        `${pedido.comprador_nombre ? `Hola, ${pedido.comprador_nombre}. ` : ''}Hemos recibido tu pago. Tu código de pedido es ${pedido.codigo}.`, '',
+        'Lo pedimos por ti a cada tienda, al mismo precio que tiene en ella:', '', bloques, '',
+        seguir
+          ? `Puedes seguirlo aquí: ${seguir}\nEn esa página verás cuándo lo pedimos a cada tienda, cuándo sale y cuándo llega.`
+          : 'Guarda este código: es el que te pediremos si nos escribes por este pedido.',
+      ].join('\n'),
+    });
+    if (!ok) console.warn(`[pedido gestionado] ${pedido.codigo}: no se ha enviado la confirmación al comprador (¿falta RESEND_API_KEY?)`);
   }
 }
 
