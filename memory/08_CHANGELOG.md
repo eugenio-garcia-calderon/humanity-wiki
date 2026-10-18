@@ -8858,3 +8858,20 @@ en mis páginas como proyecto pendiente».
 - `src/components/bloquesDatos/registro.tsx`: cada bloque vive en su carpeta (`<tipo>/definicion.tsx`) y se apunta solo; el editor y la página publicada lo consultan en un único punto. Un bloque que falla enseña «Este bloque no se ha podido mostrar» sin tumbar la página. Ninguno está construido todavía, así que hoy nadie ve nada nuevo.
 - Un bloque de datos se puede escribir en markdown (valla ```` ```bloque ```` con JSON), así la API `/api/v1` puede crear páginas con ellos. Sólo para esos nueve tipos. Prueba: `npx tsx scripts/wikiproducts/probar-bloques-datos.ts`.
 - `scripts/wikiproducts/local.sh`: una copia local entera (Postgres en Docker, migraciones, una cuenta administradora y un miembro, clave de API, servidor en el 3005 y una página PRUEBA creada por la API).
+
+### 2026-10-18 — Las páginas publicadas llevan su contenido en el HTML (Wikiproducts W2)
+- El HTML que descarga quien abre una página publicada (o un buscador) ya lleva el contenido: títulos, párrafos, listas, tablas, imágenes con texto alternativo, enlaces y la tabla de cada base de datos con sus filas enlazadas. Antes sólo llevaba título y descripción; el cuerpo lo pintaba JavaScript, y los buscadores de IA (ChatGPT, Claude, Perplexity) no veían nada más. `src/server/htmlBloques.ts`.
+- Una dirección de página de un sitio que no existe responde 404 (antes 200 con la aplicación vacía).
+- Cada página declara UNA dirección canónica: la de su dominio propio activo si su sitio tiene uno, o la de su subdominio (`quien.humanity.wiki/…`). Antes cada forma de entrar (`humanity.wiki/@quien/…`, subdominio, dominio) se declaraba canónica a sí misma.
+- `robots.txt` de cada sitio nombra a los rastreadores de IA y deja fuera el buscador y las ordenaciones; nuevo `/llms.txt` con las páginas principales del sitio.
+- Enchufes para módulos: `registrarHtml` (cómo se escribe un bloque nuevo en el HTML) y `registrarAmpliacion` (`src/server/ampliarPagina.ts`: título, tipo, robots, `<meta>` y datos estructurados de una página, para la ficha de producto).
+
+### 2026-10-18 — Un subdominio de humanity.wiki para un sitio (Wikiproducts W2)
+- Una página publicada puede tener su propio `algo.humanity.wiki` (p. ej. `wikiproducts.humanity.wiki`), no sólo el nombre de su dueño. Se reclama como un dominio propio (`POST /api/dominios` con `dominio: "algo.humanity.wiki"` y la página) y funciona al momento: no hay DNS ni certificado que esperar.
+- Las reglas: un solo nivel, las mismas que un nombre de usuario, no puede ser el nombre de nadie, como mucho 3 por persona, siempre a una página. Al reclamarlo, el nombre queda reservado para que nadie lo coja después como usuario.
+- La dirección canónica de las páginas del sitio pasa a ser ese subdominio, salvo que el sitio tenga un dominio comprado, que gana.
+
+### 2026-10-18 — Buscador dentro de cada sitio publicado (Wikiproducts W2)
+- El menú de un sitio puede llevar una caja «Buscar» («Buscador del sitio» en los ajustes del menú; apagada en los sitios que ya existían). Busca sólo en ese sitio: sus páginas, las filas de sus bases de datos (por nombre y por los valores de sus columnas, p. ej. marca o código de barras) y el texto de sus bloques, sin acentos.
+- Los resultados se abren en `/buscar?q=…` dentro del propio sitio, con su menú y su pie. Funciona en dominio propio, subdominio y `humanity.wiki/@quien/buscar`.
+- No encuentra lo que la página esconde: lo de miembros, ni las columnas con «Ocultar siempre».
