@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/knowledge/CreadorMenu.tsx",
-      "motivo": "W2 buscador",
-      "desde": "2026-10-18T11:59:09.996Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/sitioWeb.ts",
       "motivo": "W2: SEO R4/R8/R11/R12/R17",
       "desde": "2026-10-18T13:11:20.244Z"
