@@ -12,7 +12,7 @@
 -- What is deliberately NOT stored:
 --   · whether the voter is a verified buyer. It is read from `pedidos` every
 --     time, so a refund (`devuelto`) takes the extra weight away by itself.
---   · the computed score. It comes out of `src/server/valoraciones.ts` on read,
+--   · the computed score. It comes out of `src/server/bd/comunidad.ts` on read,
 --     like formulas: storing it would give two truths.
 --
 -- In a backup a month from now a vote is (opaque user id, row, column, 1-5).
@@ -32,14 +32,14 @@ CREATE TABLE IF NOT EXISTS valoraciones (
 -- One person, one vote per row and criterion. Enforced here and not only in
 -- code: it is the rule the whole ranking rests on.
 CREATE UNIQUE INDEX IF NOT EXISTS valoraciones_unica_idx ON valoraciones (fila_id, columna_id, user_id);
--- Read path: every vote of a column, for the whole table (the Bayesian prior
--- needs the table's mean). Also covers the `columna_id` foreign key.
+-- Read path: every vote of a column, for the whole table (one query per
+-- table read). Also covers the `columna_id` foreign key.
 CREATE INDEX IF NOT EXISTS valoraciones_columna_idx ON valoraciones (columna_id, fila_id);
 -- Foreign key on users (drizzle/CLAUDE.md: every FK carries an index).
 CREATE INDEX IF NOT EXISTS valoraciones_user_idx ON valoraciones (user_id);
 
 COMMENT ON TABLE valoraciones IS
-  'Community votes 1-5 per row and criterion (column of type comunidad). Score computed on read in src/server/valoraciones.ts; never reads commission.';
+  'Community votes 1-5 per row and criterion (column of type comunidad). Score computed on read in src/server/bd/comunidad.ts; never reads commission.';
 
 -- The new column type. The list is the one from 0144 plus `comunidad`.
 -- WARNING for whoever adds the next type: this constraint is redefined whole,
