@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "scripts/wikiproducts/enlazar-sitio.mjs",
-      "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
-      "desde": "2026-10-18T16:47:27.878Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/wikiproducts/sitio.json",
       "motivo": "W2 ronda 1: secciones del sitio, migas, 404",
       "desde": "2026-10-18T16:47:30.440Z"
