@@ -9267,6 +9267,19 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Tamaño del texto** por propiedad (S, M, L, XL) en su menú: agranda su nombre y su contenido. `config.tamano_ficha`.
 - El botón de las galerías dice solo **«Mostrar más»** (sin el nombre de la base de datos ni el recuento).
 
+## 2026-10-18 — Wikiproducts: offer prices re-checked at the shops (W3a, evaluator round 2)
+- All 38 offers without a price were re-read from the shop's own page. Only one shows a price for the exact model, and it is now loaded: Samsung EB-P4520 at MediaMarkt, 47,99 € plus 2,99 € shipping, in stock.
+- Why the other 37 are still empty:
+  - Amazon refuses automated reading (8).
+  - The price is for members only or given on request (9).
+  - The page shows only a wholesale price per Wp with no VAT (4).
+  - The product is unavailable; the data already said so (6).
+  - The page shows no price (5).
+  - The page is not a product page (2).
+  - The price is rendered by JavaScript (2).
+  - The product has not launched (1).
+  - The page failed to load (1).
+  A shop that only quotes, or only sells to members, has no price to show, so those offers stay «Sin precio confirmado» rather than get an estimate.
 ## 2026-10-18 — Sin precio, sin «precio por kWh»; comparador y ficha que se leen en el móvil (Wikiproducts W1)
 - **Fórmulas**: `REDONDEAR`, `ABS`, `RAIZ`, `TECHO`, `SUELO` y `POTENCIA` leen sus argumentos por posición. Antes quitaban los vacíos y se corrían: `REDONDEAR(vacío; 2)` daba 2 y `REDONDEAR(vacío * 1000; 0)` daba 0. De ahí salían el «2 €/Wp» de los paneles sin precio y el «0 €/kWh MEJOR» de las baterías domésticas (evaluador, ronda 2). Las fórmulas se calculan al leer, así que el arreglo llega a producción sin volver a cargar datos.
 - **Ficha**: un precio por unidad de 0 o menos cuenta como «sin dato» (no sale, no es «mejor», no ordena). Sin precio, la cabecera no dice «A la venta» junto a «Sin precio todavía» ni muestra precio por unidad.
