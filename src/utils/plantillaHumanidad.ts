@@ -47,6 +47,9 @@ export async function crearHumanidadWiki(alAvanzar?: (hechas: number, total: num
     subtitulo: 'El conocimiento, la sabiduría y las soluciones de toda la humanidad, ordenados por temas.',
     bloques: [
       { id: idBloque(), tipo: 'menuTemas', datos: { titulo: 'Temas', forma: 'rejilla', temas: subpaginas.map(({ tema, id }) => ({ ...tema, enlace: `/paginas/${id}` })) } },
+      // El Mapa de Indicadores de la Humanidad, que antes era la herramienta «Mapas» (2026-10-18).
+      { id: idBloque(), tipo: 'titulo2', texto: 'El mapa de la humanidad' },
+      { id: idBloque(), tipo: 'mapaMundo', datos: { alto: 560, territorio: '' } },
       { id: idBloque(), tipo: 'titulo2', texto: 'Todos los temas' },
       ...subpaginas.map(({ tema, id }) => ({ id: idBloque(), tipo: 'subpagina', entityId: id, pubTitulo: tema.nombre })),
     ],

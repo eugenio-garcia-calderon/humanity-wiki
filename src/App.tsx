@@ -49,6 +49,7 @@ const IncendiosMapa = lazy(() => import('./pages/IncendiosMapa'));
 const IndicatorDetail = lazy(() => import('./pages/IndicatorDetail'));
 const Indicators = lazy(() => import('./pages/Indicators'));
 const MapPage = lazy(() => import('./pages/Map'));
+const MapasPortada = lazy(() => import('./pages/MapasPortada'));
 const Mapas = lazy(() => import('./pages/Mapas'));
 const Mensajes = lazy(() => import('./pages/Mensajes'));
 const Telefono = lazy(() => import('./pages/Telefono'));
@@ -465,7 +466,10 @@ export default function App() {
                 <Route path="lienzos" element={<Navigate to="/esquemas" replace />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />
                 <Route path="mis-mapas" element={<Mapas />} />
-                <Route path="mapas" element={<MapPage />} />
+                {/* «Mapas» es la herramienta: qué puedes crear y los de la comunidad
+                    (2026-10-18). El Mapa de Indicadores es un proyecto: vive en `/mapa`
+                    y, como bloque, en la página Humanidad Wiki. */}
+                <Route path="mapas" element={<MapasPortada />} />
                 <Route path="mapas/:slug" element={<UserMapa />} />
                 <Route path="incendios-espana-mapa" element={<IncendiosMapa />} />
                 <Route path="territorios/:id" element={<TerritoryProfile />} />
@@ -495,7 +499,7 @@ export default function App() {
                 <Route path="organizaciones" element={<Organizations />} />
                 <Route path="iniciativas/:id" element={<ProjectProfile />} />
                 <Route path="organizaciones/:id" element={<OrganizationProfile />} />
-            <Route path="mapa" element={<Navigate to="/mapas" replace />} />
+            <Route path="mapa" element={<MapPage />} />
                 <Route path="login" element={<Login />} />
                 <Route path="restablecer" element={<Restablecer />} />
                 <Route path="configuracion" element={<Configuracion />} />

@@ -96,6 +96,7 @@ export const TIPOS_BLOQUE_DATOS = [
   'menuTemas',     // menú de temas con icono y color (Humanidad Wiki, 2026-10-18)
   'contenidoTema', // lo que hay sobre un tema, por secciones (Humanidad Wiki, 2026-10-18)
   'secciones',     // las páginas del sitio con catálogo, con imagen y recuento (W2, 2026-10-18)
+  'mapaMundo',     // el mapa de indicadores del mundo, en un marco (Humanidad Wiki, 2026-10-18)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 
