@@ -8986,3 +8986,7 @@ en mis páginas como proyecto pendiente».
 - Un precio enviado como número por la API (`0.138`) se pasaba a texto y la regla del punto de millar español lo leía como «138». Ahora un número llega tal cual a las columnas de precio y de porcentaje (la de número ya lo hacía).
 - En texto, un punto con un cero delante ya no cuenta como millar: «0.138» es 0,138. «120.000» sigue siendo ciento veinte mil.
 - Prueba: `npx tsx scripts/probar-tipos-numeros.ts` (21 casos).
+
+### 2026-10-18 — Cargar Wikiproducts desde el propio servidor, sin clave de API a mano (W3a)
+- `scripts/wikiproducts/cargar-en-servidor.sh` y la acción manual «Cargar Wikiproducts» (`.github/workflows/cargar-wikiproducts.yml`): entra por SSH con los secretos del despliegue, crea en la base de datos una clave de escritura temporal para la dueña del sitio (eugenio@lighthumanity.org), guardando sólo su huella sha256, ejecuta `crear-esquema.mjs --plantillas` y `cargar.mjs` contra la app en 127.0.0.1 y borra la clave al salir, salga bien o mal. La clave no se imprime, no se escribe en disco y no sale del servidor. Comparte cola con el despliegue (`deploy-prod`). Se puede repetir: la carga es idempotente, y una clave que quedara de una ejecución matada se borra al empezar la siguiente.
+- `CARGA_MODO=local` hace lo mismo contra la copia de `local.sh`. Probado allí, incluida una ejecución cortada a medias: la clave se borró y la siguiente siguió donde iba.
