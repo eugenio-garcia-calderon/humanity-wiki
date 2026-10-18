@@ -1,0 +1,124 @@
+{
+  "slug": "ecoflow-powerocean",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "EcoFlow PowerOcean",
+  "marca": "EcoFlow",
+  "modelo": "PowerOcean (monofásico y trifásico) con módulos de batería EF BD-5.1-S1; variante de reacondicionamiento PowerOcean DC Fit",
+  "variante_ficha": "PowerOcean monofásico: inversor híbrido EF HD-P1-3K…6K-S1 + módulo de batería EF BD-5.1-S1 (ficha técnica EN 20241022)",
+  "ean": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No se ha encontrado un GTIN público. Referencias de distribuidor: módulo 5008601004." },
+  "anio_lanzamiento": { "valor": 2023, "unidad": "año", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "fecha": "2026-10-18", "nota": "Se toma la fecha del folleto comercial más antiguo encontrado (5 de junio de 2023); no es una fecha oficial de lanzamiento." },
+  "estado": "a la venta",
+  "resumen": "PowerOcean es un sistema de almacenamiento doméstico de EcoFlow formado por un inversor híbrido y módulos apilables de batería de litio-ferrofosfato (LFP) de 5,1 kWh nominales cada uno. Según la ficha técnica, cada inversor admite hasta tres módulos (15,3 kWh) y pueden encadenarse hasta tres inversores para llegar a unos 45 kWh. La marca declara más de 6.000 ciclos y ofrece una garantía de 15 años o 6.000 ciclos, lo que ocurra antes, con un 70 % de capacidad mínima, para equipos comprados a través de un instalador. Las baterías solo funcionan con inversores PowerOcean de EcoFlow; existe una variante DC Fit pensada para añadir almacenamiento a instalaciones ya existentes. No se ha encontrado ningún ensayo independiente publicado de este sistema.",
+  "imagen": { "url": null, "fuente": null, "licencia": "propiedad del fabricante; solo enlace", "nota": "Pendiente de enlazar una imagen oficial verificada." },
+
+  "datos_tecnicos": {
+    "capacidad_total_kwh": { "valor": 5.1, "unidad": "kWh", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Por módulo EF BD-5.1-S1 (energía nominal)." },
+    "capacidad_util_kwh": { "valor": 4.8, "unidad": "kWh", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Por módulo, con un 95 % de profundidad de descarga. 9,7 kWh con 2 módulos y 14,5 kWh con 3." },
+    "gama_capacidades_kwh": { "valor": "5,1 / 10,2 / 15,3 por inversor; hasta unos 45 kWh con tres inversores", "unidad": "kWh", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Nominal." },
+    "modular": { "valor": true, "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Módulos apilables de 5,1 kWh." },
+    "ampliable": { "valor": true, "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": null },
+    "ampliacion_max_kwh": { "valor": 45, "unidad": "kWh", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "«Up to 45kWh» encadenando tres inversores; con un solo inversor el máximo es 15,3 kWh." },
+    "potencia_continua_kw": { "valor": "3 / 3,68 / 4,6 / 5 / 6", "unidad": "kW", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Potencia AC nominal del inversor monofásico según modelo (EF HD-P1-3K…6K-S1). La ficha no da la potencia de carga/descarga del módulo de batería por separado." },
+    "potencia_pico_kw": { "valor": null, "unidad": "kW", "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No figura en la ficha consultada." },
+    "quimica": { "valor": "LFP (litio-ferrofosfato)", "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": null },
+    "fabricante_celulas": { "valor": "CATL", "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "fecha": "2026-10-18", "nota": "El folleto de 2023 dice «CATL LFP battery». La ficha técnica de 2024 no nombra al fabricante de celdas; no se ha verificado que siga siendo así en las unidades actuales." },
+    "ciclos_declarados": { "valor": 6000, "unidad": "ciclos", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "fecha": "2026-10-18", "nota": "«6,000+ life cycle till degradation to 70%». La ficha 2024 dice «over 6,000 charge cycles». Una tienda española indica a la vez 95 % y 80 % de profundidad de descarga para esa cifra." },
+    "profundidad_descarga_pct": { "valor": 95, "unidad": "%", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": null },
+    "eficiencia_ida_vuelta_pct": { "valor": null, "unidad": "%", "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "La ficha solo da la eficiencia del inversor (máx. >96 %–96,5 %; europea >95 %–96 %), no la de ida y vuelta de la batería." },
+    "tension": { "valor": "alta tensión; 800 V nominal (720–960 V)", "unidad": "V", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": null },
+    "acoplamiento": { "valor": "DC, con inversor híbrido EcoFlow PowerOcean (la variante DC Fit se acopla a instalaciones existentes)", "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": null },
+    "inversor_integrado": { "valor": false, "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Inversor separado del mismo fabricante, obligatorio: la batería no es compatible con inversores de otras marcas." },
+    "inversores_compatibles": { "valor": "Inversores híbridos EcoFlow PowerOcean monofásicos (EF HD-P1-3K…6K-S1) y trifásicos", "unidad": null, "origen": "declarado", "fuente": "https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html", "fecha": "2026-10-18", "nota": "SolarQuotes señala que la garantía de capacidad exige un inversor EcoFlow compatible." },
+    "respaldo_apagones": { "valor": "sí; salida de respaldo (EPS) de 3.000 a 6.000 VA según inversor", "unidad": "VA", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "La ficha no aclara si cubre toda la vivienda o solo circuitos de respaldo; depende de la instalación." },
+    "instalacion": { "valor": "interior o exterior; suelo o pared", "unidad": null, "origen": "declarado", "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-5kwh-ecoflow-powerocean", "fecha": "2026-10-18", "nota": "Dato de la tienda; la ficha da IP65." },
+    "ip": { "valor": "IP65", "unidad": null, "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Batería e inversor." },
+    "rango_temperatura_c": { "valor": "-20 a 50", "unidad": "°C", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "El inversor reduce potencia por encima de 40 °C y por debajo de 0 °C." },
+    "peso_kg": { "valor": 55.5, "unidad": "kg", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Módulo EF BD-5.1-S1. Configuración de 1 módulo: 59,2 kg; 2 módulos: 114,7 kg; 3 módulos: 170,2 kg. Inversor: 21,5 kg." },
+    "medidas_mm": { "valor": "680 × 183 × 452", "unidad": "mm (an × fo × al)", "origen": "declarado", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18", "nota": "Configuración de 1 módulo; 2 módulos: 680 × 183 × 849; 3 módulos: 680 × 183 × 1245." },
+    "garantia_energia_mwh": { "valor": 30.6, "unidad": "MWh", "origen": "calculado", "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf", "fecha": "2026-10-18", "nota": "La garantía no da una cifra en MWh: la limita a 6.000 ciclos. Cálculo: 6.000 ciclos × 5,1 kWh nominales por módulo = 30,6 MWh por módulo, suponiendo ciclos completos." },
+    "precio_por_kwh_util_eur": { "valor": 431.01, "unidad": "EUR/kWh útil", "origen": "calculado", "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-5kwh-ecoflow-powerocean", "fecha": "2026-10-18", "nota": "2.068,83 € (IVA incluido, solo el módulo de batería) / 4,8 kWh útiles. No incluye el inversor, que es obligatorio, ni la instalación." },
+    "pruebas_independientes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-PPT-Stromspeicher-Inspektion-2026.pdf", "fecha": "2026-10-18", "nota": "EcoFlow PowerOcean no figura entre los sistemas evaluados con nombre en la Stromspeicher-Inspektion de la HTW Berlin de 2025 ni de 2026." }
+  },
+
+  "garantias": {
+    "producto": { "anios": 15, "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf", "fecha": "2026-10-18", "nota": "Condiciones de garantía del fabricante para la UE, versión B V1.3, vigentes desde el 29-09-2024. Inversor: 15 años. Batería: 15 años o 6.000 ciclos de carga/descarga, lo que ocurra antes." },
+    "rendimiento": { "anios": 15, "porcentaje_final": 70, "primer_anio_pct": null, "lineal_anual_pct": null, "fuente": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf", "fecha": "2026-10-18", "nota": "Capacidad nominal mínima del 70 % a los 15 años o 6.000 ciclos, en condiciones normales (-20 a 50 °C)." },
+    "letra_pequena": [
+      "Cubre a primeros compradores que adquieren el equipo a través de un instalador y lo ponen en marcha por primera vez; las reclamaciones van primero al instalador (cláusula 1.6 permite acudir a EcoFlow si el instalador no puede). Fuente: https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf",
+      "El plazo empieza al terminar la instalación o un año después de la salida de fábrica, lo que ocurra antes. Fuente: misma garantía.",
+      "Límite de 6.000 ciclos: lo que ocurra antes entre años y ciclos. Fuente: misma garantía.",
+      "Durante la garantía EcoFlow asume material, reparación y logística (cl. 1.9), pero los gastos de aduana corren a cargo del usuario o el distribuidor (cl. 11.9). Fuente: misma garantía.",
+      "Excluye componentes de terceros incompatibles, modificaciones no autorizadas y fuerza mayor (incendio, inundación, rayo). Fuente: misma garantía.",
+      "Según SolarQuotes, la garantía de capacidad exige trabajar con un inversor EcoFlow compatible. Fuente: https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html",
+      "Se aplican las condiciones vigentes en la fecha de compra (cl. 4.4–4.5). Fuente: misma garantía."
+    ],
+    "quien_responde": "El instalador en primera instancia y EcoFlow como fabricante (contacto UE: solutionservice.eu@ecoflow.com). La garantía no prevé qué ocurre si EcoFlow deja de operar en Europa; en ese caso quedarían los derechos legales frente al vendedor."
+  },
+
+  "empresa": {
+    "razon_social": null,
+    "pais_sede": "China",
+    "fundacion": 2017,
+    "cotiza_en": null,
+    "web": "https://www.ecoflow.com",
+    "fabricante_celulas": "CATL (según folleto de 2023)",
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Fundada en 2017; la mayor parte de su base de clientes procede de las estaciones de energía portátiles. Fuente: https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html",
+      "En EE. UU. opera como EcoFlow Technology, Inc. (San Francisco), importador según la CPSC. Fuente: https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard",
+      "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos ni insolvencias relacionadas con este producto en las búsquedas realizadas."
+    ],
+    "fuentes": [
+      "https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html",
+      "https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": null,
+    "materiales_principales": ["celdas de litio-ferrofosfato (LFP)", "carcasa con protección IP65", "módulo de extinción por aerosol integrado"],
+    "num_componentes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "El fabricante no lo publica." },
+    "reparabilidad": "Cada módulo tiene su propio BMS y es sustituible por separado, según el folleto de la marca (https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf). No se ha encontrado información sobre piezas de repuesto a nivel de celda."
+  },
+  "certificados": [
+    { "nombre": "EN 62619, EN 62040-1, EN 62477-1, ISO 13849, VDE-AR-E 2510-50 (batería)", "emisor": "no indicado en la ficha", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18" },
+    { "nombre": "UN 38.3 (transporte)", "emisor": "no indicado en la ficha", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18" },
+    { "nombre": "IEC/EN 62109-1/-2, VDE-AR-N 4105, G98/G99 (inversor)", "emisor": "marca DEKRA indicada en la ficha", "fuente": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "fecha": "2026-10-18" }
+  ],
+  "documentos": [
+    { "tipo": "ficha técnica", "url": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "idioma": "en", "fecha": "2024-10-22" },
+    { "tipo": "ficha técnica", "url": "https://teknosolar.com/wp-content/uploads/2024/06/PowerOcean-three-phase_Datasheet_20240201_EN.pdf", "idioma": "en", "fecha": "2024-02-01" },
+    { "tipo": "garantía", "url": "https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf", "idioma": "de", "fecha": "2024-09-29" },
+    { "tipo": "garantía", "url": "https://solarproof.com.au/warranty_documents/battery_warranty_EcoFlow Warranty Policy for Home Solar Battery Solutions in Europe V1.3_for end user_EN.pdf", "idioma": "en", "fecha": "2024-09-29" },
+    { "tipo": "folleto", "url": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "idioma": "en", "fecha": "2023-06-05" }
+  ],
+
+  "afirmaciones": [
+    { "afirmacion": "CATL LFP battery with industry-leading 15-year warranty.", "donde": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "veredicto": "matizable", "explicacion": "La garantía europea es de 15 años o 6.000 ciclos, lo que ocurra antes, con un 70 % de capacidad final, y se dirige a compras realizadas a través de un instalador. Que sea la mejor del sector no está demostrado; es más larga que los 10 años habituales.", "fuentes": ["https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf", "https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html"], "fecha": "2026-10-18" },
+    { "afirmacion": "6,000+ life cycle till degradation to 70%", "donde": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "veredicto": "matizable", "explicacion": "La cifra está respaldada por la propia garantía (6.000 ciclos hasta el 70 %), pero no hay una medición independiente publicada. Una tienda española la presenta a la vez con un 95 % y un 80 % de profundidad de descarga, por lo que las condiciones de ensayo no están claras.", "fuentes": ["https://heckertsolar.com/media/45/2c/e9/1743667060/0050568946b81fd0848c2991c25460ff.pdf", "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-5kwh-ecoflow-powerocean"], "fecha": "2026-10-18" },
+    { "afirmacion": "Up to 45kWh battery capacity", "donde": "https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "veredicto": "matizable", "explicacion": "Cada inversor admite un máximo de 15,3 kWh nominales (14,5 kWh útiles). Los 45 kWh solo se alcanzan encadenando tres inversores con tres torres de baterías.", "fuentes": ["https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf", "https://www.solarquotes.com.au/battery-storage/reviews/ecoflow-review.html"], "fecha": "2026-10-18" },
+    { "afirmacion": "Active fire protection module integrated into the system", "donde": "https://midsummer.ie/pdfs/powerocean-brochure-20230605-en.pdf", "veredicto": "sin pruebas", "explicacion": "La ficha confirma un módulo de prevención por aerosol integrado, pero no se ha encontrado ningún ensayo independiente publicado sobre su eficacia.", "fuentes": ["https://midsummer.ie/pdfs/ecoflow-powerocean--single-phase--datasheet-en-20241022.pdf"], "fecha": "2026-10-18" }
+  ],
+  "retiradas": [
+    { "pais": "Estados Unidos", "organismo": "CPSC", "fecha": "2025-10-09", "motivo": "Riesgo de sobrecalentamiento e incendio. Afecta a la misma marca, no a PowerOcean.", "modelos_afectados": "EcoFlow Delta Max 2000 (estación de energía portátil), unas 25.030 unidades; no a PowerOcean", "url": "https://cpsc.gov/Recalls/2026/EcoFlow-Technology-Recalls-Delta-Max-2000-Power-Stations-Due-to-Risk-of-Serious-Burn-Injury-and-Fire-Hazard", "fecha_consulta": "2026-10-18" },
+    { "pais": "Canadá", "organismo": "Health Canada", "fecha": null, "motivo": "Riesgo de quemaduras graves e incendio. Afecta a la misma marca, no a PowerOcean.", "modelos_afectados": "EcoFlow Delta Max 2000; no a PowerOcean", "url": "https://recalls-rappels.canada.ca/en/alert-recall/ecoflow-delta-max-2000-power-stations-recalled-due-risk-serious-burn-injury-and-fire", "fecha_consulta": "2026-10-18" }
+  ],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 en web abierta (CPSC, Health Canada, ACCC/Clean Energy Council, gov.uk product safety, noticias) por «EcoFlow PowerOcean recall / Rückruf / safety notice». No se ha encontrado ninguna retirada ni alerta de seguridad de PowerOcean; las dos entradas listadas son de un producto portátil de la misma marca. No se consultó directamente la base de EU Safety Gate (búsqueda limitada a buscador web), por lo que conviene repetir la consulta allí.",
+
+  "ofertas": [
+    { "distribuidor": "AutoSolar", "tipo": "tienda online", "pais": "España", "url": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-5kwh-ecoflow-powerocean", "precio_eur": 2068.83, "iva_incluido": true, "unidad": "por módulo de batería 5,1 kWh (sin inversor)", "incluye_instalacion": false, "envio": "Entrega estimada en la península con pago con tarjeta; coste de envío no indicado", "stock": "no indicado («salvo rotura de stock»)", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" },
+    { "distribuidor": "Solarboss", "tipo": "tienda online", "pais": "Irlanda", "url": "https://solarboss.ie/products/ecoflow-powerocean-lfp-5kwh-battery-5008601004", "precio_eur": 1680.00, "iva_incluido": false, "unidad": "por módulo de batería 5 kWh (ref. 5008601004)", "incluye_instalacion": false, "envio": "no indicado", "stock": "contradictorio: la página muestra «In Stock» y el botón «Sold Out»", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" }
+  ],
+  "compatibles": ["Inversores híbridos EcoFlow PowerOcean monofásicos (3–6 kW) y trifásicos", "EcoFlow PowerOcean DC Fit (convertidor para instalaciones existentes)", "Bombas de calor con entrada SG Ready (según la marca)"],
+  "pendiente": [
+    "Razón social exacta de la matriz china, y si cotiza o está en proceso de salida a bolsa (no se pudo verificar en esta sesión).",
+    "Eficiencia de ida y vuelta de la batería: el fabricante no la publica.",
+    "Potencia de carga/descarga y potencia de pico del módulo de batería.",
+    "Confirmar que las celdas actuales siguen siendo de CATL (dato del folleto de 2023).",
+    "Consulta directa en EU Safety Gate.",
+    "Precio en España del inversor y de un kit completo; precio de la variante DC Fit.",
+    "Fábricas concretas."
+  ]
+}

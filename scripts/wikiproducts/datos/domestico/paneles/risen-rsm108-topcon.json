@@ -1,0 +1,114 @@
+{
+  "slug": "risen-rsm108-topcon",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Risen RSM108-10 BNDG (TOPCon, 108 medias células, marco negro)",
+  "marca": "Risen Energy",
+  "modelo": "RSM108-10-430…455BNDG (ficha marco negro); la garantía cubre también RSM108-10-xxxNDG",
+  "variante_ficha": "RSM108-10-450BNDG (ficha REM108-BNDG-16BB-EN-H2-1-2023-Blackframe, marcada «Preliminary»)",
+  "ean": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://cuencasolar.es/producto/panel-solar-risen-black-450wp-108-celulas-n-type-topcon-rsm108-10-450bndg/", "fecha": "2026-10-18", "nota": "No se encontró GTIN público." },
+  "anio_lanzamiento": { "valor": 2023, "unidad": "año", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Deducido del código de versión de la ficha (H2-2023); la marca no publica una fecha de lanzamiento." },
+  "estado": "a la venta",
+  "resumen": "El RSM108-10 BNDG es un módulo fotovoltaico de formato doméstico de la empresa china Risen Energy, con 108 medias células TOPCon de tipo N, doble vidrio y marco negro, en potencias de 430 a 455 W. Según la ficha técnica, la variante de 450 W mide 1800 × 1134 mm, pesa 22 kg y tiene un 22,1 % de eficiencia y un coeficiente de temperatura de −0,29 %/°C. La garantía oficial cubre 15 años de producto y 30 años de rendimiento con un mínimo del 99 % el primer año y una pérdida máxima del 0,4 % anual. En su web, a fecha 2026-10-18, Risen ya presenta como gama de tejado las series RSM108-11 (490–515 W) y RSM96-11 (450–475 W), y su producto de gran formato es la serie de heterounión Hyper-ion (RSM132-8, 710–760 W), pensada para parques solares. Risen Energy cotiza en la Bolsa de Shenzhen y registró pérdidas en 2024 y en 2025.",
+  "imagen": { "url": "https://cuencasolar.es/wp-content/uploads/2026/02/KSPSMC-13-Panel-Solar-RISEN-BLACK-450WP-108-CELULAS-N-TYPE-TOPCon-RSM108-10-450BNDG_processed.webp", "fuente": "https://cuencasolar.es/producto/panel-solar-risen-black-450wp-108-celulas-n-type-topcon-rsm108-10-450bndg/", "licencia": "propiedad del fabricante o del distribuidor; solo enlace" },
+
+  "datos_tecnicos": {
+    "potencia_pico_wp": { "valor": 450, "unidad": "Wp", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "STC; tolerancia 0/+3 W." },
+    "gama_potencias_wp": { "valor": "430–455", "unidad": "Wp", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "En pasos de 5 W. Algunas tiendas citan versiones de hasta 465 W, no confirmadas en una ficha oficial." },
+    "eficiencia_pct": { "valor": 22.1, "unidad": "%", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Variante 450 W. Comprobación: 450 / (1,800 × 1,134) = 22,05 %. La gama va del 21,1 % (430 W) al 22,3 % (455 W)." },
+    "tecnologia_celula": { "valor": "TOPCon, N-type, 16 busbars", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "16BB según el código de versión de la ficha." },
+    "tipo_celula": { "valor": "monocristalina", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": null },
+    "num_celulas": { "valor": 108, "unidad": "medias células (6×9 + 6×9)", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": null },
+    "bifacial": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Contradictorio: la «B» del código BNDG suele indicar bifacial y la ficha describe vidrio trasero, pero sun.store lo lista como monofacial y solartraders como «Bifacial: No» con lámina trasera blanca. La ficha extraída no da bifacialidad." },
+    "bifacialidad_pct": { "valor": null, "unidad": "%", "origen": "desconocido", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "La ficha no lo indica." },
+    "vidrio": { "valor": "doble (frontal templado térmicamente, bajo en hierro, con antirreflejo; trasero templado térmicamente)", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Espesor no indicado. Solartraders lo describe como vidrio/lámina; la garantía lo incluye en la de módulos de doble vidrio." },
+    "marco": { "valor": "aluminio anodizado negro, 30 mm", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": null },
+    "medidas_mm": { "valor": "1800 × 1134 × 30", "unidad": "mm", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "2,04 m²." },
+    "peso_kg": { "valor": 22, "unidad": "kg", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Autosolar indica 25 kg para un «Risen 450 W Black Frame» con otros datos eléctricos (Voc 39,91 V), probablemente otra serie." },
+    "coef_temp_pmax_pct_c": { "valor": -0.29, "unidad": "%/°C", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Voc −0,25 %/°C; Isc +0,046 %/°C." },
+    "noct_o_nmot_c": { "valor": 44, "unidad": "°C (NMOT)", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "±2 °C. Potencia en NMOT de la variante 450 W: 341 W." },
+    "degradacion_primer_anio_pct": { "valor": 1, "unidad": "%", "origen": "declarado", "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf", "fecha": "2026-10-18", "nota": "Garantía: ≥99 % al final del primer año (grupo c, que incluye RSM108-10-xxxBNDG)." },
+    "degradacion_anual_pct": { "valor": 0.4, "unidad": "%/año", "origen": "declarado", "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf", "fecha": "2026-10-18", "nota": "Grupo (c) de la garantía. Los módulos HJT Hyper-ion (grupo b) garantizan 0,3 %." },
+    "voc_v": { "valor": 39.05, "unidad": "V", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Vmpp 32,44 V; Impp 13,88 A." },
+    "isc_a": { "valor": 14.66, "unidad": "A", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": null },
+    "tension_max_sistema_v": { "valor": 1500, "unidad": "V DC", "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Fusible máx. en serie 30 A." },
+    "carga_mecanica_pa": { "valor": "5400 / 2400", "unidad": "Pa (nieve/viento)", "origen": "declarado", "fuente": "https://solartraders.com/en/products/modules/risen-rsm108-10-450bndg-bfr", "fecha": "2026-10-18", "nota": "Dato de la ficha de producto del distribuidor solartraders; el texto extraído de la ficha PDF no lo mostraba." },
+    "ip_caja_conexiones": { "valor": "IP68", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "Encapsulada, 3 diodos Schottky." },
+    "conector": { "valor": "Risen Twinsel PV-SY02 (IP68), cables de 4 mm² y 1200 mm", "unidad": null, "origen": "declarado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18", "nota": "No es MC4 original; conviene comprobar compatibilidad del conector con el instalador." },
+    "precio_por_wp_eur": { "valor": 0.192, "unidad": "€/Wp", "origen": "calculado", "fuente": "https://cuencasolar.es/producto/panel-solar-risen-black-450wp-108-celulas-n-type-topcon-rsm108-10-450bndg/", "fecha": "2026-10-18", "nota": "86,48 € (IVA incl.) / 450 Wp = 0,192 €/Wp. Oferta sin existencias en la fecha de consulta." },
+    "resultado_pvel": { "valor": "Risen Energy figura como Top Performer en el Scorecard 2024 de Kiwa PVEL (fabricante, cuatro ediciones 2021–2024)", "unidad": null, "origen": "medido", "fuente": "https://2024modulescorecard.pvel.com/manufacturer_name/risen/", "fecha": "2026-10-18", "nota": "La página no indica qué modelo o lista de materiales se ensayó; no puede atribuirse al RSM108-10. No se comprobó la edición 2025 ni la 2026." },
+    "pruebas_independientes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No se encontraron ensayos independientes publicados de este modelo concreto." }
+  },
+
+  "garantias": {
+    "producto": { "anios": 15, "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf", "fecha": "2026-10-18", "nota": "RSM108-10-xxxBNDG en el grupo de 15 años. El texto extraído de la ficha PDF mostraba «5 years», probablemente un error de extracción; manda el documento de garantía." },
+    "rendimiento": { "anios": 30, "porcentaje_final": 87.4, "primer_anio_pct": 99, "lineal_anual_pct": 0.4, "fuente": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf", "fecha": "2026-10-18", "nota": "El documento no da el porcentaje final; 87,4 % = 99 − 29 × 0,4 (calculado), coincide con la gráfica de la ficha." },
+    "letra_pequena": [
+      "Reclamación «inmediata», definida como un plazo de 2 meses desde que se detecta el defecto, con prueba de compra y números de serie (garantía n-type Dual-Glass A1[2026]).",
+      "Risen no paga desmontaje, instalación ni reinstalación; sí paga el envío de vuelta, aduanas y el reenvío del módulo de reposición según el Incoterm pactado. La retirada y eliminación de los módulos sustituidos corre a cargo del comprador salvo que Risen decida recogerlos (A1[2026]).",
+      "La garantía empieza en la entrega o seis meses después de la salida de fábrica, lo que ocurra antes (A1[2026]).",
+      "Se anula por instalación incorrecta o distinta del manual, reparaciones no autorizadas o estructuras de montaje defectuosas; la responsabilidad total se limita al importe facturado (A1[2026]).",
+      "En caso de disputa sobre la potencia, el ensayo de un laboratorio independiente lo paga la parte que pierde (A1[2026]).",
+      "No exige registro del producto ni instalador certificado. La ley aplicable es la del país de instalación; reconoce que prevalecen los derechos legales del consumidor (cita la Directiva 1999/44/CE).",
+      "No se publica seguro de garantía de terceros. Ante la quiebra o salida del fabricante quedaría solo la garantía legal frente al vendedor."
+    ],
+    "quien_responde": "Risen Energy Co., Ltd. (Ninghai, China); en Europa tiene sede en Madrid desde finales de 2024 y filial en Núremberg. Sin aseguradora de garantía publicada."
+  },
+
+  "empresa": {
+    "razon_social": "Risen Energy Co., Ltd.",
+    "pais_sede": "China (Ninghai, Ningbo, Zhejiang)",
+    "fundacion": 1986,
+    "cotiza_en": "Bolsa de Shenzhen (300118), desde 2010",
+    "web": "https://en.risen.com",
+    "fabricante_celulas": "Risen Energy (fabrica células propias)",
+    "pais_fabricacion": "China; también Malasia",
+    "fabricas_conocidas": [ "Ningbo / Ninghai (Zhejiang)", "Yiwu (Zhejiang)", "Jintan (Jiangsu)", "Chuzhou (Anhui)", "Baotou (Mongolia Interior)", "Nanbin (15 GW, desde 2023)", "Malasia" ],
+    "notas": [
+      "Pérdidas en 2024: ingresos de 20.240 millones de yuanes (−42,7 %) y pérdida neta de 3.436 millones (42watt.de).",
+      "Pérdidas en 2025: ingresos de 12.584 millones de yuanes (−37,8 %), pérdida atribuible de 2.827 millones, ventas de módulos de 9,83 GW (−45,6 %) y margen bruto del −4,44 % (EnergyTrend, a partir del informe anual publicado el 24-04-2026). Es relevante para la solidez de garantías de 15 a 30 años.",
+      "Abrió sede europea en Madrid en diciembre de 2024 (Energías Renovables).",
+      "Incendio en una zona auxiliar de su planta de células de Meilin en noviembre de 2016, sin víctimas, según la propia empresa (EQ Mag Pro).",
+      "No se encontraron detenciones bajo la ley UFLPA de EE. UU. ni retiradas de producto asociadas a Risen en las búsquedas a fecha 2026-10-18; esto no equivale a una auditoría."
+    ],
+    "fuentes": [ "https://42watt.de/magazin/risen-energy", "https://m.energytrend.com/news/20260430-51330.html", "https://www.energias-renovables.com/fotovoltaica/risen-se-lanza-a-la-conquista-del-20241212", "https://www.eqmagpro.com/?p=27129", "https://en.risen.com/assembly/topc" ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China (planta concreta no indicada en la ficha)",
+    "fabrica": "La ficha solo da la dirección corporativa: Tashan Industry Zone, Meilin, Ninghai, Ningbo",
+    "materiales_principales": [ "silicio monocristalino N-type", "vidrio templado térmicamente (dos capas)", "marco de aluminio anodizado negro" ],
+    "num_componentes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "El fabricante no lo publica." },
+    "reparabilidad": "Módulo laminado no reparable en la práctica; la garantía prevé reparación, reposición o compensación (garantía A1[2026])."
+  },
+  "certificados": [
+    { "nombre": "IEC 62941 / ISO 45001 (mencionados en la ficha)", "emisor": "no indicado", "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "fecha": "2026-10-18" }
+  ],
+  "documentos": [
+    { "tipo": "ficha técnica", "url": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "idioma": "en", "fecha": "2023 (H2)" },
+    { "tipo": "garantía", "url": "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf", "idioma": "en", "fecha": "2026-03-12" },
+    { "tipo": "garantía", "url": "https://en.risen.com/serve/download?one_level=6", "idioma": "en", "fecha": "2026-10-18" }
+  ],
+
+  "afirmaciones": [
+    { "afirmacion": "0.4% Annual Degradation over 30 years", "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en", "veredicto": "cierta", "explicacion": "Coincide con lo que garantiza por escrito el documento de garantía para RSM108-10 (≥99 % el primer año y ≤0,4 % anual). Es un compromiso de garantía, no una medición independiente.", "fuentes": [ "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf" ], "fecha": "2026-10-18" },
+    { "afirmacion": "Product warranty: 15 years; Power output warranty: 30 years", "donde": "https://en.risen.com/assembly/topc", "veredicto": "matizable", "explicacion": "Es lo que dice la garantía, pero 15 años de producto es menos que los 25 años que ofrecen varios fabricantes para módulos domésticos de doble vidrio, y la garantía no cubre la mano de obra de desmontaje y reinstalación.", "fuentes": [ "https://en.risen.com/uploads/20260312/Risen_Limited%20Warranty%20for%20n-type%20Dual-Glass%20Modules%20A1[2026].pdf" ], "fecha": "2026-10-18" },
+    { "afirmacion": "Maximum efficiency: 23.3%", "donde": "https://en.risen.com/assembly/topc", "veredicto": "matizable", "explicacion": "Es el máximo de la gama TOPCon de la marca en su web; el RSM108-10 declara entre el 21,1 % y el 22,3 % (22,1 % la variante de 450 W).", "fuentes": [ "https://www.solartraders.com/uploads/production/data_sheet/file/34248/RSM108-10-430-455BNDG%20Black%20frame.pdf?locale=en" ], "fecha": "2026-10-18" }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 de «Risen Energy», «RSM108» y «RSM132» en EU Safety Gate, CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia), Health Canada y prensa sectorial (pv magazine, TaiyangNews, EQ Mag Pro). No se encontró ninguna retirada ni alerta de seguridad para el modelo ni la marca: ninguna conocida a fecha 2026-10-18.",
+
+  "ofertas": [
+    { "distribuidor": "Cuenca Solar (cuencasolar.es)", "tipo": "tienda online", "pais": "España", "url": "https://cuencasolar.es/producto/panel-solar-risen-black-450wp-108-celulas-n-type-topcon-rsm108-10-450bndg/", "precio_eur": 86.48, "iva_incluido": true, "unidad": "por módulo (450 Wp)", "incluye_instalacion": false, "envio": "Envío gratis en 72 h para pedidos de más de 200 € (pie de página de la tienda)", "stock": "Sin existencias", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" },
+    { "distribuidor": "Cuenca Solar (cuencasolar.es), segundo anuncio «(copia)»", "tipo": "tienda online", "pais": "España", "url": "https://cuencasolar.es/producto/panel-solar-risen-black-450wp-108-celulas-n-type-topcon-rsm108-10-450bndg-copia/", "precio_eur": 89.68, "iva_incluido": true, "unidad": "por módulo (450 Wp)", "incluye_instalacion": false, "envio": null, "stock": "Sin existencias", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" },
+    { "distribuidor": "sun.store", "tipo": "mayorista", "pais": "UE (plataforma B2B)", "url": "https://sun.store/en/product/risen-rsm108-10-450bndg-black-frame-31126", "precio_eur": null, "iva_incluido": null, "unidad": "por módulo", "incluye_instalacion": false, "envio": null, "stock": "Sin ofertas disponibles", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" }
+  ],
+  "compatibles": [ "Inversores de string domésticos e híbridos con entrada ≥14,7 A por MPPT; comprobar corriente máxima de microinversores." ],
+  "pendiente": [
+    "Ninguna oferta con existencias en España a fecha 2026-10-18; posible fin de serie, sustituido en la web de Risen por RSM108-11 (490–515 W) y RSM96-11 (450–475 W).",
+    "Bifacialidad: datos contradictorios entre el código BNDG, la ficha y los distribuidores.",
+    "Carga mecánica según la ficha PDF oficial (solo se vio en la ficha del distribuidor).",
+    "Ficha oficial en la web de Risen (la usada procede del distribuidor solartraders y está marcada «Preliminary»).",
+    "Si el RSM108-10 está en el Scorecard de Kiwa PVEL 2025 o 2026.",
+    "Certificados IEC 61215/61730 con emisor."
+  ]
+}

@@ -1,0 +1,441 @@
+{
+  "slug": "sungrow-sbr",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Sungrow SBR (SBR064 – SBR256)",
+  "marca": "Sungrow",
+  "modelo": "SBR064, SBR096, SBR128, SBR160, SBR192, SBR224, SBR256 (batería de alta tensión modular, módulos de 3,2 kWh; versiones comerciales V13 y V114 en distribuidores)",
+  "variante_ficha": "SBR096 (3 módulos de 3,2 kWh, 9,6 kWh útiles), ficha técnica oficial «SBR064/096/128/160/192/224/256» versión 1.4 (2023), copia alojada por el distribuidor irlandés Midsummer",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró la fecha de lanzamiento. La ficha más antigua localizada es la V1.2.1 de 16-08-2021 (https://solarproof.com.au/datasheets/battery_datasheet_DS_20210816_SBR096_SBR256_V1.2.1_EN.pdf), lo que indica que ya se vendía en 2021."
+  },
+  "estado": "descatalogado",
+  "estado_nota": "Según el distribuidor alemán Solarics, la SBR llegó al fin de su vida comercial en 2024 y fue sustituida por la serie SBH, aunque sigue disponible como existencias restantes y para ampliaciones (https://www.solarics.de/products/sungrow-sbr096-1-gen-lv-96-kwh-batteriespeicher). La web global de Sungrow solo lista la SBH como batería residencial (https://www.sungrowpower.com/en/ess). A 2026-10-18 el mayorista SolarTraders aún mostraba existencias de la SBR096 V13 en almacenes de España y Alemania (https://www.solartraders.com/es/products/acumulador/sistema-de-acumulacion/sungrow-power-sbr096-v13) y Krannich España mantiene la ficha sin precio (https://shop.krannich-solar.com/es-es/baterias/baterias-solares/53971/sungrow-sbr096-v13).",
+  "resumen": "La Sungrow SBR es una batería doméstica modular de alta tensión con celdas prismáticas de litio-ferrofosfato (LFP) del fabricante chino Sungrow, formada por módulos de 3,2 kWh apilables de 2 a 8 por torre (6,4 a 25,6 kWh útiles) y pensada para los inversores híbridos de la propia marca. Según su ficha técnica admite instalación interior y exterior con protección IP55 y una corriente continua máxima de 30 A. Según la marca la energía útil llega al 100 % de profundidad de descarga, pero la HTW Berlin señala que el manual del inversor SH10RT limita el funcionamiento al 5–100 % del estado de carga. Un distribuidor alemán indica que la SBR fue sustituida en 2024 por la serie SBH y que se vende como existencias restantes. En marzo de 2023 Sungrow reconoció en Alemania fallos de comunicación de la batería que dejaron algunos equipos sin funcionar.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.sungrowpower.com/en/ess",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha fijado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha solo publica la energía útil (9,6 kWh para SBR096, a 25 °C, 100 % DoD y 0,2C)."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.6,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SBR096, ficha V1.4: condiciones de ensayo 25 °C, 100 % DoD, carga y descarga a 0,2C. La HTW Berlin recuerda que el manual del inversor SH10RT limita el estado de carga a 5–100 % (https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "6,4 / 9,6 / 12,8 / 16,0 / 19,2 / 22,4 / 25,6",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SBR064 a SBR256 (2 a 8 módulos de 3,2 kWh)."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Módulos de 3,2 kWh y 33 kg; «plug and play», sin cables entre módulos según la web de la marca (https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256)."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+      "fecha": "2026-10-18",
+      "nota": "«Extendable during lifetime» según la web de Sungrow."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 25.6,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Máximo por torre (SBR256, 8 módulos). La ficha de Krannich España indica hasta cuatro unidades en paralelo (https://shop.krannich-solar.com/es-es/baterias/baterias-solares/53971/sungrow-sbr096-v13); no comprobado en la documentación de Sungrow."
+    },
+    "potencia_continua_kw": {
+      "valor": 5.76,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SBR096 (potencia DC nominal; 30 A a 192 V nominales). Escala con el número de módulos: 3,84 kW (SBR064) a 15,36 kW (SBR256). El inversor híbrido puede limitarla."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no publica potencia de pico; solo corriente continua máxima de 30 A y corriente de cortocircuito de 3.500 A."
+    },
+    "quimica": {
+      "valor": "LFP (LiFePO4), celdas prismáticas",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ni la ficha ni la web de Sungrow nombran el fabricante de las celdas."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": "ciclos",
+      "origen": "desconocido",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no publica ciclos. La garantía UE fija un tope de energía (ver garantia_energia_mwh)."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 100,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "«Up to 100 % DoD (settable)». El manual del inversor SH10RT limita el rango operativo a 5–100 % de estado de carga, un 95 % en la práctica (HTW Berlin 2024, cap. 2.1: https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf)."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha y la web solo dicen «high efficiency», sin cifra."
+    },
+    "tension": {
+      "valor": "Alta tensión: 192 V nominales (SBR096), rango de trabajo 162–219 V; de 128 V (SBR064) a 512 V (SBR256)",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "DC (a inversor híbrido Sungrow, p. ej. SH10RT)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La HTW Berlin relaciona la SBR096 con el manual del inversor híbrido SH10RT."
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversores_compatibles": {
+      "valor": "Inversores híbridos Sungrow monofásicos y trifásicos de la serie SH (SH-RS, SH-RT); la ficha no publica una lista",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.vpsolar.com/en/sungrow-sbr-and-sbh-batteries-reliability-and-high-performance/",
+      "fecha": "2026-10-18",
+      "nota": "Según el distribuidor VP Solar (28-04-2025); con SH-RS admite desde 2 módulos. La ficha V1.4 no incluye lista de compatibilidad."
+    },
+    "respaldo_apagones": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Lo proporciona el inversor híbrido, no la batería; depende del modelo de inversor y de la instalación."
+    },
+    "instalacion": {
+      "valor": "interior y exterior, sobre suelo",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "VP Solar recomienda instalarla en interior, en un cuarto técnico (https://www.vpsolar.com/en/sungrow-sbr-and-sbh-batteries-reliability-and-high-performance/)."
+    },
+    "ip": {
+      "valor": "IP55",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "carga 0 a 50; descarga −20 a 50",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Humedad 0–95 % sin condensación; altitud máxima 4.000 m; refrigeración por convección natural."
+    },
+    "peso_kg": {
+      "valor": 114,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SBR096; 33 kg por módulo; de 89 kg (SBR064) a 279 kg (SBR256)."
+    },
+    "medidas_mm": {
+      "valor": "625 × 545 × 330 (an × al × fo)",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SBR096 según la ficha (mismas medidas que la SBR064); SBR256: 625 × 1195 × 330 mm."
+    },
+    "garantia_energia_mwh": {
+      "valor": 40.32,
+      "unidad": "MWh",
+      "origen": "calculado",
+      "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Garantía de producto: 10 años o 4.200 × capacidad nominal en kWh de energía medida, lo que antes ocurra. 4.200 × 9,6 kWh = 40,32 MWh para la SBR096 (tomando 9,6 kWh como capacidad nominal). La garantía de rendimiento (>80 %) solo vale mientras la energía sea < 3.000 × capacidad nominal = 28,8 MWh."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": null,
+      "unidad": "€/kWh útil",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ninguna oferta con precio público en España (Krannich, SolarTraders e IBC Solar muestran la SBR096 sin precio o solo para socios; Solarics muestra un precio de marcador «XXX,XX €»)."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Sungrow se menciona en la Stromspeicher-Inspektion 2024 de la HTW Berlin solo en el análisis de mercado; no figura entre los sistemas ensayados en 2024 ni 2025 (https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "«Limited Manufacturer Warranty for Distribution», Rev. 2.0, válida desde 01-04-2021, para productos vendidos desde el 01-06-2021 a través de distribuidores en los países de la UE (incluida España), Noruega, Suiza y Reino Unido. Batería residencial: 10 años o 4.200 × capacidad nominal (kWh) de energía medida, lo que antes ocurra; máximo 10 años y 6 meses desde la fecha de fabricación. Puede haber versiones posteriores no localizadas."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 80,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Capacidad disponible > 80 % de la nominal durante 10 años, mientras la energía medida sea < 3.000 × capacidad nominal (kWh). Ensayo de capacidad a 25–28 °C."
+    },
+    "letra_pequena": [
+      "La garantía de rendimiento termina al superar 3.000 × capacidad nominal de energía (28,8 MWh en la SBR096, unos 3.000 ciclos completos), aunque no hayan pasado 10 años (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de).",
+      "No cubre los costes de personal propio del usuario ni de terceros (mano de obra); las visitas fuera de garantía se cobran a 90 €/hora en días laborables (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, cláusulas 4.16 y 6.5).",
+      "Transporte cubierto por Sungrow en la «región A» (países UE listados); no cubierto en territorios de ultramar ni en países no listados (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 2.3.3).",
+      "Excluye el uso con un inversor o convertidor incompatible, la instalación sin seguir el manual y el uso fuera de las temperaturas del manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 4.4, 4.4.1 y 4.13).",
+      "El documento es de 2021; Sungrow publica garantías por país en https://www.sungrowpower.com/en/warranty-terms-and-conditions-country-list-global-site, donde España aparece sin documento enlazado."
+    ],
+    "quien_responde": "El garante es la matriz china, Sungrow Power Supply Co., Ltd. (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de, 1.2); la reclamación se tramita a través del instalador y del distribuidor. El documento no prevé qué ocurre si Sungrow dejara el mercado europeo; quedan las garantías legales del vendedor."
+  },
+  "empresa": {
+    "razon_social": "Sungrow Power Supply Co., Ltd. (阳光电源股份有限公司)",
+    "pais_sede": "China (Hefei, Anhui)",
+    "fundacion": 1997,
+    "cotiza_en": "Bolsa de Shenzhen (SZSE: 300274). Solicitud de cotización de acciones H en la Bolsa de Hong Kong presentada el 24-04-2026 (segunda tras la de octubre de 2025); no se verificó si ya cotiza allí.",
+    "web": "https://www.sungrowpower.com/en",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "No publicado en ficha ni garantía",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Fundada en 1997 por Cao Renxian, antiguo profesor de la Universidad Tecnológica de Hefei (https://en.wikipedia.org/wiki/Sungrow).",
+      "Marzo de 2023: Sungrow reconoció un «fallo en la comunicación de la batería SBR» que dejó sin funcionar algunos sistemas, sobre todo en Alemania; ofreció revisar y, si era necesario, sustituir el BMS a través del instalador. No hubo retirada ni intervención de autoridades según la fuente (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/).",
+      "El 04-05-2026 la Comisión Europea anunció la retirada progresiva de inversores de proveedores chinos de alto riesgo en proyectos energéticos financiados por la UE; la prensa cita a Huawei y Sungrow como ejemplos, sin que conste que la medida los nombre. No afecta directamente a la compra privada (https://www.euronews.com/my-europe/2026/05/04/eu-moves-to-ban-high-risk-inverters-from-china-over-cybersecurity-threats).",
+      "No se encontraron detenciones UFLPA, medidas antidumping ni litigios específicos sobre baterías Sungrow en las búsquedas realizadas el 2026-10-18."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/Sungrow",
+      "https://www.pv-magazine.com/2026/04/28/catl-raises-5-billion-in-share-sale-sungrow-files-for-hong-kong-ipo-for-the-second-time/",
+      "https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/",
+      "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+      "https://www.sungrowpower.com/en/ess"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://en.wikipedia.org/wiki/Sungrow",
+      "pais_sede": "https://en.wikipedia.org/wiki/Sungrow",
+      "fundacion": "https://en.wikipedia.org/wiki/Sungrow",
+      "cotiza_en": "https://en.wikipedia.org/wiki/Sungrow ; https://www.pv-magazine.com/2026/04/28/catl-raises-5-billion-in-share-sale-sungrow-files-for-hong-kong-ipo-for-the-second-time/"
+    }
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": null,
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas prismáticas LFP",
+      "BMS con protección de sobretensión, sobrecorriente y temperatura e interruptor DC",
+      "refrigeración por convección natural"
+    ],
+    "num_componentes": {
+      "valor": "2 a 8 módulos de batería de 3,2 kWh + controlador",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El SBR064 lleva 2 módulos y un hueco vacío. Los distribuidores venden por separado el controlador (p. ej. https://en.shopb2b.corab.pl/sungrow-sbr-battery-controller-32-12-0033.html)."
+    },
+    "reparabilidad": "Modular: los módulos y el controlador se venden por separado y se pueden añadir durante la vida útil según la marca (https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256). En el incidente de 2023 la solución fue revisar o cambiar el BMS (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/). La garantía excluye reparaciones sin seguir el manual (https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de)."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619",
+      "emisor": null,
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "VDE 2510-50",
+      "emisor": null,
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62040, IEC 62477, IEC 63056, IEC 61000",
+      "emisor": null,
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN38.3",
+      "emisor": null,
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE, UKCA, CEC",
+      "emisor": null,
+      "fuente": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+      "idioma": "en",
+      "fecha": "2023",
+      "nota": "Versión 1.4 (SBR064–SBR256), copia de distribuidor."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://solarproof.com.au/datasheets/battery_datasheet_DS_20210816_SBR096_SBR256_V1.2.1_EN.pdf",
+      "idioma": "en",
+      "fecha": "2021-08-16",
+      "nota": "Versión anterior V1.2.1 (SBR096–SBR256), copia de un portal australiano; no revisada."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de",
+      "idioma": "en",
+      "fecha": "2021-04-01",
+      "nota": "Limited Manufacturer Warranty for Distribution Rev. 2.0 (UE y otros países europeos), copia de SolarTraders."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://info-support.sungrowpower.com/application/pdf/2024/08/30/DS_20240329_SBH100_150_200_250_300_350_400_Datasheet_V4_EN.pdf",
+      "idioma": "en",
+      "fecha": "2024-03-29",
+      "nota": "Ficha de la SBH100–400, sucesora según distribuidores; no es la SBR. No revisada."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "SBR096: 9,6 kWh nutzbare Kapazität bei 100 % Entladetiefe",
+      "donde": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La HTW Berlin señala que la ficha declara 9,6 kWh útiles al 100 % de profundidad de descarga, pero el manual del inversor SH10RT limita el funcionamiento a un estado de carga del 5 al 100 %, por lo que la capacidad aprovechable en uso sería menor.",
+      "fuentes": [
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Up to 100% usable energy",
+      "donde": "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+      "veredicto": "matizable",
+      "explicacion": "La ficha declara hasta 100 % de profundidad de descarga «ajustable», medida a 25 °C y 0,2C. La HTW Berlin señala que el manual del inversor SH10RT limita el funcionamiento al 5–100 % del estado de carga, por lo que en uso real con ese inversor se aprovecha alrededor del 95 %.",
+      "fuentes": [
+        "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+        "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Compact and light, single person installation",
+      "donde": "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+      "veredicto": "matizable",
+      "explicacion": "Cada módulo pesa 33 kg según la ficha, de modo que puede montarse módulo a módulo, pero el conjunto SBR096 pesa 114 kg y la SBR256 279 kg; la garantía exige además instalación conforme al manual por profesionales.",
+      "fuentes": [
+        "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+        "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+        "https://solartraders.com/uploads/production/data_sheet/file/10804/warranty.pdf?locale=de"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Up to 30A continuous charging and discharging current with high efficiency",
+      "donde": "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+      "veredicto": "sin pruebas",
+      "explicacion": "Los 30 A figuran en la ficha, pero ni la ficha ni la web dan una cifra de eficiencia, y la SBR no ha sido ensayada por la HTW Berlin; no hay datos independientes que permitan valorar «high efficiency».",
+      "fuentes": [
+        "https://www.sungrowpower.com/sa/en/products/residential-energy-storage-system/b-sbr064-096-128-160-192-224-256",
+        "https://midsummer.ie/pdfs/en-ds-sbr064-096-sbr128-sbr160-sbr192-sbr224-sbr256-datasheet-v14-20230418.pdf",
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2024.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: web abierta por «Sungrow battery recall / SBR recall / Rückruf», lista de retiradas del Clean Energy Council y fichas de productsafety.gov.au (ACCC, Australia: aparecen GoodWe, Growatt, Tesla, LG, Sigenergy y otros, no Sungrow), búsquedas en el sitio de la CPSC (EE. UU.) y de Health Canada, y prensa especializada alemana. No se encontró ninguna retirada ni alerta oficial de la Sungrow SBR. Se encontró un incidente de marzo de 2023 en Alemania (fallo de comunicación de la batería SBR que dejó equipos sin funcionar; Sungrow ofreció revisar o cambiar el BMS), que no fue una retirada ni implicó a autoridades (https://www.pv-magazine.de/2023/03/13/sungrow-batteriespeicher-ausfaelle-nach-fehler-in-batteriekommunikation/). La base de datos de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica y acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha.",
+  "ofertas": [],
+  "compatibles": [
+    "Inversores híbridos Sungrow de las series SH-RS (monofásicos) y SH-RT (trifásicos), p. ej. SH10RT, según distribuidores; la ficha no publica una lista oficial"
+  ],
+  "pendiente": [
+    "Precio público en España con IVA (Krannich, SolarTraders e IBC Solar no muestran precio) y, con él, el €/kWh útil.",
+    "Garantía específica para España más reciente que la Rev. 2.0 de 2021, si existe.",
+    "Fabricante de las celdas y país o fábrica de montaje.",
+    "Eficiencia de ida y vuelta y ciclos declarados (no publicados).",
+    "Lista oficial de inversores compatibles.",
+    "Si Sungrow considera oficialmente descatalogada la SBR (solo lo afirma un distribuidor).",
+    "Consulta directa a EU Safety Gate."
+  ]
+}

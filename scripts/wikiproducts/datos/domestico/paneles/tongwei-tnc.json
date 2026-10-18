@@ -1,0 +1,419 @@
+{
+  "slug": "tongwei-tnc",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Tongwei TNC 2.0 TWMNH-48HE (TOPCon, 96 medias células, doble vidrio, todo negro)",
+  "marca": "Tongwei (TW Solar)",
+  "modelo": "TWMNH-48HE450…470 (TNC 2.0, todo negro); variantes hermanas de la misma generación: TWMNH-48HD 445–465 W (bifacial, marco negro) y TWMNH-48HW 455–475 W",
+  "variante_ficha": "TWMNH-48HE455 (ficha Ver.20250801; datos eléctricos idénticos en la ficha alemana del distribuidor photovoltaik4all)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": "https://www.photovoltaik4all.de/pv4all-netz/solarmodule/tongwei/tongwei-twmnh-48he-455-full-black-dg",
+    "fecha": "2026-10-18",
+    "nota": "No se encontró GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2025,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.gramwzielone.pl/energia-sloneczna/20303771/produkty-tnc-2-0-zaprezentowane-po-raz-pierwszy-na-swiecie-moduly-firmy-tongwei-na-targach-enex-2025",
+    "fecha": "2026-10-18",
+    "nota": "La generación TNC 2.0 se presentó en Europa en la feria ENEX (febrero de 2025, artículo patrocinado); ficha fechada el 01-08-2025."
+  },
+  "estado": "a la venta",
+  "resumen": "El TWMNH-48HE es un módulo fotovoltaico doméstico de la generación TNC 2.0 de Tongwei, empresa china que es también uno de los mayores fabricantes de polisilicio y células del mundo. Tiene 96 medias células TOPCon de tipo N, doble vidrio de 2 mm y aspecto todo negro, y se ofrece de 450 a 470 W en un formato de 1762 × 1134 mm. Según la ficha, la variante de 455 W alcanza un 22,8 % de eficiencia y un coeficiente de temperatura de −0,28 %/°C. Pese al doble vidrio, la marca lo describe como monofacial. La duración de la garantía de producto varía según el documento: 15 años en la ficha y la garantía para Australia y en el distribuidor español, 25 años en la ficha alemana de un distribuidor.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.photovoltaik4all.de/pv4all-netz/solarmodule/tongwei/tongwei-twmnh-48he-455-full-black-dg",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 455,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "STC; tolerancia de salida 0/+3 %."
+    },
+    "gama_potencias_wp": {
+      "valor": "450–470",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El distribuidor español Vico Export lista 450–475 W."
+    },
+    "eficiencia_pct": {
+      "valor": 22.8,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Variante 455 W. Comprobación: 455 / (1,762 × 1,134) = 22,77 %. La gama va del 22,5 % al 23,5 %."
+    },
+    "tecnologia_celula": {
+      "valor": "TOPCon (TNC 2.0), N-type, células G12R",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.gramwzielone.pl/energia-sloneczna/20303771/produkty-tnc-2-0-zaprezentowane-po-raz-pierwszy-na-swiecie-moduly-firmy-tongwei-na-targach-enex-2025",
+      "fecha": "2026-10-18",
+      "nota": "Formato de célula G12R según la denominación «TNC-G12R 48/54 HD» de la gama."
+    },
+    "tipo_celula": {
+      "valor": "monocristalina",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "num_celulas": {
+      "valor": 96,
+      "unidad": "medias células (6×16)",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha lo denomina «Monofacial Dual Glass Full-black»: doble vidrio pero cara trasera opaca. La variante bifacial es la TWMNH-48HD."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No aplica: módulo monofacial."
+    },
+    "vidrio": {
+      "valor": "doble (2,0 mm frontal semitemplado con antirreflejo + 2,0 mm trasero semitemplado)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "marco": {
+      "valor": "aluminio anodizado negro, 30 mm",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Aleación de la serie 6005 según la presentación de la gama."
+    },
+    "medidas_mm": {
+      "valor": "1762 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "±2 mm; 2,0 m²."
+    },
+    "peso_kg": {
+      "valor": 23.7,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha alemana del distribuidor photovoltaik4all indica 24,3 kg."
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.28,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,24 %/°C; Isc +0,046 %/°C."
+    },
+    "noct_o_nmot_c": {
+      "valor": null,
+      "unidad": "°C",
+      "origen": "desconocido",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "No figura en la ficha; la versión alemana da una temperatura T98 ≤70 °C."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía TNC de doble vidrio."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.4,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Años 2 a 30."
+    },
+    "voc_v": {
+      "valor": 36.1,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Vmpp 30,06 V; Impp 15,14 A."
+    },
+    "isc_a": {
+      "valor": 15.85,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Conviene comprobar la corriente máxima de entrada del inversor o microinversor."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Fusible máx. en serie 30 A."
+    },
+    "carga_mecanica_pa": {
+      "valor": "6000 / 4000",
+      "unidad": "Pa (frontal/trasera)",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Según el método de montaje del manual."
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "3 diodos."
+    },
+    "conector": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha australiana no lo nombra; la versión alemana indica un conector «TNC» sin más detalle. Cables de 4 mm² y 1200 mm."
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": "https://www.photovoltaik4all.de/pv4all-netz/solarmodule/tongwei/tongwei-twmnh-48he-455-full-black-dg",
+      "fecha": "2026-10-18",
+      "nota": "No se encontró una oferta con IVA incluido claramente indicado. Referencia: 80 € / 455 Wp = 0,176 €/Wp en photovoltaik4all (Alemania), sin aclarar si aplica el IVA del 0 % alemán para fotovoltaica."
+    },
+    "resultado_pvel": {
+      "valor": "Tongwei comunica ser «Top Performer» del Scorecard de Kiwa PVEL en 2024, 2025 y 2026 con su serie TNC (siete categorías en 2026)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://taiyangnews.info/pressreleases/tongwei-named-2026-kiwa-pvel-top-performer-for-third-consecutive-year",
+      "fecha": "2026-10-18",
+      "nota": "Nota de prensa de la marca; no nombra los modelos ensayados. No se comprobó en el Scorecard original."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontraron ensayos independientes publicados del TWMNH-48HE."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 15,
+      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fecha": "2026-10-18",
+      "nota": "15 años en la garantía (Australia, 30-05-2025), la ficha Ver.20250801 y el distribuidor español Vico Export. La ficha en alemán de photovoltaik4all dice 25 años y esa misma tienda dice 15 en su tabla: comprobar con el vendedor antes de comprar."
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 87.4,
+      "primer_anio_pct": 99,
+      "lineal_anual_pct": 0.4,
+      "fuente": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía de potencia TNC doble vidrio."
+    },
+    "letra_pequena": [
+      "Reclamación en un plazo de 30 días naturales desde que se descubre el incumplimiento, por escrito a Tongwei o a un distribuidor autorizado, con fotos de la etiqueta y del código de barras, factura y fecha de entrega (garantía Tongwei para Australia, 30-05-2025).",
+      "El comprador paga desmontaje, reembalaje y reinstalación; Tongwei no cubre seguro, transporte aéreo, aduanas ni aranceles (garantía Australia).",
+      "La garantía empieza en la fecha de instalación o el día 90 después de la entrega, lo que ocurra antes: un módulo almacenado más de tres meses pierde parte del plazo (garantía Australia).",
+      "Excluye defectos estéticos (arañazos, manchas, diferencias de color, cambios en imágenes de electroluminiscencia), módulos con pagos pendientes o que no sean de grado A, e instaladores no cualificados según la ley local (garantía Australia).",
+      "El documento leído es el de Australia; no se encontró la versión europea vigente. No exige registro del producto.",
+      "No se publica seguro de garantía de terceros. Ante la quiebra o salida del fabricante quedaría solo la garantía legal frente al vendedor."
+    ],
+    "quien_responde": "Tongwei Co., Ltd. (Chengdu, China) o su distribuidor autorizado; en España el distribuidor que se presenta como punto de venta es Vico Export Solar Energy. Sin aseguradora de garantía publicada."
+  },
+  "empresa": {
+    "razon_social": "Tongwei Co., Ltd.",
+    "pais_sede": "China (Chengdu, Sichuan)",
+    "fundacion": null,
+    "cotiza_en": "Bolsa de Shanghái (600438)",
+    "web": "https://en.tongwei.cn/",
+    "fabricante_celulas": "Tongwei (más de 103 GW de células vendidas en 2025); también produce su propio polisilicio",
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Sede en Chengdu (Sichuan); la ficha no indica la planta de módulos"
+    ],
+    "notas": [
+      "Resultados de 2025: ingresos de 84.128 millones de yuanes (−8,55 %), pérdida atribuible de 9.553 millones (mayor que en 2024) y 43,25 GW de módulos vendidos (EnergyTrend). La empresa atribuye las pérdidas al exceso de oferta y la caída de precios del polisilicio y las células.",
+      "El informe «Over-Exposed» (Sheffield Hallam University, 2023) recoge que Hoshine Silicon, productor de silicio metalúrgico de Xinjiang, cita a Tongwei entre sus clientes; según Bernreuter Research, la aduana de EE. UU. retuvo ese año módulos de LONGi fabricados con polisilicio de Tongwei. No se encontraron retenciones bajo la UFLPA de módulos con la marca Tongwei.",
+      "No se encontraron retiradas de producto ni demandas relevantes asociadas a módulos Tongwei en las búsquedas a fecha 2026-10-18; esto no equivale a una auditoría."
+    ],
+    "fuentes": [
+      "https://m.energytrend.com/news/20260430-51330.html",
+      "https://filingreader.com/news-wire/shanghai/2026-06-16/tongwei-reports-cny-95bn-loss-as-solar-prices-plummet",
+      "https://www.bernreuter.com/newsroom/polysilicon-news/article/new-report-these-solar-modules-are-tainted-by-forced-labor/",
+      "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": null,
+    "materiales_principales": [
+      "silicio monocristalino N-type (polisilicio de producción propia del grupo)",
+      "vidrio semitemplado de 2 mm (dos capas)",
+      "marco de aluminio anodizado negro"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable en la práctica; la garantía prevé reparación o sustitución."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215, IEC 61730, IEC TS 62804 (PID), IEC 61701 (niebla salina), IEC 62716 (amoniaco), IEC 60068-2-68 (arena), ISO 9001/14001/45001/50001",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "idioma": "en",
+      "fecha": "2025-08-01"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.photovoltaik4all.de/media/52/77/37/1781676787/TONGWEI TWMNH-48HE-460 Datenblatt DE.pdf",
+      "idioma": "de",
+      "fecha": null
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+      "idioma": "en",
+      "fecha": "2025-05-30"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Higher power output, higher conversion efficiency",
+      "donde": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "veredicto": "matizable",
+      "explicacion": "No dice respecto a qué. Frente a la generación anterior de 96 células de la marca (TWMNH-48HD, 22,3–23,3 %) la mejora es de unas décimas; el 23,5 % corresponde solo a la variante de 470 W.",
+      "fuentes": [
+        "https://www.vicoexport.com/en/home-es/solar-panels/tongwei-solar/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Compact size and lightweight, making installation easier",
+      "donde": "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf",
+      "veredicto": "matizable",
+      "explicacion": "El tamaño (2,0 m²) es compacto para 450–470 W, pero con 23,7–24,3 kg pesa más que los módulos de vidrio y lámina trasera de tamaño parecido, que rondan los 21–22 kg.",
+      "fuentes": [
+        "https://solarproof.com.au/datasheets/panel_datasheet_TNC2.0-TWMNH-48HE450470WB30-2811.5-compressed.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "25 Jahre Herstellerproduktgarantie",
+      "donde": "https://www.photovoltaik4all.de/pv4all-netz/solarmodule/tongwei/tongwei-twmnh-48he-455-full-black-dg",
+      "veredicto": "matizable",
+      "explicacion": "La garantía oficial que se pudo leer (Australia, 2025), la ficha Ver.20250801 y el distribuidor español dan 15 años de producto para el TWMNH-48HE; la propia tienda alemana dice 15 años en su tabla técnica. No se encontró una garantía europea que confirme los 25 años, aunque podría existir una versión regional distinta.",
+      "fuentes": [
+        "https://solarproof.com.au//warranty_documents/panel_warranty_Warranty - TWMNH-48HE470.pdf",
+        "https://www.vicoexport.com/en/home-es/solar-panels/tongwei-solar/"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 de «Tongwei», «TW Solar» y «TWMNH» en EU Safety Gate, CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia), Health Canada y prensa sectorial (pv magazine, TaiyangNews, Bernreuter). No se encontró ninguna retirada ni alerta de seguridad para el modelo ni la marca: ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "photovoltaik4all.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.photovoltaik4all.de/pv4all-netz/solarmodule/tongwei/tongwei-twmnh-48he-455-full-black-dg",
+      "precio_eur": 80,
+      "iva_incluido": null,
+      "unidad": "por módulo (455 Wp)",
+      "incluye_instalacion": false,
+      "envio": "Por agencia de transporte; no indica si envía a España",
+      "stock": "Disponible de inmediato",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    },
+    {
+      "distribuidor": "Vico Export Solar Energy",
+      "tipo": "mayorista",
+      "pais": "España",
+      "url": "https://www.vicoexport.com/en/home-es/solar-panels/tongwei-solar/",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "No indicado; precio bajo consulta",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    },
+    {
+      "distribuidor": "sun.store",
+      "tipo": "mayorista",
+      "pais": "UE (plataforma B2B)",
+      "url": "https://sun.store/en/product/tongwei-twmnh-48he450-450-470-1500v-full-black-51655",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "Sin ofertas disponibles",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    }
+  ],
+  "compatibles": [
+    "Inversores de string e híbridos domésticos con entrada ≥16 A por MPPT; microinversores que admitan Isc ≈ 15,9 A."
+  ],
+  "pendiente": [
+    "Ninguna oferta con precio en una tienda española a fecha 2026-10-18; el precio alemán no aclara el IVA.",
+    "Garantía europea vigente: 15 o 25 años de producto (documentos contradictorios).",
+    "Planta de fabricación de los módulos y año de fundación de Tongwei.",
+    "Tipo de conector.",
+    "Comprobación en el Scorecard de Kiwa PVEL de qué modelos TNC se ensayaron.",
+    "Emisor de los certificados IEC."
+  ]
+}

@@ -1,0 +1,489 @@
+{
+  "slug": "lg-resu",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "LG Energy Solution RESU (RESU10H Prime, RESU16H Prime, RESU Flex)",
+  "marca": "LG Energy Solution",
+  "modelo": "RESU10H Prime (9,6 kWh) y RESU16H Prime (16 kWh), alta tensión; RESU Flex; generación anterior RESU 7H/10H (Type-R y Type-C) y RESU 3.3/6.5/10/13 de baja tensión",
+  "variante_ficha": "RESU10H Prime (EH153064P8S1), ficha técnica «RESU Prime» versión 1.4 (copia alojada por SolarQuotes, Australia; la ficha no indica región) y página de producto europea de LG ESS",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No encontrado."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró la fecha de lanzamiento de la gama Prime; la página de SolarQuotes que aloja la ficha es de octubre de 2021."
+  },
+  "estado": "a la venta",
+  "resumen": "Gama de baterías domésticas de iones de litio de LG Energy Solution (antes LG Chem), con sede en Corea del Sur. La generación actual en Europa incluye la RESU10H Prime, de 9,6 kWh útiles y 5 kW de potencia continua según la ficha, y la RESU16H Prime, de 16 kWh, ambas de alta tensión y con protección IP55. Su garantía europea es de 10 años con un 70 % de capacidad residual, limitada a 32 MWh en la RESU10H Prime y condicionada a instalador certificado y conexión a internet. La generación anterior (RESU 10H y otros modelos) ha sido retirada por riesgo de sobrecalentamiento e incendio en EE. UU., Australia, Reino Unido y, desde 2025, en la Unión Europea; las retiradas no incluyen la gama Prime. Las retiradas afectan también a sistemas de otras marcas que usaban baterías o celdas LG.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada en la página europea consultada."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.6,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "RESU10H Prime, a 25 °C y 100 % de profundidad de descarga según la ficha V1.4; coincide con la web europea (https://www.lgessbattery.com/eu/home-battery/product-info.lg)."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "9,6 (10H Prime) / 16 (16H Prime); 32 con dos 16H Prime en paralelo (web de EE. UU.)",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "fecha": "2026-10-18",
+      "nota": "Paralelo según https://www.lgessbattery.com/us/home-battery/product-info.lg."
+    },
+    "modular": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "fecha": "2026-10-18",
+      "nota": "Unidades cerradas de capacidad fija; la ampliación es en paralelo de unidades."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha indica 19,2 kWh con dos RESU10H Prime en paralelo; la web de EE. UU. indica 32 kWh con dos 16H Prime."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 19.2,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Dos RESU10H Prime en paralelo. Para la 16H Prime, 32 kWh en paralelo según la web de EE. UU. (https://www.lgessbattery.com/us/home-battery/product-info.lg); no verificado para Europa."
+    },
+    "potencia_continua_kw": {
+      "valor": 5,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "RESU10H Prime: 5 kW (14,3 A a 350 V)."
+    },
+    "potencia_pico_kw": {
+      "valor": 7,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "7 kW durante 10 s, solo en descarga (20 A)."
+    },
+    "quimica": {
+      "valor": "iones de litio (química concreta no publicada)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha dice «Lithium ion» y certificación de celda UL1642; no indica si es NMC u otra."
+    },
+    "fabricante_celulas": {
+      "valor": "LG Energy Solution",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "fecha": "2026-10-18",
+      "nota": "Fabricante integrado de celdas; fábrica de las celdas de la gama Prime no verificada."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado en la página consultada."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 100,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Condición de la capacidad útil declarada (25 °C)."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no publica eficiencia de ciclo completo; solo una eficiencia del convertidor DC/DC del 97,5 % en un sentido."
+    },
+    "tension": {
+      "valor": "Alta tensión: carga 420–450 V DC; descarga 350–410 V DC",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "DC (requiere inversor híbrido compatible)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "fecha": "2026-10-18",
+      "nota": "La web muestra los inversores compatibles solo como logotipos."
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversores_compatibles": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La web los muestra solo como imágenes, sin nombres legibles en el texto."
+    },
+    "respaldo_apagones": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Depende del inversor; no verificado."
+    },
+    "instalacion": {
+      "valor": "interior y exterior; de pie o en pared",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ip": {
+      "valor": "IP55",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Coincide con la web europea."
+    },
+    "rango_temperatura_c": {
+      "valor": "carga −10 a 50; descarga −20 a 50 (recomendado 15 a 30)",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 111,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "RESU10H Prime; RESU16H Prime: 159 kg (https://www.lgessbattery.com/eu/home-battery/product-info.lg)."
+    },
+    "medidas_mm": {
+      "valor": "504 × 817 × 295",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18",
+      "nota": "RESU10H Prime; RESU16H Prime: 504 × 1086 × 295 mm (web europea)."
+    },
+    "garantia_energia_mwh": {
+      "valor": 32,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "RESU10H Prime: 32 MWh; RESU16H Prime: 54 MWh. La garantía de retención del 70 % termina a los 10 años o al alcanzar esa energía, lo que antes ocurra."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 692.6,
+      "unidad": "€/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://tienda-solar.es/en/wind-solar-batteries/1723-battery-lg-chem-resu-10h-prime",
+      "fecha": "2026-10-18",
+      "nota": "6.648,95 € (IVA incluido, tienda-solar.es, sin instalación) / 9,6 kWh útiles. Disponibilidad no indicada en la tienda."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La RESU no figura en la Stromspeicher-Inspektion 2025 de la HTW Berlin (allí aparecen celdas LG solo dentro de un sistema VARTA)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "«Limited Warranty for the RESU Prime Home Battery» (sin fecha ni versión), válida en 29 países europeos, incluida España (artículo 12). Empieza en la instalación o 12 meses después de la fabricación, lo que antes ocurra."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Retención del 70 % de la energía al final del periodo o al alcanzar la energía mínima (32 MWh para la RESU10H Prime, 54 MWh para la 16H Prime), lo que antes ocurra (artículo 4.1)."
+    },
+    "letra_pequena": [
+      "Exige conexión a internet para actualizaciones remotas y registro en la web RESU Monitor (con aceptación de la recogida de datos personales); sin ello LG puede no cubrir el periodo completo, aunque garantiza al menos cinco años (artículo 7) (https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf).",
+      "Requiere instalación y mantenimiento por un «Certified Installer» de LG Energy Solution con cualificación eléctrica; si no, queda excluida (artículos 2.5 y 8).",
+      "No dice que cubra mano de obra ni transporte; excluye daños en el transporte del vendedor al comprador y la indemnización por daños derivados (artículos 6.3 y 8).",
+      "Excluye productos almacenados o instalados sin cumplir el manual, incluidos los rangos de temperatura del anexo 1 (artículo 8).",
+      "En las retiradas de la generación anterior, LG aplicó a las unidades conectadas actualizaciones remotas que pueden apagar la batería si detectan riesgo, o limitarla al 75 % de carga en Australia (https://www.cpsc.gov/Recalls/2023/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-Recall-Alert; https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia)."
+    ],
+    "quien_responde": "El garante es LG Energy Solution, Ltd. (Corea del Sur); para Europa (salvo Italia) el contacto es el servicio de LG Energy Solution Europe GmbH en Alemania (+49 6196 5719 660) (https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf). El documento no prevé qué ocurre si LG dejara el mercado europeo; quedan las garantías legales del vendedor."
+  },
+  "empresa": {
+    "razon_social": "LG Energy Solution, Ltd. (filial europea: LG Energy Solution Europe GmbH; importador en EE. UU.: LG Energy Solution Michigan, Inc.)",
+    "pais_sede": "Corea del Sur (Seúl)",
+    "fundacion": 2020,
+    "cotiza_en": "Bolsa de Corea (KRX: 373220), desde enero de 2022",
+    "web": "https://www.lgessbattery.com/",
+    "fabricante_celulas": "LG Energy Solution",
+    "pais_fabricacion": "No publicado para la gama Prime",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Escindida de LG Chem como empresa independiente el 1 de diciembre de 2020; empezó a cotizar en la Bolsa de Corea en enero de 2022 (https://en.wikipedia.org/wiki/LG_Energy_Solution).",
+      "Antes LG Chem; las RESU 10H retiradas en EE. UU. se vendieron como «LG Chem RESU 10H» (https://www.cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard).",
+      "Las baterías LG retiradas en Australia pueden estar dentro de sistemas de las marcas SolaX, Opal, Redback, Red Earth, Eguana o VARTA, o sin marca (https://ProductSafety.gov.au/news/consumers-urged-to-immediately-check-for-recalled-lg-solar-batteries-after-government-safety-warning-notice).",
+      "En noviembre de 2022, en Australia se habían retirado o sustituido unas 2.900 baterías, unas 1.400 estaban apagadas o limitadas al 75 % y unas 3.000 seguían sin localizar; se registraron 9 incidentes desde octubre de 2019, con un herido y 3 casos de daños materiales (https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia).",
+      "En Europa, LG retira las RESU de generación anterior (RESU3.3, 6.5, 10, 13, 7H y 10H Type-R/Type-C, 10M) por riesgo de sobrecalentamiento e incendio; la página de retirada tiene versiones para la UE, Alemania, Reino Unido, Francia, España e Italia (https://recall.lgessbattery.com/de/recallnotice.html)."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/LG_Energy_Solution",
+      "https://www.cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard",
+      "https://cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-0",
+      "https://www.cpsc.gov/Recalls/2023/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-Recall-Alert",
+      "https://ProductSafety.gov.au/news/consumers-urged-to-immediately-check-for-recalled-lg-solar-batteries-after-government-safety-warning-notice",
+      "https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia",
+      "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-resu-ess-home-batteries-lg-ess-battery-division-2103-0025",
+      "https://recall.lgessbattery.com/de/recallnotice.html",
+      "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+      "pais_sede": "https://en.wikipedia.org/wiki/LG_Energy_Solution",
+      "fundacion": "https://en.wikipedia.org/wiki/LG_Energy_Solution",
+      "cotiza_en": "https://en.wikipedia.org/wiki/LG_Energy_Solution"
+    }
+  },
+  "origen": {
+    "pais_marca": "Corea del Sur",
+    "pais_fabricacion": null,
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas de iones de litio de LG Energy Solution"
+    ],
+    "num_componentes": {
+      "valor": "1 unidad cerrada (sin módulos ampliables internamente)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "fecha": "2026-10-18",
+      "nota": "La ampliación es poniendo dos unidades en paralelo."
+    },
+    "reparabilidad": "No se encontró información pública. En las retiradas de la RESU 10H el remedio fue la sustitución completa, una actualización de software o el reembolso."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619",
+      "emisor": null,
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL1973 (pack), UL1642 (celda)",
+      "emisor": null,
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE, RCM, FCC",
+      "emisor": null,
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN38.3",
+      "emisor": null,
+      "fuente": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.lgessbattery.com/eu/home-battery/product-info.lg",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Página de producto europea (los PDF de ficha y garantía se cargan por JavaScript y no se pudieron leer)."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.lgessbattery.com/us/home-battery/product-info.lg",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Página de producto de EE. UU."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.solarquotes.com.au/wp-content/uploads/2021/10/lg-chem-resu-prime-10h.pdf",
+      "idioma": "en",
+      "fecha": "2021",
+      "nota": "RESU10H Prime, versión 1.4, copia de SolarQuotes (Australia)."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf",
+      "idioma": "en",
+      "fecha": null,
+      "nota": "Limited Warranty RESU Prime, 29 países europeos incluida España; copia de GPC Europe."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "«Optimal Capacity (9.6kWh) for Daily Use» (RESU10H Prime).",
+      "donde": "https://www.lgessbattery.com/us",
+      "veredicto": "sin pruebas",
+      "explicacion": "La capacidad declarada es de 9,6 kWh utilizables; que sea «óptima» depende del consumo de cada vivienda. No se encontró medición independiente de la RESU10H Prime.",
+      "fuentes": [
+        "https://www.lgessbattery.com/us",
+        "https://www.lgessbattery.com/eu/home-battery/product-info.lg"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Garantía de producto de 10 años (mencionada en la web de LG ESS).",
+      "donde": "https://www.lgessbattery.com/us",
+      "veredicto": "matizable",
+      "explicacion": "La garantía europea es de 10 años, pero la de rendimiento (70 %) termina antes si se alcanzan 32 MWh en la RESU10H Prime; además exige instalador certificado por LG y conexión a internet, sin la cual LG solo asegura cinco años.",
+      "fuentes": [
+        "https://res.cloudinary.com/gpceurope/image/upload/v1624281527/og822q43xzstabl03hkn.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [
+    {
+      "pais": "Estados Unidos",
+      "organismo": "CPSC",
+      "fecha": "2020-12-16",
+      "motivo": "Las baterías pueden sobrecalentarse, con riesgo de incendio y emisión de humo nocivo; 5 incendios con daños materiales menores, sin heridos.",
+      "modelos_afectados": "LG Chem RESU 10H (incluida Type-R), números de serie que empiezan por R15563P3SSEG, vendidas de enero de 2017 a marzo de 2019; unas 1.815 unidades (recall 21-055).",
+      "url": "https://www.cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Remedio: sustitución gratuita."
+    },
+    {
+      "pais": "Estados Unidos",
+      "organismo": "CPSC",
+      "fecha": "2021-08-04",
+      "motivo": "Sobrecalentamiento con riesgo de incendio; 5 informes de humo e incendio con daños materiales y un herido.",
+      "modelos_afectados": "LG Chem RESU 10H, números de serie que empiezan por R15563P3, vendidas de enero de 2017 a abril de 2019; unas 10.000 unidades (recall 21-175, ampliación de la anterior).",
+      "url": "https://cpsc.gov/Recalls/2021/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-0",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Remedio: sustitución gratuita; modificaciones remotas en las unidades conectadas hasta la sustitución."
+    },
+    {
+      "pais": "Estados Unidos",
+      "organismo": "CPSC",
+      "fecha": "2022-10-27",
+      "motivo": "Sobrecalentamiento con riesgo de incendio y humo nocivo; un incendio con daños materiales, sin heridos.",
+      "modelos_afectados": "RESU 10H, números de serie que empiezan por R15563P3S, vendidas de marzo de 2017 a marzo de 2020; unas 11.500 unidades (recall 23-705, vía rápida).",
+      "url": "https://www.cpsc.gov/Recalls/2023/LG-Energy-Solution-Michigan-Recalls-Home-Energy-Storage-Batteries-Due-to-Fire-Hazard-Recall-Alert",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Remedio: reparación mediante software de diagnóstico remoto que puede apagar la batería; la URL de la CPSC lleva el año 2023."
+    },
+    {
+      "pais": "Australia",
+      "organismo": "ACCC",
+      "fecha": "2023-11-20",
+      "motivo": "Aviso nacional de seguridad (Safety Warning Notice) emitido por el Ministro Adjunto del Tesoro sobre baterías LG retiradas que pueden sobrecalentarse y provocar incendios en viviendas.",
+      "modelos_afectados": "Baterías LG ESS para el hogar (retiradas PRA 2020/18529 y PRA 2022/19550) y SolaX LG S/A Gen2 (PRA 2022/19420); también dentro de sistemas Opal, Redback, Red Earth, Eguana, VARTA o sin marca. Unas 8.000 seguían instaladas, 6.000 sin localizar. Las retiradas de 2021–2022 afectaban a lotes fabricados de marzo de 2017 a septiembre de 2018 según la prensa.",
+      "url": "https://ProductSafety.gov.au/news/consumers-urged-to-immediately-check-for-recalled-lg-solar-batteries-after-government-safety-warning-notice",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Remedio: sustitución, reembolso o actualización de software, más compensación por el aumento de la factura eléctrica. Ver también https://energy-storage.news/recall-again-for-home-energy-storage-systems-with-dangerous-lg-batteries-in-australia y https://worksafe.qld.gov.au/news-and-events/newsletters/esafe-newsletters/esafe-editions/esafe-electrical/2022-newsletters/may-2022/help-identify-dangerous-recalled-energy-storage-batteries-which-can-cause-fire."
+    },
+    {
+      "pais": "Reino Unido",
+      "organismo": "OPSS (Office for Product Safety and Standards)",
+      "fecha": "2021-03-26",
+      "motivo": "Las baterías pueden sobrecalentarse, con riesgo de incendio y emisión de humo o gases; riesgo valorado como bajo con la metodología RAPEX.",
+      "modelos_afectados": "RESU7H Type R/C, RESU10H Type R/C, RESU10, RESU3.3, RESU6.5, RESU13 y módulos EM048126P3S8, EM048126P3S7, EM048063P3S4, EM048063P3S5, con celdas fabricadas entre marzo (o abril) de 2017 y septiembre de 2018.",
+      "url": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-resu-ess-home-batteries-lg-ess-battery-division-2103-0025",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Publicado el 25-03-2022; la página da como fecha de alerta el 26-03-2021. Remedio: sustitución de todas las baterías potencialmente afectadas."
+    },
+    {
+      "pais": "Unión Europea (Alemania, Austria, España y otros mercados europeos)",
+      "organismo": "fabricante (LG Energy Solution Europe)",
+      "fecha": "2025-03",
+      "motivo": "Riesgo de sobrecalentamiento e incendio; según la prensa, un error del software del BMS puede causar sobrecalentamiento incluso con el equipo apagado. La retirada se amplió a más modelos.",
+      "modelos_afectados": "RESU3.3, RESU6.5, RESU10, RESU13, RESU7H Type C/R, RESU10H Type C/R (números de serie R15563P3SDLT1, R15563P3SSEG1, R15563P3SSEG2), RESU10M y módulos LG en sistemas de otras marcas. No incluye la RESU Prime.",
+      "url": "https://recall.lgessbattery.com/de/recallnotice.html",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Remedio: sustitución gratuita o módulo nuevo, retirada de la batería y software de diagnóstico que apaga las unidades en riesgo; mientras tanto, mantenerlas apagadas. La página no tiene fecha; la cobertura en prensa es de febrero-marzo de 2025 (https://www.nextpit.de/news/brandgefahr-diese-stromspeicher-modelle-sind-betroffen; https://notebookcheck.com/Rueckruf-durch-Brandgefahr-und-Explosion-Mehrere-Energiespeicher-auch-fuer-Privatanwender-betroffen.972283.0.html; https://www.vienna.at/recall-of-energy-storage-systems-these-models-are-affected/9244817). No se encontró que la impusiera una autoridad."
+    }
+  ],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: CPSC (tres retiradas de la RESU 10H en EE. UU.), ACCC/productsafety.gov.au y Clean Energy Council (retiradas y aviso nacional de seguridad en Australia), WorkSafe Queensland, gov.uk Product Safety Alerts (retirada en Reino Unido, 2021), la página de retirada europea de LG (recall.lgessbattery.com) y prensa alemana y austríaca (nextpit, Notebookcheck, vienna.at, 2025). Health Canada: no se encontró una ficha específica. La base de EU Safety Gate no pudo consultarse directamente (aplicación dinámica, acceso bloqueado desde la herramienta). No se encontró ninguna retirada de la RESU10H Prime, RESU16H Prime ni RESU Flex.",
+  "ofertas": [
+    {
+      "distribuidor": "tienda-solar.es",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/wind-solar-batteries/1723-battery-lg-chem-resu-10h-prime",
+      "precio_eur": 6648.95,
+      "iva_incluido": true,
+      "unidad": "por unidad RESU10H Prime (9,6 kWh)",
+      "incluye_instalacion": false,
+      "envio": "no indicado",
+      "stock": "no indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio sin IVA 5.495 € según los metadatos de la página."
+    }
+  ],
+  "compatibles": [
+    "inversores híbridos de alta tensión listados por LG (no verificados en esta revisión)"
+  ],
+  "pendiente": [
+    "Ficha técnica europea oficial (la consultada no indica región) y datos de la RESU Flex.",
+    "Eficiencia de ida y vuelta (no publicada).",
+    "Química concreta de las celdas, país y fábrica de producción.",
+    "Fecha de lanzamiento de la gama Prime y estado comercial de la RESU Flex en Europa.",
+    "Lista de inversores compatibles para Europa en texto (la web la muestra como logotipos).",
+    "Consulta directa a EU Safety Gate y Health Canada."
+  ],
+  "estado_nota": "La web europea de LG ESS sigue mostrando la RESU10H Prime y la 16H Prime. AutoSolar ya no tiene página de producto (redirige a la portada); tienda-solar.es la lista con precio sin indicar existencias (2026-10-18)."
+}

@@ -1,0 +1,476 @@
+{
+  "slug": "huawei-luna2000",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Huawei LUNA2000 (S1 y S0)",
+  "marca": "Huawei",
+  "modelo": "LUNA2000-5/7/10/12/14/15/17/19/21-S1 (módulo de potencia LUNA2000-10KW-C1 + 1 a 3 módulos LUNA2000-5-E1 de 5 kWh o LUNA2000-7-E1 de 6,9 kWh); generación anterior LUNA2000-5/10/15-S0 (módulos de 5 kWh), no compatible con S1",
+  "variante_ficha": "LUNA2000-7-S1 (1 módulo LUNA2000-7-E1 de 6,9 kWh + LUNA2000-10KW-C1), página de especificaciones global de Huawei",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No encontrado."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No verificado en esta revisión. La garantía europea S1 consultada es de 01-03-2024."
+  },
+  "estado": "a la venta",
+  "resumen": "Batería doméstica modular de alta tensión de Huawei, de fosfato de hierro y litio (LFP), que se conecta a los inversores híbridos SUN2000 de la propia marca. La generación S1 combina un módulo de potencia con uno a tres módulos de 5 o 6,9 kWh, de 5 a 20,7 kWh por torre, e incluye, según la marca, optimización a nivel de módulo; no es compatible con la generación anterior S0. La garantía europea del S1 es de 5 años de base y solo llega a 15 años si la batería permanece registrada y conectada a la plataforma en la nube FusionSolar, con un 60 % de capacidad garantizada. En la UE, la Comisión Europea anunció en mayo de 2026 la retirada progresiva de inversores chinos de alto riesgo en proyectos con fondos europeos, citando a Huawei como ejemplo de fabricante. No se ha encontrado ninguna retirada de seguridad de la batería.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Huawei publica solo la energía utilizable."
+    },
+    "capacidad_util_kwh": {
+      "valor": 6.9,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "LUNA2000-7-S1 (1 × 7-E1)."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5 / 6,9 / 10 / 11,9 / 13,8 / 15 / 16,9 / 18,8 / 20,7 por torre",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "Combinaciones de 1 a 3 módulos de 5 y 6,9 kWh."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "Hasta 3 módulos por torre; hasta 4 sistemas en paralelo solo con inversor SUN2000 MB0 (trifásico)."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 82.8,
+      "unidad": "kWh",
+      "origen": "calculado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "4 sistemas en paralelo × 20,7 kWh (solo con inversor MB0)."
+    },
+    "potencia_continua_kw": {
+      "valor": 3.5,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "3,5 kW por módulo de batería («fast charge and discharge at 3.5 kW for each battery module»); 7 kW con 2 módulos y 10,5 kW con 3. Krannich indica 7 kW de descarga máxima para el 7-S1, dato que no coincide."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada en la página de especificaciones."
+    },
+    "quimica": {
+      "valor": "LFP (LiFePO4)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Huawei no publica el fabricante de las celdas."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado; la garantía S1 fija 28,84 MWh por módulo de 6,9 kWh."
+    },
+    "profundidad_descarga_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada como cifra."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Huawei no publica la eficiencia de ida y vuelta en la página de especificaciones."
+    },
+    "tension": {
+      "valor": "alta tensión: 350–560 V (monofásico) / 600–980 V (trifásico)",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "acoplamiento": {
+      "valor": "DC (con inversor híbrido Huawei SUN2000)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversores_compatibles": {
+      "valor": "Huawei SUN2000 L1, LB0, LC0, M1, MAP0, MB0 y SUN5000 MAP0, MB0, LB0",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "respaldo_apagones": {
+      "valor": "depende del inversor y de la caja de respaldo de Huawei",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "La página de la batería no detalla el respaldo; pendiente."
+    },
+    "instalacion": {
+      "valor": "interior o exterior (se recomienda exterior); de pie o en pared",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip": {
+      "valor": "IP66",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "rango_temperatura_c": {
+      "valor": "-20 a 55",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "peso_kg": {
+      "valor": 80,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "Torre con 1 módulo (módulo de batería 68 kg + módulo de potencia 10 kg); 148 kg con 2 y 216 kg con 3."
+    },
+    "medidas_mm": {
+      "valor": "590 × 255 × 510",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": "Torre de 1 módulo; 870 mm de alto con 2 y 1230 mm con 3."
+    },
+    "ruido_db": {
+      "valor": "< 29",
+      "unidad": "dB a 1 m",
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "garantia_energia_mwh": {
+      "valor": 28.84,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Por módulo de 6,9 kWh (S1). S0 (5 kWh): 16,45 MWh."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 554.06,
+      "unidad": "€/kWh",
+      "origen": "calculado",
+      "fuente": "https://suministrosdelsol.com/pt/baterias-huawei/2574-huawei-luna2000-7-14-21-s1-nova-bateria-de-litio.html",
+      "fecha": "2026-10-18",
+      "nota": "3.823,00 € (IVA incl., Suministros del Sol) / 6,9 kWh. La página muestra un único precio para el producto 7/14/21-S1; se asume que corresponde a la configuración básica de 1 módulo (no lo indica expresamente)."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "LUNA2000 no figura entre los sistemas ensayados en la Stromspeicher-Inspektion 2025 de la HTW Berlin (solo se menciona en el análisis de mercado)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 5,
+      "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+      "fecha": "2026-10-18",
+      "nota": "S1: garantía básica de 60 meses; avanzada de 180 meses (15 años) si se cumple el requisito de conexión. S0: 120 meses. Inicio: 180 días después del envío. Condiciones UE de 01-03-2024 para EEE y Suiza."
+    },
+    "rendimiento": {
+      "anios": 15,
+      "porcentaje_final": 60,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+      "fecha": "2026-10-18",
+      "nota": "60 % de la energía utilizable hasta el fin del plazo o hasta 28,84 MWh por módulo de 6,9 kWh, lo que ocurra primero. Los 15 años solo con la garantía avanzada (conectada)."
+    },
+    "letra_pequena": [
+      "S1: los 15 años solo se aplican si la batería está registrada en FusionSolar SmartPVMS y no pasa más de 6 meses desconectada de internet; si no, la garantía es de 5 años (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
+      "El plazo empieza 180 días después del envío desde Huawei, no desde la instalación; la instalación debe hacerse en el mes siguiente a la salida del almacén del distribuidor, entregando el albarán a Huawei (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
+      "Instalador cualificado o socio certificado por Huawei; las averías deben comunicarse en un mes (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
+      "Excluye dejar la batería sin cargar más de un mes (S1), almacenamiento o manejo indebidos y modificaciones; el módulo de potencia tiene garantía independiente del rendimiento de la batería (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf).",
+      "Solo cubre compras a Huawei o a vendedores autorizados en el EEE y Suiza (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf)."
+    ],
+    "quien_responde": "Huawei Technologies Co., Ltd. (China). La garantía no prevé qué ocurre si Huawei dejara de operar en el mercado europeo; quedan las garantías legales del vendedor."
+  },
+  "empresa": {
+    "razon_social": "Huawei Technologies Co., Ltd.",
+    "pais_sede": "China (Longgang, Shenzhen, Guangdong)",
+    "fundacion": 1987,
+    "cotiza_en": "No cotiza en bolsa: empresa privada que se declara propiedad de sus empleados (a través de un comité sindical; Ren Zhengfei tiene en torno al 1 %), condición discutida por algunos académicos",
+    "web": "https://solar.huawei.com/",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "No indicado en ficha ni garantía",
+    "fabricas_conocidas": [],
+    "notas": [
+      "El 04-05-2026 la Comisión Europea anunció la retirada progresiva de inversores chinos de proveedores de alto riesgo en proyectos energéticos financiados por la UE, por motivos de ciberseguridad; el artículo cita a Huawei y Sungrow como ejemplos de fabricantes chinos, sin afirmar que la medida los nombre. Calendario: contratos nuevos plenamente afectados en abril de 2027. No afecta directamente a la compra privada (https://www.euronews.com/my-europe/2026/05/04/eu-moves-to-ban-high-risk-inverters-from-china-over-cybersecurity-threats).",
+      "SolarPower Europe inició la exclusión de Huawei como socio en abril-mayo de 2025, después de que la Comisión Europea dejara de reunirse con asociaciones que lo tuvieran como miembro por una investigación de corrupción; en octubre de 2025 suspendió el procedimiento y Huawei sigue como socio sin participar en sus actividades. Huawei niega irregularidades (https://www.ess-news.com/?p=5085; https://www.pv-magazine.com/2025/10/10/solarpower-europe-suspends-exclusion-proceedings-for-huawei/).",
+      "Lituania prohibió en noviembre de 2024 el acceso remoto de fabricantes de países considerados amenaza (incluida China) a sistemas de control de instalaciones solares, eólicas y de almacenamiento de más de 100 kW; no afecta a baterías domésticas típicas (https://www.pv-magazine.com/2024/11/18/lithuania-bans-remote-chinese-access-to-solar-wind-storage-devices/)."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/Huawei",
+      "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+      "https://www.euronews.com/my-europe/2026/05/04/eu-moves-to-ban-high-risk-inverters-from-china-over-cybersecurity-threats",
+      "https://www.ess-news.com/?p=5085",
+      "https://www.pv-magazine.com/2025/10/10/solarpower-europe-suspends-exclusion-proceedings-for-huawei/",
+      "https://www.pv-magazine.com/2024/11/18/lithuania-bans-remote-chinese-access-to-solar-wind-storage-devices/"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf (garante en la garantía europea)",
+      "pais_sede": "https://en.wikipedia.org/wiki/Huawei",
+      "fundacion": "https://en.wikipedia.org/wiki/Huawei (fundada en Shenzhen en 1987 por Ren Zhengfei)",
+      "cotiza_en": "https://en.wikipedia.org/wiki/Huawei (tipo «privada»)"
+    }
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": null,
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas LFP",
+      "optimizadores DC-DC por módulo",
+      "carcasa IP66 con refrigeración por convección natural"
+    ],
+    "num_componentes": {
+      "valor": "1 módulo de potencia + 1 a 3 módulos de batería",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "reparabilidad": "Modular: los módulos de batería y el módulo de potencia se venden por separado (https://www.wattuneed.com/es/bateria-litio/26861-bateria-de-litio-huawei-luna2000-7-e1-69-kwh-350-v-lfp-69-kwh-ip66.html). Las reparaciones no autorizadas excluyen la garantía (https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf)."
+  },
+  "certificados": [
+    {
+      "nombre": "VDE 2510-50",
+      "emisor": "no indicado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62619, UN 38.3, ISO 13849",
+      "emisor": "no indicado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE, RCM, CEC, REACH, RoHS",
+      "emisor": "no indicado",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "Marca de seguridad TÜV Rheinland («Highest-Level Safety»)",
+      "emisor": "TÜV Rheinland (según Huawei)",
+      "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Página de especificaciones S1 (web)."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Condiciones de garantía UE LUNA2000 S0/S1, versión 01-03-2024 (alojada por un distribuidor)."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.alternergy.co.uk/media/mageplaza/product_attachments/attachment_file/h/u/huawei_residential_standard_warranty_terms_-_15_02_2021.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Garantía residencial estándar Reino Unido, 15-02-2021 (generación S0)."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "«Extending warranty to up to 15 years».",
+      "donde": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+      "veredicto": "matizable",
+      "explicacion": "La garantía básica del S1 en Europa es de 5 años; los 15 años exigen registro y conexión permanente a la nube FusionSolar (no más de 6 meses desconectada), con un 60 % de capacidad o 28,84 MWh por módulo de 6,9 kWh como límite.",
+      "fuentes": [
+        "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+        "https://fvcomponentes.com/wp-content/uploads/2026/04/Warranty_Manual_EN-14.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "«more than 40% usable energy» (gracias a la optimización por módulo).",
+      "donde": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+      "veredicto": "sin pruebas",
+      "explicacion": "La propia nota de la página indica que la cifra del 40 % es teórica y procede de ensayos internos de Huawei. No se ha encontrado una medición independiente que la confirme o la desmienta.",
+      "fuentes": [
+        "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "«Certified with TÜV Rheinland Safety Mark's Highest-Level Safety» y «5-layer Protection».",
+      "donde": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+      "veredicto": "sin pruebas",
+      "explicacion": "Huawei no enlaza el certificado TÜV concreto en la página; la lista de certificaciones incluye IEC 62619 y VDE 2510-50, normas habituales en baterías domésticas. No se encontraron incidentes ni retiradas publicadas, pero tampoco un ensayo independiente comparativo.",
+      "fuentes": [
+        "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+        "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "«Quiet operation at 29 dB».",
+      "donde": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/",
+      "veredicto": "sin pruebas",
+      "explicacion": "Medido por Huawei a 1 m en condiciones típicas, según su nota; sin verificación independiente encontrada.",
+      "fuentes": [
+        "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: búsquedas web de retiradas de LUNA2000 en Australia (ACCC y lista del Clean Energy Council: Huawei no figura), Países Bajos, Reino Unido, Alemania («Rückruf») y EU Safety Gate, búsquedas en los sitios de la CPSC (Huawei no vende esta batería en EE. UU.) y Health Canada, y prensa especializada. Solo aparecieron fichas de seguridad (MSDS) y reseñas; un distribuidor alemán (https://www.aceflex.de/?p=139271) afirma, sin datos, que no hay informes extendidos de incendios. La base de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica; acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha. Ninguna retirada conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "Suministros del Sol",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://suministrosdelsol.com/pt/baterias-huawei/2574-huawei-luna2000-7-14-21-s1-nova-bateria-de-litio.html",
+      "precio_eur": 3823,
+      "iva_incluido": true,
+      "unidad": "por sistema (LUNA2000-10KW-C1 + módulos 7-E1); precio mostrado por defecto, variante no indicada",
+      "envio": "no indicado",
+      "stock": "no indicado",
+      "nota": "≈ 3.159,50 € sin IVA según metadatos. El soporte técnico remoto para configuración y la tramitación de garantía se venden aparte."
+    },
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "Wattuneed",
+      "tipo": "tienda online",
+      "pais": "Bélgica",
+      "url": "https://www.wattuneed.com/es/bateria-litio/26861-bateria-de-litio-huawei-luna2000-7-e1-69-kwh-350-v-lfp-69-kwh-ip66.html",
+      "precio_eur": 4144.17,
+      "iva_incluido": true,
+      "unidad": "por módulo LUNA2000-7-E1 (sin módulo de potencia)",
+      "envio": "no indicado",
+      "stock": "no indicado",
+      "nota": "El módulo de potencia LUNA2000-10KW-C1 se vende aparte por 1.471,77 €; conjunto 7-S1 = 5.615,94 € (cálculo). Tasa Bebat solo para clientes en Bélgica."
+    },
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "Krannich Solar",
+      "tipo": "mayorista",
+      "pais": "España",
+      "url": "https://shop.krannich-solar.com/es-es/baterias/baterias-solares/60833/huawei-luna2000-7-s1",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por conjunto LUNA2000-7-S1 (7-E1 + 10KW-C1)",
+      "envio": "fecha de envío no determinada",
+      "stock": "no indicado",
+      "nota": "Precio solo bajo petición."
+    }
+  ],
+  "compatibles": [
+    "inversores Huawei SUN2000 (L1, LB0, LC0, M1, MAP0, MB0) y SUN5000",
+    "plataforma de monitorización Huawei FusionSolar"
+  ],
+  "pendiente": [
+    "Eficiencia de ida y vuelta y potencia pico (Huawei no las publica en la página).",
+    "Fabricante y país de fabricación de las celdas.",
+    "Año de lanzamiento de S0 y S1 y fecha de fin de venta de S0.",
+    "Precio exacto por variante en Suministros del Sol.",
+    "Ficha técnica en PDF (solo se consultó la página web).",
+    "Consulta directa a EU Safety Gate."
+  ]
+}

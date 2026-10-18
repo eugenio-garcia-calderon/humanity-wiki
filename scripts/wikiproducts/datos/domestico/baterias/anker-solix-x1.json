@@ -1,0 +1,431 @@
+{
+  "slug": "anker-solix-x1",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Anker SOLIX X1",
+  "marca": "Anker SOLIX",
+  "modelo": "SOLIX X1 (HES X1): módulos de potencia X1-H3.68K-S … X1-H12K-T y módulo de batería X1-B5-H",
+  "variante_ficha": "Módulo de batería X1-B5-H (5 kWh) con módulo de potencia monofásico X1-H5K-S / X1-H4.6K-S",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se ha encontrado un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2023,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.nacleanenergy.com/energy-storage/anker-solix-showcasing-next-generation-hybrid-category-of-energy-solutions-at-re-2023-to-redefine-power-energy-independence",
+    "fecha": "2026-10-18",
+    "nota": "Presentado en la feria RE+ de 2023 (EE. UU.); la llegada a Europa fue posterior y no se ha fechado."
+  },
+  "estado": "a la venta",
+  "resumen": "Anker SOLIX X1 es un sistema doméstico modular formado por un módulo de potencia (inversor híbrido) y módulos de batería LFP de 5 kWh nominales, de 1 a 6 por sistema según la tabla de especificaciones de la marca. En Europa se ofrecen módulos de potencia monofásicos de 3,68 a 6 kW y trifásicos de hasta 12 kW. La garantía europea de la batería es de 10 años con un 80 % de capacidad, limitada a 13,17 MWh de energía o 6.000 ciclos, lo que ocurra antes, y se aplica solo en el país de compra. Anker no publica la capacidad útil ni la eficiencia de ida y vuelta de la batería, y no se ha encontrado ningún ensayo independiente publicado.",
+  "imagen": {
+    "url": null,
+    "fuente": null,
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "Pendiente de enlazar una imagen oficial verificada."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 5,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "Por módulo X1-B5-H (nominal)."
+    },
+    "capacidad_util_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no publica la capacidad útil en la web europea ni en la ficha de distribuidor consultada; una nota dice que la capacidad real varía según las condiciones."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5 / 10 / 15 / 20 / 25 / 30 por sistema",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha de especificaciones en neerlandés del distribuidor GPC Europe."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliacion_max_kwh": {
+      "valor": 30,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "6 módulos por sistema según la tabla. La misma página anuncia «5-180kWh», cifra que no se explica en la tabla (ver afirmaciones)."
+    },
+    "potencia_continua_kw": {
+      "valor": "3,68 / 4,6 / 5 / 6 (monofásico); hasta 12 (trifásico)",
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "Potencia AC del módulo de potencia. La ficha del distribuidor da 3 kW de carga/descarga máxima por módulo de batería."
+    },
+    "potencia_pico_kw": {
+      "valor": 10,
+      "unidad": "kVA",
+      "origen": "declarado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18",
+      "nota": "10 kVA durante 10 s, para el módulo de potencia de 4,6 kW / 5 kVA."
+    },
+    "quimica": {
+      "valor": "LFP (litio-ferrofosfato)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "ciclos_declarados": {
+      "valor": 6000,
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+      "fecha": "2026-10-18",
+      "nota": "Cifra que aparece como límite de la garantía; la página de producto no da una vida en ciclos."
+    },
+    "profundidad_descarga_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada. El módulo de potencia declara un máximo del 97,5 % y un 96,7 % europeo (eficiencia del inversor, no de ida y vuelta)."
+    },
+    "tension": {
+      "valor": "alta tensión; 350–550 V CC por módulo de batería",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "híbrido DC con módulo de potencia propio (existe también una versión AC en otros mercados)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "El inversor es un módulo de potencia que se apila con las baterías."
+    },
+    "inversores_compatibles": {
+      "valor": "Solo módulos de potencia Anker SOLIX X1",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+      "fecha": "2026-10-18",
+      "nota": "La garantía excluye componentes de terceros."
+    },
+    "respaldo_apagones": {
+      "valor": "sí; salida de respaldo de 4,6 kW / 5 kVA (10 kVA pico 10 s), conmutación < 10 ms",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Datos del módulo de 4,6 kW. Cobertura de toda la casa o por circuitos según instalación (Power Dock)."
+    },
+    "instalacion": {
+      "valor": "interior o exterior; suelo o pared (con soporte adicional)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ip": {
+      "valor": "IP66 (tabla) / IP65 (texto comercial)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "La propia página da dos grados distintos sin explicar la diferencia."
+    },
+    "rango_temperatura_c": {
+      "valor": "-20 a 55",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "fecha": "2026-10-18",
+      "nota": "Batería. El módulo de potencia: -25 a 60 °C con reducción de potencia desde 45 °C. La garantía excluye exposiciones por encima de 45 °C o por debajo de -20 °C."
+    },
+    "peso_kg": {
+      "valor": 51,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/en/products/batteries/battery-module/anker-solix-x1-b5-h",
+      "fecha": "2026-10-18",
+      "nota": "Módulo X1-B5-H. Módulo de potencia: 19 kg."
+    },
+    "medidas_mm": {
+      "valor": "670 × 360 × 150",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/en/products/batteries/battery-module/anker-solix-x1-b5-h",
+      "fecha": "2026-10-18",
+      "nota": "Módulo X1-B5-H. Módulo de potencia: 670 × 335 × 150 mm."
+    },
+    "garantia_energia_mwh": {
+      "valor": 13.17,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+      "fecha": "2026-10-18",
+      "nota": "Por módulo X1-B5-H. Equivale a unos 2.634 ciclos completos de 5 kWh (13,17 MWh / 5 kWh, calculado), por lo que este límite llega antes que los 6.000 ciclos."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": null,
+      "unidad": "EUR/kWh útil",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se ha encontrado ningún precio público con IVA en España/UE, y la capacidad útil no se publica."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SOLIX X1 no figura en los ensayos de eficiencia de la HTW Berlin de 2025 ni de 2026; en 2025 la marca Anker SOLIX aparece solo en el análisis de mercado (Solarbank E1600)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+      "fecha": "2026-10-18",
+      "nota": "Módulo de potencia, módulo de batería y Power Dock Pro: 10 años. Dongle WLAN/móvil: 5 años. Sensores de potencia: 24 meses."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 80,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://www.ankersolix.com/eu/hes-x1-warranty",
+      "fecha": "2026-10-18",
+      "nota": "Al menos el 80 % de la capacidad inicial durante 120 meses desde la instalación, o hasta 13,17 MWh o 6.000 ciclos, lo que ocurra antes."
+    },
+    "letra_pequena": [
+      "Límite de 13,17 MWh por módulo: equivale a unos 2.634 ciclos completos, por debajo de los 6.000 ciclos que también cita la garantía. Fuente: https://www.ankersolix.com/eu/hes-x1-warranty",
+      "Cobertura limitada al país de compra; los plazos solo valen para compras en la web oficial o en socios listados. Fuente: misma garantía.",
+      "Excluye instalaciones no realizadas por un instalador certificado. Fuente: misma garantía.",
+      "No cubre desmontaje, instalación ni diagnóstico. Si la unidad defectuosa no llega en 60 días desde la RMA, Anker factura el precio de lista. Fuente: misma garantía.",
+      "Excluye: batería al 0 % no recargada en 7 días, rechazo de actualizaciones de firmware, traslado del equipo, temperaturas fuera de -20/45 °C, corrosión y óxido, agua de mar. Fuente: misma garantía.",
+      "La batería no tiene ampliación de garantía disponible. Fuente: misma garantía."
+    ],
+    "quien_responde": "Anker (Anker Innovations) como fabricante, a través de support@ankersolix.com o el socio vendedor. La garantía no prevé qué ocurre si la marca abandona el mercado europeo; quedarían los derechos legales frente al vendedor."
+  },
+  "empresa": {
+    "razon_social": "Anker Innovations Co., Ltd.",
+    "pais_sede": "China (Changsha, Hunan)",
+    "fundacion": 2011,
+    "cotiza_en": "Bolsa de Shenzhen (SZSE: 300866)",
+    "web": "https://www.ankersolix.com",
+    "fabricante_celulas": null,
+    "pais_fabricacion": null,
+    "fabricas_conocidas": [],
+    "notas": [
+      "Fundada en 2011 en Shenzhen por Steven Yang; sede actual en Changsha. Fuente: https://en.wikipedia.org/wiki/Anker",
+      "La marca Anker SOLIX para almacenamiento doméstico nació en 2023. Fuente: https://solarquotes.com.au/battery-storage/reviews/anker-solix-review.html",
+      "Anker ha retirado varios modelos de baterías externas (power banks) por riesgo de incendio desde 2023, entre ellos cinco modelos PowerCore en junio de 2025 por un problema de celdas de un solo proveedor. No afectan al X1. Fuente: https://en.wikipedia.org/wiki/Anker",
+      "No se han encontrado retenciones UFLPA, procedimientos antidumping ni insolvencias relacionadas con este producto en las búsquedas realizadas."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/Anker",
+      "https://solarquotes.com.au/battery-storage/reviews/anker-solix-review.html"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": null,
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas de litio-ferrofosfato (LFP)",
+      "carcasa con protección contra corrosión C5 (según la marca)"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Sistema apilable con módulos sustituibles por separado según el diseño descrito por la marca (https://www.ankersolix.com/eu/x1-energy-storage-system-hes). No se ha encontrado información sobre repuestos a nivel de celda."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619, IEC 62040-1, VDE-AR-E 2510-50, UN 38.3 (batería)",
+      "emisor": "no indicado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "EN IEC 62109-1/-2, EN IEC 61000-6-1/-3, VDE-AR-N 4105, EN 50549, G99 (módulo de potencia)",
+      "emisor": "no indicado",
+      "fuente": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf",
+      "idioma": "nl",
+      "fecha": null
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/40871/data_sheet_x1_b5_h_en_13-08-2025.pdf?locale=en",
+      "idioma": "en",
+      "fecha": "2025-08-13"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.ankersolix.com/eu/hes-x1-warranty",
+      "idioma": "en",
+      "fecha": null
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/40872/warranty_x1_b5_h_en_13-08-2025.pdf?locale=en",
+      "idioma": "en",
+      "fecha": "2025-08-13"
+    },
+    {
+      "tipo": "manual",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/40873/manual_x1_b5_h_en_13-08-2025.pdf?locale=en",
+      "idioma": "en",
+      "fecha": "2025-08-13"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "0 ms Load-Side Switching",
+      "donde": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "veredicto": "matizable",
+      "explicacion": "La tabla de especificaciones de la misma página da un tiempo de conmutación de red a isla inferior a 10 ms, no de 0 ms. El «0 ms» parece referirse a una configuración concreta del lado de las cargas.",
+      "fuentes": [
+        "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+        "https://res.cloudinary.com/gpceurope/image/upload/v1768068555/g9vevzbsgtyad8ifjvmr.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "5-180kWh | 3.68-72kW",
+      "donde": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "veredicto": "matizable",
+      "explicacion": "La tabla de la misma página limita un sistema a 6 módulos de 5 kWh (30 kWh). La cifra de 180 kWh implica combinar varios sistemas, algo que la página no detalla.",
+      "fuentes": [
+        "https://www.ankersolix.com/eu/x1-energy-storage-system-hes"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "10-year warranty",
+      "donde": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "veredicto": "matizable",
+      "explicacion": "La garantía de la batería termina a los 10 años o al alcanzar 13,17 MWh por módulo o 6.000 ciclos, lo que ocurra antes. Además solo vale en el país de compra. Con un ciclo completo diario, 13,17 MWh se alcanzan en algo más de 7 años (cálculo propio: 13,17 MWh / 5 kWh / 365).",
+      "fuentes": [
+        "https://www.ankersolix.com/eu/hes-x1-warranty"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "LiFePO4 cells can withstand thermal runaway between 300°C to 350°C, significantly higher than ternary lithium batteries.",
+      "donde": "https://www.ankersolix.com/eu/x1-energy-storage-system-hes",
+      "veredicto": "matizable",
+      "explicacion": "Es una afirmación general sobre la química LFP frente a las celdas NMC («ternarias»), no un resultado medido en este producto. No se ha encontrado un ensayo independiente del X1.",
+      "fuentes": [
+        "https://www.ankersolix.com/eu/x1-energy-storage-system-hes"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [
+    {
+      "pais": "Estados Unidos",
+      "organismo": "CPSC",
+      "fecha": "2025-09",
+      "motivo": "Riesgo de incendio y explosión de las celdas (33 incidentes notificados). Afecta a la misma marca, no al X1.",
+      "modelos_afectados": "Baterías externas (power banks) Anker, unas 481.000 unidades; no al SOLIX X1",
+      "url": "https://www.wkyt.com/2025/09/25/anker-power-banks-recalled-due-fire-burn-risk",
+      "fecha_consulta": "2026-10-18"
+    },
+    {
+      "pais": "Internacional",
+      "organismo": "fabricante",
+      "fecha": "2025-06",
+      "motivo": "Retirada voluntaria por un posible defecto de fabricación en celdas de un proveedor. Afecta a la misma marca, no al X1.",
+      "modelos_afectados": "Cinco modelos de power bank PowerCore; no al SOLIX X1",
+      "url": "https://en.wikipedia.org/wiki/Anker",
+      "fecha_consulta": "2026-10-18"
+    }
+  ],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 en web abierta (CPSC, ACCC/Clean Energy Council, gov.uk product safety, noticias en inglés y alemán) por «Anker SOLIX X1 recall / Rückruf / fire». No se ha encontrado ninguna retirada ni alerta de seguridad del SOLIX X1; las entradas listadas son de power banks de la misma marca. No se consultó directamente la base de EU Safety Gate ni la de Health Canada.",
+  "ofertas": [],
+  "compatibles": [
+    "Módulos de potencia Anker SOLIX X1 monofásicos (X1-H3.68K-S … X1-H6K-S) y trifásicos (hasta X1-H12K-T)",
+    "Anker SOLIX Power Dock Pro",
+    "Dongles WLAN DG-WF-H y móvil VCB-5106L8-WB-AK",
+    "Sensores de potencia DDSU666 (1F) / DTSU666 (3F)"
+  ],
+  "pendiente": [
+    "Precio público en España/UE: no se ha encontrado ninguno con IVA (SolarTraders y Solarboss muestran el artículo sin precio o no disponible). Nueva búsqueda el 2026-10-18: Solarboss (Irlanda) lo muestra sin precio y «back order»; SecondSol (mercado de segunda mano y excedentes, Alemania) tiene un anuncio de 4.350 € sin IVA de un X1-H10K-T con módulos X1-B5-H, sin indicar cuántos módulos incluye (https://www.secondsol.com/en/anzeige/48066/solar-storage/home-storage/anker-solix/anker-x1-10kw-10kwh-aio); no se registra como oferta por no ser comparable.",
+    "Capacidad útil, profundidad de descarga y eficiencia de ida y vuelta: no se publican.",
+    "Fabricante de las celdas y país o fábrica de montaje.",
+    "La ficha técnica PDF de distribuidor (13-08-2025) no se pudo leer; datos tomados de la web de la marca y de la ficha neerlandesa de GPC Europe.",
+    "Explicación oficial de la cifra de 180 kWh y de la diferencia IP65/IP66.",
+    "Consulta directa en EU Safety Gate y Health Canada."
+  ]
+}

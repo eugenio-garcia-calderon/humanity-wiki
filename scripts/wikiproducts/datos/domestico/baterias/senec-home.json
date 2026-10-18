@@ -1,0 +1,439 @@
+{
+  "slug": "senec-home",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "SENEC.Home (V3 hybrid, Home 4 y sucesor Home P4)",
+  "marca": "SENEC",
+  "modelo": "SENEC.Home V2.1, V3 hybrid / V3 hybrid duo, Home 4 (módulos de generación «3.0», NMC o NCA) y SENEC.Home P4 / E4 (LFP, desde agosto de 2024)",
+  "variante_ficha": "SENEC.Home P4 (LFP), según la página de producto de senec.com consultada el 2026-10-18; no se pudo abrir la ficha técnica PDF de la V3 hybrid ni de la Home 4.",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2024,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/",
+    "fecha": "2026-10-18",
+    "nota": "Año de la Home P4 / E4 (LFP), con entregas desde finales de agosto de 2024. Las V3 hybrid y Home 4 son anteriores; sus años de lanzamiento no se verificaron."
+  },
+  "estado": "descatalogado",
+  "resumen": "SENEC.Home es la gama de baterías domésticas de SENEC GmbH, empresa de Leipzig (Alemania) filial al 100 % del grupo energético EnBW desde 2018. Entre marzo de 2022 y agosto de 2023 se conocieron varios incendios y deflagraciones en sistemas SENEC.Home V2.1, V3 hybrid y Home 4, tras lo cual la empresa apagó o limitó a distancia los equipos afectados (en agosto de 2023, al 70 % de la capacidad). Desde julio de 2024 SENEC sustituye gratuitamente los módulos de celdas NMC/NCA de esas generaciones por módulos LFP, o el sistema completo por una Home P4 en el caso de la Home 4; en octubre de 2025 declaraba más del 90 % del canje completado. En julio de 2026 EnBW anunció que SENEC deja de vender a nuevos clientes y se limita a atender a unos 186.000 clientes existentes, manteniendo las garantías vigentes. Varios tribunales civiles alemanes han fallado a favor de compradores; en mayo de 2026 uno de ellos concluyó, en una sentencia no firme, que los equipos afectados no debieron comercializarse. La última generación, Home P4, usa celdas LFP con 7,1 a 17,75 kWh útiles, según la marca.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://senec.com/de/produkte/senec-home/p4",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha fijado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": "7,52–18,8",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Capacidad bruta de la Home P4 según configuración."
+    },
+    "capacidad_util_kwh": {
+      "valor": "7,1–17,75",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Home P4. pv magazine (agosto 2024) citaba 7,1–17,5 kWh; la Home E4 ofrece 9,2 kWh."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "Home P4: 7,1 a 17,75 kWh útiles; Home E4: 9,2 kWh",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/",
+      "fecha": "2026-10-18",
+      "nota": "Capacidades de la V3 hybrid y Home 4 no verificadas."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/aktuelle-informationen",
+      "fecha": "2026-10-18",
+      "nota": "Los sistemas V3 usan módulos de batería sustituibles (el canje LFP de la V3 cambia solo los módulos)."
+    },
+    "ampliable": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://senec.com/de/produkte/stromspeicher",
+      "fecha": "2026-10-18",
+      "nota": "SENEC declara que ya no vende ampliaciones ni componentes."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 17.75,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Máximo útil de la Home P4."
+    },
+    "potencia_continua_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "No figura en la página de producto; la ficha técnica PDF no pudo consultarse."
+    },
+    "potencia_pico_kw": {
+      "valor": null,
+      "unidad": "kW",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No consultado."
+    },
+    "quimica": {
+      "valor": "LFP (Home P4/E4 y módulos de sustitución); NMC o NCA en los módulos originales de V2.1, V3 y Home 4",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarserver.de/2024/08/27/senec-tauscht-batteriemodule-aus/",
+      "fecha": "2026-10-18",
+      "nota": "Solarserver: «Die alten Systeme waren mit NMC- oder NCA-Batterien ausgestattet», sin precisar qué química corresponde a cada modelo."
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Ni SENEC ni la prensa consultada (pv magazine, Solarserver) nombran el proveedor de celdas de los módulos antiguos ni de los LFP."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": "ciclos",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No consultado en ficha técnica."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 94.4,
+      "unidad": "%",
+      "origen": "calculado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Útil / bruta = 17,75 / 18,8 (configuración máxima de la Home P4)."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada en la página de producto."
+    },
+    "tension": {
+      "valor": null,
+      "unidad": "V",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada en la página de producto."
+    },
+    "acoplamiento": {
+      "valor": "Home P4: variantes AC (requiere inversor FV aparte) e híbrida (inversor FV y de batería en un equipo); V3 hybrid: híbrida",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "En la variante híbrida."
+    },
+    "inversores_compatibles": {
+      "valor": "Variante AC: compatible con instalaciones existentes, según la marca",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/stromspeicher",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "respaldo_apagones": {
+      "valor": "Sí, opcional (función SENEC.Backup P4), según configuración instalada",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "instalacion": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "La página indica IP54 pero no dice expresamente si es apta para exterior."
+    },
+    "ip": {
+      "valor": "IP54",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Home P4."
+    },
+    "rango_temperatura_c": {
+      "valor": null,
+      "unidad": "°C",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado en la página de producto."
+    },
+    "peso_kg": {
+      "valor": 220,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "«Menos de 220 kg» (Home P4)."
+    },
+    "medidas_mm": {
+      "valor": "1120 × 750 × 450",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Home P4."
+    },
+    "garantia_energia_mwh": {
+      "valor": null,
+      "unidad": "MWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Condiciones de garantía en PDF no consultadas."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": null,
+      "unidad": "€/kWh útil",
+      "origen": "desconocido",
+      "fuente": "https://senec.com/de/produkte/stromspeicher",
+      "fecha": "2026-10-18",
+      "nota": "Sin ofertas: SENEC ya no vende baterías a nuevos clientes."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Energy-Storage-Inspection-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SENEC no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. La web de SENEC menciona el sello «Protected by NOVUM» y una prueba TÜV según VDE-AR-E 2510-50, que son certificaciones, no ensayos comparativos."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18",
+      "nota": "Home P4: «10 años» sin más detalle en la página; hay condiciones distintas para P4 hasta y desde el 15-09-2025, y varias modalidades para la V3 (estándar, ampliación de garantía, valor actual, BHKW/eólica), que no pudieron abrirse."
+    },
+    "rendimiento": {
+      "anios": null,
+      "porcentaje_final": null,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://senec.com/de/unternehmen/download",
+      "fecha": "2026-10-18",
+      "nota": "Umbral de capacidad residual no verificado."
+    },
+    "letra_pequena": [
+      "El canje de módulos por LFP es una medida de cortesía dentro de la garantía de componentes y no reinicia el periodo: «läuft daher der Garantiezeitraum unverändert weiter» (https://senec.com/de/aktuelle-informationen).",
+      "Durante el «modo de acondicionamiento» (desde el 9-08-2023) los sistemas V2.1/V3 afectados solo almacenan hasta ~70 % de la capacidad y reducen la potencia por encima del 50 % de carga; SENEC paga voluntariamente 1,07 € por día afectado (base 10 kWh) hasta el canje, «sin obligación legal y de forma revocable».",
+      "SENEC pide no desconectar el equipo de internet ni apagarlo; su sistema de vigilancia SmartGuard puede apagar a distancia los equipos con anomalías (https://senec.com/de/smartguard).",
+      "Fin de las ventas: SENEC declara que las garantías y derechos legales existentes siguen vigentes y que se mantendrán funciones de seguridad y actualizaciones importantes, pero no nuevas funciones (https://senec.com/de/informationen-bestandskundenbetrieb)."
+    ],
+    "quien_responde": "SENEC GmbH (filial de EnBW Energie Baden-Württemberg AG), a través de sus socios instaladores. Tras el cese de ventas a nuevos clientes, la empresa sigue operando para clientes existentes y afirma mantener las garantías; no hay información pública sobre qué pasaría si la filial se liquidara."
+  },
+  "empresa": {
+    "razon_social": "SENEC GmbH",
+    "pais_sede": "Alemania (Leipzig)",
+    "fundacion": 2009,
+    "cotiza_en": "No cotiza; filial al 100 % de EnBW Energie Baden-Württemberg AG desde marzo de 2018",
+    "web": "https://senec.com/de",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "No publicado",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Marzo de 2022: tras tres deflagraciones/incendios (uno en Bodnegg, cerca de Ravensburg, sin heridos), SENEC puso en espera a distancia sus sistemas Home V3 hybrid, V3 hybrid duo y V2.1 (https://www.pv-magazine.de/2022/03/10/senec-nimmt-fernabschaltung-seiner-photovoltaik-heimspeicher-vor-sicherheitspruefung-nach-verpuffungen/).",
+      "Marzo de 2023: incendio en Burladingen, citado como antecedente por pv magazine en agosto de 2023 (http://www.pv-magazine.de/2023/08/10/zwei-neue-zwischenfaelle-photovoltaik-heimspeicher-von-senec-erneut-im-konditionierungsbetrieb/); según Wikipedia, siguieron nuevas limitaciones temporales (https://de.wikipedia.org/wiki/SENEC).",
+      "Agosto de 2023: dos nuevos incendios (Franconia Media y Baja Sajonia); desde el 9-08-2023 los equipos de una generación de módulos quedaron limitados al 70 % de la capacidad (http://www.pv-magazine.de/2023/08/10/zwei-neue-zwischenfaelle-photovoltaik-heimspeicher-von-senec-erneut-im-konditionierungsbetrieb/).",
+      "Julio de 2024: comienza el canje gratuito a módulos LFP para V2.1, V3 y Home 4; unos 5.000 sistemas cambiados a finales de agosto de 2024; pv magazine cita seis incidentes con incendio en total (http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/). En octubre de 2025 SENEC declaraba más del 90 % completado (https://senec.com/de/aktuelle-informationen).",
+      "El 14-07-2026 EnBW anunció que, al no encontrar inversor (búsqueda iniciada en febrero de 2026), SENEC deja el negocio con clientes nuevos y el desarrollo de productos; los SENEC.Home E4 y P4 podían pedirse hasta finales de agosto de 2026 y deben instalarse antes de fin de 2026 para contar como clientes existentes. Según EnBW, «el servicio, la garantía legal y las garantías existentes continúan» y se completarán los canjes pendientes (https://www.pv-magazine.de/2026/07/14/enbw-findet-keinen-investor-neukundengeschaeft-von-senec-wird-eingestellt/). SENEC atiende a unos 186.000 clientes existentes (https://senec.com/de/informationen-bestandskundenbetrieb).",
+      "Autoridades: en las fuentes consultadas (pv magazine, Solarserver, Wikipedia en alemán, web de SENEC y búsquedas específicas del 2026-10-18 por KBA, Bundesnetzagentur, vigilancia del mercado y Landesdirektion Sachsen) no consta la intervención de ninguna autoridad alemana; las desconexiones, limitaciones y canjes fueron medidas de la propia empresa. Lo que sí consta es la vía judicial civil (ver nota siguiente).",
+      "Tribunales: desde marzo de 2025 varios tribunales civiles alemanes han fallado contra SENEC o sus distribuidores; consideran defecto material la limitación permanente de la capacidad al 70 % o menos (p. ej. Landgericht Ravensburg, 09-05-2025, Az. 2 O 187/24, que obligó a reparar o sustituir el equipo) (https://www.solarserver.de/2025/06/05/speicher-auch-landgericht-ravensburg-urteilt-gegen-senec/). El 12-05-2026 el Landgericht Ravensburg (Az. 4 O 152/25, no firme) concluyó, sobre una SENEC.Home V3 hybrid duo de 2020, que los equipos presentaban un riesgo grave de incendio y deflagración según la ley de seguridad de productos (ProdSG) y que «no deberían haberse comercializado», y declaró a SENEC responsable de futuros daños personales (https://www.pv-magazine.de/unternehmensmeldungen/gericht-stromspeicher-haetten-ueberhaupt-nicht-auf-den-markt-gebracht-werden-duerfen/)."
+    ],
+    "fuentes": [
+      "https://de.wikipedia.org/wiki/SENEC",
+      "https://senec.com/de/aktuelle-informationen",
+      "https://senec.com/de/informationen-bestandskundenbetrieb",
+      "https://www.solarserver.de/2024/08/27/senec-tauscht-batteriemodule-aus/",
+      "https://www.pv-magazine.de/2026/07/14/enbw-findet-keinen-investor-neukundengeschaeft-von-senec-wird-eingestellt/",
+      "https://www.pv-magazine.de/unternehmensmeldungen/gericht-stromspeicher-haetten-ueberhaupt-nicht-auf-den-markt-gebracht-werden-duerfen/",
+      "https://www.solarserver.de/2025/06/05/speicher-auch-landgericht-ravensburg-urteilt-gegen-senec/"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://de.wikipedia.org/wiki/SENEC",
+      "pais_sede": "https://de.wikipedia.org/wiki/SENEC",
+      "fundacion": "https://de.wikipedia.org/wiki/SENEC (fundada en 2009 en Leipzig como Deutsche Energieversorgung GmbH)",
+      "cotiza_en": "https://de.wikipedia.org/wiki/SENEC (filial al 100 % de EnBW desde marzo de 2018)"
+    }
+  },
+  "origen": {
+    "pais_marca": "Alemania",
+    "pais_fabricacion": "No publicado",
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas LFP (P4/E4 y módulos de sustitución)",
+      "celdas NMC o NCA (módulos originales V2.1/V3/Home 4)"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "componentes",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado."
+    },
+    "reparabilidad": "En la V3 los módulos de batería se pueden sustituir in situ (canje de unos 1,5 h según SENEC); la Home 4 se cambia por un sistema P4 completo (hasta 3 h) (https://senec.com/de/aktuelle-informationen)."
+  },
+  "certificados": [
+    {
+      "nombre": "VDE-AR-E 2510-50 (prueba TÜV)",
+      "emisor": "TÜV (no se precisa cuál)",
+      "fuente": "https://senec.com/de/produkte/senec-home/p4",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "Sello «Protected by NOVUM»",
+      "emisor": "NOVUM",
+      "fuente": "https://senec.com/de/smartguard",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://senec.com/de/unternehmen/download",
+      "idioma": "de",
+      "fecha": null,
+      "nota": "Página de descargas: fichas técnicas de Home P4, E4, V3 hybrid (con y sin LFP) y V2.1, y condiciones de garantía; los PDF individuales no pudieron abrirse."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://senec.com/de/unternehmen/download",
+      "idioma": "de",
+      "fecha": "2025-09-15",
+      "nota": "«Garantiebedingungen SENEC.Home P4 ab dem 15.09.2025» (listado en la página de descargas)."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Überraschend niedriges Brandrisiko",
+      "donde": "https://senec.com/de/aktuelle-informationen",
+      "veredicto": "matizable",
+      "explicacion": "SENEC cita una probabilidad anual de incendio del 0,0049 % para baterías domésticas en general, según un estudio de la RWTH Aachen. Es una media del conjunto del mercado y no dice nada de la tasa de los propios equipos SENEC, en los que se documentaron al menos seis incidentes con incendio entre 2022 y 2024.",
+      "fuentes": [
+        "https://senec.com/de/aktuelle-informationen",
+        "http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "So erkennt SENEC.SmartGuard schon kleinste Verhaltensauffälligkeiten auf Zellebene",
+      "donde": "https://senec.com/de/smartguard",
+      "veredicto": "sin pruebas",
+      "explicacion": "No se encontró evaluación independiente publicada de la capacidad de detección de SmartGuard. Se produjeron nuevos incidentes en 2023 después de introducir las funciones de seguridad de mediados de 2022.",
+      "fuentes": [
+        "https://de.wikipedia.org/wiki/SENEC"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Der High-End-Speicher, der Höchstleistung, Sicherheit & Innovation vereint",
+      "donde": "https://senec.com/de/produkte/senec-home/p4",
+      "veredicto": "sin pruebas",
+      "explicacion": "Afirmación publicitaria genérica; la Home P4 no ha participado en ensayos comparativos independientes como la Stromspeicher-Inspektion de la HTW Berlin.",
+      "fuentes": [
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "LFP-Module sind sicherer, langlebiger und performanter",
+      "donde": "http://www.pv-magazine.de/2024/08/27/senec-seit-ende-juli-bereits-5000-photovoltaik-heimspeicher-ausgetauscht/",
+      "veredicto": "matizable",
+      "explicacion": "La química LFP se considera en general menos propensa a la fuga térmica que NMC/NCA, lo que respalda la parte de seguridad. La mayor duración y rendimiento de estos módulos concretos no está demostrada por ensayos independientes publicados.",
+      "fuentes": [
+        "https://www.solarserver.de/2024/08/27/senec-tauscht-batteriemodule-aus/"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [
+    {
+      "pais": "Alemania",
+      "organismo": "fabricante (SENEC GmbH)",
+      "fecha": "2022-03-10",
+      "motivo": "Tres deflagraciones/incendios en viviendas; puesta en espera remota preventiva de los sistemas",
+      "modelos_afectados": "SENEC.Home V3 hybrid, V3 hybrid duo, V2.1",
+      "url": "https://www.pv-magazine.de/2022/03/10/senec-nimmt-fernabschaltung-seiner-photovoltaik-heimspeicher-vor-sicherheitspruefung-nach-verpuffungen/",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Medida voluntaria del fabricante, no retirada ordenada por una autoridad."
+    },
+    {
+      "pais": "Alemania",
+      "organismo": "fabricante (SENEC GmbH)",
+      "fecha": "2023-08-09",
+      "motivo": "Dos nuevos incendios; limitación remota de la capacidad al 70 % («Konditionierungsbetrieb»)",
+      "modelos_afectados": "Sistemas con «una determinada generación de módulos» (V2.1, V3, Home 4 con módulos 3.0)",
+      "url": "http://www.pv-magazine.de/2023/08/10/zwei-neue-zwischenfaelle-photovoltaik-heimspeicher-von-senec-erneut-im-konditionierungsbetrieb/",
+      "fecha_consulta": "2026-10-18",
+      "nota": null
+    },
+    {
+      "pais": "Alemania (y otros mercados SENEC)",
+      "organismo": "fabricante (SENEC GmbH)",
+      "fecha": "2024-07",
+      "motivo": "Canje gratuito de módulos NMC/NCA por módulos LFP tras defectos técnicos e incendios",
+      "modelos_afectados": "SENEC.Home V2.1 (cambio a V3 LFP), V3 (cambio de módulos), Home 4 con módulos 3.0 (cambio a Home P4)",
+      "url": "https://senec.com/de/aktuelle-informationen",
+      "fecha_consulta": "2026-10-18",
+      "nota": "Más del 90 % completado en octubre de 2025 según SENEC."
+    }
+  ],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: web de SENEC (canje LFP y clientes existentes), pv magazine Alemania, Solarserver, Wikipedia en alemán con sus referencias, búsquedas específicas sobre intervención de autoridades alemanas (KBA, Bundesnetzagentur, vigilancia del mercado, Landesdirektion Sachsen; no se encontró ninguna), prensa italiana (SENEC tiene filial en Italia) y búsquedas generales de retiradas en Australia (Clean Energy Council y ACCC: SENEC no figura), CPSC y Health Canada (SENEC no vende en EE. UU. ni Canadá según las fuentes consultadas). Las tres entradas de «retiradas» son medidas voluntarias del fabricante, no ordenadas por una autoridad. La base de EU Safety Gate no pudo consultarse directamente (aplicación dinámica, acceso bloqueado desde la herramienta).",
+  "ofertas": [],
+  "compatibles": [
+    "SENEC.PowerPilot (gestión energética)",
+    "SENEC.Backup P4",
+    "SENEC.Cloud",
+    "SENEC.Solar (paneles)"
+  ],
+  "pendiente": [
+    "Fichas técnicas PDF de V3 hybrid, Home 4 y Home P4 (potencia, ciclos, eficiencia, tensión, temperatura).",
+    "Condiciones de garantía (umbral de capacidad residual, MWh, requisitos de conexión).",
+    "Proveedor de celdas de los módulos antiguos y de los LFP.",
+    "Si SENEC vendió en España (la web consultada es la alemana; existe filial italiana).",
+    "Consulta directa a EU Safety Gate.",
+    "Si alguna autoridad alemana actuó (no consta en ninguna fuente encontrada; búsqueda negativa, no prueba de ausencia)."
+  ]
+}

@@ -1,0 +1,477 @@
+{
+  "slug": "enphase-iq-battery-5p",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Enphase IQ Battery 5P (con FlexPhase)",
+  "marca": "Enphase",
+  "modelo": "IQBATTERY-5P-3P-INT (IQ Battery 5P con FlexPhase, mono o trifásica; versión anterior IQBATTERY-5P-1P-INT, monofásica)",
+  "variante_ficha": "IQBATTERY-5P-3P-INT, configuración por defecto monofásica 3,84 kVA (ficha DSH-00477-7.0-EN, mayo 2026)",
+  "ean": {
+    "valor": "0768563823077",
+    "unidad": "GTIN-13",
+    "origen": "declarado",
+    "fuente": "https://www.wattuneed.com/en/enphase-lithium-battery/27240-copy-of-enphase-iq-flex-phase-three-phase-5p-3p-int-battery-intelligent-battery-for-all-uses-0768563823077.html",
+    "fecha": "2026-10-18",
+    "nota": "Publicado por la tienda Wattuneed para IQBATTERY-5P-3P-INT; no comprobado en un documento de Enphase."
+  },
+  "anio_lanzamiento": {
+    "valor": 2025,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+    "fecha": "2026-10-18",
+    "nota": "La versión FlexPhase llegó a España, Portugal, Francia y otros países el 16 de junio de 2025; la IQ Battery 5P monofásica INT tiene ficha de septiembre de 2023."
+  },
+  "estado": "a la venta",
+  "resumen": "La Enphase IQ Battery 5P es una batería doméstica de litio-ferrofosfato (LFP) de 5 kWh útiles por unidad, con microinversores integrados y acoplamiento en alterna (AC), pensada sobre todo para instalaciones con microinversores Enphase. La versión con FlexPhase puede configurarse en monofásico o trifásico y, según la marca, apilarse hasta 70 kWh. El respaldo ante apagones exige un controlador aparte (IQ System Controller 3 INT). Enphase anuncia una garantía limitada de 15 años o 6.000 ciclos, lo que antes ocurra, con un umbral de capacidad residual del 60 %. El fabricante es la estadounidense Enphase Energy, que cotiza en el Nasdaq.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://enphase.com/es-es",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha fijado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha solo publica la capacidad útil."
+    },
+    "capacidad_util_kwh": {
+      "valor": 5,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Por unidad."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5 kWh por unidad; sistemas de 5 a 70 kWh",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "fecha": "2026-10-18",
+      "nota": "El tamaño máximo no figura en la ficha; procede de la nota de prensa."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "fecha": "2026-10-18",
+      "nota": "Unidades de 5 kWh combinables."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliacion_max_kwh": {
+      "valor": 70,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "fecha": "2026-10-18",
+      "nota": "Nota de prensa de junio de 2025."
+    },
+    "potencia_continua_kw": {
+      "valor": 3.84,
+      "unidad": "kVA",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Configuración por defecto; en trifásico 1,28 kVA por fase. Existen variantes limitadas a 1,65–3,68 kVA para cumplir normas de red."
+    },
+    "potencia_pico_kw": {
+      "valor": 7.68,
+      "unidad": "kVA",
+      "origen": "calculado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "33,4 A durante 3 s × 230 V ≈ 7,68 kVA (la ficha da la corriente pico, no la potencia)."
+    },
+    "quimica": {
+      "valor": "LFP (litio-ferrofosfato)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Enphase no publica el proveedor de celdas en fichas ni notas de prensa consultadas."
+    },
+    "ciclos_declarados": {
+      "valor": 6000,
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tope de la garantía (15 años o 6.000 ciclos, lo que antes ocurra)."
+    },
+    "profundidad_descarga_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha publica solo la capacidad útil, no la nominal."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": 90,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "En alterna (AC); 96 % en continua al inicio de vida."
+    },
+    "tension": {
+      "valor": "Baja tensión: 76,8 V CC nominal (60–87 V); salida 230 V CA (400 V entre fases en trifásico)",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "AC (microinversores IQ8 integrados en la batería)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Microinversor IQ8T-BAT (IP67)."
+    },
+    "inversores_compatibles": {
+      "valor": "Sistemas Enphase (pasarela IQ Gateway); al ser AC puede añadirse a otras instalaciones, sujeto a la configuración de Enphase",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La compatibilidad con inversores de otras marcas no se verificó en documentación oficial."
+    },
+    "respaldo_apagones": {
+      "valor": "Sí, solo con IQ System Controller 3 INT (aparte); modo «Full Backup»",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Con FlexPhase, respaldo trifásico según la marca."
+    },
+    "instalacion": {
+      "valor": "interior y exterior",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Mural (soporte incluido) o sobre pedestal (aparte); refrigeración pasiva."
+    },
+    "ip": {
+      "valor": "IP55 (batería); IP67 (microinversor)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "-20 a 50 (carga); -20 a 55 (descarga)",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Reduce potencia al cargar por debajo de 15 °C o por encima de 45 °C, y al descargar por debajo de 5 °C o por encima de 50 °C."
+    },
+    "peso_kg": {
+      "valor": 83,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Peso total instalado; 69,5 kg de peso de elevación."
+    },
+    "medidas_mm": {
+      "valor": "980 × 550 × 188 (alto × ancho × fondo)",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "garantia_energia_mwh": {
+      "valor": null,
+      "unidad": "MWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La garantía se expresa en años y ciclos (6.000), no en MWh."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 703.49,
+      "unidad": "€/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://tienda-solar.es/en/batteries/2254-drums-enphase-iq-battery-5p-flexphase-5-kwh",
+      "fecha": "2026-10-18",
+      "nota": "3.517,47 € (IVA incluido) / 5 kWh útiles. No incluye IQ System Controller ni IQ Gateway ni instalación."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Enphase no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 15,
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18",
+      "nota": "«Limited warranty >60% capacity, up to 15 years or 6000 cycles», lo que antes ocurra; «restrictions apply»."
+    },
+    "rendimiento": {
+      "anios": 15,
+      "porcentaje_final": 60,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía de Australia y Nueva Zelanda (productos activados desde el 12-04-2023): al menos 60 % de 5,0 kWh CC durante 15 años o 6.000 ciclos. No se localizó el documento de garantía específico de España."
+    },
+    "letra_pequena": [
+      "La cobertura acaba a los 15 años o a los 6.000 ciclos de descarga, lo que antes ocurra; el umbral de capacidad es 60 %, más bajo que el 70–80 % habitual en otras marcas (ficha DSH-00477-7.0).",
+      "Australia/Nueva Zelanda: la mano de obra de desinstalación, reinstalación o trabajos eléctricos no está cubierta; excluye firmware no actualizado, perfiles de red alterados y uso comercial (https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf).",
+      "La transferencia a un nuevo propietario exige que la batería siga en el lugar original, un formulario de cambio de titularidad y el pago de una tasa en 30 días.",
+      "Enphase se reserva el derecho a ceder (novar) la garantía a un tercero cualificado; no se dice qué ocurre en caso de insolvencia.",
+      "En la generación anterior (AC Battery, Europa) la garantía exigía registro y conexión a internet en 45 días y se anulaba con más de 45 días sin conexión (https://www.solartraders.com/uploads/production/data_sheet/file/20997/warranty.pdf?locale=da); no se verificó si la condición se mantiene para la 5P en Europa."
+    ],
+    "quien_responde": "Enphase Energy, Inc. o su filial europea, a través del instalador o distribuidor autorizado. El documento australiano permite ceder la garantía a un tercero; no aborda la quiebra del fabricante."
+  },
+  "empresa": {
+    "razon_social": "Enphase Energy, Inc.",
+    "pais_sede": "Estados Unidos (Fremont, California)",
+    "fundacion": 2006,
+    "cotiza_en": "Nasdaq (ENPH)",
+    "web": "https://enphase.com/es-es",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "No publicado para la versión INT europea; Enphase fabrica versiones para EE. UU. en plantas estadounidenses",
+    "fabricas_conocidas": [
+      "Plantas de fabricación en EE. UU. para las unidades con «contenido nacional» (sin nombre publicado), según Enphase en julio de 2025"
+    ],
+    "notas": [
+      "Establecida en 2006 y con sede en Fremont (California); cotiza en el Nasdaq con el símbolo ENPH desde su salida a bolsa en marzo de 2012 (https://en.wikipedia.org/wiki/Enphase_Energy).",
+      "En julio de 2025 Enphase empezó a enviar en EE. UU. unidades IQ Battery 5P con mayor contenido nacional para cumplir requisitos fiscales federales; no se nombran plantas ni proveedor de celdas (https://solarbuildermag.com/news/enphase-shipping-iq-battery-5p-with-more-domestic-content/).",
+      "La IQ Battery 5P con FlexPhase se lanzó en España y otros seis países europeos el 16 de junio de 2025 (https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering).",
+      "No se encontraron detenciones UFLPA, sanciones ni procedimientos de insolvencia relacionados con este producto."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/Enphase_Energy",
+      "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "https://solarbuildermag.com/news/enphase-shipping-iq-battery-5p-with-more-domestic-content/"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://en.wikipedia.org/wiki/Enphase_Energy",
+      "pais_sede": "https://en.wikipedia.org/wiki/Enphase_Energy",
+      "fundacion": "https://en.wikipedia.org/wiki/Enphase_Energy (establecida en 2006; constituida como Enphase Energy, Inc. a principios de 2007)",
+      "cotiza_en": "https://en.wikipedia.org/wiki/Enphase_Energy (Nasdaq: ENPH desde marzo de 2012)"
+    }
+  },
+  "origen": {
+    "pais_marca": "Estados Unidos",
+    "pais_fabricacion": "No publicado (versión europea)",
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas LFP",
+      "carcasa metálica IP55",
+      "microinversores IQ8T-BAT"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "componentes",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado."
+    },
+    "reparabilidad": "Sin información pública sobre sustitución de celdas o módulos. La garantía australiana excluye daños por servicio de personas que no sean representantes de Enphase."
+  },
+  "certificados": [
+    {
+      "nombre": "UL 9540A (ensayo de propagación térmica)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62619:2022",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "EN IEC 62109-1/-2, EN 62040-1, EN 62909-1, IEC/EN 62116",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN 38.3",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "Declaración UE de conformidad (Reglamento de baterías (UE) 2023/1542, EMC, BT, RoHS)",
+      "emisor": "Enphase (autodeclaración)",
+      "fuente": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "idioma": "en",
+      "fecha": "2026-05-06",
+      "nota": "DSH-00477-7.0-EN, IQ Battery 5P con FlexPhase"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.pluginsolar.co.uk/wp-content/uploads/2023/10/Enphase-Battery-5P-Datasheet.pdf",
+      "idioma": "en",
+      "fecha": "2023-09-21",
+      "nota": "IQBATTERY-5P-1P-INT, versión monofásica anterior"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Enphase IQ Battery 5P 5kWh Warranty.pdf",
+      "idioma": "en",
+      "fecha": "2023-04-12",
+      "nota": "Australia y Nueva Zelanda; no es la garantía española"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "industry-leading 15-year warranty",
+      "donde": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "veredicto": "matizable",
+      "explicacion": "El plazo de 15 años es largo para el sector, pero la cobertura termina antes si se alcanzan 6.000 ciclos y solo garantiza el 60 % de la capacidad, frente al 70–80 % que garantizan otras marcas en 10 años.",
+      "fuentes": [
+        "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "UL 9540A, the highest industry standard for battery safety",
+      "donde": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "veredicto": "matizable",
+      "explicacion": "UL 9540A es un método de ensayo de propagación térmica que documenta cómo se comporta la batería en un fallo; no es una certificación de aprobado/suspenso ni la única norma de seguridad aplicable (en Europa rige IEC 62619).",
+      "fuentes": [
+        "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Designed to briefly discharge up to twice its maximum continuous power for three seconds",
+      "donde": "https://investor.enphase.com/news-releases/news-release-details/enphase-energy-rolls-out-iq-battery-5p-flexphase-delivering",
+      "veredicto": "cierta",
+      "explicacion": "La ficha técnica lo respalda: 16,7 A nominales y 33,4 A durante 3 s en la configuración por defecto. Es un dato declarado; no se encontró medición independiente.",
+      "fuentes": [
+        "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Round-trip efficiency 90% (AC)",
+      "donde": "https://www.pluginsolar.co.uk/wp-content/uploads/2026/09/Enphase-IQ-Battery-5p-with-Flexphase.pdf",
+      "veredicto": "sin pruebas",
+      "explicacion": "Dato del fabricante sin ensayo independiente publicado; el producto no ha participado en la Stromspeicher-Inspektion de la HTW Berlin.",
+      "fuentes": [
+        "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: web abierta por «Enphase IQ Battery recall / safety notice / fire», búsquedas en los sitios de la CPSC (EE. UU.) y Health Canada, lista de retiradas del Clean Energy Council y fichas de la ACCC (Australia; Enphase no figura), avisos de WorkSafe QLD y gov.uk. No se encontró ninguna retirada ni alerta de la IQ Battery 5P ni de otras baterías Enphase. La base de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica; acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha.",
+  "ofertas": [
+    {
+      "distribuidor": "tienda-solar.es",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://tienda-solar.es/en/batteries/2254-drums-enphase-iq-battery-5p-flexphase-5-kwh",
+      "producto": "Enphase IQ Battery 5P FlexPhase 5 kWh (IQBATTERY-5P-3P-INT)",
+      "precio_eur": 3517.47,
+      "iva_incluido": true,
+      "unidad": "por unidad (5 kWh)",
+      "incluye_instalacion": false,
+      "envio": "No indicado en la ficha",
+      "stock": "No indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "2.907,00 € sin IVA."
+    },
+    {
+      "distribuidor": "Wattuneed",
+      "tipo": "tienda online",
+      "pais": "Francia",
+      "url": "https://www.wattuneed.com/en/enphase-lithium-battery/27240-copy-of-enphase-iq-flex-phase-three-phase-5p-3p-int-battery-intelligent-battery-for-all-uses-0768563823077.html",
+      "producto": "Enphase IQ Battery 5P FlexPhase (IQBATTERY-5P-3P-INT)",
+      "precio_eur": 4267.4,
+      "iva_incluido": true,
+      "unidad": "por unidad (5 kWh)",
+      "incluye_instalacion": false,
+      "envio": "No indicado en la ficha",
+      "stock": "No indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "IVA francés incluido; 3.526,78 € sin IVA."
+    },
+    {
+      "distribuidor": "sun.store (marketplace mayorista)",
+      "tipo": "mayorista",
+      "pais": "UE",
+      "url": "https://sun.store/es/product/enphase-iq-battery-5p-with-flexphase-iqbattery-5p-3p-int-50066",
+      "producto": "Enphase IQ Battery 5P with FlexPhase (IQBATTERY-5P-3P-INT)",
+      "precio_eur": 2107.26,
+      "iva_incluido": false,
+      "unidad": "por unidad (5 kWh)",
+      "incluye_instalacion": false,
+      "envio": "No indicado",
+      "stock": "Varias ofertas de vendedores terceros",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio «desde»; la página no indica si incluye IVA; marketplace orientado a profesionales. Se asume sin IVA."
+    }
+  ],
+  "compatibles": [
+    "IQ System Controller 3 INT (necesario para respaldo)",
+    "IQ Gateway / Envoy",
+    "Microinversores Enphase IQ8",
+    "IQ Relay (para ciertas normas de red)"
+  ],
+  "pendiente": [
+    "Documento de garantía vigente para España de la IQ Battery 5P (requisito de conexión a internet, mano de obra).",
+    "Fabricante y país de origen de las celdas y de la versión INT.",
+    "Capacidad nominal total (solo se publica la útil).",
+    "Pruebas independientes de eficiencia.",
+    "Consulta directa a EU Safety Gate."
+  ]
+}

@@ -1,0 +1,459 @@
+{
+  "slug": "solaredge-home-battery",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "SolarEdge Home Battery (400V y 48V)",
+  "marca": "SolarEdge",
+  "modelo": "SolarEdge Home Battery 400V (BAT-10K1P, unidad BAT-10K1PS0B-01/-02; antes «Energy Bank») y SolarEdge Home Battery 48V",
+  "variante_ficha": "SolarEdge Home Battery 400V Europa, BAT-10K1P (ficha DS-000164-EU, 9 de julio de 2024). Los datos técnicos de la versión 48V no se verificaron; solo su garantía alemana.",
+  "ean": {
+    "valor": "0768563817625",
+    "unidad": "GTIN-13",
+    "origen": "declarado",
+    "fuente": "https://www.wattuneed.com/en/lithium-battery/25980-battery-solaredge-home-battery-10-kwh-bat-10k1ps0b-01-0768563817625.html",
+    "fecha": "2026-10-18",
+    "nota": "Publicado por la tienda Wattuneed para BAT-10K1PS0B-01; no comprobado en un documento de SolarEdge."
+  },
+  "anio_lanzamiento": {
+    "valor": 2021,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+    "fecha": "2026-10-18",
+    "nota": "La garantía de la «Energy Bank» (nombre inicial del modelo 400V) está revisada en octubre de 2021; la primera ficha europea como «Home Battery 400V» es de abril de 2022. Año exacto de lanzamiento no confirmado."
+  },
+  "estado": "a la venta",
+  "resumen": "La SolarEdge Home Battery 400V es una batería doméstica de alta tensión de 9,7 kWh útiles que se conecta en continua (acoplamiento DC) a inversores SolarEdge compatibles, con hasta tres unidades por inversor. Según la ficha, entrega 5 kW continuos, 7,5 kW durante 10 s en modo respaldo y una eficiencia de ciclo completo máxima del 94,5 %. Las celdas son de óxido de litio-níquel-manganeso-cobalto (NMC) según el manual y la prensa especializada, no de LFP. La garantía es de 10 años con un 70 % de capacidad final y ciclos ilimitados, condicionada a que la batería permanezca conectada a la plataforma de monitorización de SolarEdge. Existe además una versión de baja tensión, la Home Battery 48V, con garantía de 10 años y un 80 % de capacidad final limitada por energía suministrada.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.solaredge.com/es",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha fijado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": null,
+      "unidad": "kWh",
+      "origen": "desconocido",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha solo da la energía útil."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.7,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Al 100 % de profundidad de descarga; 9,5 kWh si se usa comunicación RS485 (ficha DS-000164-ENG, abril 2022)."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "9,7 kWh por unidad; hasta 29,1 kWh (3 unidades) por inversor monofásico",
+      "unidad": "kWh",
+      "origen": "calculado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "3 × 9,7 kWh según el número máximo de baterías por inversor de la ficha."
+    },
+    "modular": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Unidad única de 9,7 kWh; se amplía añadiendo unidades completas."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Hasta 3 por inversor Home Hub/Wave o StorEdge HD-Wave monofásico; conectores de derivación aparte."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 29.1,
+      "unidad": "kWh",
+      "origen": "calculado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "3 × 9,7 kWh por inversor."
+    },
+    "potencia_continua_kw": {
+      "valor": 5,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "14,3 A máx. continuos."
+    },
+    "potencia_pico_kw": {
+      "valor": 7.5,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Durante 10 s en modo respaldo."
+    },
+    "quimica": {
+      "valor": "NMC (litio-níquel-manganeso-cobalto)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.solarquotes.com.au/blog/solaredge-home-battery-review/",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no indica la química; el manual (v1.3, nov. 2021) menciona «cobalt lithium nickel oxide» en el aviso Prop 65 y SolarQuotes la describe como NMC."
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado en ficha ni manual; no se pudo verificar si las celdas proceden de la filial Kokam/Sella 2 de SolarEdge."
+    },
+    "ciclos_declarados": {
+      "valor": "ilimitados (garantía)",
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+      "fecha": "2026-10-18",
+      "nota": "La garantía del modelo 400V no fija tope de ciclos ni de MWh."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 100,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La energía útil de 9,7 kWh se da «al 100 % de profundidad de descarga»."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": 94.5,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Valor «pico», no medio."
+    },
+    "tension": {
+      "valor": "Alta tensión: 350–450 V CC",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "acoplamiento": {
+      "valor": "DC (al inversor SolarEdge)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://apljzccbdzncctnpnjdz.supabase.co/storage/v1/object/public/datasheets/164d757d-e8f0-4fcf-b6a5-1901a744a87c/1787213804390_datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Requiere inversor SolarEdge compatible."
+    },
+    "inversores_compatibles": {
+      "valor": "SolarEdge Home Hub / Home Wave monofásico, StorEdge monofásico con HD-Wave, Home Short String (solo Países Bajos y Polonia)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Solo inversores SolarEdge."
+    },
+    "respaldo_apagones": {
+      "valor": "Sí, sujeto a normativa local; puede requerir componentes adicionales y actualización de firmware",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SolarQuotes señala que en sistemas trifásicos australianos el respaldo cubre una sola fase."
+    },
+    "instalacion": {
+      "valor": "interior y exterior",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Suelo (soporte aparte) o pared (asas aparte)."
+    },
+    "ip": {
+      "valor": "IP55",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "-10 a 50 (recomendado 0 a 40 durante al menos el 95 % del periodo de garantía)",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La recomendación es también condición de garantía."
+    },
+    "peso_kg": {
+      "valor": 119,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "medidas_mm": {
+      "valor": "790 × 1179 × 250 (ancho × alto × fondo)",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "garantia_energia_mwh": {
+      "valor": null,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+      "fecha": "2026-10-18",
+      "nota": "400V: sin límite de energía («unlimited cycles»). 48V (Alemania): 2,615 MWh por kWh de capacidad útil (https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3)."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 703.55,
+      "unidad": "€/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://www.wattuneed.com/en/lithium-battery/25980-battery-solaredge-home-battery-10-kwh-bat-10k1ps0b-01-0768563817625.html",
+      "fecha": "2026-10-18",
+      "nota": "6.824,40 € (IVA francés incluido) / 9,7 kWh útiles. No incluye inversor ni instalación."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-aquu-Stromspeicher-Inspektion-2026.pdf",
+      "fecha": "2026-10-18",
+      "nota": "SolarEdge no figura en la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026. SolarQuotes estima una eficiencia real de ciclo completo de ~93,3 % frente al 94,5 % pico declarado, pero no es una medición de laboratorio."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+      "fecha": "2026-10-18",
+      "nota": "Desde la fecha de instalación registrada en el portal de monitorización o 12 meses después del envío, lo que antes ocurra."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+      "fecha": "2026-10-18",
+      "nota": "Modelo 400V (garantía «Energy Bank», rev. octubre 2021): 70 % al final, ciclos ilimitados. Modelo 48V (Alemania, sept. 2022): 80 % al final o al alcanzar 2,615 MWh por kWh útil."
+    },
+    "letra_pequena": [
+      "La batería debe permanecer conectada a un inversor SolarEdge aprobado y a la plataforma de monitorización durante todo el periodo; sin esa conexión SolarEdge declara que no puede atender la garantía, y el comprador acepta actualizaciones remotas de firmware sin aviso (https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en).",
+      "La temperatura ambiente debe estar entre 0 y 40 °C al menos el 95 % del periodo de garantía.",
+      "Mano de obra, desplazamiento y desinstalación/reinstalación excluidos salvo acuerdo previo por escrito; el envío de la unidad para la reparación lo paga el comprador.",
+      "Cubre solo el continente donde SolarEdge vendió la unidad; no se puede trasladar ni reinstalar sin consentimiento escrito; transferible a un nuevo propietario si la batería no se mueve.",
+      "Responsabilidad limitada al precio pagado por la unidad; en la versión 48V alemana la compensación en crédito se prorratea sobre 120 meses (https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3)."
+    ],
+    "quien_responde": "SolarEdge Technologies Ltd. (fabricante). Los documentos no dicen qué ocurre en caso de insolvencia."
+  },
+  "empresa": {
+    "razon_social": "SolarEdge Technologies, Inc. (garantías emitidas por SolarEdge Technologies Ltd.)",
+    "pais_sede": "Israel (Herzliya Pituach); sociedad constituida en Delaware (EE. UU.)",
+    "fundacion": 2006,
+    "cotiza_en": "Nasdaq (SEDG)",
+    "web": "https://www.solaredge.com/es",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "No publicado en los documentos consultados",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Las retiradas de baterías LG Chem/LG Energy Solution RESU (Australia, EE. UU.) afectaron a sistemas que a menudo se combinaban con inversores SolarEdge StorEdge, pero eran baterías de LG, no de SolarEdge (https://worksafe.qld.gov.au/news-and-events/newsletters/esafe-newsletters/esafe-editions/esafe-electrical/2022-newsletters/may-2022/help-identify-dangerous-recalled-energy-storage-batteries-which-can-cause-fire).",
+      "La versión V01 de la Home Battery 400V incluía un extintor de nitrato potásico en la carcasa; según SolarQuotes (actualización de septiembre de 2024), SolarEdge lo retiró por considerarlo superior a los requisitos de seguridad obligatorios (https://www.solarquotes.com.au/blog/solaredge-home-battery-review/).",
+      "El 27-11-2024 SolarEdge anunció el cierre de su división de almacenamiento (Energy Storage), que incluía la fabricación de celdas y packs de iones de litio en Corea del Sur (filial Kokam, adquirida mayoritariamente en 2019, y fábrica de celdas de Eumseong abierta en 2022); casi todo el personal afectado debía salir en el primer semestre de 2025. SolarEdge dijo que seguiría vendiendo baterías para el mercado residencial y comercial, sin aclarar de dónde procederían las celdas (https://www.energy-storage.news/solaredge-closes-energy-storage-division-focus-on-core-solar-pv-business/)."
+    ],
+    "fuentes": [
+      "https://en.wikipedia.org/wiki/SolarEdge",
+      "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
+      "https://www.energy-storage.news/solaredge-closes-energy-storage-division-focus-on-core-solar-pv-business/",
+      "https://www.solarquotes.com.au/blog/solaredge-home-battery-review/",
+      "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
+      "pais_sede": "https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf (oficinas principales: 1 HaMada Street, Herzliya Pituach, Israel; «incorporated in Delaware in 2006»)",
+      "fundacion": "https://en.wikipedia.org/wiki/SolarEdge ; https://www.sec.gov/Archives/edgar/data/0001419612/000117891326002201/zk2635126.pdf",
+      "cotiza_en": "https://en.wikipedia.org/wiki/SolarEdge (Nasdaq Global Select: SEDG, salida a bolsa en 2015)"
+    }
+  },
+  "origen": {
+    "pais_marca": "Israel",
+    "pais_fabricacion": "No publicado",
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas de iones de litio NMC",
+      "carcasa metálica IP55"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "componentes",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicado."
+    },
+    "reparabilidad": "Unidad cerrada de 119 kg; la garantía excluye reparaciones no autorizadas y el traslado sin consentimiento. No se publica información sobre sustitución de módulos o celdas."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619 (celda y batería)",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61010-1",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 9540 / UL 9540A",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN 38.3",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "idioma": "en",
+      "fecha": "2024-07-09",
+      "nota": "DS-000164-EU"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://res.cloudinary.com/gpceurope/image/upload/v1691477567/f4qd0wjz4lpu14yg3dsk.pdf",
+      "idioma": "en",
+      "fecha": "2022-04-26",
+      "nota": "DS-000164-ENG, versión anterior"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+      "idioma": "en",
+      "fecha": "2021-10",
+      "nota": "Limited SolarEdge Energy Bank Warranty (modelo 400V)"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3",
+      "idioma": "de",
+      "fecha": "2022-09",
+      "nota": "Home Battery 48V, Alemania"
+    },
+    {
+      "tipo": "manual",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/21214/manual.pdf?locale=en",
+      "idioma": "en",
+      "fecha": "2021-11",
+      "nota": "Energy Bank Installation and Operation Guide v1.3"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Peak roundtrip efficiency 94.5%",
+      "donde": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Es un valor pico en condiciones óptimas, no la eficiencia media en uso. No hay medición independiente publicada (no participa en la HTW Berlin); SolarQuotes calcula unos 93,3 % a partir de otros datos del fabricante.",
+      "fuentes": [
+        "https://www.solarquotes.com.au/blog/solaredge-home-battery-review/"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Unlimited cycles",
+      "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+      "veredicto": "matizable",
+      "explicacion": "La garantía del modelo 400V no limita ciclos, pero solo asegura el 70 % de capacidad a 10 años y exige conexión permanente a la monitorización y temperatura de 0–40 °C el 95 % del tiempo. La versión 48V sí tiene tope de energía (2,615 MWh por kWh útil).",
+      "fuentes": [
+        "https://www.solartraders.com/uploads/production/data_sheet/file/21212/warranty.pdf?locale=en",
+        "https://memodo.de/mwdownloads/d131b7a5f0fb5bb4b99b58e99d9e2eb3"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "9,700 Wh usable energy (100% depth of discharge)",
+      "donde": "https://www.goodenergy.co.uk/wp-content/uploads/2025/03/SolarEdge-home-battery-400V-datasheet.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La ficha de 2022 aclara que la energía útil baja a 9,5 kWh si la comunicación es por RS485 en lugar de la red inalámbrica de SolarEdge.",
+      "fuentes": [
+        "https://res.cloudinary.com/gpceurope/image/upload/v1691477567/f4qd0wjz4lpu14yg3dsk.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: web abierta por «SolarEdge battery recall», informes anuales de SolarEdge a la SEC (FY2025 y FY2026, sin mención de retiradas de baterías en el texto revisado), búsquedas en los sitios de la CPSC (EE. UU.), Health Canada y gov.uk, lista de retiradas del Clean Energy Council y fichas de la ACCC (Australia; SolarEdge no figura), avisos de WorkSafe QLD y la reseña de SolarQuotes. No se encontró ninguna retirada de baterías fabricadas por SolarEdge. Las retiradas de LG Energy Solution RESU (2020–2025) afectaron a baterías de LG usadas a menudo con inversores SolarEdge StorEdge, no a la Home Battery. La base de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica; acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha.",
+  "ofertas": [
+    {
+      "distribuidor": "Wattuneed",
+      "tipo": "tienda online",
+      "pais": "Francia",
+      "url": "https://www.wattuneed.com/en/lithium-battery/25980-battery-solaredge-home-battery-10-kwh-bat-10k1ps0b-01-0768563817625.html",
+      "producto": "SolarEdge Home Battery 10 kWh (9,7 kWh útiles) BAT-10K1PS0B-01",
+      "precio_eur": 6824.4,
+      "iva_incluido": true,
+      "unidad": "por unidad",
+      "incluye_instalacion": false,
+      "envio": "No indicado en la ficha",
+      "stock": "No indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "5.640 € sin IVA."
+    },
+    {
+      "distribuidor": "SolarTraders",
+      "tipo": "mayorista",
+      "pais": "Alemania (almacén)",
+      "url": "https://www.solartraders.com/en/products/batteries/battery-system/solaredge-home-battery-10-kwh-v01",
+      "producto": "SolarEdge Home Battery 10 kWh (V01) BAT-10K1PS0B-01",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por unidad",
+      "incluye_instalacion": false,
+      "envio": "No indicado",
+      "stock": "4 unidades en almacén de Alemania",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio visible solo para miembros registrados."
+    }
+  ],
+  "compatibles": [
+    "SolarEdge Home Hub / Home Wave (monofásico)",
+    "StorEdge con HD-Wave",
+    "SolarEdge Home Short String (NL, PL)",
+    "SolarEdge Backup Interface / Home Backup"
+  ],
+  "pendiente": [
+    "Ficha técnica de la Home Battery 48V (capacidad por módulo, química, potencia, apilamiento).",
+    "Fabricante y país de las celdas y de montaje.",
+    "Garantía vigente específica para España de ambos modelos.",
+    "Oferta con precio en una tienda española.",
+    "Origen de las celdas de la Home Battery tras el cierre de la fabricación en Corea del Sur (noviembre de 2024) y efecto en repuestos y soporte.",
+    "Consulta directa a EU Safety Gate."
+  ]
+}

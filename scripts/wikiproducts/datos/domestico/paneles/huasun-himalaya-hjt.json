@@ -1,0 +1,385 @@
+{
+  "slug": "huasun-himalaya-hjt",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Huasun Himalaya G10 Black (HJT, 108 semicélulas)",
+  "marca": "Huasun",
+  "modelo": "HS-182-B108DSN 420–440 W (Himalaya G10 Black, bifacial vidrio-vidrio, marco negro). Hay variantes en catálogos europeos: DSB (fondo negro), S108DSB (marco plateado) y una gama 430–450 W (sun.store). En su página residencial Huasun cita además los modelos de 210R y 96 células HSN-210R-B96DSN/-S96DSB/-B96DS (serie Everest G12R).",
+  "variante_ficha": "HS-182-B108DSN440 (ficha Ver. 2.0)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": "https://www.huasunsolar.com/downloads.html",
+    "fecha": "2026-10-18",
+    "nota": "No se pudo consultar la ficha."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No verificado."
+  },
+  "estado": "a la venta",
+  "estado_nota": "La serie aparece en catálogos de mayoristas europeos (sun.store, solartraders.com) pero sin ofertas activas a 2026-10-18; la propia Huasun promociona en su página residencial modelos más recientes de 96 células (HSN-210R). No se ha confirmado si la G10 sigue en fabricación.",
+  "resumen": "Huasun (Anhui Huasun Energy Co., Ltd.) es un fabricante chino de células y módulos de heterounión (HJT) fundado en 2020, con sede en Xuancheng (Anhui). Su módulo para tejados Himalaya G10 Black usa 108 semicélulas HJT de tipo n de 182 mm, con doble vidrio y bifacialidad del 90 ± 5 % según la ficha, y una gama de 420 a 440 W en un formato de 1722 × 1134 mm. Según la marca, la versión de 440 W alcanza un 22,53 % de eficiencia y su coeficiente de temperatura es de −0,24 %/°C, más bajo que el de los módulos PERC o TOPCon. La garantía de producto varía entre documentos: la ficha da 15 años y la garantía para tejados de Europa de 2022–2023 daba 30 años, ambas con 30 años de rendimiento. No se encontró ninguna oferta con precio en España a fecha 2026-10-18.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.huasunsolar.com/residential.html",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 440,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha Huasun Himalaya G10 Black Series HS-182-B108DSN 420–440 W, File No. HS-T2-SM-0014 Ver. 2.0 (© 2020-2024), copia alojada por el distribuidor australiano Solarproof. Tolerancia 0/+5 W."
+    },
+    "gama_potencias_wp": {
+      "valor": "420–440",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha Ver. 2.0. El listado europeo de sun.store muestra una gama 430–450 Wp (HS-182-B108DSN450, 23,04 %): https://sun.store/es/product/huasun-hs-182-b108-dsn450-22-kg-16mm-full-black-28786"
+    },
+    "eficiencia_pct": {
+      "valor": 22.53,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Versión 440 W; la de 420 W da 21,51 %."
+    },
+    "tecnologia_celula": {
+      "valor": "HJT (heterounión), tipo n, semicélula de 182 × 91,75 mm, SMBB",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "tipo_celula": {
+      "valor": "monocristalina tipo n",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "num_celulas": {
+      "valor": 108,
+      "unidad": "semicélulas",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "6 × 18"
+    },
+    "bifacial": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "bifacialidad_pct": {
+      "valor": 90,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Tabla eléctrica: 90 ± 5 %; el texto comercial dice «up to 95%»."
+    },
+    "vidrio": {
+      "valor": "doble vidrio: 2,0 mm delantero / 1,6 mm trasero",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "marco": {
+      "valor": "negro (aleación de aluminio anodizado)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "medidas_mm": {
+      "valor": "1722 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 24.2,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha da «24,2 kg / 21,2 kg» sin decir a qué corresponde cada valor; sun.store y solartraders indican 22 kg en otras variantes. Dato a confirmar."
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.24,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "noct_o_nmot_c": {
+      "valor": 44,
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "NOCT 44 ± 2 °C (la ficha no da NMOT)."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía: menos del 1 % el primer año."
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.3,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Ficha: máximo 0,3 %/año desde el año 2. La garantía europea 2022–2023 da en cambio 0,375 %/año de media (años 2–15)."
+    },
+    "voc_v": {
+      "valor": 41.91,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "440 W, STC"
+    },
+    "isc_a": {
+      "valor": 13.05,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "440 W, STC"
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V DC",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "IEC"
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 Pa delante / 2400 Pa detrás",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "conector": {
+      "valor": "MC4 original",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "precio_por_wp_eur": {
+      "valor": null,
+      "unidad": "€/Wp",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "Sin ofertas con precio a 2026-10-18 (sun.store: «No hay ofertas disponibles»; solartraders: «Article currently unavailable»)."
+    },
+    "resultado_pvel": {
+      "valor": "Huasun no figura entre los 43 fabricantes «Top Performer» del Scorecard 2026 de Kiwa PVEL.",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://scorecard.pvel.com/manufacturers/",
+      "fecha": "2026-10-18",
+      "nota": "No figurar puede significar que no se presentó; no implica un mal resultado."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se comprobó en esta sesión."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 15,
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha Ver. 2.0 da 15 años de producto. La garantía «Roof Market Series» v1.0 para Europa, Australia, Nueva Zelanda, Japón y Corea, válida solo para módulos entregados entre el 1-1-2022 y el 31-12-2023, daba 30 años de producto (HS-182-B108DSN incluido). Los listados de sun.store dan 15 años y solartraders 30. No se encontró el documento de garantía vigente para entregas desde 2024. Fuente garantía 2022–2023: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 90.3,
+      "primer_anio_pct": 99,
+      "lineal_anual_pct": 0.3,
+      "fuente": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Valores de la ficha (≥ 90,3 % al año 30). La garantía 2022–2023 da ≥ 99 % el primer año, ≤ 0,375 %/año de media en los años 2–15 y ≥ 88 % al año 30; sun.store indica 90 % a 25 años y 88 % a 30."
+    },
+    "letra_pequena": [
+      "La garantía «Roof Market Series» v1.0 solo cubre módulos entregados por la fábrica entre el 1-1-2022 y el 31-12-2023 (art. 13); para módulos posteriores hay que pedir el documento vigente. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "No cubre instalación, desmontaje, reinstalación, aranceles ni transporte; Huasun puede reembolsar un flete de devolución razonable si su servicio al cliente lo aprueba. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "La reclamación debe notificarse por escrito en 30 días desde que se detecta el problema; el correo electrónico solo no se considera notificación válida. No se pueden devolver módulos sin autorización escrita. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "Si se opta por reembolso, se paga el precio original menos un 3,3 % de depreciación por año; la responsabilidad total se limita al valor de factura de los módulos defectuosos. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "La garantía empieza en la entrega o seis meses después de salir de fábrica, lo que ocurra antes. Es transferible si los módulos siguen en la misma instalación y la transmisión está documentada. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "Las disputas técnicas las resuelve un laboratorio (TÜV SÜD, Intertek, UL, CQC, CGC) y «Huasun se reserva el derecho de interpretación final»; la ley aplicable es la del contrato de venta. Fuente: https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+    ],
+    "quien_responde": "Anhui Huasun Energy Co., Ltd. (China). La ficha menciona un reaseguro suscrito con Ariel Re, pero no se encontró la póliza ni sus condiciones; el documento de garantía no habla de seguro ni de insolvencia. En la práctica, la primera reclamación se hace al distribuidor o instalador."
+  },
+  "empresa": {
+    "razon_social": "Anhui Huasun Energy Co., Ltd.",
+    "pais_sede": "China (Xuancheng, Anhui)",
+    "fundacion": "21 de julio de 2020",
+    "cotiza_en": "No consta en la web oficial",
+    "web": "https://www.huasunsolar.com",
+    "fabricante_celulas": "Huasun (células HJT propias)",
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Xuancheng (Anhui): 500 MW de células y módulos HJT, desde 2021",
+      "Dali (Yunnan): células HJT, 2,5 GW (fase I, 2023)",
+      "Hefei (Anhui): 5 GW de células y módulos HJT (2023)",
+      "Wuxi (Jiangsu): 3,6 GW de células HJT (2024)",
+      "Yinchuan (Ningxia): planta de producción, sin más detalle"
+    ],
+    "notas": [
+      "La marca dice tener «20 GW of HJT production capacity» y ser «the world's largest HJT manufacturer», con más de 13 GW enviados a más de 80 países. Fuente: https://www.huasunsolar.com/about-us.html",
+      "Búsqueda a 2026-10-18 de detenciones UFLPA, litigios o retiradas con el nombre Huasun: no apareció ninguna referencia específica a la marca. Fuente: búsqueda web (pv-magazine, pv-tech).",
+      "La ficha del Himalaya G10 cita a Huasun como fabricante Tier 1 de BloombergNEF y un reaseguro de Ariel Re. Fuente: https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf"
+    ],
+    "fuentes": [
+      "https://www.huasunsolar.com/about-us.html",
+      "https://www.huasunsolar.com",
+      "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": "No se indica qué planta fabrica los modelos residenciales.",
+    "materiales_principales": [
+      "silicio monocristalino tipo n (HJT)",
+      "vidrio templado 2,0 + 1,6 mm",
+      "sellante perimetral de PIB",
+      "marco de aluminio anodizado negro"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario."
+  },
+  "certificados": [],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.huasunsolar.com/downloads.html",
+      "idioma": "inglés",
+      "fecha": "2026-10-18",
+      "nota": "Página de descargas (los ficheros se cargan con JavaScript; no se descargaron)."
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "idioma": "en",
+      "fecha": "Ver. 2.0 (© 2020-2024)"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solarproof.com.au//warranty_documents/panel_warranty_limited-warranty-roof-market-series.pdf",
+      "idioma": "en",
+      "fecha": "v1.0 (2022), entregas 2022–2023"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "With 20 GW of HJT production capacity, Huasun is the world's largest HJT manufacturer.",
+      "donde": "https://www.huasunsolar.com/about-us.html",
+      "veredicto": "sin pruebas",
+      "explicacion": "Es una afirmación de la propia empresa. En esta sesión no se consultó ningún informe sectorial independiente que compare la capacidad HJT de los fabricantes.",
+      "fuentes": [
+        "https://www.huasunsolar.com/about-us.html"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "maximum output power of 768W and feature an impressive peak efficiency of 24.75%",
+      "donde": "https://www.huasunsolar.com/himalaya-g12.html",
+      "veredicto": "matizable",
+      "explicacion": "Son cifras de un ejemplar récord («champion») del módulo grande Himalaya G12; la gama comercial que muestra la misma página es de 700–730 W y 22,5–23,5 %. No se aplica a los módulos residenciales, mucho más pequeños.",
+      "fuentes": [
+        "https://www.huasunsolar.com/himalaya-g12.html"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Bifaciality up to 95%",
+      "donde": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La tabla eléctrica de la misma ficha da 90 ± 5 %; el 95 % es el extremo superior de la tolerancia.",
+      "fuentes": [
+        "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Lower temperature coefficient, better performance in hot climates",
+      "donde": "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+      "veredicto": "cierta",
+      "explicacion": "El −0,24 %/°C declarado es menor que el de módulos TOPCon de la misma clase (p. ej. −0,30 %/°C en la ficha del Qcells Q.TRON BLK M-G2+), lo que en teoría reduce las pérdidas con calor. Es un valor declarado por la marca; no se encontró una medición independiente de este modelo.",
+      "fuentes": [
+        "https://solarproof.com.au/datasheets/panel_datasheet_hs-182-b108dsn.pdf",
+        "https://solartown.com/content/Qcells_Data_sheet_Q.TRON_BLK_M-G2.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18 en buscador web de «Huasun» + recall, safety, UFLPA, detained, lawsuit, además de la búsqueda general previa de retiradas de paneles en EU Safety Gate, CPSC, ACCC y Health Canada. No apareció ninguna retirada, alerta de seguridad ni detención aduanera atribuida a Huasun. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [],
+  "compatibles": [],
+  "pendiente": [
+    "Documento de garantía vigente para módulos entregados desde 2024 (la ficha da 15 años de producto; la garantía 2022–2023 daba 30).",
+    "Peso exacto de la versión DSN440 (la ficha da 24,2 / 21,2 kg sin etiqueta).",
+    "Ofertas con precio en España o la UE: ninguna encontrada a 2026-10-18.",
+    "Certificados IEC 61215/61730 (la ficha no los enumera).",
+    "Ficha de los modelos residenciales HSN-210R-B96DSN (Everest G12R), que Huasun promociona en su web residencial.",
+    "Resultado RETC.",
+    "Antidumping de la UE: no se ha buscado de forma específica."
+  ]
+}

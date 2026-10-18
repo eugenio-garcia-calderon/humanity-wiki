@@ -1,0 +1,440 @@
+{
+  "slug": "growatt-ark-xh",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Growatt ARK XH",
+  "marca": "Growatt",
+  "modelo": "ARK XH: ARK 5.1XH … ARK 25.6XH (2 a 10 módulos ARK 2.5H-A1 de 2,56 kWh + BMS BDC 95045-A1)",
+  "variante_ficha": "ARK 10.2XH (4 módulos ARK 2.5H-A1, 10,24 kWh)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se ha encontrado un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se ha encontrado una fecha de lanzamiento fiable."
+  },
+  "estado": "a la venta",
+  "resumen": "Growatt ARK XH es una batería doméstica de alta tensión que se monta apilando de 2 a 10 módulos LFP ARK 2.5H-A1 de 2,56 kWh sobre un BMS, de 5,12 a 25,6 kWh nominales. Según la ficha técnica, la energía útil es de alrededor del 90 % de la nominal (9,21 kWh en la versión de 10,24 kWh) y está pensada para los inversores híbridos Growatt MIN-XH; la versión europea solo funciona con inversores europeos. Growatt anuncia 10 años de garantía, pero el único documento de garantía de la batería encontrado es australiano: allí la cobertura baja a 3 años sin monitorización y está limitada por un tope de energía. No se ha encontrado ningún ensayo independiente publicado de esta batería.",
+  "imagen": {
+    "url": null,
+    "fuente": null,
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "Pendiente de enlazar una imagen oficial verificada."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 10.24,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH (4 módulos de 2,56 kWh)."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.21,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH. Otras: 5.1XH 4,6; 7.6XH 6,9; 12.8XH 11,52; 15.3XH 13,81; 17.9XH 16,12; 20.4XH 18,42; 23XH 20,74; 25.6XH 23,04 kWh."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5,12 – 25,6 (en pasos de 2,56)",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Monofásico: 2–7 módulos; trifásico: 3–10 módulos."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "ampliacion_max_kwh": {
+      "valor": 25.6,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "10 módulos (trifásico). Con inversor monofásico MIN-XH: 17,92 kWh (7 módulos)."
+    },
+    "potencia_continua_kw": {
+      "valor": 5,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH; aumenta 1,25 kW por módulo (2,5 kW con 2 módulos, 12,5 kW con 10). Corriente máxima: 21 A."
+    },
+    "potencia_pico_kw": {
+      "valor": 10,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH, durante 10 s (42 A)."
+    },
+    "quimica": {
+      "valor": "LFP (litio-ferrofosfato), sin cobalto",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "ciclos_declarados": {
+      "valor": null,
+      "unidad": "ciclos",
+      "origen": "desconocido",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no da una vida en ciclos."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 90,
+      "unidad": "%",
+      "origen": "calculado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La ficha no la indica como tal. Cálculo: 9,21 kWh útiles / 10,24 kWh nominales ≈ 90 %. AutoSolar indica «Energía útil almacenada: 90 %»."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No publicada."
+    },
+    "tension": {
+      "valor": "alta tensión; 400 V nominal (360–550 V) en monofásico; 650 V (600–950 V) en las versiones trifásicas grandes",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Módulo ARK 2.5H-A1: 51,2 V."
+    },
+    "acoplamiento": {
+      "valor": "DC, con inversor híbrido Growatt",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "inversores_compatibles": {
+      "valor": "Growatt MIN-XH (monofásico); según la tienda, también SPH trifásicos",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-growatt-ark-25h-a1a2-hv",
+      "fecha": "2026-10-18",
+      "nota": "La ficha indica MIN-XH. La batería europea solo es compatible con inversores europeos. La garantía australiana excluye el uso con equipos que no sean de Growatt."
+    },
+    "respaldo_apagones": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "depende del inversor Growatt asociado. La batería no tiene salida propia; el respaldo lo da el inversor híbrido."
+    },
+    "instalacion": {
+      "valor": "pared o suelo (soporte adicional para suelo)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Aunque es IP65, la garantía australiana excluye la instalación exterior sin resguardo adecuado."
+    },
+    "ip": {
+      "valor": "IP65",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "descarga -10 a 50; carga 0 a 50",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "peso_kg": {
+      "valor": 127,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH completo. Módulo ARK 2.5H-A1: 28 kg."
+    },
+    "medidas_mm": {
+      "valor": "650 × 260 × 1000",
+      "unidad": "mm (an × fo × al)",
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH; la altura crece 185 mm por módulo."
+    },
+    "garantia_energia_mwh": {
+      "valor": 37.36,
+      "unidad": "MWh",
+      "origen": "declarado",
+      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK 10.2XH-A1 según la garantía australiana (no se ha encontrado la europea). Equivale a unos 3.650 ciclos completos de 10,24 kWh (cálculo propio)."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 422.92,
+      "unidad": "EUR/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://autosolar.es/baterias-litio-alto-voltaje/baterias-de-litio-para-placas-solares-growatt-ark-xh-102kwh",
+      "fecha": "2026-10-18",
+      "nota": "3.895,12 € (IVA incluido, kit ARK XH 10,24 kWh) / 9,21 kWh útiles. Sin inversor ni instalación; la página es contradictoria sobre si incluye base y cable."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "ARK XH no figura en los ensayos de la HTW Berlin de 2025 ni de 2026; en 2025 Growatt aparece solo en el análisis de mercado (APX 5.0P)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "fecha": "2026-10-18",
+      "nota": "El documento dice que el plazo de 10 años «is only applicable for selling and installation in Australia». Las tiendas europeas anuncian 10 años, pero no se ha encontrado el documento de garantía europeo de la batería. Sin monitorización: 3 años."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 70,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Al menos el 70 % de la energía nominal a los 10 años, dentro del tope de energía de cada modelo (garantía australiana)."
+    },
+    "letra_pequena": [
+      "El plazo de 10 años solo consta para Australia; no se ha encontrado la garantía europea de la batería. Fuente: https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "Sin monitorización en la plataforma de Growatt, la garantía baja a 3 años, y sin datos acumulados la garantía de rendimiento no es válida. Fuente: misma garantía.",
+      "La instalación debe hacerse en los 3 meses siguientes a la entrega desde Growatt; el plazo termina como máximo 10 años y 6 meses tras la entrega. Fuente: misma garantía.",
+      "Los defectos deben comunicarse en los 14 días siguientes a la aparición de signos de problema. Fuente: misma garantía.",
+      "Excluye la instalación o el uso en exterior sin resguardo adecuado, el uso con equipos que no sean de Growatt, la luz solar directa, el almacenamiento fuera de -20/40 °C y altitudes por encima de 2.000 m. Fuente: misma garantía.",
+      "No cubre mano de obra, logística ni lucro cesante; si la inspección no confirma el defecto, el cliente paga la inspección. La pieza de sustitución no reinicia el plazo. Fuente: misma garantía.",
+      "La garantía de inversores de Growatt (tarjeta GR-WA-01-A-05) tampoco cubre logística ni mano de obra en los últimos cinco años. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/25741/Growatt%20WA%20EN.pdf?locale=en"
+    ],
+    "quien_responde": "Growatt como fabricante, a través de su agente local o de warranty.growatt.com. No se ha encontrado qué ocurre si Growatt deja el mercado europeo; quedarían los derechos legales frente al vendedor."
+  },
+  "empresa": {
+    "razon_social": "Shenzhen Growatt New Energy Co., Ltd.",
+    "pais_sede": "China (Shenzhen)",
+    "fundacion": 2011,
+    "cotiza_en": null,
+    "web": "https://www.growatt.com",
+    "fabricante_celulas": null,
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Huizhou (China)",
+      "Vietnam (fábrica en el extranjero)"
+    ],
+    "notas": [
+      "No cotiza: el 16 de junio de 2026 presentó su tercera solicitud de salida a la Bolsa de Hong Kong, tras intentos en 2022 y 2023 que pasaron la audiencia pero no llegaron a la oferta. Fuente: https://www.energytrend.com/news/20260618-51619.html",
+      "Ingresos de 5.233 millones de RMB en 2025, el 63,4 % de ellos en almacenamiento. Fuente: https://www.energytrend.com/news/20260618-51619.html",
+      "En Australia retiró los inversores híbridos SPH3000–6000TL BL-UP (2023), porque el conector EPS se podía quitar a mano, y el inversor 8000 MTL-S (2021), por riesgo de sobrecalentamiento de conectores. Son inversores, no esta batería. Fuente: https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154",
+      "No se han encontrado retenciones UFLPA, procedimientos antidumping específicos ni insolvencias en las búsquedas realizadas."
+    ],
+    "fuentes": [
+      "https://www.energytrend.com/news/20260618-51619.html",
+      "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas de litio-ferrofosfato (LFP) sin cobalto"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulos ARK 2.5H-A1 sustituibles por separado (se venden sueltos: https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-growatt-ark-25h-a1a2-hv). La garantía australiana advierte que las piezas de sustitución pueden no ser compatibles con el sistema existente y excluye esos costes."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619 (celda y pack)",
+      "emisor": "no indicado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "CE, CEC, RCM, UN 38.3",
+      "emisor": "no indicado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "idioma": "de",
+      "fecha": null
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf",
+      "idioma": "en",
+      "fecha": null
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/25741/Growatt%20WA%20EN.pdf?locale=en",
+      "idioma": "en",
+      "fecha": null
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Warranty: 10 years",
+      "donde": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "veredicto": "matizable",
+      "explicacion": "El único documento de garantía de la batería encontrado limita los 10 años a Australia, los reduce a 3 años sin monitorización y fija un tope de energía (37,36 MWh para el ARK 10.2XH). No se ha encontrado la versión europea.",
+      "fuentes": [
+        "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Cobalt Free Lithium Iron Phosphate (LFP)",
+      "donde": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "veredicto": "cierta",
+      "explicacion": "La química LFP no utiliza cobalto en el cátodo, así que la afirmación es correcta por definición. No dice nada sobre el origen de los demás materiales.",
+      "fuentes": [
+        "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Protection class: IP65",
+      "donde": "https://www.offgridtec.com/media/product_attachements/Growatt_ARK-XH_Speichersystem_Datenblatt.pdf",
+      "veredicto": "matizable",
+      "explicacion": "La ficha da IP65, apto en principio para exterior, pero la garantía australiana excluye la instalación o el uso en exterior sin resguardo adecuado, así como la luz solar directa.",
+      "fuentes": [
+        "https://solarproof.com.au/datasheets/battery_datasheet_Growatt Battery_Warranty_10years_ARK_XH_NSW.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [
+    {
+      "pais": "Australia",
+      "organismo": "ACCC / Clean Energy Council",
+      "fecha": "2023-11-17",
+      "motivo": "El conector del puerto EPS se puede quitar a mano y deja partes en tensión expuestas. Afecta a inversores de la misma marca, no a la batería ARK XH.",
+      "modelos_afectados": "Inversores Growatt SPH3000TL … SPH6000TL BL-UP; no a la batería ARK XH",
+      "url": "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154",
+      "fecha_consulta": "2026-10-18"
+    },
+    {
+      "pais": "Australia",
+      "organismo": "ACCC / Clean Energy Council",
+      "fecha": "2021-09-17",
+      "motivo": "Conectores incompatibles que pueden sobrecalentarse o fundirse. Afecta a un inversor de la misma marca.",
+      "modelos_afectados": "Inversor Growatt 8000 MTL-S; no a la batería ARK XH",
+      "url": "https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154",
+      "fecha_consulta": "2026-10-18"
+    }
+  ],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 en la lista de retiradas del Clean Energy Council (Australia), en gov.uk product safety y en web abierta. No se ha encontrado ninguna retirada de la batería ARK XH ni del módulo ARK 2.5H-A1; las entradas listadas son de inversores de la misma marca. No se consultaron directamente EU Safety Gate, CPSC ni Health Canada.",
+  "ofertas": [
+    {
+      "distribuidor": "AutoSolar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/baterias-litio-alto-voltaje/baterias-de-litio-para-placas-solares-growatt-ark-xh-102kwh",
+      "precio_eur": 3895.12,
+      "iva_incluido": true,
+      "unidad": "por kit ARK XH 10,24 kWh (4 módulos + BMS; base y cable según la página, aunque se contradice)",
+      "incluye_instalacion": false,
+      "envio": "Entrega estimada en la península con pago con tarjeta",
+      "stock": "no indicado («salvo rotura de stock»)",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    },
+    {
+      "distribuidor": "AutoSolar",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://autosolar.es/baterias-litio-alto-voltaje/modulo-bateria-litio-growatt-ark-25h-a1a2-hv",
+      "precio_eur": 847,
+      "iva_incluido": true,
+      "unidad": "por módulo ARK 2.5H-A1/A2 (2,56 kWh), sin BMS",
+      "incluye_instalacion": false,
+      "envio": "Entrega estimada en la península con pago con tarjeta",
+      "stock": "no indicado",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18"
+    }
+  ],
+  "compatibles": [
+    "Inversores híbridos Growatt MIN-XH (monofásicos)",
+    "Inversores Growatt SPH trifásicos (según la tienda)",
+    "BMS BDC 95045-A1/A2"
+  ],
+  "pendiente": [
+    "Documento oficial de garantía europea de la batería ARK XH (plazo, tope de MWh y condiciones).",
+    "Vida en ciclos y eficiencia de ida y vuelta: no se publican.",
+    "Fabricante de las celdas.",
+    "Versión y fecha de la ficha técnica consultada (no constan).",
+    "Año de lanzamiento.",
+    "Un comprador en AutoSolar dice que obtuvo unos 4.500 W con tres módulos frente a los 6.900 W esperados; es un testimonio sin verificar.",
+    "Consulta directa en EU Safety Gate, CPSC y Health Canada."
+  ]
+}

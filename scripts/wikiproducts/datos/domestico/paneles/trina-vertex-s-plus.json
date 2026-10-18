@@ -1,0 +1,433 @@
+{
+  "slug": "trina-vertex-s-plus",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Trina Solar Vertex S+ NEG9R.28 (vidrio-vidrio)",
+  "marca": "Trina Solar",
+  "modelo": "TSM-425 … 450NEG9R.28 (existe también la variante bifacial TSM-NEG9RC.27, 410–440 W)",
+  "variante_ficha": "TSM-450NEG9R.28, ficha TSM_EN_2023_B (copia de solartraders fechada 29-10-2024)",
+  "ean": {
+    "valor": null,
+    "unidad": "GTIN",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": "año",
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "La ficha está fechada en 2023 (TSM_EN_2023_B); no se encontró la fecha de lanzamiento."
+  },
+  "estado": "a la venta",
+  "resumen": "El Vertex S+ NEG9R.28 es un módulo de Trina Solar para tejados residenciales y comerciales con 144 medias células de tipo n (i-TOPCon) y construcción vidrio-vidrio de 1,6 + 1,6 mm, en un formato de 1762 × 1134 mm y 21 kg. Su ficha de 2023 cubre de 425 a 450 W con eficiencias del 21,3 % al 22,5 % y un coeficiente de temperatura de −0,30 %/°C. La ficha anuncia 25 años de garantía de producto y 30 años de potencia (99 % el año 1, 0,40 % anual y 87,4 % al año 30), aunque la garantía global de Trina que la acompaña (Rev. U) solo recoge plazos de producto de 5 a 15 años y remite el plazo ampliado a una «Extended Vertex S+ Warranty» que no se pudo consultar. Por la configuración de células su tensión es alta (Voc 52,9 V) y su corriente baja (Isc 10,74 A), lo que lo hace compatible con casi cualquier inversor u optimizador doméstico. No se encontró un precio público en tiendas españolas en la fecha de consulta.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://www.solartraders.com/de/products/module/trina-solar-tsm-450neg9r-28-bfr-evo2",
+    "licencia": "propiedad del fabricante; solo enlace"
+  },
+  "datos_tecnicos": {
+    "potencia_pico_wp": {
+      "valor": 450,
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Variante TSM-450NEG9R.28, STC; tolerancia 0/+5 W."
+    },
+    "gama_potencias_wp": {
+      "valor": "425–450",
+      "unidad": "Wp",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "La página de serie de solartraders habla de 430–455 W y 22,8 % (https://www.solartraders.com/es/producers/trina-solar/vertex-s-plus); no se ha visto ficha oficial con 455 W."
+    },
+    "eficiencia_pct": {
+      "valor": 22.5,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Variante 450 W."
+    },
+    "tecnologia_celula": {
+      "valor": "i-TOPCon tipo n",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "tipo_celula": {
+      "valor": "monocristalino",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "num_celulas": {
+      "valor": 144,
+      "unidad": "medias células",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Células de formato rectangular; tecnología de interconexión de alta densidad, según la marca."
+    },
+    "bifacial": {
+      "valor": false,
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/de/products/module/trina-solar-tsm-450neg9r-28-bfr-evo2",
+      "fecha": "2026-10-18",
+      "nota": "La NEG9R.28 se ofrece como vidrio-vidrio sin declarar bifacialidad; la variante bifacial es la NEG9RC.27. solartraders es contradictorio en este punto."
+    },
+    "bifacialidad_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No declarada para la NEG9R.28."
+    },
+    "vidrio": {
+      "valor": "doble: 1,6 mm frontal antirreflejo + 1,6 mm trasero, ambos termoendurecidos",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Encapsulante POE/EVA."
+    },
+    "marco": {
+      "valor": "aluminio anodizado negro, 30 mm",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "medidas_mm": {
+      "valor": "1762 × 1134 × 30",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "peso_kg": {
+      "valor": 21.0,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "coef_temp_pmax_pct_c": {
+      "valor": -0.3,
+      "unidad": "%/°C",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Voc −0,24 %/K; Isc +0,04 %/K."
+    },
+    "noct_o_nmot_c": {
+      "valor": 43,
+      "unidad": "°C (NOCT, ±2)",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Potencia en NOCT de la variante 450 W: 343 W."
+    },
+    "degradacion_primer_anio_pct": {
+      "valor": 1.0,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "degradacion_anual_pct": {
+      "valor": 0.4,
+      "unidad": "%/año",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Años 2 a 30."
+    },
+    "voc_v": {
+      "valor": 52.9,
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Variante 450 W, STC. La extracción automática del PDF estaba desordenada; los valores se emparejaron comprobando Vmp × Imp ≈ Pmax."
+    },
+    "isc_a": {
+      "valor": 10.74,
+      "unidad": "A",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Variante 450 W, STC. Vmp 44,6 V; Imp 10,09 A."
+    },
+    "tension_max_sistema_v": {
+      "valor": 1500,
+      "unidad": "V CC (IEC)",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Fusible máximo 20 A."
+    },
+    "carga_mecanica_pa": {
+      "valor": "5400 nieve / 4000 viento (cargas de ensayo)",
+      "unidad": "Pa",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip_caja_conexiones": {
+      "valor": "IP68",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "conector": {
+      "valor": "TS4 / MC4 EVO2",
+      "unidad": "",
+      "origen": "declarado",
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "La referencia de solartraders lleva Stäubli MC4-EVO2."
+    },
+    "precio_por_wp_eur": {
+      "valor": 0.165,
+      "unidad": "€/Wp",
+      "origen": "calculado",
+      "fuente": "https://fvcomponentes.com/en/?p=16280",
+      "fecha": "2026-10-18",
+      "nota": "2674,31 € (IVA incl.) / 36 módulos / 450 Wp = 0,165 €/Wp. Precio por palé completo; en unidades sueltas suele ser mayor."
+    },
+    "resultado_pvel": {
+      "valor": "No figura la NEG9R.28 en la lista visible de Top Performers 2026",
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": "https://scorecard.pvel.com/top-performers/",
+      "fecha": "2026-10-18",
+      "nota": "En la lista 2026 aparece TSM-xxxNEG9RH.25 (monofacial, vidrio-vidrio 1,6/1,6 mm, otra lista de materiales de la misma familia de tamaño) en la prueba LID+LETID; no la NEG9R.28. La página de solartraders atribuye a la serie el sello «Top Performer» sin precisar modelo ni año."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "No se encontró ningún ensayo independiente publicado para la NEG9R.28. El récord de eficiencia del 24,24 % de 2022 que cita el distribuidor se refiere a un módulo de laboratorio, no a este producto."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 25,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Según la ficha («Extended Vertex S+ Warranty»). La garantía global Rev. U adjunta no incluye ningún plazo de 25 años (máximo 15) y no se encontró el documento de la garantía ampliada; la página de serie de solartraders llega a mencionar 12 años en sus preguntas frecuentes. Se encontró el «Limited Warranty Supplement» de 25 años de producto de Trina Solar Co., Ltd. (copia en solarquotes.com.au, sin fecha de revisión): vale para módulos instalados en Europa, Australia o Japón y entregados después del 1-4-2022, pero solo nombra los modelos TSM-***NEG9C.27 y TSM-***NEG9.28; el NEG9R.28 de esta ficha no aparece en esa lista. https://www.solarquotes.com.au/wp-content/uploads/2023/05/trina-vertexsplus-warranty.pdf"
+    },
+    "rendimiento": {
+      "anios": 30,
+      "porcentaje_final": 87.4,
+      "primer_anio_pct": 99.0,
+      "lineal_anual_pct": 0.4,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18",
+      "nota": "Coincide con la curva de la garantía global Rev. U para módulos N-type Mono Duomax (≥87,4 % al año 30)."
+    },
+    "letra_pequena": [
+      "La garantía global de Trina (PS-M-0135 Rev. U, productos entregados desde el 1 de septiembre de 2022) no se aplica en Alemania ni Turquía, que tienen garantías propias; en España sí aplica si el lugar de instalación figura en su anexo. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "Inicio en la fecha de instalación o tres meses después de la entrega, lo que ocurra antes. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "Plazo para reclamar: dos meses desde que se descubre el incumplimiento, por el portal de atención al cliente, con factura y números de serie. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "El comprador paga desmontaje, manipulación, reembalaje y reinstalación; Trina paga la reparación y el envío del repuesto, pero no seguros, transporte aéreo, aduanas ni almacenaje. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "Exclusiones: mantenimiento por técnicos no cualificados, piezas de montaje inadecuadas (incluidas las grapas), estructuras defectuosas, moho o decoloración por efectos externos, importaciones paralelas sin consentimiento (salvo comercio intra-UE). Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "Disputas técnicas: perito designado de mutuo acuerdo cuya decisión es vinculante. Responsabilidad limitada al precio de compra; derechos legales del consumidor no afectados. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "Transferible solo si los módulos siguen en su ubicación original sin haberse desmontado. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "El suplemento de 25 años de producto cubre defectos que «impidan de forma material» la generación; excluye cambios de aspecto (arañazos, manchas, óxido, moho, decoloración) y la rotura de vidrio por causa externa; lo no previsto se rige por la última garantía global publicada en la web de Trina. No menciona registro ni requisitos de instalador. Fuente: https://www.solarquotes.com.au/wp-content/uploads/2023/05/trina-vertexsplus-warranty.pdf"
+    ],
+    "quien_responde": "El fabricante (Trina Solar). La ley aplicable es la del país de instalación y los tribunales ordinarios de ese país. El documento no menciona seguro de respaldo ni qué ocurre en caso de quiebra. Frente al consumidor responde también el vendedor."
+  },
+  "empresa": {
+    "razon_social": "Trina Solar Co., Ltd.",
+    "pais_sede": "China (Changzhou, Jiangsu)",
+    "fundacion": null,
+    "cotiza_en": null,
+    "web": "https://www.trinasolar.com",
+    "fabricante_celulas": "Trina Solar (según la marca)",
+    "pais_fabricacion": "No especificado en la ficha",
+    "fabricas_conocidas": [],
+    "notas": [
+      "Según Reuters (noviembre de 2022), los productos solares retenidos por la aduana de EE. UU. bajo la ley UFLPA entre junio y octubre de 2022 eran principalmente de LONGi, Trina y JinkoSolar; Trina no respondió a la agencia. Fuente: https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "En julio de 2023 Trina respondió al Business & Human Rights Resource Centre sobre el informe «In Broad Daylight» (Sheffield Hallam) afirmando que no tiene fabricación en Xinjiang, que aplica trazabilidad de la cadena y que fue la primera en superar una auditoría tras la entrada en vigor de la UFLPA; es la versión de la empresa, sin verificación independiente. Fuente: https://www.business-humanrights.org/documents/39421/Trina_Solar.pdf",
+      "El informe «Over-Exposed» (Sheffield Hallam, 2023) también evalúa a Trina; no se pudo leer la sección correspondiente en esta investigación. Fuente: https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ],
+    "fuentes": [
+      "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "https://www.businessday.co.za/bd/world/2022-11-11-us-blocks-chinese-solar-shipments-amid-slave-labour-concerns",
+      "https://www.business-humanrights.org/documents/39421/Trina_Solar.pdf",
+      "https://www.shu.ac.uk/-/media/home/research/helena-kennedy-centre/projects/over-exposed/crawford-murphy-et-al--over-exposed-november-2023.pdf"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "No especificado en la ficha",
+    "fabrica": null,
+    "materiales_principales": [
+      "silicio monocristalino tipo n",
+      "vidrio termoendurecido 1,6 mm (dos láminas)",
+      "encapsulante POE/EVA",
+      "marco de aluminio anodizado",
+      "caja de conexiones IP68"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica."
+    },
+    "reparabilidad": "Módulo laminado no reparable por el usuario; la garantía prevé reparación, sustitución (también por producto remanufacturado) o compensación a criterio de Trina. Fuente: https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de"
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 61215",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61730",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 61701 (niebla salina), IEC 62716 (amoniaco)",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "ISO 9001, ISO 14001, ISO 45001",
+      "emisor": null,
+      "fuente": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "TSM_EN_2023_B, copia de solartraders."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Global Limited Warranty PS-M-0135 Rev. U (diciembre de 2022)."
+    },
+    {
+      "tipo": "manual",
+      "url": "https://www.solartraders.com/uploads/production/data_sheet/file/37183/manual_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Manual de instalación, copia de solartraders (no revisado)."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Generates up to 450 W, 22.5 % module efficiency with high density interconnect technology",
+      "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "veredicto": "cierta",
+      "explicacion": "Coincide con la tabla eléctrica de la propia ficha para la variante superior; las variantes inferiores rinden menos (21,3 % a 425 W). Son valores declarados, no medidos por terceros.",
+      "fuentes": [
+        "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "25 years product warranty (Extended Vertex S+ Warranty)",
+      "donde": "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+      "veredicto": "matizable",
+      "explicacion": "La ficha lo anuncia, pero la garantía global de Trina que la acompaña solo recoge plazos de producto de hasta 15 años y no se encontró el texto de la garantía ampliada; conviene exigir el documento por escrito al comprar.",
+      "fuentes": [
+        "https://www.solartraders.com/uploads/production/data_sheet/file/37179/data_sheet_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+        "https://www.solartraders.com/uploads/production/data_sheet/file/37181/warranty_neg9r_28_vertex_s_en_29-10-2024.pdf?locale=de",
+        "https://www.solartraders.com/es/producers/trina-solar/vertex-s-plus"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Top Performer (Kiwa PVEL)",
+      "donde": "https://www.solartraders.com/es/producers/trina-solar/vertex-s-plus",
+      "veredicto": "matizable",
+      "explicacion": "La afirmación procede de la página del distribuidor. En la lista 2026 de Kiwa PVEL figura otra referencia de Trina del mismo formato (NEG9RH.25) en una sola prueba, no la NEG9R.28; la distinción se otorga por lista de materiales concreta.",
+      "fuentes": [
+        "https://www.solartraders.com/es/producers/trina-solar/vertex-s-plus",
+        "https://scorecard.pvel.com/top-performers/"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada ni alerta para la Trina TSM-NEG9R.28 ni para módulos de la marca Trina Solar. Ninguna conocida a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "distribuidor": "Solartraders",
+      "tipo": "mayorista",
+      "pais": "Alemania (mercado B2B)",
+      "url": "https://www.solartraders.com/de/products/module/trina-solar-tsm-450neg9r-28-bfr-evo2",
+      "precio_eur": null,
+      "iva_incluido": null,
+      "unidad": "por módulo (TSM-450NEG9R.28, BFR, MC4-EVO2)",
+      "incluye_instalacion": false,
+      "envio": null,
+      "stock": "No disponible para pedido en la consulta",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Sin precio público."
+    },
+    {
+      "distribuidor": "FV Componentes (Cartagena, Murcia)",
+      "tipo": "tienda online",
+      "pais": "España",
+      "url": "https://fvcomponentes.com/en/?p=16280",
+      "precio_eur": 2674.31,
+      "iva_incluido": true,
+      "unidad": "por palé de 36 módulos TSM-450NEG9R.28 (≈ 74,29 € por módulo)",
+      "incluye_instalacion": false,
+      "envio": "No indicado; entrega estándar 2–4 días laborables, 1–2 semanas si no está en almacén",
+      "stock": "«Disponible», sin cantidad; la tienda pide confirmar stock",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "La página indica «TAXES INC.». Domicilio de la tienda según ENF Solar: https://www.enfsolar.com/fv-componentes"
+    }
+  ],
+  "compatibles": [
+    "Inversores de string, microinversores y optimizadores domésticos: Voc 52,9 V e Isc 10,74 A entran en el rango de casi todos; comprobar la tensión máxima de string en frío (coeficiente Voc −0,24 %/K)."
+  ],
+  "pendiente": [
+    "Documento de la «Extended Vertex S+ Warranty» (25 años de producto) aplicable al NEG9R.28: el suplemento encontrado solo cita NEG9C.27 y NEG9.28.",
+    "Sección de Trina en el informe Sheffield Hallam «Over-Exposed».",
+    "Año de lanzamiento, año de fundación y cotización bursátil de Trina con fuente.",
+    "País y planta de fabricación.",
+    "Verificar la lista completa de Top Performers PVEL para NEG9R.28.",
+    "Precio por módulo suelto en España (solo se encontró precio por palé de 36)."
+  ]
+}

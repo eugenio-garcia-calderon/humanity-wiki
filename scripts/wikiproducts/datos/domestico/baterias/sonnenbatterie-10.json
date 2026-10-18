@@ -1,0 +1,481 @@
+{
+  "slug": "sonnenbatterie-10",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "sonnenBatterie 10 / sonnenBatterie 10 performance",
+  "marca": "sonnen",
+  "modelo": "sonnenBatterie 10 (10/5.5, 10/11, 10/22; monofásica) y sonnenBatterie 10 performance / performance+ (10p/11 … 10p/55; trifásica)",
+  "variante_ficha": "sonnenBatterie 10 performance 10p/11 (ficha técnica febrero 2024, módulo de potencia art. 3000364); se indican también los datos de la sonnenBatterie 10 monofásica (ficha febrero 2024, sonnenModule 4)",
+  "ean": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No se encontró un GTIN público."
+  },
+  "anio_lanzamiento": {
+    "valor": 2020,
+    "unidad": "año",
+    "origen": "declarado",
+    "fuente": "https://www.pv-magazine.de/2020/06/17/neue-generation-der-sonnenbatterie-verfuegbar/",
+    "fecha": "2026-10-18",
+    "nota": "Presentación de la nueva generación sonnenBatterie 10 en junio de 2020; la versión performance es posterior."
+  },
+  "estado": "a la venta",
+  "resumen": "La sonnenBatterie 10 es un sistema de almacenamiento doméstico con celdas de litio-ferrofosfato (LFP) que se conecta en alterna (acoplamiento AC) a una instalación fotovoltaica existente e integra su propio inversor de batería. Se vende en una versión monofásica de 5 a 20 kWh útiles y en una versión trifásica «performance» de 10 a 50 kWh útiles, ampliable en cascada hasta nueve unidades. Según la marca, está diseñada para 20 años de vida y 10.000 ciclos, con una garantía de 10 años sujeta a las condiciones vigentes. El fabricante, sonnen GmbH, con sede en Wildpoldsried (Alemania), fue propiedad de Shell desde 2019 hasta su venta al inversor TIVEN, completada en agosto de 2026. En España la distribuye en exclusiva BayWa r.e. Solar Trade desde febrero de 2026.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://sonnen.es",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "No se ha fijado una URL de imagen estable."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 11,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Capacidad nominal del modelo 10p/11."
+    },
+    "capacidad_util_kwh": {
+      "valor": 10,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Modelo 10p/11. La sonnenBatterie 10 monofásica ofrece 5, 10 o 20 kWh útiles."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "5–20 kWh útiles (sonnenBatterie 10, monofásica); 10–50 kWh útiles (10 performance, trifásica); en cascada hasta 450 kWh útiles",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0ed69341-95f8-40b0-bb83-e7f6ada364c3-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Fichas técnicas en español de febrero de 2024 (sonnenBatterie 10 y sonnenBatterie 10 performance)."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Módulos de batería en uno o dos armarios; cascada de 2 a 9 unidades con el mismo número de módulos por unidad."
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Por módulos dentro del armario y por cascada; la cascada no es posible en modo respaldo según la ficha inglesa de la versión performance+."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 50,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Útiles por unidad (10p/55). En cascada de 9 unidades, hasta 450 kWh útiles."
+    },
+    "potencia_continua_kw": {
+      "valor": 7,
+      "unidad": "kW",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Potencia nominal de carga/descarga del 10p/11; 9,9 kW en los modelos 10p/22 a 10p/55. La versión monofásica: 3,4 o 4,6 kW."
+    },
+    "potencia_pico_kw": {
+      "valor": 8.8,
+      "unidad": "kVA",
+      "origen": "declarado",
+      "fuente": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Sobrecarga de 30 s según la ficha de la versión performance+ (junio 2024); la asignación exacta por modelo no queda clara en la tabla."
+    },
+    "quimica": {
+      "valor": "LFP (litio-ferrofosfato)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "fabricante_celulas": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El fabricante no lo publica en fichas ni en web consultadas."
+    },
+    "ciclos_declarados": {
+      "valor": 10000,
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Cifra de la ficha; la garantía australiana limita la cobertura a 10 años o 10.000 ciclos completos, lo que antes ocurra."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 90.9,
+      "unidad": "%",
+      "origen": "calculado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Capacidad útil / capacidad nominal = 10 / 11. La marca no publica la profundidad de descarga como tal."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "La ficha da por separado eficiencia máxima del inversor (97,2 % performance; 95,4 % monofásica) y de la batería (95,9 %), no una eficiencia de ciclo completo."
+    },
+    "tension": {
+      "valor": "No publicada (lado batería); conexión a red 230 V monofásica o 400 V trifásica",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "La tensión del bus de batería no figura en las fichas consultadas."
+    },
+    "acoplamiento": {
+      "valor": "AC (inversor de batería integrado, conexión en alterna a la instalación existente)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.aceflex.de/produkt/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw/",
+      "fecha": "2026-10-18",
+      "nota": "Descrito como «AC-Speichersystem» por el distribuidor; la marca también ofrece un inversor híbrido aparte (sonneninverter)."
+    },
+    "inversor_integrado": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Inversor de batería, no inversor fotovoltaico."
+    },
+    "inversores_compatibles": {
+      "valor": "Cualquier inversor fotovoltaico, al ser acoplamiento AC",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.aceflex.de/produkt/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw/",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "respaldo_apagones": {
+      "valor": "Sí, con accesorio opcional: sonnenProtect 8000 (trifásico, toda la casa) en la versión performance; sonnenProtect 4000 (monofásico) en la sonnenBatterie 10",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Conmutación aprox. 10 s y retorno de hasta 5,5 min con unos 3 s de corte (ficha performance+, junio 2024)."
+    },
+    "instalacion": {
+      "valor": "interior",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Deducido del grado de protección IP30; armario de pie."
+    },
+    "ip": {
+      "valor": "IP30",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": null
+    },
+    "rango_temperatura_c": {
+      "valor": "-5 a 45 (óptimo 5 a 35; reducción de potencia fuera del óptimo)",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Versión monofásica: óptimo 5 a 30 °C."
+    },
+    "peso_kg": {
+      "valor": 165,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "10p/11; hasta 535 kg el 10p/55 (dos armarios)."
+    },
+    "medidas_mm": {
+      "valor": "1720–1840 × 690 × 360 (alto × ancho × fondo, por armario)",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "Versión monofásica: fondo 270 mm."
+    },
+    "garantia_energia_mwh": {
+      "valor": null,
+      "unidad": "MWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La marca expresa el límite en ciclos (10.000), no en MWh."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 1132.54,
+      "unidad": "€/kWh útil",
+      "origen": "calculado",
+      "fuente": "https://www.aceflex.de/produkt/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw/",
+      "fecha": "2026-10-18",
+      "nota": "11.325,37 € / 10 kWh útiles. Precio sin IVA: no se encontró oferta con IVA incluido; en Alemania el IVA aplicable a baterías de autoconsumo residencial es 0 % (§ 12.3 UStG). Con IVA del 19 % serían 1.347,72 €/kWh."
+    },
+    "pruebas_independientes": {
+      "valor": null,
+      "unidad": null,
+      "origen": "desconocido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "sonnen no figura en los resultados de eficiencia (SPI) de la Stromspeicher-Inspektion de la HTW Berlin 2025 ni 2026; en 2025 solo participó en la prueba de gestión de energía (capítulo 4)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 10,
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18",
+      "nota": "La ficha remite a «las condiciones de garantía vigentes»; no se localizó el documento de garantía europeo."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 80,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
+      "fecha": "2026-10-18",
+      "nota": "Dato de la garantía de sonnen Australia (mayo 2022): capacidad no inferior al 80 % de la nominal durante 10 años o 10.000 ciclos completos. En EE. UU. el umbral es 70 %. No se verificó el umbral para España."
+    },
+    "letra_pequena": [
+      "Australia: la garantía termina a los 10 años o a los 10.000 ciclos completos, lo que antes ocurra (https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download).",
+      "Australia: si la unidad está desconectada de internet o no recibe actualizaciones, sonnen no garantiza que esté libre de defectos; EE. UU.: el acceso en línea continuo es condición expresa (https://media.sonnengroup.com/10df77cf-efda-4739-a698-a8e9908cde43-en-download).",
+      "Instalación y reparación solo por sonnen o instaladores certificados; el precinto roto anula la garantía (garantía Australia).",
+      "Australia: transporte, desplazamiento y mano de obra cubiertos solo hasta 200 AUD; reclamar en 6 meses desde que se detecta el fallo; no transferible sin consentimiento escrito.",
+      "Alemania: el distribuidor Krannich indica «10 años de garantía tras registro en línea» (https://shop.krannich-solar.com/en-de/sonnenBatterie-10-performance-10p-44/0163899).",
+      "En 2019 el Landgericht München desestimó los 12 puntos de la demanda de la Verbraucherzentrale NRW contra las condiciones de garantía de sonnen, incluida la exigencia de conexión a internet (https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/)."
+    ],
+    "quien_responde": "El fabricante (sonnen GmbH o su filial nacional) a través del instalador certificado. Los documentos consultados no dicen qué ocurre si el fabricante quiebra. Tras la venta de Shell a TIVEN (agosto 2026) no se encontró información pública sobre la continuidad de las garantías."
+  },
+  "empresa": {
+    "razon_social": "sonnen GmbH",
+    "pais_sede": "Alemania (Wildpoldsried, Baviera)",
+    "fundacion": 2010,
+    "cotiza_en": "No cotiza. Propiedad de Shell desde 2019; vendida a TIVEN (family office de Gert Purkert, cofundador de AURELIUS), operación completada en agosto de 2026.",
+    "web": "https://sonnen.es",
+    "fabricante_celulas": "No publicado",
+    "pais_fabricacion": "Alemania (según la marca)",
+    "fabricas_conocidas": [
+      "Wildpoldsried (Alemania), según la ficha técnica («Made in Germany»)"
+    ],
+    "notas": [
+      "Fundada en 2010 en Wildpoldsried (Alta Algovia) por Christoph Ostermann y Torsten Stiefenhofer; filial al 100 % de Shell desde marzo de 2019 (https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)).",
+      "Shell completó la venta de sonnen a TIVEN el 24 de agosto de 2026; no se publicaron condiciones financieras (https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/).",
+      "Desde febrero de 2026 BayWa r.e. Solar Trade es distribuidor exclusivo en España (https://www.energias-renovables.com/almacenamiento/baywa-distribuidora-exclusiva-de-las-bater-as-20260223).",
+      "En 2019 un tribunal de Múnich declaró conformes a derecho las condiciones de garantía impugnadas por la Verbraucherzentrale NRW (https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/).",
+      "La marca opera una central eléctrica virtual (sonnenCommunity / VPP) que usa las baterías conectadas."
+    ],
+    "fuentes": [
+      "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)",
+      "https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/",
+      "https://www.energias-renovables.com/almacenamiento/baywa-distribuidora-exclusiva-de-las-bater-as-20260223",
+      "https://www.solarserver.de/2019/07/19/garantiebedingungen-von-sonnen-sind-rechtskonform/"
+    ],
+    "fuentes_por_campo": {
+      "razon_social": "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen) (PROSOL Invest Deutschland GmbH; Sonnenbatterie GmbH desde finales de 2013; sonnen GmbH desde noviembre de 2015)",
+      "pais_sede": "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen)",
+      "fundacion": "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen) (fundada en 2010 por Christoph Ostermann y Torsten Stiefenhofer)",
+      "cotiza_en": "https://de.wikipedia.org/wiki/Sonnen_(Unternehmen) ; https://www.energy-storage.news/shell-offloads-residential-battery-storage-vpp-provider-sonnen/"
+    }
+  },
+  "origen": {
+    "pais_marca": "Alemania",
+    "pais_fabricacion": "Alemania (montaje, según la marca); origen de las celdas no publicado",
+    "fabrica": "Wildpoldsried (Alemania)",
+    "materiales_principales": [
+      "celdas LFP",
+      "armario metálico",
+      "electrónica de potencia (inversor de batería)"
+    ],
+    "num_componentes": {
+      "valor": null,
+      "unidad": "componentes",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "El 10p/44 se compone de unidad de potencia, 2 armarios, 8 módulos de almacenamiento y kits de accesorio/ampliación según Krannich; no hay recuento total publicado."
+    },
+    "reparabilidad": "Diseño modular: los módulos de batería (sonnenModule, 5,5 kWh) y la unidad de potencia se venden por separado como piezas (https://shop.krannich-solar.com/en-de/sonnenBatterie-10-performance-10p-44/0163899). La reparación debe hacerla un instalador certificado según la garantía."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "VDE-AR-E 2510-50",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "VDE-AR-N 4105 / TOR Erzeuger",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UN 38.3 / IEC 62281",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "IEC 62109-1 / IEC 62109-2 / IEC 62040-1",
+      "emisor": "no indicado en la ficha",
+      "fuente": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "idioma": "es",
+      "fecha": "2024-02",
+      "nota": "sonnenBatterie 10 performance"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://media.sonnengroup.com/0ed69341-95f8-40b0-bb83-e7f6ada364c3-es-download",
+      "idioma": "es",
+      "fecha": "2024-02",
+      "nota": "sonnenBatterie 10 (monofásica)"
+    },
+    {
+      "tipo": "ficha técnica",
+      "url": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
+      "idioma": "en",
+      "fecha": "2024-06",
+      "nota": "sonnenBatterie 10 performance+"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download",
+      "idioma": "en",
+      "fecha": "2022-05",
+      "nota": "sonnen Australia; no es la garantía española"
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://media.sonnengroup.com/10df77cf-efda-4739-a698-a8e9908cde43-en-download",
+      "idioma": "en",
+      "fecha": "2022-08-08",
+      "nota": "sonnen, Inc. (EE. UU.); modelos estadounidenses"
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Ciclos 10.000",
+      "donde": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "veredicto": "matizable",
+      "explicacion": "Es una cifra declarada por el fabricante sin ensayo independiente publicado. En la garantía australiana los 10.000 ciclos son un tope de cobertura (10 años o 10.000 ciclos, lo que antes ocurra) con un umbral de 80 % de capacidad, no una promesa de que la batería los alcance sin pérdida.",
+      "fuentes": [
+        "https://media.sonnengroup.com/fcf9f069-ae8d-43dd-86a0-aea67da2fdf5-en-download"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Made in Germany",
+      "donde": "https://media.sonnengroup.com/dd373a24-6f4c-498b-b1a7-f222bebef369-de",
+      "veredicto": "matizable",
+      "explicacion": "La marca monta sus sistemas en Wildpoldsried (Alemania), pero no publica el fabricante ni el país de origen de las celdas LFP, que son el componente principal.",
+      "fuentes": [
+        "https://media.sonnengroup.com/dd373a24-6f4c-498b-b1a7-f222bebef369-de"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Full-Home Backup with solar recharging and controlled black start",
+      "donde": "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
+      "veredicto": "matizable",
+      "explicacion": "El respaldo de toda la vivienda requiere el accesorio opcional sonnenProtect 8000, que se vende aparte; la conmutación tarda unos 10 s, por lo que no funciona como un SAI sin corte. En la versión monofásica el respaldo (sonnenProtect 4000) es monofásico.",
+      "fuentes": [
+        "https://shop.krannich-solar.com/en-de/product-downloads/0164253/sonnenBatterie-10-performance-10p-44/Datasheet-EN.pdf",
+        "https://media.sonnengroup.com/0ed69341-95f8-40b0-bb83-e7f6ada364c3-es-download"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Vida útil de diseño 20 años",
+      "donde": "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download",
+      "veredicto": "sin pruebas",
+      "explicacion": "Es una vida de diseño declarada; la garantía cubre 10 años y no se encontró ningún ensayo independiente que la confirme o la desmienta.",
+      "fuentes": [
+        "https://media.sonnengroup.com/0fd3eaa9-23f5-4998-bd12-2c17387888d5-es-download"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: web abierta por «sonnenBatterie recall / Rückruf / fire» y «sonnen battery recall CPSC / Safety Gate / productsafety.gov.au», lista de retiradas del Clean Energy Council y fichas de la ACCC (Australia; sonnen no figura: aparecen LG, SolaX, Tesla, GoodWe, Growatt, Sigenergy y otros), búsquedas en los sitios de la CPSC (EE. UU.), Health Canada y gov.uk, y prensa alemana. No se encontró ninguna retirada ni alerta de la sonnenBatterie 10 ni de la marca. La base de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica; acceso bloqueado desde la herramienta), por lo que «ninguna conocida» significa ninguna encontrada en esas fuentes a esa fecha.",
+  "ofertas": [
+    {
+      "distribuidor": "aceflex.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.aceflex.de/produkt/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw/",
+      "producto": "sonnenBatterie 10 performance 10p/11 (10 kWh útiles / 7 kW)",
+      "precio_eur": 11325.37,
+      "iva_incluido": false,
+      "unidad": "por sistema",
+      "incluye_instalacion": false,
+      "envio": "Por agencia como mercancía peligrosa clase 9; coste no indicado; no envía a España según la lista de destinos",
+      "stock": "5 unidades; entrega 1–2 semanas",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio sin 19 % de IVA; IVA 0 % aplicable en Alemania a autoconsumo residencial."
+    },
+    {
+      "distribuidor": "aceflex.de",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.aceflex.de/?p=185337",
+      "producto": "sonnenBatterie 10 performance+ 10p+/11 (10 kWh útiles / 7 kW), art. 0163895",
+      "precio_eur": 12525.84,
+      "iva_incluido": false,
+      "unidad": "por sistema",
+      "incluye_instalacion": false,
+      "envio": "Por agencia; coste no indicado",
+      "stock": "13 unidades; entrega 1–2 semanas",
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "nota": "Precio sin 19 % de IVA."
+    }
+  ],
+  "compatibles": [
+    "Cualquier inversor fotovoltaico (acoplamiento AC)",
+    "sonnenProtect 4000 / 8000 (respaldo)",
+    "sonnenCharger (cargador de coche eléctrico)",
+    "sonnenKNX"
+  ],
+  "pendiente": [
+    "Documento de garantía vigente para España/UE (umbral de capacidad residual, requisito de conexión a internet, cobertura de mano de obra).",
+    "Fabricante y país de origen de las celdas LFP.",
+    "EAN/GTIN.",
+    "Efecto de la venta a TIVEN (agosto 2026) sobre las garantías existentes.",
+    "Eficiencia de ciclo completo medida por un tercero.",
+    "Precio con IVA en tienda española: las búsquedas web en español del 2026-10-18 («sonnenBatterie 10 precio España IVA») no devolvieron ninguna tienda con precio (sonnen se vende en España a través de BayWa r.e. e instaladores, sin precio público).",
+    "Consulta directa a EU Safety Gate."
+  ]
+}

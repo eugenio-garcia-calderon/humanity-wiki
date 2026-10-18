@@ -1,0 +1,109 @@
+{
+  "slug": "atersa",
+  "subcategoria": "Paneles solares domésticos",
+  "nombre": "Atersa A-xxxM GS (línea GS Optimum, PERC)",
+  "marca": "Atersa",
+  "modelo": "A-430M … A-455M GS 144 (144 medias células, PERC); también A-460M GS (120 medias células, PERC) en tiendas; la línea TOPCon de la marca (A-570M … A-585M GS 144) es de formato grande",
+  "variante_ficha": "A-455M GS 144 (ficha Ref. MU-M6M 6x24 M6 9BB GS (ES) – F, revisada el 13-01-2023)",
+  "ean": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "No se encontró GTIN público." },
+  "anio_lanzamiento": { "valor": null, "unidad": "año", "origen": "desconocido", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "La ficha consultada es de enero de 2023 (revisión F); la gama Optimum/GS se lanzó en 2014 (Alimarket), pero esta variante concreta no tiene fecha publicada." },
+  "estado": "a la venta",
+  "resumen": "Atersa (Aplicaciones Técnicas de la Energía) es una empresa española de energía solar fundada en 1979 en Valencia y filial del grupo Elecnor desde 2004. Según la propia marca y la prensa sectorial, su línea GS Optimum se fabrica en China y Taiwán por fábricas de terceros bajo control de calidad de Atersa, mientras que la línea ULTRA se fabricaba en su planta de Almussafes (Valencia). El A-455M GS 144 es un módulo de 144 medias células PERC de tipo P, de 2094 × 1038 mm y 24 kg, que según la ficha alcanza un 20,93 % de eficiencia; es una tecnología anterior a las TOPCon de tipo N que dominan el mercado doméstico en 2026. La ficha declara 12 años de garantía de producto y 25 de rendimiento. No se encontró en las fuentes consultadas un módulo TOPCon de Atersa de formato doméstico (430–500 W en unos 1,7–2 m²).",
+  "imagen": { "url": null, "fuente": "https://www.atersa.com/", "licencia": "propiedad del fabricante; solo enlace" },
+
+  "datos_tecnicos": {
+    "potencia_pico_wp": { "valor": 455, "unidad": "Wp", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "STC; tolerancia 0/+5 W. Ficha alojada en el foro solarweb.net: la web de Atersa no permite su lectura automática." },
+    "gama_potencias_wp": { "valor": "430–455", "unidad": "Wp", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "En pasos de 5 W." },
+    "eficiencia_pct": { "valor": 20.93, "unidad": "%", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Comprobación: 455 / (2,094 × 1,038) = 20,93 %. La gama va del 19,78 % al 20,93 %." },
+    "tecnologia_celula": { "valor": "PERC, P-type, 9 busbars", "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Células M6 de 166 × 83 mm." },
+    "tipo_celula": { "valor": "monocristalina", "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": null },
+    "num_celulas": { "valor": 144, "unidad": "medias células (6×24)", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": null },
+    "bifacial": { "valor": false, "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Vidrio frontal con lámina trasera." },
+    "bifacialidad_pct": { "valor": null, "unidad": "%", "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No aplica: módulo monofacial." },
+    "vidrio": { "valor": "simple (templado de 3,2 mm con antirreflejo)", "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": null },
+    "marco": { "valor": "aluminio anodizado plateado, 35 mm", "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": null },
+    "medidas_mm": { "valor": "2094 × 1038 × 35", "unidad": "mm", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "2,17 m²: más largo que los módulos domésticos TOPCon de potencia similar (≈1,76 m)." },
+    "peso_kg": { "valor": 24, "unidad": "kg", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "±0,5 kg." },
+    "coef_temp_pmax_pct_c": { "valor": -0.352, "unidad": "%/°C", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Voc −0,271 %/°C; Isc +0,049 %/°C. Mayor pérdida con calor que los módulos TOPCon (≈ −0,29 %/°C)." },
+    "noct_o_nmot_c": { "valor": 45, "unidad": "°C", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "±2 °C; la ficha lo llama «Temperatura de Funcionamiento Normal de la Célula»." },
+    "degradacion_primer_anio_pct": { "valor": 2, "unidad": "%", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "≈98 % el primer año según la gráfica, parcialmente ilegible en la extracción." },
+    "degradacion_anual_pct": { "valor": 0.55, "unidad": "%/año", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Lectura de la gráfica de la ficha (≈84,8 % a 25 años); no se pudo leer el documento de garantía." },
+    "voc_v": { "valor": 49.5, "unidad": "V", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Vmp 41,70 V; Imp 10,92 A." },
+    "isc_a": { "valor": 11.67, "unidad": "A", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Corriente baja, compatible con casi cualquier inversor o microinversor; tensión alta, que limita el número de módulos por string." },
+    "tension_max_sistema_v": { "valor": 1500, "unidad": "V DC (IEC)", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Fusible máx. en serie 20 A." },
+    "carga_mecanica_pa": { "valor": "5400 / 2400", "unidad": "Pa (frontal/trasera)", "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Granizo: 25 mm a 23 m/s." },
+    "ip_caja_conexiones": { "valor": "IP68", "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "3 diodos." },
+    "conector": { "valor": "compatible MC4; cables de 4 mm² y 1200 mm", "unidad": null, "origen": "declarado", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "«Compatible MC4» no es MC4 original; conviene no mezclar marcas de conector." },
+    "precio_por_wp_eur": { "valor": 0.302, "unidad": "€/Wp", "origen": "calculado", "fuente": "https://solarplus.es/marcas/atersa", "fecha": "2026-10-18", "nota": "139 € (IVA incl.) / 460 Wp = 0,302 €/Wp, para la variante A-460M GS (120 medias células), no para el A-455M GS 144, que figuraba agotado. Precio de DamiaSolar citado por solarplus.es; no se pudo leer la página de DamiaSolar directamente." },
+    "resultado_pvel": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No se encontró Atersa en los Scorecards de Kiwa PVEL consultados." },
+    "pruebas_independientes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "No se encontraron ensayos independientes publicados." }
+  },
+
+  "garantias": {
+    "producto": { "anios": 12, "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "«Garantía de producto ATERSA-España», según la ficha de 2023. Solarplus.es habla de 10 años contra defectos; la línea TOPCon A-5xxM indica 15 años." },
+    "rendimiento": { "anios": 25, "porcentaje_final": 84.8, "primer_anio_pct": 98, "lineal_anual_pct": 0.55, "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18", "nota": "Valores leídos de la gráfica de la ficha (parcialmente ilegible); comprobación: 98 − 24 × 0,55 = 84,8 %." },
+    "letra_pequena": [
+      "No se pudo leer el documento oficial de garantía: la página atersa.com/garantias bloquea la lectura automática. Plazos de reclamación, costes cubiertos y exclusiones quedan sin verificar.",
+      "Garantía de producto (12 años) y de rendimiento (25 años, ≈84,8 % final) más cortas que las de los módulos TOPCon domésticos de 2025–2026 de otras marcas, que suelen ofrecer 15–30 años de producto y 30 años de rendimiento con ≈87–89 % final.",
+      "La garantía la presta Atersa, empresa española con sede en Valencia y filial de un grupo cotizado (Elecnor), lo que facilita reclamar en España aunque el módulo se fabrique en China.",
+      "En España la garantía legal frente al vendedor es independiente de la del fabricante."
+    ],
+    "quien_responde": "Atersa (Aplicaciones Técnicas de la Energía), Ribarroja del Turia (Valencia), filial de Elecnor S.A. No se publica aseguradora de garantía."
+  },
+
+  "empresa": {
+    "razon_social": "Aplicaciones Técnicas de la Energía (Atersa), filial de Elecnor S.A.",
+    "pais_sede": "España (Valencia; la ficha da la dirección P.I. El Oliveral, Ribarroja del Turia)",
+    "fundacion": 1979,
+    "cotiza_en": "No cotiza; su matriz Elecnor S.A. cotiza en la Bolsa de Madrid",
+    "web": "https://www.atersa.com",
+    "fabricante_celulas": "No publicado. En 2015 usuarios del foro solarweb.net afirmaban haber visto cajas de células Motech (Taiwán) en la fábrica; no verificado.",
+    "pais_fabricacion": "Línea GS Optimum: China y Taiwán (fabricantes OEM). Línea ULTRA: Almussafes (Valencia), según fuentes de 2014–2026",
+    "fabricas_conocidas": [ "Almussafes (Valencia): más de 20.000 m² y hasta 344 MW de capacidad declarada (Wikipedia; Energías Renovables, 2025)", "Mauritania (planta inaugurada hacia 2014 para la línea ULTRA, según Energías Renovables)", "Fábricas OEM de terceros en China y Taiwán para la línea Optimum/GS" ],
+    "notas": [
+      "En 2014 Atersa anunció que su gama Optimum (modelos GSE para Europa y GS para otros mercados) se fabricaría «en Taiwán y China como producto OEM», mientras la gama ULTRA seguiría en Almussafes (Energías Renovables, 14-01-2014; Alimarket, 15-01-2014).",
+      "Un portal de comparación (solarplus.es) indica en 2026 que la línea GS Optimum y la línea ES se fabrican en China y la ULTRA y la gama aislada en Almussafes; no se encontró confirmación de la propia Atersa para 2026.",
+      "Elecnor compró Atersa a la multinacional AstroPower en julio de 2004 (Energías Renovables).",
+      "Un informe de Sinovoltaics de 2025 la sitúa como el fabricante nacional más destacado de España, con 344 MW de capacidad en Almussafes (Energías Renovables, 03-07-2025). No se encontró información pública sobre cuántos módulos fabrica realmente en España hoy.",
+      "Las fichas de 2023–2024 dan una dirección en Ribarroja del Turia (Valencia), no en Almussafes; no se encontró explicación pública.",
+      "No se encontraron retiradas, sanciones ni litigios relevantes asociados a Atersa en las búsquedas a fecha 2026-10-18."
+    ],
+    "fuentes": [ "https://www.energias-renovables.com/fotovoltaica/atersa-lanza-la-gama-optimum-20140114", "https://www.alimarket.es/construccion/noticia/144389/atersa-lanza-una-nueva-gama-de-modulos-fotovoltaicos", "https://www.energias-renovables.com/fotovoltaica/elecnor-compra-atersa-a-la-multinacinal-astropower", "https://www.energias-renovables.com/fotovoltaica/eclipse-solar-en-europa-20250703", "https://es.wikipedia.org/wiki/Atersa", "https://solarplus.es/marcas/atersa", "https://www.solarweb.net/forosolar/fotovoltaica-sistemas-aislados-la-red/38145-fabricantes-espanoles-placas.html" ]
+  },
+  "origen": {
+    "pais_marca": "España",
+    "pais_fabricacion": "China (línea GS Optimum, fabricación OEM por terceros); la ficha solo dice «ATERSA-España»",
+    "fabrica": null,
+    "materiales_principales": [ "silicio monocristalino P-type (PERC)", "vidrio templado de 3,2 mm", "lámina trasera", "marco de aluminio plateado" ],
+    "num_componentes": { "valor": null, "unidad": null, "origen": "desconocido", "fuente": null, "fecha": "2026-10-18", "nota": "El fabricante no lo publica." },
+    "reparabilidad": "Módulo laminado no reparable en la práctica."
+  },
+  "certificados": [
+    { "nombre": "IEC 61215, IEC 61730, IEC 61701 (niebla salina); certificados de sistema ER-0096/1995, GA-2000/0294, SST-0164/2007, HCO-2015/0011", "emisor": "no indicado en el texto extraído (los códigos ER/GA/SST siguen el formato de AENOR; no confirmado)", "fuente": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "fecha": "2026-10-18" }
+  ],
+  "documentos": [
+    { "tipo": "ficha técnica", "url": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "idioma": "es", "fecha": "2023-01-13" },
+    { "tipo": "ficha técnica", "url": "https://www.solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32672d1747228008-pequena-ampliacion-paneles-atersa-topcon-570w-585w-580m.pdf", "idioma": "es", "fecha": "2024-09-18" },
+    { "tipo": "garantía", "url": "https://www.atersa.com/garantias", "idioma": "es", "fecha": null }
+  ],
+
+  "afirmaciones": [
+    { "afirmacion": "ATERSA-España", "donde": "https://solarweb.net/forosolar/attachments/fotovoltaica-sistemas-aislados-la-red/32382-consulta-mppt-100-50-smart-solar-charge-victron-455m-ficha-tecnica-.pdf", "veredicto": "matizable", "explicacion": "La marca y la garantía son españolas, pero según la propia Atersa (2014) la línea GS se fabrica en China y Taiwán por fábricas de terceros. La ficha no indica el país de fabricación.", "fuentes": [ "https://www.energias-renovables.com/fotovoltaica/atersa-lanza-la-gama-optimum-20140114", "https://www.alimarket.es/construccion/noticia/144389/atersa-lanza-una-nueva-gama-de-modulos-fotovoltaicos" ], "fecha": "2026-10-18" },
+    { "afirmacion": "Atersa es el fabricante de placas solares pionero de España", "donde": "https://solarplus.es/marcas/atersa", "veredicto": "cierta", "explicacion": "Fundada en 1979, es una de las empresas fotovoltaicas más antiguas de España (Energías Renovables, 2004). La frase procede de un portal de terceros, no de la marca.", "fuentes": [ "https://www.energias-renovables.com/fotovoltaica/elecnor-compra-atersa-a-la-multinacinal-astropower" ], "fecha": "2026-10-18" },
+    { "afirmacion": "Fábrica en Almussafes con capacidad de hasta 344 MW", "donde": "https://es.wikipedia.org/wiki/Atersa", "veredicto": "sin pruebas", "explicacion": "Es una capacidad declarada; no se encontró información independiente sobre la producción real actual en Almussafes ni sobre qué líneas se fabrican allí en 2026.", "fuentes": [ "https://www.energias-renovables.com/fotovoltaica/eclipse-solar-en-europa-20250703" ], "fecha": "2026-10-18" }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda el 2026-10-18 de «Atersa», «A-455M» y «A-460M» en EU Safety Gate, CPSC (EE. UU.), ACCC/productsafety.gov.au (Australia), Health Canada y prensa sectorial española (Energías Renovables, El Periódico de la Energía). No se encontró ninguna retirada ni alerta de seguridad para el modelo ni la marca: ninguna conocida a fecha 2026-10-18.",
+
+  "ofertas": [
+    { "distribuidor": "DamiaSolar (precio citado por solarplus.es)", "tipo": "tienda online", "pais": "España", "url": "https://solarplus.es/marcas/atersa", "precio_eur": 139, "iva_incluido": true, "unidad": "por módulo (A-460M GS, 460 Wp)", "incluye_instalacion": false, "envio": null, "stock": "No indicado; el A-455M GS figura agotado", "comision": "sin acuerdo", "fecha_comprobacion": "2026-10-18" }
+  ],
+  "compatibles": [ "Inversores de string domésticos de hasta 1000–1500 V; con Voc de 49,5 V caben menos módulos por string que con módulos de 108 medias células." ],
+  "pendiente": [
+    "Documento oficial de garantía (atersa.com bloquea la lectura automática).",
+    "Ficha técnica oficial del A-460M GS y su página en DamiaSolar.",
+    "Si Atersa vende algún módulo TOPCon de formato doméstico (no se encontró).",
+    "Dónde se fabrica en 2026 cada línea, según la propia Atersa.",
+    "Origen de las células."
+  ]
+}

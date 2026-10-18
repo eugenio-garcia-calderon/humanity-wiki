@@ -1,0 +1,452 @@
+{
+  "slug": "pylontech-force-h",
+  "subcategoria": "Baterías domésticas",
+  "nombre": "Pylontech Force H2 / Force H3",
+  "marca": "Pylontech",
+  "modelo": "Force-H3 (módulos FH10050 de 5,12 kWh, BMS FC1000, 2 a 7 módulos) y Force-H2 (módulos FH9637M de 3,55 kWh, BMS FC0500M-40S)",
+  "variante_ficha": "Force-H3 con 2 módulos FH10050 (10,24 kWh nominales, 9,69 kWh utilizables) — ficha EN-SD-250121",
+  "ean": {
+    "valor": "6097316695642",
+    "unidad": null,
+    "origen": "declarado",
+    "fuente": "https://www.nkon.nl/novat/pylontech-force-h3-bms-met-basis-en-kabel.html",
+    "fecha": "2026-10-18",
+    "nota": "EAN del BMS FC1000 según la tienda NKON; EAN del módulo FH10050 no encontrado."
+  },
+  "anio_lanzamiento": {
+    "valor": null,
+    "unidad": null,
+    "origen": "desconocido",
+    "fuente": null,
+    "fecha": "2026-10-18",
+    "nota": "No verificado en esta revisión."
+  },
+  "estado": "a la venta",
+  "resumen": "Batería doméstica modular de alta tensión del fabricante chino Pylontech, de fosfato de hierro y litio (LFP), que necesita un inversor híbrido externo compatible. La Force H3 apila de 2 a 7 módulos de 5,12 kWh (de 9,69 a 34,01 kWh utilizables por torre, según la marca) sobre una unidad de control FC1000, y la Force H2 usa módulos de 3,55 kWh. La garantía europea de la H2 es de 7 años, ampliable a 10 años si se registra el producto, con un umbral de capacidad del 60 % que baja al 50 % en la ampliación. Una configuración KOSTAL con Force H2 participó en la Stromspeicher-Inspektion 2025 de la HTW Berlin. Pylontech cotiza en el mercado STAR de Shanghái y fabrica celdas propias.",
+  "imagen": {
+    "url": null,
+    "fuente": "https://en.pylontech.com.cn/",
+    "licencia": "propiedad del fabricante; solo enlace",
+    "nota": "URL de la web del fabricante no verificada en esta revisión."
+  },
+  "datos_tecnicos": {
+    "capacidad_total_kwh": {
+      "valor": 10.24,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Force H3 con 2 módulos (nominal)."
+    },
+    "capacidad_util_kwh": {
+      "valor": 9.69,
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Force H3 con 2 módulos."
+    },
+    "gama_capacidades_kwh": {
+      "valor": "H3: 9,69 / 14,73 / 19,48 / 24,32 / 29,17 / 34,01 utilizables (2–7 módulos); H2: 7,1–14,2 nominales por torre (2–4 módulos)",
+      "unidad": "kWh",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "H2 según https://www.offgridtec.com/en/pylontech-force-h2-96v-lifepo4-high-voltage-battery-bms-fc0500m-40s-v2.html."
+    },
+    "modular": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ampliable": {
+      "valor": true,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Hasta 7 módulos por torre y hasta 6 grupos en paralelo."
+    },
+    "ampliacion_max_kwh": {
+      "valor": 204.06,
+      "unidad": "kWh",
+      "origen": "calculado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "6 torres en paralelo × 34,01 kWh utilizables. Límite real según el inversor."
+    },
+    "potencia_continua_kw": {
+      "valor": 10.24,
+      "unidad": "kW",
+      "origen": "calculado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "50 A nominales × 204,8 V (H3, 2 módulos) = 10,24 kW; la ficha no da la potencia directamente. Potencia real limitada por el inversor."
+    },
+    "potencia_pico_kw": {
+      "valor": 11.26,
+      "unidad": "kW",
+      "origen": "calculado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "55 A máx. (15 min) × 204,8 V (H3, 2 módulos)."
+    },
+    "quimica": {
+      "valor": "LFP (LiFePO4)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
+      "fecha": "2026-10-18",
+      "nota": "Dato de la tienda Offgridtec; la ficha consultada no lo etiqueta claramente."
+    },
+    "fabricante_celulas": {
+      "valor": "Pylontech (producción propia de celdas LFP)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html",
+      "fecha": "2026-10-18",
+      "nota": "El comunicado de 2026 trata de celdas grandes para almacenamiento a escala de red; no confirma que los módulos FH10050 usen celdas propias."
+    },
+    "ciclos_declarados": {
+      "valor": "> 8.000 (25 °C)",
+      "unidad": "ciclos",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Force H3. Force H2: > 5.000 a 95 % DoD (Offgridtec). La garantía no cubre ciclos."
+    },
+    "profundidad_descarga_pct": {
+      "valor": 95,
+      "unidad": "%",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "La etiqueta de la ficha es ambigua; NKON indica «95 % DoD»."
+    },
+    "eficiencia_ida_vuelta_pct": {
+      "valor": null,
+      "unidad": "%",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La ficha H3 consultada no la etiqueta claramente; una tienda indica 95 % para la H2 sin condiciones."
+    },
+    "tension": {
+      "valor": "alta tensión: 204,8 V (2 módulos) a 716,8 V (7 módulos) en H3; módulo 102,4 V",
+      "unidad": "V",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "H2: módulo 96 V."
+    },
+    "acoplamiento": {
+      "valor": "DC (requiere inversor híbrido externo)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversor_integrado": {
+      "valor": false,
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "inversores_compatibles": {
+      "valor": "Más de 30 marcas de inversores según tiendas (p. ej. KOSTAL, Victron, Growatt, Solis)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
+      "fecha": "2026-10-18",
+      "nota": "La garantía excluye inversores no certificados por Pylontech."
+    },
+    "respaldo_apagones": {
+      "valor": "depende del inversor",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "instalacion": {
+      "valor": "interior o exterior protegido (sin sol directo ni heladas, según garantía)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "ip": {
+      "valor": "IP65 (H3); IP55 (H2)",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "H2 según https://www.offgridtec.com/en/pylontech-force-h2-96v-lifepo4-high-voltage-battery-bms-fc0500m-40s-v2.html."
+    },
+    "rango_temperatura_c": {
+      "valor": "-10 a 55 (carga, H3)",
+      "unidad": "°C",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "H2: 0 a 50 °C según Offgridtec."
+    },
+    "peso_kg": {
+      "valor": 92,
+      "unidad": "kg",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "H3 con 2 módulos."
+    },
+    "medidas_mm": {
+      "valor": "540 × 350 × 530 (ancho × fondo × alto)",
+      "unidad": "mm",
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": "H3 con 2 módulos; 1380 mm de alto con 7."
+    },
+    "garantia_energia_mwh": {
+      "valor": null,
+      "unidad": "MWh",
+      "origen": "desconocido",
+      "fuente": null,
+      "fecha": "2026-10-18",
+      "nota": "La garantía europea H1/H2 no fija un límite de energía; exige uso en ciclos diarios con DoD < 90 %."
+    },
+    "precio_por_kwh_util_eur": {
+      "valor": 268.18,
+      "unidad": "€/kWh",
+      "origen": "calculado",
+      "fuente": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
+      "fecha": "2026-10-18",
+      "nota": "(2 × 960,95 € módulo FH10050 + 676,73 € BMS FC1000) = 2.598,63 € con IVA alemán del 19 % (Offgridtec) / 9,69 kWh. Sin inversor, cables ni instalación."
+    },
+    "pruebas_independientes": {
+      "valor": "Participó: Force H2 combinada con KOSTAL PLENTICORE plus G2 10 (sistema C5).",
+      "unidad": null,
+      "origen": "medido",
+      "fuente": "https://solar.htw-berlin.de/wp-content/uploads/HTW-Stromspeicher-Inspektion-2025.pdf",
+      "fecha": "2026-10-18",
+      "nota": "HTW Berlin, Stromspeicher-Inspektion 2025. El SPI evalúa el sistema completo; el valor exacto está en gráficos no extraídos (pendiente)."
+    }
+  },
+  "garantias": {
+    "producto": {
+      "anios": 7,
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Garantía al consumidor Force-H1/H2 para UE y Reino Unido (ref. 4AB16W50091): 7 años desde la instalación o 6 meses tras la fabricación (lo que sea antes); 10 años si se registra en la web de Pylontech. Para Force H3 en Europa no se ha leído el documento (una tienda enlaza «Force H series v1.2 EU»); la versión para EE. UU./Canadá V1.2 da 10 años de producto."
+    },
+    "rendimiento": {
+      "anios": 10,
+      "porcentaje_final": 50,
+      "primer_anio_pct": null,
+      "lineal_anual_pct": null,
+      "fuente": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "fecha": "2026-10-18",
+      "nota": "Mínimo 60 % de la energía nominal durante los 7 años; con la ampliación a 10 años por registro, el mínimo baja al 50 % al final. Sin límite de MWh."
+    },
+    "letra_pequena": [
+      "La ampliación de 7 a 10 años exige registrar el producto en la web de Pylontech, y entonces el umbral de capacidad baja del 60 % al 50 % (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).",
+      "Los defectos deben comunicarse en 48 horas desde que se descubren, a través del vendedor autorizado, con tarjeta de garantía original, factura y registros del sistema (https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf).",
+      "Excluye instalaciones por personas que no sean Pylontech o instaladores certificados, y el uso con inversores/PCS/EMS no certificados por Pylontech (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).",
+      "Exige uso en ciclos diarios en almacenamiento fotovoltaico con profundidad de descarga inferior al 90 %; en exterior, protección frente a sol directo y heladas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).",
+      "Solo repara o sustituye; mano de obra y transporte no se tratan. Si el cliente discute la decisión y el laboratorio externo da la razón a Pylontech, el cliente paga el ensayo (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf).",
+      "La copia checa de la garantía UE se presenta como traducción no oficial y tiene cláusulas en blanco o truncadas (https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf)."
+    ],
+    "quien_responde": "Pylon Technologies Co., Ltd. (Shanghái, China), a través del vendedor autorizado. La garantía no prevé qué ocurre si Pylontech dejara el mercado europeo."
+  },
+  "empresa": {
+    "razon_social": "Pylon Technologies Co., Ltd.",
+    "pais_sede": "China",
+    "fundacion": null,
+    "cotiza_en": "Bolsa de Shanghái, mercado STAR (688063.SH)",
+    "web": "https://en.pylontech.com.cn/",
+    "fabricante_celulas": "Pylontech (producción propia de celdas LFP; ver nota en datos técnicos)",
+    "pais_fabricacion": "China",
+    "fabricas_conocidas": [
+      "Hefei (China): base de producción de celdas LFP grandes desde septiembre de 2026, según comunicado"
+    ],
+    "notas": [
+      "Pylontech anunció el 22-09-2026 la producción en masa de celdas LFP propias de 588 Ah y 601 Ah en Hefei para almacenamiento a gran escala (https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html)."
+    ],
+    "fuentes": [
+      "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "https://www.prnewswire.com/il/news-releases/pylontech-starts-mass-production-of-588ah-and-601ah-lfp-cells-for-ess-302886297.html"
+    ]
+  },
+  "origen": {
+    "pais_marca": "China",
+    "pais_fabricacion": "China",
+    "fabrica": null,
+    "materiales_principales": [
+      "celdas LFP",
+      "BMS FC1000 (H3) / FC0500M (H2)",
+      "carcasa metálica"
+    ],
+    "num_componentes": {
+      "valor": "1 BMS + 2 a 7 módulos de batería",
+      "unidad": null,
+      "origen": "declarado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18",
+      "nota": ""
+    },
+    "reparabilidad": "Módulos sustituibles por separado; la garantía excluye mezclar tipos de módulos y reparaciones no autorizadas (https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf)."
+  },
+  "certificados": [
+    {
+      "nombre": "IEC 62619, IEC 62040-1, IEC 62477-1, IEC 63056",
+      "emisor": "no indicado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "VDE-AR-E 2510-50",
+      "emisor": "no indicado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18"
+    },
+    {
+      "nombre": "UL 1973, UL 9540A, UN 38.3",
+      "emisor": "no indicado",
+      "fuente": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "fecha": "2026-10-18"
+    }
+  ],
+  "documentos": [
+    {
+      "tipo": "ficha técnica",
+      "url": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Force H3, código EN-SD-250121 (posiblemente enero de 2025)."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Force-H1/H2, UE y Reino Unido, ref. 4AB16W50091."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://memodo.cz/media/pdf/54/90/76/cz-memodo-pylontech-product-warranty-force-h_serie-eu_73_7a991446ff65c52f29984b7f953d911f.pdf",
+      "idioma": "cs",
+      "fecha": "2026-10-18",
+      "nota": "Traducción no oficial de la garantía UE Force-H."
+    },
+    {
+      "tipo": "garantía",
+      "url": "https://solarproof.com.au/warranty_documents/battery_warranty_Pylontech product warranty-Force H serie V1.2 UL24WFH100527_20241101092414A174.pdf",
+      "idioma": "en",
+      "fecha": "2026-10-18",
+      "nota": "Force-H1/H1-V2/H3, EE. UU. y Canadá, V1.2 (UL24WFH100527)."
+    }
+  ],
+  "afirmaciones": [
+    {
+      "afirmacion": "Más de 8.000 ciclos a 25 °C y vida de diseño de más de 15 años (Force H3).",
+      "donde": "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+      "veredicto": "matizable",
+      "explicacion": "Es un dato de laboratorio a 25 °C. La garantía no está ligada a ciclos y, en la versión UE consultada (H1/H2), dura 7 años o 10 con registro, con un mínimo del 50–60 % de capacidad.",
+      "fuentes": [
+        "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "«Compatible with over 30 inverter manufacturers».",
+      "donde": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
+      "veredicto": "matizable",
+      "explicacion": "Es una frase de la tienda que repite la lista de compatibilidad de Pylontech. La compatibilidad depende de modelo, número de módulos y rango de tensión: por ejemplo, con el Victron HS19 solo sirven torres de 7 u 8 módulos.",
+      "fuentes": [
+        "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
+        "https://www.victronenergy.com/live/_export/raw/hv_battery_compatibility:pylontech"
+      ],
+      "fecha": "2026-10-18"
+    },
+    {
+      "afirmacion": "Profundidad de descarga del 95 %.",
+      "donde": "https://www.nkon.nl/en/pylontech-force-h3-5-12kwh-hoogspannings-batterij.html",
+      "veredicto": "cierta",
+      "explicacion": "Coincide con la ficha: 9,69 kWh utilizables de 10,24 kWh nominales (94,6 %, cálculo). Para conservar la garantía UE de la H2 la profundidad de descarga debe ser inferior al 90 %.",
+      "fuentes": [
+        "https://solarshop.baywa-re.lv/en/documents/pylontech-residential-battery-solutions-fh10050-001-4262442220194-0/382/385.pdf",
+        "https://www.offgridtec.com/media/product_attachements/Pylontech_Force-H_Consumer Warranty.pdf"
+      ],
+      "fecha": "2026-10-18"
+    }
+  ],
+  "retiradas": [],
+  "retiradas_busqueda": "Búsqueda a 2026-10-18: búsquedas web de retiradas de Pylontech («Pylontech recall battery fire safety notice») en Australia (ACCC y lista de retiradas del Clean Energy Council: Pylontech no figura), Reino Unido (gov.uk), EE. UU. (CPSC), Canadá (Health Canada) y prensa. Solo aparecieron manuales y foros de usuarios (p. ej. celdas hinchadas en US2000 en powerforum.co.za, sin relación con Force H y sin carácter de retirada). La base de EU Safety Gate no pudo consultarse directamente (aplicación web dinámica; acceso bloqueado desde la herramienta). Ninguna retirada conocida de Force H2/H3 a fecha 2026-10-18.",
+  "ofertas": [
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "Offgridtec",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.offgridtec.com/en/pylontech-force-h3-5.12kwh-102v-high-voltage-lifepo4-battery.html",
+      "precio_eur": 960.95,
+      "iva_incluido": true,
+      "unidad": "por módulo FH10050 (5,12 kWh)",
+      "envio": "envío aparte; 2–5 días laborables",
+      "stock": "disponible",
+      "nota": "IVA alemán del 19 %. Se necesita además el BMS FC1000 (676,73 € con IVA: https://www.offgridtec.com/en/pylontech-bms-for-force-h3-fh10050-fc1000.html)."
+    },
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "NKON",
+      "tipo": "tienda online",
+      "pais": "Países Bajos",
+      "url": "https://www.nkon.nl/en/pylontech-force-h3-5-12kwh-hoogspannings-batterij.html",
+      "precio_eur": 959.95,
+      "iva_incluido": true,
+      "unidad": "por módulo FH10050 (5,12 kWh)",
+      "envio": "según destino",
+      "stock": "en stock",
+      "nota": "793,35 € sin IVA. Se necesitan al menos 2 módulos y el BMS FC1000."
+    },
+    {
+      "comision": "sin acuerdo",
+      "fecha_comprobacion": "2026-10-18",
+      "incluye_instalacion": false,
+      "distribuidor": "Offgridtec",
+      "tipo": "tienda online",
+      "pais": "Alemania",
+      "url": "https://www.offgridtec.com/en/pylontech-force-h2-96v-lifepo4-high-voltage-battery-bms-fc0500m-40s-v2.html",
+      "precio_eur": 2120.21,
+      "iva_incluido": true,
+      "unidad": "por sistema Force H2 7,1 kWh (2 módulos FH9637M + BMS FC0500M-40S-V2)",
+      "envio": "envío aparte",
+      "stock": "no indicado",
+      "nota": "IVA alemán del 19 %; 298,62 €/kWh nominal (cálculo: 2.120,21 / 7,1)."
+    }
+  ],
+  "compatibles": [
+    "inversores híbridos de alta tensión certificados por Pylontech (p. ej. KOSTAL PLENTICORE, Victron HS19 con 7–8 módulos H3)"
+  ],
+  "pendiente": [
+    "Garantía UE específica de la Force H3 («Force H series v1.2 EU»): no se pudo leer.",
+    "Eficiencia de ida y vuelta declarada de la H3.",
+    "Si la H2 está descatalogada en Europa.",
+    "Valor SPI de la HTW Berlin 2025 para el sistema KOSTAL + Force H2.",
+    "Año de fundación y de lanzamiento de cada generación.",
+    "Consulta directa a EU Safety Gate.",
+    "Oferta con precio en tienda española: AutoSolar lista los kits Force H2 de 7,1 y 10,65 kWh solo con «Pide presupuesto» (https://autosolar.es/baterias-litio-alto-voltaje/bateria-litio-pylontech-force-h2-71-kwh); SolarTraders muestra la FH10050 con precio solo para socios; no se encontró precio público con IVA en España el 2026-10-18."
+  ]
+}
