@@ -473,6 +473,32 @@ export function registerBdRoutes(app: Express, db: any) {
         }
       }
 
+      // LA MINIATURA DE LO ENLAZADO (2026-10-18, Eugenio): «que no solo
+      // aparezca que está en la categoría de movilidad, sino la imagen de esa
+      // categoría». Cada entrada enlazada lleva la imagen de su página
+      // (`miniatura`), la haya elegido o no la columna en «mostrar»: la página
+      // de un elemento la enseña junto al nombre. Se mira el permiso de cada
+      // tabla de destino: enlazar no abre lo que esa tabla esconde.
+      {
+        const enlazadas = preparadas.flatMap(f => Object.values(f.apuntados).flat()).filter(a => a.clase === 'fila');
+        const ids = [...new Set(enlazadas.map(a => a.id))];
+        if (ids.length) {
+          const otras = (await db.execute(sql`
+            SELECT id, tabla_id, pagina_id FROM bd_filas
+            WHERE id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND deleted_at IS NULL
+          `)).rows as any[];
+          const legibles = new Set<string>();
+          for (const t of new Set(otras.map(o => o.tabla_id as string))) {
+            if (!('error' in (await puedeConTabla(req, t, false)))) legibles.add(t);
+          }
+          const vistas = otras.filter(o => legibles.has(o.tabla_id) && o.pagina_id);
+          const tarjetas = vistas.length ? await tarjetasDe(vistas.map(o => o.pagina_id)) : {};
+          const imagenDe = new Map<string, string>();
+          for (const o of vistas) { const img = tarjetas[o.pagina_id]?.imagen; if (img) imagenDe.set(o.id, img); }
+          for (const a of enlazadas) { const img = imagenDe.get(a.id); if (img) (a as any).miniatura = img; }
+        }
+      }
+
       // LAS COLUMNAS CALCULADAS, EN ORDEN. Se hace aquí, con la tabla entera
       // delante, y no celda a celda: un agregado necesita mirar la otra tabla
       // completa, así que fila a fila serían tantas consultas como filas. Y el

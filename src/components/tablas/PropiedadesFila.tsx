@@ -32,7 +32,14 @@ import { cn } from '../../utils/cn';
 // rellenarlas; quien lee, no.
 
 type Visibilidad = 'siempre' | 'si_tiene' | 'nunca';
-type Diseno = { estilo?: 'lista' | 'dos_columnas'; plegar_vacias?: boolean };
+// (2026-10-18, Eugenio) «Que aparezcan de forma más estética… ordenadas de
+// izquierda a derecha, con varias columnas según sea escritorio o móvil.» El
+// diseño por defecto es ahora una REJILLA: cada propiedad es una casilla con
+// su nombre encima y el valor debajo, y caben tantas por fila como permita el
+// ancho (una en el móvil, tres o cuatro en un escritorio ancho). Lo enlazado
+// sale con la imagen de su página. «dos_columnas», el diseño de antes, se lee
+// como la rejilla; «lista» sigue siendo una columna con el nombre a la izquierda.
+type Diseno = { estilo?: 'lista' | 'dos_columnas' | 'columnas'; plegar_vacias?: boolean };
 
 const VISIBILIDADES: Array<{ id: Visibilidad; label: string; desc: string }> = [
   { id: 'siempre', label: 'Siempre visible', desc: 'Aunque esté vacía' },
@@ -77,6 +84,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   const columnas = datos.columnas.filter(c => c.id !== datos.titulo);
   if (!columnas.length && !editable) return null;
   const diseno = datos.diseno;
+  const enRejilla = diseno.estilo !== 'lista';
 
   const visibilidad = (c: Columna): Visibilidad => (c.config?.visibilidad as Visibilidad) || 'siempre';
   const seVe = (c: Columna) => {
@@ -174,18 +182,20 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
         onDragOver={e => { if (arrastrando && arrastrando !== c.id) { e.preventDefault(); setEncima(c.id); } }}
         onDragLeave={() => setEncima(x => (x === c.id ? null : x))}
         onDrop={e => { e.preventDefault(); soltar(c.id); }}
-        className={cn('group/prop', diseno.estilo === 'dos_columnas' && 'sm:border-b sm:border-slate-100',
-          encima === c.id && 'border-t-2 border-t-emerald-400', arrastrando === c.id && 'opacity-40')}>
-        <div className="flex items-start gap-1 py-0.5">
+        className={cn('group/prop relative min-w-0',
+          enRejilla && 'rounded-xl px-3 pt-2.5 pb-1 bg-slate-50/70 hover:bg-slate-100/60 transition-colors',
+          encima === c.id && (enRejilla ? 'ring-2 ring-emerald-400' : 'border-t-2 border-t-emerald-400'), arrastrando === c.id && 'opacity-40')}>
+        <div className={cn(enRejilla ? 'flex flex-col' : 'flex items-start gap-1 py-0.5')}>
           {editable && (
             <span draggable onDragStart={e => { setArrastrando(c.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.id); }}
               onDragEnd={() => { setArrastrando(null); setEncima(null); }}
               title="Arrastra para ordenar (el orden es el de toda la tabla)" aria-label={`Mover ${c.nombre}`}
-              className="shrink-0 mt-2 -ml-5 w-4 h-5 grid place-items-center text-slate-300 cursor-grab opacity-0 group-hover/prop:opacity-100 active:cursor-grabbing">
+              className={cn('shrink-0 w-4 h-5 grid place-items-center text-slate-300 cursor-grab opacity-0 group-hover/prop:opacity-100 active:cursor-grabbing',
+                enRejilla ? 'absolute right-1.5 top-2' : 'mt-2 -ml-5')}>
               <GripVertical className="w-3.5 h-3.5" />
             </span>
           )}
-          <div className="relative w-32 sm:w-40 shrink-0 flex items-center gap-0.5 min-w-0">
+          <div className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', enRejilla ? 'pr-5 -mb-0.5' : 'w-32 sm:w-40')}>
             {renombrando === c.id ? (
               <input autoFocus defaultValue={c.nombre} maxLength={120} aria-label="Nombre de la propiedad"
                 onBlur={e => { setRenombrando(null); const n = e.target.value.trim(); if (n && n !== c.nombre) cambiarColumna(c, { nombre: n }); }}
@@ -193,16 +203,17 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
                 className="mt-1 w-full h-7 px-1.5 rounded border border-emerald-300 text-xs font-bold outline-none" />
             ) : editable ? (
               <button onClick={() => { setMenu(menu === c.id ? null : c.id); setSubmenu(false); }} aria-expanded={menu === c.id}
-                className="mt-1 h-7 px-1.5 -ml-1.5 rounded text-xs font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-100 truncate text-left inline-flex items-center gap-1 min-w-0">
+                className={cn('rounded font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 truncate text-left inline-flex items-center gap-1 min-w-0',
+                  enRejilla ? 'h-6 px-1 -ml-1 text-[11px] uppercase tracking-wide' : 'mt-1 h-7 px-1.5 -ml-1.5 text-xs')}>
                 {v !== 'siempre' && <EyeOff className="w-3 h-3 shrink-0 text-slate-300" />}
                 <span className="truncate">{c.nombre}</span>
               </button>
             ) : (
-              <span className="pt-2 text-xs font-bold text-slate-400 truncate">{c.nombre}</span>
+              <span className={cn('font-bold text-slate-400 truncate', enRejilla ? 'h-6 leading-6 text-[11px] uppercase tracking-wide' : 'pt-2 text-xs')}>{c.nombre}</span>
             )}
             {destino && (
               <button onClick={() => irABase(destino)} title="Ir a la base de datos enlazada" aria-label={`Ir a la base de datos de ${c.nombre}`}
-                className="mt-1 shrink-0 w-6 h-7 grid place-items-center rounded text-slate-300 hover:text-emerald-700 hover:bg-emerald-50">
+                className={cn('shrink-0 w-6 grid place-items-center rounded text-slate-300 hover:text-emerald-700 hover:bg-emerald-50', enRejilla ? 'h-6' : 'mt-1 h-7')}>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             )}
@@ -229,14 +240,14 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
               {opcionMenu(LayoutTemplate, 'Personalizar diseño', () => { setMenu(null); setDisenando(true); })}
             </Desplegable>
           </div>
-          <div className="flex-1 min-w-0">
-            <CeldaTabla celda={datos.fila.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
+          <div className={cn('flex-1 min-w-0', enRejilla && '-mx-2')}>
+            <CeldaTabla enFicha celda={datos.fila.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
               apuntados={datos.fila.apuntados?.[c.id]} archivos={datos.fila.archivos?.[c.id]}
               editable={editable} onGuardar={val => guardar(c.id, val)} />
           </div>
         </div>
         {comentando === c.id && (
-          <div className="ml-0 sm:ml-40 mb-2 rounded-lg border border-slate-100 bg-slate-50/60 p-2">
+          <div className={cn('mb-2 rounded-lg border border-slate-100 bg-slate-50/60 p-2', enRejilla ? 'mt-1 bg-white' : 'sm:ml-40')}>
             <div className="flex items-center justify-between pb-1">
               <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Comentarios sobre «{c.nombre}»</p>
               <button onClick={() => setComentando(null)} aria-label="Cerrar comentarios" className="w-6 h-6 grid place-items-center text-slate-300 hover:text-slate-700"><X className="w-3.5 h-3.5" /></button>
@@ -249,8 +260,8 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   };
 
   return (
-    <div className="mb-6 border-y border-slate-100 pl-5 -ml-5">
-      <div className={cn(diseno.estilo === 'dos_columnas' ? 'grid sm:grid-cols-2 sm:gap-x-6' : 'divide-y divide-slate-100')}>
+    <div className={cn('mb-6', enRejilla ? 'py-3' : 'border-y border-slate-100 pl-5 -ml-5')}>
+      <div className={cn(enRejilla ? 'grid items-start gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))]' : 'divide-y divide-slate-100')}>
         {visibles.map(fila)}
       </div>
       {/* Las escondidas: solo para quien edita, para poder rellenarlas. */}
@@ -260,7 +271,11 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
             {verOcultas ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
             {verOcultas ? 'Esconder' : `${ocultas.length} ${ocultas.length === 1 ? 'propiedad más' : 'propiedades más'}`}
           </button>
-          {verOcultas && <div className="divide-y divide-slate-100 opacity-80">{ocultas.map(fila)}</div>}
+          {verOcultas && (
+            <div className={cn('opacity-80', enRejilla ? 'grid items-start gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))]' : 'divide-y divide-slate-100')}>
+              {ocultas.map(fila)}
+            </div>
+          )}
         </>
       )}
       {fallo && <p className="py-1 text-[11px] font-bold text-rose-600">{fallo}</p>}
@@ -289,9 +304,9 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
             </div>
             <p className="text-xs text-slate-500">Vale para la página de todas las filas de esta base de datos.</p>
             <div className="grid grid-cols-2 gap-2">
-              {([['lista', 'Una columna'], ['dos_columnas', 'Dos columnas']] as const).map(([id, label]) => (
+              {([['columnas', 'Rejilla', true], ['lista', 'Una columna', false]] as const).map(([id, label, rejilla]) => (
                 <button key={id} onClick={() => guardarDiseno({ ...diseno, estilo: id })}
-                  className={cn('h-11 rounded-lg border text-xs font-bold', (diseno.estilo || 'lista') === id ? 'border-emerald-400 bg-emerald-50 text-emerald-800' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
+                  className={cn('h-11 rounded-lg border text-xs font-bold', enRejilla === rejilla ? 'border-emerald-400 bg-emerald-50 text-emerald-800' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
                   {label}
                 </button>
               ))}

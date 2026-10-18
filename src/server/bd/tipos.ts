@@ -69,9 +69,10 @@ function aNumero(bruto: any): number | null {
   if (/,/.test(t)) {
     // Hay coma: la coma es el decimal y los puntos son millares. «1.500,50».
     normal = t.replace(/\./g, '').replace(',', '.');
-  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(t)) {
+  } else if (/^-?[1-9]\d{0,2}(\.\d{3})+$/.test(t)) {
     // Solo puntos, y en grupos de tres exactos: son millares. «120.000»,
     // «1.234.567». Es la convención de aquí y la que escribe la gente.
+    // Nunca con un cero delante: «0.138» no es un millar, es un decimal.
     normal = t.replace(/\./g, '');
   } else {
     // Un punto suelto que no forma grupos de tres es decimal: «120.5», «0.15».
@@ -176,7 +177,9 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
     }
 
     case 'moneda': {
-      const n = aNumero(String(bruto).replace(/[€$£¥]/g, ''));
+      // A JS number is already a number (the public API sends them): turning
+      // it into text first made 0.138 read as «0.138» → 138 by the rule above.
+      const n = aNumero(typeof bruto === 'number' ? bruto : String(bruto).replace(/[€$£¥]/g, ''));
       if (n === null) return mal('No es una cantidad.');
       const dec = Number.isFinite(Number(config?.decimales)) ? Number(config.decimales) : 2;
       return ok(Number(n.toFixed(Math.min(Math.max(dec, 0), 8))));
@@ -186,8 +189,7 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
       // Se guarda la FRACCIÓN: «15 %» y «15» son 0,15. Guardar 15 haría que la
       // primera media de la fase 6 saliera cien veces mayor sin que nadie lo
       // notara hasta mirar el resultado.
-      const t = String(bruto).trim();
-      const n = aNumero(t.replace('%', ''));
+      const n = aNumero(typeof bruto === 'number' ? bruto : String(bruto).trim().replace('%', ''));
       if (n === null) return mal('No es un porcentaje.');
       return ok(n / 100);
     }
