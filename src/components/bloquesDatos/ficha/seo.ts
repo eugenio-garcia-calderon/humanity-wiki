@@ -118,13 +118,14 @@ export function metaFicha(f: Ficha, opciones: { url: string; sitio?: string | nu
       ...(nOfertas ? { offerCount: nOfertas } : {}),
     };
   }
-  // AggregateRating only from real votes: W4's score columns carry
-  // `config.ficha = 'nota_media'` and `'votos'`. Without votes, nothing.
-  const cNota = t.columnas.find(c => c.config?.ficha === 'nota_media');
-  const cVotos = t.columnas.find(c => c.config?.ficha === 'votos');
-  const nota = cNota ? numeroDe(fila, cNota) : null;
-  const votos = cVotos ? numeroDe(fila, cVotos) : null;
-  if (nota !== null && votos && votos > 0) {
+  // AggregateRating only from real votes: W4's overall community score
+  // (tipo 'comunidad', criterio 'media'). Its cell is empty under 3 voters,
+  // and then there is nothing to declare.
+  const cMedia = t.columnas.find(c => c.tipo === 'comunidad' && c.config?.criterio === 'media');
+  const celdaMedia: any = cMedia ? fila?.celdas?.[cMedia.id] : null;
+  const nota = celdaMedia?.estado === 'ok' ? Number(celdaMedia.media ?? celdaMedia.valor) : null;
+  const votos = celdaMedia?.estado === 'ok' ? Number(celdaMedia.votos) || 0 : 0;
+  if (nota !== null && Number.isFinite(nota) && votos > 0) {
     producto.aggregateRating = { '@type': 'AggregateRating', ratingValue: Math.round(nota * 10) / 10, ratingCount: votos, bestRating: 5, worstRating: 1 };
   }
 

@@ -125,6 +125,12 @@ export function numeroDe(fila: FilaFicha | undefined, c: Columna): number | null
 export function textoDe(fila: FilaFicha | undefined, c: Columna): string {
   const celda = fila?.celdas?.[c.id];
   if (!celda) return '';
+  if (esComunidad(c)) {
+    if (celda.estado !== 'ok') return '';
+    const m = Number((celda as any).media ?? celda.valor);
+    const v = Number((celda as any).votos) || 0;
+    return Number.isFinite(m) ? `${m.toLocaleString('es-ES', { maximumFractionDigits: 1 })} / 5${v ? ` · ${v} ${v === 1 ? 'voto' : 'votos'}` : ''}` : '';
+  }
   const t = formatear(celda, c, { apuntados: fila?.apuntados?.[c.id] });
   if (!t) return '';
   const u = c.config?.unidad;
@@ -159,8 +165,17 @@ export const fechaCorta = (iso: string | null | undefined) =>
 
 // ── COMPARING ───────────────────────────────────────────────────────────────
 
+/** A community score column (W4, `valoraciones/ESQUEMA.md`): tipo
+ *  'comunidad', `config.criterio` = calidad | precio | … | media. Its cell's
+ *  `valor` is the adjusted (Bayesian) score, used to ORDER; `media` is the
+ *  plain mean, the one SHOWN; `votos` the voter count. Under 3 voters the
+ *  cell is empty: «not enough votes yet» is not a number. */
+export const esComunidad = (c: Columna | undefined) => c?.tipo === 'comunidad';
+export const criterioDe = (c: Columna | undefined): string | undefined => (esComunidad(c) ? c?.config?.criterio : undefined);
+
 export const sentidoDe = (c: Columna): 'mayor' | 'menor' | null => {
   if (NUNCA_ORDENA.has(rolDe(c) || '')) return null;
+  if (esComunidad(c)) return 'mayor';
   const s = c.config?.comparar;
   return s === 'mayor' || s === 'menor' ? s : null;
 };
@@ -252,4 +267,41 @@ export function fechaRevision(f: Ficha): string | null {
   if (celda?.estado === 'ok' && typeof celda.valor === 'string') return celda.valor.slice(0, 10);
   const fechas = Object.values(fila?.procedencia || {}).map(p => p?.fecha).filter((x): x is string => !!x && /^\d{4}-\d{2}-\d{2}/.test(x));
   return fechas.length ? fechas.sort().at(-1)!.slice(0, 10) : null;
+}
+
+/**
+ * `GET /api/bd/tablas/:id` → a `TablaFicha`. The same conversion on the server
+ * (`bd/plantillaFicha.ts`) and in the browser (a comparator pinned to a table).
+ * `ocultarInternas` drops `config.interna` columns (working notes) for readers
+ * who cannot edit; `soloFilas` keeps only those rows.
+ */
+export function aTablaFicha(cuerpo: any, opciones: { ocultarInternas?: boolean; soloFilas?: Set<string> } = {}): TablaFicha | null {
+  if (!cuerpo?.tabla) return null;
+  const columnas: Columna[] = (cuerpo.columnas || []).filter((x: any) => !opciones.ocultarInternas || x.config?.interna !== true);
+  const ids = new Set(columnas.map(x => x.id));
+  const titulo = (cuerpo.columna_titulo ?? null) as string | null;
+  const filas: FilaFicha[] = (cuerpo.filas || [])
+    .filter((f: any) => !opciones.soloFilas || opciones.soloFilas.has(f.id))
+    .map((f: any) => {
+      const celdas: Record<string, Celda> = {};
+      for (const [k, v] of Object.entries(f.celdas || {})) if (ids.has(k)) celdas[k] = v as Celda;
+      const procedencia: Record<string, Procedencia> = {};
+      for (const [k, v] of Object.entries(f.procedencia || {})) if (ids.has(k)) procedencia[k] = v as Procedencia;
+      const t = titulo ? f.celdas?.[titulo] : null;
+      return {
+        id: f.id,
+        pagina_id: f.pagina_id || null,
+        titulo: String(t?.estado === 'ok' ? t.valor : f.pagina?.titulo || '').trim() || 'Sin título',
+        celdas,
+        apuntados: f.apuntados || {},
+        procedencia,
+        imagen: f.pagina?.imagen || null,
+        updated_at: f.updated_at ? new Date(f.updated_at).toISOString() : null,
+      };
+    });
+  return {
+    id: cuerpo.tabla.id, titulo: cuerpo.tabla.titulo, icono: cuerpo.tabla.icono || null,
+    config: { plantilla: cuerpo.tabla.config?.plantilla || null },
+    columnas, columna_titulo: titulo, filas,
+  };
 }

@@ -435,7 +435,22 @@ export function registrarApiPublica(app: Express, db: any) {
       const id = ids.has(k) ? k : porNombre.get(k.toLowerCase());
       if (!id) desconocidas.push(k); else celdas[id] = v;
     }
-    return desconocidas.length ? { error: `Columnas que no existen en esta base de datos: ${desconocidas.map(d => `«${d.slice(0, 60)}»`).join(', ')}.` } : { celdas };
+    if (desconocidas.length) return { error: `Columnas que no existen en esta base de datos: ${desconocidas.map(d => `«${d.slice(0, 60)}»`).join(', ')}.` };
+    // A choice can be sent by its label («Falsa») as well as by its id
+    // (2026-10-18): a loader knows the words, not the generated ids. Only an
+    // exact label (ignoring case) translates; anything else goes as it came
+    // and the column's own validation answers.
+    const porId = new Map(cols.map(c => [c.id, c]));
+    for (const [id, v] of Object.entries(celdas)) {
+      const c = porId.get(id);
+      if (!c || (c.tipo !== 'seleccion' && c.tipo !== 'seleccion_multiple') || !Array.isArray(c.opciones)) continue;
+      const aId = (x: any) => {
+        if (typeof x !== 'string' || c.opciones.some((o: any) => o?.id === x)) return x;
+        return c.opciones.find((o: any) => String(o?.label ?? '').toLowerCase() === x.trim().toLowerCase())?.id ?? x;
+      };
+      celdas[id] = Array.isArray(v) ? v.map(aId) : aId(v);
+    }
+    return { celdas };
   };
 
   app.post('/api/v1/databases/:id/rows', async (req: Request, res: Response) => {

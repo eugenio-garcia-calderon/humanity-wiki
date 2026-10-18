@@ -28,45 +28,20 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { bdInterno } from '../bd';
 import { nuevoIdBloque, type Bloque } from '../../utils/bloques';
-import { NATURALEZAS, type Ficha, type FilaFicha, type TablaFicha, type Procedencia } from '../../components/bloquesDatos/ficha/modelo';
+import { NATURALEZAS, aTablaFicha, type Ficha, type FilaFicha, type TablaFicha, type Procedencia } from '../../components/bloquesDatos/ficha/modelo';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
 /** The table read as a sheet needs it. `null` when the reader cannot see it. */
 async function tablaFicha(req: Pick<Request, 'user'> | null, tablaId: string, soloFilas?: Set<string>): Promise<TablaFicha | null> {
   const r = await bdInterno.leerTabla!(req, tablaId);
-  if (r.codigo !== 200 || !r.cuerpo?.tabla) return null;
-  const c = r.cuerpo;
-  // A column its owner marked «never show» stays out of what leaves for a
-  // reader who cannot edit: internal notes («pendiente») are not for the web.
+  if (r.codigo !== 200) return null;
+  // A column marked `interna` (working notes: «pendiente de comprobar») stays
+  // out of what leaves for a reader who cannot edit. Not `visibilidad: nunca`:
+  // that one only means «not in the generic property list», and the photo
+  // and the summary use it because the sheet's header paints them itself.
   const escribe = req?.user ? !('error' in (await bdInterno.puedeConTabla!(req as any, tablaId, true))) : false;
-  const columnas = (c.columnas || []).filter((x: any) => escribe || x.config?.visibilidad !== 'nunca');
-  const ids = new Set(columnas.map((x: any) => x.id));
-  const titulo = c.columna_titulo as string | null;
-  const filas: FilaFicha[] = (c.filas || [])
-    .filter((f: any) => !soloFilas || soloFilas.has(f.id))
-    .map((f: any) => {
-      const celdas: Record<string, any> = {};
-      for (const [k, v] of Object.entries(f.celdas || {})) if (ids.has(k)) celdas[k] = v;
-      const procedencia: Record<string, Procedencia> = {};
-      for (const [k, v] of Object.entries(f.procedencia || {})) if (ids.has(k)) procedencia[k] = v as Procedencia;
-      const t = titulo ? f.celdas?.[titulo] : null;
-      return {
-        id: f.id,
-        pagina_id: f.pagina_id || null,
-        titulo: String(t?.estado === 'ok' ? t.valor : f.pagina?.titulo || '').trim() || 'Sin título',
-        celdas,
-        apuntados: f.apuntados || {},
-        procedencia,
-        imagen: f.pagina?.imagen || null,
-        updated_at: f.updated_at ? new Date(f.updated_at).toISOString() : null,
-      };
-    });
-  return {
-    id: c.tabla.id, titulo: c.tabla.titulo, icono: c.tabla.icono || null,
-    config: { plantilla: c.tabla.config?.plantilla || null, wikiproducts: c.tabla.config?.wikiproducts || null },
-    columnas, columna_titulo: titulo, filas,
-  };
+  return aTablaFicha(r.cuerpo, { ocultarInternas: !escribe, soloFilas });
 }
 
 /** The template's blocks, or null. Read without a permission check on
