@@ -52,6 +52,11 @@ export function usarValoraciones(clave: string | undefined) {
     if (primera.current) { primera.current = false; return; }
     cargar();
   }, [cargar]);
+  // Signing in through the site's bar does not reload the page: ask again.
+  useEffect(() => {
+    window.addEventListener('sitio:sesion', cargar);
+    return () => window.removeEventListener('sitio:sesion', cargar);
+  }, [cargar]);
   return { datos, fallo, cargar };
 }
 
