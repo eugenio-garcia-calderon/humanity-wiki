@@ -253,3 +253,32 @@ export async function notasComunidad(
   }
 }
 
+
+/**
+ * The customer-service note of these distributor rows, for the «Ofertas»
+ * block (W5): the adjusted note (the one that orders) or `null` when the row
+ * has fewer voters than the threshold, or its table has no `atencion` column.
+ * Rows not found are left out of the map.
+ */
+export async function notaAtencionDistribuidores(db: any, filaIds: string[]): Promise<Map<string, number | null>> {
+  const out = new Map<string, number | null>();
+  const ids = [...new Set(filaIds.filter(Boolean))];
+  if (!ids.length) return out;
+  const r = await db.execute(sql`
+    SELECT f.id AS fila_id, c.id, c.tipo, c.config
+    FROM bd_filas f
+    LEFT JOIN bd_columnas c ON c.tabla_id = f.tabla_id AND c.tipo = ${TIPO_COMUNIDAD}
+      AND c.archived_at IS NULL AND c.config->>'criterio' = 'atencion'
+    WHERE f.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND f.deleted_at IS NULL AND f.archived_at IS NULL
+  `);
+  const columnaDe = new Map<string, { id: string; tipo: string; config: any } | null>();
+  for (const x of r.rows as any[]) if (!columnaDe.get(x.fila_id)) columnaDe.set(x.fila_id, x.id ? { id: x.id, tipo: x.tipo, config: x.config } : null);
+  const columnas = [...new Map([...columnaDe.values()].filter(Boolean).map(c => [c!.id, c!])).values()];
+  const votos = await votosDe(db, columnas.map(c => c.id));
+  const celdas = celdasComunidad(columnas, [...columnaDe.keys()], votos);
+  for (const [fila, col] of columnaDe) {
+    const c = col ? celdas[fila]?.[col.id] : null;
+    out.set(fila, c && c.estado === 'ok' ? (c.valor as number) : null);
+  }
+  return out;
+}
