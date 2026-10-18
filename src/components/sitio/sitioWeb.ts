@@ -109,6 +109,11 @@ export type Sitio = {
   titular: Titular;
   /** Texto propio para un documento legal. Vacío: la plantilla. */
   textos: Partial<Record<DocLegal, string>>;
+  /** Los códigos de Google Search Console y Bing Webmaster Tools para
+   *  demostrar que el sitio es tuyo (SEO R17, `seoSitio.ts`). */
+  verificacion: { google?: string; bing?: string };
+  /** Avisar a Bing y compañía de cada cambio (IndexNow, `indexNow.ts`). */
+  avisarBuscadores?: boolean;
 };
 
 export const NOMBRES_LEGALES: Record<DocLegal, string> = {
@@ -147,6 +152,8 @@ export function completarSitio(s: any): Sitio {
     },
     titular: { ...(s?.titular || {}) },
     textos: { ...(s?.textos || {}) },
+    verificacion: { ...(s?.verificacion || {}) },
+    avisarBuscadores: s?.avisarBuscadores === true,
   };
 }
 
