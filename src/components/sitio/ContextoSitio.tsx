@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { slugDe } from './sitioWeb';
+import { rutaLegible } from '../../utils/rutasLegibles';
 
 // ============================================================================
 // EN QUÉ SITIO ESTAMOS (2026-09-30)
@@ -37,7 +38,12 @@ export const useSitio = () => useContext(Contexto);
 
 /** Dominio propio y subdominio: todo cuelga de la raíz del anfitrión. */
 export const sitioConAnfitrion = (raizId?: string | null): Sitio => ({
-  enlacePagina: id => (raizId && id === raizId ? '/' : `/p/${id}`),
+  // Una ficha con dirección legible, por ella: `/p/:id` sólo redirige (R2/R7).
+  enlacePagina: id => {
+    if (raizId && id === raizId) return '/';
+    const r = rutaLegible(id);
+    return r ? `/${r}` : `/p/${id}`;
+  },
   enlaceBd: (t, titulo) => `/bd/${t}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`,
   enlaceSlug: slug => `/${slug}`,
   enlaceBuscar: () => '/buscar',
@@ -46,7 +52,10 @@ export const sitioConAnfitrion = (raizId?: string | null): Sitio => ({
 
 /** `humanity.wiki/@quien/…`: todo cuelga del arroba. */
 export const sitioEnCasa = (handle: string): Sitio => ({
-  enlacePagina: id => `/@${handle}/p/${id}`,
+  enlacePagina: id => {
+    const r = rutaLegible(id);
+    return r ? `/@${handle}/${r}` : `/@${handle}/p/${id}`;
+  },
   enlaceBd: (t, titulo) => `/@${handle}/bd/${t}${slugDe(titulo) ? `/${slugDe(titulo)}` : ''}`,
   enlaceSlug: (slug, h) => `/@${h || handle}/${slug}`,
   enlaceBuscar: () => `/@${handle}/buscar`,

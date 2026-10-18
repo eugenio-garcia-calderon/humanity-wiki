@@ -23,6 +23,9 @@ type Precargado = {
   paginas?: Record<string, any>;
   /** La dirección legible de una ficha y su página: `{ '/powerbanks/x': id }`. */
   rutas?: Record<string, string>;
+  /** La dirección legible de cada ficha enlazada en la página: `{ id: 'powerbanks/x' }`.
+   *  La lee `rutasLegibles.ts`. */
+  legibles?: Record<string, string>;
 };
 
 const datos: Precargado =
