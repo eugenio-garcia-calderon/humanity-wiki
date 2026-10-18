@@ -1,7 +1,7 @@
 import { cn } from '../../utils/cn';
 
 // ============================================================================
-// EL LOGO: «Humanity.Wiki», Y SÓLO LLEVA AL INICIO (2026-10-05)
+// EL LOGO: «Wiki Creator», Y SÓLO LLEVA AL INICIO (2026-10-05)
 // ============================================================================
 // Eugenio: «el logotipo como hace YouTube: a la izquierda, y cuando se
 // despliega el menú izquierdo se mantiene más o menos en su sitio. El logo
@@ -17,8 +17,8 @@ export default function Logo({ onClick, className }: { onClick: () => void; clas
   return (
     <button
       onClick={onClick}
-      title="Humanity.Wiki — ir al inicio"
-      aria-label="Humanity.Wiki — ir al inicio"
+      title="Wiki Creator — ir al inicio"
+      aria-label="Wiki Creator — ir al inicio"
       className={cn('flex h-8 shrink-0 items-center rounded-lg px-2 text-slate-900 transition-colors hover:bg-slate-100', className)}
     >
       <span className="whitespace-nowrap text-[16px] font-black tracking-tight">

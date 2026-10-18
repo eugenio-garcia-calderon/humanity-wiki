@@ -58,7 +58,7 @@ export default function Servidores() {
   return (
     <div className="max-w-3xl mx-auto space-y-10">
       <Link to="/sobre-red-humana" className="inline-flex items-center text-sm font-bold text-emerald-600 hover:text-emerald-700">
-        <ArrowLeft className="w-4 h-4 mr-2" /> Volver a Sobre Humanity.wiki
+        <ArrowLeft className="w-4 h-4 mr-2" /> Volver a Sobre Wiki Creator
       </Link>
 
       <div>

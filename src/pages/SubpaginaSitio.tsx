@@ -12,7 +12,7 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 // ============================================================================
 // Lo que se abre al pinchar una tarjeta de la galería de una página publicada.
 // Eugenio: «cuando se pincha en un elemento de la base de datos vuelve a
-// aparecer el menú general de Humanity Wiki, y eso es un error. Tiene que
+// aparecer el menú general de Wiki Creator, y eso es un error. Tiene que
 // permanecer en ese dominio como si fuese una página».
 //
 // Quién puede verla lo decide el servidor (`sitios.ts`): la página si está

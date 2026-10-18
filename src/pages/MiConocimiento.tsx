@@ -406,7 +406,7 @@ function RecoPanel({ graphId, addWindow, onClose }: {
         {!data && !busy && (
           <p className="text-[11px] text-slate-400 leading-relaxed text-center py-6 px-3">
             <Sparkles className="w-4 h-4 text-indigo-400 mx-auto mb-1.5" />
-            Escribe un tema y verás cuánta información existe ya en Humanity.wiki — y podrás
+            Escribe un tema y verás cuánta información existe ya en Wiki Creator — y podrás
             conectarla a tu lienzo sin duplicarla.
           </p>
         )}

@@ -32,7 +32,7 @@ const TERMINOS: { titulo: string; parrafos: string[] }[] = [
   {
     titulo: '1 · Quién presta el servicio y qué aceptas',
     parrafos: [
-      'Humanity.wiki es una plataforma para reunir, organizar y compartir conocimiento, con una red de personas, un mercado y un sistema de puntos. La presta Light for Humanity (CIF G88040563), con domicilio en Calle Bahía de Almería 30, Bajo C, 28042 Madrid, España — una entidad sin ánimo de lucro.',
+      'Wiki Creator es una plataforma para reunir, organizar y compartir conocimiento, con una red de personas, un mercado y un sistema de puntos. La presta Light for Humanity (CIF G88040563), con domicilio en Calle Bahía de Almería 30, Bajo C, 28042 Madrid, España — una entidad sin ánimo de lucro.',
       'Al crear una cuenta o usar la plataforma aceptas estos términos y la política de privacidad. Si no estás de acuerdo, no uses el servicio. Para tener cuenta debes tener al menos 14 años; para vender en el mercado o cobrar, la mayoría de edad.',
     ],
   },
@@ -87,7 +87,7 @@ const TERMINOS: { titulo: string; parrafos: string[] }[] = [
   {
     titulo: '8 · La plataforma y sus cambios',
     parrafos: [
-      'El software, la marca y el diseño de Humanity.wiki son de su titular; el conocimiento que la gente publica, de quien lo publica, con las licencias dichas arriba. La plataforma se ofrece tal cual, con el esfuerzo razonable por mantenerla disponible y segura, pero sin garantía de disponibilidad ininterrumpida ni de ausencia de errores. Nuestra responsabilidad se limita a lo que la ley no permita limitar; en ningún caso respondemos de lo que un vendedor venda o una persona publique.',
+      'El software, la marca y el diseño de Wiki Creator son de su titular; el conocimiento que la gente publica, de quien lo publica, con las licencias dichas arriba. La plataforma se ofrece tal cual, con el esfuerzo razonable por mantenerla disponible y segura, pero sin garantía de disponibilidad ininterrumpida ni de ausencia de errores. Nuestra responsabilidad se limita a lo que la ley no permita limitar; en ningún caso respondemos de lo que un vendedor venda o una persona publique.',
       'Podemos cambiar estos términos. Cuando el cambio importe, lo anunciaremos dentro de la plataforma con antelación y aquí aparecerá la nueva versión con su fecha; seguir usando la plataforma después es aceptarla. Las versiones anteriores quedan archivadas.',
       'Estos términos se rigen por la ley española y la europea que corresponda. Si eres consumidor conservas todos los derechos que esa ley te da, incluidos los tribunales de tu domicilio. Para cualquier cuestión sobre estos términos puedes escribir a Light for Humanity en la dirección postal de arriba, o decírnoslo desde Feedback dentro de la plataforma.',
     ],
@@ -101,7 +101,7 @@ function Terminos() {
         <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-600 mb-3">
           <FileText className="w-3.5 h-3.5" /> Términos y condiciones · {VERSION}
         </p>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight font-display mb-4">Las reglas de usar Humanity.wiki</h1>
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight font-display mb-4">Las reglas de usar Wiki Creator</h1>
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-900 leading-relaxed">

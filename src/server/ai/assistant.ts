@@ -104,7 +104,7 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // persona, indexadas e integradas con el conocimiento de la plataforma.
   CREATE_MAP: { minLevel: ROLE.USER, entity: 'user_maps', description: 'Crear un mapa público a nombre del usuario' },
   // 2026-08-20: la IA no sabía hacer las cosas de la propia plataforma —
-  // Eugenio le pidió «añade una tarea al proyecto Humanity.wiki» y no había
+  // Eugenio le pidió «añade una tarea al proyecto Wiki Creator» y no había
   // ninguna acción para eso. Estas tres son las que se usan a diario.
   CREATE_TAREA:    { minLevel: ROLE.USER, entity: 'roadmap_items', description: 'Crear una tarea en un proyecto' },
   UPDATE_TAREA:    { minLevel: ROLE.USER, entity: 'roadmap_items', description: 'Cambiar una tarea (estado, título, responsable)' },
@@ -525,7 +525,7 @@ Ya está: Gala se une al proyecto — la tienes de pie en la sala de Personas.
     // Idéntica en cada llamada. NADA interpolado aquí salvo UI_EVENTS, que es
     // una constante del servidor (cambia solo al desplegar código nuevo, y
     // entonces la caché se regenera una vez, como debe ser).
-    const estable = `Eres el asistente de Humanity.wiki, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
+    const estable = `Eres el asistente de Wiki Creator, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
 
 CADENA DE CONOCIMIENTO DE LA PLATAFORMA:
 Territorio → Objetivo → Indicador → Marcador → Reto → Solución → Necesidad → Producto → Demanda → Transacción → Iniciativa → Resultados → Caso de éxito
@@ -606,10 +606,10 @@ LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando l
 · CREATE_PAGINA — titulo (obligatorio), texto (el contenido inicial), carpeta
   (el NOMBRE de una carpeta suya, si quiere guardarla en una).
 
-Ejemplo, para «añade una tarea de prueba en el proyecto Humanity.wiki»:
+Ejemplo, para «añade una tarea de prueba en el proyecto Wiki Creator»:
 
 \`\`\`redhumana
-{"actions": [{"type": "CREATE_TAREA", "params": {"titulo": "Tarea de prueba", "proyecto": "Humanity.wiki"}, "rationale": "lo ha pedido"}]}
+{"actions": [{"type": "CREATE_TAREA", "params": {"titulo": "Tarea de prueba", "proyecto": "Wiki Creator"}, "rationale": "lo ha pedido"}]}
 \`\`\``;
 
     // ══ CAPA 2: LO DE ESTA PERSONA (2026-08-22) ═══════════════════════════

@@ -6,7 +6,7 @@ import { avisar } from './avisos.js';
 import { numeroSincrono, iniciarAjustes } from './ajustes.js';
 
 // ============================================================================
-// PUNTOS DE HUMANITY.WIKI (2026-08-08, petición del usuario)
+// PUNTOS DE WIKI CREATOR (2026-08-08, petición del usuario)
 // ============================================================================
 // Un sistema de puntos interno con saldo decimal — "en un futuro serán
 // puntos tokenizados con blockchain, de momento es un sistema de puntos

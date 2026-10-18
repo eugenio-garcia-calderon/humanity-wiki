@@ -15,7 +15,7 @@
 
 Data about the things that actually matter (the state of our water, our food, our housing, our ecosystems) is scattered across PDFs, ministries and one-off reports. When you do find it, it stops at the national level, and you can rarely tell where a number came from.
 
-**humanity.wiki** puts that knowledge into one navigable model. Pick a challenge, zoom from the planet to a municipality, and keep drilling until you reach the physical station that produced the reading. Every number carries its source and its date, and **when there is no data, the platform says so** instead of shading in a plausible guess.
+**Wiki Creator** puts that knowledge into one navigable model. Pick a challenge, zoom from the planet to a municipality, and keep drilling until you reach the physical station that produced the reading. Every number carries its source and its date, and **when there is no data, the platform says so** instead of shading in a plausible guess.
 
 ## 🔭 Three Ways In
 

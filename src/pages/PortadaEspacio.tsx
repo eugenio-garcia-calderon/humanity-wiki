@@ -114,7 +114,7 @@ export default function PortadaEspacio({ handle }: { handle: string }) {
 
       <footer className="mt-10 pt-4 border-t border-slate-100">
         <a href="https://humanity.wiki" className="text-[11px] font-bold text-slate-400 hover:text-slate-600">
-          Publicado en <b>humanity.wiki</b>
+          Publicado en <b>Wiki Creator</b>
         </a>
       </footer>
 

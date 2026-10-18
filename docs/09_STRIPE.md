@@ -166,4 +166,4 @@ Toda transacción deberá poder relacionarse con:
 
 # Objetivo final
 
-Convertir Stripe en la infraestructura financiera de Humanity.wiki, garantizando una experiencia de pago segura, transparente, integrada y completamente conectada con el ecosistema de conocimiento.
+Convertir Stripe en la infraestructura financiera de Wiki Creator, garantizando una experiencia de pago segura, transparente, integrada y completamente conectada con el ecosistema de conocimiento.
