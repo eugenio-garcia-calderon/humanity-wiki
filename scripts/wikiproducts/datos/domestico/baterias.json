@@ -1058,12 +1058,12 @@
           "nota": "Condición de medida de la energía utilizable."
         },
         "eficiencia_ida_vuelta_pct": {
-          "valor": "≥ 96",
+          "valor": 96,
           "unidad": "%",
           "naturaleza": "declarado",
           "fuente": "https://bydbatterybox.com/uploads/downloads/BBOX_HVS_Datasheet_ES_V1.0_240703_L-6690809ed9771.pdf",
           "fecha": "2026-10-18",
-          "nota": "Dato general de la ficha, sin condiciones de medida detalladas; eficiencia de la batería en CC, no del sistema con inversor."
+          "nota": "La ficha dice «≥ 96 %»: al menos 96 %. Dato general de la ficha, sin condiciones de medida detalladas; eficiencia de la batería en CC, no del sistema con inversor."
         },
         "tension": {
           "valor": "alta tensión: 409,6 V nominal (320–480 V) en HVS 10.2",
@@ -4609,12 +4609,12 @@
           "nota": "Torre de 1 módulo; 870 mm de alto con 2 y 1230 mm con 3."
         },
         "ruido_db": {
-          "valor": "< 29",
+          "valor": 29,
           "unidad": "dB a 1 m",
           "naturaleza": "declarado",
           "fuente": "https://solar.huawei.com/en/products/LUNA2000-7-14-21-S1/specs",
           "fecha": "2026-10-18",
-          "nota": ""
+          "nota": "La marca dice «< 29 dB»: como mucho 29."
         },
         "garantia_energia_mwh": {
           "valor": 28.84,
@@ -8637,12 +8637,12 @@
           "nota": "Expansion: 1105 × 609 × 168 mm."
         },
         "ruido_db": {
-          "valor": "< 50 típico; < 62 máximo",
+          "valor": 50,
           "unidad": "dB(A) a 1 m",
           "naturaleza": "declarado",
           "fuente": "https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf",
           "fecha": "2026-10-18",
-          "nota": ""
+          "nota": "La ficha dice «< 50 típico; < 62 máximo»: como mucho 50 dB(A) en uso normal y 62 en el peor caso."
         },
         "garantia_energia_mwh": {
           "valor": 37.8,

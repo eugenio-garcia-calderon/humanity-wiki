@@ -874,12 +874,12 @@
           "fecha": "2026-10-18"
         },
         "eficiencia_celula_pct": {
-          "valor": "21–22",
+          "valor": 21,
           "unidad": "%",
           "naturaleza": "tercero",
           "fuente": "https://techtest.org/test-das-ecoflow-160w-solarpanel-faltbar-aber-mit-standard-anschluessen/",
           "fecha": "2026-10-18",
-          "nota": "Autosolar: 22 %."
+          "nota": "La fuente da un intervalo de 21 a 22 %; aquí va el valor bajo. Autosolar: 22 %."
         },
         "tipo_celula": {
           "valor": "Monocristalino",
@@ -3548,11 +3548,12 @@
           "fecha": "2026-10-18"
         },
         "eficiencia_celula_pct": {
-          "valor": "21,5–23,5",
+          "valor": 21.5,
           "unidad": "%",
           "naturaleza": "declarado",
           "fuente": "https://www.anker.com/eu-en/products/a2421",
-          "fecha": "2026-10-18"
+          "fecha": "2026-10-18",
+          "nota": "La marca da un intervalo de 21,5 a 23,5 %; aquí va el valor bajo."
         },
         "tipo_celula": {
           "valor": null,
@@ -4344,11 +4345,12 @@
           "nota": "±5 %."
         },
         "eficiencia_celula_pct": {
-          "valor": "19–22",
+          "valor": 19,
           "unidad": "%",
           "naturaleza": "tercero",
           "fuente": "https://www.fotofabrikas.lt/en/items/Power-Banks/Chargers/8636915.2-Photovoltaic-panel-Allpowers-AP-SP-033-BLA-200W.html?htmlamp",
-          "fecha": "2026-10-18"
+          "fecha": "2026-10-18",
+          "nota": "La tienda da un intervalo de 19 a 22 %; aquí va el valor bajo."
         },
         "tipo_celula": {
           "valor": "Policristalino",
