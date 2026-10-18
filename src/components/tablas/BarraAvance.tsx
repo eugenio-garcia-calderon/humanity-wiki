@@ -22,28 +22,43 @@ export const colorAvance = (pct: number) =>
 
 const aPct = (fraccion: number) => Math.max(0, Math.round(fraccion * 100));
 
+/** El color de la cifra, a juego con la barra. */
+const colorCifra = (pct: number) => (pct >= 100 ? 'text-emerald-600' : pct >= 50 ? 'text-sky-600' : 'text-amber-600');
+
+/** La cifra: el número grande y el «%» pegado, sin partirse nunca en dos líneas
+ *  (2026-10-18, Eugenio: «el 100 % sale con el % debajo»). */
+function Cifra({ pct, grande = false }: { pct: number; grande?: boolean }) {
+  return (
+    <span className={cn('inline-flex shrink-0 items-baseline whitespace-nowrap font-black tabular-nums leading-none', colorCifra(pct), grande ? 'text-3xl' : 'text-xs')}>
+      {pct}<span className={cn('font-bold', grande ? 'ml-0.5 text-base' : 'ml-px text-[10px]')}>%</span>
+    </span>
+  );
+}
+
 /** La barra. `grande` es la de la página del elemento: gruesa y con la cifra grande. */
 export function BarraAvance({ fraccion, grande = false, centrada = false }: { fraccion: number; grande?: boolean; centrada?: boolean }) {
   const pct = aPct(fraccion);
+  const ancho = `${Math.min(100, pct)}%`;
   if (grande) {
     return (
       <div className="w-full py-1" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${pct} % completado`}>
-        <div className={cn('mb-1.5 flex items-baseline gap-1.5', centrada ? 'justify-center' : 'justify-between')}>
-          <span className="text-2xl font-black tabular-nums text-slate-900">{pct} %</span>
-          <span className="text-xs font-bold text-slate-400">completado</span>
+        <div className={cn('mb-2 flex items-baseline gap-2', centrada ? 'justify-center' : 'justify-between')}>
+          <Cifra pct={pct} grande />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{pct >= 100 ? 'completado' : 'de avance'}</span>
         </div>
-        <div className="h-4 w-full overflow-hidden rounded-full bg-slate-200/80">
-          <div className={cn('h-full rounded-full transition-[width] duration-500', colorAvance(pct))} style={{ width: `${Math.min(100, pct)}%` }} />
+        <div className="h-3.5 w-full overflow-hidden rounded-full bg-slate-200/70 shadow-inner">
+          <div className={cn('h-full rounded-full transition-[width] duration-500', colorAvance(pct))} style={{ width: ancho }} />
         </div>
       </div>
     );
   }
+  // En la tarjeta: la barra a lo ancho y la cifra a su derecha, en una sola línea.
   return (
-    <div className="flex w-full min-w-[7rem] items-center gap-2" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${pct} % completado`}>
-      <span className="w-9 shrink-0 text-left text-xs font-semibold tabular-nums text-slate-600">{pct} %</span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200/80">
-        <div className={cn('h-full rounded-full', colorAvance(pct))} style={{ width: `${Math.min(100, pct)}%` }} />
+    <div className="flex w-full min-w-[6rem] items-center gap-2" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${pct} % completado`}>
+      <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-200/80">
+        <div className={cn('h-full rounded-full', colorAvance(pct))} style={{ width: ancho }} />
       </div>
+      <Cifra pct={pct} />
     </div>
   );
 }

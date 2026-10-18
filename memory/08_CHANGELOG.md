@@ -9247,3 +9247,7 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 
 ## 2026-10-18 — Arrastrar las propiedades de la ficha, como los bloques (prog8)
 - Las propiedades de la página de una entrada se reordenan **arrastrándolas por su nombre** o por el tirador ⋮⋮ que aparece a la izquierda al pasar el ratón (antes, solo un tirador diminuto en la esquina). Una **barra verde** marca si caerá antes o después (izquierda/derecha en la rejilla, arriba/abajo en la lista). El orden es el de toda la tabla.
+
+## 2026-10-18 — La cifra de la barra de avance, bien puesta (prog8)
+- La cifra del porcentaje ya **no se parte en dos líneas** («100» arriba y «%» debajo): número y «%» van juntos y sin salto (`whitespace-nowrap`), del **color de su tramo** (naranja, azul o verde).
+- En la tarjeta, la barra va a lo ancho y la cifra a su **derecha**. En la ficha, la cifra es grande con el «%» pequeño pegado y al lado «de avance» o «completado» al 100 %; la barra lleva una sombra interior suave.
