@@ -153,6 +153,36 @@
       "tipo": "instalador",
       "pais": "España",
       "web": "https://holaluz.com"
+    },
+    {
+      "id": "vekto-nl",
+      "nombre": "Vekto",
+      "tipo": "mayorista",
+      "pais": "Países Bajos",
+      "web": "https://www.vekto.nl",
+      "nota": "Vende «EXCLUSIEF VOOR INSTALLATEURS & INSTALLATIEBEDRIJVEN»."
+    },
+    {
+      "id": "zonnefabriek-nl",
+      "nombre": "Zonnefabriek",
+      "tipo": "tienda online",
+      "pais": "Países Bajos",
+      "web": "https://www.zonnefabriek.nl",
+      "nota": "Las fichas leídas no muestran precio; remiten a asesoramiento personal."
+    },
+    {
+      "id": "sunpower-instaladores-es",
+      "nombre": "Red de instaladores SunPower (Maxeon) en España",
+      "tipo": "Instalador",
+      "pais": "España",
+      "web": "https://www.sunpowerglobal.com/es/encuentra-un-instalador"
+    },
+    {
+      "id": "senec-fachpartner-de",
+      "nombre": "Red de socios especialistas SENEC (Alemania)",
+      "tipo": "Instalador",
+      "pais": "Alemania",
+      "web": "https://senec.com/en/node/3389"
     }
   ]
 }

@@ -145,9 +145,12 @@ try {
 // ── 3. Readable addresses ───────────────────────────────────────────────────
 console.log('== Direcciones de las fichas ==');
 let rutas = 0;
-for (const s of sitio.subcategorias) {
-  try { rutas += (await api('POST', `/api/v1/databases/${idTabla(s.tabla)}/routes`)).routes_updated || 0; }
-  catch (e) { fallos.push(`rutas ${s.tabla}: ${e.message}`); }
+// Every table that has a route template (products, and since W2 #620 brands,
+// shops, claims and recalls too). A table without one answers 400: skipped.
+for (const t of esquema.tablas) {
+  if (!tablas[t.titulo]) continue;
+  try { rutas += (await api('POST', `/api/v1/databases/${tablas[t.titulo]}/routes`)).routes_updated || 0; }
+  catch (e) { if (e.status !== 400) fallos.push(`rutas ${t.clave}: ${e.message}`); }
 }
 console.log(`  ${rutas} direcciones puestas al día`);
 
