@@ -8843,3 +8843,7 @@ en mis páginas como proyecto pendiente».
 ### 2026-10-18 — Galería: propiedades en todos los tamaños y nombre en dos líneas (prog8)
 - Las propiedades marcadas como visibles se ven debajo del nombre de cada tarjeta en cualquier tamaño de galería; antes, en XS y XXS no salían.
 - El nombre de la tarjeta ocupa hasta dos líneas en vez de cortarse con «…» en la primera.
+
+### 2026-10-18 — La portada se puede recortar (prog8)
+- Al elegir una imagen de portada se abre un recortador: un marco que se mueve arrastrándolo y cambia de tamaño por sus esquinas, libre o con proporción fija (panorámica 3:1, 16:9, 4:3, cuadrada). Se sube el trozo elegido; también se puede usar sin recortar.
+- Una portada ya puesta tiene «Recortar» junto a «Cambiar» y «Quitar».

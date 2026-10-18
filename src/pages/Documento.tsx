@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { subirArchivo } from '../utils/subir';
 import OptimizacionWeb from '../components/knowledge/OptimizacionWeb';
 import SoltarImagen from '../components/ui/SoltarImagen';
+import RecortarImagen from '../components/ui/RecortarImagen';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
@@ -271,6 +272,8 @@ function EditorPagina() {
   const ultimoSeleccionado = useRef<string | null>(null);
   // Fase 2 —
   const [portada, setPortada] = useState<string | null>(null);
+  /** La imagen de portada que se está recortando: la recién elegida o la que ya hay. */
+  const [recortandoPortada, setRecortandoPortada] = useState<File | string | null>(null);
   const [icono, setIcono] = useState<string | null>(null);
   /** Ajustes de publicación (autor, fecha, ancho, descripción, imagen). */
   const [ajustes, setAjustes] = useState<Ajustes>({});
@@ -4100,6 +4103,10 @@ function EditorPagina() {
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     {tr('Cambiar')}
                   </button>
+                  <button onClick={() => setRecortandoPortada(portada)}
+                    className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
+                    {tr('Recortar')}
+                  </button>
                   <button onClick={() => { setPortada(null); programarGuardado(); }}
                     className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
                     {tr('Quitar')}
@@ -4155,8 +4162,13 @@ function EditorPagina() {
                     onCerrar={() => setEligiendoPortada(false)}
                     // Se cierra en cuanto hay archivo: la portada enseña su
                     // propia barra de subida en la página, con la foto ya puesta.
-                    onArchivo={f => { subirPortada(f); }}
+                    onArchivo={f => { setRecortandoPortada(f); }}
                   />
+                )}
+                {recortandoPortada && (
+                  <RecortarImagen fuente={recortandoPortada} titulo="Recortar la portada"
+                    onCancelar={() => setRecortandoPortada(null)}
+                    onListo={f => { setRecortandoPortada(null); subirPortada(f); }} />
                 )}
                 {!portada && !eligiendoIcono && (
                   <button onClick={() => setEligiendoPortada(true)}
