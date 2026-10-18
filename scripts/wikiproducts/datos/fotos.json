@@ -1,0 +1,13 @@
+{
+  "_comentario": "Una foto de Wikimedia Commons por producto, sólo si el archivo es identificable como ese modelo. La licencia y el autor no se copian aquí: cargar.mjs los lee de la API de Commons y sólo admite CC0, dominio público, CC BY y CC BY-SA. Búsqueda del 2026-10-18 en commons.wikimedia.org: 94 productos, 2 con foto identificable; el resto se deja sin foto.",
+  "fotos": {
+    "jackery-explorer-1000-v2": {
+      "commons": "Jackery Explorer 1000 New JE-1000D.jpg",
+      "por_que": "El nombre del archivo lleva el código de modelo JE-1000D, el mismo del catálogo."
+    },
+    "tesla-powerwall-2": {
+      "commons": "Tesla Powerwall 2.jpg",
+      "por_que": "El título del archivo nombra el producto y la generación."
+    }
+  }
+}

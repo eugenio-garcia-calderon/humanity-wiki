@@ -236,19 +236,26 @@ export function relacionConRol(f: Ficha, rol: Rol, rolDentro?: Rol): Columna | u
 
 // ── R10: THE QUALITY BAR FOR BEING INDEXED ──────────────────────────────────
 // A sheet stays `noindex` until it is worth reading (SEO requirements R10):
-// a photo, a neutral summary, at least 8 technical values WITH a source, at
-// least one offer (or «not sold in Spain» said in its status), and a review
-// date. Google punishes thin pages in bulk («scaled content abuse»); this is
-// what keeps a thousand empty sheets from dragging the good ones down.
+// a neutral summary, at least 8 technical values WITH a source, at least one
+// offer (or «not sold in Spain» said in its status), and a review date.
+// Google punishes thin pages in bulk («scaled content abuse»); this is what
+// keeps a thousand empty sheets from dragging the good ones down.
+//
+// A photo is NOT required (2026-10-18). The first catalogue went live with
+// no photos at all (the brand photos are still pending) and the rule kept
+// every sheet out of Google, rich ones included. A sheet with sourced data
+// and offers is not thin; a photo helps it rank, it does not make it worth
+// reading. It is still listed in `mejoras` so the editor knows it is missing.
 
 export const MINIMO_DATOS_CON_FUENTE = 8;
 
-export function calidadFicha(f: Ficha): { indexable: boolean; faltan: string[]; datosConFuente: number } {
+export function calidadFicha(f: Ficha): { indexable: boolean; faltan: string[]; mejoras: string[]; datosConFuente: number } {
   const fila = filaActual(f);
   const t = f.tabla;
   const faltan: string[] = [];
+  const mejoras: string[] = [];
   const img = columnaPorRol(t, 'imagen');
-  if (!(img && tieneValor(fila, img)) && !fila?.imagen) faltan.push('una foto');
+  if (!(img && tieneValor(fila, img)) && !fila?.imagen) mejoras.push('una foto');
   const res = columnaPorRol(t, 'resumen');
   if (!(res && tieneValor(fila, res))) faltan.push('el resumen');
   const datosConFuente = t.columnas.filter(c => grupoDe(c) === 'tecnico' && tieneValor(fila, c) && !!procedenciaDe(fila, c)?.fuente).length;
@@ -260,7 +267,7 @@ export function calidadFicha(f: Ficha): { indexable: boolean; faltan: string[]; 
   if (!ofertas && !noSeVende) faltan.push('una oferta (o decir «no se vende en España» en el estado)');
   const rev = columnaPorRol(t, 'revisado');
   if (!(rev && tieneValor(fila, rev))) faltan.push('la fecha de revisión');
-  return { indexable: faltan.length === 0, faltan, datosConFuente };
+  return { indexable: faltan.length === 0, faltan, mejoras, datosConFuente };
 }
 
 /** The last day the data was checked: the review date, else the newest

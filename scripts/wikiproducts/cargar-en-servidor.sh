@@ -49,7 +49,8 @@ else
   # copied into the running container first (a tar stream, nothing on disk).
   $COMPOSE exec -T app sh -c 'rm -rf /tmp/wikiproducts'
   tar -C scripts -cf - wikiproducts | $COMPOSE exec -T app tar -C /tmp -xf -
-  nodo() { $COMPOSE exec -T -e HW_API_KEY app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}"; }
+  export WP_FOTOS="${WP_FOTOS:-no}"
+  nodo() { $COMPOSE exec -T -e HW_API_KEY -e WP_FOTOS app node "/tmp/wikiproducts/$1" --base "$BASE" "${@:2}"; }
 fi
 
 USUARIO=$(sql "SELECT id FROM users WHERE lower(email) = lower('$EMAIL')")

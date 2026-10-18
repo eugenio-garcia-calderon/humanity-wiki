@@ -859,3 +859,21 @@ the management panel, is the cheapest way to check it.
 ## 2026-10-18 — Offers inherit the product sheet's visibility, same owner only
 
 **Context.** `puedeConTabla` makes a table public only when it is embedded in a published page; an offers table is shown only through the sheet's «Ofertas» block, so visitors saw nothing. **Options.** (a) Ask authors to also embed the offers table somewhere public (leaks every row, every commission, as a table). (b) Treat any table with a «Producto» relation to a visible sheet as visible (lets anyone advertise on someone else's sheet). (c) Visible sheet + same owner for both tables. **Chosen: (c)**, in `permisoOfertas` (`src/server/ofertas.ts`). Only `OfertaPublica` fields leave; the commission is public by design.
+
+## 2026-10-18 — What a Wikiproducts sitemap and site search contain (W2)
+
+- **Sitemap.** A site where at least one table has a route template lists only
+  pages and rows with a readable path. Rows without one (offers, auxiliary
+  tables) and `/bd/…` table pages are left out: they still open, but they are
+  not offered to search engines as pages. Alternative: list everything (510
+  URLs, 409 of them `/p/…` rows that are thin or duplicate) or give every table
+  a route. Sites without any template keep the old behaviour, so the change
+  only reaches sites that opted into readable URLs.
+- **Site search order.** Tiers derived from table structure, not names: rows of
+  tables with a sheet template, then targets of those tables' direct relation
+  columns (brands), then the rest. Alternative: a per-table priority setting —
+  more control, one more field nobody would fill in.
+- **R10 without a photo.** The spec (`requisitos-tecnicos.md` R10) lists a
+  licensed photo as part of the indexing bar. Dropped from the bar and kept as
+  `mejoras`, because the first catalogue went live with no photos and the rule
+  kept every sheet out of Google. Diverges from the SEO requirements text.

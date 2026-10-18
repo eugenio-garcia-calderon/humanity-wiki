@@ -75,7 +75,8 @@ export function registrarBuscadorSitio(app: Express, db: any) {
               WHERE rs.pagina_id = w.id AND (rs.bloque_id = '' OR rs.bloque_id = blq->>'id')
             )
         )
-        SELECT DISTINCT ON (w.id) w.id, w.title, w.config, t.titulo AS tabla,
+        SELECT DISTINCT ON (w.id) w.id, w.title, w.config, t.titulo AS tabla, t.id AS tabla_id,
+          (t.config->'plantilla'->>'pagina_id') IS NOT NULL AS es_ficha,
           (${plano(sql`w.title`)} LIKE ${patron}) AS en_titulo,
           EXISTS (
             SELECT 1 FROM jsonb_each_text(COALESCE(f.valores, '{}'::jsonb)) kv
@@ -103,9 +104,30 @@ export function registrarBuscadorSitio(app: Express, db: any) {
         LIMIT 200
       `);
 
-      // Los que lo dicen en el título, primero; luego por orden alfabético.
+      // QUÉ VA PRIMERO (2026-10-18). Buscar «anker» enseñaba antes las
+      // afirmaciones publicitarias que el producto, porque el orden era sólo
+      // alfabético. Ahora, por escalones:
+      //   0. Las fichas: filas de una tabla con plantilla de ficha (W1).
+      //   1. Aquello a lo que las fichas apuntan: marcas, fabricantes… (las
+      //      tablas destino de sus columnas de relación, no las de vuelta).
+      //   2. Todo lo demás: afirmaciones, retiradas, páginas…
+      // Dentro de cada escalón, los que lo dicen en el título y luego por orden
+      // alfabético. Sale de cómo están hechas las tablas, no de sus nombres:
+      // vale para cualquier sitio, no sólo para Wikiproducts.
+      const fichas = [...new Set((r.rows as any[]).filter(x => x.es_ficha).map(x => String(x.tabla_id)))];
+      const apuntadas = new Set<string>();
+      if (fichas.length) {
+        const c = await db.execute(sql`
+          SELECT DISTINCT config->>'tabla_destino' AS destino FROM bd_columnas
+          WHERE tabla_id = ANY(string_to_array(${fichas.join(',')}, ',')) AND tipo = 'relacion'
+            AND archived_at IS NULL AND (config->>'inversa_de') IS NULL AND (config->>'tabla_destino') IS NOT NULL
+        `);
+        for (const x of c.rows as any[]) if (!fichas.includes(String(x.destino))) apuntadas.add(String(x.destino));
+      }
+      const escalon = (x: any) => x.es_ficha ? 0 : x.tabla_id && apuntadas.has(String(x.tabla_id)) ? 1 : 2;
       const filas = (r.rows as any[]).sort((a, b) =>
-        Number(b.en_titulo) - Number(a.en_titulo) || String(a.title || '').localeCompare(String(b.title || ''), 'es'));
+        escalon(a) - escalon(b) || Number(b.en_titulo) - Number(a.en_titulo)
+        || String(a.title || '').localeCompare(String(b.title || ''), 'es'));
       const resultados: any[] = [];
       for (const x of filas) {
         if (resultados.length >= MAX_RESULTADOS) break;

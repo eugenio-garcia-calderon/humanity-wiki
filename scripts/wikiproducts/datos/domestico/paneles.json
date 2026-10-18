@@ -2121,7 +2121,21 @@
           "nota": "Búsqueda realizada el 2026-10-18 en: EU Safety Gate (búsquedas web de alertas de módulos fotovoltaicos), US CPSC (búsqueda de retiradas de paneles solares: solo aparecen Bosch Solar 2017 y paneles flexibles RNG 2016, ninguna de esta marca), Australia ACCC/productsafety.gov.au y la lista de retiradas del Clean Energy Council (https://www.cleanenergycouncil.org.au/industry/products/product-recalls?token=154), Health Canada (recalls-rappels.canada.ca) y prensa sectorial (pv-magazine, pv-tech). No se encontró ninguna retirada ni alerta para el Canadian Solar CS6.1-54TD ni para módulos de la marca Canadian Solar. Ninguna conocida a fecha 2026-10-18."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "vicoexport",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://www.vicoexport.com/en/home-es/solar-panels/canadian-solar/canadian-solar-tophiku6/",
+          "precio_eur": null,
+          "iva_incluido": null,
+          "unidad": "por panel",
+          "stock": "no indicado",
+          "nota": "Página de la familia TOPHiKu6 que lista el CS6.1-54TD de 445 a 470 W (además de CS6.2-48TD y CS6R-T). Sin precio, IVA ni stock: remite a «Check availability and prices for your solar projects» y a un botón de WhatsApp.",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [],
       "pendiente": [
         "Revisión del documento de garantía que incluya el CS6.1-54TD y confirme los 25 años de producto en tejados europeos (la Rev 1.13 encontrada no lo cita).",
@@ -2963,7 +2977,21 @@
           "nota": "Búsqueda a 2026-10-18 en buscador web de «Huasun» + recall, safety, UFLPA, detained, lawsuit, además de la búsqueda general previa de retiradas de paneles en EU Safety Gate, CPSC, ACCC y Health Canada. No apareció ninguna retirada, alerta de seguridad ni detención aduanera atribuida a Huasun. Ninguna conocida a fecha 2026-10-18."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "tienda-solar-es",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://tienda-solar.es/en/solar-panels/1896-huasun-bifacial-solar-panel-430w",
+          "precio_eur": 87.12,
+          "iva_incluido": true,
+          "unidad": "por panel de 430 W",
+          "stock": "no indicado",
+          "nota": "«HUASUN Bifacial Solar Panel 430W», modelo HS-182-B108DSN citado en la descripción, marco negro anodizado. 87,12 € «Tax included» (0,20 €/W). La ficha no indica stock, plazo ni envío, ni si se vende por unidad o por palé.",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [],
       "pendiente": [
         "Documento de garantía vigente para módulos entregados desde 2024 (la ficha da 15 años de producto; la garantía 2022–2023 daba 30).",
@@ -5157,7 +5185,21 @@
           "nota": "Búsqueda a 2026-10-18 en buscador web de «Maxeon» y «SunPower» + recall en productsafety.gov.au (ACCC), CPSC y Health Canada, además de la búsqueda general previa de retiradas de paneles en EU Safety Gate. No apareció ninguna retirada de paneles Maxeon. La única retirada con la marca SunPower encontrada es de 2011 y afecta a inversores Xantrex Grid Tie vendidos también como SunPower (Health Canada, riesgo de que salte la tapa del compartimento de cableado), no a paneles y anterior a la escisión de Maxeon: https://www.healthycanadians.gc.ca/recall-alert-rappel-avis/hc-sc/2011/11739r-eng.php Las retenciones de la aduana de EE. UU. por la ley UFLPA (desde julio de 2024) no son una retirada de seguridad; se describen en «empresa.notas». Ninguna retirada de paneles conocida a fecha 2026-10-18."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "sunpower-instaladores-es",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": true,
+          "url": "https://www.sunpowerglobal.com/es/encuentra-un-instalador",
+          "precio_eur": null,
+          "iva_incluido": null,
+          "unidad": "por instalación (según presupuesto)",
+          "stock": "no aplica",
+          "nota": "Se vende sólo a través de instaladores; el precio es bajo presupuesto. En Europa los paneles Maxeon se venden con la marca SunPower (sunpowerglobal.com). La web española no tiene tienda: el botón «ENCUENTRA UN INSTALADOR» lleva a un formulario («Registra tu interés a través de este formulario y nos pondremos en contacto contigo»). La página de productos menciona el «nuevo panel Maxeon 7 de CC».",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [
         "Inversores de string hasta 1000 V DC",
         "Maxeon 6 AC: microinversor integrado de fábrica (sin ficha consultada)"
@@ -5973,7 +6015,21 @@
           "nota": "Búsqueda a 2026-10-18 en buscador web de «Qcells/Hanwha Q CELLS» + recall, safety alert, fire risk, class action, y en prensa sectorial (pv-magazine); antes, búsqueda general de retiradas de paneles en EU Safety Gate, CPSC, ACCC y Health Canada. No apareció ninguna retirada ni alerta de seguridad de módulos Qcells. Lo que aparece son litigios de patentes que Qcells inició contra otros fabricantes (JinkoSolar, REC, LONGi; Alemania, 2019) en los que Qcells pidió retirar del mercado productos de terceros, no propios. Ninguna retirada conocida a fecha 2026-10-18."
         }
       ],
-      "ofertas": [],
+      "ofertas": [
+        {
+          "distribuidor_id": "zonnefabriek-nl",
+          "comision": "sin acuerdo",
+          "fecha_comprobacion": "2026-10-18",
+          "incluye_instalacion": false,
+          "url": "https://www.zonnefabriek.nl/en/solar-panels/q-cells/q-tron-blk-m-g2-425/",
+          "precio_eur": null,
+          "iva_incluido": null,
+          "unidad": "por panel de 425 W",
+          "stock": "no indicado",
+          "nota": "Ficha «Q-Cells Q.TRON BLK M-G2+ 425» de Zonnefabriek (Países Bajos), sin precio, IVA, stock ni envío; la única acción es «Get personal advice». No se encontró ninguna tienda española o europea con precio.",
+          "envio_eur": null
+        }
+      ],
       "compatibles": [],
       "pendiente": [
         "Ficha técnica europea oficial del Q.TRON BLK M-G2+ (los datos proceden de la ficha norteamericana Rev06; el listado europeo de sun.store coincide en la versión de 425 W y da una gama de 405–430 Wp). La gama «430–445 W» del encargo no se encontró en ninguna fuente.",
