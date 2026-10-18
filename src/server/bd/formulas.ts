@@ -350,6 +350,12 @@ function funcion(nombre: string, args: Nodo[], ctx: Contexto): Celda {
   const cs = args.map(ev);
   const e = primerError(cs); if (e) return e;
   const nums = cs.map(num).filter((n): n is number => n !== null);
+  // By position, for the functions whose arguments mean different things.
+  // Filtering the empties out shifted them: `REDONDEAR(vacío; 2)` read the 2
+  // as the number to round and answered «2» — the «2 €/Wp» of a panel with no
+  // price that evaluator round 2 caught (2026-10-18). An empty first argument
+  // is an empty result.
+  const pos = cs.map(num);
   const red = (n: number) => Number(n.toFixed(10));
 
   switch (nombre) {
@@ -358,19 +364,19 @@ function funcion(nombre: string, args: Nodo[], ctx: Contexto): Celda {
     case 'MIN':   return nums.length ? valor(Math.min(...nums)) : VACIA;
     case 'MAX':   return nums.length ? valor(Math.max(...nums)) : VACIA;
     case 'CONTAR': return valor(nums.length);
-    case 'ABS':   return nums.length ? valor(Math.abs(nums[0])) : VACIA;
+    case 'ABS':   return pos[0] != null ? valor(Math.abs(pos[0])) : VACIA;
     case 'RAIZ':
-      if (!nums.length) return VACIA;
-      if (nums[0] < 0) return error('No se puede sacar la raíz de un número negativo.');
-      return valor(red(Math.sqrt(nums[0])));
+      if (pos[0] == null) return VACIA;
+      if (pos[0] < 0) return error('No se puede sacar la raíz de un número negativo.');
+      return valor(red(Math.sqrt(pos[0])));
     case 'REDONDEAR': {
-      if (!nums.length) return VACIA;
-      const dec = nums.length > 1 ? Math.min(Math.max(Math.round(nums[1]), 0), 10) : 0;
-      return valor(Number(nums[0].toFixed(dec)));
+      if (pos[0] == null) return VACIA;
+      const dec = pos[1] != null ? Math.min(Math.max(Math.round(pos[1]), 0), 10) : 0;
+      return valor(Number(pos[0].toFixed(dec)));
     }
-    case 'TECHO':  return nums.length ? valor(Math.ceil(nums[0])) : VACIA;
-    case 'SUELO':  return nums.length ? valor(Math.floor(nums[0])) : VACIA;
-    case 'POTENCIA': return nums.length > 1 ? valor(red(Math.pow(nums[0], nums[1]))) : VACIA;
+    case 'TECHO':  return pos[0] != null ? valor(Math.ceil(pos[0])) : VACIA;
+    case 'SUELO':  return pos[0] != null ? valor(Math.floor(pos[0])) : VACIA;
+    case 'POTENCIA': return pos[0] != null && pos[1] != null ? valor(red(Math.pow(pos[0], pos[1]))) : VACIA;
 
     case 'CONCATENAR': return valor(cs.map(txt).join(''));
     case 'MAYUSCULAS': return cs[0]?.estado === 'ok' ? valor(txt(cs[0]).toUpperCase()) : VACIA;

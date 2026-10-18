@@ -133,18 +133,22 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     // the column is `visibilidad: nunca` (that only keeps it out of the lists),
     // and only under a photo.
     const cCredito = porRol('credito_imagen');
+    const compra = compraDe(t, fila);
+    const estado = porRol('estado') ? textoDe(fila, porRol('estado')!) : '';
     return {
       estilo,
       nombre: fila.titulo,
       marca: cMarca && tieneValor(fila, cMarca) ? valorDe(f, fila, cMarca) : null,
       modelo: porRol('modelo') ? textoDe(fila, porRol('modelo')!) : '',
-      estado: porRol('estado') ? textoDe(fila, porRol('estado')!) : '',
+      // «A la venta» next to «Sin precio todavía» contradicts itself (evaluator
+      // round 2): with no price in any shop, the badge is left out.
+      estado: compra && !compra.desde && /venta/i.test(estado) ? '' : estado,
       imagen,
       credito: imagen && cCredito ? textoDe(fila, cCredito) : '',
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
       categoria: t.titulo,
       subcategoria: porRol('subcategoria') ? textoDe(fila, porRol('subcategoria')!) : '',
-      compra: compraDe(t, fila),
+      compra,
       nota: notaDe(t, fila),
       destacados: columnasDestacadas(t)
         .filter(c => tieneValor(fila, c))
@@ -190,10 +194,11 @@ function compraDe(t: TablaFicha, fila: FilaFicha): Compra | null {
   if (!min) return null;
   const max = columnaPorRol(t, 'precio_max');
   const n = columnaPorRol(t, 'num_ofertas');
-  const desde = textoDe(fila, min);
+  // A price of 0 is no price: nothing is sold for free here.
+  const desde = numeroDe(fila, min) === 0 ? '' : textoDe(fila, min);
   const hasta = max ? textoDe(fila, max) : '';
   const u = columnaPorRol(t, 'precio_unidad');
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: (n && numeroDe(fila, n)) || 0, porUnidad: u ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: (n && numeroDe(fila, n)) || 0, porUnidad: u && desde ? textoDe(fila, u) : '', etiquetaUnidad: u ? etiquetaColumna(u) : '' };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {
