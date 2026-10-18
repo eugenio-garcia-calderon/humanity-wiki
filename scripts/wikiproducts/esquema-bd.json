@@ -3889,6 +3889,15 @@
           }
         },
         {
+          "clave": "disponible",
+          "nombre": "Disponible",
+          "tipo": "casilla",
+          "config": {
+            "clave": "disponible",
+            "rol": "disponible"
+          }
+        },
+        {
           "clave": "unidad",
           "nombre": "Unidad de venta",
           "tipo": "texto",
@@ -4049,6 +4058,15 @@
           "config": {
             "clave": "stock",
             "rol": "stock"
+          }
+        },
+        {
+          "clave": "disponible",
+          "nombre": "Disponible",
+          "tipo": "casilla",
+          "config": {
+            "clave": "disponible",
+            "rol": "disponible"
           }
         },
         {
@@ -4215,6 +4233,15 @@
           }
         },
         {
+          "clave": "disponible",
+          "nombre": "Disponible",
+          "tipo": "casilla",
+          "config": {
+            "clave": "disponible",
+            "rol": "disponible"
+          }
+        },
+        {
           "clave": "unidad",
           "nombre": "Unidad de venta",
           "tipo": "texto",
@@ -4378,6 +4405,15 @@
           }
         },
         {
+          "clave": "disponible",
+          "nombre": "Disponible",
+          "tipo": "casilla",
+          "config": {
+            "clave": "disponible",
+            "rol": "disponible"
+          }
+        },
+        {
           "clave": "unidad",
           "nombre": "Unidad de venta",
           "tipo": "texto",
@@ -4538,6 +4574,15 @@
           "config": {
             "clave": "stock",
             "rol": "stock"
+          }
+        },
+        {
+          "clave": "disponible",
+          "nombre": "Disponible",
+          "tipo": "casilla",
+          "config": {
+            "clave": "disponible",
+            "rol": "disponible"
           }
         },
         {

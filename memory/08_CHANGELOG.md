@@ -9309,3 +9309,14 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Lo que no se sabe se dice («Plazo de entrega: la tienda no lo publica»), en gris; un plazo cargado como «desconocido» ya no sale como «Entrega: desconocido».
 - Las condiciones son **propiedades de la fila del distribuidor** (11 columnas nuevas en «Distribuidores», encontradas por `rol`), con fuente y fecha de cada valor: `datos/*/condiciones-tiendas.json`, investigadas en la web de las 58 tiendas. Solo se leen de una tabla de distribuidores del mismo dueño que las ofertas.
 - El HTML para buscadores (`ofertasEnHtml`) dice las mismas líneas (`lineasCompra`, compartida).
+
+## 2026-10-18 — Wikiproducts: «en stock» reads as in stock (W3a, found by W5)
+- An offer whose data said «en stock» without a number of units loaded an empty «Stock (unidades)» cell, so its box read «Disponibilidad sin confirmar». Inventing a count would be worse.
+- The offer tables now have a «Disponible» checkbox (role `disponible`):
+  - `cargar.mjs` (`disponibleDe`) sets it to true for «en stock», «disponible» or a count above zero.
+  - It sets it to false for a sold-out offer.
+  - It leaves it empty for «sin confirmar» or contradictory pages.
+- How the offers API uses it:
+  - It returns `en_stock` (a count wins when there is one) and treats `disponible = false` as sold out.
+  - The box says «En stock», and the SEO markup says InStock only in that case.
+- Test in `scripts/probar-ofertas.ts`. The column is created by the next full load.

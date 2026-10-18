@@ -135,7 +135,7 @@ export type CondicionesTienda = {
 
 type ConCondiciones = {
   precio_centimos: number | null; envio_centimos: number | null; moneda: string;
-  stock: number | null; agotada: boolean; plazo: string | null; comprobado: string | null;
+  stock: number | null; agotada: boolean; en_stock?: boolean | null; plazo: string | null; comprobado: string | null;
   compra?: unknown; tienda?: CondicionesTienda | null;
 };
 
@@ -182,7 +182,7 @@ export function textoGarantia(t: CondicionesTienda | null | undefined): string |
 
 export function textoStock(o: ConCondiciones): string {
   if (o.agotada) return 'Agotado';
-  if (o.stock === null) return 'Disponibilidad sin confirmar';
+  if (o.stock === null) return o.en_stock ? 'En stock' : 'Disponibilidad sin confirmar';
   return o.stock <= 5 ? `Quedan ${o.stock}` : 'En stock';
 }
 
