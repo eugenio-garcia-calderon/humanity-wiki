@@ -217,11 +217,23 @@ export function conUnidad(texto: string, unidad: string): string {
 
 /** A column's name as a sheet shows it: without a trailing «(años)» when the
  *  value already carries that unit — «Garantía (años): 1 años» said it twice. */
-export function etiquetaColumna(c: Columna): string {
+export function etiquetaColumna(c: Columna, hermanas?: Columna[]): string {
+  const propia = ETIQUETA_POR_CLAVE[c.config?.clave];
+  if (propia) return propia;
+  const base = sinUnidad(c);
+  // Two columns that differ only by unit would both read «Batería» (Goal
+  // Zero, production check 2026-10-18): then the unit stays.
+  if (base !== c.nombre && hermanas?.some(x => x.id !== c.id && !ETIQUETA_POR_CLAVE[x.config?.clave] && sinUnidad(x) === base)) return c.nombre;
+  return base;
+}
+function sinUnidad(c: Columna): string {
   const u = String(c.config?.unidad || '').trim().toLowerCase();
   const m = c.nombre.match(/^(.*\S)\s*\(([^)]*)\)$/);
   return u && m && m[2].trim().toLowerCase() === u ? m[1] : c.nombre;
 }
+/** Names that say WHAT is measured where the column name only says the
+ *  unit, by loader key (production column names cannot be patched). */
+const ETIQUETA_POR_CLAVE: Record<string, string> = { bateria_mah: 'Batería (capacidad)', bateria_wh: 'Batería (energía)' };
 
 // ── PROVENANCE, AS A SENTENCE ───────────────────────────────────────────────
 // The house tone (plan §2.6): manufacturer claims are always attributed.

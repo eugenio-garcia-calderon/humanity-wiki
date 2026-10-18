@@ -83,7 +83,8 @@ const esFuera = (d: Destino, nueva?: boolean) => (d?.tipo === 'url' && /^https?:
 
 const MEDIDAS: Record<Tamano, { alto: number; logo: number; letra: string; caja: string; icono: number }> = {
   pequeno: { alto: 56, logo: 28, letra: 'text-[13px]', caja: 'h-8 px-2.5', icono: 14 },
-  mediano: { alto: 68, logo: 36, letra: 'text-sm', caja: 'h-10 px-3.5', icono: 16 },
+  // 44 px de alto: el mínimo para un dedo (ronda 3 del evaluador).
+  mediano: { alto: 68, logo: 36, letra: 'text-sm', caja: 'h-11 px-3.5', icono: 16 },
   grande: { alto: 84, logo: 44, letra: 'text-base', caja: 'h-12 px-4', icono: 18 },
 };
 
@@ -115,7 +116,7 @@ function Marca({ logo, nombre, tamano, rutas, columna }: {
   const m = MEDIDAS[tamano];
   return (
     <a href={hrefDe({ tipo: 'inicio' }, rutas)} data-interno=""
-      className={cn('flex min-w-0 shrink-0 font-black tracking-tight', columna ? 'flex-col items-start gap-3' : 'items-center gap-2.5')}>
+      className={cn('flex min-w-0 min-h-11 shrink-0 font-black tracking-tight', columna ? 'flex-col items-start gap-3' : 'items-center gap-2.5')}>
       {logo && <IconoMenu valor={logo} tamano={m.logo} />}
       {nombre && <span className={cn('truncate', tamano === 'grande' ? 'text-xl' : tamano === 'pequeno' ? 'text-sm' : 'text-base')}>{nombre}</span>}
     </a>
@@ -132,11 +133,11 @@ function CajaBuscar({ rutas, s, lleno }: { rutas: Rutas; s: Sitio; lleno?: boole
   const mn = s.menu;
   return (
     <form role="search" method="get" action={rutas.enlaceBuscar?.() ?? '/buscar'}
-      className={cn('flex items-center gap-2 rounded-lg border px-2.5 h-10 min-w-0', lleno ? 'w-full' : 'w-44 @4xl:w-60')}
+      className={cn('flex items-center gap-2 rounded-lg border px-2.5 h-11 min-w-0', lleno ? 'w-full' : 'w-44 @4xl:w-60')}
       style={{ borderColor: `${mn.texto}33` }}>
       <Search className="w-4 h-4 shrink-0 opacity-60" aria-hidden />
       <input type="search" name="q" required minLength={2} aria-label="Buscar en este sitio" placeholder="Buscar"
-        className="flex-1 min-w-0 bg-transparent outline-none text-base placeholder:opacity-60" style={{ color: mn.texto }} />
+        className="flex-1 min-w-0 h-full bg-transparent outline-none text-base placeholder:opacity-60" style={{ color: mn.texto }} />
       {rutas.raizId && <input type="hidden" name="sitio" value={rutas.raizId} />}
     </form>
   );
@@ -224,7 +225,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
             {/* Opaco y por encima: sin fondo propio del menú, la caja de buscar
                 de debajo se transparentaba entre los enlaces (ronda 2). */}
             <div style={{ background: mn.fondo || 'white', color: mn.texto, borderColor: `${mn.texto}1f` }}
-              className="absolute z-50 right-3 left-3 @md:left-auto @md:w-72 top-full mt-1 rounded-2xl border shadow-2xl p-2 flex flex-col gap-1">
+              className="absolute z-50 right-3 left-3 @md:left-auto @md:w-72 top-full mt-1 rounded-2xl border shadow-2xl p-2 hidden group-open:flex flex-col gap-1">
               {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
             </div>
           </details>
@@ -277,17 +278,17 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
               {nombre && <span>{nombre}</span>}
             </div>
           )}
-          {p.descripcion && <p className="text-sm opacity-75 leading-relaxed whitespace-pre-line max-w-xs">{p.descripcion}</p>}
+          {p.descripcion && <p className="text-base opacity-75 leading-relaxed whitespace-pre-line max-w-xs">{p.descripcion}</p>}
         </div>
         {p.enlaces.length > 0 && (
           <div>
             <p className={titulo}>Enlaces</p>
-            <ul className="space-y-2">
+            <ul>
               {p.enlaces.map(e => (
                 <li key={e.id}>
                   <a href={hrefDe(e.destino, rutas)} data-interno={esInterno(e.destino, e.nuevaPestana) ? '' : undefined}
                     target={esFuera(e.destino, e.nuevaPestana) ? '_blank' : undefined} rel={esFuera(e.destino, e.nuevaPestana) ? 'noopener noreferrer' : undefined}
-                    className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100">
+                    className="inline-flex items-center gap-2 min-h-11 text-base opacity-80 hover:opacity-100">
                     <IconoMenu valor={e.icono} tamano={15} /> {e.texto}
                   </a>
                 </li>
@@ -298,9 +299,9 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
         {hayContacto && (
           <div>
             <p className={titulo}>Contacto</p>
-            <ul className="space-y-2 text-sm">
-              {c.email && <li><a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 opacity-80 hover:opacity-100 break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a></li>}
-              {c.telefono && <li><a href={`tel:${c.telefono.replace(/\s+/g, '')}`} className="inline-flex items-center gap-2 opacity-80 hover:opacity-100"><Phone className="w-4 h-4 shrink-0" /> {c.telefono}</a></li>}
+            <ul className="space-y-1 text-base">
+              {c.email && <li><a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 min-h-11 opacity-80 hover:opacity-100 break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a></li>}
+              {c.telefono && <li><a href={`tel:${c.telefono.replace(/\s+/g, '')}`} className="inline-flex items-center gap-2 min-h-11 opacity-80 hover:opacity-100"><Phone className="w-4 h-4 shrink-0" /> {c.telefono}</a></li>}
               {c.direccion && <li className="inline-flex items-start gap-2 opacity-80 whitespace-pre-line"><MapPin className="w-4 h-4 shrink-0 mt-0.5" /> {c.direccion}</li>}
             </ul>
           </div>
@@ -308,9 +309,9 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
       </div>
       {(p.copyright || legales.length > 0) && (
         <div style={{ borderColor: `${p.texto}26` }} className="border-t">
-          <div className="mx-auto max-w-6xl px-5 @2xl:px-8 py-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs opacity-75">
+          <div className="mx-auto max-w-6xl px-5 @2xl:px-8 py-3 flex flex-wrap items-center gap-x-5 text-sm opacity-75">
             {p.copyright && <span>© {new Date().getFullYear()} {s.titular.nombre || nombre}</span>}
-            {legales.map(d => <a key={d} href={`#${d}`} className="hover:underline">{NOMBRES_LEGALES[d]}</a>)}
+            {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
           </div>
         </div>
       )}

@@ -9372,6 +9372,15 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 ## 2026-10-18 — Zonas táctiles de 44 px en la puntuación de la comunidad (Wikiproducts W4)
 - En el móvil, «Entrar para puntuar» medía 32 px de alto y «Cómo se calcula y cómo se ordena» menos de 44: ahora los dos miden al menos 44 px (`min-h-11`). Las estrellas para votar pasan de 32×36 a 44×44, y los enlaces de «Opiniones en otras webs» también tienen 44 px de alto. Medido a 390 px de ancho en la copia local.
 - El pie de «La mejor en cada criterio» ya no enumera precio, garantía, ecología y seguridad: en las luces sólo salen dos y prometía cuatro. Ahora dice que «las líneas marcadas “Según los datos”» se deciden con el dato que nombran.
+## 2026-10-18 — Evaluator round 3, fix 3: visible filters and sort, ranked and paged search, listing CLS, 16 px / 44 px (Wikiproducts W2)
+
+- Listings: on a published product catalog (a table with a `precio_min` or `tamano` column), the gallery shows «Ordenar por» (price, price per unit, size, power, warranty, cycles, efficiency) and filter chips by thirds of the data (size, power, price), plus «Con precio en tienda» and «LiFePO₄ (LFP)» when the table has them (`MandosCatalogo.tsx`). Visitor-only, per load; the author's view is untouched, and the commission never orders. The generic Filtrar/Ordenar bar is hidden for visitors on catalogs. Sorting by price per unit leaves out rows whose value is 0 (no price).
+- Listing CLS: the database block keeps one screen of height until its rows arrive (`ReservaAlto` in `BloquesLectura`, `onCargada` on `Rejilla`). Local 1440×900 /powerbanks: 0.386 → 0.
+- Search: ranked by relevance (all words in the title 100, exact phrase in the title +30, each word in the title 10, table name 40, sheet 5 / linked table 2) and paged by 20 (`?pagina=`), with «Más resultados» / «Anteriores» instead of «escribe algo más concreto».
+- 16 px and 44 px on home, listings and search: footer text and links, menu links (`mediano` h-11), search boxes, group headings, subpage links, folding headings, brand chips on cards, and the block comment button (44 × 44 hit area, 28 px bubble). The closed mobile menu panel is `display:none` so its links are not counted as hidden tap targets. Locally at 390 px: text under 16 px is 30 % of the home (cards' counts), 5 % of /powerbanks, 10 % of search; tap targets under 44 px: 0 (one 42 px search input).
+- Code only; no load needed. Not checked on production.
+## 2026-10-18 — «Batería (capacidad)» y «Batería (energía)», no dos «Batería» (Wikiproducts W1)
+- Al quitar la unidad del nombre («Batería (mAh)» → «Batería»), las luces solares tenían dos datos llamados igual, uno en mAh y otro en Wh (Goal Zero, revisión en producción). Ahora se llaman «Batería (capacidad)» y «Batería (energía)» (`ETIQUETA_POR_CLAVE`), y en general la unidad se queda en el nombre cuando otra columna de la tabla se llamaría igual sin ella. Solo había este caso en las cinco tablas.
 
 ## 2026-10-18 — Wikiproducts: «Precio desde» no longer counts sold-out shops (W3a, evaluator round 3)
 
