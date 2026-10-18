@@ -115,6 +115,31 @@ prueba('AggregateRating sólo con votos reales', () => {
   assert.equal(metaFicha(ficha('a'), { url: null }).jsonLd[0].url, undefined);
 });
 
+prueba('cada tienda es un Offer; sin precio no sale, y la comisión nunca', () => {
+  const base = { distribuidor: 'Tienda A', envio_centimos: 499, moneda: 'EUR', stock: 3, agotada: false, enlace: 'https://a.es/737' };
+  const ofertas = [
+    { ...base, precio_centimos: 12999, comision_pct: 5 },
+    { ...base, distribuidor: 'Tienda B', precio_centimos: 13999, envio_centimos: null, stock: null, enlace: null },
+    { ...base, distribuidor: 'Tienda C', precio_centimos: 9999, stock: 0, agotada: true },
+    { ...base, distribuidor: 'Tienda D', precio_centimos: null },
+  ];
+  const ag = metaFicha(ficha('a'), { url: 'https://x/a', ofertas }).jsonLd[0].offers;
+  assert.equal(ag['@type'], 'AggregateOffer');
+  assert.equal(ag.offers.length, 3);
+  assert.equal(ag.offerCount, 3);
+  assert.equal(ag.lowPrice, 99.99);
+  assert.equal(ag.highPrice, 139.99);
+  const [a, b, c] = ag.offers;
+  assert.equal(a.availability, 'https://schema.org/InStock');
+  assert.equal(a.shippingDetails.shippingRate.value, 4.99);
+  assert.equal(a.seller.name, 'Tienda A');
+  assert.equal(b.availability, undefined);
+  assert.equal(b.url, 'https://x/a');
+  assert.equal(b.shippingDetails, undefined);
+  assert.equal(c.availability, 'https://schema.org/OutOfStock');
+  assert.ok(!JSON.stringify(ag).includes('comision'));
+});
+
 prueba('el título cabe en 60 caracteres sin cortar palabras', () => {
   assert.equal(tituloFicha('Anker 737', 'Wikiproducts'), 'Anker 737: datos, precio y opiniones | Wikiproducts');
   const largo = tituloFicha('EcoFlow DELTA Pro Ultra con panel solar de 400 W', 'Wikiproducts');

@@ -34,6 +34,7 @@ import {
   propiedadHtml, comparadorHtml, alternativasHtml, afirmacionHtml, retiradaHtml, claveTablaComparador, type Herramientas,
 } from '../../components/bloquesDatos/ficha/html';
 import { registrarAmpliacion } from '../ampliarPagina';
+import { ofertasDeProducto } from '../ofertas';
 import { registrarHtml, esc, enLinea, hrefSeguro, type ContextoHtml } from '../htmlBloques';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -278,8 +279,28 @@ async function ampliarFicha(db: any, req: Request | undefined, pagina: any) {
   // `sitios.ts` turns «{{canonica}}» into the page's canonical address and
   // resolves paths starting with «/» against its origin (W2, 2026-10-18).
   const padre = pagina.padre;
-  const migas = padre?.id ? [{ nombre: String(padre.titulo || '').trim() || 'Inicio', url: padre.slug ? `/${padre.slug}` : `/p/${padre.id}` }] : [];
-  const m = metaFicha(r.ficha, { url: '{{canonica}}', sitio: pagina.sitio?.titulo || null, migas });
+  // The site's home page is «/» on its own domain, not its slug: W2 resolves
+  // «{{inicio}}» to the home page's canonical address (#603).
+  const enInicio = !!padre?.id && padre.id === pagina.sitio?.raizId;
+  const migas = padre?.id ? [{
+    nombre: String(padre.titulo || '').trim() || 'Inicio',
+    url: enInicio ? '{{inicio}}' : padre.slug ? `/${padre.slug}` : `/p/${padre.id}`,
+  }] : [];
+  // Each shop's `Offer` (W5) only in the HTML everybody gets: the browser
+  // does not read the markup, and this reads the whole offers table. The
+  // result is left on the page for the «Dónde comprarlo» writer
+  // (`ofertas.ts`), so the server HTML reads it once.
+  let ofertas: any[] | undefined;
+  if (!req) {
+    const o = await ofertasDeProducto(db, { user: undefined } as any, { filaId: r.ficha.fila_id });
+    if (!('error' in o)) {
+      ofertas = o.ofertas;
+      // Not enumerable: the page itself is written into the HTML for the
+      // browser (`window.__SITIO__`), and the offers have no business there.
+      Object.defineProperty(pagina, 'ofertas_ficha', { value: o, enumerable: false, configurable: true });
+    }
+  }
+  const m = metaFicha(r.ficha, { url: '{{canonica}}', sitio: pagina.sitio?.titulo || null, migas, ofertas });
   pagina.meta = {
     ...(pagina.meta || {}),
     titulo: m.titulo,

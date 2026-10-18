@@ -2,7 +2,8 @@
 // WHAT A PRODUCT SHEET TELLS SEARCH ENGINES (2026-10-18, Wikiproducts W1)
 // ============================================================================
 // SEO requirements (/mnt/project-files/wikiproducto/seo/requisitos-tecnicos.md):
-//   R4  JSON-LD `Product` + `AggregateOffer` + `BreadcrumbList`, generated
+//   R4  JSON-LD `Product` + `AggregateOffer` (with one `Offer` per shop when
+//       the server read them) + `BreadcrumbList`, generated
 //       from the data, never written by hand. `AggregateRating` ONLY with real
 //       votes: an invented rating is a manual penalty and against the house.
 //   R5  og:type=product, product:price:*, and the title pattern
@@ -31,6 +32,43 @@ export type MetaFicha = {
 
 export type Miga = { nombre: string; url: string };
 
+/** One shop's offer, as W5's `ofertasDeProducto` returns it (only the fields
+ *  the markup needs, so this file does not import the server). */
+export type OfertaLd = {
+  distribuidor: string | null;
+  precio_centimos: number | null;
+  envio_centimos: number | null;
+  moneda: string;
+  stock: number | null;
+  agotada: boolean;
+  enlace: string | null;
+};
+
+const euros = (c: number) => Math.round(c) / 100;
+
+/** The `Offer`s of the «Dónde comprarlo» block, in its order. An offer with no
+ *  published price is left out: it is on the page, but schema.org needs a
+ *  price and inventing one is worse than saying nothing. The commission is
+ *  never in the markup, as it never orders anything. Unknown stock declares
+ *  no availability rather than guessing «InStock». */
+export function ofertasLd(ofertas: OfertaLd[], url?: string | null): any[] {
+  return ofertas.filter(o => o.precio_centimos !== null).map(o => ({
+    '@type': 'Offer',
+    price: euros(o.precio_centimos!),
+    priceCurrency: o.moneda || 'EUR',
+    ...(o.agotada ? { availability: 'https://schema.org/OutOfStock' }
+      : o.stock !== null && o.stock > 0 ? { availability: 'https://schema.org/InStock' } : {}),
+    ...(o.enlace ? { url: o.enlace } : url ? { url } : {}),
+    ...(o.distribuidor ? { seller: { '@type': 'Organization', name: o.distribuidor } } : {}),
+    ...(o.envio_centimos !== null ? {
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: euros(o.envio_centimos), currency: o.moneda || 'EUR' },
+      },
+    } : {}),
+  }));
+}
+
 const LIMITE_TITULO = 60;
 
 /** R5: «Anker 737: datos, precio y opiniones | Wikiproducts», shortened by
@@ -57,7 +95,7 @@ function gtin(valor: string): Record<string, string> {
   return d ? { gtin: d } : {};
 }
 
-export function metaFicha(f: Ficha, opciones: { url?: string | null; sitio?: string | null; migas?: Miga[]; imagenAbsoluta?: (u: string) => string }): MetaFicha {
+export function metaFicha(f: Ficha, opciones: { url?: string | null; sitio?: string | null; migas?: Miga[]; imagenAbsoluta?: (u: string) => string; ofertas?: OfertaLd[] }): MetaFicha {
   const fila = filaActual(f);
   const t = f.tabla;
   const abs = opciones.imagenAbsoluta || ((u: string) => u);
@@ -77,10 +115,15 @@ export function metaFicha(f: Ficha, opciones: { url?: string | null; sitio?: str
   const cMin = columnaPorRol(t, 'precio_min');
   const cMax = columnaPorRol(t, 'precio_max');
   const cNum = columnaPorRol(t, 'num_ofertas');
-  const precioMin = cMin ? numeroDe(fila, cMin) : null;
-  const precioMax = cMax ? numeroDe(fila, cMax) : null;
-  const nOfertas = cNum ? numeroDe(fila, cNum) : null;
-  const moneda = cMin?.config?.moneda || 'EUR';
+  // The shops' own offers, when the server read them, win over the row's
+  // aggregate columns: they are what the «Dónde comprarlo» block shows, and
+  // the aggregate can lag behind them.
+  const sueltas = opciones.ofertas ? ofertasLd(opciones.ofertas, opciones.url) : [];
+  const precios = sueltas.map(o => o.price as number);
+  const precioMin = sueltas.length ? Math.min(...precios) : cMin ? numeroDe(fila, cMin) : null;
+  const precioMax = sueltas.length ? Math.max(...precios) : cMax ? numeroDe(fila, cMax) : null;
+  const nOfertas = sueltas.length ? sueltas.length : cNum ? numeroDe(fila, cNum) : null;
+  const moneda = sueltas.length ? sueltas[0].priceCurrency : cMin?.config?.moneda || 'EUR';
 
   // Every technical value that has one, with its unit: what lets an AI
   // search engine answer «how many Wh does it have» from our page.
@@ -116,6 +159,7 @@ export function metaFicha(f: Ficha, opciones: { url?: string | null; sitio?: str
       lowPrice: precioMin,
       ...(precioMax !== null ? { highPrice: precioMax } : {}),
       ...(nOfertas ? { offerCount: nOfertas } : {}),
+      ...(sueltas.length ? { offers: sueltas } : {}),
     };
   }
   // AggregateRating only from real votes: W4's overall community score
