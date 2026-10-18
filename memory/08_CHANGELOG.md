@@ -8893,4 +8893,4 @@ en mis páginas como proyecto pendiente».
 
 ### 2026-10-18 — Ocultar una entrada entera al público (prog8)
 - En el menú de una tarjeta (clic derecho o ⋯), «Ocultar al publicar»: la entrada deja de verse en la web publicada. Quien edita la sigue viendo, atenuada y con la marca «Oculta», y la vuelve a enseñar con «Mostrar al publicar».
-- El servidor no manda las entradas ocultas a quien no puede editar la tabla (columna `bd_filas.oculta`, migración 0153).
+- El servidor no manda las entradas ocultas a quien no puede editar la tabla (columna `bd_filas.oculta`, migración 0154).
