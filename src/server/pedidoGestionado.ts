@@ -180,10 +180,16 @@ async function correosDelPedido(db: any, pedido: any, porTienda: { tienda: strin
   const destino = pedido.entrega_tipo === 'recogida' ? 'Lo recoge en persona.'
     : [dir.name, dir.line1, dir.line2, [dir.postal_code, dir.city].filter(Boolean).join(' '), dir.country].filter(Boolean).join(', ');
 
-  const dueno = (await db.execute(sql`SELECT email, handle FROM users WHERE id = ${pedido.vendedor_user_id}`)).rows[0] as any;
-  // The tracking page (`MiPedido`) lives on the seller's shop subdomain; the
-  // main domain has no `/pedido` route. No handle → no link, just the code.
-  const seguir = dueno?.handle ? `https://${dueno.handle}.${dominio}/pedido?codigo=${encodeURIComponent(pedido.codigo)}` : null;
+  const dueno = (await db.execute(sql`SELECT email FROM users WHERE id = ${pedido.vendedor_user_id}`)).rows[0] as any;
+  // The tracking page (`/pedido`) exists on the main domain and on every site
+  // domain. Link to the seller's own site when they have exactly one active
+  // (Wikiproducts: wikiproducts.humanity.wiki); with none or several we cannot
+  // tell which one the buyer used, so the main domain.
+  const sitios = (await db.execute(sql`
+    SELECT dominio FROM dominios_paginas WHERE propietario_user_id = ${pedido.vendedor_user_id} AND estado = 'activo' LIMIT 2
+  `)).rows as any[];
+  const casa = sitios.length === 1 ? `https://${sitios[0].dominio}` : base;
+  const seguir = `${casa}/pedido?codigo=${encodeURIComponent(pedido.codigo)}`;
   if (dueno?.email) {
     const ok = await enviarCorreo({
       para: dueno.email,
@@ -204,9 +210,8 @@ async function correosDelPedido(db: any, pedido: any, porTienda: { tienda: strin
       texto: [
         `${pedido.comprador_nombre ? `Hola, ${pedido.comprador_nombre}. ` : ''}Hemos recibido tu pago. Tu código de pedido es ${pedido.codigo}.`, '',
         'Lo pedimos por ti a cada tienda, al mismo precio que tiene en ella:', '', bloques, '',
-        seguir
-          ? `Puedes seguirlo aquí: ${seguir}\nEn esa página verás cuándo lo pedimos a cada tienda, cuándo sale y cuándo llega.`
-          : 'Guarda este código: es el que te pediremos si nos escribes por este pedido.',
+        `Puedes seguirlo aquí: ${seguir}`,
+        'En esa página verás cuándo lo pedimos a cada tienda, cuándo sale y cuándo llega.',
       ].join('\n'),
     });
     if (!ok) console.warn(`[pedido gestionado] ${pedido.codigo}: no se ha enviado la confirmación al comprador (¿falta RESEND_API_KEY?)`);

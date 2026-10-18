@@ -93,6 +93,7 @@ try {
   assert.equal(aCliente.to[0], 'comprador-ai@example.com');
   assert.match(aCliente.subject, /Tu pedido AIC\d+/);
   assert.match(aCliente.text, /Tu código de pedido es AIC\d+/);
+  assert.match(aCliente.text, /https:\/\/\S+\/pedido\?codigo=AIC\d+/);
   console.log('  ✓ al pagar: un correo a quien gestiona y otro al comprador');
 
   // 2. Stripe repite el aviso: nada nuevo.

@@ -457,5 +457,5 @@ threshold, checked only on that null path here).
 - **No server-rendered HTML fallback yet** for the two blocks (W2's
   `registrarHtml` was not merged when this was written).
 
-### 2026-10-18 — Order tracking link points at a shop subdomain only (W5)
-- `MiPedido` (`/pedido?codigo=…`) is routed only in the shop-subdomain tree of `App.tsx`. The new order e-mail links to `https://<handle>.<domain>/pedido` and omits the link when the seller has no handle. The existing WhatsApp texts in `stripe.ts` and `publicar.ts` still say `<domain>/pedido?codigo=…` on the main domain, where that route does not exist — unverified in production. Right fix: route `/pedido` on the main domain and on custom-domain sites (`AplicacionDeDominio`); ~30 min now.
+### 2026-10-18 — Order e-mail picks the seller's site by "exactly one active domain" (W5)
+- `correosDelPedido` links to the seller's site only when they own exactly one active domain; with several it falls back to the main domain, because the order does not record which site the buyer was on. Right fix: store the checkout's return host on `pedidos` and link back there; ~30 min (column + webhook + e-mail).
