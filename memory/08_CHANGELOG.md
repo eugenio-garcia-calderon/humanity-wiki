@@ -8959,3 +8959,8 @@ en mis páginas como proyecto pendiente».
 - El `AggregateOffer` del JSON-LD `Product` lleva ahora un `Offer` por tienda: precio, moneda, envío (`shippingDetails`), disponibilidad sólo si se sabe el stock, enlace y vendedor. Salen de las mismas ofertas que pinta «Dónde comprarlo» (`ofertasDeProducto`, W5), así que el precio mínimo, el máximo y el número de tiendas cuadran con lo que se ve. Una oferta sin precio publicado no se declara; la comisión nunca.
 - Sólo en el HTML del servidor, leído como un anónimo. La lectura se deja en la página (sin salir en `window.__SITIO__`) y el bloque «Dónde comprarlo» la reutiliza: una sola lectura de la tabla de ofertas por visita.
 - Las migas de pan apuntan a la portada con `{{inicio}}` cuando la ficha cuelga de ella (W2, #603): en un dominio propio la portada es `/`, no su slug.
+
+### 2026-10-18 — Un número con decimales ya no se guarda mil veces mayor (tablas, Wikiproducts W1)
+- Un precio enviado como número por la API (`0.138`) se pasaba a texto y la regla del punto de millar español lo leía como «138». Ahora un número llega tal cual a las columnas de precio y de porcentaje (la de número ya lo hacía).
+- En texto, un punto con un cero delante ya no cuenta como millar: «0.138» es 0,138. «120.000» sigue siendo ciento veinte mil.
+- Prueba: `npx tsx scripts/probar-tipos-numeros.ts` (21 casos).
