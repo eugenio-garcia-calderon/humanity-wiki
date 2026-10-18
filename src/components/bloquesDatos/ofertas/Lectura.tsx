@@ -112,10 +112,12 @@ export function ListaOfertas({ ofertas, titulo }: { ofertas: Oferta[]; titulo: s
               <p className="mt-2 text-xs leading-snug text-slate-500">{textoComision(o.comision_pct, comisionUnidad, o.moneda)}</p>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                {o.compra && !o.agotada && <BotonCompra datos={o.compra} />}
+                {/* An offer without a price already says «Precio no publicado» above; the
+                    buy button's own empty state is an instruction for the seller. */}
+                {o.compra && !o.agotada && o.compra.precio_centimos !== null && <BotonCompra datos={o.compra} />}
                 {o.enlace && (
                   <a href={o.enlace} target="_blank" rel={o.rel}
-                     className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                     className="inline-flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm sm:text-xs font-bold text-slate-700 hover:bg-slate-50">
                     Ver en la tienda <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                   </a>
                 )}

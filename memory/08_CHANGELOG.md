@@ -9040,3 +9040,13 @@ en mis páginas como proyecto pendiente».
 - Header photo shows its credit (new role `credito_imagen`, clave `foto_licencia`) as a caption, only when there is a photo, in both React and server HTML. A photo that fails to load hides itself instead of showing alt text.
 - Gallery cards fall back to the row's `imagen`-role column when the page has no cover or image block (`tarjetasDe` in `src/server/bd.ts`).
 - Recalls/claims linked but not readable no longer produce «No conocemos ninguna retirada»: recalls are listed by title, claims block hides.
+
+## 2026-10-18 — Wikiproducts W1: evaluator round 1 on the product sheet
+
+- «La mejor en cada criterio»: same type and comparable size (half to double), and the sentence says so; community criteria always show their vote count («0 votos, hacen falta 3»).
+- Comparator: on phones 16 px text, 44×44 remove buttons and picker, narrower fixed label column with a visible edge, a «desliza» hint, and the table scrolls to a product just added. It only offers products of the same type and warns when a link mixes types.
+- Sheet layout no longer jumps while loading (CLS 0.78 → 0.00 measured locally on the Anker Zolo sheet): data-block chunks and community scores are fetched before the first paint (`bloquesDatos/precarga.ts`); a broken header photo keeps its box.
+- Visitors no longer see «Ponle un precio para venderlo»; an offer without a price shows no buy button.
+- Gallery cards of product tables show brand, key figure with its unit, «Precio desde» and the community score by default.
+- «Sugerir una corrección» on every sheet (via the existing report queue).
+- New provenance nature `tercero` («Según <host>»), and «no publicado» texts per column (e.g. «No hay pruebas independientes publicadas»).

@@ -52,7 +52,7 @@ export default function BotonCompra({ datos, compacto, centrado }: { datos: Dato
 
   if (datos.motivo) return aviso(datos.motivo);
   if (!datos.producto_id) return aviso('—');
-  if (datos.precio_centimos === null) return aviso('Ponle un precio para venderlo');
+  if (datos.precio_centimos === null) return aviso('Sin precio todavía');  // visitors see this too: no seller instructions here
   if (datos.stock === 0) return aviso('Agotado');
 
   const tope = Math.min(99, datos.stock ?? 99);

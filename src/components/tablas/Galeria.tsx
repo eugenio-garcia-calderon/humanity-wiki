@@ -561,7 +561,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });
                   return v ? (
                     <p key={c.id} className={cn('text-slate-500 line-clamp-2 break-words', chica ? 'text-[10px] leading-tight' : 'text-xs')}>
-                      <span className="text-slate-400">{c.nombre}: </span>{v}
+                      <span className="text-slate-500">{c.nombre}: </span>{v}
+                      {/* «72» alone says nothing on a card: the unit the column declares goes with it. */}
+                      {c.config?.unidad && ['numero', 'formula', 'agregado'].includes(c.tipo) ? ` ${c.config.unidad}` : ''}
                     </p>
                   ) : null;
                 })}

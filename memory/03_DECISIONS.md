@@ -877,3 +877,25 @@ the management panel, is the cheapest way to check it.
   licensed photo as part of the indexing bar. Dropped from the bar and kept as
   `mejoras`, because the first catalogue went live with no photos and the rule
   kept every sheet out of Google. Diverges from the SEO requirements text.
+
+## 2026-10-18 — Sheet: a fifth provenance nature, and the first paint waits for the sheet's blocks (W1)
+
+- **`tercero` nature.** Values relayed by a shop, the press, a regulator or
+  Wikipedia were stored as `declarado` and read «Según la marca» with a source
+  that was not the brand (1,041 values). They now take `tercero`, shown as
+  «Según <host>». Approved by the coordinator; W3a reclassifies by host.
+  `no_publicado` reads per column (`config.sin_dato`, else a short map by
+  loader clave, else «El fabricante no lo publica»).
+- **Alternatives: same type AND comparable size.** Half to double the row's
+  `tamano` column (energy or peak power), dropped if it leaves fewer than three.
+  Alternative considered: a hand-set «segment» column per product; rejected
+  because nobody fills it in and the size is already in the data.
+- **CLS.** `main.tsx` waits (max 1.5 s, in parallel with the app chunk) for the
+  reading chunks of the data blocks on the page the server sent, and for its
+  community scores; meanwhile the server HTML stays visible. Alternative:
+  importing the sheet blocks eagerly into the entry chunk — rejected, every
+  humanity.wiki page would pay for them. Measured locally: 0.78 → 0.00.
+- **«Sugerir una corrección»** reuses `POST /api/report` (`content_reports`,
+  reviewed at level 3) with the reason prefixed «Corrección sugerida». Needs an
+  account, like voting. A dedicated corrections queue is the right shape once
+  volume justifies it; today the table has zero rows.
