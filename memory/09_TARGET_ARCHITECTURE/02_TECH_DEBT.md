@@ -467,3 +467,4 @@ threshold, checked only on that null path here).
 ## Shop shipping rule is shown, not counted (W5, 2026-10-18)
 - `textoEnvioTienda` shows «Envío 4,99 €, gratis desde 50 €» when an offer has no `envio` of its own, but `totalOferta` and `ordenarOfertas` still treat that offer's shipping as unknown (counted as 0, sorted after known ones). Accepted because the order rule is the ethics code's and changing it deserves its own PR and test.
 - Right fix: derive `envio_centimos` server-side from the shop rule and the price, flagged as derived, and let the cart use the same value. About 1 h today; grows with every place that reads `envio_centimos` (today 4).
+- Update (W5, round 3 fix 1): the cart now counts the shop rule in each shop's total (`envioCompraTienda`, shared by the cart quote). The sheet's `totalOferta`/`ordenarOfertas` still do not; that half of the debt stands.

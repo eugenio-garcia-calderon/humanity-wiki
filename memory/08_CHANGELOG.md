@@ -9359,5 +9359,15 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - **Zonas táctiles**: enlaces de fuente (`py-3` en línea, sin mover nada), «Dónde se buscó» y sus enlaces, y la miga de pan llegan a 44 px.
 - Sigue pendiente (datos, no código): el comparador, las tarjetas y el orden siguen usando «Precio desde» de la fila, que cuenta también las tiendas agotadas.
 
+
+
+## 2026-10-18 — Multi-shop cart open to every visitor (Wikiproducts W5, round 3)
+- «Añadir a la cesta» now shows for everyone on every priced offer, not only for the owner. The «Muy pronto podrás comprar…» note that ended the journey is gone.
+- While payment through Wikiproducts is not open (payments off, or a Stripe TEST key and the reader is not the owner), the cart groups by shop: each line with its price, its commission always stated («Comisión de Wikiproducts: 0,00 € (sin acuerdo con esta tienda)» when there is no agreement) and a «Completar en {tienda}» link to the shop's page; each shop with subtotal, shipping and total; then a grand total and the total commission.
+- Each shop's shipping counts in its total: the offer's own shipping wins; otherwise the shop's published rule (free from X, or its flat cost). When nobody published it the cart says «lo calcula la tienda» and never adds it as zero (`envioCompraTienda` in `src/utils/ofertas.ts`).
+- At checkout, instead of «Finalizar compra», the cart says plainly that payment through Wikiproducts is not available yet and that the purchase is completed at each shop for the same price. The owner with the test key still pays here as before; no key or config was touched.
+- Fixed on the way: offers on a sheet whose table is private but whose page is published were hidden from anonymous readers, because the query never read the sheet's `pagina_id`.
+- `POST /api/publicar/cotizar` also returns `compra_en_tiendas` and `es_dueno`. Tests: `scripts/probar-ofertas.ts` (16), `probar-ofertas-anonimo.mjs`, `probar-correos-pedido.ts`; checked in a browser with no session, 4 products from 3 shops (199,36 €).
+
 ## 2026-10-18 — Zonas táctiles de 44 px en la puntuación de la comunidad (Wikiproducts W4)
 - En el móvil, «Entrar para puntuar» medía 32 px de alto y «Cómo se calcula y cómo se ordena» menos de 44: ahora los dos miden al menos 44 px (`min-h-11`). Las estrellas para votar pasan de 32×36 a 44×44, y los enlaces de «Opiniones en otras webs» también tienen 44 px de alto. Medido a 390 px de ancho en la copia local.
