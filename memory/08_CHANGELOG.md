@@ -9396,3 +9396,12 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - The comparator's chooser is always shown: with room it adds, with four products it swaps the last one («Cambiar el último por…»).
 - Product galleries on a published site get a «Comparar» tick per card (only tables with two or more `config.comparar` columns; never in the editor, carousels or XS cards). From 2 to 4 ticks a bar at the foot opens the first product's sheet at `?comparar=…#comparar`, which the sheet's comparator already reads, and scrolls to it. `src/components/tablas/CompararGaleria.tsx`; the choice is in memory only.
 - Checked locally on the mounted site at 1440 and 390 px (Powerbanks gallery → 3 ticked → sheet comparator with the 3; Anker PowerCore 10000: «Garantía … Este producto: sin dato»). Not checked on production or with the installed app.
+
+## 2026-10-19 — Offers tell the truth about Spain, and the summary matches the list (Wikiproducts W5, round 4)
+- A shop whose row says it does not ship to Spain (`envia_espana` unticked) no longer counts as selling the product: no «Desde», no «A la venta», no cart, sorted after the shops that can sell, labelled «No envía a España», and left out of the JSON-LD offers. AlphaESS now reads «Sin precio en España ahora: una tienda lo vende pero no envía a España».
+- One count and one sentence for the sheet header, the «Dónde comprarlo» box and the server HTML (`contarOfertas`, `textoResumenOfertas`, `textoSinVenta` in `src/utils/ofertas.ts`). «Sin precio todavía: ninguna tienda lo vende aquí» is gone: Anker SOLIX X1 reads «una tienda lo tiene sin precio publicado», the same shop the list shows.
+- Shops without a price are one compact line each under «Otras tiendas que lo tienen, sin precio que podamos confirmar», instead of full cards that buried the one shop that sells it (Anker 737).
+- Not covered here: the listings' and cards' «Desde» come from the `precio_disponible` aggregate and still count a shop that does not ship to Spain until W3a adds the offer-level flag (proposed to W3a).
+- Anker 737 prices re-searched on 2026-10-19: no shop selling it directly in Spain has it in stock with a public price beyond PcComponentes (Carrefour lists only third-party marketplace sellers; not added).
+- Tests: `scripts/probar-ofertas.ts` (18), `scripts/wikiproducts/probar-ficha.ts` (header cases), `probar-ofertas-anonimo.mjs`.
+

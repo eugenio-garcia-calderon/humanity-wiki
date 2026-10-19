@@ -15,7 +15,7 @@
 //      garantía, stock, fecha del precio) dice «no lo sabemos» de forma
 //      distinguible de un dato, y nunca «Entrega: desconocido».
 import assert from 'node:assert/strict';
-import { ordenarOfertas, comisionDeLinea, textoComision, relEnlaceTienda, lineasCompra, textoEnvioTienda, envioCompraTienda, textoComisionLinea, type CondicionesTienda } from '../src/utils/ofertas';
+import { ordenarOfertas, comisionDeLinea, textoComision, relEnlaceTienda, lineasCompra, textoEnvioTienda, envioCompraTienda, textoComisionLinea, contarOfertas, textoResumenOfertas, textoSinVenta, type CondicionesTienda } from '../src/utils/ofertas';
 import { calcularEnvio } from '../src/server/zonasEnvio';
 import { calcularEnvioPorDistribuidor, estadoDeducido } from '../src/server/pedidoGestionado';
 
@@ -166,6 +166,21 @@ ok('la cesta cuenta el envío de cada tienda: el de la oferta manda, si no la re
 ok('cada línea de la cesta dice su comisión, también cuando es cero', () => {
   assert.match(textoComisionLinea(null, null, 'EUR'), /^Comisión de Wikiproducts: 0,00\s€ \(sin acuerdo con esta tienda\)$/);
   assert.match(textoComisionLinea(3, 288, 'EUR'), /^Comisión de Wikiproducts: 2,88\s€ \(3\s?%\), la paga la tienda$/);
+});
+ok('una tienda que no envía a España no vende aquí: ni «Desde», ni primera en el orden', () => {
+  const fuera = { precio_centimos: 179080, envio_centimos: 0, distribuidor_nombre: 'Vekto', agotada: false, fuera_de_espana: true };
+  const aqui = { precio_centimos: 190000, envio_centimos: 0, distribuidor_nombre: 'Otra', agotada: false };
+  assert.deepEqual(ordenarOfertas([fuera, aqui]).map(o => o.distribuidor_nombre), ['Otra', 'Vekto']);
+  const c = contarOfertas([fuera]);
+  assert.deepEqual(c, { vendibles: 0, sinPrecio: 0, agotadas: 0, fuera: 1, total: 1 });
+  assert.equal(textoResumenOfertas(c, null), 'Sin precio en España ahora: una tienda lo vende pero no envía a España.');
+});
+ok('el resumen nombra las mismas tiendas que la lista (nunca «ninguna tienda» con una debajo)', () => {
+  const sin = { precio_centimos: null, agotada: false };
+  assert.equal(textoSinVenta(contarOfertas([sin])), 'Sin precio en España ahora: una tienda lo tiene sin precio publicado.');
+  assert.equal(textoSinVenta(contarOfertas([])), 'Sin precio todavía: no tenemos registrada ninguna tienda que lo venda.');
+  const c = contarOfertas([{ precio_centimos: 14420, agotada: false }, sin, sin, { precio_centimos: null, agotada: true }, { precio_centimos: 100, agotada: false, fuera_de_espana: true }]);
+  assert.equal(textoResumenOfertas(c, '144,20 €'), 'Desde 144,20 € con envío, en una tienda (además, 2 sin precio confirmado, una agotada y una no envía a España).');
 });
 
 console.log(`\n${n} comprobaciones, todas bien.`);

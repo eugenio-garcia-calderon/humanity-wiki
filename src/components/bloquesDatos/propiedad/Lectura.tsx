@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ImageOff, Star, ShoppingCart, Columns3 } from 'lucide-react';
 import { Badge, Button } from '../../ui/core';
 import { cn } from '../../../utils/cn';
+import { textoOtrasOfertas, textoSinVenta } from '../../../utils/ofertas';
 import TextoConEnlaces from '../../ui/TextoConEnlaces';
 import type { PropsLectura } from '../tipos';
 import { useFicha } from '../ficha/useFicha';
@@ -76,14 +77,13 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
                     <p className="text-sm text-slate-600">
                       {v.compra.hasta ? <>hasta {v.compra.hasta} · </> : null}
                       en {v.compra.tiendas || 1} {(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}
-                      {v.compra.agotadas ? <> · {v.compra.agotadas} {v.compra.agotadas === 1 ? 'agotada' : 'agotadas'}</> : null}
-                      {v.compra.sinPrecio ? <> · {v.compra.sinPrecio} más sin precio confirmado</> : null}
+                      {textoOtrasOfertas(v.compra) ? <> · además, {textoOtrasOfertas(v.compra)}</> : null}
                     </p>
                     {v.compra.porUnidad ? <p className="text-base font-bold text-slate-800" title="Precio más bajo de las tiendas dividido por la potencia o la energía que declara la marca"><span className="font-normal text-slate-600">{v.compra.etiquetaUnidad}: </span>{v.compra.porUnidad}</p> : null}
                   </>
-                ) : v.compra.ultimo ? (
+                ) : v.compra.ultimo && !v.compra.sinPrecio && !v.compra.fuera ? (
                   <p className="text-base font-semibold text-slate-600">Último precio visto <span className="font-bold text-slate-800">{v.compra.ultimo}</span> ({v.compra.agotadas === 1 ? 'agotado en la única tienda que lo tenía' : `agotado en las ${v.compra.agotadas} tiendas que lo tenían`})</p>
-                ) : <p className="text-base font-semibold text-slate-600">Sin precio todavía: ninguna tienda lo vende aquí.</p>}
+                ) : <p className="text-base font-semibold text-slate-600">{textoSinVenta({ ...v.compra, vendibles: 0 })}</p>}
                 {v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
               </div>
             ) : v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}

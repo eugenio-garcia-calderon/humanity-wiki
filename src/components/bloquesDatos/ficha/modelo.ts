@@ -82,7 +82,7 @@ export type Ficha = {
   /** The row's shops as the «Dónde comprarlo» block sees them (W5's
    *  `ofertasDeProducto`, its rule for who may read them): only what the
    *  header needs. Absent on a template or when they could not be read. */
-  ofertas?: Array<{ precio_centimos: number | null; agotada: boolean }>;
+  ofertas?: Array<{ precio_centimos: number | null; agotada: boolean; fuera_de_espana?: boolean }>;
 };
 
 export const ROLES = [

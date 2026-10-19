@@ -290,7 +290,7 @@ prueba('la cabecera cuenta las tiendas con precio y no esconde que está descata
   assert.equal(cab.estado, 'A la venta');
   const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
   const html = propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: conCeldas([num, cp, est], { num: ok(5), cp: ok(1) }), relacionadas: {} }, { estilo: 'cabecera' }, h);
-  assert.ok(html.includes('en 1 tienda · 4 más sin precio confirmado'), html);
+  assert.ok(html.includes('en 1 tienda · además, 4 sin precio confirmado'), html);
   // A table loaded before the column existed keeps counting them all.
   cab = vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', tabla: conCeldas([num], { num: ok(5) }), relacionadas: {} }, { estilo: 'cabecera' }) as any;
   assert.deepEqual([cab.compra.tiendas, cab.compra.sinPrecio], [5, 0]);
@@ -331,6 +331,16 @@ prueba('la cabecera sale de las tiendas: una agotada no es «Desde» ni «A la v
   assert.equal(v.estado, '', 'nada de «A la venta» con todo agotado');
   const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
   assert.ok(propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {}, ofertas: [{ precio_centimos: 2995, agotada: true }] }, { estilo: 'cabecera' }, h).match(/Último precio visto 29,95\s€ \(agotado\)/));
+  // AlphaESS (round 4): its only shop does not ship to Spain.
+  v = cab([{ precio_centimos: 179080, agotada: false, fuera_de_espana: true }]);
+  assert.equal(v.compra.desde, '');
+  assert.equal(v.compra.fuera, 1);
+  assert.equal(v.estado, '', 'nada de «A la venta» si ninguna tienda envía a España');
+  assert.ok(propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {}, ofertas: [{ precio_centimos: 179080, agotada: false, fuera_de_espana: true }] }, { estilo: 'cabecera' }, h)
+    .includes('Sin precio en España ahora: una tienda lo vende pero no envía a España.'));
+  // Anker SOLIX X1: one shop, no price. The header names it, never «ninguna tienda».
+  assert.ok(propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {}, ofertas: [{ precio_centimos: null, agotada: false }] }, { estilo: 'cabecera' }, h)
+    .includes('Sin precio en España ahora: una tienda lo tiene sin precio publicado.'));
 });
 
 prueba('las cifras escritas como texto llevan su unidad', () => {
