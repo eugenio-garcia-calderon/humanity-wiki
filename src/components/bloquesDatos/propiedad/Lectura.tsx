@@ -244,7 +244,7 @@ function Documentos({ lista }: { lista: Documento[] }) {
             {conEmisor ? <td className="hidden py-1.5 pr-3 text-sm text-slate-600 sm:table-cell">{d.emisor || 'No indicado'}</td> : null}
             <td className="py-1.5">
               {d.enlace ? (
-                <a href={d.enlace} target="_blank" rel="noopener nofollow" className="inline-flex min-h-[44px] max-w-full items-center gap-1 text-sm font-semibold text-sky-700 [overflow-wrap:anywhere] hover:underline" title={d.fecha ? `Consultado el ${d.fecha}` : undefined}>
+                <a href={d.enlace} target="_blank" rel="noopener nofollow" className="flex min-h-11 w-fit max-w-full items-center gap-1 py-3 text-sm font-semibold text-sky-700 [overflow-wrap:anywhere] hover:underline" title={d.fecha ? `Consultado el ${d.fecha}` : undefined}>
                   {d.sitio || 'Ver el documento'} <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 </a>
               ) : <span className="text-sm text-slate-500">Sin enlace</span>}
