@@ -41,6 +41,7 @@ export type OfertaLd = {
   moneda: string;
   stock: number | null;
   agotada: boolean;
+  fuera_de_espana?: boolean;
   en_stock?: boolean | null;
   enlace: string | null;
 };
@@ -53,7 +54,8 @@ const euros = (c: number) => Math.round(c) / 100;
  *  never in the markup, as it never orders anything. Unknown stock declares
  *  no availability rather than guessing «InStock». */
 export function ofertasLd(ofertas: OfertaLd[], url?: string | null): any[] {
-  return ofertas.filter(o => o.precio_centimos !== null).map(o => ({
+  // A shop that does not ship to Spain is not an offer a reader here can take.
+  return ofertas.filter(o => o.precio_centimos !== null && !o.fuera_de_espana).map(o => ({
     '@type': 'Offer',
     price: euros(o.precio_centimos!),
     priceCurrency: o.moneda || 'EUR',

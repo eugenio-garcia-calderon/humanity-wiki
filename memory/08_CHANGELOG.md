@@ -9389,6 +9389,37 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - New `PATCH /api/v1/databases/:id/columns/:columnId` `{config, name?}`, through the screen's own `PUT /api/bd/columnas/:id` (same cycle check, type still not changeable).
 - Local copy, real data: 20 priced-but-sold-out offers drop out. Goal Zero Crush Light Chroma's «Precio desde» goes from 29,95 € to empty, while Anker 737 stays at 144,20 €. A second run changes nothing. «Precio hasta» and «Tiendas con precio» read the same in-stock column, so «desde X hasta Y en N tiendas» describes one set of offers.
 
+## 2026-10-19 — Wikiproducts: the product's own rank on every line, and «Comparar» chosen by the visitor (W4, evaluator round 4)
+
+- «La mejor en cada criterio»: every line now says where this product stands, «Este producto: 3.º de 12», or why it cannot: «sin dato» (no figure), «sin votos todavía» (community line), «N retiradas o alertas» / «sin dato (aún no hemos revisado sus retiradas)» (safety line). Before, a product without the figure got a line naming only the winner. Field `esteProducto` in `vistaAlternativas`; React and server HTML both paint it.
+- Comparator default (`porDefecto`): products with a price go before unpriced ones, so a sheet no longer opens its comparison with «Sin precio en ninguna tienda todavía» when priced siblings exist.
+- The comparator's chooser is always shown: with room it adds, with four products it swaps the last one («Cambiar el último por…»).
+- Product galleries on a published site get a «Comparar» tick per card (only tables with two or more `config.comparar` columns; never in the editor, carousels or XS cards). From 2 to 4 ticks a bar at the foot opens the first product's sheet at `?comparar=…#comparar`, which the sheet's comparator already reads, and scrolls to it. `src/components/tablas/CompararGaleria.tsx`; the choice is in memory only.
+- Checked locally on the mounted site at 1440 and 390 px (Powerbanks gallery → 3 ticked → sheet comparator with the 3; Anker PowerCore 10000: «Garantía … Este producto: sin dato»). Not checked on production or with the installed app.
+
+## 2026-10-19 — Offers tell the truth about Spain, and the summary matches the list (Wikiproducts W5, round 4)
+- A shop whose row says it does not ship to Spain (`envia_espana` unticked) no longer counts as selling the product: no «Desde», no «A la venta», no cart, sorted after the shops that can sell, labelled «No envía a España», and left out of the JSON-LD offers. AlphaESS now reads «Sin precio en España ahora: una tienda lo vende pero no envía a España».
+- One count and one sentence for the sheet header, the «Dónde comprarlo» box and the server HTML (`contarOfertas`, `textoResumenOfertas`, `textoSinVenta` in `src/utils/ofertas.ts`). «Sin precio todavía: ninguna tienda lo vende aquí» is gone: Anker SOLIX X1 reads «una tienda lo tiene sin precio publicado», the same shop the list shows.
+- Shops without a price are one compact line each under «Otras tiendas que lo tienen, sin precio que podamos confirmar», instead of full cards that buried the one shop that sells it (Anker 737).
+- Not covered here: the listings' and cards' «Desde» come from the `precio_disponible` aggregate and still count a shop that does not ship to Spain until W3a adds the offer-level flag (proposed to W3a).
+- Anker 737 prices re-searched on 2026-10-19: no shop selling it directly in Spain has it in stock with a public price beyond PcComponentes (Carrefour lists only third-party marketplace sellers; not added).
+- Tests: `scripts/probar-ofertas.ts` (18), `scripts/wikiproducts/probar-ficha.ts` (header cases), `probar-ofertas-anonimo.mjs`.
+
+## 2026-10-19 · Wikiproducts: «Precio desde» leaves out shops that don't ship to Spain (W3a, round 4, W5's request)
+
+- Each offers table gets a hidden checkbox «Envía a España» (`envia_espana`), filled by `cargar.mjs` from the shop's `envia_a_espana` in `condiciones-tiendas.json`. Unknown stays empty.
+- «Precio si quedan existencias» is now `SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})`, so «Precio desde», «Precio hasta» and «Tiendas con precio» skip sold-out offers and shops that don't ship to Spain. Empty counts as yes, so nothing unknown is hidden.
+- `crear-esquema.mjs` also rewrites an existing formula column whose text differs from the schema.
+- 12 shops are marked as not shipping to Spain (Vekto, basic-solar.de, proshop.nl, …). Local copy, real data: AlphaESS SMILE-G3 goes from «Desde 1790,80 €» to no price, while Anker 737 stays at 144,20 €.
+
+## 2026-10-19 · Shorter, touch-friendly mobile sheet; certificates and documents as data (Wikiproducts W1, round 4)
+- On a phone (< 640 px) the data tables («Características técnicas», «En la caja y usos», «Garantía», «Origen y fabricación», «Documentos y enlaces»), the comparator, the ad claims and a recall section with no recall start folded: a 48 px title row with a count («14 datos», «4 productos», «3 revisadas · 1 falsa», «Ninguna conocida»). Header, key figures, «Dónde comprarlo», «La mejor en cada criterio» and the ratings stay open, and so does a section with a known recall. The header's «Comparar con otros» and an arrival at `#comparar` open the comparator. Desktop and the editor are unchanged; folded content stays in the page and in the server HTML. Local Anker 737 at 390 px: 9,315 → 5,485 px (part of it W5's #679).
+- Tap targets on mobile: the quantity buttons, «Añadir a la cesta», the variant selector and the shop's «Condiciones» / «En otras webs» links are 44 px tall. Local Anker 737: 3 small targets → 0 (`BotonCompra.tsx`, `ofertas/Lectura.tsx`).
+- Certificates and documents are read back from the loader's text into rows: name, issuer, short link («woba-solar.de») instead of «nombre: …; emisor: …; fuente: https://…» (`documentosDe` in `ficha/vistas.ts`, both painters).
+- A value whose source is one of the product's own documents names the document: «Según la garantía del producto» instead of «Según static.getpylon.com» (AlphaESS). The host stays in the tooltip.
+- Ad claims are quoted once: the text comes from the claim's own column, not from the row title «“claim” · product», which printed “«24,000mAh» · Anker 737…”.
+- The header says «Fabricado en China» where the data has a country (short form; «No publicado» and long qualified values stay only in «Origen y fabricación»). 41 of 94 products have none; passed to W3a.
+- Tests: `scripts/wikiproducts/probar-ficha.ts` (documents, own-document source, claims, country).
 ## 2026-10-19 — Catalog listings: first product above the fold on phones, per-category filters, named default order, 16 px site text, visible focus (W2)
 
 Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).

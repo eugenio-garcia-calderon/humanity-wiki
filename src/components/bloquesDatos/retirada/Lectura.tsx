@@ -19,7 +19,8 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
   const v = vistaRetiradas(manual ? null : ficha, datos);
   if (!v) return enEditor ? <p className="text-sm text-slate-400">La base de datos de esta fila no tiene columna de retiradas.</p> : null;
   return (
-    <Seccion titulo={v.titulo}>
+    // A known recall stays open on a phone: it is safety information, not detail.
+    <Seccion titulo={v.titulo} plegable={!enEditor && v.estado !== 'hay'} resumen={v.estado === 'ninguna' ? 'Ninguna conocida' : v.estado === 'sin_comprobar' ? 'Sin comprobar' : undefined}>
       {v.estado === 'hay' ? (
         <ul className="space-y-3">
           {v.items.map((r, i) => (

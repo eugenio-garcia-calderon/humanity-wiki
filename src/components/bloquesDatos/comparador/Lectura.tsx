@@ -66,6 +66,15 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   useEffect(() => {
     if (anadido && caja) caja.scrollTo({ left: caja.scrollWidth, behavior: 'smooth' });
   }, [anadido, caja]);
+  // Arriving from a gallery's «Comparar» (`…?comparar=a,b#comparar`): the
+  // comparison the visitor asked for is what they see first, not the top of
+  // the sheet. Once, when the table is there.
+  const [llegado, setLlegado] = useState(false);
+  useEffect(() => {
+    if (llegado || !caja || typeof window === 'undefined' || window.location.hash !== '#comparar') return;
+    setLlegado(true);
+    document.getElementById('comparar')?.scrollIntoView({ block: 'start' });
+  }, [caja, llegado]);
   // On a phone each product column is exactly half the box: the sheet's own
   // product fixed on the left, one other beside it, and the snap lands on a
   // whole column. A column cut in half showed a stray «×» and «a ·» from the
@@ -110,7 +119,8 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   const anchoCol = mitad ? { width: mitad, minWidth: mitad, maxWidth: mitad } : undefined;
 
   return (
-    <Seccion titulo={v?.titulo}>
+    // Folded on a phone like the data tables; «Comparar con otros» in the header opens it.
+    <Seccion titulo={v?.titulo} id={modo !== 'fijo' ? 'comparar' : undefined} plegable={!enEditor} resumen={v && v.productos.length > 1 ? `${v.productos.length} productos` : undefined}>
       {v?.mezcla ? <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{v.mezcla}</p> : null}
       {v && v.productos.length > 1 ? (
         <p className="mb-1 text-sm text-slate-500 sm:hidden">
@@ -188,12 +198,15 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
           {todo ? 'Ver sólo lo principal' : `Ver las ${v!.lineas.length} características`}
         </Button>
       ) : null}
-      {modo !== 'fijo' && caben && v?.candidatos.length ? (
+      {/* THE VISITOR CHOOSES (evaluator round 4: «los productos del comparador
+          los elige el sitio»). The chooser is always there: with room it adds,
+          with four it swaps the last one, so a full table never locks them in. */}
+      {modo !== 'fijo' && v?.candidatos.length ? (
         <label className="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-600">
           <Plus className="h-4 w-4" />
-          <select value="" onChange={e => { if (e.target.value) { cambiar([...otros, e.target.value]); setAnadido(n => n + 1); } }}
-                  className={cn(CLASE_CAMPO, 'min-h-[44px] text-base sm:min-h-0 sm:text-xs')} aria-label="Añadir a la comparación">
-            <option value="">Añadir otro producto…</option>
+          <select value="" onChange={e => { if (e.target.value) { cambiar([...(caben ? otros : otros.slice(0, -1)), e.target.value]); setAnadido(n => n + 1); } }}
+                  className={cn(CLASE_CAMPO, 'min-h-[44px] text-base sm:min-h-0 sm:text-xs')} aria-label={caben ? 'Añadir a la comparación' : 'Cambiar el último producto de la comparación'}>
+            <option value="">{caben ? 'Añadir otro producto…' : 'Cambiar el último por…'}</option>
             {v.candidatos.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
           </select>
         </label>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { ImageOff, Star, ShoppingCart, Columns3 } from 'lucide-react';
+import { ImageOff, Star, ShoppingCart, Columns3, ExternalLink } from 'lucide-react';
 import { Badge, Button } from '../../ui/core';
 import { cn } from '../../../utils/cn';
+import { textoOtrasOfertas, textoSinVenta } from '../../../utils/ofertas';
 import TextoConEnlaces from '../../ui/TextoConEnlaces';
 import type { PropsLectura } from '../tipos';
 import { useFicha } from '../ficha/useFicha';
-import { vistaPropiedad, DESCRIPCION_NATURALEZA, type Valor, type Linea, type Nota } from '../ficha/vistas';
+import { vistaPropiedad, DESCRIPCION_NATURALEZA, type Valor, type Linea, type Nota, type Documento } from '../ficha/vistas';
 import { fechaCorta, type Procedencia } from '../ficha/modelo';
 import { AvisoVistaPrevia, Cargando, MarcaProcedencia, Seccion, SinFila, useEnlaceFila } from '../ficha/comunes';
 
@@ -66,6 +67,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
             <p className="text-base text-slate-700">
               {v.marca ? <>Marca: <ValorConEnlace v={v.marca} /></> : null}
               {v.marca && identidad ? ' · ' : null}{identidad}
+              {v.fabricadoEn ? <>{v.marca || identidad ? ' · ' : null}Fabricado en {v.fabricadoEn.texto}</> : null}
             </p>
             {v.nota ? <Puntuacion n={v.nota} /> : null}
             {v.compra ? (
@@ -76,14 +78,13 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
                     <p className="text-sm text-slate-600">
                       {v.compra.hasta ? <>hasta {v.compra.hasta} · </> : null}
                       en {v.compra.tiendas || 1} {(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}
-                      {v.compra.agotadas ? <> · {v.compra.agotadas} {v.compra.agotadas === 1 ? 'agotada' : 'agotadas'}</> : null}
-                      {v.compra.sinPrecio ? <> · {v.compra.sinPrecio} más sin precio confirmado</> : null}
+                      {textoOtrasOfertas(v.compra) ? <> · además, {textoOtrasOfertas(v.compra)}</> : null}
                     </p>
                     {v.compra.porUnidad ? <p className="text-base font-bold text-slate-800" title="Precio más bajo de las tiendas dividido por la potencia o la energía que declara la marca"><span className="font-normal text-slate-600">{v.compra.etiquetaUnidad}: </span>{v.compra.porUnidad}</p> : null}
                   </>
-                ) : v.compra.ultimo ? (
+                ) : v.compra.ultimo && !v.compra.sinPrecio && !v.compra.fuera ? (
                   <p className="text-base font-semibold text-slate-600">Último precio visto <span className="font-bold text-slate-800">{v.compra.ultimo}</span> ({v.compra.agotadas === 1 ? 'agotado en la única tienda que lo tenía' : `agotado en las ${v.compra.agotadas} tiendas que lo tenían`})</p>
-                ) : <p className="text-base font-semibold text-slate-600">Sin precio todavía: ninguna tienda lo vende aquí.</p>}
+                ) : <p className="text-base font-semibold text-slate-600">{textoSinVenta({ ...v.compra, vendibles: 0 })}</p>}
                 {v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
               </div>
             ) : v.estado ? <Badge className="!text-sm !normal-case !tracking-normal" variant={/^a la venta/i.test(v.estado) ? 'success' : 'default'}>{v.estado}</Badge> : null}
@@ -128,9 +129,13 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
     );
   }
 
+  // On a phone the data tables start folded (evaluator round 4: a 12,600 px
+  // sheet); the header, the shops and «la mejor» stay open.
+  const nDatos = v.lineas.reduce((n, l) => n + (l.documentos?.length || 1), 0) + v.sinDato.reduce((n, x) => n + x.etiquetas.length, 0);
+  const resumen = `${nDatos} ${nDatos === 1 ? 'dato' : 'datos'}`;
   if (v.estilo === 'lista') {
     return (
-      <Seccion titulo={v.titulo}>
+      <Seccion titulo={v.titulo} plegable={!enEditor} resumen={resumen}>
         {aviso}
         <ul className="space-y-1.5 text-base">
           {v.lineas.map(l => (
@@ -149,7 +154,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
   // properties since 2026-10-18): two to four per row instead of one long
   // two-column table. A long value takes the whole row.
   return (
-    <Seccion titulo={v.titulo}>
+    <Seccion titulo={v.titulo} plegable={!enEditor} resumen={resumen}>
       {aviso}
       {v.lineas.length ? (
         <dl className="grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(min(100%,10rem),1fr))]">
@@ -169,6 +174,15 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
 const LARGO = 60;
 
 function Casilla({ l, compacta }: { l: Linea; compacta?: boolean }) {
+  if (l.documentos) {
+    return (
+      <div className="col-span-full min-w-0 rounded-xl bg-slate-50 px-3 py-2">
+        <dt className="text-sm text-slate-500">{l.etiqueta}</dt>
+        <dd><Documentos lista={l.documentos} /></dd>
+        {l.valor.procedencia?.naturaleza ? <ProcedenciaCorta p={l.valor.procedencia} /> : null}
+      </div>
+    );
+  }
   return (
     <div className={cn('min-w-0 rounded-xl bg-slate-50 px-3 py-2 text-center', !compacta && l.valor.texto.length > LARGO && 'col-span-full text-left')}>
       <dt className="text-sm text-slate-500">{l.etiqueta}</dt>
@@ -190,6 +204,27 @@ function ProcedenciaCorta({ p }: { p: Procedencia }) {
     <dd className={cn('text-sm font-semibold [overflow-wrap:anywhere]', tono)} title={titulo}>
       {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 hover:underline">{texto}</a> : texto}
     </dd>
+  );
+}
+
+/** Certificates and documents as rows: name, issuer, a short link. On a
+ *  phone each row stacks; from `sm` up the three sit side by side. */
+function Documentos({ lista }: { lista: Documento[] }) {
+  const conEmisor = lista.some(d => d.emisor);
+  return (
+    <ul className="divide-y divide-slate-200">
+      {lista.map((d, i) => (
+        <li key={i} className={cn('grid items-center gap-x-4 py-1.5', conEmisor ? 'sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_auto]' : 'sm:grid-cols-[minmax(0,1fr)_auto]')}>
+          <span className="break-words text-base font-semibold text-slate-900" title={d.nota || undefined}>{d.nombre}</span>
+          {conEmisor ? <span className="text-sm text-slate-600">{d.emisor ? <>Emisor: {d.emisor}</> : 'Emisor: no indicado'}</span> : null}
+          {d.enlace ? (
+            <a href={d.enlace} target="_blank" rel="noopener nofollow" className="inline-flex min-h-[44px] items-center gap-1 text-sm font-semibold text-sky-700 hover:underline" title={d.fecha ? `Consultado el ${d.fecha}` : undefined}>
+              {d.sitio || 'Ver el documento'} <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            </a>
+          ) : <span className="text-sm text-slate-500">Sin enlace</span>}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -222,6 +257,8 @@ function Puntuacion({ n }: { n: Nota }) {
  *  block's wrapper, `BloquesLectura`). */
 function irA(tipo: string) {
   const el = document.querySelector(`[data-tipo="${tipo}"]`);
+  // A section folded on a phone (`Seccion plegable`) opens on the way there.
+  el?.querySelectorAll('details').forEach(d => { d.open = true; });
   // 80 px: clear of the site's sticky header.
   if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
 }

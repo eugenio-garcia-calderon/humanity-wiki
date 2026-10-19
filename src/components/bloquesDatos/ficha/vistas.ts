@@ -14,13 +14,19 @@ import {
   type Ficha, type FilaFicha, type TablaFicha, type Procedencia,
   columnaPorRol, rolDe, grupoDe, visible, filaActual, tieneValor, textoDe, numeroDe,
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
-  fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia,
+  fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia, ETIQUETA_NATURALEZA,
 } from './modelo';
+import { contarOfertas, type CuentaOfertas } from '../../../utils/ofertas';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
  *  its own page (a brand): the painter turns it into a link. */
 export type Valor = { texto: string; paginaId?: string | null; procedencia: Procedencia | null; enlace?: string | null };
-export type Linea = { columnaId: string; etiqueta: string; valor: Valor };
+/** One certificate or document, as a row of its own: what it is, who issued
+ *  it, and a short link («woba-solar.de») instead of the address in full. */
+export type Documento = { nombre: string; emisor: string; fecha: string; nota: string; enlace: string | null; sitio: string };
+/** `documentos`: the value is a list of certificates or documents, painted as
+ *  a small table instead of `valor.texto`. */
+export type Linea = { columnaId: string; etiqueta: string; valor: Valor; documentos?: Documento[] };
 
 /** The groups a sheet is split into (`config.grupo` in `esquema-bd.json`). */
 export const GRUPOS: Record<string, string> = {
@@ -50,7 +56,7 @@ const listable = (c: Columna) =>
 const URL_SOLA = /^https?:\/\/\S+$/;
 
 function valorDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Valor {
-  const procedencia = procedenciaDe(fila, c);
+  const procedencia = conDocumentoPropio(procedenciaDe(fila, c), documentosPropios(f, fila));
   let texto = textoDe(fila, c);
   let paginaId: string | null = null;
   if (c.tipo === 'relacion') {
@@ -71,7 +77,67 @@ function lineaDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Linea | nul
   const v = valorDe(f, fila, c);
   if (!v.texto && v.procedencia?.naturaleza !== 'no_publicado') return null;
   if (!v.texto) v.texto = 'No publicado';
-  return { columnaId: c.id, etiqueta: etiquetaColumna(c, f.tabla.columnas), valor: v };
+  const documentos = esListaDocumentos(c) ? documentosDe(v.texto) : null;
+  return { columnaId: c.id, etiqueta: etiquetaColumna(c, f.tabla.columnas), valor: v, ...(documentos?.length ? { documentos } : {}) };
+}
+
+// ── CERTIFICATES AND DOCUMENTS, AS DATA ─────────────────────────────────────
+// The loader writes them as text (`cargar.mjs`, `aTexto`): one line each,
+// «nombre: IEC 62619; emisor: no indicado; fuente: https://…; fecha: …» for a
+// certificate and «ficha técnica — https://…» for a document. Shown as such
+// they read as raw data with long addresses in view (evaluator round 4, C7),
+// so the sheet reads the lines back into rows. A line that fits neither shape
+// stays a row with its text as the name: nothing is dropped.
+
+const esListaDocumentos = (c: Columna) => c.config?.clave === 'certificados' || c.config?.formato === 'enlaces';
+const CLAVES_CERTIFICADO = /;\s+(?=(?:nombre|emisor|fuente|fecha|nota|url):\s)/;
+const URL_EN = /https?:\/\/\S+/;
+/** The loader's document types, as a reader says them. */
+const TIPO_DOCUMENTO: Record<string, string> = {
+  ficha_tecnica: 'ficha técnica', declaracion_ce: 'declaración CE de conformidad', otro: 'documento',
+};
+const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+export function documentosDe(texto: string): Documento[] {
+  return texto.split('\n').map(l => l.trim()).filter(Boolean).map(linea => {
+    if (/^nombre:\s/.test(linea)) {
+      const campos: Record<string, string> = {};
+      for (const parte of linea.split(CLAVES_CERTIFICADO)) {
+        const m = parte.match(/^(\w+):\s*([\s\S]*)$/);
+        if (m) campos[m[1]] = m[2].trim();
+      }
+      const enlace = (campos.fuente || campos.url || '').match(URL_EN)?.[0] || null;
+      return { nombre: campos.nombre || linea, emisor: campos.emisor || '', fecha: fechaCorta(campos.fecha), nota: campos.nota || '', enlace, sitio: sitioDe(enlace) };
+    }
+    const enlace = linea.match(URL_EN)?.[0] || null;
+    const nombre = (enlace ? linea.replace(enlace, '') : linea).replace(/\s*—\s*$/, '').replace(/^\s*—\s*/, '').trim();
+    return { nombre: mayuscula(TIPO_DOCUMENTO[nombre] || nombre || 'Documento'), emisor: '', fecha: '', nota: '', enlace, sitio: sitioDe(enlace) };
+  });
+}
+
+/** The product's own documents, by address: a value whose source is one of
+ *  them says WHICH document («Según la garantía del producto») instead of the
+ *  host it happens to be stored on — AlphaESS's warranty read «Según
+ *  static.getpylon.com», a site nobody recognises (evaluator round 4, C3). */
+function documentosPropios(f: Ficha, fila: FilaFicha | undefined): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const c of f.tabla.columnas) {
+    if (c.config?.formato !== 'enlaces' || !fila || !tieneValor(fila, c)) continue;
+    for (const d of documentosDe(textoDe(fila, c))) if (d.enlace && !m.has(d.enlace)) m.set(d.enlace, d.nombre);
+  }
+  return m;
+}
+const ARTICULO_DOCUMENTO: Record<string, string> = {
+  'ficha técnica': 'la ficha técnica', 'garantía': 'la garantía', manual: 'el manual', certificado: 'el certificado',
+  'declaración ce de conformidad': 'la declaración CE de conformidad', folleto: 'el folleto',
+};
+function conDocumentoPropio(p: Procedencia | null, propios: Map<string, string>): Procedencia | null {
+  const nombre = p?.fuente && p.naturaleza && p.naturaleza !== 'no_publicado' ? propios.get(p.fuente) : undefined;
+  if (!p || !nombre) return p;
+  const cual = `${ARTICULO_DOCUMENTO[nombre.toLowerCase()] || 'un documento'} del producto`;
+  const host = sitioDe(p.fuente);
+  const etiqueta = p.naturaleza === 'tercero' ? `Según ${cual}` : `${ETIQUETA_NATURALEZA[p.naturaleza!]} · ${cual}`;
+  return { ...p, etiqueta, nota: [p.nota, host && `Documento guardado en ${host}`].filter(Boolean).join(' · ') || null };
 }
 
 /** Columns chosen by id or by `config.clave`, in the order given. */
@@ -100,13 +166,18 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
 /** `tiendas`: the shops on sale with a confirmed price, the ones «Desde» is
  *  taken from; `sinPrecio` and `agotadas`: the other shops listed; `ultimo`:
  *  the lowest price last seen when every priced shop is sold out. */
-export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; agotadas: number; ultimo: string; porUnidad: string; etiquetaUnidad: string };
+export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; agotadas: number;
+  /** Shops that have it but do not ship to Spain (evaluator round 4). */
+  fuera: number; total: number; ultimo: string; porUnidad: string; etiquetaUnidad: string };
 export type Nota = { media: string; votos: number };
 
 export type VistaPropiedad =
   | {
     estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; credito: string; gtin: string; categoria: string;
     subcategoria: string;
+    /** «China», where the data has it: the origin in view without opening
+     *  «Origen y fabricación» (evaluator round 4, C3). '' when unknown. */
+    fabricadoEn: Valor | null;
     /** Null when the table has no price columns; `desde` '' = no shop yet. */
     compra: Compra | null;
     /** Null when the table has no community score; `media` '' = too few votes. */
@@ -149,6 +220,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
       categoria: t.titulo,
       subcategoria: porRol('subcategoria') ? textoDe(fila, porRol('subcategoria')!) : '',
+      fabricadoEn: fabricadoEnDe(f, fila),
       compra,
       nota: notaDe(t, fila),
       destacados: columnasDestacadas(t)
@@ -188,6 +260,20 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     return false;
   }) : todas;
   return { estilo: esTabla ? 'tabla' : 'lista', titulo: titulo || (grupo && GRUPOS[grupo]) || '', lineas, sinDato };
+}
+
+/** The country of manufacture, short enough for the header line: «China»,
+ *  «Filipinas / México». The loaded value can be a sentence («Alemania
+ *  (células, Thalheim) y, según la época, …») or say there is none («No
+ *  publicado»): the qualifiers stay in «Origen y fabricación», and a value
+ *  that is still long after trimming is left to that section alone. */
+function fabricadoEnDe(f: Ficha, fila: FilaFicha): Valor | null {
+  const c = f.tabla.columnas.find(x => x.config?.clave === 'pais_fabricacion' && visible(x));
+  if (!c || !tieneValor(fila, c)) return null;
+  const v = valorDe(f, fila, c);
+  if (v.procedencia?.naturaleza === 'no_publicado' || /^no\s+(publicad|especificad|consta|indicad)/i.test(v.texto)) return null;
+  const corto = v.texto.split(';')[0].replace(/\s*\([^)]*\)/g, '').split(/,?\s+según\b/)[0].trim();
+  return corto && corto.length <= 30 ? { ...v, texto: corto } : null;
 }
 
 /** The status badge, read together with the price.
@@ -233,7 +319,8 @@ function compraDe(f: Ficha, t: TablaFicha, fila: FilaFicha): Compra | null {
     const v = of.vendibles, ag = of.agotadas;
     const desde = v.length ? v[0].texto : '';
     const hasta = v.length > 1 && v[v.length - 1].texto !== desde ? v[v.length - 1].texto : '';
-    return { desde, hasta, tiendas: v.length, sinPrecio: of.sinPrecio, agotadas: ag.length, ultimo: !v.length && ag.length ? ag[0].texto : '', porUnidad: porUnidadDe(desde, v[0]?.precio ?? null), etiquetaUnidad };
+    const c = of.cuenta;
+    return { desde, hasta, tiendas: v.length, sinPrecio: c.sinPrecio, agotadas: c.agotadas, fuera: c.fuera, total: c.total, ultimo: !v.length && ag.length ? ag[0].texto : '', porUnidad: porUnidadDe(desde, v[0]?.precio ?? null), etiquetaUnidad };
   }
 
   // A price of 0 is no price: nothing is sold for free here.
@@ -244,14 +331,16 @@ function compraDe(f: Ficha, t: TablaFicha, fila: FilaFicha): Compra | null {
   // apart. Tables loaded before `ofertas_con_precio` existed count them all.
   const todas = (n && numeroDe(fila, n)) || 0;
   const conPrecio = cp ? numeroDe(fila, cp) ?? 0 : todas;
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), agotadas: 0, ultimo: '', porUnidad: porUnidadDe(desde, null), etiquetaUnidad };
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), agotadas: 0, fuera: 0, total: todas, ultimo: '', porUnidad: porUnidadDe(desde, null), etiquetaUnidad };
 }
 
 type PrecioTienda = { precio: number; texto: string };
 /** The row's shops, split the way a buyer sees them: priced and on sale
- *  (cheapest first), priced but sold out, and without a price. Null when the
- *  sheet came without them (a template, an editor preview). */
-export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: PrecioTienda[]; sinPrecio: number; total: number } | null {
+ *  (cheapest first), priced but sold out, and the counts of every group
+ *  (`contarOfertas`, shared with the «Dónde comprarlo» box). A shop that does
+ *  not ship to Spain is in none of the price lists. Null when the sheet came
+ *  without them (a template, an editor preview). */
+export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: PrecioTienda[]; sinPrecio: number; total: number; cuenta: CuentaOfertas } | null {
   if (!Array.isArray(f.ofertas)) return null;
   const min = columnaPorRol(f.tabla, 'precio_min');
   // Written the way «Precio desde» writes its own value.
@@ -259,13 +348,14 @@ export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: Prec
   const vendibles: PrecioTienda[] = [], agotadas: PrecioTienda[] = [];
   let sinPrecio = 0;
   for (const o of f.ofertas) {
+    if (o.fuera_de_espana) continue;
     if (o.precio_centimos == null || o.precio_centimos <= 0) { sinPrecio++; continue; }
     const precio = o.precio_centimos / 100;
     (o.agotada ? agotadas : vendibles).push({ precio, texto: texto(precio) });
   }
   const orden = (x: PrecioTienda, y: PrecioTienda) => x.precio - y.precio;
   vendibles.sort(orden); agotadas.sort(orden);
-  return { vendibles, agotadas, sinPrecio, total: f.ofertas.length };
+  return { vendibles, agotadas, sinPrecio, total: f.ofertas.length, cuenta: contarOfertas(f.ofertas) };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {
@@ -320,9 +410,15 @@ export function porDefecto(t: TablaFicha, actualId: string, n = MAX_COMPARAR - 1
   const ref = [columnaPorRol(t, 'precio_min'), ...t.columnas.filter(c => grupoDe(c) === 'tecnico' && ordenable(c))]
     .find(c => c && actual && numeroDe(actual, c) !== null);
   const base = ref && actual ? numeroDe(actual, ref)! : null;
+  // Priced products before unpriced ones: a default comparison that hands the
+  // reader «Sin precio en ninguna tienda todavía» answers nothing (evaluator
+  // round 4). An unpriced one still comes in when nothing priced is left.
+  const cPrecio = columnaPorRol(t, 'precio_min');
+  const conPrecio = (x: FilaFicha) => !cPrecio || numeroDe(x, cPrecio) !== null;
   return otras
-    .map(x => ({ x, d: ref && base !== null ? numeroDe(x, ref) : null }))
+    .map(x => ({ x, d: ref && base !== null ? numeroDe(x, ref) : null, p: conPrecio(x) }))
     .sort((a, b) => {
+      if (a.p !== b.p) return a.p ? -1 : 1;
       if (a.d === null && b.d === null) return a.x.titulo.localeCompare(b.x.titulo, 'es');
       if (a.d === null) return 1;
       if (b.d === null) return -1;
@@ -394,6 +490,10 @@ export type VistaAlternativas = {
     esEsta: boolean;
     /** Where the current product stands: «3.º de 12». Null without a value. */
     puesto: { n: number; de: number } | null;
+    /** What the line says about the current product when it is not the
+     *  winner: «3.º de 12», «sin dato», «2 avisos». Always set, so no line
+     *  ever names only the winner and leaves the reader guessing. */
+    esteProducto: string;
     /** A rubric criterion (precio, garantía, ecología…): decided by community
      *  votes once they pass the threshold, else by the data named in `segun`. */
     base?: 'votos' | 'datos';
@@ -431,6 +531,9 @@ const RUBRICA: Array<{ criterio: string; comunidad: string; medida?: MedidaRubri
 ];
 const minusculaInicial = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+/** «3.º de 12», or the reason there is no rank: a product with no figure is
+ *  not last, it is unknown (`sinValor` says how). */
+const textoPuesto = (p: { n: number; de: number } | null, sinValor: string) => p ? `${p.n}.º de ${p.de}` : sinValor;
 /** The block's footnote, one sentence for both painters. */
 export const NOTA_ORDEN = 'El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.';
 export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que las líneas marcadas «Según los datos» se deciden con el dato publicado que nombran; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
@@ -485,6 +588,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
         columnaId: votos.id, criterio: r.criterio, base: 'votos', segun: null, empates: mv.size - 1,
         ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: `${textoDe(g, votos)} de 5` },
         esEsta: mv.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+        esteProducto: textoPuesto(i >= 0 ? { n: i + 1, de: orden.length } : null, 'sin votos todavía'),
       });
       continue;
     }
@@ -508,9 +612,9 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
         columnaId: cRet.id, criterio: r.criterio, base: 'datos', segun: 'retiradas y alertas de seguridad', empates: limpias.length - 1,
         ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: 'ninguna retirada' },
         esEsta: esta, puesto: null,
+        // Where this one stands, said plainly instead of a rank among ties.
+        esteProducto: vistas.some(x => x.id === actual.id) ? plural(n(actual), 'retirada o alerta', 'retiradas o alertas') : 'sin dato (aún no hemos revisado sus retiradas)',
       });
-      // Where this one stands, said plainly instead of a rank among ties.
-      if (!esta && vistas.some(x => x.id === actual.id)) criterios[criterios.length - 1].ganador.valor = `ninguna retirada; este producto tiene ${plural(n(actual), 'aviso', 'avisos')}`;
       continue;
     }
     const c = m.claves.map(k => t.columnas.find(x => x.config?.clave === k && ordenable(x) && listableEn(t)(x))).find(x => x && mejoresEn(filas, x).size);
@@ -528,6 +632,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       segun: SEGUN[c.config?.clave] || minusculaInicial(etiquetaColumna(c)), empates: mejores.size - 1,
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
       esEsta: mejores.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+      esteProducto: textoPuesto(i >= 0 ? { n: i + 1, de: orden.length } : null, 'sin dato'),
     });
   }
   // 2 · Then the technical figures, as before.
@@ -548,6 +653,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
       esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+      esteProducto: textoPuesto(i >= 0 ? { n: i + 1, de: orden.length } : null, 'sin dato'),
     });
   }
   if (!criterios.length) return null;
@@ -586,6 +692,16 @@ const textoRol = (t: TablaFicha, x: FilaFicha, r: Parameters<typeof columnaPorRo
   return c ? textoDe(x, c) : '';
 };
 
+/** The claim itself, without quotation marks: painters quote it (`<q>`).
+ *  The row's title is «“claim” · product» for the loader (`cargar.mjs`), and
+ *  quoting that printed “«24,000mAh» · Anker 737…” (evaluator round 4). */
+function textoAfirmacion(t: TablaFicha, x: FilaFicha): string {
+  const c = t.columnas.find(k => k.config?.clave === 'afirmacion');
+  const propio = c ? textoDe(x, c).trim() : '';
+  const base = propio || x.titulo.replace(/^«([\s\S]+)»\s+·\s+[^«»]+$/, '$1');
+  return base.replace(/^[«“"']+|[»”"']+$/g, '').trim() || x.titulo;
+}
+
 export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown>): VistaAfirmaciones | null {
   const titulo = String(datos.titulo || '').trim();
   if (datos.modo === 'manual' || !f) {
@@ -608,7 +724,7 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
     const donde = textoRol(rel!.tabla, x, 'donde');
     const fecha = columnaPorRol(rel!.tabla, 'fecha');
     return {
-      texto: x.titulo,
+      texto: textoAfirmacion(rel!.tabla, x),
       veredicto: veredictoDe(textoRol(rel!.tabla, x, 'veredicto')),
       explicacion: textoRol(rel!.tabla, x, 'explicacion'),
       fuentes: textoRol(rel!.tabla, x, 'fuentes'),

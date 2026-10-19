@@ -40,7 +40,7 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
                 )}
                 {!c.esEsta && c.empates ? <span className="text-slate-500"> y {c.empates} más</span> : null}
                 <span className="ml-1.5 text-slate-500">{c.ganador.valor}</span>
-                {!c.esEsta && c.puesto ? <span className="block text-sm text-slate-500">Este producto: {c.puesto.n}.º de {c.puesto.de}</span> : null}
+                {!c.esEsta ? <span className="block text-sm text-slate-500">Este producto: {c.esteProducto}</span> : null}
               </span>
             </li>
           );

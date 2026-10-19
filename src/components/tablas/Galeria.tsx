@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowDownToLine, ArrowRightLeft, ArrowUpToLine, Check, ChevronDown, Copy, ExternalLink, Eye, EyeOff, X, FileText, GripVertical, Link2, Loader2, MoreHorizontal, Move, Plus, Trash2 } from 'lucide-react';
@@ -10,6 +10,7 @@ import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
 import type { TamanoGaleria } from '../../utils/bloques';
 import GaleriaCarrusel from './GaleriaCarrusel';
+import { BarraComparar, MAX_COMPARAR_GALERIA, MarcaComparar, tablaComparable, useComparar } from './CompararGaleria';
 import MenuAcciones, { type AccionMenu } from './MenuAcciones';
 import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 
@@ -394,6 +395,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   // 16 px and properties at 14 px (W2's 16 px audit, 2026-10-18; they were 12).
   // The editor keeps the compact sizes its users already lay pages out with.
   const legible = !!sitio && !chica;
+  // «Comparar» on product cards of a published site (`CompararGaleria.tsx`).
+  const comparable = !!sitio && !chica && !carrusel && tablaComparable(columnas);
+  const comparar = useComparar(tablaId, useId());
   const tarjeta = (f: Fila, copia = false, arrastre = false, mover = false) => {
           const conMenu = (arrastrable ?? editable) && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
@@ -626,6 +630,10 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                     </p>
                   ) : null;
                 })}
+                {comparable && !copia && f.pagina_id ? (
+                  <MarcaComparar nombre={nombreDe(f)} elegida={comparar.ids.includes(f.id)} llena={comparar.ids.length >= MAX_COMPARAR_GALERIA}
+                    onCambio={() => comparar.alternar(f.id, f.pagina_id!, nombreDe(f))} />
+                ) : null}
               </div>
             </div>
           );
@@ -716,6 +724,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         </p>
       )}
       <span className="sr-only" role="status" aria-live="polite">{anuncio}</span>
+      {comparable && sitio && comparar.esDueno ? (
+        <BarraComparar ids={comparar.ids} nombres={comparar.nombres} paginas={comparar.paginas} enlace={sitio.enlacePagina} onVaciar={comparar.vaciar} />
+      ) : null}
       {menu && <MenuAcciones x={menu.x} y={menu.y} acciones={accionesDe(menu.fila, ordenable && (arrastrable ?? editable) && !sitio && filasVis.length > 1)} onCerrar={() => setMenu(null)} etiqueta={`Acciones de ${nombreDe(menu.fila)}`} />}
       {aviso && (
         <div role="status" aria-live="polite" className="fixed bottom-5 left-1/2 z-[400] flex h-11 max-w-[92vw] -translate-x-1/2 items-center gap-3 rounded-xl bg-slate-900 px-4 text-[13px] font-bold text-white shadow-2xl">

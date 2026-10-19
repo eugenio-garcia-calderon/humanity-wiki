@@ -24,6 +24,8 @@ export type OfertaOrdenable = {
   nota_distribuidor?: number | null;
   distribuidor_nombre?: string | null;
   agotada?: boolean;
+  /** The shop does not ship to Spain: shown, never bought from here. */
+  fuera_de_espana?: boolean;
 };
 
 /** Lo que paga quien compra por una unidad. Sin precio no hay total. */
@@ -41,7 +43,10 @@ export const totalOferta = (o: OfertaOrdenable) =>
 export function ordenarOfertas<T extends OfertaOrdenable>(ofertas: T[]): T[] {
   const clave = (o: OfertaOrdenable): OfertaOrdenable => ({
     precio_centimos: o.precio_centimos, envio_centimos: o.envio_centimos,
-    nota_distribuidor: o.nota_distribuidor ?? null, distribuidor_nombre: o.distribuidor_nombre ?? '', agotada: !!o.agotada,
+    nota_distribuidor: o.nota_distribuidor ?? null, distribuidor_nombre: o.distribuidor_nombre ?? '',
+    // A shop that does not ship to Spain cannot sell it here: after the ones
+    // that can, like a sold-out one (evaluator round 4, AlphaESS).
+    agotada: !!o.agotada || !!o.fuera_de_espana,
   });
   return ofertas
     .map((o, i) => ({ o, k: clave(o), i }))
@@ -236,4 +241,56 @@ export function envioCompraTienda(
   if (t.envio_gratis_desde_centimos !== null && subtotal >= t.envio_gratis_desde_centimos) return { centimos: 0, origen: 'tienda' };
   if (t.envio_centimos !== null) return { centimos: t.envio_centimos, origen: 'tienda' };
   return { centimos: null, origen: null };
+}
+
+// ── THE SUMMARY LINE (evaluator round 4) ────────────────────────────────────
+// The sheet header, the «Dónde comprarlo» box and the HTML for search engines
+// all say how many shops have it and why the others cannot sell it now. One
+// count and one sentence here, so «ninguna tienda lo vende aquí» can never sit
+// above a list of shops (Anker SOLIX X1), and a shop that does not ship to
+// Spain never makes a product «A la venta» (AlphaESS).
+
+export type CuentaOfertas = { vendibles: number; sinPrecio: number; agotadas: number; fuera: number; total: number };
+
+/** Each shop in exactly one group: does not ship to Spain, sold out, no price, on sale. */
+export function contarOfertas(ofertas: Array<{ precio_centimos: number | null; agotada: boolean; fuera_de_espana?: boolean }>): CuentaOfertas {
+  const c: CuentaOfertas = { vendibles: 0, sinPrecio: 0, agotadas: 0, fuera: 0, total: ofertas.length };
+  for (const o of ofertas) {
+    if (o.fuera_de_espana) c.fuera++;
+    else if (o.agotada) c.agotadas++;
+    else if (o.precio_centimos === null || o.precio_centimos <= 0) c.sinPrecio++;
+    else c.vendibles++;
+  }
+  return c;
+}
+
+const tiendasN = (n: number) => (n === 1 ? 'una tienda' : `${n} tiendas`);
+const yLista = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}` : xs[0] || '');
+
+/** What the shops that cannot sell it now are: «una sin precio confirmado, una no envía a España». */
+export function textoOtrasOfertas(c: Pick<CuentaOfertas, 'sinPrecio' | 'agotadas' | 'fuera'>): string {
+  const n = (k: number) => (k === 1 ? 'una' : String(k));
+  return yLista([
+    c.sinPrecio ? `${n(c.sinPrecio)} sin precio confirmado` : '',
+    c.agotadas ? `${n(c.agotadas)} ${c.agotadas === 1 ? 'agotada' : 'agotadas'}` : '',
+    c.fuera ? `${n(c.fuera)} no ${c.fuera === 1 ? 'envía' : 'envían'} a España` : '',
+  ].filter(Boolean));
+}
+
+/** No shop can sell it in Spain now: say why, with the same shops the list shows. */
+export function textoSinVenta(c: CuentaOfertas): string {
+  if (!c.total) return 'Sin precio todavía: no tenemos registrada ninguna tienda que lo venda.';
+  const partes = [
+    c.sinPrecio ? `${tiendasN(c.sinPrecio)} lo ${c.sinPrecio === 1 ? 'tiene' : 'tienen'} sin precio publicado` : '',
+    c.agotadas ? `${tiendasN(c.agotadas)} lo ${c.agotadas === 1 ? 'tiene' : 'tienen'} agotado` : '',
+    c.fuera ? `${tiendasN(c.fuera)} lo ${c.fuera === 1 ? 'vende' : 'venden'} pero no ${c.fuera === 1 ? 'envía' : 'envían'} a España` : '',
+  ].filter(Boolean);
+  return `Sin precio en España ahora: ${yLista(partes)}.`;
+}
+
+/** The line under «Dónde comprarlo», given the cheapest total already written as money. */
+export function textoResumenOfertas(c: CuentaOfertas, desde: string | null): string {
+  if (desde === null || !c.vendibles) return textoSinVenta(c);
+  const otras = textoOtrasOfertas(c);
+  return `Desde ${desde} con envío, en ${tiendasN(c.vendibles)}${otras ? ` (además, ${otras})` : ''}.`;
 }
