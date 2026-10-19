@@ -141,7 +141,14 @@ ok(notaMedia([4, 5, null]) === 4.5, 'media con 2 de 3 criterios: 4,5');
   const precio = v.criterios[0];
   ok(precio.ganador.nombre === 'Xiaomi' && precio.puesto?.n === 3, `precio: gana el menor €/kWh (Xiaomi) y Anker es 3.º (${precio.ganador.nombre}, ${precio.puesto?.n})`);
   const seg = v.criterios[3];
-  ok(!seg.esEsta && seg.empates === 1 && /1 aviso/.test(seg.ganador.valor), `seguridad: dos sin retiradas, y este dice que tiene un aviso («${seg.ganador.valor}»)`);
+  ok(!seg.esEsta && seg.empates === 1 && seg.esteProducto === '1 retirada o alerta', `seguridad: dos sin retiradas, y este dice que tiene una («${seg.esteProducto}»)`);
+  ok(precio.esteProducto === '3.º de 3', `cada línea dice el puesto de este producto («${precio.esteProducto}»)`);
+  // A product with no price is not last: the line says it has no figure.
+  const sinPrecio = { ...t, filas: t.filas.map(f => f.id === 'a' ? { ...f, celdas: { ...f.celdas, pk: { estado: 'vacia' } as any } } : f) };
+  const sp = vistaAlternativas({ pagina_id: 'PA', fila_id: 'a', tabla: sinPrecio, relacionadas: {} }, {})!;
+  const lp = sp.criterios.find(c => c.criterio === 'Precio')!;
+  ok(lp && !lp.esEsta && lp.esteProducto === 'sin dato', `sin precio, la línea de precio dice «sin dato» («${lp?.esteProducto}»)`);
+  ok(sp.criterios.every(c => c.esEsta || !!c.esteProducto), 'ninguna línea nombra sólo al ganador');
   // With votes, the community takes over that criterion.
   const conVotos = { ...t, filas: t.filas.map((f, i) => ({ ...f, celdas: { ...f.celdas, cal: { estado: 'ok', valor: [3.2, 4.1, 3.8][i], media: 4, votos: 5 } as any } })) };
   const w = vistaAlternativas({ pagina_id: 'PA', fila_id: 'a', tabla: conVotos, relacionadas: {} }, {})!;

@@ -12,9 +12,9 @@ import { etiquetaProcedencia, fechaCorta, type Procedencia } from './modelo';
  *  are the page's h2s, in order (SEO R14: one h1, headings in order). */
 export const CLASE_H2 = 'text-xl font-black text-slate-900 mt-3 mb-3';
 
-export function Seccion({ titulo, children, className }: { titulo?: string; children: ReactNode; className?: string }) {
+export function Seccion({ titulo, children, className, id }: { titulo?: string; children: ReactNode; className?: string; id?: string }) {
   return (
-    <section className={cn('my-2', className)}>
+    <section id={id} className={cn('my-2', id && 'scroll-mt-36', className)}>
       {titulo ? <h2 className={CLASE_H2}>{titulo}</h2> : null}
       {children}
     </section>

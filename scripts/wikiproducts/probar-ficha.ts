@@ -76,6 +76,13 @@ prueba('la elección por defecto del comparador es por cercanía de precio, nunc
   assert.ok(!porDefecto(tabla, 'a').includes('a'));
 });
 
+prueba('por defecto, un producto sin precio va detrás de los que tienen precio', () => {
+  // Xiaomi is closest to Baseus in price, but with no price it goes last.
+  const t = { ...tabla, filas: tabla.filas.map(f => f.id === 'b' ? { ...f, celdas: { ...f.celdas, pre: { estado: 'vacia' } as any } } : f) };
+  assert.deepEqual(porDefecto(t, 'c'), ['a', 'b']);
+  assert.deepEqual(porDefecto(t, 'c', 1), ['a']);
+});
+
 prueba('la nota de la comunidad ordena por la nota ajustada (valor), no por la media', () => {
   const cal = tabla.columnas.find(c => c.id === 'cal')!;
   assert.deepEqual(ordenarPor(tabla.filas, cal).map(f => f.id), ['b', 'a']);
