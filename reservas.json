@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/bloquesDatos/ficha/MandosCatalogo.tsx",
-      "motivo": "W2: mandos en una fila en el móvil",
-      "desde": "2026-10-19T00:39:11.020Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "W2: título plegable alineado",
       "desde": "2026-10-19T00:39:13.860Z"
