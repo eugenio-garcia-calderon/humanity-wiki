@@ -59,6 +59,12 @@
       "ruta": "src/components/tablas/Galeria.tsx",
       "motivo": "W2: catálogo en lista en el móvil",
       "desde": "2026-10-19T00:56:40.860Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/bloquesDatos/ficha/modelo.ts",
+      "motivo": "W2: columna del orden por defecto de un catálogo",
+      "desde": "2026-10-19T01:05:10.832Z"
     }
   ]
 }
