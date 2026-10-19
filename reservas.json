@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/CabeceraLectura.tsx",
-      "motivo": "W2: descripción a todo el ancho en el móvil",
-      "desde": "2026-10-19T00:43:50.201Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "W2: orden por defecto con nombre en catálogos",
       "desde": "2026-10-19T00:47:24.079Z"
