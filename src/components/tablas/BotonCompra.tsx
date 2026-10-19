@@ -100,6 +100,7 @@ export default function BotonCompra({ datos, compacto, centrado }: { datos: Dato
   const Icono = hecho ? Check : modo === 'donar' ? Heart : modo === 'recompensa' ? Gift : ShoppingBag;
 
   // 44 px de blanco alrededor, como en la cesta: «uno menos» y «comprar» están a dos dedos de distancia.
+  // En el móvil cada control mide 44 px de alto (y los de cantidad, de ancho): ronda 4 del evaluador.
   return (
     <div className={cn('flex flex-wrap items-center gap-1.5', compacto ? 'px-1.5 py-1' : 'py-1', centrado && 'justify-center')}
       onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
@@ -111,12 +112,12 @@ export default function BotonCompra({ datos, compacto, centrado }: { datos: Dato
         <div className="w-full flex flex-wrap items-center gap-1.5">
           {[...new Set([Math.round((datos.precio_centimos ?? 500)) / 100, ...SUGERIDOS_EUROS])].sort((a, b) => a - b).slice(0, 5).map(e => (
             <button key={e} type="button" onClick={() => { setImporte(e); setLibre(''); setFallo(null); }}
-              className={cn('h-9 px-2.5 rounded-lg border text-xs font-black tabular-nums', !libre.trim() && importe === e ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-700 hover:bg-slate-50')}>
+              className={cn('h-11 sm:h-9 px-2.5 rounded-lg border text-xs font-black tabular-nums', !libre.trim() && importe === e ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-700 hover:bg-slate-50')}>
               {e} €
             </button>
           ))}
           <input value={libre} onChange={e => { setLibre(e.target.value); setFallo(null); }} inputMode="decimal" placeholder="Otra" aria-label="Otra cantidad, en euros"
-            className={cn('h-9 w-20 px-2 rounded-lg border text-xs font-bold tabular-nums', libre.trim() && !importeBueno ? 'border-rose-400' : 'border-slate-200')} />
+            className={cn('h-11 sm:h-9 w-20 px-2 rounded-lg border text-xs font-bold tabular-nums', libre.trim() && !importeBueno ? 'border-rose-400' : 'border-slate-200')} />
         </div>
       ) : (
         <span className="text-xs font-black text-slate-800 tabular-nums mr-0.5">{dinero(datos.precio_centimos * cantidad)}</span>
@@ -124,27 +125,27 @@ export default function BotonCompra({ datos, compacto, centrado }: { datos: Dato
 
       {hayVariantes && (
         <select value={variante} onChange={e => { setVariante(e.target.value); setFallo(null); }} aria-label="Opción"
-          className={cn('h-9 max-w-[9rem] px-2 rounded-lg border text-sm bg-white', fallo && !elegida ? 'border-rose-400' : 'border-slate-200')}>
+          className={cn('h-11 sm:h-9 max-w-[9rem] px-2 rounded-lg border text-sm bg-white', fallo && !elegida ? 'border-rose-400' : 'border-slate-200')}>
           <option value="">Elige…</option>
           {datos.variantes.map(v => <option key={v.id} value={v.id}>{v.nombre}</option>)}
         </select>
       )}
       {!donacion && (
-        <div className="flex items-center h-9 rounded-lg border border-slate-200">
+        <div className="flex items-center h-[46px] sm:h-9 rounded-lg border border-slate-200">
           <button type="button" aria-label="Una unidad menos" disabled={unidades <= 1} onClick={() => setUnidades(u => Math.max(1, u - 1))}
-            className="w-8 h-full grid place-items-center text-slate-500 disabled:opacity-30"><Minus className="w-3.5 h-3.5" /></button>
+            className="w-11 sm:w-8 h-full grid place-items-center text-slate-500 disabled:opacity-30"><Minus className="w-3.5 h-3.5" /></button>
           <span className="w-6 text-center text-sm font-bold tabular-nums" aria-live="polite">{unidades}</span>
           <button type="button" aria-label="Una unidad más" disabled={unidades >= tope} onClick={() => setUnidades(u => Math.min(tope, u + 1))}
-            className="w-8 h-full grid place-items-center text-slate-500 disabled:opacity-30"><Plus className="w-3.5 h-3.5" /></button>
+            className="w-11 sm:w-8 h-full grid place-items-center text-slate-500 disabled:opacity-30"><Plus className="w-3.5 h-3.5" /></button>
         </div>
       )}
       <button type="button" onClick={principal}
-        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-black">
+        className="inline-flex items-center gap-1.5 h-11 sm:h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-black">
         <Icono className={cn('w-3.5 h-3.5', hecho && 'text-emerald-300')} />
         {etiqueta}
       </button>
       {donacion && (
-        <button type="button" onClick={alCesta} className="h-9 px-2 text-[11px] font-bold text-slate-500 hover:text-slate-800 underline underline-offset-2">
+        <button type="button" onClick={alCesta} className="h-11 sm:h-9 px-2 text-[11px] font-bold text-slate-500 hover:text-slate-800 underline underline-offset-2">
           {hecho ? 'Añadida' : 'Añadir a la cesta'}
         </button>
       )}

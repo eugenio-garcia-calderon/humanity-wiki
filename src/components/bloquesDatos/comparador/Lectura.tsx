@@ -119,7 +119,8 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
   const anchoCol = mitad ? { width: mitad, minWidth: mitad, maxWidth: mitad } : undefined;
 
   return (
-    <Seccion titulo={v?.titulo} id={modo !== 'fijo' ? 'comparar' : undefined}>
+    // Folded on a phone like the data tables; «Comparar con otros» in the header opens it.
+    <Seccion titulo={v?.titulo} id={modo !== 'fijo' ? 'comparar' : undefined} plegable={!enEditor} resumen={v && v.productos.length > 1 ? `${v.productos.length} productos` : undefined}>
       {v?.mezcla ? <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{v.mezcla}</p> : null}
       {v && v.productos.length > 1 ? (
         <p className="mb-1 text-sm text-slate-500 sm:hidden">

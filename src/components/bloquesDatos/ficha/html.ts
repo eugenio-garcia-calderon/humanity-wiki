@@ -14,7 +14,7 @@ import { etiquetaProcedencia, sitioDe, fechaCorta } from './modelo';
 import {
   vistaPropiedad, vistaComparador, vistaAlternativas, vistaAfirmaciones, vistaRetiradas,
   porDefecto, fraseSinRetiradas, ETIQUETA_VEREDICTO, DESCRIPCION_NATURALEZA, type Valor,
-  NOTA_POR_DATOS, NOTA_ORDEN,
+  NOTA_POR_DATOS, NOTA_ORDEN, type Documento,
 } from './vistas';
 
 /** What the server lends the writers: escaping, inline markup and the
@@ -43,6 +43,14 @@ function valor(v: Valor, h: Herramientas): string {
   return h.enLinea(v.texto);
 }
 
+function documentosHtml(lista: Documento[], h: Herramientas): string {
+  return `<ul>${lista.map(d => {
+    const href = d.enlace ? h.hrefSeguro(d.enlace) : null;
+    const partes = [h.esc(d.nombre), d.emisor ? `emisor: ${h.esc(d.emisor)}` : '', href ? `<a href="${h.esc(href)}" rel="nofollow noopener">${h.esc(d.sitio || 'documento')}</a>` : ''];
+    return `<li>${partes.filter(Boolean).join(' · ')}</li>`;
+  }).join('')}</ul>`;
+}
+
 const h2 = (t: string, h: Herramientas) => (t ? `<h2>${h.esc(t)}</h2>` : '');
 
 export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herramientas): string {
@@ -55,6 +63,7 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       if (v.marca) filas.push(['Marca', valor(v.marca, h)]);
       if (v.modelo) filas.push(['Modelo', h.esc(v.modelo)]);
       filas.push(['Categoría', h.esc(v.subcategoria || v.categoria)]);
+      if (v.fabricadoEn) filas.push(['País de fabricación', `${valor(v.fabricadoEn, h)}${procedencia(v.fabricadoEn.procedencia, h)}`]);
       if (v.nota) filas.push(['Valoración de la comunidad', v.nota.media ? `${h.esc(v.nota.media)} de 5 (${v.nota.votos} ${v.nota.votos === 1 ? 'voto' : 'votos'})` : 'Sin valoraciones suficientes todavía']);
       if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}${textoOtrasOfertas(v.compra) ? ` · además, ${textoOtrasOfertas(v.compra)}` : ''}${v.compra.porUnidad ? ` (${h.esc(v.compra.etiquetaUnidad.charAt(0).toLowerCase() + v.compra.etiquetaUnidad.slice(1))}: ${h.esc(v.compra.porUnidad)})` : ''}` : v.compra.ultimo && !v.compra.sinPrecio && !v.compra.fuera ? `Último precio visto ${h.esc(v.compra.ultimo)} (agotado)` : h.esc(textoSinVenta({ ...v.compra, vendibles: 0 }))]);
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
@@ -72,7 +81,7 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       return `<section>${h2(v.titulo, h)}<ul>${v.lineas.map(l => `<li>${h.esc(l.etiqueta)}: ${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}</li>`).join('')}</ul></section>`;
     default: {
       const sin = v.sinDato.map(x => `<p>${h.esc(x.motivo)}: ${h.esc(x.etiquetas.join(', '))}.</p>`).join('');
-      const tabla = v.lineas.length ? `<table><tbody>${v.lineas.map(l => `<tr><th scope="row">${h.esc(l.etiqueta)}</th><td>${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}</td></tr>`).join('')}</tbody></table>` : '';
+      const tabla = v.lineas.length ? `<table><tbody>${v.lineas.map(l => `<tr><th scope="row">${h.esc(l.etiqueta)}</th><td>${l.documentos ? documentosHtml(l.documentos, h) : valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}</td></tr>`).join('')}</tbody></table>` : '';
       return `<section>${h2(v.titulo, h)}${tabla}${sin}</section>`;
     }
   }

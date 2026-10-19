@@ -21,7 +21,7 @@ export function VistaAfirmaciones({ datos, paginaId, enEditor }: PropsLectura & 
   const v = vistaAfirmaciones(manual ? null : ficha, datos);
   if (!v) return enEditor ? <p className="text-sm text-slate-400">Sin afirmaciones todavía.</p> : null;
   return (
-    <Seccion titulo={v.titulo}>
+    <Seccion titulo={v.titulo} plegable={!enEditor} resumen={v.vacia ? undefined : `${v.items.length} ${v.items.length === 1 ? 'revisada' : 'revisadas'}${(n => (n ? ` · ${n} ${n === 1 ? 'falsa' : 'falsas'}` : ''))(v.items.filter(a => a.veredicto === 'falsa').length)}`}>
       {v.vacia ? <p className="text-base text-slate-500">{v.vacia}</p> : (
         <ul className="space-y-3">
           {v.items.map((a, i) => (

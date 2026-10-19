@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Info } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { ChevronDown, Info } from 'lucide-react';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { cn } from '../../../utils/cn';
 import { etiquetaProcedencia, fechaCorta, type Procedencia } from './modelo';
@@ -12,7 +12,48 @@ import { etiquetaProcedencia, fechaCorta, type Procedencia } from './modelo';
  *  are the page's h2s, in order (SEO R14: one h1, headings in order). */
 export const CLASE_H2 = 'text-xl font-black text-slate-900 mt-3 mb-3';
 
-export function Seccion({ titulo, children, className, id }: { titulo?: string; children: ReactNode; className?: string; id?: string }) {
+/** Below Tailwind's `sm`: a phone. */
+const MOVIL = '(max-width: 639px)';
+export function useEsMovil(): boolean {
+  const [movil, setMovil] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(MOVIL).matches);
+  useEffect(() => {
+    const q = window.matchMedia?.(MOVIL);
+    if (!q) return;
+    const cambio = () => setMovil(q.matches);
+    cambio();
+    q.addEventListener('change', cambio);
+    return () => q.removeEventListener('change', cambio);
+  }, []);
+  return movil;
+}
+
+/**
+ * A section of the sheet. `plegable`: on a phone it starts folded, its title
+ * a 48 px row with `resumen` beside it («18 datos»). Evaluator round 4: the
+ * mobile sheet was ~12,600 px tall, most of it technical tables a shopper
+ * scrolls past to reach the shops. On a wider screen it is always open.
+ * Folded content stays in the page (find-in-page and crawlers reach it), and
+ * `irA` in `propiedad/Lectura.tsx` opens a section it scrolls to.
+ */
+export function Seccion({ titulo, children, className, id, plegable, resumen }: { titulo?: string; children: ReactNode; className?: string; id?: string; plegable?: boolean; resumen?: string }) {
+  const movil = useEsMovil();
+  if (plegable && movil && titulo) {
+    return (
+      <section id={id} className={cn('my-1 border-b border-slate-100', id && 'scroll-mt-36', className)}>
+        {/* Arriving at «#comparar» (the gallery's «Comparar», W4) opens it. */}
+        <details className="group" open={(!!id && typeof location !== 'undefined' && location.hash === `#${id}`) || undefined}>
+          <summary className="flex min-h-[48px] cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+            <h2 className={cn(CLASE_H2, 'my-0')}>{titulo}</h2>
+            <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-sky-700">
+              {resumen ? <span>{resumen}</span> : null}
+              <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" aria-hidden />
+            </span>
+          </summary>
+          <div className="pb-3">{children}</div>
+        </details>
+      </section>
+    );
+  }
   return (
     <section id={id} className={cn('my-2', id && 'scroll-mt-36', className)}>
       {titulo ? <h2 className={CLASE_H2}>{titulo}</h2> : null}

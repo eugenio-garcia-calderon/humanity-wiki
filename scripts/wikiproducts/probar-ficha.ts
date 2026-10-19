@@ -6,7 +6,7 @@
 // the ethics code: THE COMMISSION NEVER ORDERS ANYTHING (plan §2.3).
 import assert from 'node:assert/strict';
 import { conUnidad, ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, etiquetaColumna, textoDe, procedenciaDe, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
-import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe } from '../../src/components/bloquesDatos/ficha/vistas';
+import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe, documentosDe } from '../../src/components/bloquesDatos/ficha/vistas';
 import { metaFicha, tituloFicha } from '../../src/components/bloquesDatos/ficha/seo';
 import { propiedadHtml, retiradaHtml, comparadorHtml, type Herramientas } from '../../src/components/bloquesDatos/ficha/html';
 import { calcular } from '../../src/server/bd/formulas';
@@ -341,6 +341,58 @@ prueba('la cabecera sale de las tiendas: una agotada no es «Desde» ni «A la v
   // Anker SOLIX X1: one shop, no price. The header names it, never «ninguna tienda».
   assert.ok(propiedadHtml({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {}, ofertas: [{ precio_centimos: null, agotada: false }] }, { estilo: 'cabecera' }, h)
     .includes('Sin precio en España ahora: una tienda lo tiene sin precio publicado.'));
+});
+
+prueba('certificados y documentos se leen como filas, sin la dirección a la vista', () => {
+  const d = documentosDe('nombre: IEC 61701 (niebla salina); certificados de sistema ER-0096/1995; emisor: no indicado; fuente: https://x.de/a.pdf; fecha: 2026-10-18\nficha_tecnica — https://www.woba-solar.de/f.pdf\nDeclaración de conformidad — https://anker.com/doc');
+  assert.equal(d.length, 3);
+  assert.equal(d[0].nombre, 'IEC 61701 (niebla salina); certificados de sistema ER-0096/1995');
+  assert.equal(d[0].emisor, 'no indicado');
+  assert.equal(d[0].enlace, 'https://x.de/a.pdf');
+  assert.equal(d[0].fecha, '18/10/2026');
+  assert.deepEqual([d[1].nombre, d[1].sitio], ['Ficha técnica', 'woba-solar.de']);
+  assert.equal(d[2].nombre, 'Declaración de conformidad');
+  const cert: any = { id: 'cert', nombre: 'Certificados', tipo: 'texto_largo', config: { clave: 'certificados', grupo: 'documentos' } };
+  const docs: any = { id: 'docs', nombre: 'Manuales y documentos', tipo: 'texto_largo', config: { clave: 'documentos', grupo: 'documentos', formato: 'enlaces' } };
+  const gar: any = { id: 'gar', nombre: 'Garantía (años)', tipo: 'numero', config: { grupo: 'garantia', unidad: 'años' } };
+  const url = 'https://static.getpylon.com/warranties/AlphaESSWarranty.pdf';
+  const t: TablaFicha = { ...tabla, columnas: [...tabla.columnas, cert, docs, gar], filas: tabla.filas.map(f => (f.id === 'a' ? { ...f,
+    celdas: { ...f.celdas, cert: ok('nombre: UN 38.3; emisor: TÜV; fuente: https://x.de/a.pdf; fecha: 2026-10-18'), docs: ok(`garantía — ${url}`), gar: ok(10) },
+    procedencia: { ...f.procedencia, gar: { naturaleza: 'tercero' as const, fuente: url } } } : f)) };
+  const fa: Ficha = { pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: {} };
+  const v = vistaPropiedad(fa, { estilo: 'tabla', grupo: 'documentos' }) as any;
+  assert.equal(v.lineas.find((l: any) => l.columnaId === 'cert').documentos[0].emisor, 'TÜV');
+  const g = vistaPropiedad(fa, { estilo: 'tabla', grupo: 'garantia' }) as any;
+  assert.equal(g.lineas[0].valor.procedencia.etiqueta, 'Según la garantía del producto', 'no «Según static.getpylon.com»');
+  const h: Herramientas = { esc: (x: unknown) => String(x), enLinea: x => x, enlacePagina: id => `/p/${id}`, hrefSeguro: x => x };
+  const html = propiedadHtml(fa, { estilo: 'tabla', grupo: 'documentos' }, h);
+  assert.ok(html.includes('<li>UN 38.3 · emisor: TÜV · <a href="https://x.de/a.pdf" rel="nofollow noopener">x.de</a></li>'), html);
+  assert.ok(!html.includes('nombre:'));
+});
+
+prueba('el país de fabricación sale en la cabecera, corto, y nunca «No publicado»', () => {
+  const pf: any = { id: 'pf', nombre: 'País de fabricación', tipo: 'texto', config: { clave: 'pais_fabricacion', grupo: 'origen' } };
+  const con = (x: string) => (vistaPropiedad({ pagina_id: 'PA', fila_id: 'a', relacionadas: {}, tabla: { ...tabla, columnas: [...tabla.columnas, pf], filas: tabla.filas.map(f => (f.id === 'a' ? { ...f, celdas: { ...f.celdas, pf: ok(x) } } : f)) } }, { estilo: 'cabecera' }) as any).fabricadoEn?.texto ?? null;
+  assert.equal(con('China'), 'China');
+  assert.equal(con('Filipinas (células) / México (ensamblaje del módulo), según la ficha A4'), 'Filipinas / México');
+  assert.equal(con('Alemania (ensamblaje del módulo en Prenzlau); origen de las células no publicado'), 'Alemania');
+  assert.equal(con('No especificado en la ficha'), null);
+  assert.equal(con('No publicado'), null);
+});
+
+prueba('una afirmación se cita una sola vez, sin las comillas del título', () => {
+  const afi: TablaFicha = { id: 'AF', titulo: 'Afirmaciones', columna_titulo: 'tit', columnas: [
+    { id: 'tit', nombre: 'Título', tipo: 'texto', config: {} },
+    { id: 'txt', nombre: 'Afirmación', tipo: 'texto', config: { clave: 'afirmacion' } },
+    { id: 'ver', nombre: 'Veredicto', tipo: 'texto', config: { ficha: 'veredicto' } },
+  ], filas: [
+    { id: 'x1', pagina_id: null, titulo: '«24,000mAh» · Anker 737 Power Bank', celdas: { txt: ok('24,000mAh'), ver: ok('matizable') } },
+    { id: 'x2', pagina_id: null, titulo: '«Up to 140W fast charging» · Anker 737', celdas: { ver: ok('cierta') } },
+  ] };
+  const rel: any = { id: 'af', nombre: 'Afirmaciones', tipo: 'relacion', config: { ficha: 'afirmaciones', tabla_destino: 'AF' } };
+  const t: TablaFicha = { ...tabla, columnas: [...tabla.columnas, rel], filas: tabla.filas.map(f => (f.id === 'a' ? { ...f, apuntados: { af: [{ id: 'x1', etiqueta: '' }, { id: 'x2', etiqueta: '' }] } } : f)) };
+  const v = vistaAfirmaciones({ pagina_id: 'PA', fila_id: 'a', tabla: t, relacionadas: { AF: afi } }, {}) as any;
+  assert.deepEqual(v.items.map((i: any) => i.texto).sort(), ['24,000mAh', 'Up to 140W fast charging']);
 });
 
 prueba('las cifras escritas como texto llevan su unidad', () => {

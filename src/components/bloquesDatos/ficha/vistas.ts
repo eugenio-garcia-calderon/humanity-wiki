@@ -14,14 +14,19 @@ import {
   type Ficha, type FilaFicha, type TablaFicha, type Procedencia,
   columnaPorRol, rolDe, grupoDe, visible, filaActual, tieneValor, textoDe, numeroDe,
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
-  fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia,
+  fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia, ETIQUETA_NATURALEZA,
 } from './modelo';
 import { contarOfertas, type CuentaOfertas } from '../../../utils/ofertas';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
  *  its own page (a brand): the painter turns it into a link. */
 export type Valor = { texto: string; paginaId?: string | null; procedencia: Procedencia | null; enlace?: string | null };
-export type Linea = { columnaId: string; etiqueta: string; valor: Valor };
+/** One certificate or document, as a row of its own: what it is, who issued
+ *  it, and a short link («woba-solar.de») instead of the address in full. */
+export type Documento = { nombre: string; emisor: string; fecha: string; nota: string; enlace: string | null; sitio: string };
+/** `documentos`: the value is a list of certificates or documents, painted as
+ *  a small table instead of `valor.texto`. */
+export type Linea = { columnaId: string; etiqueta: string; valor: Valor; documentos?: Documento[] };
 
 /** The groups a sheet is split into (`config.grupo` in `esquema-bd.json`). */
 export const GRUPOS: Record<string, string> = {
@@ -51,7 +56,7 @@ const listable = (c: Columna) =>
 const URL_SOLA = /^https?:\/\/\S+$/;
 
 function valorDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Valor {
-  const procedencia = procedenciaDe(fila, c);
+  const procedencia = conDocumentoPropio(procedenciaDe(fila, c), documentosPropios(f, fila));
   let texto = textoDe(fila, c);
   let paginaId: string | null = null;
   if (c.tipo === 'relacion') {
@@ -72,7 +77,67 @@ function lineaDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Linea | nul
   const v = valorDe(f, fila, c);
   if (!v.texto && v.procedencia?.naturaleza !== 'no_publicado') return null;
   if (!v.texto) v.texto = 'No publicado';
-  return { columnaId: c.id, etiqueta: etiquetaColumna(c, f.tabla.columnas), valor: v };
+  const documentos = esListaDocumentos(c) ? documentosDe(v.texto) : null;
+  return { columnaId: c.id, etiqueta: etiquetaColumna(c, f.tabla.columnas), valor: v, ...(documentos?.length ? { documentos } : {}) };
+}
+
+// ── CERTIFICATES AND DOCUMENTS, AS DATA ─────────────────────────────────────
+// The loader writes them as text (`cargar.mjs`, `aTexto`): one line each,
+// «nombre: IEC 62619; emisor: no indicado; fuente: https://…; fecha: …» for a
+// certificate and «ficha técnica — https://…» for a document. Shown as such
+// they read as raw data with long addresses in view (evaluator round 4, C7),
+// so the sheet reads the lines back into rows. A line that fits neither shape
+// stays a row with its text as the name: nothing is dropped.
+
+const esListaDocumentos = (c: Columna) => c.config?.clave === 'certificados' || c.config?.formato === 'enlaces';
+const CLAVES_CERTIFICADO = /;\s+(?=(?:nombre|emisor|fuente|fecha|nota|url):\s)/;
+const URL_EN = /https?:\/\/\S+/;
+/** The loader's document types, as a reader says them. */
+const TIPO_DOCUMENTO: Record<string, string> = {
+  ficha_tecnica: 'ficha técnica', declaracion_ce: 'declaración CE de conformidad', otro: 'documento',
+};
+const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+export function documentosDe(texto: string): Documento[] {
+  return texto.split('\n').map(l => l.trim()).filter(Boolean).map(linea => {
+    if (/^nombre:\s/.test(linea)) {
+      const campos: Record<string, string> = {};
+      for (const parte of linea.split(CLAVES_CERTIFICADO)) {
+        const m = parte.match(/^(\w+):\s*([\s\S]*)$/);
+        if (m) campos[m[1]] = m[2].trim();
+      }
+      const enlace = (campos.fuente || campos.url || '').match(URL_EN)?.[0] || null;
+      return { nombre: campos.nombre || linea, emisor: campos.emisor || '', fecha: fechaCorta(campos.fecha), nota: campos.nota || '', enlace, sitio: sitioDe(enlace) };
+    }
+    const enlace = linea.match(URL_EN)?.[0] || null;
+    const nombre = (enlace ? linea.replace(enlace, '') : linea).replace(/\s*—\s*$/, '').replace(/^\s*—\s*/, '').trim();
+    return { nombre: mayuscula(TIPO_DOCUMENTO[nombre] || nombre || 'Documento'), emisor: '', fecha: '', nota: '', enlace, sitio: sitioDe(enlace) };
+  });
+}
+
+/** The product's own documents, by address: a value whose source is one of
+ *  them says WHICH document («Según la garantía del producto») instead of the
+ *  host it happens to be stored on — AlphaESS's warranty read «Según
+ *  static.getpylon.com», a site nobody recognises (evaluator round 4, C3). */
+function documentosPropios(f: Ficha, fila: FilaFicha | undefined): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const c of f.tabla.columnas) {
+    if (c.config?.formato !== 'enlaces' || !fila || !tieneValor(fila, c)) continue;
+    for (const d of documentosDe(textoDe(fila, c))) if (d.enlace && !m.has(d.enlace)) m.set(d.enlace, d.nombre);
+  }
+  return m;
+}
+const ARTICULO_DOCUMENTO: Record<string, string> = {
+  'ficha técnica': 'la ficha técnica', 'garantía': 'la garantía', manual: 'el manual', certificado: 'el certificado',
+  'declaración ce de conformidad': 'la declaración CE de conformidad', folleto: 'el folleto',
+};
+function conDocumentoPropio(p: Procedencia | null, propios: Map<string, string>): Procedencia | null {
+  const nombre = p?.fuente && p.naturaleza && p.naturaleza !== 'no_publicado' ? propios.get(p.fuente) : undefined;
+  if (!p || !nombre) return p;
+  const cual = `${ARTICULO_DOCUMENTO[nombre.toLowerCase()] || 'un documento'} del producto`;
+  const host = sitioDe(p.fuente);
+  const etiqueta = p.naturaleza === 'tercero' ? `Según ${cual}` : `${ETIQUETA_NATURALEZA[p.naturaleza!]} · ${cual}`;
+  return { ...p, etiqueta, nota: [p.nota, host && `Documento guardado en ${host}`].filter(Boolean).join(' · ') || null };
 }
 
 /** Columns chosen by id or by `config.clave`, in the order given. */
@@ -110,6 +175,9 @@ export type VistaPropiedad =
   | {
     estilo: 'cabecera'; nombre: string; marca: Valor | null; modelo: string; estado: string; imagen: string | null; credito: string; gtin: string; categoria: string;
     subcategoria: string;
+    /** «China», where the data has it: the origin in view without opening
+     *  «Origen y fabricación» (evaluator round 4, C3). '' when unknown. */
+    fabricadoEn: Valor | null;
     /** Null when the table has no price columns; `desde` '' = no shop yet. */
     compra: Compra | null;
     /** Null when the table has no community score; `media` '' = too few votes. */
@@ -152,6 +220,7 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
       gtin: porRol('gtin') ? textoDe(fila, porRol('gtin')!) : '',
       categoria: t.titulo,
       subcategoria: porRol('subcategoria') ? textoDe(fila, porRol('subcategoria')!) : '',
+      fabricadoEn: fabricadoEnDe(f, fila),
       compra,
       nota: notaDe(t, fila),
       destacados: columnasDestacadas(t)
@@ -191,6 +260,20 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
     return false;
   }) : todas;
   return { estilo: esTabla ? 'tabla' : 'lista', titulo: titulo || (grupo && GRUPOS[grupo]) || '', lineas, sinDato };
+}
+
+/** The country of manufacture, short enough for the header line: «China»,
+ *  «Filipinas / México». The loaded value can be a sentence («Alemania
+ *  (células, Thalheim) y, según la época, …») or say there is none («No
+ *  publicado»): the qualifiers stay in «Origen y fabricación», and a value
+ *  that is still long after trimming is left to that section alone. */
+function fabricadoEnDe(f: Ficha, fila: FilaFicha): Valor | null {
+  const c = f.tabla.columnas.find(x => x.config?.clave === 'pais_fabricacion' && visible(x));
+  if (!c || !tieneValor(fila, c)) return null;
+  const v = valorDe(f, fila, c);
+  if (v.procedencia?.naturaleza === 'no_publicado' || /^no\s+(publicad|especificad|consta|indicad)/i.test(v.texto)) return null;
+  const corto = v.texto.split(';')[0].replace(/\s*\([^)]*\)/g, '').split(/,?\s+según\b/)[0].trim();
+  return corto && corto.length <= 30 ? { ...v, texto: corto } : null;
 }
 
 /** The status badge, read together with the price.
@@ -609,6 +692,16 @@ const textoRol = (t: TablaFicha, x: FilaFicha, r: Parameters<typeof columnaPorRo
   return c ? textoDe(x, c) : '';
 };
 
+/** The claim itself, without quotation marks: painters quote it (`<q>`).
+ *  The row's title is «“claim” · product» for the loader (`cargar.mjs`), and
+ *  quoting that printed “«24,000mAh» · Anker 737…” (evaluator round 4). */
+function textoAfirmacion(t: TablaFicha, x: FilaFicha): string {
+  const c = t.columnas.find(k => k.config?.clave === 'afirmacion');
+  const propio = c ? textoDe(x, c).trim() : '';
+  const base = propio || x.titulo.replace(/^«([\s\S]+)»\s+·\s+[^«»]+$/, '$1');
+  return base.replace(/^[«“"']+|[»”"']+$/g, '').trim() || x.titulo;
+}
+
 export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown>): VistaAfirmaciones | null {
   const titulo = String(datos.titulo || '').trim();
   if (datos.modo === 'manual' || !f) {
@@ -631,7 +724,7 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
     const donde = textoRol(rel!.tabla, x, 'donde');
     const fecha = columnaPorRol(rel!.tabla, 'fecha');
     return {
-      texto: x.titulo,
+      texto: textoAfirmacion(rel!.tabla, x),
       veredicto: veredictoDe(textoRol(rel!.tabla, x, 'veredicto')),
       explicacion: textoRol(rel!.tabla, x, 'explicacion'),
       fuentes: textoRol(rel!.tabla, x, 'fuentes'),

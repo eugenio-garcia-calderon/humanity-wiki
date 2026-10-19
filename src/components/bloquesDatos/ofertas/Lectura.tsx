@@ -124,7 +124,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                     // link is the evidence, the date says how old it is.
                     <p key={t.url} className="mt-0.5 text-sm text-slate-600">
                       En otras webs:{' '}
-                      <a href={t.url} target="_blank" rel="nofollow noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">
+                      <a href={t.url} target="_blank" rel="nofollow noopener noreferrer" className="inline-flex min-h-[44px] items-center gap-1 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 sm:min-h-0">
                         {textoOpinion(t)}<ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
                       </a>
                     </p>
@@ -172,7 +172,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
               </ul>
               {o.tienda?.condiciones_url && (
                 <a href={o.tienda.condiciones_url} target="_blank" rel="nofollow noopener"
-                   className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-slate-500 underline-offset-2 hover:underline">
+                   className="mt-1 inline-flex min-h-[44px] items-center gap-1 text-sm font-bold text-slate-500 underline-offset-2 hover:underline sm:min-h-0">
                   {textoCondiciones(o.tienda)} <ExternalLink className="h-3 w-3" aria-hidden />
                 </a>
               )}
