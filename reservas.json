@@ -17,6 +17,12 @@
       "ruta": "src/components/bloquesDatos/ficha/modelo.ts",
       "motivo": "W2: con precio primero; buscador de 44 px",
       "desde": "2026-10-19T01:41:32.143Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/bloquesDatos/ficha/MandosCatalogo.tsx",
+      "motivo": "W2: con precio primero; buscador de 44 px",
+      "desde": "2026-10-19T01:41:38.007Z"
     }
   ]
 }
