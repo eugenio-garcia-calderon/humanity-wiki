@@ -230,11 +230,11 @@
           "nota": "Las fuentes consultadas citan a EcoFlow Technology Ltd como fabricante (Wikipedia) y a EcoFlow Technology Inc. (San Francisco, EE. UU.) como importador; no se confirmó con fuente la sede central (se suele citar Shenzhen, China, pero no se verificó)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.mediamarkt.es/es/product/_estacion-de-energia-ecoflow-river-3-300-w-245-wh-ip54-1x-usb-c-2x-usb-a-1x-ca-1x-cc-negro-1606746.html",
-          "fecha": "2026-10-18",
-          "nota": "Ni el manual ni MediaMarkt indican el país de fabricación de este modelo."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/ua/products/ecoflow-river-3",
+          "fecha": "2026-10-19",
+          "nota": "«Виробництво: Китай» (Fabricación: China) en la ficha de la tienda ucraniana Vencon para «EcoFlow River 3, 300Вт / 245Вт*год» (no la versión UPS). Ni el manual ni MediaMarkt, Proshop o Adorama lo indican."
         },
         "fabrica": {
           "valor": null,
@@ -914,10 +914,11 @@
           "nota": "Wikipedia indica que la empresa se fundó en Shenzhen en 2009; no indica la sede actual."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.bluettipower.eu/products/elite-30-v2-portable-power-station",
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/bluetti-elite-30-v2-600-vt",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» (Fabricación: China) en la ficha de la tienda ucraniana Vencon para «Bluetti Elite 30 V2, 600Вт / 288Вт*час»."
         },
         "fabrica": {
           "valor": null,
@@ -1226,10 +1227,11 @@
           "nota": "No se encontró fuente sobre la sede de Allpowers."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.pccomponentes.com/estacion-de-energia-allpowers-r600-299wh-8-puertos-lifepo4-cargador-solar-compatible",
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/ua/products/allpowers-r600-600vt--299vt-chas",
+          "fecha": "2026-10-19",
+          "nota": "«Виробництво: Китай» (Fabricación: China) en la ficha de la tienda ucraniana Vencon para «Allpowers R600, 600Вт / 299Вт*год». Es un campo distinto de «Країна реєстрації бренду» (país de registro de la marca)."
         },
         "fabrica": {
           "valor": null,
@@ -2197,10 +2199,11 @@
           "nota": "Anker Innovations Co., Ltd., con sede en Changsha (Hunan)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://cdn.shopify.com/s/files/1/0726/0736/7225/files/A1761_V6_EN_UK_UG_Web_20260512.pdf?v=1782298238",
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/anker-solix-c1000x",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» (Fabricación: China) en la ficha de Vencon para la variante SOLIX C1000X (la misma que ofrece MediaMarkt en la entrada; otra tienda, justbuy.com.ua, la identifica como A1761311). La guía de usuario A1761 no indica el país."
         },
         "fabrica": {
           "valor": null,
@@ -2539,10 +2542,11 @@
           "nota": "SZ DJI Technology Co., Ltd., Shenzhen."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.dji.com/es/power-1000/specs",
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/dji-power-1000",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» (Fabricación: China) en la ficha de la tienda ucraniana Vencon para «DJI Power 1000, 2200Вт / 1024Вт*час». La ficha de DJI, Alza y el manual (versión PL) no lo indican."
         },
         "fabrica": {
           "valor": null,
@@ -2874,10 +2878,11 @@
           "nota": "Wikipedia indica que la empresa se fundó en Shenzhen en 2009; no indica la sede actual."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.bluettipower.eu/products/ac180p",
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://comfy.ua/ua/zarjadnaja-stancija-universal-naja-bluetti-ac180p-1440wh-400000mah-1800w-pb931255.html",
+          "fecha": "2026-10-19",
+          "nota": "«Країна виробництва: Китай» (País de fabricación: China) en la ficha de la tienda ucraniana Comfy para «Bluetti AC180P 1440Wh 1800W»."
         },
         "fabrica": {
           "valor": null,
@@ -3225,10 +3230,11 @@
           "nota": "Las fuentes consultadas citan a EcoFlow Technology Ltd como fabricante (Wikipedia) y a EcoFlow Technology Inc. (San Francisco, EE. UU.) como importador; no se confirmó con fuente la sede central (se suele citar Shenzhen, China, pero no se verificó)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": "https://www.pccomponentes.com/estacion-de-energia-ecoflow-delta-3-max-2048wh-4-salidas-ac-y-5-salidas-dc-bateria-lifepo4-pantalla-lcd-wifi-bluetooth-ups",
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/ua/products/ecoflow-delta-3-max",
+          "fecha": "2026-10-19",
+          "nota": "«Виробництво: Китай» (Fabricación: China) en la ficha de la tienda ucraniana Vencon para «EcoFlow DELTA 3 Max, 2400Вт / 2048Вт*год» (no la versión Max Plus)."
         },
         "fabrica": {
           "valor": null,

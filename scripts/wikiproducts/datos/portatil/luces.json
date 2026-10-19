@@ -448,11 +448,11 @@
           "nota": "Salt Lake City (Utah)."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.manualslib.mx/manual/715599/Goal-Zero-Torch-500.html",
+          "fecha": "2026-10-19",
+          "nota": "«Designed in the U.S.A. Made in China» en la página 40 de la guía del usuario de Goal Zero para la TORCH 500 (copia alojada en ManualsLib; el manual no muestra el número 90115). Ni goalzero.com ni solarpowersupply.eu lo indican."
         },
         "fabrica": {
           "valor": null,

@@ -67,7 +67,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
             <p className="text-base text-slate-700">
               {v.marca ? <>Marca: <ValorConEnlace v={v.marca} /></> : null}
               {v.marca && identidad ? ' · ' : null}{identidad}
-              {v.fabricadoEn ? <>{v.marca || identidad ? ' · ' : null}Fabricado en {v.fabricadoEn.texto}</> : null}
+              {v.fabricadoEn ? <>{v.marca || identidad ? ' · ' : null}Fabricado en {v.fabricadoEn.texto}<Segun p={v.fabricadoEn.procedencia} /></> : null}
             </p>
             {v.nota ? <Puntuacion n={v.nota} /> : null}
             {v.compra ? (
@@ -205,6 +205,17 @@ function ProcedenciaCorta({ p }: { p: Procedencia }) {
       {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 hover:underline">{texto}</a> : texto}
     </dd>
   );
+}
+
+/** « (según rs-online.com)», « (según la marca)»: who says where it is
+ *  made, in the header line itself. Most countries come from a shop's
+ *  «country of origin» field, not the maker (W3a, round 4), and the line
+ *  must not read as the brand's word. Nothing without a stated source. */
+function Segun({ p }: { p: Procedencia | null }) {
+  const base = (p?.etiqueta || '').split(' · ')[0];
+  if (!p?.naturaleza || p.naturaleza === 'no_publicado' || !/^según /i.test(base)) return null;
+  const texto = base.charAt(0).toLowerCase() + base.slice(1);
+  return <> ({p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 text-slate-500 hover:underline" title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>{texto}</a> : texto})</>;
 }
 
 /** Certificates and documents as rows: name, issuer, a short link. On a
