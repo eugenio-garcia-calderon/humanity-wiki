@@ -9420,6 +9420,11 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Ad claims are quoted once: the text comes from the claim's own column, not from the row title «“claim” · product», which printed “«24,000mAh» · Anker 737…”.
 - The header says «Fabricado en China» where the data has a country (short form; «No publicado» and long qualified values stay only in «Origen y fabricación»). 41 of 94 products have none; passed to W3a.
 - Tests: `scripts/wikiproducts/probar-ficha.ts` (documents, own-document source, claims, country).
+
+## 2026-10-19 · Country of manufacture for 21 more products (Wikiproducts W1 + W3a, round 4)
+- `origen.pais_fabricacion` filled for 21 of the 41 products that had none (4 powerbanks, 9 portable panels, 1 light, 7 stations), all «China», from W3a's research (`/mnt/project-files/wikiproducto/w3a-datos-w1/`, applied with its `aplicar.mjs`; never overwrites a value). Two are «declarado» (Xiaomi's own page, Goal Zero Torch 500's user guide), 19 «tercero» (shop «country of origin» fields: RS Components, vencon.ua, comfy.ua, thegioididong, dienmayxanh). The other 20 stay «no publicado»; nothing inferred from the brand.
+- The header line says who says it: «Fabricado en China (según uk.rs-online.com)» / «(según la marca)», linked to the source, so a shop's field never reads as the maker's word.
+- Needs a full load to reach production.
 ## 2026-10-19 — Catalog listings: first product above the fold on phones, per-category filters, named default order, 16 px site text, visible focus (W2)
 
 Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
