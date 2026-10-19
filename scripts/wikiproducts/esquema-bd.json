@@ -4054,14 +4054,23 @@
           }
         },
         {
+          "clave": "envia_espana",
+          "nombre": "Envía a España",
+          "tipo": "casilla",
+          "config": {
+            "clave": "envia_espana",
+            "visibilidad": "nunca"
+          }
+        },
+        {
           "clave": "precio_disponible",
           "nombre": "Precio si quedan existencias",
           "tipo": "formula",
           "config": {
             "clave": "precio_disponible",
             "visibilidad": "nunca",
-            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
-            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+            "formula": "SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada o no envía a España. Lo lee «Precio desde» del producto, para que esas tiendas no marquen el precio más bajo. Si no se sabe, cuenta."
           }
         },
         {
@@ -4237,14 +4246,23 @@
           }
         },
         {
+          "clave": "envia_espana",
+          "nombre": "Envía a España",
+          "tipo": "casilla",
+          "config": {
+            "clave": "envia_espana",
+            "visibilidad": "nunca"
+          }
+        },
+        {
           "clave": "precio_disponible",
           "nombre": "Precio si quedan existencias",
           "tipo": "formula",
           "config": {
             "clave": "precio_disponible",
             "visibilidad": "nunca",
-            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
-            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+            "formula": "SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada o no envía a España. Lo lee «Precio desde» del producto, para que esas tiendas no marquen el precio más bajo. Si no se sabe, cuenta."
           }
         },
         {
@@ -4420,14 +4438,23 @@
           }
         },
         {
+          "clave": "envia_espana",
+          "nombre": "Envía a España",
+          "tipo": "casilla",
+          "config": {
+            "clave": "envia_espana",
+            "visibilidad": "nunca"
+          }
+        },
+        {
           "clave": "precio_disponible",
           "nombre": "Precio si quedan existencias",
           "tipo": "formula",
           "config": {
             "clave": "precio_disponible",
             "visibilidad": "nunca",
-            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
-            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+            "formula": "SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada o no envía a España. Lo lee «Precio desde» del producto, para que esas tiendas no marquen el precio más bajo. Si no se sabe, cuenta."
           }
         },
         {
@@ -4603,14 +4630,23 @@
           }
         },
         {
+          "clave": "envia_espana",
+          "nombre": "Envía a España",
+          "tipo": "casilla",
+          "config": {
+            "clave": "envia_espana",
+            "visibilidad": "nunca"
+          }
+        },
+        {
           "clave": "precio_disponible",
           "nombre": "Precio si quedan existencias",
           "tipo": "formula",
           "config": {
             "clave": "precio_disponible",
             "visibilidad": "nunca",
-            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
-            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+            "formula": "SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada o no envía a España. Lo lee «Precio desde» del producto, para que esas tiendas no marquen el precio más bajo. Si no se sabe, cuenta."
           }
         },
         {
@@ -4786,14 +4822,23 @@
           }
         },
         {
+          "clave": "envia_espana",
+          "nombre": "Envía a España",
+          "tipo": "casilla",
+          "config": {
+            "clave": "envia_espana",
+            "visibilidad": "nunca"
+          }
+        },
+        {
           "clave": "precio_disponible",
           "nombre": "Precio si quedan existencias",
           "tipo": "formula",
           "config": {
             "clave": "precio_disponible",
             "visibilidad": "nunca",
-            "formula": "SI(SI.VACIO({Disponible}; 1); {Precio})",
-            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada. Lo lee «Precio desde» del producto, para que una tienda sin existencias no marque el precio más bajo."
+            "formula": "SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})",
+            "explicacion": "El precio de la oferta, salvo cuando la tienda la tiene agotada o no envía a España. Lo lee «Precio desde» del producto, para que esas tiendas no marquen el precio más bajo. Si no se sabe, cuenta."
           }
         },
         {
