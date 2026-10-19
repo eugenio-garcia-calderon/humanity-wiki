@@ -84,7 +84,7 @@ const esFuera = (d: Destino, nueva?: boolean) => (d?.tipo === 'url' && /^https?:
 const MEDIDAS: Record<Tamano, { alto: number; logo: number; letra: string; caja: string; icono: number }> = {
   pequeno: { alto: 56, logo: 28, letra: 'text-[13px]', caja: 'h-8 px-2.5', icono: 14 },
   // 44 px de alto: el mínimo para un dedo (ronda 3 del evaluador).
-  mediano: { alto: 68, logo: 36, letra: 'text-sm', caja: 'h-11 px-3.5', icono: 16 },
+  mediano: { alto: 68, logo: 36, letra: 'text-base', caja: 'h-11 px-3.5', icono: 16 },
   grande: { alto: 84, logo: 44, letra: 'text-base', caja: 'h-12 px-4', icono: 18 },
 };
 
@@ -309,7 +309,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
       </div>
       {(p.copyright || legales.length > 0) && (
         <div style={{ borderColor: `${p.texto}26` }} className="border-t">
-          <div className="mx-auto max-w-6xl px-5 @2xl:px-8 py-3 flex flex-wrap items-center gap-x-5 text-sm opacity-75">
+          <div className="mx-auto max-w-6xl px-5 @2xl:px-8 py-3 flex flex-wrap items-center gap-x-5 text-base opacity-75">
             {p.copyright && <span>© {new Date().getFullYear()} {s.titular.nombre || nombre}</span>}
             {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
           </div>
@@ -347,7 +347,7 @@ export function TextoSencillo({ texto }: { texto: string }) {
     x.startsWith('**') && x.endsWith('**') ? <strong key={i} className="text-slate-900">{x.slice(2, -2)}</strong> : x);
   const trozos = texto.split(/\n{2,}/);
   return (
-    <div className="space-y-3 text-sm leading-relaxed">
+    <div className="space-y-3 text-base leading-relaxed">
       {trozos.map((t, i) => {
         if (t.startsWith('# ')) return <h2 key={i} className="text-2xl font-black text-slate-900 pr-10">{t.slice(2)}</h2>;
         if (t.startsWith('## ')) return <h3 key={i} className="pt-2 text-base font-black text-slate-900">{t.slice(3)}</h3>;
@@ -381,7 +381,7 @@ export function MarcoSitio({ sitio, rutas, logo, nombre, cuenta, children }: {
   const nombrePie = sitio.pie.nombre || mn.nombre || nombre || undefined;
   const lateral = mn.activo && mn.posicion === 'lateral' && mn.plegado !== 'siempre';
   return (
-    <div className="@container min-h-screen bg-white flex flex-col">
+    <div className="sitio-foco @container min-h-screen bg-white flex flex-col">
       {mn.activo && <Barra s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} soloMovil={lateral} cuenta={cuenta} />}
       <div className={cn('flex-1', lateral && '@2xl:flex')}>
         {lateral && <Lateral s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} cuenta={cuenta} />}

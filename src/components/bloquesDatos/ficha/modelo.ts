@@ -146,6 +146,17 @@ export const grupoDe = (c: Columna | undefined): string | undefined => c?.config
 export const columnaPorRol = (t: TablaFicha | undefined, rol: Rol): Columna | undefined =>
   t?.columnas.find(c => rolDe(c) === rol);
 
+/** A catalogue with no order of its own is shown by this column, smallest first
+ *  (W2, 2026-10-19): its size figure, or failing that its power or light
+ *  output. The server sorts by it (`server/bd.ts`) and the visitor's «Ordenar
+ *  por» names it (`MandosCatalogo`): one rule, so the label cannot lie. */
+export const CLAVES_POTENCIA = ['potencia_salida_max_w', 'potencia_continua_kw', 'lumenes_max', 'potencia_pico_w', 'potencia_pico_wp'];
+export const columnaOrdenCatalogo = <C extends Columna>(columnas: C[]): C | undefined => {
+  const vis = columnas.filter(c => c.config?.visibilidad !== 'nunca');
+  return vis.find(c => rolDe(c) === 'tamano')
+    ?? CLAVES_POTENCIA.map(k => vis.find(c => c.config?.clave === k)).find(Boolean);
+};
+
 /** Shown on a page? `visibilidad: 'nunca'` is the table owner saying no. */
 export const visible = (c: Columna) => c.config?.visibilidad !== 'nunca';
 

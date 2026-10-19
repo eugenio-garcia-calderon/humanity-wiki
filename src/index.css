@@ -95,3 +95,14 @@ html, body { overscroll-behavior-x: none; }
 .sitio-lectura .text-\[15px\] { font-size: 1rem; }
 .sitio-lectura :is(p, li, dd, dt, td, th, label, blockquote).text-sm { font-size: 1rem; line-height: 1.5rem; }
 
+/* EL FOCO DEL TECLADO SE VE EN TODO EL SITIO (2026-10-19, Wikiproducts W2,
+   ronda 4 del evaluador: «no se puede ver si el foco es visible»). Muchos
+   controles llevan `outline-none` y otros sólo un anillo propio en algunos
+   sitios: quien navega con el tabulador se perdía. Un contorno de 3 px, el
+   mismo en el menú, el contenido y el pie, sólo con teclado (`:focus-visible`):
+   con el ratón o el dedo no aparece. Gana a `outline-none` por especificidad. */
+:is(.sitio-foco, .sitio-lectura) :focus-visible {
+  outline: 3px solid var(--color-emerald-700, rgb(0 122 85));
+  outline-offset: 2px;
+}
+

@@ -103,7 +103,7 @@ export default function VistaPagina({ pagina, propio, pie }: {
     <MarcoLectura pagina={pagina} rutas={rutas}>
       {migas.length > 0 && (
         <nav aria-label="Estás en" className="mb-4">
-          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-slate-600">
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {/* On a phone, one line: only the level just above, the way back.
                 The full trail took three lines before the title (evaluator
                 round 2, 2026-10-18); from `sm` up it is all there. */}
@@ -151,9 +151,9 @@ export function SinPagina({ titulo, texto, volver }: { titulo: string; texto: st
       <div className="text-center max-w-sm">
         <p className="text-5xl font-black text-slate-200">404</p>
         <h1 className="mt-3 text-lg font-black text-slate-800">{titulo}</h1>
-        <p className="mt-1 text-sm text-slate-500">{texto}</p>
+        <p className="mt-1 text-base text-slate-500">{texto}</p>
         {volver && (
-          <Link to={volver} className="inline-block mt-5 h-11 leading-[2.75rem] px-4 rounded-xl bg-slate-900 text-white text-sm font-bold">
+          <Link to={volver} className="inline-block mt-5 h-11 leading-[2.75rem] px-4 rounded-xl bg-slate-900 text-white text-base font-bold">
             Ir al inicio
           </Link>
         )}
