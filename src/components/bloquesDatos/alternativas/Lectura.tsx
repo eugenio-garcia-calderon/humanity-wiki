@@ -34,7 +34,7 @@ export function VistaAlternativas({ datos, paginaId, enEditor }: PropsLectura & 
                 {c.esEsta ? (
                   <span className="inline-flex items-center gap-1 font-bold text-emerald-700"><Trophy className="h-3.5 w-3.5" /> Este producto{c.empates ? ` (y ${c.empates} más)` : ''}</span>
                 ) : href ? (
-                  <a href={href} className="font-bold text-sky-700 hover:underline">{c.ganador.nombre}</a>
+                  <a href={href} className="inline-flex min-h-11 items-center font-bold text-sky-700 hover:underline">{c.ganador.nombre}</a>
                 ) : (
                   <span className="font-bold text-slate-800">{c.ganador.nombre}</span>
                 )}
