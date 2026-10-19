@@ -9435,3 +9435,7 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - **16 px text.** Section cards (counts, descriptions, compact titles on the phone), the footer bottom row, the legal texts, the header menu, the breadcrumb and the 404 text move from 13–14 px to 16 px. Median text size (evaluator's metric, `p,li,td,span` over 20 characters) is 16 px on home, both categories, «Cómo trabajamos» and /powerbanks at 390 and 1440; it was 14.
 - **Keyboard focus.** A 3 px emerald outline on `:focus-visible` across the published site (menu, content, footer), overriding `outline-none`.
 - **Home LCP.** Not reproduced: three cold loads at 1440×900 gave 340–432 ms, and the LCP element is the intro paragraph, not an image. No change.
+
+## 2026-10-19 — Wikiproducts: the sheet header's score link is 44 px high (W4, Mac check of #678)
+
+- «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11`. Not checked in a browser: the local server was down; tsc and build pass.
