@@ -398,7 +398,10 @@ function cuerpoDe(fila) {
     const crudo = fila.campos[clave];
     const r = aCelda(c, crudo);
     if (r.rechazo) informe.rechazos.push(`${fila.tabla} · ${corto(fila.nombre, 50)} · ${c.nombre}: ${r.rechazo}`);
-    else if (r.valor !== null || esDato(crudo)) values[c.nombre] = r.valor;
+    // A key present with a plain null is a value taken out of the data: it is
+    // written as empty so the old one does not stay live (Vekto's price, round
+    // 4). A key that is absent is not this load's to touch.
+    else if (r.valor !== null || esDato(crudo) || crudo === null) values[c.nombre] = r.valor;
     const pr = procedenciaDe(crudo);
     // A range («21–22 %») in a number column: the cell stays empty and the
     // published wording travels in the source note, so it is not lost.
@@ -547,7 +550,7 @@ for (const t of new Set(cuerpos.map(c => c.fila.tabla))) {
 const paraEnviar = (values, tipos) => Object.fromEntries(Object.entries(values).map(([k, v]) =>
   [k, tipos[k] === 'moneda' && typeof v === 'number' && !Number.isInteger(v) ? String(v).replace('.', ',') : v]));
 
-const hecho = { creadas: 0, cambiadas: 0, iguales: 0, fallos: [] };
+const hecho = { creadas: 0, cambiadas: 0, iguales: 0, fallos: [], vaciadas: [] };
 for (const c of cuerpos) {
   const t = tablas[c.fila.tabla];
   const values = {};
@@ -576,6 +579,13 @@ for (const c of cuerpos) {
       });
       hecho.cambiadas++;
       process.stdout.write(`  ~ ${corto(c.fila.nombre, 70)} (${Object.keys(cambian).length} celdas, ${Object.keys(procCambia).length} fuentes)\n`);
+      // Every cell this load empties is said, so the log shows what was removed.
+      for (const [k, v] of Object.entries(cambian)) {
+        if (v !== null || previa.values?.[k] == null) continue;
+        const linea = `${tablaDef(c.fila.tabla).titulo} · ${corto(c.fila.nombre, 60)} · ${k} (era ${JSON.stringify(previa.values[k]).slice(0, 60)})`;
+        hecho.vaciadas.push(linea);
+        process.stdout.write(`      vaciada: ${linea}\n`);
+      }
       if (DETALLE) for (const k of [...Object.keys(cambian), ...Object.keys(procCambia)]) process.stdout.write(`      ${k}: ${JSON.stringify(previa.values?.[k] ?? previa.provenance?.[k] ?? null).slice(0, 80)} → ${JSON.stringify(cambian[k] ?? procCambia[k]).slice(0, 80)}\n`);
     }
   } catch (e) {
@@ -620,6 +630,7 @@ for (const t of new Set(productos.map(p => p._tabla))) {
 contar();
 if (retiradasAhora.length) { console.log(`\nA la papelera, por error de una carga anterior (${retiradasAhora.length}):`); for (const s of retiradasAhora) console.log(`  − ${s}`); }
 if (sobran.length) { console.log(`\nFilas en el servidor que estos datos no tienen (no se tocan) (${sobran.length}):`); for (const s of sobran.slice(0, 20)) console.log(`  · ${s}`); }
+if (hecho.vaciadas.length) { console.log(`\nCeldas vaciadas porque el dato se quitó de los datos (${hecho.vaciadas.length}):`); for (const v of hecho.vaciadas) console.log(`  ∅ ${v}`); }
 if (hecho.fallos.length) { console.log(`\nFallos (${hecho.fallos.length}):`); for (const f of hecho.fallos) console.log(`  ! ${f}`); }
 if (fallosRutas.length) { console.log('\nDirecciones sin recalcular (se calcularán al visitar cada ficha o el sitemap):'); for (const f of fallosRutas) console.log(`  ! ${f}`); }
 console.log(`\nHecho: ${hecho.creadas} filas nuevas, ${hecho.cambiadas} cambiadas, ${hecho.iguales} iguales; ${escrituras} escrituras; ${rutas} direcciones puestas al día.`);
