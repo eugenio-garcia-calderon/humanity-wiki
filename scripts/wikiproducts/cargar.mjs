@@ -276,6 +276,11 @@ function disponibleDe(x) {
   if (/confirma|dudoso|contradictorio/i.test(t)) return null;
   return /^(en stock|in stock|disponible)\b/i.test(t) ? true : null;
 }
+function enviaEspanaDe(id) {
+  const v = distribuidores.get(id)?.envia_a_espana;
+  const b = esDato(v) ? v.valor : v;
+  return typeof b === 'boolean' ? b : null;
+}
 function filaOferta(p, o) {
   const sinAcuerdo = o.comision == null || /sin acuerdo/i.test(String(o.comision));
   return {
@@ -288,6 +293,9 @@ function filaOferta(p, o) {
       // Stock is a number of units; the data has words. Only a number goes in.
       stock: stockDe(o.stock),
       disponible: disponibleDe(o.stock),
+      // Copied from the shop so «precio_disponible» can leave out shops that
+      // don't ship to Spain (W5, round 4). Unknown stays empty: counts as ships.
+      envia_espana: enviaEspanaDe(o.distribuidor_id),
       incluye_instalacion: o.incluye_instalacion,
       nota: o.nota,
     },
