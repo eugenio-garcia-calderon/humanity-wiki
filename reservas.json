@@ -47,6 +47,12 @@
       "ruta": "src/components/sitio/MenuSitio.tsx",
       "motivo": "W2: texto de 16 px en las páginas del sitio",
       "desde": "2026-10-19T00:51:25.506Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/VistaPagina.tsx",
+      "motivo": "W2: texto de 16 px en las páginas del sitio",
+      "desde": "2026-10-19T00:51:28.272Z"
     }
   ]
 }
