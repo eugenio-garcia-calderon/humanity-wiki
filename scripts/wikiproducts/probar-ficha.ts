@@ -176,8 +176,11 @@ prueba('las propiedades no enseñan la comisión ni las notas internas', () => {
 });
 
 prueba('la procedencia se dice según quién la da y qué falta', () => {
-  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://www.pccomponentes.com/x' }), 'Según pccomponentes.com');
-  assert.equal(etiquetaProcedencia({ naturaleza: 'declarado', fuente: 'https://anker.com/x' }), 'Según la marca · anker.com');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://www.pccomponentes.com/x' }), 'Según PcComponentes (tienda)');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://www.cpsc.gov/Recalls/x' }), 'Según la CPSC (EE. UU.)');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'medido', fuente: 'https://techtest.org/x' }), 'Medido por Techtest (análisis)');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://tienda-desconocida.example/x' }), 'Según tienda-desconocida.example', 'sin nombre conocido, el dominio');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'declarado', fuente: 'https://anker.com/x' }), 'Según la marca');
   const pruebas: any = { id: 'p', nombre: 'Pruebas independientes', tipo: 'texto', config: { clave: 'pruebas_independientes' } };
   assert.equal(etiquetaProcedencia({ naturaleza: 'no_publicado' }, pruebas), 'No hay pruebas independientes publicadas');
   assert.equal(etiquetaProcedencia({ naturaleza: 'no_publicado' }, { ...pruebas, config: { sin_dato: 'Nadie lo sabe' } }), 'Nadie lo sabe');
@@ -368,6 +371,17 @@ prueba('certificados y documentos se leen como filas, sin la dirección a la vis
   const html = propiedadHtml(fa, { estilo: 'tabla', grupo: 'documentos' }, h);
   assert.ok(html.includes('<li>UN 38.3 · emisor: TÜV · <a href="https://x.de/a.pdf" rel="nofollow noopener">x.de</a></li>'), html);
   assert.ok(!html.includes('nombre:'));
+});
+
+prueba('el comparador dice por qué no hay precio, con la misma frase que la ficha', () => {
+  const pu: any = { id: 'pu', nombre: 'Precio por kWh', tipo: 'formula', config: { ficha: 'precio_unidad', grupo: 'compra', comparar: 'menor', explicacion: 'Precio ÷ energía', sin_dato: 'Sin precio en ninguna tienda todavía' } };
+  const t: TablaFicha = { ...tabla, columnas: [...tabla.columnas, pu], filas: tabla.filas.map(f => (f.id === 'b' ? { ...f, celdas: { ...f.celdas, pre: { estado: 'vacia' } as any } } : f)) };
+  const cuentas = { a: { vendibles: 1, sinPrecio: 0, agotadas: 0, fuera: 0, total: 1 }, b: { vendibles: 0, sinPrecio: 0, agotadas: 0, fuera: 1, total: 1 } };
+  const v = vistaComparador(t, ['b'], { actualId: 'a', cuentas })!;
+  const precio = v.lineas.find(l => l.columnaId === 'pre')!;
+  assert.equal(precio.celdas[1].texto, 'Sin precio en España ahora: una tienda lo vende pero no envía a España.');
+  const unidad = v.lineas.find(l => l.columnaId === 'pu');
+  assert.ok(!unidad || unidad.celdas[1].procedencia === null, 'nada de «Sin precio en ninguna tienda todavía»');
 });
 
 prueba('el país de fabricación sale en la cabecera, corto, y nunca «No publicado»', () => {

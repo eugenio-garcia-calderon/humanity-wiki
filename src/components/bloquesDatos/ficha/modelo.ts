@@ -27,6 +27,7 @@
 //   config.unidad    printed after the number («86,4 Wh»).
 //   config.clave     the stable key the loaders use (`capacidad_wh`).
 import { formatear, type Celda, type Columna } from '../../../utils/formatoCelda';
+import { nombreFuente } from './fuentes';
 
 // 'tercero' (2026-10-18): a value taken from someone who is neither the brand
 // nor a measurement — a shop relaying the spec sheet, the press, a regulator,
@@ -83,6 +84,9 @@ export type Ficha = {
    *  `ofertasDeProducto`, its rule for who may read them): only what the
    *  header needs. Absent on a template or when they could not be read. */
   ofertas?: Array<{ precio_centimos: number | null; agotada: boolean; fuera_de_espana?: boolean }>;
+  /** Every row's shops, counted the same way (`contarOfertas`), for the
+   *  comparator: a sibling without a price says why. Absent when unread. */
+  cuentas?: Record<string, { vendibles: number; sinPrecio: number; agotadas: number; fuera: number; total: number }>;
 };
 
 export const ROLES = [
@@ -275,18 +279,22 @@ const SIN_DATO_POR_CLAVE: Record<string, string> = {
   razon_social: 'La empresa no lo publica',
 };
 
-/** The provenance as one sentence, with the source's host where it adds
- *  something: «Según la marca · anker.com», «Según pccomponentes.com». */
+/** The provenance as one sentence, naming the source the way a reader knows
+ *  it: «Según PcComponentes (tienda)», «Medido por Techtest (análisis)»,
+ *  «Según la CPSC (EE. UU.)» (`fuentes.ts`). The domain stays in the link and
+ *  the tooltip, not in the sentence (production check, round 4). A host with
+ *  no name listed keeps its domain where the domain is the only name there
+ *  is (a third party); the brand's own claim says «Según la marca». */
 export function etiquetaProcedencia(p: Procedencia, c?: Columna): string {
   const host = sitioDe(p.fuente);
-  if (p.naturaleza === 'tercero') return host ? `Según ${host}` : ETIQUETA_NATURALEZA.tercero;
+  const nombre = host ? nombreFuente(host) : '';
+  if (p.naturaleza === 'tercero') return nombre || host ? `Según ${nombre || host}` : ETIQUETA_NATURALEZA.tercero;
+  if (p.naturaleza === 'medido' && (nombre || host)) return `Medido por ${nombre || host}`;
   if (p.naturaleza === 'no_publicado') {
     const propio = typeof c?.config?.sin_dato === 'string' && c.config.sin_dato.trim() ? c.config.sin_dato.trim() : '';
-    const base = propio || (c?.config?.clave && SIN_DATO_POR_CLAVE[c.config.clave]) || ETIQUETA_NATURALEZA.no_publicado;
-    return host ? `${base} · ${host}` : base;
+    return propio || (c?.config?.clave && SIN_DATO_POR_CLAVE[c.config.clave]) || ETIQUETA_NATURALEZA.no_publicado;
   }
-  const base = p.naturaleza ? ETIQUETA_NATURALEZA[p.naturaleza] : '';
-  return host ? `${base} · ${host}` : base;
+  return p.naturaleza ? ETIQUETA_NATURALEZA[p.naturaleza] : '';
 }
 
 export const procedenciaDe = (fila: FilaFicha | undefined, c: Columna): Procedencia | null => {

@@ -97,7 +97,7 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
       ? <SinFila que="En modo «esta fila», el comparador compara la fila de la página con otras de su base de datos." />
       : <p className="text-sm text-slate-400">Elige una base de datos para comparar sus filas.</p>;
   }
-  const v = vistaComparador(tabla, ids.filter(i => i !== actualId), { actualId, titulo: String(datos.titulo || ''), columnas: datos.columnas });
+  const v = vistaComparador(tabla, ids.filter(i => i !== actualId), { actualId, titulo: String(datos.titulo || ''), columnas: datos.columnas, cuentas: deFila ? ficha?.cuentas : undefined });
   if (!v || v.productos.length < 2) {
     if (!enEditor && !v?.candidatos.length) return null;
   }
@@ -139,7 +139,7 @@ export function VistaComparador({ datos, paginaId, enEditor }: PropsLectura & { 
                     <th key={p.id} scope="col" style={anchoCol} className={cn('min-w-[10rem] sm:min-w-[9.5rem] px-3 py-2 text-left align-bottom', p.actual ? cn('bg-sky-50', FIJA) : 'snap-start')}>
                       {p.imagen ? <img src={p.imagen} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = 'none'; }} className="mb-1 h-16 w-16 rounded-lg object-contain" /> : null}
                       <div className="flex items-start gap-1">
-                        {href ? <a href={href} className="font-bold text-sky-700 hover:underline [overflow-wrap:anywhere]">{p.nombre}</a> : <span className="font-bold text-slate-900 [overflow-wrap:anywhere]">{p.nombre}</span>}
+                        {href ? <a href={href} className="flex min-h-[44px] items-center font-bold text-sky-700 hover:underline [overflow-wrap:anywhere]">{p.nombre}</a> : <span className="font-bold text-slate-900 [overflow-wrap:anywhere]">{p.nombre}</span>}
                         {!p.actual && modo !== 'fijo' ? (
                           <Button variant="ghost" className="-mr-2 -mt-2 h-11 w-11 shrink-0 p-0" aria-label={`Quitar ${p.nombre}`} onClick={() => cambiar(otros.filter(i => i !== p.id))}>
                             <X className="h-4 w-4" />

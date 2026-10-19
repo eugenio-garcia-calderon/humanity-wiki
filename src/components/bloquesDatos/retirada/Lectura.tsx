@@ -27,7 +27,7 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
             <li key={i} className="rounded-xl border border-rose-100 bg-rose-50/40 p-3">
               <p className="flex items-start gap-1.5 font-semibold text-rose-900"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" /> {r.titulo}</p>
               <p className="mt-0.5 text-sm text-slate-600">{[r.fecha, r.organismo, r.pais].filter(Boolean).join(' · ')}{r.referencia ? ` · Ref. ${r.referencia}` : ''}</p>
-              {r.motivo ? <p className="mt-1.5 text-base text-slate-700"><TextoConEnlaces texto={r.motivo} /></p> : null}
+              {r.motivo ? <p className="mt-1.5 text-base text-slate-700"><TextoConEnlaces tactil texto={r.motivo} /></p> : null}
               {r.enlace ? <a href={r.enlace} target="_blank" rel="noopener nofollow" className="mt-1 inline-block text-sm text-sky-700 hover:underline">Aviso oficial ({sitioDe(r.enlace)})</a> : null}
             </li>
           ))}
@@ -42,7 +42,7 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
       {v.busqueda && v.estado !== 'sin_comprobar' ? (
         <details className="mt-1 text-sm text-slate-500">
           <summary className="cursor-pointer py-3 font-semibold text-slate-600">Dónde se buscó</summary>
-          <p className="whitespace-pre-line [&_a]:py-1"><TextoConEnlaces texto={v.busqueda} /></p>
+          <p className="whitespace-pre-line"><TextoConEnlaces tactil texto={v.busqueda} /></p>
         </details>
       ) : null}
     </Seccion>

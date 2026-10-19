@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronDown, Info } from 'lucide-react';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { cn } from '../../../utils/cn';
-import { etiquetaProcedencia, fechaCorta, type Procedencia } from './modelo';
+import { etiquetaProcedencia, fechaCorta, sitioDe, type Procedencia } from './modelo';
 
 // The small pieces every block of a product sheet uses, so that a section
 // title, a source mark or a link to another product look the same in all of
@@ -69,10 +69,10 @@ export function MarcaProcedencia({ p }: { p: Procedencia | null }) {
   const tono = p.naturaleza === 'medido' ? 'text-emerald-700' : p.naturaleza === 'no_publicado' ? 'text-amber-700' : 'text-slate-500';
   const texto = <>{p.etiqueta || etiquetaProcedencia(p)}</>;
   return (
-    <span className={cn('inline-flex items-center gap-1 text-sm font-semibold', tono)} title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>
+    <span className={cn('inline-flex items-center gap-1 text-sm font-semibold', tono)} title={[sitioDe(p.fuente) && `Fuente: ${sitioDe(p.fuente)}`, p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>
       {/* `py-3` on an inline link grows what a finger can hit to 44 px
           without moving a line (evaluator round 3: tap targets). */}
-      {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 hover:underline">{texto}</a> : texto}
+      {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-[14px] hover:underline">{texto}</a> : texto}
       {p.nota ? <Info className="w-3 h-3 opacity-60" aria-hidden /> : null}
     </span>
   );

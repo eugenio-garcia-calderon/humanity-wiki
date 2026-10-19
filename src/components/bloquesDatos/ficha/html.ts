@@ -97,7 +97,7 @@ export function comparadorHtml(f: Ficha | null | undefined, tablaSuelta: TablaFi
   if (!tabla) return '';
   const actualId = deFila ? f!.fila_id : null;
   const ids = deFila ? porDefecto(tabla, actualId!) : (d.modo === 'fijo' && Array.isArray(d.filas) ? d.filas.map(String) : tabla.filas.slice(0, 2).map(x => x.id));
-  const v = vistaComparador(tabla, ids, { actualId, titulo: d.titulo, columnas: d.columnas });
+  const v = vistaComparador(tabla, ids, { actualId, titulo: d.titulo, columnas: d.columnas, cuentas: deFila ? f?.cuentas : undefined });
   if (!v || v.productos.length < 2) return '';
   const cab = v.productos.map(p => `<th scope="col">${p.paginaId && !p.actual ? `<a href="${h.esc(h.enlacePagina(p.paginaId))}">${h.esc(p.nombre)}</a>` : h.esc(p.nombre)}</th>`).join('');
   const filas = v.lineas.map(l => `<tr><th scope="row">${h.esc(l.etiqueta)}</th>${l.celdas.map(c => `<td>${c.mejor ? `<strong>${h.esc(c.texto)}</strong> (mejor)` : h.esc(c.texto)}</td>`).join('')}</tr>`).join('');
