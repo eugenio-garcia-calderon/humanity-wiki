@@ -9405,3 +9405,12 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Anker 737 prices re-searched on 2026-10-19: no shop selling it directly in Spain has it in stock with a public price beyond PcComponentes (Carrefour lists only third-party marketplace sellers; not added).
 - Tests: `scripts/probar-ofertas.ts` (18), `scripts/wikiproducts/probar-ficha.ts` (header cases), `probar-ofertas-anonimo.mjs`.
 
+
+## 2026-10-19 · Shorter, touch-friendly mobile sheet; certificates and documents as data (Wikiproducts W1, round 4)
+- On a phone (< 640 px) the data tables («Características técnicas», «En la caja y usos», «Garantía», «Origen y fabricación», «Documentos y enlaces»), the comparator, the ad claims and a recall section with no recall start folded: a 48 px title row with a count («14 datos», «4 productos», «3 revisadas · 1 falsa», «Ninguna conocida»). Header, key figures, «Dónde comprarlo», «La mejor en cada criterio» and the ratings stay open, and so does a section with a known recall. The header's «Comparar con otros» and an arrival at `#comparar` open the comparator. Desktop and the editor are unchanged; folded content stays in the page and in the server HTML. Local Anker 737 at 390 px: 9,315 → 5,485 px (part of it W5's #679).
+- Tap targets on mobile: the quantity buttons, «Añadir a la cesta», the variant selector and the shop's «Condiciones» / «En otras webs» links are 44 px tall. Local Anker 737: 3 small targets → 0 (`BotonCompra.tsx`, `ofertas/Lectura.tsx`).
+- Certificates and documents are read back from the loader's text into rows: name, issuer, short link («woba-solar.de») instead of «nombre: …; emisor: …; fuente: https://…» (`documentosDe` in `ficha/vistas.ts`, both painters).
+- A value whose source is one of the product's own documents names the document: «Según la garantía del producto» instead of «Según static.getpylon.com» (AlphaESS). The host stays in the tooltip.
+- Ad claims are quoted once: the text comes from the claim's own column, not from the row title «“claim” · product», which printed “«24,000mAh» · Anker 737…”.
+- The header says «Fabricado en China» where the data has a country (short form; «No publicado» and long qualified values stay only in «Origen y fabricación»). 41 of 94 products have none; passed to W3a.
+- Tests: `scripts/wikiproducts/probar-ficha.ts` (documents, own-document source, claims, country).
