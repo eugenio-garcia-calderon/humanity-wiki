@@ -9470,3 +9470,7 @@ Production check after #688 on the Anker 737 sheet.
 - Documents table: a document on the brand's own site with no issuer written down shows «Anker (la marca)» as issuer, so the Emisor column (or the line under the name on phones) appears. Documents on other sites stay «no indicado».
 - Recall «Aviso oficial» link gets a 44 px hit area on phones.
 - Measured locally at 390 px: document links 89×44 and 144×44, zero tap targets under 44 px. The 75×19 reported on production was not reproduced (the #688 build already had min-h 44 px on those links); possibly a stale cached build.
+
+## 2026-10-19 — Wikiproducts sheet: document links tall by padding (W1)
+
+Production (Mac, 390 px iframe, ?sw=off) still measured the documents table's «anker.com» links at 75×19 after #690, while every local measurement (390/639/641/800/1280 px, top-level and iframed) gave 89×44. Not explained. The link is now `flex w-fit` with `py-3` plus `min-h-11`, so its 44 px comes from padding on a block box and no longer depends on min-height or the display mode.
