@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/server/bd.ts",
-      "motivo": "W2: orden por defecto con nombre en catálogos",
-      "desde": "2026-10-19T00:47:26.738Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/tarjetaSeccion.ts",
       "motivo": "W2: texto de 16 px en las páginas del sitio",
       "desde": "2026-10-19T00:51:22.788Z"
