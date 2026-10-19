@@ -16,7 +16,8 @@ import {
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
   fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia, ETIQUETA_NATURALEZA,
 } from './modelo';
-import { contarOfertas, type CuentaOfertas } from '../../../utils/ofertas';
+import { nombreFuente } from './fuentes';
+import { contarOfertas, textoSinVenta, type CuentaOfertas } from '../../../utils/ofertas';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
  *  its own page (a brand): the painter turns it into a link. */
@@ -136,7 +137,7 @@ function conDocumentoPropio(p: Procedencia | null, propios: Map<string, string>)
   if (!p || !nombre) return p;
   const cual = `${ARTICULO_DOCUMENTO[nombre.toLowerCase()] || 'un documento'} del producto`;
   const host = sitioDe(p.fuente);
-  const etiqueta = p.naturaleza === 'tercero' ? `Según ${cual}` : `${ETIQUETA_NATURALEZA[p.naturaleza!]} · ${cual}`;
+  const etiqueta = p.naturaleza === 'tercero' || p.naturaleza === 'declarado' ? `Según ${cual}` : `${ETIQUETA_NATURALEZA[p.naturaleza!]} · ${cual}`;
   return { ...p, etiqueta, nota: [p.nota, host && `Documento guardado en ${host}`].filter(Boolean).join(' · ') || null };
 }
 
@@ -238,7 +239,8 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
 
   if (estilo === 'pie') {
     // Every source quoted anywhere in the row, by site: «anker.com, ocu.org».
-    const fuentes = [...new Set(Object.values(fila.procedencia || {}).map(p => sitioDe(p?.fuente)).filter(Boolean))].sort();
+    // By name where the source has one («la CPSC (EE. UU.)»), else its domain.
+    const fuentes = [...new Set(Object.values(fila.procedencia || {}).map(p => sitioDe(p?.fuente)).filter(Boolean))].sort().map(h => nombreFuente(h) || h);
     return { estilo, revisado: fechaRevision(f), fuentes, editadoEl: fila.updated_at ? fila.updated_at.slice(0, 10) : null };
   }
 
@@ -432,7 +434,7 @@ export function porDefecto(t: TablaFicha, actualId: string, n = MAX_COMPARAR - 1
 export const idsDeConsulta = (q: string | null | undefined): string[] =>
   String(q || '').split(',').map(s => s.trim()).filter(s => /^[\w-]{1,80}$/.test(s)).slice(0, MAX_COMPARAR);
 
-export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actualId?: string | null; titulo?: string; columnas?: unknown } = {}): VistaComparador | null {
+export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actualId?: string | null; titulo?: string; columnas?: unknown; cuentas?: Ficha['cuentas'] } = {}): VistaComparador | null {
   const porId = new Map(t.filas.map(x => [x.id, x]));
   const orden = [...new Set([...(opciones.actualId ? [opciones.actualId] : []), ...ids])];
   const filas = orden.map(id => porId.get(id)).filter((x): x is FilaFicha => !!x).slice(0, MAX_COMPARAR);
@@ -442,15 +444,27 @@ export function vistaComparador(t: TablaFicha, ids: string[], opciones: { actual
   // Community scores first (what people think), then the price, then the rest.
   const peso = (c: Columna) => (esComunidad(c) ? 0 : grupoDe(c) === 'compra' ? 1 : grupoDe(c) === 'tecnico' ? 2 : 3);
   const claves = new Set([columnaPorRol(t, 'precio_min'), columnaPorRol(t, 'precio_unidad'), t.columnas.find(c => criterioDe(c) === 'media'), ...columnasDestacadas(t)].filter(Boolean).map(c => c!.id));
+  // A product with no price says why, with the words of its own sheet and
+  // «Dónde comprarlo» (`textoSinVenta`, W5): in the price line the sentence,
+  // in the price-per-unit line a dash instead of the formula's «Sin precio en
+  // ninguna tienda todavía», which contradicted a shop that does not ship here.
+  const cMin = columnaPorRol(t, 'precio_min'), cUnidad = columnaPorRol(t, 'precio_unidad');
+  const sinVentaEn = (x: FilaFicha, c: Columna): CeldaComparada | null => {
+    const cuenta = opciones.cuentas?.[x.id];
+    if (!cuenta || cuenta.vendibles || !cMin || tieneValor(x, cMin)) return null;
+    if (c.id === cMin.id) return { texto: textoSinVenta(cuenta), mejor: false, procedencia: null };
+    if (c.id === cUnidad?.id) return { texto: '—', mejor: false, procedencia: null };
+    return null;
+  };
   const lineas = cols
-    .filter(c => filas.some(x => tieneValor(x, c)))
+    .filter(c => filas.some(x => tieneValor(x, c)) || (c.id === cMin?.id && filas.some(x => sinVentaEn(x, c))))
     .sort((a, b) => peso(a) - peso(b))
     .map(c => {
       const mejores = mejoresEn(filas, c);
       return {
         columnaId: c.id, etiqueta: etiquetaColumna(c, t.columnas), grupo: esComunidad(c) ? 'Valoración de la comunidad' : GRUPOS[grupoDe(c) || ''] || '',
         sentido: ordenable(c) ? (esComunidad(c) ? 'mayor' as const : c.config?.comparar) : null,
-        celdas: filas.map(x => ({ texto: textoDe(x, c) || '—', mejor: mejores.has(x.id), procedencia: procedenciaDe(x, c) })),
+        celdas: filas.map(x => sinVentaEn(x, c) || { texto: textoDe(x, c) || '—', mejor: mejores.has(x.id), procedencia: procedenciaDe(x, c) }),
         clave: claves.has(c.id),
       };
     });

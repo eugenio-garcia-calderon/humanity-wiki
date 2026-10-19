@@ -7,7 +7,7 @@ import TextoConEnlaces from '../../ui/TextoConEnlaces';
 import type { PropsLectura } from '../tipos';
 import { useFicha } from '../ficha/useFicha';
 import { vistaPropiedad, DESCRIPCION_NATURALEZA, type Valor, type Linea, type Nota, type Documento } from '../ficha/vistas';
-import { fechaCorta, type Procedencia } from '../ficha/modelo';
+import { fechaCorta, sitioDe, type Procedencia } from '../ficha/modelo';
 import { AvisoVistaPrevia, Cargando, MarcaProcedencia, Seccion, SinFila, useEnlaceFila } from '../ficha/comunes';
 
 // PROPERTIES OF THE CURRENT ROW (plan §3.2). What it shows is decided in
@@ -17,9 +17,10 @@ import { AvisoVistaPrevia, Cargando, MarcaProcedencia, Seccion, SinFila, useEnla
 function ValorConEnlace({ v }: { v: Valor }) {
   const enlace = useEnlaceFila();
   const href = enlace(v.paginaId);
-  if (href) return <a href={href} className="font-semibold text-sky-700 hover:underline">{v.texto}</a>;
-  if (v.enlace) return <a href={v.enlace} target="_blank" rel="noopener nofollow" className="text-sky-700 hover:underline">{v.texto}</a>;
-  return <TextoConEnlaces texto={v.texto} />;
+  // `py-[14px]`: a 44 px tap target for an inline link, lines unmoved.
+  if (href) return <a href={href} className="py-[14px] font-semibold text-sky-700 hover:underline">{v.texto}</a>;
+  if (v.enlace) return <a href={v.enlace} target="_blank" rel="noopener nofollow" className="py-[14px] text-sky-700 hover:underline">{v.texto}</a>;
+  return <TextoConEnlaces tactil texto={v.texto} />;
 }
 
 /** The product photo with its credit. A photo that fails to load (a moved
@@ -39,7 +40,7 @@ function Foto({ src, alt, credito }: { src: string; alt: string; credito: string
   return (
     <figure className="shrink-0">
       <img src={src} alt={alt} loading="eager" onError={() => setRota(true)} className="h-56 w-full rounded-2xl border border-slate-100 bg-white object-contain p-2 sm:w-56" />
-      {credito ? <figcaption className="mt-1 text-sm leading-snug text-slate-500 sm:w-56"><TextoConEnlaces texto={credito} /></figcaption> : null}
+      {credito ? <figcaption className="mt-1 text-sm leading-snug text-slate-500 sm:w-56"><TextoConEnlaces tactil texto={credito} /></figcaption> : null}
     </figure>
   );
 }
@@ -110,7 +111,7 @@ export function VistaPropiedad({ datos, paginaId, enEditor }: PropsLectura & { e
     return (
       <Seccion titulo={v.titulo}>
         {aviso}
-        <p className="text-base leading-relaxed text-slate-700"><TextoConEnlaces texto={v.texto} /></p>
+        <p className="text-base leading-relaxed text-slate-700"><TextoConEnlaces tactil texto={v.texto} /></p>
         <MarcaProcedencia p={v.procedencia} />
       </Seccion>
     );
@@ -199,10 +200,10 @@ function Casilla({ l, compacta }: { l: Linea; compacta?: boolean }) {
 function ProcedenciaCorta({ p }: { p: Procedencia }) {
   const tono = p.naturaleza === 'medido' ? 'text-emerald-700' : p.naturaleza === 'no_publicado' ? 'text-amber-700' : 'text-slate-500';
   const texto = p.etiqueta || '';
-  const titulo = [texto, p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ');
+  const titulo = [texto, sitioDe(p.fuente) && `Fuente: ${sitioDe(p.fuente)}`, p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ');
   return (
     <dd className={cn('text-sm font-semibold [overflow-wrap:anywhere]', tono)} title={titulo}>
-      {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 hover:underline">{texto}</a> : texto}
+      {p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-[14px] hover:underline">{texto}</a> : texto}
     </dd>
   );
 }
@@ -215,27 +216,43 @@ function Segun({ p }: { p: Procedencia | null }) {
   const base = (p?.etiqueta || '').split(' · ')[0];
   if (!p?.naturaleza || p.naturaleza === 'no_publicado' || !/^según /i.test(base)) return null;
   const texto = base.charAt(0).toLowerCase() + base.slice(1);
-  return <> ({p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-3 text-slate-500 hover:underline" title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>{texto}</a> : texto})</>;
+  return <> ({p.fuente ? <a href={p.fuente} target="_blank" rel="noopener nofollow" className="py-[14px] text-slate-500 hover:underline" title={[p.nota, p.fecha && `Consultado el ${fechaCorta(p.fecha)}`].filter(Boolean).join(' · ') || undefined}>{texto}</a> : texto})</>;
 }
 
-/** Certificates and documents as rows: name, issuer, a short link. On a
- *  phone each row stacks; from `sm` up the three sit side by side. */
+/** Certificates and documents as a table: name, issuer, a short link. On a
+ *  phone the issuer moves under the name, so the table keeps two columns and
+ *  still reads as one (production check of round 4: the stacked rows read as
+ *  a plain list). */
 function Documentos({ lista }: { lista: Documento[] }) {
   const conEmisor = lista.some(d => d.emisor);
   return (
-    <ul className="divide-y divide-slate-200">
-      {lista.map((d, i) => (
-        <li key={i} className={cn('grid items-center gap-x-4 py-1.5', conEmisor ? 'sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_auto]' : 'sm:grid-cols-[minmax(0,1fr)_auto]')}>
-          <span className="break-words text-base font-semibold text-slate-900" title={d.nota || undefined}>{d.nombre}</span>
-          {conEmisor ? <span className="text-sm text-slate-600">{d.emisor ? <>Emisor: {d.emisor}</> : 'Emisor: no indicado'}</span> : null}
-          {d.enlace ? (
-            <a href={d.enlace} target="_blank" rel="noopener nofollow" className="inline-flex min-h-[44px] items-center gap-1 text-sm font-semibold text-sky-700 hover:underline" title={d.fecha ? `Consultado el ${d.fecha}` : undefined}>
-              {d.sitio || 'Ver el documento'} <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            </a>
-          ) : <span className="text-sm text-slate-500">Sin enlace</span>}
-        </li>
-      ))}
-    </ul>
+    <table className="mt-1 w-full table-fixed border-collapse text-left">
+      <thead>
+        <tr className="border-b border-slate-200 text-sm text-slate-500">
+          <th scope="col" className="py-1 pr-3 font-semibold">Nombre</th>
+          {conEmisor ? <th scope="col" className="hidden w-48 py-1 pr-3 font-semibold sm:table-cell">Emisor</th> : null}
+          <th scope="col" className="w-40 py-1 font-semibold sm:w-48">Enlace</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-200">
+        {lista.map((d, i) => (
+          <tr key={i} className="align-middle">
+            <th scope="row" className="break-words py-1.5 pr-3 text-base font-semibold text-slate-900" title={d.nota || undefined}>
+              {d.nombre}
+              {conEmisor ? <span className="block text-sm font-normal text-slate-600 sm:hidden">Emisor: {d.emisor || 'no indicado'}</span> : null}
+            </th>
+            {conEmisor ? <td className="hidden py-1.5 pr-3 text-sm text-slate-600 sm:table-cell">{d.emisor || 'No indicado'}</td> : null}
+            <td className="py-1.5">
+              {d.enlace ? (
+                <a href={d.enlace} target="_blank" rel="noopener nofollow" className="inline-flex min-h-[44px] max-w-full items-center gap-1 text-sm font-semibold text-sky-700 [overflow-wrap:anywhere] hover:underline" title={d.fecha ? `Consultado el ${d.fecha}` : undefined}>
+                  {d.sitio || 'Ver el documento'} <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                </a>
+              ) : <span className="text-sm text-slate-500">Sin enlace</span>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 

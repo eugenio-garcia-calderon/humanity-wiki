@@ -69,8 +69,11 @@ function partirCola(bruto: string): [string, string] {
   return [url, cola];
 }
 
-export default function TextoConEnlaces({ texto, className }: {
+export default function TextoConEnlaces({ texto, className, tactil }: {
   texto: string;
+  /** Inline padding that grows each link to a 44 px tap target without
+   *  moving a line (product sheets, evaluator round 4). */
+  tactil?: boolean;
   /** Las clases del párrafo que lo envuelve, para que quien lo use no pierda
    *  el tamaño ni el color que ya tenía su texto. */
   className?: string;
@@ -95,7 +98,7 @@ export default function TextoConEnlaces({ texto, className }: {
               // por qué saber desde qué pantalla de la plataforma vienes.
               rel="noopener noreferrer"
               target="_blank"
-              className="text-sky-600 underline decoration-sky-300 underline-offset-2 hover:text-sky-800 hover:decoration-sky-500 break-words"
+              className={cn('text-sky-600 underline decoration-sky-300 underline-offset-2 hover:text-sky-800 hover:decoration-sky-500 break-words', tactil && 'py-[14px]')}
             >
               {url}
             </a>

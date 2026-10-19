@@ -34,7 +34,8 @@ import {
   propiedadHtml, comparadorHtml, alternativasHtml, afirmacionHtml, retiradaHtml, claveTablaComparador, type Herramientas,
 } from '../../components/bloquesDatos/ficha/html';
 import { registrarAmpliacion } from '../ampliarPagina';
-import { ofertasDeProducto } from '../ofertas';
+import { ofertasDeProducto, type OfertaPublica } from '../ofertas';
+import { contarOfertas, type CuentaOfertas } from '../../utils/ofertas';
 import { registrarHtml, esc, enLinea, hrefSeguro, type ContextoHtml } from '../htmlBloques';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -128,12 +129,25 @@ export async function fichaDePagina(db: any, req: Pick<Request, 'user'> | null, 
   // header's «Desde» must count only what can be bought (a sold-out shop's
   // price is not a price, evaluator round 3). The offers table is not readable
   // on its own by a visitor, so `relacionadas` never carries it.
-  const ofertas = vistaPrevia ? null : await ofertasDeProducto(db, req || ({ user: undefined } as any), { filaId: filaId! });
+  // Read for the whole table in one go: the comparator needs every sibling's
+  // count to say why one has no price (Anker Zolo read «Sin precio en ninguna
+  // tienda todavía» while its sheet said the Anker EU shop sells it but does
+  // not ship to Spain, production check of round 4).
+  const todas = vistaPrevia ? null : await ofertasDeProducto(db, req || ({ user: undefined } as any), { filaId: filaId!, todas: true });
+  const ofertas = todas && !('error' in todas)
+    ? { ofertas: todas.ofertas.filter(o => todas.producto_de?.[o.fila_id] === filaId), tabla_id: todas.tabla_id, fila_id: todas.fila_id }
+    : todas;
   const resumen = ofertas && !('error' in ofertas) ? ofertas.ofertas.map(o => ({ precio_centimos: o.precio_centimos, agotada: o.agotada, fuera_de_espana: o.fuera_de_espana })) : undefined;
+  let cuentas: Record<string, CuentaOfertas> | undefined;
+  if (todas && !('error' in todas)) {
+    const por: Record<string, OfertaPublica[]> = {};
+    for (const o of todas.ofertas) { const p = todas.producto_de?.[o.fila_id]; if (p) (por[p] ||= []).push(o); }
+    cuentas = Object.fromEntries(tabla.filas.map(x => [x.id, contarOfertas(por[x.id] || [])]));
+  }
   const plantillaId = tabla.config?.plantilla?.pagina_id || null;
   return {
     ofertas,
-    ficha: { pagina_id: paginaId, vista_previa: vistaPrevia || undefined, fila_id: filaId!, tabla, relacionadas, ofertas: resumen },
+    ficha: { pagina_id: paginaId, vista_previa: vistaPrevia || undefined, fila_id: filaId!, tabla, relacionadas, ofertas: resumen, cuentas },
     plantilla: vistaPrevia ? null : await bloquesPlantilla(db, plantillaId),
     plantilla_pagina_id: plantillaId,
   };

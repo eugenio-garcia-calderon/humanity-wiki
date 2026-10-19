@@ -9435,3 +9435,10 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - **16 px text.** Section cards (counts, descriptions, compact titles on the phone), the footer bottom row, the legal texts, the header menu, the breadcrumb and the 404 text move from 13–14 px to 16 px. Median text size (evaluator's metric, `p,li,td,span` over 20 characters) is 16 px on home, both categories, «Cómo trabajamos» and /powerbanks at 390 and 1440; it was 14.
 - **Keyboard focus.** A 3 px emerald outline on `:focus-visible` across the published site (menu, content, footer), overriding `outline-none`.
 - **Home LCP.** Not reproduced: three cold loads at 1440×900 gave 340–432 ms, and the LCP element is the intro paragraph, not an image. No change.
+
+## 2026-10-19 · Sheet polish after the production check of round 4 (Wikiproducts W1)
+- Sources by name, not domain: «Según PcComponentes (tienda)», «Medido por Techtest (análisis)», «Según la CPSC (EE. UU.)», «Según la marca». The domain stays in the link and the tooltip («Fuente: …»). Names and kinds are hand-written for the ~100 most cited of the 259 hosts in the data (`ficha/fuentes.ts`); an unlisted third party keeps its domain rather than a guessed name. The footer's «Fuentes:» uses the same names.
+- Certificates and documents are a real table on phones too (Nombre / Enlace, issuer under the name), not stacked rows that read as a list.
+- Tap targets: inline links on the sheet (brand, photo credit, sources, links inside texts via `TextoConEnlaces tactil`) get 14 px vertical padding (≥ 44 px, lines unmoved); comparator product names are 44 px rows. Local Anker 737 at 390 px with every section open: 0 targets under 44 px.
+- The comparator says why a sibling has no price with #679's sentence (`textoSinVenta`): Anker Zolo read «Precio desde —» and «Sin precio en ninguna tienda todavía» while its sheet said the Anker EU shop does not ship to Spain. The sheet now reads every product's offers in one call (`ofertasDeProducto(…, { todas: true })`, same permission, one read instead of one) and counts them per row (`ficha.cuentas`).
+- Tests: `probar-ficha.ts` 33 (source names, comparator sentence).

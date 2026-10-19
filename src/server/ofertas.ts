@@ -187,8 +187,8 @@ export async function condicionesDeTiendas(db: any, ids: string[], dueno: string
  */
 export async function ofertasDeProducto(
   db: any, req: Pick<Request, 'user'>,
-  o: { filaId?: string | null; paginaId?: string | null; tablaId?: string | null },
-): Promise<{ ofertas: OfertaPublica[]; tabla_id: string | null; fila_id: string | null } | { error: string; codigo: number }> {
+  o: { filaId?: string | null; paginaId?: string | null; tablaId?: string | null; todas?: boolean },
+): Promise<{ ofertas: OfertaPublica[]; tabla_id: string | null; fila_id: string | null; producto_de?: Record<string, string> } | { error: string; codigo: number }> {
   const f = o.filaId
     ? await db.execute(sql`SELECT id, tabla_id, pagina_id FROM bd_filas WHERE id = ${o.filaId} AND deleted_at IS NULL`)
     : o.paginaId
@@ -254,7 +254,13 @@ export async function ofertasDeProducto(
   const moneda = String(cPrecio?.config?.moneda || 'EUR').toUpperCase();
   const cent = (v: any) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.round(v * 100) : null);
 
-  const suyas = preparadas.filter(p => (p.apuntados[cProducto.id] || []).some(a => a.id === ficha.id));
+  // `todas` (W1, the sheet's comparator): every product's offers in the same
+  // read, with `producto_de` saying whose each one is, so a sibling with no
+  // price says WHY with the same words as its own sheet. Same permission:
+  // the offers table is the one this sheet's table points at.
+  const suyas = o.todas
+    ? preparadas.filter(p => (p.apuntados[cProducto.id] || []).length)
+    : preparadas.filter(p => (p.apuntados[cProducto.id] || []).some(a => a.id === ficha.id));
   const ofertas: OfertaPublica[] = suyas.map(p => {
     const compra = (compras as Record<string, CompraFila>)[p.id] || null;
     // Lo que dice la fila manda; el producto de detrás es su copia.
@@ -308,7 +314,8 @@ export async function ofertasDeProducto(
   }
   const fuera = await opinionesTerceros(db, ofertas.map(x => x.distribuidor_id).filter(Boolean) as string[]);
   for (const x of ofertas) x.opiniones_distribuidor = (x.distribuidor_id && fuera.get(x.distribuidor_id)) || [];
-  return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id };
+  const producto_de = o.todas ? Object.fromEntries(suyas.map(p => [p.id, String((p.apuntados[cProducto.id] || [])[0]?.id || '')])) : undefined;
+  return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id, ...(producto_de ? { producto_de } : {}) };
 }
 
 // ── EL HTML PARA LOS BUSCADORES (requisito R1 de SEO) ───────────────────────
