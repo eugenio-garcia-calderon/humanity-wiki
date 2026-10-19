@@ -9445,6 +9445,9 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - Neither had a `datos/fotos.json` entry, so `fotos.mjs` took the og:image of their aceflex.de page, which is a generated green social card, not the product. Both now pin the first image of that page's product gallery; `pagina` is the image itself so `fotos.mjs` replaces the current photo (with the product page as `pagina` it would keep the banner). Applies on the next load with fotos=si.
 - Not seen from the cloud (the proxy blocks aceflex.de): the Mac should look at both cards after the load. Fallback for REC in W3a's note: REC's own product page images.
 
+## 2026-10-19 — Catalog default order: priced products first; 44 px search box (W2)
+
+Mac pass on #683: «smallest first» opened 3 of 5 listings on a card with no price (Goal Zero Nomad 20, Little Sun Original, Meyer Burger). With no author or visitor order, the server now puts products with a «Precio desde» (already the in-stock, ships-to-Spain minimum) before those without, smallest first within each group (`columnaPrecioCatalogo` in `ficha/modelo.ts`, stable partition after the sort in `GET /api/bd/tablas/:id`, `lectura=1` only). The selector says so: «Con precio primero, menor capacidad/potencia/luz». Availability, not commission. Local copy: the first card has a price on all 5 subcategory pages. The site search input is 44 px tall itself (was 42 inside a 44 px box).
 ## 2026-10-19 — Wikiproducts: 44 px for the sheet header score link and the gallery «Comparar» tick (W4)
 
 - «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11` (350×48 locally at 390 px).
