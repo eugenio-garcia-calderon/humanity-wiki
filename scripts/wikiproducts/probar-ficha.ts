@@ -427,6 +427,8 @@ prueba('las webs de la marca son «la marca», y las fuentes de una afirmación 
   const f = fuentesDe('CPSC: retirada de power banks Anker — https://www.cpsc.gov/Recalls/a\nhttps://www.cpsc.gov/Recalls/b\nhttps://www.anker.com/uk/products/a1689\nhttps://www.anker.com/uk/products/a1689\nUn informe sin enlace', 'Anker');
   assert.deepEqual(f.map(x => x.nombre), ['la CPSC (EE. UU.)', 'la CPSC (EE. UU.) (2)', 'la marca', 'Un informe sin enlace']);
   assert.equal(f[0].titulo, 'CPSC: retirada de power banks Anker');
+  const m = vistaAfirmaciones(null, { modo: 'manual', items: [{ afirmacion: '24.000 mAh', veredicto: 'cierta', donde: 'https://www.cpsc.gov/x' }] });
+  assert.equal(m?.items[0].dondeNombre, 'la CPSC (EE. UU.)', '«Dónde se dice» también va por su nombre');
   assert.deepEqual(documentosDe('Declaración de conformidad A1289 — https://www.anker.com/eu-en/products/a1289').map(d => [d.nombre, d.sitio]), [['Declaración de conformidad A1289', 'anker.com']]);
 });
 
