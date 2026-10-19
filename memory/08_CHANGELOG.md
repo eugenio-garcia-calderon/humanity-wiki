@@ -9441,3 +9441,7 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - Now a key present in the data with `null` is written as empty; a key that is absent is still left untouched, and only the schema's columns are written.
 - Every cell a load empties is printed («vaciada: tabla · fila · columna (era …)») and listed again at the end, so the load log says exactly what was removed. Checked on the local copy: one cell, Vekto's price; `cargar --seco` 644 rows.
 
+## 2026-10-19 — Real product photos for REC Alpha Pure-R and sonnenBatterie 10 (Wikiproducts, W3a's handoff via W5)
+- Neither had a `datos/fotos.json` entry, so `fotos.mjs` took the og:image of their aceflex.de page, which is a generated green social card, not the product. Both now pin the first image of that page's product gallery; `pagina` is the image itself so `fotos.mjs` replaces the current photo (with the product page as `pagina` it would keep the banner). Applies on the next load with fotos=si.
+- Not seen from the cloud (the proxy blocks aceflex.de): the Mac should look at both cards after the load. Fallback for REC in W3a's note: REC's own product page images.
+
