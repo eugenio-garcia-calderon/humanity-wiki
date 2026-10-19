@@ -151,6 +151,12 @@ export const columnaPorRol = (t: TablaFicha | undefined, rol: Rol): Columna | un
  *  output. The server sorts by it (`server/bd.ts`) and the visitor's «Ordenar
  *  por» names it (`MandosCatalogo`): one rule, so the label cannot lie. */
 export const CLAVES_POTENCIA = ['potencia_salida_max_w', 'potencia_continua_kw', 'lumenes_max', 'potencia_pico_w', 'potencia_pico_wp'];
+/** And within that order, products with a price go first (W2, 2026-10-19, Mac
+ *  pass on #683: «smallest first» opened 3 of 5 listings on a card with no
+ *  price). «Precio desde» is already the in-stock, ships-to-Spain minimum, so
+ *  this is availability, never commission. */
+export const columnaPrecioCatalogo = <C extends Columna>(columnas: C[]): C | undefined =>
+  columnas.find(c => rolDe(c) === 'precio_min' && c.config?.visibilidad !== 'nunca');
 export const columnaOrdenCatalogo = <C extends Columna>(columnas: C[]): C | undefined => {
   const vis = columnas.filter(c => c.config?.visibilidad !== 'nunca');
   return vis.find(c => rolDe(c) === 'tamano')
