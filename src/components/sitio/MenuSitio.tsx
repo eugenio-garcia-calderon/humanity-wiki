@@ -133,11 +133,12 @@ function CajaBuscar({ rutas, s, lleno }: { rutas: Rutas; s: Sitio; lleno?: boole
   const mn = s.menu;
   return (
     <form role="search" method="get" action={rutas.enlaceBuscar?.() ?? '/buscar'}
-      className={cn('flex items-center gap-2 rounded-lg border px-2.5 h-11 min-w-0', lleno ? 'w-full' : 'w-44 @4xl:w-60')}
+      className={cn('flex items-center gap-2 rounded-lg border px-2.5 min-w-0', lleno ? 'w-full' : 'w-44 @4xl:w-60')}
       style={{ borderColor: `${mn.texto}33` }}>
       <Search className="w-4 h-4 shrink-0 opacity-60" aria-hidden />
       <input type="search" name="q" required minLength={2} aria-label="Buscar en este sitio" placeholder="Buscar"
-        className="flex-1 min-w-0 h-full bg-transparent outline-none text-base placeholder:opacity-60" style={{ color: mn.texto }} />
+        // 44 px la propia caja de texto, que es lo que se toca (el borde va fuera).
+        className="flex-1 min-w-0 h-11 bg-transparent outline-none text-base placeholder:opacity-60" style={{ color: mn.texto }} />
       {rutas.raizId && <input type="hidden" name="sitio" value={rutas.raizId} />}
     </form>
   );

@@ -268,7 +268,7 @@ function Destacados({ lineas }: { lineas: Linea[] }) {
 function Puntuacion({ n }: { n: Nota }) {
   const valor = Number(n.media.replace(',', '.'));
   return (
-    <button type="button" onClick={() => irA('valoracion')} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-left text-base text-slate-700 hover:underline">
+    <button type="button" onClick={() => irA('valoracion')} className="flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 text-left text-base text-slate-700 hover:underline">
       {n.media ? (
         <>
           <span className="flex" aria-hidden>

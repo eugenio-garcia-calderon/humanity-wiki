@@ -159,8 +159,9 @@ export default function MandosCatalogo({ columnas, filas, ordenAutor, filtrosAut
     // servidor ordena un catálogo por su cifra de tamaño (o su potencia), de
     // menor a mayor (`columnaOrdenCatalogo`), el mismo criterio en todas las
     // categorías, y aquí se dice cuál. Sin ninguna, por nombre si lo están.
+    // Los que tienen precio van delante (`columnaPrecioCatalogo`), y el nombre lo dice.
     { valor: '', orden: ordenAutor, etiqueta: ordenAutor.length ? 'Orden de la página'
-      : porDefecto ? `Menor ${rotuloDe(porDefecto).toLowerCase()} primero` : alfabetico(base) ? 'Nombre (A–Z)' : 'Orden de la página' },
+      : porDefecto ? (precio ? `Con precio primero, menor ${rotuloDe(porDefecto).toLowerCase()}` : `Menor ${rotuloDe(porDefecto).toLowerCase()} primero`) : alfabetico(base) ? 'Nombre (A–Z)' : 'Orden de la página' },
     ...(precio ? [{ valor: 'precio', etiqueta: 'Precio más bajo primero', orden: [{ columna_id: precio.id, direccion: 'asc' as const }] }] : []),
     // Sin precio, el precio por unidad no existe (0): esos se apartan al ordenar por él.
     ...(unidad ? [{ valor: 'unidad', etiqueta: `${unidad.nombre} más bajo primero`, orden: [{ columna_id: unidad.id, direccion: 'asc' as const }], extra: { columna_id: unidad.id, operador: 'mayor', valor: 0 } }] : []),
@@ -202,7 +203,7 @@ export default function MandosCatalogo({ columnas, filas, ordenAutor, filtrosAut
       <div role="group" aria-label="Ordenar y filtrar" className="-mx-1 px-1 pb-1 flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:gap-3 sm:overflow-visible">
         <label htmlFor={idOrden} className="sr-only sm:not-sr-only shrink-0 text-base font-bold text-slate-800">Ordenar por</label>
         <select id={idOrden} value={orden} onChange={e => { setOrden(e.target.value); aplicar(elegidos, e.target.value); }}
-          className="h-11 shrink-0 max-w-[14rem] sm:max-w-none rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-900">
+          className="h-11 shrink-0 max-w-[19rem] sm:max-w-none rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-900">
           {ordenes.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}{o.extra ? ' (los que tienen precio)' : ''}</option>)}
         </select>
         {grupos.map(g => (

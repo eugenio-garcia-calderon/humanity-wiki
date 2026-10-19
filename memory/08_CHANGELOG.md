@@ -9436,6 +9436,22 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - **Keyboard focus.** A 3 px emerald outline on `:focus-visible` across the published site (menu, content, footer), overriding `outline-none`.
 - **Home LCP.** Not reproduced: three cold loads at 1440×900 gave 340–432 ms, and the LCP element is the intro paragraph, not an image. No change.
 
+## 2026-10-19 — The loader empties a cell whose value was removed from the data (Wikiproducts W5 for W3a, round 4)
+- `cargar.mjs` (`cuerpoDe`) never wrote a plain `null`, so a value later removed from the data stayed live in production: Vekto's offer kept 1.790,80 € although the data has `precio_eur: null` and the figure only in the note.
+- Now a key present in the data with `null` is written as empty; a key that is absent is still left untouched, and only the schema's columns are written.
+- Every cell a load empties is printed («vaciada: tabla · fila · columna (era …)») and listed again at the end, so the load log says exactly what was removed. Checked on the local copy: one cell, Vekto's price; `cargar --seco` 644 rows.
+
+## 2026-10-19 — Real product photos for REC Alpha Pure-R and sonnenBatterie 10 (Wikiproducts, W3a's handoff via W5)
+- Neither had a `datos/fotos.json` entry, so `fotos.mjs` took the og:image of their aceflex.de page, which is a generated green social card, not the product. Both now pin the first image of that page's product gallery; `pagina` is the image itself so `fotos.mjs` replaces the current photo (with the product page as `pagina` it would keep the banner). Applies on the next load with fotos=si.
+- Not seen from the cloud (the proxy blocks aceflex.de): the Mac should look at both cards after the load. Fallback for REC in W3a's note: REC's own product page images.
+
+## 2026-10-19 — Catalog default order: priced products first; 44 px search box (W2)
+
+Mac pass on #683: «smallest first» opened 3 of 5 listings on a card with no price (Goal Zero Nomad 20, Little Sun Original, Meyer Burger). With no author or visitor order, the server now puts products with a «Precio desde» (already the in-stock, ships-to-Spain minimum) before those without, smallest first within each group (`columnaPrecioCatalogo` in `ficha/modelo.ts`, stable partition after the sort in `GET /api/bd/tablas/:id`, `lectura=1` only). The selector says so: «Con precio primero, menor capacidad/potencia/luz». Availability, not commission. Local copy: the first card has a price on all 5 subcategory pages. The site search input is 44 px tall itself (was 42 inside a 44 px box).
+## 2026-10-19 — Wikiproducts: 44 px for the sheet header score link and the gallery «Comparar» tick (W4)
+
+- «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11` (350×48 locally at 390 px).
+- The gallery «Comparar» checkbox was a 20×20 input inside a 44 px label, and audits count the input. The real input is now 44×44 and transparent, laid over a drawn 20 px box (`CompararGaleria.tsx`); the label text still toggles it. Locally: 44×44, ticking by box and by text both work.
 ## 2026-10-19 · Sheet polish after the production check of round 4 (Wikiproducts W1)
 - Sources by name, not domain: «Según PcComponentes (tienda)», «Medido por Techtest (análisis)», «Según la CPSC (EE. UU.)», «Según la marca». The domain stays in the link and the tooltip («Fuente: …»). Names and kinds are hand-written for the ~100 most cited of the 259 hosts in the data (`ficha/fuentes.ts`); an unlisted third party keeps its domain rather than a guessed name. The footer's «Fuentes:» uses the same names.
 - Certificates and documents are a real table on phones too (Nombre / Enlace, issuer under the name), not stacked rows that read as a list.

@@ -53,7 +53,7 @@ import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
 import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
 import { emitirEventoFila } from './webhooks';
-import { columnaOrdenCatalogo } from '../components/bloquesDatos/ficha/modelo';
+import { columnaOrdenCatalogo, columnaPrecioCatalogo } from '../components/bloquesDatos/ficha/modelo';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
  *  misma tabla: cambiar de forma no toca ni una fila. */
@@ -578,11 +578,21 @@ export function registerBdRoutes(app: Express, db: any) {
       // se edita): en el editor el orden a mano tiene que seguir mandando, o
       // arrastrar una fila no haría nada. «Catálogo» es lo mismo que en
       // `columnaOrdenCatalogo`: su cifra de tamaño o, si no tiene, su potencia.
+      // Y dentro de ese orden, primero los que tienen precio (`columnaPrecioCatalogo`).
+      let conPrecioPrimero: string | null = null;
       if (!ordenPor.length && req.query.lectura === '1') {
         const col = columnaOrdenCatalogo(columnas as any[]);
-        if (col) ordenPor = [{ columna_id: col.id, direccion: 'asc' }];
+        if (col) {
+          ordenPor = [{ columna_id: col.id, direccion: 'asc' }];
+          conPrecioPrimero = columnaPrecioCatalogo(columnas as any[])?.id ?? null;
+        }
       }
       visibles = ordenarFilas(filtrar(visibles, filtros), ordenPor);
+      if (conPrecioPrimero) {
+        const id = conPrecioPrimero;
+        const tiene = (f: { celdas: Record<string, Celda> }) => { const c: any = f.celdas[id]; return c?.estado === 'ok' && typeof c.valor === 'number' && c.valor > 0; };
+        visibles = [...visibles.filter(tiene), ...visibles.filter(f => !tiene(f))];
+      }
 
       const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);
       const grupos = agrupadoPor ? agrupar(visibles, agrupadoPor) : null;
