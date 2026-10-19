@@ -6,7 +6,8 @@
 // the ethics code: THE COMMISSION NEVER ORDERS ANYTHING (plan §2.3).
 import assert from 'node:assert/strict';
 import { conUnidad, ordenable, mejoresEn, ordenarPor, calidadFicha, fechaRevision, etiquetaProcedencia, propiedadesTarjeta, etiquetaColumna, textoDe, procedenciaDe, type Ficha, type TablaFicha } from '../../src/components/bloquesDatos/ficha/modelo';
-import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe, documentosDe } from '../../src/components/bloquesDatos/ficha/vistas';
+import { vistaAlternativas, vistaComparador, vistaRetiradas, vistaAfirmaciones, vistaPropiedad, porDefecto, veredictoDe, documentosDe, fuentesDe } from '../../src/components/bloquesDatos/ficha/vistas';
+import { esDeLaMarca, nombreLegible } from '../../src/components/bloquesDatos/ficha/fuentes';
 import { metaFicha, tituloFicha } from '../../src/components/bloquesDatos/ficha/seo';
 import { propiedadHtml, retiradaHtml, comparadorHtml, type Herramientas } from '../../src/components/bloquesDatos/ficha/html';
 import { calcular } from '../../src/server/bd/formulas';
@@ -179,7 +180,7 @@ prueba('la procedencia se dice según quién la da y qué falta', () => {
   assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://www.pccomponentes.com/x' }), 'Según PcComponentes (tienda)');
   assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://www.cpsc.gov/Recalls/x' }), 'Según la CPSC (EE. UU.)');
   assert.equal(etiquetaProcedencia({ naturaleza: 'medido', fuente: 'https://techtest.org/x' }), 'Medido por Techtest (análisis)');
-  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://tienda-desconocida.example/x' }), 'Según tienda-desconocida.example', 'sin nombre conocido, el dominio');
+  assert.equal(etiquetaProcedencia({ naturaleza: 'tercero', fuente: 'https://tienda-desconocida.example/x' }), 'Según la web tienda-desconocida.example', 'sin nombre conocido, «la web» y el dominio');
   assert.equal(etiquetaProcedencia({ naturaleza: 'declarado', fuente: 'https://anker.com/x' }), 'Según la marca');
   const pruebas: any = { id: 'p', nombre: 'Pruebas independientes', tipo: 'texto', config: { clave: 'pruebas_independientes' } };
   assert.equal(etiquetaProcedencia({ naturaleza: 'no_publicado' }, pruebas), 'No hay pruebas independientes publicadas');
@@ -415,6 +416,18 @@ prueba('las cifras escritas como texto llevan su unidad', () => {
   assert.equal(conUnidad('Hasta 5400 Pa', 'Pa'), 'Hasta 5400 Pa', 'lo que ya dice algo se deja');
   const c: any = { id: 'cm', nombre: 'Carga mecánica', tipo: 'texto', config: { clave: 'carga_mecanica_pa' } };
   assert.equal(textoDe({ id: 'x', pagina_id: null, titulo: 'x', celdas: { cm: ok('6000 / 4000') } }, c), '6000 / 4000 Pa');
+});
+
+prueba('las webs de la marca son «la marca», y las fuentes de una afirmación van por su nombre', () => {
+  assert.ok(esDeLaMarca('service.anker.com', 'Anker') && esDeLaMarca('us.anker.com', 'Anker') && esDeLaMarca('eu.ankersolix.com', 'Anker'));
+  assert.ok(!esDeLaMarca('techtest.org', 'Anker') && !esDeLaMarca('anker.com', '') && !esDeLaMarca('lg.com', 'LG'));
+  assert.equal(nombreLegible('service.anker.com', 'Anker'), 'la marca');
+  assert.equal(nombreLegible('mezha.ua', 'Anker'), 'la web mezha.ua');
+  assert.equal(nombreLegible('www.cpsc.gov', 'Anker'), 'la CPSC (EE. UU.)');
+  const f = fuentesDe('CPSC: retirada de power banks Anker — https://www.cpsc.gov/Recalls/a\nhttps://www.cpsc.gov/Recalls/b\nhttps://www.anker.com/uk/products/a1689\nhttps://www.anker.com/uk/products/a1689\nUn informe sin enlace', 'Anker');
+  assert.deepEqual(f.map(x => x.nombre), ['la CPSC (EE. UU.)', 'la CPSC (EE. UU.) (2)', 'la marca', 'Un informe sin enlace']);
+  assert.equal(f[0].titulo, 'CPSC: retirada de power banks Anker');
+  assert.deepEqual(documentosDe('Declaración de conformidad A1289 — https://www.anker.com/eu-en/products/a1289').map(d => [d.nombre, d.sitio]), [['Declaración de conformidad A1289', 'anker.com']]);
 });
 
 prueba('dos datos que solo se distinguen por la unidad no se llaman igual', () => {

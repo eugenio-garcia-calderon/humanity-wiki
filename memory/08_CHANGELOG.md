@@ -9462,3 +9462,11 @@ Mac pass on #683: «smallest first» opened 3 of 5 listings on a card with no pr
 ## 2026-10-19 — Wikiproducts: winner links in «La mejor en cada criterio» are 44 px high (W4, Mac check of #685)
 
 - The winner's name link measured 43 px high on production (Xiaomi 240×43). It is now `inline-flex min-h-11 items-center`. Locally at 390 px all 9 links measure 44 to 72 px high.
+## 2026-10-19 — Wikiproducts sheet: every source by name, issuer in the documents table (W1)
+
+Production check after #688 on the Anker 737 sheet.
+- The «Fuentes:» footer folds the brand's own sites (anker.com, service.anker.com, us.anker.com) into «la marca», listed first; a host with no listed name reads «la web mezha.ua» instead of a bare domain. Same fallback in «Según …» / «Medido por …».
+- Each ad claim's «Fuentes:» is no longer «título — URL»: one link per source, named the same way («la CPSC (EE. UU.)», «la marca»), with the title as tooltip; repeated sources read «(2)».
+- Documents table: a document on the brand's own site with no issuer written down shows «Anker (la marca)» as issuer, so the Emisor column (or the line under the name on phones) appears. Documents on other sites stay «no indicado».
+- Recall «Aviso oficial» link gets a 44 px hit area on phones.
+- Measured locally at 390 px: document links 89×44 and 144×44, zero tap targets under 44 px. The 75×19 reported on production was not reproduced (the #688 build already had min-h 44 px on those links); possibly a stale cached build.

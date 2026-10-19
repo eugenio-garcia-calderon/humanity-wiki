@@ -283,13 +283,14 @@ const SIN_DATO_POR_CLAVE: Record<string, string> = {
  *  it: «Según PcComponentes (tienda)», «Medido por Techtest (análisis)»,
  *  «Según la CPSC (EE. UU.)» (`fuentes.ts`). The domain stays in the link and
  *  the tooltip, not in the sentence (production check, round 4). A host with
- *  no name listed keeps its domain where the domain is the only name there
- *  is (a third party); the brand's own claim says «Según la marca». */
+ *  no name listed reads «la web mezha.ua», never a bare domain; the brand's
+ *  own claim says «Según la marca». */
 export function etiquetaProcedencia(p: Procedencia, c?: Columna): string {
   const host = sitioDe(p.fuente);
   const nombre = host ? nombreFuente(host) : '';
-  if (p.naturaleza === 'tercero') return nombre || host ? `Según ${nombre || host}` : ETIQUETA_NATURALEZA.tercero;
-  if (p.naturaleza === 'medido' && (nombre || host)) return `Medido por ${nombre || host}`;
+  const quien = nombre || (host ? `la web ${host}` : '');
+  if (p.naturaleza === 'tercero') return quien ? `Según ${quien}` : ETIQUETA_NATURALEZA.tercero;
+  if (p.naturaleza === 'medido' && quien) return `Medido por ${quien}`;
   if (p.naturaleza === 'no_publicado') {
     const propio = typeof c?.config?.sin_dato === 'string' && c.config.sin_dato.trim() ? c.config.sin_dato.trim() : '';
     return propio || (c?.config?.clave && SIN_DATO_POR_CLAVE[c.config.clave]) || ETIQUETA_NATURALEZA.no_publicado;

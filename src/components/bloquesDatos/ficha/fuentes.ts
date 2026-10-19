@@ -59,3 +59,24 @@ export function nombreFuente(host: string): string {
   const h = host.replace(/^www\./, '').toLowerCase();
   return NOMBRES[h] || '';
 }
+
+const sinAcentos = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/** A host of the brand itself: anker.com, service.anker.com, us.anker.com,
+ *  eu.ankersolix.com for «Anker». Some label before the TLD equals the brand
+ *  or starts with it; a brand under three letters never matches (too many
+ *  false friends). */
+export function esDeLaMarca(host: string, marca: string): boolean {
+  const m = sinAcentos(marca);
+  if (m.length < 3 || !host) return false;
+  return host.toLowerCase().split('.').slice(0, -1).some(l => l.replace(/-/g, '') === m || l.startsWith(m));
+}
+
+/** The source as a reader names it, always: «la marca» for the brand's own
+ *  sites, the listed name, else «la web mezha.ua». A bare domain in a list of
+ *  names read as a mistake (production check after #688). */
+export function nombreLegible(host: string, marca = ''): string {
+  if (!host) return '';
+  if (esDeLaMarca(host, marca)) return 'la marca';
+  return nombreFuente(host) || `la web ${host.replace(/^www\./, '').toLowerCase()}`;
+}

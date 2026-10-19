@@ -16,7 +16,7 @@ import {
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
   fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia, ETIQUETA_NATURALEZA,
 } from './modelo';
-import { nombreFuente } from './fuentes';
+import { esDeLaMarca, nombreLegible } from './fuentes';
 import { contarOfertas, textoSinVenta, type CuentaOfertas } from '../../../utils/ofertas';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
@@ -78,7 +78,7 @@ function lineaDe(f: Ficha, fila: FilaFicha | undefined, c: Columna): Linea | nul
   const v = valorDe(f, fila, c);
   if (!v.texto && v.procedencia?.naturaleza !== 'no_publicado') return null;
   if (!v.texto) v.texto = 'No publicado';
-  const documentos = esListaDocumentos(c) ? documentosDe(v.texto) : null;
+  const documentos = esListaDocumentos(c) ? conEmisorDeLaMarca(documentosDe(v.texto), marcaDe(f, fila)) : null;
   return { columnaId: c.id, etiqueta: etiquetaColumna(c, f.tabla.columnas), valor: v, ...(documentos?.length ? { documentos } : {}) };
 }
 
@@ -114,6 +114,21 @@ export function documentosDe(texto: string): Documento[] {
     const nombre = (enlace ? linea.replace(enlace, '') : linea).replace(/\s*—\s*$/, '').replace(/^\s*—\s*/, '').trim();
     return { nombre: mayuscula(TIPO_DOCUMENTO[nombre] || nombre || 'Documento'), emisor: '', fecha: '', nota: '', enlace, sitio: sitioDe(enlace) };
   });
+}
+
+/** The sheet's brand by name («Anker»), '' when the row has none. */
+function marcaDe(f: Ficha, fila: FilaFicha | undefined): string {
+  const c = columnaPorRol(f.tabla, 'marca');
+  return c && fila && tieneValor(fila, c) ? valorDe(f, fila, c).texto : '';
+}
+
+/** A document with no issuer written down, published on the brand's own site,
+ *  is the brand's: its declaration of conformity, its manual. Only then — a
+ *  document on a shop or a forum stays «no indicado», since the site that
+ *  hosts it is not who issued it (production check after #688: the Anker 737
+ *  table showed no issuer at all). */
+function conEmisorDeLaMarca(docs: Documento[], marca: string): Documento[] {
+  return docs.map(d => (!d.emisor && d.enlace && esDeLaMarca(d.sitio, marca) ? { ...d, emisor: `${marca} (la marca)` } : d));
 }
 
 /** The product's own documents, by address: a value whose source is one of
@@ -238,9 +253,12 @@ export function vistaPropiedad(f: Ficha, datos: Record<string, unknown>): VistaP
   }
 
   if (estilo === 'pie') {
-    // Every source quoted anywhere in the row, by site: «anker.com, ocu.org».
-    // By name where the source has one («la CPSC (EE. UU.)»), else its domain.
-    const fuentes = [...new Set(Object.values(fila.procedencia || {}).map(p => sitioDe(p?.fuente)).filter(Boolean))].sort().map(h => nombreFuente(h) || h);
+    // Every source quoted anywhere in the row, by name: «la marca, la CPSC
+    // (EE. UU.), la web mezha.ua» — the brand's own sites folded into one
+    // «la marca», first (production check after #688).
+    const marca = marcaDe(f, fila);
+    const nombres = new Set(Object.values(fila.procedencia || {}).map(p => sitioDe(p?.fuente)).filter(Boolean).map(h => nombreLegible(h, marca)));
+    const fuentes = [...nombres].sort((a, b) => Number(b === 'la marca') - Number(a === 'la marca') || a.localeCompare(b, 'es'));
     return { estilo, revisado: fechaRevision(f), fuentes, editadoEl: fila.updated_at ? fila.updated_at.slice(0, 10) : null };
   }
 
@@ -695,8 +713,9 @@ export function veredictoDe(texto: string): Veredicto {
   return 'desconocido';
 }
 
+export type FuenteCitada = { nombre: string; enlace: string | null; titulo: string };
 export type Afirmacion = {
-  texto: string; veredicto: Veredicto; explicacion: string; fuentes: string;
+  texto: string; veredicto: Veredicto; explicacion: string; fuentes: FuenteCitada[];
   donde: string | null; fecha: string; paginaId: string | null;
 };
 export type VistaAfirmaciones = { titulo: string; items: Afirmacion[]; vacia: string | null };
@@ -716,13 +735,35 @@ function textoAfirmacion(t: TablaFicha, x: FilaFicha): string {
   return base.replace(/^[«“"']+|[»”"']+$/g, '').trim() || x.titulo;
 }
 
+/** A claim's sources, one per line as the loader writes them («CPSC:
+ *  retirada de power banks Anker — https://…», or a bare address), named the
+ *  way the rest of the sheet names them: «la CPSC (EE. UU.)», «la marca».
+ *  The line's own title stays as the link's tooltip. Two links to the same
+ *  source read «la CPSC (EE. UU.)», «la CPSC (EE. UU.) (2)». */
+export function fuentesDe(texto: string, marca: string): FuenteCitada[] {
+  const vistas = new Set<string>(), veces = new Map<string, number>();
+  const out: FuenteCitada[] = [];
+  for (const linea of texto.split('\n').map(l => l.trim()).filter(Boolean)) {
+    const enlace = linea.match(URL_EN)?.[0]?.replace(/[.,;)\]]+$/, '') || null;
+    if (enlace && vistas.has(enlace)) continue;
+    if (enlace) vistas.add(enlace);
+    const titulo = (enlace ? linea.replace(enlace, '') : linea).replace(/\s*—\s*$/, '').replace(/^\s*—\s*/, '').trim();
+    const base = enlace ? nombreLegible(sitioDe(enlace), marca) || titulo : titulo;
+    if (!base) continue;
+    const n = (veces.get(base) || 0) + 1;
+    veces.set(base, n);
+    out.push({ nombre: n > 1 ? `${base} (${n})` : base, enlace, titulo: enlace ? titulo : '' });
+  }
+  return out;
+}
+
 export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown>): VistaAfirmaciones | null {
   const titulo = String(datos.titulo || '').trim();
   if (datos.modo === 'manual' || !f) {
     const items = (Array.isArray(datos.items) ? datos.items : []).map((i: any) => ({
       texto: String(i?.afirmacion || i?.texto || '').trim(),
       veredicto: veredictoDe(String(i?.veredicto || '')),
-      explicacion: String(i?.explicacion || ''), fuentes: String(i?.fuentes || ''),
+      explicacion: String(i?.explicacion || ''), fuentes: fuentesDe(String(i?.fuentes || ''), ''),
       donde: URL_SOLA.test(String(i?.donde || '')) ? String(i.donde) : null, fecha: '', paginaId: null,
     })).filter(i => i.texto);
     return items.length ? { titulo, items, vacia: null } : null;
@@ -734,6 +775,7 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
   // «we have not reviewed any». Say nothing.
   const apuntadas = filaActual(f)?.apuntados?.[c.id]?.length || 0;
   if (apuntadas > (rel?.filas.length || 0) && !rel?.filas.length) return null;
+  const marca = marcaDe(f, filaActual(f));
   const items = (rel?.filas || []).map(x => {
     const donde = textoRol(rel!.tabla, x, 'donde');
     const fecha = columnaPorRol(rel!.tabla, 'fecha');
@@ -741,7 +783,7 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
       texto: textoAfirmacion(rel!.tabla, x),
       veredicto: veredictoDe(textoRol(rel!.tabla, x, 'veredicto')),
       explicacion: textoRol(rel!.tabla, x, 'explicacion'),
-      fuentes: textoRol(rel!.tabla, x, 'fuentes'),
+      fuentes: fuentesDe(textoRol(rel!.tabla, x, 'fuentes'), marca),
       donde: URL_SOLA.test(donde) ? donde : null,
       fecha: fecha && tieneValor(x, fecha) ? fechaCorta(String((x.celdas[fecha.id] as any).valor)) : '',
       paginaId: x.pagina_id,
