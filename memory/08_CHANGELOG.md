@@ -9448,3 +9448,7 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 ## 2026-10-19 — Catalog default order: priced products first; 44 px search box (W2)
 
 Mac pass on #683: «smallest first» opened 3 of 5 listings on a card with no price (Goal Zero Nomad 20, Little Sun Original, Meyer Burger). With no author or visitor order, the server now puts products with a «Precio desde» (already the in-stock, ships-to-Spain minimum) before those without, smallest first within each group (`columnaPrecioCatalogo` in `ficha/modelo.ts`, stable partition after the sort in `GET /api/bd/tablas/:id`, `lectura=1` only). The selector says so: «Con precio primero, menor capacidad/potencia/luz». Availability, not commission. Local copy: the first card has a price on all 5 subcategory pages. The site search input is 44 px tall itself (was 42 inside a 44 px box).
+## 2026-10-19 — Wikiproducts: 44 px for the sheet header score link and the gallery «Comparar» tick (W4)
+
+- «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11` (350×48 locally at 390 px).
+- The gallery «Comparar» checkbox was a 20×20 input inside a 44 px label, and audits count the input. The real input is now 44×44 and transparent, laid over a drawn 20 px box (`CompararGaleria.tsx`); the label text still toggles it. Locally: 44×44, ticking by box and by text both work.

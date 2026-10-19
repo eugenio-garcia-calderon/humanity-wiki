@@ -16,7 +16,7 @@
 // expects of a choice they never saved.
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Columns3, X } from 'lucide-react';
+import { Check, Columns3, X } from 'lucide-react';
 import { Button } from '../ui/core';
 import type { Columna } from './Celda';
 
@@ -69,9 +69,17 @@ export function MarcaComparar({ elegida, llena, onCambio, nombre }: { elegida: b
   return (
     <label data-sin-arrastre onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}
       title={bloqueada ? `Puedes comparar hasta ${MAX_COMPARAR_GALERIA} productos` : undefined}
-      className={`inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm ${bloqueada ? 'text-slate-400' : 'text-slate-600'}`}>
-      <input type="checkbox" checked={elegida} disabled={bloqueada} onChange={onCambio}
-        aria-label={`Comparar ${nombre}`} className="h-5 w-5 accent-sky-700" />
+      className={`inline-flex min-h-11 cursor-pointer items-center gap-0.5 text-sm ${bloqueada ? 'text-slate-400' : 'text-slate-600'}`}>
+      {/* The real checkbox is 44 × 44 and invisible, laid over the 20 px box
+          drawn beside it: the target a finger (or an audit) measures is the
+          input itself, and the box keeps its usual size. */}
+      <span className="relative grid h-11 w-11 shrink-0 place-items-center">
+        <input type="checkbox" checked={elegida} disabled={bloqueada} onChange={onCambio}
+          aria-label={`Comparar ${nombre}`} className="peer absolute inset-0 m-0 h-11 w-11 cursor-pointer opacity-0 disabled:cursor-not-allowed" />
+        <span aria-hidden className="pointer-events-none grid h-5 w-5 place-items-center rounded border-2 border-slate-400 bg-white text-white peer-checked:border-sky-700 peer-checked:bg-sky-700 peer-focus-visible:ring-2 peer-focus-visible:ring-sky-500 peer-focus-visible:ring-offset-1 peer-disabled:opacity-50">
+          {elegida ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
+        </span>
+      </span>
       Comparar
     </label>
   );
