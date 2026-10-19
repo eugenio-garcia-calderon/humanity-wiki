@@ -9445,6 +9445,7 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - Neither had a `datos/fotos.json` entry, so `fotos.mjs` took the og:image of their aceflex.de page, which is a generated green social card, not the product. Both now pin the first image of that page's product gallery; `pagina` is the image itself so `fotos.mjs` replaces the current photo (with the product page as `pagina` it would keep the banner). Applies on the next load with fotos=si.
 - Not seen from the cloud (the proxy blocks aceflex.de): the Mac should look at both cards after the load. Fallback for REC in W3a's note: REC's own product page images.
 
-## 2026-10-19 — Wikiproducts: the sheet header's score link is 44 px high (W4, Mac check of #678)
+## 2026-10-19 — Wikiproducts: 44 px for the sheet header score link and the gallery «Comparar» tick (W4)
 
-- «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11`. Not checked in a browser: the local server was down; tsc and build pass.
+- «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11` (350×48 locally at 390 px).
+- The gallery «Comparar» checkbox was a 20×20 input inside a 44 px label, and audits count the input. The real input is now 44×44 and transparent, laid over a drawn 20 px box (`CompararGaleria.tsx`); the label text still toggles it. Locally: 44×44, ticking by box and by text both work.
