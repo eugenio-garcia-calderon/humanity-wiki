@@ -129,7 +129,7 @@ export async function fichaDePagina(db: any, req: Pick<Request, 'user'> | null, 
   // price is not a price, evaluator round 3). The offers table is not readable
   // on its own by a visitor, so `relacionadas` never carries it.
   const ofertas = vistaPrevia ? null : await ofertasDeProducto(db, req || ({ user: undefined } as any), { filaId: filaId! });
-  const resumen = ofertas && !('error' in ofertas) ? ofertas.ofertas.map(o => ({ precio_centimos: o.precio_centimos, agotada: o.agotada })) : undefined;
+  const resumen = ofertas && !('error' in ofertas) ? ofertas.ofertas.map(o => ({ precio_centimos: o.precio_centimos, agotada: o.agotada, fuera_de_espana: o.fuera_de_espana })) : undefined;
   const plantillaId = tabla.config?.plantilla?.pagina_id || null;
   return {
     ofertas,

@@ -16,6 +16,7 @@ import {
   procedenciaDe, esComunidad, ordenable, mejoresEn, ordenarPor, relacionadasPor, relacionConRol,
   fechaRevision, sitioDe, fechaCorta, criterioDe, etiquetaColumna, columnasDestacadas, MAX_DESTACADAS, etiquetaProcedencia,
 } from './modelo';
+import { contarOfertas, type CuentaOfertas } from '../../../utils/ofertas';
 
 /** One value as a painter needs it. `paginaId` = it names another row with
  *  its own page (a brand): the painter turns it into a link. */
@@ -100,7 +101,9 @@ export const ESTILOS_PROPIEDAD: Record<EstiloPropiedad, string> = {
 /** `tiendas`: the shops on sale with a confirmed price, the ones «Desde» is
  *  taken from; `sinPrecio` and `agotadas`: the other shops listed; `ultimo`:
  *  the lowest price last seen when every priced shop is sold out. */
-export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; agotadas: number; ultimo: string; porUnidad: string; etiquetaUnidad: string };
+export type Compra = { desde: string; hasta: string; tiendas: number; sinPrecio: number; agotadas: number;
+  /** Shops that have it but do not ship to Spain (evaluator round 4). */
+  fuera: number; total: number; ultimo: string; porUnidad: string; etiquetaUnidad: string };
 export type Nota = { media: string; votos: number };
 
 export type VistaPropiedad =
@@ -233,7 +236,8 @@ function compraDe(f: Ficha, t: TablaFicha, fila: FilaFicha): Compra | null {
     const v = of.vendibles, ag = of.agotadas;
     const desde = v.length ? v[0].texto : '';
     const hasta = v.length > 1 && v[v.length - 1].texto !== desde ? v[v.length - 1].texto : '';
-    return { desde, hasta, tiendas: v.length, sinPrecio: of.sinPrecio, agotadas: ag.length, ultimo: !v.length && ag.length ? ag[0].texto : '', porUnidad: porUnidadDe(desde, v[0]?.precio ?? null), etiquetaUnidad };
+    const c = of.cuenta;
+    return { desde, hasta, tiendas: v.length, sinPrecio: c.sinPrecio, agotadas: c.agotadas, fuera: c.fuera, total: c.total, ultimo: !v.length && ag.length ? ag[0].texto : '', porUnidad: porUnidadDe(desde, v[0]?.precio ?? null), etiquetaUnidad };
   }
 
   // A price of 0 is no price: nothing is sold for free here.
@@ -244,14 +248,16 @@ function compraDe(f: Ficha, t: TablaFicha, fila: FilaFicha): Compra | null {
   // apart. Tables loaded before `ofertas_con_precio` existed count them all.
   const todas = (n && numeroDe(fila, n)) || 0;
   const conPrecio = cp ? numeroDe(fila, cp) ?? 0 : todas;
-  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), agotadas: 0, ultimo: '', porUnidad: porUnidadDe(desde, null), etiquetaUnidad };
+  return { desde, hasta: hasta && hasta !== desde ? hasta : '', tiendas: conPrecio, sinPrecio: Math.max(todas - conPrecio, 0), agotadas: 0, fuera: 0, total: todas, ultimo: '', porUnidad: porUnidadDe(desde, null), etiquetaUnidad };
 }
 
 type PrecioTienda = { precio: number; texto: string };
 /** The row's shops, split the way a buyer sees them: priced and on sale
- *  (cheapest first), priced but sold out, and without a price. Null when the
- *  sheet came without them (a template, an editor preview). */
-export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: PrecioTienda[]; sinPrecio: number; total: number } | null {
+ *  (cheapest first), priced but sold out, and the counts of every group
+ *  (`contarOfertas`, shared with the «Dónde comprarlo» box). A shop that does
+ *  not ship to Spain is in none of the price lists. Null when the sheet came
+ *  without them (a template, an editor preview). */
+export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: PrecioTienda[]; sinPrecio: number; total: number; cuenta: CuentaOfertas } | null {
   if (!Array.isArray(f.ofertas)) return null;
   const min = columnaPorRol(f.tabla, 'precio_min');
   // Written the way «Precio desde» writes its own value.
@@ -259,13 +265,14 @@ export function ofertasDe(f: Ficha): { vendibles: PrecioTienda[]; agotadas: Prec
   const vendibles: PrecioTienda[] = [], agotadas: PrecioTienda[] = [];
   let sinPrecio = 0;
   for (const o of f.ofertas) {
+    if (o.fuera_de_espana) continue;
     if (o.precio_centimos == null || o.precio_centimos <= 0) { sinPrecio++; continue; }
     const precio = o.precio_centimos / 100;
     (o.agotada ? agotadas : vendibles).push({ precio, texto: texto(precio) });
   }
   const orden = (x: PrecioTienda, y: PrecioTienda) => x.precio - y.precio;
   vendibles.sort(orden); agotadas.sort(orden);
-  return { vendibles, agotadas, sinPrecio, total: f.ofertas.length };
+  return { vendibles, agotadas, sinPrecio, total: f.ofertas.length, cuenta: contarOfertas(f.ofertas) };
 }
 
 function notaDe(t: TablaFicha, fila: FilaFicha): Nota | null {

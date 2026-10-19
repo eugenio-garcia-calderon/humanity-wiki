@@ -8,6 +8,7 @@
 // Same decisions as the React blocks, because both draw the same `vistas.ts`
 // result. Plain semantic HTML, no classes: the app replaces it on load, and a
 // crawler only needs the structure (h2, table/th scope, ul, q, time).
+import { textoOtrasOfertas, textoSinVenta } from '../../../utils/ofertas';
 import type { Ficha, TablaFicha, Procedencia } from './modelo';
 import { etiquetaProcedencia, sitioDe, fechaCorta } from './modelo';
 import {
@@ -55,7 +56,7 @@ export function propiedadHtml(f: Ficha | null | undefined, datos: any, h: Herram
       if (v.modelo) filas.push(['Modelo', h.esc(v.modelo)]);
       filas.push(['Categoría', h.esc(v.subcategoria || v.categoria)]);
       if (v.nota) filas.push(['Valoración de la comunidad', v.nota.media ? `${h.esc(v.nota.media)} de 5 (${v.nota.votos} ${v.nota.votos === 1 ? 'voto' : 'votos'})` : 'Sin valoraciones suficientes todavía']);
-      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}${v.compra.agotadas ? ` · ${v.compra.agotadas} ${v.compra.agotadas === 1 ? 'agotada' : 'agotadas'}` : ''}${v.compra.sinPrecio ? ` · ${v.compra.sinPrecio} más sin precio confirmado` : ''}${v.compra.porUnidad ? ` (${h.esc(v.compra.etiquetaUnidad.charAt(0).toLowerCase() + v.compra.etiquetaUnidad.slice(1))}: ${h.esc(v.compra.porUnidad)})` : ''}` : v.compra.ultimo ? `Último precio visto ${h.esc(v.compra.ultimo)} (agotado)` : 'Sin precio todavía']);
+      if (v.compra) filas.push(['Precio', v.compra.desde ? `Desde ${h.esc(v.compra.desde)}${v.compra.hasta ? ` hasta ${h.esc(v.compra.hasta)}` : ''} en ${v.compra.tiendas || 1} ${(v.compra.tiendas || 1) === 1 ? 'tienda' : 'tiendas'}${textoOtrasOfertas(v.compra) ? ` · además, ${textoOtrasOfertas(v.compra)}` : ''}${v.compra.porUnidad ? ` (${h.esc(v.compra.etiquetaUnidad.charAt(0).toLowerCase() + v.compra.etiquetaUnidad.slice(1))}: ${h.esc(v.compra.porUnidad)})` : ''}` : v.compra.ultimo && !v.compra.sinPrecio && !v.compra.fuera ? `Último precio visto ${h.esc(v.compra.ultimo)} (agotado)` : h.esc(textoSinVenta({ ...v.compra, vendibles: 0 }))]);
       if (v.estado) filas.push(['Estado', h.esc(v.estado)]);
       for (const l of v.destacados) filas.push([h.esc(l.etiqueta), `${valor(l.valor, h)}${procedencia(l.valor.procedencia, h)}`]);
       if (v.gtin) filas.push(['EAN', h.esc(v.gtin)]);

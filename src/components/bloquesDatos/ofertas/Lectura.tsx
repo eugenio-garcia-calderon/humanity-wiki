@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ExternalLink, Wrench, Store, Truck, RotateCcw, ShieldCheck, PackageCheck, CalendarCheck, Globe, type LucideIcon } from 'lucide-react';
 import BotonCompra from '../../tablas/BotonCompra';
 import { useCobro } from '../../../hooks/useCobro';
-import { comisionDeLinea, textoComision, totalOferta, motivoSinPrecio, textoSinPrecio, lineasCompra, textoEnvioTienda, textoCondiciones, type CondicionesTienda } from '../../../utils/ofertas';
+import { comisionDeLinea, textoComision, totalOferta, motivoSinPrecio, lineasCompra, contarOfertas, textoResumenOfertas, textoEnvioTienda, textoCondiciones, type CondicionesTienda } from '../../../utils/ofertas';
 import type { PropsLectura } from '../tipos';
 import { textoOpinion, type OpinionTercero } from '../../../utils/opinionesTerceros';
 
@@ -35,6 +35,7 @@ export type Oferta = {
   stock: number | null; agotada: boolean; en_stock?: boolean | null; plazo: string | null; enlace: string | null; rel: string;
   comision_pct: number | null; comprobado: string | null; instalacion: boolean | null;
   compra: any | null; nota_distribuidor: number | null;
+  fuera_de_espana?: boolean;
   votos_distribuidor?: { votos: number; umbral: number } | null;
   tienda?: CondicionesTienda | null;
   /** The shop's rating elsewhere, with link and date (W4). Never orders. */
@@ -79,26 +80,27 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
   const enPruebas = !!cobro?.pruebas;
   const seCompraAqui = cobro === null ? null : cobro.abierto && cobro.con_pasarela && (!enPruebas || esDueno);
   // A buy cell without a price is the seller's to-do («ponle un precio»), never the reader's.
-  const conCesta = (o: Oferta) => !!o.compra && !o.agotada && o.precio_centimos !== null;
+  const conCesta = (o: Oferta) => !!o.compra && !o.agotada && !o.fuera_de_espana && o.precio_centimos !== null;
   const algunaConCesta = ofertas.some(conCesta);
-  const conPrecio = ofertas.filter(o => o.precio_centimos !== null && !o.agotada);
+  const conPrecio = ofertas.filter(o => o.precio_centimos !== null && !o.agotada && !o.fuera_de_espana);
   const desde = conPrecio.length ? Math.min(...conPrecio.map(o => totalOferta(o)!)) : null;
   const moneda = ofertas[0]?.moneda || 'EUR';
   const ultima = ofertas.map(o => o.comprobado).filter(Boolean).sort().pop() || null;
-  const sinPrecio = ofertas.filter(o => o.precio_centimos === null).length;
+  // A shop with no price to show is one compact line, not a full card: four
+  // of them were drowning the one shop that sells it (Anker 737, round 4).
+  const completas = ofertas.filter(o => o.precio_centimos !== null);
+  const compactas = ofertas.filter(o => o.precio_centimos === null);
 
   return (
     <section aria-label={titulo} className="my-4">
       <h2 className="text-xl font-black text-slate-900">{titulo}</h2>
       <p className="mt-0.5 text-base text-slate-500">
-        {desde !== null
-          ? <>Desde <b className="text-slate-800">{dinero(desde, moneda)}</b> con envío, en {ofertas.length === 1 ? 'una tienda' : `${ofertas.length} tiendas`}{sinPrecio ? ` (${textoSinPrecio(sinPrecio)})` : ''}.</>
-          : `${ofertas.length === 1 ? 'Una tienda' : `${ofertas.length} tiendas`}, sin precio disponible ahora.`}
+        {textoResumenOfertas(contarOfertas(ofertas), desde === null ? null : dinero(desde, moneda))}
         {ultima && <> Precios comprobados el {fecha(ultima)}.</>}
       </p>
 
       <ul className="mt-3 space-y-2.5">
-        {ofertas.map(o => {
+        {completas.map(o => {
           const total = totalOferta(o);
           const comisionUnidad = o.precio_centimos === null ? null : comisionDeLinea(o.precio_centimos, 1, o.comision_pct);
           return (
@@ -132,6 +134,7 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                   )}
                 </div>
                 <div className="text-right">
+                  {o.fuera_de_espana && <p className="text-sm font-bold text-amber-700">No envía a España</p>}
                   {o.precio_centimos !== null ? (
                     <>
                       <p className="text-lg font-black tabular-nums text-slate-900">{dinero(o.precio_centimos, o.moneda)}</p>
@@ -186,12 +189,37 @@ export function ListaOfertas({ ofertas, titulo, esDueno = false }: { ofertas: Of
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                   </a>
                 )}
-                {!o.enlace && o.precio_centimos !== null && !conCesta(o) && <span className="text-sm text-slate-400">Esta tienda no tiene venta en línea registrada.</span>}
+                {!o.enlace && o.precio_centimos !== null && !conCesta(o) && !o.fuera_de_espana && <span className="text-sm text-slate-400">Esta tienda no tiene venta en línea registrada.</span>}
               </div>
             </li>
           );
         })}
       </ul>
+
+      {compactas.length > 0 && (
+        <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2">
+          <p className="py-1 text-sm font-bold text-slate-600">
+            {completas.length ? 'Otras tiendas que lo tienen, sin precio que podamos confirmar' : 'Tiendas que lo tienen, sin precio que podamos confirmar'}
+          </p>
+          <ul className="divide-y divide-slate-200">
+            {compactas.map(o => (
+              <li key={o.fila_id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1.5">
+                <p className="min-w-0 text-sm leading-snug text-slate-600">
+                  <b className="text-slate-800">{o.distribuidor || 'Tienda sin nombre'}</b>
+                  {' · '}{o.fuera_de_espana ? 'no envía a España' : o.agotada ? 'agotado cuando lo miramos' : 'no pudimos confirmar el precio'}
+                  {o.comprobado ? ` (${fecha(o.comprobado)})` : ''}
+                </p>
+                {o.enlace && (
+                  <a href={o.enlace} target="_blank" rel={o.rel}
+                     className="inline-flex min-h-[44px] sm:min-h-0 items-center gap-1 text-sm font-bold text-slate-600 underline-offset-2 hover:underline">
+                    Ver el precio en la tienda <ExternalLink className="h-3 w-3" aria-hidden />
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <p className="mt-2 text-sm leading-snug text-slate-400">
         Ordenadas por lo que pagas con el envío; a igual precio, por la atención al cliente de la tienda. La comisión no cambia el orden.

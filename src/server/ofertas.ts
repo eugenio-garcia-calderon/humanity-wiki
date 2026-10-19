@@ -25,7 +25,7 @@ import { opinionesTerceros, textoOpinion, type OpinionTercero } from './bd/opini
 import { enlacesDe, enlacesInversos, celdaDeEnlaces, CLASE_DE_TIPO, type Apuntado } from './bd/enlaces.js';
 import { ficherosDe, celdaDeFicheros, CLASE_FICHERO, type Fichero } from './bd/ficheros.js';
 import { sincronizarTienda, columnaConRol, enlaceSeguro, type CompraFila } from './bd/tienda.js';
-import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, textoSinPrecio, lineasCompra, textoCondiciones, textoEnvioTienda, envioCompraTienda, type CondicionesTienda } from '../utils/ofertas.js';
+import { ordenarOfertas, relEnlaceTienda, totalOferta, comisionDeLinea, textoComision, motivoSinPrecio, lineasCompra, contarOfertas, textoResumenOfertas, textoCondiciones, textoEnvioTienda, envioCompraTienda, type CondicionesTienda } from '../utils/ofertas.js';
 import { registrarHtml, esc } from './htmlBloques.js';
 import { atencionDistribuidores } from './bd/comunidad.js';
 import { paginaVisible } from './sitios.js';
@@ -39,6 +39,9 @@ export type OfertaPublica = {
   moneda: string;
   stock: number | null;
   agotada: boolean;
+  /** Its shop says it does not ship to Spain (`envia_espana` unticked on the
+   *  shop's row): shown, but never «A la venta», never in «Desde», no cart. */
+  fuera_de_espana: boolean;
   /** The shop says it has it, with or without a count («en stock»). `null` = not said. */
   en_stock: boolean | null;
   plazo: string | null;
@@ -275,6 +278,7 @@ export async function ofertasDeProducto(
       moneda,
       stock,
       agotada: stock === 0 || disponible === false,
+      fuera_de_espana: false,
       en_stock: stock !== null ? stock > 0 : disponible,
       plazo: cPlazo ? (String(valorDe(p.celdas[cPlazo.id]) || '').trim() || null) : null,
       enlace,
@@ -298,7 +302,10 @@ export async function ofertasDeProducto(
     x.votos_distribuidor = a ? { votos: a.votos, umbral: a.umbral } : null;
   }
   const condiciones = await condicionesDeTiendas(db, ofertas.map(x => x.distribuidor_id).filter(Boolean) as string[], await duenoDe(db, tablaId));
-  for (const x of ofertas) x.tienda = (x.distribuidor_id && condiciones.get(x.distribuidor_id)) || null;
+  for (const x of ofertas) {
+    x.tienda = (x.distribuidor_id && condiciones.get(x.distribuidor_id)) || null;
+    x.fuera_de_espana = x.tienda?.envia_a_espana === false;
+  }
   const fuera = await opinionesTerceros(db, ofertas.map(x => x.distribuidor_id).filter(Boolean) as string[]);
   for (const x of ofertas) x.opiniones_distribuidor = (x.distribuidor_id && fuera.get(x.distribuidor_id)) || [];
   return { ofertas: ordenarOfertas(ofertas), tabla_id: tablaId, fila_id: ficha.id };
@@ -314,12 +321,10 @@ const claveOfertas = (b: any, paginaId: string | null) => `ofertas:${b?.datos?.f
 export function ofertasEnHtml(ofertas: OfertaPublica[], titulo: string): string {
   const cab = `<h2>${esc(titulo)}</h2>`;
   if (!ofertas.length) return `<section>${cab}<p>Todavía no tenemos registrada ninguna tienda que lo venda.</p></section>`;
-  const conPrecio = ofertas.filter(o => o.precio_centimos !== null && !o.agotada);
+  const conPrecio = ofertas.filter(o => o.precio_centimos !== null && !o.agotada && !o.fuera_de_espana);
   const moneda = ofertas[0].moneda || 'EUR';
   const desde = conPrecio.length ? Math.min(...conPrecio.map(o => totalOferta(o)!)) : null;
-  const tiendas = ofertas.length === 1 ? 'una tienda' : `${ofertas.length} tiendas`;
-  const sinPrecio = ofertas.filter(o => o.precio_centimos === null).length;
-  const resumen = desde !== null ? `Desde ${dineroHtml(desde, moneda)} con envío, en ${tiendas}${sinPrecio ? ` (${textoSinPrecio(sinPrecio)})` : ''}.` : `${tiendas[0].toUpperCase()}${tiendas.slice(1)}, sin precio disponible ahora.`;
+  const resumen = textoResumenOfertas(contarOfertas(ofertas), desde === null ? null : dineroHtml(desde, moneda));
   const items = ofertas.map(o => {
     const partes: string[] = [`<strong>${esc(o.distribuidor || 'Tienda sin nombre')}</strong>`];
     if (o.precio_centimos !== null) {

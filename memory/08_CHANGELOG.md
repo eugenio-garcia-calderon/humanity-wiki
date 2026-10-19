@@ -9388,3 +9388,12 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - `crear-esquema.mjs` re-points an existing aggregate when the schema says it should read another column (it compares relation, target, operation and direction only).
 - New `PATCH /api/v1/databases/:id/columns/:columnId` `{config, name?}`, through the screen's own `PUT /api/bd/columnas/:id` (same cycle check, type still not changeable).
 - Local copy, real data: 20 priced-but-sold-out offers drop out. Goal Zero Crush Light Chroma's «Precio desde» goes from 29,95 € to empty, while Anker 737 stays at 144,20 €. A second run changes nothing. «Precio hasta» and «Tiendas con precio» read the same in-stock column, so «desde X hasta Y en N tiendas» describes one set of offers.
+
+## 2026-10-19 — Offers tell the truth about Spain, and the summary matches the list (Wikiproducts W5, round 4)
+- A shop whose row says it does not ship to Spain (`envia_espana` unticked) no longer counts as selling the product: no «Desde», no «A la venta», no cart, sorted after the shops that can sell, labelled «No envía a España», and left out of the JSON-LD offers. AlphaESS now reads «Sin precio en España ahora: una tienda lo vende pero no envía a España».
+- One count and one sentence for the sheet header, the «Dónde comprarlo» box and the server HTML (`contarOfertas`, `textoResumenOfertas`, `textoSinVenta` in `src/utils/ofertas.ts`). «Sin precio todavía: ninguna tienda lo vende aquí» is gone: Anker SOLIX X1 reads «una tienda lo tiene sin precio publicado», the same shop the list shows.
+- Shops without a price are one compact line each under «Otras tiendas que lo tienen, sin precio que podamos confirmar», instead of full cards that buried the one shop that sells it (Anker 737).
+- Not covered here: the listings' and cards' «Desde» come from the `precio_disponible` aggregate and still count a shop that does not ship to Spain until W3a adds the offer-level flag (proposed to W3a).
+- Anker 737 prices re-searched on 2026-10-19: no shop selling it directly in Spain has it in stock with a public price beyond PcComponentes (Carrefour lists only third-party marketplace sellers; not added).
+- Tests: `scripts/probar-ofertas.ts` (18), `scripts/wikiproducts/probar-ficha.ts` (header cases), `probar-ofertas-anonimo.mjs`.
+
