@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/components/bloquesDatos/ficha/MandosCatalogo.tsx",
+      "motivo": "W2: mandos en una fila en el móvil",
+      "desde": "2026-10-19T00:39:11.020Z"
+    }
+  ]
 }
