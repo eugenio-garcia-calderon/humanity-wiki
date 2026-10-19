@@ -119,14 +119,16 @@ for (const pasada of [1, 2]) {
         // column than the schema says is re-pointed. Only the four fields that
         // decide what it computes are compared: the rest of a column's config
         // can be changed from the screen and is not this loader's to undo.
-        if (pasada === 2 && c.tipo === 'agregado') {
+        // A formula's text is compared the same way (W5, round 4: the
+        // in-stock price also leaves out shops that don't ship to Spain).
+        if (pasada === 2 && (c.tipo === 'agregado' || c.tipo === 'formula')) {
           const cuerpo = columnaParaApi(c, ids, t.clave);
-          const campos = ['columna_relacion', 'columna_destino', 'operacion', 'direccion'];
+          const campos = c.tipo === 'formula' ? ['formula'] : ['columna_relacion', 'columna_destino', 'operacion', 'direccion'];
           if (cuerpo && campos.some(k => (cuerpo.config[k] ?? null) !== (ya.config?.[k] ?? null))) {
             try {
               await api('PATCH', `/api/v1/databases/${tabla.id}/columns/${ya.id}`, { config: { ...ya.config, ...cuerpo.config } });
               creadas.cambiadas++;
-              console.log(`  ~ ${t.titulo} · ${c.nombre}: ahora resume otra columna`);
+              console.log(`  ~ ${t.titulo} · ${c.nombre}: ${c.tipo === 'formula' ? 'fórmula nueva' : 'ahora resume otra columna'}`);
             } catch (e) { fallidas.push(`${t.titulo} · ${c.nombre}: ${e.message}`); }
           }
         }

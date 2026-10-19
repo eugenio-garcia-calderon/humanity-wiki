@@ -9405,3 +9405,9 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - Anker 737 prices re-searched on 2026-10-19: no shop selling it directly in Spain has it in stock with a public price beyond PcComponentes (Carrefour lists only third-party marketplace sellers; not added).
 - Tests: `scripts/probar-ofertas.ts` (18), `scripts/wikiproducts/probar-ficha.ts` (header cases), `probar-ofertas-anonimo.mjs`.
 
+## 2026-10-19 · Wikiproducts: «Precio desde» leaves out shops that don't ship to Spain (W3a, round 4, W5's request)
+
+- Each offers table gets a hidden checkbox «Envía a España» (`envia_espana`), filled by `cargar.mjs` from the shop's `envia_a_espana` in `condiciones-tiendas.json`. Unknown stays empty.
+- «Precio si quedan existencias» is now `SI(Y(SI.VACIO({Disponible}; 1); SI.VACIO({Envía a España}; 1)); {Precio})`, so «Precio desde», «Precio hasta» and «Tiendas con precio» skip sold-out offers and shops that don't ship to Spain. Empty counts as yes, so nothing unknown is hidden.
+- `crear-esquema.mjs` also rewrites an existing formula column whose text differs from the schema.
+- 12 shops are marked as not shipping to Spain (Vekto, basic-solar.de, proshop.nl, …). Local copy, real data: AlphaESS SMILE-G3 goes from «Desde 1790,80 €» to no price, while Anker 737 stays at 144,20 €.
