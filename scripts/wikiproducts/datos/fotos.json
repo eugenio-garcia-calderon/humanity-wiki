@@ -192,6 +192,16 @@
       "imagen": "https://aikosolar.com/wp-content/uploads/2025/03/Neostar-3P54-Dual-Glass-detail.jpg",
       "pagina": "https://aikosolar.com/?p=28185",
       "por_que": "Foto de producto del fabricante (Neostar 3P54). La de la tienda (aceflex) era un banner con logo, texto y estrellas."
+    },
+    "rec-alpha-pure-r": {
+      "imagen": "https://www.aceflex.de/wp-content/uploads/2022/07/solarmodul-rec-410-alpha-pur-r-mono-hjt-pb.jpg",
+      "pagina": "https://www.aceflex.de/wp-content/uploads/2022/07/solarmodul-rec-410-alpha-pur-r-mono-hjt-pb.jpg",
+      "por_que": "El og:image de la ficha de aceflex.de (aceflex-og/p4339-….jpg) es una tarjeta para redes con fondo verde, no la foto: es la que salía. Esta es la primera foto de la galería de producto de la misma ficha (alt «REC Alpha Pure 420»; la galería trae también vista lateral y trasera). «pagina» es la propia imagen para que fotos.mjs la cambie: con la ficha como «pagina» daría la foto vieja por buena. No pude ver la imagen desde la nube."
+    },
+    "sonnenbatterie-10": {
+      "imagen": "https://www.aceflex.de/wp-content/uploads/2026/10/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw.jpg",
+      "pagina": "https://www.aceflex.de/wp-content/uploads/2026/10/sonnenbatterie-10-performance-10p-11-ac-speichersystem-10-kwh-7-kw.jpg",
+      "por_que": "Mismo caso que el REC: el og:image de aceflex.de (aceflex-og/p185337-….jpg) es su tarjeta para redes, no la foto. Esta es la primera foto de la galería de la ficha (alt «sonnenBatterie 10 performance+ 10p+/11 AC-Speichersystem 10 kWh / 7 kW»). «pagina» es la propia imagen para que fotos.mjs sustituya la anterior. No pude ver la imagen desde la nube."
     }
   }
 }
