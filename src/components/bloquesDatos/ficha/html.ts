@@ -102,7 +102,7 @@ export function alternativasHtml(f: Ficha | null | undefined, datos: any, h: Her
     const quien = c.esEsta ? 'Este producto' : c.ganador.paginaId ? `<a href="${h.esc(h.enlacePagina(c.ganador.paginaId))}">${h.esc(c.ganador.nombre)}</a>` : h.esc(c.ganador.nombre);
     const segun = c.base === 'votos' ? ' (según los votos de la comunidad)' : c.base ? ` (según los datos: ${h.esc(c.segun || '')})` : '';
     const mas = c.empates ? ` y ${c.empates} más` : '';
-    return `<li>${h.esc(c.criterio)}${segun}: ${quien}${mas} (${h.esc(c.ganador.valor)})${!c.esEsta && c.puesto ? `. Este producto: ${c.puesto.n}.º de ${c.puesto.de}` : ''}</li>`;
+    return `<li>${h.esc(c.criterio)}${segun}: ${quien}${mas} (${h.esc(c.ganador.valor)})${!c.esEsta ? `. Este producto: ${h.esc(c.esteProducto)}` : ''}</li>`;
   }).join('');
   const sub = v.ambito ? `<p>${h.esc(v.ambito)}</p>` : '';
   return `<section>${h2(v.titulo, h)}${sub}<ul>${li}</ul><p><small>${h.esc(v.porDatos ? NOTA_POR_DATOS : NOTA_ORDEN)}</small></p></section>`;

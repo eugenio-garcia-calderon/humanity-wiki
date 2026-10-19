@@ -320,9 +320,15 @@ export function porDefecto(t: TablaFicha, actualId: string, n = MAX_COMPARAR - 1
   const ref = [columnaPorRol(t, 'precio_min'), ...t.columnas.filter(c => grupoDe(c) === 'tecnico' && ordenable(c))]
     .find(c => c && actual && numeroDe(actual, c) !== null);
   const base = ref && actual ? numeroDe(actual, ref)! : null;
+  // Priced products before unpriced ones: a default comparison that hands the
+  // reader «Sin precio en ninguna tienda todavía» answers nothing (evaluator
+  // round 4). An unpriced one still comes in when nothing priced is left.
+  const cPrecio = columnaPorRol(t, 'precio_min');
+  const conPrecio = (x: FilaFicha) => !cPrecio || numeroDe(x, cPrecio) !== null;
   return otras
-    .map(x => ({ x, d: ref && base !== null ? numeroDe(x, ref) : null }))
+    .map(x => ({ x, d: ref && base !== null ? numeroDe(x, ref) : null, p: conPrecio(x) }))
     .sort((a, b) => {
+      if (a.p !== b.p) return a.p ? -1 : 1;
       if (a.d === null && b.d === null) return a.x.titulo.localeCompare(b.x.titulo, 'es');
       if (a.d === null) return 1;
       if (b.d === null) return -1;
@@ -394,6 +400,10 @@ export type VistaAlternativas = {
     esEsta: boolean;
     /** Where the current product stands: «3.º de 12». Null without a value. */
     puesto: { n: number; de: number } | null;
+    /** What the line says about the current product when it is not the
+     *  winner: «3.º de 12», «sin dato», «2 avisos». Always set, so no line
+     *  ever names only the winner and leaves the reader guessing. */
+    esteProducto: string;
     /** A rubric criterion (precio, garantía, ecología…): decided by community
      *  votes once they pass the threshold, else by the data named in `segun`. */
     base?: 'votos' | 'datos';
@@ -431,6 +441,9 @@ const RUBRICA: Array<{ criterio: string; comunidad: string; medida?: MedidaRubri
 ];
 const minusculaInicial = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+/** «3.º de 12», or the reason there is no rank: a product with no figure is
+ *  not last, it is unknown (`sinValor` says how). */
+const textoPuesto = (p: { n: number; de: number } | null, sinValor: string) => p ? `${p.n}.º de ${p.de}` : sinValor;
 /** The block's footnote, one sentence for both painters. */
 export const NOTA_ORDEN = 'El orden sale de los datos y de las valoraciones de la comunidad. Nunca de lo que cobramos por cada venta.';
 export const NOTA_POR_DATOS = 'Todavía no hay votos suficientes de la comunidad, así que las líneas marcadas «Según los datos» se deciden con el dato publicado que nombran; cuando haya votos, mandarán ellos. Calidad, estética y ética sólo las decide la comunidad. Nunca cuenta lo que cobramos por cada venta.';
@@ -485,6 +498,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
         columnaId: votos.id, criterio: r.criterio, base: 'votos', segun: null, empates: mv.size - 1,
         ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: `${textoDe(g, votos)} de 5` },
         esEsta: mv.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+        esteProducto: textoPuesto(i >= 0 ? { n: i + 1, de: orden.length } : null, 'sin votos todavía'),
       });
       continue;
     }
@@ -508,9 +522,9 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
         columnaId: cRet.id, criterio: r.criterio, base: 'datos', segun: 'retiradas y alertas de seguridad', empates: limpias.length - 1,
         ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: 'ninguna retirada' },
         esEsta: esta, puesto: null,
+        // Where this one stands, said plainly instead of a rank among ties.
+        esteProducto: vistas.some(x => x.id === actual.id) ? plural(n(actual), 'retirada o alerta', 'retiradas o alertas') : 'sin dato (aún no hemos revisado sus retiradas)',
       });
-      // Where this one stands, said plainly instead of a rank among ties.
-      if (!esta && vistas.some(x => x.id === actual.id)) criterios[criterios.length - 1].ganador.valor = `ninguna retirada; este producto tiene ${plural(n(actual), 'aviso', 'avisos')}`;
       continue;
     }
     const c = m.claves.map(k => t.columnas.find(x => x.config?.clave === k && ordenable(x) && listableEn(t)(x))).find(x => x && mejoresEn(filas, x).size);
@@ -528,6 +542,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       segun: SEGUN[c.config?.clave] || minusculaInicial(etiquetaColumna(c)), empates: mejores.size - 1,
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
       esEsta: mejores.has(actual.id), puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+      esteProducto: textoPuesto(i >= 0 ? { n: i + 1, de: orden.length } : null, 'sin dato'),
     });
   }
   // 2 · Then the technical figures, as before.
@@ -548,6 +563,7 @@ export function vistaAlternativas(f: Ficha, datos: Record<string, unknown>): Vis
       ganador: { id: g.id, nombre: g.titulo, paginaId: g.pagina_id, valor: textoDe(g, c) },
       esEsta: mejoresEn(filas, c).has(actual.id),
       puesto: i >= 0 ? { n: i + 1, de: orden.length } : null,
+      esteProducto: textoPuesto(i >= 0 ? { n: i + 1, de: orden.length } : null, 'sin dato'),
     });
   }
   if (!criterios.length) return null;

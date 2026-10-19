@@ -9388,3 +9388,11 @@ Eugenio: «Añade el precio por vatio y el precio por kilovatio hora en batería
 - `crear-esquema.mjs` re-points an existing aggregate when the schema says it should read another column (it compares relation, target, operation and direction only).
 - New `PATCH /api/v1/databases/:id/columns/:columnId` `{config, name?}`, through the screen's own `PUT /api/bd/columnas/:id` (same cycle check, type still not changeable).
 - Local copy, real data: 20 priced-but-sold-out offers drop out. Goal Zero Crush Light Chroma's «Precio desde» goes from 29,95 € to empty, while Anker 737 stays at 144,20 €. A second run changes nothing. «Precio hasta» and «Tiendas con precio» read the same in-stock column, so «desde X hasta Y en N tiendas» describes one set of offers.
+
+## 2026-10-19 — Wikiproducts: the product's own rank on every line, and «Comparar» chosen by the visitor (W4, evaluator round 4)
+
+- «La mejor en cada criterio»: every line now says where this product stands, «Este producto: 3.º de 12», or why it cannot: «sin dato» (no figure), «sin votos todavía» (community line), «N retiradas o alertas» / «sin dato (aún no hemos revisado sus retiradas)» (safety line). Before, a product without the figure got a line naming only the winner. Field `esteProducto` in `vistaAlternativas`; React and server HTML both paint it.
+- Comparator default (`porDefecto`): products with a price go before unpriced ones, so a sheet no longer opens its comparison with «Sin precio en ninguna tienda todavía» when priced siblings exist.
+- The comparator's chooser is always shown: with room it adds, with four products it swaps the last one («Cambiar el último por…»).
+- Product galleries on a published site get a «Comparar» tick per card (only tables with two or more `config.comparar` columns; never in the editor, carousels or XS cards). From 2 to 4 ticks a bar at the foot opens the first product's sheet at `?comparar=…#comparar`, which the sheet's comparator already reads, and scrolls to it. `src/components/tablas/CompararGaleria.tsx`; the choice is in memory only.
+- Checked locally on the mounted site at 1440 and 390 px (Powerbanks gallery → 3 ticked → sheet comparator with the 3; Anker PowerCore 10000: «Garantía … Este producto: sin dato»). Not checked on production or with the installed app.
