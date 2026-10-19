@@ -615,5 +615,8 @@ export function tituloDeBloques(bloques: Bloque[], porDefecto = 'Documento sin t
  * Los bloques van separados 8–10 px, que para dos párrafos está bien y para
  * dos galerías seguidas las pega. Una sola clase para el editor y la página
  * publicada: si se separan, lo que se ve al escribir deja de ser lo que sale.
+ * En el teléfono, menos arriba que abajo (2026-10-19): el aire de arriba
+ * empujaba la primera tarjeta de cada subcategoría por debajo del borde, y
+ * entre dos galerías seguidas sigue habiendo ~40 px.
  */
-export const AIRE_BASE_DATOS = 'py-5 sm:py-8';
+export const AIRE_BASE_DATOS = 'pt-2 pb-5 sm:py-8';

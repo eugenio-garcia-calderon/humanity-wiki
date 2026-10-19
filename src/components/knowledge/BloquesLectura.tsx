@@ -284,8 +284,10 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       <details open={b.abierto === true} className="group/pl">
         <summary className="flex items-center gap-1.5 min-h-11 cursor-pointer list-none -ml-1 pl-1 rounded-lg hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
           <ChevronRight className={cn('shrink-0 text-slate-400 transition-transform group-open/pl:rotate-90',
-            b.tipo === 'titulo1' ? 'w-6 h-6 mt-5' : b.tipo === 'titulo2' ? 'w-5 h-5 mt-4' : 'w-4 h-4 mt-2.5')} />
-          {texto('flex-1 min-w-0')}
+            b.tipo === 'titulo1' ? 'w-6 h-6' : b.tipo === 'titulo2' ? 'w-5 h-5' : 'w-4 h-4')} />
+          {/* Sin el margen de arriba del título: la línea ya mide 44 px, y
+              así la flecha queda a su altura en vez de por encima. */}
+          {texto('flex-1 min-w-0 !mt-0')}
         </summary>
         <div className="ml-7 mt-1">
           {dentro.length > 0

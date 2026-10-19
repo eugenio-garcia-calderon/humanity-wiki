@@ -53,6 +53,7 @@ import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
 import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
 import { emitirEventoFila } from './webhooks';
+import { columnaOrdenCatalogo } from '../components/bloquesDatos/ficha/modelo';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
  *  misma tabla: cambiar de forma no toca ni una fila. */
@@ -570,7 +571,17 @@ export function registerBdRoutes(app: Express, db: any) {
       let filtros: Filtros = filtrosUrl ?? vista?.filtros ?? [];
       if (!filtroValido(filtros)) filtros = [];
       const ordenUrl = deUrl(req.query.orden);
-      const ordenPor: Orden[] = Array.isArray(ordenUrl) ? ordenUrl : (vista?.orden_por || []);
+      let ordenPor: Orden[] = Array.isArray(ordenUrl) ? ordenUrl : (vista?.orden_por || []);
+      // UN CATÁLOGO SIN ORDEN VA POR TAMAÑO (2026-10-19, Wikiproducts, ronda 4
+      // del evaluador: «"Orden de la página" no explica qué criterio sigue»).
+      // Sólo en la página publicada (`lectura=1`, que manda `Rejilla` cuando no
+      // se edita): en el editor el orden a mano tiene que seguir mandando, o
+      // arrastrar una fila no haría nada. «Catálogo» es lo mismo que en
+      // `columnaOrdenCatalogo`: su cifra de tamaño o, si no tiene, su potencia.
+      if (!ordenPor.length && req.query.lectura === '1') {
+        const col = columnaOrdenCatalogo(columnas as any[]);
+        if (col) ordenPor = [{ columna_id: col.id, direccion: 'asc' }];
+      }
       visibles = ordenarFilas(filtrar(visibles, filtros), ordenPor);
 
       const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);

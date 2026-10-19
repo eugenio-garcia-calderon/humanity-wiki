@@ -64,7 +64,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -91,6 +91,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   filasMax?: number | null;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
   tituloTabla?: string;
+  /** En un teléfono, una tarjeta por fila con la foto a la izquierda (Wikiproducts,
+   *  2026-10-19): un catálogo que se ve como lista, con nombre y precio sin bajar. */
+  listaEnMovil?: boolean;
   /** Por qué no se puede ordenar a mano (p. ej. hay un orden por propiedad). */
   motivoSinOrden?: string;
   tablaId: string;
@@ -386,6 +389,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   // propiedades ni mandos grandes: no caben, y taparían la imagen.
   const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
   const minima = tamano === 'xxxs';
+  // La lista del teléfono sólo para tarjetas que se leen (no miniaturas ni carrusel).
+  const enLista = listaEnMovil && !chica && !carrusel && !nombreArriba;
   // On a published site, cards from size S up are read, not managed: names at
   // 16 px and properties at 14 px (W2's 16 px audit, 2026-10-18; they were 12).
   // The editor keeps the compact sizes its users already lay pages out with.
@@ -486,6 +491,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
               className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
+                enLista && 'max-sm:flex max-sm:items-start max-sm:gap-3',
                 enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'), arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
               {f.oculta && (
                 <span className="absolute left-2 top-2 z-[2] inline-flex items-center gap-1 rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No se ve en la web publicada">
@@ -501,7 +507,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                 )} />
               )}
               {nombreArriba && <div className="mb-2">{nombreEl}</div>}
-              <div className="relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
+              <div className={cn('relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square')}>
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
                     recolocable={(recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}
@@ -543,7 +549,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               {/* CENTRADOS EN UNA PÁGINA (2026-10-02, Eugenio: «el título de cada
                   tarjeta centrado, al igual que la descripción, y no a la
                   izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
-              <div className={cn(minima ? 'px-0 pt-1 pb-0 space-y-0.5' : chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center')}>
+              <div className={cn(minima ? 'px-0 pt-1 pb-0 space-y-0.5' : chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center',
+                enLista && 'max-sm:flex-1 max-sm:min-w-0 max-sm:pt-0 max-sm:text-left max-sm:[&_.justify-center]:justify-start')}>
 {!nombreArriba && nombreEl}
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
@@ -645,7 +652,12 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   /** La galería entera, sin carrusel: todas las entradas, las filas que hagan falta. */
   const rejilla = (
     <div>
-      <div ref={rejillaRef} className={cn(minima ? 'grid gap-x-1 gap-y-2' : chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40')}
+      <div ref={rejillaRef} className={cn(minima ? 'grid gap-x-1 gap-y-2' : chica ? 'grid gap-x-2 gap-y-3' : 'grid gap-x-4 gap-y-5', entrando && 'rounded-xl ring-2 ring-emerald-300 ring-offset-4 bg-emerald-50/40',
+          // Un catálogo: en el teléfono, una columna a todo el ancho; en pantalla
+          // grande, las columnas llenan el ancho y empiezan donde los filtros
+          // (ronda 4: «la rejilla está más metida que la fila de filtros»).
+          // `!` porque las columnas van en `style`.
+          enLista && 'max-sm:!grid-cols-1 max-sm:gap-y-4 sm:![grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]')}
         onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
         onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}

@@ -248,6 +248,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     if (activa.id) params.set('vista', activa.id);
     if (!editable && visitante.filtros) params.set('filtros', JSON.stringify(visitante.filtros));
     if (!editable && visitante.orden_por) params.set('orden', JSON.stringify(visitante.orden_por));
+    // En la página publicada un catálogo sin orden va por tamaño (`server/bd.ts`).
+    if (!editable) params.set('lectura', '1');
     const qs = params.toString();
     try {
       const r = await pedirDatos(`/api/bd/tablas/${tablaId}${qs ? `?${qs}` : ''}`);
@@ -1192,6 +1194,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               // el orden es el de la tabla, y el grupo enseña su trozo en ese orden.
               ordenable={editable && !activa.orden_por.length}
               tituloTabla={datos.tabla?.titulo}
+              listaEnMovil={!editable && esCatalogo(columnas)}
               motivoSinOrden={activa.orden_por.length ? 'Está ordenada por una propiedad: quita el orden (Ordenar) para mover las tarjetas a mano.' : undefined} />
           ), (g, nivel, plegado, alternar) => <div className={cn('flex', nivel && 'pt-4', (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>{cabeceraGaleria(g, nivel, plegado, alternar)}</div>,
           // «Añadir», pegado al título del grupo (2026-10-18, Eugenio): así se ve

@@ -13,8 +13,8 @@ export const CLASES_TARJETA = {
   imagen: 'absolute inset-0 w-full h-full object-contain p-3',
   cuerpo: 'flex flex-col gap-0.5 p-3',
   titulo: 'text-base font-bold leading-snug text-slate-900',
-  cuenta: 'text-sm text-slate-600',
-  descripcion: 'hidden sm:block mt-1 text-sm text-slate-700 line-clamp-2',
+  cuenta: 'text-base text-slate-600',
+  descripcion: 'hidden sm:block mt-1 text-base text-slate-700 line-clamp-2',
 } as const;
 
 /** Las primeras seis tarjetas (dos filas en escritorio, tres en el teléfono)
@@ -61,7 +61,7 @@ export const CLASES_COMPACTA = {
   marco: 'relative shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-slate-50 text-slate-500 sm:w-auto sm:h-auto sm:aspect-[4/3] sm:rounded-none',
   imagen: 'absolute inset-0 w-full h-full object-contain p-0.5 sm:p-3',
   cuerpo: 'flex flex-col min-w-0 sm:gap-0.5 sm:p-3',
-  titulo: 'text-[13px] font-bold leading-tight text-slate-900 line-clamp-3 sm:line-clamp-2 sm:text-base sm:leading-snug',
-  cuenta: 'text-xs text-slate-600 sm:text-sm',
-  descripcion: 'hidden lg:block mt-1 text-sm text-slate-700 line-clamp-2',
+  titulo: 'text-base font-bold leading-tight text-slate-900 line-clamp-3 sm:line-clamp-2 sm:leading-snug',
+  cuenta: 'text-sm text-slate-600 sm:text-base',
+  descripcion: 'hidden lg:block mt-1 text-base text-slate-700 line-clamp-2',
 } as const;
