@@ -9436,6 +9436,11 @@ Mac check on #675 plus evaluator round 4 (fix 3, criteria 2, 8 and 9).
 - **Keyboard focus.** A 3 px emerald outline on `:focus-visible` across the published site (menu, content, footer), overriding `outline-none`.
 - **Home LCP.** Not reproduced: three cold loads at 1440×900 gave 340–432 ms, and the LCP element is the intro paragraph, not an image. No change.
 
+## 2026-10-19 — The loader empties a cell whose value was removed from the data (Wikiproducts W5 for W3a, round 4)
+- `cargar.mjs` (`cuerpoDe`) never wrote a plain `null`, so a value later removed from the data stayed live in production: Vekto's offer kept 1.790,80 € although the data has `precio_eur: null` and the figure only in the note.
+- Now a key present in the data with `null` is written as empty; a key that is absent is still left untouched, and only the schema's columns are written.
+- Every cell a load empties is printed («vaciada: tabla · fila · columna (era …)») and listed again at the end, so the load log says exactly what was removed. Checked on the local copy: one cell, Vekto's price; `cargar --seco` 644 rows.
+
 ## 2026-10-19 — Wikiproducts: the sheet header's score link is 44 px high (W4, Mac check of #678)
 
 - «Sin valoraciones suficientes todavía · Puntúalo» (and the stars line when there are votes) in the sheet header was a 338×24 tap target on a phone; the button now has `min-h-11`. Not checked in a browser: the local server was down; tsc and build pass.
