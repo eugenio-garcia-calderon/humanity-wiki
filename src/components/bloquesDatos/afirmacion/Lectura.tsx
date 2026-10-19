@@ -33,7 +33,7 @@ export function VistaAfirmaciones({ datos, paginaId, enEditor }: PropsLectura & 
               </div>
               {a.explicacion ? <p className="mt-1.5 text-base leading-relaxed text-slate-700"><TextoConEnlaces tactil texto={a.explicacion} /></p> : null}
               <p className="mt-1 text-sm text-slate-500">
-                {a.donde ? <>Dónde se dice: <a href={a.donde} target="_blank" rel="noopener nofollow" className="hover:underline">{sitioDe(a.donde) || a.donde}</a>. </> : null}
+                {a.donde ? <>Dónde se dice: <a href={a.donde} target="_blank" rel="noopener nofollow" title={sitioDe(a.donde)} className="py-[14px] text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800">{a.dondeNombre || sitioDe(a.donde) || a.donde}</a>. </> : null}
                 {a.fecha ? <>Revisada el {a.fecha}. </> : null}
               </p>
               {a.fuentes.length ? (

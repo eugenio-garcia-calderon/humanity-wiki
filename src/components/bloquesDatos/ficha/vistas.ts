@@ -716,7 +716,8 @@ export function veredictoDe(texto: string): Veredicto {
 export type FuenteCitada = { nombre: string; enlace: string | null; titulo: string };
 export type Afirmacion = {
   texto: string; veredicto: Veredicto; explicacion: string; fuentes: FuenteCitada[];
-  donde: string | null; fecha: string; paginaId: string | null;
+  /** Where the claim is made, and that place by name («la marca»). */
+  donde: string | null; dondeNombre: string; fecha: string; paginaId: string | null;
 };
 export type VistaAfirmaciones = { titulo: string; items: Afirmacion[]; vacia: string | null };
 
@@ -765,6 +766,7 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
       veredicto: veredictoDe(String(i?.veredicto || '')),
       explicacion: String(i?.explicacion || ''), fuentes: fuentesDe(String(i?.fuentes || ''), ''),
       donde: URL_SOLA.test(String(i?.donde || '')) ? String(i.donde) : null, fecha: '', paginaId: null,
+      dondeNombre: URL_SOLA.test(String(i?.donde || '')) ? nombreLegible(sitioDe(String(i.donde)), '') : '',
     })).filter(i => i.texto);
     return items.length ? { titulo, items, vacia: null } : null;
   }
@@ -785,6 +787,7 @@ export function vistaAfirmaciones(f: Ficha | null, datos: Record<string, unknown
       explicacion: textoRol(rel!.tabla, x, 'explicacion'),
       fuentes: fuentesDe(textoRol(rel!.tabla, x, 'fuentes'), marca),
       donde: URL_SOLA.test(donde) ? donde : null,
+      dondeNombre: URL_SOLA.test(donde) ? nombreLegible(sitioDe(donde), marca) : '',
       fecha: fecha && tieneValor(x, fecha) ? fechaCorta(String((x.celdas[fecha.id] as any).valor)) : '',
       paginaId: x.pagina_id,
     };
