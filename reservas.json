@@ -17,6 +17,12 @@
       "ruta": "src/utils/bloques.ts",
       "motivo": "W2: menos aire sobre la galería en el móvil",
       "desde": "2026-10-19T00:39:16.563Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "W2: descripción a todo el ancho en el móvil",
+      "desde": "2026-10-19T00:43:50.201Z"
     }
   ]
 }
