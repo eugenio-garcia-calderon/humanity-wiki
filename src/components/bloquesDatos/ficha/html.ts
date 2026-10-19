@@ -125,7 +125,7 @@ export function afirmacionHtml(f: Ficha | null | undefined, datos: any, h: Herra
   if (v.vacia) return `<section>${h2(v.titulo, h)}<p>${h.esc(v.vacia)}</p></section>`;
   const li = v.items.map(a => {
     const donde = a.donde && h.hrefSeguro(a.donde);
-    return `<li><p><q>${h.esc(a.texto)}</q>: <strong>${ETIQUETA_VEREDICTO[a.veredicto]}</strong></p>${a.explicacion ? `<p>${h.enLinea(a.explicacion)}</p>` : ''}${donde ? `<p>Dónde se dice: <a href="${h.esc(donde)}" rel="nofollow noopener">${h.esc(sitioDe(donde))}</a></p>` : ''}${a.fuentes ? `<p>Fuentes: ${h.enLinea(a.fuentes)}</p>` : ''}</li>`;
+    return `<li><p><q>${h.esc(a.texto)}</q>: <strong>${ETIQUETA_VEREDICTO[a.veredicto]}</strong></p>${a.explicacion ? `<p>${h.enLinea(a.explicacion)}</p>` : ''}${donde ? `<p>Dónde se dice: <a href="${h.esc(donde)}" rel="nofollow noopener">${h.esc(sitioDe(donde))}</a></p>` : ''}${a.fuentes.length ? `<p>Fuentes: ${a.fuentes.map(x => { const href = x.enlace && h.hrefSeguro(x.enlace); return href ? `<a href="${h.esc(href)}" rel="nofollow noopener"${x.titulo ? ` title="${h.esc(x.titulo)}"` : ''}>${h.esc(x.nombre)}</a>` : h.esc(x.nombre); }).join(', ')}.</p>` : ''}</li>`;
   }).join('');
   return `<section>${h2(v.titulo, h)}<ul>${li}</ul></section>`;
 }

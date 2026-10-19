@@ -28,7 +28,7 @@ export function VistaRetiradas({ datos, paginaId, enEditor }: PropsLectura & { e
               <p className="flex items-start gap-1.5 font-semibold text-rose-900"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" /> {r.titulo}</p>
               <p className="mt-0.5 text-sm text-slate-600">{[r.fecha, r.organismo, r.pais].filter(Boolean).join(' · ')}{r.referencia ? ` · Ref. ${r.referencia}` : ''}</p>
               {r.motivo ? <p className="mt-1.5 text-base text-slate-700"><TextoConEnlaces tactil texto={r.motivo} /></p> : null}
-              {r.enlace ? <a href={r.enlace} target="_blank" rel="noopener nofollow" className="mt-1 inline-block text-sm text-sky-700 hover:underline">Aviso oficial ({sitioDe(r.enlace)})</a> : null}
+              {r.enlace ? <a href={r.enlace} target="_blank" rel="noopener nofollow" className="mt-1 inline-flex min-h-[44px] items-center text-sm text-sky-700 hover:underline sm:min-h-0">Aviso oficial ({sitioDe(r.enlace)})</a> : null}
             </li>
           ))}
         </ul>

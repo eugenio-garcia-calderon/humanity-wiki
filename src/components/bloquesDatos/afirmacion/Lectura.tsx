@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Badge } from '../../ui/core';
 import TextoConEnlaces from '../../ui/TextoConEnlaces';
 import type { PropsLectura } from '../tipos';
@@ -35,7 +36,20 @@ export function VistaAfirmaciones({ datos, paginaId, enEditor }: PropsLectura & 
                 {a.donde ? <>Dónde se dice: <a href={a.donde} target="_blank" rel="noopener nofollow" className="hover:underline">{sitioDe(a.donde) || a.donde}</a>. </> : null}
                 {a.fecha ? <>Revisada el {a.fecha}. </> : null}
               </p>
-              {a.fuentes ? <p className="mt-0.5 text-sm text-slate-500">Fuentes: <TextoConEnlaces tactil texto={a.fuentes} /></p> : null}
+              {a.fuentes.length ? (
+                <p className="mt-0.5 text-sm text-slate-500">
+                  Fuentes:{' '}
+                  {a.fuentes.map((x, k) => (
+                    <Fragment key={k}>
+                      {k ? ', ' : null}
+                      {x.enlace ? (
+                        <a href={x.enlace} target="_blank" rel="noopener nofollow" title={[x.titulo, sitioDe(x.enlace)].filter(Boolean).join(' · ')} className="py-[14px] text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800">{x.nombre}</a>
+                      ) : x.nombre}
+                    </Fragment>
+                  ))}
+                  .
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

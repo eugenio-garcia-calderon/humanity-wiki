@@ -9458,3 +9458,12 @@ Mac pass on #683: «smallest first» opened 3 of 5 listings on a card with no pr
 - Tap targets: inline links on the sheet (brand, photo credit, sources, links inside texts via `TextoConEnlaces tactil`) get 14 px vertical padding (≥ 44 px, lines unmoved); comparator product names are 44 px rows. Local Anker 737 at 390 px with every section open: 0 targets under 44 px.
 - The comparator says why a sibling has no price with #679's sentence (`textoSinVenta`): Anker Zolo read «Precio desde —» and «Sin precio en ninguna tienda todavía» while its sheet said the Anker EU shop does not ship to Spain. The sheet now reads every product's offers in one call (`ofertasDeProducto(…, { todas: true })`, same permission, one read instead of one) and counts them per row (`ficha.cuentas`).
 - Tests: `probar-ficha.ts` 33 (source names, comparator sentence).
+
+## 2026-10-19 — Wikiproducts sheet: every source by name, issuer in the documents table (W1)
+
+Production check after #688 on the Anker 737 sheet.
+- The «Fuentes:» footer folds the brand's own sites (anker.com, service.anker.com, us.anker.com) into «la marca», listed first; a host with no listed name reads «la web mezha.ua» instead of a bare domain. Same fallback in «Según …» / «Medido por …».
+- Each ad claim's «Fuentes:» is no longer «título — URL»: one link per source, named the same way («la CPSC (EE. UU.)», «la marca»), with the title as tooltip; repeated sources read «(2)».
+- Documents table: a document on the brand's own site with no issuer written down shows «Anker (la marca)» as issuer, so the Emisor column (or the line under the name on phones) appears. Documents on other sites stay «no indicado».
+- Recall «Aviso oficial» link gets a 44 px hit area on phones.
+- Measured locally at 390 px: document links 89×44 and 144×44, zero tap targets under 44 px. The 75×19 reported on production was not reproduced (the #688 build already had min-h 44 px on those links); possibly a stale cached build.
