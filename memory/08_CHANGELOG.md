@@ -9459,6 +9459,9 @@ Mac pass on #683: «smallest first» opened 3 of 5 listings on a card with no pr
 - The comparator says why a sibling has no price with #679's sentence (`textoSinVenta`): Anker Zolo read «Precio desde —» and «Sin precio en ninguna tienda todavía» while its sheet said the Anker EU shop does not ship to Spain. The sheet now reads every product's offers in one call (`ofertasDeProducto(…, { todas: true })`, same permission, one read instead of one) and counts them per row (`ficha.cuentas`).
 - Tests: `probar-ficha.ts` 33 (source names, comparator sentence).
 
+## 2026-10-19 — Wikiproducts: winner links in «La mejor en cada criterio» are 44 px high (W4, Mac check of #685)
+
+- The winner's name link measured 43 px high on production (Xiaomi 240×43). It is now `inline-flex min-h-11 items-center`. Locally at 390 px all 9 links measure 44 to 72 px high.
 ## 2026-10-19 — Wikiproducts sheet: every source by name, issuer in the documents table (W1)
 
 Production check after #688 on the Anker 737 sheet.
