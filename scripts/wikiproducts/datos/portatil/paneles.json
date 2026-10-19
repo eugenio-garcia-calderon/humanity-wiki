@@ -418,12 +418,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://uk.rs-online.com/web/p/solar-panels/0859316",
+          "fecha": "2026-10-19",
+          "nota": "«COO (Country of Origin): CN» en la ficha de RS Components, con referencia de fabricante EFSOLAR220W-N."
         },
         "fabrica": {
           "valor": null,
@@ -714,12 +713,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/ecoflow-400-vt-solar-panel",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» (fabricación: China) en la ficha de la tienda Vencon para «EcoFlow 400W Solar Panel» (el portátil, distinto de la ficha del panel estacionario). La ficha no da el código SOLAR400W."
         },
         "fabrica": {
           "valor": null,
@@ -992,12 +990,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/ecoflow-160w-solar-panel",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» en la ficha de Vencon para «EcoFlow 160W Solar Panel» (5 kg, la versión clásica, no la NextGen). RS Components también indica «COO (Country of Origin): CN» para la variante EFSOLAR160W-N (https://uk.rs-online.com/web/p/solar-panels/0859315)."
         },
         "fabrica": {
           "valor": null,
@@ -1276,12 +1273,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/jackery-solarsaga-100w",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» en la ficha de Vencon para «Jackery SolarSaga 100W» (EAN 6958657300094). La ficha no da la referencia 21-0002-000059."
         },
         "fabrica": {
           "valor": null,
@@ -1582,12 +1578,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/jackery-solarsaga-200w",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» en la ficha de Vencon para «Jackery SolarSaga 200W». Bürklin también indica «Country of origin: CN» para la referencia 80-0200-USOR02, que no es el SKU 21-0002-000063 (https://www.buerklin.com/en/p/27A0054/)."
         },
         "fabrica": {
           "valor": null,
@@ -1867,12 +1862,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://befr.rs-online.com/web/p/solar-panels/0458669",
+          "fecha": "2026-10-19",
+          "nota": "«Pays d'origine : CN» en la ficha de RS Components con «Référence fabricant: PV120». Vencon también indica «Производство: Китай». El manual del PV120 no indica país."
         },
         "fabrica": {
           "valor": null,
@@ -2153,12 +2147,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/bluetti-pv200-solar-panel",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» en la ficha de Vencon para «Bluetti PV200 Solar Panel». RS Components indica «Pays d'origine : CN» con referencia de fabricante PV200, aunque el título de esa ficha está mal (https://befr.rs-online.com/web/p/solar-panels/0458671). El manual del PV200 no indica país."
         },
         "fabrica": {
           "valor": null,
@@ -2455,12 +2448,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://nl.rs-online.com/web/p/solar-panels/0458674",
+          "fecha": "2026-10-19",
+          "nota": "«Land van herkomst: CN» en la ficha de RS Components con referencia de fabricante PV350. Vencon también indica «Производство: Китай»."
         },
         "fabrica": {
           "valor": null,
@@ -3383,12 +3375,11 @@
           "nota": "No se encontró una fuente consultada que lo indique para la marca; ver marcas[]."
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "La ficha consultada no indica el país de fabricación."
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/products/anker-625-solar-panel-100w",
+          "fecha": "2026-10-19",
+          "nota": "«Производство: Китай» en la ficha de Vencon para «Anker 625 Solar Panel 100W». La ficha no da el código A2431031."
         },
         "fabrica": {
           "valor": null,

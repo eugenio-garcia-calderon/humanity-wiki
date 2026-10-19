@@ -1266,10 +1266,11 @@
           "nota": "Sede no verificada con fuente en esta sesión"
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://www.thegioididong.com/sac-dtdd/pin-sac-du-phong-20000mah-type-c-pd-qc-3-0-130w-ugreen-pb721",
+          "fecha": "2026-10-19",
+          "nota": "«Sản xuất tại: Trung Quốc» (fabricado en: China) en la ficha del minorista vietnamita Thế Giới Di Động para «Ugreen PB721». Coincide meta.vn: «Sản xuất tại: Trung Quốc» para PB721 (35524B)."
         },
         "fabrica": {
           "valor": null,
@@ -1883,11 +1884,11 @@
           "nota": "Sede de la marca no verificada con fuente en esta sesión"
         },
         "pais_fabricacion": {
-          "valor": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "No publicado en las fichas consultadas"
+          "valor": "China",
+          "naturaleza": "declarado",
+          "fuente": "https://www.mi.com/vn/product/xiaomi-power-bank-20000/specs/",
+          "fecha": "2026-10-19",
+          "nota": "«Xuất xứ: Trung Quốc» (origen: China) en la ficha técnica oficial de Xiaomi Vietnam, «Kiểu máy: PB2020MI». La ficha de mi.com/es no lo indica. Thế Giới Di Động también dice «Sản xuất tại: Trung Quốc» para PB2020MI."
         },
         "fabrica": {
           "valor": null,
@@ -3630,12 +3631,11 @@
           "nota": "No verificado en una fuente consultada en esta ronda"
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://www.dienmayxanh.com/sac-dtdd/pin-sac-du-phong-20000mah-type-c-pd-45w-samsung-eb-p4520",
+          "fecha": "2026-10-19",
+          "nota": "«Sản xuất tại: Trung Quốc» (fabricado en: China) en la ficha del minorista vietnamita Điện Máy Xanh para «Samsung EB-P4520» (variante de mercado vietnamita, no necesariamente el sufijo XUEGEU). samsung.com/es y PcBox no lo indican."
         },
         "fabrica": {
           "valor": null,
@@ -3981,12 +3981,11 @@
           "nota": "Ver ficha de marca: sede no confirmada con fuente"
         },
         "pais_fabricacion": {
-          "valor": null,
-          "unidad": null,
-          "naturaleza": "no_publicado",
-          "fuente": null,
-          "fecha": "2026-10-18",
-          "nota": "No se encontró la etiqueta ni una ficha que lo indique"
+          "valor": "China",
+          "naturaleza": "tercero",
+          "fuente": "https://vencon.ua/ua/products/ecoflow-rapid-pro-27650mah",
+          "fecha": "2026-10-19",
+          "nota": "«Виробництво Китай» (fabricación: China) en la ficha del minorista ucraniano Vencon para «EcoFlow Rapid Pro 27650mAh». Euronics, Shopro, Solarkontor, Solarpowersupply y Epicentr no lo indican."
         },
         "fabrica": {
           "valor": null,
