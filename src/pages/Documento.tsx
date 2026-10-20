@@ -39,6 +39,7 @@ import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { useCargas, iniciarCarga, registrarReceptor, claveDestino, type DestinoCarga } from '../utils/cargas';
 import { FilaBotones, VentanaBoton, type BotonCabecera } from '../components/knowledge/BotonesCabecera';
 import { BarraFija } from '../components/knowledge/BarraFija';
+import { preguntarBorrarBd } from '../components/tablas/PreguntaBorrarBd';
 import {
   CabeceraElementos, elementosDe, usaDisenoNuevo, cabeceraFija, DISENO_NUEVO_DESDE,
   tamTitulo, tamIcono, tamDescripcion, altoPortada, tallaBotones, zoomPropiedades,
@@ -1666,7 +1667,24 @@ function EditorPagina() {
     contarPasos();
   };
 
-  const borrarBloque = (bid: string) => {
+  /** Las bases de datos que hay en estos bloques (con lo que llevan dentro). */
+  const tablasEn = (ids: string[]) => {
+    const bs = bloquesRef.current;
+    const dentro = new Set(ids.flatMap(id => idsSubarbol(bs, id)));
+    return bs.filter(x => dentro.has(x.id) && x.tipo === 'basedatos' && (x as any).tabla_id).map(x => String((x as any).tabla_id));
+  };
+  /** ¿Se borra una base de datos? Antes, la pregunta de «Mantener / Borrar» (2026-10-20). */
+  const siSeBorranTablas = async (ids: string[]) => {
+    const tablas = tablasEn(ids);
+    if (!tablas.length) return true;
+    return preguntarBorrarBd({ tablaIds: tablas, detalle: 'Se quitará de esta página con todas sus entradas a la vista. Si te equivocas, ⌘Z la devuelve.' });
+  };
+  const borrarBloque = async (bid: string) => {
+    setMenuAsa(null);
+    if (!(await siSeBorranTablas([bid]))) return;
+    borrarBloqueYa(bid);
+  };
+  const borrarBloqueYa = (bid: string) => {
     guardarHistoria();
     setMenuAsa(null);
     // Con lo que lleva dentro, como en Notion: borrar un desplegable no deja
@@ -2928,8 +2946,9 @@ function EditorPagina() {
     return true;
   };
 
-  const eliminarSeleccion = useCallback(() => {
+  const eliminarSeleccion = useCallback(async () => {
     if (!seleccion.length) return;
+    if (!(await siSeBorranTablas(seleccion))) return;
     setAviso(seleccion.length === 1 ? 'Bloque borrado' : `${seleccion.length} bloques borrados`);
     setBloques(bs => {
       // Lo que va dentro de un bloque marcado se va con él.
@@ -3097,7 +3116,10 @@ function EditorPagina() {
       const t = tramoSeleccionado();
       if (!t) return;
       e.preventDefault(); e.stopPropagation();
-      borrarTramoRef.current(t, letra ? e.key : '');
+      // Si en medio hay una base de datos, antes se pregunta.
+      const i1 = bloquesRef.current.findIndex(x => x.id === t.id1), i2 = bloquesRef.current.findIndex(x => x.id === t.id2);
+      const ids = bloquesRef.current.slice(Math.min(i1, i2), Math.max(i1, i2) + 1).map(x => x.id);
+      siSeBorranTablas(ids).then(si => { if (si) borrarTramoRef.current(t, letra ? e.key : ''); });
     };
     const cortar = (e: ClipboardEvent) => {
       const t = tramoSeleccionado();
