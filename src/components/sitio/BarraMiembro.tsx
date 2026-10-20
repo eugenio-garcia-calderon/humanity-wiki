@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { UserRound, LogOut, Bookmark, BookmarkCheck, X, Loader2 } from 'lucide-react';
+import { UserRound, LogOut, Bookmark, BookmarkCheck, X, Loader2, Pencil } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MuroMiembros, { useCanjeEnlace, type Muro } from './MuroMiembros';
 import { useSitio } from './ContextoSitio';
@@ -52,7 +52,9 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   // A block that needs a session («Entrar para puntuar», `valoracion`) asks for
   // the sign-in panel. Only while this bar is the one on screen: with the
   // site's menu on, `CuentaMenu` answers instead.
-  const visible = !conMenu && !!e?.activo && !e?.es_equipo;
+  // El equipo que entró con la sesión de humanity.wiki tiene su propia barra; el que entró
+  // con su cuenta de miembro (2026-10-20) sigue viendo esta píldora, con «Editar esta página».
+  const visible = !conMenu && !!e?.activo && (!e?.es_equipo || !!e?.yo);
   useEffect(() => {
     if (!visible) return;
     const pedir = (ev: Event) => { ev.preventDefault(); setAbierto(e?.yo ? 'menu' : 'entrar'); };
@@ -62,7 +64,7 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
 
   // Con el menú encendido, aquí sólo queda el aviso del enlace mágico (el canje sigue siendo cosa de esta pieza).
   if (conMenu) return avisoEnlace ? <p className="fixed bottom-4 left-4 z-[60] max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p> : null;
-  if (!e?.activo || e.es_equipo) return null;
+  if (!e?.activo || (e.es_equipo && !e.yo)) return null;
   const yo = e.yo;
   const acento = e.acento || '#0f172a';
   const guardada = !!guardados?.some(g => g.id === paginaId);
@@ -91,7 +93,18 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
       {abierto === 'menu' && yo && (
         <div className="mb-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
           <p className="truncate px-2 pt-1 text-[13px] font-bold text-slate-800">{yo.nombre || yo.email}</p>
-          <p className="truncate px-2 pb-2 text-[11px] text-slate-400">{yo.categoria || 'Miembro'}{yo.estado !== 'activo' ? ' · pendiente' : ''}</p>
+          <p className="truncate px-2 pb-2 text-[11px] text-slate-400">{e.es_equipo ? 'Equipo de esta web' : <>{yo.categoria || 'Miembro'}{yo.estado !== 'activo' ? ' · pendiente' : ''}</>}</p>
+          {/* QUIEN GESTIONA LA WEB, AUNQUE HAYA ENTRADO COMO MIEMBRO (2026-10-20, Eugenio:
+              «ha desaparecido Entrar y no puede editar»): el editor está en humanity.wiki. */}
+          {e.es_equipo && (
+            <>
+              <a href={`https://humanity.wiki/paginas/${encodeURIComponent(paginaId)}`} target="_blank" rel="noopener noreferrer"
+                className="flex h-10 w-full items-center gap-2 rounded-xl px-2 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-50">
+                <Pencil className="h-4 w-4" /> Editar esta página
+              </a>
+              <p className="px-2 pb-1 text-[10px] leading-snug text-slate-400">Se abre en humanity.wiki: entra allí con este mismo correo y contraseña.</p>
+            </>
+          )}
           {puedeGuardar && (
             <button onClick={alternarGuardado} disabled={ocupado}
               className="flex h-10 w-full items-center gap-2 rounded-xl px-2 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-50">

@@ -9497,3 +9497,6 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 ## 2026-10-20 — Las propiedades, también en la página pública (prog8)
 - **Fallo**: las propiedades de una entrada solo se pintaban en el editor; en la página publicada no salían aunque estuvieran visibles. Ahora `paginaPublica` dice si la página es una entrada (`fila: { fila_id, tabla_id }`, salvo entradas ocultas al publicar) y `CabeceraLectura` pinta sus **propiedades visibles, de solo lectura**, bajo el título y la descripción (centradas si el título va centrado). Las ocultas en la página no salen; los mandos de edición, tampoco. El componente se carga en diferido: el HTML del servidor no lo trae.
+
+## 2026-10-20 — Arreglo: la píldora «Entrar» desaparecía al dueño (prog8)
+- Tras reconocer como equipo al dueño que entra en su web con la cuenta de miembro (#695), la píldora flotante de `BarraMiembro` (que se esconde para el equipo, porque el de humanity.wiki tiene su barra) desaparecía del todo: ni su nombre, ni «Salir», ni forma de editar. Ahora, si el equipo entró con su cuenta de miembro, la píldora se queda, dice «Equipo de esta web» y trae **«Editar esta página»** (abre el editor en humanity.wiki) y «Salir».
