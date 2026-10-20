@@ -108,11 +108,17 @@ export function useVoiceDictation(onResult: (text: string, isFinal: boolean) => 
     if (!Ctor) return false;
     const r: Reconocedor = new Ctor();
     r.lang = 'es-ES'; r.continuous = true; r.interimResults = true;
+    // Algunos navegadores (Chrome en Android, sobre todo) reenvían la misma
+    // frase cerrada varias veces: se descarta si ya se escribió (2026-10-20).
+    const normal = (t: string) => t.normalize('NFD').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
+    let ultimoFinal = '';
     r.onresult = (e: any) => {
       let fin = '', medio = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) fin += e.results[i][0].transcript; else medio += e.results[i][0].transcript;
       }
+      if (fin && normal(fin) && (normal(ultimoFinal).endsWith(normal(fin)))) fin = '';
+      if (fin) ultimoFinal += ' ' + fin;
       // Las dos, y en este orden: cuando una frase se cierra y la siguiente
       // ya ha empezado, llegan en el mismo evento.
       if (fin) alResultado.current(fin, true);
