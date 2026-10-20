@@ -282,13 +282,14 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       const titulo = String(req.body?.titulo || '').trim() || 'Documento sin título';
       const id = newId('KW');
       const bloques = [{ id: `B${Date.now().toString(36)}0`, tipo: 'parrafo', texto: '' }];
+      // Nace con la cabecera por elementos (2026-10-20, ver `DisenoCabecera.tsx`).
       // Puede nacer YA dentro de un proyecto (2026-08-20). Se comprueba que
       // ese proyecto sea tuyo: si no, la página nace suelta en vez de colarse
       // en el proyecto de otra persona.
       const proyecto = await proyectoTuyo(req, req.body?.proyecto_id);
       await db.execute(sql`
         INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id)
-        VALUES (${id}, ${titulo}, 'pagina', ${JSON.stringify({ bloques })}::jsonb,
+        VALUES (${id}, ${titulo}, 'pagina', ${JSON.stringify({ bloques, cabecera: { v: 2 } })}::jsonb,
                 false, ${req.user.id}, false, ${req.user.id}, ${req.user.id}, ${proyecto})
       `);
       res.json({ id });

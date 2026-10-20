@@ -38,6 +38,12 @@ import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { useCargas, iniciarCarga, registrarReceptor, claveDestino, type DestinoCarga } from '../utils/cargas';
 import { FilaBotones, VentanaBoton, type BotonCabecera } from '../components/knowledge/BotonesCabecera';
+import { BarraFija } from '../components/knowledge/BarraFija';
+import {
+  CabeceraElementos, elementosDe, usaDisenoNuevo, cabeceraFija, DISENO_NUEVO_DESDE,
+  tamTitulo, tamIcono, tamDescripcion, altoPortada, tallaBotones, zoomPropiedades,
+  type IdElemento, type Elemento, type TallaElemento,
+} from '../components/knowledge/DisenoCabecera';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion, TALLAS_PORTADA, tallaDe } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -290,11 +296,10 @@ function EditorPagina() {
   /** Buscar en la página (⌘F propio) y la lista de atajos («?»). */
   const [buscando, setBuscando] = useState<{ q: string; senal: number } | null>(null);
   const [atajosAbiertos, setAtajosAbiertos] = useState(false);
-  const [menuSitioAbierto, setMenuSitioAbierto] = useState(false);
+  const [menuSitioAbierto, setMenuSitioAbierto] = useState<false | 'menu' | 'cabecera'>(false);
   const [consolaAbierta, setConsolaAbierta] = useState(false);
   const [optimizacionAbierta, setOptimizacionAbierta] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
-  const [disenoAbierto, setDisenoAbierto] = useState(false);
   /** El botón de la cabecera cuya página está abierta en su ventana (2026-10-20). */
   const [ventanaBoton, setVentanaBoton] = useState<BotonCabecera | null>(null);
   /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
@@ -427,6 +432,10 @@ function EditorPagina() {
         setIcono(j.config?.icono || null);
         const aj: Ajustes = {};
         for (const k of CLAVES_AJUSTES) if (j.config?.[k] !== undefined) (aj as any)[k] = j.config[k];
+        // Una página recién creada nace con la cabecera por elementos (2026-10-20); las de antes, como estaban.
+        if (aj.cabecera?.v === undefined && !Array.isArray(aj.cabecera?.elementos) && j.created_at && new Date(j.created_at) >= new Date(DISENO_NUEVO_DESDE)) {
+          aj.cabecera = { ...(aj.cabecera || {}), v: 2 };
+        }
         setAjustes(aj);
         ultimaMeta.current = JSON.stringify({ ...aj, portada: j.config?.portada || undefined, icono: j.config?.icono || undefined });
         // Lo guardado es un árbol; el editor trabaja con la lista plana.
@@ -3954,7 +3963,12 @@ function EditorPagina() {
   }
 
   return (
-    <div className="h-full overflow-y-auto">
+    // Sin `overflow-y-auto` (2026-10-20): esta caja crece con la página y
+    // nunca baja ella (baja la de fuera, `main`); con ese `overflow` era un
+    // contenedor de desplazamiento quieto y lo «sticky» de dentro —la barra
+    // fija de la cabecera— no se pegaba nunca. `overflow-x-clip` recorta lo
+    // ancho sin ser contenedor.
+    <div className="h-full overflow-x-clip">
       {/* SIEMPRE A ANCHO COMPLETO (2026-10-02, Eugenio: «quita la opción de
           que no sea ancho completo»). El mismo ancho que la página publicada. */}
       <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', anchoDePagina(ajustes))}>
@@ -4029,9 +4043,9 @@ function EditorPagina() {
           {/* EL MENÚ Y EL PIE DE LA WEB (2026-10-02). Con su nombre y no
               escondido en los ajustes: es lo que convierte una página en una web. */}
           {editable && (
-            <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')}
+            <button onClick={() => setMenuSitioAbierto('menu')} title={tr('Menú, cabecera y pie de página de la web')}
               className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
-              <PanelTop className="w-4 h-4" /> {tr('Menú y pie')}
+              <PanelTop className="w-4 h-4" /> {tr('Menú y cabecera')}
             </button>
           )}
           {/* OPTIMIZACIÓN WEB (2026-10-13): solo cuando la página está publicada, y a quien la edita. */}
@@ -4050,7 +4064,7 @@ function EditorPagina() {
             </button>
           )}
           {editable && (
-            <button onClick={() => setMenuSitioAbierto(true)} title={tr('Menú y pie de página de la web')} aria-label={tr('Menú y pie de página de la web')}
+            <button onClick={() => setMenuSitioAbierto('menu')} title={tr('Menú, cabecera y pie de página de la web')} aria-label={tr('Menú, cabecera y pie de página de la web')}
               className="sm:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
               <PanelTop className="w-4 h-4" />
             </button>
@@ -4170,27 +4184,43 @@ function EditorPagina() {
           </nav>
         )}
 
-        {/* ══ LA CABECERA: IMAGEN, ICONO Y TÍTULO (2026-09-30) ══════════════
-            Eugenio eligió que la imagen pueda ir arriba, debajo o a un lado
-            del título, con una barra para el tamaño. La misma pieza pinta la
-            página publicada. Ver `CabeceraPagina.tsx`. */}
-        <LayoutCabecera
-          cabecera={ajustes.cabecera}
-          imagen={subidas.portada ? (
+        {/* ══ LA CABECERA (2026-09-30; POR ELEMENTOS desde 2026-10-20) ══════════
+            Dos formas: la de siempre (`LayoutCabecera`: imagen arriba, debajo o
+            a un lado) y la nueva por elementos (`DisenoCabecera.tsx`: dos
+            columnas con icono, título, descripción, portada, botones y
+            propiedades en el orden, el tamaño y la visibilidad que se elijan).
+            Las piezas son las mismas; sólo cambia cómo se colocan. */}
+        {/* LA BARRA FIJA AL BAJAR (2026-10-20): justo ANTES de la cabecera (ver `BarraFija`). */}
+        {cabeceraFija(ajustes.cabecera) && (
+          <BarraFija icono={icono} titulo={titulo} subtitulo={ajustes.subtitulo} portada={portada}
+            botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : (ajustes.botones || [])}
+            estilo={ajustes.cabecera?.botonesEstilo} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
+        )}
+        <div data-cabecera-editor>
+        {(() => {
+          const v2 = usaDisenoNuevo(ajustes.cabecera);
+          const els = elementosDe(ajustes.cabecera);
+          const el = (id: IdElemento) => els.find(e => e.id === id);
+          const der = (id: IdElemento) => el(id)?.col === 'der';
+          const ponElemento = (id: IdElemento, cambio: Partial<Elemento>) => {
+            setAjustes(a => ({ ...a, cabecera: { ...(a.cabecera || {}), elementos: elementosDe(a.cabecera).map(e => (e.id === id ? { ...e, ...cambio } : e)) } }));
+            programarGuardado();
+          };
+          const portadaNodo = (subidas.portada ? (
             <SubiendoImagen vista={subidas.portada.vista} fraccion={subidas.portada.fraccion} texto="Subiendo la portada" />
           ) : portada ? (
-            <div className="group/portada relative w-fit max-w-full">
-              <MediaPortada src={portada} className="w-full h-56 object-cover rounded-2xl" />
+            <div className={cn('group/portada relative w-fit max-w-full', v2 && '[&_img]:max-h-[var(--alto)]')} style={v2 ? { '--alto': `${altoPortada(ajustes.cabecera, el('portada'), esMovil)}px` } as any : undefined}>
+              <MediaPortada src={portada} className={v2 ? 'block h-auto w-auto max-w-full rounded-2xl object-contain' : 'w-full h-56 object-cover rounded-2xl'} />
               {editable && (
                 <div className="absolute top-2 right-2 flex flex-wrap justify-end gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
                   {/* TAMAÑO, junto a recortar y cambiar (2026-10-18, Eugenio). */}
                   <div role="radiogroup" aria-label={tr('Tamaño de la portada')} className="flex items-center gap-0.5 rounded-lg bg-white/90 pl-2 pr-0.5">
                     <span className="mr-0.5 text-[10px] font-black text-slate-400">{tr('Tamaño')}</span>
                     {TALLAS_PORTADA.map(([nombre, valor]) => {
-                      const puesta = tallaDe(ajustes.cabecera?.tamano) === nombre;
+                      const puesta = v2 ? (el('portada')?.talla || 'm') === nombre.toLowerCase() : tallaDe(ajustes.cabecera?.tamano) === nombre;
                       return (
                         <button key={nombre} role="radio" aria-checked={puesta} aria-label={`${tr('Tamaño')} ${nombre}`}
-                          onClick={() => { setAjustes(a => ({ ...a, cabecera: { ...(a.cabecera || {}), tamano: valor } })); programarGuardado(); }}
+                          onClick={() => { if (v2) { ponElemento('portada', { talla: nombre.toLowerCase() as TallaElemento }); return; } setAjustes(a => ({ ...a, cabecera: { ...(a.cabecera || {}), tamano: valor } })); programarGuardado(); }}
                           className={cn('min-w-[1.6rem] px-1 py-1 rounded-md text-[10px] font-black', puesta ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>
                           {nombre}
                         </button>
@@ -4214,8 +4244,8 @@ function EditorPagina() {
                 </div>
               )}
             </div>
-          ) : null}
-          cuerpo={<>
+          ) : null);
+          const filaAnadir = (<>
             {editable && (
               <div className="flex items-center gap-3 mb-2 flex-wrap">
                 {!icono && !eligiendoIcono && (
@@ -4285,24 +4315,24 @@ function EditorPagina() {
                     <AlignLeft className="w-3.5 h-3.5" /> {tr('Añadir descripción')}
                   </button>
                 )}
-                {!(ajustes.botones || []).length && !eligiendoIcono && (
+                {!v2 && !(ajustes.botones || []).length && !eligiendoIcono && (
                   <button onClick={crearBotonCabecera}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
                     <RectangleHorizontal className="w-3.5 h-3.5" /> {tr('Añadir botón')}
                   </button>
                 )}
-                {(portada || icono || ajustes.subtitulo !== undefined || !!(ajustes.botones || []).length) && !eligiendoIcono && (
-                  <button onClick={() => setDisenoAbierto(v => !v)} aria-expanded={disenoAbierto}
+                {(v2 || portada || icono || ajustes.subtitulo !== undefined || !!(ajustes.botones || []).length) && !eligiendoIcono && (
+                  // Abre el creador del menú en su pestaña «Cabecera»: la cabecera es parte del menú (2026-10-20).
+                  <button onClick={() => setMenuSitioAbierto('cabecera')} aria-expanded={menuSitioAbierto === 'cabecera'}
                     className={cn('inline-flex items-center gap-1 text-[11px] font-bold transition-colors',
-                      disenoAbierto ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500')}>
+                      menuSitioAbierto === 'cabecera' ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500')}>
                     <LayoutTemplate className="w-3.5 h-3.5" /> Diseño de la cabecera
                   </button>
                 )}
               </div>
             )}
-            {/* Icono al lado del título por defecto; título y descripción
-                van juntos. Ver `FilaTitulo`. */}
-            <FilaTitulo cabecera={ajustes.cabecera} icono={icono ? (
+          </>);
+          const iconoNodo = icono ? (
               <div className="relative inline-block">
                 <button
                   onClick={() => editable && setEligiendoIcono(v => !v)}
@@ -4311,26 +4341,26 @@ function EditorPagina() {
                 >
                   {/* El icono puede ser un emoji o una IMAGEN tuya (Eugenio,
                       2026-08-20). Se distinguen mirando el valor. */}
-                  <IconoElemento valor={icono} tamano={ladoIcono(ajustes.cabecera, esMovil)} className="rounded-xl" />
+                  <IconoElemento valor={icono} tamano={v2 ? tamIcono(ajustes.cabecera, esMovil, el('icono')) : ladoIcono(ajustes.cabecera, esMovil)} className="rounded-xl" />
                 </button>
               </div>
-            ) : null}>
-        {/* Título del documento */}
+            ) : null;
+          const tituloNodo = (<>
         {editable ? (
           <TituloEditable
+            letra={v2 ? tamTitulo(ajustes.cabecera, el('titulo'), esMovil) : undefined}
             valor={titulo}
             onCambiar={v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); }}
           />
         ) : (
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-1 break-words">{titulo}</h1>
+          <h1 className={cn('font-black tracking-tight text-slate-900 mb-1 break-words leading-tight', !v2 && 'text-4xl')} style={v2 ? { fontSize: tamTitulo(ajustes.cabecera, el('titulo'), esMovil) } : undefined}>{titulo}</h1>
         )}
-        {/* LA DESCRIPCIÓN, PEGADA AL TÍTULO (2026-09-30). Va dentro de la
-            cabecera, así que se mueve con él cuando la imagen cambia de
-            sitio: título y descripción son un solo bloque. */}
+          </>);
+          const descNodo = ajustes.subtitulo !== undefined ? (<>
         {ajustes.subtitulo !== undefined && (editable ? (
           <DescripcionEditable
             valor={ajustes.subtitulo}
-            letra={letraDescripcion(ajustes.cabecera, esMovil)}
+            letra={(v2 ? tamDescripcion(ajustes.cabecera, esMovil, el('descripcion')) : letraDescripcion(ajustes.cabecera, esMovil))}
             enfocar={focoDescripcion}
             onEnfocado={() => setFocoDescripcion(false)}
             onCambiar={v => { setAjustes(a => ({ ...a, subtitulo: v })); programarGuardado(); }}
@@ -4339,28 +4369,26 @@ function EditorPagina() {
             onVaciar={() => { setAjustes(a => ({ ...a, subtitulo: undefined, subtituloOculto: undefined })); programarGuardado(); }}
           />
         ) : ajustes.subtitulo ? (
-          <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line" style={{ fontSize: letraDescripcion(ajustes.cabecera, esMovil) }}>
+          <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line" style={{ fontSize: (v2 ? tamDescripcion(ajustes.cabecera, esMovil, el('descripcion')) : letraDescripcion(ajustes.cabecera, esMovil)) }}>
             <Inline texto={ajustes.subtitulo} />
           </p>
         ) : null)}
-            </FilaTitulo>
-        {/* LOS BOTONES DE LA CABECERA (2026-10-20): cada uno abre su página en una ventana. */}
-        <FilaBotones botones={ajustes.botones || []} talla={ajustes.cabecera?.botonesTalla} estilo={ajustes.cabecera?.botonesEstilo}
+          </>) : null;
+          const botonesNodo = (<>
+        <FilaBotones botones={ajustes.botones || []} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derechaAncho={v2 && der('botones')} sinMargen={v2} estilo={ajustes.cabecera?.botonesEstilo}
           onAbrir={b => setVentanaBoton(b)}
           onQuitar={editable ? b => {
             if (!window.confirm(`¿Quitar el botón «${b.pubTitulo || 'Sin título'}»? Su página no se borra: queda en la lista de páginas.`)) return;
             setAjustes(a => ({ ...a, botones: (a.botones || []).filter(x => x.id !== b.id) })); programarGuardado();
           } : undefined}
           onAnadir={editable ? crearBotonCabecera : undefined} />
-        {ventanaBoton && (
-          <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
-            {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
-            <iframe src={`/paginas/${encodeURIComponent(ventanaBoton.entityId)}?embed=1`} title={ventanaBoton.pubTitulo || 'Sin título'} className="block h-full w-full border-0" />
-          </VentanaBoton>
-        )}
-        {/* EL AUTOR, OCULTO POR DEFECTO (2026-09-30). Quien escribe lo ve
-            atenuado, con la opción de mostrarlo al pasar el ratón; quien lee
-            sólo lo ve si el autor lo ha decidido. */}
+          </>);
+          const propsNodo = filaDe?.fila_id && filaDe.tabla_id ? (
+            <div style={v2 ? { zoom: zoomPropiedades(el('propiedades')) } : undefined} >
+              <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} alDerecha={v2 && der('propiedades')} />
+            </div>
+          ) : null;
+          const autorNodo = (<>
         {autor && (editable ? (
           <p className="group flex items-center gap-2 text-xs mb-6">
             <span className={ajustes.mostrarAutor ? 'text-slate-400' : 'text-slate-300 line-through decoration-slate-200'}>de {autor}</span>
@@ -4380,24 +4408,38 @@ function EditorPagina() {
         ) : ajustes.mostrarAutor ? (
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>
         ) : <div className="mb-6" />)}
-        {/* Las propiedades del elemento, si esta página es una fila de una
-            base de datos: ahí se liga el proyecto a su área. Van DEBAJO DEL
-            TÍTULO Y LA DESCRIPCIÓN, en su columna, junto a la imagen
-            (2026-10-20, Eugenio), no a lo ancho debajo de toda la cabecera. */}
-        {filaDe?.fila_id && filaDe.tabla_id && (
-          <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
+          </>);
+          if (v2) return (
+            <>
+              {filaAnadir}
+              <CabeceraElementos editando={editable} elementos={els} iconoEncima={ajustes.cabecera?.iconoPos === 'encima'}
+                piezas={{ icono: iconoNodo, titulo: tituloNodo, descripcion: descNodo, portada: portadaNodo,
+                  botones: (ajustes.botones || []).length || editable ? botonesNodo : null, propiedades: propsNodo }} />
+              <div className="mt-3">{autorNodo}</div>
+            </>
+          );
+          return (
+            <LayoutCabecera cabecera={ajustes.cabecera} imagen={portadaNodo} cuerpo={<>
+              {filaAnadir}
+              {/* Icono al lado del título por defecto; título y descripción van juntos. Ver `FilaTitulo`. */}
+              <FilaTitulo cabecera={ajustes.cabecera} icono={iconoNodo}>
+                {tituloNodo}
+                {descNodo}
+              </FilaTitulo>
+              {botonesNodo}
+              {autorNodo}
+              {propsNodo}
+            </>} />
+          );
+        })()}
+        </div>
+        {ventanaBoton && (
+          <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
+            {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
+            <iframe src={`/paginas/${encodeURIComponent(ventanaBoton.entityId)}?embed=1`} title={ventanaBoton.pubTitulo || 'Sin título'} className="block h-full w-full border-0" />
+          </VentanaBoton>
         )}
 
-          </>}
-        />
-
-        {editable && disenoAbierto && (portada || icono || ajustes.subtitulo !== undefined || !!(ajustes.botones || []).length) && (
-          <div className="mb-6">
-            <MandosCabecera cabecera={ajustes.cabecera} hayImagen={!!portada} hayIcono={!!icono} hayBotones={!!(ajustes.botones || []).length}
-              hayDescripcion={ajustes.subtitulo !== undefined}
-              onCambio={cab => { setAjustes(a => ({ ...a, cabecera: cab })); programarGuardado(); }} />
-          </div>
-        )}
 
         {/* EL BOTÓN DE LA IA, FLOTANDO (2026-10-02, Eugenio: «un botón flotante
             en la herramienta de creación de páginas que abra el chat con la IA,
@@ -4458,6 +4500,19 @@ function EditorPagina() {
         {consolaAbierta && id && <ConsolaCadena paginaId={id} titulo={titulo} onCerrar={() => setConsolaAbierta(false)} />}
         {menuSitioAbierto && (
           <CreadorMenu sitio={ajustes.sitio} titulo={titulo} icono={icono}
+            pestanaInicial={menuSitioAbierto === 'cabecera' ? 'cabecera' : 'menu'}
+            cabecera={{
+              titulo, icono, portada, subtitulo: ajustes.subtitulo, botones: ajustes.botones || [], cab: ajustes.cabecera,
+              esFila: !!filaDe?.fila_id, fila: filaDe?.fila_id && filaDe.tabla_id ? { fila_id: filaDe.fila_id, tabla_id: filaDe.tabla_id } : null,
+              config: { ...ajustes, portada, icono },
+              onTitulo: v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); },
+              onIcono: v => { setIcono(v); programarGuardado(); },
+              onSubtitulo: v => { setAjustes(a => ({ ...a, subtitulo: v })); programarGuardado(); },
+              onCab: cab => { setAjustes(a => ({ ...a, cabecera: cab })); programarGuardado(); },
+              onBotones: botones => { setAjustes(a => ({ ...a, botones })); programarGuardado(); },
+              onCrearBoton: () => { setMenuSitioAbierto(false); crearBotonCabecera(); },
+              onAbrirBoton: b => { setMenuSitioAbierto(false); setVentanaBoton(b); },
+            }}
             opciones={{
               secciones: bloques.filter(b => ['titulo1', 'titulo2', 'titulo3'].includes(b.tipo) && (b as any).texto?.trim())
                 .map(b => ({ id: b.id, titulo: String((b as any).texto).replace(/[*_`#]/g, '').trim().slice(0, 60) })),
@@ -4798,7 +4853,7 @@ function CeldaEditable({ inicial, ...props }: { inicial: string } & React.TdHTML
  * en el menú, en las tarjetas y en las pestañas, donde sí es un `<input>` o un
  * `<span>`.
  */
-function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: string) => void }) {
+function TituloEditable({ valor, onCambiar, letra }: { valor: string; onCambiar: (v: string) => void; letra?: number }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
   // Medir y ajustar. `height:auto` primero es obligatorio: sin eso
@@ -4833,7 +4888,8 @@ function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: st
       onChange={e => onCambiar(e.target.value)}
       onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
       placeholder={tr('Título del documento')}
-      className="w-full text-4xl font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1 resize-none overflow-hidden block bg-transparent leading-tight"
+      style={letra ? { fontSize: letra } : undefined}
+      className={cn('w-full font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1 resize-none overflow-hidden block bg-transparent leading-tight', !letra && 'text-4xl')}
     />
   );
 }
@@ -4867,7 +4923,7 @@ function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onV
       placeholder={tr('Escribe una descripción…')}
       aria-label={tr('Descripción de la página')}
       style={{ fontSize: letra }}
-      className="mt-2 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
+      className="mt-1 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
     />
   );
 }

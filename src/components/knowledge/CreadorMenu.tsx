@@ -3,6 +3,8 @@ import { X, Plus, Trash2, ArrowUp, ArrowDown, Monitor, Smartphone, Image as Imag
 import { cn } from '../../utils/cn';
 import { subirArchivo } from '../../utils/subir';
 import { MarcoSitio, IconoMenu, ICONOS_MENU, TextoSencillo } from '../sitio/MenuSitio';
+import { CabeceraLectura } from '../sitio/CabeceraLectura';
+import MandosCabeceraPagina, { type DatosCabecera } from './MandosCabeceraPagina';
 import {
   type Sitio, type Enlace, type Destino, type DocLegal, type Menu, type Pie,
   completarSitio, NOMBRES_LEGALES, textoLegal,
@@ -35,8 +37,12 @@ export type OpcionesDestino = {
   titulos?: Record<string, string>;
 };
 
-export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, onCambio, onCerrar }: {
+export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, onCambio, onCerrar, cabecera, pestanaInicial }: {
   sitio: any;
+  /** LA CABECERA DE LA PÁGINA, AQUÍ TAMBIÉN (2026-10-20): icono, título,
+   *  descripción, botones y su diseño, en la pestaña «Cabecera». */
+  cabecera?: DatosCabecera & { config: any; fila?: { fila_id: string; tabla_id: string } | null };
+  pestanaInicial?: 'cabecera' | 'menu' | 'pie' | 'legal';
   /** El título y el icono de la página: lo que sale si no se pone otro. */
   titulo: string;
   icono: string | null;
@@ -56,7 +62,7 @@ export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, 
     return () => { vivo = false; };
   }, [idsBases]);
   opciones = { ...opciones, titulos };
-  const [pestana, setPestana] = useState<'menu' | 'pie' | 'legal'>('menu');
+  const [pestana, setPestana] = useState<'cabecera' | 'menu' | 'pie' | 'legal'>(pestanaInicial || (cabecera ? 'cabecera' : 'menu'));
   const [pantalla, setPantalla] = useState<'escritorio' | 'telefono'>('escritorio');
   const poner = (n: Sitio) => { setS(n); onCambio(n); };
   const menu = (p: Partial<Menu>) => poner({ ...s, menu: { ...s.menu, ...p } });
@@ -64,10 +70,10 @@ export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, 
 
   return (
     <div className="fixed inset-0 z-[10000] bg-slate-900/40 flex" onClick={onCerrar}>
-      <div onClick={e => e.stopPropagation()} role="dialog" aria-label="Menú y pie de página"
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-label="Menú, cabecera y pie de página"
         className="m-auto w-full h-full sm:h-[94vh] sm:w-[96vw] max-w-[1500px] bg-white sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         <div className="flex items-center gap-3 px-5 h-14 border-b border-slate-100 shrink-0">
-          <h2 className="text-sm font-black text-slate-800">Menú y pie de página</h2>
+          <h2 className="text-sm font-black text-slate-800">{cabecera ? 'Menú, cabecera y pie' : 'Menú y pie de página'}</h2>
           <p className="hidden md:block text-[11px] text-slate-400">Se ven igual en esta página y en todas las que cuelgan de ella.</p>
           <button onClick={onCerrar} aria-label="Cerrar" className="ml-auto w-11 h-11 grid place-items-center text-slate-400 hover:text-slate-700">
             <X className="w-5 h-5" />
@@ -78,13 +84,14 @@ export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, 
           {/* Los mandos */}
           <div className="lg:w-[400px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col min-h-0 max-h-[55vh] lg:max-h-none">
             <div className="flex gap-1 p-2 border-b border-slate-100 shrink-0" role="tablist">
-              {([['menu', 'Menú'], ['pie', 'Pie de página'], ['legal', 'Datos legales']] as const).map(([k, l]) => (
+              {([...(cabecera ? [['cabecera', 'Cabecera']] as const : []), ['menu', 'Menú'], ['pie', 'Pie'], ['legal', 'Datos legales']] as const).map(([k, l]) => (
                 <button key={k} role="tab" aria-selected={pestana === k} onClick={() => setPestana(k)}
                   className={cn('flex-1 h-10 rounded-lg text-xs font-bold transition-colors',
                     pestana === k ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50')}>{l}</button>
               ))}
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-6">
+              {pestana === 'cabecera' && cabecera && <MandosCabeceraPagina d={cabecera} />}
               {pestana === 'menu' && <MandosMenu s={s} menu={menu} poner={poner} titulo={titulo} opciones={opciones} />}
               {pestana === 'pie' && <MandosPie s={s} pie={pie} poner={poner} titulo={titulo} opciones={opciones} />}
               {pestana === 'legal' && <MandosLegal s={s} poner={poner} titulo={titulo} />}
@@ -106,16 +113,37 @@ export default function CreadorMenu({ sitio: guardado, titulo, icono, opciones, 
               <div
                 // En la vista previa los enlaces no llevan a ninguna parte:
                 // salir del editor por pinchar un «Inicio» de mentira sería un susto.
-                onClickCapture={e => { if ((e.target as HTMLElement).closest('a')) e.preventDefault(); }}
-                className={cn('mx-auto bg-white shadow-lg rounded-xl overflow-hidden transition-all',
+                onClickCapture={e => {
+                  const t = e.target as HTMLElement;
+                  if (t.closest('a')) e.preventDefault();
+                  // Los botones de la cabecera abren su página en el editor, no la publicada.
+                  const b = t.closest('[aria-label="Apartados de la página"] button');
+                  if (b && cabecera) {
+                    e.preventDefault(); e.stopPropagation();
+                    const i = [...(b.parentElement?.parentElement?.children || [])].indexOf(b.parentElement as Element);
+                    if (cabecera.botones[i]) cabecera.onAbrirBoton(cabecera.botones[i]);
+                  }
+                }}
+                // `overflow-clip` y no `hidden`: `hidden` haría de esta caja un contenedor de
+                // desplazamiento y lo «fijo» (menú, cabecera) dejaría de pegarse arriba.
+                className={cn('mx-auto bg-white shadow-lg rounded-xl overflow-clip transition-all',
                   pantalla === 'telefono' ? 'w-[375px]' : 'w-full')}>
                 <MarcoSitio sitio={s} rutas={{ enlacePagina: id => `#${id}`, enlaceBd: t => `#bd-${t}`, raizId: null }} logo={icono} nombre={titulo}>
-                  <div className="mx-auto max-w-6xl px-5 py-10 space-y-4">
-                    <p className="text-3xl font-black text-slate-900">{titulo || 'Sin título'}</p>
-                    {[92, 80, 86, 60].map((w, i) => <div key={i} className="h-3 rounded bg-slate-100" style={{ width: `${w}%` }} />)}
-                    <div className="grid grid-cols-2 gap-4 pt-4">
-                      <div className="aspect-video rounded-xl bg-slate-100" /><div className="aspect-video rounded-xl bg-slate-100" />
-                    </div>
+                  <div className="mx-auto max-w-6xl px-5 sm:px-8 py-6 space-y-4">
+                    {cabecera ? (
+                      // La cabecera DE VERDAD, la misma pieza que la página publicada.
+                      <CabeceraLectura esMovil={pantalla === 'telefono'}
+                        pagina={{ id: 'vista-previa', titulo: cabecera.titulo, fila: cabecera.fila || null, config: cabecera.config }} />
+                    ) : <p className="text-3xl font-black text-slate-900">{titulo || 'Sin título'}</p>}
+                    {/* Contenido de relleno, para poder bajar y ver la cabecera fija. */}
+                    {Array.from({ length: cabecera ? 3 : 1 }).map((_, k) => (
+                      <div key={k} className="space-y-4">
+                        {[92, 80, 86, 60].map((w, i) => <div key={i} className="h-3 rounded bg-slate-100" style={{ width: `${w}%` }} />)}
+                        <div className="grid grid-cols-2 gap-4 pt-4">
+                          <div className="aspect-video rounded-xl bg-slate-100" /><div className="aspect-video rounded-xl bg-slate-100" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </MarcoSitio>
               </div>
