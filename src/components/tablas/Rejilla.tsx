@@ -1,6 +1,6 @@
 import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, LayoutGrid, FileText, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria, { ANCHO_TARJETA } from './Galeria';
 import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
@@ -220,6 +220,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
   const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
+  // La visibilidad en la página, cambiada aquí mismo antes de que conteste el
+  // servidor, y el aviso de lo que se acaba de guardar (panel «Propiedades»).
+  const [visPaginaLocal, setVisPaginaLocal] = useState<Record<string, string>>({});
+  const [avisoVis, setAvisoVis] = useState<string | null>(null);
+  useEffect(() => { if (!avisoVis) return; const t = setTimeout(() => setAvisoVis(null), 2600); return () => clearTimeout(t); }, [avisoVis]);
   const [plegados, setPlegados] = useState<Set<string>>(new Set());
   /** Las filas madre desplegadas (sus subelementos se ven debajo). */
   const [abiertas, setAbiertas] = useState<Set<string>>(new Set());
@@ -930,38 +935,99 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   // LAS PROPIEDADES, EN UN SOLO SITIO (2026-10-14): el botón «Propiedades» de la barra
   // enseña cuáles se ven (en la galería, dentro de la tarjeta) y, al pie, crear una
   // propiedad o enlazar con otra base de datos, como en Notion.
+  // ══ DÓNDE SE VE CADA PROPIEDAD: TARJETA Y PÁGINA (2026-10-20, Eugenio) ════
+  // «Son cosas distintas: si quito la visibilidad en la galería no quiero
+  // quitarla en la página.» Ya se guardaban aparte —la tarjeta en la VISTA
+  // (`config.propiedades`), la página en la PROPIEDAD (`config.visibilidad`)—,
+  // pero el panel solo enseñaba una sin decir cuál. Ahora son dos columnas, y
+  // cada una dice a qué afecta.
+  const NOMBRE_VIS: Record<string, string> = { siempre: 'visible siempre', si_tiene: 'visible si tiene valor', nunca: 'oculta' };
+  const cambiarVisibilidadPagina = async (col: Columna, v: string) => {
+    const antes = (col.config?.visibilidad as string) || 'siempre';
+    setVisPaginaLocal(m => ({ ...m, [col.id]: v }));
+    setAvisoVis(`Página: «${col.nombre}» ${NOMBRE_VIS[v]} en todas las entradas`);
+    const r = await fetch(`/api/bd/columnas/${col.id}`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config: { ...(col.config || {}), visibilidad: v } }),
+    });
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      setVisPaginaLocal(m => ({ ...m, [col.id]: antes }));
+      setAvisoVis(null);
+      setFalloVista(j.error || 'No se pudo cambiar.');
+      return;
+    }
+    await cargar();
+    setVisPaginaLocal(m => { const n = { ...m }; delete n[col.id]; return n; });
+  };
+  const alternarTarjeta = (nombreProp: string, puesta: boolean, aplicar: () => void) => {
+    aplicar();
+    setAvisoVis(`Tarjeta: «${nombreProp}» ${puesta ? 'oculta' : 'visible'} en esta galería`);
+  };
+  const interruptorTarjeta = (puesta: boolean, alternar: () => void, nombreProp: string) => (
+    <button type="button" role="switch" aria-checked={puesta} onClick={alternar}
+      aria-label={`${puesta ? 'Ocultar' : 'Mostrar'} «${nombreProp}» en la tarjeta`} title={puesta ? 'Se ve en la tarjeta' : 'No se ve en la tarjeta'}
+      className={cn('mx-auto grid h-9 w-11 place-items-center rounded-md border transition-colors sm:h-7 sm:w-9',
+        puesta ? 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'border-dashed border-slate-300 bg-white text-slate-400 hover:bg-slate-100 hover:text-slate-600')}>
+      {puesta ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+    </button>
+  );
+  const OPCIONES_PAGINA: Array<[string, string]> = [['siempre', 'Siempre'], ['si_tiene', 'Si tiene valor'], ['nunca', 'Oculta']];
+  const COLUMNAS_VIS = 'grid grid-cols-[1fr_4rem_7rem] items-center gap-1.5';
   const panelVisiblesGaleria = editable ? (
-    <div className="max-h-72 overflow-y-auto">
-      <p className="px-1.5 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
-      {/* LA DESCRIPCIÓN, COMO UNA PROPIEDAD MÁS (2026-10-18, Eugenio): es el
-          subtítulo de la página de cada entrada; aquí se elige si sale. */}
-      <div className="flex items-center rounded-md hover:bg-slate-50">
-        <button onClick={() => cambiarVista({ config: { ...activa.config, descripcion: activa.config.descripcion === false } })}
-          className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-8 text-xs font-bold text-slate-600 text-left">
-          {activa.config.descripcion !== false ? <Eye className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
-          <span className={cn('flex-1 truncate', activa.config.descripcion === false && 'text-slate-400')}>Descripción</span>
-          <span className="shrink-0 text-[10px] font-bold text-slate-300">texto de la página</span>
-        </button>
+    <div>
+      {/* LAS DOS CABECERAS DICEN A QUÉ AFECTAN (revisión de UX, 2026-10-20). */}
+      <div className={cn(COLUMNAS_VIS, 'items-end px-1.5 pb-2 border-b border-slate-100 mb-1')}>
+        <span className="text-[11px] font-black uppercase tracking-wide text-slate-500">Propiedad</span>
+        <span className="flex flex-col items-center leading-tight" title="En las tarjetas de esta vista de galería">
+          <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-black uppercase tracking-wide text-slate-500"><LayoutGrid className="h-3 w-3" />Tarjeta</span>
+          <span className="whitespace-nowrap text-[10px] font-semibold text-slate-500">esta vista</span>
+        </span>
+        <span className="flex flex-col items-center leading-tight" title="Al abrir la página de cualquier entrada">
+          <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wide text-slate-500"><FileText className="h-3 w-3" />Página</span>
+          <span className="whitespace-nowrap text-[10px] font-semibold text-slate-500">todas las entradas</span>
+        </span>
       </div>
-      {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
-        const puesta = visiblesAhora.includes(c.id);
-        return (
-          <div key={c.id} className="flex items-center rounded-md hover:bg-slate-50">
-            <button onClick={() => cambiarVista({ config: { ...activa.config, propiedades: puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id] } })}
-              className="flex-1 min-w-0 flex items-center gap-2 px-1.5 h-8 text-xs font-bold text-slate-600 text-left">
-              {puesta ? <Eye className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
-              <span className={cn('flex-1 truncate', !puesta && 'text-slate-400')}>{c.nombre}</span>
-              {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
-            </button>
-            {editable && (
-              <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
-                className="w-7 h-7 grid place-items-center rounded-md text-slate-300 hover:text-slate-700 hover:bg-slate-100">
-                <Pencil className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        );
-      })}
+      <div className="max-h-80 overflow-y-auto">
+        {/* LA DESCRIPCIÓN, COMO UNA PROPIEDAD MÁS (2026-10-18): en la página es su subtítulo, siempre. */}
+        <div className={cn(COLUMNAS_VIS, 'rounded-md px-1.5 py-0.5 hover:bg-slate-50')}>
+          <span className={cn('truncate text-xs font-bold', activa.config.descripcion === false ? 'text-slate-400' : 'text-slate-700')}>Descripción</span>
+          {interruptorTarjeta(activa.config.descripcion !== false, () => alternarTarjeta('Descripción', activa.config.descripcion !== false, () => cambiarVista({ config: { ...activa.config, descripcion: activa.config.descripcion === false } })), 'Descripción')}
+          <span className="text-center text-[11px] font-semibold text-slate-500" title="En la página es el subtítulo, bajo el título">Subtítulo (siempre)</span>
+        </div>
+        {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
+          const puesta = visiblesAhora.includes(c.id);
+          const enPagina = visPaginaLocal[c.id] || (c.config?.visibilidad as string) || 'siempre';
+          const enNinguna = !puesta && enPagina === 'nunca';
+          return (
+            <div key={c.id} className={cn(COLUMNAS_VIS, 'group/vis rounded-md px-1.5 py-0.5 hover:bg-slate-50')}>
+              <span className="flex min-w-0 items-center gap-1">
+                <span className={cn('truncate text-xs font-bold', !puesta ? 'text-slate-400' : 'text-slate-700', enNinguna && 'line-through decoration-slate-300')}
+                  title={enNinguna ? 'No se ve ni en la tarjeta ni en la página' : undefined}>{c.nombre}</span>
+                {c.tipo === 'relacion' && <span className="shrink-0 text-[9px] font-bold text-slate-400">enlace</span>}
+                <button title="Editar la propiedad" aria-label={`Editar ${c.nombre}`} onClick={() => setEditorColumna(c)}
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:opacity-100 sm:h-6 sm:w-6 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/vis:opacity-100">
+                  <Pencil className="h-3 w-3" />
+                </button>
+              </span>
+              {interruptorTarjeta(puesta, () => alternarTarjeta(c.nombre, puesta, () => cambiarVista({ config: { ...activa.config, propiedades: puesta ? visiblesAhora.filter(x => x !== c.id) : [...visiblesAhora, c.id] } })), c.nombre)}
+              <span className="relative">
+                <span aria-hidden className={cn('pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2', enPagina === 'nunca' ? 'text-slate-400' : enPagina === 'si_tiene' ? 'text-amber-600' : 'text-emerald-600')}>
+                  {enPagina === 'nunca' ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </span>
+                <select value={enPagina} onChange={e => cambiarVisibilidadPagina(c, e.target.value)} aria-label={`Visibilidad de «${c.nombre}» en la página de cada entrada`}
+                  className={cn('h-9 w-full rounded-md border pl-6 pr-1 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-300 sm:h-7',
+                    enPagina === 'nunca' ? 'border-slate-200 bg-slate-100 text-slate-500' : enPagina === 'si_tiene' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700')}>
+                  {OPCIONES_PAGINA.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <p role="status" aria-live="polite" className={cn('mt-1.5 min-h-[1.5rem] rounded-md px-1.5 py-1 text-[11px] font-bold transition-colors', avisoVis ? 'bg-emerald-50 text-emerald-700' : 'text-transparent')}>
+        {avisoVis ? <><Check className="mr-1 inline h-3 w-3" />{avisoVis}</> : '·'}
+      </p>
     </div>
   ) : undefined;
   const accionesPropiedades = editable ? (
