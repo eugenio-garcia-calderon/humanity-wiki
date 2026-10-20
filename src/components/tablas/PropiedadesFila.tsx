@@ -295,7 +295,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
                     </button>
                   ))}
                   {/* Dos visibilidades distintas (2026-10-20): ésta es la de la página. */}
-                  <p className="px-2 pt-1 pb-1.5 text-[10px] leading-snug text-slate-400">Solo en la página de cada entrada. En las tarjetas de una galería se elige en su botón «Propiedades».</p>
+                  <p className="px-2 pt-1 pb-1.5 text-[11px] leading-snug text-slate-500">Solo en la página de cada entrada. En las tarjetas de una galería se elige en su botón «Propiedades».</p>
                 </div>
               )}
               {enRejilla && (

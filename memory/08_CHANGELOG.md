@@ -9489,4 +9489,4 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - El panel **Propiedades** de una galería tiene ahora **dos columnas**: **Tarjeta** («esta vista», un interruptor) y **Página** («todas las entradas»: Siempre / Si tiene valor / Oculta). Antes enseñaba una sola sin decir cuál, y parecía que ocultar en la galería ocultaba también en la página. Se guardan aparte: la tarjeta en la vista (`config.propiedades`), la página en la propiedad (`config.visibilidad`).
 - El mismo lenguaje en los dos sitios: verde = se ve, ámbar = si tiene valor, gris = oculta. Aviso al momento de lo guardado («Página: «Presupuesto» oculta en todas las entradas»), cambio optimista con vuelta atrás si falla, nombres tachados si no se ven en ningún sitio, zonas táctiles más grandes en el móvil.
 - En la página de una entrada, el menú de cada propiedad dice «Visible en la página» y aclara que las tarjetas se eligen en la galería; «Personalizar diseño» usa los mismos colores.
-- Diseño revisado por un agente evaluador de UX (6/10 → mejoras aplicadas).
+- Diseño revisado por un agente evaluador de UX (6 → 8,5 → 9 tras dos rondas de mejoras).

@@ -973,7 +973,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     </button>
   );
   const OPCIONES_PAGINA: Array<[string, string]> = [['siempre', 'Siempre'], ['si_tiene', 'Si tiene valor'], ['nunca', 'Oculta']];
-  const COLUMNAS_VIS = 'grid grid-cols-[1fr_4rem_7rem] items-center gap-1.5';
+  const COLUMNAS_VIS = 'grid grid-cols-[1fr_4rem_7.75rem] items-center gap-1.5';
   const panelVisiblesGaleria = editable ? (
     <div>
       {/* LAS DOS CABECERAS DICEN A QUÉ AFECTAN (revisión de UX, 2026-10-20). */}
