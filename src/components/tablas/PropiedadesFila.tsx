@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Link2, ArrowUpRight, GripVertical, Pencil, Settings2, MessageSquare, Eye, EyeOff, Copy, Trash2, LayoutTemplate,
   ChevronRight, ChevronDown, Check, X, Plus,
@@ -32,10 +32,13 @@ import { cn } from '../../utils/cn';
 // rellenarlas; quien lee, no.
 
 type Visibilidad = 'siempre' | 'si_tiene' | 'nunca';
-type Talla = 's' | 'm' | 'l' | 'xl';
-/** El nombre de la propiedad según su tamaño, y cuánto se agranda su contenido. */
-const LETRA_NOMBRE: Record<Talla, string> = { s: 'text-[10px]', m: 'text-[11px]', l: 'text-[13px]', xl: 'text-sm' };
-const ESCALA_VALOR: Record<Talla, number> = { s: 0.85, m: 1, l: 1.2, xl: 1.45 };
+type Talla = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl';
+const TALLAS: Talla[] = ['xxs', 'xs', 's', 'm', 'l', 'xl'];
+/** El nombre de la propiedad según su tamaño, y cuánto se agranda o encoge su
+ *  contenido. (2026-10-20, Eugenio: «más compactas»: la M de ahora es más
+ *  pequeña que la de antes y hay XS y XXS.) */
+const LETRA_NOMBRE: Record<Talla, string> = { xxs: 'text-[8px]', xs: 'text-[9px]', s: 'text-[9.5px]', m: 'text-[10px]', l: 'text-[12px]', xl: 'text-[13px]' };
+const ESCALA_VALOR: Record<Talla, number> = { xxs: 0.65, xs: 0.75, s: 0.85, m: 0.92, l: 1.1, xl: 1.35 };
 // (2026-10-18, Eugenio) «Que aparezcan de forma más estética… ordenadas de
 // izquierda a derecha, con varias columnas según sea escritorio o móvil.» El
 // diseño por defecto es ahora una REJILLA: cada propiedad es una casilla con
@@ -73,24 +76,11 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   const [encima, setEncima] = useState<string | null>(null);
   /** Si cae antes o después de la propiedad de debajo del puntero. */
   const [lado, setLado] = useState<'antes' | 'despues'>('antes');
-  // ANCHO Y TAMAÑO DE CADA PROPIEDAD (2026-10-18, Eugenio): «que se pueda cambiar
-  // el tamaño de la propiedad con unos selectores laterales, y el tamaño de su
-  // título y su contenido». El ancho es en COLUMNAS de la rejilla
-  // (`config.ancho_ficha`, 1 por defecto: las de al lado, iguales) y se estira
-  // con el tirador del borde derecho; el texto, S–XL (`config.tamano_ficha`).
-  const rejillaRef = useRef<HTMLDivElement>(null);
-  const [colsRejilla, setColsRejilla] = useState(1);
-  const [anchoVivo, setAnchoVivo] = useState<{ id: string; span: number } | null>(null);
-  const observador = useRef<ResizeObserver | null>(null);
-  useEffect(() => {
-    const el = rejillaRef.current;
-    if (!el || observador.current) return;
-    const medir = () => setColsRejilla(getComputedStyle(el).gridTemplateColumns.split(' ').filter(t => parseFloat(t) > 0).length || 1);
-    medir();
-    observador.current = new ResizeObserver(medir);
-    observador.current.observe(el);
-  });
-  useEffect(() => () => { observador.current?.disconnect(); observador.current = null; }, []);
+  // ANCHO Y TAMAÑO DE CADA PROPIEDAD (2026-10-18; 2026-10-20). Cada casilla
+  // mide lo que mide su contenido —una fecha de un número es pequeña— salvo que
+  // se le dé un ancho con el tirador de su borde derecho (`config.ancho_ficha`,
+  // en px). El texto, de XXS a XL (`config.tamano_ficha`, M por defecto).
+  const [anchoVivo, setAnchoVivo] = useState<{ id: string; px: number } | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
@@ -203,25 +193,24 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   const fila = (c: Columna) => {
     const destino = c.tipo === 'relacion' ? c.config?.tabla_destino as string | undefined : undefined;
     const v = visibilidad(c);
-    const span = Math.max(1, Math.min(anchoVivo?.id === c.id ? anchoVivo.span : Number(c.config?.ancho_ficha) || 1, colsRejilla));
-    const talla = (c.config?.tamano_ficha as Talla) || 'm';
-    /** Estirar o encoger por el borde derecho: se redondea a columnas enteras. */
+    const guardado = Number(c.config?.ancho_ficha) > 60 ? Number(c.config.ancho_ficha) : null;
+    const anchoPx = anchoVivo?.id === c.id ? anchoVivo.px : guardado;
+    const talla = (TALLAS.includes(c.config?.tamano_ficha) ? c.config?.tamano_ficha : 'm') as Talla;
+    /** Estirar o encoger por el borde derecho, en px (de 10 en 10). */
     const empezarAncho = (e: React.PointerEvent<HTMLSpanElement>) => {
       const caja = e.currentTarget.parentElement as HTMLElement;
-      const rejilla = rejillaRef.current;
-      if (!caja || !rejilla) return;
+      const padre = caja?.parentElement;
+      if (!caja || !padre) return;
       e.preventDefault(); e.stopPropagation();
-      const hueco = 8;
-      const colW = (rejilla.clientWidth - hueco * (colsRejilla - 1)) / colsRejilla;
-      const x0 = e.clientX, w0 = caja.getBoundingClientRect().width;
-      let actual = span;
+      const x0 = e.clientX, w0 = caja.getBoundingClientRect().width, max = padre.clientWidth;
+      let actual = Math.round(w0);
       const mover = (ev: PointerEvent) => {
-        actual = Math.max(1, Math.min(colsRejilla, Math.round((w0 + ev.clientX - x0 + hueco) / (colW + hueco))));
-        setAnchoVivo({ id: c.id, span: actual });
+        actual = Math.max(80, Math.min(max, Math.round((w0 + ev.clientX - x0) / 10) * 10));
+        setAnchoVivo({ id: c.id, px: actual });
       };
       const soltarAncho = () => {
         window.removeEventListener('pointermove', mover); window.removeEventListener('pointerup', soltarAncho);
-        if (actual !== (Number(c.config?.ancho_ficha) || 1)) cambiarColumna(c, { config: { ...(c.config || {}), ancho_ficha: actual } }).then(() => setAnchoVivo(null));
+        if (Math.abs(actual - w0) > 4) cambiarColumna(c, { config: { ...(c.config || {}), ancho_ficha: actual } }).then(() => setAnchoVivo(null));
         else setAnchoVivo(null);
       };
       window.addEventListener('pointermove', mover); window.addEventListener('pointerup', soltarAncho);
@@ -240,16 +229,17 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
         }}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEncima(x => (x === c.id ? null : x)); }}
         onDrop={e => { e.preventDefault(); soltar(c.id, lado); }}
-        style={enRejilla && span > 1 ? { gridColumn: `span ${span} / span ${span}` } : undefined}
+        style={enRejilla && anchoPx ? { width: anchoPx, maxWidth: '100%' } : undefined}
         className={cn('group/prop relative min-w-0',
-          enRejilla && 'rounded-xl px-3 pt-2.5 pb-1 bg-slate-50/70 hover:bg-slate-100/60 transition-colors',
+          // Sin fondo ni borde (2026-10-20): casillas blancas del tamaño de lo que llevan.
+          enRejilla && 'rounded-lg px-2 pt-1.5 pb-0.5 hover:bg-slate-50 transition-colors',
           arrastrando === c.id && 'opacity-40')}>
         {/* Dónde caerá: una barra verde a ese lado, como entre bloques. */}
         {encima === c.id && (
           <span aria-hidden className={cn('pointer-events-none absolute z-10 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]',
             enRejilla ? cn('inset-y-1 w-1', lado === 'antes' ? '-left-1.5' : '-right-1.5') : cn('inset-x-0 h-0.5', lado === 'antes' ? '-top-px' : '-bottom-px'))} />
         )}
-        {editable && enRejilla && colsRejilla > 1 && (
+        {editable && enRejilla && (
           <span onPointerDown={empezarAncho} role="separator" aria-orientation="vertical" aria-label={`Cambiar el ancho de ${c.nombre}`}
             title="Arrastra para hacerla más ancha o más estrecha"
             className="absolute -right-1 top-1/2 z-10 h-10 w-2.5 -translate-y-1/2 cursor-ew-resize touch-none rounded-full bg-slate-300 opacity-0 transition-opacity hover:bg-emerald-500 group-hover/prop:opacity-100" />
@@ -267,7 +257,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
           <div draggable={editable && renombrando !== c.id}
             onDragStart={editable ? e => { setArrastrando(c.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.id); } : undefined}
             onDragEnd={() => { setArrastrando(null); setEncima(null); }}
-            className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', editable && 'cursor-grab active:cursor-grabbing', enRejilla ? 'justify-center px-7 -mb-0.5' : 'w-32 sm:w-40')}>
+            className={cn('relative shrink-0 flex items-center gap-0.5 min-w-0', editable && 'cursor-grab active:cursor-grabbing', enRejilla ? 'justify-center px-5 -mb-0.5' : 'w-32 sm:w-40')}>
             {renombrando === c.id ? (
               <input autoFocus defaultValue={c.nombre} maxLength={120} aria-label="Nombre de la propiedad"
                 onBlur={e => { setRenombrando(null); const n = e.target.value.trim(); if (n && n !== c.nombre) cambiarColumna(c, { nombre: n }); }}
@@ -310,24 +300,15 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
                 <div className="flex items-center justify-between gap-2 px-2 h-9">
                   <span className="text-xs font-bold text-slate-600">Tamaño del texto</span>
                   <span role="radiogroup" aria-label="Tamaño del texto" className="flex rounded-md bg-slate-100 p-0.5">
-                    {(['s', 'm', 'l', 'xl'] as Talla[]).map(t => (
+                    {TALLAS.map(t => (
                       <button key={t} role="radio" aria-checked={talla === t} onClick={() => cambiarColumna(c, { config: { ...(c.config || {}), tamano_ficha: t } })}
                         className={cn('h-6 min-w-7 px-1 rounded text-[10px] font-black uppercase', talla === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>{t}</button>
                     ))}
                   </span>
                 </div>
               )}
-              {enRejilla && colsRejilla > 1 && (
-                <div className="flex items-center justify-between gap-2 px-2 h-9">
-                  <span className="text-xs font-bold text-slate-600">Ancho</span>
-                  <span role="radiogroup" aria-label="Ancho" className="flex rounded-md bg-slate-100 p-0.5">
-                    {Array.from({ length: Math.min(colsRejilla, 4) }, (_, i) => i + 1).map(n => (
-                      <button key={n} role="radio" aria-checked={span === n} onClick={() => cambiarColumna(c, { config: { ...(c.config || {}), ancho_ficha: n } })}
-                        className={cn('h-6 min-w-7 px-1 rounded text-[10px] font-black', span === n ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}>{n === colsRejilla ? 'Todo' : n}</button>
-                    ))}
-                  </span>
-                </div>
-              )}
+              {enRejilla && guardado && opcionMenu(LayoutTemplate, 'Ancho automático', () => { setMenu(null); cambiarColumna(c, { config: { ...(c.config || {}), ancho_ficha: undefined } }); }, false,
+                <span className="text-[10px] text-slate-400">ahora {guardado} px</span>)}
               {opcionMenu(Copy, 'Duplicar propiedad', () => { setMenu(null); duplicar(c); })}
               {opcionMenu(Trash2, 'Eliminar propiedad', () => { setMenu(null); eliminar(c); }, true)}
               <div className="my-1 border-t border-slate-100" />
@@ -338,7 +319,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
               propiedad y su valor van centrados, uno encima del otro —también
               los números, que en la tabla van a la derecha—. */}
           <div className={cn('flex-1 min-w-0', enRejilla && '-mx-2 text-center [&_.text-right]:text-center [&_.flex-wrap]:justify-center')}
-            style={enRejilla && talla !== 'm' ? { zoom: ESCALA_VALOR[talla] } as React.CSSProperties : undefined}>
+            style={enRejilla && ESCALA_VALOR[talla] !== 1 ? { zoom: ESCALA_VALOR[talla] } as React.CSSProperties : undefined}>
             <CeldaTabla enFicha celda={datos.fila.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
               apuntados={datos.fila.apuntados?.[c.id]} archivos={datos.fila.archivos?.[c.id]}
               editable={editable} onGuardar={val => guardar(c.id, val)} />
@@ -358,8 +339,8 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   };
 
   return (
-    <div className={cn('mb-6', enRejilla ? 'py-3' : 'border-y border-slate-100 pl-5 -ml-5')}>
-      <div ref={rejillaRef} className={cn(enRejilla ? 'grid items-stretch gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))]' : 'divide-y divide-slate-100')}>
+    <div className={cn('mb-4', enRejilla ? 'py-1 -ml-2' : 'border-y border-slate-100 pl-5 -ml-5')}>
+      <div className={cn(enRejilla ? 'flex flex-wrap items-start gap-x-1 gap-y-1' : 'divide-y divide-slate-100')}>
         {visibles.map(fila)}
       </div>
       {/* Las escondidas: solo para quien edita, para poder rellenarlas. */}
@@ -370,7 +351,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
             {verOcultas ? 'Esconder' : `${ocultas.length} ${ocultas.length === 1 ? 'propiedad más' : 'propiedades más'}`}
           </button>
           {verOcultas && (
-            <div className={cn('opacity-80', enRejilla ? 'grid items-stretch gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))]' : 'divide-y divide-slate-100')}>
+            <div className={cn('opacity-80', enRejilla ? 'flex flex-wrap items-start gap-x-1 gap-y-1' : 'divide-y divide-slate-100')}>
               {ocultas.map(fila)}
             </div>
           )}

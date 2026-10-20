@@ -41,7 +41,7 @@ export function BarraAvance({ fraccion, grande = false, centrada = false }: { fr
   const ancho = `${Math.min(100, pct)}%`;
   if (grande) {
     return (
-      <div className="w-full py-1" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${pct} % completado`}>
+      <div className="w-full min-w-[13rem] py-1" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={`${pct} % completado`}>
         <div className={cn('mb-2 flex items-baseline gap-2', centrada ? 'justify-center' : 'justify-between')}>
           <Cifra pct={pct} grande />
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{pct >= 100 ? 'completado' : 'de avance'}</span>

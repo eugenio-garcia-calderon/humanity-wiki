@@ -4289,15 +4289,16 @@ function EditorPagina() {
         ) : ajustes.mostrarAutor ? (
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>
         ) : <div className="mb-6" />)}
-
-          </>}
-        />
-
         {/* Las propiedades del elemento, si esta página es una fila de una
-            base de datos: ahí se liga el proyecto a su área. */}
+            base de datos: ahí se liga el proyecto a su área. Van DEBAJO DEL
+            TÍTULO Y LA DESCRIPCIÓN, en su columna, junto a la imagen
+            (2026-10-20, Eugenio), no a lo ancho debajo de toda la cabecera. */}
         {filaDe?.fila_id && filaDe.tabla_id && (
           <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
         )}
+
+          </>}
+        />
 
         {editable && disenoAbierto && (portada || icono || ajustes.subtitulo !== undefined) && (
           <div className="mb-6">
