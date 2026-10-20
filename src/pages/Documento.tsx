@@ -16,7 +16,7 @@ import {
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
   PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, CircleDashed, Gauge,
 } from 'lucide-react';
-import SelectorBloques, { Flotante, type OpcionBloque } from '../components/knowledge/SelectorBloques';
+import SelectorBloques, { type OpcionBloque } from '../components/knowledge/SelectorBloques';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
 import Rejilla from '../components/tablas/Rejilla';
@@ -3817,18 +3817,23 @@ function EditorPagina() {
           // móvil, hoja desde abajo con fondo; en el ordenador, bajo la línea.
           (() => {
             const selector = (
-              <SelectorBloques movil={esMovil} opciones={TIPOS_MENU}
+              <SelectorBloques movil={esMovil} centrado={!esMovil} onCerrar={() => setMenuAbierto(null)} opciones={TIPOS_MENU}
                 onElegir={t => insertar(b.id, t as TipoMenu)}
                 extra={{
                   mejorar: esBloqueTexto ? () => iaMejorar(b) : undefined,
                   eliminar: () => { eliminar(b.id); setMenuAbierto(null); },
                 }} />
             );
-            return esMovil ? createPortal(
-              <div onClick={e => e.stopPropagation()} className="fixed inset-0 z-[60] flex items-end bg-slate-900/30">
-                <button aria-label={tr('Cerrar')} className="absolute inset-0" onClick={() => setMenuAbierto(null)} />
-                <div className="relative w-full">{selector}</div>
-              </div>, document.body) : <Flotante>{selector}</Flotante>;
+            // UNA VENTANA EN EL CENTRO (2026-10-20, Eugenio: «me ha aparecido mucho más
+            // abajo de la página en vez de donde estaba el bloque»). Flotando junto a la
+            // línea, en páginas largas se colocaba lejos; en el centro siempre está a la
+            // vista. El bloque nuevo se sigue poniendo justo debajo del que tenía el «+».
+            return createPortal(
+              <div onClick={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') setMenuAbierto(null); }}
+                className={cn('fixed inset-0 z-[60] flex bg-slate-900/30', esMovil ? 'items-end' : 'items-center justify-center p-4')}>
+                <button aria-label={tr('Cerrar')} className="absolute inset-0 cursor-default" onClick={() => setMenuAbierto(null)} />
+                <div className={cn('relative', esMovil && 'w-full')}>{selector}</div>
+              </div>, document.body);
           })()
         )}
       </div>

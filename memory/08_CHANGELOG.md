@@ -9503,3 +9503,7 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 ## 2026-10-20 — La base de datos de un bloque nace sola (prog8)
 - Al poner un bloque **Base de datos**, ya no sale el paso intermedio «Este bloque todavía no apunta a ninguna tabla · Crear una tabla aquí»: la base de datos «Nueva base de datos» se crea sola al aparecer el bloque («Creando la base de datos…») y se ve directamente la galería. Solo si falla queda un botón «Volver a intentarlo». Una vez por bloque (`TablaNueva` en `Documento.tsx`).
+
+## 2026-10-20 — El «+» de un bloque abre una ventana en el centro (prog8)
+- El selector de bloques del «+» se abría flotando junto a la línea y, en páginas largas, aparecía mucho más abajo. Ahora es una **ventana en el centro de la pantalla** (con fondo, «¿Qué bloque quieres añadir?», cerrar con ✕, Esc o fuera), en el ordenador y en el móvil (hoja desde abajo). El bloque nuevo se pone justo debajo del que tenía el «+».
+- La primera opción, destacada: **«Base de datos en galería»**.

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Wand2, Trash2 } from 'lucide-react';
+import { Search, Wand2, Trash2, X, LayoutGrid } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -39,10 +39,13 @@ const GRUPOS: { id: OpcionBloque['grupo']; titulo: string }[] = [
 
 const sinTildes = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-export default function SelectorBloques({ opciones, onElegir, movil, extra }: {
+export default function SelectorBloques({ opciones, onElegir, movil, extra, centrado, onCerrar }: {
   opciones: OpcionBloque[];
   onElegir: (tipo: string) => void;
   movil?: boolean;
+  /** Ventana en el centro de la pantalla, con título y «Base de datos en galería» la primera (2026-10-20). */
+  centrado?: boolean;
+  onCerrar?: () => void;
   /** Acciones sobre el bloque de al lado (mejorar con IA, eliminar). */
   extra?: { mejorar?: () => void; eliminar?: () => void };
 }) {
@@ -73,9 +76,19 @@ export default function SelectorBloques({ opciones, onElegir, movil, extra }: {
 
   return (
     <div className={cn('bg-white border border-slate-200 shadow-2xl flex flex-col overflow-hidden',
-      movil ? 'w-full rounded-t-3xl max-h-[80vh]' : 'w-[26rem] rounded-2xl max-h-[min(36rem,75vh)]')}
+      movil ? 'w-full rounded-t-3xl max-h-[80vh]' : centrado ? 'w-[min(34rem,calc(100vw-2rem))] rounded-3xl max-h-[min(44rem,88vh)]' : 'w-[26rem] rounded-2xl max-h-[min(36rem,75vh)]')}
+      role={centrado ? 'dialog' : undefined} aria-label={centrado ? '¿Qué bloque quieres añadir?' : undefined}
       onMouseDown={e => { if (e.target !== buscador.current) e.preventDefault(); }}>
       {movil && <span aria-hidden className="mx-auto mt-2 w-10 h-1 rounded-full bg-slate-200 shrink-0" />}
+      {centrado && (
+        <div className="flex items-center justify-between gap-2 px-4 pt-4">
+          <h2 className="text-base font-black text-slate-900">¿Qué bloque quieres añadir?</h2>
+          {onCerrar && (
+            <button type="button" onClick={onCerrar} aria-label="Cerrar"
+              className="grid h-9 w-9 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X className="h-4 w-4" /></button>
+          )}
+        </div>
+      )}
       <div className="p-3 pb-2 shrink-0">
         <label className="flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-100 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-400/60 transition">
           <Search className="w-4 h-4 text-slate-400 shrink-0" />
@@ -102,7 +115,22 @@ export default function SelectorBloques({ opciones, onElegir, movil, extra }: {
               ))}
             </div>
           ) : <p className="py-8 text-center text-sm text-slate-400">Ningún bloque se llama «{q}».</p>
-        ) : GRUPOS.map(g => {
+        ) : <>
+        {/* LA PRIMERA, BASE DE DATOS EN GALERÍA (2026-10-20, Eugenio). */}
+        {centrado && opciones.some(o => o.tipo === 'basedatos') && (() => {
+          const bd = opciones.find(o => o.tipo === 'basedatos')!;
+          return (
+            <button onClick={() => onElegir('basedatos')}
+              className="mb-3 flex w-full items-center gap-3 rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 p-3 text-left transition-colors hover:border-emerald-400 hover:bg-emerald-50">
+              <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl', bd.color || 'bg-slate-100 text-slate-600')}><LayoutGrid className="h-6 w-6" /></span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-black text-slate-900">Base de datos en galería</span>
+                <span className="block text-xs text-slate-500">Tarjetas con imagen y propiedades, como un portfolio. Lo más usado.</span>
+              </span>
+            </button>
+          );
+        })()}
+        {GRUPOS.map(g => {
           const del = opciones.filter(o => o.grupo === g.id);
           if (!del.length) return null;
           return (
@@ -144,6 +172,7 @@ export default function SelectorBloques({ opciones, onElegir, movil, extra }: {
             </section>
           );
         })}
+        </>}
       </div>
 
       {(extra?.mejorar || extra?.eliminar) && (
