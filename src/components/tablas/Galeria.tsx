@@ -64,7 +64,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -87,6 +87,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
   enCaja?: boolean;
   /** La descripción de la página en la tarjeta, como una propiedad más que se enseña o no (2026-10-18). */
   conDescripcion?: boolean;
+  /** Tarjetas sin imagen (2026-10-20, Eugenio): la galería de siempre, sólo con el nombre y las propiedades. */
+  conImagen?: boolean;
   /** «Filas que se ven»: cuántas FILAS DE TARJETAS se enseñan (en cada grupo, si está agrupada); «Mostrar más» suma otras tantas. */
   filasMax?: number | null;
   /** Cómo se llama esta base de datos: sale en «Mover a…» de las demás galerías. */
@@ -492,7 +494,9 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
               // esquinas redondeadas y el texto debajo, como un portfolio.
               className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
                 enLista && 'max-sm:flex max-sm:items-start max-sm:gap-3',
-                enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'), arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
+                enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'),
+                // Sin imagen, la tarjeta lleva su marco: si no, parecería una lista.
+                !conImagen && !enCaja && !copia && 'bg-white rounded-2xl border border-slate-200 p-3 hover:border-slate-300 hover:shadow-sm', arrastrada === f.id && 'opacity-40', f.oculta && arrastrada !== f.id && 'opacity-50')}>
               {f.oculta && (
                 <span className="absolute left-2 top-2 z-[2] inline-flex items-center gap-1 rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No se ve en la web publicada">
                   <EyeOff className="h-3 w-3" /> Oculta
@@ -507,7 +511,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                 )} />
               )}
               {nombreArriba && <div className="mb-2">{nombreEl}</div>}
-              <div className={cn('relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square')}>
+              <div className={cn('relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
                     recolocable={(recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}

@@ -58,6 +58,8 @@ export type ConfigVista = {
   velocidad?: number;
   /** La galería: `false` esconde la descripción de la página en la tarjeta (2026-10-18). */
   descripcion?: boolean;
+  /** La galería: `false` quita las imágenes de las tarjetas (2026-10-20). */
+  imagenes?: boolean;
   /** Qué propiedades se ven en las tarjetas (tablero, lista, calendario). */
   propiedades?: string[];
   /** Calendario y línea de tiempo. */

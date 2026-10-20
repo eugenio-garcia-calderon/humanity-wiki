@@ -9522,3 +9522,6 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 ## 2026-10-20 — El «+» de un bloque alto pone lo nuevo donde está el botón (prog8)
 - En un bloque alto (una base de datos, una imagen grande), el «+» está arriba, junto a su título, pero lo nuevo se ponía DETRÁS del bloque: debajo de toda su galería, lejos de donde se pulsó. Ahora, si el bloque mide más de 220 px, lo nuevo va **encima**, justo a la altura del botón; en los bloques normales, debajo como siempre.
 - Además, la vista se lleva al bloque recién puesto y se resalta un momento, para que se vea dónde ha caído.
+
+## 2026-10-20 — Galería sin imágenes (prog8)
+- **Configuración → Tarjetas → Imágenes: Con imagen / Sin imagen.** Sin imagen, la galería sigue siendo de tarjetas (con su marco, nombre y propiedades) pero sin el hueco de la foto. Se guarda en la vista (`config.imagenes === false`).

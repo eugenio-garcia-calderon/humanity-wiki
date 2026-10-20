@@ -928,6 +928,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
         {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={2} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
+        {/* GALERÍA SIN IMÁGENES (2026-10-20): las mismas tarjetas, sólo con nombre y propiedades. */}
+        <Chips etiqueta="Imágenes" valor={activa.config.imagenes === false ? 'no' : 'si'}
+          onCambiar={v => cambiarVista({ config: { ...activa.config, imagenes: v === 'si' } })}
+          opciones={[['si', 'Con imagen'], ['no', 'Sin imagen']]} />
         {onCambiarNombreArriba && <Chips etiqueta="Nombre" valor={nombreArriba ? 'arriba' : 'abajo'} onCambiar={v => onCambiarNombreArriba(v === 'arriba')} opciones={[['abajo', 'Debajo'], ['arriba', 'Encima']]} />}
       </Grupo>
     </div>
@@ -1252,7 +1256,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               enCaja={!!colAgr}
               alSoltarEnGrupo={colAgr && editable && grupo ? id => moverAGrupo(id, grupo) : undefined} tablaId={tablaId} columnas={columnas} filas={fs} sinMargen centrada
               columnaTitulo={datos.columna_titulo ?? null} editable={editable && !colAgr} onCambio={cargar}
-              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora} conDescripcion={activa.config.descripcion !== false}
+              claseTitulo={tono.texto} tamano={tamano} tamanoNombre={tamanoNombre} nombreArriba={nombreArriba} pesoNombre={pesoNombre} visibles={visiblesAhora} conDescripcion={activa.config.descripcion !== false} conImagen={activa.config.imagenes !== false}
               // «Filas que se ven»: filas de tarjetas en CADA grupo (2026-10-18).
               filasMax={vista === 'carrusel' ? null : porTanda}
               carrusel={vista === 'carrusel'} velocidad={activa.config.velocidad}
