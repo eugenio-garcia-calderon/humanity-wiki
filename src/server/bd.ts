@@ -49,6 +49,7 @@ import { sincronizarTienda } from './bd/tienda';
 import { notasComunidad } from './bd/comunidad';
 import { compilar } from './bd/formulas';
 import { renombrarEnConfig } from './bd/renombrar';
+import { tablasDelProyecto } from './bd/arbolProyecto';
 import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
 import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
@@ -1230,6 +1231,16 @@ export function registerBdRoutes(app: Express, db: any) {
 
   /** Dónde vive una base de datos: la primera página (que no sea la de una
    *  fila) que la enseña. Es el ↗ del nombre de una relación. */
+  /** Las bases de datos del mismo proyecto (árbol del menú) que esta tabla (2026-10-20). */
+  app.get('/api/bd/tablas/:id/del-proyecto', async (req: Request, res: Response) => {
+    try {
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const r = await tablasDelProyecto(db, String(req.params.id));
+      res.json(r || { raiz: null, tablas: [] });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/bd/tablas/:id/hogar', async (req: Request, res: Response) => {
     try {
       const permiso = await puedeConTabla(req, req.params.id, false);
