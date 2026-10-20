@@ -9500,3 +9500,6 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 ## 2026-10-20 — Arreglo: la píldora «Entrar» desaparecía al dueño (prog8)
 - Tras reconocer como equipo al dueño que entra en su web con la cuenta de miembro (#695), la píldora flotante de `BarraMiembro` (que se esconde para el equipo, porque el de humanity.wiki tiene su barra) desaparecía del todo: ni su nombre, ni «Salir», ni forma de editar. Ahora, si el equipo entró con su cuenta de miembro, la píldora se queda, dice «Equipo de esta web» y trae **«Editar esta página»** (abre el editor en humanity.wiki) y «Salir».
+
+## 2026-10-20 — La base de datos de un bloque nace sola (prog8)
+- Al poner un bloque **Base de datos**, ya no sale el paso intermedio «Este bloque todavía no apunta a ninguna tabla · Crear una tabla aquí»: la base de datos «Nueva base de datos» se crea sola al aparecer el bloque («Creando la base de datos…») y se ve directamente la galería. Solo si falla queda un botón «Volver a intentarlo». Una vez por bloque (`TablaNueva` en `Documento.tsx`).
