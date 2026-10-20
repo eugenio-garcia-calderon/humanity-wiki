@@ -4,6 +4,7 @@ import { Table2, Pencil, Archive, Plus, Loader2, ArrowLeft } from 'lucide-react'
 import Rejilla from '../components/tablas/Rejilla';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
+import { preguntarBorrarBd } from '../components/tablas/PreguntaBorrarBd';
 
 // ============================================================================
 // TABLAS — la herramienta
@@ -56,7 +57,8 @@ export default function Tablas() {
    * cuando hay alguien más a quien le va a cambiar la pantalla.
    */
   async function retirar(t: any) {
-    if (!window.confirm(`¿Retirar «${t.titulo}»?\n\nDeja de verse en la lista y en las páginas donde esté. No se borra nada.`)) return;
+    // La pregunta de «Mantener / Borrar base de datos» (2026-10-20, Eugenio).
+    if (!(await preguntarBorrarBd({ tablaIds: [t.id], detalle: 'Deja de verse en la lista y en las páginas donde esté. Se archiva: sus entradas no se pierden.' }))) return;
 
     const quitar = (confirmado: boolean) => fetch(`/api/bd/tablas/${t.id}`, {
       method: 'DELETE', credentials: 'include',
@@ -67,7 +69,7 @@ export default function Tablas() {
     let r = await quitar(false);
     if (r.status === 409) {
       const j = await r.json().catch(() => ({}));
-      if (!window.confirm(`${j.error}\n\n¿Retirarla de todas formas?`)) return;
+      if (!(await preguntarBorrarBd({ tablaIds: [t.id], detalle: `${j.error} ¿La borras de todas formas?` }))) return;
       r = await quitar(true);
     }
     if (!r.ok) {

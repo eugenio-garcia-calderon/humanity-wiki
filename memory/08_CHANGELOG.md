@@ -9558,3 +9558,8 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **Con una selección que cruza bloques** (`tramoSeleccionado`/`borrarTramo`): Supr/Retroceso la borran y juntan lo que queda del primero y del último, como en Notion; los bloques de en medio se van. ⌘X la copia (texto + HTML) y la borra. Escribir una letra la sustituye. ⌘C, el del navegador. Las posiciones visibles se traducen al texto guardado, que lleva marcas (`aFuente`).
 - **Asa ⋮⋮ → Copiar / Cortar**: el bloque entero, con lo que lleva dentro, va al portapapeles como texto y, escondido en el HTML (`data-humanity-bloques`), tal cual es (tipo, color, sangría, imagen, base de datos…). Al pegarlo en una página vuelven los mismos bloques. Con varios bloques marcados con ⌘clic, ⌘C y ⌘X hacen lo mismo.
 - **Arreglo de paso en `MenuBloque`**: `Opcion` se definía dentro del componente, se volvía a montar en cada repintado y a veces el clic se perdía. Ahora está fuera.
+
+## 2026-10-20 — «¿Seguro que quieres borrar esta base de datos?» (Programador 8)
+
+- `PreguntaBorrarBd.tsx`, `preguntarBorrarBd({ tablaIds, detalle })` devuelve una promesa. Es una ventana con el nombre de cada base de datos y dos botones que dicen lo que hacen: «Mantener base de datos» (con el foco; Escape hace lo mismo) y «Borrar base de datos». Pinchar fuera no la cierra: hay que elegir.
+- Sale al borrar un bloque de base de datos desde el asa, al borrar con Supr una selección de bloques que tenga alguna, al borrar o sustituir un tramo de texto que cruce una, y al retirar una tabla en /tablas (las dos preguntas que antes eran `window.confirm`).
