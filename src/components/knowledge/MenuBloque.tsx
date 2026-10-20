@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Trash2, Copy, Repeat, Palette, Link2, Columns2, ChevronRight, Check,
+  Trash2, Copy, Repeat, Scissors, ClipboardCopy, Palette, Link2, Columns2, ChevronRight, Check,
   Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, Quote, Info,
 } from 'lucide-react';
 import type { TipoBloque } from '../../utils/bloques';
@@ -32,12 +32,15 @@ export const CONVERTIBLES: { tipo: TipoBloque; label: string; icon: any }[] = [
  *  publicar, sincronizar, configurar un botón… El menú no sabe qué hacen. */
 export interface OpcionExtra { icon: any; label: string; onClick: () => void; activo?: boolean; atajo?: string }
 
-export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplicar, onConvertir, onColor, onEnlace, onSacarDeColumnas, onCerrar, extras }: {
+export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplicar, onCopiar, onCortar, onConvertir, onColor, onEnlace, onSacarDeColumnas, onCerrar, extras }: {
   tipo: TipoBloque;
   color?: string;
   enColumnas: boolean;
   onBorrar: () => void;
   onDuplicar: () => void;
+  /** Copiar / cortar el bloque entero (2026-10-20). */
+  onCopiar?: () => void;
+  onCortar?: () => void;
   onConvertir: (t: TipoBloque) => void;
   onColor: (c: string | undefined) => void;
   onEnlace: () => void;
@@ -58,16 +61,6 @@ export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplic
     return () => { clearTimeout(t); document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', tecla); };
   }, [onCerrar]);
 
-  const Opcion = ({ icon: Icono, label, atajo, onClick, peligro, flecha }: any) => (
-    <button onClick={onClick}
-      className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-left transition-colors',
-        peligro ? 'text-rose-600 hover:bg-rose-50' : 'text-slate-600 hover:bg-slate-100')}>
-      <Icono className={cn('w-3.5 h-3.5 shrink-0', peligro ? 'text-rose-500' : 'text-slate-400')} />
-      <span className="flex-1">{label}</span>
-      {atajo && <span className="text-[10px] font-bold text-slate-300">{atajo}</span>}
-      {flecha && <ChevronRight className="w-3 h-3 text-slate-300" />}
-    </button>
-  );
 
   return (
     <div ref={caja} onClick={e => e.stopPropagation()}
@@ -75,6 +68,8 @@ export default function MenuBloque({ tipo, color, enColumnas, onBorrar, onDuplic
       <div className="w-56 bg-white border border-slate-200 rounded-xl shadow-2xl p-1">
         <Opcion icon={Trash2} label="Borrar" atajo="Supr" peligro onClick={onBorrar} />
         <Opcion icon={Copy} label="Duplicar" atajo="⌘D" onClick={onDuplicar} />
+        {onCopiar && <Opcion icon={ClipboardCopy} label="Copiar" atajo="⌘C" onClick={onCopiar} />}
+        {onCortar && <Opcion icon={Scissors} label="Cortar" atajo="⌘X" onClick={onCortar} />}
         {esTexto && <Opcion icon={Repeat} label="Convertir en" flecha onClick={() => setSub(s => s === 'convertir' ? null : 'convertir')} />}
         <Opcion icon={Palette} label="Color" flecha onClick={() => setSub(s => s === 'color' ? null : 'color')} />
         <Opcion icon={Link2} label="Copiar enlace al bloque" onClick={onEnlace} />
@@ -129,6 +124,23 @@ function FilaColor({ etiqueta, activo, onClick, clase }: { etiqueta: string; act
       <span className={cn('w-5 h-5 rounded border border-slate-200 grid place-items-center text-[11px] font-black', clase)}>A</span>
       <span className="flex-1">{etiqueta}</span>
       {activo && <Check className="w-3 h-3 text-emerald-600" />}
+    </button>
+  );
+}
+
+/** Una opción del menú. FUERA del componente (2026-10-20): definida dentro era
+ *  un componente NUEVO en cada repintado, y si la página se repintaba entre el
+ *  «mousedown» y el «mouseup» (al cambiar la selección, por ejemplo) el botón
+ *  se montaba otra vez y el clic se perdía: «Cortar» no hacía nada. */
+function Opcion({ icon: Icono, label, atajo, onClick, peligro, flecha }: any) {
+  return (
+    <button onClick={onClick}
+      className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-left transition-colors',
+        peligro ? 'text-rose-600 hover:bg-rose-50' : 'text-slate-600 hover:bg-slate-100')}>
+      <Icono className={cn('w-3.5 h-3.5 shrink-0', peligro ? 'text-rose-500' : 'text-slate-400')} />
+      <span className="flex-1">{label}</span>
+      {atajo && <span className="text-[10px] font-bold text-slate-300">{atajo}</span>}
+      {flecha && <ChevronRight className="w-3 h-3 text-slate-300" />}
     </button>
   );
 }

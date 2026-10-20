@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import { subirArchivo } from '../utils/subir';
 import OptimizacionWeb from '../components/knowledge/OptimizacionWeb';
 import SoltarImagen from '../components/ui/SoltarImagen';
@@ -1679,6 +1679,65 @@ function EditorPagina() {
     avisar(fuera.length > 1 ? `Bloque borrado (con ${fuera.length - 1} dentro)` : 'Bloque borrado');
   };
 
+  /** COPIAR Y CORTAR BLOQUES ENTEROS (2026-10-20, Eugenio: «pinchar en los
+   *  cuatro puntitos y poder copiar o cortar el bloque»). Van al portapapeles
+   *  de dos formas: el texto, para pegarlo en cualquier sitio, y los bloques
+   *  tal cual (tipo, color, sangría, imagen, base de datos…) escondidos en el
+   *  HTML, para que al pegarlos en una página vuelvan a ser los mismos bloques.
+   *  Con varios bloques marcados (⌘clic), ⌘C y ⌘X hacen lo mismo con todos. */
+  const copiarBloques = async (ids: string[], cortar = false) => {
+    setMenuAsa(null);
+    const bs = bloquesRef.current;
+    const dentro = new Set(ids.flatMap(id => idsSubarbol(bs, id)));
+    const lista = bs.filter(x => dentro.has(x.id)).map(o => ({
+      ...o, grupo: undefined,
+      texto: o.texto !== undefined || textosRef.current[o.id] !== undefined ? (textosRef.current[o.id] ?? o.texto ?? '') : undefined,
+      filas: filasRef.current[o.id] ? filasRef.current[o.id].map(f => [...f]) : o.filas,
+    }));
+    if (!lista.length) return;
+    const base = Math.min(...lista.map(x => x.nivel || 0));
+    const limpios = lista.map(x => ({ ...x, nivel: ((x.nivel || 0) - base) || undefined }));
+    const texto = limpios.map(x => (x as any).texto || (x as any).url || '').filter(Boolean).join('\n\n');
+    const json = btoa(unescape(encodeURIComponent(JSON.stringify(limpios))));
+    const escapar = (t: string) => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+    const html = `<div data-humanity-bloques="${json}">${escapar(texto).replace(/\n/g, '<br>')}</div>`;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/plain': new Blob([texto], { type: 'text/plain' }),
+        'text/html': new Blob([html], { type: 'text/html' }),
+      })]);
+    } catch {
+      try { await navigator.clipboard.writeText(texto); } catch { avisar('El navegador no deja copiar'); return; }
+    }
+    const n = ids.length;
+    if (cortar) {
+      guardarHistoria();
+      for (const x of dentro) { delete textosRef.current[x]; delete filasRef.current[x]; }
+      setBloques(cur => {
+        const resto = normalizarGrupos(cur.filter(x => !dentro.has(x.id)));
+        return resto.length ? resto : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
+      });
+      setSeleccion([]);
+      programarGuardado();
+    }
+    avisar(cortar ? (n === 1 ? 'Bloque cortado' : `${n} bloques cortados`) : (n === 1 ? 'Bloque copiado' : `${n} bloques copiados`));
+  };
+
+  /** Los bloques copiados con `copiarBloques`, si lo pegado los trae (con ids nuevos). */
+  const bloquesCopiados = (dt: DataTransfer): Bloque[] | null => {
+    const m = (dt.getData('text/html') || '').match(/data-humanity-bloques="([^"]+)"/);
+    if (!m) return null;
+    try {
+      const lista = JSON.parse(decodeURIComponent(escape(atob(m[1])))) as Bloque[];
+      if (!Array.isArray(lista) || !lista.length) return null;
+      return aArbol(lista.map(o => {
+        const nid = nuevoIdBloque();
+        if ((o as any).filas) filasRef.current[nid] = (o as any).filas;
+        return { ...o, id: nid };
+      }));
+    } catch { return null; }
+  };
+
   const duplicar = (bid: string) => {
     guardarHistoria();
     setMenuAsa(null);
@@ -2753,6 +2812,9 @@ function EditorPagina() {
 
   const alPegar = (b: Bloque, e: React.ClipboardEvent<HTMLDivElement>) => {
     const texto = e.clipboardData.getData('text/plain');
+    // Bloques copiados con el asa ⋮⋮: vuelven a ser los mismos bloques.
+    const copiados = bloquesCopiados(e.clipboardData);
+    if (copiados) { e.preventDefault(); insertarBloques(b, copiados, !(e.currentTarget.textContent || '').trim()); return; }
 
     // ¿Trae algo que NO sea texto suelto? Un archivo, una imagen copiada de
     // una web, o un enlace que es inequívocamente un medio (YouTube, Vimeo, un
@@ -2825,6 +2887,8 @@ function EditorPagina() {
       const dt = e.clipboardData;
       if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return;
       e.preventDefault();
+      const copiados = bloquesCopiados(dt);
+      if (copiados) { insertarBloques(null, copiados, false); return; }
       const sinc = (dt.getData('text/plain') || '').trim().match(/^humanity-sincronizado:([A-Z0-9]+)$/i);
       if (sinc) { insertarSincronizado(null, sinc[1]); return; }
       bloquesDelPortapapeles(dt).then(nuevos => {
@@ -2887,6 +2951,7 @@ function EditorPagina() {
       const activo = document.activeElement as HTMLElement | null;
       if (activo && (activo.isContentEditable || activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA')) return;
       if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); eliminarSeleccion(); }
+      else if ((e.metaKey || e.ctrlKey) && (e.key === 'c' || e.key === 'x') && !String(getSelection() || '')) { e.preventDefault(); copiarBloques(seleccion, e.key === 'x'); }
       else if (e.key === 'Escape') setSeleccion([]);
       // Tab con varios bloques marcados los sangra todos a la vez.
       else if (e.key === 'Tab') { e.preventDefault(); guardarHistoria(); sangrar(seleccion, e.shiftKey ? -1 : 1); }
@@ -2894,6 +2959,161 @@ function EditorPagina() {
     window.addEventListener('keydown', tecla);
     return () => window.removeEventListener('keydown', tecla);
   }, [seleccion, eliminarSeleccion]);
+
+  // ── SELECCIONAR TEXTO DE VARIOS BLOQUES (2026-10-20, Eugenio) ─────────────
+  // «Selecciono un texto que cruza varios bloques y ni Supr borra, ni ⌘X corta,
+  // ni ⌘C copia.» Dos causas:
+  //  1. Sólo el bloque activo es editable, y una selección que EMPIEZA dentro
+  //     de él no puede salir de él (el navegador la recorta a su caja). Al
+  //     arrastrar fuera, el bloque deja de estar activo y la selección se
+  //     rehace a mano desde el punto donde se pinchó hasta el ratón.
+  //  2. Fuera de un bloque editable el navegador no borra ni corta nada: lo
+  //     hace el editor. Supr/Retroceso borran el tramo (lo que queda del
+  //     primer bloque y del último se juntan, como en Notion), ⌘X lo copia y
+  //     lo borra, y escribir una letra lo sustituye. ⌘C es el del navegador.
+  const editaTexto = puedoEditar && !generando && !ajustes.bloqueada;
+  useEffect(() => {
+    if (!editaTexto) return;
+    let inicio: { x: number; y: number; id: string } | null = null;
+    let cruzando = false;
+    const punto = (x: number, y: number) => {
+      const d = document as any;
+      if (d.caretRangeFromPoint) { const r = d.caretRangeFromPoint(x, y); return r ? { n: r.startContainer as Node, o: r.startOffset as number } : null; }
+      const c = d.caretPositionFromPoint?.(x, y);
+      return c ? { n: c.offsetNode as Node, o: c.offset as number } : null;
+    };
+    const abajo = (e: PointerEvent) => {
+      cruzando = false;
+      if (e.button !== 0 || e.shiftKey || e.metaKey || e.ctrlKey || e.pointerType === 'touch') { inicio = null; return; }
+      const t = (e.target as Element | null)?.closest?.('[data-texto-bloque]');
+      inicio = t && docRef.current?.contains(t) ? { x: e.clientX, y: e.clientY, id: t.getAttribute('data-texto-bloque')! } : null;
+    };
+    const mover = (e: PointerEvent) => {
+      if (!inicio || !(e.buttons & 1)) return;
+      if (!cruzando) {
+        const sobre = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-bloque-caja]');
+        const id = sobre?.getAttribute('data-bloque-caja');
+        if (!id || id === inicio.id || sobre?.contains(document.querySelector(`[data-texto-bloque="${inicio.id}"]`))) return;
+        cruzando = true;
+        // Sale del bloque activo: deja de ser editable (y su texto ya está guardado).
+        flushSync(() => setBloqueActivo(null));
+      }
+      const a = punto(inicio.x, inicio.y), f = punto(e.clientX, e.clientY);
+      if (a && f) { try { getSelection()?.setBaseAndExtent(a.n, a.o, f.n, f.o); } catch { /* fuera del documento */ } }
+    };
+    const arriba = () => { inicio = null; };
+    document.addEventListener('pointerdown', abajo, true);
+    document.addEventListener('pointermove', mover, true);
+    document.addEventListener('pointerup', arriba, true);
+    return () => {
+      document.removeEventListener('pointerdown', abajo, true);
+      document.removeEventListener('pointermove', mover, true);
+      document.removeEventListener('pointerup', arriba, true);
+    };
+  }, [editaTexto]);
+
+  /** El tramo de texto seleccionado si cruza dos o más bloques (si no, `null`: lo atiende el navegador). */
+  const tramoSeleccionado = () => {
+    const sel = getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !docRef.current) return null;
+    const r = sel.getRangeAt(0);
+    const caja = (n: Node) => ((n.nodeType === 1 ? n : n.parentElement) as Element | null)?.closest('[data-bloque-caja]');
+    const c1 = caja(r.startContainer), c2 = caja(r.endContainer);
+    if (!c1 || !c2 || c1 === c2 || !docRef.current.contains(c1) || !docRef.current.contains(c2)) return null;
+    const id1 = c1.getAttribute('data-bloque-caja')!, id2 = c2.getAttribute('data-bloque-caja')!;
+    /** Cuántas letras VISIBLES hay antes del punto, dentro del texto del bloque. */
+    const desplaz = (id: string, n: Node, o: number, alFinal: boolean) => {
+      const t = docRef.current!.querySelector(`[data-texto-bloque="${id}"]`);
+      if (!t) return null;
+      if (!t.contains(n)) return alFinal ? (t.textContent || '').length : 0;
+      const rr = document.createRange();
+      rr.selectNodeContents(t);
+      rr.setEnd(n, o);
+      return rr.toString().length;
+    };
+    return {
+      id1, id2,
+      o1: desplaz(id1, r.startContainer, r.startOffset, false),
+      o2: desplaz(id2, r.endContainer, r.endOffset, true),
+      visible1: docRef.current.querySelector(`[data-texto-bloque="${id1}"]`)?.textContent || '',
+      visible2: docRef.current.querySelector(`[data-texto-bloque="${id2}"]`)?.textContent || '',
+    };
+  };
+
+  /** De una posición en el texto VISIBLE a la misma en el texto guardado (que lleva **, _, [..](..)…). */
+  const aFuente = (fuente: string, visible: string, n: number) => {
+    if (fuente === visible) return n;
+    let v = 0;
+    for (let i = 0; i < fuente.length; i++) {
+      if (v === n) return i;
+      if (fuente[i] === visible[v]) v++;
+    }
+    return fuente.length;
+  };
+
+  /** Borra el tramo (y pone `inserta` en su sitio, si se escribió una letra encima). */
+  const borrarTramo = (t: NonNullable<ReturnType<typeof tramoSeleccionado>>, inserta = '') => {
+    let i1 = bloques.findIndex(x => x.id === t.id1), i2 = bloques.findIndex(x => x.id === t.id2);
+    if (i1 < 0 || i2 < 0) return;
+    if (i1 > i2) [i1, i2] = [i2, i1];
+    const b1 = bloques[i1], b2 = bloques[i2];
+    const fuente = (b: Bloque) => textosRef.current[b.id] ?? (b as any).texto ?? '';
+    const texto1 = ES_TEXTO.includes(b1.tipo) && t.o1 !== null;
+    const texto2 = ES_TEXTO.includes(b2.tipo) && t.o2 !== null;
+    const antes = texto1 ? fuente(b1).slice(0, aFuente(fuente(b1), t.visible1, t.o1!)) : null;
+    const despues = texto2 ? fuente(b2).slice(aFuente(fuente(b2), t.visible2, t.o2!)) : '';
+    // Si el primero es de texto, se queda con lo de antes + lo de después; si
+    // no (una imagen, una base de datos), se va con todo lo de en medio.
+    const queda = antes !== null ? b1 : (texto2 ? b2 : null);
+    const nuevoTexto = antes !== null ? antes + inserta + despues : inserta + despues;
+    const fuera = new Set(bloques.slice(i1, i2 + 1).map(x => x.id).filter(id => id !== queda?.id));
+    getSelection()?.removeAllRanges();
+    setAviso(fuera.size === 1 ? 'Texto borrado' : `Texto borrado (${fuera.size} bloques)`);
+    setBloques(bs => {
+      const resto = normalizarGrupos(bs.filter(x => !fuera.has(x.id)).map(x => (x.id === queda?.id ? { ...x, texto: nuevoTexto } : x)));
+      return resto.length ? resto : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
+    });
+    for (const id of fuera) { delete textosRef.current[id]; delete filasRef.current[id]; }
+    if (queda) {
+      textosRef.current[queda.id] = nuevoTexto;
+      colabRef.current?.texto(queda.id, nuevoTexto);
+      setRevision(r => r + 1);
+      posicionCaret.current = (antes !== null ? t.o1! : 0) + inserta.length;
+      setBloqueActivo(queda.id); setFocoId(queda.id);
+    }
+    programarGuardado();
+  };
+  const borrarTramoRef = useRef(borrarTramo);
+  borrarTramoRef.current = borrarTramo;
+
+  useEffect(() => {
+    if (!editaTexto) return;
+    const tecla = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      const solo = !e.metaKey && !e.ctrlKey && !e.altKey;
+      const borrar = solo && (e.key === 'Backspace' || e.key === 'Delete');
+      const letra = solo && e.key.length === 1;
+      if (!borrar && !letra) return;
+      const t = tramoSeleccionado();
+      if (!t) return;
+      e.preventDefault(); e.stopPropagation();
+      borrarTramoRef.current(t, letra ? e.key : '');
+    };
+    const cortar = (e: ClipboardEvent) => {
+      const t = tramoSeleccionado();
+      if (!t || !e.clipboardData) return;
+      const r = getSelection()!.getRangeAt(0);
+      const caja = document.createElement('div');
+      caja.appendChild(r.cloneContents());
+      e.clipboardData.setData('text/plain', getSelection()!.toString());
+      e.clipboardData.setData('text/html', caja.innerHTML);
+      e.preventDefault();
+      borrarTramoRef.current(t);
+    };
+    window.addEventListener('keydown', tecla, true);
+    document.addEventListener('cut', cortar);
+    return () => { window.removeEventListener('keydown', tecla, true); document.removeEventListener('cut', cortar); };
+  }, [editaTexto]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enfocar el bloque recién creado/activado cuando ya está en el DOM. Por
   // defecto el cursor va al final; `posicionCaret` lo coloca en un punto
@@ -3441,9 +3661,11 @@ function EditorPagina() {
         onCompositionEnd: (e: React.CompositionEvent<HTMLDivElement>) => colabRef.current?.texto(b.id, e.currentTarget.textContent || ''),
         onPaste: (e: React.ClipboardEvent<HTMLDivElement>) => alPegar(b, e),
         onBlur: () => setBloqueActivo(a => (a === b.id ? null : a)),
+        'data-texto-bloque': b.id,
         className: cn(CLASES_TEXTO[b.tipo], 'outline-none bg-emerald-50/40 rounded px-1 -mx-1 min-h-[1.4em] whitespace-pre-wrap'),
       } : {
-        onClick: editable ? () => { setSeleccion([]); setBloqueActivo(b.id); setFocoId(b.id); } : undefined,
+        onClick: editable ? () => { if (!getSelection()?.isCollapsed) return; setSeleccion([]); setBloqueActivo(b.id); setFocoId(b.id); } : undefined,
+        'data-texto-bloque': b.id,
         className: cn(CLASES_TEXTO[b.tipo], 'px-1 -mx-1 min-h-[1.4em]', editable && 'cursor-text hover:bg-slate-50/80 rounded'),
       };
 
@@ -3791,6 +4013,8 @@ function EditorPagina() {
                 tipo={b.tipo} color={b.color} enColumnas={!!b.grupo}
                 onBorrar={() => borrarBloque(b.id)}
                 onDuplicar={() => duplicar(b.id)}
+                onCopiar={() => copiarBloques([b.id])}
+                onCortar={() => copiarBloques([b.id], true)}
                 onConvertir={t => {
                   // Lo escrito se conserva: sólo cambia la forma.
                   cambiarBloque(b.id, { tipo: t, texto: textosRef.current[b.id] ?? b.texto ?? '' });
