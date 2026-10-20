@@ -9507,3 +9507,10 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 ## 2026-10-20 — El «+» de un bloque abre una ventana en el centro (prog8)
 - El selector de bloques del «+» se abría flotando junto a la línea y, en páginas largas, aparecía mucho más abajo. Ahora es una **ventana en el centro de la pantalla** (con fondo, «¿Qué bloque quieres añadir?», cerrar con ✕, Esc o fuera), en el ordenador y en el móvil (hoja desde abajo). El bloque nuevo se pone justo debajo del que tenía el «+».
 - La primera opción, destacada: **«Base de datos en galería»**.
+
+## 2026-10-20 — Dictado: se acabaron las frases repetidas (prog8)
+- **Fallo** (Eugenio): en el chat de IA, el dictado escribía la misma frase dos, tres, cuatro veces mientras seguías hablando. El transcriptor a veces reenvía TODO lo dicho, y al reenviar corrige palabras (una coma, «bicicletas» → «bici»); `unir` solo reconocía el reenvío si empezaba letra a letra por lo ya escrito, así que con una palabra cambiada lo añadía detrás y cada reenvío duplicaba otra vez el texto.
+- **Ahora** (`src/server/voz/unir.ts`): se compara por palabras (sin tildes, mayúsculas ni signos) y con tolerancia (subsecuencia común ≥ 70 %): si lo nuevo encaja con el final de lo escrito desde cualquier punto, lo SUSTITUYE; si repite una frase ya escrita, no se añade; si no encaja con nada, es frase nueva y va detrás. También separa palabras pegadas por el transcriptor («cosaCambia», «50Por»). Casos en `unir.prueba.ts` (`npx tsx src/server/voz/unir.prueba.ts`, 13/13).
+- El dictado del propio navegador (el de respaldo) descarta una frase cerrada que llega repetida.
+- `VOZ_DEPURAR=1` en el servidor escribe al registro cada texto del transcriptor tal cual.
+- Probado con el micrófono real del Mac escuchando `say` por el altavoz: 23 s y 44 s de habla seguida, con pausas a media frase y cambios de tema, sin ninguna frase repetida.

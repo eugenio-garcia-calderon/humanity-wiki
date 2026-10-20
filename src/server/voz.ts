@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response } from 'express';
 import WebSocket from 'ws';
 import fs from 'node:fs';
 import { hayPresupuesto } from './ai/tope.js';
+import { unir } from './voz/unir.js';
 
 // ============================================================================
 // DICTADO POR VOZ EN TIEMPO REAL (2026-10-02)
@@ -167,6 +168,8 @@ export function registrarVoz(app: Express, db: any) {
         const enCurso = sc.interimInputTranscription?.text;
         const cerrado = sc.inputTranscription?.text;
         if (enCurso || cerrado) s.textos++;
+        // VOZ_DEPURAR=1: cada texto del transcriptor, tal cual, al registro.
+        if (process.env.VOZ_DEPURAR && (enCurso || cerrado)) console.log(`[voz-crudo] ${enCurso ? 'en curso' : 'cerrado'}: ${JSON.stringify(enCurso || cerrado)}`);
         if (enCurso) { s.enCurso = unir(s.cerrado, enCurso); emitir(s, 'texto', { texto: s.enCurso }); }
         if (cerrado) { s.cerrado = unir(s.cerrado, cerrado); s.enCurso = s.cerrado; emitir(s, 'texto', { texto: s.cerrado }); }
       });
@@ -235,23 +238,6 @@ export function registrarVoz(app: Express, db: any) {
     setTimeout(() => cerrar(s), 2500);
     res.status(204).end();
   });
-}
-
-// Sólo letras y números: el transcriptor a veces corrige una coma de lo ya
-// dicho, y eso no debe hacer que se repita la frase entera.
-const sinEspacios = (t: string) => t.normalize('NFD').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
-/** Espacio tras el punto si dos frases vienen pegadas. */
-const limpio = (t: string) => t.replace(/([.!?…;:,])(?=\p{L})/gu, '$1 ').replace(/\s+/g, ' ').trim();
-
-/**
- * Lo cerrado más un texto nuevo del transcriptor. Si el nuevo ya empieza por
- * todo lo cerrado, es el texto entero de la sesión y se queda él; si no, es
- * sólo la frase de ahora y va detrás.
- */
-function unir(cerrado: string, nuevo: string): string {
-  if (!cerrado) return limpio(nuevo);
-  if (sinEspacios(nuevo).startsWith(sinEspacios(cerrado))) return limpio(nuevo);
-  return limpio(`${cerrado} ${nuevo}`);
 }
 
 function enviarAudio(s: Sesion, b: Buffer) {
