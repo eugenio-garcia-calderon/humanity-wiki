@@ -3178,33 +3178,13 @@ function EditorPagina() {
       if (b.tipo === 'basedatos') {
         const tablaId = (b as any).tabla_id || bloquesRef.current?.[b.id]?.tabla_id;
         if (!tablaId) {
+          // LA BASE DE DATOS NACE SOLA (2026-10-20, Eugenio: «al crear una base de
+          // datos tiene que aparecer directamente la galería, no el paso de
+          // "crear tabla"»). Se crea en cuanto el bloque aparece; el botón solo
+          // queda si la creación falla.
           return (
-            <div className="border border-dashed border-slate-200 rounded-xl p-4 text-center">
-              <p className="text-xs font-bold text-slate-500">Este bloque todavía no apunta a ninguna tabla.</p>
-              {editable && (
-                <button
-                  onClick={async () => {
-                    const r = await fetch('/api/bd/tablas', {
-                      method: 'POST', credentials: 'include',
-                      headers: { 'Content-Type': 'application/json' },
-                      // Nace como «Nueva base de datos» (Eugenio, 2026-10-01), no
-                      // con el título de la página: dos cosas con el mismo nombre
-                      // en la misma pantalla no se distinguen. Se renombra
-                      // pinchando en el nombre.
-                      body: JSON.stringify({ titulo: 'Nueva base de datos' }),
-                    });
-                    const j = await r.json();
-                    if (j.id) {
-                      (b as any).tabla_id = j.id;
-                      setBloques(bs => [...bs]);
-                      programarGuardado();
-                    }
-                  }}
-                  className="mt-2 inline-flex items-center gap-1.5 h-11 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
-                  Crear una tabla aquí
-                </button>
-              )}
-            </div>
+            <TablaNueva editable={editable} bloqueId={b.id}
+              alCrear={id => { (b as any).tabla_id = id; setBloques(bs => [...bs]); programarGuardado(); }} />
           );
         }
         return (
@@ -4848,6 +4828,44 @@ function EntradaEnlace({ tipo, onListo, onSubir }: { tipo: 'marcador' | 'web' | 
         <button type="button" onClick={onSubir} className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-100">
           o sube un vídeo
         </button>
+      )}
+    </div>
+  );
+}
+
+/** Crea la tabla de un bloque «Base de datos» recién puesto, una sola vez. */
+const creandoTabla = new Set<string>();
+function TablaNueva({ editable, bloqueId, alCrear }: { editable: boolean; bloqueId: string; alCrear: (id: string) => void }) {
+  const [fallo, setFallo] = useState<string | null>(null);
+  const crear = useCallback(async () => {
+    if (creandoTabla.has(bloqueId)) return;
+    creandoTabla.add(bloqueId);
+    setFallo(null);
+    try {
+      const r = await fetch('/api/bd/tablas', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        // Nace como «Nueva base de datos» (2026-10-01): se renombra pinchando en el nombre.
+        body: JSON.stringify({ titulo: 'Nueva base de datos' }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.id) throw new Error(j.error || 'No se ha podido crear la base de datos.');
+      alCrear(j.id);
+    } catch (e: any) {
+      creandoTabla.delete(bloqueId);
+      setFallo(e.message);
+    }
+  }, [bloqueId, alCrear]);
+  useEffect(() => { if (editable) crear(); }, [editable]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!editable) return <div className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">Base de datos sin crear.</div>;
+  return (
+    <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center">
+      {fallo ? (
+        <>
+          <p className="text-xs font-bold text-rose-600">{fallo}</p>
+          <button onClick={crear} className="mt-2 inline-flex h-11 items-center gap-1.5 rounded-lg bg-slate-900 px-3 text-xs font-bold text-white">Volver a intentarlo</button>
+        </>
+      ) : (
+        <p className="inline-flex items-center gap-2 text-xs font-bold text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Creando la base de datos…</p>
       )}
     </div>
   );
