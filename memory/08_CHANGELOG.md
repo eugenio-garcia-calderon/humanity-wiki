@@ -9528,3 +9528,11 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 ## 2026-10-20 — Cada tamaño de tarjeta tiene un ancho fijo (prog8)
 - Con pocas tarjetas, una galería XS salía con tarjetas más grandes (las columnas se estiraban hasta llenar la fila del recuadro). Ahora cada tamaño tiene un **ancho fijo** (`anchoTarjeta` = ancho base × 1,15: XS 129 px, L 345 px…), haya las que haya: las tarjetas van **centradas** y sobra espacio a los lados si hace falta. En el teléfono, como mucho el ancho de la pantalla. «Filas que se ven» sigue contando cuántas caben a ese tamaño, y los recuadros de grupos pequeños se ajustan al mismo ancho.
+
+## 2026-10-20 — Botones en la cabecera de las páginas (Programador 8)
+
+- «Añadir botón» junto a portada, icono y descripción. Cada botón crea una página nueva **sin título** y la abre en una ventana grande (el editor de siempre, en un marco). Al cerrar, el botón toma el título que se le haya puesto. Se pueden añadir varios («+ Botón») y quitar (×; la página no se borra).
+- Se guardan en `config.botones` con la forma de un bloque «Página» (`{tipo:'subpagina', entityId}`), así que son subpáginas en todo: `bloquesDe` (bloquesSql.ts) los suma, el árbol del menú izquierdo los cuelga de su página, `/mover` quita el botón si la página se lleva a otro sitio y el árbol del proyecto de las bases de datos los recorre.
+- «Diseño de la cabecera» gana «Botones»: tamaño S/M/L y estilo Relleno/Contorno/Suave (`cabecera.botonesTalla`, `cabecera.botonesEstilo`).
+- En la página publicada (`CabeceraLectura` → `BotonesLectura`, en diferido), el botón abre una ventana con la subpágina leída desde `/api/sitio/pagina/:id`.
+- De paso: las galerías nuevas nacen con el título y los nombres de las tarjetas en grosor «normal» (`tituloPeso`/`pesoNombre`).

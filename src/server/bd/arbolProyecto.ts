@@ -77,7 +77,7 @@ export async function tablasDelProyecto(db: any, tablaId: string): Promise<{ rai
     const siguientes: string[] = [];
     const nuevasTablas: string[] = [];
     for (const f of filas) {
-      recorrer(f.config?.bloques, b => {
+      recorrer([f.config?.bloques, f.config?.botones], b => {
         if (b.tipo === 'subpagina' && typeof b.entityId === 'string' && !visitadas.has(b.entityId)) { visitadas.add(b.entityId); siguientes.push(b.entityId); }
         if (typeof b.tabla_id === 'string' && !tablas.has(b.tabla_id)) { tablas.add(b.tabla_id); nuevasTablas.push(b.tabla_id); }
       });

@@ -437,7 +437,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión para ver tus páginas.' });
       const yo = req.user.id;
       const r = await db.execute(sql`
-        SELECT w.id, w.title, w.config->>'icono' AS icono, w.config->'bloques' AS bloques, w.proyecto_id, w.updated_at, w.created_at
+        SELECT w.id, w.title, w.config->>'icono' AS icono, w.config->'bloques' AS bloques, w.config->'botones' AS botones, w.proyecto_id, w.updated_at, w.created_at
         FROM knowledge_windows w
         WHERE w.kind = 'pagina' AND w.creator_user_id = ${yo} AND w.archived_at IS NULL AND w.deleted_at IS NULL
         ORDER BY w.created_at
@@ -453,7 +453,8 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       for (const p of paginas) {
         // A cualquier profundidad: una subpágina dentro de un desplegable
         // sigue siendo hija de esta página (2026-10-05).
-        const bloques: any[] = todosLosBloques(p.bloques);
+        // Los botones de la cabecera (2026-10-20) también son subpáginas.
+        const bloques: any[] = [...todosLosBloques(p.bloques), ...(Array.isArray(p.botones) ? p.botones : [])];
         for (const b of bloques) {
           if (b?.tipo === 'subpagina' && b.entityId && mias.has(b.entityId) && b.entityId !== p.id && !conPadre.has(b.entityId)) {
             nodos[p.id].hijas.push(b.entityId);
@@ -591,12 +592,12 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         //    desplegable (2026-10-05): por eso se quita en JS y no con SQL,
         //    que sólo veía la primera fila de bloques.
         const madres = (await tx.execute(sql`
-          SELECT w.id, w.config->'bloques' AS bloques FROM knowledge_windows w
+          SELECT w.id, w.config->'bloques' AS bloques, w.config->'botones' AS botones FROM knowledge_windows w
           WHERE w.kind = 'pagina' AND w.id <> ${dentroDe || ''}
             AND ${bloquesDe('w')} @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${id}::text))
         `)).rows as any[];
         for (const m of madres) {
-          let arbol = m.bloques;
+          let arbol = Array.isArray(m.bloques) ? m.bloques : [];
           for (;;) {
             const r = quitarDelArbol(arbol, (b: any) => b.tipo === 'subpagina' && b.entityId === id);
             if (!r.quitado) break;
@@ -604,8 +605,10 @@ export function registerDocumentosRoutes(app: Express, db: any) {
             const { arbol: a } = r;
             arbol = Array.isArray(r.quitado.bloques) && r.quitado.bloques.length ? [...a, ...r.quitado.bloques] : a;
           }
+          // Si era un botón de la cabecera (2026-10-20), el botón también se va.
+          const botones = (Array.isArray(m.botones) ? m.botones : []).filter((b: any) => !(b?.tipo === 'subpagina' && b.entityId === id));
           await tx.execute(sql`
-            UPDATE knowledge_windows SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', ${JSON.stringify(arbol)}::jsonb),
+            UPDATE knowledge_windows SET config = jsonb_set(jsonb_set(COALESCE(config, '{}'::jsonb), '{bloques}', ${JSON.stringify(arbol || [])}::jsonb), '{botones}', ${JSON.stringify(botones)}::jsonb),
               version = version + 1, updated_at = now(), updated_by = ${yo}
             WHERE id = ${m.id}
           `);

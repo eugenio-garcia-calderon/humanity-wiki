@@ -39,6 +39,9 @@ export type Cabecera = {
   iconoPos?: 'lado' | 'encima';
   /** Tamaño de letra del título, 16–64 px. */
   titulo?: number;
+  /** Los botones de la cabecera (2026-10-20): tamaño y estilo. */
+  botonesTalla?: 's' | 'm' | 'l';
+  botonesEstilo?: 'relleno' | 'contorno' | 'suave';
 };
 
 /**
@@ -175,11 +178,12 @@ const OPCIONES: { d: Disposicion; label: string; Icono: any }[] = [
   { d: 'derecha', label: 'Imagen a la derecha', Icono: PanelRight },
 ];
 
-export function MandosCabecera({ cabecera, hayImagen, hayIcono, hayDescripcion = false, onCambio }: {
+export function MandosCabecera({ cabecera, hayImagen, hayIcono, hayDescripcion = false, hayBotones = false, onCambio }: {
   cabecera?: Cabecera;
   hayImagen: boolean;
   hayIcono: boolean;
   hayDescripcion?: boolean;
+  hayBotones?: boolean;
   onCambio: (c: Cabecera) => void;
 }) {
   const c = cabecera || {};
@@ -224,6 +228,21 @@ export function MandosCabecera({ cabecera, hayImagen, hayIcono, hayDescripcion =
                 (c.iconoPos || 'lado') === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-400 hover:text-slate-700')}>
               {label}
             </button>
+          ))}
+        </div>
+      )}
+      {hayBotones && (
+        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Botones">
+          <span className="text-[11px] font-bold text-slate-500 mr-1">Botones</span>
+          {([['s', 'S'], ['m', 'M'], ['l', 'L']] as const).map(([v, label]) => (
+            <button key={v} aria-pressed={(c.botonesTalla || 'm') === v} onClick={() => pon({ botonesTalla: v })} title={`Tamaño ${label}`}
+              className={cn('h-11 sm:h-8 min-w-8 px-2 rounded-lg border text-[11px] font-bold transition-colors',
+                (c.botonesTalla || 'm') === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-400 hover:text-slate-700')}>{label}</button>
+          ))}
+          {([['relleno', 'Relleno'], ['contorno', 'Contorno'], ['suave', 'Suave']] as const).map(([v, label]) => (
+            <button key={v} aria-pressed={(c.botonesEstilo || 'relleno') === v} onClick={() => pon({ botonesEstilo: v })}
+              className={cn('h-11 sm:h-8 px-2.5 rounded-lg border text-[11px] font-bold transition-colors',
+                (c.botonesEstilo || 'relleno') === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-400 hover:text-slate-700')}>{label}</button>
           ))}
         </div>
       )}

@@ -18,5 +18,8 @@ import { sql } from 'drizzle-orm';
 // `alias` es el nombre de la tabla en la consulta (`w`, `p`…), o '' si no hay.
 export function bloquesDe(alias = '') {
   const col = alias ? `${alias}.config` : 'config';
-  return sql.raw(`jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.bloques.** ? (@.type() == "object" && exists(@.tipo))', '{}', true)`);
+  // (2026-10-20) Más los BOTONES DE LA CABECERA (`config.botones`): cada uno es
+  // una subpágina con la forma de un bloque «Página», así que cuenta como hija
+  // en todo lo que pregunta por subpáginas (visibilidad, madre, menú).
+  return sql.raw(`(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.bloques.** ? (@.type() == "object" && exists(@.tipo))', '{}', true) || COALESCE(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.botones[*] ? (@.type() == "object" && exists(@.tipo))', '{}', true), '[]'::jsonb))`);
 }
