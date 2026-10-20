@@ -11,7 +11,7 @@ import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
   ChevronRight, Info, ChevronDown, Undo2, Redo2,
-  LayoutTemplate, LayoutGrid,
+  LayoutTemplate, LayoutGrid, RectangleHorizontal,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
   PanelTop, Bookmark, Link2, Play, Sigma, Keyboard, Unlock, Map as MapIcon, MousePointerClick, Navigation, RefreshCw, Unlink, Copy, CircleDashed, Gauge,
@@ -37,6 +37,7 @@ import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { useCargas, iniciarCarga, registrarReceptor, claveDestino, type DestinoCarga } from '../utils/cargas';
+import { FilaBotones, VentanaBoton, type BotonCabecera } from '../components/knowledge/BotonesCabecera';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion, TALLAS_PORTADA, tallaDe } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -294,6 +295,8 @@ function EditorPagina() {
   const [optimizacionAbierta, setOptimizacionAbierta] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
+  /** El botón de la cabecera cuya página está abierta en su ventana (2026-10-20). */
+  const [ventanaBoton, setVentanaBoton] = useState<BotonCabecera | null>(null);
   /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
   const [focoDescripcion, setFocoDescripcion] = useState(false);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
@@ -1057,6 +1060,8 @@ function EditorPagina() {
     if (plegable) nuevo.plegable = true;
     if (esBloqueDatos(tipo)) nuevo.datos = datosIniciales(tipo);
     if (tipo === 'boton') { nuevo.texto = 'Botón'; nuevo.boton = { tipo: 'plantilla' }; setConfigBoton(nuevo.id); }
+    // Una galería nueva, con el título y los nombres en grosor NORMAL (2026-10-20, Eugenio).
+    if (tipo === 'basedatos') { (nuevo as any).tituloPeso = 'normal'; (nuevo as any).pesoNombre = 'normal'; }
     if (esVideo) videosPendientes.current.add(nuevo.id);
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
     if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'marcador' && tipo !== 'web' && tipo !== 'embed' && tipo !== 'migas' && !esBloqueDatos(tipo)) textosRef.current[nuevo.id] = nuevo.texto ?? '';
@@ -2225,6 +2230,29 @@ function EditorPagina() {
   useEffect(() => registrarReceptor(claveCargas, (d, r) => alTerminarCarga.current(d, r)), [claveCargas]);
 
   const subirPortada = (archivo: File) => { iniciarCarga(archivo, claveCargas, { tipo: 'portada' }); };
+
+  /** Un botón nuevo en la cabecera: crea su página (sin título) y la abre en la ventana. */
+  const crearBotonCabecera = async () => {
+    const r = await fetch('/api/documentos', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: 'Sin título' }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.id) { fallar(j.error || 'No se ha podido crear la página del botón.'); return; }
+    const b: BotonCabecera = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.id, pubTitulo: '' };
+    setAjustes(a => ({ ...a, botones: [...(a.botones || []), b] }));
+    programarGuardado();
+    setVentanaBoton(b);
+  };
+  /** Al cerrar la ventana, el botón toma el título que se le haya puesto a su página. */
+  const cerrarVentanaBoton = useCallback(async () => {
+    const b = ventanaBoton;
+    setVentanaBoton(null);
+    if (!b) return;
+    const w = await fetch(`/api/windows/${encodeURIComponent(b.entityId)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+    const t = (w?.title || '').trim();
+    const titulo = t === 'Sin título' || t === 'Documento sin título' ? '' : t;
+    if (titulo === (b.pubTitulo || '')) return;
+    setAjustes(a => ({ ...a, botones: (a.botones || []).map(x => (x.id === b.id ? { ...x, pubTitulo: titulo } : x)) }));
+    programarGuardado();
+  }, [ventanaBoton]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ES_TEXTO: TipoBloque[] = ['parrafo', 'titulo1', 'titulo2', 'titulo3', 'lista', 'numerada', 'tarea', 'cita'];
 
@@ -4228,7 +4256,13 @@ function EditorPagina() {
                     <AlignLeft className="w-3.5 h-3.5" /> {tr('Añadir descripción')}
                   </button>
                 )}
-                {(portada || icono || ajustes.subtitulo !== undefined) && !eligiendoIcono && (
+                {!(ajustes.botones || []).length && !eligiendoIcono && (
+                  <button onClick={crearBotonCabecera}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
+                    <RectangleHorizontal className="w-3.5 h-3.5" /> {tr('Añadir botón')}
+                  </button>
+                )}
+                {(portada || icono || ajustes.subtitulo !== undefined || !!(ajustes.botones || []).length) && !eligiendoIcono && (
                   <button onClick={() => setDisenoAbierto(v => !v)} aria-expanded={disenoAbierto}
                     className={cn('inline-flex items-center gap-1 text-[11px] font-bold transition-colors',
                       disenoAbierto ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500')}>
@@ -4281,6 +4315,20 @@ function EditorPagina() {
           </p>
         ) : null)}
             </FilaTitulo>
+        {/* LOS BOTONES DE LA CABECERA (2026-10-20): cada uno abre su página en una ventana. */}
+        <FilaBotones botones={ajustes.botones || []} talla={ajustes.cabecera?.botonesTalla} estilo={ajustes.cabecera?.botonesEstilo}
+          onAbrir={b => setVentanaBoton(b)}
+          onQuitar={editable ? b => {
+            if (!window.confirm(`¿Quitar el botón «${b.pubTitulo || 'Sin título'}»? Su página no se borra: queda en la lista de páginas.`)) return;
+            setAjustes(a => ({ ...a, botones: (a.botones || []).filter(x => x.id !== b.id) })); programarGuardado();
+          } : undefined}
+          onAnadir={editable ? crearBotonCabecera : undefined} />
+        {ventanaBoton && (
+          <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
+            {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
+            <iframe src={`/paginas/${encodeURIComponent(ventanaBoton.entityId)}?embed=1`} title={ventanaBoton.pubTitulo || 'Sin título'} className="block h-full w-full border-0" />
+          </VentanaBoton>
+        )}
         {/* EL AUTOR, OCULTO POR DEFECTO (2026-09-30). Quien escribe lo ve
             atenuado, con la opción de mostrarlo al pasar el ratón; quien lee
             sólo lo ve si el autor lo ha decidido. */}
@@ -4314,9 +4362,9 @@ function EditorPagina() {
           </>}
         />
 
-        {editable && disenoAbierto && (portada || icono || ajustes.subtitulo !== undefined) && (
+        {editable && disenoAbierto && (portada || icono || ajustes.subtitulo !== undefined || !!(ajustes.botones || []).length) && (
           <div className="mb-6">
-            <MandosCabecera cabecera={ajustes.cabecera} hayImagen={!!portada} hayIcono={!!icono}
+            <MandosCabecera cabecera={ajustes.cabecera} hayImagen={!!portada} hayIcono={!!icono} hayBotones={!!(ajustes.botones || []).length}
               hayDescripcion={ajustes.subtitulo !== undefined}
               onCambio={cab => { setAjustes(a => ({ ...a, cabecera: cab })); programarGuardado(); }} />
           </div>

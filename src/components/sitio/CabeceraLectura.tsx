@@ -10,6 +10,8 @@ import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina }
 // Las propiedades de la entrada, en diferido: sólo las páginas que son una
 // entrada de base de datos las cargan (y el HTML del servidor no las pinta).
 const PropiedadesFila = lazy(() => import('../tablas/PropiedadesFila'));
+// Los botones de la cabecera (2026-10-20): con ganchos y ventana, sólo en el navegador.
+const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
 // ============================================================================
 // EL MARCO Y LA CABECERA DE UNA PÁGINA PUBLICADA (2026-10-01)
@@ -94,6 +96,9 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
             </p>
           )}
           </FilaTitulo>
+          {Array.isArray(cfg.botones) && cfg.botones.length > 0 && (
+            <Suspense fallback={null}><BotonesLectura config={cfg} centrado={!alIzquierda} /></Suspense>
+          )}
           {/* LA FECHA YA NO SE PUBLICA (2026-10-02, Eugenio: «quita la fecha que
               está debajo del icono»). `cfg.mostrarFecha`, que tienen algunas
               páginas viejas, se ignora. */}

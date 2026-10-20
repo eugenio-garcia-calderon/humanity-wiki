@@ -50,10 +50,12 @@ export type Ajustes = {
   subtituloOculto?: boolean;
   /** El menú y el pie de la web (2026-10-02). Ver `sitio/sitioWeb.ts`. */
   sitio?: any;
+  /** Los botones de la cabecera, cada uno una subpágina (2026-10-20). Ver `BotonesCabecera.tsx`. */
+  botones?: { id: string; tipo: 'subpagina'; entityId: string; pubTitulo?: string }[];
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio', 'botones'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, resumen, onCambio, onCerrar }: {
   ajustes: Ajustes;
