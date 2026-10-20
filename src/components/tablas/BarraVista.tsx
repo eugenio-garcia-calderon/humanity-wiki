@@ -600,7 +600,7 @@ export default function BarraVista({
                 title="Propiedades" aria-label="Propiedades">
                 <Eye className="w-[18px] h-[18px]" />Propiedades
               </button>
-              <Desplegable abierto={abierto === 'props'} onCerrar={cerrar} ancho="w-72" derecha>
+              <Desplegable abierto={abierto === 'props'} onCerrar={cerrar} ancho={panelPropiedades ? 'w-[22rem]' : 'w-72'} derecha>
                 {panelPropiedades ?? <PanelPropiedades vista={activa} columnas={columnas} columnaTitulo={columnaTitulo} onCambiar={onCambiar} />}
                 {acciones && <div className="mt-1.5 pt-1.5 border-t border-slate-100 space-y-0.5">{acciones}</div>}
               </Desplegable>

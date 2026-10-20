@@ -49,9 +49,9 @@ const ESCALA_VALOR: Record<Talla, number> = { xxs: 0.65, xs: 0.75, s: 0.85, m: 0
 type Diseno = { estilo?: 'lista' | 'dos_columnas' | 'columnas'; plegar_vacias?: boolean };
 
 const VISIBILIDADES: Array<{ id: Visibilidad; label: string; desc: string }> = [
-  { id: 'siempre', label: 'Siempre visible', desc: 'Aunque esté vacía' },
-  { id: 'si_tiene', label: 'Ocultar si está vacía', desc: 'Solo cuando la fila tiene algo' },
-  { id: 'nunca', label: 'Ocultar siempre', desc: 'Sigue en la tabla y en los filtros' },
+  { id: 'siempre', label: 'Siempre', desc: 'Aunque esté vacía' },
+  { id: 'si_tiene', label: 'Si tiene valor', desc: 'Solo cuando la entrada tiene algo' },
+  { id: 'nunca', label: 'Oculta', desc: 'Sigue en la tabla y en los filtros' },
 ];
 
 const vacia = (fila: any, c: Columna) => {
@@ -283,7 +283,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
               {opcionMenu(Pencil, 'Renombrar', () => { setMenu(null); setRenombrando(c.id); })}
               {opcionMenu(Settings2, 'Editar propiedad', () => { setMenu(null); setEditando(c); })}
               {opcionMenu(MessageSquare, 'Comentar', () => { setMenu(null); setComentando(comentando === c.id ? null : c.id); })}
-              {opcionMenu(Eye, 'Visibilidad de la propiedad', () => setSubmenu(s => !s), false,
+              {opcionMenu(Eye, 'Visible en la página', () => setSubmenu(s => !s), false,
                 <span className="inline-flex items-center gap-1 text-[10px] text-slate-400">{VISIBILIDADES.find(x => x.id === v)?.label}{submenu ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}</span>)}
               {submenu && (
                 <div className="ml-5 mb-1 border-l border-slate-100 pl-1">
@@ -294,6 +294,8 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
                       <span><span className="block text-xs font-bold text-slate-700">{x.label}</span><span className="block text-[11px] text-slate-400">{x.desc}</span></span>
                     </button>
                   ))}
+                  {/* Dos visibilidades distintas (2026-10-20): ésta es la de la página. */}
+                  <p className="px-2 pt-1 pb-1.5 text-[11px] leading-snug text-slate-500">Solo en la página de cada entrada. En las tarjetas de una galería se elige en su botón «Propiedades».</p>
                 </div>
               )}
               {enRejilla && (
@@ -407,13 +409,16 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
               Plegar las propiedades vacías bajo «N propiedades más»
             </label>
             <div className="border-t border-slate-100 pt-2">
-              <p className="pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Cada propiedad</p>
+              <p className="pb-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">En la página, cada propiedad</p>
+              <p className="pb-1.5 text-[11px] text-slate-500">Las tarjetas de la galería se configuran aparte, en su botón «Propiedades».</p>
               <div className="max-h-64 overflow-y-auto space-y-1">
                 {columnas.map(c => (
                   <div key={c.id} className="flex items-center gap-2">
                     <span className="flex-1 truncate text-xs font-bold text-slate-700">{c.nombre}</span>
                     <select value={visibilidad(c)} onChange={e => cambiarColumna(c, { config: { ...(c.config || {}), visibilidad: e.target.value } })}
-                      aria-label={`Visibilidad de ${c.nombre}`} className="h-8 rounded-md border border-slate-200 bg-white px-1.5 text-xs font-bold text-slate-600">
+                      aria-label={`Visibilidad de ${c.nombre} en la página`}
+                      className={cn('h-8 rounded-md border px-1.5 text-xs font-bold',
+                        visibilidad(c) === 'nunca' ? 'border-slate-200 bg-slate-100 text-slate-500' : visibilidad(c) === 'si_tiene' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700')}>
                       {VISIBILIDADES.map(x => <option key={x.id} value={x.id}>{x.label}</option>)}
                     </select>
                   </div>
