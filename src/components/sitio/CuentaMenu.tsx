@@ -174,12 +174,14 @@ export default function CuentaMenu({ raiz, color, className }: { raiz: string; c
                 <Item icono={FolderKanban} texto="Mis proyectos" href={`${PLATAFORMA}/proyectos`} />
                 <Item icono={Settings} texto="Ajustes" href={`${PLATAFORMA}/configuracion`} />
               </div>
-              {!equipo && (
+              {/* Quien es del equipo pero entró con su cuenta de miembro (2026-10-20)
+                  también puede cerrar esa sesión, y sabe dónde se edita. */}
+              {(!equipo || yo) && (
                 <div className="border-t border-slate-100 pt-1">
                   <Item icono={LogOut} texto="Cerrar sesión" onClick={salir} />
                 </div>
               )}
-              {!equipo && <p className="px-3 pb-1 pt-1 text-[10px] leading-snug text-slate-400">«Mis proyectos» y «Ajustes» se abren en humanity.wiki: entra allí con este mismo correo y contraseña.</p>}
+              {(!equipo || yo) && <p className="px-3 pb-1 pt-1 text-[10px] leading-snug text-slate-400">{equipo ? '«Editar esta página», «Mis proyectos» y «Ajustes»' : '«Mis proyectos» y «Ajustes»'} se abren en humanity.wiki: entra allí con este mismo correo y contraseña.</p>}
             </>
           )}
 

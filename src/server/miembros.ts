@@ -260,8 +260,19 @@ export async function accesoMiembro(db: any, req: Request | undefined, paginaId:
   const sr = await sitioYRegla(db, paginaId);
   if (!sr) return null;
   const { sitio, regla } = sr;
-  const esEquipo = req ? rango((await rolEnPagina(db, quienDe(req), paginaId)).rol) > 0 : false;
+  let esEquipo = req ? rango((await rolEnPagina(db, quienDe(req), paginaId)).rol) > 0 : false;
   const miembro = req ? await miembroActual(db, req, sitio.raiz) : null;
+  // EL DUEÑO QUE ENTRA COMO MIEMBRO TAMBIÉN ES EQUIPO (2026-10-20, Eugenio: «se
+  // ha registrado en su propia web, es administrador, y no puede editar»). En
+  // la web publicada (su dominio, otro origen) no viaja la sesión de
+  // humanity.wiki: se entra con la cuenta de miembro, y esa cuenta ES la suya
+  // (`user_id`). Antes solo contaba la sesión de la plataforma, así que el
+  // dueño se veía como un miembro más, sin «Editar esta página». Ahora el rol
+  // se mira también con la persona del miembro.
+  if (!esEquipo && miembro?.userId && miembro.estado === 'activo') {
+    const u = (await db.execute(sql`SELECT role_level FROM users WHERE id = ${miembro.userId} AND deleted_at IS NULL AND archived_at IS NULL`)).rows[0] as any;
+    if (u) esEquipo = rango((await rolEnPagina(db, { id: miembro.userId, nivel: Number(u.role_level) || 0 }, paginaId)).rol) > 0;
+  }
   const base = { sitio, miembro, esEquipo, restringida: !!regla };
   if (esEquipo || !regla) return { ...base, permitido: true, motivo: null };
   if (!miembro) return { ...base, permitido: false, motivo: 'entrar' };
@@ -548,10 +559,15 @@ export function registrarMiembros(app: Express, db: any) {
       const like = `%${q}%`;
       const r = await db.execute(sql`
         SELECT m.id, m.email, COALESCE(m.nombre, u.display_name, u.name) AS nombre, m.estado, m.categoria_id,
-               c.nombre AS categoria, m.ultima_visita, m.visitas, m.created_at, m.user_id IS NOT NULL AS tiene_cuenta
+               c.nombre AS categoria, m.ultima_visita, m.visitas, m.created_at, m.user_id IS NOT NULL AS tiene_cuenta,
+               -- Su PERMISO sobre la web (2026-10-20): ver, comentar, editar o administrar,
+               -- el mismo que da «Compartir». El dueño, aparte: lo puede todo.
+               m.user_id, ae.rol, (m.user_id IS NOT NULL AND m.user_id = kw.creator_user_id) AS es_duenyo
         FROM sitio_miembros m
         LEFT JOIN sitio_categorias c ON c.id = m.categoria_id
         LEFT JOIN users u ON u.id = m.user_id
+        LEFT JOIN knowledge_windows kw ON kw.id = m.raiz_id
+        LEFT JOIN accesos_entidad ae ON ae.entidad_tipo = 'pagina' AND ae.entidad_id = m.raiz_id AND ae.user_id = m.user_id
         WHERE m.raiz_id = ${raiz}
           AND (${q} = '' OR m.email ILIKE ${like} OR m.nombre ILIKE ${like} OR u.display_name ILIKE ${like})
           AND (${estado} = '' OR m.estado = ${estado})
@@ -783,7 +799,10 @@ export function registrarMiembros(app: Express, db: any) {
       res.json({
         activo: true, ...muro.sitio, es_equipo: a.esEquipo,
         yo: m ? { nombre: m.nombre, email: m.email, estado: m.estado, categoria: m.categoriaNombre, avatar: await foto(m.userId), permisos: m.estado === 'activo' ? m.permisos : null } : null,
-        equipo: a.esEquipo && req.user ? { nombre: req.user.displayName || req.user.name || req.user.email, avatar: req.user.avatarUrl || null } : null,
+        equipo: !a.esEquipo ? null
+          : req.user ? { nombre: req.user.displayName || req.user.name || req.user.email, avatar: req.user.avatarUrl || null }
+          // Entró con su cuenta de miembro (ver `accesoMiembro`): sus datos.
+          : m ? { nombre: m.nombre || m.email, avatar: await foto(m.userId) } : null,
       });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
