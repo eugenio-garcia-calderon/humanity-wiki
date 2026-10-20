@@ -38,6 +38,8 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
   const [visible, setVisible] = useState(false);
   const [arriba, setArriba] = useState(0);
   const [repetida, setRepetida] = useState(false);
+  /** Lo que ocupa la píldora de la cuenta, arriba a la derecha, para no tapar los botones. */
+  const [hueco, setHueco] = useState(0);
   useEffect(() => {
     let raf = 0;
     let ahora = false;
@@ -53,6 +55,8 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
       const relleno = caja ? parseFloat(getComputedStyle(caja).paddingTop) || 0 : 0;
       setArriba(altoMenu - relleno);
       setRepetida(!!menu && !!titulo && (menu.textContent || '').includes(titulo));
+      const pildora = document.querySelector<HTMLElement>('[data-barra-miembro]');
+      setHueco(pildora && !altoMenu ? Math.round(pildora.getBoundingClientRect().width) + 16 : 0);
       // El título es lo que manda: la cabecera es la que va justo detrás de la barra.
       const t = (p.nextElementSibling as HTMLElement | null)?.querySelector<HTMLElement>('h1, textarea, [data-elemento-cabecera="titulo"]');
       if (!t) return;
@@ -75,7 +79,7 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
       <div data-barra-fija aria-hidden={!visible} inert={!visible || undefined}
         className={cn('absolute inset-x-0 top-0 transition-[opacity,transform] duration-200', margenes,
           visible ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0')}>
-        <div className="flex h-12 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-5 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur sm:h-14 sm:px-8">
+        <div style={hueco ? { paddingRight: hueco } : undefined} className="flex h-12 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-5 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur sm:h-14 sm:px-8">
           <button type="button" onClick={subir} title="Volver arriba"
             className={cn('flex min-w-0 items-center gap-2.5 text-left', repetida ? 'shrink' : 'flex-1')}>
             {portada && (

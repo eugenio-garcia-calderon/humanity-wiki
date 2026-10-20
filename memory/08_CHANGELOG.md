@@ -9563,3 +9563,11 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 - `PreguntaBorrarBd.tsx`, `preguntarBorrarBd({ tablaIds, detalle })` devuelve una promesa. Es una ventana con el nombre de cada base de datos y dos botones que dicen lo que hacen: «Mantener base de datos» (con el foco; Escape hace lo mismo) y «Borrar base de datos». Pinchar fuera no la cierra: hay que elegir.
 - Sale al borrar un bloque de base de datos desde el asa, al borrar con Supr una selección de bloques que tenga alguna, al borrar o sustituir un tramo de texto que cruce una, y al retirar una tabla en /tablas (las dos preguntas que antes eran `window.confirm`).
+
+## 2026-10-20 — Añadir entradas desde la página publicada y la cuenta arriba a la derecha (Programador 8)
+
+- **Quién**: el equipo con rol de editar en la página (entre con la sesión de humanity.wiki o con su cuenta de miembro) y los miembros activos cuya categoría tenga «editar». En el panel de Miembros ese permiso pasa a llamarse «Añadir contenido».
+- **Qué**: crear entradas en las bases de datos que están en esa página, con valores para las propiedades que ya existen (no privadas, no calculadas y sin opciones nuevas), enlaces a otras bases de datos y, en la página de la entrada, portada, texto e imágenes. No toca la página ni crea propiedades.
+- **Servidor** (`src/server/contribuir.ts`): `contribuidor()`; `GET /api/sitio-contribuir/:pagina`; `GET …/tablas/:tabla` (las propiedades que se pueden rellenar); `GET …/relacion/:columna?q=`; `POST …/filas`. La fila la crea el dueño de la tabla (`bdInterno.crearFila`/`escribirCeldas`, como los formularios), en todo o nada, y luego se anota `created_by` con quien la trajo. Las subidas van por `POST /api/uploads?contribuir=<página>` (`identidadDeContribuidor`, montado justo después de «miembros»).
+- **Cliente**: `Contribuir.tsx` pone «Añadir entrada» encima de cada base de datos de la página publicada para quien puede. `NuevaEntradaPublica.tsx` es el formulario. La galería se recarga con la entrada nueva.
+- **La cuenta, arriba a la derecha y con el nombre**: la píldora de `BarraMiembro` pasa de abajo a la izquierda a arriba a la derecha, con la inicial y el nombre. El icono del menú (`CuentaMenu`) también muestra el nombre. La barra fija de la cabecera deja hueco a la píldora.

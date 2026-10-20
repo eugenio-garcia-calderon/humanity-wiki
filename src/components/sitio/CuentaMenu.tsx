@@ -137,11 +137,13 @@ export default function CuentaMenu({ raiz, color, className }: { raiz: string; c
         style={color ? { color } : undefined}
         // Signed out, the word is written: a bare person icon was not read as
         // «you can sign in or register here» (Wikiproducts evaluator, 2026-10-18).
+        // CON SU NOMBRE AL LADO (2026-10-20, Eugenio: «el icono de perfil arriba a
+        // la derecha, junto con el nombre de la persona registrada»).
         className={cn(conSesion
-          ? 'grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-black/5 focus-visible:outline focus-visible:outline-2'
+          ? 'inline-flex h-11 max-w-[14rem] shrink-0 items-center gap-2 rounded-full pl-1.5 pr-1.5 sm:pr-3 hover:bg-black/5 focus-visible:outline focus-visible:outline-2'
           : 'inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-current/20 px-3 text-sm font-bold hover:bg-black/5 focus-visible:outline focus-visible:outline-2', className)}>
         {conSesion
-          ? <Foto url={foto} nombre={nombre} tam={32} acento={acento} />
+          ? <><Foto url={foto} nombre={nombre} tam={32} acento={acento} />{nombre && <span className="hidden truncate text-sm font-bold sm:inline">{nombre.includes('@') ? nombre.split('@')[0] : nombre.split(' ')[0]}</span>}</>
           : <><UserRound className="h-5 w-5" strokeWidth={1.9} /><span>Entrar</span></>}
       </button>
 

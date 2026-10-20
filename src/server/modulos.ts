@@ -53,6 +53,7 @@ import { registerArchivosRoutes } from './archivos.js';
 import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
+import { registrarContribuir, identidadDeContribuidor } from './contribuir.js';
 import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
@@ -189,6 +190,12 @@ export const MODULOS: Modulo[] = [
         + 'sesión de un sitio en `req.user` para una lista cerrada de rutas (comentar, favoritos, '
         + 'comprar). Montado después, esas rutas ya habrían contestado «inicia sesión».',
   },
+  {
+    nombre: 'contribuir-identidad',
+    montar: (app, db) => app.use(identidadDeContribuidor(db)),
+    nota: 'Justo después de «miembros» y ANTES de las subidas: `POST /api/uploads?contribuir=<página>` con la sesión '
+        + 'de miembro de quien puede añadir entradas en esa página (ver `contribuir.ts`).',
+  },
 
   {
     nombre: 'api-publica',
@@ -276,6 +283,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
+  { nombre: 'contribuir', montar: (app, db) => registrarContribuir(app, db), nota: 'Añadir entradas desde la página publicada (2026-10-20). DESPUÉS de «bd»: usa `bdInterno.crearFila`/`escribirCeldas`.' },
   {
     nombre: 'bd/plantillaFicha',
     montar: (app, db) => registrarPlantillaFicha(app, db),

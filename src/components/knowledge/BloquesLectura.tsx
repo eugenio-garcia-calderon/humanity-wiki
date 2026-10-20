@@ -21,6 +21,7 @@ import { MigasDePan, BotonVista } from './BloquesExtra';
 import { ImagenVista } from './ImagenBloque';
 import { useSitio } from '../sitio/ContextoSitio';
 import { CargaEnOrden } from './CargaEnOrden';
+import { BdContribuible } from '../sitio/Contribuir';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -490,7 +491,8 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <ReservaAlto>{lista => <CargaEnOrden alto={520}><Rejilla tablaId={tablaId} onCargada={lista} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloColor={b.tituloColor} tituloPeso={b.tituloPeso || 'negrita'} nombreArriba={!!b.nombreArriba} pesoNombre={b.pesoNombre || 'negrita'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} ocultarMandosPublica={!!b.ocultarMandosPublica} tituloAlineacion={b.tituloAlineacion || 'centro'} visibles={b.propsGaleria} /></CargaEnOrden>}</ReservaAlto> : null;
+        // Con «Añadir entrada» para quien puede añadir en la web publicada (2026-10-20, `Contribuir.tsx`).
+        return tablaId ? <BdContribuible paginaId={raiz?.paginaId} tablaId={tablaId}>{clave => <ReservaAlto key={clave}>{lista => <CargaEnOrden alto={520}><Rejilla tablaId={tablaId} onCargada={lista} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} tamanoTitulo={b.tamanoTitulo || 'mediano'} tituloColor={b.tituloColor} tituloPeso={b.tituloPeso || 'negrita'} nombreArriba={!!b.nombreArriba} pesoNombre={b.pesoNombre || 'negrita'} tamanoNombre={b.tamanoNombre} tituloOculto={!!b.tituloOculto} ocultarMandosPublica={!!b.ocultarMandosPublica} tituloAlineacion={b.tituloAlineacion || 'centro'} visibles={b.propsGaleria} /></CargaEnOrden>}</ReservaAlto>}</BdContribuible> : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────

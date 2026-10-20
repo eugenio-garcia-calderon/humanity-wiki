@@ -32,7 +32,7 @@ const PERMISOS: { id: string; nombre: string; explica: string }[] = [
   { id: 'comentar', nombre: 'Comentar', explica: 'Comenta y responde.' },
   { id: 'guardar', nombre: 'Guardar', explica: 'Guarda páginas en «Mis guardados» y productos en favoritos.' },
   { id: 'comprar', nombre: 'Comprar', explica: 'Compra en la tienda del sitio con su cuenta.' },
-  { id: 'editar', nombre: 'Editar', explica: 'Edita las páginas que ve, desde humanity.wiki con la misma cuenta.' },
+  { id: 'editar', nombre: 'Añadir contenido', explica: 'Añade entradas en las bases de datos de las páginas que ve, desde la propia web: con portada, texto, imágenes y enlaces a otras bases de datos. No cambia la página ni crea propiedades.' },
   { id: 'todo', nombre: 'Todo', explica: 'Todo lo anterior.' },
 ];
 const ESTADOS: Record<string, { nombre: string; clase: string }> = {

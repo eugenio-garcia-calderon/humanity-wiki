@@ -88,10 +88,19 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   };
 
   return (
-    <div ref={caja} className="fixed bottom-4 left-4 z-[60] print:hidden">
-      {avisoEnlace && <p className="mb-2 max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p>}
+    // ARRIBA A LA DERECHA (2026-10-20, Eugenio: «el icono de perfil arriba a la
+    // derecha, junto con el nombre»). Antes era una píldora abajo a la izquierda.
+    <div ref={caja} data-barra-miembro className="fixed right-4 top-4 z-[60] flex flex-col items-end print:hidden">
+      {avisoEnlace && <p className="order-last mt-2 max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p>}
+      <button onClick={() => setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'))}
+        className="flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white/95 pl-1.5 pr-4 text-[13px] font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white">
+        {yo
+          ? <span className="grid h-8 w-8 place-items-center rounded-full text-sm font-black text-white" style={{ background: acento }}>{(yo.nombre || yo.email).trim().charAt(0).toUpperCase()}</span>
+          : <span className="grid h-8 w-8 place-items-center"><UserRound className="h-4 w-4" style={{ color: acento }} /></span>}
+        {yo ? (yo.nombre || yo.email.split('@')[0]).split(' ')[0] : 'Entrar'}
+      </button>
       {abierto === 'menu' && yo && (
-        <div className="mb-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+        <div className="mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
           <p className="truncate px-2 pt-1 text-[13px] font-bold text-slate-800">{yo.nombre || yo.email}</p>
           <p className="truncate px-2 pb-2 text-[11px] text-slate-400">{e.es_equipo ? 'Equipo de esta web' : <>{yo.categoria || 'Miembro'}{yo.estado !== 'activo' ? ' · pendiente' : ''}</>}</p>
           {/* QUIEN GESTIONA LA WEB, AUNQUE HAYA ENTRADO COMO MIEMBRO (2026-10-20, Eugenio:
@@ -135,11 +144,6 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
           </div>
         </div>
       )}
-      <button onClick={() => setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'))}
-        className="flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 text-[13px] font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white">
-        <UserRound className="h-4 w-4" style={{ color: acento }} />
-        {yo ? (yo.nombre || yo.email).split(' ')[0] : 'Entrar'}
-      </button>
     </div>
   );
 }
