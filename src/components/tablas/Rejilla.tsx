@@ -2,7 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, LayoutGrid, FileText, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Galeria, { ANCHO_TARJETA } from './Galeria';
+import Galeria, { anchoTarjeta } from './Galeria';
 import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
 
 /** Las cinco velocidades del carrusel, en píxeles por segundo. */
@@ -641,9 +641,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         const n = g.filas.length;
         const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
         const ancho = n <= 2
-          // ×1,25 por tarjeta: dentro del recuadro las columnas se estiran hasta llenarlo.
+          // El ancho fijo de la tarjeta de ese tamaño (`anchoTarjeta`).
           // + el relleno del recuadro (p-4 y el borde, a cada lado).
-          ? Math.max(1, n) * Math.round((ANCHO_TARJETA[tamano as keyof typeof ANCHO_TARJETA] ?? 220) * 1.25) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 34
+          ? Math.max(1, n) * anchoTarjeta(tamano) + (Math.max(1, n) - 1) * (chica ? 8 : 16) + 34
           : null;
         const caja = (COLORES_GRUPO[activa.config.grupo_color || 'gris'] || COLORES_GRUPO.gris).caja;
         return (
