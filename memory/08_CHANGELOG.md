@@ -9514,3 +9514,7 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - El dictado del propio navegador (el de respaldo) descarta una frase cerrada que llega repetida.
 - `VOZ_DEPURAR=1` en el servidor escribe al registro cada texto del transcriptor tal cual.
 - Probado con el micrófono real del Mac escuchando `say` por el altavoz: 23 s y 44 s de habla seguida, con pausas a media frase y cambios de tema, sin ninguna frase repetida.
+
+## 2026-10-20 — Al enlazar bases de datos, primero las del mismo proyecto (prog8)
+- En «Enlazar con otra base de datos» salían todas las bases de datos del usuario. Ahora salen **las de esta página** y **las del mismo proyecto** («En «Raíz A»»): las que cuelgan de la misma raíz del menú —subpáginas y páginas de entradas, a cualquier profundidad—. Las demás quedan tras el botón **«Conectar con otros proyectos (N)»**, que las carga todas. Si el proyecto no tiene otras o la elegida es de otro proyecto, se ven sin pedirlas.
+- Servidor: `GET /api/bd/tablas/:id/del-proyecto` → `{ raiz, tablas }` (`src/server/bd/arbolProyecto.ts`: sube desde la página de la tabla por sus madres —bloque «Página» o tabla de la entrada— hasta la raíz y baja recogiendo bloques de base de datos; con topes).

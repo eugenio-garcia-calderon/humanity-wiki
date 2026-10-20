@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Plus, Trash2, Loader2, AlertTriangle, Check, Image as ImageIcon, AlignLeft, Database, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, AlertTriangle, Check, Image as ImageIcon, AlignLeft, Database, ChevronUp, ChevronDown, Link2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -211,6 +211,16 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
     if (tipo !== 'relacion' && tipo !== 'agregado') return;
     fetch('/api/bd/tablas', { credentials: 'include' }).then(r => r.json()).then(setTablas).catch(() => {});
   }, [tipo]);
+  // LAS DEL MISMO PROYECTO PRIMERO (2026-10-20, Eugenio: «me salen tantas bases
+  // de datos que no encuentro la de este proyecto»). El servidor dice cuáles
+  // cuelgan de la misma raíz del menú (`bd/arbolProyecto.ts`); las demás
+  // quedan tras «Conectar con otros proyectos».
+  const [proyecto, setProyecto] = useState<{ raiz: { id: string; titulo: string } | null; tablas: string[] } | null>(null);
+  const [verOtras, setVerOtras] = useState(false);
+  useEffect(() => {
+    if (tipo !== 'relacion' || !tablaId) return;
+    fetch(`/api/bd/tablas/${tablaId}/del-proyecto`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(setProyecto).catch(() => setProyecto(null));
+  }, [tipo, tablaId]);
 
   // Para un resumen hay que elegir qué campo de la OTRA tabla se resume, así
   // que se piden sus columnas en cuanto se sabe cuál es la relación.
@@ -255,7 +265,12 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const candidatas = tablas.filter(t => t.id !== tablaId);
   const enPagina = candidatas.filter(t => tablasPagina.includes(t.id))
     .sort((a, b) => tablasPagina.indexOf(a.id) - tablasPagina.indexOf(b.id));
-  const otras = candidatas.filter(t => !tablasPagina.includes(t.id));
+  const enProyecto = new Set(proyecto?.tablas || []);
+  const delProyecto = candidatas.filter(t => !tablasPagina.includes(t.id) && enProyecto.has(t.id));
+  const otras = candidatas.filter(t => !tablasPagina.includes(t.id) && !enProyecto.has(t.id));
+  // Sin nada del proyecto que ofrecer (o sin saber el proyecto), las demás se ven sin pedirlas;
+  // y si la elegida es de otro proyecto, también.
+  const otrasAbiertas = verOtras || (!enPagina.length && !delProyecto.length) || otras.some(t => t.id === config.tabla_destino);
 
   const guardar = async () => {
     setGuardando(true); setFallo(null);
@@ -505,7 +520,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                   </p>
                 ) : (
                   <div className="mt-1 max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-1.5 space-y-2">
-                    {[['En esta página', enPagina], ['Otras bases de datos', otras]].map(([titulo, lista]: any) => lista.length > 0 && (
+                    {[['En esta página', enPagina], [proyecto?.raiz ? `En «${proyecto.raiz.titulo}»` : 'De este proyecto', delProyecto], ...(otrasAbiertas ? [['Otros proyectos', otras]] : [])].map(([titulo, lista]: any) => lista.length > 0 && (
                       <div key={titulo}>
                         <p className="px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-300">{titulo}</p>
                         {lista.map((t: any) => (
@@ -521,6 +536,12 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
                       </div>
                     ))}
                     {!candidatas.length && <p className="px-2 py-3 text-xs text-slate-400">No hay otras bases de datos todavía.</p>}
+                    {!otrasAbiertas && otras.length > 0 && (
+                      <button type="button" onClick={() => setVerOtras(true)}
+                        className="w-full flex items-center justify-center gap-1.5 h-10 rounded-lg border border-dashed border-slate-300 text-xs font-bold text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-700">
+                        <Link2 className="h-3.5 w-3.5" /> Conectar con otros proyectos <span className="text-slate-400">({otras.length})</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
