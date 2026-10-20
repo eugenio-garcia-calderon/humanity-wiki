@@ -59,8 +59,10 @@ const vacia = (fila: any, c: Columna) => {
   return !celda || celda.estado === 'vacia' || (celda.estado === 'ok' && Array.isArray(celda.valor) && !celda.valor.length);
 };
 
-export default function PropiedadesFila({ tablaId, filaId, editable }: {
+export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha = false }: {
   tablaId: string; filaId: string; editable: boolean;
+  /** En la columna derecha de la cabecera (2026-10-20): todo pegado a la derecha. */
+  alDerecha?: boolean;
 }) {
   const [datos, setDatos] = useState<{ columnas: Columna[]; fila: any; titulo: string | null; diseno: Diseno } | null>(null);
   const [creando, setCreando] = useState(false);
@@ -341,8 +343,8 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   };
 
   return (
-    <div className={cn('mb-4', enRejilla ? 'py-1 -ml-2' : 'border-y border-slate-100 pl-5 -ml-5')}>
-      <div className={cn(enRejilla ? 'flex flex-wrap items-start gap-x-1 gap-y-1' : 'divide-y divide-slate-100')}>
+    <div className={cn('mb-4', enRejilla ? (alDerecha ? 'py-1 -mr-2' : 'py-1 -ml-2') : 'border-y border-slate-100 pl-5 -ml-5')}>
+      <div className={cn(enRejilla ? 'flex flex-wrap items-start gap-x-1 gap-y-1' : 'divide-y divide-slate-100', enRejilla && alDerecha && 'justify-end')}>
         {visibles.map(fila)}
       </div>
       {/* Las escondidas: solo para quien edita, para poder rellenarlas. */}
@@ -365,7 +367,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
       {/* AÑADIR UNA PROPIEDAD DESDE AQUÍ (2026-10-18, Eugenio): una columna nueva
           de la base de datos —texto, fecha, estado, número…— sin volver a la tabla. */}
       {editable && (
-        <div className="flex flex-wrap items-center gap-x-3">
+        <div className={cn('flex flex-wrap items-center gap-x-3', alDerecha && 'justify-end')}>
           <button onClick={() => setNuevaPropiedad(true)}
             className="inline-flex items-center gap-1 h-9 px-1 text-xs font-bold text-slate-400 hover:text-emerald-700">
             <Plus className="w-3.5 h-3.5" /> Añadir una propiedad

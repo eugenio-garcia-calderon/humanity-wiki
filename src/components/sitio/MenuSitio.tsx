@@ -200,7 +200,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   const { fila, nav, apretado } = useApretado(plegado === 'movil');
   const enBuscar = /\/buscar\/?$/.test(useLocation().pathname);
   return (
-    <header style={estilo}
+    <header style={estilo} data-menu-fijo={mn.fijo ? '' : undefined}
       className={cn('w-full z-40', mn.fijo ? 'sticky top-0' : 'relative', mn.borde && 'border-b', soloMovil && '@2xl:hidden')}>
       {/* El desplegable de las tres rayas se coloca respecto a la cabecera
           entera, no a esta fila: así cae debajo de la caja de buscar y no la
@@ -382,7 +382,7 @@ export function MarcoSitio({ sitio, rutas, logo, nombre, cuenta, children }: {
   const nombrePie = sitio.pie.nombre || mn.nombre || nombre || undefined;
   const lateral = mn.activo && mn.posicion === 'lateral' && mn.plegado !== 'siempre';
   return (
-    <div className="sitio-foco @container min-h-screen bg-white flex flex-col">
+    <div data-marco-sitio className="sitio-foco @container min-h-screen bg-white flex flex-col">
       {mn.activo && <Barra s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} soloMovil={lateral} cuenta={cuenta} />}
       <div className={cn('flex-1', lateral && '@2xl:flex')}>
         {lateral && <Lateral s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} cuenta={cuenta} />}

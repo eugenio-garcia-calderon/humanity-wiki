@@ -42,6 +42,12 @@ export type Cabecera = {
   /** Los botones de la cabecera (2026-10-20): tamaño y estilo. */
   botonesTalla?: 's' | 'm' | 'l';
   botonesEstilo?: 'relleno' | 'contorno' | 'suave';
+  /** 2 = la cabecera por elementos (2026-10-20). Ver `DisenoCabecera.tsx`. */
+  v?: number;
+  /** El orden, la columna, el tamaño y la visibilidad de cada elemento. */
+  elementos?: import('./DisenoCabecera').Elemento[];
+  /** Se queda arriba, en pequeño, al bajar por la página. */
+  fija?: boolean;
 };
 
 /**

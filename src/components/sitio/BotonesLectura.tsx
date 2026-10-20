@@ -1,39 +1,59 @@
 import { useState, useEffect } from 'react';
 import BloquesLectura from '../knowledge/BloquesLectura';
-import { FilaBotones, VentanaBoton, botonesDe, type BotonCabecera } from '../knowledge/BotonesCabecera';
+import { FilaBotones, VentanaBoton, botonesDe, type BotonCabecera, type TallaBotones } from '../knowledge/BotonesCabecera';
+import { BarraFija } from '../knowledge/BarraFija';
 
 // LOS BOTONES DE LA CABECERA, EN LA PÁGINA PUBLICADA (2026-10-20): cada uno
 // abre su página (una subpágina) en una ventana, leída como cualquier otra.
-export default function BotonesLectura({ config, centrado }: { config: any; centrado: boolean }) {
-  const botones = botonesDe(config);
-  const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
-  const [pagina, setPagina] = useState<{ titulo: string; bloques: any[] } | 'cargando' | 'no' | null>(null);
+// Con ganchos y ventanas: sólo en el navegador (`CabeceraLectura` los carga en diferido).
+
+/** La ventana con la página de un botón, leída del servidor. */
+function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCerrar: () => void }) {
+  const [pagina, setPagina] = useState<{ titulo: string; bloques: any[] } | 'cargando' | 'no'>('cargando');
   useEffect(() => {
-    if (!abierto) { setPagina(null); return; }
     let vivo = true;
     setPagina('cargando');
-    fetch(`/api/sitio/pagina/${encodeURIComponent(abierto.entityId)}`, { credentials: 'include' })
+    fetch(`/api/sitio/pagina/${encodeURIComponent(boton.entityId)}`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : null))
-      .then(j => { if (vivo) setPagina(j ? { titulo: j.titulo || abierto.pubTitulo || '', bloques: j.config?.bloques || [] } : 'no'); })
+      .then(j => { if (vivo) setPagina(j ? { titulo: j.titulo || boton.pubTitulo || '', bloques: j.config?.bloques || [] } : 'no'); })
       .catch(() => { if (vivo) setPagina('no'); });
     return () => { vivo = false; };
-  }, [abierto]);
+  }, [boton]);
+  const titulo = (typeof pagina === 'object' && pagina.titulo) || boton.pubTitulo || 'Sin título';
+  return (
+    <VentanaBoton titulo={titulo} onCerrar={onCerrar}>
+      <div className="mx-auto max-w-3xl px-5 pb-12 pt-10 sm:px-10 text-left">
+        <h2 className="mb-6 pr-10 text-3xl font-black tracking-tight text-slate-900 break-words">{titulo}</h2>
+        {pagina === 'cargando' && <p className="text-slate-400">Cargando…</p>}
+        {pagina === 'no' && <p className="text-slate-500">Esta página no está publicada.</p>}
+        {typeof pagina === 'object' && <BloquesLectura bloques={pagina.bloques} paginaId={boton.entityId} />}
+      </div>
+    </VentanaBoton>
+  );
+}
+
+export default function BotonesLectura({ config, centrado, derecha, talla }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones }) {
+  const botones = botonesDe(config);
+  const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
   if (!botones.length) return null;
-  const titulo = (typeof pagina === 'object' && pagina?.titulo) || abierto?.pubTitulo || 'Sin título';
   return (
     <>
-      <FilaBotones botones={botones} talla={config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
-        centrado={centrado} onAbrir={setAbierto} />
-      {abierto && (
-        <VentanaBoton titulo={titulo} onCerrar={() => setAbierto(null)}>
-          <div className="mx-auto max-w-3xl px-5 pb-12 pt-10 sm:px-10 text-left">
-            <h2 className="mb-6 pr-10 text-3xl font-black tracking-tight text-slate-900 break-words">{titulo}</h2>
-            {pagina === 'cargando' && <p className="text-slate-400">Cargando…</p>}
-            {pagina === 'no' && <p className="text-slate-500">Esta página no está publicada.</p>}
-            {typeof pagina === 'object' && pagina && <BloquesLectura bloques={pagina.bloques} paginaId={abierto.entityId} />}
-          </div>
-        </VentanaBoton>
-      )}
+      <FilaBotones botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
+        centrado={centrado} derecha={derecha} sinMargen={derecha !== undefined} onAbrir={setAbierto} />
+      {abierto && <VentanaPaginaPublica boton={abierto} onCerrar={() => setAbierto(null)} />}
+    </>
+  );
+}
+
+/** La barra fina que se queda arriba al bajar (ver `BarraFija`). */
+export function BarraFijaLectura({ config, titulo }: { config: any; titulo: string }) {
+  const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
+  const verBotones = !(config?.cabecera?.elementos || []).some((e: any) => e?.id === 'botones' && e.oculto);
+  return (
+    <>
+      <BarraFija icono={config?.icono || null} titulo={config?.ocultarTitulo ? '' : titulo} subtitulo={config?.subtitulo}
+        portada={config?.portada} botones={verBotones ? botonesDe(config) : []} estilo={config?.cabecera?.botonesEstilo} onAbrir={setAbierto} />
+      {abierto && <VentanaPaginaPublica boton={abierto} onCerrar={() => setAbierto(null)} />}
     </>
   );
 }

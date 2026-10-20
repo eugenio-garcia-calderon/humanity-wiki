@@ -220,6 +220,8 @@ const en: Record<string, string> = {
   "Añadir a favoritos ": "Add to favorites",
   "Compartir": "Share",
   "Menú y pie": "Menu and footer",
+  "Menú y cabecera": "Menu and header",
+  "Menú, cabecera y pie de página de la web": "Website menu, header and footer",
   "Menú y pie de página de la web": "Website menu and footer",
   "Ajustes de la página": "Page settings",
   "Descargar": "Download",

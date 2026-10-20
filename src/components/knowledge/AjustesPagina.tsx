@@ -4,6 +4,7 @@ import { subirArchivo } from '../../utils/subir';
 import { cn } from '../../utils/cn';
 import type { Cabecera } from './CabeceraPagina';
 import { textoLectura, type Letra, type Ancho } from '../../utils/ajustesPagina';
+import { cabeceraFija } from './DisenoCabecera';
 
 // ============================================================================
 // AJUSTES DE LA PÁGINA (2026-09-30)
@@ -135,6 +136,9 @@ export default function AjustesPagina({ ajustes, portada, titulo, resumen, onCam
 
         <section className="space-y-1">
           <p className="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Cómo se ve publicada</p>
+          {/* La cabecera fija al bajar (2026-10-20): la misma opción que en «Menú, cabecera y pie». */}
+          <Interruptor etiqueta="Cabecera fija al bajar" ayuda="Al bajar por la página, el título, la portada en pequeño y los botones se quedan arriba."
+            valor={cabeceraFija(ajustes.cabecera)} onCambio={v => pon({ cabecera: { ...(ajustes.cabecera || {}), fija: v } })} />
           <Interruptor etiqueta="Mostrar el tiempo de lectura" ayuda="«320 palabras · 2 min de lectura» bajo el título."
             valor={!!ajustes.tiempoLectura} onCambio={v => pon({ tiempoLectura: v || undefined })} />
           <Interruptor etiqueta="Mostrar el autor" ayuda="Tu nombre y tu foto bajo el título."

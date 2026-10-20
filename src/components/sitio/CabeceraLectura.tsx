@@ -7,11 +7,16 @@ import { completarSitio } from './sitioWeb';
 import MediaPortada from '../ui/MediaPortada';
 import { esVideoPortada } from '../../utils/videoPortada';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina } from '../knowledge/CabeceraPagina';
+import {
+  CabeceraElementos, elementosDe, usaDisenoNuevo, cabeceraFija,
+  tamTitulo, tamIcono, tamDescripcion, altoPortada, tallaBotones, zoomPropiedades,
+} from '../knowledge/DisenoCabecera';
 // Las propiedades de la entrada, en diferido: sólo las páginas que son una
 // entrada de base de datos las cargan (y el HTML del servidor no las pinta).
 const PropiedadesFila = lazy(() => import('../tablas/PropiedadesFila'));
 // Los botones de la cabecera (2026-10-20): con ganchos y ventana, sólo en el navegador.
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
+const BarraFijaLectura = lazy(() => import('./BotonesLectura').then(m => ({ default: m.BarraFijaLectura })));
 
 // ============================================================================
 // EL MARCO Y LA CABECERA DE UNA PÁGINA PUBLICADA (2026-10-01)
@@ -57,6 +62,63 @@ export function MarcoLectura({ pagina, rutas, children }: {
 }
 
 export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMovil: boolean }) {
+  const cfg = pagina.config || {};
+  const fija = cabeceraFija(cfg.cabecera) && (
+    <Suspense fallback={null}><BarraFijaLectura config={cfg} titulo={pagina.titulo} /></Suspense>
+  );
+  if (usaDisenoNuevo(cfg.cabecera)) return <>{cabeceraPorElementos(pagina, esMovil)}{fija}</>;
+  return <>{cabeceraDeAntes(pagina, esMovil)}{fija}</>;
+}
+
+/** LA CABECERA POR ELEMENTOS (2026-10-20). Ver `DisenoCabecera.tsx`. */
+function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
+  const cfg = pagina.config || {};
+  const c = cfg.cabecera;
+  const els = elementosDe(c);
+  const el = (id: string) => els.find(e => e.id === id);
+  const icono: string | null = cfg.icono || null;
+  const lado = tamIcono(c, esMovil, el('icono'));
+  const der = (id: string) => el(id)?.col === 'der';
+  const hayBotones = Array.isArray(cfg.botones) && cfg.botones.length > 0;
+  return (
+    <header className="mb-5" data-cabecera-elementos>
+      <CabeceraElementos elementos={els} iconoEncima={c?.iconoPos === 'encima'} piezas={{
+        icono: icono ? (esUrl(icono)
+          ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
+          : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>) : null,
+        titulo: (
+          <h1 className={cn('font-black tracking-tight text-slate-900 break-words leading-tight', cfg.ocultarTitulo && 'sr-only')}
+            style={{ fontSize: tamTitulo(c, el('titulo')) }}>
+            {pagina.titulo || 'Sin título'}
+          </h1>
+        ),
+        descripcion: cfg.subtitulo ? (
+          <p className="mt-1 text-slate-500 leading-snug whitespace-pre-line break-words" style={{ fontSize: tamDescripcion(c, esMovil, el('descripcion')) }}>
+            <TextoEnriquecido texto={cfg.subtitulo} />
+          </p>
+        ) : null,
+        portada: cfg.portada ? (
+          <div style={{ '--alto': `${altoPortada(c, el('portada'))}px` } as any}
+            className={cn('[&_img]:h-auto [&_img]:max-h-[var(--alto)] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain', der('portada') && 'flex justify-end')}>
+            <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} />
+          </div>
+        ) : null,
+        botones: hayBotones ? (
+          <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense>
+        ) : null,
+        propiedades: pagina.fila ? (
+          <div className="text-left" style={{ zoom: zoomPropiedades(el('propiedades')) }}>
+            <Suspense fallback={null}>
+              <PropiedadesFila tablaId={pagina.fila.tabla_id} filaId={pagina.fila.fila_id} editable={false} alDerecha={der('propiedades')} />
+            </Suspense>
+          </div>
+        ) : null,
+      }} />
+    </header>
+  );
+}
+
+function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
   const cfg = pagina.config || {};
   const mostrarAutor = cfg.mostrarAutor === true;
   const icono: string | null = cfg.icono || null;

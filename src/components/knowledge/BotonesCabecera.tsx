@@ -17,13 +17,13 @@ import { cn } from '../../utils/cn';
 // El rótulo del botón es el título de esa página.
 
 export type BotonCabecera = { id: string; tipo: 'subpagina'; entityId: string; pubTitulo?: string };
-export type TallaBotones = 's' | 'm' | 'l';
+export type TallaBotones = 'xs' | 's' | 'm' | 'l' | 'xl';
 export type EstiloBotones = 'relleno' | 'contorno' | 'suave';
 
 export const botonesDe = (config: any): BotonCabecera[] =>
   (Array.isArray(config?.botones) ? config.botones : []).filter((b: any) => b && typeof b.entityId === 'string');
 
-const TALLA: Record<TallaBotones, string> = { s: 'h-8 px-3 text-xs', m: 'h-10 px-4 text-sm', l: 'h-12 px-5 text-base' };
+const TALLA: Record<TallaBotones, string> = { xs: 'h-7 px-2.5 text-[11px]', s: 'h-8 px-3 text-xs', m: 'h-10 px-4 text-sm', l: 'h-12 px-5 text-base', xl: 'h-14 px-6 text-lg' };
 const ESTILO: Record<EstiloBotones, string> = {
   relleno: 'bg-slate-900 text-white hover:bg-slate-800',
   contorno: 'border-2 border-slate-900 text-slate-900 hover:bg-slate-50',
@@ -31,11 +31,16 @@ const ESTILO: Record<EstiloBotones, string> = {
 };
 
 /** La fila de botones, bajo el título y la descripción. */
-export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, acento, onAbrir, onQuitar, onAnadir }: {
+export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, sinMargen = false, enLinea = false, acento, onAbrir, onQuitar, onAnadir }: {
   botones: BotonCabecera[];
   talla?: TallaBotones;
   estilo?: EstiloBotones;
   centrado?: boolean;
+  /** A la derecha, de derecha a izquierda: el primero, el de más a la derecha (2026-10-20). */
+  derecha?: boolean;
+  sinMargen?: boolean;
+  /** En una sola línea (la barra fija): sin saltar de renglón. */
+  enLinea?: boolean;
   /** El color de la web publicada, para el estilo «relleno». */
   acento?: string | null;
   onAbrir: (b: BotonCabecera) => void;
@@ -45,9 +50,9 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
 }) {
   if (!botones.length && !onAnadir) return null;
   return (
-    <div className={cn('mt-4 flex flex-wrap items-center gap-2', centrado && 'justify-center')} role="navigation" aria-label="Apartados de la página">
+    <div className={cn('flex items-center gap-2', enLinea ? 'flex-nowrap' : 'flex-wrap', !sinMargen && 'mt-3', centrado && 'justify-center', derecha && 'flex-row-reverse')} role="navigation" aria-label="Apartados de la página">
       {botones.map(b => (
-        <span key={b.id} className="group/boton relative">
+        <span key={b.id} className="group/boton relative shrink-0">
           <button type="button" onClick={() => onAbrir(b)}
             style={estilo === 'relleno' && acento ? { backgroundColor: acento } : undefined}
             className={cn('inline-flex items-center rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo])}>
@@ -61,10 +66,10 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
           )}
         </span>
       ))}
-      {onAnadir && botones.length > 0 && (
+      {onAnadir && (botones.length > 0 || sinMargen) && (
         <button type="button" onClick={onAnadir} title="Añadir otro botón"
           className={cn('inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 font-bold text-slate-400 hover:border-emerald-400 hover:text-emerald-700', TALLA[talla])}>
-          <Plus className="h-4 w-4" /> Botón
+          <Plus className="h-4 w-4" /> {botones.length ? 'Botón' : 'Añadir botón'}
         </button>
       )}
     </div>
