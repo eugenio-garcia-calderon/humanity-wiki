@@ -57,7 +57,7 @@ export async function subirArchivo(
   alProgreso?: (fraccion: number) => void,
   /** `maxLado`: una imagen que nunca se verá grande (un icono, un logotipo)
    *  se reduce a esto sin preguntar. */
-  opciones?: { maxLado?: number },
+  opciones?: { maxLado?: number; /** Subir como quien añade entradas en esta página publicada (`contribuir.ts`). */ contribuir?: string },
 ): Promise<ResultadoSubida> {
   // LAS IMÁGENES SE PREPARAN ANTES (2026-10-02): HEIC a JPG, y si pesa mucho
   // se pregunta si comprimirla o elegir otra. Ver `prepararImagen.ts`.
@@ -76,7 +76,7 @@ export async function subirArchivo(
   // éste: es lo único que permite pintar una barra de progreso de verdad.
   const enviar = () => new Promise<{ status: number; j: any }>((ok, mal) => {
     const x = new XMLHttpRequest();
-    x.open('POST', `/api/uploads?type=${encodeURIComponent(suTipo)}`);
+    x.open('POST', `/api/uploads?type=${encodeURIComponent(suTipo)}${opciones?.contribuir ? `&contribuir=${encodeURIComponent(opciones.contribuir)}` : ''}`);
     x.withCredentials = true;
     x.setRequestHeader('Content-Type', 'application/octet-stream');
     x.upload.onprogress = e => { if (e.lengthComputable && alProgreso) alProgreso(Math.min(0.99, e.loaded / e.total)); };
