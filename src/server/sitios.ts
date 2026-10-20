@@ -410,6 +410,14 @@ async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
     // para que el navegador vuelva a pedirla con su sesión si viene del HTML.
     miembros: acceso ? { raiz: acceso.sitio.raiz, ocultos } : null,
   };
+  // LA ENTRADA DE BASE DE DATOS QUE ES ESTA PÁGINA (2026-10-20, Eugenio: «las
+  // propiedades no se ven en la página pública aunque estén visibles»). Con
+  // esto, la cabecera pública pinta sus propiedades visibles, de solo lectura,
+  // como el editor. Una entrada oculta al publicar no las enseña.
+  const fr = (await db.execute(sql`
+    SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${w.id} AND deleted_at IS NULL AND oculta = false LIMIT 1
+  `)).rows[0] as any;
+  if (fr) out.fila = { fila_id: fr.id, tabla_id: fr.tabla_id };
   // Los módulos que amplían la página (la plantilla de ficha, W1).
   await ampliar(db, req, out);
   return out;
