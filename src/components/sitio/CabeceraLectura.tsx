@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import TextoEnriquecido from '../knowledge/TextoEnriquecido';
 import { cn } from '../../utils/cn';
 import { anchoDePagina, clasesDePagina } from '../../utils/ajustesPagina';
@@ -7,6 +7,9 @@ import { completarSitio } from './sitioWeb';
 import MediaPortada from '../ui/MediaPortada';
 import { esVideoPortada } from '../../utils/videoPortada';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina } from '../knowledge/CabeceraPagina';
+// Las propiedades de la entrada, en diferido: sólo las páginas que son una
+// entrada de base de datos las cargan (y el HTML del servidor no las pinta).
+const PropiedadesFila = lazy(() => import('../tablas/PropiedadesFila'));
 
 // ============================================================================
 // EL MARCO Y LA CABECERA DE UNA PÁGINA PUBLICADA (2026-10-01)
@@ -102,6 +105,17 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
               {pagina.autor?.nombre && <span>de <b className="text-slate-600">{pagina.autor.nombre}</b></span>}
             </div>
           )}
+          {/* LAS PROPIEDADES DE LA ENTRADA, COMO EN EL EDITOR (2026-10-20): bajo el
+              título y la descripción, solo las visibles en la página. */}
+          {pagina.fila && (
+            <div className={cn('mt-3 text-left',
+              // Con el título centrado (sin imagen al lado), las propiedades también.
+              !alIzquierda && !(cfg.portada && ['izquierda', 'derecha'].includes(cfg.cabecera?.disposicion || 'derecha')) && '[&>div>div:first-child]:justify-center')}>
+              <Suspense fallback={null}>
+                <PropiedadesFila tablaId={pagina.fila.tabla_id} filaId={pagina.fila.fila_id} editable={false} />
+              </Suspense>
+            </div>
+          )}
         </>}
       />
     </header>
@@ -115,6 +129,8 @@ export type DatosPagina = {
   indexable?: boolean | null;
   /** La página propia de una base de datos (`/bd/:tabla`), no una página guardada. */
   virtual?: boolean;
+  /** Si la página es una entrada de una base de datos: cuál (para sus propiedades). */
+  fila?: { fila_id: string; tabla_id: string } | null;
   created_at?: string;
   updated_at?: string;
   autor?: { handle?: string; nombre?: string; avatar?: string | null };
