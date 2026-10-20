@@ -63,15 +63,26 @@ export const cabeceraFija = (c: Cabecera | undefined) => (typeof c?.fija === 'bo
 // así una página que pase al diseño nuevo conserva sus tamaños.
 const T = <V,>(t: TallaElemento | undefined, tabla: Record<TallaElemento, V>, def: V) => (t ? tabla[t] : def);
 
-export const tamTitulo = (c: Cabecera | undefined, e?: Elemento) => T(e?.talla, { xs: 18, s: 22, m: 28, l: 36, xl: 48 }, tituloPagina(c));
-export const tamIcono = (c: Cabecera | undefined, esMovil: boolean, e?: Elemento) =>
-  T(e?.talla, { xs: 28, s: 36, m: 48, l: 64, xl: 88 }, Math.min(ladoIcono(c, esMovil), 64));
-export const tamDescripcion = (c: Cabecera | undefined, esMovil: boolean, e?: Elemento) =>
-  T(e?.talla, { xs: 13, s: 15, m: 17, l: 20, xl: 24 }, Math.min(letraDescripcion(c, esMovil), 20));
+// EN UN TELÉFONO, TOPES (2026-10-20, bot evaluador: «la cabecera ocupa casi
+// media pantalla en móvil»): el título como mucho 26 px, el icono 40, la
+// descripción 16 y la portada 160 de alto.
+export const tamTitulo = (c: Cabecera | undefined, e?: Elemento, esMovil = false) => {
+  const t = T(e?.talla, { xs: 18, s: 22, m: 28, l: 36, xl: 48 }, tituloPagina(c));
+  return esMovil ? Math.min(t, 26) : t;
+};
+export const tamIcono = (c: Cabecera | undefined, esMovil: boolean, e?: Elemento) => {
+  const t = T(e?.talla, { xs: 28, s: 36, m: 48, l: 64, xl: 88 }, Math.min(ladoIcono(c, esMovil), 64));
+  return esMovil ? Math.min(t, 40) : t;
+};
+export const tamDescripcion = (c: Cabecera | undefined, esMovil: boolean, e?: Elemento) => {
+  const t = T(e?.talla, { xs: 13, s: 15, m: 17, l: 20, xl: 24 }, Math.min(letraDescripcion(c, esMovil), 20));
+  return esMovil ? Math.min(t, 16) : t;
+};
 /** El alto MÁXIMO de la portada (la imagen nunca se recorta). */
-export const altoPortada = (c: Cabecera | undefined, e?: Elemento) => {
+export const altoPortada = (c: Cabecera | undefined, e?: Elemento, esMovil = false) => {
   const porTamano = typeof c?.tamano === 'number' ? Math.round(120 + ((Math.min(80, Math.max(20, c.tamano)) - 20) / 60) * 300) : 220;
-  return T(e?.talla, { xs: 110, s: 160, m: 220, l: 300, xl: 420 }, porTamano);
+  const t = T(e?.talla, { xs: 110, s: 160, m: 220, l: 300, xl: 420 }, porTamano);
+  return esMovil ? Math.min(t, 160) : t;
 };
 export const tallaBotones = (c: Cabecera | undefined, e?: Elemento): TallaElemento =>
   e?.talla || (c?.botonesTalla === 's' ? 's' : c?.botonesTalla === 'l' ? 'l' : 'm');

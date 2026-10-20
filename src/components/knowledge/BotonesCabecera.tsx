@@ -31,13 +31,15 @@ const ESTILO: Record<EstiloBotones, string> = {
 };
 
 /** La fila de botones, bajo el título y la descripción. */
-export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, sinMargen = false, enLinea = false, acento, onAbrir, onQuitar, onAnadir }: {
+export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, acento, onAbrir, onQuitar, onAnadir }: {
   botones: BotonCabecera[];
   talla?: TallaBotones;
   estilo?: EstiloBotones;
   centrado?: boolean;
   /** A la derecha, de derecha a izquierda: el primero, el de más a la derecha (2026-10-20). */
   derecha?: boolean;
+  /** Lo mismo, pero sólo cuando la cabecera es ancha (en un teléfono, de izquierda a derecha). */
+  derechaAncho?: boolean;
   sinMargen?: boolean;
   /** En una sola línea (la barra fija): sin saltar de renglón. */
   enLinea?: boolean;
@@ -50,7 +52,7 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
 }) {
   if (!botones.length && !onAnadir) return null;
   return (
-    <div className={cn('flex items-center gap-2', enLinea ? 'flex-nowrap' : 'flex-wrap', !sinMargen && 'mt-3', centrado && 'justify-center', derecha && 'flex-row-reverse')} role="navigation" aria-label="Apartados de la página">
+    <div className={cn('flex items-center gap-2', enLinea ? 'flex-nowrap' : 'flex-wrap', !sinMargen && 'mt-3', centrado && 'justify-center', derecha && 'flex-row-reverse', derechaAncho && '@xl:flex-row-reverse')} role="navigation" aria-label="Apartados de la página">
       {botones.map(b => (
         <span key={b.id} className="group/boton relative shrink-0">
           <button type="button" onClick={() => onAbrir(b)}

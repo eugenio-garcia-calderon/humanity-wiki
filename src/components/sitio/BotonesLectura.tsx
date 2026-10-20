@@ -39,7 +39,7 @@ export default function BotonesLectura({ config, centrado, derecha, talla }: { c
   return (
     <>
       <FilaBotones botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
-        centrado={centrado} derecha={derecha} sinMargen={derecha !== undefined} onAbrir={setAbierto} />
+        centrado={centrado} derechaAncho={derecha} sinMargen={derecha !== undefined} onAbrir={setAbierto} />
       {abierto && <VentanaPaginaPublica boton={abierto} onCerrar={() => setAbierto(null)} />}
     </>
   );

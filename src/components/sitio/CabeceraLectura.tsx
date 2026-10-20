@@ -66,8 +66,9 @@ export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMo
   const fija = cabeceraFija(cfg.cabecera) && (
     <Suspense fallback={null}><BarraFijaLectura config={cfg} titulo={pagina.titulo} /></Suspense>
   );
-  if (usaDisenoNuevo(cfg.cabecera)) return <>{cabeceraPorElementos(pagina, esMovil)}{fija}</>;
-  return <>{cabeceraDeAntes(pagina, esMovil)}{fija}</>;
+  // La barra fija va JUSTO ANTES de la cabecera (ver `BarraFija`).
+  if (usaDisenoNuevo(cfg.cabecera)) return <>{fija}{cabeceraPorElementos(pagina, esMovil)}</>;
+  return <>{fija}{cabeceraDeAntes(pagina, esMovil)}</>;
 }
 
 /** LA CABECERA POR ELEMENTOS (2026-10-20). Ver `DisenoCabecera.tsx`. */
@@ -88,7 +89,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
           : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>) : null,
         titulo: (
           <h1 className={cn('font-black tracking-tight text-slate-900 break-words leading-tight', cfg.ocultarTitulo && 'sr-only')}
-            style={{ fontSize: tamTitulo(c, el('titulo')) }}>
+            style={{ fontSize: tamTitulo(c, el('titulo'), esMovil) }}>
             {pagina.titulo || 'Sin título'}
           </h1>
         ),
@@ -98,7 +99,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
           </p>
         ) : null,
         portada: cfg.portada ? (
-          <div style={{ '--alto': `${altoPortada(c, el('portada'))}px` } as any}
+          <div style={{ '--alto': `${altoPortada(c, el('portada'), esMovil)}px` } as any}
             className={cn('[&_img]:h-auto [&_img]:max-h-[var(--alto)] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain', der('portada') && 'flex justify-end')}>
             <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} />
           </div>

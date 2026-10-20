@@ -4190,6 +4190,12 @@ function EditorPagina() {
             columnas con icono, título, descripción, portada, botones y
             propiedades en el orden, el tamaño y la visibilidad que se elijan).
             Las piezas son las mismas; sólo cambia cómo se colocan. */}
+        {/* LA BARRA FIJA AL BAJAR (2026-10-20): justo ANTES de la cabecera (ver `BarraFija`). */}
+        {cabeceraFija(ajustes.cabecera) && (
+          <BarraFija icono={icono} titulo={titulo} subtitulo={ajustes.subtitulo} portada={portada}
+            botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : (ajustes.botones || [])}
+            estilo={ajustes.cabecera?.botonesEstilo} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
+        )}
         <div data-cabecera-editor>
         {(() => {
           const v2 = usaDisenoNuevo(ajustes.cabecera);
@@ -4203,7 +4209,7 @@ function EditorPagina() {
           const portadaNodo = (subidas.portada ? (
             <SubiendoImagen vista={subidas.portada.vista} fraccion={subidas.portada.fraccion} texto="Subiendo la portada" />
           ) : portada ? (
-            <div className={cn('group/portada relative w-fit max-w-full', v2 && '[&_img]:max-h-[var(--alto)]')} style={v2 ? { '--alto': `${altoPortada(ajustes.cabecera, el('portada'))}px` } as any : undefined}>
+            <div className={cn('group/portada relative w-fit max-w-full', v2 && '[&_img]:max-h-[var(--alto)]')} style={v2 ? { '--alto': `${altoPortada(ajustes.cabecera, el('portada'), esMovil)}px` } as any : undefined}>
               <MediaPortada src={portada} className={v2 ? 'block h-auto w-auto max-w-full rounded-2xl object-contain' : 'w-full h-56 object-cover rounded-2xl'} />
               {editable && (
                 <div className="absolute top-2 right-2 flex flex-wrap justify-end gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
@@ -4342,12 +4348,12 @@ function EditorPagina() {
           const tituloNodo = (<>
         {editable ? (
           <TituloEditable
-            letra={v2 ? tamTitulo(ajustes.cabecera, el('titulo')) : undefined}
+            letra={v2 ? tamTitulo(ajustes.cabecera, el('titulo'), esMovil) : undefined}
             valor={titulo}
             onCambiar={v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); }}
           />
         ) : (
-          <h1 className={cn('font-black tracking-tight text-slate-900 mb-1 break-words leading-tight', !v2 && 'text-4xl')} style={v2 ? { fontSize: tamTitulo(ajustes.cabecera, el('titulo')) } : undefined}>{titulo}</h1>
+          <h1 className={cn('font-black tracking-tight text-slate-900 mb-1 break-words leading-tight', !v2 && 'text-4xl')} style={v2 ? { fontSize: tamTitulo(ajustes.cabecera, el('titulo'), esMovil) } : undefined}>{titulo}</h1>
         )}
           </>);
           const descNodo = ajustes.subtitulo !== undefined ? (<>
@@ -4369,7 +4375,7 @@ function EditorPagina() {
         ) : null)}
           </>) : null;
           const botonesNodo = (<>
-        <FilaBotones botones={ajustes.botones || []} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derecha={v2 && der('botones')} sinMargen={v2} estilo={ajustes.cabecera?.botonesEstilo}
+        <FilaBotones botones={ajustes.botones || []} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derechaAncho={v2 && der('botones')} sinMargen={v2} estilo={ajustes.cabecera?.botonesEstilo}
           onAbrir={b => setVentanaBoton(b)}
           onQuitar={editable ? b => {
             if (!window.confirm(`¿Quitar el botón «${b.pubTitulo || 'Sin título'}»? Su página no se borra: queda en la lista de páginas.`)) return;
@@ -4427,12 +4433,6 @@ function EditorPagina() {
           );
         })()}
         </div>
-        {/* LA BARRA FIJA AL BAJAR (2026-10-20): justo después de la cabecera. */}
-        {cabeceraFija(ajustes.cabecera) && (
-          <BarraFija icono={icono} titulo={titulo} subtitulo={ajustes.subtitulo} portada={portada}
-            botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : (ajustes.botones || [])}
-            estilo={ajustes.cabecera?.botonesEstilo} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
-        )}
         {ventanaBoton && (
           <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
             {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
