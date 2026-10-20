@@ -1160,6 +1160,27 @@ function EditorPagina() {
     return { pos: finSubarbol(bs, finDeFila(bs, i)) + 1, nivel: bs[i].nivel || 0 };
   };
 
+  /** CLIC EN LA LÍNEA VACÍA DE ENCIMA DE UNA BASE DE DATOS (2026-10-20, Eugenio:
+   *  «si pincho en esa línea, me tiene que dejar escribir sin darle al “+”»).
+   *  Pone un párrafo justo encima y lo deja listo para escribir. Si ya hay uno
+   *  vacío justo encima, se usa ése: no se apilan líneas en blanco. */
+  const escribirEncima = (id: string) => {
+    const i = bloques.findIndex(x => x.id === id);
+    if (i < 0) return;
+    let j = i;
+    const g = bloques[i].grupo;
+    while (g && j > 0 && bloques[j - 1].grupo === g) j--;
+    const antes = bloques[j - 1];
+    if (antes && antes.tipo === 'parrafo' && !antes.grupo && !(textosRef.current[antes.id] ?? antes.texto ?? '').trim()) {
+      setBloqueActivo(antes.id); setFocoId(antes.id); return;
+    }
+    const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'parrafo', nivel: bloques[i].nivel || undefined };
+    textosRef.current[nuevo.id] = '';
+    setBloques(bs => { const c = [...bs]; c.splice(Math.min(j, c.length), 0, nuevo); return c; });
+    setBloqueActivo(nuevo.id); setFocoId(nuevo.id);
+    programarGuardado();
+  };
+
   const alFinal = useRef(false);
   /** El «+» se pulsó en un bloque alto: lo nuevo va encima (ver `puntoInsercion`). */
   const insertarEncima = useRef(false);
@@ -3714,6 +3735,14 @@ function EditorPagina() {
             precio a escondidas. Enseñarlo solo en el bloque activo es lo que
             hace el ratón con el hover, traducido a lo que un dedo sí tiene:
             dónde estás tocando. */}
+        {/* La línea vacía de encima de una base de datos, junto al «+» y el asa:
+            un clic y se escribe ahí (ver `escribirEncima`). */}
+        {editable && !esMovil && b.tipo === 'basedatos' && (
+          <div onClick={e => { e.stopPropagation(); escribirEncima(b.id); }} data-escribir-encima={b.id}
+            className="group/linea absolute inset-x-0 top-0 z-[5] hidden h-8 cursor-text items-center sm:flex">
+            <span className="pl-1 text-sm text-slate-300 opacity-0 transition-opacity group-hover/linea:opacity-100">{tr('Clic para escribir aquí')}</span>
+          </div>
+        )}
         {editable && (!esMovil || bloqueActivo === b.id) && (
           <div className={cn('absolute flex items-center transition-opacity',
             esMovil

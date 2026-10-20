@@ -9536,3 +9536,7 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - «Diseño de la cabecera» gana «Botones»: tamaño S/M/L y estilo Relleno/Contorno/Suave (`cabecera.botonesTalla`, `cabecera.botonesEstilo`).
 - En la página publicada (`CabeceraLectura` → `BotonesLectura`, en diferido), el botón abre una ventana con la subpágina leída desde `/api/sitio/pagina/:id`.
 - De paso: las galerías nuevas nacen con el título y los nombres de las tarjetas en grosor «normal» (`tituloPeso`/`pesoNombre`).
+
+## 2026-10-20 — Clic en la línea vacía de encima de una base de datos = escribir (Programador 8)
+
+- La franja vacía de encima de una galería (donde salen el «+» y el asa) ahora es una línea de escritura: al pasar el ratón dice «Clic para escribir aquí» y un clic pone un párrafo justo encima con el cursor dentro, sin abrir el menú del «+» (`escribirEncima` en Documento.tsx). Si ya hay un párrafo vacío justo encima, se usa ése.
