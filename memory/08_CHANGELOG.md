@@ -9518,3 +9518,7 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 ## 2026-10-20 — Al enlazar bases de datos, primero las del mismo proyecto (prog8)
 - En «Enlazar con otra base de datos» salían todas las bases de datos del usuario. Ahora salen **las de esta página** y **las del mismo proyecto** («En «Raíz A»»): las que cuelgan de la misma raíz del menú —subpáginas y páginas de entradas, a cualquier profundidad—. Las demás quedan tras el botón **«Conectar con otros proyectos (N)»**, que las carga todas. Si el proyecto no tiene otras o la elegida es de otro proyecto, se ven sin pedirlas.
 - Servidor: `GET /api/bd/tablas/:id/del-proyecto` → `{ raiz, tablas }` (`src/server/bd/arbolProyecto.ts`: sube desde la página de la tabla por sus madres —bloque «Página» o tabla de la entrada— hasta la raíz y baja recogiendo bloques de base de datos; con topes).
+
+## 2026-10-20 — El «+» de un bloque alto pone lo nuevo donde está el botón (prog8)
+- En un bloque alto (una base de datos, una imagen grande), el «+» está arriba, junto a su título, pero lo nuevo se ponía DETRÁS del bloque: debajo de toda su galería, lejos de donde se pulsó. Ahora, si el bloque mide más de 220 px, lo nuevo va **encima**, justo a la altura del botón; en los bloques normales, debajo como siempre.
+- Además, la vista se lleva al bloque recién puesto y se resalta un momento, para que se vea dónde ha caído.

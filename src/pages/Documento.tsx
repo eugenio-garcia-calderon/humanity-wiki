@@ -1071,6 +1071,7 @@ function EditorPagina() {
     setBloqueActivo(nuevo.id);
     setFocoId(nuevo.id);
     programarGuardado();
+    mostrarNuevo(nuevo.id);
   };
 
   const eliminar = (bid: string) => {
@@ -1139,12 +1140,33 @@ function EditorPagina() {
     if (alFinal.current) return { pos: bs.length, nivel: 0 };
     const i = tras ? bs.findIndex(b => b.id === tras) : -1;
     if (i < 0) return { pos: bs.length, nivel: 0 };
+    // EN UN BLOQUE ALTO, ENCIMA (2026-10-20, Eugenio: «la base de datos nueva
+    // aparece mucho más abajo de donde le he dado»). En una base de datos o una
+    // imagen grande el «+» está arriba, junto a su título; poner lo nuevo
+    // DETRÁS del bloque lo mandaba debajo de toda su galería, lejos de donde
+    // se pulsó. Ahí va encima, justo donde está el botón.
+    if (insertarEncima.current) {
+      let j = i;
+      const g = bs[i].grupo;
+      while (g && j > 0 && bs[j - 1].grupo === g) j--;
+      return { pos: j, nivel: bs[i].nivel || 0 };
+    }
     if (vaDentro(bs, i)) return { pos: i + 1, nivel: (bs[i].nivel || 0) + 1 };
     return { pos: finSubarbol(bs, finDeFila(bs, i)) + 1, nivel: bs[i].nivel || 0 };
   };
 
   const alFinal = useRef(false);
-  useEffect(() => { if (!menuAbierto) alFinal.current = false; }, [menuAbierto]);
+  /** El «+» se pulsó en un bloque alto: lo nuevo va encima (ver `puntoInsercion`). */
+  const insertarEncima = useRef(false);
+  useEffect(() => { if (!menuAbierto) { alFinal.current = false; insertarEncima.current = false; } }, [menuAbierto]);
+  /** Lleva la vista al bloque recién puesto y lo resalta un momento: que se vea dónde ha caído. */
+  const mostrarNuevo = (id: string) => setTimeout(() => {
+    const el = document.querySelector<HTMLElement>(`[data-bloque-caja="${id}"]`);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 80 || r.top > window.innerHeight - 120) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.animate?.([{ boxShadow: '0 0 0 3px rgba(16,185,129,0.55)', borderRadius: '12px' }, { boxShadow: '0 0 0 3px rgba(16,185,129,0)', borderRadius: '12px' }], { duration: 1800, easing: 'ease-out' });
+  }, 150);
 
   /** Tab (+1) y ⇧Tab (−1): el bloque se mueve con todos sus hijos. Como en
    *  Notion, al quitar sangría los hermanos que tenía debajo pasan a ser
@@ -3670,8 +3692,15 @@ function EditorPagina() {
               ? 'right-0 -top-1 z-10'
               : cn('-left-14 top-0.5 z-20 opacity-0 group-hover/bloque:opacity-100', menuAsa === b.id && '!opacity-100'))}>
             <button
-              onClick={e => { e.stopPropagation(); setMenuAbierto(m => (m === b.id ? null : b.id)); }}
-              title={tr('Añadir un bloque debajo')}
+              onClick={e => {
+                e.stopPropagation();
+                // Un bloque más alto que una pantalla pequeña (una base de datos, una
+                // imagen grande): lo nuevo irá encima, donde está este botón.
+                const caja = (e.currentTarget as HTMLElement).closest<HTMLElement>('[data-bloque-caja]');
+                insertarEncima.current = (caja?.getBoundingClientRect().height || 0) > 220;
+                setMenuAbierto(m => (m === b.id ? null : b.id));
+              }}
+              title={tr('Añadir un bloque aquí')}
               aria-label={tr('Añadir un bloque debajo')}
               className={cn('rounded-md transition-colors',
                 esMovil
