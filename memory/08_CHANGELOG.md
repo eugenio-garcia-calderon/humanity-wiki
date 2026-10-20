@@ -9525,3 +9525,6 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 ## 2026-10-20 — Galería sin imágenes (prog8)
 - **Configuración → Tarjetas → Imágenes: Con imagen / Sin imagen.** Sin imagen, la galería sigue siendo de tarjetas (con su marco, nombre y propiedades) pero sin el hueco de la foto. Se guarda en la vista (`config.imagenes === false`).
+
+## 2026-10-20 — Cada tamaño de tarjeta tiene un ancho fijo (prog8)
+- Con pocas tarjetas, una galería XS salía con tarjetas más grandes (las columnas se estiraban hasta llenar la fila del recuadro). Ahora cada tamaño tiene un **ancho fijo** (`anchoTarjeta` = ancho base × 1,15: XS 129 px, L 345 px…), haya las que haya: las tarjetas van **centradas** y sobra espacio a los lados si hace falta. En el teléfono, como mucho el ancho de la pantalla. «Filas que se ven» sigue contando cuántas caben a ese tamaño, y los recuadros de grupos pequeños se ajustan al mismo ancho.

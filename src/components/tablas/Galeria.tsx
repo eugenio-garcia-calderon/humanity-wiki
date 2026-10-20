@@ -38,6 +38,12 @@ type Fila = {
 };
 
 /** Ancho mínimo de una tarjeta, en píxeles, por tamaño. */
+/** EL ANCHO DE UNA TARJETA, FIJO PARA CADA TAMAÑO (2026-10-20, Eugenio: «si
+ *  elijo XS y hay pocas tarjetas, salen más grandes»). Las columnas ya no se
+ *  estiran para llenar la fila: miden esto, y si sobra sitio las tarjetas van
+ *  centradas con espacio a los lados. En un teléfono, como mucho el ancho. */
+export const anchoTarjeta = (t: TamanoGaleria | string) => Math.round((ANCHO_TARJETA[t as TamanoGaleria] ?? 220) * 1.15);
+
 export const ANCHO_TARJETA: Record<TamanoGaleria, number> = {
   // XXXS (2026-10-18, Eugenio): aún más pequeñas y más juntas.
   xxxs: 60, xxs: 84, xs: 112, pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
@@ -667,10 +673,8 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
         onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
         // En el recuadro de un grupo, las tarjetas llenan todo el ancho (2026-10-18,
         // Eugenio: «hay mucho espacio lateral no aprovechado»).
-        style={enCaja
-        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }
-        : centrada
-        ? { gridTemplateColumns: `repeat(auto-fit, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), ${Math.round((ANCHO_TARJETA[tamano] ?? 220) * 1.5)}px))`, justifyContent: 'center' }
+        style={enCaja || centrada
+        ? { gridTemplateColumns: `repeat(auto-fit, min(${anchoTarjeta(tamano)}px, 100%))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
         {filasVis.slice(0, cuantas).map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && (arrastrable ?? editable) && !sitio))}
         {editable && (
