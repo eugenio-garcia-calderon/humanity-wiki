@@ -133,7 +133,7 @@ export function LayoutCabecera({ cabecera, imagen, cuerpo, centrado }: {
     const estilo = { '--img': `${t}fr`, '--txt': `${100 - t}fr` } as CSSProperties;
     return (
       <div style={estilo}
-        className={cn('flex flex-col gap-5 sm:grid sm:items-center sm:gap-8',
+        className={cn('flex flex-col gap-5 sm:grid sm:items-start sm:gap-8',
           d === 'izquierda' ? 'sm:[grid-template-columns:var(--img)_var(--txt)]' : 'sm:[grid-template-columns:var(--txt)_var(--img)]')}>
         {/* En móvil la imagen va siempre primero, como en «arriba». */}
         <div className={cn('min-w-0 [&_img]:w-full [&_img]:h-auto [&_img]:object-contain', d === 'derecha' && 'sm:order-2')}>{imagen}</div>

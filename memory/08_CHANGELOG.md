@@ -9478,3 +9478,9 @@ Production (Mac, 390 px iframe, ?sw=off) still measured the documents table's «
 ## 2026-10-19 — Wikiproducts sheet: «Dónde se dice» by name, 44 px (W1)
 
 The last two tap targets under 44 px on the Anker 737 sheet were the claims' «Dónde se dice: anker.com» links (Mac, production, after #691). They now read «Dónde se dice: la marca» (same `nombreLegible` as every other source, domain in the tooltip) and carry the same 14 px inline padding as the claim sources (48 px hit area on text-sm).
+
+## 2026-10-20 — Ficha compacta: propiedades bajo el título, del tamaño de su contenido (prog8)
+- En la página de una entrada, las **propiedades van debajo del título y la descripción**, en su misma columna (a la izquierda de la imagen si la cabecera la lleva al lado), no a lo ancho debajo de toda la cabecera.
+- Con la imagen al lado, el título y la descripción van **arriba** (antes, centrados en vertical). `LayoutCabecera`: `sm:items-start`.
+- Cada propiedad **mide lo que mide su contenido** (una fecha de un número es pequeña), **sin fondo gris ni borde**: casillas blancas en fila que saltan de línea. El tirador del borde derecho fija un ancho en px; «Ancho automático» en su menú lo devuelve.
+- **Tamaños XXS, XS, S, M, L y XL**; la M (por defecto) es más pequeña que la de antes.
