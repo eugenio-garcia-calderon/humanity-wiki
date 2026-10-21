@@ -62,6 +62,8 @@ const ENCUADRES: Record<string, [number, number, number, number]> = {
 };
 
 export default function MapPage() {
+  /** En el mapa incrustado con filtros: la ficha del territorio pinchado, a la derecha. */
+  const [fichaAbierta, setFichaAbierta] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCoords, setNewCoords] = useState<[number, number] | null>(null);
   const [formData, setFormData] = useState({ name: '', type: 'municipality', description: '' });
@@ -346,6 +348,67 @@ export default function MapPage() {
     { key: 'cultura', label: 'Cultura', icon: Palette, color: 'text-pink-500' },
   ];
 
+  /** Lo que se sabe del territorio elegido: sus objetivos, retos y soluciones (o el explorador). */
+  const contenidoTerritorio = (
+    selectedTerritory ? (
+          currentExplorerLevel && currentExplorerId ? (
+            <EntityExplorerPanel
+              level={currentExplorerLevel}
+              id={currentExplorerId}
+              territoryId={selectedTerritory.id}
+              breadcrumb={buildBreadcrumb()}
+              onNavigate={navigateExplorer}
+              onClearFilter={clearExplorer}
+              indicators={indicators}
+              markers={markers}
+              metrics={metrics}
+            />
+          ) : (
+            <div className="p-4 sm:p-6">
+              {/* DE DÓNDE SALEN ESTAS CIFRAS (2026-08-22). Va ARRIBA, antes de
+                  las puntuaciones y no debajo: quien mira un número decide en
+                  el primer segundo si se lo cree. Un aviso al final llega tarde.
+
+                  De 20.557 observaciones de la plataforma, 20.499 están
+                  simuladas — los municipios de Madrid y los países europeos—.
+                  Hasta hoy se veían igual que las 58 que salen del INE. */}
+              <div className="mb-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    Sus cifras
+                  </span>
+                  <MarcaOrigen origen={selectedTerritory.origenDato} />
+                </div>
+                <AvisoDatoSimulado origen={selectedTerritory.origenDato} />
+              </div>
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => {
+                    const casa = /(^|\.)humanity\.wiki$|^localhost$|^127\./.test(window.location.hostname) ? '' : 'https://humanity.wiki';
+                    const url = `${casa}/objetivos?territorio=${selectedTerritory.id}`;
+                    window.open(url, '_blank');
+                  }}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-500 transition-colors"
+                  title="Abrir en pantalla completa"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                </button>
+              </div>
+              <Objectives
+                embeddedTerritoryId={selectedTerritory.id}
+                onSelectObjective={(objId) => navigateExplorer('objetivo', objId)}
+              />
+            </div>
+          )
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center p-8">
+            <MapPin className="w-10 h-10 mb-3 text-slate-300" />
+            <p className="text-sm font-medium text-slate-400">Selecciona un territorio en el mapa</p>
+            <p className="text-xs mt-1 text-slate-300">Aquí verás sus objetivos, retos y soluciones</p>
+          </div>
+        )
+  );
+
   const columnaFiltros = (
     <>
       {/* COLUMN 1 (~1/6): vertical accordion filters — Objetivo > Indicador > Marcador > Métrica.
@@ -513,9 +576,24 @@ export default function MapPage() {
       <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">
         {columnaFiltros}
         <div className="relative h-full min-w-0 flex-1">
+          {/* LA FICHA DEL TERRITORIO (2026-10-21, Eugenio: «recupera la versión donde, si
+              pinchabas en un territorio, se abría la ventana con su información»). Un
+              panel a la derecha, sobre el mapa, sólo después de pinchar (al cargar ya hay
+              un territorio elegido, el de la dirección, y no se abre solo). */}
+          {fichaAbierta && selectedTerritory && (
+            <aside data-ficha-territorio className="absolute inset-y-0 right-0 z-30 flex w-[min(30rem,100%)] flex-col border-l border-slate-200 bg-white shadow-2xl">
+              <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+                <MapPin className="h-4 w-4 shrink-0 text-emerald-600" />
+                <p className="min-w-0 flex-1 truncate text-sm font-black text-slate-900">{selectedTerritory.name}</p>
+                <button onClick={() => setFichaAbierta(false)} aria-label="Cerrar la ficha del territorio"
+                  className="grid h-9 w-9 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X className="h-4 w-4" /></button>
+              </div>
+              <div className="relative min-h-0 flex-1 overflow-y-auto">{contenidoTerritorio}</div>
+            </aside>
+          )}
           <HumanityMap
-            onFeatureClick={handleFeatureClick}
-            onMapClick={() => setSelectedTerritory(null)}
+            onFeatureClick={(id, type) => { setFichaAbierta(true); handleFeatureClick(id, type); }}
+            onMapClick={() => { setFichaAbierta(false); setSelectedTerritory(null); }}
             onMapDoubleClick={() => { /* sin alta de territorios en modo embed */ }}
             shouldReload={reloadTrigger}
             activeObjective={activeObjective}
@@ -587,62 +665,7 @@ export default function MapPage() {
             {explorerFull ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         )}
-        {selectedTerritory ? (
-          currentExplorerLevel && currentExplorerId ? (
-            <EntityExplorerPanel
-              level={currentExplorerLevel}
-              id={currentExplorerId}
-              territoryId={selectedTerritory.id}
-              breadcrumb={buildBreadcrumb()}
-              onNavigate={navigateExplorer}
-              onClearFilter={clearExplorer}
-              indicators={indicators}
-              markers={markers}
-              metrics={metrics}
-            />
-          ) : (
-            <div className="p-4 sm:p-6">
-              {/* DE DÓNDE SALEN ESTAS CIFRAS (2026-08-22). Va ARRIBA, antes de
-                  las puntuaciones y no debajo: quien mira un número decide en
-                  el primer segundo si se lo cree. Un aviso al final llega tarde.
-
-                  De 20.557 observaciones de la plataforma, 20.499 están
-                  simuladas — los municipios de Madrid y los países europeos—.
-                  Hasta hoy se veían igual que las 58 que salen del INE. */}
-              <div className="mb-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
-                    Sus cifras
-                  </span>
-                  <MarcaOrigen origen={selectedTerritory.origenDato} />
-                </div>
-                <AvisoDatoSimulado origen={selectedTerritory.origenDato} />
-              </div>
-              <div className="flex justify-end mb-2">
-                <button
-                  onClick={() => {
-                    const url = `/objetivos?territorio=${selectedTerritory.id}`;
-                    window.open(url, '_blank');
-                  }}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-500 transition-colors"
-                  title="Abrir en pantalla completa"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                </button>
-              </div>
-              <Objectives
-                embeddedTerritoryId={selectedTerritory.id}
-                onSelectObjective={(objId) => navigateExplorer('objetivo', objId)}
-              />
-            </div>
-          )
-        ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center p-8">
-            <MapPin className="w-10 h-10 mb-3 text-slate-300" />
-            <p className="text-sm font-medium text-slate-400">Selecciona un territorio en el mapa</p>
-            <p className="text-xs mt-1 text-slate-300">Aquí verás sus objetivos, retos y soluciones</p>
-          </div>
-        )}
+        {contenidoTerritorio}
       </div>
 
       {/* COLUMN 3: the map — fills whatever width remains after columns 1 and 2,
