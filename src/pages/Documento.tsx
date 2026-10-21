@@ -1785,7 +1785,7 @@ function EditorPagina() {
     });
     setBloqueActivo(nuevoId);
     programarGuardado();
-    avisar('Bloque duplicado');
+    // Sin aviso (2026-10-21, Eugenio: «que no aparezca el mensaje de bloque duplicado»): la copia ya se ve debajo.
   };
 
   const cambiarBloque = (bid: string, cambios: Partial<Bloque>) => {
