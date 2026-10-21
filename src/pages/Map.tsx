@@ -53,6 +53,14 @@ async function loadTerritoryDetail(tid: string) {
   };
 }
 
+/** Por dónde empieza el mapa cuando se abre en un territorio (2026-10-21). La
+ *  tabla de territorios no guarda el contorno de los países, así que los
+ *  encuadres van aquí: [oeste, sur, este, norte]. */
+const ENCUADRES: Record<string, [number, number, number, number]> = {
+  espana: [-9.6, 35.8, 4.6, 43.9],
+  europa: [-25, 34, 45, 71],
+};
+
 export default function MapPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCoords, setNewCoords] = useState<[number, number] | null>(null);
@@ -338,40 +346,8 @@ export default function MapPage() {
     { key: 'cultura', label: 'Cultura', icon: Palette, color: 'text-pink-500' },
   ];
 
-  if (isEmbedMode) {
-    return (
-      <div className="w-full h-full relative">
-        <HumanityMap
-          onFeatureClick={handleFeatureClick}
-          onMapClick={() => setSelectedTerritory(null)}
-          onMapDoubleClick={() => { /* sin alta de territorios en modo embed */ }}
-          shouldReload={reloadTrigger}
-          activeObjective={activeObjective}
-          activeChallenge={null}
-          activeIndicatorId={activeIndicatorId}
-          indicators={indicators}
-          activeMarkerId={activeMarkerId}
-          activeMetricId={activeMetricId}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">
-      {/* Identidad del mapa + puerta a los demás mapas: este es el Mapa de
-          Indicadores de la Humanidad, y cualquiera puede crear el suyo. */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-3.5 pr-1.5 py-1 flex items-center gap-2 max-w-[92vw]">
-        <span className="text-[10px] font-black text-slate-700 truncate hidden sm:inline">Mapa de Indicadores de la Humanidad</span>
-        <span className="text-[10px] font-black text-slate-700 sm:hidden">Mapa</span>
-        <Link
-          to="/mapas"
-          className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-full text-[10px] font-black shadow transition-colors shrink-0"
-        >
-          Todos los mapas
-        </Link>
-      </div>
-
+  const columnaFiltros = (
+    <>
       {/* COLUMN 1 (~1/6): vertical accordion filters — Objetivo > Indicador > Marcador > Métrica.
           Collapses to a 56px icon rail; hovering the rail while collapsed opens
           the full menu as a floating flyout instead of resizing the layout. */}
@@ -524,6 +500,73 @@ export default function MapPage() {
           <ResizeHandle onMouseDown={startResizeFiltros('right')} edge="right" active={draggingFiltros} />
         )}
       </div>
+    </>
+  );
+
+  // CON LOS OBJETIVOS A LA IZQUIERDA (2026-10-21, Eugenio: «el mapa con el menú
+  // lateral de los objetivos: pinchas en Movilidad y te da sus indicadores en el
+  // mapa»). `?embed=1&filtros=1`: el mapa incrustado con la columna de filtros
+  // (objetivo > indicador > marcador > métrica), sin el panel del territorio.
+  const conFiltros = searchParams.get('filtros') === '1';
+  if (isEmbedMode && conFiltros) {
+    return (
+      <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">
+        {columnaFiltros}
+        <div className="relative h-full min-w-0 flex-1">
+          <HumanityMap
+            onFeatureClick={handleFeatureClick}
+            onMapClick={() => setSelectedTerritory(null)}
+            onMapDoubleClick={() => { /* sin alta de territorios en modo embed */ }}
+            shouldReload={reloadTrigger}
+            activeObjective={activeObjective}
+            activeChallenge={null}
+            activeIndicatorId={activeIndicatorId}
+            indicators={indicators}
+            activeMarkerId={activeMarkerId}
+            activeMetricId={activeMetricId}
+            limites={ENCUADRES[searchParams.get('territorio') || ''] || null}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (isEmbedMode) {
+    return (
+      <div className="w-full h-full relative">
+        <HumanityMap
+          onFeatureClick={handleFeatureClick}
+          onMapClick={() => setSelectedTerritory(null)}
+          onMapDoubleClick={() => { /* sin alta de territorios en modo embed */ }}
+          shouldReload={reloadTrigger}
+          activeObjective={activeObjective}
+          activeChallenge={null}
+          activeIndicatorId={activeIndicatorId}
+          indicators={indicators}
+          activeMarkerId={activeMarkerId}
+          activeMetricId={activeMetricId}
+          limites={ENCUADRES[searchParams.get('territorio') || ''] || null}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">
+      {/* Identidad del mapa + puerta a los demás mapas: este es el Mapa de
+          Indicadores de la Humanidad, y cualquiera puede crear el suyo. */}
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-3.5 pr-1.5 py-1 flex items-center gap-2 max-w-[92vw]">
+        <span className="text-[10px] font-black text-slate-700 truncate hidden sm:inline">Mapa de Indicadores de la Humanidad</span>
+        <span className="text-[10px] font-black text-slate-700 sm:hidden">Mapa</span>
+        <Link
+          to="/mapas"
+          className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-full text-[10px] font-black shadow transition-colors shrink-0"
+        >
+          Todos los mapas
+        </Link>
+      </div>
+
+      {columnaFiltros}
 
       {/* COLUMN 2 (~2/5 por defecto, redimensionable): permanent territory panel (replaces the old floating panel) */}
       <div
@@ -616,6 +659,7 @@ export default function MapPage() {
           indicators={indicators}
           activeMarkerId={activeMarkerId}
           activeMetricId={activeMetricId}
+          limites={ENCUADRES[searchParams.get('territorio') || ''] || null}
         />
       </div>
 

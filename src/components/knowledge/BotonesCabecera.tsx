@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, X, Menu } from 'lucide-react';
+import { Plus, X, Menu, Maximize2, Minimize2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -152,8 +152,15 @@ function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnad
   );
 }
 
-/** La ventana que abre un botón: grande, en el centro, con la página dentro. */
-export function VentanaBoton({ titulo, onCerrar, children }: { titulo: string; onCerrar: () => void; children: ReactNode }) {
+/** La ventana que abre un botón: grande, en el centro, con la página dentro.
+ *  EXPANDIR (2026-10-21, Eugenio: «una opción de expandir página: ahora se abre
+ *  en un pop-up central»): ocupa toda la pantalla, y el contenido sabe que tiene
+ *  sitio (`children` puede ser una función que recibe `grande`). */
+export function VentanaBoton({ titulo, onCerrar, children, inicialGrande = false }: {
+  titulo: string; onCerrar: () => void; children: ReactNode | ((grande: boolean) => ReactNode); inicialGrande?: boolean;
+}) {
+  const [grande, setGrande] = useState(inicialGrande);
+  useEffect(() => { if (inicialGrande) setGrande(true); }, [inicialGrande]);
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
     window.addEventListener('keydown', tecla);
@@ -161,13 +168,19 @@ export function VentanaBoton({ titulo, onCerrar, children }: { titulo: string; o
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', tecla); document.body.style.overflow = antes; };
   }, [onCerrar]);
+  const boton = 'grid h-10 w-10 place-items-center rounded-full bg-white/90 text-slate-500 shadow ring-1 ring-slate-200 hover:text-slate-900';
   return createPortal(
-    <div className="fixed inset-0 z-[9995] flex items-center justify-center bg-slate-900/40 p-2 sm:p-6" onClick={onCerrar}>
-      <div role="dialog" aria-label={titulo} onClick={e => e.stopPropagation()}
-        className="relative flex h-[min(92vh,60rem)] w-[min(72rem,100%)] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <button type="button" onClick={onCerrar} aria-label="Cerrar"
-          className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-slate-500 shadow ring-1 ring-slate-200 hover:text-slate-900"><X className="h-5 w-5" /></button>
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+    <div className={cn('fixed inset-0 z-[9995] flex items-center justify-center bg-slate-900/40', !grande && 'p-2 sm:p-6')} onClick={onCerrar}>
+      <div role="dialog" aria-label={titulo} onClick={e => e.stopPropagation()} data-ventana-boton={grande ? 'grande' : 'centro'}
+        className={cn('relative flex flex-col overflow-hidden bg-white shadow-2xl', grande ? 'h-full w-full' : 'h-[min(92vh,60rem)] w-[min(72rem,100%)] rounded-3xl')}>
+        <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+          <button type="button" onClick={() => setGrande(g => !g)} aria-label={grande ? 'Reducir la ventana' : 'Expandir a pantalla completa'}
+            title={grande ? 'Reducir' : 'Expandir a pantalla completa'} className={boton}>
+            {grande ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </button>
+          <button type="button" onClick={onCerrar} aria-label="Cerrar" className={boton}><X className="h-5 w-5" /></button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">{typeof children === 'function' ? children(grande) : children}</div>
       </div>
     </div>,
     document.body,

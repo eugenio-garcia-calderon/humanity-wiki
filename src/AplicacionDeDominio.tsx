@@ -7,6 +7,7 @@ import RutaSitio from './pages/RutaSitio';
 import BuscadorSitio from './components/sitio/BuscadorSitio';
 import NoEncontradaSitio from './components/sitio/NoEncontradaSitio';
 import { resolverPrecargado } from './utils/precargado';
+const MapaDominio = lazy(() => import('./pages/MapaDominio'));
 
 // The one exception to «no lazy» below: the order-tracking page. It is opened
 // from an order e-mail, never on a first visit, so it should not make every
@@ -96,6 +97,10 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
             {/* Seguir un pedido (2026-10-18): el correo de compra de Wikiproducts
                 lleva aquí, `dominio/pedido?codigo=…`. */}
             <Route path="pedido" element={<Suspense fallback={null}><MiPedido /></Suspense>} />
+            {/* El mapa de indicadores, para el marco del bloque «Mapa» (2026-10-21). Sólo incrustado. */}
+            <Route path="mapa" element={new URLSearchParams(window.location.search).get('embed') === '1'
+              ? <Suspense fallback={null}><MapaDominio /></Suspense>
+              : <RutaSitio propio siNo={perdida} />} />
             {/* La portada: sólo `/`. */}
             <Route index element={<PaginaDeDominio host={host} resuelto={resuelto} />} />
             {/* Una página del sitio por su nombre corto (`/powerbanks`, su

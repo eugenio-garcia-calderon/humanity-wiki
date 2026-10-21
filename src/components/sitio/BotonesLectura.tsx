@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import { FilaBotones, VentanaBoton, botonesDe, type BotonCabecera, type TallaBotones } from '../knowledge/BotonesCabecera';
 import { BarraFija } from '../knowledge/BarraFija';
+import { cn } from '../../utils/cn';
 
 // LOS BOTONES DE LA CABECERA, EN LA PÁGINA PUBLICADA (2026-10-20): cada uno
 // abre su página (una subpágina) en una ventana, leída como cualquier otra.
@@ -20,14 +21,18 @@ function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCer
     return () => { vivo = false; };
   }, [boton]);
   const titulo = (typeof pagina === 'object' && pagina.titulo) || boton.pubTitulo || 'Sin título';
+  // Una página con un mapa a pantalla completa se abre ya expandida.
+  const tieneMapa = typeof pagina === 'object' && pagina.bloques.some((b: any) => b?.tipo === 'mapaMundo' && b?.datos?.alto === 'pantalla');
   return (
-    <VentanaBoton titulo={titulo} onCerrar={onCerrar}>
-      <div className="mx-auto max-w-3xl px-5 pb-12 pt-10 sm:px-10 text-left">
+    <VentanaBoton titulo={titulo} onCerrar={onCerrar} inicialGrande={tieneMapa}>
+      {grande => (
+      <div className={cn('mx-auto px-5 pb-12 pt-10 text-left', grande ? 'max-w-[110rem] sm:px-8' : 'max-w-3xl sm:px-10')}>
         <h2 className="mb-6 pr-10 text-3xl font-black tracking-tight text-slate-900 break-words">{titulo}</h2>
         {pagina === 'cargando' && <p className="text-slate-400">Cargando…</p>}
         {pagina === 'no' && <p className="text-slate-500">Esta página no está publicada.</p>}
         {typeof pagina === 'object' && <BloquesLectura bloques={pagina.bloques} paginaId={boton.entityId} />}
       </div>
+      )}
     </VentanaBoton>
   );
 }
