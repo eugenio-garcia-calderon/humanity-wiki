@@ -22,7 +22,7 @@ import { FilaBotones, type BotonCabecera, type EstiloBotones } from './BotonesCa
 // vista previa del creador del menú. Si el menú del sitio es fijo, la barra va
 // debajo de él, y si el menú ya enseña el mismo nombre, la barra no lo repite.
 
-export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, acento, onAbrir, margenes = '-mx-5 sm:-mx-8' }: {
+export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, acento, onAbrir, plegado = false, margenes = '-mx-5 sm:-mx-8' }: {
   icono: string | null;
   titulo: string;
   subtitulo?: string | null;
@@ -31,6 +31,8 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
   estilo?: EstiloBotones;
   acento?: string | null;
   onAbrir: (b: BotonCabecera) => void;
+  /** Los botones en un menú ☰ en cascada (2026-10-21). */
+  plegado?: boolean;
   /** Para que el fondo blanco llegue a los bordes de la columna. */
   margenes?: string;
 }) {
@@ -40,9 +42,18 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
   const [repetida, setRepetida] = useState(false);
   /** Lo que ocupa la píldora de la cuenta, arriba a la derecha, para no tapar los botones. */
   const [hueco, setHueco] = useState(0);
+  /** En un teléfono los botones van en el menú ☰: sueltos se comen el título (2026-10-21). */
+  const [estrecha, setEstrecha] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia('(max-width: 639px)');
+    const v = () => setEstrecha(m.matches);
+    v(); m.addEventListener('change', v);
+    return () => m.removeEventListener('change', v);
+  }, []);
   useEffect(() => {
     let raf = 0;
     let ahora = false;
+    let ultimo = '';
     const medir = () => {
       const p = pegajosa.current;
       if (!p) return;
@@ -55,8 +66,15 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
       const relleno = caja ? parseFloat(getComputedStyle(caja).paddingTop) || 0 : 0;
       setArriba(altoMenu - relleno);
       setRepetida(!!menu && !!titulo && (menu.textContent || '').includes(titulo));
-      const pildora = document.querySelector<HTMLElement>('[data-barra-miembro]');
-      setHueco(pildora && !altoMenu ? Math.round(pildora.getBoundingClientRect().width) + 16 : 0);
+      // LA CUENTA, DENTRO DE LA BARRA (2026-10-21, Eugenio: «el icono de iniciar sesión, al
+      // bajar, arriba a la derecha y unificado con este menú, alineado y en su línea»). Sin
+      // menú del sitio, la píldora de `BarraMiembro` flota arriba a la derecha; con la barra a
+      // la vista se coloca DENTRO de ella (le decimos dónde con el evento `barra-fija`), y la
+      // barra le deja su hueco.
+      const pildora = document.querySelector<HTMLElement>('[data-barra-miembro] [data-pildora-cuenta]');
+      const interior = p.querySelector<HTMLElement>('[data-barra-fija] > div');
+      const relleno0 = interior ? parseFloat(getComputedStyle(interior).paddingLeft) || 0 : 0;
+      setHueco(pildora && !altoMenu ? relleno0 + Math.round(pildora.getBoundingClientRect().width) + 12 : 0);
       // El título es lo que manda: la cabecera es la que va justo detrás de la barra.
       const t = (p.nextElementSibling as HTMLElement | null)?.querySelector<HTMLElement>('h1, textarea, [data-elemento-cabecera="titulo"]');
       if (!t) return;
@@ -65,12 +83,21 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
       // Con 20 px de margen entre aparecer y desaparecer: justo en el límite no parpadea.
       const v = ahora ? fondo < borde + 28 : fondo < borde + 8;
       if (v !== ahora) { ahora = v; setVisible(v); }
+      if (interior && !altoMenu) {
+        const r = interior.getBoundingClientRect();
+        const pos = ahora ? { visible: true, top: Math.round(p.getBoundingClientRect().top), alto: Math.round(r.height), derecha: Math.round(window.innerWidth - r.right + relleno0) } : { visible: false };
+        const clave = JSON.stringify(pos);
+        if (clave !== ultimo) { ultimo = clave; window.dispatchEvent(new CustomEvent('barra-fija', { detail: pos })); }
+      }
     };
     const alMover = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(medir); };
     medir();
     window.addEventListener('scroll', alMover, true);
     window.addEventListener('resize', alMover);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', alMover, true); window.removeEventListener('resize', alMover); };
+    return () => {
+      cancelAnimationFrame(raf); window.removeEventListener('scroll', alMover, true); window.removeEventListener('resize', alMover);
+      window.dispatchEvent(new CustomEvent('barra-fija', { detail: { visible: false } }));
+    };
   }, [titulo]);
   const subir = () => pegajosa.current?.parentElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const esUrl = !!icono && /^(https?:|\/)/.test(icono);
@@ -79,31 +106,31 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
       <div data-barra-fija aria-hidden={!visible} inert={!visible || undefined}
         className={cn('absolute inset-x-0 top-0 transition-[opacity,transform] duration-200', margenes,
           visible ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0')}>
-        <div style={hueco ? { paddingRight: hueco } : undefined} className="flex h-12 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-5 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur sm:h-14 sm:px-8">
+        <div style={hueco ? { paddingRight: hueco } : undefined} className="flex h-14 items-center gap-3.5 border-b border-slate-200/80 bg-white/95 px-5 shadow-[0_6px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur sm:h-16 sm:px-8">
           <button type="button" onClick={subir} title="Volver arriba"
-            className={cn('flex min-w-0 items-center gap-2.5 text-left', repetida ? 'shrink' : 'flex-1')}>
+            className={cn('flex min-w-0 items-center gap-3 text-left', repetida ? 'shrink' : 'flex-1')}>
             {portada && (
-              <span className="hidden h-9 w-9 shrink-0 overflow-hidden rounded-md bg-slate-50 sm:block [&_img]:h-full [&_img]:w-full [&_img]:object-contain [&_video]:h-full [&_video]:w-full [&_video]:object-cover">
+              <span className="hidden h-10 w-10 shrink-0 overflow-hidden rounded-md bg-slate-50 sm:block [&_img]:h-full [&_img]:w-full [&_img]:object-contain [&_video]:h-full [&_video]:w-full [&_video]:object-cover">
                 <MediaPortada src={portada} className="h-full w-full object-contain" />
               </span>
             )}
             {/* Si el menú fijo ya dice cómo se llama, aquí no se repite. */}
             {!repetida && icono && (esUrl
-              ? <img src={icono} alt="" className="h-7 w-7 shrink-0 rounded-md object-cover" />
-              : <span className="shrink-0 text-2xl leading-none">{icono}</span>)}
+              ? <img src={icono} alt="" className="h-8 w-8 shrink-0 rounded-md object-cover" />
+              : <span className="shrink-0 text-[28px] leading-none">{icono}</span>)}
             <span className="min-w-0">
-              {!repetida && <span className="block truncate text-[15px] font-black leading-tight tracking-tight text-slate-900">{titulo || 'Sin título'}</span>}
+              {!repetida && <span className="block truncate text-[17px] font-black leading-tight tracking-tight text-slate-900">{titulo || 'Sin título'}</span>}
               {subtitulo && (
-                <span className={cn('truncate leading-tight text-slate-500', repetida ? 'hidden text-sm md:block' : 'hidden text-xs md:block')}>
+                <span className={cn('truncate leading-tight text-slate-500', repetida ? 'hidden text-base md:block' : 'hidden text-[14px] md:block')}>
                   {subtitulo.replace(/[*_`#[\]]/g, '')}
                 </span>
               )}
             </span>
           </button>
           {botones.length > 0 && (
-            <div className={cn('min-w-0 overflow-x-auto [scrollbar-width:none]', repetida ? 'flex-1' : 'max-w-[60%] shrink')}>
+            <div className={cn('min-w-0', !(plegado || estrecha) && 'overflow-x-auto [scrollbar-width:none]', repetida ? 'flex-1' : 'max-w-[60%] shrink')}>
               {/* En un teléfono, de izquierda a derecha y algo más grandes (se tocan con el dedo). */}
-              <FilaBotones botones={botones} talla="s" estilo={estilo} acento={acento} derecha={!repetida} sinMargen enLinea onAbrir={onAbrir} />
+              <FilaBotones botones={botones} talla="sm" estilo={estilo} acento={acento} derecha={!repetida} sinMargen enLinea plegado={plegado || (estrecha && botones.length > 1)} onAbrir={onAbrir} />
             </div>
           )}
         </div>

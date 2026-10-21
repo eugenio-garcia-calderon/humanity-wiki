@@ -30,6 +30,40 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   const [abierto, setAbierto] = useState<'menu' | 'entrar' | null>(null);
   const [guardados, setGuardados] = useState<any[] | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  /** Dónde está la barra fija de la cabecera, si está a la vista: la píldora se mete en ella. */
+  const [enBarra, setEnBarra] = useState<{ top: number; alto: number; derecha: number } | null>(null);
+  // QUE LA PÍLDORA NO TAPE LA CABECERA (2026-10-21). Flota arriba a la derecha:
+  // si cae encima de los botones de la cabecera, éstos se apartan a su
+  // izquierda; si cae encima del título (en un teléfono), la cabecera baja.
+  useEffect(() => {
+    const ajustar = () => {
+      const pil = caja.current?.querySelector('[data-pildora-cuenta]')?.getBoundingClientRect();
+      if (!pil) return;
+      const y = window.scrollY, arriba = 16, abajo = 16 + pil.height;
+      const bots = document.querySelector<HTMLElement>('[data-botones-cabecera]');
+      if (bots) {
+        bots.style.marginRight = '';
+        const r = bots.getBoundingClientRect();
+        const choca = r.top + y < abajo && r.bottom + y > arriba && r.right > pil.left - 12 && r.left < pil.right;
+        if (choca && r.left < pil.left - 40) bots.style.marginRight = `${Math.ceil(r.right - pil.left + 12)}px`;
+      }
+      const cab = document.querySelector<HTMLElement>('[data-cabecera-pagina]');
+      const h1 = cab?.querySelector('h1');
+      if (cab && h1) {
+        cab.style.paddingTop = '';
+        const r = h1.getBoundingClientRect();
+        if (r.top + y < abajo && r.right > pil.left - 8) cab.style.paddingTop = `${Math.ceil(abajo - (r.top + y) + 8)}px`;
+      }
+    };
+    const t = [setTimeout(ajustar, 50), setTimeout(ajustar, 800), setTimeout(ajustar, 2500)];
+    window.addEventListener('resize', ajustar);
+    return () => { t.forEach(clearTimeout); window.removeEventListener('resize', ajustar); };
+  }, [e?.yo?.nombre, e?.activo]);
+  useEffect(() => {
+    const oir = (ev: Event) => { const d = (ev as CustomEvent).detail; setEnBarra(d?.visible ? { top: d.top, alto: d.alto, derecha: d.derecha } : null); };
+    window.addEventListener('barra-fija', oir);
+    return () => window.removeEventListener('barra-fija', oir);
+  }, []);
   const caja = useRef<HTMLDivElement>(null);
   const sitio = useSitio();
   const base = `/api/sitio-miembros/${encodeURIComponent(raiz)}`;
@@ -90,10 +124,14 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   return (
     // ARRIBA A LA DERECHA (2026-10-20, Eugenio: «el icono de perfil arriba a la
     // derecha, junto con el nombre»). Antes era una píldora abajo a la izquierda.
-    <div ref={caja} data-barra-miembro className="fixed right-4 top-4 z-[60] flex flex-col items-end print:hidden">
+    <div ref={caja} data-barra-miembro className="fixed right-4 top-4 z-[60] flex flex-col items-end print:hidden"
+      style={enBarra ? { top: enBarra.top + Math.round((enBarra.alto - 44) / 2), right: enBarra.derecha } : undefined}>
       {avisoEnlace && <p className="order-last mt-2 max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p>}
-      <button onClick={() => setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'))}
-        className="flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white/95 pl-1.5 pr-4 text-[13px] font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white">
+      <button onClick={() => setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'))} data-pildora-cuenta
+        className={enBarra
+          // Dentro de la barra fija: sin borde ni sombra, como una pieza más de la barra.
+          ? 'flex h-11 items-center gap-2 rounded-full border border-transparent pl-1.5 pr-3 text-[15px] font-bold text-slate-700 hover:bg-slate-100'
+          : 'flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white/95 pl-1.5 pr-4 text-[13px] font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white'}>
         {yo
           ? <span className="grid h-8 w-8 place-items-center rounded-full text-sm font-black text-white" style={{ background: acento }}>{(yo.nombre || yo.email).trim().charAt(0).toUpperCase()}</span>
           : <span className="grid h-8 w-8 place-items-center"><UserRound className="h-4 w-4" style={{ color: acento }} /></span>}
