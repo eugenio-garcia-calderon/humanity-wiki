@@ -4476,7 +4476,7 @@ function EditorPagina() {
         {cabeceraFija(ajustes.cabecera) && (
           <BarraFija icono={icono} titulo={titulo} subtitulo={ajustes.subtitulo} portada={portada}
             botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : (ajustes.botones || [])}
-            estilo={ajustes.cabecera?.botonesEstilo} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
+            estilo={ajustes.cabecera?.botonesEstilo} plegado={ajustes.cabecera?.botonesMenu === 'plegado'} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
         )}
         <div data-cabecera-editor>
         {(() => {
@@ -4657,7 +4657,7 @@ function EditorPagina() {
         ) : null)}
           </>) : null;
           const botonesNodo = (<>
-        <FilaBotones botones={ajustes.botones || []} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derechaAncho={v2 && der('botones')} sinMargen={v2} estilo={ajustes.cabecera?.botonesEstilo}
+        <FilaBotones botones={ajustes.botones || []} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derechaAncho={v2 ? der('botones') : true} sinMargen plegado={ajustes.cabecera?.botonesMenu === 'plegado'} estilo={ajustes.cabecera?.botonesEstilo}
           onAbrir={b => setVentanaBoton(b)}
           onQuitar={editable ? b => {
             if (!window.confirm(`¿Quitar el botón «${b.pubTitulo || 'Sin título'}»? Su página no se borra: queda en la lista de páginas.`)) return;
@@ -4704,11 +4704,16 @@ function EditorPagina() {
             <LayoutCabecera cabecera={ajustes.cabecera} imagen={portadaNodo} cuerpo={<>
               {filaAnadir}
               {/* Icono al lado del título por defecto; título y descripción van juntos. Ver `FilaTitulo`. */}
-              <FilaTitulo cabecera={ajustes.cabecera} icono={iconoNodo}>
-                {tituloNodo}
-                {descNodo}
-              </FilaTitulo>
-              {botonesNodo}
+              {/* Los botones a la derecha del título, como en la barra al bajar (2026-10-21). */}
+              <div className="@container"><div className="flex flex-col gap-3 @xl:flex-row @xl:items-start @xl:justify-between @xl:gap-6">
+                <div className="min-w-0 flex-1">
+                  <FilaTitulo cabecera={ajustes.cabecera} icono={iconoNodo}>
+                    {tituloNodo}
+                    {descNodo}
+                  </FilaTitulo>
+                </div>
+                {((ajustes.botones || []).length > 0 || editable) && <div className="shrink-0 @xl:pt-1">{botonesNodo}</div>}
+              </div></div>
               {autorNodo}
               {propsNodo}
             </>} />
@@ -5171,7 +5176,7 @@ function TituloEditable({ valor, onCambiar, letra }: { valor: string; onCambiar:
       onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
       placeholder={tr('Título del documento')}
       style={letra ? { fontSize: letra } : undefined}
-      className={cn('w-full font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1 resize-none overflow-hidden block bg-transparent leading-tight', !letra && 'text-4xl')}
+      className={cn('w-full font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 resize-none overflow-hidden block bg-transparent leading-[1.08]', !letra && 'text-4xl')}
     />
   );
 }
@@ -5205,7 +5210,7 @@ function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onV
       placeholder={tr('Escribe una descripción…')}
       aria-label={tr('Descripción de la página')}
       style={{ fontSize: letra }}
-      className="mt-1 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
+      className="mt-0.5 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
     />
   );
 }

@@ -9577,3 +9577,11 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - En el editor, en el asa ⋮⋮ de un bloque de base de datos, aparece «Cerrada a nuevas entradas» si eres su dueño (o superadministrador). Con el candado puesto, el bloque muestra una insignia ámbar; un clic en ella lo quita.
 - Se guarda en la tabla (`bd_tablas.config.cerrada`), con `GET/PUT /api/bd/tablas/:id/candado`. Solo lo cambia el dueño de la tabla o un superadministrador.
 - En la web publicada, con el candado puesto, «Añadir entrada» desaparece y `contribuir.ts` rechaza con 403 a todos (equipo y miembros con «Añadir contenido») salvo al dueño de la tabla, al de la página o a un superadministrador. En el Wiki Creator, el dueño sigue añadiendo como siempre.
+
+## 2026-10-21 — Barra al bajar: la cuenta dentro, un 15 % más grande, botones a la derecha también arriba, menú ☰ en cascada (Programador 8)
+
+- **La cuenta dentro de la barra**: sin menú del sitio, la píldora de `BarraMiembro` flota arriba a la derecha. Con la barra fija a la vista se mete dentro de ella: `BarraFija` emite `barra-fija` con su posición, y la píldora se alinea, sin borde ni sombra, mientras la barra le deja su hueco. Arriba del todo, si la píldora tapa los botones de la cabecera, éstos se apartan; si tapa el título (en un teléfono), la cabecera baja.
+- **Barra un 15 % más grande**: 64 px en escritorio y 56 en el teléfono, título de 17 px, icono de 32, miniatura de 40 y botones de 36 (talla `sm` nueva).
+- **Botones a la derecha también en la cabecera grande** (diseño de antes y editor): a la derecha del título y en el mismo orden que la barra; en un teléfono, debajo.
+- **Menú ☰ en cascada**: `cabecera.botonesMenu = 'plegado'`, en Menú y cabecera → Cabecera → «Botones sueltos / Menú ☰ en cascada». Las opciones caen una detrás de otra, en un portal. En un teléfono la barra lo usa siempre que haya más de un botón.
+- **Menos aire entre el título y la descripción** en la cabecera grande: interlineado 1,08 y 4 px de separación. En un teléfono, el título del diseño de antes llega como mucho a 34 px y ya no parte las palabras.

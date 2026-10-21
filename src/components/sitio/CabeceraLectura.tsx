@@ -82,19 +82,19 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
   const der = (id: string) => el(id)?.col === 'der';
   const hayBotones = Array.isArray(cfg.botones) && cfg.botones.length > 0;
   return (
-    <header className="mb-5" data-cabecera-elementos>
+    <header className="mb-5" data-cabecera-elementos data-cabecera-pagina>
       <CabeceraElementos elementos={els} iconoEncima={c?.iconoPos === 'encima'} piezas={{
         icono: icono ? (esUrl(icono)
           ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
           : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>) : null,
         titulo: (
-          <h1 className={cn('font-black tracking-tight text-slate-900 break-words leading-tight', cfg.ocultarTitulo && 'sr-only')}
+          <h1 className={cn('font-black tracking-tight text-slate-900 break-words leading-[1.08]', cfg.ocultarTitulo && 'sr-only')}
             style={{ fontSize: tamTitulo(c, el('titulo'), esMovil) }}>
             {pagina.titulo || 'Sin título'}
           </h1>
         ),
         descripcion: cfg.subtitulo ? (
-          <p className="mt-1 text-slate-500 leading-snug whitespace-pre-line break-words" style={{ fontSize: tamDescripcion(c, esMovil, el('descripcion')) }}>
+          <p className="mt-0.5 text-slate-500 leading-snug whitespace-pre-line break-words" style={{ fontSize: tamDescripcion(c, esMovil, el('descripcion')) }}>
             <TextoEnriquecido texto={cfg.subtitulo} />
           </p>
         ) : null,
@@ -105,7 +105,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
           </div>
         ) : null,
         botones: hayBotones ? (
-          <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense>
+          <div data-botones-cabecera><Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense></div>
         ) : null,
         propiedades: pagina.fila ? (
           <div className="text-left" style={{ zoom: zoomPropiedades(el('propiedades')) }}>
@@ -129,7 +129,7 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
   return (
     // La misma cabecera que el editor: imagen arriba, debajo o a un
     // lado, con el tamaño que eligió el autor.
-    <header className="mb-5">
+    <header className="mb-5" data-cabecera-pagina>
       <LayoutCabecera
         centrado={!alIzquierda}
         cabecera={cfg.cabecera}
@@ -137,6 +137,9 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
         // de los iconos y las imágenes de más abajo.
         imagen={cfg.portada ? <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} /> : null}
         cuerpo={<>
+          {/* LOS BOTONES, A LA DERECHA DEL TÍTULO (2026-10-21, Eugenio: «que coincida con la
+              barra al bajar: los botones siempre a la derecha por defecto»). En un teléfono, debajo. */}
+          <div className="@container"><div className="flex flex-col gap-3 @xl:flex-row @xl:items-start @xl:justify-between @xl:gap-6"><div className="min-w-0 flex-1">
           <FilaTitulo centrado={!alIzquierda} cabecera={cfg.cabecera} icono={icono ? (
             <div>
               {esUrl(icono)
@@ -147,21 +150,24 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
           {/* OCULTO AL PÚBLICO SI SE PIDE (2026-10-02, Eugenio: «permite ocultar
               el título de la página»). Se queda para los lectores de pantalla y
               los buscadores (`sr-only`): una página sin título no se entiende. */}
-          <h1 className={cn('font-black tracking-tight text-slate-900 break-words', cfg.ocultarTitulo && 'sr-only')}
-            style={{ fontSize: tituloPagina(cfg.cabecera) }}>
+          {/* Interlineado justo (2026-10-21, Eugenio: «demasiado espacio entre el título y la descripción»). */}
+          <h1 className={cn('font-black tracking-tight text-slate-900 break-words leading-[1.08]', cfg.ocultarTitulo && 'sr-only')}
+            style={{ fontSize: esMovil ? Math.min(tituloPagina(cfg.cabecera), 34) : tituloPagina(cfg.cabecera) }}>
             {pagina.titulo || 'Sin título'}
           </h1>
           {/* Si está escrita, se publica. */}
           {cfg.subtitulo && (
-            <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line break-words"
+            <p className="mt-1 text-slate-500 leading-snug whitespace-pre-line break-words"
               style={{ fontSize: letraDescripcion(cfg.cabecera, esMovil) }}>
               <TextoEnriquecido texto={cfg.subtitulo} />
             </p>
           )}
           </FilaTitulo>
+          </div>
           {Array.isArray(cfg.botones) && cfg.botones.length > 0 && (
-            <Suspense fallback={null}><BotonesLectura config={cfg} centrado={!alIzquierda} /></Suspense>
+            <div data-botones-cabecera className="shrink-0 @xl:pt-1"><Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha /></Suspense></div>
           )}
+          </div></div>
           {/* LA FECHA YA NO SE PUBLICA (2026-10-02, Eugenio: «quita la fecha que
               está debajo del icono»). `cfg.mostrarFecha`, que tienen algunas
               páginas viejas, se ignora. */}

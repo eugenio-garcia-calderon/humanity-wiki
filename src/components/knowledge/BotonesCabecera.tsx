@@ -1,6 +1,6 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Menu } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -17,13 +17,13 @@ import { cn } from '../../utils/cn';
 // El rótulo del botón es el título de esa página.
 
 export type BotonCabecera = { id: string; tipo: 'subpagina'; entityId: string; pubTitulo?: string };
-export type TallaBotones = 'xs' | 's' | 'm' | 'l' | 'xl';
+export type TallaBotones = 'xs' | 's' | 'sm' | 'm' | 'l' | 'xl';
 export type EstiloBotones = 'relleno' | 'contorno' | 'suave';
 
 export const botonesDe = (config: any): BotonCabecera[] =>
   (Array.isArray(config?.botones) ? config.botones : []).filter((b: any) => b && typeof b.entityId === 'string');
 
-const TALLA: Record<TallaBotones, string> = { xs: 'h-7 px-2.5 text-[11px]', s: 'h-8 px-3 text-xs', m: 'h-10 px-4 text-sm', l: 'h-12 px-5 text-base', xl: 'h-14 px-6 text-lg' };
+const TALLA: Record<TallaBotones, string> = { xs: 'h-7 px-2.5 text-[11px]', s: 'h-8 px-3 text-xs', sm: 'h-9 px-3.5 text-[13px]', m: 'h-10 px-4 text-sm', l: 'h-12 px-5 text-base', xl: 'h-14 px-6 text-lg' };
 const ESTILO: Record<EstiloBotones, string> = {
   relleno: 'bg-slate-900 text-white hover:bg-slate-800',
   contorno: 'border-2 border-slate-900 text-slate-900 hover:bg-slate-50',
@@ -31,7 +31,7 @@ const ESTILO: Record<EstiloBotones, string> = {
 };
 
 /** La fila de botones, bajo el título y la descripción. */
-export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, acento, onAbrir, onQuitar, onAnadir }: {
+export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, acento, onAbrir, onQuitar, onAnadir }: {
   botones: BotonCabecera[];
   talla?: TallaBotones;
   estilo?: EstiloBotones;
@@ -43,6 +43,8 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
   sinMargen?: boolean;
   /** En una sola línea (la barra fija): sin saltar de renglón. */
   enLinea?: boolean;
+  /** Todos los botones recogidos en un menú ☰ que se abre en cascada (2026-10-21). */
+  plegado?: boolean;
   /** El color de la web publicada, para el estilo «relleno». */
   acento?: string | null;
   onAbrir: (b: BotonCabecera) => void;
@@ -51,6 +53,13 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
   onAnadir?: () => void;
 }) {
   if (!botones.length && !onAnadir) return null;
+  if (plegado) {
+    return (
+      <div className={cn('flex', !sinMargen && 'mt-3', centrado && 'justify-center', (derecha || derechaAncho) && 'justify-end')} role="navigation" aria-label="Apartados de la página">
+        <MenuPlegado botones={botones} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} onQuitar={onQuitar} onAnadir={onAnadir} />
+      </div>
+    );
+  }
   return (
     <div className={cn('flex items-center gap-2', enLinea ? 'flex-nowrap' : 'flex-wrap', !sinMargen && 'mt-3', centrado && 'justify-center', derecha && 'flex-row-reverse', derechaAncho && '@xl:flex-row-reverse')} role="navigation" aria-label="Apartados de la página">
       {botones.map(b => (
@@ -75,6 +84,71 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
         </button>
       )}
     </div>
+  );
+}
+
+/**
+ * EL MENÚ ☰ EN CASCADA (2026-10-21, Eugenio: «la posibilidad de un menú
+ * colapsable con tres rayitas en vez de tantos botones, que se abra en
+ * cascada»). Las opciones caen una detrás de otra. El panel va en un portal
+ * con posición fija: dentro de la barra fija lo cortaría su `overflow`.
+ */
+function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir }: {
+  botones: BotonCabecera[]; talla: TallaBotones; estilo: EstiloBotones; acento?: string | null;
+  onAbrir: (b: BotonCabecera) => void; onQuitar?: (b: BotonCabecera) => void; onAnadir?: () => void;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const [listo, setListo] = useState(false);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const boton = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) { setListo(false); return; }
+    const r = boton.current?.getBoundingClientRect();
+    if (r) setPos({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
+    const raf = requestAnimationFrame(() => setListo(true));
+    const fuera = (e: PointerEvent) => { if (!panel.current?.contains(e.target as Node) && !boton.current?.contains(e.target as Node)) setAbierto(false); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    const cerrar = () => setAbierto(false);
+    window.addEventListener('pointerdown', fuera);
+    window.addEventListener('keydown', tecla);
+    window.addEventListener('scroll', cerrar, true);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', fuera); window.removeEventListener('keydown', tecla); window.removeEventListener('scroll', cerrar, true); };
+  }, [abierto]);
+  const elegir = (b: BotonCabecera) => { setAbierto(false); onAbrir(b); };
+  return (
+    <>
+      <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-expanded={abierto} aria-haspopup="menu" data-menu-plegado
+        style={estilo === 'relleno' && acento ? { backgroundColor: acento } : undefined}
+        className={cn('inline-flex items-center gap-2 rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo])}>
+        <Menu className="h-4 w-4" /> Menú
+      </button>
+      {abierto && pos && createPortal(
+        <div ref={panel} role="menu" style={{ top: pos.top, right: pos.right }}
+          className="fixed z-[9996] w-64 max-w-[calc(100vw-1rem)] rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl">
+          {botones.map((b, i) => (
+            <div key={b.id} style={{ transitionDelay: `${i * 45}ms` }}
+              className={cn('group/op flex items-center rounded-xl transition-[opacity,transform] duration-200 ease-out', listo ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0')}>
+              <button type="button" role="menuitem" onClick={() => elegir(b)}
+                className="min-w-0 flex-1 truncate rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-slate-50">
+                {b.pubTitulo?.trim() || 'Sin título'}
+              </button>
+              {onQuitar && (
+                <button type="button" onClick={() => { setAbierto(false); onQuitar(b); }} aria-label={`Quitar el botón ${b.pubTitulo || 'Sin título'}`}
+                  className="mr-1 hidden h-7 w-7 place-items-center rounded-full text-slate-400 hover:text-rose-600 group-hover/op:grid"><X className="h-3.5 w-3.5" /></button>
+              )}
+            </div>
+          ))}
+          {onAnadir && (
+            <button type="button" onClick={() => { setAbierto(false); onAnadir(); }} style={{ transitionDelay: `${botones.length * 45}ms` }}
+              className={cn('flex w-full items-center gap-1.5 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-400 transition-[opacity,transform] duration-200 hover:bg-slate-50 hover:text-emerald-700', listo ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0')}>
+              <Plus className="h-4 w-4" /> Añadir botón
+            </button>
+          )}
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }
 

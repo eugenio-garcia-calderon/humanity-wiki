@@ -101,6 +101,10 @@ export default function MandosCabeceraPagina({ d }: { d: DatosCabecera }) {
           <Plus className="w-3.5 h-3.5" /> Añadir un botón
         </button>
         {d.botones.length > 0 && (
+          <Elegir valor={c.botonesMenu === 'plegado' ? 'plegado' : 'sueltos'} onCambio={v => pon({ botonesMenu: v })} pequeno
+            opciones={[['sueltos', 'Botones sueltos'], ['plegado', 'Menú ☰ en cascada']]} />
+        )}
+        {d.botones.length > 0 && (
           <Elegir valor={c.botonesEstilo || 'relleno'} onCambio={v => pon({ botonesEstilo: v })} pequeno
             opciones={[['relleno', 'Relleno'], ['contorno', 'Contorno'], ['suave', 'Suave']]} />
         )}
