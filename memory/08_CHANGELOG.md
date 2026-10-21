@@ -9612,3 +9612,4 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 - En `/mapa?embed=1&filtros=1` (el botón «Mapa» de la web de Eugenio), al pinchar un territorio se abre a la derecha, sobre el mapa, su ficha: cifras, origen del dato, objetivos y el explorador de objetivo › indicador › marcador. Es la misma que en la columna del mapa completo (`contenidoTerritorio`, sacada de la columna 2). Al cargar no se abre sola, y se cierra con la × o pinchando fuera de un territorio.
 - Desde un dominio propio, el enlace de pantalla completa de esa ficha abre `/objetivos` en humanity.wiki.
+- En un dominio propio, la ficha del territorio rompía el mapa (`useEdit must be used within EditProvider`): `MapaDominio` monta ahora los mismos proveedores que `App.tsx` (ajustes, sesión, datos, edición, diseño y textos).
