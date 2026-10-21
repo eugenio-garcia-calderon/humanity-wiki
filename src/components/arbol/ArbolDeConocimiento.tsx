@@ -71,10 +71,16 @@ export default function ArbolDeConocimiento({
   hijosDe,
   puedeEditar,
   onElegir,
+  alto: altoCaja,
+  escala = 1,
 }: {
   hijosDe: Record<string, Hoja[]>;
   puedeEditar: boolean;
   onElegir?: (id: string) => void;
+  /** Alto fijo de la caja (con desplazamiento en las dos direcciones), p. ej. a pantalla completa (2026-10-21). */
+  alto?: string;
+  /** Tamaño del dibujo: 1 = el de siempre; más, para leerlo en grande en una página. */
+  escala?: number;
 }) {
   const [ramas, setRamas] = useState<Rama[]>([]);
   const [aristas, setAristas] = useState<Arista[]>([]);
@@ -218,7 +224,7 @@ export default function ArbolDeConocimiento({
     requestAnimationFrame(() => {
       const caja = cajaRef.current;
       if (!caja) return;
-      const destino = x + PASO * 1.6 - caja.clientWidth;
+      const destino = (x + PASO * 1.6) * escala - caja.clientWidth;
       if (destino > caja.scrollLeft) caja.scrollTo({ left: destino, behavior: 'smooth' });
     });
   };
@@ -300,11 +306,11 @@ export default function ArbolDeConocimiento({
         </p>
       )}
 
-      <div ref={cajaRef} className="overflow-x-auto p-3">
+      <div ref={cajaRef} className={cn('p-3', altoCaja ? 'overflow-auto' : 'overflow-x-auto')} style={altoCaja ? { height: altoCaja } : undefined}>
         <svg
           ref={svgRef}
-          width={ancho + MARGEN}
-          height={alto}
+          width={(ancho + MARGEN) * escala}
+          height={alto * escala}
           viewBox={`${-MARGEN} ${-MARGEN} ${ancho + MARGEN} ${alto}`}
           style={{ maxWidth: 'none' }}
           onPointerMove={e => { if (arrastrando) setEncima(ramaBajoElPunto(puntoEnSvg(e))?.id ?? null); }}
