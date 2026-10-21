@@ -44,10 +44,13 @@ function Foto({ url, nombre, tam, acento }: { url?: string | null; nombre?: stri
   if (url && !rota) {
     return <img src={url} alt="" onError={() => setRota(true)} style={{ width: tam, height: tam }} className="rounded-full object-cover shrink-0" />;
   }
-  const inicial = (nombre || '').trim().charAt(0).toUpperCase();
-  return inicial
-    ? <span style={{ width: tam, height: tam, background: acento || '#0f172a', fontSize: Math.round(tam * 0.45) }} className="rounded-full grid place-items-center font-black text-white shrink-0">{inicial}</span>
-    : <UserRound style={{ width: tam * 0.62, height: tam * 0.62 }} strokeWidth={1.9} className="shrink-0" />;
+  // Sin foto, una silueta con contorno negro y fondo blanco (2026-10-21, Eugenio), no la inicial en color.
+  void nombre; void acento;
+  return (
+    <span style={{ width: tam, height: tam }} className="grid shrink-0 place-items-center rounded-full border-[1.5px] border-slate-900 bg-white text-slate-900">
+      <UserRound style={{ width: tam * 0.56, height: tam * 0.56 }} strokeWidth={2} />
+    </span>
+  );
 }
 
 export default function CuentaMenu({ raiz, color, className }: { raiz: string; color?: string; className?: string }) {
@@ -143,7 +146,7 @@ export default function CuentaMenu({ raiz, color, className }: { raiz: string; c
           ? 'inline-flex h-11 max-w-[14rem] shrink-0 items-center gap-2 rounded-full pl-1.5 pr-1.5 sm:pr-3 hover:bg-black/5 focus-visible:outline focus-visible:outline-2'
           : 'inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-current/20 px-3 text-sm font-bold hover:bg-black/5 focus-visible:outline focus-visible:outline-2', className)}>
         {conSesion
-          ? <><Foto url={foto} nombre={nombre} tam={32} acento={acento} />{nombre && <span className="hidden truncate text-sm font-bold sm:inline">{nombre.includes('@') ? nombre.split('@')[0] : nombre.split(' ')[0]}</span>}</>
+          ? <><Foto url={foto} nombre={nombre} tam={28} acento={acento} />{nombre && <span className="hidden truncate text-sm font-bold sm:inline">{nombre.includes('@') ? nombre.split('@')[0] : nombre.split(' ')[0]}</span>}</>
           : <><UserRound className="h-5 w-5" strokeWidth={1.9} /><span>Entrar</span></>}
       </button>
 
