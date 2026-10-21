@@ -3242,6 +3242,11 @@ function EditorPagina() {
   /** Lo que el menú ⋮⋮ ofrece además según el bloque (ver `OpcionExtra`). */
   const opcionesExtra = (b: Bloque): OpcionExtra[] => {
     const out: OpcionExtra[] = [];
+    // EL CANDADO (2026-10-21): cerrar la base de datos a entradas nuevas desde la web publicada.
+    const tc = b.tipo === 'basedatos' ? String((b as any).tabla_id || '') : '';
+    if (tc && candados[tc]?.puede) {
+      out.push({ icon: Lock, label: 'Cerrada a nuevas entradas', activo: candados[tc].cerrada, onClick: () => { setMenuAsa(null); alternarCandado(tc); } });
+    }
     if (/^titulo[123]$/.test(b.tipo)) {
       out.push({ icon: ChevronRight, label: 'Título desplegable', activo: !!b.plegable, onClick: () => alternarPlegable(b.id) });
     }
@@ -3264,6 +3269,29 @@ function EditorPagina() {
     out.push({ icon: ChevronRight, label: 'Meter un nivel', atajo: 'Tab', onClick: () => { setMenuAsa(null); sangrar([b.id], 1); } });
     if (b.nivel) out.push({ icon: ArrowLeft, label: 'Sacar un nivel', atajo: '⇧Tab', onClick: () => { setMenuAsa(null); sangrar([b.id], -1); } });
     return out;
+  };
+
+  /** El candado de cada base de datos de la página: si está cerrada y si yo puedo cambiarlo. */
+  const [candados, setCandados] = useState<Record<string, { cerrada: boolean; puede: boolean }>>({});
+  const idsTablas = [...new Set(bloques.filter(x => x.tipo === 'basedatos' && (x as any).tabla_id).map(x => String((x as any).tabla_id)))].join(',');
+  useEffect(() => {
+    const faltan = idsTablas.split(',').filter(t => t && !(t in candados));
+    for (const t of faltan) {
+      fetch(`/api/bd/tablas/${encodeURIComponent(t)}/candado`, { credentials: 'include' })
+        .then(r => (r.ok ? r.json() : null))
+        .then(j => setCandados(c => ({ ...c, [t]: { cerrada: !!j?.cerrada, puede: !!j?.puede_cambiar } })))
+        .catch(() => {});
+    }
+  }, [idsTablas]); // eslint-disable-line react-hooks/exhaustive-deps
+  const alternarCandado = async (t: string) => {
+    const cerrada = !candados[t]?.cerrada;
+    const r = await fetch(`/api/bd/tablas/${encodeURIComponent(t)}/candado`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cerrada }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { avisar(j.error || 'No se ha podido cambiar el candado'); return; }
+    setCandados(c => ({ ...c, [t]: { ...c[t], cerrada: !!j.cerrada } }));
+    avisar(j.cerrada ? 'Base de datos cerrada: solo tú añades entradas' : 'Base de datos abierta a nuevas entradas');
   };
 
   /** Dónde se inserta lo nuevo: tras el bloque activo, o al final. */
@@ -3964,6 +3992,14 @@ function EditorPagina() {
         // «+» y el asa) detrás, como en Notion.
         style={b.nivel ? { marginLeft: Math.min(b.nivel - (enSinc[b.id]?.capas || 0), 10) * (esMovil ? 18 : 28) } : undefined}
       >
+        {/* El candado puesto se ve: un clic lo quita (quien puede). */}
+        {editable && b.tipo === 'basedatos' && candados[String((b as any).tabla_id)]?.cerrada && (
+          <button type="button" data-candado-bd onClick={() => candados[String((b as any).tabla_id)]?.puede && alternarCandado(String((b as any).tabla_id))}
+            title="Cerrada: en la web publicada nadie más que tú puede añadir entradas. Pulsa para abrirla."
+            className="absolute right-0 top-1 z-10 inline-flex h-7 items-center gap-1 rounded-full bg-amber-50 px-2.5 text-[11px] font-bold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100">
+            <Lock className="h-3 w-3" /> Cerrada a nuevas entradas
+          </button>
+        )}
         {/* LOS MANDOS DEL BLOQUE. En escritorio viven FUERA de la columna, a
             56 px por la izquierda, y aparecen al pasar el ratón.
 

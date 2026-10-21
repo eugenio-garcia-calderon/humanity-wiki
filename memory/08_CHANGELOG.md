@@ -9571,3 +9571,9 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **Servidor** (`src/server/contribuir.ts`): `contribuidor()`; `GET /api/sitio-contribuir/:pagina`; `GET …/tablas/:tabla` (las propiedades que se pueden rellenar); `GET …/relacion/:columna?q=`; `POST …/filas`. La fila la crea el dueño de la tabla (`bdInterno.crearFila`/`escribirCeldas`, como los formularios), en todo o nada, y luego se anota `created_by` con quien la trajo. Las subidas van por `POST /api/uploads?contribuir=<página>` (`identidadDeContribuidor`, montado justo después de «miembros»).
 - **Cliente**: `Contribuir.tsx` pone «Añadir entrada» encima de cada base de datos de la página publicada para quien puede. `NuevaEntradaPublica.tsx` es el formulario. La galería se recarga con la entrada nueva.
 - **La cuenta, arriba a la derecha y con el nombre**: la píldora de `BarraMiembro` pasa de abajo a la izquierda a arriba a la derecha, con la inicial y el nombre. El icono del menú (`CuentaMenu`) también muestra el nombre. La barra fija de la cabecera deja hueco a la píldora.
+
+## 2026-10-21 — El candado de una base de datos: cerrada a nuevas entradas (Programador 8)
+
+- En el editor, en el asa ⋮⋮ de un bloque de base de datos, aparece «Cerrada a nuevas entradas» si eres su dueño (o superadministrador). Con el candado puesto, el bloque muestra una insignia ámbar; un clic en ella lo quita.
+- Se guarda en la tabla (`bd_tablas.config.cerrada`), con `GET/PUT /api/bd/tablas/:id/candado`. Solo lo cambia el dueño de la tabla o un superadministrador.
+- En la web publicada, con el candado puesto, «Añadir entrada» desaparece y `contribuir.ts` rechaza con 403 a todos (equipo y miembros con «Añadir contenido») salvo al dueño de la tabla, al de la página o a un superadministrador. En el Wiki Creator, el dueño sigue añadiendo como siempre.

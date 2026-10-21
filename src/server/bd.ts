@@ -737,6 +737,40 @@ export function registerBdRoutes(app: Express, db: any) {
   });
 
   /**
+   * EL CANDADO DE UNA BASE DE DATOS (2026-10-21, Eugenio): «que desde el
+   * creador de páginas se pueda bloquear una base de datos para que no se
+   * generen nuevas entradas salvo por el dueño; que en la página pública,
+   * aunque alguien sea miembro y pueda añadir entradas, no pueda en las
+   * bloqueadas». Es `config.cerrada` de la tabla. Lo pone y lo quita sólo su
+   * dueño (o un superadministrador). Lo aplica `contribuir.ts`.
+   */
+  const puedeCandado = async (req: Request, tablaId: string) => {
+    if (!req.user || (req as any).miembroSitio) return false;
+    const t = (await db.execute(sql`SELECT creador_user_id FROM bd_tablas WHERE id = ${tablaId} AND deleted_at IS NULL`)).rows[0] as any;
+    return !!t && (t.creador_user_id === req.user.id || (req.user.roleLevel ?? 0) >= 4);
+  };
+  app.get('/api/bd/tablas/:id/candado', async (req: Request, res: Response) => {
+    try {
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const t = (await db.execute(sql`SELECT config FROM bd_tablas WHERE id = ${String(req.params.id)}`)).rows[0] as any;
+      res.json({ cerrada: !!t?.config?.cerrada, puede_cambiar: await puedeCandado(req, String(req.params.id)) });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+  app.put('/api/bd/tablas/:id/candado', async (req: Request, res: Response) => {
+    try {
+      if (!(await puedeCandado(req, String(req.params.id)))) return res.status(403).json({ error: 'Solo el dueño de la base de datos puede cerrarla o abrirla.' });
+      const cerrada = req.body?.cerrada === true;
+      await db.execute(sql`
+        UPDATE bd_tablas SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{cerrada}', ${JSON.stringify(cerrada)}::jsonb),
+          updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${String(req.params.id)}
+      `);
+      res.json({ cerrada });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * RETIRAR UNA TABLA — `DELETE /api/bd/tablas/:id`
    *
    * Tampoco existía, y era el hueco más incómodo de la herramienta: se podían
