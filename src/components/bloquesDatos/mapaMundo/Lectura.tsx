@@ -21,7 +21,8 @@ export function VistaMapaMundo({ datos }: { datos: Record<string, unknown> }) {
     <figure className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
       <iframe src={direccionMapa(datos, true)} title="Mapa de indicadores del mundo" loading="lazy"
         className="block w-full" style={{ height: alto, border: 0 }} />
-      <a href={direccionMapa(datos, false)} target="_blank" rel="noreferrer"
+      {/* En un dominio propio, `/mapa` sin marco es una página del sitio: la pantalla completa se abre en humanity.wiki. */}
+      <a href={(typeof window !== 'undefined' && !/(^|\.)humanity\.wiki$|^localhost$|^127\./.test(window.location.hostname) ? 'https://humanity.wiki' : '') + direccionMapa(datos, false)} target="_blank" rel="noreferrer"
         className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black text-slate-700 shadow ring-1 ring-slate-200 hover:bg-white">
         <Maximize2 className="h-3.5 w-3.5" /> Pantalla completa
       </a>

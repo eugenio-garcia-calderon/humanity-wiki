@@ -9599,3 +9599,4 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **En los dominios propios**: `/mapa?embed=1` no existía (la aplicación es la del sitio) y el marco quedaba vacío. `AplicacionDeDominio` tiene ahora una ruta `mapa` que, sólo con `embed=1`, pinta el mapa (`MapaDominio.tsx`, con sesión y datos).
 - **Expandir la ventana de un botón**: `VentanaBoton` tiene un botón para expandir a pantalla completa o reducir. El contenido recibe si está en grande y entonces usa todo el ancho. Una página con un mapa a pantalla completa se abre ya expandida.
 - En la web de Eugenio, la página del botón «Mapa» (KWMVI0B1LJWN) lleva el bloque con España, a pantalla completa y con objetivos; su nota «MAPA retos?» se queda debajo.
+- El enlace «Pantalla completa» del bloque de mapa, en un dominio propio, abre el mapa en humanity.wiki: allí `/mapa` sin marco es una página del sitio.
