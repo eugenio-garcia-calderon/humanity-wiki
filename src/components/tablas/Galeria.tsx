@@ -517,10 +517,11 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                 )} />
               )}
               {nombreArriba && <div className="mb-2">{nombreEl}</div>}
-              <div className={cn('relative aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
+              {/* CUADRADA Y SIN RECORTAR (2026-10-21, Eugenio): la imagen entera dentro de un cuadrado, con blanco arriba y abajo (o a los lados) si no es cuadrada. */}
+              <div className={cn('relative aspect-square bg-white border border-slate-100 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
-                    recolocable={(recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}
+                    recolocable={false /* la imagen se ve entera: no hay nada que recolocar (2026-10-21) */ && (recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}
                     onGuardar={async (x, y) => {
                       const r = await fetch(`/api/bd/filas/${f.id}/encuadre`, {
                         method: 'PUT', credentials: 'include',
@@ -681,7 +682,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
           <button onClick={nueva} disabled={abriendo === 'nueva'}
             onDragOver={arrastrada ? e => { e.preventDefault(); } : undefined}
             onDrop={arrastrada ? e => { e.preventDefault(); const id = arrastrada; setArrastrada(null); setDestino(null); moverFila(id, null); } : undefined}
-            className={cn('aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors', chica ? 'min-h-0' : 'min-h-[9rem]')} aria-label="Nueva página">
+            className={cn('aspect-square rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors', chica ? 'min-h-0' : 'min-h-[9rem]')} aria-label="Nueva página">
             {abriendo === 'nueva' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
             {!chica && 'Nueva página'}
           </button>
@@ -794,7 +795,7 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, compacta = false
       <img src={src} alt="" loading="lazy" draggable={false}
         onError={e => { e.currentTarget.style.display = 'none'; }}
         style={{ objectPosition: `${visible.x}% ${visible.y}%` }}
-        className={cn('w-full h-full object-cover select-none', !modo && 'group-hover:scale-[1.02] transition-transform')} />
+        className={cn('w-full h-full object-contain select-none', !modo && 'group-hover:scale-[1.02] transition-transform')} />
 
       {recolocable && !modo && (
         <button type="button"
