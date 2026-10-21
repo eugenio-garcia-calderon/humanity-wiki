@@ -98,12 +98,29 @@ async function columnasContribuibles(db: any, tablaId: string) {
   return { titulo, columnas };
 }
 
+/**
+ * LAS BASES DE DATOS CERRADAS (2026-10-21): con el candado puesto
+ * (`bd_tablas.config.cerrada`) sólo añaden entradas el dueño de la tabla, el
+ * de la página o un superadministrador; nadie más, ni el equipo ni los
+ * miembros con «Añadir contenido».
+ */
+async function abiertaPara(db: any, tablaId: string, paginaId: string, userId: string): Promise<boolean> {
+  const t = (await db.execute(sql`SELECT config, creador_user_id FROM bd_tablas WHERE id = ${tablaId}`)).rows[0] as any;
+  if (!t?.config?.cerrada) return true;
+  if (t.creador_user_id === userId) return true;
+  const w = (await db.execute(sql`SELECT creator_user_id FROM knowledge_windows WHERE id = ${paginaId}`)).rows[0] as any;
+  if (w?.creator_user_id === userId) return true;
+  const u = (await db.execute(sql`SELECT role_level FROM users WHERE id = ${userId}`)).rows[0] as any;
+  return Number(u?.role_level) >= 4;
+}
+
 /** Lo común a las rutas de una tabla: quién es, y que la tabla esté en la página. */
 async function permiso(db: any, req: Request, res: Response): Promise<{ quien: Contribuidor; paginaId: string; tablaId: string } | null> {
   const paginaId = String(req.params.paginaId), tablaId = String(req.params.tablaId);
   const quien = await contribuidor(db, req, paginaId);
   if (!quien) { res.status(403).json({ error: 'Para añadir entradas, entra con una cuenta que pueda editar en esta web.' }); return null; }
   if (!(await tablasDePagina(db, req, paginaId)).includes(tablaId)) { res.status(404).json({ error: 'Esa base de datos no está en esta página.' }); return null; }
+  if (!(await abiertaPara(db, tablaId, paginaId, quien.userId))) { res.status(403).json({ error: 'Esta base de datos está cerrada: solo su dueño añade entradas.' }); return null; }
   return { quien, paginaId, tablaId };
 }
 
@@ -132,7 +149,10 @@ export function registrarContribuir(app: Express, db: any) {
       res.set('Cache-Control', 'private, no-store');
       const quien = await contribuidor(db, req, String(req.params.paginaId));
       if (!quien) return res.json({ puede: false, tablas: [] });
-      res.json({ puede: true, equipo: quien.esEquipo, tablas: await tablasDePagina(db, req, String(req.params.paginaId)) });
+      const todas = await tablasDePagina(db, req, String(req.params.paginaId));
+      const abiertas: string[] = [];
+      for (const t of todas) if (await abiertaPara(db, t, String(req.params.paginaId), quien.userId)) abiertas.push(t);
+      res.json({ puede: true, equipo: quien.esEquipo, tablas: abiertas });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
