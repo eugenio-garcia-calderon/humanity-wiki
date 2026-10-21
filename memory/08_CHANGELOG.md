@@ -9613,3 +9613,10 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - En `/mapa?embed=1&filtros=1` (el botón «Mapa» de la web de Eugenio), al pinchar un territorio se abre a la derecha, sobre el mapa, su ficha: cifras, origen del dato, objetivos y el explorador de objetivo › indicador › marcador. Es la misma que en la columna del mapa completo (`contenidoTerritorio`, sacada de la columna 2). Al cargar no se abre sola, y se cierra con la × o pinchando fuera de un territorio.
 - Desde un dominio propio, el enlace de pantalla completa de esa ficha abre `/objetivos` en humanity.wiki.
 - En un dominio propio, la ficha del territorio rompía el mapa (`useEdit must be used within EditProvider`): `MapaDominio` monta ahora los mismos proveedores que `App.tsx` (ajustes, sesión, datos, edición, diseño y textos).
+
+## 2026-10-21 — El árbol del conocimiento como bloque, en el botón «Esquema» (Programador 8)
+
+- Bloque nuevo `arbolConocimiento` (`bloquesDatos/arbolConocimiento`): el mismo árbol de Preferencias (`ArbolDeConocimiento`). La red de conocimiento queda a la izquierda, luego las tres ramas, los quince objetivos y sus subtemas (`/api/temas`), que se abren al pulsar. Es solo para mirar. Tiene opciones de alto (pantalla completa por defecto) y de tamaño (`escala`).
+- `ArbolDeConocimiento` acepta `alto` (caja con desplazamiento en las dos direcciones) y `escala`.
+- La ventana de un botón cuya página lleva un árbol o un mapa a pantalla completa se abre ya expandida.
+- En la web de Eugenio, la página del botón «Esquema» (KWMVI45CWSSR) lleva el árbol a pantalla completa y en tamaño grande.

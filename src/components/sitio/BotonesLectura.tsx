@@ -22,7 +22,7 @@ function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCer
   }, [boton]);
   const titulo = (typeof pagina === 'object' && pagina.titulo) || boton.pubTitulo || 'Sin título';
   // Una página con un mapa a pantalla completa se abre ya expandida.
-  const tieneMapa = typeof pagina === 'object' && pagina.bloques.some((b: any) => b?.tipo === 'mapaMundo' && b?.datos?.alto === 'pantalla');
+  const tieneMapa = typeof pagina === 'object' && pagina.bloques.some((b: any) => ['mapaMundo', 'arbolConocimiento'].includes(b?.tipo) && b?.datos?.alto === 'pantalla');
   return (
     <VentanaBoton titulo={titulo} onCerrar={onCerrar} inicialGrande={tieneMapa}>
       {grande => (
