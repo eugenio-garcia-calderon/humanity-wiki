@@ -105,7 +105,10 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
           </div>
         ) : null,
         botones: hayBotones ? (
-          <div data-botones-cabecera><Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense></div>
+          <div data-botones-cabecera className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense>
+            <span data-hueco-cuenta="cabecera" className="contents" />
+          </div>
         ) : null,
         propiedades: pagina.fila ? (
           <div className="text-left" style={{ zoom: zoomPropiedades(el('propiedades')) }}>
@@ -164,9 +167,11 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
           )}
           </FilaTitulo>
           </div>
-          {Array.isArray(cfg.botones) && cfg.botones.length > 0 && (
-            <div data-botones-cabecera className="shrink-0 @xl:pt-1"><Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha /></Suspense></div>
-          )}
+          {/* Los botones y, a su lado, el hueco de la cuenta (`BarraMiembro`). */}
+          <div data-botones-cabecera className="hidden shrink-0 flex-wrap items-center gap-x-6 gap-y-2 has-[button]:flex @xl:pt-1">
+            {Array.isArray(cfg.botones) && cfg.botones.length > 0 && <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha /></Suspense>}
+            <span data-hueco-cuenta="cabecera" className="contents" />
+          </div>
           </div></div>
           {/* LA FECHA YA NO SE PUBLICA (2026-10-02, Eugenio: «quita la fecha que
               está debajo del icono»). `cfg.mostrarFecha`, que tienen algunas

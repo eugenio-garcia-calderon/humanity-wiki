@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { UserRound, LogOut, Bookmark, BookmarkCheck, X, Loader2, Pencil } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MuroMiembros, { useCanjeEnlace, type Muro } from './MuroMiembros';
 import { useSitio } from './ContextoSitio';
+import { cn } from '../../utils/cn';
 
 // ============================================================================
 // «ENTRAR» EN UN SITIO CON MIEMBROS (2026-10-05, carril «acceso»)
@@ -30,40 +32,30 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   const [abierto, setAbierto] = useState<'menu' | 'entrar' | null>(null);
   const [guardados, setGuardados] = useState<any[] | null>(null);
   const [ocupado, setOcupado] = useState(false);
-  /** Dónde está la barra fija de la cabecera, si está a la vista: la píldora se mete en ella. */
-  const [enBarra, setEnBarra] = useState<{ top: number; alto: number; derecha: number } | null>(null);
-  // QUE LA PÍLDORA NO TAPE LA CABECERA (2026-10-21). Flota arriba a la derecha:
-  // si cae encima de los botones de la cabecera, éstos se apartan a su
-  // izquierda; si cae encima del título (en un teléfono), la cabecera baja.
+  // EN LA LÍNEA DE LOS BOTONES (2026-10-21, Eugenio: «más pequeño, una silueta en
+  // vez de la inicial, contorno negro y fondo blanco, más separado de los botones, y
+  // en la misma línea arriba del todo y al bajar: que no flote»). La cuenta se pinta
+  // DENTRO de un hueco que dejan la cabecera (`data-hueco-cuenta="cabecera"`, junto a
+  // sus botones) y la barra fija (`="barra"`). Al bajar pasa a la barra. Sólo si la
+  // página no tiene hueco (sin botones en la cabecera) flota arriba a la derecha.
+  const [barraVisible, setBarraVisible] = useState(false);
+  const [hueco, setHueco] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    const ajustar = () => {
-      const pil = caja.current?.querySelector('[data-pildora-cuenta]')?.getBoundingClientRect();
-      if (!pil) return;
-      const y = window.scrollY, arriba = 16, abajo = 16 + pil.height;
-      const bots = document.querySelector<HTMLElement>('[data-botones-cabecera]');
-      if (bots) {
-        bots.style.marginRight = '';
-        const r = bots.getBoundingClientRect();
-        const choca = r.top + y < abajo && r.bottom + y > arriba && r.right > pil.left - 12 && r.left < pil.right;
-        if (choca && r.left < pil.left - 40) bots.style.marginRight = `${Math.ceil(r.right - pil.left + 12)}px`;
-      }
-      const cab = document.querySelector<HTMLElement>('[data-cabecera-pagina]');
-      const h1 = cab?.querySelector('h1');
-      if (cab && h1) {
-        cab.style.paddingTop = '';
-        const r = h1.getBoundingClientRect();
-        if (r.top + y < abajo && r.right > pil.left - 8) cab.style.paddingTop = `${Math.ceil(abajo - (r.top + y) + 8)}px`;
-      }
-    };
-    const t = [setTimeout(ajustar, 50), setTimeout(ajustar, 800), setTimeout(ajustar, 2500)];
-    window.addEventListener('resize', ajustar);
-    return () => { t.forEach(clearTimeout); window.removeEventListener('resize', ajustar); };
-  }, [e?.yo?.nombre, e?.activo]);
-  useEffect(() => {
-    const oir = (ev: Event) => { const d = (ev as CustomEvent).detail; setEnBarra(d?.visible ? { top: d.top, alto: d.alto, derecha: d.derecha } : null); };
+    const oir = (ev: Event) => setBarraVisible(!!(ev as CustomEvent).detail?.visible);
     window.addEventListener('barra-fija', oir);
     return () => window.removeEventListener('barra-fija', oir);
   }, []);
+  useEffect(() => {
+    const elegir = () => {
+      const barra = document.querySelector<HTMLElement>('[data-hueco-cuenta="barra"]');
+      const cab = document.querySelector<HTMLElement>('[data-hueco-cuenta="cabecera"]');
+      setHueco((barraVisible && barra) || cab || null);
+    };
+    elegir();
+    // La cabecera y la barra llegan en diferido: se vuelve a mirar un par de veces.
+    const t = [setTimeout(elegir, 300), setTimeout(elegir, 1200), setTimeout(elegir, 3000)];
+    return () => t.forEach(clearTimeout);
+  }, [barraVisible]);
   const caja = useRef<HTMLDivElement>(null);
   const sitio = useSitio();
   const base = `/api/sitio-miembros/${encodeURIComponent(raiz)}`;
@@ -121,24 +113,20 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
     yo: null,
   };
 
-  return (
-    // ARRIBA A LA DERECHA (2026-10-20, Eugenio: «el icono de perfil arriba a la
-    // derecha, junto con el nombre»). Antes era una píldora abajo a la izquierda.
-    <div ref={caja} data-barra-miembro className="fixed right-4 top-4 z-[60] flex flex-col items-end print:hidden"
-      style={enBarra ? { top: enBarra.top + Math.round((enBarra.alto - 44) / 2), right: enBarra.derecha } : undefined}>
-      {avisoEnlace && <p className="order-last mt-2 max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p>}
+  const cuenta = (
+    <div ref={caja} data-barra-miembro className={cn('relative flex items-center print:hidden', !hueco && 'fixed right-4 top-4 z-[60] rounded-full bg-white/90 pl-1 pr-1 shadow-sm backdrop-blur')}>
+      {avisoEnlace && <p className="absolute right-0 top-full z-[70] mt-2 w-64 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p>}
       <button onClick={() => setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'))} data-pildora-cuenta
-        className={enBarra
-          // Dentro de la barra fija: sin borde ni sombra, como una pieza más de la barra.
-          ? 'flex h-11 items-center gap-2 rounded-full border border-transparent pl-1.5 pr-3 text-[15px] font-bold text-slate-700 hover:bg-slate-100'
-          : 'flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white/95 pl-1.5 pr-4 text-[13px] font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white'}>
-        {yo
-          ? <span className="grid h-8 w-8 place-items-center rounded-full text-sm font-black text-white" style={{ background: acento }}>{(yo.nombre || yo.email).trim().charAt(0).toUpperCase()}</span>
-          : <span className="grid h-8 w-8 place-items-center"><UserRound className="h-4 w-4" style={{ color: acento }} /></span>}
-        {yo ? (yo.nombre || yo.email.split('@')[0]).split(' ')[0] : 'Entrar'}
+        title={yo ? (yo.nombre || yo.email) : 'Entrar o registrarte'} aria-label={yo ? `Mi cuenta: ${yo.nombre || yo.email}` : 'Entrar o registrarte'}
+        className="inline-flex h-9 items-center gap-1.5 rounded-full pr-1 text-[13px] font-semibold text-slate-700 hover:text-slate-950">
+        {/* Una silueta, con contorno negro y fondo blanco: igual con sesión o sin ella. */}
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] border-slate-900 bg-white text-slate-900">
+          <UserRound className="h-4 w-4" strokeWidth={2} />
+        </span>
+        <span className="hidden max-w-[8rem] truncate sm:inline">{yo ? (yo.nombre || yo.email.split('@')[0]).split(' ')[0] : 'Entrar'}</span>
       </button>
       {abierto === 'menu' && yo && (
-        <div className="mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+        <div className="absolute right-0 top-full z-[70] mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
           <p className="truncate px-2 pt-1 text-[13px] font-bold text-slate-800">{yo.nombre || yo.email}</p>
           <p className="truncate px-2 pb-2 text-[11px] text-slate-400">{e.es_equipo ? 'Equipo de esta web' : <>{yo.categoria || 'Miembro'}{yo.estado !== 'activo' ? ' · pendiente' : ''}</>}</p>
           {/* QUIEN GESTIONA LA WEB, AUNQUE HAYA ENTRADO COMO MIEMBRO (2026-10-20, Eugenio:
@@ -173,15 +161,17 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
           </button>
         </div>
       )}
-      {abierto === 'entrar' && !yo && (
-        <div className="fixed inset-0 z-[61] grid place-items-center bg-slate-900/40 p-4" onClick={() => setAbierto(null)}>
+      {abierto === 'entrar' && !yo && createPortal(
+        <div className="fixed inset-0 z-[10010] grid place-items-center bg-slate-900/40 p-4" onClick={() => setAbierto(null)}>
           <div className="relative" onClick={ev => ev.stopPropagation()}>
             <button onClick={() => setAbierto(null)} aria-label="Cerrar"
               className="absolute right-2 top-2 z-10 grid h-9 w-9 place-items-center rounded-full text-slate-400 hover:bg-slate-100"><X className="h-4 w-4" /></button>
             <MuroMiembros muro={muro} onDentro={tras} enLinea />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
+  return hueco ? createPortal(cuenta, hueco) : cuenta;
 }

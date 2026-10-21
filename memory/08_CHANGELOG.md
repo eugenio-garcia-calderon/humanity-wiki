@@ -9585,3 +9585,8 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **Botones a la derecha también en la cabecera grande** (diseño de antes y editor): a la derecha del título y en el mismo orden que la barra; en un teléfono, debajo.
 - **Menú ☰ en cascada**: `cabecera.botonesMenu = 'plegado'`, en Menú y cabecera → Cabecera → «Botones sueltos / Menú ☰ en cascada». Las opciones caen una detrás de otra, en un portal. En un teléfono la barra lo usa siempre que haya más de un botón.
 - **Menos aire entre el título y la descripción** en la cabecera grande: interlineado 1,08 y 4 px de separación. En un teléfono, el título del diseño de antes llega como mucho a 34 px y ya no parte las palabras.
+
+## 2026-10-21 — La cuenta: silueta pequeña, en la línea de los botones (Programador 8)
+
+- El icono de la cuenta pasa a ser una silueta de 28 px, con contorno negro y fondo blanco (ni inicial ni color de acento), con el nombre al lado en 13 px; en el teléfono, solo la silueta. Lo mismo en el icono del menú del sitio (`CuentaMenu`) cuando no hay foto.
+- Ya no flota: `BarraMiembro` se pinta con un portal DENTRO del hueco `data-hueco-cuenta`. Arriba es `="cabecera"`, junto a los botones de la cabecera y a 24 px de ellos; al bajar es `="barra"`, al final de la barra fija. Solo flota arriba a la derecha si la página no tiene hueco. La ventana de entrar va en un portal al `body`, porque la barra tiene `transform`. Se quitan el cálculo de huecos y el evento con posiciones; `barra-fija` solo dice si la barra se ve.
