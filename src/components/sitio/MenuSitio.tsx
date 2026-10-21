@@ -205,7 +205,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
       {/* El desplegable de las tres rayas se coloca respecto a la cabecera
           entera, no a esta fila: así cae debajo de la caja de buscar y no la
           tapa (comprobación en producción tras la ronda 2). */}
-      <div ref={fila} className="mx-auto max-w-6xl px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
+      <div ref={fila} className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
         <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} />
         <nav ref={nav} aria-label="Menú"
           className={cn('flex-1 items-center gap-1 min-w-0',
@@ -240,7 +240,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
       {/* En la página de resultados ya hay una caja, con lo que se buscó
           dentro: dos seguidas eran una de más (ronda 2 del evaluador). */}
       {mn.buscador && plegado !== 'nunca' && !enBuscar && (
-        <div className={cn('mx-auto max-w-6xl px-5 pb-2.5', plegado === 'movil' && '@2xl:hidden')}>
+        <div className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 pb-2.5', plegado === 'movil' && '@2xl:hidden')}>
           <CajaBuscar rutas={rutas} s={s} lleno />
         </div>
       )}
@@ -271,7 +271,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
   return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
-      <div className="mx-auto max-w-6xl px-5 @2xl:px-8 py-12 grid gap-10 @2xl:grid-cols-3">
+      <div className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-12 grid gap-10 @2xl:grid-cols-3">
         <div className="space-y-3">
           {(logo || nombre) && (
             <div className="flex items-center gap-2.5 font-black text-lg">
@@ -310,7 +310,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
       </div>
       {(p.copyright || legales.length > 0) && (
         <div style={{ borderColor: `${p.texto}26` }} className="border-t">
-          <div className="mx-auto max-w-6xl px-5 @2xl:px-8 py-3 flex flex-wrap items-center gap-x-5 text-base opacity-75">
+          <div className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center gap-x-5 text-base opacity-75">
             {p.copyright && <span>© {new Date().getFullYear()} {s.titular.nombre || nombre}</span>}
             {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
           </div>

@@ -92,7 +92,7 @@ import { embedDe, type Embed } from '../utils/embeds';
 // Ajustes de página, buscar y atajos (2026-10-06, carril editorB, #29 y #30).
 import BuscarEnPagina from '../components/knowledge/BuscarEnPagina';
 import AtajosAyuda from '../components/knowledge/AtajosAyuda';
-import { anchoDePagina, clasesDePagina, contarPagina } from '../utils/ajustesPagina';
+import { anchoDePagina, anchoDeEditor, clasesDePagina, contarPagina } from '../utils/ajustesPagina';
 import { detectarMencion, referenciasDe } from '../utils/menciones';
 
 import { t as tr } from '../i18n';
@@ -4253,7 +4253,7 @@ function EditorPagina() {
     <div className="h-full overflow-x-clip">
       {/* SIEMPRE A ANCHO COMPLETO (2026-10-02, Eugenio: «quita la opción de
           que no sea ancho completo»). El mismo ancho que la página publicada. */}
-      <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', anchoDePagina(ajustes))}>
+      <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', anchoDeEditor(ajustes))}>
 
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">
@@ -4576,7 +4576,8 @@ function EditorPagina() {
                     // propia barra de subida en la página, con la foto ya puesta.
                     // Imagen: primero se recorta. Vídeo: se sube tal cual. Enlace de YouTube o Vimeo: se guarda.
                     conVideo
-                    onArchivo={f => { if (f.type.startsWith('video/')) subirPortada(f); else setRecortandoPortada(f); }}
+                    // SIN PASO INTERMEDIO (2026-10-21, Eugenio): la imagen se sube tal cual; quien quiera recortarla tiene «Recortar» sobre la portada.
+                    onArchivo={f => subirPortada(f)}
                     onEnlace={url => { setPortada(url); programarGuardado(); }}
                   />
                 )}

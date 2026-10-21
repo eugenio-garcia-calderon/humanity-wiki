@@ -9600,3 +9600,10 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **Expandir la ventana de un botón**: `VentanaBoton` tiene un botón para expandir a pantalla completa o reducir. El contenido recibe si está en grande y entonces usa todo el ancho. Una página con un mapa a pantalla completa se abre ya expandida.
 - En la web de Eugenio, la página del botón «Mapa» (KWMVI0B1LJWN) lleva el bloque con España, a pantalla completa y con objetivos; su nota «MAPA retos?» se queda debajo.
 - El enlace «Pantalla completa» del bloque de mapa, en un dominio propio, abre el mapa en humanity.wiki: allí `/mapa` sin marco es una página del sitio.
+
+## 2026-10-21 — La mitad de margen a los lados; editor y página publicada con el mismo ancho; portada sin recorte previo; galería en cuadrado (Programador 8)
+
+- **Ancho completo**: antes era un tope fijo de 1152 px. Ahora es `calc(576px+50vw)` (`ANCHO_COMPLETO`), es decir, 1152 px más la mitad de lo que sobre de la ventana, con lo que cada margen lateral queda en la mitad. El menú y el pie del sitio usan el mismo ancho.
+- **Editor igual que la página publicada**: `anchoDeEditor` suma los 16 px por lado que el editor tiene de más de relleno (para el «+» y el asa), así el CONTENIDO mide lo mismo: mismas columnas en una galería y el mismo espacio. Con los paneles laterales del editor abiertos, el editor tiene menos sitio que la ventana entera.
+- **Portada**: al pegar o subir una imagen se sube tal cual, sin la ventana de recortar. «Recortar» sigue sobre la portada.
+- **Galería**: la imagen de cada tarjeta es cuadrada y se ve entera (`object-contain`, fondo blanco), sin recortar. «Recolocar» se quita porque ya no hay nada que mover.
