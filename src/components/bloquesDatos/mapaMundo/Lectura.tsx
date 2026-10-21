@@ -5,6 +5,8 @@ import type { PropsLectura } from '../tipos';
 export const direccionMapa = (datos: Record<string, unknown>, enMarco: boolean) => {
   const q = new URLSearchParams();
   if (enMarco) q.set('embed', '1');
+  // Con la columna de los objetivos a la izquierda (2026-10-21).
+  if (datos.filtros === true) q.set('filtros', '1');
   const t = String(datos.territorio || '').trim();
   if (t) q.set('territorio', t);
   const s = q.toString();
@@ -12,7 +14,9 @@ export const direccionMapa = (datos: Record<string, unknown>, enMarco: boolean) 
 };
 
 export function VistaMapaMundo({ datos }: { datos: Record<string, unknown> }) {
-  const alto = Math.min(1200, Math.max(320, Number(datos.alto) || 560));
+  // «Pantalla completa» (2026-10-21): todo el alto de la ventana, menos el menú de arriba.
+  const pantalla = datos.alto === 'pantalla';
+  const alto = pantalla ? 'max(560px, calc(100vh - 7rem))' : Math.min(1200, Math.max(320, Number(datos.alto) || 560));
   return (
     <figure className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
       <iframe src={direccionMapa(datos, true)} title="Mapa de indicadores del mundo" loading="lazy"

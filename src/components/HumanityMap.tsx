@@ -41,6 +41,8 @@ interface HumanityMapProps {
   indicators?: any[];
   activeMarkerId?: string | null;
   activeMetricId?: string | null;
+  /** Dónde empieza el mapa: [oeste, sur, este, norte] (2026-10-21, «el mapa de España»). */
+  limites?: [number, number, number, number] | null;
 }
 
 function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature; objectiveIndicators?: { id: string; name: string }[] }) {
@@ -152,7 +154,7 @@ function StationTooltip({ properties }: { properties: any }) {
   );
 }
 
-export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, activeMetricId }: HumanityMapProps) {
+export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, activeMetricId, limites }: HumanityMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [zoom, setZoom] = useState(2.4);
@@ -186,11 +188,13 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
-        center: [15, 25],
-        zoom: zoom,
+        ...(limites ? { bounds: limites, fitBoundsOptions: { padding: 24 } } : { center: [15, 25] as [number, number], zoom }),
         doubleClickZoom: false,
         attributionControl: false
       });
+
+      // El encuadre pedido, también cuando el estilo termina de cargar (el globo lo reinicia).
+      if (limites) map.current.once('load', () => map.current?.fitBounds(limites, { padding: 24, duration: 0 }));
 
       if (!mapPopupRef.current) {
         mapPopupRef.current = new mapboxgl.Popup({

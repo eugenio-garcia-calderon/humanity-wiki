@@ -9590,3 +9590,12 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 
 - El icono de la cuenta pasa a ser una silueta de 28 px, con contorno negro y fondo blanco (ni inicial ni color de acento), con el nombre al lado en 13 px; en el teléfono, solo la silueta. Lo mismo en el icono del menú del sitio (`CuentaMenu`) cuando no hay foto.
 - Ya no flota: `BarraMiembro` se pinta con un portal DENTRO del hueco `data-hueco-cuenta`. Arriba es `="cabecera"`, junto a los botones de la cabecera y a 24 px de ellos; al bajar es `="barra"`, al final de la barra fija. Solo flota arriba a la derecha si la página no tiene hueco. La ventana de entrar va en un portal al `body`, porque la barra tiene `transform`. Se quitan el cálculo de huecos y el evento con posiciones; `barra-fija` solo dice si la barra se ve.
+
+## 2026-10-21 — El mapa de España con el menú de objetivos, en el botón «Mapa»; expandir la ventana de un botón (Programador 8)
+
+- **El mapa con los objetivos a la izquierda**: `/mapa?embed=1&filtros=1` pinta el mapa incrustado con la columna de filtros de siempre (objetivo › indicador › marcador › métrica), pero sin el panel del territorio. En `Map.tsx`, esa columna pasa a la constante `columnaFiltros`, que usan la vista completa y este modo.
+- **Que empiece en España**: `HumanityMap` acepta `limites` (`fitBounds`) y `Map.tsx` tiene `ENCUADRES` por nombre corto (`espana`, `europa`). La tabla de territorios no guarda el contorno de los países.
+- **Bloque «Mapa de indicadores»**: nuevas opciones «Pantalla completa» (`alto: 'pantalla'`, todo el alto de la ventana) y «Con el menú de objetivos a la izquierda» (`filtros: true`).
+- **En los dominios propios**: `/mapa?embed=1` no existía (la aplicación es la del sitio) y el marco quedaba vacío. `AplicacionDeDominio` tiene ahora una ruta `mapa` que, sólo con `embed=1`, pinta el mapa (`MapaDominio.tsx`, con sesión y datos).
+- **Expandir la ventana de un botón**: `VentanaBoton` tiene un botón para expandir a pantalla completa o reducir. El contenido recibe si está en grande y entonces usa todo el ancho. Una página con un mapa a pantalla completa se abre ya expandida.
+- En la web de Eugenio, la página del botón «Mapa» (KWMVI0B1LJWN) lleva el bloque con España, a pantalla completa y con objetivos; su nota «MAPA retos?» se queda debajo.
