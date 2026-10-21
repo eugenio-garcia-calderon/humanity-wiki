@@ -9620,3 +9620,7 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - `ArbolDeConocimiento` acepta `alto` (caja con desplazamiento en las dos direcciones) y `escala`.
 - La ventana de un botón cuya página lleva un árbol o un mapa a pantalla completa se abre ya expandida.
 - En la web de Eugenio, la página del botón «Esquema» (KWMVI45CWSSR) lleva el árbol a pantalla completa y en tamaño grande.
+
+## 2026-10-21 — Sin el aviso «Bloque duplicado» (Programador 8)
+
+- Al duplicar un bloque ya no sale el aviso: la copia se ve debajo.
