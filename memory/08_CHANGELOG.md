@@ -9607,3 +9607,8 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **Editor igual que la página publicada**: `anchoDeEditor` suma los 16 px por lado que el editor tiene de más de relleno (para el «+» y el asa), así el CONTENIDO mide lo mismo: mismas columnas en una galería y el mismo espacio. Con los paneles laterales del editor abiertos, el editor tiene menos sitio que la ventana entera.
 - **Portada**: al pegar o subir una imagen se sube tal cual, sin la ventana de recortar. «Recortar» sigue sobre la portada.
 - **Galería**: la imagen de cada tarjeta es cuadrada y se ve entera (`object-contain`, fondo blanco), sin recortar. «Recolocar» se quita porque ya no hay nada que mover.
+
+## 2026-10-21 — El mapa incrustado con objetivos vuelve a abrir la ficha del territorio (Programador 8)
+
+- En `/mapa?embed=1&filtros=1` (el botón «Mapa» de la web de Eugenio), al pinchar un territorio se abre a la derecha, sobre el mapa, su ficha: cifras, origen del dato, objetivos y el explorador de objetivo › indicador › marcador. Es la misma que en la columna del mapa completo (`contenidoTerritorio`, sacada de la columna 2). Al cargar no se abre sola, y se cierra con la × o pinchando fuera de un territorio.
+- Desde un dominio propio, el enlace de pantalla completa de esa ficha abre `/objetivos` en humanity.wiki.
