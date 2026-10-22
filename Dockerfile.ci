@@ -1,0 +1,23 @@
+# ============================================================================
+# humanity.wiki — la imagen SIN compilar en el servidor (2026-10-22)
+# ============================================================================
+# Eugenio: «muchas veces se queda el icono de cargando mucho tiempo en
+# humanity.wiki». En cada despliegue el servidor (2 núcleos) compilaba Vite y
+# esbuild con `Dockerfile` MIENTRAS servía la web: minutos con la CPU a tope y
+# las páginas sin terminar de cargar. Y ese día se desplegó diez veces.
+#
+# Ahora compila GitHub (`deploy.yml`), sube `dist/` a `compilado/` y esta
+# imagen solo lo copia. Lo demás es igual que la etapa final de `Dockerfile`
+# (que sigue ahí como plan B: si lo compilado no llega o no es de este commit,
+# el despliegue compila en el servidor como antes).
+FROM node:22-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont font-noto-emoji
+ENV NAVEGADOR_CHROMIUM=/usr/bin/chromium-browser
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
+COPY compilado/dist ./dist
+COPY public ./public
+EXPOSE 3000
+CMD ["node", "dist/server.cjs"]

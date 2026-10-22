@@ -63,6 +63,9 @@ services:
   app:
     build:
       context: .
+      # `Dockerfile.ci` cuando GitHub ya ha compilado este commit (ver `deploy.yml`);
+      # `Dockerfile` (compila aquí) si no.
+      dockerfile: ${APP_DOCKERFILE:-Dockerfile}
       args:
         VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-}
     restart: unless-stopped

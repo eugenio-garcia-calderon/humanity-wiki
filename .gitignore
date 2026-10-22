@@ -45,3 +45,6 @@ deploy/certs/*
 # Las capturas de la ficha de las tiendas: se regeneran con
 # `node --env-file=.env scripts/capturas-tienda.mjs` y pesan medio mega cada una.
 capturas-tienda/
+compilado/
+.caddyfile-desplegado
+compilado.tgz

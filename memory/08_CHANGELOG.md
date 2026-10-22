@@ -9687,3 +9687,11 @@ Eugenio: «una presentación de la plataforma en formato web, con capturas reale
 - `htmlBloques.ts` escribe los dos en HTML (títulos, párrafos, listas, imágenes) para buscadores.
 - OJO: en la página publicada `.sitio-lectura` oscurece `text-slate-300/400`; sobre fondo oscuro se usa `text-[#cfd6e2]`.
 - Contenido puesto en la página «Light for Humanity» (KWMVJVP5TYFB) con 6 capturas reales de luzhumanidad.com en `/uploads/2026/10/presentacion-*.webp`.
+
+## 2026-10-22 · Desplegar sin dejar la web «cargando» (Programador 8)
+Eugenio: «muchas veces se queda el icono de cargando durante mucho tiempo en humanity.wiki».
+- Causa: cada despliegue compilaba Vite + esbuild DENTRO del servidor (2 núcleos) con `docker compose up --build`, mientras servía la web. Ese día hubo ~10 despliegues. Además Caddy se recreaba siempre, cortando todas las conexiones abiertas.
+- Ahora `deploy.yml` compila en GitHub, sube `dist/` (`compilado.tgz`, con el commit dentro) y el servidor arma la imagen con `Dockerfile.ci`, que solo copia. Si lo compilado no llega o no es de ese commit, plan B: compila en el servidor como antes (`APP_DOCKERFILE` vacío → `Dockerfile`).
+- El servidor se pone en el commit exacto del despliegue (`git reset --hard <sha>`), no en «lo último de main».
+- Caddy solo se recrea si cambia `deploy/Caddyfile` (huella en `.caddyfile-desplegado`).
+- Visto en local: con 4 pestañas del editor abiertas, las conexiones SSE (telecom + presencia) agotan las 6 de HTTP/1.1 y la quinta pestaña se queda colgada. En producción va por HTTP/2-3 (Cloudflare) y no pasa, pero ojo si algún día se sirve por HTTP/1.1.
