@@ -25,7 +25,7 @@ import { COMPARTIBLES, compartiblePorTipo } from './compartir.js';
 
 /** Dominios que son de la casa y nadie puede reclamar. */
 const RESERVADOS = new Set([
-  'humanity.wiki', 'www.humanity.wiki', 'lighthumanity.org', 'localhost',
+  'humanity.wiki', 'www.humanity.wiki',
 ]);
 
 /**
