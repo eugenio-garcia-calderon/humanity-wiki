@@ -4300,7 +4300,13 @@ function EditorPagina() {
                   ? subiendo
                     : guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : guardado === 'sin conexión' ? tr('sin conexión · se guardará al volver') : 'Cambios sin guardar'}
               </span>
-              <button onClick={cambiarVisibilidad}
+              {/* «PÚBLICA» ABRE LOS AJUSTES DE PUBLICACIÓN (2026-10-22, Eugenio: «al
+                  pinchar se deja de publicar la página y es un desastre»). Es el
+                  mismo diálogo que «Compartir», con el dominio y lo demás; dejar de
+                  publicar se hace allí, a sabiendas. «Privada» sigue publicando de
+                  un clic. */}
+              <button onClick={publico ? () => setCompartirAbierto(true) : cambiarVisibilidad}
+                title={publico ? tr('Ajustes de publicación') : tr('Publicar la página')}
                 className={cn('inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border transition-colors',
                   publico ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500')}>
                 {publico ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}

@@ -9695,3 +9695,7 @@ Eugenio: «muchas veces se queda el icono de cargando durante mucho tiempo en hu
 - El servidor se pone en el commit exacto del despliegue (`git reset --hard <sha>`), no en «lo último de main».
 - Caddy solo se recrea si cambia `deploy/Caddyfile` (huella en `.caddyfile-desplegado`).
 - Visto en local: con 4 pestañas del editor abiertas, las conexiones SSE (telecom + presencia) agotan las 6 de HTTP/1.1 y la quinta pestaña se queda colgada. En producción va por HTTP/2-3 (Cloudflare) y no pasa, pero ojo si algún día se sirve por HTTP/1.1.
+
+## 2026-10-22 · «Pública» abre los ajustes de publicación (Programador 8)
+Eugenio: «al pinchar en Pública se deja de publicar la página y es un desastre a nivel de experiencia de usuario».
+- En el editor, el botón «Pública» abre el diálogo de Compartir (dominio, miembros, Google, «Dejar de publicar»). Despublicar ya solo se hace allí, a sabiendas. «Privada» sigue publicando de un clic.
