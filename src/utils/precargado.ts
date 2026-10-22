@@ -26,6 +26,13 @@ type Precargado = {
   /** La dirección legible de cada ficha enlazada en la página: `{ id: 'powerbanks/x' }`.
    *  La lee `rutasLegibles.ts`. */
   legibles?: Record<string, string>;
+  /** La pestaña de la red o las migas de una entrada en su contexto, por dirección (`porContexto`, 2026-10-21). */
+  contextos?: Record<string, ContextoRuta>;
+};
+
+export type ContextoRuta = {
+  seccion: { slug: string; nombre: string } | null;
+  contexto: { madre: { id: string; titulo: string; camino: string }; grupo: { nombre: string; camino: string } } | null;
 };
 
 const datos: Precargado =
@@ -52,4 +59,9 @@ export function paginaPrecargada(id: string | undefined | null): any | null {
  *  vieja, y en las rutas que cargan aparte el componente se monta dos veces. */
 export function rutaPrecargada(camino: string): string | null {
   return datos.rutas?.[camino] || null;
+}
+
+/** El contexto de esta dirección (pestaña o migas), si vino en el HTML. */
+export function contextoPrecargado(camino: string): ContextoRuta | null {
+  return datos.contextos?.[camino] || null;
 }

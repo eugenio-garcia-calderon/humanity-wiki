@@ -18,7 +18,9 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 // Quién puede verla lo decide el servidor (`sitios.ts`): la página si está
 // publicada, o si lo está la página que contiene su base de datos.
 
-export default function SubpaginaSitio({ propio, idFijo }: { propio: boolean; idFijo?: string }) {
+import type { ContextoRuta } from '../utils/precargado';
+
+export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
   const { id: idDeRuta } = useParams();
   // Por `/p/:id` el id viene en la dirección; por la dirección legible de una
   // ficha (`/powerbanks/anker-737`) lo trae `RutaSitio`.
@@ -41,7 +43,7 @@ export default function SubpaginaSitio({ propio, idFijo }: { propio: boolean; id
     );
   }
   return <>
-    <VistaPagina pagina={pagina} propio={propio} />
+    <VistaPagina pagina={pagina} propio={propio} contexto={contexto} />
     {pagina.miembros?.raiz && <BarraMiembro raiz={pagina.miembros.raiz} paginaId={pagina.id} onCambio={recargar} conMenu={conMenuDeSitio(pagina)} />}
       <HerramientasPagina key={pagina.id} paginaId={pagina.id} raiz="article" contarVisita />
   </>;

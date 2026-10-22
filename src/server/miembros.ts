@@ -375,6 +375,8 @@ const RUTAS_DE_MIEMBRO: { re: RegExp; metodos: string[]; permiso: Permiso }[] = 
   { re: /^\/api\/valoraciones\/fila\/[^/]+\/?$/, metodos: ['GET', 'PUT'], permiso: 'comentar' },
   // «Sugerir una corrección» on a product sheet (W1): a report, like a comment.
   { re: /^\/api\/report\/?$/, metodos: ['POST'], permiso: 'comentar' },
+  // Seguir una página (2026-10-21): un aviso en su campana cuando cambia; basta con poder verla.
+  { re: /^\/api\/seguir\/pagina\/[^/]+\/?$/, metodos: ['GET', 'POST'], permiso: 'ver' },
 ];
 
 export function identidadDeSitio(db: any) {

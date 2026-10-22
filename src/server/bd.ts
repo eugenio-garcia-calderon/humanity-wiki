@@ -54,6 +54,7 @@ import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, type Filtros, type Orden } from './bd/vistas';
 import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
 import { emitirEventoFila } from './webhooks';
+import { slugDe } from '../components/sitio/sitioWeb';
 import { columnaOrdenCatalogo, columnaPrecioCatalogo } from '../components/bloquesDatos/ficha/modelo';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
@@ -74,6 +75,13 @@ export type { Celda } from './bd/celdas';
  * HTTP (2026-10-02: la IA del editor de páginas). Lo rellena
  * `registerBdRoutes`, que es donde viven los permisos.
  */
+/** LA RED DE UNA PÁGINA (2026-10-21, Eugenio): con qué entradas de otras bases
+ *  de datos está conectada una página, por grupos (una columna de relación = un
+ *  grupo, una pestaña), con lo que hace falta para enseñarlas en galería. */
+export type EntradaRed = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null };
+export type GrupoRed = { columna_id: string; nombre: string; slug: string; tabla_destino: string | null; tabla_titulo: string | null; entradas: EntradaRed[] };
+export type RedPagina = { fila_id: string; tabla_id: string; grupos: GrupoRed[] };
+
 export const bdInterno: {
   crearFila?: (req: Pick<Request, 'user'>, tablaId: string, titulo: unknown)
     => Promise<{ id: string; pagina_id: string } | { error: string; codigo: number }>;
@@ -82,6 +90,8 @@ export const bdInterno: {
   /** La pregunta de permisos de siempre, para la API pública (`apiPublica.ts`). */
   puedeConTabla?: (req: Pick<Request, 'user'>, tablaId: string, escribir: boolean)
     => Promise<{ tabla: any } | { error: string; codigo: number }>;
+  /** La red de una página (2026-10-21): sus relaciones con las entradas de otras bases de datos. */
+  redDePagina?: (req: Pick<Request, 'user'> | null, paginaId: string) => Promise<RedPagina | null>;
   /** `GET /api/bd/tablas/:id` without HTTP: definition, columns and computed rows. */
   leerTabla?: (req: Pick<Request, 'user'> | null, tablaId: string)
     => Promise<{ codigo: number; cuerpo: any }>;
@@ -1296,6 +1306,65 @@ export function registerBdRoutes(app: Express, db: any) {
    * Se respeta «ocultar siempre» y lo que esconde la otra tabla: si quien
    * mira no puede leerla, no se enseña.
    */
+  /** Ver `RedPagina`. Con `req = null`, lo que ve un anónimo (el HTML y las direcciones). */
+  const redDePagina = async (req: Pick<Request, 'user'> | null, paginaId: string): Promise<RedPagina | null> => {
+    const quien = (req || { user: undefined }) as Request;
+    const fila = (await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${paginaId} AND deleted_at IS NULL LIMIT 1`)).rows[0] as any;
+    if (!fila) return null;
+    if ('error' in (await puedeConTabla(quien, fila.tabla_id, false))) return null;
+    const cols = (await columnasDe(fila.tabla_id)).filter((c: any) => c.tipo === 'relacion' && c.config?.visibilidad !== 'nunca');
+    const enl: Record<string, any[]> = cols.length ? ((await enlacesDe(db, [fila.id]))[fila.id] || {}) : {};
+    for (const c of cols) {
+      if (!c.config?.inversa_de) continue;
+      const inv = await enlacesInversos(db, c.config.inversa_de, [fila.id]);
+      if (inv[fila.id]) enl[c.id] = inv[fila.id];
+    }
+    const grupos: GrupoRed[] = [];
+    const usados = new Set<string>();
+    for (const c of cols) {
+      const lista = (enl[c.id] || []).filter((x: any) => x.existe !== false);
+      if (!lista.length) continue;
+      const destino = c.config?.tabla_destino || null;
+      if (destino && 'error' in (await puedeConTabla(quien, destino, false))) continue;
+      const filas = (await db.execute(sql`
+        SELECT id, pagina_id, COALESCE(oculta, false) AS oculta FROM bd_filas
+        WHERE id = ANY(string_to_array(${lista.map((x: any) => x.id).join(',')}, ',')) AND deleted_at IS NULL
+      `)).rows as any[];
+      const porId = new Map(filas.filter(f => !f.oculta).map(f => [f.id, f]));
+      const tarj = await tarjetasDe(filas.map(f => f.pagina_id).filter(Boolean));
+      const t = destino ? (await db.execute(sql`SELECT titulo FROM bd_tablas WHERE id = ${destino}`)).rows[0] as any : null;
+      let slug = slugDe(c.nombre) || c.id.toLowerCase();
+      while (usados.has(slug)) slug += '-2';
+      usados.add(slug);
+      const vistos = new Set<string>();
+      const entradas: EntradaRed[] = [];
+      for (const a of lista) {
+        const f = porId.get(a.id);
+        if (!f) continue;
+        const k = f.pagina_id ? tarj[f.pagina_id] : null;
+        const titulo = String(k?.titulo || a.etiqueta || 'Sin título');
+        let s = slugDe(titulo) || String(f.id).toLowerCase();
+        while (vistos.has(s)) s += '-2';
+        vistos.add(s);
+        entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null });
+      }
+      if (entradas.length) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas });
+    }
+    return { fila_id: fila.id, tabla_id: fila.tabla_id, grupos };
+  };
+  bdInterno.redDePagina = redDePagina;
+
+  /** La red de una página, para la página publicada (`RedRelaciones.tsx`). */
+  app.get('/api/bd/paginas/:paginaId/red', async (req: Request, res: Response) => {
+    try {
+      res.set('Cache-Control', 'private, no-store');
+      const r = await redDePagina(req, String(req.params.paginaId));
+      const w = (await db.execute(sql`SELECT title, slug FROM knowledge_windows WHERE id = ${req.params.paginaId}`)).rows[0] as any;
+      const corto = typeof w?.slug === 'string' && w.slug && !w.slug.includes('/') ? w.slug : slugDe(w?.title || '');
+      res.json({ grupos: r?.grupos || [], slug: corto || null });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/bd/paginas/:paginaId/relaciones', async (req: Request, res: Response) => {
     try {
       const f = await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${req.params.paginaId} AND deleted_at IS NULL LIMIT 1`);

@@ -59,8 +59,11 @@ const vacia = (fila: any, c: Columna) => {
   return !celda || celda.estado === 'vacia' || (celda.estado === 'ok' && Array.isArray(celda.valor) && !celda.valor.length);
 };
 
-export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha = false }: {
+export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha = false, sinRelaciones = false }: {
   tablaId: string; filaId: string; editable: boolean;
+  /** En la página publicada las relaciones van en su red (pestañas y galerías,
+   *  `RedRelaciones.tsx`, 2026-10-21): aquí no se repiten. */
+  sinRelaciones?: boolean;
   /** En la columna derecha de la cabecera (2026-10-20): todo pegado a la derecha. */
   alDerecha?: boolean;
 }) {
@@ -110,8 +113,10 @@ export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha =
     if (v === 'si_tiene' || diseno.plegar_vacias) return !vacia(datos.fila, c);
     return true;
   };
-  const visibles = columnas.filter(seVe);
-  const ocultas = columnas.filter(c => !seVe(c));
+  const propias = sinRelaciones ? columnas.filter(c => c.tipo !== 'relacion') : columnas;
+  const visibles = propias.filter(seVe);
+  const ocultas = propias.filter(c => !seVe(c));
+  if (sinRelaciones && !visibles.length && !editable) return null;
 
   const guardar = async (columnaId: string, valor: any) => {
     const r = await fetch(`/api/bd/filas/${filaId}`, {

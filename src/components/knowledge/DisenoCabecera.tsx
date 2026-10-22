@@ -35,16 +35,29 @@ export const NOMBRES_ELEMENTOS: Record<IdElemento, string> = {
 };
 export const TALLAS: TallaElemento[] = ['xs', 's', 'm', 'l', 'xl'];
 
+// LA PORTADA A LA IZQUIERDA, PEQUEÑA (2026-10-21, Eugenio: «a partir de ahora la
+// portada a la izquierda como una imagen, más pequeña por defecto; un híbrido
+// entre un icono y una imagen»). Va la primera: delante del título, a su lado.
 export const ELEMENTOS_POR_DEFECTO: Elemento[] = [
-  { id: 'icono', col: 'izq' }, { id: 'titulo', col: 'izq' }, { id: 'descripcion', col: 'izq' }, { id: 'portada', col: 'izq' },
+  { id: 'portada', col: 'izq' }, { id: 'icono', col: 'izq' }, { id: 'titulo', col: 'izq' }, { id: 'descripcion', col: 'izq' },
   { id: 'botones', col: 'der' }, { id: 'propiedades', col: 'der' },
 ];
+
+/** ¿Va la portada al lado del título (justo delante del icono, el título o la descripción, en su columna)? */
+export function portadaAlLado(elementos: Elemento[]): boolean {
+  const i = elementos.findIndex(e => e.id === 'portada');
+  if (i < 0) return false;
+  const sig = elementos.slice(i + 1).find(e => e.col === elementos[i].col);
+  return !!sig && ['icono', 'titulo', 'descripcion'].includes(sig.id);
+}
 
 /** Las páginas creadas desde aquí nacen con el diseño nuevo (el editor les pone `v = 2` al abrirlas). */
 export const DISENO_NUEVO_DESDE = '2026-10-21T00:00:00Z';
 
-/** ¿Esta página usa la cabecera por elementos? */
-export const usaDisenoNuevo = (c: Cabecera | undefined) => c?.v === 2 || Array.isArray(c?.elementos);
+/** ¿Esta página usa la cabecera por elementos? Las de las entradas de una base de
+ *  datos, también si no dicen nada (2026-10-21): son las de la red de conocimiento. */
+export const usaDisenoNuevo = (c: Cabecera | undefined, esFila = false) =>
+  c?.v === 2 || Array.isArray(c?.elementos) || (esFila && c?.v === undefined);
 
 /** Los elementos guardados, completados con los que falten (en su sitio por defecto). */
 export function elementosDe(c: Cabecera | undefined): Elemento[] {
@@ -56,7 +69,7 @@ export function elementosDe(c: Cabecera | undefined): Elemento[] {
 }
 
 /** ¿Se queda arriba al bajar? Por defecto sí en el diseño nuevo y no en el de antes. */
-export const cabeceraFija = (c: Cabecera | undefined) => (typeof c?.fija === 'boolean' ? c.fija : usaDisenoNuevo(c));
+export const cabeceraFija = (c: Cabecera | undefined, esFila = false) => (typeof c?.fija === 'boolean' ? c.fija : usaDisenoNuevo(c, esFila));
 
 // ── LOS TAMAÑOS ────────────────────────────────────────────────────────────
 // Sin talla elegida, el número de antes (la barra de «Tamaño del título»…),
@@ -79,6 +92,11 @@ export const tamDescripcion = (c: Cabecera | undefined, esMovil: boolean, e?: El
   return esMovil ? Math.min(t, 16) : t;
 };
 /** El alto MÁXIMO de la portada (la imagen nunca se recorta). */
+/** La portada al lado del título: un cuadrado entre icono e imagen. «La M, mucho más pequeña.» */
+export const ladoPortada = (e?: Elemento, esMovil = false) => {
+  const t = T(e?.talla, { xs: 64, s: 88, m: 120, l: 168, xl: 240 }, 120);
+  return esMovil ? Math.min(t, 96) : t;
+};
 export const altoPortada = (c: Cabecera | undefined, e?: Elemento, esMovil = false) => {
   const porTamano = typeof c?.tamano === 'number' ? Math.round(120 + ((Math.min(80, Math.max(20, c.tamano)) - 20) / 60) * 300) : 220;
   const t = T(e?.talla, { xs: 110, s: 160, m: 220, l: 300, xl: 420 }, porTamano);
@@ -102,15 +120,28 @@ export function CabeceraElementos({ elementos, piezas, editando, iconoEncima }: 
   editando?: boolean;
   iconoEncima?: boolean;
 }) {
+  const envolver = (x: Elemento, n: ReactNode) => (
+    <div key={x.id} data-elemento-cabecera={x.id} className={cn('min-w-0', editando && x.oculto && 'opacity-40')}
+      title={editando && x.oculto ? 'Oculto al publicar' : undefined}>{n}</div>
+  );
   const columna = (col: 'izq' | 'der') => {
     const lista = elementos.filter(e => e.col === col && piezas[e.id] != null && (editando || !e.oculto));
     const out: ReactNode[] = [];
     for (let i = 0; i < lista.length; i++) {
       const e = lista[i];
-      const envolver = (x: Elemento, n: ReactNode) => (
-        <div key={x.id} data-elemento-cabecera={x.id} className={cn('min-w-0', editando && x.oculto && 'opacity-40')}
-          title={editando && x.oculto ? 'Oculto al publicar' : undefined}>{n}</div>
-      );
+      // LA PORTADA AL LADO: delante del icono, el título y la descripción que la siguen.
+      if (e.id === 'portada' && ['icono', 'titulo', 'descripcion'].includes(lista[i + 1]?.id)) {
+        let j = i + 1;
+        while (j < lista.length && ['icono', 'titulo', 'descripcion'].includes(lista[j].id)) j++;
+        out.push(
+          <div key="portada-al-lado" className={cn('flex min-w-0 items-center gap-4 sm:gap-5', col === 'der' && 'flex-row-reverse text-right')}>
+            <div data-elemento-cabecera="portada" className={cn('shrink-0', editando && e.oculto && 'opacity-40')}>{piezas.portada}</div>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">{grupoTitulo(lista.slice(i + 1, j), col)}</div>
+          </div>,
+        );
+        i = j - 1;
+        continue;
+      }
       if (e.id === 'icono' && !iconoEncima && lista[i + 1]?.id === 'titulo') {
         const t = lista[i + 1];
         const d = lista[i + 2]?.id === 'descripcion' ? lista[i + 2] : null;
@@ -121,6 +152,27 @@ export function CabeceraElementos({ elementos, piezas, editando, iconoEncima }: 
               {envolver(t, piezas.titulo)}
               {d && envolver(d, piezas.descripcion)}
             </div>
+          </div>,
+        );
+        i += d ? 2 : 1;
+        continue;
+      }
+      out.push(envolver(e, piezas[e.id]));
+    }
+    return out;
+  };
+  /** Icono, título y descripción seguidos: el icono a su lado (o encima). */
+  const grupoTitulo = (lista: Elemento[], col: 'izq' | 'der') => {
+    const out: ReactNode[] = [];
+    for (let i = 0; i < lista.length; i++) {
+      const e = lista[i];
+      if (e.id === 'icono' && !iconoEncima && lista[i + 1]?.id === 'titulo') {
+        const t = lista[i + 1];
+        const d = lista[i + 2]?.id === 'descripcion' ? lista[i + 2] : null;
+        out.push(
+          <div key="icono-titulo" className={cn('flex min-w-0 items-center gap-3', col === 'der' && 'flex-row-reverse text-right')}>
+            <div data-elemento-cabecera="icono" className={cn('shrink-0', editando && e.oculto && 'opacity-40')}>{piezas.icono}</div>
+            <div className="min-w-0 flex-1">{envolver(t, piezas.titulo)}{d && envolver(d, piezas.descripcion)}</div>
           </div>,
         );
         i += d ? 2 : 1;

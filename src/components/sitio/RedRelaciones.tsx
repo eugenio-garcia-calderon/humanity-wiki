@@ -1,0 +1,227 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Bell, BellRing, Link2, Check, ArrowRight, FileText } from 'lucide-react';
+import { useSitio } from './ContextoSitio';
+import { cn } from '../../utils/cn';
+
+// ============================================================================
+// LA RED DE UNA PÁGINA (2026-10-21, Eugenio)
+// ============================================================================
+// «Un menú justo debajo del título con todas las relaciones de la página: si
+// pinchas en una pestaña te lleva a las entradas de esa base de datos, en
+// galería y con más información; y si bajas, ves eso mismo desplegado. La URL
+// tiene que coincidir con la pestaña: movilidad/lineas-de-desarrollo, y una
+// entrada, movilidad/lineas-de-desarrollo/su-nombre.»
+//
+// Cada columna de relación de la entrada es un grupo (`GET /api/bd/paginas/:id/red`).
+// «Todo» enseña todos los grupos uno debajo de otro; una pestaña, sólo el
+// suyo y en grande. Cambiar de pestaña escribe la dirección sin recargar
+// (`history.pushState`); entrar por la dirección abre ya la pestaña (el
+// servidor la resuelve en `porContexto`, `sitios.ts`). Pinchar una entrada va
+// a `pestaña/entrada`, que es su página con esta en las migas.
+//
+// No es el menú de arriba de la web (ése es del sitio): es la ramificación de
+// ESTA página.
+
+type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null };
+type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: string | null; entradas: Entrada[] };
+
+const MAX_EN_TODO = 8;
+
+export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }: {
+  paginaId: string; titulo: string; autorHandle?: string; esRaiz?: boolean;
+}) {
+  const sitio = useSitio();
+  const [grupos, setGrupos] = useState<Grupo[] | null>(null);
+  const [slugPagina, setSlugPagina] = useState<string | null>(null);
+  const [activa, setActiva] = useState<string>('todo');
+  const barra = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/bd/paginas/${encodeURIComponent(paginaId)}/red`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : { grupos: [] }))
+      .then(j => { if (vivo) { setGrupos(j.grupos || []); setSlugPagina(j.slug || null); } })
+      .catch(() => { if (vivo) setGrupos([]); });
+    return () => { vivo = false; };
+  }, [paginaId]);
+
+  /** Dónde vive la página: las pestañas y las entradas cuelgan de aquí. */
+  const base = useMemo(() => {
+    if (!sitio || esRaiz || !slugPagina) return null;
+    return sitio.enlaceSlug(slugPagina, autorHandle || '');
+  }, [sitio, esRaiz, slugPagina, autorHandle]);
+
+  // La pestaña sale de la dirección (también al ir atrás y adelante).
+  useEffect(() => {
+    if (!grupos) return;
+    const leer = () => {
+      const t = window.location.pathname.split('/').filter(Boolean).map(x => { try { return decodeURIComponent(x); } catch { return x; } });
+      const ultimo = t[t.length - 1];
+      const q = new URLSearchParams(window.location.search).get('seccion');
+      setActiva(grupos.some(g => g.slug === ultimo) ? ultimo : q && grupos.some(g => g.slug === q) ? q : 'todo');
+    };
+    leer();
+    window.addEventListener('popstate', leer);
+    return () => window.removeEventListener('popstate', leer);
+  }, [grupos]);
+
+  if (!grupos || !grupos.length) return null;
+
+  const caminoDe = (g?: Grupo) => {
+    if (!base) return g ? `?seccion=${g.slug}` : window.location.pathname;
+    return g ? `${base}/${g.slug}` : base;
+  };
+  const elegir = (e: React.MouseEvent, g: Grupo | null) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    const destino = caminoDe(g || undefined);
+    if (destino !== window.location.pathname + window.location.search) window.history.pushState(null, '', destino);
+    setActiva(g ? g.slug : 'todo');
+    document.title = g ? `${g.nombre} · ${titulo}` : titulo;
+    // Que la barra quede arriba y se vea lo que se ha abierto.
+    const y = (barra.current?.getBoundingClientRect().top || 0) + window.scrollY - 80;
+    if (window.scrollY > y) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  };
+  const enlaceEntrada = (g: Grupo, x: Entrada) =>
+    base ? `${base}/${g.slug}/${x.slug}` : x.pagina_id && sitio ? sitio.enlacePagina(x.pagina_id) : '#';
+  const grupo = grupos.find(g => g.slug === activa) || null;
+  const total = grupos.reduce((n, g) => n + g.entradas.length, 0);
+
+  return (
+    <section className="mb-8" data-red-relaciones>
+      {/* LAS PESTAÑAS */}
+      <div ref={barra} className="mb-5 border-b border-slate-200">
+        <nav aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none]">
+          <Pestana href={caminoDe()} activa={activa === 'todo'} onClick={e => elegir(e, null)} texto="Todo" n={total} />
+          {grupos.map(g => (
+            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} />
+          ))}
+        </nav>
+      </div>
+
+      {grupo ? (
+        // UNA PESTAÑA: sólo su grupo, en grande.
+        <div>
+          <div className="mb-4 flex items-baseline gap-2">
+            <h2 className="text-xl font-black tracking-tight text-slate-900">{grupo.nombre}</h2>
+            <span className="text-sm font-semibold text-slate-400">{grupo.entradas.length}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 sm:[grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr))]">
+            {grupo.entradas.map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} grande />)}
+          </div>
+        </div>
+      ) : (
+        // TODO: todos los grupos, uno debajo de otro.
+        <div className="space-y-9">
+          {grupos.map(g => (
+            <div key={g.slug} data-grupo-red={g.slug}>
+              <div className="mb-3 flex items-baseline gap-2">
+                <h2 className="text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
+                <span className="text-sm font-semibold text-slate-400">{g.entradas.length}</span>
+                <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-900">
+                  Ver {g.entradas.length > MAX_EN_TODO ? 'todo' : 'en grande'} <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(min(11rem,100%),1fr))]">
+                {g.entradas.slice(0, MAX_EN_TODO).map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(g, x)} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Pestana({ href, activa, onClick, texto, n }: { href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number }) {
+  return (
+    <a href={href} onClick={onClick} aria-current={activa ? 'page' : undefined}
+      className={cn('inline-flex h-12 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-[15px] font-semibold transition-colors',
+        activa ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800')}>
+      {texto}
+      <span className={cn('rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500')}>{n}</span>
+    </a>
+  );
+}
+
+function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande?: boolean }) {
+  const texto = (x.descripcion || x.resumen || '').trim();
+  return (
+    <Link to={href} data-interno className="group flex min-w-0 flex-col">
+      {/* Cuadrada y sin recortar, como en las galerías (2026-10-21). */}
+      <div className="relative grid aspect-square place-items-center overflow-hidden rounded-2xl border border-slate-100 bg-white transition-shadow group-hover:shadow-md">
+        {x.imagen
+          ? <img src={x.imagen} alt="" loading="lazy" className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]" />
+          : x.icono && !/^(https?:|\/)/.test(x.icono)
+            ? <span className="text-5xl">{x.icono}</span>
+            : <FileText className="h-8 w-8 text-slate-200" />}
+      </div>
+      <p className={cn('mt-2.5 font-bold leading-snug text-slate-900 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
+      {texto && <p className={cn('mt-1 text-slate-500 leading-snug', grande ? 'line-clamp-3 text-sm' : 'line-clamp-2 text-[13px]')}>{texto}</p>}
+    </Link>
+  );
+}
+
+// ============================================================================
+// SEGUIR Y COMPARTIR (2026-10-21, Eugenio: «botones de funcionalidades básicas
+// de red social, como seguir la página: cuando hay una actualización, te avisan»)
+// ============================================================================
+// Seguir es lo de siempre (`/api/seguir/pagina/:id`, `seguir.ts`): un aviso en
+// la campana cuando la página cambia, como mucho uno cada seis horas. Sin
+// sesión, se abre el «Entrar» de la web (miembros) o se explica.
+export function AccionesPagina({ paginaId }: { paginaId: string }) {
+  const [estado, setEstado] = useState<{ seguidores: number; siguiendo: boolean; es_duenyo: boolean } | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
+  useEffect(() => {
+    let vivo = true;
+    const cargar = () => fetch(`/api/seguir/pagina/${encodeURIComponent(paginaId)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null)).then(j => { if (vivo && j) setEstado(j); }).catch(() => {});
+    cargar();
+    window.addEventListener('sitio:sesion', cargar);
+    return () => { vivo = false; window.removeEventListener('sitio:sesion', cargar); };
+  }, [paginaId]);
+  const seguir = async () => {
+    setAviso(null);
+    const r = await fetch(`/api/seguir/pagina/${encodeURIComponent(paginaId)}`, { method: 'POST', credentials: 'include' });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) {
+      // La web con miembros abre su «Entrar»; si nadie lo atiende, se explica.
+      const ev = new Event('sitio:entrar', { cancelable: true });
+      window.dispatchEvent(ev);
+      if (!ev.defaultPrevented) setAviso('Entra con tu cuenta para seguir esta página.');
+      return;
+    }
+    if (!r.ok) { setAviso(j.error || 'No se ha podido.'); return; }
+    setEstado(e => ({ ...(e || { es_duenyo: false }), seguidores: j.seguidores, siguiendo: j.siguiendo }));
+  };
+  const compartir = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share && window.matchMedia('(pointer: coarse)').matches) { await navigator.share({ url, title: document.title }); return; }
+      await navigator.clipboard.writeText(url);
+      setCopiado(true); setTimeout(() => setCopiado(false), 2000);
+    } catch { /* cancelado */ }
+  };
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-2" data-acciones-pagina>
+      {estado && !estado.es_duenyo && (
+        <button type="button" onClick={seguir} aria-pressed={estado.siguiendo}
+          className={cn('inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-bold transition-colors',
+            estado.siguiendo ? 'bg-slate-100 text-slate-800 hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-slate-800')}>
+          {estado.siguiendo ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+          {estado.siguiendo ? 'Siguiendo' : 'Seguir'}
+        </button>
+      )}
+      {estado && estado.seguidores > 0 && (
+        <span className="text-sm text-slate-500">{estado.seguidores} {estado.seguidores === 1 ? 'persona la sigue' : 'personas la siguen'}</span>
+      )}
+      <button type="button" onClick={compartir}
+        className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:bg-slate-50">
+        {copiado ? <Check className="h-4 w-4 text-emerald-600" /> : <Link2 className="h-4 w-4" />} {copiado ? 'Enlace copiado' : 'Compartir'}
+      </button>
+      {aviso && <span className="text-sm font-semibold text-rose-600">{aviso}</span>}
+    </div>
+  );
+}

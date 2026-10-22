@@ -42,7 +42,7 @@ import { BarraFija } from '../components/knowledge/BarraFija';
 import { preguntarBorrarBd } from '../components/tablas/PreguntaBorrarBd';
 import {
   CabeceraElementos, elementosDe, usaDisenoNuevo, cabeceraFija, DISENO_NUEVO_DESDE,
-  tamTitulo, tamIcono, tamDescripcion, altoPortada, tallaBotones, zoomPropiedades,
+  tamTitulo, tamIcono, tamDescripcion, altoPortada, ladoPortada, portadaAlLado, tallaBotones, zoomPropiedades,
   type IdElemento, type Elemento, type TallaElemento,
 } from '../components/knowledge/DisenoCabecera';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion, TALLAS_PORTADA, tallaDe } from '../components/knowledge/CabeceraPagina';
@@ -4473,14 +4473,16 @@ function EditorPagina() {
             propiedades en el orden, el tamaño y la visibilidad que se elijan).
             Las piezas son las mismas; sólo cambia cómo se colocan. */}
         {/* LA BARRA FIJA AL BAJAR (2026-10-20): justo ANTES de la cabecera (ver `BarraFija`). */}
-        {cabeceraFija(ajustes.cabecera) && (
+        {cabeceraFija(ajustes.cabecera, !!filaDe?.fila_id) && (
           <BarraFija icono={icono} titulo={titulo} subtitulo={ajustes.subtitulo} portada={portada}
             botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : (ajustes.botones || [])}
             estilo={ajustes.cabecera?.botonesEstilo} plegado={ajustes.cabecera?.botonesMenu === 'plegado'} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
         )}
         <div data-cabecera-editor>
         {(() => {
-          const v2 = usaDisenoNuevo(ajustes.cabecera);
+          const v2 = usaDisenoNuevo(ajustes.cabecera, !!filaDe?.fila_id);
+          const alLado = v2 && portadaAlLado(elementosDe(ajustes.cabecera));
+          const lado = ladoPortada(elementosDe(ajustes.cabecera).find(e => e.id === 'portada'), esMovil);
           const els = elementosDe(ajustes.cabecera);
           const el = (id: IdElemento) => els.find(e => e.id === id);
           const der = (id: IdElemento) => el(id)?.col === 'der';
@@ -4491,10 +4493,12 @@ function EditorPagina() {
           const portadaNodo = (subidas.portada ? (
             <SubiendoImagen vista={subidas.portada.vista} fraccion={subidas.portada.fraccion} texto="Subiendo la portada" />
           ) : portada ? (
-            <div className={cn('group/portada relative w-fit max-w-full', v2 && '[&_img]:max-h-[var(--alto)]')} style={v2 ? { '--alto': `${altoPortada(ajustes.cabecera, el('portada'), esMovil)}px` } as any : undefined}>
-              <MediaPortada src={portada} className={v2 ? 'block h-auto w-auto max-w-full rounded-2xl object-contain' : 'w-full h-56 object-cover rounded-2xl'} />
+            <div className={cn('group/portada relative max-w-full', alLado ? 'grid place-items-center rounded-2xl bg-white [&_img]:h-full [&_img]:w-full [&_img]:object-contain' : 'w-fit', v2 && !alLado && '[&_img]:max-h-[var(--alto)]')}
+              style={alLado ? { width: lado, height: lado } : v2 ? { '--alto': `${altoPortada(ajustes.cabecera, el('portada'), esMovil)}px` } as any : undefined}>
+              <MediaPortada src={portada} className={alLado ? 'h-full w-full rounded-2xl object-contain' : v2 ? 'block h-auto w-auto max-w-full rounded-2xl object-contain' : 'w-full h-56 object-cover rounded-2xl'} />
               {editable && (
-                <div className="absolute top-2 right-2 flex flex-wrap justify-end gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
+                // Al lado del título la portada es pequeña: los mandos van debajo, sin taparla.
+                <div className={cn('absolute flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity', alLado ? 'left-0 top-full z-20 mt-1 w-max' : 'top-2 right-2 flex-wrap justify-end')}>
                   {/* TAMAÑO, junto a recortar y cambiar (2026-10-18, Eugenio). */}
                   <div role="radiogroup" aria-label={tr('Tamaño de la portada')} className="flex items-center gap-0.5 rounded-lg bg-white/90 pl-2 pr-0.5">
                     <span className="mr-0.5 text-[10px] font-black text-slate-400">{tr('Tamaño')}</span>
@@ -5165,7 +5169,11 @@ function TituloEditable({ valor, onCambiar, letra }: { valor: string; onCambiar:
   // líneas parte. Girar el teléfono es el caso real.
   useEffect(() => {
     window.addEventListener('resize', ajustar);
-    return () => window.removeEventListener('resize', ajustar);
+    // También cuando cambia el ancho de su caja sin cambiar la ventana (la
+    // portada al lado, una columna a la derecha que se llena…): 2026-10-21.
+    const ro = typeof ResizeObserver !== 'undefined' && ref.current ? new ResizeObserver(() => ajustar()) : null;
+    if (ro && ref.current) ro.observe(ref.current);
+    return () => { window.removeEventListener('resize', ajustar); ro?.disconnect(); };
   }, [ajustar]);
 
   return (
@@ -5197,6 +5205,11 @@ function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onV
     el.style.height = `${el.scrollHeight}px`;
   }, []);
   useEffect(ajustar, [valor, letra, ajustar]);
+  useEffect(() => {
+    const ro = typeof ResizeObserver !== 'undefined' && ref.current ? new ResizeObserver(() => ajustar()) : null;
+    if (ro && ref.current) ro.observe(ref.current);
+    return () => ro?.disconnect();
+  }, [ajustar]);
   useEffect(() => {
     if (enfocar) { ref.current?.focus(); onEnfocado(); }
   }, [enfocar, onEnfocado]);

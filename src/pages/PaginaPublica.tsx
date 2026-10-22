@@ -7,6 +7,7 @@ import { conMenuDeSitio } from '../components/sitio/sitioWeb';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
 import VistaPagina, { Cargando, SinPagina } from '../components/sitio/VistaPagina';
 import { ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
+import RutaSitio from './RutaSitio';
 
 // ============================================================================
 // LA CARA PÚBLICA DE UNA PÁGINA — `/@nombre/pagina` (2026-08-22)
@@ -126,6 +127,13 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
   const sitio = propio ? sitioConAnfitrion(null) : sitioEnCasa(handle || '');
 
   if (estado === 'cargando') return <Cargando />;
+
+  // UNA PÁGINA DE LA RED POR SU NOMBRE (2026-10-21): `/@quien/movilidad` no es una
+  // página publicada con nombre corto, pero puede ser una entrada de una base de
+  // datos que se ve en su sitio (`porContexto`, `sitios.ts`). Se pregunta allí.
+  if (estado === 'no-existe' && handle && !propio) {
+    return <ProveedorSitio sitio={sitio}><RutaSitio propio={false} /></ProveedorSitio>;
+  }
 
   if (estado !== 'ok') {
     return (
