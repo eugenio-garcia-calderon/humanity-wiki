@@ -193,8 +193,6 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
         attributionControl: false
       });
 
-      // El encuadre pedido, también cuando el estilo termina de cargar (el globo lo reinicia).
-      if (limites) map.current.once('load', () => map.current?.fitBounds(limites, { padding: 24, duration: 0 }));
 
       if (!mapPopupRef.current) {
         mapPopupRef.current = new mapboxgl.Popup({

@@ -9659,3 +9659,15 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
   - Ahora esas respuestas, que son iguales para cualquier lector anónimo, se guardan 30 s en memoria (se guarda la promesa, así las peticiones a la vez esperan a la misma consulta): `paginaVisible`, `cuelgaDe`, las páginas de cada tabla, la fila de cada tabla (`puedeConTabla`) y lo que lee de una tabla un visitante sin sesión ni cookie de miembro (`bdInterno.leerTabla` y `GET /api/bd/tablas/:id`).
   - Cualquier escritura a la API vacía la memoria. No la vacían las que no cambian contenido: contar visitas (cada página manda una), seguir, entrar, comentar, subir un archivo…
   - Resultado en la copia: de 414 consultas y 250 ms a **10 consultas y 26 ms**.
+
+## 2026-10-22 — El mapa carga mucho antes (Programador 8)
+
+- Medido en luzhumanidad.com/mapa (el botón «Mapa»): unos 5,2 s hasta ver las etiquetas.
+  - El HTML tardaba 2,1 s, porque `/mapa?embed=1` se buscaba como página del sitio (y armaba entera la página «Mapa») para luego tirarla.
+  - Los polígonos (615 KB, 0,85 s) se pedían dos veces: el `fitBounds` de más al cargar movía el mapa.
+  - Ninguna petición de territorios se reutilizaba, porque el zoom y el encuadre iban con todos sus decimales.
+- **Arreglos**:
+  - En un dominio propio, `/mapa?embed=1` sirve la aplicación tal cual, sin resolver página y sin los precargados de la plataforma.
+  - Fuera el `fitBounds` repetido: con la opción `bounds` del mapa basta.
+  - `MapDataProvider` manda un zoom por nivel (continente, país, región, municipio) y el encuadre redondeado hacia fuera a una rejilla, con lo que las direcciones se repiten y las guardan el navegador y Cloudflare.
+  - El servidor guarda en memoria 10 minutos la respuesta de los polígonos, los centroides y `/api/territories/:id` (`memoRespuesta`, `cacheCorta.ts`): de 0,6–0,85 s a unos milisegundos desde la segunda visita.
