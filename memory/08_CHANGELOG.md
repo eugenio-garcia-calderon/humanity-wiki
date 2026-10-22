@@ -9647,3 +9647,15 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
   - Los nombres largos de pestaña se cortan, con el entero en `title`.
   - Todas las tarjetas con el mismo formato: sin imagen, la inicial en su color.
 - Pendiente, por su tamaño: miniaturas WebP de las imágenes (la página baja 7,6 MB en PNG) y acelerar `/api/sitio/pagina`.
+
+## 2026-10-22 — Miniaturas WebP siempre, y la API de las páginas publicadas 10 veces más rápida (Programador 8)
+
+- **Miniaturas WebP** (`server/miniaturas.ts`, `utils/miniatura.ts`):
+  - `/uploads/…png?w=400` devuelve la imagen en WebP, girada según su EXIF y del ancho de una lista fija (96 · 200 · 400 · 800 · 1600). Se genera una vez con `sharp` y se guarda en `uploads/.mini/<ancho>/…webp`, con caché de un año; el original no se toca. Si algo falla, sale el original.
+  - `miniatura(url, ancho)` pide el doble del ancho al que se ve, para pantallas retina. Sólo para lo subido a la plataforma: no toca SVG, GIF ni imágenes de fuera.
+  - Ya se usa en la galería, la red de relaciones, las fichas de relación, las portadas (`MediaPortada ancho`), los bloques de imagen al leer, los logotipos e iconos, el buscador y las secciones del sitio, y el HTML del servidor.
+- **La API, más rápida** (`server/cacheCorta.ts`):
+  - Medido con una copia de producción, `/api/sitio/pagina/:id` de Movilidad hacía **414 consultas**: 62 subidas recursivas para saber si una página se ve, 68 búsquedas de en qué páginas está una tabla, 75 lecturas de la fila de una tabla y la tabla entera leída por la ficha de cada relación.
+  - Ahora esas respuestas, que son iguales para cualquier lector anónimo, se guardan 30 s en memoria (se guarda la promesa, así las peticiones a la vez esperan a la misma consulta): `paginaVisible`, `cuelgaDe`, las páginas de cada tabla, la fila de cada tabla (`puedeConTabla`) y lo que lee de una tabla un visitante sin sesión ni cookie de miembro (`bdInterno.leerTabla` y `GET /api/bd/tablas/:id`).
+  - Cualquier escritura a la API vacía la memoria. No la vacían las que no cambian contenido: contar visitas (cada página manda una), seguir, entrar, comentar, subir un archivo…
+  - Resultado en la copia: de 414 consultas y 250 ms a **10 consultas y 26 ms**.

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Crop, Maximize, Loader2, Minimize2, Wand2, Check, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Bloque, Recorte } from '../../utils/bloques';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LA IMAGEN DE UNA PÁGINA, COMO EN POWERPOINT (2026-10-06)
@@ -62,7 +63,7 @@ export function ImagenVista({ b, clase }: { b: Bloque; clase?: string }) {
   if (!b.url) return null;
   const R = relacionDe(b);
   if (!esMoldeada(b) || !R) {
-    return <img src={b.url} alt={b.pie || ''} loading="lazy" className={cn('w-full rounded-xl border border-slate-200', clase)} />;
+    return <img src={miniatura(b.url, 1000)} alt={b.pie || ''} loading="lazy" className={cn('w-full rounded-xl border border-slate-200', clase)} />;
   }
   return (
     <div className={cn('relative overflow-hidden rounded-xl border border-slate-200 mx-auto max-w-full', clase)}

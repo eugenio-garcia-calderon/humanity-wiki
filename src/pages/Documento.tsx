@@ -4495,7 +4495,7 @@ function EditorPagina() {
           ) : portada ? (
             <div className={cn('group/portada relative max-w-full', alLado ? 'grid place-items-center rounded-2xl bg-white [&_img]:h-full [&_img]:w-full [&_img]:object-contain' : 'w-fit', v2 && !alLado && '[&_img]:max-h-[var(--alto)]')}
               style={alLado ? { width: lado, height: lado } : v2 ? { '--alto': `${altoPortada(ajustes.cabecera, el('portada'), esMovil)}px` } as any : undefined}>
-              <MediaPortada src={portada} className={alLado ? 'h-full w-full rounded-2xl object-contain' : v2 ? 'block h-auto w-auto max-w-full rounded-2xl object-contain' : 'w-full h-56 object-cover rounded-2xl'} />
+              <MediaPortada src={portada} ancho={alLado ? lado : 1600} className={alLado ? 'h-full w-full rounded-2xl object-contain' : v2 ? 'block h-auto w-auto max-w-full rounded-2xl object-contain' : 'w-full h-56 object-cover rounded-2xl'} />
               {editable && (
                 // Al lado del título la portada es pequeña: los mandos van debajo, sin taparla.
                 <div className={cn('absolute flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity', alLado ? 'left-0 top-full z-20 mt-1 w-max' : 'top-2 right-2 flex-wrap justify-end')}>

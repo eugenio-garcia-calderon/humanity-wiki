@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
 import { CLASES_TARJETA as C, CLASES_COMPACTA as K, CLASES_GRUPOS as G, CARGA_INMEDIATA, agruparSecciones } from './tarjetaSeccion';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LAS SECCIONES DE UN SITIO, EN TARJETAS (2026-10-18, Wikiproducts W2)
@@ -40,7 +41,7 @@ export default function SeccionesSitio({ secciones, enlace, className = '', agru
         <Link to={a(s)} className={K.enlace}>
           <span className={K.marco} aria-hidden={s.portada ? undefined : true}>
             {s.portada
-              ? <img src={s.portada} alt="" width={320} height={240} loading={i < CARGA_INMEDIATA ? 'eager' : 'lazy'} className={K.imagen} />
+              ? <img src={miniatura(s.portada, 320)} alt="" width={320} height={240} loading={i < CARGA_INMEDIATA ? 'eager' : 'lazy'} className={K.imagen} />
               : <Package className="w-8 h-8" />}
           </span>
           <span className={K.cuerpo}>

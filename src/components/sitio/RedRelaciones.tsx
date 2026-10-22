@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bell, BellRing, Link2, Check, ArrowRight, FileText } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LA RED DE UNA PÁGINA (2026-10-21, Eugenio)
@@ -174,7 +175,7 @@ function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande
       {/* Cuadrada y sin recortar, como en las galerías (2026-10-21). */}
       <div className="relative grid aspect-square place-items-center overflow-hidden rounded-2xl border border-slate-100 bg-white transition-shadow group-hover:shadow-md">
         {x.imagen
-          ? <img src={x.imagen} alt="" loading="lazy" className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]" />
+          ? <img src={miniatura(x.imagen, grande ? 320 : 220)} alt="" loading="lazy" className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]" />
           : conImagen
             ? <span className="text-5xl">{x.icono}</span>
             : <span className={cn('grid h-full w-full place-items-center text-5xl font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase() || <FileText className="h-8 w-8" />}</span>}

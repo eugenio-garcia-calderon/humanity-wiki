@@ -100,7 +100,7 @@ export function BarraFija({ icono, titulo, subtitulo, portada, botones, estilo, 
             className={cn('flex min-w-0 items-center gap-3 text-left', repetida ? 'shrink' : 'flex-1')}>
             {portada && (
               <span className="hidden h-10 w-10 shrink-0 overflow-hidden rounded-md bg-slate-50 sm:block [&_img]:h-full [&_img]:w-full [&_img]:object-contain [&_video]:h-full [&_video]:w-full [&_video]:object-cover">
-                <MediaPortada src={portada} className="h-full w-full object-contain" />
+                <MediaPortada src={portada} ancho={40} className="h-full w-full object-contain" />
               </span>
             )}
             {/* Si el menú fijo ya dice cómo se llama, aquí no se repite. */}

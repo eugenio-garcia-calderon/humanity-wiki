@@ -43,6 +43,12 @@ import { madresValidas, rolEnPagina, capacidades, quienDe } from './permisos.js'
 import { accesoMiembro, filtrarBloques, muroDe } from './miembros.js';
 import { peticionActual } from './peticionActual.js';
 import { bdInterno } from './bd';
+import { cacheCorta } from './cacheCorta';
+
+/** Memoria corta de las preguntas de visibilidad anónima (ver `cacheCorta.ts`). */
+const cacheVisible = cacheCorta<boolean>();
+const cacheCuelga = cacheCorta<boolean>();
+const cachePaginasDeTabla = cacheCorta<string[]>();
 
 const DOMINIO = 'humanity.wiki';
 const RESERVADOS = new Set(['www', 'api', 'admin', 'app', 'mail', 'ftp', 'cdn', 'static', 'assets']);
@@ -113,8 +119,10 @@ export async function sitioDePagina(db: any, id: string) {
 
 /** ¿Puede verla cualquiera? Publicada ella, o alguna página por encima. */
 export async function paginaVisible(db: any, id: string): Promise<boolean> {
-  const r = await db.execute(subirDesdePagina(id));
-  return !!(r.rows[0] as any)?.visible;
+  return cacheVisible.dar(id, async () => {
+    const r = await db.execute(subirDesdePagina(id));
+    return !!(r.rows[0] as any)?.visible;
+  });
 }
 
 /**
@@ -124,6 +132,9 @@ export async function paginaVisible(db: any, id: string): Promise<boolean> {
  */
 export async function cuelgaDe(db: any, id: string, raizId: string): Promise<boolean> {
   if (id === raizId) return true;
+  return cacheCuelga.dar(`${id}>${raizId}`, () => cuelgaDeSinMemoria(db, id, raizId));
+}
+async function cuelgaDeSinMemoria(db: any, id: string, raizId: string): Promise<boolean> {
   const r = await db.execute(sql`
     WITH RECURSIVE sube(id, n) AS (
       SELECT ${id}::text, 0
@@ -140,13 +151,15 @@ export async function cuelgaDe(db: any, id: string, raizId: string): Promise<boo
 /** ¿Puede ver cualquiera esta tabla? Sí si está metida en una página que se
  *  ve. La tabla no tiene visibilidad propia: la hereda de dónde se enseña. */
 export async function tablaVisible(db: any, tablaId: string): Promise<boolean> {
-  const r = await db.execute(sql`
+  const paginas = await cachePaginasDeTabla.dar(tablaId, async () => (await db.execute(sql`
     SELECT id FROM knowledge_windows
     WHERE kind = 'pagina' AND deleted_at IS NULL AND archived_at IS NULL
       AND ${bloquesDe()} @> jsonb_build_array(jsonb_build_object('tabla_id', ${tablaId}::text))
     LIMIT 20
-  `);
-  for (const p of r.rows as any[]) if (await paginaVisible(db, p.id) || await laVeQuienPregunta(db, p.id)) return true;
+  `)).rows.map((p: any) => String(p.id)));
+  // Primero lo que ve cualquiera (en memoria); lo de quien pregunta, después.
+  for (const p of paginas) if (await paginaVisible(db, p)) return true;
+  for (const p of paginas) if (await laVeQuienPregunta(db, p)) return true;
   return false;
 }
 

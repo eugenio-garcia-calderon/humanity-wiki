@@ -54,6 +54,7 @@ import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
 import { registrarContribuir, identidadDeContribuidor } from './contribuir.js';
+import { registrarVaciado } from './cacheCorta.js';
 import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
@@ -176,6 +177,11 @@ export const MODULOS: Modulo[] = [
 
   // Grafo de conocimiento, red social y mercado (fases 3-5). Van después de la
   // autenticación porque dependen de `req.user` para los niveles de rol.
+  {
+    nombre: 'cache-corta',
+    montar: app => registrarVaciado(app),
+    nota: 'ANTES de cualquier ruta: toda escritura vacía la memoria corta de lecturas públicas (`cacheCorta.ts`).',
+  },
   {
     nombre: 'peticion-actual',
     montar: app => registrarPeticionActual(app),

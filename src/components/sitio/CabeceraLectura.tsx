@@ -7,6 +7,7 @@ import { completarSitio } from './sitioWeb';
 import MediaPortada from '../ui/MediaPortada';
 import { esVideoPortada } from '../../utils/videoPortada';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina } from '../knowledge/CabeceraPagina';
+import { miniatura } from '../../utils/miniatura';
 import {
   CabeceraElementos, elementosDe, usaDisenoNuevo, cabeceraFija,
   tamTitulo, tamIcono, tamDescripcion, altoPortada, ladoPortada, portadaAlLado, tallaBotones, zoomPropiedades,
@@ -86,7 +87,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
     <header className="mb-5" data-cabecera-elementos data-cabecera-pagina>
       <CabeceraElementos elementos={els} iconoEncima={c?.iconoPos === 'encima'} piezas={{
         icono: icono ? (esUrl(icono)
-          ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
+          ? <img src={miniatura(icono, lado)} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
           : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>) : null,
         titulo: (
           <h1 className={cn('font-black tracking-tight text-slate-900 break-words leading-[1.08]', cfg.ocultarTitulo && 'sr-only')}
@@ -103,7 +104,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
           // Al lado del título, un cuadrado: la imagen entera dentro (2026-10-21).
           <div style={{ width: ladoPortada(el('portada'), esMovil), height: ladoPortada(el('portada'), esMovil) }}
             className="grid place-items-center overflow-hidden rounded-2xl bg-white [&_img]:h-full [&_img]:w-full [&_img]:object-contain [&_video]:h-full [&_video]:w-full [&_video]:object-cover">
-            <MediaPortada src={cfg.portada} prioridad className="h-full w-full object-contain" />
+            <MediaPortada src={cfg.portada} prioridad ancho={ladoPortada(el('portada'), esMovil)} className="h-full w-full object-contain" />
           </div>
         ) : (
           <div style={{ '--alto': `${altoPortada(c, el('portada'), esMovil)}px` } as any}
@@ -153,7 +154,7 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
           <FilaTitulo centrado={!alIzquierda} cabecera={cfg.cabecera} icono={icono ? (
             <div>
               {esUrl(icono)
-                ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
+                ? <img src={miniatura(icono, lado)} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
                 : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>}
             </div>
           ) : null}>

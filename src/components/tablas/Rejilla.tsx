@@ -27,6 +27,7 @@ import FormularioVista from './FormularioVista';
 import Calendario from './Calendario';
 import LineaTiempo from './LineaTiempo';
 import { NuevoElemento, MarcaRecurrente } from './Tarjetas';
+import { miniatura } from '../../utils/miniatura';
 // recharts pesa: solo se baja cuando hay un gráfico en pantalla.
 const Grafico = lazy(() => import('./Grafico'));
 import {
@@ -686,7 +687,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     return (
       <button onClick={alternar} aria-expanded={!plegado}
         className={cn('group/grupo flex items-center gap-2.5 py-1 font-extrabold text-slate-800', !centro && (nivel ? 'pl-6' : 'pl-2'))}>
-        {conImagen && <img src={g.imagen!} alt="" loading="lazy" className={cn('shrink-0 rounded-xl object-cover bg-slate-100 ring-1 ring-black/5', lado)} />}
+        {conImagen && <img src={miniatura(g.imagen!, 96)} alt="" loading="lazy" className={cn('shrink-0 rounded-xl object-cover bg-slate-100 ring-1 ring-black/5', lado)} />}
         {/* El color de la opción, como un punto: el título queda en un solo tono. */}
         {g.color && !conImagen && <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: g.color }} />}
         <span className={cn('leading-tight', letra, g.vacio && 'text-slate-400')}>{g.etiqueta}</span>

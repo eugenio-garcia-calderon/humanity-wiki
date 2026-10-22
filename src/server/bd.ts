@@ -55,6 +55,15 @@ import { filtrar, ordenarFilas, agrupar, OPERADORES, reglasDe, filtroValido, typ
 import { sumarPeriodo, validarRecurrencia, diceHecho, hoyIso, type Recurrencia } from './bd/recurrencia';
 import { emitirEventoFila } from './webhooks';
 import { slugDe } from '../components/sitio/sitioWeb';
+import { cacheCorta } from './cacheCorta';
+import { peticionActual } from './peticionActual';
+
+/** Memoria corta (2026-10-22, ver `cacheCorta.ts`): la fila de cada tabla y lo que
+ *  lee de una tabla un visitante anónimo. Cualquier escritura la vacía. */
+const cacheFilaTabla = cacheCorta<any>();
+const cacheTablaAnonima = cacheCorta<{ codigo: number; cuerpo: any }>();
+/** ¿Es un lector anónimo de verdad? Sin sesión y sin la de miembro de ningún sitio. */
+const esAnonimo = (req: any) => !req?.user && !/rh_sitio_/.test(String((req?.headers || peticionActual()?.headers || {}).cookie || ''));
 import { columnaOrdenCatalogo, columnaPrecioCatalogo } from '../components/bloquesDatos/ficha/modelo';
 
 /** Las formas que puede tener una vista. Una vista es una manera de MIRAR la
@@ -105,14 +114,14 @@ export const bdInterno: {
 /** Runs a route handler without HTTP and hands back what it answered. Used by
  *  `bdInterno` so that the server-side callers go through the very same
  *  permission checks and validation as the screen. */
-function internamente(ruta: (req: Request, res: Response) => Promise<any>, req: Pick<Request, 'user'> | null, params: Record<string, string>, body?: any): Promise<{ codigo: number; cuerpo: any }> {
+function internamente(ruta: (req: Request, res: Response) => Promise<any>, req: Pick<Request, 'user'> | null, params: Record<string, string>, body?: any, query?: any): Promise<{ codigo: number; cuerpo: any }> {
   return new Promise(resolve => {
     let codigo = 200;
     const res: any = {
       status(c: number) { codigo = c; return res; }, set() { return res; }, setHeader() { return res; },
       json(cuerpo: any) { resolve({ codigo, cuerpo }); return res; },
     };
-    ruta({ user: req?.user ?? null, headers: (req as any)?.headers || {}, params, query: {}, body: body ?? {} } as any, res)
+    ruta({ user: req?.user ?? null, headers: (req as any)?.headers || {}, params, query: query ?? {}, body: body ?? {} } as any, res)
       .catch((e: any) => resolve({ codigo: 500, cuerpo: { error: e?.message || 'Error interno.' } }));
   });
 }
@@ -137,13 +146,12 @@ export function registerBdRoutes(app: Express, db: any) {
     // tabla puede estar metida en la página de otra persona, y ahí «esa tabla
     // no existe» se lee como un fallo del programa en vez de como una decisión
     // de alguien.
-    const r = await db.execute(sql`
+    const t = await cacheFilaTabla.dar(tablaId, async () => (await db.execute(sql`
       SELECT t.*, p.creador_user_id AS proyecto_creador, p.publico AS proyecto_publico
       FROM bd_tablas t
       LEFT JOIN proyectos p ON p.id = t.proyecto_id
       WHERE t.id = ${tablaId} AND t.deleted_at IS NULL
-    `);
-    const t = r.rows[0] as any;
+    `)).rows[0] as any);
     if (!t) return { error: 'Esa tabla no existe.', codigo: 404 };
     if (t.archived_at) {
       return { error: 'Esta tabla se retiró. Quien la creó puede recuperarla.', codigo: 404 };
@@ -672,11 +680,20 @@ export function registerBdRoutes(app: Express, db: any) {
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   };
-  app.get('/api/bd/tablas/:id', leerTablaRuta);
+  // Un visitante anónimo lee de la memoria corta (la misma dirección, con su `?…`).
+  app.get('/api/bd/tablas/:id', async (req: Request, res: Response) => {
+    if (!esAnonimo(req)) return leerTablaRuta(req, res);
+    try {
+      const r = await cacheTablaAnonima.dar(`ruta:${req.originalUrl}`, () => internamente(leerTablaRuta, req, req.params as any, undefined, req.query));
+      res.status(r.codigo).json(r.cuerpo);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
   // The same read from inside the server (2026-10-18, Wikiproducts W1: the
   // product sheet is written into the HTML before any JavaScript runs). It goes
   // through the route itself, permissions included, so the two cannot drift.
-  bdInterno.leerTabla = (req, tablaId) => internamente(leerTablaRuta, req, { id: tablaId });
+  bdInterno.leerTabla = (req, tablaId) => esAnonimo(req)
+    ? cacheTablaAnonima.dar(`interna:${tablaId}`, () => internamente(leerTablaRuta, req, { id: tablaId }))
+    : internamente(leerTablaRuta, req, { id: tablaId });
 
   /** Crear una tabla. Nace con una columna de texto: una tabla sin ninguna
    *  columna no se puede ni mirar, y obligar a crear la primera a mano es una
