@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SubpaginaSitio from './SubpaginaSitio';
 import { Cargando, SinPagina } from '../components/sitio/VistaPagina';
 import { ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
-import { rutaPrecargada } from '../utils/precargado';
+import { rutaPrecargada, contextoPrecargado, type ContextoRuta } from '../utils/precargado';
 
 // ============================================================================
 // LA DIRECCIÓN LEGIBLE DE UNA FICHA — `/powerbanks/anker-737` (2026-10-18)
@@ -16,14 +16,14 @@ import { rutaPrecargada } from '../utils/precargado';
 // (`rutaPrecargada`). Si no, se pregunta a `/api/sitio/ruta`. Una dirección
 // vieja (la ficha cambió de nombre) lleva a la nueva.
 
-type Estado = { camino: string; id: string | null; no?: boolean };
+type Estado = { camino: string; id: string | null; no?: boolean; contexto?: ContextoRuta['contexto'] };
 
 export default function RutaSitio({ propio, siNo }: { propio: boolean; siNo?: ReactNode }) {
   const { pathname } = useLocation();
   const ir = useNavigate();
   const [estado, setEstado] = useState<Estado | null>(() => {
     const id = rutaPrecargada(pathname);
-    return id ? { camino: pathname, id } : null;
+    return id ? { camino: pathname, id, contexto: contextoPrecargado(pathname)?.contexto || null } : null;
   });
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function RutaSitio({ propio, siNo }: { propio: boolean; siNo?: Re
         const j = await r.json().catch(() => ({}));
         if (!vivo) return;
         if (j.redirigir) return ir(j.redirigir, { replace: true });
-        setEstado({ camino: pathname, id: r.ok && j.id ? j.id : null, no: !r.ok || !j.id });
+        setEstado({ camino: pathname, id: r.ok && j.id ? j.id : null, no: !r.ok || !j.id, contexto: j.contexto || null });
       })
       .catch(() => vivo && setEstado({ camino: pathname, id: null, no: true }));
     return () => { vivo = false; };
@@ -46,7 +46,7 @@ export default function RutaSitio({ propio, siNo }: { propio: boolean; siNo?: Re
   if (!estado.id) {
     return <>{siNo ?? <SinPagina titulo="Esta página no está aquí" texto="O nunca existió, o ha dejado de estar publicada." volver={propio ? '/' : null} />}</>;
   }
-  return <SubpaginaSitio key={estado.id} propio={propio} idFijo={estado.id} />;
+  return <SubpaginaSitio key={estado.id} propio={propio} idFijo={estado.id} contexto={estado.contexto || null} />;
 }
 
 /** Por subdominio: `quien.humanity.wiki/powerbanks/anker-737`. */

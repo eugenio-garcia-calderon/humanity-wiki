@@ -9,7 +9,7 @@ import { esVideoPortada } from '../../utils/videoPortada';
 import { LayoutCabecera, FilaTitulo, ladoIcono, letraDescripcion, tituloPagina } from '../knowledge/CabeceraPagina';
 import {
   CabeceraElementos, elementosDe, usaDisenoNuevo, cabeceraFija,
-  tamTitulo, tamIcono, tamDescripcion, altoPortada, tallaBotones, zoomPropiedades,
+  tamTitulo, tamIcono, tamDescripcion, altoPortada, ladoPortada, portadaAlLado, tallaBotones, zoomPropiedades,
 } from '../knowledge/DisenoCabecera';
 // Las propiedades de la entrada, en diferido: sólo las páginas que son una
 // entrada de base de datos las cargan (y el HTML del servidor no las pinta).
@@ -63,11 +63,12 @@ export function MarcoLectura({ pagina, rutas, children }: {
 
 export function CabeceraLectura({ pagina, esMovil }: { pagina: DatosPagina; esMovil: boolean }) {
   const cfg = pagina.config || {};
-  const fija = cabeceraFija(cfg.cabecera) && (
+  const esFila = !!pagina.fila;
+  const fija = cabeceraFija(cfg.cabecera, esFila) && (
     <Suspense fallback={null}><BarraFijaLectura config={cfg} titulo={pagina.titulo} /></Suspense>
   );
   // La barra fija va JUSTO ANTES de la cabecera (ver `BarraFija`).
-  if (usaDisenoNuevo(cfg.cabecera)) return <>{fija}{cabeceraPorElementos(pagina, esMovil)}</>;
+  if (usaDisenoNuevo(cfg.cabecera, esFila)) return <>{fija}{cabeceraPorElementos(pagina, esMovil)}</>;
   return <>{fija}{cabeceraDeAntes(pagina, esMovil)}</>;
 }
 
@@ -98,12 +99,18 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
             <TextoEnriquecido texto={cfg.subtitulo} />
           </p>
         ) : null,
-        portada: cfg.portada ? (
+        portada: cfg.portada ? (portadaAlLado(els) ? (
+          // Al lado del título, un cuadrado: la imagen entera dentro (2026-10-21).
+          <div style={{ width: ladoPortada(el('portada'), esMovil), height: ladoPortada(el('portada'), esMovil) }}
+            className="grid place-items-center overflow-hidden rounded-2xl bg-white [&_img]:h-full [&_img]:w-full [&_img]:object-contain [&_video]:h-full [&_video]:w-full [&_video]:object-cover">
+            <MediaPortada src={cfg.portada} prioridad className="h-full w-full object-contain" />
+          </div>
+        ) : (
           <div style={{ '--alto': `${altoPortada(c, el('portada'), esMovil)}px` } as any}
             className={cn('[&_img]:h-auto [&_img]:max-h-[var(--alto)] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain', der('portada') && 'flex justify-end')}>
             <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} />
           </div>
-        ) : null,
+        )) : null,
         botones: hayBotones ? (
           <div data-botones-cabecera className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense>
@@ -113,7 +120,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
         propiedades: pagina.fila ? (
           <div className="text-left" style={{ zoom: zoomPropiedades(el('propiedades')) }}>
             <Suspense fallback={null}>
-              <PropiedadesFila tablaId={pagina.fila.tabla_id} filaId={pagina.fila.fila_id} editable={false} alDerecha={der('propiedades')} />
+              <PropiedadesFila tablaId={pagina.fila.tabla_id} filaId={pagina.fila.fila_id} editable={false} sinRelaciones alDerecha={der('propiedades')} />
             </Suspense>
           </div>
         ) : null,
@@ -191,7 +198,7 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
               // Con el título centrado (sin imagen al lado), las propiedades también.
               !alIzquierda && !(cfg.portada && ['izquierda', 'derecha'].includes(cfg.cabecera?.disposicion || 'derecha')) && '[&>div>div:first-child]:justify-center')}>
               <Suspense fallback={null}>
-                <PropiedadesFila tablaId={pagina.fila.tabla_id} filaId={pagina.fila.fila_id} editable={false} />
+                <PropiedadesFila tablaId={pagina.fila.tabla_id} filaId={pagina.fila.fila_id} editable={false} sinRelaciones />
               </Suspense>
             </div>
           )}

@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import EnlazanAqui from '../knowledge/EnlazanAqui';
 import { contarPagina, textoLectura } from '../../utils/ajustesPagina';
-import RelacionesPublicas from '../tablas/RelacionesPublicas';
+import RedRelaciones, { AccionesPagina } from './RedRelaciones';
+import type { ContextoRuta } from '../../utils/precargado';
 import SugerirCorreccion from '../bloquesDatos/ficha/SugerirCorreccion';
 import { useSitio } from './ContextoSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
@@ -30,8 +31,10 @@ import type { DatosPagina } from './CabeceraLectura';
 
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function VistaPagina({ pagina, propio, pie }: {
+export default function VistaPagina({ pagina, propio, pie, contexto }: {
   pagina: DatosPagina;
+  /** Entrando por `madre/pestaña/entrada`: esas dos van en las migas (2026-10-21). */
+  contexto?: ContextoRuta['contexto'];
   /** Dominio propio o subdominio: el título de la pestaña no lleva la marca
    *  de la plataforma y el icono de la página hace de favicon. */
   propio: boolean;
@@ -80,6 +83,13 @@ export default function VistaPagina({ pagina, propio, pie }: {
     ? (sitio.raizId === m.id || pagina.sitio?.raizId === m.id ? '/' : m.slug ? sitio.enlaceSlug(m.slug, m.handle) : sitio.enlacePagina(m.id))
     : null;
   const migas = sitio ? (pagina.migas?.length ? pagina.migas : padre ? [padre] : []) : [];
+  // En su contexto: Inicio › Movilidad › Líneas de desarrollo › esta entrada.
+  const migasContexto = sitio && contexto ? [
+    ...(pagina.sitio?.raizId ? [{ clave: 'inicio', titulo: 'Inicio', href: '/' }] : []),
+    { clave: 'madre', titulo: contexto.madre.titulo, href: contexto.madre.camino },
+    { clave: 'grupo', titulo: contexto.grupo.nombre, href: contexto.grupo.camino },
+  ] : null;
+  const esRaiz = !!pagina.sitio?.raizId && pagina.sitio.raizId === pagina.id;
 
   // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
   // —el servidor también los pinta—, así que aquí se cogen los que van a
@@ -101,7 +111,20 @@ export default function VistaPagina({ pagina, propio, pie }: {
   return (
     <div onClickCapture={alPinchar}>
     <MarcoLectura pagina={pagina} rutas={rutas}>
-      {migas.length > 0 && (
+      {migasContexto ? (
+        <nav aria-label="Estás en" className="mb-4">
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
+            {migasContexto.map((m, i) => (
+              <li key={m.clave} className={cn('items-center gap-1', i === migasContexto.length - 1 ? 'flex' : 'hidden sm:flex')}>
+                {i === migasContexto.length - 1 ? <ChevronLeft className="w-4 h-4 text-slate-500 sm:hidden" aria-hidden /> : null}
+                <Link to={m.href} className="font-bold hover:text-slate-900 hover:underline py-3">{m.titulo}</Link>
+                <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migasContexto.length - 1 && 'hidden sm:block')} aria-hidden />
+              </li>
+            ))}
+            <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
+          </ol>
+        </nav>
+      ) : migas.length > 0 && (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {/* On a phone, one line: only the level just above, the way back.
@@ -131,7 +154,11 @@ export default function VistaPagina({ pagina, propio, pie }: {
             relaciones, ni comentarios, ni quien la enlace. */}
         {/* A product sheet (W1) already shows its brand, claims, recalls and
             offers in its own blocks: the generic list would say it twice. */}
-        {!pagina.virtual && !(pagina as any).ficha && <RelacionesPublicas paginaId={pagina.id} />}
+        {/* SEGUIR Y LA RED DE LA PÁGINA (2026-10-21): bajo la cabecera, las acciones y
+            las pestañas de lo relacionado, con su galería (`RedRelaciones.tsx`). */}
+        {!pagina.virtual && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
+        {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
+        {!pagina.virtual && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
         <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
         {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}

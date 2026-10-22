@@ -44,7 +44,7 @@ const NOMBRE_TALLA: Record<TallaElemento, string> = { xs: 'XS', s: 'S', m: 'M', 
 
 export default function MandosCabeceraPagina({ d }: { d: DatosCabecera }) {
   const c = d.cab || {};
-  const v2 = usaDisenoNuevo(c);
+  const v2 = usaDisenoNuevo(c, d.esFila);
   const pon = (x: Partial<Cabecera>) => d.onCab({ ...c, ...x });
   const hay: Record<IdElemento, boolean> = {
     icono: !!d.icono, titulo: true, descripcion: d.subtitulo !== undefined, portada: !!d.portada,
@@ -111,7 +111,7 @@ export default function MandosCabeceraPagina({ d }: { d: DatosCabecera }) {
       </Grupo>
 
       <Grupo titulo="Al bajar por la página">
-        <Elegir valor={cabeceraFija(c) ? 'fija' : 'normal'} onCambio={v => pon({ fija: v === 'fija' })}
+        <Elegir valor={cabeceraFija(c, d.esFila) ? 'fija' : 'normal'} onCambio={v => pon({ fija: v === 'fija' })}
           opciones={[['fija', 'Se queda arriba, en pequeño'], ['normal', 'Se va con la página']]} />
       </Grupo>
 

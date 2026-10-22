@@ -42,6 +42,7 @@ import { slugDe } from '../components/sitio/sitioWeb';
 import { madresValidas, rolEnPagina, capacidades, quienDe } from './permisos.js';
 import { accesoMiembro, filtrarBloques, muroDe } from './miembros.js';
 import { peticionActual } from './peticionActual.js';
+import { bdInterno } from './bd';
 
 const DOMINIO = 'humanity.wiki';
 const RESERVADOS = new Set(['www', 'api', 'admin', 'app', 'mail', 'ftp', 'cdn', 'static', 'assets']);
@@ -522,12 +523,12 @@ export function registrarSitios(app: Express, db: any) {
       const t = camino.split('/').filter(Boolean);
       const sinArroba = t[0]?.startsWith('@') ? t.slice(1) : t;
       // Un tramo: una página del sitio por su nombre corto, sólo en un dominio propio.
-      const uno = sinArroba.length === 1 && t.length === 1 && sitioDe(req).forma === 'dominio';
+      const uno = sinArroba.length === 1 && ((t.length === 1 && sitioDe(req).forma === 'dominio') || (t.length === 2 && t[0].startsWith('@')));
       if (!uno && (sinArroba.length < 2 || sinArroba.length > 3)) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
       const w = await paginaDeLaDireccion(req, camino);
       if (w?.redirigir) return res.json({ redirigir: w.redirigir });
       if (!w?.porRuta) return res.status(404).json({ error: 'Esa página no existe o no está publicada.' });
-      res.json({ id: w.id });
+      res.json({ id: w.id, seccion: w.seccion || null, contexto: w.contexto || null });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -919,7 +920,9 @@ export function registrarSitios(app: Express, db: any) {
       const publica = w.virtual ? w : await paginaPublica(db, w.id);
       const m: MetaPagina = (publica && !publica.muro && publica.meta) || {};
       const cfg = (publica && !publica.muro ? publica.config : null) || w.config;
-      const titulo = String(m.titulo || w.title || '').trim() || 'Sin título';
+      const tituloBase = String(m.titulo || w.title || '').trim() || 'Sin título';
+      // En una pestaña de la red, la pestaña va delante: «Líneas de desarrollo · Movilidad».
+      const titulo = w.seccion?.nombre ? `${w.seccion.nombre} · ${tituloBase}` : w.contexto ? `${tituloBase} · ${w.contexto.madre.titulo}` : tituloBase;
       const desc = (typeof m.descripcion === 'string' && m.descripcion.trim()) || descripcionDe(cfg);
       const img = imagenDe(cfg);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
@@ -932,7 +935,8 @@ export function registrarSitios(app: Express, db: any) {
       // se abre por `humanity.wiki/@quien/…`, por `quien.humanity.wiki/…` y por
       // su dominio propio; si cada una se declara canónica a sí misma, Google
       // ve tres copias y reparte la autoridad entre ellas.
-      const canonica = (await direccionCanonica(w, publica)) || url;
+      // La pestaña y la entrada en su contexto se declaran a sí mismas: es la dirección que se comparte.
+      const canonica = (w.seccion || w.contexto) ? url : ((await direccionCanonica(w, publica)) || url);
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const indexable = w.perdida ? false : m.indexable === false ? false : w.indexable !== false;
@@ -1022,7 +1026,7 @@ export function registrarSitios(app: Express, db: any) {
       s.forma === 'dominio' ? resolverDominio(db, s.host) : null,
       yaArmada !== undefined ? yaArmada : w ? (w.virtual ? w : paginaPublica(db, w.id)) : null,
     ]);
-    const pre: { resolver?: any; paginas?: Record<string, any>; rutas?: Record<string, string>; legibles?: Record<string, string> } = {};
+    const pre: { resolver?: any; paginas?: Record<string, any>; rutas?: Record<string, string>; legibles?: Record<string, string>; contextos?: Record<string, any> } = {};
     if (resuelto) pre.resolver = { host: s.host, ...resuelto };
 
     // La página sólo se manda si es la que se va a pintar: la del dominio
@@ -1033,6 +1037,8 @@ export function registrarSitios(app: Express, db: any) {
     // La dirección legible de una ficha (R2): qué página es, para que el
     // navegador no tenga que preguntarlo (`RutaSitio`).
     if (pagina && w?.porRuta) pre.rutas = { [req.path]: pagina.id };
+    // La pestaña de la red o las migas de una entrada en su contexto (`porContexto`).
+    if (pagina && (w?.seccion || w?.contexto)) pre.contextos = { [req.path]: { seccion: w.seccion || null, contexto: w.contexto || null } };
 
     // EL CONTENIDO, EN EL HTML (2026-10-18, SEO R1, ver `htmlBloques.ts`).
     // En TODAS las formas de sitio y para toda página que se pueda leer: la
@@ -1052,6 +1058,20 @@ export function registrarSitios(app: Express, db: any) {
       const enlaceRuta = (slug: string) => `${prefijo}/${slug.split('/').map(encodeURIComponent).join('/')}`;
       try { cuerpo = await cuerpoEnHtml(db, legible, enlaces.enlacePagina, enlaceRuta); }
       catch (e) { console.error('sitios: cuerpo', e); }
+      // LA RED, EN EL HTML (2026-10-21): los grupos y sus entradas como enlaces
+      // con sus direcciones (`/a/b`, `/a/b/c`), para que un buscador las
+      // encuentre todas sin ejecutar nada. La página viva lo sustituye.
+      try {
+        const red = !legible.virtual && bdInterno.redDePagina ? await bdInterno.redDePagina(null, legible.id) : null;
+        const esRaiz = raizDominio && raizDominio === legible.id;
+        if (red?.grupos.length && !esRaiz) {
+          const corto = typeof w?.slug === 'string' && w.slug && !w.slug.includes('/') ? w.slug : slugDe(legible.titulo || '');
+          const base = `${prefijo}/${encodeURIComponent(corto)}`;
+          cuerpo += `<nav aria-label="Relacionado">${red.grupos.map(g =>
+            `<section><h2><a href="${base}/${g.slug}">${escHtml(g.nombre)}</a></h2><ul>${g.entradas.map(e =>
+              `<li><a href="${base}/${g.slug}/${e.slug}">${escHtml(e.titulo)}</a>${e.resumen ? ` — ${escHtml(e.resumen.slice(0, 160))}` : ''}</li>`).join('')}</ul></section>`).join('')}</nav>`;
+        }
+      } catch (e) { console.error('sitios: red', e); }
     }
 
     // La cabecera, sólo en un dominio propio: en la plataforma la página va
@@ -1204,12 +1224,66 @@ export function registrarSitios(app: Express, db: any) {
       return { ...w, indexable: w.publico ? w.indexable : true, porRuta: true };
     };
 
+    /**
+     * LA RED DE UNA PÁGINA EN LA DIRECCIÓN (2026-10-21, Eugenio: «si estamos en
+     * movilidad y quiero ver las líneas de desarrollo, la URL debería ser
+     * movilidad/lineas-de-desarrollo, y una de ellas, movilidad/lineas-de-
+     * desarrollo/su-nombre»). Cuando la dirección no es una página con nombre
+     * corto ni una ficha (`porRuta`), se lee así:
+     *   · `/a`     — la página A, por su nombre corto o por su TÍTULO (las de
+     *                las entradas de una base de datos no tienen nombre corto);
+     *   · `/a/b`   — A, abierta en su pestaña B (un grupo de su red, `bd.ts`);
+     *   · `/a/b/c` — la entrada C del grupo B de A, con A y B en sus migas.
+     * Nada de esto se guarda: sale de la red de A en cada visita, así que una
+     * relación nueva tiene su dirección al momento.
+     */
+    const porContexto = async (handle: string, ruta: string[], raizId: string | null, prefijo: string) => {
+      if (!ruta.length || ruta.length > 3 || TRAMOS_RESERVADOS.has(ruta[0])) return null;
+      const a = ruta[0].toLowerCase();
+      const patron = a.replace(/[%_]/g, '').replace(/-/g, '%').replace(/[aeioun]/g, '_');
+      const candidatas = (await db.execute(sql`
+        SELECT w.id, w.title, w.slug FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+        WHERE u.handle = ${handle.toLowerCase()} AND w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+          AND (w.slug = ${a} OR lower(w.title) LIKE ${patron})
+        ORDER BY (w.slug = ${a}) DESC, w.created_at LIMIT 40
+      `)).rows as any[];
+      let pagA: any = null;
+      for (const c of candidatas) {
+        if (c.slug !== a && slugDe(c.title || '') !== a) continue;
+        if (!(await paginaVisible(db, c.id))) continue;
+        if (raizId && !(await cuelgaDe(db, c.id, raizId))) continue;
+        pagA = c; break;
+      }
+      if (!pagA) return null;
+      const wA = await datosPagina(db, pagA.id);
+      if (!wA) return null;
+      const caminoA = `${prefijo}/${encodeURIComponent(a)}`;
+      if (ruta.length === 1) return { ...wA, indexable: true, porRuta: true };
+      const red = bdInterno.redDePagina ? await bdInterno.redDePagina(null, wA.id) : null;
+      const grupo = red?.grupos.find(g => g.slug === ruta[1].toLowerCase());
+      if (!grupo) return null;
+      const caminoB = `${caminoA}/${encodeURIComponent(grupo.slug)}`;
+      if (ruta.length === 2) return { ...wA, indexable: true, porRuta: true, seccion: { slug: grupo.slug, nombre: grupo.nombre } };
+      const e = grupo.entradas.find(x => x.slug === ruta[2].toLowerCase());
+      if (!e?.pagina_id) return null;
+      const wC = await datosPagina(db, e.pagina_id);
+      if (!wC || !(await paginaVisible(db, wC.id))) return null;
+      return {
+        ...wC, indexable: true, porRuta: true,
+        contexto: { madre: { id: wA.id, titulo: wA.title || 'Sin título', camino: caminoA }, grupo: { nombre: grupo.nombre, camino: caminoB } },
+      };
+    };
+
     if (s.forma === 'dominio') {
       const d = await dominioApunta(db, s.host);
       if (!d) return null;
       if (tramos.length >= 2) {
         const f = await porRuta(d.handle, tramos, '');
         if (f) return f;
+        if (d.entidad_id && d.entidad_tipo === 'pagina') {
+          const c = await porContexto(d.handle, tramos, d.entidad_id, '');
+          if (c) return c;
+        }
       }
       // `dominio.com/powerbanks`: una página del sitio por su nombre corto,
       // que es la dirección canónica que se le da (`canonicaDe`). Sólo las que
@@ -1222,6 +1296,8 @@ export function registrarSitios(app: Express, db: any) {
         if (!p) {
           const a = await anterior(d.handle, tramos[0], '');
           if (a) return a;
+          const c = await porContexto(d.handle, tramos, d.entidad_id, '');
+          if (c) return c;
         }
       }
       if (d.entidad_id && d.entidad_tipo === 'pagina') {
@@ -1237,14 +1313,17 @@ export function registrarSitios(app: Express, db: any) {
       return null;
     }
     if (s.forma === 'subdominio') {
-      if (tramos.length === 1) return (await porSlug(s.handle, tramos[0])) || anterior(s.handle, tramos[0], '');
-      return porRuta(s.handle, tramos, '');
+      if (tramos.length === 1) return (await porSlug(s.handle, tramos[0])) || (await anterior(s.handle, tramos[0], '')) || porContexto(s.handle, tramos, null, '');
+      return (await porRuta(s.handle, tramos, '')) || porContexto(s.handle, tramos, null, '');
     }
     if (tramos.length === 2 && tramos[0].startsWith('@')) {
       const h = tramos[0].slice(1);
-      return (await porSlug(h, tramos[1])) || anterior(h, tramos[1], `/@${h}`);
+      return (await porSlug(h, tramos[1])) || (await anterior(h, tramos[1], `/@${h}`)) || porContexto(h, tramos.slice(1), null, `/@${h}`);
     }
-    if (tramos.length >= 3 && tramos[0].startsWith('@')) return porRuta(tramos[0].slice(1), tramos.slice(1), `/@${tramos[0].slice(1)}`);
+    if (tramos.length >= 3 && tramos[0].startsWith('@')) {
+      const h = tramos[0].slice(1);
+      return (await porRuta(h, tramos.slice(1), `/@${h}`)) || porContexto(h, tramos.slice(1), null, `/@${h}`);
+    }
     return null;
   }
 }
