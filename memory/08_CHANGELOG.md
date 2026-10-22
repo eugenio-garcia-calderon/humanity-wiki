@@ -9634,3 +9634,16 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
 - **La portada a la izquierda, pequeña**: en el diseño por elementos, la portada va primero, al lado del título, como un cuadrado entre icono e imagen (`ladoPortada`: XS 64 · S 88 · M 120 · L 168 · XL 240; en el teléfono, como mucho 96). Las entradas de una base de datos sin diseño elegido usan ya el diseño por elementos.
 - De paso: el título y la descripción del editor se reajustan al cambiar el ancho de su caja (`ResizeObserver`). `/@quien/nombre` que no es una página publicada se pregunta a la red antes de decir «no existe».
 - Más compacta: las entradas sin imagen son fichas de texto, no cuadrados vacíos. En «Todo», los grupos de una o dos entradas se juntan de dos en dos o de tres en tres. El título de una pestaña usa el título de verdad, no el de la ficha de producto.
+- Tras el bot evaluador (UX 6, encontrar 5, SEO 3, velocidad 4; global 4,5):
+  - Las páginas de la red (`w.red`) se indexan aunque la ficha de producto diga «flaca».
+  - Una sola dirección: `/movilidad/` va a `/movilidad`, y `/p/:id` de una entrada que se abre por su nombre redirige a él con un 301.
+  - Canónicas: la pestaña, de sí misma; la entrada en contexto, de su `/nombre`; la entidad, de `/nombre`.
+  - Descripción propia de cada pestaña («6 proyectos del laboratorio de Movilidad: …»).
+  - Migas JSON-LD completas, de cuatro niveles.
+  - El sitemap lleva las entradas por su nombre y sus pestañas, en vez de `/p/…`.
+  - En un dominio propio, los enlaces del HTML (y del navegador, `legibles`) van por el nombre.
+  - Al cambiar de pestaña o ir atrás se actualiza la canónica.
+  - La pestaña activa se centra en la barra, que en el teléfono tiene un degradado que avisa de que hay más.
+  - Los nombres largos de pestaña se cortan, con el entero en `title`.
+  - Todas las tarjetas con el mismo formato: sin imagen, la inicial en su color.
+- Pendiente, por su tamaño: miniaturas WebP de las imágenes (la página baja 7,6 MB en PNG) y acelerar `/api/sitio/pagina`.

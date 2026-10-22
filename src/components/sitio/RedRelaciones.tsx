@@ -27,6 +27,7 @@ type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug
 type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: string | null; entradas: Entrada[] };
 
 const MAX_EN_TODO = 8;
+const TONOS = ['bg-emerald-50 text-emerald-600', 'bg-sky-50 text-sky-600', 'bg-amber-50 text-amber-600', 'bg-rose-50 text-rose-600', 'bg-violet-50 text-violet-600', 'bg-teal-50 text-teal-600'];
 
 export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }: {
   paginaId: string; titulo: string; autorHandle?: string; esRaiz?: boolean;
@@ -62,9 +63,14 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
       setActiva(grupos.some(g => g.slug === ultimo) ? ultimo : q && grupos.some(g => g.slug === q) ? q : 'todo');
     };
     leer();
-    window.addEventListener('popstate', leer);
-    return () => window.removeEventListener('popstate', leer);
+    const alVolver = () => { leer(); ponerCanonica(); };
+    window.addEventListener('popstate', alVolver);
+    return () => window.removeEventListener('popstate', alVolver);
   }, [grupos]);
+  // La pestaña activa, a la vista en la barra (en el teléfono la barra se desplaza).
+  useEffect(() => {
+    barra.current?.querySelector<HTMLElement>('a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, [activa]);
 
   if (!grupos || !grupos.length) return null;
 
@@ -79,6 +85,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
     if (destino !== window.location.pathname + window.location.search) window.history.pushState(null, '', destino);
     setActiva(g ? g.slug : 'todo');
     document.title = g ? `${g.nombre} · ${titulo}` : titulo;
+    ponerCanonica();
     // Que la barra quede arriba y se vea lo que se ha abierto.
     const y = (barra.current?.getBoundingClientRect().top || 0) + window.scrollY - 80;
     if (window.scrollY > y) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
@@ -91,8 +98,9 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
   return (
     <section className="mb-8" data-red-relaciones>
       {/* LAS PESTAÑAS */}
-      <div ref={barra} className="mb-5 border-b border-slate-200">
-        <nav aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none]">
+      {/* En el teléfono, un degradado a la derecha avisa de que hay más pestañas. */}
+      <div ref={barra} className="relative mb-5 border-b border-slate-200 after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-10 after:bg-gradient-to-l after:from-white sm:after:hidden">
+        <nav aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto pr-8 [scrollbar-width:none] sm:pr-0">
           <Pestana href={caminoDe()} activa={activa === 'todo'} onClick={e => elegir(e, null)} texto="Todo" n={total} />
           {grupos.map(g => (
             <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} />
@@ -137,13 +145,20 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
   );
 }
 
+/** La dirección canónica, al día al cambiar de pestaña sin recargar. */
+function ponerCanonica() {
+  const l = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (l) l.href = window.location.origin + window.location.pathname.replace(/\/+$/, '');
+}
+
 function Pestana({ href, activa, onClick, texto, n }: { href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number }) {
   return (
     <a href={href} onClick={onClick} aria-current={activa ? 'page' : undefined}
-      className={cn('inline-flex h-12 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-[15px] font-semibold transition-colors',
+      title={texto}
+      className={cn('inline-flex h-12 max-w-[16rem] shrink-0 items-center gap-1.5 border-b-2 px-3 text-[15px] font-semibold transition-colors',
         activa ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800')}>
-      {texto}
-      <span className={cn('rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500')}>{n}</span>
+      <span className="truncate">{texto}</span>
+      <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500')}>{n}</span>
     </a>
   );
 }
@@ -151,26 +166,18 @@ function Pestana({ href, activa, onClick, texto, n }: { href: string; activa: bo
 function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande?: boolean }) {
   const texto = (x.descripcion || x.resumen || '').trim();
   const conImagen = !!x.imagen || (!!x.icono && !/^(https?:|\/)/.test(x.icono));
-  // SIN IMAGEN, UNA FICHA DE TEXTO: un cuadrado vacío con un icono de documento no
-  // dice nada y ocupa lo mismo que una foto (visto en Movilidad, 2026-10-21).
-  if (!conImagen) {
-    return (
-      <Link to={href} data-interno className="group col-span-2 flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md sm:col-span-1">
-        <p className={cn('font-bold leading-snug text-slate-900 line-clamp-3 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
-        {texto && <p className="mt-1.5 line-clamp-3 text-[13px] leading-snug text-slate-500">{texto}</p>}
-        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-[12px] font-bold text-slate-400 group-hover:text-slate-700">Abrir <ArrowRight className="h-3 w-3" /></span>
-      </Link>
-    );
-  }
+  // SIN IMAGEN, LA INICIAL EN SU COLOR: todas las tarjetas con el mismo formato
+  // (bot evaluador: mezclar fotos y fichas de texto descolocaba la rejilla).
+  const tono = TONOS[(x.titulo.charCodeAt(0) || 0) % TONOS.length];
   return (
     <Link to={href} data-interno className="group flex min-w-0 flex-col">
       {/* Cuadrada y sin recortar, como en las galerías (2026-10-21). */}
       <div className="relative grid aspect-square place-items-center overflow-hidden rounded-2xl border border-slate-100 bg-white transition-shadow group-hover:shadow-md">
         {x.imagen
           ? <img src={x.imagen} alt="" loading="lazy" className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]" />
-          : x.icono && !/^(https?:|\/)/.test(x.icono)
+          : conImagen
             ? <span className="text-5xl">{x.icono}</span>
-            : <FileText className="h-8 w-8 text-slate-200" />}
+            : <span className={cn('grid h-full w-full place-items-center text-5xl font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase() || <FileText className="h-8 w-8" />}</span>}
       </div>
       <p className={cn('mt-2.5 font-bold leading-snug text-slate-900 line-clamp-3 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
       {texto && <p className={cn('mt-1 text-slate-500 leading-snug', grande ? 'line-clamp-3 text-sm' : 'line-clamp-2 text-[13px]')}>{texto}</p>}
