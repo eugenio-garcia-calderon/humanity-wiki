@@ -6,6 +6,7 @@ import { Cargando } from './VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from './ContextoSitio';
 import { recordarRuta } from '../../utils/rutasLegibles';
 import SeccionesSitio, { type Seccion } from './SeccionesSitio';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LOS RESULTADOS DEL BUSCADOR DE UN SITIO — `/buscar?q=…` (2026-10-18)
@@ -104,7 +105,7 @@ export default function BuscadorSitio() {
                   <Link to={enlace(r.id)} className="flex gap-3 items-center group">
                     <span className="w-16 h-16 rounded-lg bg-slate-50 shrink-0 flex items-center justify-center overflow-hidden">
                       {r.portada
-                        ? <img src={r.portada} alt="" width={64} height={64} loading={i < 8 ? 'eager' : 'lazy'} className="w-full h-full object-contain" />
+                        ? <img src={miniatura(r.portada, 64)} alt="" width={64} height={64} loading={i < 8 ? 'eager' : 'lazy'} className="w-full h-full object-contain" />
                         : <Package className="w-6 h-6 text-slate-400" aria-hidden />}
                     </span>
                     <span className="min-w-0 flex-1">

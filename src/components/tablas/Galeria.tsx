@@ -13,6 +13,7 @@ import GaleriaCarrusel from './GaleriaCarrusel';
 import { BarraComparar, MAX_COMPARAR_GALERIA, MarcaComparar, tablaComparable, useComparar } from './CompararGaleria';
 import MenuAcciones, { type AccionMenu } from './MenuAcciones';
 import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -416,7 +417,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                   <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (minima ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : legible ? 'text-base' : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                     {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                       : icono ? (esUrl(icono)
-                        ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
+                        ? <img src={miniatura(icono, 24)} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
                         : <span className="shrink-0">{icono}</span>)
                       : null}
                     <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
@@ -792,7 +793,7 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, compacta = false
         setPos({ x: c(i.x - ((e.clientX - i.px) / i.w) * 100), y: c(i.y - ((e.clientY - i.py) / i.h) * 100) });
       } : undefined}
       onPointerUp={modo ? () => { inicio.current = null; } : undefined}>
-      <img src={src} alt="" loading="lazy" draggable={false}
+      <img src={miniatura(src, 400)} alt="" loading="lazy" draggable={false}
         onError={e => { e.currentTarget.style.display = 'none'; }}
         style={{ objectPosition: `${visible.x}% ${visible.y}%` }}
         className={cn('w-full h-full object-contain select-none', !modo && 'group-hover:scale-[1.02] transition-transform')} />
@@ -844,7 +845,7 @@ function Enlazado({ a }: { a: any }) {
   const pagina = a.extra?.pagina_id as string | undefined;
   const dentro = (
     <>
-      {m.imagen && <img src={m.imagen} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
+      {m.imagen && <img src={miniatura(m.imagen, 48)} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-bold text-slate-700 truncate">{a.etiqueta || 'Sin título'}</span>
         {m.texto && <span className="block text-[11px] text-slate-500 leading-snug line-clamp-2">{m.texto}</span>}

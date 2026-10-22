@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { miniaturas } from './miniaturas';
 
 // ============================================================================
 // UPLOADS — archivos subidos por las personas (2026-08-07)
@@ -181,6 +182,9 @@ export function registerUploadRoutes(app: Express, _db: any) {
   app.use(`/uploads/${PRIVADO}`, (_req: Request, res: Response) => {
     res.status(404).json({ error: 'Ese archivo no es público. Si lo compraste, descárgalo desde tu pedido.' });
   });
+
+  // Las miniaturas WebP (`?w=`), antes que el original (ver `miniaturas.ts`).
+  app.use('/uploads', miniaturas(raiz));
 
   // Servir lo subido. Los nombres son UUID generados aquí, así que no hay
   // nombre de usuario en la ruta; express.static ya bloquea el path traversal.

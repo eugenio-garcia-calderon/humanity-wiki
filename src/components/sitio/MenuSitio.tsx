@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useLocation } from 'react-router-dom';
+import { miniatura } from '../../utils/miniatura';
 import {
   type Sitio, type Enlace, type Destino, type DocLegal, type Tamano,
   NOMBRES_LEGALES, textoLegal, textoSobre,
@@ -45,7 +46,7 @@ export function IconoMenu({ valor, tamano }: { valor?: string; tamano: number })
     const I = ICONOS_MENU[valor.slice(7)];
     return I ? <I style={{ width: tamano, height: tamano }} strokeWidth={1.9} className="shrink-0" /> : null;
   }
-  if (/^(https?:|\/)/.test(valor)) return <img src={valor} alt="" style={{ width: tamano, height: tamano }} className="shrink-0 rounded object-cover" />;
+  if (/^(https?:|\/)/.test(valor)) return <img src={miniatura(valor, tamano)} alt="" style={{ width: tamano, height: tamano }} className="shrink-0 rounded object-cover" />;
   return <span style={{ fontSize: Math.round(tamano * 0.9), lineHeight: 1 }} className="shrink-0">{valor}</span>;
 }
 

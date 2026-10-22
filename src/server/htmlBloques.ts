@@ -28,6 +28,7 @@
 // comparador, valoraciones…) deben registrarse.
 import { sql } from 'drizzle-orm';
 import { formatear } from '../components/tablas/Celda';
+import { miniatura } from '../utils/miniatura';
 
 /** Lo que hace falta saber, ya preguntado a la base de datos, para escribir
  *  los bloques sin ir y volver por cada uno. */
@@ -266,7 +267,7 @@ function tablaEnHtml(t: TablaHtml, b: any, ctx: ContextoHtml): string {
   const filas = t.filas.map(f => {
     const nombre = esc(f.nombre || 'Sin título');
     const img = f.portada && hrefSeguro(f.portada)
-      ? `<img src="${esc(f.portada)}" alt="${nombre}" loading="lazy" width="64" height="64"> ` : '';
+      ? `<img src="${esc(miniatura(f.portada, 64))}" alt="${nombre}" loading="lazy" width="64" height="64"> ` : '';
     const href = f.ruta && ctx.enlaceRuta ? ctx.enlaceRuta(f.ruta) : f.paginaId ? ctx.enlacePagina(f.paginaId) : null;
     const primera = href ? `<a href="${esc(href)}">${img}${nombre}</a>` : `${img}${nombre}`;
     const celdas = t.columnas.map(c => {
@@ -322,7 +323,7 @@ function bloqueEnHtml(b: any, ctx: ContextoHtml, hijos: (lista: any[]) => string
       const h = hrefSeguro(b.url || '');
       if (!h) return '';
       const pie = b.pie ? `<figcaption>${enLinea(b.pie, ctx)}</figcaption>` : '';
-      return `<figure><img src="${esc(h)}" alt="${esc(b.pie || b.texto || '')}" loading="lazy">${pie}</figure>`;
+      return `<figure><img src="${esc(miniatura(h, 1000))}" alt="${esc(b.pie || b.texto || '')}" loading="lazy">${pie}</figure>`;
     }
     case 'medio': {
       const h = hrefSeguro(b.url || '');

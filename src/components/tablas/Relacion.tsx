@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Check, Plus, Search, X, Loader2, FileText } from 'lucide-react';
 import { useSitio } from '../sitio/ContextoSitio';
 import { cn } from '../../utils/cn';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // RELACIONES ENTRE BASES DE DATOS (2026-10-01)
@@ -38,7 +39,7 @@ export function FichaConImagen({ a }: { a: Apuntado }) {
   const dentro = (
     <>
       {a.miniatura && !roto
-        ? <img src={a.miniatura} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-lg object-cover bg-slate-100" />
+        ? <img src={miniatura(a.miniatura, 48)} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-lg object-cover bg-slate-100" />
         : <span className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-lg text-base font-black', roto ? 'bg-rose-100' : tonoDe(nombre))}>
             {nombre.trim().charAt(0).toUpperCase() || '·'}
           </span>}
