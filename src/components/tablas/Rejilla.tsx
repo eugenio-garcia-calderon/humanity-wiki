@@ -738,14 +738,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                 ) : <span className="shrink-0 w-5" />)}
                 <div className="flex-1 min-w-0">
                   <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
-                    apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                    apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]} filaId={f.id}
                     editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
                 </div>
                 {f.recurrencia && <span className="shrink-0 mt-2.5 mr-1"><MarcaRecurrente fila={f} /></span>}
               </div>
             ) : (
               <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
-                apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]} filaId={f.id}
                 editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
             )}
           </td>
@@ -1282,7 +1282,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
                   <span className="w-28 shrink-0 pt-1.5 text-[11px] font-black uppercase tracking-wide text-slate-400 truncate">{c.nombre}</span>
                   <div className="flex-1 min-w-0">
                     <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
-                      apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                      apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]} filaId={f.id}
                       editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
                   </div>
                 </div>

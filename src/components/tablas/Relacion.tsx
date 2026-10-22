@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { Check, Plus, Search, X, Loader2, FileText } from 'lucide-react';
+import { Check, Plus, Search, X, Loader2, FileText, Sparkles, ChevronRight } from 'lucide-react';
 import { useSitio } from '../sitio/ContextoSitio';
 import { cn } from '../../utils/cn';
 import { miniatura } from '../../utils/miniatura';
@@ -18,7 +18,12 @@ import { miniatura } from '../../utils/miniatura';
 // están las dos piezas que faltaban: la ficha, que lleva a la página del
 // elemento enlazado, y el selector.
 
-export type Apuntado = { id: string; etiqueta: string; extra?: any; existe?: boolean; miniatura?: string };
+export type Apuntado = { id: string; etiqueta: string; extra?: any; existe?: boolean; miniatura?: string;
+  /** Columna «Tema» (2026-10-22): los temas de arriba, de la raíz a la madre. */
+  ruta?: Array<{ id: string; etiqueta: string }> };
+
+/** «Energía › Energía solar › Fotovoltaica», para el título de una ficha de tema. */
+const rutaEnTexto = (a: Apuntado) => [...(a.ruta || []).map(e => e.etiqueta), a.etiqueta].join(' › ');
 
 /** El color de la inicial cuando lo enlazado no tiene imagen: siempre el
  *  mismo para el mismo nombre, para que «Ana» se reconozca de un vistazo. */
@@ -43,12 +48,15 @@ export function FichaConImagen({ a }: { a: Apuntado }) {
         : <span className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-lg text-base font-black', roto ? 'bg-rose-100' : tonoDe(nombre))}>
             {nombre.trim().charAt(0).toUpperCase() || '·'}
           </span>}
-      <span className="min-w-0 text-[13px] font-bold leading-tight line-clamp-2 group-hover/ficha:text-emerald-800">{nombre}</span>
+      <span className="min-w-0">
+        {!!a.ruta?.length && <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-400">{a.ruta.map(e => e.etiqueta).join(' › ')}</span>}
+        <span className="block text-[13px] font-bold leading-tight line-clamp-2 group-hover/ficha:text-emerald-800">{nombre}</span>
+      </span>
     </>
   );
-  if (!pagina || roto) return <span className={clase}>{dentro}</span>;
+  if (!pagina || roto) return <span className={clase} title={a.ruta?.length ? rutaEnTexto(a) : undefined}>{dentro}</span>;
   return (
-    <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} className={clase} onClick={e => e.stopPropagation()}>
+    <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} className={clase} title={a.ruta?.length ? rutaEnTexto(a) : undefined} onClick={e => e.stopPropagation()}>
       {dentro}
     </Link>
   );
@@ -62,10 +70,13 @@ export function FichaRelacion({ a, grande = false, legible = false }: { a: Apunt
   const clase = cn('inline-flex items-center gap-1 rounded-lg font-bold max-w-[14rem] transition-colors',
     legible ? 'px-2.5 min-h-11 text-base' : grande ? 'px-2 py-1 text-xs' : 'px-2 py-0.5 text-[11px]',
     a.existe === false ? 'bg-rose-50 text-rose-500' : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700');
-  const dentro = <><FileText className="w-3 h-3 shrink-0 opacity-60" /><span className="truncate">{a.etiqueta || 'Sin título'}</span></>;
-  if (!pagina || a.existe === false) return <span className={clase}>{dentro}</span>;
+  // Un tema enseña de dónde cuelga: «E. solar › Fotovoltaica» (la ruta entera, al pasar por encima).
+  const madre = a.ruta?.length ? a.ruta[a.ruta.length - 1].etiqueta : null;
+  const titulo = a.ruta?.length ? rutaEnTexto(a) : undefined;
+  const dentro = <><FileText className="w-3 h-3 shrink-0 opacity-60" />{madre && <span className="shrink-0 max-w-[6rem] truncate font-semibold opacity-50">{madre} ›</span>}<span className="truncate">{a.etiqueta || 'Sin título'}</span></>;
+  if (!pagina || a.existe === false) return <span className={clase} title={titulo}>{dentro}</span>;
   return (
-    <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} className={clase}
+    <Link to={sitio ? sitio.enlacePagina(pagina) : `/paginas/${pagina}`} className={clase} title={titulo}
       onClick={e => e.stopPropagation()}>
       {dentro}
     </Link>
@@ -76,8 +87,10 @@ export function FichaRelacion({ a, grande = false, legible = false }: { a: Apunt
  * La celda de una relación: las fichas y, para quien puede editar, un
  * selector con buscador de los elementos de la otra base de datos.
  */
-export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImagen = false }: {
+export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImagen = false, filaId }: {
   columna: { id: string; nombre: string; config?: any };
+  /** La fila de la celda: hace falta para sugerir su tema. */
+  filaId?: string;
   apuntados: Apuntado[];
   editable: boolean;
   /** Fichas grandes con la imagen de lo enlazado (la página del elemento). */
@@ -85,7 +98,9 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
   onGuardar: (ids: string[]) => Promise<boolean>;
 }) {
   const [abierto, setAbierto] = useState(false);
-  const [opciones, setOpciones] = useState<{ id: string; nombre: string }[] | null>(null);
+  const [opciones, setOpciones] = useState<{ id: string; nombre: string; nivel?: number; ruta?: string }[] | null>(null);
+  const esTema = !!columna.config?.tema;
+  const [sugeridas, setSugeridas] = useState<{ lista: any[]; motivo?: string | null } | 'cargando' | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -103,10 +118,29 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
         const j = await r.json();
         if (!r.ok) throw new Error(j.error || 'No se pudo leer la otra base de datos.');
         const colT = j.columna_titulo;
-        setOpciones((j.filas || []).map((f: any) => ({
+        const lista = (j.filas || []).map((f: any) => ({
           id: f.id,
           nombre: (colT && f.celdas?.[colT]?.estado === 'ok' ? String(f.celdas[colT].valor) : '') || f.pagina?.titulo || 'Sin título',
-        })));
+        }));
+        // UN TEMA SE ELIGE EN SU ÁRBOL (2026-10-22): sangrado por niveles,
+        // cada uno bajo su madre, y la búsqueda mira también la ruta.
+        const colMadre = (j.columnas || []).find((c: any) => c.config?.rol === 'madre')?.id;
+        if (esTema && colMadre) {
+          const madreDe = new Map<string, string>();
+          for (const f of j.filas || []) { const m = f.apuntados?.[colMadre]?.[0]?.id; if (m) madreDe.set(f.id, m); }
+          const porId = new Map(lista.map((o: any) => [o.id, o]));
+          const hijos = new Map<string, any[]>();
+          const raices: any[] = [];
+          for (const o of lista) { const m = madreDe.get(o.id); if (m && porId.has(m)) (hijos.get(m) || hijos.set(m, []).get(m)!).push(o); else raices.push(o); }
+          const salida: any[] = [];
+          const bajar = (o: any, nivel: number, ruta: string[]) => {
+            if (salida.length > 5000 || nivel > 30) return;
+            salida.push({ ...o, nivel, ruta: ruta.join(' › ') });
+            for (const h of hijos.get(o.id) || []) bajar(h, nivel + 1, [...ruta, o.nombre]);
+          };
+          for (const r of raices) bajar(r, 0, []);
+          setOpciones(salida);
+        } else setOpciones(lista);
       })
       .catch(e => setFallo(e.message));
   }, [abierto, opciones, destino]);
@@ -153,7 +187,15 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
     if (!varios) setAbierto(false);
   };
 
-  const filtradas = (opciones || []).filter(o => !q.trim() || o.nombre.toLowerCase().includes(q.trim().toLowerCase()));
+  const buscando = q.trim().toLowerCase();
+  const filtradas = (opciones || []).filter(o => !buscando || o.nombre.toLowerCase().includes(buscando) || (o.ruta || '').toLowerCase().includes(buscando));
+  const sugerir = async () => {
+    if (!filaId) return;
+    setSugeridas('cargando');
+    const r = await fetch(`/api/bd/columnas/${columna.id}/sugerir-tema`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fila_id: filaId }) });
+    const j = await r.json().catch(() => ({}));
+    setSugeridas(r.ok ? { lista: j.sugerencias || [], motivo: j.motivo } : { lista: [], motivo: j.error || 'No se ha podido sugerir.' });
+  };
 
   // ══ CREAR LO QUE AÚN NO EXISTE (2026-10-06, Eugenio) ═════════════════════
   // «Desde Proyectos, añadir al equipo una persona que aún no está en Equipo
@@ -221,17 +263,44 @@ export function CeldaRelacion({ columna, apuntados, editable, onGuardar, conImag
                   className="flex-1 min-w-0 text-xs outline-none bg-transparent" />
                 {guardando && <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-300" />}
               </label>
+              {esTema && filaId && (
+                <div className="mb-1 border-b border-slate-100 pb-1">
+                  {sugeridas === null && (
+                    <button onClick={sugerir} className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-bold text-violet-700 hover:bg-violet-50">
+                      <Sparkles className="w-3.5 h-3.5" /> Sugerir el tema más concreto
+                    </button>
+                  )}
+                  {sugeridas === 'cargando' && <p className="px-2 py-1.5 text-xs text-slate-400 inline-flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Pensando…</p>}
+                  {sugeridas && sugeridas !== 'cargando' && (
+                    <div data-sugerencias-tema>
+                      {sugeridas.lista.map((t: any) => (
+                        <button key={t.id} onClick={() => alternar(t.id)} title={t.por?.length ? `Por: ${t.por.join(', ')}` : t.origen === 'ia' ? 'Lo propone la IA de la casa' : undefined}
+                          className="w-full flex items-start gap-2 px-2 py-1.5 rounded-md text-left hover:bg-violet-50">
+                          <Sparkles className="mt-0.5 w-3.5 h-3.5 shrink-0 text-violet-500" />
+                          <span className="min-w-0">
+                            {!!t.ruta?.length && <span className="block truncate text-[10px] font-bold text-slate-400">{t.ruta.join(' › ')}</span>}
+                            <span className="block truncate text-xs font-bold text-slate-700">{t.nombre}{elegidos.includes(t.id) ? ' ✓' : ''}</span>
+                          </span>
+                        </button>
+                      ))}
+                      {!sugeridas.lista.length && <p className="px-2 py-1.5 text-[11px] text-slate-400">{sugeridas.motivo || 'Ningún tema encaja.'}</p>}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="max-h-60 overflow-y-auto">
                 {filtradas.map(o => {
                   const puesto = elegidos.includes(o.id);
                   return (
-                    <button key={o.id} onClick={() => alternar(o.id)}
+                    <button key={o.id} onClick={() => alternar(o.id)} title={o.ruta ? `${o.ruta} › ${o.nombre}` : undefined}
+                      style={o.nivel && !buscando ? { paddingLeft: 8 + Math.min(o.nivel, 6) * 14 } : undefined}
                       className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-bold text-slate-600 text-left hover:bg-slate-50">
                       <span className={cn('w-3.5 h-3.5 rounded border grid place-items-center shrink-0',
                         puesto ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300')}>
                         {puesto && <Check className="w-2.5 h-2.5" />}
                       </span>
-                      <span className="truncate">{o.nombre}</span>
+                      {!!o.nivel && !buscando && <ChevronRight className="-ml-1 w-3 h-3 shrink-0 text-slate-300" />}
+                      <span className="truncate">{buscando && o.ruta ? <><span className="font-semibold text-slate-400">{o.ruta} › </span>{o.nombre}</> : o.nombre}</span>
                     </button>
                   );
                 })}

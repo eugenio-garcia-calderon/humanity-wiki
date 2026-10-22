@@ -42,7 +42,9 @@ import { tablaVisible } from './sitios';
 import { madresValidas, PROFUNDIDAD, puedeEditarPagina, quienDe } from './permisos';
 import { TIPOS, tipar, type Tipo } from './bd/tipos';
 import { celdasDe, type Celda } from './bd/celdas';
-import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, enlacesInversos, guardarInversos, type Apuntado } from './bd/enlaces';
+import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, enlacesInversos, guardarInversos, nombresDeFilas, type Apuntado } from './bd/enlaces';
+import { columnaMadreDe, rutasDe, descendientesDe, puntuarTemas } from './bd/temas';
+import { pedirJsonLocal } from './iaLocal';
 import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
 import { sincronizarTienda } from './bd/tienda';
@@ -87,7 +89,9 @@ export type { Celda } from './bd/celdas';
 /** LA RED DE UNA PÁGINA (2026-10-21, Eugenio): con qué entradas de otras bases
  *  de datos está conectada una página, por grupos (una columna de relación = un
  *  grupo, una pestaña), con lo que hace falta para enseñarlas en galería. */
-export type EntradaRed = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null };
+export type EntradaRed = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null;
+  /** (2026-10-22) Llega por un subtema: su nombre («Fotovoltaica»). Sin valor, es de la propia página. */
+  via?: string | null };
 export type GrupoRed = { columna_id: string; nombre: string; slug: string; tabla_destino: string | null; tabla_titulo: string | null; entradas: EntradaRed[] };
 export type RedPagina = { fila_id: string; tabla_id: string; grupos: GrupoRed[] };
 
@@ -471,6 +475,31 @@ export function registerBdRoutes(app: Express, db: any) {
             apuntados,
           };
       });
+
+      // LA HERENCIA DE UNA COLUMNA «TEMA» (2026-10-22, `bd/temas.ts`). Cada
+      // tema enlazado lleva su `ruta` (de la raíz a su madre) y la celda sus
+      // `heredados`, para que filtrar por «Energía» encuentre lo que cuelga de
+      // «Fotovoltaica».
+      for (const c of columnas as any[]) {
+        const destino = c.config?.tabla_destino;
+        if (c.tipo !== 'relacion' || !c.config?.tema || !destino) continue;
+        const colMadre = await columnaMadreDe(db, destino);
+        if (!colMadre) continue;
+        const ids = preparadas.flatMap(f => (f.apuntados[c.id] || []).filter(a => a.clase === 'fila').map(a => a.id));
+        if (!ids.length) continue;
+        const rutas = await rutasDe(db, colMadre, ids);
+        for (const f of preparadas) {
+          const lista = f.apuntados[c.id] || [];
+          const heredados = new Set<string>();
+          for (const a of lista) {
+            const ruta = rutas.get(a.id) || [];
+            (a as any).ruta = ruta;
+            for (const e of ruta) heredados.add(e.id);
+          }
+          const celda: any = f.celdas[c.id];
+          if (celda?.estado === 'ok' && heredados.size) celda.heredados = [...heredados];
+        }
+      }
 
       // LO QUE SE VE DEL ELEMENTO ENLAZADO (2026-10-02, Eugenio: «que te
       // permita seleccionar las variables que quieres mostrar como enlazadas,
@@ -885,6 +914,8 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /** Ver `asegurarArbol` más abajo, junto a los subelementos. */
+  let asegurarArbol: (req: Request, tablaId: string) => Promise<void> = async () => {};
   const crearColumnaRuta = async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
@@ -934,6 +965,8 @@ export function registerBdRoutes(app: Express, db: any) {
       let reciproca_id: string | null = null;
       let aviso: string | null = null;
       const destino = d.config?.tabla_destino;
+      // Un «Tema» apunta a un árbol: la otra tabla necesita sus subelementos.
+      if (tipo === 'relacion' && d.config?.tema && destino) await asegurarArbol(req, destino);
       if (tipo === 'relacion' && d.config?.reciproca && destino && destino !== req.params.id) {
         const otra = await puedeConTabla(req, destino, true);
         if ('error' in otra) aviso = 'El enlace se ve sólo en esta base de datos: no puedes editar la otra.';
@@ -1073,7 +1106,16 @@ export function registerBdRoutes(app: Express, db: any) {
       res.json({ ok: true, formulasArregladas });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   };
-  app.put('/api/bd/columnas/:id', editarColumnaRuta);
+  app.put('/api/bd/columnas/:id', async (req: Request, res: Response) => {
+    // Al convertir un enlace en «Tema», su tabla de destino gana subelementos.
+    if (req.user && req.body?.config?.tema) {
+      try {
+        const c = (await db.execute(sql`SELECT tipo, config FROM bd_columnas WHERE id = ${req.params.id} AND archived_at IS NULL`)).rows[0] as any;
+        if (c?.tipo === 'relacion' && c.config?.tabla_destino) await asegurarArbol(req, c.config.tabla_destino);
+      } catch (e: any) { console.error('[bd] tema:', e?.message || e); }
+    }
+    return editarColumnaRuta(req, res);
+  });
   bdInterno.editarColumna = (req, columnaId, cuerpo) => internamente(editarColumnaRuta, req, { id: columnaId }, cuerpo);
 
   /** Quitar una columna. Se archiva, no se borra: sus valores siguen en el
@@ -1330,18 +1372,58 @@ export function registerBdRoutes(app: Express, db: any) {
     if (!fila) return null;
     if ('error' in (await puedeConTabla(quien, fila.tabla_id, false))) return null;
     const cols = (await columnasDe(fila.tabla_id)).filter((c: any) => c.tipo === 'relacion' && c.config?.visibilidad !== 'nunca');
-    const enl: Record<string, any[]> = cols.length ? ((await enlacesDe(db, [fila.id]))[fila.id] || {}) : {};
+
+    // LA RED DE UN TEMA SUMA LA DE SUS SUBTEMAS (2026-10-22, `bd/temas.ts`).
+    // Si la tabla anida (subelementos), lo conectado a «Fotovoltaica» sale
+    // también en «Energía solar» y en «Energía», marcado con `via`. La madre y
+    // los hijos directos no se suman: son el propio árbol, no lo que cuelga de él.
+    const colMadre = cols.find((c: any) => c.config?.rol === 'madre')?.id || null;
+    const desc = colMadre ? await descendientesDe(db, colMadre, fila.id) : [];
+    const todas: string[] = [fila.id, ...desc.map(d => d.id)];
+    const nombreSub = desc.length ? await nombresDeFilas(db, desc.map(d => d.id)) : new Map<string, string>();
+
+    const enl: Record<string, Record<string, any[]>> = cols.length ? await enlacesDe(db, todas) : {};
     for (const c of cols) {
       if (!c.config?.inversa_de) continue;
-      const inv = await enlacesInversos(db, c.config.inversa_de, [fila.id]);
-      if (inv[fila.id]) enl[c.id] = inv[fila.id];
+      const inv = await enlacesInversos(db, c.config.inversa_de, todas);
+      for (const id of todas) { if (enl[id]) delete enl[id][c.id]; if (inv[id]) (enl[id] ||= {})[c.id] = inv[id]; }
     }
+
+    // Los «Tema» de OTRAS tablas que apuntan aquí sin cara de vuelta: un
+    // proyecto con «Tema: Fotovoltaica» se ve en el tema aunque nadie creara
+    // la relación doble.
+    const entrantes = (await db.execute(sql`
+      SELECT c.id, c.nombre, c.tabla_id, t.titulo FROM bd_columnas c JOIN bd_tablas t ON t.id = c.tabla_id
+      WHERE c.tipo = 'relacion' AND c.archived_at IS NULL AND t.archived_at IS NULL AND t.deleted_at IS NULL
+        AND c.config->>'tema' = 'true' AND c.config->>'tabla_destino' = ${fila.tabla_id}
+        AND c.config->>'reciproca_id' IS NULL AND c.tabla_id <> ${fila.tabla_id}
+      ORDER BY c.created_at
+    `)).rows as any[];
+
+    type Fuente = { id: string; nombre: string; destino: string | null; propias: boolean; lista: (fid: string) => any[] };
+    const fuentes: Fuente[] = cols.map((c: any) => ({
+      id: c.id, nombre: c.nombre, destino: c.config?.tabla_destino || null,
+      propias: c.config?.rol === 'madre' || c.config?.rol === 'hijos',
+      lista: (fid: string) => enl[fid]?.[c.id] || [],
+    }));
+    for (const e of entrantes) {
+      const inv = await enlacesInversos(db, e.id, todas);
+      fuentes.push({ id: e.id, nombre: e.titulo || e.nombre, destino: e.tabla_id, propias: false, lista: (fid: string) => inv[fid] || [] });
+    }
+
     const grupos: GrupoRed[] = [];
     const usados = new Set<string>();
-    for (const c of cols) {
-      const lista = (enl[c.id] || []).filter((x: any) => x.existe !== false);
+    for (const c of fuentes) {
+      const desde = c.propias ? [fila.id] : todas;
+      const vistosId = new Set<string>();
+      const lista: Array<any> = [];
+      for (const fid of desde) for (const a of c.lista(fid)) {
+        if (a.existe === false || vistosId.has(a.id) || todas.includes(a.id) && !c.propias) continue;
+        vistosId.add(a.id);
+        lista.push({ ...a, via: fid === fila.id ? null : (nombreSub.get(fid) || null) });
+      }
       if (!lista.length) continue;
-      const destino = c.config?.tabla_destino || null;
+      const destino = c.destino;
       if (destino && 'error' in (await puedeConTabla(quien, destino, false))) continue;
       const filas = (await db.execute(sql`
         SELECT id, pagina_id, COALESCE(oculta, false) AS oculta FROM bd_filas
@@ -1363,7 +1445,7 @@ export function registerBdRoutes(app: Express, db: any) {
         let s = slugDe(titulo) || String(f.id).toLowerCase();
         while (vistos.has(s)) s += '-2';
         vistos.add(s);
-        entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null });
+        entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null, via: a.via || null });
       }
       if (entradas.length) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas });
     }
@@ -1423,27 +1505,89 @@ export function registerBdRoutes(app: Express, db: any) {
     subelementos: { ida: 'Elemento madre', vuelta: 'Subelementos', rolIda: 'madre', rolVuelta: 'hijos', variosIda: false },
     dependencias: { ida: 'Bloqueada por', vuelta: 'Bloquea', rolIda: 'bloqueada_por', rolVuelta: 'bloquea', variosIda: true },
   };
+  /** Pone una función en una tabla (sin mirar permisos: eso lo hace quien llama). */
+  const activarFuncion = async (tablaId: string, nombre: string): Promise<{ ida: string; vuelta: string | null; ya?: boolean }> => {
+    const f = FUNCIONES[nombre];
+    const cols = await columnasDe(tablaId);
+    const ya = cols.find((c: any) => c.config?.rol === f.rolIda);
+    if (ya) return { ida: ya.id, vuelta: ya.config?.reciproca_id || null, ya: true };
+    const libre = (base: string) => { let n = base; for (let i = 2; cols.some((c: any) => String(c.nombre).toLowerCase() === n.toLowerCase()); i++) n = `${base} ${i}`; return n; };
+    const ida = nid('BDC'), vuelta = nid('BDC');
+    const ultima = Number(((await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_columnas WHERE tabla_id = ${tablaId}`)).rows[0] as any).m);
+    await db.execute(sql`
+      INSERT INTO bd_columnas (id, tabla_id, nombre, tipo, opciones, config, orden) VALUES
+        (${ida}, ${tablaId}, ${libre(f.ida)}, 'relacion', '[]'::jsonb,
+         ${JSON.stringify({ tabla_destino: tablaId, varios: f.variosIda, rol: f.rolIda, reciproca_id: vuelta })}::jsonb, ${ultima + 1}),
+        (${vuelta}, ${tablaId}, ${libre(f.vuelta)}, 'relacion', '[]'::jsonb,
+         ${JSON.stringify({ tabla_destino: tablaId, varios: true, rol: f.rolVuelta, inversa_de: ida })}::jsonb, ${ultima + 2})
+    `);
+    return { ida, vuelta };
+  };
+  /** La tabla de un «Tema» tiene que poder anidar. Si quien crea el tema no
+   *  puede editarla, se queda como está: el tema funciona igual, sin herencia. */
+  asegurarArbol = async (req: Request, tablaId: string) => {
+    if ('error' in (await puedeConTabla(req, tablaId, true))) return;
+    await activarFuncion(tablaId, 'subelementos');
+  };
   app.post('/api/bd/tablas/:id/funciones', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
       const permiso = await puedeConTabla(req, req.params.id, true);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
-      const f = FUNCIONES[String(req.body?.funcion)];
-      if (!f) return res.status(400).json({ error: 'Las funciones que hay: subelementos, dependencias.' });
-      const cols = await columnasDe(req.params.id);
-      const ya = cols.find((c: any) => c.config?.rol === f.rolIda);
-      if (ya) return res.json({ ida: ya.id, vuelta: ya.config?.reciproca_id || null, ya: true });
-      const libre = (base: string) => { let n = base; for (let i = 2; cols.some((c: any) => String(c.nombre).toLowerCase() === n.toLowerCase()); i++) n = `${base} ${i}`; return n; };
-      const ida = nid('BDC'), vuelta = nid('BDC');
-      const ultima = Number(((await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_columnas WHERE tabla_id = ${req.params.id}`)).rows[0] as any).m);
-      await db.execute(sql`
-        INSERT INTO bd_columnas (id, tabla_id, nombre, tipo, opciones, config, orden) VALUES
-          (${ida}, ${req.params.id}, ${libre(f.ida)}, 'relacion', '[]'::jsonb,
-           ${JSON.stringify({ tabla_destino: req.params.id, varios: f.variosIda, rol: f.rolIda, reciproca_id: vuelta })}::jsonb, ${ultima + 1}),
-          (${vuelta}, ${req.params.id}, ${libre(f.vuelta)}, 'relacion', '[]'::jsonb,
-           ${JSON.stringify({ tabla_destino: req.params.id, varios: true, rol: f.rolVuelta, inversa_de: ida })}::jsonb, ${ultima + 2})
-      `);
-      res.json({ ida, vuelta });
+      if (!FUNCIONES[String(req.body?.funcion)]) return res.status(400).json({ error: 'Las funciones que hay: subelementos, dependencias.' });
+      res.json(await activarFuncion(req.params.id, String(req.body.funcion)));
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ── SUGERIR EL TEMA MÁS CONCRETO (2026-10-22, fase 4 del árbol de temas) ──
+  // Primero por palabras (`puntuarTemas`): instantáneo y explicable. Si nada
+  // encaja, la IA de la casa elige entre la lista (sin coste, en el servidor).
+  // Solo sugiere: enlazar lo decide la persona con un clic.
+  app.post('/api/bd/columnas/:id/sugerir-tema', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const col = (await db.execute(sql`SELECT * FROM bd_columnas WHERE id = ${req.params.id} AND archived_at IS NULL`)).rows[0] as any;
+      if (!col || col.tipo !== 'relacion' || !col.config?.tabla_destino) return res.status(404).json({ error: 'Esa columna no apunta a un árbol de temas.' });
+      const permiso = await puedeConTabla(req, col.tabla_id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const destino = String(col.config.tabla_destino);
+      if ('error' in (await puedeConTabla(req, destino, false))) return res.status(403).json({ error: 'No puedes leer la base de datos de los temas.' });
+
+      // Lo que se sabe de la entrada: lo que llegue escrito y, si se dice cuál, su página y sus textos.
+      let texto = String(req.body?.texto || '').slice(0, 4000);
+      const filaId = req.body?.fila_id ? String(req.body.fila_id) : null;
+      if (filaId) {
+        const f = (await db.execute(sql`SELECT id, valores, pagina_id FROM bd_filas WHERE id = ${filaId} AND tabla_id = ${col.tabla_id} AND deleted_at IS NULL`)).rows[0] as any;
+        if (f) {
+          const k = f.pagina_id ? (await tarjetasDe([f.pagina_id]))[f.pagina_id] : null;
+          const textos = Object.values(f.valores || {}).filter(v => typeof v === 'string') as string[];
+          texto = [k?.titulo, k?.descripcion, k?.resumen, ...textos, texto].filter(Boolean).join(' . ').slice(0, 4000);
+        }
+      }
+      if (!texto.trim()) return res.json({ sugerencias: [], motivo: 'La entrada aún no tiene texto del que deducir su tema.' });
+
+      const filasT = (await db.execute(sql`SELECT id FROM bd_filas WHERE tabla_id = ${destino} AND deleted_at IS NULL AND COALESCE(oculta, false) = false LIMIT 3000`)).rows as any[];
+      const ids = filasT.map(x => x.id);
+      const nombres = await nombresDeFilas(db, ids);
+      const colMadre = await columnaMadreDe(db, destino);
+      const rutas = colMadre ? await rutasDe(db, colMadre, ids) : new Map();
+      const temas = ids.map(id => ({ id, nombre: nombres.get(id) || '', ruta: (rutas.get(id) || []).map((e: any) => e.etiqueta) })).filter(t => t.nombre);
+
+      let sugerencias: any[] = puntuarTemas(texto, temas).slice(0, 3).map(c => ({ ...c, origen: 'palabras' }));
+      if (!sugerencias.length && temas.length) {
+        const lista = temas.slice(0, 80);
+        try {
+          const { json } = await pedirJsonLocal({
+            sistema: 'Eres un clasificador. Elige el número del tema MÁS CONCRETO que mejor describe el texto. Responde solo JSON {"n": número}; 0 si ninguno encaja.',
+            usuario: `Temas:\n${lista.map((t, i) => `${i + 1}. ${[...t.ruta, t.nombre].join(' > ')}`).join('\n')}\n\nTexto: ${texto.slice(0, 1200)}`,
+            esquema: { type: 'object', properties: { n: { type: 'integer' } }, required: ['n'] },
+            maxTokens: 12,
+          });
+          const elegido = lista[Number(json?.n) - 1];
+          if (elegido) sugerencias = [{ ...elegido, profundidad: elegido.ruta.length, puntos: 0, por: [], origen: 'ia' }];
+        } catch { /* sin IA: se queda en «ninguno encaja» */ }
+      }
+      res.json({ sugerencias, motivo: sugerencias.length ? null : 'Ningún tema encaja con lo que dice la entrada.' });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

@@ -9699,3 +9699,11 @@ Eugenio: «muchas veces se queda el icono de cargando durante mucho tiempo en hu
 ## 2026-10-22 · «Pública» abre los ajustes de publicación (Programador 8)
 Eugenio: «al pinchar en Pública se deja de publicar la página y es un desastre a nivel de experiencia de usuario».
 - En el editor, el botón «Pública» abre el diálogo de Compartir (dominio, miembros, Google, «Dejar de publicar»). Despublicar ya solo se hace allí, a sabiendas. «Privada» sigue publicando de un clic.
+
+## 2026-10-22 · El árbol de temas: columna «Tema», herencia, red que suma subtemas y sugerencia (Programador 8)
+Eugenio: «Un tipo de columna Tema que apunte a ese árbol y calcule la herencia. Que la red de cada tema sume su subárbol. Migrar vuestras tablas sin perder relaciones. Sugerencia automática del tema más concreto con IA.»
+- Un tema es una fila de una tabla con subelementos (madre ↔ hijos); no hay tabla nueva. Una columna «Tema» es una relación con `config.tema = true` (tipo «Tema» en el editor de propiedades o la casilla «Es un tema»). Al crearla, la tabla de destino gana subelementos si se puede editar.
+- `server/bd/temas.ts`: `columnaMadreDe`, `rutasDe` (de la raíz a la madre, una consulta recursiva para todas las filas), `descendientesDe`, `puntuarTemas`.
+- Al leer la tabla, cada tema enlazado lleva `ruta` y la celda `heredados`; `vistas.ts` cuenta los heredados: «Tema contiene Energía» encuentra lo de «Fotovoltaica». La ficha enseña «Energía solar › Fotovoltaica» (la ruta entera al pasar por encima).
+- `redDePagina`: en una tabla que anida, la red de un tema suma lo conectado a todos sus subtemas, con `via` («vía Fotovoltaica» en la tarjeta). También salen los «Tema» de otras tablas que apuntan aquí sin cara de vuelta. La madre y los hijos directos no se suman.
+- Elegir un tema: el selector sale en árbol (sangrado, la búsqueda mira la ruta) y con «Sugerir el tema más concreto» → `POST /api/bd/columnas/:id/sugerir-tema` (palabras de la entrada contra el tema y su ruta, gana el más profundo; si nada encaja, la IA de la casa elige de la lista). Solo sugiere.

@@ -33,8 +33,10 @@ export { formatear, textoComunidad };
 
 
 export default function CeldaTabla({
-  celda, columna, apuntados, archivos, editable, onGuardar, enFicha = false,
+  celda, columna, apuntados, archivos, editable, onGuardar, enFicha = false, filaId,
 }: {
+  /** La fila (para sugerir su tema en una columna «Tema»). */
+  filaId?: string;
   celda: Celda;
   columna: Columna;
   apuntados?: any[];
@@ -142,7 +144,7 @@ export default function CeldaTabla({
   //    selector para elegirlas (2026-10-01). Ver `Relacion.tsx`.
   if (columna.tipo === 'relacion') {
     return (
-      <CeldaRelacion columna={columna} apuntados={apuntados || []} editable={puedeEditar} conImagen={enFicha}
+      <CeldaRelacion columna={columna} apuntados={apuntados || []} editable={puedeEditar} conImagen={enFicha} filaId={filaId}
         onGuardar={ids => guardar(ids)} />
     );
   }
