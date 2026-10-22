@@ -119,6 +119,21 @@ export async function guardarEnlaces(
 
 export type Apuntado = { id: string; etiqueta: string; extra: any; clase: Clase; existe: boolean };
 
+/** El nombre de unas filas, con la misma regla que las fichas de una relación
+ *  (título de su página o su primera columna de texto). Ver `bd/temas.ts`. */
+export async function nombresDeFilas(db: any, ids: string[]): Promise<Map<string, string>> {
+  const salida = new Map<string, string>();
+  const unicos = [...new Set(ids)].filter(Boolean);
+  if (!unicos.length) return salida;
+  const f = FUENTES.fila;
+  const r = await db.execute(sql`
+    SELECT id, ${sql.raw(f.etiqueta)} AS etiqueta FROM bd_filas
+    WHERE id = ANY(string_to_array(${unicos.join(',')}, ',')) AND ${sql.raw(f.filtro)}
+  `);
+  for (const x of r.rows as any[]) salida.set(x.id, String(x.etiqueta || ''));
+  return salida;
+}
+
 /**
  * Los enlaces de un conjunto de filas, ya con el nombre de lo apuntado.
  *

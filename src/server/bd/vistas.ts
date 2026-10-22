@@ -87,7 +87,9 @@ export function pasa(celdas: Record<string, Celda>, f: Filtro): boolean {
   // relaciones). «Etiquetas contiene Urgente» es «Urgente está entre ellas»,
   // no «el texto de todas juntas contiene esas letras».
   if (c && c.estado === 'ok' && Array.isArray(c.valor) && objetivo !== undefined && objetivo !== null && objetivo !== '') {
-    const lista = c.valor.map(x => String(x).toLowerCase());
+    // Una columna «Tema» lleva también sus temas de arriba (`heredados`, ver
+    // `bd/temas.ts`): «Tema contiene Energía» encuentra lo de «Fotovoltaica».
+    const lista = [...c.valor, ...(((c as any).heredados as string[] | undefined) || [])].map(x => String(x).toLowerCase());
     const buscado = String(objetivo).toLowerCase();
     if (f.operador === 'contiene' || f.operador === 'es') return lista.includes(buscado);
     if (f.operador === 'no_contiene' || f.operador === 'no_es') return !lista.includes(buscado);

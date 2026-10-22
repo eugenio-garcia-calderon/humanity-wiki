@@ -581,7 +581,7 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
                         onDragStart={e => { e.preventDefault(); e.stopPropagation(); }}>
                         {vacia && <span className="shrink-0 text-[10px] font-bold text-slate-400">{c.nombre}</span>}
                         <div className={cn('min-w-0 max-w-full', esBarra(c) && !vacia && 'w-full')}>
-                          <CeldaTabla celda={celda} columna={c} apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
+                          <CeldaTabla celda={celda} columna={c} apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]} filaId={f.id}
                             editable onGuardar={v => onGuardarCelda(f.id, c.id, v)} />
                         </div>
                       </div>

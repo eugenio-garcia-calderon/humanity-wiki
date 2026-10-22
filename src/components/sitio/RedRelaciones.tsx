@@ -24,7 +24,9 @@ import { miniatura } from '../../utils/miniatura';
 // No es el menú de arriba de la web (ése es del sitio): es la ramificación de
 // ESTA página.
 
-type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null };
+type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null;
+  /** Llega por un subtema (`bd/temas.ts`): «vía Fotovoltaica». */
+  via?: string | null };
 type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: string | null; entradas: Entrada[] };
 
 const MAX_EN_TODO = 8;
@@ -180,7 +182,8 @@ function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande
             ? <span className="text-5xl">{x.icono}</span>
             : <span className={cn('grid h-full w-full place-items-center text-5xl font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase() || <FileText className="h-8 w-8" />}</span>}
       </div>
-      <p className={cn('mt-2.5 font-bold leading-snug text-slate-900 line-clamp-3 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
+      {x.via && <p className="mt-2 truncate text-[11px] font-bold uppercase tracking-wide text-slate-400" title={`Conectado a través de «${x.via}»`}>vía {x.via}</p>}
+      <p className={cn('font-bold leading-snug text-slate-900 line-clamp-3 group-hover:underline', x.via ? 'mt-0.5' : 'mt-2.5', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
       {texto && <p className={cn('mt-1 text-slate-500 leading-snug', grande ? 'line-clamp-3 text-sm' : 'line-clamp-2 text-[13px]')}>{texto}</p>}
     </Link>
   );

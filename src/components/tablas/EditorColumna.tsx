@@ -14,7 +14,7 @@ import { cn } from '../../utils/cn';
 // pregunta que se hace el usuario —qué quiero meter aquí— tiene cuatro
 // respuestas en vez de veintiuna.
 
-export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; modo?: string; nombre?: string; criterio?: string; soloCompradores?: boolean }> }> = [
+export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: string; ayuda?: string; rol?: string; modo?: string; nombre?: string; criterio?: string; soloCompradores?: boolean; tema?: boolean }> }> = [
   {
     grupo: 'Texto y números',
     tipos: [
@@ -51,6 +51,8 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
       { id: 'proyecto', label: 'Proyecto' },
       { id: 'publicacion', label: 'Publicación' },
       { id: 'relacion', label: 'Otra tabla', ayuda: 'Enlaza con otra base de datos' },
+      // EL TEMA (2026-10-22): un enlace a un árbol de temas, con herencia. Ver `server/bd/temas.ts`.
+      { id: 'relacion', tema: true, label: 'Tema', ayuda: 'Un tema de un árbol: aparece también en sus temas de arriba' },
     ],
   },
   {
@@ -180,14 +182,14 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   const [buscarTipo, setBuscarTipo] = useState('');
   /** La rejilla de tipos: abierta al crear, plegada en cuanto se elige uno (como en Notion). */
   const [tiposAbiertos, setTiposAbiertos] = useState(!columna);
-  type TipoElegible = { id: string; label: string; rol?: string; modo?: string; nombre?: string; criterio?: string; soloCompradores?: boolean };
+  type TipoElegible = { id: string; label: string; rol?: string; modo?: string; nombre?: string; criterio?: string; soloCompradores?: boolean; tema?: boolean };
   const elegirTipo = (t: TipoElegible) => {
     setTipo(t.id);
     setTiposAbiertos(false);
     setConfig((c: any) => {
-      const { rol: _fuera, modo: _modo, criterio: _criterio, solo_compradores: _solo, ...resto } = c || {};
+      const { rol: _fuera, modo: _modo, criterio: _criterio, solo_compradores: _solo, tema: _tema, ...resto } = c || {};
       return {
-        ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}),
+        ...resto, ...(t.rol ? { rol: t.rol } : {}), ...(t.modo ? { modo: t.modo } : {}), ...(t.tema ? { tema: true } : {}),
         ...(t.criterio ? { criterio: t.criterio, solo_compradores: !!t.soloCompradores } : {}),
       };
     });
@@ -331,7 +333,7 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-black uppercase tracking-wide text-slate-500">Tipo</span>
                 {(() => {
-                  const actual = GRUPOS.flatMap(g => g.tipos).find(t => t.id === tipo && (config.rol || undefined) === t.rol && (t.id !== 'comunidad' || config.criterio === t.criterio));
+                  const actual = GRUPOS.flatMap(g => g.tipos).find((t: TipoElegible) => t.id === tipo && (config.rol || undefined) === t.rol && (t.id !== 'comunidad' || config.criterio === t.criterio) && (t.id !== 'relacion' || !!t.tema === !!config.tema));
                   return actual ? <span className="text-[11px] font-bold text-slate-500 truncate">Elegido: {actual.label}{actual.ayuda ? ` · ${actual.ayuda}` : ''}</span> : null;
                 })()}
               </div>
@@ -491,6 +493,17 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
               <input type="checkbox" checked={!!config.varios}
                 onChange={e => setConfig((c: any) => ({ ...c, varios: e.target.checked }))} />
               <span className="text-xs font-bold text-slate-600">Admite varios</span>
+            </label>
+          )}
+          {/* ES UN TEMA (2026-10-22): lo enlazado hereda sus temas de arriba. */}
+          {tipo === 'relacion' && !config.rol && (
+            <label className={cn('flex items-start gap-2', soloEnlace && 'order-4')}>
+              <input type="checkbox" className="mt-0.5" checked={!!config.tema}
+                onChange={e => setConfig((c: any) => ({ ...c, tema: e.target.checked || undefined }))} />
+              <span className="text-xs font-bold text-slate-600">
+                Es un tema (árbol de temas)
+                <span className="block text-[11px] font-medium text-slate-400">Una entrada en «Fotovoltaica» aparece también en «Energía solar» y en «Energía». La otra base de datos pasa a admitir subtemas.</span>
+              </span>
             </label>
           )}
           {/* EN LAS DOS (2026-10-05): la otra base de datos enseña el enlace

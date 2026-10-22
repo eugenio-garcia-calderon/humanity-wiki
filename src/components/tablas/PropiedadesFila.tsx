@@ -330,7 +330,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha =
           <div className={cn('flex-1 min-w-0', enRejilla && '-mx-2 text-center [&_.text-right]:text-center [&_.flex-wrap]:justify-center')}
             style={enRejilla && ESCALA_VALOR[talla] !== 1 ? { zoom: ESCALA_VALOR[talla] } as React.CSSProperties : undefined}>
             <CeldaTabla enFicha celda={datos.fila.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
-              apuntados={datos.fila.apuntados?.[c.id]} archivos={datos.fila.archivos?.[c.id]}
+              apuntados={datos.fila.apuntados?.[c.id]} archivos={datos.fila.archivos?.[c.id]} filaId={datos.fila.id}
               editable={editable} onGuardar={val => guardar(c.id, val)} />
           </div>
         </div>
