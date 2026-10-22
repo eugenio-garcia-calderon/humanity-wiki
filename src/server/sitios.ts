@@ -922,7 +922,8 @@ export function registrarSitios(app: Express, db: any) {
       const cfg = (publica && !publica.muro ? publica.config : null) || w.config;
       const tituloBase = String(m.titulo || w.title || '').trim() || 'Sin título';
       // En una pestaña de la red, la pestaña va delante: «Líneas de desarrollo · Movilidad».
-      const titulo = w.seccion?.nombre ? `${w.seccion.nombre} · ${tituloBase}` : w.contexto ? `${tituloBase} · ${w.contexto.madre.titulo}` : tituloBase;
+      // Con los títulos de verdad, no con el de una ficha de producto («datos, precio y opiniones»).
+      const titulo = w.seccion?.nombre ? `${w.seccion.nombre} · ${w.title || tituloBase}` : w.contexto ? `${w.title || tituloBase} · ${w.contexto.madre.titulo}` : tituloBase;
       const desc = (typeof m.descripcion === 'string' && m.descripcion.trim()) || descripcionDe(cfg);
       const img = imagenDe(cfg);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
