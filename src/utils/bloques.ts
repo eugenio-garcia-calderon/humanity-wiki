@@ -98,6 +98,8 @@ export const TIPOS_BLOQUE_DATOS = [
   'secciones',     // las páginas del sitio con catálogo, con imagen y recuento (W2, 2026-10-18)
   'mapaMundo',     // el mapa de indicadores del mundo, en un marco (Humanidad Wiki, 2026-10-18)
   'arbolConocimiento', // el árbol del conocimiento de izquierda a derecha (2026-10-21)
+  'presentacion',  // una presentación en formato web, por secciones (2026-10-22)
+  'infografiaRed', // la infografía de cómo se conecta el conocimiento (2026-10-22)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 

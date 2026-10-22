@@ -406,3 +406,26 @@ export async function cuerpoEnHtml(db: any, pagina: any, enlacePagina: (id: stri
   ctx.enlaceRuta = enlaceRuta;
   return bloquesEnHtml(bloques, ctx);
 }
+
+// ── LA PRESENTACIÓN Y LA INFOGRAFÍA (2026-10-22) ────────────────────────────
+// Todo su texto vive en `datos`: aquí se escribe como títulos, párrafos e
+// imágenes, para que la página se lea y se indexe sin JavaScript.
+const parrafosHtml = (t: unknown, ctx: ContextoHtml) => String(t || '').split(/\n\s*\n/).filter(Boolean).map(p => `<p>${enLinea(p, ctx)}</p>`).join('');
+const itemsHtml = (items: unknown, ctx: ContextoHtml) => {
+  const lista = Array.isArray(items) ? items.filter((x: any) => x && typeof x === 'object') : [];
+  if (!lista.length) return '';
+  return `<ul>${lista.map((it: any) => `<li>${[it.fecha, it.valor].filter(Boolean).map(esc).join(' · ')}${it.fecha || it.valor ? ' — ' : ''}${it.titulo ? `<strong>${esc(it.titulo)}</strong>. ` : ''}${enLinea(String(it.texto || ''), ctx)}</li>`).join('')}</ul>`;
+};
+registrarHtml('presentacion', (b, ctx) => {
+  const secciones = Array.isArray(b.datos?.secciones) ? b.datos.secciones : [];
+  return secciones.filter((s: any) => s && typeof s === 'object').map((s: any) => {
+    const t = s.titulo ? `<h2${s.id ? ` id="${esc(s.id)}"` : ''}>${esc(String(s.titulo).replace(/\*\*/g, ''))}</h2>` : '';
+    const img = s.imagen ? `<img src="${esc(s.imagen)}" alt="${esc(s.pie || String(s.titulo || '').replace(/\*\*/g, ''))}" loading="lazy">` : '';
+    const bots = (Array.isArray(s.botones) ? s.botones : []).map((x: any) => { const h = x?.url ? hrefSeguro(x.url) : null; return h && x.texto ? `<p>${enlace(h, esc(x.texto))}</p>` : ''; }).join('');
+    return `<section>${s.antetitulo ? `<p>${esc(s.antetitulo)}</p>` : ''}${t}${parrafosHtml(s.texto, ctx)}${itemsHtml(s.items, ctx)}${img}${bots}</section>`;
+  }).join('');
+});
+registrarHtml('infografiaRed', (b, ctx) => {
+  const d = b.datos || {};
+  return `<section>${d.titulo ? `<h2>${esc(d.titulo)}</h2>` : ''}${parrafosHtml(d.texto, ctx)}${itemsHtml(d.pasos, ctx)}</section>`;
+});

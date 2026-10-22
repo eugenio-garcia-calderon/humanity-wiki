@@ -9679,3 +9679,11 @@ Eugenio: «la mitad de las veces se abre el pop-up central pero no carga el cont
 - La ventana de la página publicada pide la página con tope de 8 s y un reintento; si aun así falla, dice «No se ha podido cargar · Volver a intentarlo» en vez de «no está publicada».
 - El mapa a pantalla completa ya no lleva `loading="lazy"` (dentro de una ventana a veces no arrancaba) y usa el mismo marco con reintento.
 - Probado en Chrome: 8 aperturas seguidas cargan; con la primera carga colgada a propósito, a los 3 s sale «Cargando…» y luego se recarga sola.
+
+## 2026-10-22 · Bloques «Presentación web» e «Infografía de la red» (Programador 8)
+Eugenio: «una presentación de la plataforma en formato web, con capturas reales… y una infografía de cómo funciona la tecnología matemática de las bases de datos conectadas, con lenguaje divulgativo y diseños esquemáticos».
+- `bloquesDatos/presentacion/`: una página de presentación por secciones (portada, texto, línea del tiempo, tarjetas, captura en ventana de navegador, infografía, cifras, llamada a participar). Todo el texto vive en `datos.secciones` y se edita desde el propio bloque (secciones plegables, reordenar, añadir). `**así**` resalta en amarillo; aparecen al bajar (sin animación con «menos movimiento»).
+- `bloquesDatos/infografiaRed/`: seis pasos con dibujos SVG (desperdigado → ficha → hilos → árbol de temas y herencia → red 10/100/1.000 → decisiones). También como sección de la presentación.
+- `htmlBloques.ts` escribe los dos en HTML (títulos, párrafos, listas, imágenes) para buscadores.
+- OJO: en la página publicada `.sitio-lectura` oscurece `text-slate-300/400`; sobre fondo oscuro se usa `text-[#cfd6e2]`.
+- Contenido puesto en la página «Light for Humanity» (KWMVJVP5TYFB) con 6 capturas reales de luzhumanidad.com en `/uploads/2026/10/presentacion-*.webp`.
