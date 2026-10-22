@@ -34,6 +34,56 @@ jobs:
             echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # ══ COMPILAR AQUÍ Y NO EN EL SERVIDOR (2026-10-22) ═══════════════════
+      # El servidor tiene 2 núcleos y sirve la web mientras se despliega:
+      # compilar allí Vite y esbuild lo dejaba minutos a tope y las páginas se
+      # quedaban «cargando» (Eugenio). Se compila en la máquina de GitHub, se
+      # sube `dist/` y el servidor arma la imagen con `Dockerfile.ci`, que solo
+      # copia. Si algo de esto falla, el servidor compila como antes (plan B).
+      - name: Descargar el código
+        if: steps.check.outputs.configured == 'true'
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        if: steps.check.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Llave SSH y token público de Mapbox
+        if: steps.check.outputs.configured == 'true'
+        continue-on-error: true
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/despliegue && chmod 600 ~/.ssh/despliegue
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # El token de Mapbox va dentro del JavaScript (es público), pero su
+          # sitio de verdad es el `.env.production` del servidor: se lee de allí.
+          T=$(ssh -i ~/.ssh/despliegue "$USER@$HOST" "grep '^VITE_MAPBOX_TOKEN=' /opt/humanity-wiki/.env.production | cut -d= -f2-" || true)
+          if [ -n "$T" ]; then echo "::add-mask::$T"; echo "VITE_MAPBOX_TOKEN=$T" >> "$GITHUB_ENV"; fi
+
+      - name: Compilar
+        if: steps.check.outputs.configured == 'true'
+        continue-on-error: true
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build
+          mkdir -p paquete && cp -r dist paquete/ && echo "${{ github.sha }}" > paquete/COMMIT
+          tar czf compilado.tgz -C paquete .
+
+      - name: Subir lo compilado
+        if: steps.check.outputs.configured == 'true'
+        continue-on-error: true
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+        run: scp -i ~/.ssh/despliegue compilado.tgz "$USER@$HOST:/opt/humanity-wiki/compilado.tgz"
+
       - name: Desplegar por SSH
         if: steps.check.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1.2.0
@@ -45,7 +95,17 @@ jobs:
           script: |
             cd /opt/humanity-wiki
             git fetch origin main
-            git reset --hard origin/main
+            # El commit de ESTE despliegue (no «lo último de main»): así lo
+            # compilado en GitHub y el código del servidor son lo mismo.
+            git reset --hard ${{ github.sha }}
+            rm -rf compilado && mkdir -p compilado
+            if [ -f compilado.tgz ]; then tar xzf compilado.tgz -C compilado && rm -f compilado.tgz; fi
+            if [ "$(cat compilado/COMMIT 2>/dev/null)" = "$(git rev-parse HEAD)" ] && [ -f compilado/dist/server.cjs ]; then
+              export APP_DOCKERFILE=Dockerfile.ci
+              echo "Imagen con lo compilado en GitHub."
+            else
+              echo "Sin lo compilado de GitHub: se compila en el servidor (plan B)."
+            fi
             # La clave de Together (modelos abiertos gratis) viaja como secreto
             # de GitHub y se escribe en el .env.production del servidor en cada
             # despliegue: así rotar la clave es cambiar el secreto y desplegar,
@@ -236,7 +296,13 @@ jobs:
             # porque la cabecera no cambió; podría haber sido el bloque de los
             # subdominios, y entonces habría parecido que el certificado
             # fallaba.
-            docker compose -f docker-compose.prod.yml --env-file .env.production up -d --force-recreate caddy
+            # (2026-10-22) Y SOLO SI EL CADDYFILE HA CAMBIADO: recrearlo corta
+            # todas las conexiones abiertas de todo el mundo en cada despliegue.
+            HUELLA=$(sha256sum deploy/Caddyfile | cut -d' ' -f1)
+            if [ "$HUELLA" != "$(cat .caddyfile-desplegado 2>/dev/null)" ]; then
+              docker compose -f docker-compose.prod.yml --env-file .env.production up -d --force-recreate caddy
+              echo "$HUELLA" > .caddyfile-desplegado
+            fi
             docker image prune -f
             # Espera y comprobación de salud: si la app no responde, el job falla.
             sleep 10
