@@ -18,6 +18,7 @@ import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
 // este fichero: es una línea en `src/server/modulos.ts`, en la PR de quien lo
 // escribe. Ver allí por qué el ORDEN de esa lista es comportamiento y no estilo.
 import { montarModulos } from "./src/server/modulos.js";
+import { memoRespuesta } from "./src/server/cacheCorta.js";
 import { medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
 
@@ -314,6 +315,12 @@ async function startServer() {
   // lista se conserva tal cual estaba aquí: en Express montar antes o después
   // cambia el comportamiento, y hoy eso costó un 403 con una sesión válida.
   montarModulos(app, db);
+  // EL MAPA, DE MEMORIA (2026-10-22, «el mapa tarda mucho en cargar»): los
+  // territorios y sus polígonos son los mismos para todos; se guardan 10 minutos
+  // por dirección (las escrituras los tiran, ver `cacheCorta.ts`).
+  const memoMapa = memoRespuesta();
+  app.get(/^\/api\/geo\/territories\/(polygons|centroids)$/, memoMapa);
+  app.get(/^\/api\/territories\/[^/]+$/, memoMapa);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {

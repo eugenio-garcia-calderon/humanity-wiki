@@ -36,6 +36,30 @@ export function cacheCorta<T>(ms = 30_000) {
   };
 }
 
+/**
+ * Una ruta GET cuya respuesta es la misma para todos (los territorios del mapa):
+ * se guarda la respuesta entera por dirección y las siguientes salen de memoria.
+ */
+export function memoRespuesta(ms = 600_000) {
+  const m = new Map<string, { t: number; codigo: number; cuerpo: any }>();
+  todas.add(m as any);
+  return (req: any, res: any, next: any) => {
+    if (req.method !== 'GET' || req.user) return next();
+    const clave = req.originalUrl;
+    const x = m.get(clave);
+    if (x && Date.now() - x.t < ms) {
+      res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=1500');
+      return res.status(x.codigo).json(x.cuerpo);
+    }
+    const json = res.json.bind(res);
+    res.json = (cuerpo: any) => {
+      if (res.statusCode === 200) { m.set(clave, { t: Date.now(), codigo: 200, cuerpo }); if (m.size > 2000) m.delete(m.keys().next().value as string); }
+      return json(cuerpo);
+    };
+    next();
+  };
+}
+
 /** Tira todo lo guardado. */
 export function vaciarCaches() { for (const m of todas) m.clear(); }
 

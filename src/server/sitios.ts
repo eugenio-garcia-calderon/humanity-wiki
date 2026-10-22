@@ -890,6 +890,15 @@ export function registrarSitios(app: Express, db: any) {
       if (process.env.NODE_ENV !== 'production') return next();
       if (!String(req.headers.accept || '').includes('text/html')) return next();
       const s = sitioDe(req);
+      // EL MAPA INCRUSTADO EN UN DOMINIO PROPIO (2026-10-22): `/mapa?embed=1` no es
+      // una página del sitio. Antes se buscaba como tal (y se armaba la página
+      // «Mapa» entera, ~2 s) para luego tirarla: va la aplicación tal cual,
+      // sin los precargados de la plataforma, que el dominio no usa.
+      if (s.forma === 'dominio' && req.path === '/mapa' && req.query.embed === '1') {
+        if (plantilla === null) plantilla = fs.existsSync(indice) ? fs.readFileSync(indice, 'utf8') : '';
+        if (!plantilla) return next();
+        return res.type('html').set('Cache-Control', 'no-cache').send(plantilla.replace(/\s*<link[^>]*data-app="casa"[^>]*>/g, ''));
+      }
       let w = await paginaDeLaDireccion(req);
       // UNA DIRECCIÓN QUE CAMBIÓ SIGUE LLEVANDO A SU PÁGINA (SEO R2): con un
       // 301, que le dice a Google que traslade lo que sabía de la vieja.
