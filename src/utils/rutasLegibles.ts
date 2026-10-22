@@ -22,8 +22,9 @@ if (pre && typeof pre === 'object') {
 export function recordarRuta(paginaId: string | null | undefined, ruta: string | null | undefined) {
   if (!paginaId) return;
   if (typeof ruta === 'string' && ruta.includes('/')) conocidas.set(paginaId, ruta);
-  // La ficha cambió de nombre o dejó de tenerla: lo que había ya no vale.
-  else conocidas.delete(paginaId);
+  // La ficha cambió de nombre o dejó de tenerla: lo que había ya no vale. Salvo
+  // el nombre de una entrada de la red (`/movilidad`, un tramo, lo da el servidor).
+  else if ((conocidas.get(paginaId) || '').includes('/')) conocidas.delete(paginaId);
 }
 
 /** La dirección legible de esta página, codificada para un enlace, si se sabe. */

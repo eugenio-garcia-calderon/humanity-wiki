@@ -727,7 +727,7 @@ export function registrarSitios(app: Express, db: any) {
               WHERE rs.pagina_id = w.id AND (rs.bloque_id = '' OR rs.bloque_id = blq->>'id')
             )
         )
-        SELECT DISTINCT ON (w.id) w.id, w.config->>'portada' AS portada,
+        SELECT DISTINCT ON (w.id) w.id, w.title, w.config->>'portada' AS portada,
           GREATEST(w.updated_at, f.updated_at) AS cambio, (f.id IS NOT NULL) AS es_fila
         FROM baja b JOIN knowledge_windows w ON w.id = b.id
         LEFT JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL
@@ -764,11 +764,24 @@ export function registrarSitios(app: Express, db: any) {
       // enseña. Un sitio sin plantillas sigue como antes (2026-10-18).
       const conRutas = (bd.rows as any[]).some(t => t.con_ruta);
       let ultimo = 0;
+      // LA RED EN EL SITEMAP (2026-10-21): cada entrada por su nombre (`/movilidad`)
+      // y sus pestañas (`/movilidad/proyectos-del-laboratorio`), en vez de `/p/…`.
+      const bonitas = new Set<string>();
       for (const x of r.rows as any[]) {
         const ruta = slugs.get(x.id);
         ultimo = Math.max(ultimo, new Date(x.cambio).getTime());
         if (conRutas && x.es_fila && !(ruta && ruta.includes('/'))) continue;
-        urls.push({ loc: `https://${s.host}/${ruta || `p/${x.id}`}`, mod: fecha(x.cambio), t: new Date(x.cambio).getTime(), img: abs(x.portada) });
+        let loc = ruta || `p/${x.id}`;
+        const corto = slugDe(x.title || '');
+        if (!ruta && x.es_fila && corto && !bonitas.has(corto) && !TRAMOS_RESERVADOS.has(corto)) {
+          bonitas.add(corto);
+          loc = corto;
+          try {
+            const red = bdInterno.redDePagina ? await bdInterno.redDePagina(null, x.id) : null;
+            for (const g of red?.grupos || []) urls.push({ loc: `https://${s.host}/${corto}/${g.slug}`, mod: fecha(x.cambio), t: new Date(x.cambio).getTime() });
+          } catch (e) { console.error('sitemap: red', e); }
+        }
+        urls.push({ loc: `https://${s.host}/${loc}`, mod: fecha(x.cambio), t: new Date(x.cambio).getTime(), img: abs(x.portada) });
       }
       if (!conRutas) for (const t of bd.rows as any[]) {
         const n = slugDe(t.titulo);
@@ -894,6 +907,14 @@ export function registrarSitios(app: Express, db: any) {
           if (destino) return res.redirect(301, `${destino}${query}`);
         }
       }
+      // LA RED: UNA SOLA DIRECCIÓN (2026-10-21, bot evaluador). `/movilidad/` va a
+      // `/movilidad`, y `/p/:id` de una entrada que se abre por su nombre, a él.
+      if (w?.red && req.path.length > 1 && req.path.endsWith('/')) return res.redirect(301, req.path.replace(/\/+$/, '') + query);
+      if (w && !w.virtual && !w.red && s.forma !== 'casa' && /^\/p\/[^/]+\/?$/.test(req.path) && slugDe(w.title || '')) {
+        const bonita = `/${slugDe(w.title)}`;
+        const r = await paginaDeLaDireccion(req, bonita).catch(() => null);
+        if (r?.id === w.id && r.red) return res.redirect(301, bonita + query);
+      }
       // En un dominio propio se reescribe SIEMPRE, haya página o no: aunque
       // apunte a un espacio entero, lo que el navegador va a preguntar ya se
       // sabe aquí (ver más abajo).
@@ -924,7 +945,9 @@ export function registrarSitios(app: Express, db: any) {
       // En una pestaña de la red, la pestaña va delante: «Líneas de desarrollo · Movilidad».
       // Con los títulos de verdad, no con el de una ficha de producto («datos, precio y opiniones»).
       const titulo = w.seccion?.nombre ? `${w.seccion.nombre} · ${w.title || tituloBase}` : w.contexto ? `${w.title || tituloBase} · ${w.contexto.madre.titulo}` : tituloBase;
-      const desc = (typeof m.descripcion === 'string' && m.descripcion.trim()) || descripcionDe(cfg);
+      const desc = w.seccion?.nombre
+        ? `${w.seccion.total} ${w.seccion.nombre.toLowerCase()} de ${w.title || tituloBase}: ${(w.seccion.muestra || []).join(', ')}${w.seccion.total > (w.seccion.muestra || []).length ? '…' : '.'}`
+        : (typeof m.descripcion === 'string' && m.descripcion.trim() && !w.red ? m.descripcion.trim() : '') || descripcionDe(cfg);
       const img = imagenDe(cfg);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
       // La de una base de datos lleva su nombre en la dirección, venga como venga la visita.
@@ -937,10 +960,19 @@ export function registrarSitios(app: Express, db: any) {
       // su dominio propio; si cada una se declara canónica a sí misma, Google
       // ve tres copias y reparte la autoridad entre ellas.
       // La pestaña y la entrada en su contexto se declaran a sí mismas: es la dirección que se comparte.
-      const canonica = (w.seccion || w.contexto) ? url : ((await direccionCanonica(w, publica)) || url);
+      // La pestaña es canónica de sí misma; la entrada en contexto, de su dirección
+      // por nombre (`/su-nombre`), que es la que va en el sitemap; la entidad, de `/su-nombre`.
+      let canonica = (w.seccion || (w.red && !w.contexto)) ? url.replace(/\/+$/, '') : '';
+      if (w.contexto && slugDe(w.title || '')) {
+        const pref = s.forma === 'casa' ? `/@${w.handle}` : '';
+        const r = await paginaDeLaDireccion(req, `${pref}/${slugDe(w.title)}`).catch(() => null);
+        canonica = r?.id === w.id ? `https://${s.host}${pref}/${slugDe(w.title)}` : url;
+      }
+      if (!canonica) canonica = (await direccionCanonica(w, publica)) || url;
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const indexable = w.perdida ? false : m.indexable === false ? false : w.indexable !== false;
+      // Las páginas de la red se indexan aunque la ficha de producto diga que está «flaca» (2026-10-21).
+      const indexable = w.perdida ? false : (m.indexable === false && !w.red) ? false : w.indexable !== false;
       // FILTROS Y ORDENACIONES FUERA DEL ÍNDICE (SEO R8). Cada combinación de
       // `?…` es otra dirección con el mismo contenido: una página basura por
       // cada una. Se siguen sus enlaces, pero no se guarda; la canónica ya
@@ -960,7 +992,20 @@ export function registrarSitios(app: Express, db: any) {
         : Array.isArray(x) ? x.map(completar)
         : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, completar(v)]))
         : x;
-      const ld = (m.jsonLd ? (Array.isArray(m.jsonLd) ? m.jsonLd : [m.jsonLd]) : []).map(completar);
+      let ld = (m.jsonLd ? (Array.isArray(m.jsonLd) ? m.jsonLd : [m.jsonLd]) : []).map(completar);
+      // Las migas de la red, completas (Inicio › Movilidad › Grupo › Entrada).
+      if (w.contexto || w.seccion) {
+        const items: Array<{ name: string; item: string }> = [{ name: 'Inicio', item: `${origen}/` }];
+        if (w.contexto) {
+          items.push({ name: w.contexto.madre.titulo, item: `https://${s.host}${w.contexto.madre.camino}` }, { name: w.contexto.grupo.nombre, item: `https://${s.host}${w.contexto.grupo.camino}` }, { name: w.title || tituloBase, item: url });
+        } else {
+          items.push({ name: w.title || tituloBase, item: url.replace(/\/[^/]*$/, '') }, { name: w.seccion.nombre, item: url });
+        }
+        ld = [...ld.filter((x: any) => x?.['@type'] !== 'BreadcrumbList'), {
+          '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+          itemListElement: items.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.name, item: x.item })),
+        }];
+      }
 
       const meta = [
         `<meta name="description" content="${esc(desc)}">`,
@@ -1118,6 +1163,21 @@ export function registrarSitios(app: Express, db: any) {
             if (s.forma === 'subdominio' && x.handle === s.handle) legibles[x.id] = slug;
             else if (s.forma === 'dominio' && raizDominio && await cuelgaDe(db, x.id, raizDominio)) legibles[x.id] = slug;
           }
+          // LAS ENTRADAS DE LA RED, POR SU NOMBRE (2026-10-21): en un dominio propio,
+          // una entrada sin nombre corto se abre por su título (`/movilidad`, `porContexto`).
+          if (s.forma === 'dominio' && raizDominio) {
+            const sin = (await db.execute(sql`
+              SELECT DISTINCT w.id, w.title FROM knowledge_windows w JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL
+              WHERE w.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND (w.slug IS NULL OR w.slug = '')
+                AND w.deleted_at IS NULL AND w.archived_at IS NULL
+            `)).rows as any[];
+            const usados = new Set(Object.values(legibles));
+            for (const x of sin) {
+              const n = slugDe(x.title || '');
+              if (!n || usados.has(n) || TRAMOS_RESERVADOS.has(n) || !(await cuelgaDe(db, x.id, raizDominio))) continue;
+              usados.add(n); legibles[x.id] = n;
+            }
+          }
           if (Object.keys(legibles).length) {
             const ruta = (slug: string) => slug.split('/').map(encodeURIComponent).join('/');
             raiz = raiz.replace(/href="(\/@[^/"]+)?\/p\/([^"/?#]+)"/g, (todo, arroba, id) =>
@@ -1259,18 +1319,18 @@ export function registrarSitios(app: Express, db: any) {
       const wA = await datosPagina(db, pagA.id);
       if (!wA) return null;
       const caminoA = `${prefijo}/${encodeURIComponent(a)}`;
-      if (ruta.length === 1) return { ...wA, indexable: true, porRuta: true };
+      if (ruta.length === 1) return { ...wA, indexable: true, porRuta: true, red: true };
       const red = bdInterno.redDePagina ? await bdInterno.redDePagina(null, wA.id) : null;
       const grupo = red?.grupos.find(g => g.slug === ruta[1].toLowerCase());
       if (!grupo) return null;
       const caminoB = `${caminoA}/${encodeURIComponent(grupo.slug)}`;
-      if (ruta.length === 2) return { ...wA, indexable: true, porRuta: true, seccion: { slug: grupo.slug, nombre: grupo.nombre } };
+      if (ruta.length === 2) return { ...wA, indexable: true, porRuta: true, red: true, seccion: { slug: grupo.slug, nombre: grupo.nombre, muestra: grupo.entradas.slice(0, 6).map(x => x.titulo), total: grupo.entradas.length } };
       const e = grupo.entradas.find(x => x.slug === ruta[2].toLowerCase());
       if (!e?.pagina_id) return null;
       const wC = await datosPagina(db, e.pagina_id);
       if (!wC || !(await paginaVisible(db, wC.id))) return null;
       return {
-        ...wC, indexable: true, porRuta: true,
+        ...wC, indexable: true, porRuta: true, red: true,
         contexto: { madre: { id: wA.id, titulo: wA.title || 'Sin título', camino: caminoA }, grupo: { nombre: grupo.nombre, camino: caminoB } },
       };
     };
