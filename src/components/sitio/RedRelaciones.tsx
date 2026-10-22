@@ -112,10 +112,11 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
           </div>
         </div>
       ) : (
-        // TODO: todos los grupos, uno debajo de otro.
-        <div className="space-y-9">
+        // TODO: todos los grupos. Los pequeños (una o dos entradas) se juntan de
+        // dos en dos o de tres en tres: uno por fila dejaba media pantalla en blanco.
+        <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
           {grupos.map(g => (
-            <div key={g.slug} data-grupo-red={g.slug}>
+            <div key={g.slug} data-grupo-red={g.slug} className={cn(g.entradas.length > 2 && 'sm:col-span-2 lg:col-span-3')}>
               <div className="mb-3 flex items-baseline gap-2">
                 <h2 className="text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
                 <span className="text-sm font-semibold text-slate-400">{g.entradas.length}</span>
@@ -123,7 +124,9 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
                   Ver {g.entradas.length > MAX_EN_TODO ? 'todo' : 'en grande'} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(min(11rem,100%),1fr))]">
+              <div className={cn('grid gap-3 sm:gap-4', g.entradas.length > 2
+                ? 'grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(min(11rem,100%),1fr))]'
+                : 'grid-cols-2')}>
                 {g.entradas.slice(0, MAX_EN_TODO).map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(g, x)} />)}
               </div>
             </div>
@@ -147,6 +150,18 @@ function Pestana({ href, activa, onClick, texto, n }: { href: string; activa: bo
 
 function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande?: boolean }) {
   const texto = (x.descripcion || x.resumen || '').trim();
+  const conImagen = !!x.imagen || (!!x.icono && !/^(https?:|\/)/.test(x.icono));
+  // SIN IMAGEN, UNA FICHA DE TEXTO: un cuadrado vacío con un icono de documento no
+  // dice nada y ocupa lo mismo que una foto (visto en Movilidad, 2026-10-21).
+  if (!conImagen) {
+    return (
+      <Link to={href} data-interno className="group col-span-2 flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md sm:col-span-1">
+        <p className={cn('font-bold leading-snug text-slate-900 line-clamp-3 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
+        {texto && <p className="mt-1.5 line-clamp-3 text-[13px] leading-snug text-slate-500">{texto}</p>}
+        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-[12px] font-bold text-slate-400 group-hover:text-slate-700">Abrir <ArrowRight className="h-3 w-3" /></span>
+      </Link>
+    );
+  }
   return (
     <Link to={href} data-interno className="group flex min-w-0 flex-col">
       {/* Cuadrada y sin recortar, como en las galerías (2026-10-21). */}
@@ -157,7 +172,7 @@ function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande
             ? <span className="text-5xl">{x.icono}</span>
             : <FileText className="h-8 w-8 text-slate-200" />}
       </div>
-      <p className={cn('mt-2.5 font-bold leading-snug text-slate-900 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
+      <p className={cn('mt-2.5 font-bold leading-snug text-slate-900 line-clamp-3 group-hover:underline', grande ? 'text-base' : 'text-sm')}>{x.titulo}</p>
       {texto && <p className={cn('mt-1 text-slate-500 leading-snug', grande ? 'line-clamp-3 text-sm' : 'line-clamp-2 text-[13px]')}>{texto}</p>}
     </Link>
   );
