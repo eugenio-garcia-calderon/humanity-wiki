@@ -37,7 +37,7 @@ import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { useCargas, iniciarCarga, registrarReceptor, claveDestino, type DestinoCarga } from '../utils/cargas';
-import { FilaBotones, VentanaBoton, type BotonCabecera } from '../components/knowledge/BotonesCabecera';
+import { FilaBotones, VentanaBoton, MarcoCargando, type BotonCabecera } from '../components/knowledge/BotonesCabecera';
 import { BarraFija } from '../components/knowledge/BarraFija';
 import { preguntarBorrarBd } from '../components/tablas/PreguntaBorrarBd';
 import {
@@ -4728,7 +4728,7 @@ function EditorPagina() {
         {ventanaBoton && (
           <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
             {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
-            <iframe src={`/paginas/${encodeURIComponent(ventanaBoton.entityId)}?embed=1`} title={ventanaBoton.pubTitulo || 'Sin título'} className="block h-full w-full border-0" />
+            <MarcoCargando src={`/paginas/${encodeURIComponent(ventanaBoton.entityId)}?embed=1`} title={ventanaBoton.pubTitulo || 'Sin título'} className="h-full w-full" />
           </VentanaBoton>
         )}
 

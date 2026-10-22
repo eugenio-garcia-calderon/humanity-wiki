@@ -10,16 +10,23 @@ import { cn } from '../../utils/cn';
 
 /** La ventana con la página de un botón, leída del servidor. */
 function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCerrar: () => void }) {
-  const [pagina, setPagina] = useState<{ titulo: string; bloques: any[] } | 'cargando' | 'no'>('cargando');
+  const [pagina, setPagina] = useState<{ titulo: string; bloques: any[] } | 'cargando' | 'no' | 'fallo'>('cargando');
+  const [intento, setIntento] = useState(0);
   useEffect(() => {
+    // (2026-10-22) Con tope de tiempo y un reintento solo: una petición que se
+    // quedaba colgada dejaba la ventana en blanco hasta cerrarla y volver a abrirla.
     let vivo = true;
+    const control = new AbortController();
+    const tope = window.setTimeout(() => control.abort(), 8000);
     setPagina('cargando');
-    fetch(`/api/sitio/pagina/${encodeURIComponent(boton.entityId)}`, { credentials: 'include' })
-      .then(r => (r.ok ? r.json() : null))
-      .then(j => { if (vivo) setPagina(j ? { titulo: j.titulo || boton.pubTitulo || '', bloques: j.config?.bloques || [] } : 'no'); })
-      .catch(() => { if (vivo) setPagina('no'); });
-    return () => { vivo = false; };
-  }, [boton]);
+    const pedir = (n: number): Promise<void> =>
+      fetch(`/api/sitio/pagina/${encodeURIComponent(boton.entityId)}`, { credentials: 'include', signal: control.signal })
+        .then(r => (r.ok ? r.json() : r.status === 404 || r.status === 403 ? null : Promise.reject(new Error(String(r.status)))))
+        .then(j => { if (vivo) setPagina(j ? { titulo: j.titulo || boton.pubTitulo || '', bloques: j.config?.bloques || [] } : 'no'); })
+        .catch(() => { if (!vivo) return; if (n < 1 && !control.signal.aborted) return pedir(n + 1); setPagina('fallo'); });
+    pedir(0).finally(() => window.clearTimeout(tope));
+    return () => { vivo = false; control.abort(); window.clearTimeout(tope); };
+  }, [boton, intento]);
   const titulo = (typeof pagina === 'object' && pagina.titulo) || boton.pubTitulo || 'Sin título';
   // Una página con un mapa a pantalla completa se abre ya expandida.
   const tieneMapa = typeof pagina === 'object' && pagina.bloques.some((b: any) => ['mapaMundo', 'arbolConocimiento'].includes(b?.tipo) && b?.datos?.alto === 'pantalla');
@@ -30,6 +37,11 @@ function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCer
         <h2 className="mb-6 pr-10 text-3xl font-black tracking-tight text-slate-900 break-words">{titulo}</h2>
         {pagina === 'cargando' && <p className="text-slate-400">Cargando…</p>}
         {pagina === 'no' && <p className="text-slate-500">Esta página no está publicada.</p>}
+        {pagina === 'fallo' && (
+          <p className="text-slate-500">No se ha podido cargar.{' '}
+            <button type="button" onClick={() => setIntento(i => i + 1)} className="font-bold text-slate-900 underline">Volver a intentarlo</button>
+          </p>
+        )}
         {typeof pagina === 'object' && <BloquesLectura bloques={pagina.bloques} paginaId={boton.entityId} />}
       </div>
       )}

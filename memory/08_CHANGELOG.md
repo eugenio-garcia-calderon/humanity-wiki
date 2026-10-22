@@ -9672,3 +9672,10 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
   - `MapDataProvider` manda un zoom por nivel (continente, país, región, municipio) y el encuadre redondeado hacia fuera a una rejilla, con lo que las direcciones se repiten y las guardan el navegador y Cloudflare.
   - El servidor guarda en memoria 10 minutos la respuesta de los polígonos, los centroides y `/api/territories/:id` (`memoRespuesta`, `cacheCorta.ts`): de 0,6–0,85 s a unos milisegundos desde la segunda visita.
 - Después: los polígonos se simplifican (Douglas-Peucker según el zoom) y redondean, y `/mapa?embed=1` en un dominio propio lleva `modulepreload` del mapa y de Mapbox (`precarga.json` → `mapa`) más un `preconnect` a api.mapbox.com, para que bajen a la vez y no uno detrás de otro.
+
+## 2026-10-22 · La ventana de los botones ya no se queda en blanco (Programador 8)
+Eugenio: «la mitad de las veces se abre el pop-up central pero no carga el contenido; tengo que cerrarlo y volver a darle».
+- `MarcoCargando` (`BotonesCabecera.tsx`): el marco de la ventana en el editor enseña «Cargando…» hasta que hay algo pintado dentro; si a los 7 s sigue vacío, se recarga solo (hasta dos veces).
+- La ventana de la página publicada pide la página con tope de 8 s y un reintento; si aun así falla, dice «No se ha podido cargar · Volver a intentarlo» en vez de «no está publicada».
+- El mapa a pantalla completa ya no lleva `loading="lazy"` (dentro de una ventana a veces no arrancaba) y usa el mismo marco con reintento.
+- Probado en Chrome: 8 aperturas seguidas cargan; con la primera carga colgada a propósito, a los 3 s sale «Cargando…» y luego se recarga sola.

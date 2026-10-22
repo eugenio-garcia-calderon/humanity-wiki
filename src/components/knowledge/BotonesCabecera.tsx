@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { Plus, X, Menu, Maximize2, Minimize2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -156,6 +156,49 @@ function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnad
  *  EXPANDIR (2026-10-21, Eugenio: «una opción de expandir página: ahora se abre
  *  en un pop-up central»): ocupa toda la pantalla, y el contenido sabe que tiene
  *  sitio (`children` puede ser una función que recibe `grande`). */
+/**
+ * UN MARCO QUE NO SE QUEDA EN BLANCO (2026-10-22, Eugenio: «la mitad de las
+ * veces se abre el pop-up pero no carga el contenido; tengo que cerrarlo y
+ * volver a darle»). La página de dentro es la aplicación entera: la primera
+ * vez tarda, y a veces se queda a medias. Mientras no hay nada que ver sale
+ * «Cargando…»; si en `paciencia` ms el marco sigue vacío, se vuelve a cargar
+ * él solo (hasta dos veces) — que es lo que hacía Eugenio a mano.
+ */
+export function MarcoCargando({ src, title, className, style, paciencia = 7000 }: {
+  src: string; title: string; className?: string; style?: CSSProperties; paciencia?: number;
+}) {
+  const ref = useRef<HTMLIFrameElement>(null);
+  const [intento, setIntento] = useState(0);
+  const [listo, setListo] = useState(false);
+  useEffect(() => {
+    setListo(false);
+    const inicio = Date.now();
+    const t = window.setInterval(() => {
+      let hay = false;
+      try {
+        const d = ref.current?.contentDocument;
+        // Mismo origen: se mira si ya hay algo pintado. Otro origen: no se puede mirar; vale el `load`.
+        hay = !!d && d.readyState !== 'loading' && !!d.querySelector('canvas, h1, h2, textarea, [contenteditable]');
+      } catch { hay = true; }
+      if (hay) { setListo(true); window.clearInterval(t); return; }
+      if (Date.now() - inicio > paciencia && intento < 2) { window.clearInterval(t); setIntento(i => i + 1); }
+    }, 250);
+    return () => window.clearInterval(t);
+  }, [src, intento, paciencia]);
+  return (
+    <div className={cn('relative', className)} style={style}>
+      <iframe key={intento} ref={ref} src={src} title={title} className="block h-full w-full border-0" />
+      {!listo && (
+        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-white/70">
+          <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-400">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" /> Cargando…
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function VentanaBoton({ titulo, onCerrar, children, inicialGrande = false }: {
   titulo: string; onCerrar: () => void; children: ReactNode | ((grande: boolean) => ReactNode); inicialGrande?: boolean;
 }) {

@@ -1,5 +1,6 @@
 import { Maximize2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
+import { MarcoCargando } from '../../knowledge/BotonesCabecera';
 
 /** La dirección del mapa: `/mapa`, en un marco, y abierto en un territorio si se eligió. */
 export const direccionMapa = (datos: Record<string, unknown>, enMarco: boolean) => {
@@ -19,8 +20,13 @@ export function VistaMapaMundo({ datos }: { datos: Record<string, unknown> }) {
   const alto = pantalla ? 'max(560px, calc(100vh - 7rem))' : Math.min(1200, Math.max(320, Number(datos.alto) || 560));
   return (
     <figure className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
-      <iframe src={direccionMapa(datos, true)} title="Mapa de indicadores del mundo" loading="lazy"
-        className="block w-full" style={{ height: alto, border: 0 }} />
+      {/* A pantalla completa es lo principal de la página (o de la ventana de un
+          botón): sin `lazy`, que dentro de una ventana a veces no llegaba a
+          cargar, y con «Cargando…» y reintento (2026-10-22). */}
+      {pantalla
+        ? <MarcoCargando src={direccionMapa(datos, true)} title="Mapa de indicadores del mundo" className="w-full" style={{ height: alto }} paciencia={10000} />
+        : <iframe src={direccionMapa(datos, true)} title="Mapa de indicadores del mundo" loading="lazy"
+            className="block w-full" style={{ height: alto, border: 0 }} />}
       {/* En un dominio propio, `/mapa` sin marco es una página del sitio: la pantalla completa se abre en humanity.wiki. */}
       <a href={(typeof window !== 'undefined' && !/(^|\.)humanity\.wiki$|^localhost$|^127\./.test(window.location.hostname) ? 'https://humanity.wiki' : '') + direccionMapa(datos, false)} target="_blank" rel="noreferrer"
         className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black text-slate-700 shadow ring-1 ring-slate-200 hover:bg-white">
