@@ -475,14 +475,19 @@ async function canonicaDe(db: any, w: any, publica: any): Promise<string | null>
 /** Lo que `vite.config.ts` dejó dicho que necesita la web de un dominio
  *  propio, para anunciarlo con `modulepreload`. Se lee una vez. */
 let precargaDominio: string[] | null = null;
+let precargaMapa: string[] = [];
 function trozosDominio(): string[] {
   if (precargaDominio === null) {
     try {
-      precargaDominio = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'dist', 'precarga.json'), 'utf8')).dominio || [];
+      const j = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'dist', 'precarga.json'), 'utf8'));
+      precargaDominio = j.dominio || [];
+      precargaMapa = j.mapa || [];
     } catch { precargaDominio = []; }
   }
   return precargaDominio!;
 }
+/** Los trozos del mapa incrustado en un dominio propio. */
+function trozosMapa(): string[] { trozosDominio(); return precargaMapa; }
 
 /** Una dirección del sitemap. `t`: cuándo cambió por última vez. */
 export type UrlSitio = { loc: string; mod: string; t?: number; img?: string | null };
@@ -897,7 +902,9 @@ export function registrarSitios(app: Express, db: any) {
       if (s.forma === 'dominio' && req.path === '/mapa' && req.query.embed === '1') {
         if (plantilla === null) plantilla = fs.existsSync(indice) ? fs.readFileSync(indice, 'utf8') : '';
         if (!plantilla) return next();
-        return res.type('html').set('Cache-Control', 'no-cache').send(plantilla.replace(/\s*<link[^>]*data-app="casa"[^>]*>/g, ''));
+        const pre = ['<link rel="preconnect" href="https://api.mapbox.com" crossorigin>', ...trozosMapa().map(f => `<link rel="modulepreload" crossorigin href="${f}">`)].join('\n    ');
+        return res.type('html').set('Cache-Control', 'no-cache')
+          .send(plantilla.replace(/\s*<link[^>]*data-app="casa"[^>]*>/g, '').replace('</head>', `    ${pre}\n  </head>`));
       }
       let w = await paginaDeLaDireccion(req);
       // UNA DIRECCIÓN QUE CAMBIÓ SIGUE LLEVANDO A SU PÁGINA (SEO R2): con un

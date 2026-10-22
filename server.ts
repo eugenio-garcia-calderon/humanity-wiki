@@ -321,6 +321,54 @@ async function startServer() {
   const memoMapa = memoRespuesta();
   app.get(/^\/api\/geo\/territories\/(polygons|centroids)$/, memoMapa);
   app.get(/^\/api\/territories\/[^/]+$/, memoMapa);
+  // LOS POLÍGONOS, MÁS LIGEROS: coordenadas con la precisión que se ve en ese zoom
+  // (una región a 3 decimales son ~100 m) y sin puntos repetidos al redondear.
+  // 615 KB → bastante menos, y es lo que más tarda en llegar del mapa.
+  app.get('/api/geo/territories/polygons', (req, res, next) => {
+    const z = parseFloat(String(req.query.zoom || '')) || 2;
+    const dec = z < 3.5 ? 2 : z < 7 ? 3 : 4;
+    const f = 10 ** dec;
+    // Douglas-Peucker: fuera los puntos que no se distinguen a este zoom.
+    const tol = z < 3.5 ? 0.05 : z < 4.5 ? 0.02 : z < 7 ? 0.004 : 0.0008;
+    const simplificar = (pts: number[][]): number[][] => {
+      if (pts.length < 6) return pts;
+      const keep = new Uint8Array(pts.length); keep[0] = 1; keep[pts.length - 1] = 1;
+      const pila: Array<[number, number]> = [[0, pts.length - 1]];
+      while (pila.length) {
+        const [i, j] = pila.pop()!;
+        const [x1, y1] = pts[i], [x2, y2] = pts[j];
+        const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1e-12;
+        let max = 0, k = -1;
+        for (let m = i + 1; m < j; m++) {
+          const d = Math.abs(dy * pts[m][0] - dx * pts[m][1] + x2 * y1 - y2 * x1) / L;
+          if (d > max) { max = d; k = m; }
+        }
+        if (k > 0 && max > tol) { keep[k] = 1; pila.push([i, k], [k, j]); }
+      }
+      const out = pts.filter((_, n) => keep[n]);
+      return out.length >= 4 ? out : pts;
+    };
+    const anillo = (a0: any[]) => {
+      const a = Array.isArray(a0) && a0.length > 8 ? simplificar(a0 as number[][]) : a0;
+      const out: any[] = [];
+      for (const p of a) {
+        if (!Array.isArray(p) || typeof p[0] !== 'number') continue;
+        const q = [Math.round(p[0] * f) / f, Math.round(p[1] * f) / f];
+        const u = out[out.length - 1];
+        if (!u || u[0] !== q[0] || u[1] !== q[1]) out.push(q);
+      }
+      return out.length >= 4 ? out : a;
+    };
+    const geo = (g: any): any => {
+      if (!g?.coordinates) return g;
+      if (g.type === 'Polygon') return { ...g, coordinates: g.coordinates.map(anillo) };
+      if (g.type === 'MultiPolygon') return { ...g, coordinates: g.coordinates.map((pol: any[]) => pol.map(anillo)) };
+      return g;
+    };
+    const json = res.json.bind(res);
+    res.json = (cuerpo: any) => json(cuerpo?.features ? { ...cuerpo, features: cuerpo.features.map((x: any) => ({ ...x, geometry: geo(x.geometry) })) } : cuerpo);
+    next();
+  });
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {

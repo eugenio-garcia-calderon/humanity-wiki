@@ -9671,3 +9671,4 @@ The last two tap targets under 44 px on the Anker 737 sheet were the claims' «D
   - Fuera el `fitBounds` repetido: con la opción `bounds` del mapa basta.
   - `MapDataProvider` manda un zoom por nivel (continente, país, región, municipio) y el encuadre redondeado hacia fuera a una rejilla, con lo que las direcciones se repiten y las guardan el navegador y Cloudflare.
   - El servidor guarda en memoria 10 minutos la respuesta de los polígonos, los centroides y `/api/territories/:id` (`memoRespuesta`, `cacheCorta.ts`): de 0,6–0,85 s a unos milisegundos desde la segunda visita.
+- Después: los polígonos se simplifican (Douglas-Peucker según el zoom) y redondean, y `/mapa?embed=1` en un dominio propio lleva `modulepreload` del mapa y de Mapbox (`precarga.json` → `mapa`) más un `preconnect` a api.mapbox.com, para que bajen a la vez y no uno detrás de otro.

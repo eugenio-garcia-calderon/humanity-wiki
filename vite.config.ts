@@ -58,7 +58,12 @@ function precargas(): Plugin {
     generateBundle(_, bundle) {
       this.emitFile({
         type: 'asset', fileName: 'precarga.json',
-        source: JSON.stringify({ dominio: trozosDe(bundle, '/src/AplicacionDeDominio.tsx').map(f => '/' + f) }),
+        source: JSON.stringify({
+          dominio: trozosDe(bundle, '/src/AplicacionDeDominio.tsx').map(f => '/' + f),
+          // El mapa incrustado en un dominio propio (2026-10-22): su página y Mapbox,
+          // para que bajen a la vez que la aplicación y no uno detrás de otro.
+          mapa: [...new Set([...trozosDe(bundle, '/src/AplicacionDeDominio.tsx'), ...trozosDe(bundle, '/src/pages/MapaDominio.tsx'), ...trozosDe(bundle, '/src/pages/Map.tsx')])].map(f => '/' + f),
+        }),
       });
     },
   };
