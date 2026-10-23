@@ -31,7 +31,7 @@ const ESTILO: Record<EstiloBotones, string> = {
 };
 
 /** La fila de botones, bajo el título y la descripción. */
-export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, acento, onAbrir, onQuitar, onAnadir }: {
+export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, acento, onAbrir, onQuitar, onAnadir, onReordenar }: {
   botones: BotonCabecera[];
   talla?: TallaBotones;
   estilo?: EstiloBotones;
@@ -51,7 +51,29 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
   /** Sólo quien edita. */
   onQuitar?: (b: BotonCabecera) => void;
   onAnadir?: () => void;
+  /** Quien edita los ordena arrastrando (2026-10-23). Recibe la lista en su orden nuevo. */
+  onReordenar?: (botones: BotonCabecera[]) => void;
 }) {
+  // ORDENAR ARRASTRANDO (2026-10-23, Eugenio: «que se puedan reordenar los botones
+  // de izquierda a derecha pinchando y arrastrando»). Se decide por la mitad del
+  // botón sobre la que se suelta; con la fila al revés (botones a la derecha, el
+  // primero el de más a la derecha) «a la izquierda» es «después» en la lista.
+  const fila = useRef<HTMLDivElement>(null);
+  const [arrastrado, setArrastrado] = useState<string | null>(null);
+  const [marca, setMarca] = useState<{ id: string; izquierda: boolean } | null>(null);
+  const alReves = () => !!fila.current && getComputedStyle(fila.current).flexDirection === 'row-reverse';
+  const soltar = (destino: string, izquierda: boolean) => {
+    const desde = arrastrado;
+    setArrastrado(null); setMarca(null);
+    if (!desde || desde === destino || !onReordenar) return;
+    const lista = botones.filter(b => b.id !== desde);
+    const movido = botones.find(b => b.id === desde);
+    if (!movido) return;
+    const i = lista.findIndex(b => b.id === destino);
+    const antes = alReves() ? !izquierda : izquierda;
+    lista.splice(antes ? i : i + 1, 0, movido);
+    onReordenar(lista);
+  };
   if (!botones.length && !onAnadir) return null;
   if (plegado) {
     return (
@@ -61,12 +83,30 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
     );
   }
   return (
-    <div className={cn('flex items-center gap-2', enLinea ? 'flex-nowrap' : 'flex-wrap', !sinMargen && 'mt-3', centrado && 'justify-center', derecha && 'flex-row-reverse', derechaAncho && '@xl:flex-row-reverse')} role="navigation" aria-label="Apartados de la página">
+    <div ref={fila} className={cn('flex items-center gap-2', enLinea ? 'flex-nowrap' : 'flex-wrap', !sinMargen && 'mt-3', centrado && 'justify-center', derecha && 'flex-row-reverse', derechaAncho && '@xl:flex-row-reverse')} role="navigation" aria-label="Apartados de la página">
       {botones.map(b => (
-        <span key={b.id} className="group/boton relative shrink-0">
+        <span key={b.id} data-boton-cabecera={b.pubTitulo || ''}
+          className={cn('group/boton relative shrink-0', arrastrado === b.id && 'opacity-40',
+            marca?.id === b.id && arrastrado !== b.id && (marca.izquierda
+              ? 'before:absolute before:-left-1.5 before:inset-y-1 before:w-0.5 before:rounded before:bg-emerald-500'
+              : 'after:absolute after:-right-1.5 after:inset-y-1 after:w-0.5 after:rounded after:bg-emerald-500'))}
+          {...(onReordenar && botones.length > 1 ? {
+            draggable: true,
+            onDragStart: (e: React.DragEvent) => { setArrastrado(b.id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', b.id); },
+            onDragOver: (e: React.DragEvent) => {
+              if (!arrastrado) return;
+              e.preventDefault();
+              const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+              const izquierda = e.clientX < r.left + r.width / 2;
+              if (marca?.id !== b.id || marca.izquierda !== izquierda) setMarca({ id: b.id, izquierda });
+            },
+            onDrop: (e: React.DragEvent) => { e.preventDefault(); soltar(b.id, marca?.id === b.id ? marca.izquierda : true); },
+            onDragEnd: () => { setArrastrado(null); setMarca(null); },
+            title: 'Arrastra para cambiarlo de sitio',
+          } : {})}>
           <button type="button" onClick={() => onAbrir(b)}
             style={estilo === 'relleno' && acento ? { backgroundColor: acento } : undefined}
-            className={cn('inline-flex items-center rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo])}>
+            className={cn('inline-flex items-center rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo], onReordenar && botones.length > 1 && 'cursor-grab active:cursor-grabbing')}>
             {b.pubTitulo?.trim() || 'Sin título'}
           </button>
           {onQuitar && (

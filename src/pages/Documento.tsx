@@ -2339,16 +2339,44 @@ function EditorPagina() {
 
   const subirPortada = (archivo: File) => { iniciarCarga(archivo, claveCargas, { tipo: 'portada' }); };
 
-  /** Un botón nuevo en la cabecera: crea su página (sin título) y la abre en la ventana. */
-  const crearBotonCabecera = async () => {
-    const r = await fetch('/api/documentos', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: 'Sin título' }) });
+  /** UN BOTÓN NUEVO EN LA CABECERA. Primero su nombre (2026-10-23, Eugenio: «tarda
+   *  en aparecer el nombre, sale "Sin título", es cutre»): el botón nace ya con él,
+   *  y su página con ese título; luego se abre la ventana para escribirla. */
+  const [nombreBotonNuevo, setNombreBotonNuevo] = useState<string | null>(null);
+  const crearBotonCabecera = () => setNombreBotonNuevo('');
+  const crearBotonConNombre = async () => {
+    const nombre = (nombreBotonNuevo || '').trim().slice(0, 60);
+    if (!nombre) return;
+    setNombreBotonNuevo(null);
+    const b: BotonCabecera = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: '', pubTitulo: nombre };
+    const r = await fetch('/api/documentos', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: nombre }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.id) { fallar(j.error || 'No se ha podido crear la página del botón.'); return; }
-    const b: BotonCabecera = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.id, pubTitulo: '' };
+    b.entityId = j.id;
     setAjustes(a => ({ ...a, botones: [...(a.botones || []), b] }));
     programarGuardado();
     setVentanaBoton(b);
   };
+  /** Ordenar los botones arrastrándolos (2026-10-23). */
+  const reordenarBotones = (lista: BotonCabecera[]) => { setAjustes(a => ({ ...a, botones: lista })); programarGuardado(); };
+  // EL NOMBRE AL DÍA MIENTRAS LA VENTANA ESTÁ ABIERTA (2026-10-23): si se cambia
+  // el título de la página del botón, el botón lo enseña ya, sin esperar a cerrar.
+  useEffect(() => {
+    if (!ventanaBoton?.entityId) return;
+    const id = ventanaBoton.entityId, bid = ventanaBoton.id;
+    const t = window.setInterval(async () => {
+      const w = await fetch(`/api/windows/${encodeURIComponent(id)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+      const titulo = String(w?.title || '').trim();
+      if (!titulo || titulo === 'Sin título' || titulo === 'Documento sin título') return;
+      setAjustes(a => {
+        const actual = (a.botones || []).find(x => x.id === bid);
+        if (!actual || actual.pubTitulo === titulo) return a;
+        programarGuardado();
+        return { ...a, botones: (a.botones || []).map(x => (x.id === bid ? { ...x, pubTitulo: titulo } : x)) };
+      });
+    }, 2000);
+    return () => window.clearInterval(t);
+  }, [ventanaBoton?.entityId]); // eslint-disable-line react-hooks/exhaustive-deps
   /** Al cerrar la ventana, el botón toma el título que se le haya puesto a su página. */
   const cerrarVentanaBoton = useCallback(async () => {
     const b = ventanaBoton;
@@ -4675,7 +4703,7 @@ function EditorPagina() {
             if (!window.confirm(`¿Quitar el botón «${b.pubTitulo || 'Sin título'}»? Su página no se borra: queda en la lista de páginas.`)) return;
             setAjustes(a => ({ ...a, botones: (a.botones || []).filter(x => x.id !== b.id) })); programarGuardado();
           } : undefined}
-          onAnadir={editable ? crearBotonCabecera : undefined} />
+          onAnadir={editable ? crearBotonCabecera : undefined} onReordenar={editable ? reordenarBotones : undefined} />
           </>);
           const propsNodo = filaDe?.fila_id && filaDe.tabla_id ? (
             <div style={v2 ? { zoom: zoomPropiedades(el('propiedades')) } : undefined} >
@@ -4737,6 +4765,23 @@ function EditorPagina() {
         {filaDe?.fila_id && filaDe.tabla_id && (
           <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
         )}
+        {nombreBotonNuevo !== null && createPortal(
+          <div className="fixed inset-0 z-[10000] flex items-start justify-center bg-slate-900/40 p-4 pt-[18vh]" onClick={() => setNombreBotonNuevo(null)}>
+            <div role="dialog" aria-label="Nuevo botón" onClick={e => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl"
+              onKeyDown={e => { if (e.key === 'Escape') setNombreBotonNuevo(null); }}>
+              <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">{tr('Nuevo botón')}</p>
+              <input autoFocus value={nombreBotonNuevo} onChange={e => setNombreBotonNuevo(e.target.value)} maxLength={60}
+                placeholder={tr('Nombre del botón (p. ej. Participa)')} aria-label={tr('Nombre del botón')}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); crearBotonConNombre(); } }}
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-base font-bold text-slate-900 outline-none focus:border-emerald-400" />
+              <p className="mt-2 text-[11px] text-slate-400">{tr('Abre su propia página en una ventana: luego escribes en ella lo que quieras.')}</p>
+              <div className="mt-4 flex justify-end gap-2">
+                <button type="button" onClick={() => setNombreBotonNuevo(null)} className="h-10 rounded-lg px-3 text-xs font-bold text-slate-500 hover:bg-slate-100">{tr('Cancelar')}</button>
+                <button type="button" onClick={crearBotonConNombre} disabled={!nombreBotonNuevo.trim()} className="h-10 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800 disabled:opacity-40">{tr('Crear botón')}</button>
+              </div>
+            </div>
+          </div>,
+          document.body)}
         {ventanaBoton && (
           <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
             {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
