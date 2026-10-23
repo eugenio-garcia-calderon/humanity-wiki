@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Plus, Filter, ArrowUpDown, Layers, Eye, EyeOff, X, ChevronDown, ChevronUp, MoreHorizontal, Copy, Trash2, Pencil,
-  Table2, LayoutGrid, Columns3, List, CalendarDays, GanttChart, BarChart3, ClipboardList, Check, Settings2, SlidersHorizontal, GalleryHorizontal,
+  Table2, LayoutGrid, Columns3, List, CalendarDays, GanttChart, BarChart3, ClipboardList, Check, Settings2, SlidersHorizontal, GalleryHorizontal, Link2,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Columna } from './Celda';
@@ -49,6 +49,10 @@ export function Desplegable({ abierto, onCerrar, children, ancho = 'w-80', derec
       const w = panel.offsetWidth;
       const vw = window.innerWidth, vh = window.innerHeight;
       let left = derecha ? r.right - w : r.left;
+      // Pegado a la derecha y sin sitio a la izquierda (un «Filtrar» cerca del
+      // borde izquierdo): se abre hacia la derecha, bajo su botón, y no pegado
+      // al borde de la ventana tapando la barra lateral (bot evaluador, 2026-10-23).
+      if (derecha && left < 8) left = r.left;
       left = Math.max(8, Math.min(left, vw - w - 8));
       let top = r.bottom + 4;
       // Sin sitio debajo: se abre hacia arriba.
@@ -217,8 +221,10 @@ function ElegirPropiedad({ columnas, texto, onElegir }: { columnas: Columna[]; t
   );
 }
 
-function PanelFiltro({ vista, columnas, conocidos, onCambiar }: {
+function PanelFiltro({ vista, columnas, conocidos, onCambiar, fijo }: {
   vista: Vista; columnas: Columna[]; conocidos: Record<string, Map<string, string>>; onCambiar: (f: GrupoFiltros) => void;
+  /** El filtro de la vista enlazada («Área contiene Movilidad»): se ve y no se quita. */
+  fijo?: string;
 }) {
   const grupo = comoGrupo(vista.filtros);
   const nueva = (): Filtro => {
@@ -235,7 +241,13 @@ function PanelFiltro({ vista, columnas, conocidos, onCambiar }: {
     <div className="space-y-1.5">
       <ElegirPropiedad columnas={columnas} texto="Filtrar por"
         onElegir={c => onCambiar({ ...grupo, reglas: [...grupo.reglas, { columna_id: c.id, operador: operadoresDe(c.tipo)[0] }] })} />
-      {!grupo.reglas.length && <p className="px-1 py-2 text-xs text-slate-400">Sin filtros: se ven todas las filas.</p>}
+      {fijo && (
+        <p className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-2 py-1.5 text-xs font-bold text-blue-800" title="Es lo que hace de esta una vista enlazada: no se puede quitar aquí.">
+          <Link2 className="h-3.5 w-3.5 shrink-0" /> {fijo}
+          <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide text-blue-400">fijo</span>
+        </p>
+      )}
+      {!grupo.reglas.length && <p className="px-1 py-2 text-xs text-slate-400">{fijo ? 'Ningún filtro más.' : 'Sin filtros: se ven todas las filas.'}</p>}
       {grupo.reglas.map((r, i) => esGrupo(r) ? (
         <div key={i} className="flex items-start gap-1">
           <div className="w-14 shrink-0 pt-2"><Conector indice={i} y_o={grupo.y_o} onCambiar={y_o => onCambiar({ ...grupo, y_o })} /></div>
@@ -442,7 +454,7 @@ function PanelPropiedades({ vista, columnas, columnaTitulo, onCambiar }: {
 // ── LA BARRA ────────────────────────────────────────────────────────────────
 
 export default function BarraVista({
-  vistas, activa, columnas, columnaTitulo, editable, conocidos, gruposConocidos, centrada = false, visitante = false,
+  vistas, activa, columnas, columnaTitulo, editable, conocidos, gruposConocidos, centrada = false, visitante = false, filtroFijo,
   onElegir, onCrear, onCambiar, onRenombrar, onDuplicar, onBorrar, ajustes, extra, panelPropiedades, acciones,
 }: {
   vistas: Vista[];
@@ -457,6 +469,8 @@ export default function BarraVista({
   centrada?: boolean;
   /** Quien mira la página publicada: solo puede filtrar y ordenar, sin tocar la vista del autor. */
   visitante?: boolean;
+  /** La vista enlazada: su filtro fijo, para enseñarlo (2026-10-23). */
+  filtroFijo?: string;
   onElegir: (v: Vista) => void;
   onCrear: (forma: Forma) => void;
   onCambiar: (c: Partial<Vista>) => void;
@@ -564,12 +578,12 @@ export default function BarraVista({
       {(editable || visitante) && conMandos && (
         <div className="ml-auto flex flex-wrap items-center gap-0.5">
           <div className="relative">
-            <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseEtiqueta(nFiltros > 0)} aria-expanded={abierto === 'filtro'}
-              title={nFiltros ? `Filtrar · ${nFiltros} ${nFiltros === 1 ? 'regla' : 'reglas'}` : 'Filtrar'} aria-label="Filtrar">
-              <Filter className="w-[18px] h-[18px]" />Filtrar{nFiltros > 0 && <Cuenta n={nFiltros} />}
+            <button onClick={() => setAbierto(abierto === 'filtro' ? null : 'filtro')} className={claseEtiqueta(nFiltros > 0 || !!filtroFijo)} aria-expanded={abierto === 'filtro'}
+              title={filtroFijo ? `Filtrar · ${filtroFijo}${nFiltros ? ` y ${nFiltros} más` : ''}` : nFiltros ? `Filtrar · ${nFiltros} ${nFiltros === 1 ? 'regla' : 'reglas'}` : 'Filtrar'} aria-label="Filtrar">
+              <Filter className="w-[18px] h-[18px]" />Filtrar{(nFiltros > 0 || !!filtroFijo) && <Cuenta n={nFiltros + (filtroFijo ? 1 : 0)} />}
             </button>
             <Desplegable abierto={abierto === 'filtro'} onCerrar={cerrar} ancho="w-[34rem]" derecha>
-              <PanelFiltro vista={activa} columnas={columnas} conocidos={conocidos} onCambiar={f => onCambiar({ filtros: f })} />
+              <PanelFiltro vista={activa} columnas={columnas} conocidos={conocidos} onCambiar={f => onCambiar({ filtros: f })} fijo={filtroFijo} />
             </Desplegable>
           </div>
           {activa.forma !== 'grafico' && (

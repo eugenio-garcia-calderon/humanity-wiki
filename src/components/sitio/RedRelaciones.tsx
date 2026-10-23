@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, BellRing, Link2, Check, ArrowRight, FileText } from 'lucide-react';
+import { Bell, BellRing, Link2, Check, ArrowRight, FileText, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
 import { miniatura } from '../../utils/miniatura';
@@ -47,6 +47,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   // para quien puede editar la tabla; el orden es de la tabla (`orden-red`).
   const [tablaId, setTablaId] = useState<string | null>(null);
   const [filaId, setFilaId] = useState<string | null>(null);
+  const [falloOrden, setFalloOrden] = useState<string | null>(null);
   const [ordenable, setOrdenable] = useState(false);
   const [arrastrada, setArrastrada] = useState<string | null>(null);
   const [encima, setEncima] = useState<{ slug: string; antes: boolean } | null>(null);
@@ -72,6 +73,14 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   }, [sitio, esRaiz, slugPagina, autorHandle]);
 
   // La pestaña sale de la dirección (también al ir atrás y adelante).
+  // En el editor la pestaña abierta va en `?seccion=` (bot evaluador: recargar volvía siempre a «Todo»).
+  const leidaEditor = useRef(false);
+  useEffect(() => {
+    if (!grupos || !enEditor || leidaEditor.current) return;
+    leidaEditor.current = true;
+    const q = new URLSearchParams(window.location.search).get('seccion');
+    if (q && grupos.some(g => g.slug === q)) setActiva(q);
+  }, [grupos, enEditor]);
   useEffect(() => {
     if (!grupos || enEditor) return;
     const leer = () => {
@@ -99,7 +108,13 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   const elegir = (e: React.MouseEvent, g: Grupo | null) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
     e.preventDefault();
-    if (enEditor) { setActiva(g ? g.slug : 'todo'); return; }
+    if (enEditor) {
+      setActiva(g ? g.slug : 'todo');
+      const u = new URL(window.location.href);
+      if (g) u.searchParams.set('seccion', g.slug); else u.searchParams.delete('seccion');
+      window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
+      return;
+    }
     const destino = caminoDe(g || undefined);
     if (destino !== window.location.pathname + window.location.search) window.history.pushState(null, '', destino);
     setActiva(g ? g.slug : 'todo');
@@ -121,11 +136,24 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
     const movida = grupos.find(g => g.slug === desde)!;
     const i = lista.findIndex(g => g.slug === destino);
     lista.splice(antes ? i : i + 1, 0, movida);
-    setGrupos(lista);
+    guardarOrden(lista);
+  };
+  /** Pone el orden en pantalla y lo guarda; si no se puede, vuelve al de antes y lo dice. */
+  const guardarOrden = (lista: Grupo[]) => {
+    const antes = grupos;
+    setGrupos(lista); setFalloOrden(null);
     fetch(`/api/bd/tablas/${encodeURIComponent(tablaId!)}/orden-red`, {
       method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orden: lista.map(g => g.columna_id) }),
-    }).catch(() => {});
+    }).then(r => { if (!r.ok) throw new Error(); }).catch(() => { setGrupos(antes); setFalloOrden('No se ha podido guardar el orden de las pestañas.'); });
+  };
+  /** Mover la pestaña abierta un sitio (teclado y teléfono, donde no se arrastra). */
+  const mover = (slug: string, paso: -1 | 1) => {
+    const i = grupos.findIndex(g => g.slug === slug), j = i + paso;
+    if (i < 0 || j < 0 || j >= grupos.length) return;
+    const lista = [...grupos];
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+    guardarOrden(lista);
   };
   const arrastre = (g: Grupo) => arrastrable ? {
     draggable: true,
@@ -153,10 +181,12 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
         <nav aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto pr-8 [scrollbar-width:none] sm:pr-0">
           <Pestana href={caminoDe()} activa={activa === 'todo'} onClick={e => elegir(e, null)} texto="Todo" n={total} />
           {grupos.map(g => (
-            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} arrastre={arrastre(g)} />
+            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} arrastre={arrastre(g)}
+              mover={arrastrable && activa === g.slug ? { izquierda: grupos[0].slug !== g.slug ? () => mover(g.slug, -1) : undefined, derecha: grupos[grupos.length - 1].slug !== g.slug ? () => mover(g.slug, 1) : undefined } : undefined} />
           ))}
         </nav>
       </div>
+      {falloOrden && <p role="alert" className="-mt-3 mb-4 text-xs font-bold text-rose-600">{falloOrden}</p>}
 
       {grupo ? (
         // UNA PESTAÑA: sólo su grupo, en grande.
@@ -217,9 +247,16 @@ type Arrastre = {
   onDrop: (e: React.DragEvent) => void; onDragEnd: () => void; marca: 'antes' | 'despues' | null; moviendo: boolean;
 };
 
-function Pestana({ href, activa, onClick, texto, n, arrastre }: { href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number; arrastre?: Arrastre }) {
+function Pestana({ href, activa, onClick, texto, n, arrastre, mover }: {
+  href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number; arrastre?: Arrastre;
+  /** La pestaña abierta, en el editor: moverla un sitio sin arrastrar. */
+  mover?: { izquierda?: () => void; derecha?: () => void };
+}) {
   const { marca, moviendo, ...eventos } = arrastre || ({} as Partial<Arrastre>);
+  const flecha = 'grid h-6 w-6 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-800';
   return (
+    <span className="group/pestana inline-flex shrink-0 items-center">
+    {mover?.izquierda && <button type="button" onClick={mover.izquierda} aria-label={`Mover «${texto}» a la izquierda`} title="Mover a la izquierda" className={flecha}><ChevronLeft className="h-3.5 w-3.5" /></button>}
     <a href={href} onClick={onClick} aria-current={activa ? 'page' : undefined}
       title={arrastre ? `${texto} · arrastra para cambiarla de sitio` : texto}
       {...(arrastre ? eventos : {})}
@@ -229,9 +266,12 @@ function Pestana({ href, activa, onClick, texto, n, arrastre }: { href: string; 
         arrastre && 'cursor-grab active:cursor-grabbing', moviendo && 'opacity-40',
         marca === 'antes' && 'before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded before:bg-emerald-500',
         marca === 'despues' && 'after:absolute after:inset-y-2 after:right-0 after:w-0.5 after:rounded after:bg-emerald-500')}>
+      {arrastre && <GripVertical aria-hidden className="-ml-1.5 h-3.5 w-3.5 shrink-0 text-slate-300 opacity-0 transition-opacity group-hover/pestana:opacity-100" />}
       <span className="truncate">{texto}</span>
       <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500')}>{n}</span>
     </a>
+    {mover?.derecha && <button type="button" onClick={mover.derecha} aria-label={`Mover «${texto}» a la derecha`} title="Mover a la derecha" className={flecha}><ChevronRight className="h-3.5 w-3.5" /></button>}
+    </span>
   );
 }
 

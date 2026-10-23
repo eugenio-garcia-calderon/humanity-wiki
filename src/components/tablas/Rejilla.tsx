@@ -121,7 +121,15 @@ async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   }
 }
 
-export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, onCargada, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
+/** El tipo de una columna, en palabras (con sus tildes). */
+const NOMBRE_TIPO: Record<string, string> = {
+  texto: 'texto', texto_largo: 'texto largo', numero: 'número', moneda: 'moneda', porcentaje: 'porcentaje', fecha: 'fecha',
+  seleccion: 'selección', seleccion_multiple: 'selección múltiple', casilla: 'casilla', persona: 'persona', proyecto: 'proyecto',
+  publicacion: 'publicación', imagen: 'imagen', video: 'vídeo', documento: 'documento', formula: 'fórmula', condicional: 'condición',
+  agregado: 'resumen', url: 'enlace', email: 'correo', telefono: 'teléfono', duracion: 'duración', valoracion: 'valoración', comunidad: 'comunidad', compra: 'compra',
+};
+
+export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCambiarVistaPropia, etiquetaFijo, textoAlCrear, sinTitulo = false, tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, onCargada, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -180,6 +188,16 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
   vinculo?: { columna_id?: string; valor?: string; ids?: string[] };
   /** Enlace de un solo lado: quien incrusta conecta la fila nueva por su cuenta. */
   alCrearEnVinculo?: (filaId: string) => Promise<void>;
+  /** (2026-10-23, bot evaluador) LA VISTA PROPIA de una vista enlazada, como en
+   *  Notion: forma, filtros, orden y grupos de esta pestaña, sin tocar las
+   *  vistas guardadas de la tabla original. Quien incrusta la guarda. */
+  vistaPropia?: Partial<Vista>;
+  onCambiarVistaPropia?: (v: Partial<Vista>) => void;
+  /** El filtro fijo en palabras («Área contiene «Movilidad»») y lo que se dice al crear. */
+  etiquetaFijo?: string;
+  textoAlCrear?: string;
+  /** Sin la fila del título (quien incrusta ya lo dice). */
+  sinTitulo?: boolean;
 }) {
   const [menuProps, setMenuProps] = useState(false);
   const tono = tonoDe(color);
@@ -198,13 +216,20 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
   /** Lo que el visitante de la página publicada filtra u ordena. No se guarda: solo vive en esta carga. */
   const [visitante, setVisitante] = useState<Partial<Pick<Vista, 'filtros' | 'orden_por'>>>({});
   const elegir = (sel: string) => {
+    if (vistaPropia !== undefined) { if (!sel.startsWith('vista:')) cambiarVista({ forma: sel as Forma }); return; }
     setSeleccion(sel);
     setVisitante({});
     // El tipo del bloque todavía dice «galeria | tabla»; por dentro se guarda
     // cualquier texto, y `vista:<id>` es lo que abre la vista guardada.
     onCambiarVista?.(sel as FormaVista);
   };
+  const propiaActiva = vistaPropia !== undefined;
+  const [propia, setPropia] = useState<Partial<Vista>>(vistaPropia || {});
   const activa: Vista = useMemo(() => {
+    if (propiaActiva) {
+      const forma = (FORMAS.some(f => f.forma === propia.forma) ? propia.forma : 'galeria') as Forma;
+      return { ...vistaVirtual(forma), ...propia, id: null, forma, nombre: propia.nombre || vistaVirtual(forma).nombre } as Vista;
+    }
     const id = seleccion.startsWith('vista:') ? seleccion.slice(6) : null;
     const lista = vistas || [];
     const porId = id ? lista.find(v => v.id === id) : null;
@@ -213,7 +238,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
     // Un bloque que dice «galería» abre la primera vista guardada de galería:
     // así una página antigua sigue viéndose igual cuando la tabla ya tiene vistas.
     return (!id && lista.find(v => v.forma === forma)) || vistaVirtual(id ? 'tabla' : forma);
-  }, [seleccion, vistas]);
+  }, [seleccion, vistas, propiaActiva, propia]);
   const vista = activa.forma;
   // Lo que se ve: en el editor, la vista guardada; en la página publicada, la misma con los filtros del visitante encima.
   const mostrada: Vista = useMemo(() => editable ? activa : { ...activa, ...visitante }, [activa, visitante, editable]);
@@ -243,6 +268,8 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
   const relojForm = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cargarVistas = useCallback(async () => {
+    // Una vista enlazada con vista propia no usa las vistas guardadas de la original.
+    if (vistaPropia !== undefined) { setVistas([]); return; }
     try {
       const r = await pedirDatos(`/api/bd/tablas/${tablaId}/vistas`);
       setVistas(r.ok ? (await r.json()).map(normalizarVista) : []);
@@ -264,6 +291,10 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
     // En la página publicada un catálogo sin orden va por tamaño (`server/bd.ts`).
     if (!editable) params.set('lectura', '1');
     if (vinculo) params.set('fijo', JSON.stringify(vinculo));
+    if (propiaActiva) {
+      if (propia.filtros && (Array.isArray(propia.filtros) ? propia.filtros.length : (propia.filtros as any).reglas?.length)) params.set('filtros', JSON.stringify(propia.filtros));
+      if (propia.orden_por?.length) params.set('orden', JSON.stringify(propia.orden_por));
+    }
     const qs = params.toString();
     try {
       const r = await pedirDatos(`/api/bd/tablas/${tablaId}${qs ? `?${qs}` : ''}`);
@@ -278,7 +309,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
       }
     } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
     if (mio === turno.current) setCargando(false);
-  }, [tablaId, activa.id, vistas === null, visitante, editable, JSON.stringify(vinculo || null)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tablaId, activa.id, vistas === null, visitante, editable, JSON.stringify(vinculo || null), propiaActiva && JSON.stringify([propia.filtros || null, propia.orden_por || null])]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { cargar(); }, [cargar]);
   /** Lo que lleva una fila nueva para nacer conectada (vista enlazada). */
@@ -304,6 +335,10 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
   const cambiarVista = async (parcial: Partial<Vista>) => {
     if (!editable) return;
     setFalloVista(null);
+    if (vistaPropia !== undefined) {
+      setPropia(prev => { const sig = { ...prev, ...parcial }; onCambiarVistaPropia?.(sig); return sig; });
+      return; // los filtros y el orden vuelven a pedir la tabla solos (dependencias de `cargar`)
+    }
     if (!activa.id) {
       const r = await fetch(`/api/bd/tablas/${tablaId}/vistas`, {
         method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
@@ -346,6 +381,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
    *  «de siempre», para que no desaparezca la pestaña que se estaba mirando. */
   const crearVista = async (forma: Forma) => {
     setFalloVista(null);
+    if (vistaPropia !== undefined) { await cambiarVista({ forma, nombre: undefined }); return; }
     if (!activa.id) {
       await fetch(`/api/bd/tablas/${tablaId}/vistas`, {
         method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
@@ -571,9 +607,25 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
     else setFallo(j.error || 'No se pudo abrir la página.');
   };
 
+  // BORRAR CON RED (2026-10-23, bot evaluador): la fila va a la papelera y un
+  // aviso deja deshacerlo al momento (`/restaurar`, 15 días en el servidor).
+  const [borrada, setBorrada] = useState<{ id: string; nombre: string } | null>(null);
+  useEffect(() => { if (!borrada) return; const t = setTimeout(() => setBorrada(null), 8000); return () => clearTimeout(t); }, [borrada]);
   const borrarFila = async (filaId: string) => {
-    await fetch(`/api/bd/filas/${filaId}`, { method: 'DELETE', credentials: 'include' });
-    cargar();
+    const f = datos?.filas.find(x => x.id === filaId);
+    const nombre = f ? (datos?.columna_titulo && f.celdas[datos.columna_titulo]?.estado === 'ok' ? String((f.celdas[datos.columna_titulo] as any).valor) : f.pagina?.titulo) || 'Sin título' : 'Sin título';
+    const r = await fetch(`/api/bd/filas/${filaId}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) setBorrada({ id: filaId, nombre });
+    await cargar();
+    avisarCambio();
+  };
+  const deshacerBorrado = async () => {
+    if (!borrada) return;
+    const id = borrada.id;
+    setBorrada(null);
+    await fetch(`/api/bd/filas/${id}/restaurar`, { method: 'POST', credentials: 'include' });
+    await cargar();
+    avisarCambio();
   };
 
   if (cargando) {
@@ -1086,7 +1138,16 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
           dirección para buscadores, en una pestaña nueva. */}
       {editable && <a href={sitio ? sitio.enlaceBd(tablaId, datos.tabla?.titulo) : `/bd/${tablaId}${slugDe(datos.tabla?.titulo) ? `/${slugDe(datos.tabla?.titulo)}` : ''}`}
         target="_blank" rel="noopener noreferrer" className={claseBoton(false)}
-        title="Abrir como página, en una pestaña nueva" aria-label="Abrir esta base de datos como página, en una pestaña nueva">
+        // (2026-10-23) En el editor y sin web publicada, a la página donde vive la
+        // base de datos: `/bd/…` es su página PÚBLICA y una tabla privada daba 404.
+        onClick={sitio ? undefined : e => {
+          e.preventDefault();
+          const ventana = window.open('', '_blank');
+          const publica = (e.currentTarget as HTMLAnchorElement).href;
+          fetch(`/api/bd/tablas/${tablaId}/hogar`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null)
+            .then(j => { const url = j?.pagina_id ? `/paginas/${j.pagina_id}` : publica; if (ventana) ventana.location.href = url; else window.location.href = url; });
+        }}
+        title={vinculo ? 'Abrir la base de datos original, en una pestaña nueva' : 'Abrir como página, en una pestaña nueva'} aria-label="Abrir la base de datos original, en una pestaña nueva">
         <ArrowUpRight className="w-[18px] h-[18px]" />
       </a>}
       {/* AÑADIR: crea una entrada al pulsarlo, sin menú. Las propiedades y los enlaces están en «Propiedades». */}
@@ -1106,6 +1167,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
             className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-5"
             onKeyDown={e => { if (e.key === 'Escape') setNuevaEntrada(false); }}>
             <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Nueva entrada en {datos?.tabla?.titulo || 'la base de datos'}</p>
+            {textoAlCrear && <p className="mt-1 flex items-center gap-1 text-xs font-bold text-blue-700"><Link2 className="h-3.5 w-3.5" /> {textoAlCrear}</p>}
             <input autoFocus value={tituloNueva} onChange={e => setTituloNueva(e.target.value)} maxLength={200}
               placeholder="Sin título" aria-label="Título de la entrada"
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); crearEntrada(false); } }}
@@ -1120,16 +1182,23 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
           </div>
         </div>,
         document.body)}
+      {borrada && createPortal(
+        <div role="status" className="fixed bottom-5 left-1/2 z-[10000] flex -translate-x-1/2 items-center gap-3 rounded-full bg-slate-900 px-4 py-2.5 text-sm text-white shadow-2xl">
+          <span className="max-w-[16rem] truncate">«{borrada.nombre}» movida a la papelera</span>
+          <button type="button" onClick={deshacerBorrado} className="font-black text-emerald-300 hover:text-emerald-200">Deshacer</button>
+          <button type="button" onClick={() => setBorrada(null)} aria-label="Cerrar el aviso" className="text-slate-400 hover:text-white"><X className="h-4 w-4" /></button>
+        </div>,
+        document.body)}
       {/* CENTRADA (2026-10-02, Eugenio: «el título de la base de datos
           centrado y la galería centrada, no esquinada a la izquierda»). El
           título va solo en su línea; los mandos del editor, debajo y también
           al centro. */}
       {/* Oculto y sin nada más que enseñar (quien lee no tiene mandos): ni la
           fila del título se pinta, para que no quede un hueco encima. */}
-      {limpia && datos.tabla.descripcion && !(tituloOculto && !editable) && (
+      {limpia && datos.tabla.descripcion && !(tituloOculto && !editable) && !sinTitulo && (
         <p className={cn('-mt-2 mb-3 max-w-2xl text-sm', tituloAlineacion === 'izquierda' ? 'text-left' : 'mx-auto text-center', 'leading-relaxed whitespace-pre-line text-slate-500', tituloOculto && 'opacity-40')}>{datos.tabla.descripcion}</p>
       )}
-      {!(limpia && tituloOculto && !editable) && (
+      {!(limpia && tituloOculto && !editable) && !sinTitulo && (
       <div className={limpia
         ? cn('flex flex-wrap items-center gap-2 pb-4 min-h-9', tituloAlineacion === 'izquierda' ? 'justify-start' : 'justify-center')
         : cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
@@ -1185,7 +1254,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
           «Ordenar» que no saben el uno del otro. */}
       {vistas && !(ocultarMandosPublica && !editable) && !(!editable && esCatalogo(columnas)) && (
         <div className={limpia ? 'pb-3' : cn('px-2 py-1.5 border-b border-slate-100', tono.fondo ? 'bg-white/30' : 'bg-white')}>
-          <BarraVista vistas={vistas} activa={mostrada} visitante={!editable} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null}
+          <BarraVista vistas={vistas} activa={mostrada} visitante={!editable} columnas={columnas} columnaTitulo={datos.columna_titulo ?? null} filtroFijo={etiquetaFijo}
             editable={editable} conocidos={conocidos.current} centrada={limpia}
             gruposConocidos={colAgr ? agruparFilas(filas, colAgr, { ...activa.config, ocultar_vacios: false }).map(g => ({ clave: g.clave, etiqueta: g.etiqueta })) : []}
             onElegir={v => elegir(v.id ? `vista:${v.id}` : v.forma)}
@@ -1326,7 +1395,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable =
                       onClick={() => editable && setEditorColumna(c)}
                       className={cn('group inline-flex items-baseline gap-1.5 max-w-full', editable && 'cursor-pointer')}>
                       <span className="text-[11px] font-black uppercase tracking-wide text-slate-500 truncate">{c.nombre}</span>
-                      <span className="text-[10px] font-bold text-slate-300">{c.tipo}</span>
+                      <span className="text-[10px] font-bold text-slate-300">{c.tipo === 'relacion' ? (c.config?.tema ? 'tema' : 'relación') : (NOMBRE_TIPO[c.tipo] || c.tipo)}</span>
                       {editable && <Settings2 className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 shrink-0" />}
                     </button>
                   </th>

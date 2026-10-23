@@ -9730,3 +9730,13 @@ Eugenio: «al añadir un botón tarda en aparecer su nombre y sale "Sin título"
 - «Añadir botón» pide primero el nombre (diálogo «Nuevo botón»): el botón nace ya con él y su página con ese título; luego se abre la ventana para escribirla.
 - Con la ventana abierta, si cambia el título de la página del botón, el botón lo enseña a los 2 s (antes, solo al cerrar).
 - `FilaBotones onReordenar`: en el editor los botones se arrastran (línea verde donde caen). Con la fila al revés (botones a la derecha) se respeta lo que se ve.
+
+## 2026-10-23 · Vista enlazada, segunda vuelta: lo que pidió el bot evaluador y conectar existentes (Programador 8)
+Bot evaluador: arrastrar pestañas 7/10, vista enlazada 6,5/10. Eugenio: «no existe la opción de conectar con una entrada ya existente».
+- «Conectar existente» en la vista enlazada: buscador de las entradas de la original; marcar conecta, desmarcar desconecta (se escribe en la columna de esta entrada; la otra se entera por la cara de vuelta). Lo que llega por un subtema sale marcado «por un subtema».
+- Vista PROPIA de cada pestaña, como en Notion (`Rejilla vistaPropia`): forma, filtros, orden y grupos se guardan en `config.vistasRed[columna]` de la tabla de la entrada; ya no tocan las vistas guardadas de la original.
+- El filtro fijo se ve: pastilla «Conectadas con «X»» (fijo) en Filtrar, y el número del botón lo cuenta. Cabecera «N conectadas con «X»» y el diálogo de crear dice «Se conectará con «X»». Sin el título repetido de la base de datos (`sinTitulo`), galería pequeña.
+- `Desplegable`: un panel pegado a la derecha sin sitio a la izquierda se abre bajo su botón (antes, pegado al borde de la ventana).
+- Borrar una fila: aviso «movida a la papelera · Deshacer» (8 s, `/restaurar`) y las pestañas se ponen al día.
+- La pestaña abierta va en `?seccion=` también en el editor; flechas ‹ › en la pestaña abierta para moverla sin arrastrar (teclado y teléfono); asa ⋮⋮ al pasar el ratón; si no se guarda el orden, vuelve y lo dice.
+- ↗ de una base de datos en el editor abre la página donde vive (`/hogar`) en vez de `/bd/…` (404 si era privada). Tipos de columna con tildes («relación», «tema»…).
