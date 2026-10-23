@@ -121,7 +121,7 @@ async function pedirDatos(url: string, intentos = 3): Promise<Response> {
   }
 }
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, onCargada, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
+export default function Rejilla({ vinculo, alCrearEnVinculo, tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, onCargada, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -173,6 +173,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
   visibles?: string[];
   onCambiarVisibles?: (ids: string[]) => void;
+  /** LA VISTA ENLAZADA (2026-10-23, como Notion): solo las filas conectadas con
+   *  una entrada (`columna_id` contiene `valor`, o una lista de `ids`), y lo que
+   *  se crea aquí nace ya conectado. La tabla es la original: editar aquí es
+   *  editar allí. */
+  vinculo?: { columna_id?: string; valor?: string; ids?: string[] };
+  /** Enlace de un solo lado: quien incrusta conecta la fila nueva por su cuenta. */
+  alCrearEnVinculo?: (filaId: string) => Promise<void>;
 }) {
   const [menuProps, setMenuProps] = useState(false);
   const tono = tonoDe(color);
@@ -256,6 +263,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     if (!editable && visitante.orden_por) params.set('orden', JSON.stringify(visitante.orden_por));
     // En la página publicada un catálogo sin orden va por tamaño (`server/bd.ts`).
     if (!editable) params.set('lectura', '1');
+    if (vinculo) params.set('fijo', JSON.stringify(vinculo));
     const qs = params.toString();
     try {
       const r = await pedirDatos(`/api/bd/tablas/${tablaId}${qs ? `?${qs}` : ''}`);
@@ -270,9 +278,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       }
     } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
     if (mio === turno.current) setCargando(false);
-  }, [tablaId, activa.id, vistas === null, visitante, editable]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tablaId, activa.id, vistas === null, visitante, editable, JSON.stringify(vinculo || null)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { cargar(); }, [cargar]);
+  /** Lo que lleva una fila nueva para nacer conectada (vista enlazada). */
+  const celdasVinculo = (): Record<string, any> => (vinculo?.columna_id && vinculo.valor ? { [vinculo.columna_id]: [vinculo.valor] } : {});
 
   /** El visitante cambia el filtro o el orden solo en su pantalla: la vista del autor no se toca. */
   const cambiarVisitante = (parcial: Partial<Vista>) => {
@@ -443,11 +453,12 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const crearEntrada = async (ampliar: boolean) => {
     const r = await fetch(`/api/bd/tablas/${tablaId}/filas`, {
       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ titulo: tituloNueva.trim() || 'Sin título' }),
+      body: JSON.stringify({ titulo: tituloNueva.trim() || 'Sin título', ...(vinculo ? { celdas: celdasVinculo() } : {}) }),
     });
     const j = await r.json().catch(() => ({}));
     setNuevaEntrada(false);
     if (!r.ok) { setFallo(j.error || 'No se pudo crear la entrada.'); return; }
+    if (vinculo && j.id) { await alCrearEnVinculo?.(j.id); avisarCambio(); }
     await cargar();
     if (ampliar && j.id) abrirPagina({ id: j.id, pagina_id: null } as any);
   };
@@ -475,11 +486,12 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const crearCon = async (titulo: string, celdas: Record<string, any>) => {
     const r = await fetch(`/api/bd/tablas/${tablaId}/filas`, {
       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ titulo, celdas }),
+      body: JSON.stringify({ titulo, celdas: { ...celdasVinculo(), ...celdas } }),
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) setFalloVista(j.error || 'No se pudo crear.');
     else if (j.aviso) setFalloVista(j.aviso);
+    if (r.ok && vinculo && j.id) { await alCrearEnVinculo?.(j.id); avisarCambio(); }
     await cargar();
   };
   /** «Estado» con tres opciones, para el tablero de una tabla que no tiene
@@ -1252,6 +1264,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-4', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(filas, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
+              celdasNueva={vinculo ? celdasVinculo() : undefined} alCrearNueva={vinculo ? async id => { await alCrearEnVinculo?.(id); avisarCambio(); } : undefined}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
               celdasAlRecibir={colAgr && editable ? celdasGrupo : undefined}
               enCaja={!!colAgr}

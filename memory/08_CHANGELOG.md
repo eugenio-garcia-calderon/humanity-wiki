@@ -9717,3 +9717,10 @@ Eugenio: «la vista de una entrada con todos sus enlaces es distinta en el edito
 Eugenio: «que en el editor se pueda pinchar y arrastrar una pestaña y colocarla más a la izquierda o a la derecha».
 - En el editor, quien puede editar la tabla arrastra las pestañas de la red (línea verde donde caerá). El orden es de la TABLA (`bd_tablas.config.ordenRed`, `PUT /api/bd/tablas/:id/orden-red`): todas sus entradas, y la página publicada, enseñan las pestañas en ese orden. Un enlace nuevo va detrás.
 - `cacheCorta`: las escrituras vacían la memoria también al TERMINAR, no solo al empezar (una lectura a mitad guardaba lo viejo 30 s).
+
+## 2026-10-23 · Vista enlazada editable en la red de una entrada (como Notion) (Programador 8)
+Eugenio: «que desde la pestaña (p. ej. Proyectos en Movilidad) se pueda modificar la base de datos, crear entradas, modificar la vista, y que sea una vista de la original conectada con ella, como hace Notion».
+- En el editor, abrir una pestaña de la red enseña la base de datos ORIGINAL (`Rejilla`) filtrada a lo conectado con la entrada (`?fijo=` en `GET /api/bd/tablas/:id`: «columna contiene esta entrada», o lista de `ids` si el enlace es de un solo lado). Editar es editar la original.
+- «Añadir» (y «Nueva página» de la galería, y el «+» de los grupos) crea la entrada ya conectada: con la columna de vuelta (`vinculo` en cada grupo de `redDePagina`) o, si el enlace es de un solo lado, añadiéndola a la columna de la entrada.
+- La forma de vista (galería, tabla, tablero…) se recuerda por pestaña en la tabla (`config.vistasRed`, `PUT /api/bd/tablas/:id/vista-red`). Las vistas guardadas son las de la tabla original (compartidas).
+- En el editor salen también las pestañas vacías (`?editor=1`), con «Aún no hay nada conectado · abrir para añadir».

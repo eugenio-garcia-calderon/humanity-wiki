@@ -92,7 +92,11 @@ export type { Celda } from './bd/celdas';
 export type EntradaRed = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null;
   /** (2026-10-22) Llega por un subtema: su nombre («Fotovoltaica»). Sin valor, es de la propia página. */
   via?: string | null };
-export type GrupoRed = { columna_id: string; nombre: string; slug: string; tabla_destino: string | null; tabla_titulo: string | null; entradas: EntradaRed[] };
+export type GrupoRed = { columna_id: string; nombre: string; slug: string; tabla_destino: string | null; tabla_titulo: string | null; entradas: EntradaRed[];
+  /** (2026-10-23) La columna de la OTRA tabla que dice «está conectado con esta entrada»: la vista enlazada del editor filtra y crea con ella. Sin valor, el enlace es de un solo lado. */
+  vinculo?: string | null;
+  /** La vista elegida para este grupo en el editor (`config.vistasRed`). */
+  vista?: string | null };
 export type RedPagina = { fila_id: string; tabla_id: string; grupos: GrupoRed[] };
 
 export const bdInterno: {
@@ -104,7 +108,7 @@ export const bdInterno: {
   puedeConTabla?: (req: Pick<Request, 'user'>, tablaId: string, escribir: boolean)
     => Promise<{ tabla: any } | { error: string; codigo: number }>;
   /** La red de una página (2026-10-21): sus relaciones con las entradas de otras bases de datos. */
-  redDePagina?: (req: Pick<Request, 'user'> | null, paginaId: string) => Promise<RedPagina | null>;
+  redDePagina?: (req: Pick<Request, 'user'> | null, paginaId: string, conVacios?: boolean) => Promise<RedPagina | null>;
   /** `GET /api/bd/tablas/:id` without HTTP: definition, columns and computed rows. */
   leerTabla?: (req: Pick<Request, 'user'> | null, tablaId: string)
     => Promise<{ codigo: number; cuerpo: any }>;
@@ -618,6 +622,16 @@ export function registerBdRoutes(app: Express, db: any) {
       const filtrosUrl = deUrl(req.query.filtros);
       let filtros: Filtros = filtrosUrl ?? vista?.filtros ?? [];
       if (!filtroValido(filtros)) filtros = [];
+      // LA VISTA ENLAZADA (2026-10-23, como Notion): «solo lo conectado con esta
+      // entrada», además de los filtros de la vista. `columna_id` contiene
+      // `valor`, o una lista de `ids` si el enlace es de un solo lado.
+      const fijo = deUrl(req.query.fijo);
+      if (fijo && typeof fijo === 'object') {
+        if (Array.isArray(fijo.ids)) { const sol = new Set(fijo.ids.map(String)); visibles = visibles.filter(f => sol.has(f.id)); }
+        if (typeof fijo.columna_id === 'string' && fijo.valor) {
+          filtros = { y_o: 'y', reglas: [{ columna_id: fijo.columna_id, operador: 'contiene', valor: String(fijo.valor) } as any, ...(Array.isArray(filtros) ? filtros : [filtros])] };
+        }
+      }
       const ordenUrl = deUrl(req.query.orden);
       let ordenPor: Orden[] = Array.isArray(ordenUrl) ? ordenUrl : (vista?.orden_por || []);
       // UN CATÁLOGO SIN ORDEN VA POR TAMAÑO (2026-10-19, Wikiproducts, ronda 4
@@ -827,6 +841,23 @@ export function registerBdRoutes(app: Express, db: any) {
         WHERE id = ${String(req.params.id)}
       `);
       res.json({ orden });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** La vista que usa cada pestaña de la red en el editor (`vistasRed[columna]`). */
+  app.put('/api/bd/tablas/:id/vista-red', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, String(req.params.id), true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const col = String(req.body?.columna_id || ''), vista = String(req.body?.vista || '');
+      if (!/^[A-Za-z0-9_-]{3,64}$/.test(col) || !/^[A-Za-z0-9_:-]{1,80}$/.test(vista)) return res.status(400).json({ error: 'Falta la pestaña o la vista.' });
+      await db.execute(sql`
+        UPDATE bd_tablas SET config = jsonb_set(jsonb_set(COALESCE(config, '{}'::jsonb), '{vistasRed}', COALESCE(config->'vistasRed', '{}'::jsonb)), ARRAY['vistasRed', ${col}], ${JSON.stringify(vista)}::jsonb),
+          updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${String(req.params.id)}
+      `);
+      res.json({ ok: true });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -1383,7 +1414,7 @@ export function registerBdRoutes(app: Express, db: any) {
    * mira no puede leerla, no se enseña.
    */
   /** Ver `RedPagina`. Con `req = null`, lo que ve un anónimo (el HTML y las direcciones). */
-  const redDePagina = async (req: Pick<Request, 'user'> | null, paginaId: string): Promise<RedPagina | null> => {
+  const redDePagina = async (req: Pick<Request, 'user'> | null, paginaId: string, conVacios = false): Promise<RedPagina | null> => {
     const quien = (req || { user: undefined }) as Request;
     const fila = (await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${paginaId} AND deleted_at IS NULL LIMIT 1`)).rows[0] as any;
     if (!fila) return null;
@@ -1419,15 +1450,16 @@ export function registerBdRoutes(app: Express, db: any) {
       ORDER BY c.created_at
     `)).rows as any[];
 
-    type Fuente = { id: string; nombre: string; destino: string | null; propias: boolean; lista: (fid: string) => any[] };
+    type Fuente = { id: string; nombre: string; destino: string | null; propias: boolean; vinculo: string | null; lista: (fid: string) => any[] };
     const fuentes: Fuente[] = cols.map((c: any) => ({
       id: c.id, nombre: c.nombre, destino: c.config?.tabla_destino || null,
       propias: c.config?.rol === 'madre' || c.config?.rol === 'hijos',
+      vinculo: c.config?.inversa_de || c.config?.reciproca_id || null,
       lista: (fid: string) => enl[fid]?.[c.id] || [],
     }));
     for (const e of entrantes) {
       const inv = await enlacesInversos(db, e.id, todas);
-      fuentes.push({ id: e.id, nombre: e.titulo || e.nombre, destino: e.tabla_id, propias: false, lista: (fid: string) => inv[fid] || [] });
+      fuentes.push({ id: e.id, nombre: e.titulo || e.nombre, destino: e.tabla_id, propias: false, vinculo: e.id, lista: (fid: string) => inv[fid] || [] });
     }
 
     const grupos: GrupoRed[] = [];
@@ -1441,13 +1473,14 @@ export function registerBdRoutes(app: Express, db: any) {
         vistosId.add(a.id);
         lista.push({ ...a, via: fid === fila.id ? null : (nombreSub.get(fid) || null) });
       }
-      if (!lista.length) continue;
+      // En el editor salen también los enlaces vacíos: su vista enlazada es donde se crea la primera entrada.
+      if (!lista.length && !(conVacios && c.destino && !c.propias)) continue;
       const destino = c.destino;
       if (destino && 'error' in (await puedeConTabla(quien, destino, false))) continue;
-      const filas = (await db.execute(sql`
+      const filas = lista.length ? (await db.execute(sql`
         SELECT id, pagina_id, COALESCE(oculta, false) AS oculta FROM bd_filas
         WHERE id = ANY(string_to_array(${lista.map((x: any) => x.id).join(',')}, ',')) AND deleted_at IS NULL
-      `)).rows as any[];
+      `)).rows as any[] : [];
       const porId = new Map(filas.filter(f => !f.oculta).map(f => [f.id, f]));
       const tarj = await tarjetasDe(filas.map(f => f.pagina_id).filter(Boolean));
       const t = destino ? (await db.execute(sql`SELECT titulo FROM bd_tablas WHERE id = ${destino}`)).rows[0] as any : null;
@@ -1466,7 +1499,8 @@ export function registerBdRoutes(app: Express, db: any) {
         vistos.add(s);
         entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null, via: a.via || null });
       }
-      if (entradas.length) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas });
+      const vistasRed = permisoTabla?.config?.vistasRed || {};
+      if (entradas.length || conVacios) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas, vinculo: c.vinculo, vista: typeof vistasRed[c.id] === 'string' ? vistasRed[c.id] : null });
     }
     // EL ORDEN DE LAS PESTAÑAS (2026-10-23, Eugenio: «pinchar y arrastrar una
     // pestaña para ordenarlas como quiera»). Es de la TABLA (`config.ordenRed`):
@@ -1485,12 +1519,12 @@ export function registerBdRoutes(app: Express, db: any) {
   app.get('/api/bd/paginas/:paginaId/red', async (req: Request, res: Response) => {
     try {
       res.set('Cache-Control', 'private, no-store');
-      const r = await redDePagina(req, String(req.params.paginaId));
+      const r = await redDePagina(req, String(req.params.paginaId), req.query.editor === '1');
       const w = (await db.execute(sql`SELECT title, slug FROM knowledge_windows WHERE id = ${req.params.paginaId}`)).rows[0] as any;
       const corto = typeof w?.slug === 'string' && w.slug && !w.slug.includes('/') ? w.slug : slugDe(w?.title || '');
       // `tabla_id` y `ordenable`: el editor deja arrastrar las pestañas a quien puede editar la tabla.
       const ordenable = !!r && !('error' in (await puedeConTabla(req, r.tabla_id, true)));
-      res.json({ grupos: r?.grupos || [], slug: corto || null, tabla_id: r?.tabla_id || null, ordenable });
+      res.json({ grupos: r?.grupos || [], slug: corto || null, tabla_id: r?.tabla_id || null, fila_id: r?.fila_id || null, ordenable });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

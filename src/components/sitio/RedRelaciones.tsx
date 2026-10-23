@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, BellRing, Link2, Check, ArrowRight, FileText } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
@@ -27,13 +27,18 @@ import { miniatura } from '../../utils/miniatura';
 type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null;
   /** Llega por un subtema (`bd/temas.ts`): «vía Fotovoltaica». */
   via?: string | null };
-type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: string | null; entradas: Entrada[] };
+export type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: string | null; tabla_destino?: string | null; entradas: Entrada[]; vinculo?: string | null; vista?: string | null };
+export type { Entrada as EntradaRedCliente };
 
 const MAX_EN_TODO = 8;
 const TONOS = ['bg-emerald-50 text-emerald-600', 'bg-sky-50 text-sky-600', 'bg-amber-50 text-amber-600', 'bg-rose-50 text-rose-600', 'bg-violet-50 text-violet-600', 'bg-teal-50 text-teal-600'];
 
-export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, enEditor = false }: {
+export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, enEditor = false, recarga = 0, renderGrupo }: {
   paginaId: string; titulo: string; autorHandle?: string; esRaiz?: boolean;
+  /** Sube y la red se vuelve a pedir sin perder la pestaña abierta (editor). */
+  recarga?: number;
+  /** En el editor, una pestaña abierta enseña esto (la vista enlazada) en vez de las tarjetas. */
+  renderGrupo?: (g: Grupo, filaId: string) => ReactNode;
   /** (2026-10-23) En el editor: la misma vista que la página publicada, pero las
    *  pestañas no tocan la dirección y las entradas abren su página en el editor. */
   enEditor?: boolean;
@@ -41,6 +46,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   // ORDENAR LAS PESTAÑAS ARRASTRANDO (2026-10-23, Eugenio). Solo en el editor y
   // para quien puede editar la tabla; el orden es de la tabla (`orden-red`).
   const [tablaId, setTablaId] = useState<string | null>(null);
+  const [filaId, setFilaId] = useState<string | null>(null);
   const [ordenable, setOrdenable] = useState(false);
   const [arrastrada, setArrastrada] = useState<string | null>(null);
   const [encima, setEncima] = useState<{ slug: string; antes: boolean } | null>(null);
@@ -52,12 +58,12 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
 
   useEffect(() => {
     let vivo = true;
-    fetch(`/api/bd/paginas/${encodeURIComponent(paginaId)}/red`, { credentials: 'include' })
+    fetch(`/api/bd/paginas/${encodeURIComponent(paginaId)}/red${enEditor ? '?editor=1' : ''}`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : { grupos: [] }))
-      .then(j => { if (vivo) { setGrupos(j.grupos || []); setSlugPagina(j.slug || null); setTablaId(j.tabla_id || null); setOrdenable(!!j.ordenable); } })
+      .then(j => { if (vivo) { setGrupos(j.grupos || []); setSlugPagina(j.slug || null); setTablaId(j.tabla_id || null); setFilaId(j.fila_id || null); setOrdenable(!!j.ordenable); } })
       .catch(() => { if (vivo) setGrupos([]); });
     return () => { vivo = false; };
-  }, [paginaId]);
+  }, [paginaId, recarga, enEditor]);
 
   /** Dónde vive la página: las pestañas y las entradas cuelgan de aquí. */
   const base = useMemo(() => {
@@ -155,13 +161,18 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
       {grupo ? (
         // UNA PESTAÑA: sólo su grupo, en grande.
         <div>
+          {/* En el editor la vista enlazada ya lleva el nombre de su base de datos. */}
+          {!(renderGrupo && filaId) && (
           <div className="mb-4 flex items-baseline gap-2">
             <h2 className="text-xl font-black tracking-tight text-slate-900">{grupo.nombre}</h2>
             <span className="text-sm font-semibold text-slate-400">{grupo.entradas.length}</span>
           </div>
+          )}
+          {renderGrupo && filaId ? renderGrupo(grupo, filaId) : (
           <div className="grid grid-cols-2 gap-4 sm:gap-5 sm:[grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr))]">
             {grupo.entradas.map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} grande />)}
           </div>
+          )}
         </div>
       ) : (
         // TODO: todos los grupos. Los pequeños (una o dos entradas) se juntan de
@@ -180,6 +191,12 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
                 ? 'grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(min(11rem,100%),1fr))]'
                 : 'grid-cols-2')}>
                 {g.entradas.slice(0, MAX_EN_TODO).map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(g, x)} />)}
+                {!g.entradas.length && (
+                  <a href={caminoDe(g)} onClick={e => elegir(e, g)}
+                    className="col-span-2 grid min-h-24 place-items-center rounded-2xl border border-dashed border-slate-300 px-3 text-center text-sm font-bold text-slate-400 hover:border-emerald-400 hover:text-emerald-700">
+                    Aún no hay nada conectado · abrir para añadir
+                  </a>
+                )}
               </div>
             </div>
           ))}
