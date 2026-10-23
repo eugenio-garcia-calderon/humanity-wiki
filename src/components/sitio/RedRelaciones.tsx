@@ -38,6 +38,12 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
    *  pestañas no tocan la dirección y las entradas abren su página en el editor. */
   enEditor?: boolean;
 }) {
+  // ORDENAR LAS PESTAÑAS ARRASTRANDO (2026-10-23, Eugenio). Solo en el editor y
+  // para quien puede editar la tabla; el orden es de la tabla (`orden-red`).
+  const [tablaId, setTablaId] = useState<string | null>(null);
+  const [ordenable, setOrdenable] = useState(false);
+  const [arrastrada, setArrastrada] = useState<string | null>(null);
+  const [encima, setEncima] = useState<{ slug: string; antes: boolean } | null>(null);
   const sitio = useSitio();
   const [grupos, setGrupos] = useState<Grupo[] | null>(null);
   const [slugPagina, setSlugPagina] = useState<string | null>(null);
@@ -48,7 +54,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
     let vivo = true;
     fetch(`/api/bd/paginas/${encodeURIComponent(paginaId)}/red`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : { grupos: [] }))
-      .then(j => { if (vivo) { setGrupos(j.grupos || []); setSlugPagina(j.slug || null); } })
+      .then(j => { if (vivo) { setGrupos(j.grupos || []); setSlugPagina(j.slug || null); setTablaId(j.tabla_id || null); setOrdenable(!!j.ordenable); } })
       .catch(() => { if (vivo) setGrupos([]); });
     return () => { vivo = false; };
   }, [paginaId]);
@@ -100,6 +106,36 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   const enlaceEntrada = (g: Grupo, x: Entrada) =>
     enEditor ? (x.pagina_id ? `/paginas/${x.pagina_id}` : '#')
       : base ? `${base}/${g.slug}/${x.slug}` : x.pagina_id && sitio ? sitio.enlacePagina(x.pagina_id) : '#';
+  const arrastrable = enEditor && ordenable && !!tablaId && grupos.length > 1;
+  const soltar = (destino: string, antes: boolean) => {
+    const desde = arrastrada;
+    setArrastrada(null); setEncima(null);
+    if (!desde || desde === destino) return;
+    const lista = grupos.filter(g => g.slug !== desde);
+    const movida = grupos.find(g => g.slug === desde)!;
+    const i = lista.findIndex(g => g.slug === destino);
+    lista.splice(antes ? i : i + 1, 0, movida);
+    setGrupos(lista);
+    fetch(`/api/bd/tablas/${encodeURIComponent(tablaId!)}/orden-red`, {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orden: lista.map(g => g.columna_id) }),
+    }).catch(() => {});
+  };
+  const arrastre = (g: Grupo) => arrastrable ? {
+    draggable: true,
+    onDragStart: (e: React.DragEvent) => { setArrastrada(g.slug); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', g.slug); },
+    onDragOver: (e: React.DragEvent) => {
+      if (!arrastrada) return;
+      e.preventDefault();
+      const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const antes = e.clientX < r.left + r.width / 2;
+      if (encima?.slug !== g.slug || encima.antes !== antes) setEncima({ slug: g.slug, antes });
+    },
+    onDrop: (e: React.DragEvent) => { e.preventDefault(); soltar(g.slug, encima?.slug === g.slug ? encima.antes : true); },
+    onDragEnd: () => { setArrastrada(null); setEncima(null); },
+    marca: (encima?.slug === g.slug && arrastrada !== g.slug ? (encima.antes ? 'antes' : 'despues') : null) as Arrastre['marca'],
+    moviendo: arrastrada === g.slug,
+  } : undefined;
   const grupo = grupos.find(g => g.slug === activa) || null;
   const total = grupos.reduce((n, g) => n + g.entradas.length, 0);
 
@@ -111,7 +147,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
         <nav aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto pr-8 [scrollbar-width:none] sm:pr-0">
           <Pestana href={caminoDe()} activa={activa === 'todo'} onClick={e => elegir(e, null)} texto="Todo" n={total} />
           {grupos.map(g => (
-            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} />
+            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} arrastre={arrastre(g)} />
           ))}
         </nav>
       </div>
@@ -159,12 +195,23 @@ function ponerCanonica() {
   if (l) l.href = window.location.origin + window.location.pathname.replace(/\/+$/, '');
 }
 
-function Pestana({ href, activa, onClick, texto, n }: { href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number }) {
+type Arrastre = {
+  draggable: boolean; onDragStart: (e: React.DragEvent) => void; onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void; onDragEnd: () => void; marca: 'antes' | 'despues' | null; moviendo: boolean;
+};
+
+function Pestana({ href, activa, onClick, texto, n, arrastre }: { href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number; arrastre?: Arrastre }) {
+  const { marca, moviendo, ...eventos } = arrastre || ({} as Partial<Arrastre>);
   return (
     <a href={href} onClick={onClick} aria-current={activa ? 'page' : undefined}
-      title={texto}
-      className={cn('inline-flex h-12 max-w-[16rem] shrink-0 items-center gap-1.5 border-b-2 px-3 text-[15px] font-semibold transition-colors',
-        activa ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800')}>
+      title={arrastre ? `${texto} · arrastra para cambiarla de sitio` : texto}
+      {...(arrastre ? eventos : {})}
+      data-pestana-red={arrastre ? texto : undefined}
+      className={cn('relative inline-flex h-12 max-w-[16rem] shrink-0 items-center gap-1.5 border-b-2 px-3 text-[15px] font-semibold transition-colors',
+        activa ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800',
+        arrastre && 'cursor-grab active:cursor-grabbing', moviendo && 'opacity-40',
+        marca === 'antes' && 'before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded before:bg-emerald-500',
+        marca === 'despues' && 'after:absolute after:inset-y-2 after:right-0 after:w-0.5 after:rounded after:bg-emerald-500')}>
       <span className="truncate">{texto}</span>
       <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500')}>{n}</span>
     </a>
