@@ -59,7 +59,11 @@ const vacia = (fila: any, c: Columna) => {
   return !celda || celda.estado === 'vacia' || (celda.estado === 'ok' && Array.isArray(celda.valor) && !celda.valor.length);
 };
 
-export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha = false, sinRelaciones = false }: {
+export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha = false, sinRelaciones = false, soloRelaciones = false, alCambiar }: {
+  /** (2026-10-23) Solo los enlaces: el «Editar enlaces» de la red en el editor. */
+  soloRelaciones?: boolean;
+  /** Tras guardar un valor (la red del editor se vuelve a pedir). */
+  alCambiar?: () => void;
   tablaId: string; filaId: string; editable: boolean;
   /** En la página publicada las relaciones van en su red (pestañas y galerías,
    *  `RedRelaciones.tsx`, 2026-10-21): aquí no se repiten. */
@@ -113,7 +117,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha =
     if (v === 'si_tiene' || diseno.plegar_vacias) return !vacia(datos.fila, c);
     return true;
   };
-  const propias = sinRelaciones ? columnas.filter(c => c.tipo !== 'relacion') : columnas;
+  const propias = sinRelaciones ? columnas.filter(c => c.tipo !== 'relacion') : soloRelaciones ? columnas.filter(c => c.tipo === 'relacion' && !c.config?.rol?.match(/^(bloquea|bloqueada_por)$/)) : columnas;
   const visibles = propias.filter(seVe);
   const ocultas = propias.filter(c => !seVe(c));
   if (sinRelaciones && !visibles.length && !editable) return null;
@@ -130,6 +134,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha =
       return { error: suyo?.error || j.error || 'No se pudo guardar.' };
     }
     await cargar();
+    alCambiar?.();
   };
 
   /** Cambia la columna (nombre o configuración) y recarga. */
