@@ -9707,3 +9707,8 @@ Eugenio: «Un tipo de columna Tema que apunte a ese árbol y calcule la herencia
 - Al leer la tabla, cada tema enlazado lleva `ruta` y la celda `heredados`; `vistas.ts` cuenta los heredados: «Tema contiene Energía» encuentra lo de «Fotovoltaica». La ficha enseña «Energía solar › Fotovoltaica» (la ruta entera al pasar por encima).
 - `redDePagina`: en una tabla que anida, la red de un tema suma lo conectado a todos sus subtemas, con `via` («vía Fotovoltaica» en la tarjeta). También salen los «Tema» de otras tablas que apuntan aquí sin cara de vuelta. La madre y los hijos directos no se suman.
 - Elegir un tema: el selector sale en árbol (sangrado, la búsqueda mira la ruta) y con «Sugerir el tema más concreto» → `POST /api/bd/columnas/:id/sugerir-tema` (palabras de la entrada contra el tema y su ruta, gana el más profundo; si nada encaja, la IA de la casa elige de la lista). Solo sugiere.
+
+## 2026-10-23 · La red de una entrada, igual en el editor que publicada (Programador 8)
+Eugenio: «la vista de una entrada con todos sus enlaces es distinta en el editor que en la página publicada, que ya tiene el submenú con todos los enlaces ordenados; haz que sea la misma».
+- `RedEnEditor.tsx`: en la página de una fila, el editor enseña la misma `RedRelaciones` (pestañas «Todo» + un grupo por enlace, en galería; `enEditor`: las pestañas no tocan la dirección y las tarjetas abren `/paginas/:id`). Las propiedades de arriba ya no repiten los enlaces (`sinRelaciones`).
+- «Editar enlaces» abre debajo las celdas de relación de siempre (`PropiedadesFila soloRelaciones`); al guardar, la red se vuelve a pedir (`alCambiar`).

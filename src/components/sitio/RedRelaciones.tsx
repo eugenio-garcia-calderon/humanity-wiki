@@ -32,8 +32,11 @@ type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: s
 const MAX_EN_TODO = 8;
 const TONOS = ['bg-emerald-50 text-emerald-600', 'bg-sky-50 text-sky-600', 'bg-amber-50 text-amber-600', 'bg-rose-50 text-rose-600', 'bg-violet-50 text-violet-600', 'bg-teal-50 text-teal-600'];
 
-export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }: {
+export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, enEditor = false }: {
   paginaId: string; titulo: string; autorHandle?: string; esRaiz?: boolean;
+  /** (2026-10-23) En el editor: la misma vista que la página publicada, pero las
+   *  pestañas no tocan la dirección y las entradas abren su página en el editor. */
+  enEditor?: boolean;
 }) {
   const sitio = useSitio();
   const [grupos, setGrupos] = useState<Grupo[] | null>(null);
@@ -58,7 +61,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
 
   // La pestaña sale de la dirección (también al ir atrás y adelante).
   useEffect(() => {
-    if (!grupos) return;
+    if (!grupos || enEditor) return;
     const leer = () => {
       const t = window.location.pathname.split('/').filter(Boolean).map(x => { try { return decodeURIComponent(x); } catch { return x; } });
       const ultimo = t[t.length - 1];
@@ -69,7 +72,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
     const alVolver = () => { leer(); ponerCanonica(); };
     window.addEventListener('popstate', alVolver);
     return () => window.removeEventListener('popstate', alVolver);
-  }, [grupos]);
+  }, [grupos, enEditor]);
   // La pestaña activa, a la vista en la barra (en el teléfono la barra se desplaza).
   useEffect(() => {
     barra.current?.querySelector<HTMLElement>('a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
@@ -84,6 +87,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
   const elegir = (e: React.MouseEvent, g: Grupo | null) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
     e.preventDefault();
+    if (enEditor) { setActiva(g ? g.slug : 'todo'); return; }
     const destino = caminoDe(g || undefined);
     if (destino !== window.location.pathname + window.location.search) window.history.pushState(null, '', destino);
     setActiva(g ? g.slug : 'todo');
@@ -94,7 +98,8 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz }:
     if (window.scrollY > y) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
   };
   const enlaceEntrada = (g: Grupo, x: Entrada) =>
-    base ? `${base}/${g.slug}/${x.slug}` : x.pagina_id && sitio ? sitio.enlacePagina(x.pagina_id) : '#';
+    enEditor ? (x.pagina_id ? `/paginas/${x.pagina_id}` : '#')
+      : base ? `${base}/${g.slug}/${x.slug}` : x.pagina_id && sitio ? sitio.enlacePagina(x.pagina_id) : '#';
   const grupo = grupos.find(g => g.slug === activa) || null;
   const total = grupos.reduce((n, g) => n + g.entradas.length, 0);
 

@@ -29,6 +29,7 @@ import CreadorMenu from '../components/knowledge/CreadorMenu';
 import ConsolaCadena from '../components/knowledge/ConsolaCadena';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
+import RedEnEditor from '../components/tablas/RedEnEditor';
 import MenuEntradaPagina from '../components/tablas/MenuEntradaPagina';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
 import { TarjetaMarcador, WebInsertada, leerEnlace } from '../components/knowledge/BloqueEnlace';
@@ -4678,7 +4679,8 @@ function EditorPagina() {
           </>);
           const propsNodo = filaDe?.fila_id && filaDe.tabla_id ? (
             <div style={v2 ? { zoom: zoomPropiedades(el('propiedades')) } : undefined} >
-              <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} alDerecha={v2 && der('propiedades')} />
+              {/* Los enlaces van en la red de abajo, como en la página publicada (2026-10-23). */}
+              <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} alDerecha={v2 && der('propiedades')} sinRelaciones />
             </div>
           ) : null;
           const autorNodo = (<>
@@ -4731,6 +4733,10 @@ function EditorPagina() {
           );
         })()}
         </div>
+        {/* LA RED DE LA ENTRADA (2026-10-23): la misma que en la página publicada. */}
+        {filaDe?.fila_id && filaDe.tabla_id && (
+          <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
+        )}
         {ventanaBoton && (
           <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
             {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
