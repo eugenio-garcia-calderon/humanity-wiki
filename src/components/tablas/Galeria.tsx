@@ -71,7 +71,10 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+export default function Galeria({ celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+  /** Lo que lleva una página nueva para nacer conectada (la vista enlazada, 2026-10-23). */
+  celdasNueva?: Record<string, any>;
+  alCrearNueva?: (filaId: string) => Promise<void>;
   /** Carrusel (una fila que se mueve) o galería quieta (2026-10-06). */
   carrusel?: boolean;
   /** Carrusel: píxeles por segundo. */
@@ -384,10 +387,12 @@ export default function Galeria({ onGuardarCelda, recolocar, arrastrable, alSolt
     setAbriendo('nueva');
     try {
       const r = await fetch(`/api/bd/tablas/${tablaId}/filas`, {
-        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}',
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(celdasNueva && Object.keys(celdasNueva).length ? { celdas: celdasNueva } : {}),
       });
       const j = await r.json();
       if (!r.ok || !j.pagina_id) throw new Error(j.error || 'No se pudo crear la página.');
+      if (j.id) await alCrearNueva?.(j.id);
       onCambio();
       navigate(`/paginas/${j.pagina_id}`);
     } catch (e: any) { setFallo(e.message); setAbriendo(null); }
