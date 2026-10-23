@@ -10,6 +10,9 @@ export const direccionMapa = (datos: Record<string, unknown>, enMarco: boolean) 
   if (datos.filtros === true) q.set('filtros', '1');
   const t = String(datos.territorio || '').trim();
   if (t) q.set('territorio', t);
+  // (2026-10-23) Un territorio concreto del mapa: encuadrado y con su ficha abierta.
+  const foco = String(datos.foco || '').trim();
+  if (foco) q.set('foco', foco);
   const s = q.toString();
   return `/mapa${s ? `?${s}` : ''}`;
 };

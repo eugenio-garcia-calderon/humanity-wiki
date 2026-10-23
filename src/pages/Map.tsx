@@ -61,9 +61,61 @@ const ENCUADRES: Record<string, [number, number, number, number]> = {
   europa: [-25, 34, 45, 71],
 };
 
+const TIPO_TERRITORIO: Record<string, string> = {
+  planet: 'Planeta', continent: 'Continente', country: 'País', region: 'Comunidad autónoma', province: 'Provincia', municipality: 'Municipio', comunidad_vecinos: 'Comunidad de vecinos',
+};
+const numero = (n: number, d = 0) => n.toLocaleString('es-ES', { maximumFractionDigits: d });
+
+/**
+ * DÓNDE ESTÁ Y CUÁNTO MIDE (2026-10-23, Eugenio: «que se abra una ventanita
+ * lateral que te indique dónde está ubicado ese territorio y cuál es su área»).
+ * Lo pide a `/api/geo/territorio/:id/ficha`: su cadena hasta el continente, su
+ * superficie calculada del polígono del mapa, su población, densidad y centro.
+ */
+function ResumenTerritorio({ id }: { id: string }) {
+  const [f, setF] = useState<any>(null);
+  useEffect(() => {
+    let vivo = true;
+    setF(null);
+    fetch(`/api/geo/territorio/${encodeURIComponent(id)}/ficha`).then(r => (r.ok ? r.json() : null)).then(j => { if (vivo) setF(j); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [id]);
+  if (!f) return null;
+  const dato = (etiqueta: string, valor: React.ReactNode) => (
+    <div className="rounded-xl bg-slate-50 px-3 py-2">
+      <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">{etiqueta}</p>
+      <p className="mt-0.5 text-sm font-black text-slate-800">{valor}</p>
+    </div>
+  );
+  return (
+    <section data-resumen-territorio className="border-b border-slate-100 p-4 sm:px-6">
+      <p className="text-xs font-bold text-slate-500">
+        <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-black text-emerald-700">{TIPO_TERRITORIO[f.tipo] || f.tipo}</span>
+        {f.ruta?.length > 0 && <> en {f.ruta.filter((r: any) => r.tipo !== 'planet').map((r: any) => r.nombre).join(' › ')}</>}
+      </p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {dato('Superficie', f.superficie_km2 ? `${numero(f.superficie_km2, f.superficie_km2 < 100 ? 1 : 0)} km²` : 'Sin dato')}
+        {dato('Población', f.poblacion ? numero(f.poblacion) : 'Sin dato')}
+        {dato('Densidad', f.densidad ? `${numero(f.densidad, 1)} hab/km²` : 'Sin dato')}
+        {dato('Centro', f.centro ? `${numero(Math.abs(f.centro[1]), 3)}° ${f.centro[1] >= 0 ? 'N' : 'S'}, ${numero(Math.abs(f.centro[0]), 3)}° ${f.centro[0] >= 0 ? 'E' : 'O'}` : 'Sin dato')}
+      </div>
+      {f.superficie_km2 && !f.con_poligono ? null : f.con_poligono && <p className="mt-2 text-[11px] text-slate-400">Superficie calculada sobre el contorno del mapa.</p>}
+    </section>
+  );
+}
+
 export default function MapPage() {
   /** En el mapa incrustado con filtros: la ficha del territorio pinchado, a la derecha. */
   const [fichaAbierta, setFichaAbierta] = useState(false);
+  // `?foco=<id>` (2026-10-23): llegar al mapa con un territorio ya elegido, encuadrado y con su ficha abierta.
+  const [searchParamsFoco] = useSearchParams();
+  const foco = searchParamsFoco.get('foco');
+  const [cajaFoco, setCajaFoco] = useState<[number, number, number, number] | null | undefined>(foco ? undefined : null);
+  useEffect(() => {
+    if (!foco) return;
+    fetch(`/api/geo/territorio/${encodeURIComponent(foco)}/ficha`).then(r => (r.ok ? r.json() : null))
+      .then(j => setCajaFoco(j?.caja || null)).catch(() => setCajaFoco(null));
+  }, [foco]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCoords, setNewCoords] = useState<[number, number] | null>(null);
   const [formData, setFormData] = useState({ name: '', type: 'municipality', description: '' });
@@ -134,6 +186,11 @@ export default function MapPage() {
     if (territoriesLoading || territoryResolved) return;
     let cancelled = false;
     (async () => {
+      if (foco) {
+        const detail = await loadTerritoryDetail(foco);
+        if (!cancelled) { setSelectedTerritory(detail); setFichaAbierta(true); setTerritoryResolved(true); }
+        return;
+      }
       const slug = searchParams.get('territorio');
       const match = slug ? territories.find((t: any) => slugify(t.name) === slug) : null;
 
@@ -364,6 +421,8 @@ export default function MapPage() {
               metrics={metrics}
             />
           ) : (
+            <div>
+            <ResumenTerritorio id={selectedTerritory.id} />
             <div className="p-4 sm:p-6">
               {/* DE DÓNDE SALEN ESTAS CIFRAS (2026-08-22). Va ARRIBA, antes de
                   las puntuaciones y no debajo: quien mira un número decide en
@@ -398,6 +457,7 @@ export default function MapPage() {
                 embeddedTerritoryId={selectedTerritory.id}
                 onSelectObjective={(objId) => navigateExplorer('objetivo', objId)}
               />
+            </div>
             </div>
           )
         ) : (
@@ -571,6 +631,8 @@ export default function MapPage() {
   // mapa»). `?embed=1&filtros=1`: el mapa incrustado con la columna de filtros
   // (objetivo > indicador > marcador > métrica), sin el panel del territorio.
   const conFiltros = searchParams.get('filtros') === '1';
+  // Con `foco`, el mapa nace ya encuadrado en el territorio: se espera a su caja.
+  if (foco && cajaFoco === undefined) return <div className="grid h-full w-full place-items-center bg-slate-50 text-sm font-bold text-slate-400">Buscando el territorio…</div>;
   if (isEmbedMode && conFiltros) {
     return (
       <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">
@@ -592,6 +654,7 @@ export default function MapPage() {
             </aside>
           )}
           <HumanityMap
+            rellenoLimites={foco && cajaFoco ? { top: 40, bottom: 40, left: 40, right: Math.min(480, window.innerWidth * 0.5) + 40 } : undefined}
             onFeatureClick={(id, type) => { setFichaAbierta(true); handleFeatureClick(id, type); }}
             onMapClick={() => { setFichaAbierta(false); setSelectedTerritory(null); }}
             onMapDoubleClick={() => { /* sin alta de territorios en modo embed */ }}
@@ -602,7 +665,7 @@ export default function MapPage() {
             indicators={indicators}
             activeMarkerId={activeMarkerId}
             activeMetricId={activeMetricId}
-            limites={ENCUADRES[searchParams.get('territorio') || ''] || null}
+            limites={cajaFoco || ENCUADRES[searchParams.get('territorio') || ''] || null}
           />
         </div>
       </div>
@@ -623,7 +686,7 @@ export default function MapPage() {
           indicators={indicators}
           activeMarkerId={activeMarkerId}
           activeMetricId={activeMetricId}
-          limites={ENCUADRES[searchParams.get('territorio') || ''] || null}
+          limites={cajaFoco || ENCUADRES[searchParams.get('territorio') || ''] || null}
         />
       </div>
     );
@@ -682,7 +745,7 @@ export default function MapPage() {
           indicators={indicators}
           activeMarkerId={activeMarkerId}
           activeMetricId={activeMetricId}
-          limites={ENCUADRES[searchParams.get('territorio') || ''] || null}
+          limites={cajaFoco || ENCUADRES[searchParams.get('territorio') || ''] || null}
         />
       </div>
 
