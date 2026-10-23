@@ -9724,3 +9724,9 @@ Eugenio: «que desde la pestaña (p. ej. Proyectos en Movilidad) se pueda modifi
 - «Añadir» (y «Nueva página» de la galería, y el «+» de los grupos) crea la entrada ya conectada: con la columna de vuelta (`vinculo` en cada grupo de `redDePagina`) o, si el enlace es de un solo lado, añadiéndola a la columna de la entrada.
 - La forma de vista (galería, tabla, tablero…) se recuerda por pestaña en la tabla (`config.vistasRed`, `PUT /api/bd/tablas/:id/vista-red`). Las vistas guardadas son las de la tabla original (compartidas).
 - En el editor salen también las pestañas vacías (`?editor=1`), con «Aún no hay nada conectado · abrir para añadir».
+
+## 2026-10-23 · Botones de la cabecera: nombre al crearlos y ordenar arrastrando (Programador 8)
+Eugenio: «al añadir un botón tarda en aparecer su nombre y sale "Sin título", es cutre; y que se puedan reordenar arrastrando».
+- «Añadir botón» pide primero el nombre (diálogo «Nuevo botón»): el botón nace ya con él y su página con ese título; luego se abre la ventana para escribirla.
+- Con la ventana abierta, si cambia el título de la página del botón, el botón lo enseña a los 2 s (antes, solo al cerrar).
+- `FilaBotones onReordenar`: en el editor los botones se arrastran (línea verde donde caen). Con la fila al revés (botones a la derecha) se respeta lo que se ve.
