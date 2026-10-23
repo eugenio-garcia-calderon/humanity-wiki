@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, X, Menu, Maximize2, Minimize2 } from 'lucide-react';
+import { Plus, X, Menu, Maximize2, Minimize2, ArrowUpRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -118,9 +118,9 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
         </span>
       ))}
       {onAnadir && (botones.length > 0 || sinMargen) && (
-        <button type="button" onClick={onAnadir} title="Añadir otro botón"
+        <button type="button" onClick={onAnadir} title="Añadir una página hija (una entrada de esta página)"
           className={cn('inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 font-bold text-slate-400 hover:border-emerald-400 hover:text-emerald-700', TALLA[talla])}>
-          <Plus className="h-4 w-4" /> {botones.length ? 'Botón' : 'Añadir botón'}
+          <Plus className="h-4 w-4" /> {botones.length ? 'Entrada' : 'Añadir entrada'}
         </button>
       )}
     </div>
@@ -239,8 +239,10 @@ export function MarcoCargando({ src, title, className, style, paciencia = 7000 }
   );
 }
 
-export function VentanaBoton({ titulo, onCerrar, children, inicialGrande = false }: {
+export function VentanaBoton({ titulo, onCerrar, children, inicialGrande = false, enlace }: {
   titulo: string; onCerrar: () => void; children: ReactNode | ((grande: boolean) => ReactNode); inicialGrande?: boolean;
+  /** (2026-10-23) Abrir la página entera, con todo lo suyo (sus hijas, su red…). */
+  enlace?: string;
 }) {
   const [grande, setGrande] = useState(inicialGrande);
   useEffect(() => { if (inicialGrande) setGrande(true); }, [inicialGrande]);
@@ -257,6 +259,12 @@ export function VentanaBoton({ titulo, onCerrar, children, inicialGrande = false
       <div role="dialog" aria-label={titulo} onClick={e => e.stopPropagation()} data-ventana-boton={grande ? 'grande' : 'centro'}
         className={cn('relative flex flex-col overflow-hidden bg-white shadow-2xl', grande ? 'h-full w-full' : 'h-[min(92vh,60rem)] w-[min(72rem,100%)] rounded-3xl')}>
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+          {enlace && (
+            <a href={enlace} title="Abrir la página entera" aria-label="Abrir la página entera"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-600 shadow ring-1 ring-slate-200 hover:text-slate-900">
+              <ArrowUpRight className="h-4 w-4" /> Abrir página
+            </a>
+          )}
           <button type="button" onClick={() => setGrande(g => !g)} aria-label={grande ? 'Reducir la ventana' : 'Expandir a pantalla completa'}
             title={grande ? 'Reducir' : 'Expandir a pantalla completa'} className={boton}>
             {grande ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}

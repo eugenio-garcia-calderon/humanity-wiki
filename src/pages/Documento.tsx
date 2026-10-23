@@ -38,6 +38,7 @@ import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { useCargas, iniciarCarga, registrarReceptor, claveDestino, type DestinoCarga } from '../utils/cargas';
+import { useHijas, botonesDeHijas, vistaDeHijas, recargarHijas, GaleriaHijas, ElegirVistaHijas, type ConfigHijas, type VistaHijas } from '../components/knowledge/PaginasHijas';
 import { FilaBotones, VentanaBoton, MarcoCargando, type BotonCabecera } from '../components/knowledge/BotonesCabecera';
 import { BarraFija } from '../components/knowledge/BarraFija';
 import { preguntarBorrarBd } from '../components/tablas/PreguntaBorrarBd';
@@ -2344,27 +2345,69 @@ function EditorPagina() {
    *  y su página con ese título; luego se abre la ventana para escribirla. */
   const [nombreBotonNuevo, setNombreBotonNuevo] = useState<string | null>(null);
   const crearBotonCabecera = () => setNombreBotonNuevo('');
+  // LAS PÁGINAS HIJAS (2026-10-23, `PaginasHijas.tsx`): «Añadir entrada» crea una
+  // página hija, fila de la base de datos propia de esta página.
+  const hijasCfg = ajustes.hijas as ConfigHijas | undefined;
+  const hijas = useHijas(hijasCfg?.tabla_id);
+  const vistaHijas: VistaHijas = vistaDeHijas(hijasCfg);
+  const esHija = (b: BotonCabecera) => !!hijas?.some(h => h.fila_id === b.id);
+  /** Los botones de la cabecera: los de antes y, en vista «menú», las hijas. */
+  const botonesCabecera: BotonCabecera[] = [...(ajustes.botones || []), ...(vistaHijas === 'menu' ? botonesDeHijas(hijas) : [])];
   const crearBotonConNombre = async () => {
-    const nombre = (nombreBotonNuevo || '').trim().slice(0, 60);
+    const nombre = (nombreBotonNuevo || '').trim().slice(0, 120);
     if (!nombre) return;
     setNombreBotonNuevo(null);
-    const b: BotonCabecera = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: '', pubTitulo: nombre };
-    const r = await fetch('/api/documentos', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: nombre }) });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok || !j.id) { fallar(j.error || 'No se ha podido crear la página del botón.'); return; }
-    b.entityId = j.id;
-    setAjustes(a => ({ ...a, botones: [...(a.botones || []), b] }));
+    let tabla = hijasCfg?.tabla_id;
+    if (!tabla) {
+      // La primera entrada crea la base de datos de la página…
+      const rt = await fetch('/api/bd/tablas', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: `Páginas de «${(titulo || 'esta página').slice(0, 120)}»` }) });
+      const jt = await rt.json().catch(() => ({}));
+      if (!rt.ok || !jt.id) { fallar(jt.error || 'No se ha podido crear la base de datos de la página.'); return; }
+      tabla = jt.id as string;
+      // …y los botones de antes pasan a ser sus primeras entradas, con sus páginas.
+      const viejos = ajustes.botones || [];
+      let quedan = viejos;
+      if (viejos.length) {
+        const rm = await fetch(`/api/bd/tablas/${tabla}/filas-de-paginas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paginas: viejos.map(b => ({ id: b.entityId, titulo: b.pubTitulo })) }) });
+        const jm = await rm.json().catch(() => ({}));
+        const hechas = new Set((jm.creadas || []).map((c: any) => c.pagina_id));
+        quedan = viejos.filter(b => !hechas.has(b.entityId));
+      }
+      const t = tabla;
+      setAjustes(a => ({ ...a, hijas: { tipo: 'basedatos', tabla_id: t, vista: 'menu' }, botones: quedan }));
+    }
+    const rf = await fetch(`/api/bd/tablas/${tabla}/filas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: nombre }) });
+    const jf = await rf.json().catch(() => ({}));
     programarGuardado();
-    setVentanaBoton(b);
+    if (!rf.ok || !jf.pagina_id) { fallar(jf.error || 'No se ha podido crear la página.'); return; }
+    recargarHijas(tabla);
+    setVentanaBoton({ id: jf.id, tipo: 'subpagina', entityId: jf.pagina_id, pubTitulo: nombre });
   };
-  /** Ordenar los botones arrastrándolos (2026-10-23). */
-  const reordenarBotones = (lista: BotonCabecera[]) => { setAjustes(a => ({ ...a, botones: lista })); programarGuardado(); };
+  const cambiarVistaHijas = (v: VistaHijas) => { setAjustes(a => (a.hijas ? { ...a, hijas: { ...a.hijas, vista: v } } : a)); programarGuardado(); };
+  /** Quitar una entrada: su página va a la papelera (15 días). */
+  const quitarHija = async (filaId: string, nombre: string) => {
+    if (!window.confirm(`¿Quitar «${nombre || 'Sin título'}»? Su página va a la papelera y se puede recuperar durante 15 días.`)) return;
+    await fetch(`/api/bd/filas/${encodeURIComponent(filaId)}`, { method: 'DELETE', credentials: 'include' });
+    recargarHijas(hijasCfg?.tabla_id);
+  };
+  /** Ordenar los botones arrastrándolos (2026-10-23): los de antes en la página, las hijas en su tabla. */
+  const reordenarBotones = async (lista: BotonCabecera[]) => {
+    const viejos = lista.filter(b => !esHija(b));
+    if (viejos.length !== (ajustes.botones || []).length || viejos.some((b, i) => b.id !== ajustes.botones?.[i]?.id)) { setAjustes(a => ({ ...a, botones: viejos })); programarGuardado(); }
+    const ids = lista.filter(esHija).map(b => b.id);
+    if (!ids.length || ids.every((id, i) => id === hijas?.[i]?.fila_id)) return;
+    for (let i = ids.length - 1; i >= 0; i--) {
+      await fetch(`/api/bd/filas/${encodeURIComponent(ids[i])}/mover`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ antes_de: ids[i + 1] || null }) });
+    }
+    recargarHijas(hijasCfg?.tabla_id);
+  };
   // EL NOMBRE AL DÍA MIENTRAS LA VENTANA ESTÁ ABIERTA (2026-10-23): si se cambia
   // el título de la página del botón, el botón lo enseña ya, sin esperar a cerrar.
   useEffect(() => {
     if (!ventanaBoton?.entityId) return;
     const id = ventanaBoton.entityId, bid = ventanaBoton.id;
     const t = window.setInterval(async () => {
+      if (hijas?.some(h => h.fila_id === bid)) { recargarHijas(hijasCfg?.tabla_id); return; }
       const w = await fetch(`/api/windows/${encodeURIComponent(id)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
       const titulo = String(w?.title || '').trim();
       if (!titulo || titulo === 'Sin título' || titulo === 'Documento sin título') return;
@@ -2382,13 +2425,14 @@ function EditorPagina() {
     const b = ventanaBoton;
     setVentanaBoton(null);
     if (!b) return;
+    if (esHija(b)) { recargarHijas(hijasCfg?.tabla_id); return; }
     const w = await fetch(`/api/windows/${encodeURIComponent(b.entityId)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
     const t = (w?.title || '').trim();
     const titulo = t === 'Sin título' || t === 'Documento sin título' ? '' : t;
     if (titulo === (b.pubTitulo || '')) return;
     setAjustes(a => ({ ...a, botones: (a.botones || []).map(x => (x.id === b.id ? { ...x, pubTitulo: titulo } : x)) }));
     programarGuardado();
-  }, [ventanaBoton]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ventanaBoton, hijas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ES_TEXTO: TipoBloque[] = ['parrafo', 'titulo1', 'titulo2', 'titulo3', 'lista', 'numerada', 'tarea', 'cita'];
 
@@ -4510,7 +4554,7 @@ function EditorPagina() {
         {/* LA BARRA FIJA AL BAJAR (2026-10-20): justo ANTES de la cabecera (ver `BarraFija`). */}
         {cabeceraFija(ajustes.cabecera, !!filaDe?.fila_id) && (
           <BarraFija icono={icono} titulo={titulo} subtitulo={ajustes.subtitulo} portada={portada}
-            botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : (ajustes.botones || [])}
+            botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : botonesCabecera}
             estilo={ajustes.cabecera?.botonesEstilo} plegado={ajustes.cabecera?.botonesMenu === 'plegado'} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
         )}
         <div data-cabecera-editor>
@@ -4637,10 +4681,10 @@ function EditorPagina() {
                     <AlignLeft className="w-3.5 h-3.5" /> {tr('Añadir descripción')}
                   </button>
                 )}
-                {!v2 && !(ajustes.botones || []).length && !eligiendoIcono && (
+                {!v2 && !botonesCabecera.length && !hijasCfg && !eligiendoIcono && (
                   <button onClick={crearBotonCabecera}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
-                    <RectangleHorizontal className="w-3.5 h-3.5" /> {tr('Añadir botón')}
+                    <RectangleHorizontal className="w-3.5 h-3.5" /> {tr('Añadir entrada')}
                   </button>
                 )}
                 {(v2 || portada || icono || ajustes.subtitulo !== undefined || !!(ajustes.botones || []).length) && !eligiendoIcono && (
@@ -4697,13 +4741,15 @@ function EditorPagina() {
         ) : null)}
           </>) : null;
           const botonesNodo = (<>
-        <FilaBotones botones={ajustes.botones || []} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derechaAncho={v2 ? der('botones') : true} sinMargen plegado={ajustes.cabecera?.botonesMenu === 'plegado'} estilo={ajustes.cabecera?.botonesEstilo}
+        <FilaBotones botones={botonesCabecera} talla={v2 ? tallaBotones(ajustes.cabecera, el('botones')) : ajustes.cabecera?.botonesTalla} derechaAncho={v2 ? der('botones') : true} sinMargen plegado={ajustes.cabecera?.botonesMenu === 'plegado'} estilo={ajustes.cabecera?.botonesEstilo}
           onAbrir={b => setVentanaBoton(b)}
           onQuitar={editable ? b => {
+            if (esHija(b)) { quitarHija(b.id, b.pubTitulo || ''); return; }
             if (!window.confirm(`¿Quitar el botón «${b.pubTitulo || 'Sin título'}»? Su página no se borra: queda en la lista de páginas.`)) return;
             setAjustes(a => ({ ...a, botones: (a.botones || []).filter(x => x.id !== b.id) })); programarGuardado();
           } : undefined}
-          onAnadir={editable ? crearBotonCabecera : undefined} onReordenar={editable ? reordenarBotones : undefined} />
+          onAnadir={editable && vistaHijas === 'menu' ? crearBotonCabecera : undefined} onReordenar={editable ? reordenarBotones : undefined} />
+        {editable && hijasCfg && vistaHijas === 'menu' && <div className="mt-2 flex justify-end"><ElegirVistaHijas vista={vistaHijas} onCambiar={cambiarVistaHijas} /></div>}
           </>);
           const propsNodo = filaDe?.fila_id && filaDe.tabla_id ? (
             <div style={v2 ? { zoom: zoomPropiedades(el('propiedades')) } : undefined} >
@@ -4761,29 +4807,35 @@ function EditorPagina() {
           );
         })()}
         </div>
+        {/* LAS PÁGINAS HIJAS EN GALERÍA (2026-10-23): cada una con su portada; al pulsar se abre su página. */}
+        {hijasCfg && vistaHijas === 'galeria' && (
+          <GaleriaHijas hijas={hijas || []} enlace={id => `/paginas/${id}`}
+            onAnadir={editable ? crearBotonCabecera : undefined} onQuitar={editable ? h => quitarHija(h.fila_id, h.titulo) : undefined}
+            extra={editable ? <ElegirVistaHijas vista={vistaHijas} onCambiar={cambiarVistaHijas} /> : undefined} />
+        )}
         {/* LA RED DE LA ENTRADA (2026-10-23): la misma que en la página publicada. */}
         {filaDe?.fila_id && filaDe.tabla_id && (
           <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
         )}
         {nombreBotonNuevo !== null && createPortal(
           <div className="fixed inset-0 z-[10000] flex items-start justify-center bg-slate-900/40 p-4 pt-[18vh]" onClick={() => setNombreBotonNuevo(null)}>
-            <div role="dialog" aria-label="Nuevo botón" onClick={e => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl"
+            <div role="dialog" aria-label="Nueva entrada" onClick={e => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl"
               onKeyDown={e => { if (e.key === 'Escape') setNombreBotonNuevo(null); }}>
-              <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">{tr('Nuevo botón')}</p>
+              <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">{tr('Nueva entrada (página hija)')}</p>
               <input autoFocus value={nombreBotonNuevo} onChange={e => setNombreBotonNuevo(e.target.value)} maxLength={60}
-                placeholder={tr('Nombre del botón (p. ej. Participa)')} aria-label={tr('Nombre del botón')}
+                placeholder={tr('Nombre de la página (p. ej. Participa)')} aria-label={tr('Nombre de la entrada')}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); crearBotonConNombre(); } }}
                 className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-base font-bold text-slate-900 outline-none focus:border-emerald-400" />
-              <p className="mt-2 text-[11px] text-slate-400">{tr('Abre su propia página en una ventana: luego escribes en ella lo que quieras.')}</p>
+              <p className="mt-2 text-[11px] text-slate-400">{tr('Es una página dentro de esta: se ve como botón del menú o en la galería, y tiene todo lo de una página (sus propias entradas, enlaces…).')}</p>
               <div className="mt-4 flex justify-end gap-2">
                 <button type="button" onClick={() => setNombreBotonNuevo(null)} className="h-10 rounded-lg px-3 text-xs font-bold text-slate-500 hover:bg-slate-100">{tr('Cancelar')}</button>
-                <button type="button" onClick={crearBotonConNombre} disabled={!nombreBotonNuevo.trim()} className="h-10 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800 disabled:opacity-40">{tr('Crear botón')}</button>
+                <button type="button" onClick={crearBotonConNombre} disabled={!nombreBotonNuevo.trim()} className="h-10 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800 disabled:opacity-40">{tr('Crear entrada')}</button>
               </div>
             </div>
           </div>,
           document.body)}
         {ventanaBoton && (
-          <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton}>
+          <VentanaBoton titulo={ventanaBoton.pubTitulo || 'Sin título'} onCerrar={cerrarVentanaBoton} enlace={esHija(ventanaBoton) ? `/paginas/${ventanaBoton.entityId}` : undefined}>
             {/* La página del botón, en el editor de siempre (sin menús: va en un marco). */}
             <MarcoCargando src={`/paginas/${encodeURIComponent(ventanaBoton.entityId)}?embed=1`} title={ventanaBoton.pubTitulo || 'Sin título'} className="h-full w-full" />
           </VentanaBoton>

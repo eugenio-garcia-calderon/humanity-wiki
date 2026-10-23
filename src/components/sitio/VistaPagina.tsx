@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import EnlazanAqui from '../knowledge/EnlazanAqui';
 import { contarPagina, textoLectura } from '../../utils/ajustesPagina';
+import { GaleriaHijasLectura } from '../knowledge/PaginasHijas';
 import RedRelaciones, { AccionesPagina } from './RedRelaciones';
 import type { ContextoRuta } from '../../utils/precargado';
 import SugerirCorreccion from '../bloquesDatos/ficha/SugerirCorreccion';
@@ -157,6 +158,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {/* SEGUIR Y LA RED DE LA PÁGINA (2026-10-21): bajo la cabecera, las acciones y
             las pestañas de lo relacionado, con su galería (`RedRelaciones.tsx`). */}
         {!pagina.virtual && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
+        {/* Las páginas hijas en galería (2026-10-23, `PaginasHijas.tsx`). */}
+        {!pagina.virtual && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
         {!pagina.virtual && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
         <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
