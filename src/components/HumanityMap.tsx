@@ -43,6 +43,8 @@ interface HumanityMapProps {
   activeMetricId?: string | null;
   /** Dónde empieza el mapa: [oeste, sur, este, norte] (2026-10-21, «el mapa de España»). */
   limites?: [number, number, number, number] | null;
+  /** El margen al encuadrar `limites` (2026-10-23: a la derecha, el ancho de la ficha que lo tapa). */
+  rellenoLimites?: number | { top: number; bottom: number; left: number; right: number };
 }
 
 function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature; objectiveIndicators?: { id: string; name: string }[] }) {
@@ -154,7 +156,7 @@ function StationTooltip({ properties }: { properties: any }) {
   );
 }
 
-export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, activeMetricId, limites }: HumanityMapProps) {
+export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, activeMetricId, limites, rellenoLimites }: HumanityMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [zoom, setZoom] = useState(2.4);
@@ -188,7 +190,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
-        ...(limites ? { bounds: limites, fitBoundsOptions: { padding: 24 } } : { center: [15, 25] as [number, number], zoom }),
+        ...(limites ? { bounds: limites, fitBoundsOptions: { padding: rellenoLimites ?? 24, maxZoom: 12 } } : { center: [15, 25] as [number, number], zoom }),
         doubleClickZoom: false,
         attributionControl: false
       });

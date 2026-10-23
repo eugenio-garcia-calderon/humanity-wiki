@@ -1471,6 +1471,76 @@ async function startServer() {
   };
 
   // 1. POLYGONS ENDPOINT serving GeoJSON features mapped to territory IDs
+  // ══ LA FICHA DE UN TERRITORIO (2026-10-23, Eugenio) ══════════════════════
+  // «Que desde la base de datos de territorios, al pinchar en un municipio, haya
+  // un enlace al mapa y se abra una ventanita lateral que diga dónde está y cuál
+  // es su área.» Dónde está (su cadena: municipio › comunidad › país ›
+  // continente), su caja para encuadrarlo en el mapa, su centro y su superficie
+  // CALCULADA del propio polígono del mapa (área esférica, R = 6371 km): la
+  // tabla `territories` no la tiene. Sin polígono (un país que el mapa aún no
+  // dibuja), se dice que no hay dato, sin inventarlo.
+  const ARCHIVOS_GEO = ['madrid_municipios.json', 'regions.json', 'countries.json', 'continents.json', 'planet.json'];
+  const areaAnillo = (anillo: number[][]) => {
+    const R = 6371.0088, rad = Math.PI / 180;
+    let s = 0;
+    for (let i = 0; i < anillo.length - 1; i++) {
+      const [l1, f1] = anillo[i], [l2, f2] = anillo[i + 1];
+      s += (l2 - l1) * rad * (2 + Math.sin(f1 * rad) + Math.sin(f2 * rad));
+    }
+    return Math.abs(s * R * R / 2);
+  };
+  const fichasGeo = new Map<string, any>();
+  const geometriaDe = (id: string) => {
+    if (fichasGeo.has(id)) return fichasGeo.get(id);
+    let polis: number[][][][] = [];
+    for (const f of ARCHIVOS_GEO) {
+      const data = getGeoJsonFile(f);
+      for (const ft of (data.features || [data])) {
+        if ((ft.properties?.territoryId || ft.properties?.id) !== id || !ft.geometry) continue;
+        const g = ft.geometry;
+        polis = polis.concat(g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []);
+      }
+      if (polis.length) break;
+    }
+    if (!polis.length) { fichasGeo.set(id, null); return null; }
+    let w = 180, s2 = 90, e = -180, n = -90, area = 0;
+    for (const poli of polis) {
+      poli.forEach((anillo, i) => {
+        const a = areaAnillo(anillo);
+        area += i === 0 ? a : -a;
+        for (const [x, y] of anillo) { if (x < w) w = x; if (x > e) e = x; if (y < s2) s2 = y; if (y > n) n = y; }
+      });
+    }
+    const r = { caja: [w, s2, e, n], centro: [(w + e) / 2, (s2 + n) / 2], superficie_km2: Math.round(area * 10) / 10 };
+    fichasGeo.set(id, r);
+    return r;
+  };
+  app.get("/api/geo/territorio/:id/ficha", async (req, res) => {
+    try {
+      cachePublica(res, 600);
+      const t = (await db.execute(sql`SELECT id, name, type, parent_id, population, area_km2 FROM territories WHERE id = ${req.params.id} AND archived_at IS NULL`)).rows[0] as any;
+      if (!t) return res.status(404).json({ error: 'Ese territorio no está en el mapa.' });
+      const ruta: Array<{ id: string; nombre: string; tipo: string }> = [];
+      let padre = t.parent_id;
+      for (let i = 0; padre && i < 8; i++) {
+        const p = (await db.execute(sql`SELECT id, name, type, parent_id FROM territories WHERE id = ${padre}`)).rows[0] as any;
+        if (!p) break;
+        ruta.push({ id: p.id, nombre: p.name, tipo: p.type });
+        padre = p.parent_id;
+      }
+      // Un continente o el planeta: su polígono del mapa es de dibujo (cruza el
+      // antimeridiano), no sirve para medirlo. Europa se encuadra a mano.
+      const grande = t.type === 'continent' || t.type === 'planet';
+      const geo = grande ? (t.id === 'T002' ? { caja: [-25, 34, 45, 71], centro: [10, 52], superficie_km2: null } : null) : geometriaDe(t.id);
+      const superficie = t.area_km2 || geo?.superficie_km2 || null;
+      res.json({
+        id: t.id, nombre: t.name, tipo: t.type, ruta, poblacion: t.population || null,
+        superficie_km2: superficie, densidad: superficie && t.population ? Math.round((t.population / superficie) * 10) / 10 : null,
+        caja: geo?.caja || null, centro: geo?.centro || null, con_poligono: !!geo && !grande,
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get("/api/geo/territories/polygons", async (req, res) => {
     try {
       cachePublica(res, 300);
