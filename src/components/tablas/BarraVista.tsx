@@ -549,12 +549,12 @@ export default function BarraVista({
         })}
         {editable && (
           <div className="relative shrink-0">
-            <button onClick={() => setAbierto(abierto === 'nueva' ? null : 'nueva')} title="Añadir una vista" aria-label="Añadir una vista"
+            <button onClick={() => setAbierto(abierto === 'nueva' ? null : 'nueva')} title={filtroFijo ? 'Cambiar la forma de la vista' : 'Añadir una vista'} aria-label={filtroFijo ? 'Cambiar la forma de la vista' : 'Añadir una vista'}
               className="w-9 h-9 grid place-items-center rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100">
               <Plus className="w-4 h-4" />
             </button>
           <Desplegable abierto={abierto === 'nueva'} onCerrar={cerrar} ancho="w-64">
-            <p className="px-2 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">Nueva vista</p>
+            <p className="px-2 pb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">{filtroFijo ? 'Ver como' : 'Nueva vista'}</p>
             {FORMAS.map(f => {
               const Icono = ICONO_FORMA[f.forma];
               return (

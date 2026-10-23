@@ -2191,6 +2191,15 @@ export function registerBdRoutes(app: Express, db: any) {
         // Se COMPRUEBA aquí y se ESCRIBE después de que todo haya validado.
         const comp = await comprobarEnlaces(db, clase, lista);
         if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+        // (2026-10-23, bot evaluador) UNA RELACIÓN SOLO APUNTA A FILAS DE SU TABLA:
+        // un buscador que se quedó abierto llegó a guardar un proyecto en «Leyes».
+        if (clase === 'fila' && col.config?.tabla_destino && lista.length) {
+          const ajenas = (await db.execute(sql`
+            SELECT count(*)::int AS n FROM bd_filas
+            WHERE id = ANY(string_to_array(${lista.join(',')}, ',')) AND tabla_id <> ${String(col.config.tabla_destino)}
+          `)).rows[0] as any;
+          if (ajenas?.n > 0) { fallos.push({ columna: colId, error: 'Esa entrada es de otra base de datos: aquí no se puede enlazar.' }); continue; }
+        }
         // UNA FILA NO PUEDE SER SU PROPIA MADRE, NI BLOQUEARSE A SÍ MISMA, NI
         // QUEDAR DEBAJO DE UNA DE SUS HIJAS: el árbol daría vueltas y la tabla
         // anidada no tendría por dónde empezar a pintarse.
