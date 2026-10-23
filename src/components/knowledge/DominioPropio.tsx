@@ -137,29 +137,22 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
 
           {/* COMPROBAR LA CONEXIÓN (2026-09-30). Se ofrece siempre, también
               cuando ya funciona: si un día deja de ir, es lo primero que se
-              pulsa, y que diga cuál de los pasos se ha roto ahorra adivinar. */}
-          {/* SOLICITAR EL CERTIFICADO (2026-09-30). Until the domain works,
-              the button asks for the certificate now — only when the DNS has
-              reached the whole internet — instead of leaving it to the first
-              visit. Once it works it goes back to a plain check. */}
-          {d.estado !== 'activo' ? (
-            <button onClick={() => comprobar(d, true)} disabled={comprobando === d.id}
-              className="mt-2 w-full h-11 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600
-                         text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60">
-              {comprobando === d.id
-                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Solicitando… puede tardar hasta un minuto</>
-                : <><ShieldCheck className="w-3.5 h-3.5" /> Solicitar certificado y conectar</>}
-            </button>
-          ) : (
-            <button onClick={() => comprobar(d)} disabled={comprobando === d.id}
-              className="mt-2 w-full h-10 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200
-                         bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60">
-              {comprobando === d.id
-                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Comprobando… puede tardar unos segundos</>
-                : <><RefreshCw className="w-3.5 h-3.5" /> Comprobar conexión</>}
-            </button>
+              pulsa, y que diga cuál de los pasos se ha roto ahorra adivinar.
+              While the domain is not active, the button lives BELOW the DNS
+              instructions instead (2026-10-23): it is the last step, so it
+              goes last. */}
+          {d.estado === 'activo' && (
+            <>
+              <button onClick={() => comprobar(d)} disabled={comprobando === d.id}
+                className="mt-2 w-full h-10 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200
+                           bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60">
+                {comprobando === d.id
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Comprobando… puede tardar unos segundos</>
+                  : <><RefreshCw className="w-3.5 h-3.5" /> Comprobar conexión</>}
+              </button>
+              {resultados[d.id] && <ResultadoComprobacion r={resultados[d.id]} />}
+            </>
           )}
-          {resultados[d.id] && <ResultadoComprobacion r={resultados[d.id]} />}
         </div>
       ))}
 
@@ -200,9 +193,9 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
               copiado={copiado === 'cname'} onCopiar={() => copiar(instrucciones.cname.valor, 'cname')} />
           </div>
           <p className="mt-2 text-[11px] text-amber-900/80 leading-relaxed">
-            Luego pulsa «Solicitar certificado y conectar»: esperamos a que el DNS
-            haya llegado a todo internet, pedimos el certificado y te decimos qué
-            falta si algo no está bien.
+            Si ya había otros registros A o CNAME para «@» o «www» (de una web
+            anterior), bórralos: con dos direcciones, parte de las visitas va
+            al sitio viejo.
           </p>
           {/* EL MINUTO DE ESPERA, DICHO ANTES DE QUE OCURRA (2026-08-22).
               Lo señaló prog6 revisando: comprobamos el DNS y guardamos el
@@ -215,8 +208,28 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
             Un cambio de DNS tarda de minutos a horas en llegar a todo internet.
             El botón te dice si ya ha llegado; si no, no pide nada todavía.
           </p>
+          <p className="mt-1.5 text-[11px] font-bold text-amber-900">
+            Cuando los tengas, pulsa el botón de abajo.
+          </p>
         </div>
       )}
+
+      {/* SOLICITAR EL CERTIFICADO (2026-09-30), THE LAST STEP. It asks for the
+          certificate now — only once the DNS has reached the whole internet —
+          instead of leaving it to the first visit. It sits after the DNS
+          instructions because it only makes sense once they are done. */}
+      {deEsta.filter(d => d.estado !== 'activo').map(d => (
+        <div key={d.id}>
+          <button onClick={() => comprobar(d, true)} disabled={comprobando === d.id}
+            className="mt-2.5 w-full h-11 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600
+                       text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60">
+            {comprobando === d.id
+              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Solicitando… puede tardar hasta un minuto</>
+              : <><ShieldCheck className="w-3.5 h-3.5" /> Solicitar certificado y conectar</>}
+          </button>
+          {resultados[d.id] && <ResultadoComprobacion r={resultados[d.id]} />}
+        </div>
+      ))}
 
       {otros.length > 0 && (
         <p className="mt-2 text-[11px] text-slate-400">

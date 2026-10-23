@@ -112,6 +112,15 @@ export function motivoInvalido(d: string): string | null {
  * `IP_PUBLICA` (comma-separated) still overrides it.
  */
 const IP_POR_DEFECTO = '37.27.244.35';
+/**
+ * Every address must be ours, not just one. A leftover A record (an old Vercel
+ * site, 76.76.21.21) sends some visitors — and Let's Encrypt — to another
+ * machine: half the requests 404 and the certificate fails. Seen 2026-10-23
+ * with lighthumanity.org, which this check used to call «Correcto».
+ */
+const todasNuestras = (ips: string[], nuestras: string[]) =>
+  ips.length > 0 && ips.every(ip => nuestras.includes(ip));
+
 const nuestrasIps = () => (process.env.IP_PUBLICA || IP_POR_DEFECTO).split(',').map(x => x.trim()).filter(Boolean);
 
 /** Our public IP as written in the DNS instructions (the first one). */
@@ -507,7 +516,7 @@ async function apuntaAqui(dominio: string): Promise<boolean> {
       dns.resolve4(dominio),
       dns.resolveCname(dominio),
     ]);
-    if (v4.status === 'fulfilled' && v4.value.some(ip => nuestras.includes(ip))) apunta = true;
+    if (v4.status === 'fulfilled' && todasNuestras(v4.value, nuestras)) apunta = true;
     // A CNAME to humanity.wiki no longer counts: it resolves to Cloudflare,
     // which cannot serve this name. `resolve4` already follows CNAMEs, so a
     // chain that really ends at our IP is still accepted above.
@@ -579,10 +588,12 @@ export async function comprobarConexion(dominio: string, { solicitar = false } =
   const [v4, cname] = await Promise.allSettled([dns.resolve4(dominio), dns.resolveCname(dominio)]);
   const ips = v4.status === 'fulfilled' ? v4.value : [];
   const cnames = cname.status === 'fulfilled' ? cname.value.map(c => c.replace(/\.$/, '').toLowerCase()) : [];
-  const raizOk = ips.some(ip => nuestras.includes(ip));
+  const raizOk = todasNuestras(ips, nuestras);
+  const sobran = ips.filter(ip => !nuestras.includes(ip));
 
   let detalleA: string;
   if (raizOk) detalleA = `Apunta a ${ips.join(', ')}. Correcto.`;
+  else if (sobran.length < ips.length) detalleA = `Hay ${ips.length} registros A: ${ips.join(', ')}. ${sobran.join(', ')} no es esta plataforma${sobran.includes('76.76.21.21') ? ' (es Vercel)' : ''}, y con ${sobran.length === 1 ? 'él' : 'ellos'} parte de las visitas van a otro sitio y el certificado falla. Borra ${sobran.length === 1 ? 'ese registro' : 'esos registros'} y deja solo ${nuestras[0]}.`;
   else if (ips.length === 0) detalleA = `Todavía no hay registro A. Crea uno con nombre «@» y valor ${nuestras[0]}. Si ya lo has creado, espera: puede tardar minutos u horas en propagarse.`;
   else if (ips.every(esDeCloudflare)) detalleA = `Apunta a ${ips.join(', ')}, que son de Cloudflare. En Cloudflare, pulsa la nube naranja del registro para dejarla gris («DNS only»).`;
   else detalleA = `Apunta a ${ips.join(', ')}, que no es esta plataforma. Cambia el valor del registro A a ${nuestras[0]}.`;
@@ -597,7 +608,7 @@ export async function comprobarConexion(dominio: string, { solicitar = false } =
   const wcns = wcn.status === 'fulfilled' ? wcn.value.map(c => c.replace(/\.$/, '').toLowerCase()) : [];
   // Only our IP counts. `resolve4` follows a CNAME to the root domain, so that
   // setup still passes; a CNAME to humanity.wiki lands on Cloudflare and fails.
-  const wwwOk = wips.some(ip => nuestras.includes(ip));
+  const wwwOk = todasNuestras(wips, nuestras);
   const wwwAHumanity = wcns.some(c => c.endsWith('humanity.wiki'));
   pasos.push({
     clave: 'www', ok: wwwOk, aviso: !wwwOk, titulo: `Registro de ${www}`,
@@ -614,7 +625,7 @@ export async function comprobarConexion(dominio: string, { solicitar = false } =
   let propagado = true;
   if (solicitar && raizOk) {
     const vistas = await ipsPublicas(dominio);
-    const atrasados = vistas.filter(v => !v.ips.some(ip => nuestras.includes(ip)));
+    const atrasados = vistas.filter(v => !todasNuestras(v.ips, nuestras));
     propagado = atrasados.length === 0;
     pasos.push({
       clave: 'propagacion', ok: propagado, titulo: 'Propagación del DNS',
