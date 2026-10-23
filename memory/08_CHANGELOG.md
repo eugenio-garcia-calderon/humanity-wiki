@@ -9747,3 +9747,9 @@ Eugenio: «permitir crear páginas dentro de esa página desde la cabecera: reci
 - Los botones de antes se convierten en entradas al añadir la primera, sin perder sus páginas (`POST /api/bd/tablas/:id/filas-de-paginas`).
 - Vista «Menú»: botones en la cabecera y en la barra fija (abren su ventana, con «Abrir página» para la página entera); arrastrar ordena las filas (`/mover`); la X manda la página a la papelera. Vista «Galería»: tarjetas con portada bajo la cabecera, que abren la página. Selector «Menú · Galería» en el editor.
 - `bloquesSql.bloquesDe` cuenta `config.hijas` como un bloque «basedatos»: visibilidad al publicar, «dónde vive» y árbol del proyecto, sin regla nueva. En la barra lateral, las hijas cuelgan directamente de la madre (`/api/paginas/arbol`).
+
+## 2026-10-23 · Vista enlazada, tercera vuelta: lo de la ronda 2 del bot (Programador 8)
+Bot evaluador, ronda 2: arrastrar pestañas 8,5 · vista enlazada 7,5 · conectar existente 6 · global 7. Fallo grave: el buscador de «Conectar existente» seguía abierto al cambiar de pestaña y guardaba entradas de una tabla en la relación de otra.
+- `escribirCeldas`: una relación solo acepta filas de SU tabla de destino (400 «Esa entrada es de otra base de datos»). Defensa en el servidor, venga de donde venga.
+- `ConectarExistente`: `key` por pestaña, la lista se vuelve a pedir si cambia la tabla, Escape y clic fuera cierran siempre (antes solo la primera vez), la búsqueda se vacía al cerrar, ↑↓ e Intro, y se abre hacia arriba si abajo no cabe (teléfono).
+- En la vista enlazada, el «+» dice «Ver como» (cambia la forma de la única vista de la pestaña) y la tarjeta «Nueva página» abre el mismo diálogo «Se conectará con…» sin salir de la entrada. Sin vista guardada, se oculta la columna que apunta a la entrada (repetía lo mismo en todas las filas).

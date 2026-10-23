@@ -71,7 +71,9 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+  /** En vez de crear y abrir: lo que diga quien la usa (la vista enlazada abre su diálogo). */
+  onNuevaPagina?: () => void;
   /** Lo que lleva una página nueva para nacer conectada (la vista enlazada, 2026-10-23). */
   celdasNueva?: Record<string, any>;
   alCrearNueva?: (filaId: string) => Promise<void>;
@@ -383,6 +385,7 @@ export default function Galeria({ celdasNueva, alCrearNueva, onGuardarCelda, rec
 
   /** «+ Nuevo», como en Notion: la página nace y se abre para escribirla. */
   const nueva = async () => {
+    if (onNuevaPagina) { onNuevaPagina(); return; }
     setFallo(null);
     setAbriendo('nueva');
     try {

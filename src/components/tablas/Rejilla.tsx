@@ -1333,7 +1333,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
         <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-4', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(filas, (fs, grupo, celdasGrupo) => (
             <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
-              celdasNueva={vinculo ? celdasVinculo() : undefined} alCrearNueva={vinculo ? async id => { await alCrearEnVinculo?.(id); avisarCambio(); } : undefined}
+              onNuevaPagina={vinculo ? anadirFila : undefined} celdasNueva={vinculo ? celdasVinculo() : undefined} alCrearNueva={vinculo ? async id => { await alCrearEnVinculo?.(id); avisarCambio(); } : undefined}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
               celdasAlRecibir={colAgr && editable ? celdasGrupo : undefined}
               enCaja={!!colAgr}
