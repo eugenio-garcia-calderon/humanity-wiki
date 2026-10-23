@@ -71,8 +71,14 @@ const NO_CAMBIAN = /^\/api\/(estadisticas|seguir|auth|uploads|voz|valoraciones|c
 
 /** Cualquier otra escritura vacía la memoria (montado al principio, `modulos.ts`). */
 export function registrarVaciado(app: Express) {
-  app.use((req, _res, next) => {
-    if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS' && !NO_CAMBIAN.test(req.path)) vaciarCaches();
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS' && !NO_CAMBIAN.test(req.path)) {
+      vaciarCaches();
+      // Y OTRA VEZ AL TERMINAR (2026-10-23): una lectura que llegue mientras se
+      // escribe guardaría lo de antes, y se serviría viejo 30 s (pasó al
+      // ordenar las pestañas de la red: recargar enseñaba el orden anterior).
+      res.on('finish', vaciarCaches);
+    }
     next();
   });
 }

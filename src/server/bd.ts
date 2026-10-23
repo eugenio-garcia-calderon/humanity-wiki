@@ -813,6 +813,23 @@ export function registerBdRoutes(app: Express, db: any) {
       res.json({ cerrada: !!t?.config?.cerrada, puede_cambiar: await puedeCandado(req, String(req.params.id)) });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
+  /** El orden de las pestañas de la red de sus entradas (ver `redDePagina`). */
+  app.put('/api/bd/tablas/:id/orden-red', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, String(req.params.id), true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const orden = Array.isArray(req.body?.orden) ? req.body.orden.map(String).filter((x: string) => /^[A-Za-z0-9_-]{3,64}$/.test(x)).slice(0, 200) : null;
+      if (!orden) return res.status(400).json({ error: 'Falta el orden.' });
+      await db.execute(sql`
+        UPDATE bd_tablas SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{ordenRed}', ${JSON.stringify(orden)}::jsonb),
+          updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${String(req.params.id)}
+      `);
+      res.json({ orden });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.put('/api/bd/tablas/:id/candado', async (req: Request, res: Response) => {
     try {
       if (!(await puedeCandado(req, String(req.params.id)))) return res.status(403).json({ error: 'Solo el dueño de la base de datos puede cerrarla o abrirla.' });
@@ -1370,7 +1387,9 @@ export function registerBdRoutes(app: Express, db: any) {
     const quien = (req || { user: undefined }) as Request;
     const fila = (await db.execute(sql`SELECT id, tabla_id FROM bd_filas WHERE pagina_id = ${paginaId} AND deleted_at IS NULL LIMIT 1`)).rows[0] as any;
     if (!fila) return null;
-    if ('error' in (await puedeConTabla(quien, fila.tabla_id, false))) return null;
+    const permisoRed = await puedeConTabla(quien, fila.tabla_id, false);
+    if ('error' in permisoRed) return null;
+    const permisoTabla: any = permisoRed.tabla;
     const cols = (await columnasDe(fila.tabla_id)).filter((c: any) => c.tipo === 'relacion' && c.config?.visibilidad !== 'nunca');
 
     // LA RED DE UN TEMA SUMA LA DE SUS SUBTEMAS (2026-10-22, `bd/temas.ts`).
@@ -1449,6 +1468,15 @@ export function registerBdRoutes(app: Express, db: any) {
       }
       if (entradas.length) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas });
     }
+    // EL ORDEN DE LAS PESTAÑAS (2026-10-23, Eugenio: «pinchar y arrastrar una
+    // pestaña para ordenarlas como quiera»). Es de la TABLA (`config.ordenRed`):
+    // todas sus entradas enseñan las pestañas en el mismo orden. Lo que no está
+    // en la lista (un enlace nuevo) va detrás, en su orden de siempre.
+    const orden: string[] = Array.isArray(permisoTabla?.config?.ordenRed) ? permisoTabla.config.ordenRed : [];
+    if (orden.length) {
+      const pos = (id: string) => { const i = orden.indexOf(id); return i < 0 ? orden.length : i; };
+      grupos.sort((a, b) => pos(a.columna_id) - pos(b.columna_id));
+    }
     return { fila_id: fila.id, tabla_id: fila.tabla_id, grupos };
   };
   bdInterno.redDePagina = redDePagina;
@@ -1460,7 +1488,9 @@ export function registerBdRoutes(app: Express, db: any) {
       const r = await redDePagina(req, String(req.params.paginaId));
       const w = (await db.execute(sql`SELECT title, slug FROM knowledge_windows WHERE id = ${req.params.paginaId}`)).rows[0] as any;
       const corto = typeof w?.slug === 'string' && w.slug && !w.slug.includes('/') ? w.slug : slugDe(w?.title || '');
-      res.json({ grupos: r?.grupos || [], slug: corto || null });
+      // `tabla_id` y `ordenable`: el editor deja arrastrar las pestañas a quien puede editar la tabla.
+      const ordenable = !!r && !('error' in (await puedeConTabla(req, r.tabla_id, true)));
+      res.json({ grupos: r?.grupos || [], slug: corto || null, tabla_id: r?.tabla_id || null, ordenable });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

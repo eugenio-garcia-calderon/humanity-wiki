@@ -9712,3 +9712,8 @@ Eugenio: «Un tipo de columna Tema que apunte a ese árbol y calcule la herencia
 Eugenio: «la vista de una entrada con todos sus enlaces es distinta en el editor que en la página publicada, que ya tiene el submenú con todos los enlaces ordenados; haz que sea la misma».
 - `RedEnEditor.tsx`: en la página de una fila, el editor enseña la misma `RedRelaciones` (pestañas «Todo» + un grupo por enlace, en galería; `enEditor`: las pestañas no tocan la dirección y las tarjetas abren `/paginas/:id`). Las propiedades de arriba ya no repiten los enlaces (`sinRelaciones`).
 - «Editar enlaces» abre debajo las celdas de relación de siempre (`PropiedadesFila soloRelaciones`); al guardar, la red se vuelve a pedir (`alCambiar`).
+
+## 2026-10-23 · Ordenar las pestañas de la red arrastrando (Programador 8)
+Eugenio: «que en el editor se pueda pinchar y arrastrar una pestaña y colocarla más a la izquierda o a la derecha».
+- En el editor, quien puede editar la tabla arrastra las pestañas de la red (línea verde donde caerá). El orden es de la TABLA (`bd_tablas.config.ordenRed`, `PUT /api/bd/tablas/:id/orden-red`): todas sus entradas, y la página publicada, enseñan las pestañas en ese orden. Un enlace nuevo va detrás.
+- `cacheCorta`: las escrituras vacían la memoria también al TERMINAR, no solo al empezar (una lectura a mitad guardaba lo viejo 30 s).
