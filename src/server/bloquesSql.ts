@@ -21,5 +21,9 @@ export function bloquesDe(alias = '') {
   // (2026-10-20) Más los BOTONES DE LA CABECERA (`config.botones`): cada uno es
   // una subpágina con la forma de un bloque «Página», así que cuenta como hija
   // en todo lo que pregunta por subpáginas (visibilidad, madre, menú).
-  return sql.raw(`(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.bloques.** ? (@.type() == "object" && exists(@.tipo))', '{}', true) || COALESCE(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.botones[*] ? (@.type() == "object" && exists(@.tipo))', '{}', true), '[]'::jsonb))`);
+  // (2026-10-23) Y LAS PÁGINAS HIJAS (`config.hijas`, «Añadir entrada» de la
+  // cabecera): una base de datos propia de la página, con la forma de un bloque
+  // «basedatos». Así su tabla cuelga de la página en todo —visibilidad al
+  // publicar, «dónde vive» (`/hogar`), el árbol del proyecto— sin regla nueva.
+  return sql.raw(`(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.bloques.** ? (@.type() == "object" && exists(@.tipo))', '{}', true) || COALESCE(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.botones[*] ? (@.type() == "object" && exists(@.tipo))', '{}', true), '[]'::jsonb) || COALESCE(jsonb_path_query_array(COALESCE(${col}, '{}'::jsonb), 'strict $.hijas ? (@.type() == "object" && exists(@.tipo))', '{}', true), '[]'::jsonb))`);
 }

@@ -2044,6 +2044,38 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /** FILAS PARA PÁGINAS QUE YA EXISTEN (2026-10-23, páginas hijas): los botones
+   *  de la cabecera de antes pasan a ser entradas de la base de datos propia de
+   *  la página sin perder su página (ni su contenido, ni su dirección). Solo
+   *  páginas de quien lo pide (o de un administrador) que aún no son una fila. */
+  app.post('/api/bd/tablas/:id/filas-de-paginas', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, req.params.id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const lista: Array<{ id: string; titulo?: string }> = Array.isArray(req.body?.paginas) ? req.body.paginas.slice(0, 200) : [];
+      const admin = (req.user?.roleLevel ?? 0) >= 4;
+      const colTitulo = await columnaTitulo(req.params.id);
+      let orden = Number(((await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_filas WHERE tabla_id = ${req.params.id}`)).rows[0] as any).m);
+      const creadas: Array<{ id: string; pagina_id: string }> = [];
+      for (const x of lista) {
+        const pid = String(x?.id || '');
+        const w = (await db.execute(sql`SELECT id, title, creator_user_id FROM knowledge_windows WHERE id = ${pid} AND deleted_at IS NULL`)).rows[0] as any;
+        if (!w || (!admin && w.creator_user_id !== req.user!.id)) continue;
+        const ya = (await db.execute(sql`SELECT 1 FROM bd_filas WHERE pagina_id = ${pid} AND deleted_at IS NULL LIMIT 1`)).rows.length;
+        if (ya) continue;
+        const titulo = String(x.titulo || w.title || '').trim().slice(0, 2000);
+        const id = nid('BDF');
+        await db.execute(sql`
+          INSERT INTO bd_filas (id, tabla_id, valores, orden, pagina_id, created_by, updated_by)
+          VALUES (${id}, ${req.params.id}, ${JSON.stringify(colTitulo && titulo ? { [colTitulo]: titulo } : {})}::jsonb, ${++orden}, ${pid}, ${req.user!.id}, ${req.user!.id})
+        `);
+        creadas.push({ id, pagina_id: pid });
+      }
+      res.json({ creadas });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** La página de una fila, creándola si aún no tiene (las filas de antes
    *  del 2026-09-30 nacieron sin ella). Abrirla es de lectura: sólo se CREA
    *  si quien la abre puede escribir en la tabla; si no, se dice que no hay. */

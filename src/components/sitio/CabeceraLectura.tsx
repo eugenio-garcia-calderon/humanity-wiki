@@ -82,7 +82,8 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
   const icono: string | null = cfg.icono || null;
   const lado = tamIcono(c, esMovil, el('icono'));
   const der = (id: string) => el(id)?.col === 'der';
-  const hayBotones = Array.isArray(cfg.botones) && cfg.botones.length > 0;
+  // Con páginas hijas en vista «menú» también hay botones (los pide `BotonesLectura`).
+  const hayBotones = (Array.isArray(cfg.botones) && cfg.botones.length > 0) || (!!cfg.hijas?.tabla_id && cfg.hijas?.vista !== 'galeria');
   return (
     <header className="mb-5" data-cabecera-elementos data-cabecera-pagina>
       <CabeceraElementos elementos={els} iconoEncima={c?.iconoPos === 'encima'} piezas={{
@@ -177,7 +178,7 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
           </div>
           {/* Los botones y, a su lado, el hueco de la cuenta (`BarraMiembro`). */}
           <div data-botones-cabecera className="hidden shrink-0 flex-wrap items-center gap-x-6 gap-y-2 has-[button]:flex @xl:pt-1">
-            {Array.isArray(cfg.botones) && cfg.botones.length > 0 && <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha /></Suspense>}
+            {((Array.isArray(cfg.botones) && cfg.botones.length > 0) || (!!cfg.hijas?.tabla_id && cfg.hijas?.vista !== 'galeria')) && <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha /></Suspense>}
             <span data-hueco-cuenta="cabecera" className="contents" />
           </div>
           </div></div>

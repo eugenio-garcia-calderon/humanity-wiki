@@ -53,10 +53,12 @@ export type Ajustes = {
   sitio?: any;
   /** Los botones de la cabecera, cada uno una subpágina (2026-10-20). Ver `BotonesCabecera.tsx`. */
   botones?: { id: string; tipo: 'subpagina'; entityId: string; pubTitulo?: string }[];
+  /** Las páginas hijas (2026-10-23): la base de datos propia de la página, ver `PaginasHijas.tsx`. */
+  hijas?: { tipo: 'basedatos'; tabla_id: string; vista?: 'menu' | 'galeria' };
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio', 'botones'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio', 'botones', 'hijas'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, resumen, onCambio, onCerrar }: {
   ajustes: Ajustes;

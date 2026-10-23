@@ -438,7 +438,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión para ver tus páginas.' });
       const yo = req.user.id;
       const r = await db.execute(sql`
-        SELECT w.id, w.title, w.config->>'icono' AS icono, w.config->'bloques' AS bloques, w.config->'botones' AS botones, w.proyecto_id, w.updated_at, w.created_at
+        SELECT w.id, w.title, w.config->>'icono' AS icono, w.config->'bloques' AS bloques, w.config->'botones' AS botones, w.config->'hijas' AS hijas, w.proyecto_id, w.updated_at, w.created_at
         FROM knowledge_windows w
         WHERE w.kind = 'pagina' AND w.creator_user_id = ${yo} AND w.archived_at IS NULL AND w.deleted_at IS NULL
         ORDER BY w.created_at
@@ -464,6 +464,26 @@ export function registerDocumentosRoutes(app: Express, db: any) {
             tablas.set(b.tabla_id, p.id);
           }
         }
+      }
+      // LAS PÁGINAS HIJAS (2026-10-23, «Añadir entrada» de la cabecera): las filas
+      // de la base de datos propia de la página cuelgan DIRECTAMENTE de ella, sin
+      // el nodo de la base de datos en medio: son sus páginas hijas.
+      const propias = new Map<string, string>();
+      for (const p of paginas) if (p.hijas?.tabla_id && !propias.has(p.hijas.tabla_id)) propias.set(String(p.hijas.tabla_id), p.id);
+      if (propias.size) {
+        const ids = [...propias.keys()];
+        const f = await db.execute(sql`
+          SELECT tabla_id, pagina_id FROM bd_filas
+          WHERE tabla_id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND pagina_id IS NOT NULL AND archived_at IS NULL AND deleted_at IS NULL
+          ORDER BY orden, created_at
+        `);
+        for (const x of f.rows as any[]) {
+          const madre = propias.get(x.tabla_id)!;
+          if (!nodos[x.pagina_id] || conPadre.has(x.pagina_id) || x.pagina_id === madre) continue;
+          conPadre.add(x.pagina_id);
+          nodos[madre].hijas.push(x.pagina_id);
+        }
+        for (const id of ids) tablas.delete(id);
       }
       if (tablas.size) {
         const ids = [...tablas.keys()];

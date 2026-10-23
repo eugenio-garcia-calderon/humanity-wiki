@@ -9740,3 +9740,10 @@ Bot evaluador: arrastrar pestañas 7/10, vista enlazada 6,5/10. Eugenio: «no ex
 - Borrar una fila: aviso «movida a la papelera · Deshacer» (8 s, `/restaurar`) y las pestañas se ponen al día.
 - La pestaña abierta va en `?seccion=` también en el editor; flechas ‹ › en la pestaña abierta para moverla sin arrastrar (teclado y teléfono); asa ⋮⋮ al pasar el ratón; si no se guarda el orden, vuelve y lo dice.
 - ↗ de una base de datos en el editor abre la página donde vive (`/hogar`) en vez de `/bd/…` (404 si era privada). Tipos de columna con tildes («relación», «tema»…).
+
+## 2026-10-23 · Páginas hijas desde la cabecera (Programador 8)
+Eugenio: «permitir crear páginas dentro de esa página desde la cabecera: reciclando "añadir botón", ahora "añadir entrada", creándose una base de datos propia de la página enlazada desde la cabecera; verlas como galería con portada o como menú de botones; que al pinchar se abran con todas sus funcionalidades: un árbol de páginas dentro de páginas».
+- `config.hijas = { tipo: 'basedatos', tabla_id, vista: 'menu' | 'galeria' }` (`PaginasHijas.tsx`). La primera «Añadir entrada» crea la tabla «Páginas de «X»»; cada entrada es una fila con su página (con sus propias hijas, su red de enlaces, todo).
+- Los botones de antes se convierten en entradas al añadir la primera, sin perder sus páginas (`POST /api/bd/tablas/:id/filas-de-paginas`).
+- Vista «Menú»: botones en la cabecera y en la barra fija (abren su ventana, con «Abrir página» para la página entera); arrastrar ordena las filas (`/mover`); la X manda la página a la papelera. Vista «Galería»: tarjetas con portada bajo la cabecera, que abren la página. Selector «Menú · Galería» en el editor.
+- `bloquesSql.bloquesDe` cuenta `config.hijas` como un bloque «basedatos»: visibilidad al publicar, «dónde vive» y árbol del proyecto, sin regla nueva. En la barra lateral, las hijas cuelgan directamente de la madre (`/api/paginas/arbol`).

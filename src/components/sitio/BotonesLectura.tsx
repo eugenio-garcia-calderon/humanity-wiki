@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import { FilaBotones, VentanaBoton, botonesDe, type BotonCabecera, type TallaBotones } from '../knowledge/BotonesCabecera';
 import { BarraFija } from '../knowledge/BarraFija';
+import { useHijas, botonesDeHijas, vistaDeHijas } from '../knowledge/PaginasHijas';
+import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
 
 // LOS BOTONES DE LA CABECERA, EN LA PÁGINA PUBLICADA (2026-10-20): cada uno
@@ -9,7 +11,15 @@ import { cn } from '../../utils/cn';
 // Con ganchos y ventanas: sólo en el navegador (`CabeceraLectura` los carga en diferido).
 
 /** La ventana con la página de un botón, leída del servidor. */
-function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCerrar: () => void }) {
+/** Los botones de la cabecera: los de antes y, en vista «menú», las páginas hijas (2026-10-23). */
+function useBotonesPagina(config: any): { botones: BotonCabecera[]; hijaIds: Set<string> } {
+  const hijas = useHijas(config?.hijas?.tabla_id);
+  const deHijas = vistaDeHijas(config?.hijas) === 'menu' ? botonesDeHijas(hijas) : [];
+  return { botones: [...botonesDe(config), ...deHijas], hijaIds: new Set(deHijas.map(b => b.id)) };
+}
+
+function VentanaPaginaPublica({ boton, onCerrar, esHija = false }: { boton: BotonCabecera; onCerrar: () => void; esHija?: boolean }) {
+  const sitio = useSitio();
   const [pagina, setPagina] = useState<{ titulo: string; bloques: any[] } | 'cargando' | 'no' | 'fallo'>('cargando');
   const [intento, setIntento] = useState(0);
   useEffect(() => {
@@ -31,7 +41,7 @@ function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCer
   // Una página con un mapa a pantalla completa se abre ya expandida.
   const tieneMapa = typeof pagina === 'object' && pagina.bloques.some((b: any) => ['mapaMundo', 'arbolConocimiento'].includes(b?.tipo) && b?.datos?.alto === 'pantalla');
   return (
-    <VentanaBoton titulo={titulo} onCerrar={onCerrar} inicialGrande={tieneMapa}>
+    <VentanaBoton titulo={titulo} onCerrar={onCerrar} inicialGrande={tieneMapa} enlace={esHija ? (sitio ? sitio.enlacePagina(boton.entityId) : `/p/${boton.entityId}`) : undefined}>
       {grande => (
       <div className={cn('mx-auto px-5 pb-12 pt-10 text-left', grande ? 'max-w-[110rem] sm:px-8' : 'max-w-3xl sm:px-10')}>
         <h2 className="mb-6 pr-10 text-3xl font-black tracking-tight text-slate-900 break-words">{titulo}</h2>
@@ -50,14 +60,14 @@ function VentanaPaginaPublica({ boton, onCerrar }: { boton: BotonCabecera; onCer
 }
 
 export default function BotonesLectura({ config, centrado, derecha, talla }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones }) {
-  const botones = botonesDe(config);
+  const { botones, hijaIds } = useBotonesPagina(config);
   const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
   if (!botones.length) return null;
   return (
     <>
       <FilaBotones botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
         centrado={centrado} derechaAncho={derecha} sinMargen={derecha !== undefined} plegado={config?.cabecera?.botonesMenu === 'plegado'} onAbrir={setAbierto} />
-      {abierto && <VentanaPaginaPublica boton={abierto} onCerrar={() => setAbierto(null)} />}
+      {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
     </>
   );
 }
@@ -65,12 +75,13 @@ export default function BotonesLectura({ config, centrado, derecha, talla }: { c
 /** La barra fina que se queda arriba al bajar (ver `BarraFija`). */
 export function BarraFijaLectura({ config, titulo }: { config: any; titulo: string }) {
   const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
+  const { botones: todos, hijaIds } = useBotonesPagina(config);
   const verBotones = !(config?.cabecera?.elementos || []).some((e: any) => e?.id === 'botones' && e.oculto);
   return (
     <>
       <BarraFija icono={config?.icono || null} titulo={config?.ocultarTitulo ? '' : titulo} subtitulo={config?.subtitulo}
-        portada={config?.portada} botones={verBotones ? botonesDe(config) : []} estilo={config?.cabecera?.botonesEstilo} plegado={config?.cabecera?.botonesMenu === 'plegado'} onAbrir={setAbierto} />
-      {abierto && <VentanaPaginaPublica boton={abierto} onCerrar={() => setAbierto(null)} />}
+        portada={config?.portada} botones={verBotones ? todos : []} estilo={config?.cabecera?.botonesEstilo} plegado={config?.cabecera?.botonesMenu === 'plegado'} onAbrir={setAbierto} />
+      {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
     </>
   );
 }
