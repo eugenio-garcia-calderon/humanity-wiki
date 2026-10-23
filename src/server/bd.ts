@@ -95,8 +95,8 @@ export type EntradaRed = { fila_id: string; pagina_id: string | null; titulo: st
 export type GrupoRed = { columna_id: string; nombre: string; slug: string; tabla_destino: string | null; tabla_titulo: string | null; entradas: EntradaRed[];
   /** (2026-10-23) La columna de la OTRA tabla que dice «está conectado con esta entrada»: la vista enlazada del editor filtra y crea con ella. Sin valor, el enlace es de un solo lado. */
   vinculo?: string | null;
-  /** La vista elegida para este grupo en el editor (`config.vistasRed`). */
-  vista?: string | null };
+  /** La vista propia de este grupo en el editor (`config.vistasRed`): un objeto de vista, o la forma (texto) de antes. */
+  vista?: any };
 export type RedPagina = { fila_id: string; tabla_id: string; grupos: GrupoRed[] };
 
 export const bdInterno: {
@@ -850,8 +850,20 @@ export function registerBdRoutes(app: Express, db: any) {
       if (!exigeSesion(req, res)) return;
       const permiso = await puedeConTabla(req, String(req.params.id), true);
       if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
-      const col = String(req.body?.columna_id || ''), vista = String(req.body?.vista || '');
-      if (!/^[A-Za-z0-9_-]{3,64}$/.test(col) || !/^[A-Za-z0-9_:-]{1,80}$/.test(vista)) return res.status(400).json({ error: 'Falta la pestaña o la vista.' });
+      // (2026-10-23) La vista PROPIA de la pestaña, como una vista enlazada de
+      // Notion: su forma, filtros, orden, grupos y ajustes. No toca las vistas
+      // de la tabla original. Se acepta aún el texto de antes («galeria»).
+      const col = String(req.body?.columna_id || '');
+      const v = req.body?.vista;
+      const vista = typeof v === 'string' ? v.slice(0, 80) : v && typeof v === 'object' ? {
+        forma: String(v.forma || 'galeria').slice(0, 30),
+        filtros: filtroValido(v.filtros) ? v.filtros ?? [] : [],
+        orden_por: Array.isArray(v.orden_por) ? v.orden_por.slice(0, 10) : [],
+        agrupar_por: typeof v.agrupar_por === 'string' ? v.agrupar_por.slice(0, 64) : null,
+        ocultas: Array.isArray(v.ocultas) ? v.ocultas.map(String).slice(0, 200) : [],
+        config: v.config && typeof v.config === 'object' ? v.config : {},
+      } : null;
+      if (!/^[A-Za-z0-9_-]{3,64}$/.test(col) || !vista || JSON.stringify(vista).length > 20000) return res.status(400).json({ error: 'Falta la pestaña o la vista.' });
       await db.execute(sql`
         UPDATE bd_tablas SET config = jsonb_set(jsonb_set(COALESCE(config, '{}'::jsonb), '{vistasRed}', COALESCE(config->'vistasRed', '{}'::jsonb)), ARRAY['vistasRed', ${col}], ${JSON.stringify(vista)}::jsonb),
           updated_by = ${req.user!.id}, updated_at = now()
@@ -1500,7 +1512,7 @@ export function registerBdRoutes(app: Express, db: any) {
         entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null, via: a.via || null });
       }
       const vistasRed = permisoTabla?.config?.vistasRed || {};
-      if (entradas.length || conVacios) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas, vinculo: c.vinculo, vista: typeof vistasRed[c.id] === 'string' ? vistasRed[c.id] : null });
+      if (entradas.length || conVacios) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas, vinculo: c.vinculo, vista: vistasRed[c.id] ?? null });
     }
     // EL ORDEN DE LAS PESTAÑAS (2026-10-23, Eugenio: «pinchar y arrastrar una
     // pestaña para ordenarlas como quiera»). Es de la TABLA (`config.ordenRed`):
