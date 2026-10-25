@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bell, BellRing, Link2, Check, ArrowRight, FileText, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
+import { usePestanasExtra, EVENTO_ABRIR_PESTANA } from './pestanasExtra';
 import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
@@ -30,7 +31,6 @@ type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug
 export type Grupo = { columna_id: string; nombre: string; slug: string; tabla_titulo: string | null; tabla_destino?: string | null; entradas: Entrada[]; vinculo?: string | null; vista?: string | null };
 export type { Entrada as EntradaRedCliente };
 
-const MAX_EN_TODO = 8;
 /** EL NOMBRE CORTO EN LA PESTAÑA (bot de UX, 2026-10-25: «Líneas de trabajo de las …»
  *  truncado y la fila cortada en seco). «Puntos de Trabajo dentro de las Líneas de
  *  Desarrollo» → «Puntos de Trabajo»; el nombre entero va en el título del grupo. */
@@ -61,7 +61,11 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   const sitio = useSitio();
   const [grupos, setGrupos] = useState<Grupo[] | null>(null);
   const [slugPagina, setSlugPagina] = useState<string | null>(null);
+  // «todo» ya no es una pestaña (2026-10-25, Eugenio: «quita la pestaña de Todo»): quiere decir
+  // «la de por defecto», que es la primera (las del termómetro, si las hay; si no, la primera base de datos).
   const [activa, setActiva] = useState<string>('todo');
+  // Las pestañas que pone un bloque de la página (el termómetro): van delante, en la misma barra.
+  const extra = usePestanasExtra(paginaId);
   const barra = useRef<HTMLDivElement>(null);
   const fila = useRef<HTMLElement>(null);
   const [hayMas, setHayMas] = useState(false);
@@ -105,12 +109,24 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
     window.addEventListener('popstate', alVolver);
     return () => window.removeEventListener('popstate', alVolver);
   }, [grupos, enEditor]);
+  // «Qué hace falta para llegar al nivel 5» abre su pestaña aquí abajo y baja hasta ella.
+  useEffect(() => {
+    const oir = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (d.paginaId !== paginaId) return;
+      setActiva(`x:${d.id}`);
+      const y = (barra.current?.getBoundingClientRect().top || 0) + window.scrollY - 80;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    };
+    window.addEventListener(EVENTO_ABRIR_PESTANA, oir);
+    return () => window.removeEventListener(EVENTO_ABRIR_PESTANA, oir);
+  }, [paginaId]);
   // La pestaña activa, a la vista en la barra (en el teléfono la barra se desplaza).
   useEffect(() => {
     barra.current?.querySelector<HTMLElement>('a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
   }, [activa]);
 
-  if (!grupos || !grupos.length) return null;
+  if (!grupos || (!grupos.length && !extra.length)) return null;
 
   const caminoDe = (g?: Grupo) => {
     if (!base) return g ? `?seccion=${g.slug}` : window.location.pathname;
@@ -181,8 +197,10 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
     marca: (encima?.slug === g.slug && arrastrada !== g.slug ? (encima.antes ? 'antes' : 'despues') : null) as Arrastre['marca'],
     moviendo: arrastrada === g.slug,
   } : undefined;
-  const grupo = grupos.find(g => g.slug === activa) || null;
-  const total = grupos.reduce((n, g) => n + g.entradas.length, 0);
+  const efectiva = activa === 'todo' || (activa.startsWith('x:') && !extra.some(x => `x:${x.id}` === activa))
+    ? (extra[0] ? `x:${extra[0].id}` : grupos[0]?.slug) : activa;
+  const grupo = grupos.find(g => g.slug === efectiva) || null;
+  const pestanaExtra = extra.find(x => `x:${x.id}` === efectiva) || null;
 
   return (
     <section className="mb-8" data-red-relaciones>
@@ -190,10 +208,13 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
       {/* En el teléfono, un degradado a la derecha avisa de que hay más pestañas. */}
       <div ref={barra} className="relative mb-5 border-b border-slate-200">
         <nav ref={fila} onScroll={medirFila} aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none]">
-          <Pestana href={caminoDe()} activa={activa === 'todo'} onClick={e => elegir(e, null)} texto="Todo" n={total} />
+          {extra.map(x => (
+            <Pestana key={`x:${x.id}`} href={`#${x.id}`} activa={efectiva === `x:${x.id}`} texto={x.titulo} n={x.n}
+              onClick={e => { if (e.button !== 0 || e.metaKey || e.ctrlKey) return; e.preventDefault(); setActiva(`x:${x.id}`); }} />
+          ))}
           {grupos.map(g => (
-            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={enEditor ? g.nombre : nombreCorto(g.nombre)} completo={g.nombre} n={g.entradas.length} arrastre={arrastre(g)}
-              mover={arrastrable && activa === g.slug ? { izquierda: grupos[0].slug !== g.slug ? () => mover(g.slug, -1) : undefined, derecha: grupos[grupos.length - 1].slug !== g.slug ? () => mover(g.slug, 1) : undefined } : undefined} />
+            <Pestana key={g.slug} href={caminoDe(g)} activa={efectiva === g.slug} onClick={e => elegir(e, g)} texto={enEditor ? g.nombre : nombreCorto(g.nombre)} completo={g.nombre} n={g.entradas.length} arrastre={arrastre(g)}
+              mover={arrastrable && efectiva === g.slug ? { izquierda: grupos[0].slug !== g.slug ? () => mover(g.slug, -1) : undefined, derecha: grupos[grupos.length - 1].slug !== g.slug ? () => mover(g.slug, 1) : undefined } : undefined} />
           ))}
         </nav>
         {/* Si no caben, un degradado y una flecha dicen que hay más pestañas (en el ordenador también). */}
@@ -208,7 +229,9 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
       </div>
       {falloOrden && <p role="alert" className="-mt-3 mb-4 text-xs font-bold text-rose-600">{falloOrden}</p>}
 
-      {grupo ? (
+      {pestanaExtra ? (
+        <div data-pestana-extra={pestanaExtra.id}>{pestanaExtra.contenido}</div>
+      ) : grupo ? (
         // UNA PESTAÑA: sólo su grupo, en grande.
         <div>
           {/* En el editor la vista enlazada ya lleva el nombre de su base de datos. */}
@@ -230,36 +253,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
           )
           )}
         </div>
-      ) : (
-        // TODO: todos los grupos. Los pequeños (una o dos entradas) se juntan de
-        // dos en dos o de tres en tres: uno por fila dejaba media pantalla en blanco.
-        <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
-          {grupos.map(g => (
-            <div key={g.slug} data-grupo-red={g.slug} className={cn('min-w-0' /* sin esto, un título en una línea ensanchaba la página en el móvil */, g.entradas.length > 2 && 'sm:col-span-2 lg:col-span-3')}>
-              <div className="mb-3 flex min-w-0 items-baseline gap-2">
-                <h2 title={g.nombre} className="min-w-0 truncate text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
-                <span className="shrink-0 text-sm font-semibold text-slate-500">{g.entradas.length}</span>
-                <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap py-1 text-sm font-bold text-slate-600 hover:text-slate-900">
-                  Ver todo <ArrowRight className="h-3.5 w-3.5" />
-                </a>
-              </div>
-              <div className={cn('grid gap-3 sm:gap-4', sinImagenes(g)
-                ? (g.entradas.length > 2 ? 'gap-2 sm:grid-cols-2 lg:grid-cols-3 sm:gap-2' : 'gap-2 sm:gap-2')
-                : g.entradas.length > 2
-                ? 'grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(min(11rem,100%),1fr))]'
-                : 'grid-cols-2')}>
-                {g.entradas.slice(0, MAX_EN_TODO).map(x => sinImagenes(g) ? <FilaEntrada key={x.fila_id} x={x} href={enlaceEntrada(g, x)} /> : <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(g, x)} />)}
-                {!g.entradas.length && (
-                  <a href={caminoDe(g)} onClick={e => elegir(e, g)}
-                    className="col-span-2 grid min-h-24 place-items-center rounded-2xl border border-dashed border-slate-300 px-3 text-center text-sm font-bold text-slate-400 hover:border-emerald-400 hover:text-emerald-700">
-                    Aún no hay nada conectado · abrir para añadir
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -276,7 +270,7 @@ type Arrastre = {
 };
 
 function Pestana({ href, activa, onClick, texto, completo, n, arrastre, mover }: {
-  href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; completo?: string; n: number; arrastre?: Arrastre;
+  href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; completo?: string; n?: number; arrastre?: Arrastre;
   /** La pestaña abierta, en el editor: moverla un sitio sin arrastrar. */
   mover?: { izquierda?: () => void; derecha?: () => void };
 }) {
@@ -296,7 +290,7 @@ function Pestana({ href, activa, onClick, texto, completo, n, arrastre, mover }:
         marca === 'despues' && 'after:absolute after:inset-y-2 after:right-0 after:w-0.5 after:rounded after:bg-emerald-500')}>
       {arrastre && <GripVertical aria-hidden className="-ml-1.5 h-3.5 w-3.5 shrink-0 text-slate-300 opacity-0 transition-opacity group-hover/pestana:opacity-100" />}
       <span className="truncate">{texto}</span>
-      <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}>{n}</span>
+      {n !== undefined && <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}>{n}</span>}
     </a>
     {mover?.derecha && <button type="button" onClick={mover.derecha} aria-label={`Mover «${texto}» a la derecha`} title="Mover a la derecha" className={flecha}><ChevronRight className="h-3.5 w-3.5" /></button>}
     </span>
