@@ -55,36 +55,39 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
   const nombres = (v: number | null) => suyas.filter(x => x.nota === v).map(x => x.nombre);
   const lista = (xs: string[]) => xs.length <= 2 ? xs.join(' y ') : `${xs.slice(0, 2).join(', ')} y ${xs.length - 2} más`;
   const vuelta = defecto && elegido !== defecto ? opciones.find(o => o.id === defecto) : null;
-  const resumen = media !== null ? (
-    <div data-resumen-territorio className="mx-auto mt-5 grid max-w-3xl items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-[auto_1fr] sm:p-6">
-      <div className="flex items-center gap-4">
-        <span className="grid h-24 w-24 place-items-center rounded-full font-black tabular-nums shadow-md" style={{ backgroundColor: colorDeNota(media), color: textoSobre(colorDeNota(media)) }}>
-          <span className="flex items-baseline text-4xl">{textoNota(Math.round(media * 10) / 10)}<span className="ml-0.5 text-sm font-semibold">/10</span></span>
-        </span>
-        <div className="sm:hidden"><p className="text-xs font-black uppercase tracking-wide text-slate-400">Media de {nombre}</p></div>
-      </div>
-      <div className="min-w-0">
-        <p className="hidden text-xs font-black uppercase tracking-[0.16em] text-slate-400 sm:block">Media de {nombre} · {suyas.length} sistemas</p>
-        <p className="mt-1 text-sm text-slate-700"><b className="font-black" style={{ color: tonosDeNota(max!).tinta }}>Mejor:</b> {lista(nombres(max))} ({textoNota(max)}) · <b className="font-black" style={{ color: tonosDeNota(min!).tinta }}>Peor:</b> {lista(nombres(min))} ({textoNota(min)})</p>
-        <div className="mt-3" aria-label="Escala de colores del 1 al 10">
-          <div className="flex h-3 overflow-hidden rounded-full">{Array.from({ length: 10 }, (_, i) => <span key={i} className="flex-1" style={{ backgroundColor: colorDeNota(i + 1) }} />)}</div>
-          <div className="mt-1 flex justify-between text-[11px] font-bold text-slate-500"><span>1 · lo más urgente</span><span>10 · resuelto</span></div>
-        </div>
+  // UN SOLO RECUADRO (2026-10-25, Eugenio: «España a la izquierda y la nota media
+  // a la derecha en el mismo recuadro unificado»): el territorio, lo mejor y lo
+  // peor con la leyenda en medio, y la media en grande a la derecha.
+  const circulo = media !== null && (
+    <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full font-black tabular-nums shadow-md" style={{ backgroundColor: colorDeNota(media), color: textoSobre(colorDeNota(media)) }}
+      aria-label={`Media de ${nombre}: ${textoNota(Math.round(media * 10) / 10)} sobre 10`}>
+      <span className="flex items-baseline text-4xl">{textoNota(Math.round(media * 10) / 10)}<span className="ml-0.5 text-sm font-semibold">/10</span></span>
+    </span>
+  );
+  const centro = media !== null ? (
+    <div data-resumen-territorio className="min-w-0">
+      <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Media de {nombre} · {suyas.length} sistemas</p>
+      <p className="mt-1 text-sm text-slate-700"><b className="font-black" style={{ color: tonosDeNota(max!).tinta }}>Mejor:</b> {lista(nombres(max))} ({textoNota(max)}) · <b className="font-black" style={{ color: tonosDeNota(min!).tinta }}>Peor:</b> {lista(nombres(min))} ({textoNota(min)})</p>
+      <div className="mt-3" aria-label="Escala de colores del 1 al 10">
+        <div className="flex h-3 overflow-hidden rounded-full">{Array.from({ length: 10 }, (_, i) => <span key={i} className="flex-1" style={{ backgroundColor: colorDeNota(i + 1) }} />)}</div>
+        <div className="mt-1 flex justify-between text-[11px] font-bold text-slate-500"><span>1 · lo más urgente</span><span>10 · resuelto</span></div>
       </div>
     </div>
-  ) : notas.length > 0 && nombre !== '…' && (
-    <div data-sin-notas className="mx-auto mt-5 max-w-xl rounded-3xl border border-dashed border-slate-300 bg-white p-5 text-center">
+  ) : notas.length > 0 && nombre !== '…' ? (
+    <div data-sin-notas className="min-w-0">
       <p className="text-base font-black text-slate-800">Todavía no hay notas para {nombre}.</p>
       <p className="mt-1 text-sm text-slate-500">Las notas se van poniendo territorio a territorio.</p>
       {vuelta && <button type="button" onClick={() => elegir(vuelta.id)} className="mt-3 rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700">Ver {vuelta.nombre}</button>}
     </div>
-  );
+  ) : null;
   return (
-    <div data-filtro-territorio className="my-6">
-      <div className="flex justify-center">
-        <ElegirTerritorio opciones={opciones} conDatos={conDatos} elegido={elegido} onElegir={elegir} />
+    <div data-filtro-territorio className="mx-auto my-6 grid max-w-5xl items-center gap-5 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-[auto_1fr_auto] lg:gap-8">
+      <div className="flex justify-center lg:border-r lg:border-slate-100 lg:pr-6">
+        <ElegirTerritorio sinMarco opciones={opciones} conDatos={conDatos} elegido={elegido} onElegir={elegir} />
       </div>
-      {resumen}
+      {centro || <span />}
+      {/* La media: a la derecha en el ordenador; en el móvil, centrada al final. */}
+      {circulo && <div className="flex justify-center lg:pl-2">{circulo}</div>}
     </div>
   );
 }
