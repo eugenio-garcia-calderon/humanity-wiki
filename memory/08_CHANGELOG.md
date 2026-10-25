@@ -9801,3 +9801,12 @@ Eugenio: «mucho más compacta, que se vea casi todo en primera página; redise�
 - Termómetro en un solo recuadro de tres columnas: el termómetro (más bajo, filas de 28 px); en el centro, la portada, el título y la descripción, y debajo el territorio, la nota y el nivel elegido; a la derecha, pestañas: «El salto 4→5» (una escalera vertical que sube del nivel de ahora al siguiente), «Soluciones» (del 10 al nivel actual, con los proyectos ya en marcha), «Fallos» y «Mejoras». La página no se alarga.
 - Con el termómetro de cabecera, las pestañas de la red van justo debajo; las páginas hijas y «Seguir / Compartir», después.
 - `ElegirTerritorio` admite `compacto`.
+
+## 2026-10-25 · Página de un sistema: mejoras del bot de UX (ronda 1: 6,3/10) y el título en la línea de la ruta (Programador 8)
+- Eugenio: «que Movilidad esté más arriba, donde la ruta de la web» → con el termómetro de cabecera, `VistaPagina` pone en la primera línea la ruta («Inicio ›») y el título (h1) con su portada y descripción; el termómetro ya no repite el título (`sinTitulo`).
+- Termómetro: sin cartel flotante (tapaba el título y el selector): pasar por un número enseña ese nivel en la tarjeta de la descripción; los niveles aún no alcanzados con su color muy claro (se ve la meta), el siguiente con borde discontinuo, el bulbo del color de la nota; teclado con un solo tabulador y flechas (`radiogroup`). En el móvil, una barra horizontal 0–10 y la descripción en 3 líneas con «Leer más».
+- «El salto»: «Para subir al nivel 5 · …», de «Hoy» (arriba) a «Meta» (abajo), pasos 1, 2, 3… con marcas neutras (no círculos del color de los niveles), escalonados.
+- «Soluciones»: cuenta soluciones, no niveles; arriba los proyectos ya en marcha; se abre en el nivel siguiente; marca «hoy» y «siguiente»; degradado abajo si hay más.
+- Pestañas con `aria-controls`/`aria-labelledby`, un tabulador y flechas; `<main>` en las páginas publicadas; el título de la pestaña del navegador: «Movilidad en España · 4/10».
+- Red: en las pestañas, el nombre corto («Puntos de Trabajo dentro de las Líneas…» → «Puntos de Trabajo»; el entero, en el título); si no caben, degradado y flecha «›» también en el ordenador; los grupos sin ninguna imagen van en filas compactas, no en cuadros con una letra gigante; «Ver en grande» con 24 px de alto.
+- Selector de territorio: anillo de foco redondeado en el buscador; los territorios sin notas en gris; «Cambiar» solo icono en el móvil compacto.

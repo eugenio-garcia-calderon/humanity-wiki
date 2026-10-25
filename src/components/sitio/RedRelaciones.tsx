@@ -31,6 +31,13 @@ export type Grupo = { columna_id: string; nombre: string; slug: string; tabla_ti
 export type { Entrada as EntradaRedCliente };
 
 const MAX_EN_TODO = 8;
+/** EL NOMBRE CORTO EN LA PESTAÑA (bot de UX, 2026-10-25: «Líneas de trabajo de las …»
+ *  truncado y la fila cortada en seco). «Puntos de Trabajo dentro de las Líneas de
+ *  Desarrollo» → «Puntos de Trabajo»; el nombre entero va en el título del grupo. */
+export const nombreCorto = (t: string) => {
+  const c = t.replace(/\s+(de los|de las|del|de la|dentro de)\s.*$/i, '').trim();
+  return c.length >= 3 ? c : t;
+};
 const TONOS = ['bg-emerald-50 text-emerald-600', 'bg-sky-50 text-sky-600', 'bg-amber-50 text-amber-600', 'bg-rose-50 text-rose-600', 'bg-violet-50 text-violet-600', 'bg-teal-50 text-teal-600'];
 
 export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, enEditor = false, recarga = 0, renderGrupo }: {
@@ -56,6 +63,10 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   const [slugPagina, setSlugPagina] = useState<string | null>(null);
   const [activa, setActiva] = useState<string>('todo');
   const barra = useRef<HTMLDivElement>(null);
+  const fila = useRef<HTMLElement>(null);
+  const [hayMas, setHayMas] = useState(false);
+  const medirFila = () => { const f = fila.current; setHayMas(!!f && f.scrollWidth - f.scrollLeft - f.clientWidth > 4); };
+  useEffect(() => { medirFila(); window.addEventListener('resize', medirFila); return () => window.removeEventListener('resize', medirFila); });
 
   useEffect(() => {
     let vivo = true;
@@ -177,14 +188,23 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
     <section className="mb-8" data-red-relaciones>
       {/* LAS PESTAÑAS */}
       {/* En el teléfono, un degradado a la derecha avisa de que hay más pestañas. */}
-      <div ref={barra} className="relative mb-5 border-b border-slate-200 after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-10 after:bg-gradient-to-l after:from-white sm:after:hidden">
-        <nav aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto pr-8 [scrollbar-width:none] sm:pr-0">
+      <div ref={barra} className="relative mb-5 border-b border-slate-200">
+        <nav ref={fila} onScroll={medirFila} aria-label={`Relacionado con ${titulo}`} className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none]">
           <Pestana href={caminoDe()} activa={activa === 'todo'} onClick={e => elegir(e, null)} texto="Todo" n={total} />
           {grupos.map(g => (
-            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={g.nombre} n={g.entradas.length} arrastre={arrastre(g)}
+            <Pestana key={g.slug} href={caminoDe(g)} activa={activa === g.slug} onClick={e => elegir(e, g)} texto={enEditor ? g.nombre : nombreCorto(g.nombre)} completo={g.nombre} n={g.entradas.length} arrastre={arrastre(g)}
               mover={arrastrable && activa === g.slug ? { izquierda: grupos[0].slug !== g.slug ? () => mover(g.slug, -1) : undefined, derecha: grupos[grupos.length - 1].slug !== g.slug ? () => mover(g.slug, 1) : undefined } : undefined} />
           ))}
         </nav>
+        {/* Si no caben, un degradado y una flecha dicen que hay más pestañas (en el ordenador también). */}
+        {hayMas && (
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex w-16 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent">
+            <button type="button" aria-label="Ver más pestañas" onClick={() => fila.current?.scrollBy({ left: 260, behavior: 'smooth' })}
+              className="pointer-events-auto grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:text-slate-900">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
       {falloOrden && <p role="alert" className="-mt-3 mb-4 text-xs font-bold text-rose-600">{falloOrden}</p>}
 
@@ -199,9 +219,15 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
           </div>
           )}
           {renderGrupo && filaId ? renderGrupo(grupo, filaId) : (
+          sinImagenes(grupo) ? (
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {grupo.entradas.map(x => <FilaEntrada key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} />)}
+            </div>
+          ) : (
           <div className="grid grid-cols-2 gap-4 sm:gap-5 sm:[grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr))]">
             {grupo.entradas.map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} grande />)}
           </div>
+          )
           )}
         </div>
       ) : (
@@ -213,14 +239,16 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
               <div className="mb-3 flex items-baseline gap-2">
                 <h2 className="text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
                 <span className="text-sm font-semibold text-slate-400">{g.entradas.length}</span>
-                <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-900">
+                <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex min-h-6 items-center gap-1 py-1 text-sm font-bold text-slate-600 hover:text-slate-900">
                   Ver {g.entradas.length > MAX_EN_TODO ? 'todo' : 'en grande'} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
-              <div className={cn('grid gap-3 sm:gap-4', g.entradas.length > 2
+              <div className={cn('grid gap-3 sm:gap-4', sinImagenes(g)
+                ? (g.entradas.length > 2 ? 'gap-2 sm:grid-cols-2 lg:grid-cols-3 sm:gap-2' : 'gap-2 sm:gap-2')
+                : g.entradas.length > 2
                 ? 'grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(min(11rem,100%),1fr))]'
                 : 'grid-cols-2')}>
-                {g.entradas.slice(0, MAX_EN_TODO).map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(g, x)} />)}
+                {g.entradas.slice(0, MAX_EN_TODO).map(x => sinImagenes(g) ? <FilaEntrada key={x.fila_id} x={x} href={enlaceEntrada(g, x)} /> : <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(g, x)} />)}
                 {!g.entradas.length && (
                   <a href={caminoDe(g)} onClick={e => elegir(e, g)}
                     className="col-span-2 grid min-h-24 place-items-center rounded-2xl border border-dashed border-slate-300 px-3 text-center text-sm font-bold text-slate-400 hover:border-emerald-400 hover:text-emerald-700">
@@ -247,8 +275,8 @@ type Arrastre = {
   onDrop: (e: React.DragEvent) => void; onDragEnd: () => void; marca: 'antes' | 'despues' | null; moviendo: boolean;
 };
 
-function Pestana({ href, activa, onClick, texto, n, arrastre, mover }: {
-  href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; n: number; arrastre?: Arrastre;
+function Pestana({ href, activa, onClick, texto, completo, n, arrastre, mover }: {
+  href: string; activa: boolean; onClick: (e: React.MouseEvent) => void; texto: string; completo?: string; n: number; arrastre?: Arrastre;
   /** La pestaña abierta, en el editor: moverla un sitio sin arrastrar. */
   mover?: { izquierda?: () => void; derecha?: () => void };
 }) {
@@ -258,7 +286,7 @@ function Pestana({ href, activa, onClick, texto, n, arrastre, mover }: {
     <span className="group/pestana inline-flex shrink-0 items-center">
     {mover?.izquierda && <button type="button" onClick={mover.izquierda} aria-label={`Mover «${texto}» a la izquierda`} title="Mover a la izquierda" className={flecha}><ChevronLeft className="h-3.5 w-3.5" /></button>}
     <a href={href} onClick={onClick} aria-current={activa ? 'page' : undefined}
-      title={arrastre ? `${texto} · arrastra para cambiarla de sitio` : texto}
+      title={arrastre ? `${completo || texto} · arrastra para cambiarla de sitio` : (completo || texto)}
       {...(arrastre ? eventos : {})}
       data-pestana-red={arrastre ? texto : undefined}
       className={cn('relative inline-flex h-12 max-w-[16rem] shrink-0 items-center gap-1.5 border-b-2 px-3 text-[15px] font-semibold transition-colors',
@@ -272,6 +300,25 @@ function Pestana({ href, activa, onClick, texto, n, arrastre, mover }: {
     </a>
     {mover?.derecha && <button type="button" onClick={mover.derecha} aria-label={`Mover «${texto}» a la derecha`} title="Mover a la derecha" className={flecha}><ChevronRight className="h-3.5 w-3.5" /></button>}
     </span>
+  );
+}
+
+/** Un grupo sin ninguna imagen se enseña en filas, no en cuadros con una letra
+ *  gigante (bot de UX: «parecen imágenes rotas y alargan la página»). */
+const sinImagenes = (g: Grupo) => g.entradas.length > 0 && g.entradas.every(x => !x.imagen && !(x.icono && !/^(https?:|\/)/.test(x.icono)));
+
+function FilaEntrada({ x, href }: { x: Entrada; href: string }) {
+  const texto = (x.descripcion || x.resumen || '').trim();
+  const tono = TONOS[(x.titulo.charCodeAt(0) || 0) % TONOS.length];
+  return (
+    <Link to={href} data-interno className="group flex min-h-14 min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 transition-shadow hover:border-slate-300 hover:shadow-sm">
+      <span className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase() || <FileText className="h-4 w-4" />}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-bold leading-snug text-slate-900 line-clamp-2 group-hover:underline">{x.titulo}</span>
+        {texto && <span className="block truncate text-[12px] text-slate-500">{texto}</span>}
+      </span>
+      <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-700" />
+    </Link>
   );
 }
 

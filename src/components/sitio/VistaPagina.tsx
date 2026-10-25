@@ -13,6 +13,7 @@ import { useSitio } from './ContextoSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
 import { cn } from '../../utils/cn';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -117,8 +118,12 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   return (
     <div onClickCapture={alPinchar}>
     <MarcoLectura pagina={pagina} rutas={rutas}>
+      {/* EL TÍTULO EN LA LÍNEA DE LA RUTA (2026-10-25, Eugenio: «que Movilidad esté
+          más arriba, donde la ruta de la web»): con el termómetro de cabecera, la ruta
+          y el título (con su portada y descripción) comparten la primera línea. */}
+      <div className={termo ? 'mb-3 flex flex-wrap items-center gap-x-3 gap-y-1' : undefined}>
       {migasContexto ? (
-        <nav aria-label="Estás en" className="mb-4">
+        <nav aria-label="Estás en" className={termo ? undefined : 'mb-4'}>
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {migasContexto.map((m, i) => (
               <li key={m.clave} className={cn('items-center gap-1', i === migasContexto.length - 1 ? 'flex' : 'hidden sm:flex')}>
@@ -127,11 +132,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
                 <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migasContexto.length - 1 && 'hidden sm:block')} aria-hidden />
               </li>
             ))}
-            <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
+            {!termo && <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>}
           </ol>
         </nav>
       ) : migas.length > 0 && (
-        <nav aria-label="Estás en" className="mb-4">
+        <nav aria-label="Estás en" className={termo ? undefined : 'mb-4'}>
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {/* On a phone, one line: only the level just above, the way back.
                 The full trail took three lines before the title (evaluator
@@ -145,13 +150,27 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
                 <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migas.length - 1 && 'hidden sm:block')} aria-hidden />
               </li>
             ))}
-            <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
+            {!termo && <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>}
           </ol>
         </nav>
       )}
+      {termo && (
+        <div className="flex min-w-0 items-center gap-2.5">
+          {cfg.portada || (icono && esUrl(icono))
+            ? <img src={miniatura(cfg.portada || icono!, 120)} alt="" className="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm ring-1 ring-black/10" />
+            : icono ? <span className="text-3xl leading-none">{icono}</span> : null}
+          <div className="min-w-0">
+            <h1 className="text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">{pagina.titulo || 'Sin título'}</h1>
+            {cfg.subtitulo && <p className="text-sm leading-snug text-slate-600">{cfg.subtitulo}</p>}
+          </div>
+        </div>
+      )}
+      </div>
+      {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
+      <main id="contenido">
       <article>
         {termo
-          ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
+          ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true, sinTitulo: true } }} paginaId={pagina.id} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
         {cfg.tiempoLectura === true && (() => {
@@ -178,6 +197,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
       </article>
+      </main>
       {pie}
     </MarcoLectura>
     </div>
