@@ -432,11 +432,11 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
       const nombreEl = (
                   <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (minima ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : legible ? 'text-base' : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
                     {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
-                      : icono ? (esUrl(icono)
+                      : icono && !(!f.pagina?.imagen && !esUrl(icono) && !chica) ? (esUrl(icono)
                         ? <img src={miniatura(icono, 24)} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
                         : <span className="shrink-0">{icono}</span>)
                       : null}
-                    <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
+                    <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')} style={tonos ? { color: textoSobre(tonos.color) } : undefined}>{nombre || 'Sin título'}</span>
                   </p>
       );
           return (
@@ -515,7 +515,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              style={tonos && !copia ? { backgroundColor: tonos.fondo, boxShadow: `inset 0 0 0 1px ${tonos.borde}` } : undefined}
+              style={tonos && !copia ? { backgroundColor: tonos.color, color: textoSobre(tonos.color) } : undefined}
               data-nota={nota ?? undefined}
               className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
                 tonos && !copia && (chica ? 'rounded-xl p-1' : 'rounded-2xl p-2 transition-shadow hover:shadow-md'),
@@ -562,10 +562,11 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                   <FileText className="w-8 h-8 text-slate-200" />
                 )}
                 {tonos && nota !== null && (
+                  // LA NOTA, GRANDE (bot evaluador, ronda 1: «56-64 px»): un círculo con el color de la nota.
                   <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
-                    className={cn('absolute z-[3] inline-flex items-baseline rounded-xl font-black tabular-nums leading-none shadow-sm', chica ? 'left-1 top-1 px-1.5 py-1 text-sm' : 'left-2 top-2 px-2.5 py-1.5 text-3xl')}
+                    className={cn('absolute z-[3] grid place-items-center rounded-full font-black tabular-nums leading-none shadow-md ring-4 ring-white', chica ? 'left-1 top-1 h-10 w-10 text-lg' : 'left-2 top-2 h-[4.5rem] w-[4.5rem] text-[2.6rem] sm:h-20 sm:w-20 sm:text-5xl')}
                     style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-                    {textoNota(nota)}<span className={cn('font-bold opacity-70', chica ? 'text-[9px]' : 'ml-0.5 text-sm')}>/10</span>
+                    <span className="flex items-baseline">{textoNota(nota)}<span className={cn('font-semibold', chica ? 'text-[8px]' : 'ml-0.5 text-xs sm:text-sm')}>/10</span></span>
                   </span>
                 )}
                 {/* El asa dice que se puede arrastrar; toda la tarjeta se arrastra. */}
@@ -596,7 +597,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
                 {!chica && conDescripcion && f.pagina?.descripcion && (
-                  <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
+                  <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')} style={tonos ? { color: textoSobre(tonos.color), opacity: 0.85 } : undefined}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.filter(c => !(tonos && c.id === colNota?.id && !onGuardarCelda)).map(c => {
                   // EDITAR DESDE LA TARJETA (2026-10-18): quien edita cambia cada propiedad visible
