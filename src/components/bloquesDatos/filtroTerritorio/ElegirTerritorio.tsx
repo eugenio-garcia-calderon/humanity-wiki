@@ -61,10 +61,12 @@ export function useTerritorios(tablaId: string | null | undefined, extra: Opcion
   }, [todos, extra]);
 }
 
-export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco }: {
+export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto }: {
   opciones: Opcion[]; conDatos: Set<string>; elegido: string; onElegir: (id: string) => void; className?: string;
   /** Dentro de otro recuadro (el resumen del territorio): sin su propio borde. */
   sinMarco?: boolean;
+  /** Más bajo (la cabecera compacta de una entrada). */
+  compacto?: boolean;
 }) {
   const [abierto, setAbierto] = useState(false);
   const [busca, setBusca] = useState('');
@@ -95,11 +97,11 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
     <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col items-center', className)}>
       <button type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
         aria-label={`Territorio: ${nombre}. Cambiar de territorio`}
-        className={cn('group inline-flex items-center gap-3 rounded-2xl bg-white py-2.5 pr-3 transition-shadow', sinMarco ? 'pl-2 hover:bg-slate-50' : 'border-2 border-slate-900 pl-4 shadow-sm hover:shadow-lg')}>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-900 text-white"><MapPin className="h-5 w-5" /></span>
+        className={cn('group inline-flex items-center gap-3 rounded-2xl bg-white pr-3 transition-shadow', compacto ? 'py-1.5' : 'py-2.5', sinMarco ? 'pl-2 hover:bg-slate-50' : 'border-2 border-slate-900 pl-4 shadow-sm hover:shadow-lg')}>
+        <span className={cn('grid shrink-0 place-items-center rounded-xl bg-slate-900 text-white', compacto ? 'h-8 w-8' : 'h-10 w-10')}><MapPin className={compacto ? 'h-4 w-4' : 'h-5 w-5'} /></span>
         <span className="flex flex-col items-start leading-tight">
           <span className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Territorio</span>
-          <span data-territorio-elegido className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{nombre}</span>
+          <span data-territorio-elegido className={cn('font-black tracking-tight text-slate-900', compacto ? 'text-xl' : 'text-2xl sm:text-3xl')}>{nombre}</span>
         </span>
         <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 group-hover:bg-slate-200">
           Cambiar <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', abierto && 'rotate-180')} />

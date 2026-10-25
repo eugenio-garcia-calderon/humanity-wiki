@@ -9795,3 +9795,9 @@ Eugenio: «el termómetro arriba a la izquierda, y arriba centrado el título co
 ## 2026-10-25 · Territorio y media en un solo recuadro; la galería principal de mejor a peor (Programador 8)
 - Filtro de territorio: un solo recuadro con el territorio a la izquierda, lo mejor/peor y la leyenda en medio, y la media en grande a la derecha (en el móvil, uno debajo de otro). `ElegirTerritorio` admite `sinMarco`.
 - Datos (SQL): la vista «Galería» de Sistemas (la de la página principal) ordena por Nota de mayor a menor y luego por nombre.
+
+## 2026-10-25 · La página de un sistema, compacta: todo en la primera pantalla (Programador 8)
+Eugenio: «mucho más compacta, que se vea casi todo en primera página; rediseña con las pestañas de las bases de datos de abajo para que no haga falta bajar para ver que hay muchas opciones donde pinchar». Y un bot de UX que puntúe del 1 al 10 y evalúe al menos dos veces.
+- Termómetro en un solo recuadro de tres columnas: el termómetro (más bajo, filas de 28 px); en el centro, la portada, el título y la descripción, y debajo el territorio, la nota y el nivel elegido; a la derecha, pestañas: «El salto 4→5» (una escalera vertical que sube del nivel de ahora al siguiente), «Soluciones» (del 10 al nivel actual, con los proyectos ya en marcha), «Fallos» y «Mejoras». La página no se alarga.
+- Con el termómetro de cabecera, las pestañas de la red van justo debajo; las páginas hijas y «Seguir / Compartir», después.
+- `ElegirTerritorio` admite `compacto`.

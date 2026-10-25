@@ -164,11 +164,16 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
             offers in its own blocks: the generic list would say it twice. */}
         {/* SEGUIR Y LA RED DE LA PÁGINA (2026-10-21): bajo la cabecera, las acciones y
             las pestañas de lo relacionado, con su galería (`RedRelaciones.tsx`). */}
-        {!pagina.virtual && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
+        {/* Con el termómetro de cabecera, las pestañas de la red van justo debajo,
+            en la primera pantalla (2026-10-25: «que se vea que hay muchas opciones
+            donde pinchar sin bajar»); seguir y compartir, después. */}
+        {!pagina.virtual && !esRaiz && !termo && <AccionesPagina paginaId={pagina.id} />}
         {/* Las páginas hijas en galería (2026-10-23, `PaginasHijas.tsx`). */}
-        {!pagina.virtual && <GaleriaHijasLectura config={(pagina as any).config} />}
+        {!pagina.virtual && !termo && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
         {!pagina.virtual && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
+        {termo && <GaleriaHijasLectura config={(pagina as any).config} />}
+        {termo && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
         <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
         {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
