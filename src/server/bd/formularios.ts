@@ -21,7 +21,7 @@ import { tipar, type Tipo } from './tipos';
 /** Los tipos que se pueden pedir en un formulario público. */
 export const TIPOS_DE_FORMULARIO = new Set<string>([
   'texto', 'texto_largo', 'numero', 'fecha', 'seleccion', 'seleccion_multiple', 'casilla',
-  'url', 'email', 'telefono', 'moneda', 'porcentaje', 'duracion', 'valoracion',
+  'url', 'email', 'telefono', 'moneda', 'porcentaje', 'duracion', 'valoracion', 'nota',
 ]);
 
 export const nuevoToken = () => randomBytes(16).toString('hex');

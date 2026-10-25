@@ -38,6 +38,8 @@ export const TIPOS = [
   // 2026-10-18 (Wikiproducts): a community rating criterion. Stores nothing:
   // its cell is the score of the votes in `valoraciones` (see `bd/comunidad.ts`).
   'comunidad',
+  // 2026-10-25: a 1-10 score painted with the map's colours (`src/utils/nota.ts`).
+  'nota',
 ] as const;
 
 export type Tipo = typeof TIPOS[number];
@@ -207,6 +209,14 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
       const v = Math.round(n);
       if (v < 0 || v > max) return mal(`La valoración va de 0 a ${max}.`);
       return ok(v);
+    }
+
+    // LA NOTA (2026-10-25): de 0 a 10, con un decimal como mucho («6,5»).
+    case 'nota': {
+      const n = aNumero(bruto);
+      if (n === null) return mal('Escribe una nota del 1 al 10, por ejemplo 7 o 6,5.');
+      if (n < 0 || n > 10) return mal('La nota va del 0 al 10.');
+      return ok(Math.round(n * 10) / 10);
     }
 
     case 'fecha': {

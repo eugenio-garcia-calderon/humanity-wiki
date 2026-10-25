@@ -25,6 +25,7 @@ export const GRUPOS: Array<{ grupo: string; tipos: Array<{ id: string; label: st
       { id: 'porcentaje', label: 'Porcentaje', ayuda: 'Se escribe 15 y vale 15 %' },
       { id: 'duracion', label: 'Duración', ayuda: 'Se escribe 1:30' },
       { id: 'valoracion', label: 'Valoración', ayuda: 'Estrellas' },
+      { id: 'nota', label: 'Nota (1–10)', ayuda: 'Con los colores del mapa: de naranja a verde' },
       { id: 'fecha', label: 'Fecha' },
       { id: 'casilla', label: 'Casilla' },
     ],

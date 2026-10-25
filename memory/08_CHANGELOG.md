@@ -9759,3 +9759,11 @@ Eugenio: «que desde la base de datos de territorios, al pinchar p. ej. Montejo 
 - `GET /api/geo/territorio/:id/ficha`: su cadena (municipio › comunidad › país › continente), población, superficie CALCULADA del polígono del mapa (área esférica; Montejo 33,6 km², Madrid 608, la Comunidad 8.002, España 506.328), densidad, centro y caja. Continentes y planeta sin superficie (su polígono es de dibujo); Europa con caja a mano.
 - `/mapa?…&foco=<id>`: el mapa nace encuadrado en ese territorio (dejando sitio a la ficha) y con la ficha abierta. La ficha del territorio enseña arriba «Dónde está y cuánto mide» (`ResumenTerritorio`), también al pinchar en el mapa.
 - Bloque «Mapa del mundo»: `datos.foco`.
+
+## 2026-10-25 · Notas del 1 al 10: propiedad «Nota», filtro de territorio y el mapa en notas (Programador 8)
+Eugenio: «una página Evolución de la Humanidad con la base de datos de los sistemas, un filtro de territorio con España por defecto y una nota del 1 al 10 por sistema, grande en la galería, con los colores del mapa, ordenadas de mejor a peor; que la nota sea una propiedad que se pueda añadir en otras bases de datos; y el mapa entero en notas del 1 al 10 en vez de porcentajes».
+- `src/utils/nota.ts`: una sola escala. `textoNota`, `textoNotaDePorcentaje` (68 % → 6,8), `colorDeNota` (el `getColorForScore` del mapa, sin copiarlo) y `tonosDeNota` (fondo, borde, tinta legible).
+- Propiedad «Nota (1–10)» (tipo `nota`, migración 0160): número de 0 a 10 con un decimal; en la tabla, una pastilla de su color. En la galería, si la tarjeta enseña una «Nota», la tarjeta se tiñe con su color y la nota va grande sobre la imagen.
+- Bloque «Filtro de territorio» (`bloquesDatos/filtroTerritorio`): elige el territorio (de los que la base de datos ya usa; `?territorio=`) y filtra la base de datos de la página (`ponerFiltroPagina` → `Rejilla`, `?fijo=` admite una lista).
+- El mapa y la ficha del territorio dicen notas («6,8») en vez de porcentajes, con las barras en el color de su nota.
+- Galería: una tarjeta sin imagen pero con un emoji de icono lo enseña grande.

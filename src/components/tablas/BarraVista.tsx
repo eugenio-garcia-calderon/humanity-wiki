@@ -150,7 +150,7 @@ function EditorValor({ regla, columna, conocidos, onCambiar }: {
       </div>
     );
   }
-  const numerico = ['numero', 'moneda', 'porcentaje', 'duracion', 'valoracion'].includes(t);
+  const numerico = ['numero', 'moneda', 'porcentaje', 'duracion', 'valoracion', 'nota'].includes(t);
   // El porcentaje se guarda como fracción (0,15) y se escribe como 15: es lo
   // que hace la propia celda, y aquí tiene que ser igual o el filtro no casa.
   if (t === 'porcentaje') {
