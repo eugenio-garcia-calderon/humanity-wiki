@@ -442,13 +442,15 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
       // LA NOTA A LA DERECHA DEL TÍTULO (2026-10-25, Eugenio: «el número a la
       // derecha del título de cada tarjeta, dando más espacio al título y el
       // número un poco más pequeño»): título a la izquierda, nota en un círculo blanco.
+      const estrecha = tamano === 'pequeno';
       const cabeceraEl = tonos && nota !== null ? (
-                  <div className="flex items-center justify-between gap-2 px-1">
-                    <div className="min-w-0 flex-1 text-left [&_p]:justify-start">{nombreEl}</div>
+                  // Las palabras largas se parten por sílabas («Telecomu-nicaciones»), nunca por una letra cualquiera.
+                  <div lang="es" className={cn('flex items-center justify-between gap-1.5 px-1', nombreArriba && !chica && 'min-h-[2.75rem]' /* con el título arriba, las imágenes alineadas aunque un título ocupe dos líneas */)}>
+                    <div className="min-w-0 flex-1 text-left hyphens-auto [overflow-wrap:normal] [&_p]:justify-start [&_span]:[overflow-wrap:normal]">{nombreEl}</div>
                     <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
-                      className={cn('inline-flex shrink-0 items-center rounded-full bg-white font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : 'h-10 px-3 text-2xl sm:h-11 sm:text-[1.65rem]')}
+                      className={cn('inline-flex shrink-0 items-center rounded-full bg-white font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : estrecha ? 'h-8 px-2 text-xl' : 'h-10 px-3 text-2xl sm:h-11 sm:text-[1.65rem]')}
                       style={{ color: tonos.tinta }}>
-                      <span className="flex items-baseline">{textoNota(nota)}<span className={cn('ml-0.5 font-bold opacity-70', chica ? 'text-[7px]' : 'text-[10px]')}>/10</span></span>
+                      <span className="flex items-baseline">{textoNota(nota)}<span className={cn('ml-0.5 font-bold opacity-70', chica || estrecha ? 'text-[8px]' : 'text-[10px]')}>/10</span></span>
                     </span>
                   </div>
       ) : nombreEl;
