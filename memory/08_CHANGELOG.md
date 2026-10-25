@@ -9785,3 +9785,8 @@ Eugenio: «el termómetro arriba a la izquierda, y arriba centrado el título co
 - `ElegirTerritorio.tsx`: el selector grande («TERRITORIO · España · Cambiar»), con buscador; todos los territorios de su base de datos, primero los que tienen notas y luego «sin notas todavía», en el orden de la tabla. El mismo en el filtro de la galería y en el termómetro; la elección se recuerda en la visita (`sessionStorage`) y va en `?territorio=`. Un territorio sin notas lo dice («Todavía no hay notas para Madrid» + «Ver España»).
 - `/api/evolucion` devuelve también el id del territorio, su base de datos y la portada, icono y descripción de la página.
 - Datos (SQL en producción): la galería de Sistemas de la página principal muestra la Nota y lleva encima el filtro de territorio; los 18 sistemas tienen descripción.
+
+## 2026-10-25 · Nota junto al título, el salto de nivel en escalera y soluciones del 10 hacia abajo (Programador 8)
+- Galería con nota: la nota va a la derecha del título, en una píldora blanca más pequeña; el título gana sitio y la imagen queda limpia. En el editor ya no se repite la nota debajo.
+- Termómetro: «El salto: del nivel 4 al 5» (Eugenio: «que se vea bien visual ese salto»): el nivel de ahora abajo a la izquierda, el siguiente arriba a la derecha y en medio una escalera, un peldaño por medida, del color de un nivel al del otro, con una barra degradada debajo. Las entradas de la red de mejoras pasan a «Mejoras propuestas».
+- «Soluciones para cada nivel», del 10 al nivel actual (como el termómetro).
