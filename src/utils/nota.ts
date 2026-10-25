@@ -36,7 +36,8 @@ export function tonosDeNota(nota: number) {
     color,
     fondo: mezclar(color, '#ffffff', 0.86),
     borde: mezclar(color, '#ffffff', 0.6),
-    tinta: mezclar(color, '#000000', nota >= 7.5 ? 0.15 : 0.45),
+    // Bot de UX, ronda 2: con la escala de 10 pasos, el verde claro del 7–8 daba 2,4:1. Ahora ≥ 4,5:1.
+    tinta: mezclar(color, '#000000', nota >= 9.5 ? 0.05 : nota >= 8.5 ? 0.3 : 0.5),
   };
 }
 

@@ -9810,3 +9810,12 @@ Eugenio: «mucho más compacta, que se vea casi todo en primera página; redise�
 - Pestañas con `aria-controls`/`aria-labelledby`, un tabulador y flechas; `<main>` en las páginas publicadas; el título de la pestaña del navegador: «Movilidad en España · 4/10».
 - Red: en las pestañas, el nombre corto («Puntos de Trabajo dentro de las Líneas…» → «Puntos de Trabajo»; el entero, en el título); si no caben, degradado y flecha «›» también en el ordenador; los grupos sin ninguna imagen van en filas compactas, no en cuadros con una letra gigante; «Ver en grande» con 24 px de alto.
 - Selector de territorio: anillo de foco redondeado en el buscador; los territorios sin notas en gris; «Cambiar» solo icono en el móvil compacto.
+
+## 2026-10-25 · Página de un sistema: mejoras del bot de UX, ronda 2 (7,3/10) (Programador 8)
+- Selector de territorio: en el móvil, hoja desde abajo (se salía por la izquierda); un solo anillo de foco; al cerrar o elegir, el foco vuelve al botón.
+- Pestañas de la derecha: «Salto 4→5», «Soluciones», «Diagnóstico» (cuenta los fallos del texto) y «Plan» (sin número): ya no contradicen a «Fallos 1»/«Mejoras 1» de abajo. En el móvil, degradado a la derecha y sin scroll dentro del panel.
+- El salto: «Qué hace falta para pasar del 4 al 5 · 5 medidas», sin cifras en los pasos (los números son de los niveles), sin sangría; «Hoy · nivel 4» y «Meta · nivel 5».
+- Termómetro: «HOY» siempre junto al tubo y anillo en el nivel de hoy aunque se mire otro; números en slate-600 (contraste); en el móvil, botones de 44 px.
+- Soluciones: el nivel de hoy y el siguiente; «Ver niveles 6–10 (5)» para el resto.
+- Contraste de la «tinta» de las notas 7–9 (era 2,4:1); rótulos «Nivel 7 · a dónde se puede llegar»; «Leer más» de 44 px; las ideas empiezan en mayúscula.
+- Red: «Ver todo» siempre, sin partirse; títulos de grupo en una línea; las páginas hijas con título («Páginas dentro de Movilidad»).
