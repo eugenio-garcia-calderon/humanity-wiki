@@ -72,11 +72,13 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
   const [busca, setBusca] = useState('');
   const caja = useRef<HTMLDivElement>(null);
   const campo = useRef<HTMLInputElement>(null);
+  const boton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!abierto) { setBusca(''); return; }
     campo.current?.focus();
     const fuera = (e: MouseEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(false); };
-    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    // Al cerrar con Escape, el foco vuelve al botón (bot de UX, ronda 2: se iba al cuerpo de la página).
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') { setAbierto(false); boton.current?.focus(); } };
     document.addEventListener('mousedown', fuera); document.addEventListener('keydown', tecla);
     return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', tecla); };
   }, [abierto]);
@@ -87,7 +89,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
   const con = pasan.filter(o => conDatos.has(o.id)), sin = pasan.filter(o => !conDatos.has(o.id));
   const fila = (o: Opcion) => (
     <li key={o.id}>
-      <button type="button" role="option" aria-selected={o.id === elegido} onClick={() => { onElegir(o.id); setAbierto(false); }}
+      <button type="button" role="option" aria-selected={o.id === elegido} onClick={() => { onElegir(o.id); setAbierto(false); boton.current?.focus(); }}
         className={cn('flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold', o.id === elegido ? 'bg-emerald-50 text-emerald-800' : conDatos.has(o.id) ? 'text-slate-800 hover:bg-slate-50' : 'font-semibold text-slate-500 hover:bg-slate-50')}>
         <span className="flex-1 truncate">{o.nombre}</span>{o.id === elegido && <Check className="h-4 w-4" />}
       </button>
@@ -95,7 +97,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
   );
   return (
     <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col items-center', className)}>
-      <button type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
+      <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
         aria-label={`Territorio: ${nombre}. Cambiar de territorio`}
         className={cn('group inline-flex items-center gap-3 rounded-2xl bg-white pr-3 transition-shadow', compacto ? 'py-1.5' : 'py-2.5', sinMarco ? 'pl-2 hover:bg-slate-50' : 'border-2 border-slate-900 pl-4 shadow-sm hover:shadow-lg')}>
         <span className={cn('grid shrink-0 place-items-center rounded-xl bg-slate-900 text-white', compacto ? 'h-8 w-8' : 'h-10 w-10')}><MapPin className={compacto ? 'h-4 w-4' : 'h-5 w-5'} /></span>
@@ -108,11 +110,12 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
         </span>
       </button>
       {abierto && (
-        <div className="absolute top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl">
+        // En el móvil, una hoja que sube desde abajo: el desplegable se salía por el borde izquierdo.
+        <div className="absolute top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:pb-4">
           <label className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 ring-offset-1 focus-within:ring-2 focus-within:ring-emerald-500">
             <Search className="h-4 w-4 text-slate-400" />
             <input ref={campo} value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar un país, región o municipio…"
-              className="h-10 w-full bg-transparent text-sm outline-none" />
+              className="h-10 w-full bg-transparent text-sm outline-none focus:outline-none focus-visible:outline-none" />
           </label>
           <ul role="listbox" aria-label="Territorios" className="mt-1 max-h-80 overflow-y-auto">
             {con.length > 0 && <li className="px-3 pb-1 pt-2 text-[11px] font-black uppercase tracking-wide text-emerald-700">Con notas</li>}

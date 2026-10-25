@@ -191,7 +191,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {!pagina.virtual && !termo && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
         {!pagina.virtual && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
-        {termo && <GaleriaHijasLectura config={(pagina as any).config} />}
+        {termo && <GaleriaHijasLectura config={(pagina as any).config} titulo={`Páginas dentro de ${pagina.titulo || 'esta página'}`} />}
         {termo && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
         <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
         {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}

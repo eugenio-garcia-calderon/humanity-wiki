@@ -37,7 +37,8 @@ type Datos = { nombre: string; nota: number | null; territorio: string | null; t
   pagina?: { icono: string | null; portada: string | null; subtitulo: string }; diagnostico: string; niveles: Nivel[]; red: Grupo[] };
 
 /** Un texto con una idea por línea (o separadas por «;»), como lista. */
-const ideas = (t: string) => String(t || '').split(/\n+|;\s*/).map(x => x.replace(/^[-•·]\s*/, '').trim()).filter(Boolean);
+// Cada idea empieza en mayúscula aunque venga tras un «;» (bot de UX: «reducir…», «corregir…»).
+const ideas = (t: string) => String(t || '').split(/\n+|;\s*/).map(x => x.replace(/^[-•·]\s*/, '').trim()).filter(Boolean).map(x => x.charAt(0).toUpperCase() + x.slice(1));
 
 // TODO EN LA PRIMERA PANTALLA (2026-10-25, Eugenio: «mucho más compacta, que se
 // vea casi todo en primera página; y las pestañas de las bases de datos de
@@ -93,7 +94,7 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
                 onClick={() => onElegir(n)} onMouseEnter={() => onEncima(n)}
                 onKeyDown={e => conFlechas(e, n, 10, onElegir, 'v', true)}
                 className={cn('grid h-7 w-7 place-items-center rounded-full text-xs font-black tabular-nums transition-colors',
-                  elegido === n ? 'bg-slate-900 text-white' : actual !== null && Math.floor(actual) === n ? 'text-slate-900' : 'text-slate-500 hover:bg-white hover:text-slate-900',
+                  elegido === n ? 'bg-slate-900 text-white' : actual !== null && Math.floor(actual) === n ? 'bg-white text-slate-900 ring-2 ring-slate-900' : 'text-slate-600 hover:bg-white hover:text-slate-900',
                   n === sig && elegido !== n && '[outline:2px_dashed_rgb(71_85_105/.7)] [outline-offset:-2px]')}>
                 {n}
               </button>
@@ -111,6 +112,11 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
         <div className="absolute -bottom-1 left-1/2 h-7 w-7 -translate-x-1/2 rounded-full ring-4 ring-white"
           style={{ backgroundColor: actual !== null ? colorDeNota(actual) : '#e2e8f0' }} />
       </div>
+      {/* «Hoy», siempre a la vista junto al tubo, aunque se mire otro nivel (bot de UX, ronda 2). */}
+      {actual !== null && (
+        <span aria-hidden className="pointer-events-none absolute left-[3.6rem] rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-white"
+          style={{ top: `${(10 - Math.floor(actual)) * FILA + FILA / 2}rem`, transform: 'translateY(-50%)' }}>hoy</span>
+      )}
     </div>
   );
 }
@@ -118,11 +124,11 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
 /** En el móvil: el mismo termómetro, tumbado (del 0 a la izquierda al 10 a la derecha). */
 function TuboHorizontal({ actual, elegido, onElegir }: { actual: number | null; elegido: number; onElegir: (n: number) => void }) {
   return (
-    <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex gap-1">
+    <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex gap-0.5">
       {Array.from({ length: 11 }, (_, n) => (
         <button key={n} type="button" role="radio" aria-checked={elegido === n} tabIndex={elegido === n ? 0 : -1} data-pos={n}
           aria-label={`Nivel ${n} · ${ESCALA[n]}`} onClick={() => onElegir(n)} onKeyDown={e => conFlechas(e, n, 10, onElegir, 'h')}
-          className={cn('grid h-9 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums', elegido === n && 'ring-2 ring-slate-900 ring-offset-1')}
+          className={cn('grid h-11 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums', elegido === n && 'ring-2 ring-slate-900 ring-offset-1', actual !== null && Math.floor(actual) === n && elegido !== n && 'outline outline-2 outline-offset-1 outline-slate-500')}
           style={actual !== null && n <= actual ? { backgroundColor: colorDeNota(n), color: textoSobre(colorDeNota(n)) } : { backgroundColor: vacio(n), color: '#475569' }}>
           {n}
         </button>
@@ -163,26 +169,27 @@ function Salto({ desde, hasta, medidas }: { desde: { nivel: number; titulo: stri
   const mezcla = (i: number) => `color-mix(in srgb, ${c2} ${Math.round(((i + 1) / (medidas.length + 1)) * 100)}%, ${c1})`;
   return (
     <div data-salto>
-      <p className="mb-2 text-sm font-black leading-snug text-slate-900">Para subir al nivel {hasta.nivel} · <span style={{ color: tonosDeNota(hasta.nivel).tinta }}>{hasta.titulo || ESCALA[hasta.nivel]}</span></p>
+      <p className="mb-2 text-sm font-black leading-snug text-slate-900">Qué hace falta para pasar del {desde.nivel} al {hasta.nivel} <span className="font-bold text-slate-500">· {medidas.length} medidas</span></p>
       <div className="relative pl-4">
         {/* La barra del salto: del color de hoy (arriba) al de la meta (abajo). */}
         <span aria-hidden className="absolute bottom-3 left-0 top-3 w-1.5 rounded-full" style={{ background: `linear-gradient(180deg, ${c1}, ${c2})` }} />
         <p className="flex items-center gap-2 text-[12px] text-slate-600">
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[11px] font-black" style={{ backgroundColor: c1, color: textoSobre(c1) }}>{desde.nivel}</span>
-          <span><b className="font-bold text-slate-800">Hoy:</b> {desde.titulo || ESCALA[desde.nivel]}</span>
+          <span><b className="font-bold text-slate-800">Hoy · nivel {desde.nivel}:</b> {desde.titulo || ESCALA[desde.nivel]}</span>
         </p>
         <ol className="my-1.5 space-y-1" aria-label={`${medidas.length} medidas para pasar del nivel ${desde.nivel} al ${hasta.nivel}`}>
           {medidas.map((m, i) => (
+            // Sin cifras: los números son de los niveles (bot de UX, ronda 2: el paso «5» chocaba con la meta 5).
             <li key={i} className="flex items-start gap-2 rounded-lg border-l-4 py-1.5 pl-2 pr-2.5 text-[13px] font-semibold leading-snug text-slate-800"
-              style={{ marginLeft: `${i * 0.6}rem`, borderLeftColor: mezcla(i), backgroundColor: `color-mix(in srgb, ${mezcla(i)} 12%, white)` }}>
-              <span className="mt-px grid h-5 w-5 shrink-0 place-items-center rounded-md border border-slate-300 bg-white text-[10px] font-black text-slate-500">{i + 1}</span>
+              style={{ borderLeftColor: mezcla(i), backgroundColor: `color-mix(in srgb, ${mezcla(i)} 12%, white)` }}>
+              <span aria-hidden className="mt-[5px] h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: mezcla(i) }} />
               <span className="min-w-0">{m}</span>
             </li>
           ))}
         </ol>
-        <p className="flex items-center gap-2 text-[12px] text-slate-600" style={{ marginLeft: `${medidas.length * 0.6}rem` }}>
+        <p className="flex items-center gap-2 text-[12px] text-slate-600">
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[11px] font-black" style={{ backgroundColor: c2, color: textoSobre(c2) }}>{hasta.nivel}</span>
-          <span><b className="font-bold text-slate-800">Meta:</b> {hasta.titulo || ESCALA[hasta.nivel]}</span>
+          <span><b className="font-bold text-slate-800">Meta · nivel {hasta.nivel}:</b> {hasta.titulo || ESCALA[hasta.nivel]}</span>
         </p>
       </div>
     </div>
@@ -200,6 +207,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const [encima, setEncima] = useState<number | null>(null);
   const [pestana, setPestana] = useState<Pestana | null>(null);
   const [leerMas, setLeerMas] = useState(false);
+  // Las soluciones enseñan el nivel de hoy y el siguiente; los de más arriba, al pedirlos (bot de UX, ronda 2).
+  const [todosNiveles, setTodosNiveles] = useState(false);
   const [masAbajo, setMasAbajo] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -258,16 +267,17 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const nSoluciones = solNiveles.reduce((a, v) => a + ideas(v.soluciones).length, 0) + cuenta(grupos.proyectos);
   // Las pestañas que tienen algo, con cuántas cosas hay en cada una.
   const pestanas: Array<{ id: Pestana; titulo: string; icono: typeof Target; n?: number }> = [
-    ...(medidas.length ? [{ id: 'salto' as const, titulo: `El salto ${nivelActual}→${nivelActual! + 1}`, icono: TrendingUp }] : []),
+    ...(medidas.length ? [{ id: 'salto' as const, titulo: `Salto ${nivelActual}→${nivelActual! + 1}`, icono: TrendingUp }] : []),
     ...(nSoluciones ? [{ id: 'soluciones' as const, titulo: 'Soluciones', icono: Lightbulb, n: nSoluciones }] : []),
-    ...(fallosTexto.length || cuenta(grupos.fallos) ? [{ id: 'fallos' as const, titulo: 'Fallos', icono: AlertTriangle, n: fallosTexto.length + cuenta(grupos.fallos) }] : []),
-    ...(cuenta(grupos.mejoras) ? [{ id: 'mejoras' as const, titulo: 'Mejoras', icono: Target, n: cuenta(grupos.mejoras) }] : []),
+    // Nombres que no chocan con las pestañas de abajo (bot de UX, ronda 2: «Fallos 7» arriba y «Fallos 1» abajo).
+    ...(fallosTexto.length || cuenta(grupos.fallos) ? [{ id: 'fallos' as const, titulo: 'Diagnóstico', icono: AlertTriangle, n: fallosTexto.length || undefined }] : []),
+    ...(cuenta(grupos.mejoras) ? [{ id: 'mejoras' as const, titulo: 'Plan', icono: Target }] : []),
   ];
   const abierta = abiertaCalc(pestanas);
   const iAbierta = Math.max(0, pestanas.findIndex(p => p.id === abierta));
   const idp = `termo-${paginaId}`;
   const elegirNivel = (v: number) => { setElegido(v === nivelActual ? null : v); setEncima(null); };
-  const rotulo = n === nivelActual ? `Hoy en ${territorioNombre || 'este territorio'}` : n === 10 ? 'La máxima aspiración · nivel 10' : n > (nivelActual ?? -1) ? `A dónde se puede llegar · nivel ${n}` : `Por debajo · nivel ${n}`;
+  const rotulo = n === nivelActual ? `Hoy en ${territorioNombre || 'este territorio'}` : n === 10 ? 'Nivel 10 · máxima aspiración' : n > (nivelActual ?? -1) ? `Nivel ${n} · a dónde se puede llegar` : `Nivel ${n} · por debajo de hoy`;
   return (
     <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6')}>
       <section className="grid grid-cols-1 gap-4 rounded-3xl border p-4 sm:p-5 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1.05fr)] lg:grid-rows-[auto_1fr] lg:gap-x-6"
@@ -304,12 +314,12 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
         </header>
 
         {/* A la izquierda, el termómetro (en el móvil, tumbado encima de la descripción). */}
-        <div className="hidden lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:block">
+        <div className="hidden lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:block lg:pr-5">
           <Tubo niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} />
         </div>
 
         {/* El nivel que se señala en el termómetro (el de hoy, si no se ha pulsado otro). */}
-        <div className="min-w-0 self-start lg:col-start-2 lg:row-start-2">
+        <div className="min-w-0 self-stretch lg:col-start-2 lg:row-start-2">
           {sinNota ? (
             <div data-sin-nota className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center">
               <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
@@ -318,13 +328,13 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           ) : (
             <>
               <div className="mb-3 lg:hidden"><TuboHorizontal actual={actual} elegido={fijo} onElegir={elegirNivel} /></div>
-              <div data-nivel-elegido aria-live="polite" className="rounded-2xl bg-white/90 p-4 ring-1 ring-black/5">
+              <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5 lg:h-full">
                 <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && <span className="sm:hidden"> · nivel {n} · {ESCALA[n]}</span>}</p>
                 <h2 className="mt-0.5 text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
                 {info?.descripcion && <p className={cn('mt-1 text-[13px] leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
-                {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="mt-1 text-xs font-bold text-slate-600 underline lg:hidden">Leer más</button>}
+                {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}
                 {!info && <p className="mt-1 text-sm text-slate-500">Aún no se ha descrito este nivel.</p>}
-                <p className="mt-2 text-[11px] text-slate-500">
+                <p className="mt-auto pt-2 text-[11px] text-slate-600">
                   {elegido !== null && nivelActual !== null && encima === null
                     ? <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-6 items-center gap-1 font-bold text-slate-600 hover:text-slate-900"><Undo2 className="h-3 w-3" /> Volver a hoy (nivel {nivelActual})</button>
                     : <span><span className="hidden lg:inline">Pasa por el termómetro o pulsa un número</span><span className="lg:hidden">Pulsa un número</span> para ver cada nivel.</span>}
@@ -338,7 +348,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
         {!sinNota && pestanas.length > 0 && (
           <div data-pestanas-termometro className="flex min-w-0 flex-col rounded-2xl bg-white/90 ring-1 ring-black/5 lg:col-start-3 lg:row-span-2 lg:row-start-1">
             <div role="tablist" aria-label={`Cómo mejorar ${x.nombre}`} data-flechas
-              className="flex gap-1 overflow-x-auto border-b border-slate-100 p-1.5 [scrollbar-width:none]">
+              className="flex gap-1 overflow-x-auto border-b border-slate-100 p-1.5 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(90deg,#000_85%,transparent)] max-sm:pr-8">
               {pestanas.map((p, i) => (
                 <button key={p.id} type="button" role="tab" id={`${idp}-t-${p.id}`} aria-controls={`${idp}-panel`} aria-selected={abierta === p.id}
                   tabIndex={abierta === p.id ? 0 : -1} data-pos={i} onClick={() => setPestana(p.id)}
@@ -352,7 +362,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
             </div>
             <div className="relative min-h-0 flex-1">
               <div ref={panel} role="tabpanel" id={`${idp}-panel`} aria-labelledby={`${idp}-t-${pestanas[iAbierta]?.id}`} tabIndex={0} onScroll={medirPanel}
-                className="max-h-[17rem] overflow-y-auto p-3 outline-none lg:max-h-[19.25rem]">
+                className="p-3 outline-none lg:max-h-[19.25rem] lg:overflow-y-auto">
                 {abierta === 'salto' && nivelActual !== null && (
                   <Salto desde={niveles.find(v => v.nivel === nivelActual) || { nivel: nivelActual, titulo: '' }}
                     hasta={niveles.find(v => v.nivel === nivelActual + 1) || { nivel: nivelActual + 1, titulo: '' }} medidas={medidas} />
@@ -361,8 +371,13 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
                   <>
                     <p className="mb-2 text-[12px] text-slate-600">Tecnologías y proyectos que encajan en cada nivel, de la máxima aspiración al de hoy.</p>
                     {cuenta(grupos.proyectos) > 0 && <div className="mb-3"><Grupos grupos={grupos.proyectos} sufijo=" · ya en marcha" /></div>}
+                    {!todosNiveles && solNiveles.some(v => v.nivel > (nivelActual ?? -1) + 1) && (
+                      <button type="button" onClick={() => setTodosNiveles(true)} className="mb-1.5 w-full rounded-xl border border-dashed border-slate-300 px-3 py-2 text-left text-[12px] font-bold text-slate-600 hover:border-slate-400 hover:text-slate-900">
+                        Ver niveles {(nivelActual ?? -1) + 2}–10 ({solNiveles.filter(v => v.nivel > (nivelActual ?? -1) + 1).length}) ↑
+                      </button>
+                    )}
                     <ol className="space-y-1.5">
-                      {solNiveles.map(v => {
+                      {solNiveles.filter(v => todosNiveles || v.nivel <= (nivelActual ?? -1) + 1).map(v => {
                         const t = tonosDeNota(v.nivel), sig = v.nivel === (nivelActual ?? -1) + 1;
                         return (
                           <li key={v.nivel} data-siguiente={sig || undefined} className={cn('flex gap-2.5 rounded-xl p-2', sig && 'ring-2 ring-emerald-400')} style={{ backgroundColor: t.fondo }}>
@@ -379,6 +394,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
                 )}
                 {abierta === 'fallos' && (
                   <>
+                    {fallosTexto.length > 0 && <p className="mb-1.5 text-[11px] font-black uppercase tracking-wide text-slate-500">Lo que falla hoy en {territorioNombre || 'este territorio'}</p>}
                     {fallosTexto.length > 0 && (
                       <ul className="mb-3 space-y-1.5">
                         {fallosTexto.map((t, i) => <li key={i} className="flex gap-2 text-[13px] leading-snug text-slate-700"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />{t}</li>)}
@@ -387,7 +403,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
                     <Grupos grupos={grupos.fallos} />
                   </>
                 )}
-                {abierta === 'mejoras' && <Grupos grupos={grupos.mejoras} />}
+                {abierta === 'mejoras' && <><p className="mb-2 text-[12px] text-slate-600">Las mejoras propuestas, sus líneas de trabajo y los puntos concretos.</p><Grupos grupos={grupos.mejoras} /></>}
               </div>
               {masAbajo && <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-8 rounded-b-2xl bg-gradient-to-t from-white to-transparent" />}
             </div>

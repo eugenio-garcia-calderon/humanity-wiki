@@ -237,10 +237,10 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
           {grupos.map(g => (
             <div key={g.slug} data-grupo-red={g.slug} className={cn(g.entradas.length > 2 && 'sm:col-span-2 lg:col-span-3')}>
               <div className="mb-3 flex items-baseline gap-2">
-                <h2 className="text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
-                <span className="text-sm font-semibold text-slate-400">{g.entradas.length}</span>
-                <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex min-h-6 items-center gap-1 py-1 text-sm font-bold text-slate-600 hover:text-slate-900">
-                  Ver {g.entradas.length > MAX_EN_TODO ? 'todo' : 'en grande'} <ArrowRight className="h-3.5 w-3.5" />
+                <h2 title={g.nombre} className="min-w-0 truncate text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
+                <span className="shrink-0 text-sm font-semibold text-slate-500">{g.entradas.length}</span>
+                <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap py-1 text-sm font-bold text-slate-600 hover:text-slate-900">
+                  Ver todo <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
               <div className={cn('grid gap-3 sm:gap-4', sinImagenes(g)
@@ -296,7 +296,7 @@ function Pestana({ href, activa, onClick, texto, completo, n, arrastre, mover }:
         marca === 'despues' && 'after:absolute after:inset-y-2 after:right-0 after:w-0.5 after:rounded after:bg-emerald-500')}>
       {arrastre && <GripVertical aria-hidden className="-ml-1.5 h-3.5 w-3.5 shrink-0 text-slate-300 opacity-0 transition-opacity group-hover/pestana:opacity-100" />}
       <span className="truncate">{texto}</span>
-      <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500')}>{n}</span>
+      <span className={cn('shrink-0 rounded-full px-1.5 text-[11px] font-bold', activa ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}>{n}</span>
     </a>
     {mover?.derecha && <button type="button" onClick={mover.derecha} aria-label={`Mover «${texto}» a la derecha`} title="Mover a la derecha" className={flecha}><ChevronRight className="h-3.5 w-3.5" /></button>}
     </span>

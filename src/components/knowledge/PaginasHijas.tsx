@@ -142,10 +142,12 @@ export function GaleriaHijas({ hijas, enlace, onAnadir, onQuitar, extra }: {
 }
 
 /** En la página publicada: la galería de las hijas, si la página la quiere en galería. */
-export function GaleriaHijasLectura({ config }: { config: any }) {
+export function GaleriaHijasLectura({ config, titulo }: { config: any; titulo?: string }) {
   const sitio = useSitio();
   const c = config?.hijas as ConfigHijas | undefined;
   const hijas = useHijas(c?.tabla_id && vistaDeHijas(c) === 'galeria' ? c.tabla_id : null);
   if (!hijas?.length) return null;
-  return <GaleriaHijas hijas={hijas} enlace={id => (sitio ? sitio.enlacePagina(id) : `/p/${id}`)} />;
+  const galeria = <GaleriaHijas hijas={hijas} enlace={id => (sitio ? sitio.enlacePagina(id) : `/p/${id}`)} />;
+  // Debajo de otras secciones, con su título (bot de UX: una tarjeta suelta sin decir qué era).
+  return titulo ? <div><h2 className="mb-3 flex items-baseline gap-2 text-base font-black tracking-tight text-slate-900">{titulo}<span className="text-sm font-semibold text-slate-500">{hijas.length}</span></h2>{galeria}</div> : galeria;
 }
