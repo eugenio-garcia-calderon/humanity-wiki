@@ -111,7 +111,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
       </button>
       {abierto && (
         // En el móvil, una hoja que sube desde abajo: el desplegable se salía por el borde izquierdo.
-        <div className="absolute top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:pb-4">
+        <div className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:pb-4">
           <label className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 ring-offset-1 focus-within:ring-2 focus-within:ring-emerald-700">
             <Search className="h-4 w-4 text-slate-400" />
             <input ref={campo} data-sin-contorno value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar un país, región o municipio…"
