@@ -61,8 +61,10 @@ export function useTerritorios(tablaId: string | null | undefined, extra: Opcion
   }, [todos, extra]);
 }
 
-export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className }: {
+export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco }: {
   opciones: Opcion[]; conDatos: Set<string>; elegido: string; onElegir: (id: string) => void; className?: string;
+  /** Dentro de otro recuadro (el resumen del territorio): sin su propio borde. */
+  sinMarco?: boolean;
 }) {
   const [abierto, setAbierto] = useState(false);
   const [busca, setBusca] = useState('');
@@ -93,7 +95,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
     <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col items-center', className)}>
       <button type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
         aria-label={`Territorio: ${nombre}. Cambiar de territorio`}
-        className="group inline-flex items-center gap-3 rounded-2xl border-2 border-slate-900 bg-white py-2.5 pl-4 pr-3 shadow-sm transition-shadow hover:shadow-lg">
+        className={cn('group inline-flex items-center gap-3 rounded-2xl bg-white py-2.5 pr-3 transition-shadow', sinMarco ? 'pl-2 hover:bg-slate-50' : 'border-2 border-slate-900 pl-4 shadow-sm hover:shadow-lg')}>
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-900 text-white"><MapPin className="h-5 w-5" /></span>
         <span className="flex flex-col items-start leading-tight">
           <span className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Territorio</span>

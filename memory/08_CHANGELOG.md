@@ -9791,3 +9791,7 @@ Eugenio: «el termómetro arriba a la izquierda, y arriba centrado el título co
 - Termómetro: «El salto: del nivel 4 al 5» (Eugenio: «que se vea bien visual ese salto»): el nivel de ahora abajo a la izquierda, el siguiente arriba a la derecha y en medio una escalera, un peldaño por medida, del color de un nivel al del otro, con una barra degradada debajo. Las entradas de la red de mejoras pasan a «Mejoras propuestas».
 - «Soluciones para cada nivel», del 10 al nivel actual (como el termómetro).
 - (seguido) En tarjetas estrechas (galería «pequeño», la de la página principal) la píldora de la nota es más pequeña y las palabras largas se parten por sílabas («Telecomu-nicaciones»), no por cualquier letra («Alimentac-ión»). Con el título arriba, todas las imágenes empiezan a la misma altura.
+
+## 2026-10-25 · Territorio y media en un solo recuadro; la galería principal de mejor a peor (Programador 8)
+- Filtro de territorio: un solo recuadro con el territorio a la izquierda, lo mejor/peor y la leyenda en medio, y la media en grande a la derecha (en el móvil, uno debajo de otro). `ElegirTerritorio` admite `sinMarco`.
+- Datos (SQL): la vista «Galería» de Sistemas (la de la página principal) ordena por Nota de mayor a menor y luego por nombre.
