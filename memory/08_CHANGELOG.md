@@ -9778,3 +9778,10 @@ Eugenio: «al pinchar Movilidad en España, la nota más grande, un termómetro 
 ## 2026-10-25 · Termómetro: la nota grande a la derecha (Programador 8)
 - El cartel que sale al pasar por los números del termómetro tapaba la nota grande; la nota pasa a la derecha de la cabecera del bloque.
 - Datos en producción (SQL, sin código): Nota, Territorio y Diagnóstico viven ahora en la base de datos ORIGINAL de Sistemas (BDTMUO8UV0QOPLO) — la copia BDTMVKE15CO000 está borrada. Nueva fila «Agua», vista «Por nota», tabla y página «Niveles de los Sistemas» (198 niveles), y un bloque Termómetro al principio de cada sistema. «Telocomunicaciones» → «Telecomunicaciones».
+
+## 2026-10-25 · El termómetro hace de cabecera; elegir territorio en grande (Programador 8)
+Eugenio: «el termómetro arriba a la izquierda, y arriba centrado el título con el icono de portada y la descripción; y ya debajo las bases de datos enlazadas». Y: «en grande la posibilidad de escoger otro territorio, que se vea que está seleccionado España; en la galería y en cada entrada». Y: «no salen las notas en la galería» (la de la página principal).
+- Si una página empieza por un bloque Termómetro, `VistaPagina` no pinta su cabecera: el termómetro va arriba a la izquierda y, centrados, la portada, el título (h1), la descripción (`subtitulo`), el territorio y la nota; debajo, fallos, medidas y soluciones, y luego la red de bases de datos enlazadas.
+- `ElegirTerritorio.tsx`: el selector grande («TERRITORIO · España · Cambiar»), con buscador; todos los territorios de su base de datos, primero los que tienen notas y luego «sin notas todavía», en el orden de la tabla. El mismo en el filtro de la galería y en el termómetro; la elección se recuerda en la visita (`sessionStorage`) y va en `?territorio=`. Un territorio sin notas lo dice («Todavía no hay notas para Madrid» + «Ver España»).
+- `/api/evolucion` devuelve también el id del territorio, su base de datos y la portada, icono y descripción de la página.
+- Datos (SQL en producción): la galería de Sistemas de la página principal muestra la Nota y lleva encima el filtro de territorio; los 18 sistemas tienen descripción.

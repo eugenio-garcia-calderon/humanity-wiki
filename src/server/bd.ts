@@ -852,14 +852,18 @@ export function registerBdRoutes(app: Express, db: any) {
       const v = fila.valores || {};
       const colNota = cols.find((c: any) => c.tipo === 'nota');
       const colDiag = cols.find((c: any) => /diagn/i.test(sinTildes(c.nombre)));
-      const titulo = String(((await db.execute(sql`SELECT title FROM knowledge_windows WHERE id = ${fila.pagina_id}`)).rows[0] as any)?.title || '');
+      const kw = (await db.execute(sql`SELECT title, config FROM knowledge_windows WHERE id = ${fila.pagina_id}`)).rows[0] as any;
+      const titulo = String(kw?.title || '');
+      const kc = kw?.config || {};
       const enl: Record<string, any[]> = (await enlacesDe(db, [fila.id]))[fila.id] || {};
-      let territorio: string | null = null, sistemaPagina: string | null = null;
+      let territorio: string | null = null, territorioId: string | null = null, sistemaPagina: string | null = null;
+      // La base de datos de los territorios, para que el termómetro deje elegir otro.
+      const colTerr = (cols as any[]).find(c => c.tipo === 'relacion' && !c.config?.rol && /territor/.test(sinTildes(c.nombre)));
       for (const c of cols as any[]) {
         if (c.tipo !== 'relacion' || c.config?.rol) continue;
         const a = (enl[c.id] || [])[0];
         if (!a) continue;
-        if (/territor/.test(sinTildes(c.nombre))) territorio = a.etiqueta || null;
+        if (/territor/.test(sinTildes(c.nombre))) { territorio = a.etiqueta || null; territorioId = a.id || null; }
         else if (!sistemaPagina && /^sistema/.test(sinTildes(c.nombre)) && a.extra?.pagina_id) sistemaPagina = a.extra.pagina_id;
       }
       let niveles: any[] = [];
@@ -879,7 +883,10 @@ export function registerBdRoutes(app: Express, db: any) {
       // Sin un «sistema original» enlazado, el sistema es la propia entrada (la tabla de Sistemas).
       const red = await redDePagina(req, sistemaPagina || fila.pagina_id);
       res.json({
-        nombre: titulo, nota: colNota && v[colNota.id] != null ? Number(v[colNota.id]) : null, territorio,
+        nombre: titulo, nota: colNota && v[colNota.id] != null ? Number(v[colNota.id]) : null, territorio, territorio_id: territorioId,
+        tabla_territorios: colTerr?.config?.tabla_destino || null,
+        // La cabecera de la página va dentro del termómetro (arriba, centrada).
+        pagina: { icono: kc.icono || null, portada: kc.portada || null, subtitulo: typeof kc.subtitulo === 'string' ? kc.subtitulo : '' },
         diagnostico: colDiag ? String(v[colDiag.id] || '') : '', niveles, sistema_pagina: sistemaPagina || fila.pagina_id,
         red: (red?.grupos || []).filter(g => !/subtema|contiene|pertenece/i.test(g.nombre)),
       });
