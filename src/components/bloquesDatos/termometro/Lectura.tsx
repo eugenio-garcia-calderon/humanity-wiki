@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, ArrowUpRight, Lightbulb, Target, TrendingUp, Undo2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
@@ -132,16 +133,27 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
 
 /** En el móvil: el mismo termómetro, tumbado (del 0 a la izquierda al 10 a la derecha). */
 function TuboHorizontal({ actual, elegido, onElegir }: { actual: number | null; elegido: number; onElegir: (n: number) => void }) {
+  const hoy = actual !== null ? Math.floor(actual) : null, sig = hoy !== null && hoy < 10 ? hoy + 1 : null;
   return (
+    <div>
     <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex gap-0.5">
       {Array.from({ length: 11 }, (_, n) => (
         <button key={n} type="button" role="radio" aria-checked={elegido === n} tabIndex={elegido === n ? 0 : -1} data-pos={n}
           aria-label={`Nivel ${n} · ${ESCALA[n]}`} onClick={() => onElegir(n)} onKeyDown={e => conFlechas(e, n, 10, onElegir, 'h')}
-          className={cn('grid h-11 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums', elegido === n && 'ring-2 ring-slate-900 ring-offset-1', actual !== null && Math.floor(actual) === n && elegido !== n && 'outline outline-2 outline-offset-1 outline-slate-500')}
+          className={cn('grid h-11 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums', elegido === n && 'ring-2 ring-slate-900 ring-offset-1', actual !== null && Math.floor(actual) === n && elegido !== n && 'outline outline-2 outline-offset-1 outline-slate-500', n === sig && elegido !== n && 'border-2 border-dashed border-amber-600')}
           style={actual !== null && n <= actual ? { backgroundColor: colorDeNota(n), color: textoSobre(colorDeNota(n)) } : { backgroundColor: vacio(n), color: '#475569' }}>
           {n}
         </button>
       ))}
+    </div>
+    {/* «HOY» y «META» debajo, como en el termómetro del ordenador (bot de UX, ronda 4). */}
+    <div aria-hidden className="mt-1 flex gap-0.5">
+      {Array.from({ length: 11 }, (_, n) => (
+        <span key={n} className="min-w-0 flex-1 text-center text-[9px] font-black uppercase leading-none">
+          {n === hoy ? <span className="text-slate-900">hoy</span> : n === sig ? <span className="text-amber-700">meta</span> : null}
+        </span>
+      ))}
+    </div>
     </div>
   );
 }
@@ -175,7 +187,9 @@ function Grupos({ grupos, sufijo = '' }: { grupos: Grupo[]; sufijo?: string }) {
 function nombreNivel(v: { nivel: number; titulo: string; descripcion?: string }) {
   if (v.titulo && sinTilde(v.titulo) !== sinTilde(ESCALA[v.nivel] || '')) return v.titulo;
   const frase = String(v.descripcion || '').split(/(?<=\.)\s/)[0]?.replace(/\.$/, '').trim();
-  return frase ? (frase.length > 110 ? `${frase.slice(0, 107).trim()}…` : frase) : (v.titulo || ESCALA[v.nivel]);
+  // Cortada por una palabra entera, nunca a media palabra (bot de UX, ronda 4).
+  if (frase && frase.length > 90) { const c = frase.slice(0, 90); return `${c.slice(0, c.lastIndexOf(' ')).replace(/[,;:]$/, '')}…`; }
+  return frase || v.titulo || ESCALA[v.nivel];
 }
 
 /** EL SALTO DE NIVEL (2026-10-25, Eugenio: «de forma visual las mejoras necesarias
@@ -229,6 +243,9 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const [verProyectos, setVerProyectos] = useState(false);
   const [masAbajo, setMasAbajo] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
+  // Con el título arriba, el territorio va a su lado, en el hueco que deja `VistaPagina` (2026-10-25, Eugenio).
+  const [ranura, setRanura] = useState<HTMLElement | null>(null);
+  useEffect(() => { if (sinTitulo) setRanura(document.querySelector<HTMLElement>('[data-ranura-territorio]')); }, [sinTitulo]);
   useEffect(() => {
     if (!paginaId) return;
     const q = d.tabla_niveles ? `?niveles=${encodeURIComponent(String(d.tabla_niveles))}` : '';
@@ -315,24 +332,25 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           {x.pagina?.subtitulo && <p className="mt-1 text-sm leading-snug text-slate-600">{x.pagina.subtitulo}</p>}
           </>}
           <div className={cn(!sinTitulo && 'mt-3', 'flex items-center justify-center gap-x-3 gap-y-2 sm:flex-wrap')}>
-            {x.tabla_territorios && opciones.length > 0 && (
-              <ElegirTerritorio compacto opciones={opciones} conDatos={conDatos} elegido={elegidoT}
-                onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
-            )}
+            {x.tabla_territorios && opciones.length > 0 && (() => {
+              const selector = <ElegirTerritorio compacto opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+                onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />;
+              return ranura ? createPortal(selector, ranura) : selector;
+            })()}
             {actual !== null && tonos && (
               <div className="flex items-center gap-2.5">
                 <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`} className="inline-flex items-baseline rounded-2xl px-4 py-1.5 font-black leading-none tabular-nums shadow-sm"
                   style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
                   <span className="text-[2.75rem] sm:text-5xl">{textoNota(actual)}</span><span className="ml-1 text-base opacity-75">/10</span>
                 </span>
-                <p className="hidden text-left text-sm font-black leading-tight sm:block" style={{ color: tonos.tinta }}>Nivel {nivelActual}<br /><span className="font-bold">{ESCALA[nivelActual!]}</span></p>
+                <p className={cn('text-left text-sm font-black leading-tight', !ranura && 'hidden sm:block')} style={{ color: tonos.tinta }}>Nivel {nivelActual}<br /><span className="font-bold">{ESCALA[nivelActual!]}</span></p>
               </div>
             )}
           </div>
         </header>
 
         {/* A la izquierda, el termómetro (en el móvil, tumbado encima de la descripción). */}
-        <div className="hidden lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:block lg:pr-5">
+        <div className="hidden lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:block lg:pr-8">
           <Tubo niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} />
         </div>
 
@@ -347,7 +365,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
             <>
               <div className="mb-3 lg:hidden"><TuboHorizontal actual={actual} elegido={fijo} onElegir={elegirNivel} /></div>
               <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5">
-                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && <span className="sm:hidden"> · nivel {n} · {ESCALA[n]}</span>}</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && !ranura && <span className="sm:hidden"> · nivel {n} · {ESCALA[n]}</span>}</p>
                 <h2 className="mt-0.5 text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
                 {info?.descripcion && <p className={cn('mt-1 text-[13px] leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
                 {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}

@@ -167,9 +167,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
           </div>
         </div>
       )}
+      {/* Arriba a la derecha, junto al título, el territorio (2026-10-25, Eugenio): lo pone ahí el termómetro. */}
+      {termo && <div data-ranura-territorio className="ml-auto max-sm:w-full max-sm:[&>*]:w-full" />}
       </div>
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
-      <main id="contenido">
+      <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
         {termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true, sinTitulo: true } }} paginaId={pagina.id} />

@@ -9828,3 +9828,7 @@ Eugenio: «mucho más compacta, que se vea casi todo en primera página; redise�
 - Soluciones: «6 proyectos ya en marcha · Ver» plegado; «Diagnóstico» y «Plan» cuentan lo que enseñan; rótulo «Nivel 7 · meta posible».
 - El salto: si el nombre del nivel solo repite la escala común («Insuficiente»), la primera frase de su descripción.
 - «Saltar al contenido» para el teclado.
+
+## 2026-10-25 · El territorio arriba a la derecha, junto al título; retoques del bot de UX, ronda 4 (8,4/10) (Programador 8)
+- Eugenio: «pon el territorio de España arriba a la derecha, al lado del título de Movilidad» → `VistaPagina` deja un hueco (`data-ranura-territorio`) en la línea de la ruta y el título, y el termómetro pone ahí su selector (portal). El desplegable se alinea a la derecha.
+- Bot de UX, ronda 4 (8,4/10; rondas 1–3: 6,3 · 7,3 · 7,4): en el móvil, «HOY» y «META» bajo la barra y la meta con borde discontinuo; «META» ya no toca la tarjeta; «Hoy/Meta» se cortan por palabras enteras; `#contenido` recibe el foco del enlace de salto; el contador del grupo, junto a su título.
