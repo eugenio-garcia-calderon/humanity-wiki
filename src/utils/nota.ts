@@ -44,5 +44,6 @@ export function tonosDeNota(nota: number) {
 export function textoSobre(color: string): string {
   const [r, g, b] = hexARgb(color).map(v => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
   const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return lum > 0.32 ? '#1c1917' : '#ffffff';
+  // WCAG: negro sobre los tonos claros (del ámbar al verde claro), blanco sobre los oscuros.
+  return lum > 0.22 ? '#1c1917' : '#ffffff';
 }

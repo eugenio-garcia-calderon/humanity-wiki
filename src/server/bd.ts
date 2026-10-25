@@ -829,6 +829,63 @@ export function registerBdRoutes(app: Express, db: any) {
       res.json({ cerrada: !!t?.config?.cerrada, puede_cambiar: await puedeCandado(req, String(req.params.id)) });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
+  // ══ EL TERMÓMETRO DE UN SISTEMA EN UN TERRITORIO (2026-10-25, Eugenio) ══════
+  // «Cuando pinchas en Movilidad en España: la nota más grande, un termómetro
+  // del 0 al 10 con dónde está España, la descripción de su nivel, los fallos
+  // actuales, las medidas para subir de nivel y las soluciones de cada nivel.»
+  // Lo que pinta el bloque «Termómetro» (`bloquesDatos/termometro`), en un viaje:
+  //   - de la fila de la página: su nota (columna «Nota»), su territorio, su
+  //     diagnóstico (columna «Diagnóstico…») y el sistema original enlazado;
+  //   - de la tabla de niveles (`?niveles=`): los once niveles de ESE sistema
+  //     (columna de texto «Sistema» con su nombre), con título, descripción,
+  //     medidas para subir y soluciones;
+  //   - la red del sistema original: sus fallos, objetivos de mejora, líneas de
+  //     trabajo y proyectos, que ya existen en sus bases de datos.
+  const sinTildes = (t: unknown) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  app.get('/api/evolucion/:paginaId', async (req: Request, res: Response) => {
+    try {
+      res.set('Cache-Control', 'private, no-store');
+      const fila = (await db.execute(sql`SELECT id, tabla_id, valores, pagina_id FROM bd_filas WHERE pagina_id = ${req.params.paginaId} AND deleted_at IS NULL LIMIT 1`)).rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esta página no es una entrada de una base de datos.' });
+      if ('error' in (await puedeConTabla(req, fila.tabla_id, false))) return res.status(403).json({ error: 'No puedes ver esta base de datos.' });
+      const cols = await columnasDe(fila.tabla_id);
+      const v = fila.valores || {};
+      const colNota = cols.find((c: any) => c.tipo === 'nota');
+      const colDiag = cols.find((c: any) => /diagn/i.test(sinTildes(c.nombre)));
+      const titulo = String(((await db.execute(sql`SELECT title FROM knowledge_windows WHERE id = ${fila.pagina_id}`)).rows[0] as any)?.title || '');
+      const enl: Record<string, any[]> = (await enlacesDe(db, [fila.id]))[fila.id] || {};
+      let territorio: string | null = null, sistemaPagina: string | null = null;
+      for (const c of cols as any[]) {
+        if (c.tipo !== 'relacion' || c.config?.rol) continue;
+        const a = (enl[c.id] || [])[0];
+        if (!a) continue;
+        if (/territor/.test(sinTildes(c.nombre))) territorio = a.etiqueta || null;
+        else if (!sistemaPagina && /^sistema/.test(sinTildes(c.nombre)) && a.extra?.pagina_id) sistemaPagina = a.extra.pagina_id;
+      }
+      let niveles: any[] = [];
+      const tablaNiveles = req.query.niveles ? String(req.query.niveles) : null;
+      if (tablaNiveles && !('error' in (await puedeConTabla(req, tablaNiveles, false)))) {
+        const cn = await columnasDe(tablaNiveles);
+        const col = (re: RegExp) => (cn as any[]).find(c => re.test(sinTildes(c.nombre)))?.id;
+        const k = { sistema: col(/^sistema/), nivel: col(/^nivel/), titulo: col(/^titulo/), desc: col(/^descrip/), medidas: col(/subir|medida/), soluciones: col(/^soluci/) };
+        if (k.sistema && k.nivel) {
+          const filas = (await db.execute(sql`SELECT valores FROM bd_filas WHERE tabla_id = ${tablaNiveles} AND deleted_at IS NULL AND COALESCE(oculta, false) = false`)).rows as any[];
+          const yo = sinTildes(titulo);
+          niveles = filas.map(f => f.valores || {}).filter(x => sinTildes(x[k.sistema!]) === yo)
+            .map(x => ({ nivel: Number(x[k.nivel!]), titulo: x[k.titulo!] || '', descripcion: x[k.desc!] || '', medidas: x[k.medidas!] || '', soluciones: x[k.soluciones!] || '' }))
+            .filter(x => Number.isFinite(x.nivel)).sort((a, b) => a.nivel - b.nivel);
+        }
+      }
+      // Sin un «sistema original» enlazado, el sistema es la propia entrada (la tabla de Sistemas).
+      const red = await redDePagina(req, sistemaPagina || fila.pagina_id);
+      res.json({
+        nombre: titulo, nota: colNota && v[colNota.id] != null ? Number(v[colNota.id]) : null, territorio,
+        diagnostico: colDiag ? String(v[colDiag.id] || '') : '', niveles, sistema_pagina: sistemaPagina || fila.pagina_id,
+        red: (red?.grupos || []).filter(g => !/subtema|contiene|pertenece/i.test(g.nombre)),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** El orden de las pestañas de la red de sus entradas (ver `redDePagina`). */
   app.put('/api/bd/tablas/:id/orden-red', async (req: Request, res: Response) => {
     try {

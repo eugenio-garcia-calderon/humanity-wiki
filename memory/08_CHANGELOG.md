@@ -9767,3 +9767,10 @@ Eugenio: «una página Evolución de la Humanidad con la base de datos de los si
 - Bloque «Filtro de territorio» (`bloquesDatos/filtroTerritorio`): elige el territorio (de los que la base de datos ya usa; `?territorio=`) y filtra la base de datos de la página (`ponerFiltroPagina` → `Rejilla`, `?fijo=` admite una lista).
 - El mapa y la ficha del territorio dicen notas («6,8») en vez de porcentajes, con las barras en el color de su nota.
 - Galería: una tarjeta sin imagen pero con un emoji de icono lo enseña grande.
+
+## 2026-10-25 · Termómetro de nivel por sistema, y Evolución con la base de datos original (Programador 8)
+Eugenio: «al pinchar Movilidad en España, la nota más grande, un termómetro del 0 al 10 con dónde está, la descripción de su nivel, los fallos actuales, las medidas para subir de nivel y las soluciones de cada nivel; al pasar por los números el título del nivel y al pinchar su aspiración». Y: «la evaluación tiene que estar en la base de datos ORIGINAL de Sistemas, no en una copia».
+- Bloque «Termómetro de nivel» (`bloquesDatos/termometro`) + `GET /api/evolucion/:pagina?niveles=`: la nota (columna «Nota»), territorio y «Diagnóstico» de la fila, los 11 niveles del sistema (tabla de niveles: columnas Sistema, Nivel, Título, Descripción, Para subir de nivel, Soluciones) y la red del propio sistema (fallos, consecuencias, objetivos de mejora, líneas, proyectos).
+- Escala de color de la nota: un color por punto (rojo → verde), la misma en el mapa (`scoreColor.ts`): el 7 ya es verde lima, el 5 y el 6 se distinguen (bot evaluador, ronda 1: global 4,5).
+- Galería con nota: la tarjeta entera del color de su nota (texto negro o blanco según contraste) y la nota en un círculo grande. Un emoji de icono no se repite en el título.
+- Filtro de territorio: con un solo territorio, una etiqueta (no un desplegable); un `?territorio=` sin datos vuelve al de por defecto; debajo, el resumen: media grande, mejor y peor, y la leyenda 1→10.
