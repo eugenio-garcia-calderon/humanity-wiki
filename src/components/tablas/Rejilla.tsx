@@ -2,6 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, LayoutGrid, FileText, Settings2, ArrowUpRight, SlidersHorizontal, Check, Link2, Pencil, Eye, EyeOff, ChevronDown, ChevronRight, Repeat, CornerDownRight, GitBranch, Link as LinkIcon, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { filtroPaginaDe, EVENTO_FILTRO, type FiltroPagina } from '../bloquesDatos/filtroTerritorio/filtroPagina';
 import Galeria, { anchoTarjeta } from './Galeria';
 import { VELOCIDAD_CARRUSEL } from './GaleriaCarrusel';
 
@@ -126,7 +127,7 @@ const NOMBRE_TIPO: Record<string, string> = {
   texto: 'texto', texto_largo: 'texto largo', numero: 'número', moneda: 'moneda', porcentaje: 'porcentaje', fecha: 'fecha',
   seleccion: 'selección', seleccion_multiple: 'selección múltiple', casilla: 'casilla', persona: 'persona', proyecto: 'proyecto',
   publicacion: 'publicación', imagen: 'imagen', video: 'vídeo', documento: 'documento', formula: 'fórmula', condicional: 'condición',
-  agregado: 'resumen', url: 'enlace', email: 'correo', telefono: 'teléfono', duracion: 'duración', valoracion: 'valoración', comunidad: 'comunidad', compra: 'compra',
+  agregado: 'resumen', url: 'enlace', email: 'correo', telefono: 'teléfono', duracion: 'duración', valoracion: 'valoración', comunidad: 'comunidad', compra: 'compra', nota: 'nota',
 };
 
 export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCambiarVistaPropia, etiquetaFijo, textoAlCrear, sinTitulo = false, tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, tamanoTitulo = 'mediano', onCambiarTamanoTitulo, ocultarMandosPublica = false, onCambiarOcultarMandos, tituloAlineacion = 'centro', onCambiarTituloAlineacion, tamanoNombre, onCambiarTamanoNombre, visibles, onCambiarVisibles, tablasPagina, tituloOculto = false, onCambiarTituloOculto, onCargada, tituloColor, onCambiarTituloColor, tituloPeso = 'negrita', onCambiarTituloPeso, nombreArriba = false, onCambiarNombreArriba, pesoNombre = 'negrita', onCambiarPesoNombre }: {
@@ -223,6 +224,14 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
     // cualquier texto, y `vista:<id>` es lo que abre la vista guardada.
     onCambiarVista?.(sel as FormaVista);
   };
+  // EL FILTRO DE LA PÁGINA (2026-10-25): un bloque «Filtro de territorio» de la
+  // misma página dice qué territorio se ve (`filtroTerritorio/filtroPagina.ts`).
+  const [filtroPagina, setFiltroPagina] = useState<FiltroPagina | null>(() => filtroPaginaDe(tablaId));
+  useEffect(() => {
+    const oir = (e: Event) => { const d = (e as CustomEvent).detail; if (d?.tablaId === tablaId) setFiltroPagina({ columna_id: d.columna_id, valor: d.valor }); };
+    window.addEventListener(EVENTO_FILTRO, oir);
+    return () => window.removeEventListener(EVENTO_FILTRO, oir);
+  }, [tablaId]);
   const propiaActiva = vistaPropia !== undefined;
   const [propia, setPropia] = useState<Partial<Vista>>(vistaPropia || {});
   const activa: Vista = useMemo(() => {
@@ -290,7 +299,8 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
     if (!editable && visitante.orden_por) params.set('orden', JSON.stringify(visitante.orden_por));
     // En la página publicada un catálogo sin orden va por tamaño (`server/bd.ts`).
     if (!editable) params.set('lectura', '1');
-    if (vinculo) params.set('fijo', JSON.stringify(vinculo));
+    const fijos = [vinculo, filtroPagina].filter(Boolean);
+    if (fijos.length) params.set('fijo', JSON.stringify(fijos.length === 1 ? fijos[0] : fijos));
     if (propiaActiva) {
       if (propia.filtros && (Array.isArray(propia.filtros) ? propia.filtros.length : (propia.filtros as any).reglas?.length)) params.set('filtros', JSON.stringify(propia.filtros));
       if (propia.orden_por?.length) params.set('orden', JSON.stringify(propia.orden_por));
@@ -309,7 +319,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
       }
     } catch (e: any) { if (mio === turno.current) setFallo(e.message); }
     if (mio === turno.current) setCargando(false);
-  }, [tablaId, activa.id, vistas === null, visitante, editable, JSON.stringify(vinculo || null), propiaActiva && JSON.stringify([propia.filtros || null, propia.orden_por || null])]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tablaId, activa.id, vistas === null, visitante, editable, JSON.stringify(vinculo || null), JSON.stringify(filtroPagina), propiaActiva && JSON.stringify([propia.filtros || null, propia.orden_por || null])]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { cargar(); }, [cargar]);
   /** Lo que lleva una fila nueva para nacer conectada (vista enlazada). */

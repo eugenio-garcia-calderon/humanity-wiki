@@ -86,6 +86,8 @@ export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; a
       return new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: col.config?.decimales ?? 2 }).format(Number(v));
     case 'numero':
       return new Intl.NumberFormat('es-ES', { maximumFractionDigits: col.config?.decimales ?? 10 }).format(Number(v));
+    case 'nota':
+      return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 }).format(Number(v));
     case 'duracion': {
       const s = Number(v); const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60);
       return col.config?.formato === 'h:mm:ss'

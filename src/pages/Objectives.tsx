@@ -1,3 +1,5 @@
+import { textoNotaDePorcentaje, notaDePorcentaje, tonosDeNota } from '../utils/nota';
+import { getColorForScore } from '../utils/scoreColor';
 import { useHelpers } from '../contexts/DataContext';
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -281,10 +283,10 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
                   <span className="text-[11px] font-bold uppercase tracking-tight text-slate-700 leading-tight line-clamp-1 w-full">{obj.title}</span>
                   <div className="w-full flex items-center gap-1.5">
                     <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      {progress != null && <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }} />}
+                      {progress != null && <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: getColorForScore(progress) }} />}
                     </div>
                     {progress != null
-                      ? <span className="text-[10px] font-black text-emerald-600 shrink-0">{progress}%</span>
+                      ? <span className="text-[11px] font-black shrink-0 tabular-nums" style={{ color: tonosDeNota(notaDePorcentaje(progress)).tinta }}>{textoNotaDePorcentaje(progress)}</span>
                       : <span className="text-[9px] font-bold text-slate-400 shrink-0 uppercase">Sin datos</span>}
                   </div>
                   {marcaSiDifiere(obj) && <MarcaOrigen origen={marcaSiDifiere(obj)} tamano="pequeno" />}
@@ -360,10 +362,10 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
               <div className="flex flex-col items-end ml-4 pl-4 border-l border-slate-200">
                 <div className="flex items-center gap-3">
                   <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
-                    {progress != null && <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }}></div>}
+                    {progress != null && <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: getColorForScore(progress) }}></div>}
                   </div>
                   {progress != null
-                    ? <span className="text-xl font-black text-emerald-600 leading-none">{progress}%</span>
+                    ? <span className="text-xl font-black leading-none tabular-nums" style={{ color: tonosDeNota(notaDePorcentaje(progress)).tinta }}>{textoNotaDePorcentaje(progress)}<span className="text-xs opacity-60">/10</span></span>
                     : <span className="text-sm font-bold text-slate-400 leading-none uppercase">Sin datos</span>}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">

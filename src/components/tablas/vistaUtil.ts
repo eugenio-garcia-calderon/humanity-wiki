@@ -174,7 +174,7 @@ export const ETIQUETA_OPERADOR: Record<string, string> = {
 
 export const SIN_VALOR = new Set(['esta_vacia', 'no_esta_vacia', 'es_verdadero', 'es_falso']);
 
-const NUMERICOS = new Set(['numero', 'moneda', 'porcentaje', 'duracion', 'valoracion']);
+const NUMERICOS = new Set(['numero', 'moneda', 'porcentaje', 'duracion', 'valoracion', 'nota']);
 export const APUNTAN = new Set(['persona', 'proyecto', 'publicacion', 'relacion']);
 export const FICHEROS = new Set(['imagen', 'video', 'documento']);
 export const CALCULADAS = new Set(['formula', 'agregado', 'condicional']);

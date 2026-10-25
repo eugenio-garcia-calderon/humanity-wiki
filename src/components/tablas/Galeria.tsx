@@ -13,6 +13,7 @@ import GaleriaCarrusel from './GaleriaCarrusel';
 import { BarraComparar, MAX_COMPARAR_GALERIA, MarcaComparar, tablaComparable, useComparar } from './CompararGaleria';
 import MenuAcciones, { type AccionMenu } from './MenuAcciones';
 import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
+import { tonosDeNota, textoNota, textoSobre } from '../../utils/nota';
 import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
@@ -420,6 +421,13 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
+          // LA NOTA, GRANDE (2026-10-25, Eugenio): si la tarjeta enseña una
+          // propiedad «Nota», la tarjeta se tiñe con su color (el del mapa) y la
+          // nota va grande sobre la imagen.
+          const colNota = otras.find(c => c.tipo === 'nota');
+          const celdaNota = colNota ? f.celdas[colNota.id] : undefined;
+          const nota = celdaNota?.estado === 'ok' && celdaNota.valor !== null && celdaNota.valor !== '' ? Number(celdaNota.valor) : null;
+          const tonos = nota !== null && Number.isFinite(nota) ? tonosDeNota(nota) : null;
       const pesoClase = pesoNombre === 'fino' ? 'font-light' : pesoNombre === 'normal' ? 'font-semibold' : 'font-bold';
       const nombreEl = (
                   <p className={cn('flex items-start gap-1.5 min-w-0 leading-snug', pesoClase, tamanoNombre ? LETRA_NOMBRE[tamanoNombre] : chica ? (minima ? 'text-[9px] leading-tight' : tamano === 'xxs' ? 'text-[10px] leading-tight' : 'text-[11px] leading-tight') : legible ? 'text-base' : 'text-sm', centrada && 'justify-center', claseTitulo || 'text-slate-800')}>
@@ -507,7 +515,10 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
+              style={tonos && !copia ? { backgroundColor: tonos.fondo, boxShadow: `inset 0 0 0 1px ${tonos.borde}` } : undefined}
+              data-nota={nota ?? undefined}
               className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
+                tonos && !copia && (chica ? 'rounded-xl p-1' : 'rounded-2xl p-2 transition-shadow hover:shadow-md'),
                 enLista && 'max-sm:flex max-sm:items-start max-sm:gap-3',
                 enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'),
                 // Sin imagen, la tarjeta lleva su marco: si no, parecería una lista.
@@ -540,12 +551,22 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                       if (!r.ok) { setFallo('No se pudo guardar la posición de la imagen.'); return; }
                       onCambio();
                     }} />
+                ) : icono && !esUrl(icono) && !chica ? (
+                  // Sin imagen pero con un icono (un emoji): el icono, grande.
+                  <span className="text-6xl" aria-hidden>{icono}</span>
                 ) : f.pagina?.resumen ? (
                   // Sin imagen, Notion enseña el principio del texto. Mejor
                   // que un hueco gris: dice de qué va sin abrirla.
                   <p className="w-full h-full p-3 text-[11px] leading-snug text-slate-400 overflow-hidden">{f.pagina.resumen}</p>
                 ) : (
                   <FileText className="w-8 h-8 text-slate-200" />
+                )}
+                {tonos && nota !== null && (
+                  <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
+                    className={cn('absolute z-[3] inline-flex items-baseline rounded-xl font-black tabular-nums leading-none shadow-sm', chica ? 'left-1 top-1 px-1.5 py-1 text-sm' : 'left-2 top-2 px-2.5 py-1.5 text-3xl')}
+                    style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
+                    {textoNota(nota)}<span className={cn('font-bold opacity-70', chica ? 'text-[9px]' : 'ml-0.5 text-sm')}>/10</span>
+                  </span>
                 )}
                 {/* El asa dice que se puede arrastrar; toda la tarjeta se arrastra. */}
                 {mover && !chica && (
@@ -577,7 +598,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                 {!chica && conDescripcion && f.pagina?.descripcion && (
                   <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
-                {otras.map(c => {
+                {otras.filter(c => !(tonos && c.id === colNota?.id && !onGuardarCelda)).map(c => {
                   // EDITAR DESDE LA TARJETA (2026-10-18): quien edita cambia cada propiedad visible
                   // aquí mismo, esté llena o vacía. El clic no abre la tarjeta.
                   if (onGuardarCelda && c.tipo !== 'compra') {

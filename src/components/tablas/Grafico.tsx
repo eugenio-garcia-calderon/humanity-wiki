@@ -30,7 +30,7 @@ import { agruparFilas, agrupable, type ConfigVista, type Fila, type Vista } from
 // cuando hay un gráfico en pantalla.
 
 const PALETA = ['#059669', '#0284c7', '#d97706', '#7c3aed', '#dc2626', '#64748b', '#0d9488', '#db2777', '#65a30d', '#9333ea'];
-const NUMERICOS = new Set(['numero', 'moneda', 'porcentaje', 'duracion', 'valoracion', 'formula', 'agregado', 'condicional']);
+const NUMERICOS = new Set(['numero', 'moneda', 'porcentaje', 'duracion', 'valoracion', 'nota', 'formula', 'agregado', 'condicional']);
 const OPERACIONES: Array<{ id: NonNullable<NonNullable<ConfigVista['grafico']>['operacion']>; label: string }> = [
   { id: 'contar', label: 'Recuento' }, { id: 'suma', label: 'Suma' }, { id: 'media', label: 'Media' },
   { id: 'minimo', label: 'Mínimo' }, { id: 'maximo', label: 'Máximo' },

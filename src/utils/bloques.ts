@@ -100,6 +100,7 @@ export const TIPOS_BLOQUE_DATOS = [
   'arbolConocimiento', // el árbol del conocimiento de izquierda a derecha (2026-10-21)
   'presentacion',  // una presentación en formato web, por secciones (2026-10-22)
   'infografiaRed', // la infografía de cómo se conecta el conocimiento (2026-10-22)
+  'filtroTerritorio', // elegir territorio y filtrar las bases de datos de la página (2026-10-25)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 

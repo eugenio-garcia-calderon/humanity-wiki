@@ -20,7 +20,7 @@ import type { Vista } from './vistaUtil';
 // Qué se acepta y qué no lo decide el servidor (`bd/formularios.ts`); esta
 // interfaz solo ofrece lo que el servidor va a aceptar.
 
-const TIPOS_OK = new Set(['texto', 'texto_largo', 'numero', 'fecha', 'seleccion', 'seleccion_multiple', 'casilla', 'url', 'email', 'telefono', 'moneda', 'porcentaje', 'duracion', 'valoracion']);
+const TIPOS_OK = new Set(['texto', 'texto_largo', 'numero', 'fecha', 'seleccion', 'seleccion_multiple', 'casilla', 'url', 'email', 'telefono', 'moneda', 'porcentaje', 'duracion', 'valoracion', 'nota']);
 const entrada = 'w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50';
 
 type CampoDef = {

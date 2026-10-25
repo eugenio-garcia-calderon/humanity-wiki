@@ -1,3 +1,4 @@
+import { textoNotaDePorcentaje } from '../../utils/nota';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow, Background, BackgroundVariant, Controls, MarkerType,
@@ -128,7 +129,7 @@ export default function ExplorerGraphCanvas({
         accent: '#0284c7',
         kind: 'objetivo',
         size: SPHERE_SM,
-        short: h.score != null ? `${h.score}%` : (h.riskLabel || null),
+        short: h.score != null ? textoNotaDePorcentaje(h.score) : (h.riskLabel || null),
         labelNear: true,
       };
       ns.push({

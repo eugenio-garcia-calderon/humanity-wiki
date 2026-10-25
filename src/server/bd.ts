@@ -625,8 +625,10 @@ export function registerBdRoutes(app: Express, db: any) {
       // LA VISTA ENLAZADA (2026-10-23, como Notion): «solo lo conectado con esta
       // entrada», además de los filtros de la vista. `columna_id` contiene
       // `valor`, o una lista de `ids` si el enlace es de un solo lado.
-      const fijo = deUrl(req.query.fijo);
-      if (fijo && typeof fijo === 'object') {
+      // (2026-10-25) Puede ser una lista: la vista enlazada y el filtro de territorio de la página a la vez.
+      const fijoUrl = deUrl(req.query.fijo);
+      for (const fijo of (Array.isArray(fijoUrl) ? fijoUrl : [fijoUrl]).slice(0, 5)) {
+        if (!fijo || typeof fijo !== 'object') continue;
         if (Array.isArray(fijo.ids)) { const sol = new Set(fijo.ids.map(String)); visibles = visibles.filter(f => sol.has(f.id)); }
         if (typeof fijo.columna_id === 'string' && fijo.valor) {
           filtros = { y_o: 'y', reglas: [{ columna_id: fijo.columna_id, operador: 'contiene', valor: String(fijo.valor) } as any, ...(Array.isArray(filtros) ? filtros : [filtros])] };

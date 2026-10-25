@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Star, ExternalLink, Paperclip, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { CeldaRelacion } from './Relacion';
+import { tonosDeNota } from '../../utils/nota';
 import { BarraAvance, SelectorAvance, esBarra } from './BarraAvance';
 import BotonCompra from './BotonCompra';
 
@@ -266,6 +267,19 @@ export default function CeldaTabla({
   }
 
   const texto = formatear(celda, columna, { apuntados, archivos });
+  // LA NOTA (2026-10-25): una pastilla con el color del mapa para su nota.
+  if (columna.tipo === 'nota' && celda.estado === 'ok') {
+    const t = tonosDeNota(Number(celda.valor));
+    return (
+      <div onClick={() => { if (puedeEditar) { setBorrador(valorParaEditar(celda, columna)); setEditando(true); } }}
+        className={cn('flex items-center px-2 py-1.5 min-h-[38px]', enFicha ? 'justify-start' : 'justify-end', puedeEditar && 'cursor-text hover:bg-slate-50')} title={`Nota: ${texto} sobre 10`}>
+        <span className={cn('inline-flex items-baseline gap-0.5 rounded-full font-black tabular-nums', enFicha ? 'px-3 py-1 text-xl' : 'px-2.5 py-0.5 text-sm')}
+          style={{ backgroundColor: t.fondo, color: t.tinta, boxShadow: `inset 0 0 0 1px ${t.borde}` }}>
+          {texto}<span className="text-[0.6em] font-bold opacity-60">/10</span>
+        </span>
+      </div>
+    );
+  }
   return (
     <div
       onClick={() => { if (puedeEditar) { setBorrador(valorParaEditar(celda, columna)); setEditando(true); } }}
