@@ -5,6 +5,8 @@ import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { cn } from '../../../utils/cn';
+import { miniatura } from '../../../utils/miniatura';
+import ElegirTerritorio, { territorioGuardado, guardarTerritorio, useTerritorios } from '../filtroTerritorio/ElegirTerritorio';
 
 // ============================================================================
 // EL TERMÓMETRO DE UN SISTEMA (2026-10-25, Eugenio)
@@ -18,6 +20,12 @@ import { cn } from '../../../utils/cn';
 // Los datos salen de `/api/evolucion/:pagina` (`bd.ts`): la nota y el
 // diagnóstico de la fila, los once niveles del sistema (tabla de niveles del
 // bloque) y la red del sistema (fallos, objetivos de mejora, proyectos).
+//
+// LA CABECERA DE LA PÁGINA (2026-10-25, Eugenio): «el termómetro arriba a la
+// izquierda, y arriba centrado el título con el icono de portada y la
+// descripción; y ya debajo las bases de datos enlazadas». Si es el primer
+// bloque, `VistaPagina` no pinta su cabecera y le pasa `comoCabecera`: el
+// título (h1), la portada, la descripción y el territorio van aquí dentro.
 
 /** La escala común: el nombre de cada nivel, el mismo para todos los sistemas. */
 export const ESCALA = ['Colapso', 'Crítico', 'Muy deficiente', 'Deficiente', 'Insuficiente', 'En transición', 'Aceptable', 'Bueno', 'Muy bueno', 'Excelente', 'Máxima aspiración'];
@@ -25,7 +33,8 @@ export const ESCALA = ['Colapso', 'Crítico', 'Muy deficiente', 'Deficiente', 'I
 type Nivel = { nivel: number; titulo: string; descripcion: string; medidas: string; soluciones: string };
 type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string };
 type Grupo = { nombre: string; slug: string; entradas: Entrada[] };
-type Datos = { nombre: string; nota: number | null; territorio: string | null; diagnostico: string; niveles: Nivel[]; red: Grupo[] };
+type Datos = { nombre: string; nota: number | null; territorio: string | null; territorio_id: string | null; tabla_territorios: string | null;
+  pagina?: { icono: string | null; portada: string | null; subtitulo: string }; diagnostico: string; niveles: Nivel[]; red: Grupo[] };
 
 /** Un texto con una idea por línea (o separadas por «;»), como lista. */
 const ideas = (t: string) => String(t || '').split(/\n+|;\s*/).map(x => x.replace(/^[-•·]\s*/, '').trim()).filter(Boolean);
@@ -113,6 +122,7 @@ function Seccion({ icono: Icono, titulo, tono, children }: { icono: typeof Targe
 }
 
 export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, unknown>; paginaId?: string }) {
+  const comoCabecera = d.comoCabecera === true;
   const [x, setX] = useState<Datos | null | 'fallo'>(null);
   const [elegido, setElegido] = useState<number | null>(null);
   useEffect(() => {
@@ -120,7 +130,15 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     const q = d.tabla_niveles ? `?niveles=${encodeURIComponent(String(d.tabla_niveles))}` : '';
     fetch(`/api/evolucion/${encodeURIComponent(paginaId)}${q}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => setX(j || 'fallo')).catch(() => setX('fallo'));
   }, [paginaId, d.tabla_niveles]);
-  const actual = x && x !== 'fallo' && x.nota !== null ? x.nota : null;
+  // El territorio elegido (el mismo que en la galería). Si no es el de esta nota, aún no hay nota para él.
+  const [terr, setTerr] = useState<string | null>(() => { const t = territorioGuardado(''); return t || null; });
+  const propio = x && x !== 'fallo' ? x.territorio_id : null;
+  const elegidoT = terr || propio || '';
+  const usados = useMemo(() => (x && x !== 'fallo' && x.territorio_id ? [{ id: x.territorio_id, nombre: x.territorio || '' }] : []), [x]);
+  const opciones = useTerritorios(x && x !== 'fallo' ? x.tabla_territorios : null, usados);
+  const conDatos = useMemo(() => new Set(usados.map(o => o.id)), [usados]);
+  const sinNota = !!(propio && elegidoT && elegidoT !== propio && opciones.some(o => o.id === elegidoT));
+  const actual = x && x !== 'fallo' && x.nota !== null && !sinNota ? x.nota : null;
   const nivelActual = actual !== null ? Math.max(0, Math.min(10, Math.floor(actual))) : null;
   const n = elegido ?? nivelActual ?? 10;
   const niveles = x && x !== 'fallo' ? x.niveles : [];
@@ -135,32 +153,52 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   if (x === 'fallo') return null;
   const tonos = actual !== null ? tonosDeNota(actual) : null;
   const tonosN = tonosDeNota(n);
+  const portada = x.pagina?.portada || (x.pagina?.icono && /^(https?:|\/)/.test(x.pagina.icono) ? x.pagina.icono : null);
+  const icono = x.pagina?.icono && !/^(https?:|\/)/.test(x.pagina.icono) ? x.pagina.icono : null;
   const siguiente = nivelActual !== null && nivelActual < 10 ? niveles.find(v => v.nivel === nivelActual)?.medidas : '';
   return (
-    <div data-termometro className="my-6 space-y-6">
+    <div data-termometro className={cn('space-y-6', comoCabecera ? 'mb-8' : 'my-6')}>
       <section className="grid gap-6 rounded-[2rem] border p-5 sm:p-8 md:grid-cols-[auto_1fr] md:gap-10"
-        style={tonos ? { backgroundColor: tonos.fondo, borderColor: tonos.borde } : undefined}>
-        <Tubo niveles={niveles} actual={actual} elegido={n} onElegir={v => setElegido(v === nivelActual ? null : v)} />
-        <div className="min-w-0">
-          {/* La nota, grande. */}
-          {actual !== null && tonos && (
-            // La nota a la derecha: el cartel de los números del termómetro sale por la izquierda y no la tapa.
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="flex items-center gap-1.5 text-sm font-bold text-slate-500"><MapPin className="h-4 w-4" /> {x.territorio || 'Territorio'}</p>
-                <p className="text-2xl font-black tracking-tight text-slate-900">{x.nombre}</p>
-                <p className="text-sm font-bold" style={{ color: tonos.tinta }}>Nivel {nivelActual} · {ESCALA[nivelActual!]}</p>
+        style={tonos ? { backgroundColor: tonos.fondo, borderColor: tonos.borde } : { backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+        {/* Arriba a la izquierda, el termómetro. */}
+        <div className="order-2 flex justify-center md:order-1 md:block">
+          <Tubo niveles={niveles} actual={actual} elegido={n} onElegir={v => setElegido(v === nivelActual ? null : v)} />
+        </div>
+        <div className="order-1 min-w-0 md:order-2">
+          {/* Arriba centrado: la portada, el título, la descripción y el territorio. */}
+          <div className="flex flex-col items-center text-center">
+            {portada
+              ? <img src={miniatura(portada, 320)} alt="" className="h-28 w-28 rounded-3xl bg-white object-contain p-2 shadow-sm ring-1 ring-black/5 sm:h-32 sm:w-32" />
+              : icono && <span className="text-6xl leading-none">{icono}</span>}
+            {comoCabecera
+              ? <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">{x.nombre}</h1>
+              : <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{x.nombre}</p>}
+            {x.pagina?.subtitulo && <p className="mt-2 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">{x.pagina.subtitulo}</p>}
+            {x.tabla_territorios && opciones.length > 0 && (
+              <ElegirTerritorio className="mt-5" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+                onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
+            )}
+            {/* La nota, grande. */}
+            {actual !== null && tonos && (
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+                <span data-nota-sistema className="inline-flex items-baseline rounded-3xl px-6 py-3 font-black leading-none tabular-nums shadow-sm"
+                  style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
+                  <span className="text-6xl sm:text-7xl">{textoNota(actual)}</span><span className="ml-1 text-xl opacity-70">/10</span>
+                </span>
+                <p className="text-left text-lg font-black leading-tight" style={{ color: tonos.tinta }}>Nivel {nivelActual}<br /><span className="text-base">{ESCALA[nivelActual!]}</span></p>
               </div>
-              <span data-nota-sistema className="inline-flex items-baseline rounded-3xl px-5 py-3 font-black leading-none tabular-nums shadow-sm"
-                style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-                <span className="text-6xl sm:text-7xl">{textoNota(actual)}</span><span className="ml-1 text-xl opacity-70">/10</span>
-              </span>
-            </div>
-          )}
+            )}
+            {sinNota && (
+              <div data-sin-nota className="mt-5 max-w-md rounded-2xl border border-dashed border-slate-300 bg-white p-4">
+                <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {opciones.find(o => o.id === elegidoT)?.nombre}.</p>
+                {propio && <button type="button" onClick={() => { setTerr(propio); guardarTerritorio(propio, ''); }} className="mt-2 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-slate-700">Ver {x.territorio}</button>}
+              </div>
+            )}
+          </div>
           {/* El nivel elegido en el termómetro (el actual, si no se ha pulsado otro). */}
           <div data-nivel-elegido className="mt-6 rounded-2xl bg-white/80 p-5 ring-1 ring-black/5">
             <p className="text-xs font-black uppercase tracking-[0.16em]" style={{ color: tonosN.tinta }}>
-              {n === nivelActual ? 'Dónde está ahora' : n === 10 ? 'La máxima aspiración' : n > (nivelActual ?? -1) ? 'A donde se puede llegar' : 'Un nivel por debajo'} · Nivel {n}
+              {n === nivelActual ? `Dónde está ${x.territorio || 'ahora'}` : n === 10 ? 'La máxima aspiración' : n > (nivelActual ?? -1) ? 'A donde se puede llegar' : 'Un nivel por debajo'} · Nivel {n}
             </p>
             <h3 className="mt-1 text-xl font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h3>
             {info?.descripcion && <p className="mt-2 text-[15px] leading-relaxed text-slate-700">{info.descripcion}</p>}
@@ -175,6 +213,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
         </div>
       </section>
 
+      {!sinNota && <>
       <div className="grid gap-6 lg:grid-cols-2">
         {(x.diagnostico || grupos.fallos.some(g => g.entradas.length)) && (
           <Seccion icono={AlertTriangle} titulo="Fallos actuales" tono="bg-rose-50 text-rose-600">
@@ -223,6 +262,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           ))}
         </Seccion>
       )}
+      </>}
     </div>
   );
 }

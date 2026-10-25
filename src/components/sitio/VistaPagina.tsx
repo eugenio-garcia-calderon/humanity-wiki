@@ -2,6 +2,7 @@ import { useEffect, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
+import { LecturaBloqueDatos } from '../bloquesDatos/registro';
 import EnlazanAqui from '../knowledge/EnlazanAqui';
 import { contarPagina, textoLectura } from '../../utils/ajustesPagina';
 import { GaleriaHijasLectura } from '../knowledge/PaginasHijas';
@@ -44,7 +45,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
 }) {
   const sitio = useSitio();
   const cfg = pagina.config || {};
-  const bloques = cfg.bloques || cfg.blocks || [];
+  const todos = cfg.bloques || cfg.blocks || [];
+  // EL TERMÓMETRO COMO CABECERA (2026-10-25): si la página empieza por él, él
+  // lleva el título, la portada y la descripción; debajo, la red y lo demás.
+  const termo = !pagina.virtual && todos[0]?.tipo === 'termometro' ? todos[0] : null;
+  const bloques = termo ? todos.slice(1) : todos;
   const icono: string | null = cfg.icono || null;
   const esMovil = useEsMovil();
 
@@ -145,7 +150,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         </nav>
       )}
       <article>
-        <CabeceraLectura pagina={pagina} esMovil={esMovil} />
+        {termo
+          ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
+          : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
         {cfg.tiempoLectura === true && (() => {
           const c = contarPagina(bloques);
