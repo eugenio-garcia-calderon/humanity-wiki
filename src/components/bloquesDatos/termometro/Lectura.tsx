@@ -144,16 +144,17 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
         <div className="min-w-0">
           {/* La nota, grande. */}
           {actual !== null && tonos && (
-            <div className="flex flex-wrap items-center gap-4">
-              <span data-nota-sistema className="inline-flex items-baseline rounded-3xl px-5 py-3 font-black leading-none tabular-nums shadow-sm"
-                style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-                <span className="text-6xl sm:text-7xl">{textoNota(actual)}</span><span className="ml-1 text-xl opacity-70">/10</span>
-              </span>
+            // La nota a la derecha: el cartel de los números del termómetro sale por la izquierda y no la tapa.
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="flex items-center gap-1.5 text-sm font-bold text-slate-500"><MapPin className="h-4 w-4" /> {x.territorio || 'Territorio'}</p>
                 <p className="text-2xl font-black tracking-tight text-slate-900">{x.nombre}</p>
                 <p className="text-sm font-bold" style={{ color: tonos.tinta }}>Nivel {nivelActual} · {ESCALA[nivelActual!]}</p>
               </div>
+              <span data-nota-sistema className="inline-flex items-baseline rounded-3xl px-5 py-3 font-black leading-none tabular-nums shadow-sm"
+                style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
+                <span className="text-6xl sm:text-7xl">{textoNota(actual)}</span><span className="ml-1 text-xl opacity-70">/10</span>
+              </span>
             </div>
           )}
           {/* El nivel elegido en el termómetro (el actual, si no se ha pulsado otro). */}
