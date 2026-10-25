@@ -121,6 +121,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* EL TÍTULO EN LA LÍNEA DE LA RUTA (2026-10-25, Eugenio: «que Movilidad esté
           más arriba, donde la ruta de la web»): con el termómetro de cabecera, la ruta
           y el título (con su portada y descripción) comparten la primera línea. */}
+      {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
       <div className={termo ? 'mb-3 flex flex-wrap items-center gap-x-3 gap-y-1' : undefined}>
       {migasContexto ? (
         <nav aria-label="Estás en" className={termo ? undefined : 'mb-4'}>
