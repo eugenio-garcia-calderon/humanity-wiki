@@ -9832,3 +9832,7 @@ Eugenio: «mucho más compacta, que se vea casi todo en primera página; redise�
 ## 2026-10-25 · El territorio arriba a la derecha, junto al título; retoques del bot de UX, ronda 4 (8,4/10) (Programador 8)
 - Eugenio: «pon el territorio de España arriba a la derecha, al lado del título de Movilidad» → `VistaPagina` deja un hueco (`data-ranura-territorio`) en la línea de la ruta y el título, y el termómetro pone ahí su selector (portal). El desplegable se alinea a la derecha.
 - Bot de UX, ronda 4 (8,4/10; rondas 1–3: 6,3 · 7,3 · 7,4): en el móvil, «HOY» y «META» bajo la barra y la meta con borde discontinuo; «META» ya no toca la tarjeta; «Hoy/Meta» se cortan por palabras enteras; `#contenido` recibe el foco del enlace de salto; el contador del grupo, junto a su título.
+
+## 2026-10-25 · El editor de una entrada con termómetro, igual que la página publicada; fuera «Insuficiente» (Programador 8)
+- Eugenio: «todo lo que aparece en la página pública, igual en la modificable». En `Documento.tsx`, si el primer bloque es un termómetro (`termoBloque`): título y descripción editables en una línea con la portada y el territorio a la derecha (`data-ranura-territorio`); debajo el termómetro de cabecera; luego la red (`RedEnEditor`) y las páginas hijas; el resto de bloques después. Los ajustes del termómetro (`soloAjustes`) y las propiedades de la fila, en un desplegable bajo el termómetro.
+- Eugenio: «quita lo de insuficiente» → junto a la nota solo «Nivel 4» (sin el nombre de la escala común).
