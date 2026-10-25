@@ -663,6 +663,9 @@ function EditorPagina() {
     return out;
   }, [bloques, plegados]);
 
+  /** El termómetro que hace de cabecera (el primer bloque), como en `VistaPagina`. */
+  const termoBloque = bloques[0]?.tipo === 'termometro' ? bloques[0] : null;
+
   // ══ EDITAR A LA VEZ (2026-10-06): versión y fusión ═════════════════════
   // Ver `utils/colaboracion.ts`. `versionBase` es la versión que el servidor
   // tenía cuando se abrió o se guardó por última vez; `bloquesBase`, cómo
@@ -4557,6 +4560,10 @@ function EditorPagina() {
             botones={elementosDe(ajustes.cabecera).some(e => e.id === 'botones' && e.oculto) ? [] : botonesCabecera}
             estilo={ajustes.cabecera?.botonesEstilo} plegado={ajustes.cabecera?.botonesMenu === 'plegado'} onAbrir={b => setVentanaBoton(b)} margenes="-mx-6 sm:-mx-12" />
         )}
+        {/* EL TERMÓMETRO DE CABECERA, TAMBIÉN AQUÍ (2026-10-25, Eugenio: «todo lo que aparece en la
+            página pública, igual en la modificable»). Si la página empieza por un termómetro: el título
+            y la descripción en una línea con el territorio a la derecha; debajo, el termómetro; luego la
+            red y las páginas hijas; los bloques, después. Lo de editar (portada, ajustes, propiedades) sigue a mano. */}
         <div data-cabecera-editor>
         {(() => {
           const v2 = usaDisenoNuevo(ajustes.cabecera, !!filaDe?.fila_id);
@@ -4778,6 +4785,26 @@ function EditorPagina() {
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>
         ) : <div className="mb-6" />)}
           </>);
+          if (termoBloque) return (
+            <>
+              {filaAnadir}
+              <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+                {portada && !esVideoPortada(portada) ? (
+                  <button type="button" onClick={() => editable && setEligiendoPortada(true)} title={editable ? tr('Cambiar la portada') : undefined}
+                    className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-black/10">
+                    <MediaPortada src={portada} ancho={120} className="h-full w-full object-contain" />
+                  </button>
+                ) : iconoNodo}
+                <div className="min-w-0 flex-1">
+                  {editable
+                    ? <TituloEditable letra={30} valor={titulo} onCambiar={v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); }} />
+                    : <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900">{titulo}</h1>}
+                  {descNodo}
+                </div>
+                <div data-ranura-territorio className="ml-auto max-sm:w-full" />
+              </div>
+            </>
+          );
           if (v2) return (
             <>
               {filaAnadir}
@@ -4807,6 +4834,29 @@ function EditorPagina() {
           );
         })()}
         </div>
+        {termoBloque && (
+          <>
+            <LecturaBloqueDatos bloque={{ ...termoBloque, datos: { ...(termoBloque.datos || {}), comoCabecera: true, sinTitulo: true } }} paginaId={docId.current || undefined} />
+            {editable && (
+              <details className="-mt-2 mb-5 rounded-xl border border-dashed border-slate-200 px-3 py-2">
+                <summary className="cursor-pointer text-[11px] font-bold text-slate-400 hover:text-slate-600">{tr('Ajustes del termómetro y propiedades de la entrada')}</summary>
+                <div className="mt-2 space-y-3">
+                  <EditorBloqueDatos bloque={{ ...termoBloque, datos: { ...(termoBloque.datos || {}), soloAjustes: true } }} paginaId={docId.current || undefined} editable={editable}
+                    cambiarDatos={c => {
+                      guardarHistoria();
+                      setBloques(bs => bs.map(x => (x.id === termoBloque.id ? { ...x, datos: { ...(x.datos || {}), ...c } } : x)));
+                      programarGuardado();
+                    }} />
+                  {filaDe?.fila_id && filaDe.tabla_id && <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} sinRelaciones />}
+                </div>
+              </details>
+            )}
+          </>
+        )}
+        {/* Con el termómetro de cabecera, la red va justo debajo y las páginas hijas después, como al publicar. */}
+        {termoBloque && filaDe?.fila_id && filaDe.tabla_id && (
+          <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
+        )}
         {/* LAS PÁGINAS HIJAS EN GALERÍA (2026-10-23): cada una con su portada; al pulsar se abre su página. */}
         {hijasCfg && vistaHijas === 'galeria' && (
           <GaleriaHijas hijas={hijas || []} enlace={id => `/paginas/${id}`}
@@ -4814,7 +4864,7 @@ function EditorPagina() {
             extra={editable ? <ElegirVistaHijas vista={vistaHijas} onCambiar={cambiarVistaHijas} /> : undefined} />
         )}
         {/* LA RED DE LA ENTRADA (2026-10-23): la misma que en la página publicada. */}
-        {filaDe?.fila_id && filaDe.tabla_id && (
+        {!termoBloque && filaDe?.fila_id && filaDe.tabla_id && (
           <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
         )}
         {nombreBotonNuevo !== null && createPortal(
@@ -4936,7 +4986,7 @@ function EditorPagina() {
         <div className={cn('space-y-2', editable && 'pl-0')}>
           {/* Una fila es un bloque suelto o varios en columnas. En un
               teléfono las columnas se apilan: 390 px no caben dos. */}
-          {enFilas(visibles).map(fila => fila.length === 1
+          {enFilas(termoBloque ? visibles.filter(b => b !== termoBloque) : visibles).map(fila => fila.length === 1
             ? renderBloque(fila[0], bloques.indexOf(fila[0]))
             : (
               <div key={`fila-${fila[0].grupo}`} className="flex flex-col sm:flex-row gap-2 sm:gap-14">

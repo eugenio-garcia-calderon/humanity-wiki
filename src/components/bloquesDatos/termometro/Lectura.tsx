@@ -343,7 +343,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
                   style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
                   <span className="text-[2.75rem] sm:text-5xl">{textoNota(actual)}</span><span className="ml-1 text-base opacity-75">/10</span>
                 </span>
-                <p className={cn('text-left text-sm font-black leading-tight', !ranura && 'hidden sm:block')} style={{ color: tonos.tinta }}>Nivel {nivelActual}<br /><span className="font-bold">{ESCALA[nivelActual!]}</span></p>
+                <p className={cn('text-left text-sm font-black leading-tight', !ranura && 'hidden sm:block')} style={{ color: tonos.tinta }}>Nivel {nivelActual}</p>
               </div>
             )}
           </div>
@@ -365,7 +365,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
             <>
               <div className="mb-3 lg:hidden"><TuboHorizontal actual={actual} elegido={fijo} onElegir={elegirNivel} /></div>
               <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5">
-                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && !ranura && <span className="sm:hidden"> · nivel {n} · {ESCALA[n]}</span>}</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && !ranura && <span className="sm:hidden"> · nivel {n}</span>}</p>
                 <h2 className="mt-0.5 text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
                 {info?.descripcion && <p className={cn('mt-1 text-[13px] leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
                 {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}
