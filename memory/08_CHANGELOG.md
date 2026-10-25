@@ -9836,3 +9836,9 @@ Eugenio: «mucho más compacta, que se vea casi todo en primera página; redise�
 ## 2026-10-25 · El editor de una entrada con termómetro, igual que la página publicada; fuera «Insuficiente» (Programador 8)
 - Eugenio: «todo lo que aparece en la página pública, igual en la modificable». En `Documento.tsx`, si el primer bloque es un termómetro (`termoBloque`): título y descripción editables en una línea con la portada y el territorio a la derecha (`data-ranura-territorio`); debajo el termómetro de cabecera; luego la red (`RedEnEditor`) y las páginas hijas; el resto de bloques después. Los ajustes del termómetro (`soloAjustes`) y las propiedades de la fila, en un desplegable bajo el termómetro.
 - Eugenio: «quita lo de insuficiente» → junto a la nota solo «Nivel 4» (sin el nombre de la escala común).
+
+## 2026-10-25 · Cabecera más ligera; Salto, Soluciones, Diagnóstico y Plan abajo, con las demás pestañas; fuera «Todo» (Programador 8)
+Eugenio: «reduce el nivel de información en la cabecera, quita las pestañas del lateral derecho y deja esas pestañas solo abajo junto con las otras. Quita la pestaña de Todo».
+- Cabecera del termómetro: el termómetro (más bajo, filas de 24 px), la nota grande con «Nivel 4» y la tarjeta del nivel con el atajo «Qué hace falta para llegar al nivel 5» (abre la pestaña de abajo y baja hasta ella).
+- `sitio/pestanasExtra.ts`: un bloque añade pestañas a la red de su página; `RedRelaciones` (publicada y editor) las pone delante de las bases de datos. El termómetro añade «Salto 4→5», «Soluciones», «Diagnóstico» y «Plan».
+- `RedRelaciones` sin «Todo»: se abre en la primera pestaña (la del salto si la hay; si no, la primera base de datos).

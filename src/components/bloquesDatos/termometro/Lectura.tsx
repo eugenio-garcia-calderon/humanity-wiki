@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ArrowUpRight, Lightbulb, Target, TrendingUp, Undo2 } from 'lucide-react';
+import { ArrowUpRight, TrendingUp, Undo2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { cn } from '../../../utils/cn';
 import { miniatura } from '../../../utils/miniatura';
 import ElegirTerritorio, { territorioGuardado, guardarTerritorio, useTerritorios } from '../filtroTerritorio/ElegirTerritorio';
+import { ponerPestanasExtra, quitarPestanasExtra, abrirPestanaRed, type PestanaExtra } from '../../sitio/pestanasExtra';
 
 // ============================================================================
 // EL TERMÓMETRO DE UN SISTEMA (2026-10-25, Eugenio)
@@ -56,7 +57,7 @@ const ideas = (t: string) => String(t || '').split(/\n+|;\s*/).map(x => x.replac
 // color de los niveles; teclado: un solo tabulador por grupo y flechas.
 
 /** Alto de cada nivel del termómetro, en rem. */
-const FILA = 1.75;
+const FILA = 1.5;
 const sinTilde = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /** Flechas para moverse por un grupo (los niveles, las pestañas): un solo tabulador. */
@@ -94,7 +95,7 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
                 aria-label={`Nivel ${n} · ${ESCALA[n]}${info?.titulo ? ` — ${info.titulo}` : ''}${actual !== null && Math.floor(actual) === n ? ' (ahora)' : n === sig ? ' (siguiente)' : ''}`}
                 onClick={() => onElegir(n)} onMouseEnter={() => onEncima(n)}
                 onKeyDown={e => conFlechas(e, n, 10, onElegir, 'v', true)}
-                className={cn('grid h-7 w-7 place-items-center rounded-full text-xs font-black tabular-nums transition-colors',
+                className={cn('grid h-6 w-6 place-items-center rounded-full text-xs font-black tabular-nums transition-colors',
                   elegido === n ? 'bg-slate-900 text-white' : actual !== null && Math.floor(actual) === n ? 'bg-white text-slate-900 ring-2 ring-slate-900' : 'text-slate-600 hover:bg-white hover:text-slate-900',
                   n === sig && elegido !== n && '[outline:2px_dashed_rgb(71_85_105/.7)] [outline-offset:-2px]')}>
                 {n}
@@ -116,15 +117,15 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
       {/* La meta (el nivel siguiente), con un tramo discontinuo en el tubo: el salto se ve aquí también (bot de UX, ronda 3). */}
       {sig !== null && (
         <>
-          <span aria-hidden className="pointer-events-none absolute left-[2.25rem] w-5 rounded-sm border-2 border-dashed border-amber-600"
+          <span aria-hidden className="pointer-events-none absolute left-[2rem] w-5 rounded-sm border-2 border-dashed border-amber-600"
             style={{ top: `${(10 - sig) * FILA + 0.125}rem`, height: `${FILA}rem` }} />
-          <span aria-hidden className="pointer-events-none absolute left-[3.6rem] rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-slate-900"
+          <span aria-hidden className="pointer-events-none absolute left-[3.35rem] rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-slate-900"
             style={{ top: `${(10 - sig) * FILA + FILA / 2}rem`, transform: 'translateY(-50%)' }}>meta</span>
         </>
       )}
       {/* «Hoy», siempre a la vista junto al tubo, aunque se mire otro nivel (bot de UX, ronda 2). */}
       {actual !== null && (
-        <span aria-hidden className="pointer-events-none absolute left-[3.6rem] rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-white"
+        <span aria-hidden className="pointer-events-none absolute left-[3.35rem] rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-white"
           style={{ top: `${(10 - Math.floor(actual)) * FILA + FILA / 2}rem`, transform: 'translateY(-50%)' }}>hoy</span>
       )}
     </div>
@@ -227,22 +228,72 @@ function Salto({ desde, hasta, medidas }: { desde: { nivel: number; titulo: stri
   );
 }
 
-type Pestana = 'salto' | 'soluciones' | 'fallos' | 'mejoras';
+
+
+// LAS PESTAÑAS, ABAJO CON LAS DEMÁS (2026-10-25, Eugenio: «reduce el nivel de
+// información en la cabecera, quita las pestañas del lateral derecho y deja esas
+// pestañas solo abajo junto con las otras»). La cabecera se queda con el
+// termómetro, la nota y el nivel; el salto, las soluciones, el diagnóstico y el
+// plan van a la barra de la red (`pestanasExtra.ts`), delante de las bases de datos.
+
+function PanelSoluciones({ solNiveles, nivelActual, proyectos }: { solNiveles: Nivel[]; nivelActual: number | null; proyectos: Grupo[] }) {
+  // El nivel de hoy y el siguiente; los de más arriba, al pedirlos (bot de UX, ronda 2).
+  const [todos, setTodos] = useState(false);
+  const sig = (nivelActual ?? -1) + 1;
+  const arriba = solNiveles.filter(v => v.nivel > sig);
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div>
+        <p className="mb-2 text-sm text-slate-600">Tecnologías y soluciones que encajan en cada nivel, de la máxima aspiración al de hoy.</p>
+        {!todos && arriba.length > 0 && (
+          <button type="button" onClick={() => setTodos(true)} className="mb-2 w-full rounded-xl border border-dashed border-slate-300 px-3 py-2 text-left text-[13px] font-bold text-slate-600 hover:border-slate-400 hover:text-slate-900">
+            Ver niveles {sig + 1}–10 ({arriba.length}) ↑
+          </button>
+        )}
+        <ol className="space-y-2">
+          {solNiveles.filter(v => todos || v.nivel <= sig).map(v => {
+            const t = tonosDeNota(v.nivel), esSig = v.nivel === sig;
+            return (
+              <li key={v.nivel} className={cn('flex gap-3 rounded-xl p-3', esSig && 'ring-2 ring-emerald-400')} style={{ backgroundColor: t.fondo }}>
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-black" style={{ backgroundColor: t.color, color: textoSobre(t.color) }}>{v.nivel}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-black leading-snug text-slate-900">{v.titulo || ESCALA[v.nivel]}{esSig && <span className="ml-1.5 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[9px] font-black uppercase text-white">siguiente</span>}{v.nivel === nivelActual && <span className="ml-1.5 rounded-full bg-slate-800 px-1.5 py-0.5 text-[9px] font-black uppercase text-white">hoy</span>}</p>
+                  <p className="text-[13px] leading-snug text-slate-700">{ideas(v.soluciones).join(' · ')}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+      {proyectos.some(g => g.entradas.length) && <div><Grupos grupos={proyectos} sufijo=" · ya en marcha" /></div>}
+    </div>
+  );
+}
+
+function PanelDiagnostico({ fallos, grupos, territorio }: { fallos: string[]; grupos: Grupo[]; territorio: string | null }) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      {fallos.length > 0 && (
+        <div>
+          <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-500">Lo que falla hoy en {territorio || 'este territorio'}</p>
+          <ul className="space-y-2">
+            {fallos.map((t, i) => <li key={i} className="flex gap-2 text-sm leading-snug text-slate-700"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />{t}</li>)}
+          </ul>
+        </div>
+      )}
+      {grupos.some(g => g.entradas.length) && <div><Grupos grupos={grupos} /></div>}
+    </div>
+  );
+}
 
 export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, unknown>; paginaId?: string }) {
   const comoCabecera = d.comoCabecera === true;
-  // El título ya está arriba, en la línea de la ruta (`VistaPagina`): aquí solo el territorio y la nota.
+  // El título ya está arriba, en la línea de la ruta (`VistaPagina`): aquí solo la nota y el nivel.
   const sinTitulo = d.sinTitulo === true;
   const [x, setX] = useState<Datos | null | 'fallo'>(null);
   const [elegido, setElegido] = useState<number | null>(null);
   const [encima, setEncima] = useState<number | null>(null);
-  const [pestana, setPestana] = useState<Pestana | null>(null);
   const [leerMas, setLeerMas] = useState(false);
-  // Las soluciones enseñan el nivel de hoy y el siguiente; los de más arriba, al pedirlos (bot de UX, ronda 2).
-  const [todosNiveles, setTodosNiveles] = useState(false);
-  const [verProyectos, setVerProyectos] = useState(false);
-  const [masAbajo, setMasAbajo] = useState(false);
-  const panel = useRef<HTMLDivElement>(null);
   // Con el título arriba, el territorio va a su lado, en el hueco que deja `VistaPagina` (2026-10-25, Eugenio).
   const [ranura, setRanura] = useState<HTMLElement | null>(null);
   useEffect(() => { if (sinTitulo) setRanura(document.querySelector<HTMLElement>('[data-ranura-territorio]')); }, [sinTitulo]);
@@ -265,11 +316,6 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const n = encima ?? fijo;
   const niveles = x && x !== 'fallo' ? x.niveles : [];
   const info = niveles.find(v => v.nivel === n);
-  const grupos = useMemo(() => {
-    const red = x && x !== 'fallo' ? x.red : [];
-    const de = (re: RegExp) => red.filter(g => re.test(sinTilde(g.nombre)));
-    return { fallos: de(/fallo|consecuen/), mejoras: de(/mejora|linea|punto|objetivo/), proyectos: de(/proyecto|soluci/) };
-  }, [x]);
   const territorioNombre = opciones.find(o => o.id === elegidoT)?.nombre || (x && x !== 'fallo' ? x.territorio : null);
   // El título de la pestaña del navegador dice el territorio y la nota (bot de UX: mejor al compartir).
   useEffect(() => {
@@ -278,84 +324,79 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     if (!antes.includes(nuevo)) document.title = antes.replace(x.nombre, nuevo);
     return () => { document.title = antes; };
   }, [comoCabecera, x, actual, territorioNombre]);
-  // ¿Queda contenido por debajo en el panel de pestañas? Entonces un degradado lo avisa.
-  const medirPanel = () => { const p = panel.current; setMasAbajo(!!p && p.scrollHeight - p.scrollTop - p.clientHeight > 8); };
-  const abiertaCalc = (ps: Array<{ id: Pestana }>) => ps.find(p => p.id === pestana)?.id || ps[0]?.id;
+
+  // Las pestañas que van abajo, en la barra de la red. Solo las que tienen algo.
+  const medidas = useMemo(() => (nivelActual !== null && nivelActual < 10 ? ideas(niveles.find(v => v.nivel === nivelActual)?.medidas || '') : []), [niveles, nivelActual]);
   useEffect(() => {
-    const p = panel.current; if (!p) return;
-    // Las soluciones se abren en el nivel siguiente (bot de UX: empezaba en el 10 y el siguiente quedaba escondido).
-    const sig = p.querySelector('[data-siguiente]') as HTMLElement | null;
-    p.scrollTop = sig ? Math.max(0, sig.offsetTop - p.offsetTop - 56) : 0;
-    medirPanel();
-  }, [pestana, x, sinNota]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!paginaId || !x || x === 'fallo' || sinNota) { if (paginaId) quitarPestanasExtra(paginaId); return; }
+    const red = x.red;
+    const de = (re: RegExp) => red.filter(g => re.test(sinTilde(g.nombre)));
+    const fallos = de(/fallo|consecuen/), mejoras = de(/mejora|linea|punto|objetivo/), proyectos = de(/proyecto|soluci/);
+    const cuenta = (gs: Grupo[]) => gs.reduce((a, g) => a + g.entradas.length, 0);
+    const solNiveles = x.niveles.filter(v => v.soluciones && (nivelActual === null || v.nivel >= nivelActual)).sort((a, b) => b.nivel - a.nivel);
+    const nSol = solNiveles.reduce((a, v) => a + ideas(v.soluciones).length, 0) + cuenta(proyectos);
+    const fallosTexto = ideas(x.diagnostico);
+    const lista: PestanaExtra[] = [];
+    if (medidas.length && nivelActual !== null) lista.push({
+      id: 'salto', titulo: `Salto ${nivelActual}→${nivelActual + 1}`,
+      contenido: <div className="max-w-3xl"><Salto desde={x.niveles.find(v => v.nivel === nivelActual) || { nivel: nivelActual, titulo: '' }}
+        hasta={x.niveles.find(v => v.nivel === nivelActual + 1) || { nivel: nivelActual + 1, titulo: '' }} medidas={medidas} /></div>,
+    });
+    if (nSol) lista.push({ id: 'soluciones', titulo: 'Soluciones', n: nSol, contenido: <PanelSoluciones solNiveles={solNiveles} nivelActual={nivelActual} proyectos={proyectos} /> });
+    if (fallosTexto.length || cuenta(fallos)) lista.push({ id: 'diagnostico', titulo: 'Diagnóstico', n: fallosTexto.length + cuenta(fallos), contenido: <PanelDiagnostico fallos={fallosTexto} grupos={fallos} territorio={territorioNombre} /> });
+    if (cuenta(mejoras)) lista.push({ id: 'plan', titulo: 'Plan', n: cuenta(mejoras), contenido: <div className="max-w-3xl"><p className="mb-3 text-sm text-slate-600">Las mejoras propuestas, sus líneas de trabajo y los puntos concretos.</p><Grupos grupos={mejoras} /></div> });
+    ponerPestanasExtra(paginaId, lista);
+  }, [paginaId, x, sinNota, nivelActual, medidas, territorioNombre]);
+  useEffect(() => () => { if (paginaId) quitarPestanasExtra(paginaId); }, [paginaId]);
+
   if (!paginaId) return <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-xs font-bold text-slate-400">El termómetro va en la página de un sistema.</p>;
-  if (x === null) return <div className="mb-6 h-80 animate-pulse rounded-3xl bg-slate-50" />;
+  if (x === null) return <div className="mb-6 h-64 animate-pulse rounded-3xl bg-slate-50" />;
   if (x === 'fallo') return null;
   const tonos = actual !== null ? tonosDeNota(actual) : null;
   const tonosN = tonosDeNota(n);
   const portada = x.pagina?.portada || (x.pagina?.icono && /^(https?:|\/)/.test(x.pagina.icono) ? x.pagina.icono : null);
   const icono = x.pagina?.icono && !/^(https?:|\/)/.test(x.pagina.icono) ? x.pagina.icono : null;
-  const medidas = nivelActual !== null && nivelActual < 10 ? ideas(niveles.find(v => v.nivel === nivelActual)?.medidas || '') : [];
-  const fallosTexto = ideas(x.diagnostico);
-  const cuenta = (gs: Grupo[]) => gs.reduce((a, g) => a + g.entradas.length, 0);
-  const solNiveles = niveles.filter(v => v.soluciones && (nivelActual === null || v.nivel >= nivelActual)).sort((a, b) => b.nivel - a.nivel);
-  const nSoluciones = solNiveles.reduce((a, v) => a + ideas(v.soluciones).length, 0) + cuenta(grupos.proyectos);
-  // Las pestañas que tienen algo, con cuántas cosas hay en cada una.
-  const pestanas: Array<{ id: Pestana; titulo: string; icono: typeof Target; n?: number }> = [
-    ...(medidas.length ? [{ id: 'salto' as const, titulo: `Salto ${nivelActual}→${nivelActual! + 1}`, icono: TrendingUp }] : []),
-    ...(nSoluciones ? [{ id: 'soluciones' as const, titulo: 'Soluciones', icono: Lightbulb, n: nSoluciones }] : []),
-    // Nombres que no chocan con las pestañas de abajo (bot de UX, ronda 2: «Fallos 7» arriba y «Fallos 1» abajo).
-    ...(fallosTexto.length || cuenta(grupos.fallos) ? [{ id: 'fallos' as const, titulo: 'Diagnóstico', icono: AlertTriangle, n: fallosTexto.length + cuenta(grupos.fallos) || undefined }] : []),
-    ...(cuenta(grupos.mejoras) ? [{ id: 'mejoras' as const, titulo: 'Plan', icono: Target, n: cuenta(grupos.mejoras) }] : []),
-  ];
-  const abierta = abiertaCalc(pestanas);
-  const iAbierta = Math.max(0, pestanas.findIndex(p => p.id === abierta));
-  const idp = `termo-${paginaId}`;
   const elegirNivel = (v: number) => { setElegido(v === nivelActual ? null : v); setEncima(null); };
   const rotulo = n === nivelActual ? `Hoy en ${territorioNombre || 'este territorio'}` : n === 10 ? 'Nivel 10 · máxima aspiración' : n > (nivelActual ?? -1) ? `Nivel ${n} · meta posible` : `Nivel ${n} · por debajo de hoy`;
+  const selector = x.tabla_territorios && opciones.length > 0 ? (
+    <ElegirTerritorio compacto opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+      onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
+  ) : null;
   return (
     <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6')}>
-      <section className="grid grid-cols-1 gap-4 rounded-3xl border p-4 sm:p-5 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1.05fr)] lg:grid-rows-[auto_1fr] lg:gap-x-6"
+      {ranura && selector && createPortal(selector, ranura)}
+      <section className="grid grid-cols-1 gap-4 rounded-3xl border p-4 sm:p-5 lg:grid-cols-[auto_auto_minmax(0,1fr)] lg:items-center lg:gap-x-8"
         style={tonos ? { backgroundColor: tonos.fondo, borderColor: tonos.borde } : { backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+        {/* Sin el título arriba (en el editor de un bloque suelto, por ejemplo), aquí la cabecera entera. */}
+        {!sinTitulo && (
+          <header className="flex flex-wrap items-center justify-center gap-3 lg:col-span-3">
+            {portada ? <img src={miniatura(portada, 160)} alt="" className="h-12 w-12 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm ring-1 ring-black/10" /> : icono && <span className="text-4xl leading-none">{icono}</span>}
+            <div className="min-w-0 text-left">
+              {comoCabecera ? <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900">{x.nombre}</h1> : <p className="text-2xl font-black leading-tight tracking-tight text-slate-900">{x.nombre}</p>}
+              {x.pagina?.subtitulo && <p className="text-sm leading-snug text-slate-600">{x.pagina.subtitulo}</p>}
+            </div>
+            {!ranura && selector}
+          </header>
+        )}
 
-        {/* Arriba, centrados: la portada y el título, la descripción; debajo, el territorio y la nota. */}
-        <header className="flex flex-col items-center text-center lg:col-start-2 lg:row-start-1">
-          {!sinTitulo && <>
-          <div className="flex items-center justify-center gap-2.5">
-            {portada
-              ? <img src={miniatura(portada, 160)} alt="" className="h-12 w-12 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm ring-1 ring-black/10" />
-              : icono && <span className="text-4xl leading-none">{icono}</span>}
-            {comoCabecera
-              ? <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900 sm:text-[2.25rem]">{x.nombre}</h1>
-              : <p className="text-2xl font-black leading-tight tracking-tight text-slate-900">{x.nombre}</p>}
-          </div>
-          {x.pagina?.subtitulo && <p className="mt-1 text-sm leading-snug text-slate-600">{x.pagina.subtitulo}</p>}
-          </>}
-          <div className={cn(!sinTitulo && 'mt-3', 'flex items-center justify-center gap-x-3 gap-y-2 sm:flex-wrap')}>
-            {x.tabla_territorios && opciones.length > 0 && (() => {
-              const selector = <ElegirTerritorio compacto opciones={opciones} conDatos={conDatos} elegido={elegidoT}
-                onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />;
-              return ranura ? createPortal(selector, ranura) : selector;
-            })()}
-            {actual !== null && tonos && (
-              <div className="flex items-center gap-2.5">
-                <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`} className="inline-flex items-baseline rounded-2xl px-4 py-1.5 font-black leading-none tabular-nums shadow-sm"
-                  style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-                  <span className="text-[2.75rem] sm:text-5xl">{textoNota(actual)}</span><span className="ml-1 text-base opacity-75">/10</span>
-                </span>
-                <p className={cn('text-left text-sm font-black leading-tight', !ranura && 'hidden sm:block')} style={{ color: tonos.tinta }}>Nivel {nivelActual}</p>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* A la izquierda, el termómetro (en el móvil, tumbado encima de la descripción). */}
-        <div className="hidden lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:block lg:pr-8">
+        {/* El termómetro (en el móvil, tumbado). */}
+        <div className="hidden lg:block lg:pr-8">
           <Tubo niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} />
         </div>
 
+        {/* La nota, grande. */}
+        {actual !== null && tonos && (
+          <div className="flex items-center justify-center gap-3 lg:flex-col lg:gap-1.5">
+            <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`} className="inline-flex items-baseline rounded-2xl px-4 py-2 font-black leading-none tabular-nums shadow-sm"
+              style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
+              <span className="text-5xl lg:text-6xl">{textoNota(actual)}</span><span className="ml-1 text-base opacity-75">/10</span>
+            </span>
+            <p className="text-sm font-black" style={{ color: tonos.tinta }}>Nivel {nivelActual}</p>
+          </div>
+        )}
+
         {/* El nivel que se señala en el termómetro (el de hoy, si no se ha pulsado otro). */}
-        <div className="min-w-0 self-start lg:col-start-2 lg:row-start-2">
+        <div className="min-w-0">
           {sinNota ? (
             <div data-sin-nota className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center">
               <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
@@ -364,98 +405,27 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           ) : (
             <>
               <div className="mb-3 lg:hidden"><TuboHorizontal actual={actual} elegido={fijo} onElegir={elegirNivel} /></div>
-              <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5">
-                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && !ranura && <span className="sm:hidden"> · nivel {n}</span>}</p>
-                <h2 className="mt-0.5 text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
-                {info?.descripcion && <p className={cn('mt-1 text-[13px] leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
-                {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}
+              <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5 sm:p-5">
+                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}</p>
+                <h2 className="mt-0.5 text-lg font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
+                {info?.descripcion && <p className={cn('mt-1 text-sm leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
+                {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center self-start text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}
                 {!info && <p className="mt-1 text-sm text-slate-500">Aún no se ha descrito este nivel.</p>}
-                {/* Del nivel de hoy, un atajo al salto (llena el hueco que quedaba y une las dos columnas). */}
-                {n === nivelActual && medidas.length > 0 && (
-                  <button type="button" onClick={() => { setPestana('salto'); panel.current?.focus(); }}
-                    className="mt-2 inline-flex min-h-8 items-center gap-1.5 self-start rounded-full bg-slate-900 px-3 text-[12px] font-bold text-white hover:bg-slate-700">
-                    <TrendingUp className="h-3.5 w-3.5" /> Qué hace falta para llegar al nivel {nivelActual! + 1}
-                  </button>
-                )}
-                <p className="pt-2 text-[11px] text-slate-600">
-                  {elegido !== null && nivelActual !== null && encima === null
-                    ? <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-6 items-center gap-1 font-bold text-slate-600 hover:text-slate-900"><Undo2 className="h-3 w-3" /> Volver a hoy (nivel {nivelActual})</button>
-                    : <span><span className="hidden lg:inline">Pasa por el termómetro o pulsa un número</span><span className="lg:hidden">Pulsa un número</span> para ver cada nivel.</span>}
-                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {n === nivelActual && medidas.length > 0 && (
+                    <button type="button" onClick={() => abrirPestanaRed(paginaId, 'salto')}
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-slate-900 px-3.5 text-[13px] font-bold text-white hover:bg-slate-700">
+                      <TrendingUp className="h-4 w-4" /> Qué hace falta para llegar al nivel {nivelActual! + 1}
+                    </button>
+                  )}
+                  {elegido !== null && nivelActual !== null && encima === null && (
+                    <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-9 items-center gap-1 text-[13px] font-bold text-slate-600 hover:text-slate-900"><Undo2 className="h-3.5 w-3.5" /> Volver a hoy (nivel {nivelActual})</button>
+                  )}
+                </div>
               </div>
             </>
           )}
         </div>
-
-        {/* A la derecha, en pestañas: el salto, las soluciones, los fallos y las mejoras. */}
-        {!sinNota && pestanas.length > 0 && (
-          <div data-pestanas-termometro className="flex min-w-0 flex-col rounded-2xl bg-white/90 ring-1 ring-black/5 lg:col-start-3 lg:row-span-2 lg:row-start-1">
-            <div role="tablist" aria-label={`Cómo mejorar ${x.nombre}`} data-flechas
-              className="flex gap-1 overflow-x-auto border-b border-slate-100 p-1.5 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(90deg,#000_85%,transparent)] max-sm:pr-8">
-              {pestanas.map((p, i) => (
-                <button key={p.id} type="button" role="tab" id={`${idp}-t-${p.id}`} aria-controls={`${idp}-panel`} aria-selected={abierta === p.id}
-                  tabIndex={abierta === p.id ? 0 : -1} data-pos={i} onClick={() => setPestana(p.id)}
-                  onKeyDown={e => conFlechas(e, i, pestanas.length - 1, j => setPestana(pestanas[j].id), 'h')}
-                  className={cn('inline-flex min-h-8 shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[13px] font-bold transition-colors',
-                    abierta === p.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>
-                  <p.icono className="h-3.5 w-3.5" />{p.titulo}
-                  {p.n ? <span className={cn('rounded-full px-1.5 text-[10px] tabular-nums', abierta === p.id ? 'bg-white/20' : 'bg-slate-100 text-slate-600')}>{p.n}</span> : null}
-                </button>
-              ))}
-            </div>
-            <div className="relative min-h-0 flex-1">
-              <div ref={panel} role="tabpanel" id={`${idp}-panel`} aria-labelledby={`${idp}-t-${pestanas[iAbierta]?.id}`} tabIndex={0} onScroll={medirPanel}
-                className="p-3 outline-none lg:max-h-[19.25rem] lg:overflow-y-auto">
-                {abierta === 'salto' && nivelActual !== null && (
-                  <Salto desde={niveles.find(v => v.nivel === nivelActual) || { nivel: nivelActual, titulo: '' }}
-                    hasta={niveles.find(v => v.nivel === nivelActual + 1) || { nivel: nivelActual + 1, titulo: '' }} medidas={medidas} />
-                )}
-                {abierta === 'soluciones' && (
-                  <>
-                    <p className="mb-2 text-[12px] text-slate-600">Tecnologías y proyectos que encajan en cada nivel, de la máxima aspiración al de hoy.</p>
-                    {cuenta(grupos.proyectos) > 0 && (verProyectos
-                      ? <div className="mb-3"><Grupos grupos={grupos.proyectos} sufijo=" · ya en marcha" /></div>
-                      : <button type="button" onClick={() => setVerProyectos(true)} className="mb-2 flex w-full items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 text-left text-[13px] font-bold text-emerald-800 ring-1 ring-emerald-200 hover:bg-emerald-100">
-                          <span>{cuenta(grupos.proyectos)} proyectos ya en marcha</span><span className="inline-flex items-center gap-1">Ver <ArrowUpRight className="h-3.5 w-3.5" /></span>
-                        </button>)}
-                    {!todosNiveles && solNiveles.some(v => v.nivel > (nivelActual ?? -1) + 1) && (
-                      <button type="button" onClick={() => setTodosNiveles(true)} className="mb-1.5 w-full rounded-xl border border-dashed border-slate-300 px-3 py-2 text-left text-[12px] font-bold text-slate-600 hover:border-slate-400 hover:text-slate-900">
-                        Ver niveles {(nivelActual ?? -1) + 2}–10 ({solNiveles.filter(v => v.nivel > (nivelActual ?? -1) + 1).length}) ↑
-                      </button>
-                    )}
-                    <ol className="space-y-1.5">
-                      {solNiveles.filter(v => todosNiveles || v.nivel <= (nivelActual ?? -1) + 1).map(v => {
-                        const t = tonosDeNota(v.nivel), sig = v.nivel === (nivelActual ?? -1) + 1;
-                        return (
-                          <li key={v.nivel} data-siguiente={sig || undefined} className={cn('flex gap-2.5 rounded-xl p-2', sig && 'ring-2 ring-emerald-400')} style={{ backgroundColor: t.fondo }}>
-                            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-black" style={{ backgroundColor: t.color, color: textoSobre(t.color) }}>{v.nivel}</span>
-                            <div className="min-w-0">
-                              <p className="text-[13px] font-black leading-snug text-slate-900">{v.titulo || ESCALA[v.nivel]}{sig && <span className="ml-1.5 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[9px] font-black uppercase text-white">siguiente</span>}{v.nivel === nivelActual && <span className="ml-1.5 rounded-full bg-slate-800 px-1.5 py-0.5 text-[9px] font-black uppercase text-white">hoy</span>}</p>
-                              <p className="text-[12px] leading-snug text-slate-700">{ideas(v.soluciones).join(' · ')}</p>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  </>
-                )}
-                {abierta === 'fallos' && (
-                  <>
-                    {fallosTexto.length > 0 && <p className="mb-1.5 text-[11px] font-black uppercase tracking-wide text-slate-500">Lo que falla hoy en {territorioNombre || 'este territorio'}</p>}
-                    {fallosTexto.length > 0 && (
-                      <ul className="mb-3 space-y-1.5">
-                        {fallosTexto.map((t, i) => <li key={i} className="flex gap-2 text-[13px] leading-snug text-slate-700"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />{t}</li>)}
-                      </ul>
-                    )}
-                    <Grupos grupos={grupos.fallos} />
-                  </>
-                )}
-                {abierta === 'mejoras' && <><p className="mb-2 text-[12px] text-slate-600">Las mejoras propuestas, sus líneas de trabajo y los puntos concretos.</p><Grupos grupos={grupos.mejoras} /></>}
-              </div>
-              {masAbajo && <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-8 rounded-b-2xl bg-gradient-to-t from-white to-transparent" />}
-            </div>
-          </div>
-        )}
       </section>
     </div>
   );
