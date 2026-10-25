@@ -423,7 +423,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
           const icono = f.pagina?.icono;
           // LA NOTA, GRANDE (2026-10-25, Eugenio): si la tarjeta enseña una
           // propiedad «Nota», la tarjeta se tiñe con su color (el del mapa) y la
-          // nota va grande sobre la imagen.
+          // nota va a la derecha del título (`cabeceraEl`).
           const colNota = otras.find(c => c.tipo === 'nota');
           const celdaNota = colNota ? f.celdas[colNota.id] : undefined;
           const nota = celdaNota?.estado === 'ok' && celdaNota.valor !== null && celdaNota.valor !== '' ? Number(celdaNota.valor) : null;
@@ -439,6 +439,19 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                     <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')} style={tonos ? { color: textoSobre(tonos.color) } : undefined}>{nombre || 'Sin título'}</span>
                   </p>
       );
+      // LA NOTA A LA DERECHA DEL TÍTULO (2026-10-25, Eugenio: «el número a la
+      // derecha del título de cada tarjeta, dando más espacio al título y el
+      // número un poco más pequeño»): título a la izquierda, nota en un círculo blanco.
+      const cabeceraEl = tonos && nota !== null ? (
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <div className="min-w-0 flex-1 text-left [&_p]:justify-start">{nombreEl}</div>
+                    <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
+                      className={cn('inline-flex shrink-0 items-center rounded-full bg-white font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : 'h-10 px-3 text-2xl sm:h-11 sm:text-[1.65rem]')}
+                      style={{ color: tonos.tinta }}>
+                      <span className="flex items-baseline">{textoNota(nota)}<span className={cn('ml-0.5 font-bold opacity-70', chica ? 'text-[7px]' : 'text-[10px]')}>/10</span></span>
+                    </span>
+                  </div>
+      ) : nombreEl;
           return (
             // Un `div` que hace de botón, no un `<button>`: dentro van los
             // mandos de recolocar la imagen, y un botón no puede llevar otro.
@@ -536,7 +549,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                     : cn('inset-x-0 h-1', destino.lado === 'antes' ? '-top-3' : '-bottom-3')
                 )} />
               )}
-              {nombreArriba && <div className="mb-2">{nombreEl}</div>}
+              {nombreArriba && <div className="mb-2">{cabeceraEl}</div>}
               {/* CUADRADA Y SIN RECORTAR (2026-10-21, Eugenio): la imagen entera dentro de un cuadrado, con blanco arriba y abajo (o a los lados) si no es cuadrada. */}
               <div className={cn('relative aspect-square bg-white border border-slate-100 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
                 {f.pagina?.imagen ? (
@@ -560,14 +573,6 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                   <p className="w-full h-full p-3 text-[11px] leading-snug text-slate-400 overflow-hidden">{f.pagina.resumen}</p>
                 ) : (
                   <FileText className="w-8 h-8 text-slate-200" />
-                )}
-                {tonos && nota !== null && (
-                  // LA NOTA, GRANDE (bot evaluador, ronda 1: «56-64 px»): un círculo con el color de la nota.
-                  <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
-                    className={cn('absolute z-[3] grid place-items-center rounded-full font-black tabular-nums leading-none shadow-md ring-4 ring-white', chica ? 'left-1 top-1 h-10 w-10 text-lg' : 'left-2 top-2 h-[4.5rem] w-[4.5rem] text-[2.6rem] sm:h-20 sm:w-20 sm:text-5xl')}
-                    style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-                    <span className="flex items-baseline">{textoNota(nota)}<span className={cn('font-semibold', chica ? 'text-[8px]' : 'ml-0.5 text-xs sm:text-sm')}>/10</span></span>
-                  </span>
                 )}
                 {/* El asa dice que se puede arrastrar; toda la tarjeta se arrastra. */}
                 {mover && !chica && (
@@ -593,13 +598,13 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                   izquierda»). En la herramienta «Tablas» siguen a la izquierda. */}
               <div className={cn(minima ? 'px-0 pt-1 pb-0 space-y-0.5' : chica ? 'px-0 pt-1.5 pb-0.5 space-y-0.5' : 'px-0.5 pt-2.5 pb-1 space-y-1', centrada && 'text-center',
                 enLista && 'max-sm:flex-1 max-sm:min-w-0 max-sm:pt-0 max-sm:text-left max-sm:[&_.justify-center]:justify-start')}>
-{!nombreArriba && nombreEl}
+{!nombreArriba && cabeceraEl}
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
                 {!chica && conDescripcion && f.pagina?.descripcion && (
                   <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')} style={tonos ? { color: textoSobre(tonos.color), opacity: 0.85 } : undefined}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
-                {otras.filter(c => !(tonos && c.id === colNota?.id && !onGuardarCelda)).map(c => {
+                {otras.filter(c => !(tonos && c.id === colNota?.id)).map(c => {
                   // EDITAR DESDE LA TARJETA (2026-10-18): quien edita cambia cada propiedad visible
                   // aquí mismo, esté llena o vacía. El clic no abre la tarjeta.
                   if (onGuardarCelda && c.tipo !== 'compra') {

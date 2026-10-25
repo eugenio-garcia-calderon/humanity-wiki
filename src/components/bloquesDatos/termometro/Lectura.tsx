@@ -121,6 +121,58 @@ function Seccion({ icono: Icono, titulo, tono, children }: { icono: typeof Targe
   );
 }
 
+/** EL SALTO DE NIVEL (2026-10-25, Eugenio: «de forma visual las mejoras necesarias
+ *  para hacer el salto de un nivel a otro; que se vea bien ese salto»): el nivel
+ *  de ahora y el siguiente a los lados, y entre los dos una escalera: cada
+ *  medida es un peldaño, que va tomando el color del nivel al que lleva. */
+function Salto({ desde, hasta, medidas, territorio }: { desde: Nivel | { nivel: number; titulo: string }; hasta: Nivel | { nivel: number; titulo: string }; medidas: string[]; territorio: string | null }) {
+  const c1 = colorDeNota(desde.nivel), c2 = colorDeNota(hasta.nivel);
+  const t1 = tonosDeNota(desde.nivel), t2 = tonosDeNota(hasta.nivel);
+  const mezcla = (i: number) => `color-mix(in srgb, ${c2} ${Math.round(((i + 1) / (medidas.length + 1)) * 100)}%, ${c1})`;
+  const Extremo = ({ v, t, c, rotulo }: { v: { nivel: number; titulo: string }; t: ReturnType<typeof tonosDeNota>; c: string; rotulo: string }) => (
+    <div className="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-black/5" style={{ backgroundColor: t.fondo }}>
+      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl font-black tabular-nums shadow-sm" style={{ backgroundColor: c, color: textoSobre(c) }}>{v.nivel}</span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: t.tinta }}>{rotulo}</p>
+        <p className="text-sm font-black leading-snug text-slate-900">{v.titulo || ESCALA[v.nivel]}</p>
+      </div>
+    </div>
+  );
+  return (
+    <section data-salto className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 sm:p-8">
+      <h3 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><TrendingUp className="h-5 w-5" /></span>
+        El salto: del nivel {desde.nivel} al {hasta.nivel}
+      </h3>
+      <p className="mt-1 text-sm text-slate-500">Lo que hace falta{territorio ? ` en ${territorio}` : ''} para subir un peldaño.</p>
+      <div className="mt-6 grid items-stretch gap-4 lg:grid-cols-[minmax(0,15rem)_1fr_minmax(0,15rem)]">
+        <div className="lg:self-end"><Extremo v={desde} t={t1} c={c1} rotulo="Ahora" /></div>
+        {/* La escalera: en el ordenador sube de izquierda a derecha; en el móvil, de arriba abajo. */}
+        <ol className="relative flex flex-col gap-2 lg:flex-row lg:items-end lg:gap-2" aria-label={`Medidas para pasar del nivel ${desde.nivel} al ${hasta.nivel}`}>
+          {medidas.map((m, i) => (
+            // Cada peldaño es un bloque macizo hasta el suelo, un poco más alto que el anterior.
+            <li key={i} className="flex min-w-0 flex-1 flex-col lg:justify-end"
+              style={{ ['--alto' as any]: `${10 + (i + 1) * 1.75}rem` }}>
+              <div className="flex min-w-0 flex-col rounded-2xl border-t-[6px] bg-white p-3 shadow-sm ring-1 ring-black/5 lg:min-h-[var(--alto)] lg:rounded-b-md"
+                style={{ borderTopColor: mezcla(i), backgroundColor: `color-mix(in srgb, ${mezcla(i)} 12%, white)` }}>
+                <span className="mb-1.5 grid h-7 w-7 place-items-center rounded-full text-xs font-black text-white" style={{ backgroundColor: mezcla(i) }}>{i + 1}</span>
+                <p className="text-[13px] font-semibold leading-snug text-slate-800">{m}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="lg:self-start"><Extremo v={hasta} t={t2} c={c2} rotulo="Siguiente nivel" /></div>
+      </div>
+      {/* La barra del salto: del color de ahora al del siguiente. */}
+      <div className="mt-5 flex items-center gap-3">
+        <span className="text-xs font-black tabular-nums" style={{ color: t1.tinta }}>{desde.nivel}</span>
+        <div className="h-2.5 flex-1 rounded-full" style={{ background: `linear-gradient(90deg, ${c1}, ${c2})` }} />
+        <span className="text-xs font-black tabular-nums" style={{ color: t2.tinta }}>{hasta.nivel}</span>
+      </div>
+    </section>
+  );
+}
+
 export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, unknown>; paginaId?: string }) {
   const comoCabecera = d.comoCabecera === true;
   const [x, setX] = useState<Datos | null | 'fallo'>(null);
@@ -214,6 +266,11 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
       </section>
 
       {!sinNota && <>
+      {nivelActual !== null && nivelActual < 10 && ideas(siguiente || '').length > 0 && (
+        <Salto desde={niveles.find(v => v.nivel === nivelActual) || { nivel: nivelActual, titulo: '' }}
+          hasta={niveles.find(v => v.nivel === nivelActual + 1) || { nivel: nivelActual + 1, titulo: '' }}
+          medidas={ideas(siguiente || '')} territorio={x.territorio} />
+      )}
       <div className="grid gap-6 lg:grid-cols-2">
         {(x.diagnostico || grupos.fallos.some(g => g.entradas.length)) && (
           <Seccion icono={AlertTriangle} titulo="Fallos actuales" tono="bg-rose-50 text-rose-600">
@@ -227,13 +284,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
             ))}
           </Seccion>
         )}
-        {(siguiente || grupos.mejoras.some(g => g.entradas.length)) && (
-          <Seccion icono={TrendingUp} titulo={nivelActual !== null && nivelActual < 10 ? `Para subir al nivel ${nivelActual + 1}` : 'Medidas de mejora'} tono="bg-emerald-50 text-emerald-700">
-            {ideas(siguiente || '').length > 0 && (
-              <ul className="mb-3 space-y-2">
-                {ideas(siguiente || '').map((t, i) => <li key={i} className="flex gap-2 text-[15px] leading-relaxed text-slate-700"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />{t}</li>)}
-              </ul>
-            )}
+        {grupos.mejoras.some(g => g.entradas.length) && (
+          <Seccion icono={Target} titulo="Mejoras propuestas" tono="bg-emerald-50 text-emerald-700">
             {grupos.mejoras.map(g => g.entradas.length > 0 && (
               <div key={g.slug} className="mt-3"><p className="mb-1.5 text-xs font-black uppercase tracking-wide text-slate-400">{g.nombre}</p><Tarjetas entradas={g.entradas} /></div>
             ))}
@@ -244,7 +296,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
       {(niveles.some(v => v.soluciones) || grupos.proyectos.some(g => g.entradas.length)) && (
         <Seccion icono={Lightbulb} titulo="Soluciones para cada nivel" tono="bg-amber-50 text-amber-600">
           <ol className="space-y-2">
-            {niveles.filter(v => v.soluciones && (nivelActual === null || v.nivel >= nivelActual)).map(v => {
+            {/* Del 10 (la aspiración) hacia abajo, hasta el nivel de ahora: como el termómetro (Eugenio, 2026-10-25). */}
+            {niveles.filter(v => v.soluciones && (nivelActual === null || v.nivel >= nivelActual)).sort((a, b) => b.nivel - a.nivel).map(v => {
               const t = tonosDeNota(v.nivel);
               return (
                 <li key={v.nivel} className={cn('flex gap-3 rounded-2xl p-3', v.nivel === (nivelActual ?? -1) + 1 && 'ring-2 ring-emerald-300')} style={{ backgroundColor: t.fondo }}>
