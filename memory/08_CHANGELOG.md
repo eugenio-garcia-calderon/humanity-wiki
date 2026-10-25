@@ -9819,3 +9819,12 @@ Eugenio: «mucho más compacta, que se vea casi todo en primera página; redise�
 - Soluciones: el nivel de hoy y el siguiente; «Ver niveles 6–10 (5)» para el resto.
 - Contraste de la «tinta» de las notas 7–9 (era 2,4:1); rótulos «Nivel 7 · a dónde se puede llegar»; «Leer más» de 44 px; las ideas empiezan en mayúscula.
 - Red: «Ver todo» siempre, sin partirse; títulos de grupo en una línea; las páginas hijas con título («Páginas dentro de Movilidad»).
+
+## 2026-10-25 · Página de un sistema: mejoras del bot de UX, ronda 3 (7,4/10; escritorio ≈ 8,3) (Programador 8)
+- Móvil: la página salía a 520 px de ancho (títulos de grupo de la red en una línea dentro de la rejilla sin `min-w-0`) y la hoja de territorio quedaba fuera; arreglado.
+- Un solo anillo de foco en el buscador de territorios (`data-sin-contorno` en `index.css`).
+- Termómetro: «META» y un tramo discontinuo en el nivel siguiente, junto a «HOY».
+- Tarjeta del nivel: alto según su texto y un atajo «Qué hace falta para llegar al nivel 5» que abre el salto.
+- Soluciones: «6 proyectos ya en marcha · Ver» plegado; «Diagnóstico» y «Plan» cuentan lo que enseñan; rótulo «Nivel 7 · meta posible».
+- El salto: si el nombre del nivel solo repite la escala común («Insuficiente»), la primera frase de su descripción.
+- «Saltar al contenido» para el teclado.

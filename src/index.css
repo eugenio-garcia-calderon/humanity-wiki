@@ -105,4 +105,7 @@ html, body { overscroll-behavior-x: none; }
   outline: 3px solid var(--color-emerald-700, rgb(0 122 85));
   outline-offset: 2px;
 }
+/* Un campo cuyo envoltorio ya lleva el anillo (`focus-within`): un solo anillo, no dos
+   (bot de UX, 2026-10-25: el buscador de territorios). */
+:is(.sitio-foco, .sitio-lectura) [data-sin-contorno]:focus-visible { outline: none; }
 

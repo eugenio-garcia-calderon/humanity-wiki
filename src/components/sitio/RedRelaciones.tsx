@@ -235,9 +235,9 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
         // dos en dos o de tres en tres: uno por fila dejaba media pantalla en blanco.
         <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
           {grupos.map(g => (
-            <div key={g.slug} data-grupo-red={g.slug} className={cn(g.entradas.length > 2 && 'sm:col-span-2 lg:col-span-3')}>
-              <div className="mb-3 flex items-baseline gap-2">
-                <h2 title={g.nombre} className="min-w-0 truncate text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
+            <div key={g.slug} data-grupo-red={g.slug} className={cn('min-w-0' /* sin esto, un título en una línea ensanchaba la página en el móvil */, g.entradas.length > 2 && 'sm:col-span-2 lg:col-span-3')}>
+              <div className="mb-3 flex min-w-0 items-baseline gap-2">
+                <h2 title={g.nombre} className="min-w-0 flex-1 truncate text-base font-black tracking-tight text-slate-900">{g.nombre}</h2>
                 <span className="shrink-0 text-sm font-semibold text-slate-500">{g.entradas.length}</span>
                 <a href={caminoDe(g)} onClick={e => elegir(e, g)} className="ml-auto inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap py-1 text-sm font-bold text-slate-600 hover:text-slate-900">
                   Ver todo <ArrowRight className="h-3.5 w-3.5" />

@@ -112,6 +112,15 @@ function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
         <div className="absolute -bottom-1 left-1/2 h-7 w-7 -translate-x-1/2 rounded-full ring-4 ring-white"
           style={{ backgroundColor: actual !== null ? colorDeNota(actual) : '#e2e8f0' }} />
       </div>
+      {/* La meta (el nivel siguiente), con un tramo discontinuo en el tubo: el salto se ve aquí también (bot de UX, ronda 3). */}
+      {sig !== null && (
+        <>
+          <span aria-hidden className="pointer-events-none absolute left-[2.25rem] w-5 rounded-sm border-2 border-dashed border-amber-600"
+            style={{ top: `${(10 - sig) * FILA + 0.125}rem`, height: `${FILA}rem` }} />
+          <span aria-hidden className="pointer-events-none absolute left-[3.6rem] rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-slate-900"
+            style={{ top: `${(10 - sig) * FILA + FILA / 2}rem`, transform: 'translateY(-50%)' }}>meta</span>
+        </>
+      )}
       {/* «Hoy», siempre a la vista junto al tubo, aunque se mire otro nivel (bot de UX, ronda 2). */}
       {actual !== null && (
         <span aria-hidden className="pointer-events-none absolute left-[3.6rem] rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-white"
@@ -161,10 +170,18 @@ function Grupos({ grupos, sufijo = '' }: { grupos: Grupo[]; sufijo?: string }) {
   ))}</>;
 }
 
+/** El nombre de un nivel para el salto: si solo repite el de la escala común
+ *  («Insuficiente»), mejor la primera frase de su descripción (bot de UX, ronda 3). */
+function nombreNivel(v: { nivel: number; titulo: string; descripcion?: string }) {
+  if (v.titulo && sinTilde(v.titulo) !== sinTilde(ESCALA[v.nivel] || '')) return v.titulo;
+  const frase = String(v.descripcion || '').split(/(?<=\.)\s/)[0]?.replace(/\.$/, '').trim();
+  return frase ? (frase.length > 110 ? `${frase.slice(0, 107).trim()}…` : frase) : (v.titulo || ESCALA[v.nivel]);
+}
+
 /** EL SALTO DE NIVEL (2026-10-25, Eugenio: «de forma visual las mejoras necesarias
  *  para hacer el salto de un nivel a otro»): de «hoy» (arriba) a la meta (abajo),
  *  cada medida un escalón algo más a la derecha, del color de un nivel al del otro. */
-function Salto({ desde, hasta, medidas }: { desde: { nivel: number; titulo: string }; hasta: { nivel: number; titulo: string }; medidas: string[] }) {
+function Salto({ desde, hasta, medidas }: { desde: { nivel: number; titulo: string; descripcion?: string }; hasta: { nivel: number; titulo: string; descripcion?: string }; medidas: string[] }) {
   const c1 = colorDeNota(desde.nivel), c2 = colorDeNota(hasta.nivel);
   const mezcla = (i: number) => `color-mix(in srgb, ${c2} ${Math.round(((i + 1) / (medidas.length + 1)) * 100)}%, ${c1})`;
   return (
@@ -175,7 +192,7 @@ function Salto({ desde, hasta, medidas }: { desde: { nivel: number; titulo: stri
         <span aria-hidden className="absolute bottom-3 left-0 top-3 w-1.5 rounded-full" style={{ background: `linear-gradient(180deg, ${c1}, ${c2})` }} />
         <p className="flex items-center gap-2 text-[12px] text-slate-600">
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[11px] font-black" style={{ backgroundColor: c1, color: textoSobre(c1) }}>{desde.nivel}</span>
-          <span><b className="font-bold text-slate-800">Hoy · nivel {desde.nivel}:</b> {desde.titulo || ESCALA[desde.nivel]}</span>
+          <span><b className="font-bold text-slate-800">Hoy · nivel {desde.nivel}:</b> {nombreNivel(desde)}</span>
         </p>
         <ol className="my-1.5 space-y-1" aria-label={`${medidas.length} medidas para pasar del nivel ${desde.nivel} al ${hasta.nivel}`}>
           {medidas.map((m, i) => (
@@ -189,7 +206,7 @@ function Salto({ desde, hasta, medidas }: { desde: { nivel: number; titulo: stri
         </ol>
         <p className="flex items-center gap-2 text-[12px] text-slate-600">
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[11px] font-black" style={{ backgroundColor: c2, color: textoSobre(c2) }}>{hasta.nivel}</span>
-          <span><b className="font-bold text-slate-800">Meta · nivel {hasta.nivel}:</b> {hasta.titulo || ESCALA[hasta.nivel]}</span>
+          <span><b className="font-bold text-slate-800">Meta · nivel {hasta.nivel}:</b> {nombreNivel(hasta)}</span>
         </p>
       </div>
     </div>
@@ -209,6 +226,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const [leerMas, setLeerMas] = useState(false);
   // Las soluciones enseñan el nivel de hoy y el siguiente; los de más arriba, al pedirlos (bot de UX, ronda 2).
   const [todosNiveles, setTodosNiveles] = useState(false);
+  const [verProyectos, setVerProyectos] = useState(false);
   const [masAbajo, setMasAbajo] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -270,14 +288,14 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     ...(medidas.length ? [{ id: 'salto' as const, titulo: `Salto ${nivelActual}→${nivelActual! + 1}`, icono: TrendingUp }] : []),
     ...(nSoluciones ? [{ id: 'soluciones' as const, titulo: 'Soluciones', icono: Lightbulb, n: nSoluciones }] : []),
     // Nombres que no chocan con las pestañas de abajo (bot de UX, ronda 2: «Fallos 7» arriba y «Fallos 1» abajo).
-    ...(fallosTexto.length || cuenta(grupos.fallos) ? [{ id: 'fallos' as const, titulo: 'Diagnóstico', icono: AlertTriangle, n: fallosTexto.length || undefined }] : []),
-    ...(cuenta(grupos.mejoras) ? [{ id: 'mejoras' as const, titulo: 'Plan', icono: Target }] : []),
+    ...(fallosTexto.length || cuenta(grupos.fallos) ? [{ id: 'fallos' as const, titulo: 'Diagnóstico', icono: AlertTriangle, n: fallosTexto.length + cuenta(grupos.fallos) || undefined }] : []),
+    ...(cuenta(grupos.mejoras) ? [{ id: 'mejoras' as const, titulo: 'Plan', icono: Target, n: cuenta(grupos.mejoras) }] : []),
   ];
   const abierta = abiertaCalc(pestanas);
   const iAbierta = Math.max(0, pestanas.findIndex(p => p.id === abierta));
   const idp = `termo-${paginaId}`;
   const elegirNivel = (v: number) => { setElegido(v === nivelActual ? null : v); setEncima(null); };
-  const rotulo = n === nivelActual ? `Hoy en ${territorioNombre || 'este territorio'}` : n === 10 ? 'Nivel 10 · máxima aspiración' : n > (nivelActual ?? -1) ? `Nivel ${n} · a dónde se puede llegar` : `Nivel ${n} · por debajo de hoy`;
+  const rotulo = n === nivelActual ? `Hoy en ${territorioNombre || 'este territorio'}` : n === 10 ? 'Nivel 10 · máxima aspiración' : n > (nivelActual ?? -1) ? `Nivel ${n} · meta posible` : `Nivel ${n} · por debajo de hoy`;
   return (
     <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6')}>
       <section className="grid grid-cols-1 gap-4 rounded-3xl border p-4 sm:p-5 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1.05fr)] lg:grid-rows-[auto_1fr] lg:gap-x-6"
@@ -319,7 +337,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
         </div>
 
         {/* El nivel que se señala en el termómetro (el de hoy, si no se ha pulsado otro). */}
-        <div className="min-w-0 self-stretch lg:col-start-2 lg:row-start-2">
+        <div className="min-w-0 self-start lg:col-start-2 lg:row-start-2">
           {sinNota ? (
             <div data-sin-nota className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center">
               <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
@@ -328,13 +346,20 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           ) : (
             <>
               <div className="mb-3 lg:hidden"><TuboHorizontal actual={actual} elegido={fijo} onElegir={elegirNivel} /></div>
-              <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5 lg:h-full">
+              <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5">
                 <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}{n === nivelActual && <span className="sm:hidden"> · nivel {n} · {ESCALA[n]}</span>}</p>
                 <h2 className="mt-0.5 text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
                 {info?.descripcion && <p className={cn('mt-1 text-[13px] leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
                 {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}
                 {!info && <p className="mt-1 text-sm text-slate-500">Aún no se ha descrito este nivel.</p>}
-                <p className="mt-auto pt-2 text-[11px] text-slate-600">
+                {/* Del nivel de hoy, un atajo al salto (llena el hueco que quedaba y une las dos columnas). */}
+                {n === nivelActual && medidas.length > 0 && (
+                  <button type="button" onClick={() => { setPestana('salto'); panel.current?.focus(); }}
+                    className="mt-2 inline-flex min-h-8 items-center gap-1.5 self-start rounded-full bg-slate-900 px-3 text-[12px] font-bold text-white hover:bg-slate-700">
+                    <TrendingUp className="h-3.5 w-3.5" /> Qué hace falta para llegar al nivel {nivelActual! + 1}
+                  </button>
+                )}
+                <p className="pt-2 text-[11px] text-slate-600">
                   {elegido !== null && nivelActual !== null && encima === null
                     ? <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-6 items-center gap-1 font-bold text-slate-600 hover:text-slate-900"><Undo2 className="h-3 w-3" /> Volver a hoy (nivel {nivelActual})</button>
                     : <span><span className="hidden lg:inline">Pasa por el termómetro o pulsa un número</span><span className="lg:hidden">Pulsa un número</span> para ver cada nivel.</span>}
@@ -370,7 +395,11 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
                 {abierta === 'soluciones' && (
                   <>
                     <p className="mb-2 text-[12px] text-slate-600">Tecnologías y proyectos que encajan en cada nivel, de la máxima aspiración al de hoy.</p>
-                    {cuenta(grupos.proyectos) > 0 && <div className="mb-3"><Grupos grupos={grupos.proyectos} sufijo=" · ya en marcha" /></div>}
+                    {cuenta(grupos.proyectos) > 0 && (verProyectos
+                      ? <div className="mb-3"><Grupos grupos={grupos.proyectos} sufijo=" · ya en marcha" /></div>
+                      : <button type="button" onClick={() => setVerProyectos(true)} className="mb-2 flex w-full items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 text-left text-[13px] font-bold text-emerald-800 ring-1 ring-emerald-200 hover:bg-emerald-100">
+                          <span>{cuenta(grupos.proyectos)} proyectos ya en marcha</span><span className="inline-flex items-center gap-1">Ver <ArrowUpRight className="h-3.5 w-3.5" /></span>
+                        </button>)}
                     {!todosNiveles && solNiveles.some(v => v.nivel > (nivelActual ?? -1) + 1) && (
                       <button type="button" onClick={() => setTodosNiveles(true)} className="mb-1.5 w-full rounded-xl border border-dashed border-slate-300 px-3 py-2 text-left text-[12px] font-bold text-slate-600 hover:border-slate-400 hover:text-slate-900">
                         Ver niveles {(nivelActual ?? -1) + 2}–10 ({solNiveles.filter(v => v.nivel > (nivelActual ?? -1) + 1).length}) ↑
