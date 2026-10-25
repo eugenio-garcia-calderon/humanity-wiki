@@ -9774,3 +9774,7 @@ Eugenio: «al pinchar Movilidad en España, la nota más grande, un termómetro 
 - Escala de color de la nota: un color por punto (rojo → verde), la misma en el mapa (`scoreColor.ts`): el 7 ya es verde lima, el 5 y el 6 se distinguen (bot evaluador, ronda 1: global 4,5).
 - Galería con nota: la tarjeta entera del color de su nota (texto negro o blanco según contraste) y la nota en un círculo grande. Un emoji de icono no se repite en el título.
 - Filtro de territorio: con un solo territorio, una etiqueta (no un desplegable); un `?territorio=` sin datos vuelve al de por defecto; debajo, el resumen: media grande, mejor y peor, y la leyenda 1→10.
+
+## 2026-10-25 · Termómetro: la nota grande a la derecha (Programador 8)
+- El cartel que sale al pasar por los números del termómetro tapaba la nota grande; la nota pasa a la derecha de la cabecera del bloque.
+- Datos en producción (SQL, sin código): Nota, Territorio y Diagnóstico viven ahora en la base de datos ORIGINAL de Sistemas (BDTMUO8UV0QOPLO) — la copia BDTMVKE15CO000 está borrada. Nueva fila «Agua», vista «Por nota», tabla y página «Niveles de los Sistemas» (198 niveles), y un bloque Termómetro al principio de cada sistema. «Telocomunicaciones» → «Telecomunicaciones».
