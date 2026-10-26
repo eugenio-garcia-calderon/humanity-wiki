@@ -130,6 +130,14 @@ export async function paginaVisible(db: any, id: string): Promise<boolean> {
  * que la visibilidad y la canónica (`canonicaDe`): si su canónica está en el
  * dominio de esa raíz, aquí sale que sí.
  */
+/** Hace `f` con cada elemento, `n` a la vez (las respuestas quedan en la memoria de `cuelgaDe`). */
+async function enParalelo<T>(lista: T[], f: (x: T) => Promise<unknown>, n = 12) {
+  let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, lista.length) }, async () => {
+    while (i < lista.length) { const x = lista[i++]; await f(x).catch(() => {}); }
+  }));
+}
+
 export async function cuelgaDe(db: any, id: string, raizId: string): Promise<boolean> {
   if (id === raizId) return true;
   return cacheCuelga.dar(`${id}>${raizId}`, () => cuelgaDeSinMemoria(db, id, raizId));
@@ -1182,6 +1190,12 @@ export function registrarSitios(app: Express, db: any) {
               AND w.deleted_at IS NULL AND w.archived_at IS NULL
           `);
           const legibles: Record<string, string> = {};
+          // DE VARIAS EN VARIAS (2026-10-26): «¿cuelga de la raíz?» es una consulta recursiva por enlace, y una
+          // página con la tabla de 283 territorios tardaba 13 s en dar el HTML preguntándolas de una en una.
+          if (s.forma === 'dominio' && raizDominio) {
+            const dudas = (r.rows as any[]).filter(x => x.publico && !String(x.slug).includes('/') && x.id !== raizDominio).map(x => String(x.id));
+            await enParalelo(dudas, id => cuelgaDe(db, id, raizDominio));
+          }
           for (const x of r.rows as any[]) {
             const slug = String(x.slug);
             if (slug.includes('/')) { legibles[x.id] = slug; continue; }
@@ -1201,6 +1215,7 @@ export function registrarSitios(app: Express, db: any) {
                 AND w.deleted_at IS NULL AND w.archived_at IS NULL
             `)).rows as any[];
             const usados = new Set(Object.values(legibles));
+            await enParalelo(sin.map(x => x.id), id => cuelgaDe(db, id, raizDominio));
             for (const x of sin) {
               const n = slugDe(x.title || '');
               if (!n || usados.has(n) || TRAMOS_RESERVADOS.has(n) || !(await cuelgaDe(db, x.id, raizDominio))) continue;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { MapPin, ChevronDown, Check, Search } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 
@@ -33,6 +33,18 @@ export function guardarTerritorio(id: string, defecto: string) {
 }
 
 type Opcion = { id: string; nombre: string; mapa?: string | null };
+
+// EL TERRITORIO QUE SE ESTÁ VIENDO (2026-10-26, Eugenio: «que el mapa enseñe el territorio que escoges arriba
+// en el menú»). Cada selector que está en pantalla anuncia el suyo; la vista de mapa del sitio lo lee.
+let actual: Opcion | null = null;
+const oyentesActual = new Set<() => void>();
+function anunciarTerritorio(o: Opcion | null) {
+  if (!o || (actual?.id === o.id && actual?.mapa === o.mapa && actual?.nombre === o.nombre)) return;
+  actual = o; oyentesActual.forEach(f => f());
+}
+export function useTerritorioActual(): Opcion | null {
+  return useSyncExternalStore(f => { oyentesActual.add(f); return () => { oyentesActual.delete(f); }; }, () => actual, () => null);
+}
 const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 /** LA SILUETA DEL TERRITORIO (2026-10-26, Eugenio: «el contorno del país en vez de un icono de ubicación»). */
@@ -106,6 +118,8 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
     return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', tecla); };
   }, [abierto]);
   const nombre = opciones.find(o => o.id === elegido)?.nombre || '…';
+  const opcionElegida = opciones.find(o => o.id === elegido) || null;
+  useEffect(() => { anunciarTerritorio(opcionElegida); }, [opcionElegida]);
   const q = plano(busca.trim());
   const pasan = opciones.filter(o => !q || plano(o.nombre).includes(q));
   // En el orden de su base de datos: de Europa a los países, las regiones, las provincias y los municipios.
