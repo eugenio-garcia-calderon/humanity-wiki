@@ -13,7 +13,7 @@ import { useSitio } from './ContextoSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
 import { cn } from '../../utils/cn';
-import { miniatura } from '../../utils/miniatura';
+import { completarSitio } from './sitioWeb';
 import CabeceraSitio from './CabeceraSitio';
 
 // ============================================================================
@@ -116,27 +116,24 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   };
   const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, enlaceBuscar: sitio.enlaceBuscar, raizId: pagina.sitio.raizId } : undefined;
 
-  // El final de la ruta, con el termómetro de cabecera: la portada tal cual (sin fondo) y el título.
-  const portadaRuta: string | null = cfg.portada || (icono && esUrl(icono) ? icono : null);
-  const tituloEnRuta = (
-    <li aria-current="page" className="flex min-w-0 items-center gap-2">
-      {portadaRuta ? <img src={miniatura(portadaRuta, 120)} alt="" className="h-10 w-10 shrink-0 object-contain" /> : icono ? <span className="text-3xl leading-none">{icono}</span> : null}
-      <h1 className="truncate text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{pagina.titulo || 'Sin título'}</h1>
-    </li>
-  );
+  // LA BARRA DEL SITIO (2026-10-26): logo, territorio, ruta, Donar, menú y cuenta en una línea,
+  // en todas las páginas del sitio menos la portada (que tiene su cabecera) y salvo que el sitio
+  // tenga su propio menú arriba. Con el termómetro de cabecera, la ruta la pone él en la barra.
+  const menuPropio = !!(pagina.sitio?.config && completarSitio(pagina.sitio.config).menu.activo);
+  const conBarra = !!pagina.sitio?.raizId && !esRaiz && !menuPropio;
   return (
     <div onClickCapture={alPinchar}>
     <MarcoLectura pagina={pagina} rutas={rutas}>
       {/* LA CABECERA DEL SITIO Y LA RUTA CENTRADA (2026-10-26, Eugenio: «que aparezca Luz &
           Humanidad como logo con el menú completo; y arriba centrado Movilidad en una ruta web,
           con su imagen de portada sin ningún color»). Solo con el termómetro de cabecera. */}
-      {termo && pagina.sitio?.raizId && !esRaiz && <CabeceraSitio raizId={pagina.sitio.raizId} />}
+      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} />}
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
-      <div className={termo ? 'mb-4' : undefined}>
+      {!termo && <div>
       {migasContexto ? (
-        <nav aria-label="Estás en" className={termo ? undefined : 'mb-4'}>
-          <ol className={cn('flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600', termo && 'justify-center')}>
+        <nav aria-label="Estás en" className="mb-4">
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {migasContexto.map((m, i) => (
               <li key={m.clave} className={cn('items-center gap-1', i === migasContexto.length - 1 ? 'flex' : 'hidden sm:flex')}>
                 {i === migasContexto.length - 1 ? <ChevronLeft className="w-4 h-4 text-slate-500 sm:hidden" aria-hidden /> : null}
@@ -144,12 +141,12 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
                 <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migasContexto.length - 1 && 'hidden sm:block')} aria-hidden />
               </li>
             ))}
-            {termo ? tituloEnRuta : <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>}
+            <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
           </ol>
         </nav>
       ) : migas.length > 0 && (
-        <nav aria-label="Estás en" className={termo ? undefined : 'mb-4'}>
-          <ol className={cn('flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600', termo && 'justify-center')}>
+        <nav aria-label="Estás en" className="mb-4">
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {/* On a phone, one line: only the level just above, the way back.
                 The full trail took three lines before the title (evaluator
                 round 2, 2026-10-18); from `sm` up it is all there. */}
@@ -162,12 +159,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
                 <ChevronRight className={cn('w-4 h-4 text-slate-500', i === migas.length - 1 && 'hidden sm:block')} aria-hidden />
               </li>
             ))}
-            {termo ? tituloEnRuta : <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>}
+            <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
           </ol>
         </nav>
       )}
-      {termo && !migasContexto && !migas.length && <div className="flex justify-center">{tituloEnRuta}</div>}
-      </div>
+      </div>}
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>

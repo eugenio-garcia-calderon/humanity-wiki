@@ -123,7 +123,8 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] border-slate-900 bg-white text-slate-900">
           <UserRound className="h-4 w-4" strokeWidth={2} />
         </span>
-        <span className="hidden max-w-[8rem] truncate sm:inline">{yo ? (yo.nombre || yo.email.split('@')[0]).split(' ')[0] : 'Entrar'}</span>
+        {/* Solo la silueta (2026-10-26, Eugenio: «no hace falta que ponga la palabra Entrar»): el nombre, para los lectores de pantalla. */}
+        <span className="sr-only">{yo ? (yo.nombre || yo.email.split('@')[0]).split(' ')[0] : 'Entrar'}</span>
       </button>
       {abierto === 'menu' && yo && (
         <div className="absolute right-0 top-full z-[70] mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">

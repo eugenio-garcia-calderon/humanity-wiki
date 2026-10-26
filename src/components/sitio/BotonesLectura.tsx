@@ -5,6 +5,7 @@ import { BarraFija } from '../knowledge/BarraFija';
 import { useHijas, botonesDeHijas, vistaDeHijas } from '../knowledge/PaginasHijas';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
+import { Heart } from 'lucide-react';
 
 // LOS BOTONES DE LA CABECERA, EN LA PÁGINA PUBLICADA (2026-10-20): cada uno
 // abre su página (una subpágina) en una ventana, leída como cualquier otra.
@@ -59,15 +60,36 @@ function VentanaPaginaPublica({ boton, onCerrar, esHija = false }: { boton: Boto
   );
 }
 
-export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
+export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false, plegado }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
   /** En una sola línea; lo que no cabe, en «Más ▾» (la cabecera del sitio, 2026-10-26). */
   unaLinea?: boolean;
+  /** Todo en el menú desplegable, diga lo que diga la página (la barra del sitio, 2026-10-26). */
+  plegado?: boolean;
 }) {
   const { botones, hijaIds } = useBotonesPagina(config);
   const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
-  if (!botones.length) return null;
+  const sitio = useSitio();
+  const plegar = plegado ?? config?.cabecera?.botonesMenu === 'plegado';
+  // DONAR (2026-10-26, Eugenio: «a la izquierda del botón de menú, un botón de donar que lleve a la
+  // página de donar»): `config.donar` es esa página.
+  const donar = typeof config?.donar === 'string' && config.donar ? (
+    <a href={sitio ? sitio.enlacePagina(config.donar) : `/p/${config.donar}`} data-interno data-boton-donar
+      className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-600 font-bold text-white shadow-sm transition-colors hover:bg-rose-700', talla === 'xs' ? 'h-7 px-2.5 text-[11px]' : 'h-9 px-3.5 text-[13px]')}>
+      <Heart className="h-4 w-4" fill="currentColor" /> Donar
+    </a>
+  ) : null;
+  if (!botones.length) return donar;
+  if (plegar) return (
+    <span className="inline-flex items-center gap-2">
+      {donar}
+      {/* En el menú, en el orden en que se leían los botones (la lista va al revés: el primero, a la derecha). */}
+      <FilaBotones botones={derecha === false ? botones : [...botones].reverse()} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo} sinMargen plegado derechaAncho onAbrir={setAbierto} />
+      {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
+    </span>
+  );
   return (
     <>
+      {donar}
       {unaLinea ? (
         // En estas cabeceras los botones iban a la derecha con el primero a la derecha del todo:
         // de izquierda a derecha se leen al revés de la lista. Se conserva ese orden.

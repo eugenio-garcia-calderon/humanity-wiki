@@ -102,6 +102,7 @@ export const TIPOS_BLOQUE_DATOS = [
   'infografiaRed', // la infografía de cómo se conecta el conocimiento (2026-10-22)
   'filtroTerritorio', // elegir territorio y filtrar las bases de datos de la página (2026-10-25)
   'termometro',    // el termómetro del 0 al 10 de un sistema en un territorio (2026-10-25)
+  'donacion',      // donar con tarjeta por Stripe, sin cuenta (2026-10-26)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 
