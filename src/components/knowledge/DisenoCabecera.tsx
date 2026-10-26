@@ -194,7 +194,7 @@ export function CabeceraElementos({ elementos, piezas, editando, iconoEncima }: 
       <div className="flex flex-col gap-4 @xl:grid @xl:grid-cols-[minmax(0,1fr)_minmax(0,auto)] @xl:items-start @xl:gap-8">
         <div className="flex min-w-0 flex-col gap-3">{izq}</div>
         {/* La derecha, pegada a la derecha y como mucho la mitad del ancho. */}
-        <div className="flex min-w-0 flex-col items-stretch gap-3 @xl:max-w-[50cqw] @xl:items-end @xl:text-right">{der}</div>
+        <div className="flex min-w-0 flex-col items-stretch gap-3 @xl:max-w-[50cqw] @xl:items-end @xl:text-right [&>*]:max-w-full">{der}</div>
       </div>
     </div>
   );

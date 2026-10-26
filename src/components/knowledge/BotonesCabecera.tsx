@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, X, Menu, Maximize2, Minimize2, ArrowUpRight } from 'lucide-react';
+import { Plus, X, Menu, Maximize2, Minimize2, ArrowUpRight, ChevronDown } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -128,14 +128,77 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
 }
 
 /**
+ * EL MENÚ EN UNA SOLA LÍNEA (2026-10-26, Eugenio: «el menú tiene que ocupar solo una
+ * línea; si hay demasiadas páginas, las que no quepan van solas a un desplegable, y las
+ * que quepan, alineadas con el logo»). Se miden los botones en una fila invisible y se
+ * enseñan los que caben en el ancho que hay; el resto, en «Más ▾». Vuelve a medir al
+ * cambiar el ancho de la ventana.
+ */
+export function FilaBotonesUnaLinea({ botones, talla = 'm', estilo = 'relleno', acento, onAbrir }: {
+  botones: BotonCabecera[]; talla?: TallaBotones; estilo?: EstiloBotones; acento?: string | null; onAbrir: (b: BotonCabecera) => void;
+}) {
+  const caja = useRef<HTMLDivElement>(null);
+  const medida = useRef<HTMLDivElement>(null);
+  const [caben, setCaben] = useState(botones.length);
+  useLayoutEffect(() => {
+    const medir = () => {
+      const c = caja.current, m = medida.current;
+      if (!c || !m) return;
+      const hueco = 8, ancho = c.clientWidth;
+      const piezas = Array.from(m.children) as HTMLElement[];
+      const anchos = piezas.slice(0, botones.length).map(x => x.offsetWidth);
+      const anchoMas = piezas[botones.length]?.offsetWidth || 90;
+      let usado = 0, k = 0;
+      for (; k < anchos.length; k++) {
+        const conEste = usado + (k ? hueco : 0) + anchos[k];
+        const quedan = k + 1 < anchos.length;
+        if (conEste + (quedan ? hueco + anchoMas : 0) > ancho) break;
+        usado = conEste;
+      }
+      setCaben(k);
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    if (caja.current) ro.observe(caja.current);
+    return () => ro.disconnect();
+  }, [botones, talla]);
+  const boton = (b: BotonCabecera, oculto = false) => (
+    <button key={b.id} type="button" onClick={() => onAbrir(b)} tabIndex={oculto ? -1 : undefined} data-boton-cabecera={oculto ? undefined : (b.pubTitulo || '')}
+      style={estilo === 'relleno' && acento ? { backgroundColor: acento } : undefined}
+      className={cn('inline-flex shrink-0 items-center whitespace-nowrap rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo])}>
+      {b.pubTitulo?.trim() || 'Sin título'}
+    </button>
+  );
+  if (!botones.length) return null;
+  const resto = botones.slice(caben);
+  return (
+    <div ref={caja} className="relative w-full min-w-0 flex-1" role="navigation" aria-label="Apartados de la web">
+      {/* La fila de medir: invisible, fuera del flujo y recortada (si no, ensancharía la página). */}
+      <div aria-hidden className="pointer-events-none invisible absolute inset-x-0 top-0 h-0 overflow-hidden">
+        <div ref={medida} className="flex w-max gap-2 whitespace-nowrap">
+          {botones.map(b => boton(b, true))}
+          <span className={cn('inline-flex shrink-0 items-center gap-2 rounded-full font-bold', TALLA[talla])}>Más <ChevronDown className="h-4 w-4" /></span>
+        </div>
+      </div>
+      <div className="flex flex-nowrap items-center justify-end gap-2 overflow-hidden">
+        {botones.slice(0, caben).map(b => boton(b))}
+        {resto.length > 0 && <MenuPlegado mas botones={resto} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} />}
+      </div>
+    </div>
+  );
+}
+
+/**
  * EL MENÚ ☰ EN CASCADA (2026-10-21, Eugenio: «la posibilidad de un menú
  * colapsable con tres rayitas en vez de tantos botones, que se abra en
  * cascada»). Las opciones caen una detrás de otra. El panel va en un portal
  * con posición fija: dentro de la barra fija lo cortaría su `overflow`.
  */
-function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir }: {
+function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir, mas = false }: {
   botones: BotonCabecera[]; talla: TallaBotones; estilo: EstiloBotones; acento?: string | null;
   onAbrir: (b: BotonCabecera) => void; onQuitar?: (b: BotonCabecera) => void; onAnadir?: () => void;
+  /** «Más ▾» en vez de «☰ Menú»: lo que no cabe en la fila de una línea. */
+  mas?: boolean;
 }) {
   const [abierto, setAbierto] = useState(false);
   const [listo, setListo] = useState(false);
@@ -161,7 +224,7 @@ function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnad
       <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-expanded={abierto} aria-haspopup="menu" data-menu-plegado
         style={estilo === 'relleno' && acento ? { backgroundColor: acento } : undefined}
         className={cn('inline-flex items-center gap-2 rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo])}>
-        <Menu className="h-4 w-4" /> Menú
+        {mas ? <>Más <ChevronDown className={cn('h-4 w-4 transition-transform', abierto && 'rotate-180')} /></> : <><Menu className="h-4 w-4" /> Menú</>}
       </button>
       {abierto && pos && createPortal(
         <div ref={panel} role="menu" style={{ top: pos.top, right: pos.right }}

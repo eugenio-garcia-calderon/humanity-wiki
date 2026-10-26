@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import BloquesLectura from '../knowledge/BloquesLectura';
-import { FilaBotones, VentanaBoton, botonesDe, type BotonCabecera, type TallaBotones } from '../knowledge/BotonesCabecera';
+import { FilaBotones, FilaBotonesUnaLinea, VentanaBoton, botonesDe, type BotonCabecera, type TallaBotones } from '../knowledge/BotonesCabecera';
 import { BarraFija } from '../knowledge/BarraFija';
 import { useHijas, botonesDeHijas, vistaDeHijas } from '../knowledge/PaginasHijas';
 import { useSitio } from './ContextoSitio';
@@ -59,14 +59,19 @@ function VentanaPaginaPublica({ boton, onCerrar, esHija = false }: { boton: Boto
   );
 }
 
-export default function BotonesLectura({ config, centrado, derecha, talla }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones }) {
+export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
+  /** En una sola línea; lo que no cabe, en «Más ▾» (la cabecera del sitio, 2026-10-26). */
+  unaLinea?: boolean;
+}) {
   const { botones, hijaIds } = useBotonesPagina(config);
   const [abierto, setAbierto] = useState<BotonCabecera | null>(null);
   if (!botones.length) return null;
   return (
     <>
-      <FilaBotones botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
-        centrado={centrado} derechaAncho={derecha} sinMargen={derecha !== undefined} plegado={config?.cabecera?.botonesMenu === 'plegado'} onAbrir={setAbierto} />
+      {unaLinea ? (
+        <FilaBotonesUnaLinea botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo} onAbrir={setAbierto} />
+      ) : <FilaBotones botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
+        centrado={centrado} derechaAncho={derecha} sinMargen={derecha !== undefined} plegado={config?.cabecera?.botonesMenu === 'plegado'} onAbrir={setAbierto} />}
       {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
     </>
   );

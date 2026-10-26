@@ -9854,3 +9854,9 @@ Eugenio: «así, como el recuadro del territorio: el territorio más pequeño a 
 - `sitio/CabeceraSitio.tsx`: en las páginas con termómetro de cabecera, el logo, el nombre, la descripción y los botones del menú de la página raíz del sitio (`/api/sitio/pagina/:raiz`).
 - `VistaPagina`: la ruta centrada termina en la portada tal cual (sin fondo) y el título (h1).
 - Termómetro: un solo recuadro blanco como el resumen del territorio: el territorio pequeño a la izquierda; en el centro «Movilidad en España · nivel 4», el nivel con su descripción (2 líneas) y la barra fina 0–10 con «HOY» y «META»; a la derecha la nota en su círculo de color. En el móvil, el territorio y el círculo arriba y el resto debajo. En el editor, el título y la imagen se cambian arriba (sin color) y la nota pulsando el círculo.
+
+## 2026-10-26 · El menú del sitio en una sola línea; lo que no cabe, en «Más ▾» (Programador 8)
+Eugenio: «el menú tiene que ocupar solo una línea; si hay demasiadas páginas, las que no quepan, solas a un desplegable; y las que quepan, alineadas con el logo».
+- `FilaBotonesUnaLinea` (`BotonesCabecera.tsx`): mide los botones en una fila invisible (recortada, para no ensanchar la página) y enseña los que caben; el resto, en «Más ▾» (el `MenuPlegado` de siempre, con `mas`). Vuelve a medir al cambiar el ancho.
+- Cabecera del sitio en las entradas (`CabeceraSitio`): el logo y el menú en la misma línea (en el móvil, el menú en una línea debajo del logo). `BotonesLectura` admite `unaLinea`.
+- Cabecera de la página principal (botones a la derecha): también en una línea; la columna derecha ya no se sale por encima del título (`[&>*]:max-w-full` en `CabeceraElementos`).
