@@ -9938,3 +9938,10 @@ Eugenio: «el mapa hasta abajo; los iconos del menú del mapa, las imágenes y n
 ### 2026-10-26 — Mobility objective covers redrawn; covers no longer cut at the bottom
 - The 12 Mobility objective covers (`/uploads/2026/10/objetivo-NN-*.svg`) were replaced by `-v2` versions: landscape 320×200 one-line drawings in navy with blue touches, matching the style of the Systems covers (Agua, Alimentación). Each one was modelled on a reference found by image search (wheelchair line art, pedestrian crossing, tram, solar panel, aerodynamic car, tree and skyline, EV charger, cyclists, container ship, phone with route, suspension bridge, hand with coin). Pages updated by SQL (`config.portada`, `version` +1); previous values saved in `~/copias-manuales/portadas-objetivos-2026-10-26.csv` on the server.
 - **Why they were cut**: the old SVGs were square with `width="240" height="240"`. In the objective card `h-full` sits in an auto-height grid track and does not resolve, so the image kept its 240 px height and overflowed the 16:10 box. The cover is now absolutely positioned inside the box (`Lectura.tsx`), so any image fits whatever its own size.
+
+## 2026-10-26 · Donar: la donación arriba y todo lo demás al lado (Programador 8)
+Eugenio: «en donar, quita el territorio y buscar de la barra; la donación arriba del todo, sin el icono, con “Apoya la evolución de los sistemas de la humanidad” en una línea; cada mes seleccionado por defecto y con más cantidad; sin bajar, empresas, transparencia, donantes, contribuidores y equipo (todas las personas), sin la pestaña Donar; el certificado para desgravar y el teléfono para dudas. Inspiración: ourworldindata.org/donate».
+- `CabeceraSitio simple` (con `config.barraSimple` en la página): solo logo, cuenta y menú.
+- `config.sinCabecera`: sin migas, cabecera ni seguir/compartir (el título queda para lectores de pantalla).
+- `pestanasTitulos: 'lado'`: el título 1 del principio a todo lo ancho, la donación a la izquierda y las pestañas a la derecha, en la primera pantalla.
+- Bloque «Donación»: `frecuencia: 'mes'`, `importeMes`/`importeUnaVez` de partida y `nota` bajo el botón (con enlaces); en el editor.
