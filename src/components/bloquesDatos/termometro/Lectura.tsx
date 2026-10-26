@@ -250,7 +250,14 @@ function PanelDiagnostico({ fallos, grupos, territorio }: { fallos: string[]; gr
 // esta entrada y con el territorio elegido. `datos.tabla_indicadores`: la de indicadores;
 // se enseñan los de este objetivo, cumplidos o no. Nota = 1 + 0,9 × indicadores cumplidos.
 type Objetivo = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; nota: number | null; imagen: string | null; descripcion: string };
-type Indicador = { fila_id: string; titulo: string; numero: number | null; cumplido: boolean; descripcion: string };
+type Estado = 'Acreditado' | 'No acreditado' | 'Parcial' | 'Sin evaluar';
+type Indicador = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; codigo: string; icono: string | null; unidad: string; estado: Estado; descripcion: string };
+const ESTADOS: Record<Estado, { clase: string; corto: string }> = {
+  'Acreditado': { clase: 'bg-emerald-600 text-white', corto: '✓ Acreditado' },
+  'Parcial': { clase: 'bg-amber-400 text-slate-900', corto: '◐ Parcial' },
+  'No acreditado': { clase: 'bg-rose-100 text-rose-800', corto: '✗ No acreditado' },
+  'Sin evaluar': { clase: 'bg-slate-100 text-slate-600', corto: 'Sin evaluar' },
+};
 type FilasTabla = { columnas: any[]; filas: any[]; columna_titulo: string | null };
 const tablas = new Map<string, Promise<FilasTabla | null>>();
 const leerTabla = (id: string) => {
@@ -315,31 +322,44 @@ function PanelObjetivos({ objetivos, sistema, territorio }: { objetivos: Objetiv
   );
 }
 
+/** LOS INDICADORES DE UN OBJETIVO, EN GALERÍA (2026-10-26, Eugenio: «a cada indicador, un icono;
+ *  y la vista de galería con esos iconos en todos los objetivos»): su icono, código, nombre y
+ *  estado en el territorio (de «Evaluaciones de indicadores»); al pulsar, su ficha técnica. */
 function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[]; territorio: string | null }) {
-  const n = indicadores.filter(i => i.cumplido).length;
+  const sitio = useSitio();
+  const cuenta = (e: Estado) => indicadores.filter(i => i.estado === e).length;
+  const n = cuenta('Acreditado');
   const nota = Math.round((1 + 0.9 * n) * 10) / 10;
   const orden = [...indicadores].sort((a, b) => (a.numero ?? 99) - (b.numero ?? 99));
+  const resto = (['Parcial', 'No acreditado', 'Sin evaluar'] as Estado[]).filter(e => cuenta(e)).map(e => `${cuenta(e)} ${e.toLowerCase()}${cuenta(e) > 1 && e !== 'Sin evaluar' ? 's' : ''}`);
   return (
-    <div data-indicadores className="max-w-4xl">
+    <div data-indicadores>
       <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-        <b className="font-black text-slate-900">{n} de {indicadores.length} indicadores cumplidos{territorio ? ` en ${territorio}` : ''}</b>
+        <b className="font-black text-slate-900">{n} de {indicadores.length} indicadores acreditados{territorio ? ` en ${territorio}` : ''}</b>
+        {resto.length > 0 && <span>({resto.join(' · ')})</span>}
         <span>→ nota 1 + 0,9 × {n} =</span>
         <span className="rounded-full px-2.5 py-0.5 font-black tabular-nums" style={{ backgroundColor: colorDeNota(nota), color: textoSobre(colorDeNota(nota)) }}>{textoNota(nota)}</span>
       </p>
-      <ol className="grid gap-2 md:grid-cols-2">
-        {orden.map(i => (
-          <li key={i.fila_id} className={cn('flex gap-3 rounded-xl border p-3', i.cumplido ? 'border-emerald-200 bg-emerald-50/60' : 'border-slate-200 bg-white')}>
-            <span className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-black', i.cumplido ? 'bg-emerald-600 text-white' : 'border-2 border-slate-300 text-slate-400')}
-              aria-label={i.cumplido ? 'Cumplido' : 'No acreditado'}>
-              {i.cumplido ? <Check className="h-4 w-4" /> : i.numero ?? ''}
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-black leading-snug text-slate-900">{i.numero !== null && <span className="mr-1 text-slate-400">{i.numero}.</span>}{i.titulo}</p>
-              {i.descripcion && <p className="mt-0.5 text-[13px] leading-snug text-slate-600">{i.descripcion}</p>}
-              <p className={cn('mt-1 text-[11px] font-bold uppercase tracking-wide', i.cumplido ? 'text-emerald-700' : 'text-slate-400')}>{i.cumplido ? 'Cumplido' : 'No acreditado'}</p>
+      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {orden.map(i => {
+          const e = ESTADOS[i.estado];
+          const tarjeta = (
+            <div data-indicador={i.codigo || undefined} className={cn('flex h-full flex-col rounded-2xl border bg-white p-3 transition-shadow hover:shadow-md', i.estado === 'Acreditado' ? 'border-emerald-200' : 'border-slate-200')}>
+              <div className="flex items-start justify-between gap-2">
+                <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl', i.estado === 'Acreditado' ? 'bg-emerald-50' : 'bg-slate-50')} aria-hidden>{i.icono || '📏'}</span>
+                <span className="text-[11px] font-black tabular-nums text-slate-400">{i.codigo || (i.numero !== null ? `#${i.numero}` : '')}</span>
+              </div>
+              <p lang="es" className="mt-2 hyphens-auto text-[13px] font-black leading-snug text-slate-900">{i.titulo}</p>
+              {i.unidad && <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{i.unidad}</p>}
+              <div className="mt-auto pt-3"><span className={cn('inline-flex rounded-full px-2 py-0.5 text-[11px] font-black', e.clase)}>{e.corto}</span></div>
             </div>
-          </li>
-        ))}
+          );
+          return (
+            <li key={i.fila_id} title={i.descripcion || undefined}>
+              {i.pagina_id ? <Link to={sitio ? sitio.enlacePagina(i.pagina_id) : `/paginas/${i.pagina_id}`} className="block h-full">{tarjeta}</Link> : tarjeta}
+            </li>
+          );
+        })}
       </ol>
     </div>
   );
@@ -414,21 +434,41 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     });
     return () => { vivo = false; };
   }, [tObj, filaId, elegidoT]);
+  const tEval = d.tabla_evaluaciones ? String(d.tabla_evaluaciones) : null;
   useEffect(() => {
     if (!tInd || !filaId) { setIndicadores(null); return; }
     let vivo = true;
-    leerTabla(tInd).then(t => {
+    Promise.all([leerTabla(tInd), tEval ? leerTabla(tEval) : Promise.resolve(null)]).then(([t, ev]) => {
       if (!vivo || !t) return;
       const cols = t.columnas || [];
-      const cNum = cols.find((c: any) => c.tipo === 'numero'), cOk = cols.find((c: any) => c.tipo === 'casilla'), cDesc = cols.find((c: any) => c.tipo === 'texto_largo');
+      const cNum = cols.find((c: any) => c.tipo === 'numero'), cOk = cols.find((c: any) => c.tipo === 'casilla');
+      const cDesc = cols.find((c: any) => c.tipo === 'texto_largo' && /finalidad|descrip/.test(sinTilde(c.nombre)));
+      const cCod = cols.find((c: any) => /^codigo/.test(sinTilde(c.nombre))), cUni = cols.find((c: any) => /^unidad/.test(sinTilde(c.nombre)));
       const cTit = cols.find((c: any) => c.id === t.columna_titulo);
+      // El estado de cada indicador en el territorio elegido: la evaluación más reciente.
+      const estados = new Map<string, Estado>();
+      if (ev) {
+        const ce = ev.columnas || [];
+        const cInd = ce.find((c: any) => c.tipo === 'relacion' && c.config?.tabla_destino === tInd);
+        const cTer = ce.find((c: any) => c.tipo === 'relacion' && /territor/.test(sinTilde(c.nombre)));
+        const cEst = ce.find((c: any) => c.tipo === 'seleccion'), cFec = ce.find((c: any) => c.tipo === 'fecha');
+        const etiqueta = (v: any) => (cEst?.opciones || []).find((o: any) => o.id === v)?.label || v;
+        const fecha = new Map<string, string>();
+        for (const f of ev.filas || []) {
+          if (!cInd || !(cTer && elegidoT ? (f.apuntados?.[cTer.id] || []).some((a: any) => a.id === elegidoT) : true)) continue;
+          const est = String(etiqueta(celda(f, cEst)) || 'Sin evaluar') as Estado, fe = String(celda(f, cFec) || '');
+          for (const a of f.apuntados?.[cInd.id] || []) if (!fecha.has(a.id) || fe > fecha.get(a.id)!) { fecha.set(a.id, fe); estados.set(a.id, (ESTADOS[est] ? est : 'Sin evaluar')); }
+        }
+      }
       setIndicadores(enlazadas(t, filaId).map((f: any) => ({
-        fila_id: f.id, titulo: String(celda(f, cTit) || f.pagina?.titulo || 'Sin título'),
-        numero: celda(f, cNum) !== null ? Number(celda(f, cNum)) : null, cumplido: celda(f, cOk) === true, descripcion: String(celda(f, cDesc) || ''),
+        fila_id: f.id, pagina_id: f.pagina_id || null, titulo: String(celda(f, cTit) || f.pagina?.titulo || 'Sin título'),
+        numero: celda(f, cNum) !== null ? Number(celda(f, cNum)) : null, codigo: String(celda(f, cCod) || ''), unidad: String(celda(f, cUni) || ''),
+        icono: f.pagina?.icono || null, descripcion: String(celda(f, cDesc) || ''),
+        estado: ev ? (estados.get(f.id) || 'Sin evaluar') : (celda(f, cOk) === true ? 'Acreditado' : 'No acreditado'),
       })));
     });
     return () => { vivo = false; };
-  }, [tInd, filaId]);
+  }, [tInd, tEval, filaId, elegidoT]);
   const medidas = useMemo(() => (nivelActual !== null && nivelActual < 10 ? ideas(niveles.find(v => v.nivel === nivelActual)?.medidas || '') : []), [niveles, nivelActual]);
   useEffect(() => {
     if (!paginaId || !x || x === 'fallo' || sinNota) { if (paginaId) quitarPestanasExtra(paginaId); return; }
