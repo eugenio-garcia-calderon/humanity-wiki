@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, TrendingUp, Undo2 } from 'lucide-react';
+import { ArrowUpRight, Check, Target, TrendingUp, Undo2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
@@ -243,6 +243,108 @@ function PanelDiagnostico({ fallos, grupos, territorio }: { fallos: string[]; gr
   );
 }
 
+// LOS OBJETIVOS Y SUS INDICADORES (2026-10-26, Eugenio: «en cada sistema, una galería de
+// sus objetivos estratégicos con su nota, como la de la página principal; y al pinchar
+// un objetivo, lo mismo: el territorio, la temperatura con la nota y sus proyectos»).
+// `datos.tabla_objetivos`: la base de datos de objetivos; se enseñan los que enlazan con
+// esta entrada y con el territorio elegido. `datos.tabla_indicadores`: la de indicadores;
+// se enseñan los de este objetivo, cumplidos o no. Nota = 1 + 0,9 × indicadores cumplidos.
+type Objetivo = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; nota: number | null; imagen: string | null; descripcion: string };
+type Indicador = { fila_id: string; titulo: string; numero: number | null; cumplido: boolean; descripcion: string };
+type FilasTabla = { columnas: any[]; filas: any[]; columna_titulo: string | null };
+const tablas = new Map<string, Promise<FilasTabla | null>>();
+const leerTabla = (id: string) => {
+  let p = tablas.get(id);
+  if (!p) { p = fetch(`/api/bd/tablas/${encodeURIComponent(id)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null); tablas.set(id, p); }
+  return p;
+};
+/** Las filas de `t` que enlazan con `filaId` (por cualquier relación), y con el territorio si la tabla lo tiene. */
+function enlazadas(t: FilasTabla, filaId: string, territorio?: string) {
+  const rel = t.columnas.filter((c: any) => c.tipo === 'relacion');
+  const colTerr = rel.find((c: any) => /territor/.test(sinTilde(c.nombre)));
+  return t.filas.filter((f: any) => !f.oculta
+    && rel.some((c: any) => (f.apuntados?.[c.id] || []).some((a: any) => a.id === filaId))
+    && (!colTerr || !territorio || (f.apuntados?.[colTerr.id] || []).some((a: any) => a.id === territorio)));
+}
+const celda = (f: any, c?: any) => (c && f.celdas?.[c.id]?.estado === 'ok' ? f.celdas[c.id].valor : null);
+
+function PanelObjetivos({ objetivos, sistema, territorio }: { objetivos: Objetivo[]; sistema: string; territorio: string | null }) {
+  const sitio = useSitio();
+  const conNota = objetivos.filter(o => o.nota !== null);
+  const media = conNota.length ? conNota.reduce((a, o) => a + (o.nota as number), 0) / conNota.length : null;
+  const peor = conNota.length ? conNota.reduce((a, o) => ((o.nota as number) < (a.nota as number) ? o : a)) : null;
+  const orden = [...objetivos].sort((a, b) => (b.nota ?? -1) - (a.nota ?? -1) || (a.numero ?? 99) - (b.numero ?? 99));
+  return (
+    <div data-objetivos>
+      <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <p className="text-sm text-slate-600"><b className="font-black text-slate-900">{objetivos.length} objetivos estratégicos</b> de {sistema}{territorio ? ` en ${territorio}` : ''}. Cada nota = 1 + 0,9 × indicadores cumplidos (de 10).</p>
+        {media !== null && (
+          <p className="flex items-center gap-2 text-sm text-slate-600">
+            <span className="rounded-full px-2.5 py-0.5 text-sm font-black tabular-nums" style={{ backgroundColor: colorDeNota(media), color: textoSobre(colorDeNota(media)) }}>{textoNota(Math.round(media * 10) / 10)}</span> de media
+            {peor && <> · el más bajo: <b className="font-bold text-slate-800">{peor.titulo}</b> ({textoNota(peor.nota)})</>}
+          </p>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {orden.map(o => {
+          const t = o.nota !== null ? tonosDeNota(o.nota) : null;
+          const contenido = (
+            <div data-objetivo={o.numero ?? undefined} className="flex h-full flex-col rounded-2xl p-2 transition-shadow hover:shadow-md"
+              style={t ? { backgroundColor: t.color, color: textoSobre(t.color) } : { backgroundColor: '#e2e8f0' }}>
+              <div lang="es" className="flex min-h-[3.25rem] items-start justify-between gap-1.5 px-1 pt-0.5">
+                <p className="min-w-0 hyphens-auto text-[13px] font-black leading-tight">
+                  {o.numero !== null && <span className="mr-1 opacity-70">{String(o.numero).padStart(2, '0')}</span>}{o.titulo}
+                </p>
+                {o.nota !== null && t && (
+                  <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-white px-2 text-base font-black tabular-nums leading-none" style={{ color: t.tinta }}>
+                    {textoNota(o.nota)}<span className="ml-0.5 text-[8px] font-bold opacity-70">/10</span>
+                  </span>
+                )}
+              </div>
+              <div className="mt-1.5 grid aspect-[4/3] place-items-center overflow-hidden rounded-xl bg-white p-2">
+                {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="h-full w-full object-contain" /> : <Target className="h-8 w-8 text-slate-300" />}
+              </div>
+            </div>
+          );
+          return o.pagina_id
+            ? <Link key={o.fila_id} to={sitio ? sitio.enlacePagina(o.pagina_id) : `/paginas/${o.pagina_id}`} title={o.descripcion || o.titulo}>{contenido}</Link>
+            : <div key={o.fila_id}>{contenido}</div>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[]; territorio: string | null }) {
+  const n = indicadores.filter(i => i.cumplido).length;
+  const nota = Math.round((1 + 0.9 * n) * 10) / 10;
+  const orden = [...indicadores].sort((a, b) => (a.numero ?? 99) - (b.numero ?? 99));
+  return (
+    <div data-indicadores className="max-w-4xl">
+      <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <b className="font-black text-slate-900">{n} de {indicadores.length} indicadores cumplidos{territorio ? ` en ${territorio}` : ''}</b>
+        <span>→ nota 1 + 0,9 × {n} =</span>
+        <span className="rounded-full px-2.5 py-0.5 font-black tabular-nums" style={{ backgroundColor: colorDeNota(nota), color: textoSobre(colorDeNota(nota)) }}>{textoNota(nota)}</span>
+      </p>
+      <ol className="grid gap-2 md:grid-cols-2">
+        {orden.map(i => (
+          <li key={i.fila_id} className={cn('flex gap-3 rounded-xl border p-3', i.cumplido ? 'border-emerald-200 bg-emerald-50/60' : 'border-slate-200 bg-white')}>
+            <span className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-black', i.cumplido ? 'bg-emerald-600 text-white' : 'border-2 border-slate-300 text-slate-400')}
+              aria-label={i.cumplido ? 'Cumplido' : 'No acreditado'}>
+              {i.cumplido ? <Check className="h-4 w-4" /> : i.numero ?? ''}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-black leading-snug text-slate-900">{i.numero !== null && <span className="mr-1 text-slate-400">{i.numero}.</span>}{i.titulo}</p>
+              {i.descripcion && <p className="mt-0.5 text-[13px] leading-snug text-slate-600">{i.descripcion}</p>}
+              <p className={cn('mt-1 text-[11px] font-bold uppercase tracking-wide', i.cumplido ? 'text-emerald-700' : 'text-slate-400')}>{i.cumplido ? 'Cumplido' : 'No acreditado'}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 /** Lo que el editor pasa para cambiar la cabecera ahí mismo (2026-10-26, Eugenio:
  *  «los elementos para modificar estas propiedades, mucho más sencillos y sobrios»). */
 export type EdicionCabecera = {
@@ -291,17 +393,56 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   }, [comoCabecera, edicion, x, actual, territorioNombre]);
 
   // Las pestañas que van abajo, en la barra de la red. Solo las que tienen algo.
+  // Los objetivos de este sistema y los indicadores de este objetivo (si el bloque los pide).
+  const [objetivos, setObjetivos] = useState<Objetivo[] | null>(null);
+  const [indicadores, setIndicadores] = useState<Indicador[] | null>(null);
+  const tObj = d.tabla_objetivos ? String(d.tabla_objetivos) : null, tInd = d.tabla_indicadores ? String(d.tabla_indicadores) : null;
+  const filaId = x && x !== 'fallo' ? x.fila_id || null : null;
+  useEffect(() => {
+    if (!tObj || !filaId) { setObjetivos(null); return; }
+    let vivo = true;
+    leerTabla(tObj).then(t => {
+      if (!vivo || !t) return;
+      const cols = t.columnas || [];
+      const cNota = cols.find((c: any) => c.tipo === 'nota'), cNum = cols.find((c: any) => c.tipo === 'numero'), cDesc = cols.find((c: any) => c.tipo === 'texto_largo');
+      const cTit = cols.find((c: any) => c.id === t.columna_titulo);
+      setObjetivos(enlazadas(t, filaId, elegidoT || undefined).map((f: any) => ({
+        fila_id: f.id, pagina_id: f.pagina_id || null, titulo: String(f.pagina?.titulo || celda(f, cTit) || 'Sin título'),
+        numero: celda(f, cNum) !== null ? Number(celda(f, cNum)) : null, nota: celda(f, cNota) !== null ? Number(celda(f, cNota)) : null,
+        imagen: f.pagina?.imagen || null, descripcion: String(f.pagina?.descripcion || celda(f, cDesc) || ''),
+      })));
+    });
+    return () => { vivo = false; };
+  }, [tObj, filaId, elegidoT]);
+  useEffect(() => {
+    if (!tInd || !filaId) { setIndicadores(null); return; }
+    let vivo = true;
+    leerTabla(tInd).then(t => {
+      if (!vivo || !t) return;
+      const cols = t.columnas || [];
+      const cNum = cols.find((c: any) => c.tipo === 'numero'), cOk = cols.find((c: any) => c.tipo === 'casilla'), cDesc = cols.find((c: any) => c.tipo === 'texto_largo');
+      const cTit = cols.find((c: any) => c.id === t.columna_titulo);
+      setIndicadores(enlazadas(t, filaId).map((f: any) => ({
+        fila_id: f.id, titulo: String(celda(f, cTit) || f.pagina?.titulo || 'Sin título'),
+        numero: celda(f, cNum) !== null ? Number(celda(f, cNum)) : null, cumplido: celda(f, cOk) === true, descripcion: String(celda(f, cDesc) || ''),
+      })));
+    });
+    return () => { vivo = false; };
+  }, [tInd, filaId]);
   const medidas = useMemo(() => (nivelActual !== null && nivelActual < 10 ? ideas(niveles.find(v => v.nivel === nivelActual)?.medidas || '') : []), [niveles, nivelActual]);
   useEffect(() => {
     if (!paginaId || !x || x === 'fallo' || sinNota) { if (paginaId) quitarPestanasExtra(paginaId); return; }
     const red = x.red;
     const de = (re: RegExp) => red.filter(g => re.test(sinTilde(g.nombre)));
-    const fallos = de(/fallo|consecuen/), mejoras = de(/mejora|linea|punto|objetivo/), proyectos = de(/proyecto|soluci/);
+    const fallos = de(/fallo|consecuen/), mejoras = de(/mejora|linea|punto/), proyectos = de(/proyecto|soluci/);
     const cuenta = (gs: Grupo[]) => gs.reduce((a, g) => a + g.entradas.length, 0);
     const solNiveles = x.niveles.filter(v => v.soluciones && (nivelActual === null || v.nivel >= nivelActual)).sort((a, b) => b.nivel - a.nivel);
     const nSol = solNiveles.reduce((a, v) => a + ideas(v.soluciones).length, 0) + cuenta(proyectos);
     const fallosTexto = ideas(x.diagnostico);
     const lista: PestanaExtra[] = [];
+    const ocultar: string[] = [];
+    if (objetivos?.length) { lista.push({ id: 'objetivos', titulo: 'Objetivos', n: objetivos.length, contenido: <PanelObjetivos objetivos={objetivos} sistema={x.nombre} territorio={territorioNombre} /> }); ocultar.push('objetivos'); }
+    if (indicadores?.length) { lista.push({ id: 'indicadores', titulo: 'Indicadores', n: indicadores.length, contenido: <PanelIndicadores indicadores={indicadores} territorio={territorioNombre} /> }); ocultar.push('indicadores'); }
     if (medidas.length && nivelActual !== null) lista.push({
       id: 'salto', titulo: `Salto ${nivelActual}→${nivelActual + 1}`,
       contenido: <div className="max-w-3xl"><Salto desde={x.niveles.find(v => v.nivel === nivelActual) || { nivel: nivelActual, titulo: '' }}
@@ -310,8 +451,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     if (nSol) lista.push({ id: 'soluciones', titulo: 'Soluciones', n: nSol, contenido: <PanelSoluciones solNiveles={solNiveles} nivelActual={nivelActual} proyectos={proyectos} /> });
     if (fallosTexto.length || cuenta(fallos)) lista.push({ id: 'diagnostico', titulo: 'Diagnóstico', n: fallosTexto.length + cuenta(fallos), contenido: <PanelDiagnostico fallos={fallosTexto} grupos={fallos} territorio={territorioNombre} /> });
     if (cuenta(mejoras)) lista.push({ id: 'plan', titulo: 'Plan', n: cuenta(mejoras), contenido: <div className="max-w-3xl"><p className="mb-3 text-sm text-slate-600">Las mejoras propuestas, sus líneas de trabajo y los puntos concretos.</p><Grupos grupos={mejoras} /></div> });
-    ponerPestanasExtra(paginaId, lista);
-  }, [paginaId, x, sinNota, nivelActual, medidas, territorioNombre]);
+    ponerPestanasExtra(paginaId, lista, ocultar);
+  }, [paginaId, x, sinNota, nivelActual, medidas, territorioNombre, objetivos, indicadores]);
   useEffect(() => () => { if (paginaId) quitarPestanasExtra(paginaId); }, [paginaId]);
 
   if (!paginaId) return <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-xs font-bold text-slate-400">El termómetro va en la página de un sistema.</p>;
@@ -393,7 +534,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
               ) : null}
             </div>
             <p className={cn('mt-1 text-sm leading-snug text-slate-700', !leerMas && 'line-clamp-2')} title={info?.descripcion || undefined}>
-              <b className="font-black" style={{ color: tonosN.tinta }}>{info?.titulo || ESCALA[n]}</b>
+              {/* Sin niveles descritos (un objetivo), su descripción en vez del nombre genérico de la escala. */}
+              {niveles.length ? <b className="font-black" style={{ color: tonosN.tinta }}>{info?.titulo || ESCALA[n]}</b> : x.pagina?.subtitulo ? <span>{x.pagina.subtitulo}</span> : null}
               {info?.descripcion && <>{' · '}{info.descripcion}</>}
             </p>
             {info?.descripcion && !leerMas && info.descripcion.length > 140 && (

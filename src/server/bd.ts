@@ -864,7 +864,8 @@ export function registerBdRoutes(app: Express, db: any) {
         const a = (enl[c.id] || [])[0];
         if (!a) continue;
         if (/territor/.test(sinTildes(c.nombre))) { territorio = a.etiqueta || null; territorioId = a.id || null; }
-        else if (!sistemaPagina && /^sistema/.test(sinTildes(c.nombre)) && a.extra?.pagina_id) sistemaPagina = a.extra.pagina_id;
+        // Solo «Sistema original» (la copia de 2026-10-25, ya borrada): una columna «Sistema» de otra tabla (los objetivos) es solo un enlace.
+        else if (!sistemaPagina && /^sistema original/.test(sinTildes(c.nombre)) && a.extra?.pagina_id) sistemaPagina = a.extra.pagina_id;
       }
       let niveles: any[] = [];
       const tablaNiveles = req.query.niveles ? String(req.query.niveles) : null;
