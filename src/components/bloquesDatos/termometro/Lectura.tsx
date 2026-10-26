@@ -76,15 +76,15 @@ function conFlechas(e: React.KeyboardEvent, actual: number, max: number, ir: (n:
 
 /** LA ESCALA EN HORIZONTAL (2026-10-26, Eugenio: «la barra de la galería, donde
  *  indica el lugar en el que está, en horizontal en la página de cada entrada»).
- *  Sustituye al termómetro vertical: los once niveles con su color, «HOY» y
- *  «META» debajo; pasar el ratón enseña el nivel, pulsarlo lo deja abierto. */
+ *  Una barra fina con los once niveles de color, como la del resumen del
+ *  territorio; «HOY» y «META» debajo. Pasar el ratón enseña el nivel, pulsarlo lo deja abierto. */
 function Escala({ niveles, actual, elegido, onElegir, onEncima }: {
   niveles: Nivel[]; actual: number | null; elegido: number; onElegir: (n: number) => void; onEncima: (n: number | null) => void;
 }) {
   const hoy = actual !== null ? Math.floor(actual) : null, sig = hoy !== null && hoy < 10 ? hoy + 1 : null;
   return (
     <div data-escala onMouseLeave={() => onEncima(null)}>
-      <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex gap-1">
+      <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex items-center">
         {Array.from({ length: 11 }, (_, n) => {
           const info = niveles.find(x => x.nivel === n);
           const c = colorDeNota(n);
@@ -92,22 +92,23 @@ function Escala({ niveles, actual, elegido, onElegir, onEncima }: {
             <button key={n} type="button" role="radio" aria-checked={elegido === n} tabIndex={elegido === n ? 0 : -1} data-pos={n}
               aria-label={`Nivel ${n}${info?.titulo ? ` — ${info.titulo}` : ''}${n === hoy ? ' (hoy)' : n === sig ? ' (meta)' : ''}`}
               onClick={() => onElegir(n)} onMouseEnter={() => onEncima(n)} onKeyDown={e => conFlechas(e, n, 10, onElegir, 'h')}
-              className={cn('grid h-9 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums transition-transform hover:-translate-y-0.5',
-                n === hoy && 'h-11 -my-1 text-base shadow-md ring-2 ring-slate-900 ring-offset-2',
-                elegido === n && n !== hoy && 'ring-2 ring-slate-500 ring-offset-1',
-                n === sig && elegido !== n && '[outline:2px_dashed_rgb(180_83_9)] [outline-offset:2px]')}
+              className={cn('relative grid h-5 min-w-0 flex-1 place-items-center text-[10px] font-black tabular-nums transition-all hover:h-7',
+                n === 0 && 'rounded-l-full', n === 10 && 'rounded-r-full',
+                n === hoy && 'z-[1] h-8 rounded-md text-sm shadow-md ring-2 ring-slate-900 ring-offset-2 hover:h-8',
+                elegido === n && n !== hoy && 'z-[1] h-7 rounded-md ring-2 ring-slate-500 ring-offset-1',
+                n === sig && elegido !== n && 'z-[1] rounded-sm [outline:2px_dashed_rgb(180_83_9)] [outline-offset:2px]')}
               style={{ backgroundColor: c, color: textoSobre(c) }}>
               {n}
             </button>
           );
         })}
       </div>
-      <div aria-hidden className="mt-1.5 flex gap-1 text-[10px] font-black uppercase leading-none">
+      <div aria-hidden className="mt-2 flex text-[10px] font-black uppercase leading-none">
         {Array.from({ length: 11 }, (_, n) => (
           // «urgente» y «resuelto» se alinean hacia dentro: en el móvil no caben en su casilla y no deben salirse de la página.
           <span key={n} className={cn('flex min-w-0 flex-1 whitespace-nowrap', n === 0 && n !== hoy && n !== sig ? 'justify-start' : n === 10 && n !== hoy && n !== sig ? 'justify-end' : 'justify-center')}>
             {n === hoy ? <span className="text-slate-900">hoy</span> : n === sig ? <span className="text-amber-700">meta</span>
-              : n === 0 ? <span className="font-bold normal-case text-slate-500">urgente</span> : n === 10 ? <span className="font-bold normal-case text-slate-500">resuelto</span> : null}
+              : n === 0 ? <span className="font-bold normal-case text-slate-500">lo más urgente</span> : n === 10 ? <span className="font-bold normal-case text-slate-500">resuelto</span> : null}
           </span>
         ))}
       </div>
@@ -333,83 +334,78 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     const r = await fetch(`/api/bd/filas/${encodeURIComponent(x.fila_id)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ celdas: { [x.columna_nota]: v } }) }).catch(() => null);
     if (!r?.ok) { setX({ ...x, nota: antes }); setFalloNota('No se ha podido guardar la nota.'); }
   };
-  const campo = 'w-full rounded-md bg-transparent outline-none transition-colors hover:bg-white/25 focus:bg-white/35 focus:ring-2 focus:ring-white/70';
-  const notaPildora = actual !== null && tonos ? (
+  const imagen = portada
+    ? <img src={miniatura(portada, 160)} alt="" className="h-full w-full object-contain" />
+    : icono ? <span className="text-4xl leading-none">{icono}</span> : <span className="text-[10px] font-bold text-slate-400">Imagen</span>;
+  const circulo = actual !== null && tonos ? (
     <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`}
-      className="relative inline-flex shrink-0 items-baseline rounded-full bg-white px-4 py-1.5 font-black leading-none tabular-nums shadow-sm" style={{ color: tonos.tinta }}>
-      <span className="text-4xl">{textoNota(actual)}</span><span className="ml-0.5 text-xs font-bold opacity-70">/10</span>
+      className="relative grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center rounded-full font-black tabular-nums shadow-md lg:h-24 lg:w-24"
+      style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
+      <span className="flex items-baseline text-3xl lg:text-4xl">{textoNota(actual)}<span className="ml-0.5 text-sm font-semibold">/10</span></span>
       {edicion && x.columna_nota && (
-        <select aria-label="Cambiar la nota" value={Math.round(actual)} onChange={e => cambiarNota(Number(e.target.value))}
-          className="absolute inset-0 cursor-pointer opacity-0">
+        <select aria-label="Cambiar la nota" title="Cambiar la nota" value={Math.round(actual)} onChange={e => cambiarNota(Number(e.target.value))}
+          className="absolute inset-0 cursor-pointer rounded-full opacity-0">
           {Array.from({ length: 10 }, (_, i) => i + 1).map(v => <option key={v} value={v}>{v}</option>)}
         </select>
       )}
     </span>
   ) : null;
-  const imagen = portada
-    ? <img src={miniatura(portada, 240)} alt="" className="h-full w-full object-contain" />
-    : icono ? <span className="text-5xl leading-none">{icono}</span> : <span className="text-xs font-bold text-slate-400">{edicion ? 'Añadir imagen' : ''}</span>;
 
   return (
     <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6', 'space-y-3')}>
-      {/* Arriba: el territorio a la izquierda y, a la derecha, la tarjeta de la galería en horizontal. */}
-      <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
-        <div className="min-w-0">
+      {/* En el editor, el título y la imagen arriba y centrados, para cambiarlos ahí mismo (sin color, sobrio). */}
+      {edicion && (
+        <div className="flex items-center justify-center gap-2.5">
+          <button type="button" onClick={edicion.onPortada} title="Cambiar la imagen" className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg hover:ring-2 hover:ring-slate-300">{imagen}</button>
+          <input aria-label="Título" value={titulo} onChange={e => edicion.onTitulo(e.target.value)}
+            style={{ width: `${Math.max(6, titulo.length + 1)}ch` }}
+            className="min-w-0 max-w-full rounded-md bg-transparent px-1 text-3xl font-black tracking-tight text-slate-900 outline-none hover:bg-slate-50 focus:bg-slate-50 focus:ring-2 focus:ring-slate-200" />
+        </div>
+      )}
+
+      {/* EL RECUADRO (2026-10-26, Eugenio: «así, como el del territorio»): el territorio, pequeño,
+          a un lado; en el medio el nivel y la barra; a la derecha la nota en su círculo. */}
+      <section data-resumen-sistema className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8">
+        <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
           {x.tabla_territorios && opciones.length > 0 && (
-            <ElegirTerritorio alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+            <ElegirTerritorio compacto sinMarco alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
               onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
           )}
         </div>
-        <div data-tarjeta-sistema className="flex items-center gap-4 rounded-3xl p-3 shadow-sm"
-          style={tonos ? { backgroundColor: tonos.color, color: textoSobre(tonos.color) } : { backgroundColor: '#e2e8f0' }}>
-          {edicion
-            ? <button type="button" onClick={edicion.onPortada} title="Cambiar la imagen" className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white p-1.5 sm:h-24 sm:w-24 hover:ring-2 hover:ring-white/80">{imagen}</button>
-            : <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white p-1.5 sm:h-24 sm:w-24">{imagen}</div>}
-          <div className="min-w-0 flex-1">
-            {edicion
-              ? <input aria-label="Título" value={titulo} onChange={e => edicion.onTitulo(e.target.value)} className={cn(campo, 'px-1 text-2xl font-black tracking-tight')} />
-              : comoCabecera ? <h1 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl">{titulo}</h1> : <p className="text-2xl font-black leading-tight tracking-tight">{titulo}</p>}
-            {edicion
-              ? <input aria-label="Descripción" value={subtitulo} placeholder="Añadir una descripción" onChange={e => edicion.onSubtitulo(e.target.value)} className={cn(campo, 'mt-0.5 px-1 text-sm font-semibold placeholder:opacity-60')} />
-              : subtitulo && <p className="mt-0.5 text-sm font-semibold leading-snug opacity-90">{subtitulo}</p>}
-          </div>
-          {notaPildora}
-        </div>
-      </div>
-      {falloNota && <p role="alert" className="text-xs font-bold text-rose-600">{falloNota}</p>}
 
-      {sinNota ? (
-        <div data-sin-nota className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center">
-          <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
-          {propio && <button type="button" onClick={() => { setTerr(propio); guardarTerritorio(propio, ''); }} className="mt-2 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-slate-700">Ver {x.territorio}</button>}
-        </div>
-      ) : (
-        <>
-          {/* La barra con el lugar en el que está, en horizontal. */}
-          <Escala niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} />
-          {/* El nivel que se señala (el de hoy, si no se ha pulsado otro), en una franja. */}
-          <div data-nivel-elegido aria-live="polite" className="flex flex-col gap-3 rounded-2xl px-4 py-3 sm:flex-row sm:items-center"
-            style={{ backgroundColor: tonosN.fondo }}>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}</p>
-              <h2 className="text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
-              {info?.descripcion && <p className={cn('mt-0.5 text-sm leading-relaxed text-slate-700', !leerMas && 'line-clamp-2')}>{info.descripcion}</p>}
-              {info?.descripcion && !leerMas && info.descripcion.length > 160 && <button type="button" onClick={() => setLeerMas(true)} className="inline-flex min-h-8 items-center text-xs font-bold text-slate-700 underline">Leer más</button>}
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {elegido !== null && nivelActual !== null && encima === null && (
-                <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-[13px] font-bold text-slate-600 hover:bg-white/60 hover:text-slate-900"><Undo2 className="h-3.5 w-3.5" /> Volver a hoy</button>
-              )}
-              {n === nivelActual && medidas.length > 0 && (
-                <button type="button" onClick={() => abrirPestanaRed(paginaId, 'salto')}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-slate-900 px-3.5 text-[13px] font-bold text-white hover:bg-slate-700">
-                  <TrendingUp className="h-4 w-4" /> Qué hace falta para llegar al {nivelActual! + 1}
-                </button>
-              )}
-            </div>
+        {sinNota ? (
+          <div data-sin-nota className="col-span-2 text-center lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:text-left">
+            <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
+            {propio && <button type="button" onClick={() => { setTerr(propio); guardarTerritorio(propio, ''); }} className="mt-2 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-slate-700">Ver {x.territorio}</button>}
           </div>
-        </>
-      )}
+        ) : (
+          <div data-nivel-elegido aria-live="polite" className="col-span-2 min-w-0 lg:col-span-1 lg:col-start-2 lg:row-start-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+                {n === nivelActual ? `${titulo} en ${territorioNombre || 'este territorio'} · nivel ${n}` : rotulo}
+              </p>
+              {elegido !== null && nivelActual !== null && encima === null ? (
+                <button type="button" onClick={() => setElegido(null)} className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-900"><Undo2 className="h-3 w-3" /> Volver a hoy</button>
+              ) : n === nivelActual && medidas.length > 0 ? (
+                <button type="button" onClick={() => abrirPestanaRed(paginaId, 'salto')} className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 underline-offset-2 hover:text-slate-900 hover:underline">
+                  <TrendingUp className="h-3.5 w-3.5" /> Qué hace falta para llegar al {nivelActual! + 1}
+                </button>
+              ) : null}
+            </div>
+            <p className={cn('mt-1 text-sm leading-snug text-slate-700', !leerMas && 'line-clamp-2')} title={info?.descripcion || undefined}>
+              <b className="font-black" style={{ color: tonosN.tinta }}>{info?.titulo || ESCALA[n]}</b>
+              {info?.descripcion && <>{' · '}{info.descripcion}</>}
+            </p>
+            {info?.descripcion && !leerMas && info.descripcion.length > 140 && (
+              <button type="button" onClick={() => setLeerMas(true)} className="text-xs font-bold text-slate-500 underline hover:text-slate-800">Leer más</button>
+            )}
+            <div className="mt-3"><Escala niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} /></div>
+          </div>
+        )}
+
+        <div className="col-start-2 row-start-1 flex justify-end lg:col-start-3 lg:justify-center">{circulo}</div>
+      </section>
+      {falloNota && <p role="alert" className="text-xs font-bold text-rose-600">{falloNota}</p>}
 
       {/* En el editor, las demás propiedades de la entrada, plegadas y sin ruido. */}
       {edicion?.propiedades && (
