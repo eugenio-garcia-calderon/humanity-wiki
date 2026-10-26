@@ -115,7 +115,7 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
         )) : null,
         botones: hayBotones ? (
           <div data-botones-cabecera className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense>
+            <Suspense fallback={null}><BotonesLectura config={cfg} centrado={false} derecha={der('botones')} unaLinea={der('botones')} talla={tallaBotones(c, el('botones'))} /></Suspense>
             <span data-hueco-cuenta="cabecera" className="contents" />
           </div>
         ) : null,

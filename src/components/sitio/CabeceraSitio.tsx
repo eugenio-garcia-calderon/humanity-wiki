@@ -29,8 +29,9 @@ export default function CabeceraSitio({ raizId }: { raizId: string }) {
   if (!raiz) return <div className="mb-4 h-16" aria-hidden />;
   const c = raiz.config, icono: string | null = c.icono || null;
   return (
-    <header data-cabecera-sitio className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-      <Link to="/" className="flex min-w-0 items-center gap-3" aria-label={`${raiz.titulo} · inicio`}>
+    // El menú, en la misma línea que el logo y en una sola línea (en el móvil, debajo del logo).
+    <header data-cabecera-sitio className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+      <Link to="/" className="flex min-w-0 shrink-0 items-center gap-3" aria-label={`${raiz.titulo} · inicio`}>
         {icono && (/^(https?:|\/)/.test(icono)
           ? <img src={miniatura(icono, 120)} alt="" className="h-12 w-12 shrink-0 rounded-xl object-contain sm:h-14 sm:w-14" />
           : <span className="text-4xl leading-none">{icono}</span>)}
@@ -39,7 +40,7 @@ export default function CabeceraSitio({ raizId }: { raizId: string }) {
           {c.subtitulo && <span className="block truncate text-sm text-slate-500 sm:text-base">{c.subtitulo}</span>}
         </span>
       </Link>
-      <Suspense fallback={null}><BotonesLectura config={c} centrado={false} derecha talla="sm" /></Suspense>
+      <div className="flex min-w-0 flex-1"><Suspense fallback={null}><BotonesLectura config={c} centrado={false} unaLinea talla="sm" /></Suspense></div>
     </header>
   );
 }
