@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Eslabon, NotaEslabon } from '../../sitio/Eslabon';
 import type { PropsLectura } from '../tipos';
 import { ponerFiltroPagina } from './filtroPagina';
 import ElegirTerritorio, { territorioGuardado, guardarTerritorio, useTerritorios } from './ElegirTerritorio';
@@ -24,6 +26,12 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
   // Las notas de cada entrada por territorio, para el resumen (media, mejor y peor).
   const [notas, setNotas] = useState<Array<{ nombre: string; nota: number; territorios: string[] }>>([]);
   const [elegido, setElegido] = useState<string>(() => territorioGuardado(defecto));
+  // EN LA BARRA DEL SITIO (2026-10-26, Eugenio: «la página principal, con el territorio y su nota arriba en el menú»).
+  const [ranura, setRanura] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const mirar = () => setRanura(document.querySelector<HTMLElement>('[data-ranura-ruta]'));
+    mirar(); const t = window.setTimeout(mirar, 400); return () => window.clearTimeout(t);
+  }, []);
   useEffect(() => {
     if (!tablaId || !columnaId) return;
     fetch(`/api/bd/tablas/${encodeURIComponent(tablaId)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => {
@@ -80,6 +88,17 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
       {vuelta && <button type="button" onClick={() => elegir(vuelta.id)} className="mt-3 rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700">Ver {vuelta.nombre}</button>}
     </div>
   ) : null;
+  if (ranura) return (
+    <>
+      {createPortal(
+        <Eslabon>
+          <ElegirTerritorio segmento alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegido} onElegir={elegir} />
+          {media !== null && <NotaEslabon nota={Math.round(media * 10) / 10} titulo={`Media de ${nombre}`} />}
+        </Eslabon>, ranura)}
+      {/* Abajo, solo lo mejor y lo peor con la escala de colores: el territorio y su nota ya están arriba. */}
+      {centro && <div data-filtro-territorio className="mx-auto my-4 max-w-3xl rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-sm">{centro}</div>}
+    </>
+  );
   return (
     <div data-filtro-territorio className="mx-auto my-6 grid max-w-5xl items-center gap-5 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-[auto_1fr_auto] lg:gap-8">
       <div className="flex justify-center lg:border-r lg:border-slate-100 lg:pr-6">

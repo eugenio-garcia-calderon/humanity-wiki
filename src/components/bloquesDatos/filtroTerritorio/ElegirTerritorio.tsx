@@ -32,15 +32,33 @@ export function guardarTerritorio(id: string, defecto: string) {
   } catch { /* sin dirección que tocar */ }
 }
 
-type Opcion = { id: string; nombre: string };
+type Opcion = { id: string; nombre: string; mapa?: string | null };
+const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** LA SILUETA DEL TERRITORIO (2026-10-26, Eugenio: «el contorno del país en vez de un icono de ubicación»). */
+const siluetas = new Map<string, Promise<string | null>>();
+export function Silueta({ mapa, className }: { mapa?: string | null; className?: string }) {
+  const [path, setPath] = useState<string | null>(null);
+  useEffect(() => {
+    if (!mapa) { setPath(null); return; }
+    let p = siluetas.get(mapa);
+    if (!p) { p = fetch(`/api/geo/territorio/${encodeURIComponent(mapa)}/silueta`).then(r => (r.ok ? r.json() : null)).then(j => j?.path || null).catch(() => null); siluetas.set(mapa, p); }
+    let vivo = true; p.then(x => { if (vivo) setPath(x); }); return () => { vivo = false; };
+  }, [mapa]);
+  if (!path) return <MapPin className={cn('text-slate-500', className)} aria-hidden />;
+  return <svg viewBox="0 0 24 24" className={cn('text-slate-800', className)} aria-hidden><path d={path} fill="currentColor" fillRule="evenodd" /></svg>;
+}
 const cache = new Map<string, Promise<Opcion[]>>();
 function territoriosDe(tablaId: string): Promise<Opcion[]> {
   let p = cache.get(tablaId);
   if (!p) {
     p = fetch(`/api/bd/tablas/${encodeURIComponent(tablaId)}`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => {
       const colT = j?.columna_titulo;
+      // «ID del mapa» (T003…): con él se dibuja la silueta del territorio.
+      const colMapa = (j?.columnas || []).find((c: any) => /mapa/.test(plano(String(c.nombre))) && c.tipo === 'texto')?.id;
       return (j?.filas || []).filter((f: any) => !f.oculta).map((f: any) => ({
         id: String(f.id), nombre: String(f.pagina?.titulo || (colT && f.celdas?.[colT]?.estado === 'ok' ? f.celdas[colT].valor : '') || 'Sin nombre'),
+        mapa: colMapa && f.celdas?.[colMapa]?.estado === 'ok' ? String(f.celdas[colMapa].valor) : null,
       }));
     }).catch(() => []);
     cache.set(tablaId, p);
@@ -48,7 +66,6 @@ function territoriosDe(tablaId: string): Promise<Opcion[]> {
   return p;
 }
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 export function useTerritorios(tablaId: string | null | undefined, extra: Opcion[] = []) {
   const [todos, setTodos] = useState<Opcion[]>([]);
@@ -61,7 +78,7 @@ export function useTerritorios(tablaId: string | null | undefined, extra: Opcion
   }, [todos, extra]);
 }
 
-export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto, mini, alinear = 'derecha' }: {
+export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto, mini, segmento, alinear = 'derecha' }: {
   opciones: Opcion[]; conDatos: Set<string>; elegido: string; onElegir: (id: string) => void; className?: string;
   /** Dentro de otro recuadro (el resumen del territorio): sin su propio borde. */
   sinMarco?: boolean;
@@ -69,6 +86,8 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
   compacto?: boolean;
   /** Una pastilla pequeña («📍 España ▾») para la barra de arriba (2026-10-26). */
   mini?: boolean;
+  /** Un eslabón de la cadena «territorio · sistema · nota» de la barra (sin borde propio, letra como la del sistema). */
+  segmento?: boolean;
   /** Hacia qué lado se abre la lista (a la izquierda cuando el botón está en el borde izquierdo). */
   alinear?: 'izquierda' | 'derecha';
 }) {
@@ -101,7 +120,15 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
   );
   return (
     <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col', alinear === 'izquierda' ? 'items-start' : 'items-center', className)}>
-      {mini ? (
+      {segmento ? (
+        <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
+          aria-label={`Territorio: ${nombre}. Cambiar de territorio`} title="Cambiar de territorio"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full pl-2 pr-1.5 text-base font-black text-slate-900 hover:bg-slate-100">
+          <Silueta mapa={opciones.find(o => o.id === elegido)?.mapa} className="h-6 w-6 shrink-0" />
+          <span data-territorio-elegido className="max-w-[10rem] truncate">{nombre}</span>
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-400 transition-transform', abierto && 'rotate-180')} />
+        </button>
+      ) : mini ? (
         <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
           aria-label={`Territorio: ${nombre}. Cambiar de territorio`} title="Cambiar de territorio"
           className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-300 bg-white pl-2.5 pr-2 text-[13px] font-black text-slate-900 shadow-sm hover:border-slate-400">

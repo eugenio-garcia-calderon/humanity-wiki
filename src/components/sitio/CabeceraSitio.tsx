@@ -37,11 +37,17 @@ export default function CabeceraSitio({ raizId, ruta }: { raizId: string; ruta?:
     // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
     // scroll»): pegada arriba, de borde a borde (anula el margen de la página) y con fondo para que no se mezcle.
     <header data-cabecera-sitio className="sticky top-0 z-40 -mx-5 mb-4 flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-5 py-2 backdrop-blur sm:-mx-8 sm:flex-nowrap sm:px-8">
-      <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
+      {/* El logo, de tamaño fijo (un 20 % mayor que antes) y con su eslogan debajo (2026-10-26, Eugenio). */}
+      <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 80)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-          : <span className="text-2xl leading-none">{icono}</span>)}
-        {raiz && <span className="hidden whitespace-nowrap text-lg font-black leading-none tracking-tight text-slate-900 md:inline">{raiz.titulo}</span>}
+          ? <img src={miniatura(icono, 96)} alt="" className="h-11 w-11 shrink-0 rounded-lg object-contain" />
+          : <span className="text-3xl leading-none">{icono}</span>)}
+        {raiz && (
+          <span className="hidden min-w-0 flex-col leading-none md:flex">
+            <span className="whitespace-nowrap text-[1.35rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
+            {c.subtitulo && <span className="mt-1 whitespace-nowrap text-xs text-slate-500">{c.subtitulo}</span>}
+          </span>
+        )}
       </Link>
       {/* El territorio y la ruta, centrados y separados del logo (2026-10-26, Eugenio: «más espacio entre
           Luz & Humanidad y España; España y Movilidad más centrados»). En el móvil, en una segunda línea. */}

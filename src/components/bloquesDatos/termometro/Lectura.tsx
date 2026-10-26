@@ -5,6 +5,7 @@ import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { createPortal } from 'react-dom';
+import { Eslabon, Union, NotaEslabon } from '../../sitio/Eslabon';
 import { cn } from '../../../utils/cn';
 import { miniatura } from '../../../utils/miniatura';
 import ElegirTerritorio, { territorioGuardado, guardarTerritorio, useTerritorios } from '../filtroTerritorio/ElegirTerritorio';
@@ -357,8 +358,13 @@ function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[
 
 /** UN PASO DE LA RUTA DE LA BARRA, DESPLEGABLE (2026-10-26, Eugenio: «que Movilidad sea un desplegable
  *  y pueda elegir otro sistema, igual que el territorio»). Una palabra; al pulsar, sus hermanos. */
-type OpcionRuta = { id: string; nombre: string; pagina_id: string };
-function PasoRuta({ etiqueta, titulo, opciones, actual, h1, pequeno }: { etiqueta: string; titulo: string; opciones: OpcionRuta[]; actual: string | null; h1?: boolean; pequeno?: boolean }) {
+type OpcionRuta = { id: string; nombre: string; pagina_id: string; icono?: string | null };
+/** El icono de un paso: su portada (un dibujo) o su emoji. */
+function IconoPaso({ icono }: { icono?: string | null }) {
+  if (!icono) return null;
+  return /^(https?:|\/)/.test(icono) ? <img src={miniatura(icono, 48)} alt="" className="h-6 w-6 shrink-0 object-contain" /> : <span className="text-lg leading-none" aria-hidden>{icono}</span>;
+}
+function PasoRuta({ etiqueta, titulo, opciones, actual, h1, apagado, icono }: { etiqueta: string; titulo: string; opciones: OpcionRuta[]; actual: string | null; h1?: boolean; apagado?: boolean; icono?: string | null }) {
   const sitio = useSitio();
   const [abierto, setAbierto] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
@@ -371,15 +377,19 @@ function PasoRuta({ etiqueta, titulo, opciones, actual, h1, pequeno }: { etiquet
   }, [abierto]);
   const Texto = h1 ? 'h1' : 'span';
   const contenido = (
-    <Texto title={titulo} className={cn('truncate tracking-tight', h1 ? 'font-black text-slate-900' : 'font-bold text-slate-600', pequeno ? 'text-base' : 'text-xl')}>
-      {etiqueta}{h1 && etiqueta !== titulo && <span className="sr-only"> · {titulo}</span>}
-    </Texto>
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <IconoPaso icono={icono} />
+      {/* La misma letra que el territorio (2026-10-26): base y negrita. */}
+      <Texto title={titulo} className={cn('truncate text-base font-black tracking-tight', apagado ? 'text-slate-600' : 'text-slate-900')}>
+        {etiqueta}{h1 && etiqueta !== titulo && <span className="sr-only"> · {titulo}</span>}
+      </Texto>
+    </span>
   );
-  if (opciones.length < 2) return contenido;
+  if (opciones.length < 2) return <span className="inline-flex min-w-0 items-center px-1.5">{contenido}</span>;
   return (
     <div ref={caja} className="relative min-w-0">
       <button type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto} title={`Cambiar: ${titulo}`}
-        className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-lg px-1.5 py-0.5 hover:bg-slate-100">
+        className="inline-flex h-9 min-w-0 max-w-full items-center gap-1 rounded-full px-2 hover:bg-slate-100">
         {contenido}<ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-400 transition-transform', abierto && 'rotate-180')} />
       </button>
       {abierto && (
@@ -433,7 +443,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     let vivo = true;
     const opcion = (t: FilasTabla, f: any): OpcionRuta => {
       const cRuta = (t.columnas || []).find((c: any) => c.tipo === 'texto' && /ruta/.test(sinTilde(c.nombre)));
-      return { id: f.id, pagina_id: f.pagina_id, nombre: String(celda(f, cRuta) || f.pagina?.titulo || celda(f, (t.columnas || []).find((c: any) => c.id === t.columna_titulo)) || 'Sin título') };
+      return { id: f.id, pagina_id: f.pagina_id, icono: f.pagina?.imagen || f.pagina?.icono || null, nombre: String(celda(f, cRuta) || f.pagina?.titulo || celda(f, (t.columnas || []).find((c: any) => c.id === t.columna_titulo)) || 'Sin título') };
     };
     const deArriba = (t: FilasTabla) => {
       const madre = (t.columnas || []).find((c: any) => c.config?.rol === 'madre');
@@ -597,28 +607,31 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   ) : null;
 
   // Dónde va el texto del nivel: con el territorio dentro del recuadro, debajo en el móvil y en medio en el ordenador.
-  const centro = ranuras.terr ? 'col-start-1 row-start-1' : 'col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-1';
+  const centro = ranuras.ruta ? 'col-span-2' : 'col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-1';
   return (
     <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6', 'space-y-3')}>
-      {ranuras.terr && x.tabla_territorios && opciones.length > 0 && createPortal(
-        <ElegirTerritorio mini alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
-          onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />, ranuras.terr)}
-      {/* La ruta, sin «Inicio», una palabra por paso y más pequeña cuantos más pasos: «Movilidad», o
-          «Movilidad › Intermodalidad». Cada paso, un desplegable con sus hermanos. */}
+      {/* EL ESLABÓN DE LA BARRA (2026-10-26): «España ⛓ Movilidad · 5/10» (o «España ⛓ Movilidad › Intermodalidad · 6,4»):
+          el territorio y el sistema unidos, con la misma letra, cada uno con su icono y su desplegable, y la nota al lado. */}
       {ranuras.ruta && createPortal(
-        <>
+        <Eslabon>
+          {x.tabla_territorios && opciones.length > 0 && (
+            <ElegirTerritorio segmento alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+              onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
+          )}
+          <Union />
           {x.padre?.nombre && (
             <>
               {opcPadre.length > 1
-                ? <PasoRuta etiqueta={x.padre.nombre} titulo={x.padre.nombre} opciones={opcPadre} actual={x.padre.fila_id} pequeno />
+                ? <PasoRuta etiqueta={x.padre.nombre} titulo={x.padre.nombre} opciones={opcPadre} actual={x.padre.fila_id} apagado icono={opcPadre.find(o => o.id === x.padre!.fila_id)?.icono} />
                 : x.padre.pagina_id
-                  ? <Link to={sitioRuta ? sitioRuta.enlacePagina(x.padre.pagina_id) : `/paginas/${x.padre.pagina_id}`} className="shrink-0 truncate text-base font-bold text-slate-600 hover:text-slate-900 hover:underline">{x.padre.nombre}</Link>
-                  : <span className="shrink-0 truncate text-base font-bold text-slate-600">{x.padre.nombre}</span>}
+                  ? <Link to={sitioRuta ? sitioRuta.enlacePagina(x.padre.pagina_id) : `/paginas/${x.padre.pagina_id}`} className="shrink-0 truncate px-1.5 text-base font-black text-slate-600 hover:underline">{x.padre.nombre}</Link>
+                  : <span className="shrink-0 truncate px-1.5 text-base font-black text-slate-600">{x.padre.nombre}</span>}
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             </>
           )}
-          <PasoRuta h1={comoCabecera} etiqueta={x.ruta_nombre || x.nombre} titulo={x.nombre} opciones={opcActual} actual={x.fila_id || null} pequeno={!!x.padre?.nombre} />
-        </>, ranuras.ruta)}
+          <PasoRuta h1={comoCabecera} etiqueta={x.ruta_nombre || x.nombre} titulo={x.nombre} opciones={opcActual} actual={x.fila_id || null} icono={x.pagina?.portada || x.pagina?.icono} />
+          {actual !== null && <NotaEslabon nota={actual} titulo={`${x.nombre} en ${territorioNombre || ''}`} />}
+        </Eslabon>, ranuras.ruta)}
       {/* En el editor, el título y la imagen arriba y centrados, para cambiarlos ahí mismo (sin color, sobrio). */}
       {edicion && (
         <div className="flex items-center justify-center gap-2.5">
@@ -633,9 +646,9 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           a un lado; en el medio el nivel y la barra; a la derecha la nota en su círculo. */}
       {/* Sin la barra del sitio (una página fuera de un sitio), el título va aquí. */}
       {comoCabecera && !edicion && ranuras.mirado && !ranuras.ruta && <h1 className="text-center text-3xl font-black tracking-tight text-slate-900">{x.nombre}</h1>}
-      <section data-resumen-sistema className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:gap-8', !ranuras.terr && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]')}>
+      <section data-resumen-sistema className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:gap-8', !ranuras.ruta && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]')}>
         {/* Sin la barra del sitio (el editor), el territorio va aquí, a la izquierda. */}
-        {!ranuras.terr && <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
+        {!ranuras.ruta && <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
           {x.tabla_territorios && opciones.length > 0 && (
             <ElegirTerritorio compacto sinMarco alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
               onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
@@ -673,7 +686,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           </div>
         )}
 
-        <div className={cn('col-start-2 row-start-1 flex justify-end lg:justify-center', !ranuras.terr && 'lg:col-start-3')}>{circulo}</div>
+        {/* La nota grande, solo sin la barra (el editor): con la barra va arriba, en el eslabón. */}
+        {!ranuras.ruta && <div className="col-start-2 row-start-1 flex justify-end lg:col-start-3 lg:justify-center">{circulo}</div>}
       </section>
       {falloNota && <p role="alert" className="text-xs font-bold text-rose-600">{falloNota}</p>}
 

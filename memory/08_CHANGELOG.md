@@ -9894,3 +9894,12 @@ Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al ba
 Eugenio: «añade 12 objetivos por cada área, como en Movilidad; reutiliza la tabla general de objetivos (una sola) y en cada sistema muestra la vista de los suyos».
 - Datos (SQL): 204 objetivos nuevos (17 sistemas × 12) en la misma tabla «Objetivos de los Sistemas», cada uno con nombre corto, «Nombre en la ruta» (una palabra), «Nombre completo», descripción, código (ENE-O01…), icono emoji, su página (termómetro de cabecera con indicadores y evaluaciones) y enlazado a su sistema y a España. Notas de momento al azar alrededor de la nota del sistema (1 + 0,9 × N). Aún sin indicadores (solo Movilidad los tiene).
 - Termómetro: las tarjetas de objetivos sin portada enseñan su icono; una página con termómetro fuera de un sitio (sin barra) pone su título encima del recuadro.
+
+## 2026-10-26 · La barra como un eslabón: territorio + sistema + nota (Programador 8)
+Eugenio: «que la nota esté arriba, al lado de Movilidad; que España y Movilidad estén unidas como un eslabón, con la misma letra; icono de Movilidad y la silueta de España; la página principal con la misma estructura; el logo fijo, un 20 % mayor y con el eslogan».
+- `Eslabon.tsx` (nuevo): píldora con borde que une territorio · (cadena) · sistema · nota; `NotaEslabon` es la única pieza coloreada.
+- Termómetro: territorio, ruta y nota van en la barra; el círculo grande y el territorio dentro del recuadro solo salen sin barra.
+- Filtro de territorio (página principal): España y la nota media en la barra; debajo solo mejor/peor y la leyenda.
+- `ElegirTerritorio` variante `segmento` con la silueta del territorio (`/api/geo/territorio/:id/silueta`, caché 1 día; si no hay, el alfiler).
+- Cabecera: logo h-11 fijo, nombre más grande y el eslogan (`config.subtitulo`) debajo.
+- La raíz enseña la barra solo con `config.sitio.barra = true` (SQL en producción en la página principal).
