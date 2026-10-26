@@ -13,7 +13,6 @@ import { useSitio } from './ContextoSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
 import { cn } from '../../utils/cn';
-import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -123,7 +122,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
           y el título (con su portada y descripción) comparten la primera línea. */}
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
-      <div className={termo ? 'mb-3 flex flex-wrap items-center gap-x-3 gap-y-1' : undefined}>
+      <div className={termo ? 'mb-2' : undefined}>
       {migasContexto ? (
         <nav aria-label="Estás en" className={termo ? undefined : 'mb-4'}>
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -156,25 +155,13 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
           </ol>
         </nav>
       )}
-      {termo && (
-        <div className="flex min-w-0 items-center gap-2.5">
-          {cfg.portada || (icono && esUrl(icono))
-            ? <img src={miniatura(cfg.portada || icono!, 120)} alt="" className="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm ring-1 ring-black/10" />
-            : icono ? <span className="text-3xl leading-none">{icono}</span> : null}
-          <div className="min-w-0">
-            <h1 className="text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">{pagina.titulo || 'Sin título'}</h1>
-            {cfg.subtitulo && <p className="text-sm leading-snug text-slate-600">{cfg.subtitulo}</p>}
-          </div>
-        </div>
-      )}
-      {/* Arriba a la derecha, junto al título, el territorio (2026-10-25, Eugenio): lo pone ahí el termómetro. */}
-      {termo && <div data-ranura-territorio className="ml-auto max-sm:w-full max-sm:[&>*]:w-full" />}
+      {/* (2026-10-26) El título va ahora en la tarjeta de la cabecera del termómetro: aquí solo la ruta. */}
       </div>
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
         {termo
-          ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true, sinTitulo: true } }} paginaId={pagina.id} />
+          ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
         {cfg.tiempoLectura === true && (() => {

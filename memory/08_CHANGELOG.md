@@ -9842,3 +9842,9 @@ Eugenio: «reduce el nivel de información en la cabecera, quita las pestañas d
 - Cabecera del termómetro: el termómetro (más bajo, filas de 24 px), la nota grande con «Nivel 4» y la tarjeta del nivel con el atajo «Qué hace falta para llegar al nivel 5» (abre la pestaña de abajo y baja hasta ella).
 - `sitio/pestanasExtra.ts`: un bloque añade pestañas a la red de su página; `RedRelaciones` (publicada y editor) las pone delante de las bases de datos. El termómetro añade «Salto 4→5», «Soluciones», «Diagnóstico» y «Plan».
 - `RedRelaciones` sin «Todo»: se abre en la primera pestaña (la del salto si la hay; si no, la primera base de datos).
+
+## 2026-10-26 · La cabecera de cada entrada con la tarjeta de la galería y la barra de colores en horizontal (Programador 8)
+Eugenio: «que la página de cada entrada conserve el diseño de la galería (la imagen rodeada del color de la puntuación); España arriba a la izquierda; arriba a la derecha la tarjeta, más horizontal; la barra de colores con el lugar en el que está, en horizontal; los elementos para modificar, más sencillos y sobrios; y las pestañas, más arriba».
+- Termómetro: arriba, el territorio a la izquierda y a la derecha la tarjeta de la galería en horizontal (imagen en blanco, título h1, descripción y nota en píldora blanca, todo sobre el color de la nota). Debajo, la escala 0–10 en horizontal (`Escala`, sustituye al termómetro vertical) con «HOY» y «META»; y una franja con el nivel señalado y «Qué hace falta para llegar al 5». La ruta queda sola en la primera línea.
+- Editor: el título, la descripción, la imagen y la nota se cambian en la propia tarjeta (la nota, una lista del 1 al 10 sobre la píldora; guarda con `PUT /api/bd/filas/:id`); el resto de propiedades y los ajustes, tras «Más propiedades de la entrada». Fuera la fila «Añadir icono · Diseño de la cabecera» en estas páginas.
+- `/api/evolucion` devuelve `fila_id` y `columna_nota`. `ElegirTerritorio` admite `alinear`.

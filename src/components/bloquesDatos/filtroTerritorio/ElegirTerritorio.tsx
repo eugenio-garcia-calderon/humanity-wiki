@@ -61,12 +61,14 @@ export function useTerritorios(tablaId: string | null | undefined, extra: Opcion
   }, [todos, extra]);
 }
 
-export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto }: {
+export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto, alinear = 'derecha' }: {
   opciones: Opcion[]; conDatos: Set<string>; elegido: string; onElegir: (id: string) => void; className?: string;
   /** Dentro de otro recuadro (el resumen del territorio): sin su propio borde. */
   sinMarco?: boolean;
   /** Más bajo (la cabecera compacta de una entrada). */
   compacto?: boolean;
+  /** Hacia qué lado se abre la lista (a la izquierda cuando el botón está en el borde izquierdo). */
+  alinear?: 'izquierda' | 'derecha';
 }) {
   const [abierto, setAbierto] = useState(false);
   const [busca, setBusca] = useState('');
@@ -96,7 +98,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
     </li>
   );
   return (
-    <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col items-center', className)}>
+    <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col', alinear === 'izquierda' ? 'items-start' : 'items-center', className)}>
       <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
         aria-label={`Territorio: ${nombre}. Cambiar de territorio`}
         className={cn('group inline-flex items-center gap-3 rounded-2xl bg-white pr-3 transition-shadow', compacto ? 'py-1.5' : 'py-2.5', sinMarco ? 'pl-2 hover:bg-slate-50' : 'border-2 border-slate-900 pl-4 shadow-sm hover:shadow-lg')}>
@@ -111,7 +113,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
       </button>
       {abierto && (
         // En el móvil, una hoja que sube desde abajo: el desplegable se salía por el borde izquierdo.
-        <div className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:pb-4">
+        <div className={cn('absolute top-full z-40', alinear === 'izquierda' ? 'left-0' : 'right-0', ' mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:pb-4')}>
           <label className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 ring-offset-1 focus-within:ring-2 focus-within:ring-emerald-700">
             <Search className="h-4 w-4 text-slate-400" />
             <input ref={campo} data-sin-contorno value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar un país, región o municipio…"

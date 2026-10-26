@@ -884,6 +884,8 @@ export function registerBdRoutes(app: Express, db: any) {
       const red = await redDePagina(req, sistemaPagina || fila.pagina_id);
       res.json({
         nombre: titulo, nota: colNota && v[colNota.id] != null ? Number(v[colNota.id]) : null, territorio, territorio_id: territorioId,
+        // Para cambiar la nota desde la cabecera del editor (`PUT /api/bd/filas/:id`).
+        fila_id: fila.id, columna_nota: colNota?.id || null,
         tabla_territorios: colTerr?.config?.tabla_destino || null,
         // La cabecera de la página va dentro del termómetro (arriba, centrada).
         pagina: { icono: kc.icono || null, portada: kc.portada || null, subtitulo: typeof kc.subtitulo === 'string' ? kc.subtitulo : '' },
