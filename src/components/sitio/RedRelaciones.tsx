@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bell, BellRing, Link2, Check, ArrowRight, FileText, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
-import { usePestanasExtra, EVENTO_ABRIR_PESTANA } from './pestanasExtra';
+import { usePestanasExtra, useGruposOcultos, EVENTO_ABRIR_PESTANA } from './pestanasExtra';
 import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
@@ -59,13 +59,17 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   const [arrastrada, setArrastrada] = useState<string | null>(null);
   const [encima, setEncima] = useState<{ slug: string; antes: boolean } | null>(null);
   const sitio = useSitio();
-  const [grupos, setGrupos] = useState<Grupo[] | null>(null);
+  const [grupos_, setGrupos] = useState<Grupo[] | null>(null);
   const [slugPagina, setSlugPagina] = useState<string | null>(null);
   // «todo» ya no es una pestaña (2026-10-25, Eugenio: «quita la pestaña de Todo»): quiere decir
   // «la de por defecto», que es la primera (las del termómetro, si las hay; si no, la primera base de datos).
   const [activa, setActiva] = useState<string>('todo');
   // Las pestañas que pone un bloque de la página (el termómetro): van delante, en la misma barra.
   const extra = usePestanasExtra(paginaId);
+  // Y los grupos que esas pestañas ya enseñan (p. ej. «Objetivos», en galería con su nota): no se repiten.
+  const ocultos = useGruposOcultos(paginaId);
+  const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const grupos = useMemo(() => (grupos_ && ocultos.length ? grupos_.filter(g => !ocultos.includes(plano(g.nombre))) : grupos_), [grupos_, ocultos]);
   const barra = useRef<HTMLDivElement>(null);
   const fila = useRef<HTMLElement>(null);
   const [hayMas, setHayMas] = useState(false);

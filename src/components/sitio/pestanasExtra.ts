@@ -12,16 +12,29 @@ import { useSyncExternalStore, type ReactNode } from 'react';
 export type PestanaExtra = { id: string; titulo: string; n?: number; contenido: ReactNode };
 
 const VACIO: PestanaExtra[] = [];
+const NADA: string[] = [];
 const mapa = new Map<string, PestanaExtra[]>();
+/** Grupos de la red que una pestaña del bloque ya enseña mejor (no se repiten). */
+const ocultos = new Map<string, string[]>();
 const oyentes = new Set<() => void>();
 const avisar = () => oyentes.forEach(f => f());
 
-export function ponerPestanasExtra(paginaId: string, lista: PestanaExtra[]) {
+export function ponerPestanasExtra(paginaId: string, lista: PestanaExtra[], ocultar: string[] = NADA) {
   mapa.set(paginaId, lista);
+  ocultos.set(paginaId, ocultar);
   avisar();
 }
 export function quitarPestanasExtra(paginaId: string) {
+  ocultos.delete(paginaId);
   if (mapa.delete(paginaId)) avisar();
+}
+/** Los nombres de los grupos de la red que no hay que enseñar (en minúsculas y sin tildes). */
+export function useGruposOcultos(paginaId: string): string[] {
+  return useSyncExternalStore(
+    f => { oyentes.add(f); return () => { oyentes.delete(f); }; },
+    () => ocultos.get(paginaId) || NADA,
+    () => NADA,
+  );
 }
 export function usePestanasExtra(paginaId: string): PestanaExtra[] {
   return useSyncExternalStore(
