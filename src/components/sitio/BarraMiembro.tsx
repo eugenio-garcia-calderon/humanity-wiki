@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UserRound, LogOut, Bookmark, BookmarkCheck, X, Loader2, Pencil } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { miniatura } from '../../utils/miniatura';
 import MuroMiembros, { useCanjeEnlace, type Muro } from './MuroMiembros';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
@@ -20,7 +21,10 @@ import { cn } from '../../utils/cn';
 type Estado = {
   activo: boolean; raiz: string; nombre: string; logo: string | null; icono: string | null; acento: string | null;
   registro: string; enlace_magico: boolean; mensaje: string | null; es_equipo: boolean;
-  yo: { nombre: string | null; email: string; estado: string; categoria: string | null; permisos: Record<string, boolean> | null } | null;
+  yo: { nombre: string | null; email: string; estado: string; categoria: string | null; avatar?: string | null; permisos: Record<string, boolean> | null } | null;
+  equipo?: { nombre: string | null; avatar: string | null } | null;
+  /** Su página en el sitio (la fila de «Personas» con su correo), si la tiene. */
+  persona?: { id: string; titulo: string; foto: string | null } | null;
 };
 
 export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
@@ -58,6 +62,7 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   }, [barraVisible]);
   const caja = useRef<HTMLDivElement>(null);
   const sitio = useSitio();
+  const ir = useNavigate();
   const base = `/api/sitio-miembros/${encodeURIComponent(raiz)}`;
 
   const cargar = () => fetch(`${base}/estado`, { credentials: 'include' }).then(r => r.json()).then(setE).catch(() => {});
@@ -80,7 +85,7 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   // site's menu on, `CuentaMenu` answers instead.
   // El equipo que entró con la sesión de humanity.wiki tiene su propia barra; el que entró
   // con su cuenta de miembro (2026-10-20) sigue viendo esta píldora, con «Editar esta página».
-  const visible = !conMenu && !!e?.activo && (!e?.es_equipo || !!e?.yo);
+  const visible = !conMenu && !!e?.activo && (!e?.es_equipo || !!e?.yo || !!e?.persona);
   useEffect(() => {
     if (!visible) return;
     const pedir = (ev: Event) => { ev.preventDefault(); setAbierto(e?.yo ? 'menu' : 'entrar'); };
@@ -90,8 +95,12 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
 
   // Con el menú encendido, aquí sólo queda el aviso del enlace mágico (el canje sigue siendo cosa de esta pieza).
   if (conMenu) return avisoEnlace ? <p className="fixed bottom-4 left-4 z-[60] max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p> : null;
-  if (!e?.activo || (e.es_equipo && !e.yo)) return null;
-  const yo = e.yo;
+  if (!e?.activo || (e.es_equipo && !e.yo && !e.persona)) return null;
+  // Quien gestiona la web y entró con su sesión de humanity.wiki cuenta como dentro si tiene su página aquí.
+  const yo = e.yo || (e.es_equipo && e.persona ? { nombre: e.equipo?.nombre || e.persona.titulo, email: '', estado: 'activo', categoria: null, permisos: null } : null);
+  const persona = yo ? e.persona || null : null;
+  const enlacePersona = persona ? (sitio ? sitio.enlacePagina(persona.id) : `/p/${persona.id}`) : null;
+  const foto = persona?.foto && /^(https?:|\/)/.test(persona.foto) ? persona.foto : yo?.avatar || null;
   const acento = e.acento || '#0f172a';
   const guardada = !!guardados?.some(g => g.id === paginaId);
   const puedeGuardar = !!yo?.permisos?.guardar;
@@ -116,19 +125,29 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   const cuenta = (
     <div ref={caja} data-barra-miembro className={cn('relative flex items-center print:hidden', !hueco && 'fixed right-4 top-4 z-[60] rounded-full bg-white/90 pl-1 pr-1 shadow-sm backdrop-blur')}>
       {avisoEnlace && <p className="absolute right-0 top-full z-[70] mt-2 w-64 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p>}
-      <button onClick={() => setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'))} data-pildora-cuenta
+      {/* SU FOTO Y SU PÁGINA (2026-10-26, Eugenio): con página en el sitio, el botón enseña su foto y lleva a
+          ella; ya en ella, abre el menú (editar, guardados, salir). */}
+      <button onClick={() => {
+        if (enlacePersona && persona!.id !== paginaId && !abierto) { ir(enlacePersona); return; }
+        setAbierto(a => (a ? null : yo ? 'menu' : 'entrar'));
+      }} data-pildora-cuenta
         title={yo ? (yo.nombre || yo.email) : 'Entrar o registrarte'} aria-label={yo ? `Mi cuenta: ${yo.nombre || yo.email}` : 'Entrar o registrarte'}
         className="inline-flex h-9 items-center gap-1.5 rounded-full pr-1 text-[13px] font-semibold text-slate-700 hover:text-slate-950">
         {/* Una silueta, con contorno negro y fondo blanco: igual con sesión o sin ella. */}
-        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] border-slate-900 bg-white text-slate-900">
-          <UserRound className="h-4 w-4" strokeWidth={2} />
-        </span>
+        {foto
+          ? <img src={miniatura(foto, 96)} alt="" data-foto-cuenta className="h-8 w-8 shrink-0 rounded-full object-cover ring-[1.5px] ring-slate-900" />
+          : <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] border-slate-900 bg-white text-slate-900">
+              <UserRound className="h-4 w-4" strokeWidth={2} />
+            </span>}
         {/* Solo la silueta (2026-10-26, Eugenio: «no hace falta que ponga la palabra Entrar»): el nombre, para los lectores de pantalla. */}
         <span className="sr-only">{yo ? (yo.nombre || yo.email.split('@')[0]).split(' ')[0] : 'Entrar'}</span>
       </button>
       {abierto === 'menu' && yo && (
         <div className="absolute right-0 top-full z-[70] mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
           <p className="truncate px-2 pt-1 text-[13px] font-bold text-slate-800">{yo.nombre || yo.email}</p>
+          {enlacePersona && (
+            <Link to={enlacePersona} onClick={() => setAbierto(null)} className="mx-2 mb-1 block text-[12px] font-semibold text-slate-500 underline-offset-2 hover:underline">Mi página</Link>
+          )}
           <p className="truncate px-2 pb-2 text-[11px] text-slate-400">{e.es_equipo ? 'Equipo de esta web' : <>{yo.categoria || 'Miembro'}{yo.estado !== 'activo' ? ' · pendiente' : ''}</>}</p>
           {/* QUIEN GESTIONA LA WEB, AUNQUE HAYA ENTRADO COMO MIEMBRO (2026-10-20, Eugenio:
               «ha desaparecido Entrar y no puede editar»): el editor está en humanity.wiki. */}

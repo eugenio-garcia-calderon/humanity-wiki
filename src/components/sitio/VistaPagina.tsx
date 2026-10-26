@@ -15,6 +15,7 @@ import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
 import { cn } from '../../utils/cn';
 import { completarSitio } from './sitioWeb';
 import CabeceraSitio from './CabeceraSitio';
+import PestanasTitulos from './PestanasTitulos';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -194,7 +195,10 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {!pagina.virtual && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
         {termo && <GaleriaHijasLectura config={(pagina as any).config} titulo={`Páginas dentro de ${pagina.titulo || 'esta página'}`} />}
         {termo && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
-        <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />
+        {/* Los títulos 2 como pestañas (`PestanasTitulos.tsx`), si la página lo pide. */}
+        {cfg.pestanasTitulos && !pagina.virtual
+          ? <PestanasTitulos bloques={bloques} paginaId={pagina.id} />
+          : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
         {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
       </article>
