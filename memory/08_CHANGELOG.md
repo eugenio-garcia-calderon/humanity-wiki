@@ -9860,3 +9860,4 @@ Eugenio: «el menú tiene que ocupar solo una línea; si hay demasiadas páginas
 - `FilaBotonesUnaLinea` (`BotonesCabecera.tsx`): mide los botones en una fila invisible (recortada, para no ensanchar la página) y enseña los que caben; el resto, en «Más ▾» (el `MenuPlegado` de siempre, con `mas`). Vuelve a medir al cambiar el ancho.
 - Cabecera del sitio en las entradas (`CabeceraSitio`): el logo y el menú en la misma línea (en el móvil, el menú en una línea debajo del logo). `BotonesLectura` admite `unaLinea`.
 - Cabecera de la página principal (botones a la derecha): también en una línea; la columna derecha ya no se sale por encima del título (`[&>*]:max-w-full` en `CabeceraElementos`).
+- (seguido) Los botones mantienen el orden de antes (en estas cabeceras la lista va al revés: el primero, a la derecha del todo), y la fila deja libre lo que tapa la píldora fija de «Entrar»: antes tapaba «Más» y no se podía pulsar.

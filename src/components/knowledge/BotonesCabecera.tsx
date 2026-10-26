@@ -140,11 +140,17 @@ export function FilaBotonesUnaLinea({ botones, talla = 'm', estilo = 'relleno', 
   const caja = useRef<HTMLDivElement>(null);
   const medida = useRef<HTMLDivElement>(null);
   const [caben, setCaben] = useState(botones.length);
+  // Lo que tapa la píldora fija de «Entrar» (arriba a la derecha) se deja libre: si no, tapaba «Más».
+  const [reserva, setReserva] = useState(0);
   useLayoutEffect(() => {
     const medir = () => {
       const c = caja.current, m = medida.current;
       if (!c || !m) return;
-      const hueco = 8, ancho = c.clientWidth;
+      const cr = c.getBoundingClientRect();
+      const fija = document.querySelector('[data-barra-miembro]')?.getBoundingClientRect();
+      const tapa = fija && fija.width > 0 && fija.bottom > cr.top && fija.top < cr.bottom && fija.left < cr.right ? Math.ceil(cr.right - (fija.left - 12)) : 0;
+      setReserva(tapa);
+      const hueco = 8, ancho = c.clientWidth - tapa;
       const piezas = Array.from(m.children) as HTMLElement[];
       const anchos = piezas.slice(0, botones.length).map(x => x.offsetWidth);
       const anchoMas = piezas[botones.length]?.offsetWidth || 90;
@@ -160,7 +166,9 @@ export function FilaBotonesUnaLinea({ botones, talla = 'm', estilo = 'relleno', 
     medir();
     const ro = new ResizeObserver(medir);
     if (caja.current) ro.observe(caja.current);
-    return () => ro.disconnect();
+    // La píldora de «Entrar» llega un poco después que la cabecera.
+    const t = window.setTimeout(medir, 600);
+    return () => { ro.disconnect(); window.clearTimeout(t); };
   }, [botones, talla]);
   const boton = (b: BotonCabecera, oculto = false) => (
     <button key={b.id} type="button" onClick={() => onAbrir(b)} tabIndex={oculto ? -1 : undefined} data-boton-cabecera={oculto ? undefined : (b.pubTitulo || '')}
@@ -180,7 +188,7 @@ export function FilaBotonesUnaLinea({ botones, talla = 'm', estilo = 'relleno', 
           <span className={cn('inline-flex shrink-0 items-center gap-2 rounded-full font-bold', TALLA[talla])}>Más <ChevronDown className="h-4 w-4" /></span>
         </div>
       </div>
-      <div className="flex flex-nowrap items-center justify-end gap-2 overflow-hidden">
+      <div className="flex flex-nowrap items-center justify-end gap-2 overflow-hidden" style={reserva ? { paddingRight: reserva } : undefined}>
         {botones.slice(0, caben).map(b => boton(b))}
         {resto.length > 0 && <MenuPlegado mas botones={resto} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} />}
       </div>
