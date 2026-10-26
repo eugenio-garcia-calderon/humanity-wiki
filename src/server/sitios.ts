@@ -44,6 +44,7 @@ import { accesoMiembro, filtrarBloques, muroDe } from './miembros.js';
 import { peticionActual } from './peticionActual.js';
 import { bdInterno } from './bd';
 import { cacheCorta } from './cacheCorta';
+import { todosLosBloques } from '../utils/bloques';
 
 /** Memoria corta de las preguntas de visibilidad anónima (ver `cacheCorta.ts`). */
 const cacheVisible = cacheCorta<boolean>();
@@ -1217,15 +1218,22 @@ export function registrarSitios(app: Express, db: any) {
           // una entrada sin nombre corto se abre por su título (`/movilidad`, `porContexto`).
           if (s.forma === 'dominio' && raizDominio) {
             const sin = (await db.execute(sql`
-              SELECT DISTINCT w.id, w.title FROM knowledge_windows w JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL
+              SELECT DISTINCT w.id, w.title, f.tabla_id FROM knowledge_windows w JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL
               WHERE w.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND (w.slug IS NULL OR w.slug = '')
                 AND w.deleted_at IS NULL AND w.archived_at IS NULL
             `)).rows as any[];
             const usados = new Set(Object.values(legibles));
-            await enParalelo(sin.map(x => x.id), id => cuelgaDe(db, id, raizDominio));
+            // LAS FILAS DE UNA TABLA DE ESTA MISMA PÁGINA (2026-10-26): cuelgan de la raíz si esta página cuelga,
+            // porque su madre es la página que enseña su tabla. Sin preguntarlo una a una: con los 283
+            // territorios en «Mapas» eran 6,4 s aun de 12 en 12.
+            const tablasAqui = new Set<string>(legible && (legible.id === raizDominio || await cuelgaDe(db, legible.id, raizDominio))
+              ? todosLosBloques(legible.config?.bloques || []).filter((b: any) => b?.tipo === 'basedatos' && b.tabla_id).map((b: any) => String(b.tabla_id))
+              : []);
+            const cuelga = (x: any) => tablasAqui.has(String(x.tabla_id)) ? Promise.resolve(true) : cuelgaDe(db, x.id, raizDominio);
+            await enParalelo(sin, cuelga);
             for (const x of sin) {
               const n = slugDe(x.title || '');
-              if (!n || usados.has(n) || TRAMOS_RESERVADOS.has(n) || !(await cuelgaDe(db, x.id, raizDominio))) continue;
+              if (!n || usados.has(n) || TRAMOS_RESERVADOS.has(n) || !(await cuelga(x))) continue;
               usados.add(n); legibles[x.id] = n;
             }
           }
