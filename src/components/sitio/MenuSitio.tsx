@@ -264,15 +264,56 @@ function Lateral({ s, rutas, logo, nombre, cuenta }: { s: Sitio; rutas: Rutas; l
   );
 }
 
+// ============================================================================
+// EL MAPA WEB DEL PIE (2026-10-26, Eugenio: «que el pie sea un mapa web con todas
+// las páginas ordenaditas»). Una columna por cada página del menú del sitio con lo
+// que cuelga de ella, y delante lo de la portada (`GET /api/sitio/mapa-web/:raiz`,
+// `server/mapaWeb.ts`). Cada columna enseña las primeras y «Ver todas».
+// ============================================================================
+type SeccionMapa = { titulo: string; pagina_id: string | null; entradas: { id: string; titulo: string }[]; total: number };
+function MapaWeb({ raizId, rutas }: { raizId: string; rutas: Rutas }) {
+  const [secciones, setSecciones] = useState<SeccionMapa[] | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/sitio/mapa-web/${encodeURIComponent(raizId)}`).then(r => (r.ok ? r.json() : null)).then(j => { if (vivo) setSecciones(j?.secciones || []); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [raizId]);
+  if (!secciones?.length) return null;
+  return (
+    <nav aria-label="Mapa web" data-mapa-web>
+      <p className="text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-4">Mapa web</p>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-7 @2xl:grid-cols-3 @5xl:grid-cols-5">
+        {secciones.map((x, i) => (
+          <div key={i} className="min-w-0">
+            {x.pagina_id
+              ? <a href={rutas.enlacePagina(x.pagina_id)} data-interno="" className="block text-sm font-black opacity-95 hover:underline">{x.titulo}</a>
+              : <p className="text-sm font-black opacity-95">{x.titulo}</p>}
+            {x.entradas.length > 0 && (
+              <ul className="mt-1.5 space-y-0.5">
+                {x.entradas.map(e => (
+                  <li key={e.id}><a href={rutas.enlacePagina(e.id)} data-interno="" className="block truncate py-0.5 text-[13px] opacity-70 hover:opacity-100 hover:underline">{e.titulo}</a></li>
+                ))}
+                {x.total > x.entradas.length && (x.pagina_id || raizId) && (
+                  <li><a href={rutas.enlacePagina(x.pagina_id || raizId)} data-interno="" className="block py-0.5 text-[13px] font-bold opacity-80 hover:opacity-100 hover:underline">Ver todas ({x.total})</a></li>
+                )}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
 function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string }) {
   const p = s.pie;
   const c = p.contacto;
-  const hayContacto = !!(c.email || c.telefono || c.direccion);
+  const hayContacto = p.mostrarContacto && !!(c.email || c.telefono || c.direccion);
   const legales = (Object.keys(NOMBRES_LEGALES) as DocLegal[]).filter(d => p.legales[d]);
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
   return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
-      <div className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-12 grid gap-10 @2xl:grid-cols-3">
+      <div className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-12 grid gap-10', p.mapaWeb && rutas.raizId ? '@2xl:grid-cols-[minmax(12rem,16rem)_1fr]' : '@2xl:grid-cols-3')}>
         <div className="space-y-3">
           {(logo || nombre) && (
             <div className="flex items-center gap-2.5 font-black text-lg">
@@ -282,6 +323,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
           )}
           {p.descripcion && <p className="text-base opacity-75 leading-relaxed whitespace-pre-line max-w-xs">{p.descripcion}</p>}
         </div>
+        {p.mapaWeb && rutas.raizId && <MapaWeb raizId={rutas.raizId} rutas={rutas} />}
         {p.enlaces.length > 0 && (
           <div>
             <p className={titulo}>Enlaces</p>

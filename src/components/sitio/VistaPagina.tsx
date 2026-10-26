@@ -141,7 +141,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} />}
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
-      {mapa && <VistaMapaSitio />}
+      {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
       <div hidden={mapa || undefined}>
       {!termo && <div>
       {migasContexto ? (

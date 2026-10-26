@@ -97,8 +97,8 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
           <ElegirTerritorio segmento alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegido} onElegir={elegir} />
           {media !== null && <NotaEslabon nota={Math.round(media * 10) / 10} titulo={`Media de ${nombre}`} />}
         </Eslabon>, ranura)}
-      {/* Abajo, solo lo mejor y lo peor con la escala de colores: el territorio y su nota ya están arriba. */}
-      {centro && <div data-filtro-territorio className="mx-auto mb-2 mt-1 max-w-3xl rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-sm">{centro}</div>}
+      {/* Nada debajo (2026-10-26, Eugenio: «elimina este cuadrado de info debajo del menú»): el territorio
+          y su nota ya están en la barra, y la galería de sistemas sube hasta arriba. */}
     </>
   );
   return (

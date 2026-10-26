@@ -14,6 +14,7 @@ import { MARKER_ICONS } from '../utils/markerIcons';
 import { METRIC_ICONS } from '../utils/metricIcons';
 import { usePanelWidth } from '../hooks/usePanelWidth';
 import ResizeHandle from '../components/ui/ResizeHandle';
+import { miniatura } from '../utils/miniatura';
 
 const OBJECTIVE_KEY_BY_ID: Record<string, ObjectiveKey> = Object.fromEntries(
   Object.entries(OBJECTIVE_ID_BY_KEY).map(([key, id]) => [id, key])
@@ -386,8 +387,26 @@ export default function MapPage() {
   // conocimiento — solo el lienzo del mapa, sin filtros ni panel de
   // territorio (Layout ya quita la barra superior con ?embed=1).
   const isEmbedMode = searchParams.get('embed') === '1';
+  const tablaSistemas = searchParams.get('sistemas');
+  const [sistemasSitio, setSistemasSitio] = useState<Record<string, { label: string; imagen: string | null }> | null>(null);
+  useEffect(() => {
+    if (!tablaSistemas) return;
+    const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    // El objetivo del mapa → el sistema que le corresponde cuando no se llaman igual.
+    const ALIAS: Record<string, string> = { ecosistemas: 'ecologia', tecnologia: 'informatica', gobernanza: 'politica', cultura: 'arte' };
+    fetch(`/api/bd/tablas/${encodeURIComponent(tablaSistemas)}?lectura=1`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => {
+      const porNombre = new Map<string, { label: string; imagen: string | null }>();
+      for (const f of j?.filas || []) if (f.pagina?.titulo) porNombre.set(plano(f.pagina.titulo), { label: f.pagina.titulo, imagen: f.pagina.imagen || null });
+      const m: Record<string, { label: string; imagen: string | null }> = {};
+      for (const k of ['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas', 'educacion', 'movilidad', 'energia', 'tecnologia', 'empleo', 'gobernanza', 'economia', 'cultura']) {
+        const s = porNombre.get(ALIAS[k] || k);
+        if (s) m[k] = s;
+      }
+      setSistemasSitio(m);
+    }).catch(() => {});
+  }, [tablaSistemas]);
 
-  const objectivesList: { key: ObjectiveKey; label: string; icon: any; color: string }[] = [
+  const objectivesBase: { key: ObjectiveKey; label: string; icon: any; color: string; imagen?: string | null }[] = [
     { key: 'overall', label: 'General', icon: Layers, color: 'text-slate-600' },
     { key: 'agua', label: 'Agua', icon: Droplet, color: 'text-blue-500' },
     { key: 'alimentacion', label: 'Alimentación', icon: Wheat, color: 'text-amber-500' },
@@ -404,6 +423,13 @@ export default function MapPage() {
     { key: 'economia', label: 'Economía', icon: Coins, color: 'text-violet-500' },
     { key: 'cultura', label: 'Cultura', icon: Palette, color: 'text-pink-500' },
   ];
+  // LOS NOMBRES E IMÁGENES DE LOS SISTEMAS DEL SITIO (2026-10-26, Eugenio: «que el menú lateral del mapa
+  // coincida con la base de datos de Sistemas de la página de inicio: sus imágenes de portada y sus
+  // nombres, que son los que prevalecen»). Con `?sistemas=<tabla>`, cada objetivo del mapa toma el
+  // nombre y la portada de su sistema; los que no tienen sistema no salen.
+  const objectivesList = objectivesBase
+    .filter(o => !sistemasSitio || o.key === 'overall' || sistemasSitio[o.key])
+    .map(o => (sistemasSitio?.[o.key] ? { ...o, label: sistemasSitio[o.key].label, imagen: sistemasSitio[o.key].imagen } : o));
 
   /** Lo que se sabe del territorio elegido: sus objetivos, retos y soluciones (o el explorador). */
   const contenidoTerritorio = (
@@ -514,7 +540,7 @@ export default function MapPage() {
                       isObjActive ? 'bg-slate-900 text-emerald-400' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
+                    {obj.imagen ? <img src={miniatura(obj.imagen, 64)} alt="" className="w-7 h-7 object-contain" /> : <Icon className="w-5 h-5" />}
                   </button>
                 );
               })}
@@ -530,11 +556,13 @@ export default function MapPage() {
             <div key={obj.key} className="border-b border-slate-100">
               <button
                 onClick={() => handleObjectiveChange(obj.key)}
-                className={`w-full flex items-center gap-2 px-4 py-3 text-left transition-colors ${
+                className={`w-full flex items-center gap-2 px-4 ${sistemasSitio ? 'py-1.5' : 'py-3'} text-left transition-colors ${
                   isObjActive ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isObjActive ? 'text-emerald-400' : obj.color}`} />
+                {obj.imagen
+                  ? <img src={miniatura(obj.imagen, 64)} alt="" className={`w-7 h-7 shrink-0 object-contain rounded-md ${isObjActive ? 'bg-white' : ''}`} />
+                  : <Icon className={`w-4 h-4 shrink-0 ${isObjActive ? 'text-emerald-400' : obj.color}`} />}
                 <span className={`flex-1 font-semibold ${isObjActive ? 'text-base' : 'text-sm'}`}>{obj.label}</span>
                 {objIndicators.length > 0 && (
                   <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${isObjActive ? 'rotate-180 text-white' : 'text-slate-400'}`} />

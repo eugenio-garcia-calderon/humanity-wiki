@@ -378,9 +378,9 @@ function PasoRuta({ etiqueta, titulo, opciones, actual, h1, apagado, icono }: { 
   const Texto = h1 ? 'h1' : 'span';
   const contenido = (
     <span className="inline-flex min-w-0 items-center gap-1.5">
-      <IconoPaso icono={icono} />
+      <span className="hidden sm:contents"><IconoPaso icono={icono} /></span>
       {/* La misma letra que el territorio (2026-10-26): base y negrita. */}
-      <Texto title={titulo} className={cn('truncate text-base font-black tracking-tight', apagado ? 'text-slate-600' : 'text-slate-900')}>
+      <Texto title={titulo} className={cn('truncate text-base font-black tracking-tight sm:text-lg', apagado ? 'text-slate-600' : 'text-slate-900')}>
         {etiqueta}{h1 && etiqueta !== titulo && <span className="sr-only"> · {titulo}</span>}
       </Texto>
     </span>
