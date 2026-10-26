@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { createPortal } from 'react-dom';
 import { ArrowUpRight, TrendingUp, Undo2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
@@ -36,6 +35,7 @@ type Nivel = { nivel: number; titulo: string; descripcion: string; medidas: stri
 type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string };
 type Grupo = { nombre: string; slug: string; entradas: Entrada[] };
 type Datos = { nombre: string; nota: number | null; territorio: string | null; territorio_id: string | null; tabla_territorios: string | null;
+  fila_id?: string; columna_nota?: string | null;
   pagina?: { icono: string | null; portada: string | null; subtitulo: string }; diagnostico: string; niveles: Nivel[]; red: Grupo[] };
 
 /** Un texto con una idea por línea (o separadas por «;»), como lista. */
@@ -56,8 +56,6 @@ const ideas = (t: string) => String(t || '').split(/\n+|;\s*/).map(x => x.replac
 // se lee de arriba abajo (1, 2, 3…) con marcas neutras, no con círculos del
 // color de los niveles; teclado: un solo tabulador por grupo y flechas.
 
-/** Alto de cada nivel del termómetro, en rem. */
-const FILA = 1.5;
 const sinTilde = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /** Flechas para moverse por un grupo (los niveles, las pestañas): un solo tabulador. */
@@ -75,86 +73,44 @@ function conFlechas(e: React.KeyboardEvent, actual: number, max: number, ir: (n:
   requestAnimationFrame(() => (grupo?.querySelector(`[data-pos="${n}"]`) as HTMLElement | null)?.focus());
 }
 
-/** El color de un nivel aún no alcanzado: el suyo, muy claro (se ve hacia dónde se va). */
-const vacio = (n: number) => `color-mix(in srgb, ${colorDeNota(n)} 18%, white)`;
 
-function Tubo({ niveles, actual, elegido, onElegir, onEncima }: {
+/** LA ESCALA EN HORIZONTAL (2026-10-26, Eugenio: «la barra de la galería, donde
+ *  indica el lugar en el que está, en horizontal en la página de cada entrada»).
+ *  Sustituye al termómetro vertical: los once niveles con su color, «HOY» y
+ *  «META» debajo; pasar el ratón enseña el nivel, pulsarlo lo deja abierto. */
+function Escala({ niveles, actual, elegido, onElegir, onEncima }: {
   niveles: Nivel[]; actual: number | null; elegido: number; onElegir: (n: number) => void; onEncima: (n: number | null) => void;
 }) {
-  const filas = Array.from({ length: 11 }, (_, i) => 10 - i);
-  const sig = actual !== null && Math.floor(actual) < 10 ? Math.floor(actual) + 1 : null;
+  const hoy = actual !== null ? Math.floor(actual) : null, sig = hoy !== null && hoy < 10 ? hoy + 1 : null;
   return (
-    <div data-tubo className="relative flex select-none items-stretch gap-2" onMouseLeave={() => onEncima(null)}>
-      {/* Los números, del 10 arriba al 0 abajo: pasar el ratón enseña el nivel, pulsar lo deja abierto. */}
-      <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex flex-col">
-        {filas.map(n => {
+    <div data-escala onMouseLeave={() => onEncima(null)}>
+      <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex gap-1">
+        {Array.from({ length: 11 }, (_, n) => {
           const info = niveles.find(x => x.nivel === n);
+          const c = colorDeNota(n);
           return (
-            <div key={n} style={{ height: `${FILA}rem` }}>
-              <button type="button" role="radio" aria-checked={elegido === n} tabIndex={elegido === n ? 0 : -1} data-pos={n}
-                aria-label={`Nivel ${n} · ${ESCALA[n]}${info?.titulo ? ` — ${info.titulo}` : ''}${actual !== null && Math.floor(actual) === n ? ' (ahora)' : n === sig ? ' (siguiente)' : ''}`}
-                onClick={() => onElegir(n)} onMouseEnter={() => onEncima(n)}
-                onKeyDown={e => conFlechas(e, n, 10, onElegir, 'v', true)}
-                className={cn('grid h-6 w-6 place-items-center rounded-full text-xs font-black tabular-nums transition-colors',
-                  elegido === n ? 'bg-slate-900 text-white' : actual !== null && Math.floor(actual) === n ? 'bg-white text-slate-900 ring-2 ring-slate-900' : 'text-slate-600 hover:bg-white hover:text-slate-900',
-                  n === sig && elegido !== n && '[outline:2px_dashed_rgb(71_85_105/.7)] [outline-offset:-2px]')}>
-                {n}
-              </button>
-            </div>
+            <button key={n} type="button" role="radio" aria-checked={elegido === n} tabIndex={elegido === n ? 0 : -1} data-pos={n}
+              aria-label={`Nivel ${n}${info?.titulo ? ` — ${info.titulo}` : ''}${n === hoy ? ' (hoy)' : n === sig ? ' (meta)' : ''}`}
+              onClick={() => onElegir(n)} onMouseEnter={() => onEncima(n)} onKeyDown={e => conFlechas(e, n, 10, onElegir, 'h')}
+              className={cn('grid h-9 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums transition-transform hover:-translate-y-0.5',
+                n === hoy && 'h-11 -my-1 text-base shadow-md ring-2 ring-slate-900 ring-offset-2',
+                elegido === n && n !== hoy && 'ring-2 ring-slate-500 ring-offset-1',
+                n === sig && elegido !== n && '[outline:2px_dashed_rgb(180_83_9)] [outline-offset:2px]')}
+              style={{ backgroundColor: c, color: textoSobre(c) }}>
+              {n}
+            </button>
           );
         })}
       </div>
-      {/* El tubo: lleno con el color de cada nivel hasta la nota; por encima, el mismo color muy claro. */}
-      <div className="relative w-5">
-        <div className="absolute inset-x-0 top-0.5 bottom-5 overflow-hidden rounded-full ring-1 ring-black/5">
-          {filas.map(n => (
-            <div key={n} className="border-b border-white/80 last:border-0" style={{ height: `${FILA}rem`, backgroundColor: actual !== null && n <= actual ? colorDeNota(n) : vacio(n) }} />
-          ))}
-        </div>
-        <div className="absolute -bottom-1 left-1/2 h-7 w-7 -translate-x-1/2 rounded-full ring-4 ring-white"
-          style={{ backgroundColor: actual !== null ? colorDeNota(actual) : '#e2e8f0' }} />
+      <div aria-hidden className="mt-1.5 flex gap-1 text-[10px] font-black uppercase leading-none">
+        {Array.from({ length: 11 }, (_, n) => (
+          // «urgente» y «resuelto» se alinean hacia dentro: en el móvil no caben en su casilla y no deben salirse de la página.
+          <span key={n} className={cn('flex min-w-0 flex-1 whitespace-nowrap', n === 0 && n !== hoy && n !== sig ? 'justify-start' : n === 10 && n !== hoy && n !== sig ? 'justify-end' : 'justify-center')}>
+            {n === hoy ? <span className="text-slate-900">hoy</span> : n === sig ? <span className="text-amber-700">meta</span>
+              : n === 0 ? <span className="font-bold normal-case text-slate-500">urgente</span> : n === 10 ? <span className="font-bold normal-case text-slate-500">resuelto</span> : null}
+          </span>
+        ))}
       </div>
-      {/* La meta (el nivel siguiente), con un tramo discontinuo en el tubo: el salto se ve aquí también (bot de UX, ronda 3). */}
-      {sig !== null && (
-        <>
-          <span aria-hidden className="pointer-events-none absolute left-[2rem] w-5 rounded-sm border-2 border-dashed border-amber-600"
-            style={{ top: `${(10 - sig) * FILA + 0.125}rem`, height: `${FILA}rem` }} />
-          <span aria-hidden className="pointer-events-none absolute left-[3.35rem] rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-slate-900"
-            style={{ top: `${(10 - sig) * FILA + FILA / 2}rem`, transform: 'translateY(-50%)' }}>meta</span>
-        </>
-      )}
-      {/* «Hoy», siempre a la vista junto al tubo, aunque se mire otro nivel (bot de UX, ronda 2). */}
-      {actual !== null && (
-        <span aria-hidden className="pointer-events-none absolute left-[3.35rem] rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-black uppercase leading-none text-white"
-          style={{ top: `${(10 - Math.floor(actual)) * FILA + FILA / 2}rem`, transform: 'translateY(-50%)' }}>hoy</span>
-      )}
-    </div>
-  );
-}
-
-/** En el móvil: el mismo termómetro, tumbado (del 0 a la izquierda al 10 a la derecha). */
-function TuboHorizontal({ actual, elegido, onElegir }: { actual: number | null; elegido: number; onElegir: (n: number) => void }) {
-  const hoy = actual !== null ? Math.floor(actual) : null, sig = hoy !== null && hoy < 10 ? hoy + 1 : null;
-  return (
-    <div>
-    <div role="radiogroup" aria-label="Niveles del 0 al 10" data-flechas className="flex gap-0.5">
-      {Array.from({ length: 11 }, (_, n) => (
-        <button key={n} type="button" role="radio" aria-checked={elegido === n} tabIndex={elegido === n ? 0 : -1} data-pos={n}
-          aria-label={`Nivel ${n} · ${ESCALA[n]}`} onClick={() => onElegir(n)} onKeyDown={e => conFlechas(e, n, 10, onElegir, 'h')}
-          className={cn('grid h-11 min-w-0 flex-1 place-items-center rounded-lg text-xs font-black tabular-nums', elegido === n && 'ring-2 ring-slate-900 ring-offset-1', actual !== null && Math.floor(actual) === n && elegido !== n && 'outline outline-2 outline-offset-1 outline-slate-500', n === sig && elegido !== n && 'border-2 border-dashed border-amber-600')}
-          style={actual !== null && n <= actual ? { backgroundColor: colorDeNota(n), color: textoSobre(colorDeNota(n)) } : { backgroundColor: vacio(n), color: '#475569' }}>
-          {n}
-        </button>
-      ))}
-    </div>
-    {/* «HOY» y «META» debajo, como en el termómetro del ordenador (bot de UX, ronda 4). */}
-    <div aria-hidden className="mt-1 flex gap-0.5">
-      {Array.from({ length: 11 }, (_, n) => (
-        <span key={n} className="min-w-0 flex-1 text-center text-[9px] font-black uppercase leading-none">
-          {n === hoy ? <span className="text-slate-900">hoy</span> : n === sig ? <span className="text-amber-700">meta</span> : null}
-        </span>
-      ))}
-    </div>
     </div>
   );
 }
@@ -286,17 +242,25 @@ function PanelDiagnostico({ fallos, grupos, territorio }: { fallos: string[]; gr
   );
 }
 
+/** Lo que el editor pasa para cambiar la cabecera ahí mismo (2026-10-26, Eugenio:
+ *  «los elementos para modificar estas propiedades, mucho más sencillos y sobrios»). */
+export type EdicionCabecera = {
+  titulo: string; onTitulo: (v: string) => void;
+  subtitulo: string; onSubtitulo: (v: string) => void;
+  onPortada: () => void;
+  /** Las demás propiedades de la fila (diagnóstico, enlaces…), plegadas. */
+  propiedades?: React.ReactNode;
+};
+
 export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, unknown>; paginaId?: string }) {
   const comoCabecera = d.comoCabecera === true;
-  // El título ya está arriba, en la línea de la ruta (`VistaPagina`): aquí solo la nota y el nivel.
-  const sinTitulo = d.sinTitulo === true;
+  const edicion = (d.edicion || null) as EdicionCabecera | null;
   const [x, setX] = useState<Datos | null | 'fallo'>(null);
   const [elegido, setElegido] = useState<number | null>(null);
   const [encima, setEncima] = useState<number | null>(null);
   const [leerMas, setLeerMas] = useState(false);
-  // Con el título arriba, el territorio va a su lado, en el hueco que deja `VistaPagina` (2026-10-25, Eugenio).
-  const [ranura, setRanura] = useState<HTMLElement | null>(null);
-  useEffect(() => { if (sinTitulo) setRanura(document.querySelector<HTMLElement>('[data-ranura-territorio]')); }, [sinTitulo]);
+  const [verProps, setVerProps] = useState(false);
+  const [falloNota, setFalloNota] = useState<string | null>(null);
   useEffect(() => {
     if (!paginaId) return;
     const q = d.tabla_niveles ? `?niveles=${encodeURIComponent(String(d.tabla_niveles))}` : '';
@@ -319,11 +283,11 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const territorioNombre = opciones.find(o => o.id === elegidoT)?.nombre || (x && x !== 'fallo' ? x.territorio : null);
   // El título de la pestaña del navegador dice el territorio y la nota (bot de UX: mejor al compartir).
   useEffect(() => {
-    if (!comoCabecera || !x || x === 'fallo' || actual === null || !territorioNombre) return;
+    if (!comoCabecera || edicion || !x || x === 'fallo' || actual === null || !territorioNombre) return;
     const antes = document.title, nuevo = `${x.nombre} en ${territorioNombre} · ${textoNota(actual)}/10`;
     if (!antes.includes(nuevo)) document.title = antes.replace(x.nombre, nuevo);
     return () => { document.title = antes; };
-  }, [comoCabecera, x, actual, territorioNombre]);
+  }, [comoCabecera, edicion, x, actual, territorioNombre]);
 
   // Las pestañas que van abajo, en la barra de la red. Solo las que tienen algo.
   const medidas = useMemo(() => (nivelActual !== null && nivelActual < 10 ? ideas(niveles.find(v => v.nivel === nivelActual)?.medidas || '') : []), [niveles, nivelActual]);
@@ -350,7 +314,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   useEffect(() => () => { if (paginaId) quitarPestanasExtra(paginaId); }, [paginaId]);
 
   if (!paginaId) return <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-xs font-bold text-slate-400">El termómetro va en la página de un sistema.</p>;
-  if (x === null) return <div className="mb-6 h-64 animate-pulse rounded-3xl bg-slate-50" />;
+  if (x === null) return <div className="mb-6 h-56 animate-pulse rounded-3xl bg-slate-50" />;
   if (x === 'fallo') return null;
   const tonos = actual !== null ? tonosDeNota(actual) : null;
   const tonosN = tonosDeNota(n);
@@ -358,75 +322,103 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const icono = x.pagina?.icono && !/^(https?:|\/)/.test(x.pagina.icono) ? x.pagina.icono : null;
   const elegirNivel = (v: number) => { setElegido(v === nivelActual ? null : v); setEncima(null); };
   const rotulo = n === nivelActual ? `Hoy en ${territorioNombre || 'este territorio'}` : n === 10 ? 'Nivel 10 · máxima aspiración' : n > (nivelActual ?? -1) ? `Nivel ${n} · meta posible` : `Nivel ${n} · por debajo de hoy`;
-  const selector = x.tabla_territorios && opciones.length > 0 ? (
-    <ElegirTerritorio compacto opciones={opciones} conDatos={conDatos} elegido={elegidoT}
-      onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
+  const titulo = edicion ? edicion.titulo : x.nombre;
+  const subtitulo = edicion ? edicion.subtitulo : (x.pagina?.subtitulo || '');
+  // La nota, desde la propia tarjeta (editor): una lista del 1 al 10, nada más.
+  const cambiarNota = async (v: number) => {
+    if (!x.fila_id || !x.columna_nota) return;
+    setFalloNota(null);
+    const antes = x.nota;
+    setX({ ...x, nota: v });
+    const r = await fetch(`/api/bd/filas/${encodeURIComponent(x.fila_id)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ celdas: { [x.columna_nota]: v } }) }).catch(() => null);
+    if (!r?.ok) { setX({ ...x, nota: antes }); setFalloNota('No se ha podido guardar la nota.'); }
+  };
+  const campo = 'w-full rounded-md bg-transparent outline-none transition-colors hover:bg-white/25 focus:bg-white/35 focus:ring-2 focus:ring-white/70';
+  const notaPildora = actual !== null && tonos ? (
+    <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`}
+      className="relative inline-flex shrink-0 items-baseline rounded-full bg-white px-4 py-1.5 font-black leading-none tabular-nums shadow-sm" style={{ color: tonos.tinta }}>
+      <span className="text-4xl">{textoNota(actual)}</span><span className="ml-0.5 text-xs font-bold opacity-70">/10</span>
+      {edicion && x.columna_nota && (
+        <select aria-label="Cambiar la nota" value={Math.round(actual)} onChange={e => cambiarNota(Number(e.target.value))}
+          className="absolute inset-0 cursor-pointer opacity-0">
+          {Array.from({ length: 10 }, (_, i) => i + 1).map(v => <option key={v} value={v}>{v}</option>)}
+        </select>
+      )}
+    </span>
   ) : null;
+  const imagen = portada
+    ? <img src={miniatura(portada, 240)} alt="" className="h-full w-full object-contain" />
+    : icono ? <span className="text-5xl leading-none">{icono}</span> : <span className="text-xs font-bold text-slate-400">{edicion ? 'Añadir imagen' : ''}</span>;
+
   return (
-    <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6')}>
-      {ranura && selector && createPortal(selector, ranura)}
-      <section className="grid grid-cols-1 gap-4 rounded-3xl border p-4 sm:p-5 lg:grid-cols-[auto_auto_minmax(0,1fr)] lg:items-center lg:gap-x-8"
-        style={tonos ? { backgroundColor: tonos.fondo, borderColor: tonos.borde } : { backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
-        {/* Sin el título arriba (en el editor de un bloque suelto, por ejemplo), aquí la cabecera entera. */}
-        {!sinTitulo && (
-          <header className="flex flex-wrap items-center justify-center gap-3 lg:col-span-3">
-            {portada ? <img src={miniatura(portada, 160)} alt="" className="h-12 w-12 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm ring-1 ring-black/10" /> : icono && <span className="text-4xl leading-none">{icono}</span>}
-            <div className="min-w-0 text-left">
-              {comoCabecera ? <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900">{x.nombre}</h1> : <p className="text-2xl font-black leading-tight tracking-tight text-slate-900">{x.nombre}</p>}
-              {x.pagina?.subtitulo && <p className="text-sm leading-snug text-slate-600">{x.pagina.subtitulo}</p>}
-            </div>
-            {!ranura && selector}
-          </header>
-        )}
-
-        {/* El termómetro (en el móvil, tumbado). */}
-        <div className="hidden lg:block lg:pr-8">
-          <Tubo niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} />
-        </div>
-
-        {/* La nota, grande. */}
-        {actual !== null && tonos && (
-          <div className="flex items-center justify-center gap-3 lg:flex-col lg:gap-1.5">
-            <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`} className="inline-flex items-baseline rounded-2xl px-4 py-2 font-black leading-none tabular-nums shadow-sm"
-              style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-              <span className="text-5xl lg:text-6xl">{textoNota(actual)}</span><span className="ml-1 text-base opacity-75">/10</span>
-            </span>
-            <p className="text-sm font-black" style={{ color: tonos.tinta }}>Nivel {nivelActual}</p>
-          </div>
-        )}
-
-        {/* El nivel que se señala en el termómetro (el de hoy, si no se ha pulsado otro). */}
+    <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6', 'space-y-3')}>
+      {/* Arriba: el territorio a la izquierda y, a la derecha, la tarjeta de la galería en horizontal. */}
+      <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
         <div className="min-w-0">
-          {sinNota ? (
-            <div data-sin-nota className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center">
-              <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
-              {propio && <button type="button" onClick={() => { setTerr(propio); guardarTerritorio(propio, ''); }} className="mt-2 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-slate-700">Ver {x.territorio}</button>}
-            </div>
-          ) : (
-            <>
-              <div className="mb-3 lg:hidden"><TuboHorizontal actual={actual} elegido={fijo} onElegir={elegirNivel} /></div>
-              <div data-nivel-elegido aria-live="polite" className="flex flex-col rounded-2xl bg-white/90 p-4 ring-1 ring-black/5 sm:p-5">
-                <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}</p>
-                <h2 className="mt-0.5 text-lg font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
-                {info?.descripcion && <p className={cn('mt-1 text-sm leading-relaxed text-slate-700', !leerMas && 'max-lg:line-clamp-3')}>{info.descripcion}</p>}
-                {info?.descripcion && !leerMas && <button type="button" onClick={() => setLeerMas(true)} className="-mb-2 inline-flex min-h-11 items-center self-start text-xs font-bold text-slate-700 underline lg:hidden">Leer más</button>}
-                {!info && <p className="mt-1 text-sm text-slate-500">Aún no se ha descrito este nivel.</p>}
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  {n === nivelActual && medidas.length > 0 && (
-                    <button type="button" onClick={() => abrirPestanaRed(paginaId, 'salto')}
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-slate-900 px-3.5 text-[13px] font-bold text-white hover:bg-slate-700">
-                      <TrendingUp className="h-4 w-4" /> Qué hace falta para llegar al nivel {nivelActual! + 1}
-                    </button>
-                  )}
-                  {elegido !== null && nivelActual !== null && encima === null && (
-                    <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-9 items-center gap-1 text-[13px] font-bold text-slate-600 hover:text-slate-900"><Undo2 className="h-3.5 w-3.5" /> Volver a hoy (nivel {nivelActual})</button>
-                  )}
-                </div>
-              </div>
-            </>
+          {x.tabla_territorios && opciones.length > 0 && (
+            <ElegirTerritorio alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+              onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
           )}
         </div>
-      </section>
+        <div data-tarjeta-sistema className="flex items-center gap-4 rounded-3xl p-3 shadow-sm"
+          style={tonos ? { backgroundColor: tonos.color, color: textoSobre(tonos.color) } : { backgroundColor: '#e2e8f0' }}>
+          {edicion
+            ? <button type="button" onClick={edicion.onPortada} title="Cambiar la imagen" className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white p-1.5 sm:h-24 sm:w-24 hover:ring-2 hover:ring-white/80">{imagen}</button>
+            : <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white p-1.5 sm:h-24 sm:w-24">{imagen}</div>}
+          <div className="min-w-0 flex-1">
+            {edicion
+              ? <input aria-label="Título" value={titulo} onChange={e => edicion.onTitulo(e.target.value)} className={cn(campo, 'px-1 text-2xl font-black tracking-tight')} />
+              : comoCabecera ? <h1 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl">{titulo}</h1> : <p className="text-2xl font-black leading-tight tracking-tight">{titulo}</p>}
+            {edicion
+              ? <input aria-label="Descripción" value={subtitulo} placeholder="Añadir una descripción" onChange={e => edicion.onSubtitulo(e.target.value)} className={cn(campo, 'mt-0.5 px-1 text-sm font-semibold placeholder:opacity-60')} />
+              : subtitulo && <p className="mt-0.5 text-sm font-semibold leading-snug opacity-90">{subtitulo}</p>}
+          </div>
+          {notaPildora}
+        </div>
+      </div>
+      {falloNota && <p role="alert" className="text-xs font-bold text-rose-600">{falloNota}</p>}
+
+      {sinNota ? (
+        <div data-sin-nota className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center">
+          <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
+          {propio && <button type="button" onClick={() => { setTerr(propio); guardarTerritorio(propio, ''); }} className="mt-2 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-slate-700">Ver {x.territorio}</button>}
+        </div>
+      ) : (
+        <>
+          {/* La barra con el lugar en el que está, en horizontal. */}
+          <Escala niveles={niveles} actual={actual} elegido={fijo} onElegir={elegirNivel} onEncima={setEncima} />
+          {/* El nivel que se señala (el de hoy, si no se ha pulsado otro), en una franja. */}
+          <div data-nivel-elegido aria-live="polite" className="flex flex-col gap-3 rounded-2xl px-4 py-3 sm:flex-row sm:items-center"
+            style={{ backgroundColor: tonosN.fondo }}>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: tonosN.tinta }}>{rotulo}</p>
+              <h2 className="text-base font-black leading-snug text-slate-900">{info?.titulo || ESCALA[n]}</h2>
+              {info?.descripcion && <p className={cn('mt-0.5 text-sm leading-relaxed text-slate-700', !leerMas && 'line-clamp-2')}>{info.descripcion}</p>}
+              {info?.descripcion && !leerMas && info.descripcion.length > 160 && <button type="button" onClick={() => setLeerMas(true)} className="inline-flex min-h-8 items-center text-xs font-bold text-slate-700 underline">Leer más</button>}
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {elegido !== null && nivelActual !== null && encima === null && (
+                <button type="button" onClick={() => setElegido(null)} className="inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-[13px] font-bold text-slate-600 hover:bg-white/60 hover:text-slate-900"><Undo2 className="h-3.5 w-3.5" /> Volver a hoy</button>
+              )}
+              {n === nivelActual && medidas.length > 0 && (
+                <button type="button" onClick={() => abrirPestanaRed(paginaId, 'salto')}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-slate-900 px-3.5 text-[13px] font-bold text-white hover:bg-slate-700">
+                  <TrendingUp className="h-4 w-4" /> Qué hace falta para llegar al {nivelActual! + 1}
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* En el editor, las demás propiedades de la entrada, plegadas y sin ruido. */}
+      {edicion?.propiedades && (
+        <div>
+          <button type="button" onClick={() => setVerProps(v => !v)} aria-expanded={verProps}
+            className="text-xs font-bold text-slate-500 hover:text-slate-800">{verProps ? 'Ocultar las propiedades' : 'Más propiedades de la entrada'}</button>
+          {verProps && <div className="mt-2 rounded-2xl border border-slate-200 p-3">{edicion.propiedades}</div>}
+        </div>
+      )}
     </div>
   );
 }

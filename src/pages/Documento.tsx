@@ -4785,26 +4785,8 @@ function EditorPagina() {
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>
         ) : <div className="mb-6" />)}
           </>);
-          if (termoBloque) return (
-            <>
-              {filaAnadir}
-              <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-                {portada && !esVideoPortada(portada) ? (
-                  <button type="button" onClick={() => editable && setEligiendoPortada(true)} title={editable ? tr('Cambiar la portada') : undefined}
-                    className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-black/10">
-                    <MediaPortada src={portada} ancho={120} className="h-full w-full object-contain" />
-                  </button>
-                ) : iconoNodo}
-                <div className="min-w-0 flex-1">
-                  {editable
-                    ? <TituloEditable letra={30} valor={titulo} onCambiar={v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); }} />
-                    : <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900">{titulo}</h1>}
-                  {descNodo}
-                </div>
-                <div data-ranura-territorio className="ml-auto max-sm:w-full" />
-              </div>
-            </>
-          );
+          // Con el termómetro de cabecera, el título, la descripción y la imagen se editan en su tarjeta (abajo).
+          if (termoBloque) return (<>{filaAnadir && eligiendoPortada ? filaAnadir : null}</>);
           if (v2) return (
             <>
               {filaAnadir}
@@ -4836,21 +4818,24 @@ function EditorPagina() {
         </div>
         {termoBloque && (
           <>
-            <LecturaBloqueDatos bloque={{ ...termoBloque, datos: { ...(termoBloque.datos || {}), comoCabecera: true, sinTitulo: true } }} paginaId={docId.current || undefined} />
-            {editable && (
-              <details className="-mt-2 mb-5 rounded-xl border border-dashed border-slate-200 px-3 py-2">
-                <summary className="cursor-pointer text-[11px] font-bold text-slate-400 hover:text-slate-600">{tr('Ajustes del termómetro y propiedades de la entrada')}</summary>
-                <div className="mt-2 space-y-3">
-                  <EditorBloqueDatos bloque={{ ...termoBloque, datos: { ...(termoBloque.datos || {}), soloAjustes: true } }} paginaId={docId.current || undefined} editable={editable}
-                    cambiarDatos={c => {
-                      guardarHistoria();
-                      setBloques(bs => bs.map(x => (x.id === termoBloque.id ? { ...x, datos: { ...(x.datos || {}), ...c } } : x)));
-                      programarGuardado();
-                    }} />
-                  {filaDe?.fila_id && filaDe.tabla_id && <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} sinRelaciones />}
-                </div>
-              </details>
-            )}
+            <LecturaBloqueDatos paginaId={docId.current || undefined} bloque={{ ...termoBloque, datos: { ...(termoBloque.datos || {}), comoCabecera: true,
+              // EDITAR EN LA PROPIA TARJETA (2026-10-26, Eugenio: «más sencillo, más sobrio»): título, descripción, imagen y nota ahí mismo.
+              edicion: editable ? {
+                titulo, onTitulo: (v: string) => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); },
+                subtitulo: ajustes.subtitulo || '', onSubtitulo: (v: string) => { setAjustes(a => ({ ...a, subtitulo: v })); programarGuardado(); },
+                onPortada: () => setEligiendoPortada(true),
+                propiedades: (
+                  <div className="space-y-3">
+                    {filaDe?.fila_id && filaDe.tabla_id && <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} sinRelaciones />}
+                    <EditorBloqueDatos bloque={{ ...termoBloque, datos: { ...(termoBloque.datos || {}), soloAjustes: true } }} paginaId={docId.current || undefined} editable={editable}
+                      cambiarDatos={c => {
+                        guardarHistoria();
+                        setBloques(bs => bs.map(x => (x.id === termoBloque.id ? { ...x, datos: { ...(x.datos || {}), ...c } } : x)));
+                        programarGuardado();
+                      }} />
+                  </div>
+                ),
+              } : undefined } }} />
           </>
         )}
         {/* Con el termómetro de cabecera, la red va justo debajo y las páginas hijas después, como al publicar. */}
