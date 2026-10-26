@@ -799,7 +799,9 @@ export function registrarMiembros(app: Express, db: any) {
         : null;
       // SU PÁGINA EN EL SITIO (2026-10-26, Eugenio: «si una persona está asociada a un correo, que el botón de
       // perfil enseñe su foto y te lleve a su página»): una fila de una base de datos del proyecto del sitio
-      // (p. ej. «Personas») cuya columna de tipo correo es el de quien ha entrado y que tiene página.
+      // (p. ej. «Personas») cuya columna de tipo correo es el de quien ha entrado y que tiene página. Del proyecto
+      // del sitio o de quien lo publica (las tablas de luzhumanidad.com no llevan proyecto): nadie más puede
+      // decir quién es quién en esta web.
       const correo = m?.email || (a.esEquipo ? req.user?.email : null) || null;
       const persona = correo ? ((await db.execute(sql`
         SELECT k.id, k.title AS titulo, COALESCE(k.config->>'portada', k.config->>'icono') AS foto
@@ -808,7 +810,8 @@ export function registrarMiembros(app: Express, db: any) {
         JOIN bd_filas f ON f.tabla_id = c.tabla_id AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL
              AND lower(trim(f.valores->>c.id)) = lower(${correo})
         JOIN knowledge_windows k ON k.id = f.pagina_id AND k.deleted_at IS NULL
-        WHERE c.tipo = 'email' AND t.proyecto_id = (SELECT proyecto_id FROM knowledge_windows WHERE id = ${raiz})
+        JOIN knowledge_windows r ON r.id = ${raiz}
+        WHERE c.tipo = 'email' AND (t.proyecto_id = r.proyecto_id OR t.creador_user_id = r.creator_user_id)
         ORDER BY f.created_at LIMIT 1
       `)).rows[0] as any) || null : null;
       res.set('Cache-Control', 'private, no-store');
