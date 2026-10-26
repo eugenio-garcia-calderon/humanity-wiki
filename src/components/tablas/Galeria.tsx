@@ -439,14 +439,13 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                     <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
                   </p>
       );
-      // LA NOTA A LA DERECHA DEL TÍTULO (2026-10-25, Eugenio: «el número a la
-      // derecha del título de cada tarjeta, dando más espacio al título y el
-      // número un poco más pequeño»): título a la izquierda, nota en un círculo blanco.
+      // LA NOTA DEBAJO DEL TÍTULO (2026-10-26, Eugenio: «el nombre arriba, centrado; debajo la nota y debajo
+      // la imagen»). Antes iba a la derecha del título.
       const estrecha = tamano === 'pequeno';
       const cabeceraEl = tonos && nota !== null ? (
                   // Las palabras largas se parten por sílabas («Telecomu-nicaciones»), nunca por una letra cualquiera.
-                  <div lang="es" className={cn('flex items-center justify-between gap-1.5 px-1', nombreArriba && !chica && 'min-h-[2.75rem]' /* con el título arriba, las imágenes alineadas aunque un título ocupe dos líneas */)}>
-                    <div className="min-w-0 flex-1 text-left hyphens-auto [overflow-wrap:normal] [&_p]:justify-start [&_span]:[overflow-wrap:normal]">{nombreEl}</div>
+                  <div lang="es" data-cabecera-nota className="flex flex-col items-center gap-1.5 px-1 text-center">
+                    <div className={cn('flex w-full min-w-0 items-center justify-center hyphens-auto [overflow-wrap:normal] [&_p]:justify-center [&_span]:[overflow-wrap:normal]', nombreArriba && !chica && 'min-h-[2.6rem]' /* las notas y las imágenes alineadas aunque un título ocupe dos líneas */)}>{nombreEl}</div>
                     <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
                       className={cn('inline-flex shrink-0 items-center rounded-full font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : estrecha ? 'h-8 px-2.5 text-lg' : 'h-10 px-3 text-2xl')}
                       style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>

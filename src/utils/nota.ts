@@ -36,15 +36,19 @@ export function tonosDeNota(nota: number) {
     color,
     fondo: mezclar(color, '#ffffff', 0.86),
     borde: mezclar(color, '#ffffff', 0.6),
-    // Bot de UX, ronda 2: con la escala de 10 pasos, el verde claro del 7–8 daba 2,4:1. Ahora ≥ 4,5:1.
-    tinta: mezclar(color, '#000000', nota >= 9.5 ? 0.05 : nota >= 8.5 ? 0.3 : 0.5),
+    // Legible sobre blanco (≥ 4,5:1): los tonos claros (amarillo, verde, azul claro) se oscurecen mucho;
+    // los oscuros (rojo, azul, morado) casi nada. Por luminancia, no por nota: vale para cualquier escala.
+    tinta: mezclar(color, '#000000', luminancia(color) > 0.3 ? 0.58 : luminancia(color) > 0.12 ? 0.4 : 0.08),
   };
+}
+
+function luminancia(color: string) {
+  const [r, g, b] = hexARgb(color).map(v => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 /** Blanco o casi negro, el que se lea mejor encima de `color`. */
 export function textoSobre(color: string): string {
-  const [r, g, b] = hexARgb(color).map(v => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
-  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  // WCAG: negro sobre los tonos claros (del ámbar al verde claro), blanco sobre los oscuros.
-  return lum > 0.22 ? '#1c1917' : '#ffffff';
+  // WCAG: negro sobre los tonos claros (amarillo, verde, turquesa, azul claro), blanco sobre los oscuros.
+  return luminancia(color) > 0.22 ? '#1c1917' : '#ffffff';
 }

@@ -137,9 +137,9 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
       {segmento ? (
         <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
           aria-label={`Territorio: ${nombre}. Cambiar de territorio`} title="Cambiar de territorio"
-          className="inline-flex h-9 items-center gap-1.5 rounded-full pl-2 pr-1.5 text-base font-black text-slate-900 hover:bg-slate-100 sm:text-lg">
+          className="inline-flex h-9 items-center gap-1.5 rounded-full pl-2 pr-1.5 text-base font-black text-slate-900 hover:bg-slate-100 sm:h-[51px] sm:pl-1 sm:text-lg">
           {/* En el móvil, sin la silueta: así cabe el sistema entero al lado (2026-10-26). */}
-          <span className="hidden sm:contents"><Silueta mapa={opciones.find(o => o.id === elegido)?.mapa} className="h-6 w-6 shrink-0" /></span>
+          <span className="hidden sm:contents"><Silueta mapa={opciones.find(o => o.id === elegido)?.mapa} className="h-[51px] w-[51px] shrink-0" /></span>
           <span data-territorio-elegido className="max-w-[14rem] truncate">{nombre}</span>
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-400 transition-transform', abierto && 'rotate-180')} />
         </button>

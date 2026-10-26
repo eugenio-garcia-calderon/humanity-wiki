@@ -76,8 +76,8 @@ export default function BotonesLectura({ config, centrado, derecha, talla, unaLi
   // página de donar»): `config.donar` es esa página.
   const donar = typeof config?.donar === 'string' && config.donar ? (
     <a href={sitio ? sitio.enlacePagina(config.donar) : `/p/${config.donar}`} data-interno data-boton-donar
-      // El amarillo del logo de Luz & Humanidad (2026-10-26, Eugenio: «un botón menos rojo»).
-      className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#f8e038] font-bold text-slate-900 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-[#efd320]', talla === 'xs' ? 'h-7 px-2.5 text-[11px]' : parte ? 'h-8 px-3 text-[12px]' : 'h-9 px-3.5 text-[13px]')}>
+      // Negro con el corazón y las letras en blanco (2026-10-26, Eugenio; antes, el amarillo del logo).
+      className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-900 font-bold text-white shadow-sm transition-colors hover:bg-slate-700', talla === 'xs' ? 'h-7 px-2.5 text-[11px]' : parte ? 'h-8 px-3 text-[12px]' : 'h-9 px-3.5 text-[13px]')}>
       <Heart className="h-4 w-4" fill="currentColor" /> Donar
     </a>
   ) : null;
