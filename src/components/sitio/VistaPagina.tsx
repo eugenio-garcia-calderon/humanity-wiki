@@ -120,7 +120,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // en todas las páginas del sitio menos la portada (que tiene su cabecera) y salvo que el sitio
   // tenga su propio menú arriba. Con el termómetro de cabecera, la ruta la pone él en la barra.
   const menuPropio = !!(pagina.sitio?.config && completarSitio(pagina.sitio.config).menu.activo);
-  const conBarra = !!pagina.sitio?.raizId && !esRaiz && !menuPropio;
+  // Solo en los sitios que la piden (`sitio.barra`, hoy luzhumanidad.com): los demás conservan su cabecera.
+  // También en la portada (2026-10-26, Eugenio: «la página principal con la misma estructura»), en lugar de su cabecera.
+  const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true;
   return (
     <div onClickCapture={alPinchar}>
     <MarcoLectura pagina={pagina} rutas={rutas}>
@@ -167,7 +169,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
-        {termo
+        {conBarra && esRaiz && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
+        {conBarra && esRaiz ? null : termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}

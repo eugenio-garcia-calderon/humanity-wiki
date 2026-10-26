@@ -1515,6 +1515,45 @@ async function startServer() {
     fichasGeo.set(id, r);
     return r;
   };
+  // LA SILUETA DE UN TERRITORIO (2026-10-26, Eugenio: «en España, el icono de la silueta del país, en vez
+  // de un icono de ubicación»): su contorno en una caja de 24×24, simplificado, solo con las partes grandes
+  // (la península y Baleares; no las Canarias, que harían el dibujo diminuto).
+  const siluetas = new Map<string, { path: string } | null>();
+  app.get("/api/geo/territorio/:id/silueta", (req, res) => {
+    try {
+      cachePublica(res, 86400);
+      const id = String(req.params.id);
+      if (!siluetas.has(id)) {
+        let polis: number[][][][] = [];
+        for (const f of ARCHIVOS_GEO) {
+          const data = getGeoJsonFile(f);
+          for (const ft of (data.features || [data])) {
+            if ((ft.properties?.territoryId || ft.properties?.id) !== id || !ft.geometry) continue;
+            const g = ft.geometry;
+            polis = polis.concat(g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []);
+          }
+          if (polis.length) break;
+        }
+        if (!polis.length) siluetas.set(id, null);
+        else {
+          const areas = polis.map(p => Math.abs(areaAnillo(p[0])));
+          const mayor = Math.max(...areas);
+          const partes = polis.filter((_, i) => areas[i] >= mayor * 0.02).map(p => p[0]);
+          let w = 180, s2 = 90, e = -180, n = -90;
+          for (const an of partes) for (const [x, y] of an) { if (x < w) w = x; if (x > e) e = x; if (y < s2) s2 = y; if (y > n) n = y; }
+          const k = Math.cos(((s2 + n) / 2) * Math.PI / 180);
+          const ancho = (e - w) * k, alto = n - s2, esc = 22 / Math.max(ancho, alto);
+          const ox = (24 - ancho * esc) / 2, oy = (24 - alto * esc) / 2;
+          const paso = Math.max(1, Math.floor(partes.reduce((a, an) => a + an.length, 0) / 400));
+          const path = partes.map(an => an.filter((_, i) => i % paso === 0).map(([x, y], i) => `${i ? 'L' : 'M'}${(ox + (x - w) * k * esc).toFixed(1)} ${(oy + (n - y) * esc).toFixed(1)}`).join('') + 'Z').join('');
+          siluetas.set(id, { path });
+        }
+      }
+      const r = siluetas.get(id);
+      if (!r) return res.status(404).json({ error: 'Sin contorno.' });
+      res.json(r);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
   app.get("/api/geo/territorio/:id/ficha", async (req, res) => {
     try {
       cachePublica(res, 600);
