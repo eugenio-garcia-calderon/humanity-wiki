@@ -899,6 +899,7 @@ export function registrarSitios(app: Express, db: any) {
   let plantilla: string | null = null;
 
   app.get(/^\/(?!api\/|assets\/|uploads\/)[^.]*$/, async (req: Request, res: Response, next: NextFunction) => {
+    (req as any)._t0 = Date.now();
     try {
       if (process.env.NODE_ENV !== 'production') return next();
       if (!String(req.headers.accept || '').includes('text/html')) return next();
@@ -1099,6 +1100,9 @@ export function registrarSitios(app: Express, db: any) {
    *      usan.
    */
   async function rapido(html: string, req: Request, s: Sitio, w: any | null, yaArmada?: any): Promise<string> {
+    // CUÁNTO TARDA CADA PARTE (2026-10-26): si el HTML tarda más de 1,5 s, se apunta en el registro por qué.
+    const t0 = Date.now(), tramos: string[] = [];
+    const marca = (n: string) => tramos.push(`${n} ${Date.now() - t0}`);
     const esSub = /^\/p\/[^/]+\/?$/.test(req.path) || /\/@[^/]+\/p\/[^/]+\/?$/.test(req.path) || !!w?.porRuta;
     const precarga = s.forma === 'dominio' || esSub;
 
@@ -1139,8 +1143,10 @@ export function registrarSitios(app: Express, db: any) {
       // Las fichas con dirección legible se enlazan por ella (R2).
       const prefijo = s.forma === 'casa' ? `/@${legible.autor?.handle || String(/^\/@([^/]+)/.exec(req.path)?.[1] || '')}` : '';
       const enlaceRuta = (slug: string) => `${prefijo}/${slug.split('/').map(encodeURIComponent).join('/')}`;
+      marca('pagina');
       try { cuerpo = await cuerpoEnHtml(db, legible, enlaces.enlacePagina, enlaceRuta); }
       catch (e) { console.error('sitios: cuerpo', e); }
+      marca('cuerpo');
       // LA RED, EN EL HTML (2026-10-21): los grupos y sus entradas como enlaces
       // con sus direcciones (`/a/b`, `/a/b/c`), para que un buscador las
       // encuentre todas sin ejecutar nada. La página viva lo sustituye.
@@ -1155,6 +1161,7 @@ export function registrarSitios(app: Express, db: any) {
               `<li><a href="${base}/${g.slug}/${e.slug}">${escHtml(e.titulo)}</a>${e.resumen ? ` — ${escHtml(e.resumen.slice(0, 160))}` : ''}</li>`).join('')}</ul></section>`).join('')}</nav>`;
         }
       } catch (e) { console.error('sitios: red', e); }
+      marca('red');
     }
 
     // La cabecera, sólo en un dominio propio: en la plataforma la página va
@@ -1240,6 +1247,8 @@ export function registrarSitios(app: Express, db: any) {
     if (precarga) html = html.replace('</head>', `    <script>window.__SITIO__=${jsonEnScript(pre)}</script>\n  </head>`);
     // Una función de reemplazo y no una cadena: un `$&` escrito en una
     // página no debe interpretarse como patrón de `replace`.
+    marca('legibles');
+    if (Date.now() - ((req as any)._t0 || t0) > 1500) console.warn(`[sitios] HTML lento ${req.hostname}${req.path}: antes ${t0 - ((req as any)._t0 || t0)} · ${tramos.join(' · ')} ms`);
     return raiz ? html.replace('<div id="root"></div>', () => `<div id="root">${raiz}</div>`) : html;
   }
 
