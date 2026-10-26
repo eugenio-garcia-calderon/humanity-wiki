@@ -51,7 +51,7 @@ export default function PestanasTitulos({ bloques, paginaId, lado = false }: { b
       <div role="tablist" aria-label="Secciones" className={cn('flex gap-1 overflow-x-auto border-b border-slate-200 [scrollbar-width:none]', !lado && 'mt-6')}>
         {grupos.map(x => (
           <button key={x.id} role="tab" type="button" aria-selected={x.id === g.id} onClick={() => abrir(x.id)}
-            className={cn('-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 pb-2.5 pt-1 text-[17px] font-semibold transition-colors',
+            className={cn('-mb-px shrink-0 whitespace-nowrap border-b-2 pb-2.5 pt-1 font-semibold transition-colors', lado ? 'px-2.5 text-[15px]' : 'px-3 text-[17px]',
               x.id === g.id ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800')}>
             {x.titulo}
           </button>

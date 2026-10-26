@@ -9945,3 +9945,4 @@ Eugenio: «en donar, quita el territorio y buscar de la barra; la donación arri
 - `config.sinCabecera`: sin migas, cabecera ni seguir/compartir (el título queda para lectores de pantalla).
 - `pestanasTitulos: 'lado'`: el título 1 del principio a todo lo ancho, la donación a la izquierda y las pestañas a la derecha, en la primera pantalla.
 - Bloque «Donación»: `frecuencia: 'mes'`, `importeMes`/`importeUnaVez` de partida y `nota` bajo el botón (con enlaces); en el editor.
+- (Arreglo) Las pestañas al lado, más pequeñas para que quepan las siete. Donar es una fila oculta del menú del sitio (así lleva la barra sin salir en el ☰).
