@@ -28,7 +28,11 @@ export function partirPorTitulos(bloques: any[]) {
   return { antes, grupos };
 }
 
-export default function PestanasTitulos({ bloques, paginaId }: { bloques: any[]; paginaId?: string }) {
+// AL LADO (2026-10-26, Eugenio: «el bloque de donación arriba del todo y, sin bajar, en el ancho de la pantalla,
+// lo de las empresas, la transparencia, los donantes, los contribuidores y el equipo»). Con
+// `pestanasTitulos: 'lado'`, un título 1 del principio va a todo lo ancho, lo demás de antes de las pestañas
+// (la donación) a la izquierda, y las pestañas a la derecha, todo en la primera pantalla.
+export default function PestanasTitulos({ bloques, paginaId, lado = false }: { bloques: any[]; paginaId?: string; lado?: boolean }) {
   const { antes, grupos } = useMemo(() => partirPorTitulos(bloques), [bloques]);
   const desdeHash = () => { try { return decodeURIComponent(window.location.hash.slice(1)); } catch { return ''; } };
   const [abierta, setAbierta] = useState<string>(() => (grupos.some(g => g.id === desdeHash()) ? desdeHash() : grupos[0]?.id || ''));
@@ -43,10 +47,8 @@ export default function PestanasTitulos({ bloques, paginaId }: { bloques: any[];
     setAbierta(id);
     try { history.replaceState(history.state, '', `${window.location.pathname}${window.location.search}#${id}`); } catch { /* sin historial */ }
   };
-  return (
-    <div data-pestanas-titulos>
-      {antes.length > 0 && <BloquesLectura bloques={antes} comentable={paginaId} paginaId={paginaId} />}
-      <div role="tablist" aria-label="Secciones" className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-200 [scrollbar-width:none]">
+  const barra = (
+      <div role="tablist" aria-label="Secciones" className={cn('flex gap-1 overflow-x-auto border-b border-slate-200 [scrollbar-width:none]', !lado && 'mt-6')}>
         {grupos.map(x => (
           <button key={x.id} role="tab" type="button" aria-selected={x.id === g.id} onClick={() => abrir(x.id)}
             className={cn('-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 pb-2.5 pt-1 text-[17px] font-semibold transition-colors',
@@ -55,9 +57,30 @@ export default function PestanasTitulos({ bloques, paginaId }: { bloques: any[];
           </button>
         ))}
       </div>
+  );
+  const panel = (
       <div role="tabpanel" aria-label={g.titulo} className="pt-5">
         <BloquesLectura key={g.id} bloques={g.bloques} comentable={paginaId} paginaId={paginaId} />
       </div>
+  );
+  if (lado) {
+    const titulo = antes[0]?.tipo === 'titulo1' ? antes[0] : null;
+    const izquierda = titulo ? antes.slice(1) : antes;
+    return (
+      <div data-pestanas-titulos data-al-lado>
+        {titulo && <h2 className="mb-5 text-2xl font-black tracking-tight text-slate-900 sm:text-[2rem] lg:whitespace-nowrap">{limpio(titulo.texto)}</h2>}
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] lg:gap-10">
+          <div className="min-w-0 [&_[data-donacion]]:my-0">{izquierda.length > 0 && <BloquesLectura bloques={izquierda} comentable={paginaId} paginaId={paginaId} />}</div>
+          <div className="min-w-0">{barra}{panel}</div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div data-pestanas-titulos>
+      {antes.length > 0 && <BloquesLectura bloques={antes} comentable={paginaId} paginaId={paginaId} />}
+      {barra}
+      {panel}
     </div>
   );
 }

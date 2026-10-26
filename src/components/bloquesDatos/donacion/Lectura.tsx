@@ -3,6 +3,7 @@ import { Heart, Loader2, Lock, Mail, Repeat } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { cn } from '../../../utils/cn';
 import { miniatura } from '../../../utils/miniatura';
+import TextoEnriquecido from '../../knowledge/TextoEnriquecido';
 
 // ============================================================================
 // DONAR (2026-10-26, Eugenio)
@@ -27,9 +28,13 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
   const logo = typeof datos.logo === 'string' && datos.logo ? datos.logo : null;
   const titulo = typeof datos.titulo === 'string' ? datos.titulo : '';
   const email = typeof datos.email === 'string' ? datos.email.trim() : '';
-  const [mensual, setMensual] = useState(false);
+  // CADA MES, POR DEFECTO (2026-10-26, Eugenio: «que la donación de cada mes sea la seleccionada por defecto,
+  // con una cantidad mayor»): `frecuencia: 'mes'` y el importe de partida de cada lista (`importeMes`, `importeUnaVez`).
+  const inicial = (l: number[], v: unknown, i: number) => (l.includes(Number(v)) ? Number(v) : l[i] || l[0] || 10);
+  const [mensual, setMensual] = useState(datos.frecuencia === 'mes');
   const lista = mensual ? mes : unaVez;
-  const [importe, setImporte] = useState<number>(unaVez[1] || unaVez[0] || 25);
+  const [importe, setImporte] = useState<number>(() => (datos.frecuencia === 'mes' ? inicial(mes, datos.importeMes, 1) : inicial(unaVez, datos.importeUnaVez, 1)));
+  const nota = typeof datos.nota === 'string' ? datos.nota.trim() : '';
   const [otro, setOtro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -38,8 +43,7 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
   const valido = Number.isFinite(euros) && euros >= 1 && euros <= 10000;
   const cambiarFrecuencia = (m: boolean) => {
     setMensual(m); setOtro('');
-    const l = m ? mes : unaVez;
-    setImporte(l[1] || l[0] || 10);
+    setImporte(m ? inicial(mes, datos.importeMes, 1) : inicial(unaVez, datos.importeUnaVez, 1));
   };
   const donar = async () => {
     if (!valido) return;
@@ -125,6 +129,8 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
           <Lock className="h-3 w-3 shrink-0" />
           {mensual ? 'Pago seguro con Stripe. Puedes cancelar la donación mensual cuando quieras.' : 'Pago seguro con tarjeta a través de Stripe. No hace falta cuenta.'}
         </p>
+        {/* El certificado para desgravar y el teléfono para dudas (2026-10-26). */}
+        {nota && <div data-nota-donacion className="mt-3 border-t border-slate-100 pt-3 text-[12px] leading-relaxed text-slate-500 [white-space:pre-line]"><TextoEnriquecido texto={nota} /></div>}
       </div>
       {email && (
         <a href={`mailto:${email}`} className="mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-slate-300">

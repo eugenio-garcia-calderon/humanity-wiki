@@ -32,6 +32,18 @@ export default function Editor(p: PropsEditor) {
           <input disabled={!editable} defaultValue={lista(datos.importesMes)} placeholder="5, 10, 20, 50, 100" onBlur={e => cambiarDatos({ importesMes: aNumeros(e.target.value) })} className={campo} />
         </label>
         {texto('email', 'Correo para empresas y organizaciones', 'administracion@…')}
+        <label className="block">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Seleccionado al abrir</span>
+          <select disabled={!editable} defaultValue={datos.frecuencia === 'mes' ? 'mes' : 'una'} onChange={e => cambiarDatos({ frecuencia: e.target.value === 'mes' ? 'mes' : 'una' })} className={campo}>
+            <option value="mes">Cada mes</option><option value="una">Una vez</option>
+          </select>
+        </label>
+        {texto('importeMes', 'Importe de partida, cada mes (€)', '25')}
+        <label className="block sm:col-span-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Nota bajo el botón (certificado, teléfono…)</span>
+          <textarea disabled={!editable} defaultValue={String(datos.nota ?? '')} rows={2} onBlur={e => cambiarDatos({ nota: e.target.value.trim() })}
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm outline-none focus:border-slate-400 disabled:bg-slate-50" />
+        </label>
         <div className="sm:col-span-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Cifras</span>
           {cifras.map((c, i) => (

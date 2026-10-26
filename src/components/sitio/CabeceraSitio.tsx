@@ -31,7 +31,10 @@ export function raizDe(id: string) {
   return p;
 }
 
-export default function CabeceraSitio({ raizId, ruta }: { raizId: string; ruta?: ReactNode }) {
+export default function CabeceraSitio({ raizId, ruta, simple = false }: { raizId: string; ruta?: ReactNode;
+  /** Solo el logo, la cuenta y el menú (2026-10-26, Eugenio: «en la página de donar, quita el territorio y buscar»). */
+  simple?: boolean;
+}) {
   const [raiz, setRaiz] = useState<Raiz | null>(null);
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
@@ -60,16 +63,16 @@ export default function CabeceraSitio({ raizId, ruta }: { raizId: string; ruta?:
       {/* LA PASTILLA DEL CENTRO: la vista (contenido o mapa), el territorio y el sistema con su nota. El
           territorio y el sistema los pone quien sabe (el termómetro o el filtro de la portada). En el móvil, en
           una segunda línea a todo lo ancho. */}
-      <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center max-sm:order-last sm:col-span-1">
+      {simple ? <span className="hidden sm:block" /> : <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center max-sm:order-last sm:col-span-1">
         <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
           <BotonVista />
           <div data-ranura-territorio className="contents" />
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
         </div>
-      </div>
+      </div>}
       <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">
-        <BuscarBarra raizId={raizId} />
-        {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
+        {!simple && <BuscarBarra raizId={raizId} />}
+        {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
         <span data-hueco-cuenta="cabecera" className="contents" />
         {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu" /></Suspense>}
       </div>

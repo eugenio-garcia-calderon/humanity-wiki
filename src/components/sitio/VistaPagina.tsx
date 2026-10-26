@@ -57,6 +57,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // áreas y sus botones (seguir, conectar, compartir, editar) van en lugar de la cabecera de siempre.
   const perfil = !pagina.virtual && !termo && todos[0]?.tipo === 'perfil' ? todos[0] : null;
   const bloques = termo || perfil ? todos.slice(1) : todos;
+  // SIN CABECERA (2026-10-26, Eugenio: «en la página de donar, el bloque de donación arriba del todo»): ni
+  // migas, ni icono, ni título a la vista (queda para los lectores de pantalla), ni seguir y compartir.
+  const sinCabecera = !pagina.virtual && cfg.sinCabecera === true;
   const icono: string | null = cfg.icono || null;
   const esMovil = useEsMovil();
 
@@ -138,12 +141,12 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* LA CABECERA DEL SITIO Y LA RUTA CENTRADA (2026-10-26, Eugenio: «que aparezca Luz &
           Humanidad como logo con el menú completo; y arriba centrado Movilidad en una ruta web,
           con su imagen de portada sin ningún color»). Solo con el termómetro de cabecera. */}
-      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} />}
+      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={cfg.barraSimple === true} />}
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
       {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
       <div hidden={mapa || undefined}>
-      {!termo && <div>
+      {!termo && !sinCabecera && <div>
       {migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -180,8 +183,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
-        {conBarra && esRaiz && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
-        {conBarra && esRaiz ? null : termo
+        {((conBarra && esRaiz) || sinCabecera) && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
+        {(conBarra && esRaiz) || sinCabecera ? null : termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : perfil ? <LecturaBloqueDatos bloque={perfil} paginaId={pagina.id} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
@@ -199,7 +202,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {/* Con el termómetro de cabecera, las pestañas de la red van justo debajo,
             en la primera pantalla (2026-10-25: «que se vea que hay muchas opciones
             donde pinchar sin bajar»); seguir y compartir, después. */}
-        {!pagina.virtual && !esRaiz && !termo && !perfil && <AccionesPagina paginaId={pagina.id} />}
+        {!pagina.virtual && !esRaiz && !termo && !perfil && !sinCabecera && <AccionesPagina paginaId={pagina.id} />}
         {/* Las páginas hijas en galería (2026-10-23, `PaginasHijas.tsx`). */}
         {!pagina.virtual && !termo && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
@@ -208,7 +211,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {termo && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
         {/* Los títulos 2 como pestañas (`PestanasTitulos.tsx`), si la página lo pide. */}
         {cfg.pestanasTitulos && !pagina.virtual
-          ? <PestanasTitulos bloques={bloques} paginaId={pagina.id} />
+          ? <PestanasTitulos bloques={bloques} paginaId={pagina.id} lado={cfg.pestanasTitulos === 'lado'} />
           : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
         {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
