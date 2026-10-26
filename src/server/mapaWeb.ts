@@ -25,7 +25,7 @@ async function entradasDeTablas(db: any, tablas: string[]): Promise<Map<string, 
     SELECT f.tabla_id, f.pagina_id AS id, k.title AS titulo FROM bd_filas f
     JOIN knowledge_windows k ON k.id = f.pagina_id AND k.deleted_at IS NULL AND k.archived_at IS NULL
     WHERE f.tabla_id IN (${sql.join(tablas.map(t => sql`${t}`), sql`, `)}) AND f.deleted_at IS NULL AND f.archived_at IS NULL AND f.oculta = false
-      AND COALESCE(k.title, '') <> ''
+      AND COALESCE(k.title, '') NOT IN ('', 'Sin título')
     ORDER BY f.orden, k.title
   `);
   for (const x of r.rows as any[]) {
