@@ -53,7 +53,10 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // EL TERMÓMETRO COMO CABECERA (2026-10-25): si la página empieza por él, él
   // lleva el título, la portada y la descripción; debajo, la red y lo demás.
   const termo = !pagina.virtual && todos[0]?.tipo === 'termometro' ? todos[0] : null;
-  const bloques = termo ? todos.slice(1) : todos;
+  // EL PERFIL DE UNA PERSONA COMO CABECERA (2026-10-26, `bloquesDatos/perfil`): su foto, su nombre, sus
+  // áreas y sus botones (seguir, conectar, compartir, editar) van en lugar de la cabecera de siempre.
+  const perfil = !pagina.virtual && !termo && todos[0]?.tipo === 'perfil' ? todos[0] : null;
+  const bloques = termo || perfil ? todos.slice(1) : todos;
   const icono: string | null = cfg.icono || null;
   const esMovil = useEsMovil();
 
@@ -180,6 +183,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {conBarra && esRaiz && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
         {conBarra && esRaiz ? null : termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
+          : perfil ? <LecturaBloqueDatos bloque={perfil} paginaId={pagina.id} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
         {cfg.tiempoLectura === true && (() => {
@@ -195,7 +199,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {/* Con el termómetro de cabecera, las pestañas de la red van justo debajo,
             en la primera pantalla (2026-10-25: «que se vea que hay muchas opciones
             donde pinchar sin bajar»); seguir y compartir, después. */}
-        {!pagina.virtual && !esRaiz && !termo && <AccionesPagina paginaId={pagina.id} />}
+        {!pagina.virtual && !esRaiz && !termo && !perfil && <AccionesPagina paginaId={pagina.id} />}
         {/* Las páginas hijas en galería (2026-10-23, `PaginasHijas.tsx`). */}
         {!pagina.virtual && !termo && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}

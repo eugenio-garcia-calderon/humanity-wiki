@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { Bell, BellRing, Link2, Check, ArrowRight, FileText, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
-import { usePestanasExtra, useGruposOcultos, EVENTO_ABRIR_PESTANA } from './pestanasExtra';
+import { usePestanasExtra, useGruposOcultos, useOpcionesRed, EVENTO_ABRIR_PESTANA } from './pestanasExtra';
 import { miniatura } from '../../utils/miniatura';
+import CompartirRedes from './CompartirRedes';
 
 // ============================================================================
 // LA RED DE UNA PÁGINA (2026-10-21, Eugenio)
@@ -69,7 +70,20 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   // Y los grupos que esas pestañas ya enseñan (p. ej. «Objetivos», en galería con su nota): no se repiten.
   const ocultos = useGruposOcultos(paginaId);
   const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const grupos = useMemo(() => (grupos_ && ocultos.length ? grupos_.filter(g => !ocultos.includes(plano(g.nombre))) : grupos_), [grupos_, ocultos]);
+  // El filtro y el tamaño que pide un bloque de la página (el perfil: «los proyectos de este área»).
+  const opcionesRed = useOpcionesRed(paginaId);
+  const filtro = opcionesRed.filtro || null;
+  const grupos = useMemo(() => {
+    if (!grupos_) return grupos_;
+    let l = ocultos.length ? grupos_.filter(g => !ocultos.includes(plano(g.nombre))) : grupos_;
+    if (filtro) {
+      const si = new Set(filtro.filas);
+      l = l.map(g => ({ ...g, entradas: g.entradas.filter(x => si.has(x.fila_id)) })).filter(g => g.entradas.length > 0);
+    }
+    // PRIMERO LAS QUE TIENEN IMAGEN (2026-10-26, Eugenio: «los proyectos sin imagen, más abajo»).
+    return l.map(g => ({ ...g, entradas: [...g.entradas].sort((a, b) => Number(!a.imagen) - Number(!b.imagen)) }));
+  }, [grupos_, ocultos, filtro]);
+
   const barra = useRef<HTMLDivElement>(null);
   const fila = useRef<HTMLElement>(null);
   const [hayMas, setHayMas] = useState(false);
@@ -201,7 +215,9 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
     marca: (encima?.slug === g.slug && arrastrada !== g.slug ? (encima.antes ? 'antes' : 'despues') : null) as Arrastre['marca'],
     moviendo: arrastrada === g.slug,
   } : undefined;
+  // Una pestaña que ya no está (el filtro del perfil la ha vaciado) cuenta como la de por defecto.
   const efectiva = activa === 'todo' || (activa.startsWith('x:') && !extra.some(x => `x:${x.id}` === activa))
+    || (!activa.startsWith('x:') && !grupos.some(g => g.slug === activa))
     ? (extra[0] ? `x:${extra[0].id}` : grupos[0]?.slug) : activa;
   const grupo = grupos.find(g => g.slug === efectiva) || null;
   const pestanaExtra = extra.find(x => `x:${x.id}` === efectiva) || null;
@@ -241,7 +257,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
           {/* En el editor la vista enlazada ya lleva el nombre de su base de datos. */}
           {!(renderGrupo && filaId) && (
           <div className="mb-4 flex items-baseline gap-2">
-            <h2 className="text-xl font-black tracking-tight text-slate-900">{grupo.nombre}</h2>
+            <h2 className="text-xl font-black tracking-tight text-slate-900">{grupo.nombre}{filtro && <span className="font-semibold text-slate-400"> · {filtro.etiqueta}</span>}</h2>
             <span className="text-sm font-semibold text-slate-400">{grupo.entradas.length}</span>
           </div>
           )}
@@ -251,8 +267,10 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
               {grupo.entradas.map(x => <FilaEntrada key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} />)}
             </div>
           ) : (
-          <div className="grid grid-cols-2 gap-4 sm:gap-5 sm:[grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr))]">
-            {grupo.entradas.map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} grande />)}
+          <div className={cn('grid gap-4 sm:gap-5', opcionesRed.compacta
+            ? 'grid-cols-3 sm:[grid-template-columns:repeat(auto-fill,minmax(min(9.5rem,100%),1fr))]'
+            : 'grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr))]')}>
+            {grupo.entradas.map(x => <Tarjeta key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} grande={!opcionesRed.compacta} />)}
           </div>
           )
           )}
@@ -350,10 +368,14 @@ function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande
 // Seguir es lo de siempre (`/api/seguir/pagina/:id`, `seguir.ts`): un aviso en
 // la campana cuando la página cambia, como mucho uno cada seis horas. Sin
 // sesión, se abre el «Entrar» de la web (miembros) o se explica.
-export function AccionesPagina({ paginaId }: { paginaId: string }) {
+export function AccionesPagina({ paginaId, nombre, extra }: { paginaId: string;
+  /** «Seguir a Eugenio» en el perfil de una persona (2026-10-26). */
+  nombre?: string;
+  /** Más botones en la misma fila (el perfil: «Conectar», «Editar perfil»). */
+  extra?: ReactNode;
+}) {
   const [estado, setEstado] = useState<{ seguidores: number; siguiendo: boolean; es_duenyo: boolean } | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
-  const [copiado, setCopiado] = useState(false);
   useEffect(() => {
     let vivo = true;
     const cargar = () => fetch(`/api/seguir/pagina/${encodeURIComponent(paginaId)}`, { credentials: 'include' })
@@ -376,14 +398,6 @@ export function AccionesPagina({ paginaId }: { paginaId: string }) {
     if (!r.ok) { setAviso(j.error || 'No se ha podido.'); return; }
     setEstado(e => ({ ...(e || { es_duenyo: false }), seguidores: j.seguidores, siguiendo: j.siguiendo }));
   };
-  const compartir = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share && window.matchMedia('(pointer: coarse)').matches) { await navigator.share({ url, title: document.title }); return; }
-      await navigator.clipboard.writeText(url);
-      setCopiado(true); setTimeout(() => setCopiado(false), 2000);
-    } catch { /* cancelado */ }
-  };
   return (
     <div className="mb-6 flex flex-wrap items-center gap-2" data-acciones-pagina>
       {estado && !estado.es_duenyo && (
@@ -391,16 +405,15 @@ export function AccionesPagina({ paginaId }: { paginaId: string }) {
           className={cn('inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-bold transition-colors',
             estado.siguiendo ? 'bg-slate-100 text-slate-800 hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-slate-800')}>
           {estado.siguiendo ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-          {estado.siguiendo ? 'Siguiendo' : 'Seguir'}
+          {estado.siguiendo ? 'Siguiendo' : nombre ? `Seguir a ${nombre}` : 'Seguir'}
         </button>
       )}
       {estado && estado.seguidores > 0 && (
         <span className="text-sm text-slate-500">{estado.seguidores} {estado.seguidores === 1 ? 'persona la sigue' : 'personas la siguen'}</span>
       )}
-      <button type="button" onClick={compartir}
-        className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:bg-slate-50">
-        {copiado ? <Check className="h-4 w-4 text-emerald-600" /> : <Link2 className="h-4 w-4" />} {copiado ? 'Enlace copiado' : 'Compartir'}
-      </button>
+      {extra}
+      {/* Compartir como en las redes: un icono con la lista de redes (`CompartirRedes.tsx`). */}
+      <CompartirRedes />
       {aviso && <span className="text-sm font-semibold text-rose-600">{aviso}</span>}
     </div>
   );

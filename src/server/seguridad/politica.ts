@@ -89,6 +89,7 @@ const REVISADAS: Entrada[] = [
   { m: 'POST', ruta: '/api/stripe/checkout/support', guardia: { tipo: 'sesion' } },
   { m: 'POST', ruta: '/api/stripe/checkout/donacion', guardia: { tipo: 'publica', porque: 'donar no exige cuenta: el cobro lo hace Stripe y no se entrega nada a cambio' },
     nota: 'stripe.ts — importe entre 1 € y 10.000 €; la vuelta, solo a una ruta del mismo sitio' },
+  { m: 'PUT', ruta: '/api/perfil/:paginaId', guardia: { tipo: 'publica', porque: 'la propia persona entra con su cuenta de miembro de la web, sin sesión de la plataforma; la ruta exige que su correo sea el de su fila o que pueda editar la página (`perfil.ts`)' } },
   { m: 'POST', ruta: '/api/stripe/refunds', guardia: { tipo: 'propietario', minimo: 4 },
     nota: 'stripe.ts:299 — solo quien cobró, o un administrador' },
   { m: 'POST', ruta: '/api/stripe/connect/onboard', guardia: { tipo: 'sesion' } },

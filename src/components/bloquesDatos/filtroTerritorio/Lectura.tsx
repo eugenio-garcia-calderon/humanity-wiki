@@ -76,10 +76,12 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
     <div data-resumen-territorio className="min-w-0">
       <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Media de {nombre} · {suyas.length} sistemas</p>
       <p className="mt-1 text-sm text-slate-700"><b className="font-black" style={{ color: tonosDeNota(max!).tinta }}>Mejor:</b> {lista(nombres(max))} ({textoNota(max)}) · <b className="font-black" style={{ color: tonosDeNota(min!).tinta }}>Peor:</b> {lista(nombres(min))} ({textoNota(min)})</p>
-      <div className="mt-3" aria-label="Escala de colores del 1 al 10">
+      {/* Sin la escala de colores bajo la barra (2026-10-26, Eugenio: «que desaparezca la barra del
+          gradiente y la galería quede más arriba»): la nota ya lleva su color. */}
+      {!ranura && <div className="mt-3" aria-label="Escala de colores del 1 al 10">
         <div className="flex h-3 overflow-hidden rounded-full">{Array.from({ length: 10 }, (_, i) => <span key={i} className="flex-1" style={{ backgroundColor: colorDeNota(i + 1) }} />)}</div>
         <div className="mt-1 flex justify-between text-[11px] font-bold text-slate-500"><span>1 · lo más urgente</span><span>10 · resuelto</span></div>
-      </div>
+      </div>}
     </div>
   ) : notas.length > 0 && nombre !== '…' ? (
     <div data-sin-notas className="min-w-0">
@@ -96,7 +98,7 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
           {media !== null && <NotaEslabon nota={Math.round(media * 10) / 10} titulo={`Media de ${nombre}`} />}
         </Eslabon>, ranura)}
       {/* Abajo, solo lo mejor y lo peor con la escala de colores: el territorio y su nota ya están arriba. */}
-      {centro && <div data-filtro-territorio className="mx-auto my-4 max-w-3xl rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-sm">{centro}</div>}
+      {centro && <div data-filtro-territorio className="mx-auto mb-2 mt-1 max-w-3xl rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-sm">{centro}</div>}
     </>
   );
   return (
