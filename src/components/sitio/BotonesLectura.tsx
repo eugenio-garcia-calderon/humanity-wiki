@@ -69,7 +69,9 @@ export default function BotonesLectura({ config, centrado, derecha, talla, unaLi
   return (
     <>
       {unaLinea ? (
-        <FilaBotonesUnaLinea botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo} onAbrir={setAbierto} />
+        // En estas cabeceras los botones iban a la derecha con el primero a la derecha del todo:
+        // de izquierda a derecha se leen al revés de la lista. Se conserva ese orden.
+        <FilaBotonesUnaLinea botones={[...botones].reverse()} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo} onAbrir={setAbierto} />
       ) : <FilaBotones botones={botones} talla={talla || config?.cabecera?.botonesTalla} estilo={config?.cabecera?.botonesEstilo}
         centrado={centrado} derechaAncho={derecha} sinMargen={derecha !== undefined} plegado={config?.cabecera?.botonesMenu === 'plegado'} onAbrir={setAbierto} />}
       {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
