@@ -797,9 +797,23 @@ export function registrarMiembros(app: Express, db: any) {
       const foto = async (uid: string | null | undefined) => uid
         ? ((await db.execute(sql`SELECT avatar_url FROM users WHERE id = ${uid}`)).rows[0] as any)?.avatar_url || null
         : null;
+      // SU PÁGINA EN EL SITIO (2026-10-26, Eugenio: «si una persona está asociada a un correo, que el botón de
+      // perfil enseñe su foto y te lleve a su página»): una fila de una base de datos del proyecto del sitio
+      // (p. ej. «Personas») cuya columna de tipo correo es el de quien ha entrado y que tiene página.
+      const correo = m?.email || (a.esEquipo ? req.user?.email : null) || null;
+      const persona = correo ? ((await db.execute(sql`
+        SELECT k.id, k.title AS titulo, COALESCE(k.config->>'portada', k.config->>'icono') AS foto
+        FROM bd_columnas c
+        JOIN bd_tablas t ON t.id = c.tabla_id AND t.deleted_at IS NULL
+        JOIN bd_filas f ON f.tabla_id = c.tabla_id AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL
+             AND lower(trim(f.valores->>c.id)) = lower(${correo})
+        JOIN knowledge_windows k ON k.id = f.pagina_id AND k.deleted_at IS NULL
+        WHERE c.tipo = 'email' AND t.proyecto_id = (SELECT proyecto_id FROM knowledge_windows WHERE id = ${raiz})
+        ORDER BY f.created_at LIMIT 1
+      `)).rows[0] as any) || null : null;
       res.set('Cache-Control', 'private, no-store');
       res.json({
-        activo: true, ...muro.sitio, es_equipo: a.esEquipo,
+        activo: true, ...muro.sitio, es_equipo: a.esEquipo, persona,
         yo: m ? { nombre: m.nombre, email: m.email, estado: m.estado, categoria: m.categoriaNombre, avatar: await foto(m.userId), permisos: m.estado === 'activo' ? m.permisos : null } : null,
         equipo: !a.esEquipo ? null
           : req.user ? { nombre: req.user.displayName || req.user.name || req.user.email, avatar: req.user.avatarUrl || null }

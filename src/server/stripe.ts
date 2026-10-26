@@ -286,11 +286,21 @@ export function registerStripeRoutes(app: Express, db: any) {
         const r = (await db.execute(sql`SELECT title FROM knowledge_windows WHERE id = ${paginaId} AND deleted_at IS NULL`)).rows[0] as any;
         if (r?.title) nombre = `Donación · ${String(r.title).slice(0, 80)}`;
       }
-      const session = await getStripe().checkout.sessions.create({
+      // CADA MES (2026-10-26, Eugenio: «añade la donación recurrente»): una suscripción mensual con el mismo
+      // importe, que la persona puede cancelar desde el correo de Stripe.
+      const mensual = req.body?.recurrente === true;
+      const metadata = { kind: mensual ? 'donacion_mensual' : 'donacion', pagina_id: paginaId };
+      const session = await getStripe().checkout.sessions.create(mensual ? {
+        mode: 'subscription',
+        line_items: [{ price_data: { currency: 'eur', product_data: { name: `${nombre} · cada mes` }, unit_amount: cents, recurring: { interval: 'month' } }, quantity: 1 }],
+        metadata, subscription_data: { metadata },
+        success_url: `${base}${ruta}?donacion=gracias`,
+        cancel_url: `${base}${ruta}?donacion=cancelada`,
+      } : {
         mode: 'payment',
         submit_type: 'donate',
         line_items: [{ price_data: { currency: 'eur', product_data: { name: nombre }, unit_amount: cents }, quantity: 1 }],
-        metadata: { kind: 'donacion', pagina_id: paginaId },
+        metadata,
         success_url: `${base}${ruta}?donacion=gracias`,
         cancel_url: `${base}${ruta}?donacion=cancelada`,
       });

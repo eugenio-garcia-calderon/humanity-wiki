@@ -9903,3 +9903,9 @@ Eugenio: «que la nota esté arriba, al lado de Movilidad; que España y Movilid
 - `ElegirTerritorio` variante `segmento` con la silueta del territorio (`/api/geo/territorio/:id/silueta`, caché 1 día; si no hay, el alfiler).
 - Cabecera: logo h-11 fijo, nombre más grande y el eslogan (`config.subtitulo`) debajo.
 - La raíz enseña la barra solo con `config.sitio.barra = true` (SQL en producción en la página principal).
+
+## 2026-10-26 · Tu página desde el botón de perfil, donar cada mes y pestañas por títulos (Programador 8)
+Eugenio: «el botón de perfil con mi foto que me lleve a mi página; la página de donar con el logo, donaciones recurrentes, el correo de empresas, los contadores y pestañas con Transparencia».
+- `GET /api/sitio-miembros/:raiz/estado` devuelve `persona`: la fila (de una base de datos del proyecto del sitio, p. ej. «Personas») cuya columna de tipo correo es el de quien ha entrado y que tiene página. `BarraMiembro` enseña su portada como foto y el botón lleva a esa página; en ella, abre el menú (con «Mi página», «Editar esta página», «Salir»).
+- Bloque «Donación»: logo, título y cifras arriba; «Una vez» / «Cada mes» (suscripción mensual de Stripe, `recurrente: true`, `metadata.kind = donacion_mensual`); tarjeta «¿Empresa u organización?» con el correo. Editor propio (`donacion/Editor.tsx`).
+- `config.pestanasTitulos` en una página: cada título 2 abre una pestaña (`PestanasTitulos.tsx`); la abierta va en `#ancla`. En el editor siguen siendo títulos normales.

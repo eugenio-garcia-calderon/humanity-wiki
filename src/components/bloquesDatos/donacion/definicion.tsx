@@ -13,5 +13,6 @@ export default definirBloque({
   claves: 'donar donacion donativo apoyo stripe pago tarjeta',
   color: 'bg-rose-100 text-rose-700',
   Lectura: lazy(() => import('./Lectura')),
-  datosIniciales: () => ({ importes: [5, 10, 25, 50, 100] }),
+  Editor: lazy(() => import('./Editor')),
+  datosIniciales: () => ({ importes: [10, 25, 50, 100, 250], importesMes: [5, 10, 20, 50, 100] }),
 });
