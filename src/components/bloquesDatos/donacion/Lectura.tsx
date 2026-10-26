@@ -46,18 +46,18 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
       <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
         {importes.map(n => (
           <button key={n} type="button" onClick={() => { setImporte(n); setOtro(''); }} aria-pressed={!otro && importe === n}
-            className={cn('h-12 rounded-2xl text-lg font-black tabular-nums transition-colors', !otro && importe === n ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-200 text-slate-800 hover:border-slate-300')}>
+            className={cn('h-12 rounded-2xl text-lg font-black tabular-nums transition-colors', !otro && importe === n ? 'bg-[#f8e038] text-slate-900 shadow-sm ring-1 ring-black/5' : 'border border-slate-200 text-slate-800 hover:border-slate-300')}>
             {n} €
           </button>
         ))}
       </div>
-      <label className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 px-3 focus-within:ring-2 focus-within:ring-rose-300">
+      <label className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 px-3 focus-within:ring-2 focus-within:ring-[#f8e038]">
         <span className="text-sm font-bold text-slate-500">Otro importe</span>
         <input inputMode="decimal" value={otro} onChange={e => setOtro(e.target.value.replace(/[^\d,.]/g, ''))} placeholder="€" aria-label="Otro importe en euros"
           className="h-11 min-w-0 flex-1 bg-transparent text-right text-lg font-black tabular-nums outline-none" />
       </label>
       <button type="button" onClick={donar} disabled={!valido || enviando}
-        className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-rose-600 text-base font-black text-white shadow-sm hover:bg-rose-700 disabled:opacity-50">
+        className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#f8e038] text-base font-black text-slate-900 shadow-sm ring-1 ring-black/5 hover:bg-[#efd320] disabled:opacity-50">
         {enviando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Heart className="h-5 w-5" fill="currentColor" />}
         {valido ? `Donar ${String(euros).replace('.', ',')} €` : 'Donar'}
       </button>

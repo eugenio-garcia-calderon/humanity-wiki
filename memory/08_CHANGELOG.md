@@ -9882,3 +9882,10 @@ Eugenio: «solo el círculo de la nota con color y el resto un cuadrado elegante
 - `BotonesLectura`: `plegado` y el botón «Donar» si la página tiene `config.donar`. `BarraMiembro`: solo la silueta.
 - Donar: bloque «Donación» (importes y otro importe) y `POST /api/stripe/checkout/donacion` (sin cuenta, 1–10.000 €, vuelta a la misma ruta del sitio; registrado en `seguridad/politica.ts`). Stripe está en modo de pruebas.
 - Datos (SQL): página «Donar» (slug `donar`); la portada con `donar` y el menú plegado; los objetivos con nombre corto (tarjetas y ruta) y «Nombre completo».
+
+## 2026-10-26 · La barra del sitio, fija al bajar; Donar en amarillo; ruta de una palabra con desplegables (Programador 8)
+Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al bajar; el botón de donar, menos rojo: el amarillo del logo de Luz & Humanidad; más espacio entre el logo y España/Movilidad, que estén centrados; la ruta con títulos de una sola palabra y más pequeña cuantos más pasos; y Movilidad, un desplegable para elegir otro sistema, como el territorio».
+- `CabeceraSitio`: `sticky top-0` de borde a borde, con fondo y línea inferior; territorio y ruta centrados y separados del logo.
+- Donar en `#f8e038` (el amarillo del logo, medido en la imagen) con texto oscuro; también en el bloque «Donación».
+- Ruta: cada paso es una palabra (columna «Nombre en la ruta» de los objetivos; `ruta_nombre` en `/api/evolucion`) y un desplegable con sus hermanos (`PasoRuta`): los sistemas en el primer paso y, en un objetivo, los objetivos de su sistema. Con dos pasos, letra más pequeña. El h1 conserva el título entero para los lectores de pantalla.
+- `/api/evolucion` devuelve también `tabla_id` y, del padre, `fila_id` y `tabla_id`.
