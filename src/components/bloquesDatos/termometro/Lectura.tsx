@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Check, ChevronRight, Target, TrendingUp, Undo2 } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, ChevronRight, Target, TrendingUp, Undo2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
@@ -36,7 +36,8 @@ type Nivel = { nivel: number; titulo: string; descripcion: string; medidas: stri
 type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string };
 type Grupo = { nombre: string; slug: string; entradas: Entrada[] };
 type Datos = { nombre: string; nota: number | null; territorio: string | null; territorio_id: string | null; tabla_territorios: string | null;
-  fila_id?: string; columna_nota?: string | null; padre?: { nombre: string; pagina_id: string | null } | null;
+  fila_id?: string; columna_nota?: string | null; padre?: { nombre: string; pagina_id: string | null; fila_id: string; tabla_id: string | null } | null;
+  tabla_id?: string; ruta_nombre?: string | null;
   pagina?: { icono: string | null; portada: string | null; subtitulo: string }; diagnostico: string; niveles: Nivel[]; red: Grupo[] };
 
 /** Un texto con una idea por línea (o separadas por «;»), como lista. */
@@ -351,6 +352,49 @@ function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[
   );
 }
 
+/** UN PASO DE LA RUTA DE LA BARRA, DESPLEGABLE (2026-10-26, Eugenio: «que Movilidad sea un desplegable
+ *  y pueda elegir otro sistema, igual que el territorio»). Una palabra; al pulsar, sus hermanos. */
+type OpcionRuta = { id: string; nombre: string; pagina_id: string };
+function PasoRuta({ etiqueta, titulo, opciones, actual, h1, pequeno }: { etiqueta: string; titulo: string; opciones: OpcionRuta[]; actual: string | null; h1?: boolean; pequeno?: boolean }) {
+  const sitio = useSitio();
+  const [abierto, setAbierto] = useState(false);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e: MouseEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(false); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('mousedown', fuera); document.addEventListener('keydown', tecla);
+    return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', tecla); };
+  }, [abierto]);
+  const Texto = h1 ? 'h1' : 'span';
+  const contenido = (
+    <Texto title={titulo} className={cn('truncate tracking-tight', h1 ? 'font-black text-slate-900' : 'font-bold text-slate-600', pequeno ? 'text-base' : 'text-xl')}>
+      {etiqueta}{h1 && etiqueta !== titulo && <span className="sr-only"> · {titulo}</span>}
+    </Texto>
+  );
+  if (opciones.length < 2) return contenido;
+  return (
+    <div ref={caja} className="relative min-w-0">
+      <button type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto} title={`Cambiar: ${titulo}`}
+        className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-lg px-1.5 py-0.5 hover:bg-slate-100">
+        {contenido}<ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-400 transition-transform', abierto && 'rotate-180')} />
+      </button>
+      {abierto && (
+        <ul role="listbox" className="absolute left-1/2 top-full z-50 mt-2 max-h-80 w-64 -translate-x-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-2xl">
+          {opciones.map(o => (
+            <li key={o.id}>
+              <Link to={sitio ? sitio.enlacePagina(o.pagina_id) : `/paginas/${o.pagina_id}`} role="option" aria-selected={o.id === actual} onClick={() => setAbierto(false)}
+                className={cn('flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold', o.id === actual ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-50')}>
+                <span className="flex-1 truncate">{o.nombre}</span>{o.id === actual && <Check className="h-4 w-4" />}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /** Lo que el editor pasa para cambiar la cabecera ahí mismo (2026-10-26, Eugenio:
  *  «los elementos para modificar estas propiedades, mucho más sencillos y sobrios»). */
 export type EdicionCabecera = {
@@ -378,6 +422,27 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     const t = window.setTimeout(mirar, 400);
     return () => window.clearTimeout(t);
   }, [comoCabecera, !!edicion]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Los hermanos de cada paso de la ruta: los sistemas (los de arriba del todo) y, en un objetivo, los de su sistema.
+  const [opcPadre, setOpcPadre] = useState<OpcionRuta[]>([]);
+  const [opcActual, setOpcActual] = useState<OpcionRuta[]>([]);
+  useEffect(() => {
+    if (!ranuras.ruta || !x || x === 'fallo') return;
+    let vivo = true;
+    const opcion = (t: FilasTabla, f: any): OpcionRuta => {
+      const cRuta = (t.columnas || []).find((c: any) => c.tipo === 'texto' && /ruta/.test(sinTilde(c.nombre)));
+      return { id: f.id, pagina_id: f.pagina_id, nombre: String(celda(f, cRuta) || f.pagina?.titulo || celda(f, (t.columnas || []).find((c: any) => c.id === t.columna_titulo)) || 'Sin título') };
+    };
+    const deArriba = (t: FilasTabla) => {
+      const madre = (t.columnas || []).find((c: any) => c.config?.rol === 'madre');
+      return t.filas.filter((f: any) => f.pagina_id && !f.oculta && !(madre && (f.apuntados?.[madre.id] || []).length)).map((f: any) => opcion(t, f))
+        .sort((a: OpcionRuta, b: OpcionRuta) => a.nombre.localeCompare(b.nombre, 'es'));
+    };
+    if (x.padre?.tabla_id) {
+      leerTabla(x.padre.tabla_id).then(t => { if (vivo && t) setOpcPadre(deArriba(t)); });
+      if (x.tabla_id) leerTabla(x.tabla_id).then(t => { if (vivo && t) setOpcActual(enlazadas(t, x.padre!.fila_id).filter((f: any) => f.pagina_id).map((f: any) => opcion(t, f))); });
+    } else if (x.tabla_id) leerTabla(x.tabla_id).then(t => { if (vivo && t) setOpcActual(deArriba(t)); });
+    return () => { vivo = false; };
+  }, [ranuras.ruta, x]);
   const sitioRuta = useSitio();
   const [falloNota, setFalloNota] = useState<string | null>(null);
   useEffect(() => {
@@ -535,18 +600,21 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
       {ranuras.terr && x.tabla_territorios && opciones.length > 0 && createPortal(
         <ElegirTerritorio mini alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
           onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />, ranuras.terr)}
-      {/* La ruta, sin «Inicio»: «Movilidad», o «Movilidad › Intermodalidad y logística» en un objetivo. */}
+      {/* La ruta, sin «Inicio», una palabra por paso y más pequeña cuantos más pasos: «Movilidad», o
+          «Movilidad › Intermodalidad». Cada paso, un desplegable con sus hermanos. */}
       {ranuras.ruta && createPortal(
         <>
           {x.padre?.nombre && (
             <>
-              {x.padre.pagina_id
-                ? <Link to={sitioRuta ? sitioRuta.enlacePagina(x.padre.pagina_id) : `/paginas/${x.padre.pagina_id}`} className="shrink-0 truncate text-sm font-bold text-slate-500 hover:text-slate-900 hover:underline">{x.padre.nombre}</Link>
-                : <span className="shrink-0 truncate text-sm font-bold text-slate-500">{x.padre.nombre}</span>}
+              {opcPadre.length > 1
+                ? <PasoRuta etiqueta={x.padre.nombre} titulo={x.padre.nombre} opciones={opcPadre} actual={x.padre.fila_id} pequeno />
+                : x.padre.pagina_id
+                  ? <Link to={sitioRuta ? sitioRuta.enlacePagina(x.padre.pagina_id) : `/paginas/${x.padre.pagina_id}`} className="shrink-0 truncate text-base font-bold text-slate-600 hover:text-slate-900 hover:underline">{x.padre.nombre}</Link>
+                  : <span className="shrink-0 truncate text-base font-bold text-slate-600">{x.padre.nombre}</span>}
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             </>
           )}
-          {comoCabecera ? <h1 className="truncate text-xl font-black tracking-tight text-slate-900">{x.nombre}</h1> : <span className="truncate text-xl font-black">{x.nombre}</span>}
+          <PasoRuta h1={comoCabecera} etiqueta={x.ruta_nombre || x.nombre} titulo={x.nombre} opciones={opcActual} actual={x.fila_id || null} pequeno={!!x.padre?.nombre} />
         </>, ranuras.ruta)}
       {/* En el editor, el título y la imagen arriba y centrados, para cambiarlos ahí mismo (sin color, sobrio). */}
       {edicion && (

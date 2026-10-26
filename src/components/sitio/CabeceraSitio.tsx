@@ -34,17 +34,20 @@ export default function CabeceraSitio({ raizId, ruta }: { raizId: string; ruta?:
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
   return (
-    <header data-cabecera-sitio className="mb-4 flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2 sm:flex-nowrap">
+    // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
+    // scroll»): pegada arriba, de borde a borde (anula el margen de la página) y con fondo para que no se mezcle.
+    <header data-cabecera-sitio className="sticky top-0 z-40 -mx-5 mb-4 flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-5 py-2 backdrop-blur sm:-mx-8 sm:flex-nowrap sm:px-8">
       <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
           ? <img src={miniatura(icono, 80)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
           : <span className="text-2xl leading-none">{icono}</span>)}
         {raiz && <span className="hidden whitespace-nowrap text-lg font-black leading-none tracking-tight text-slate-900 md:inline">{raiz.titulo}</span>}
       </Link>
-      {/* El territorio y la ruta; en el móvil, en una segunda línea. */}
-      <div className="flex min-w-0 flex-1 items-center gap-3 max-sm:order-last max-sm:w-full max-sm:flex-none">
+      {/* El territorio y la ruta, centrados y separados del logo (2026-10-26, Eugenio: «más espacio entre
+          Luz & Humanidad y España; España y Movilidad más centrados»). En el móvil, en una segunda línea. */}
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-4 max-sm:order-last max-sm:w-full max-sm:flex-none sm:mx-8">
         <div data-ranura-territorio className="contents" />
-        <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 flex-1 items-center gap-1.5">{ruta}</nav>
+        <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
         {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} plegado talla="sm" /></Suspense>}
