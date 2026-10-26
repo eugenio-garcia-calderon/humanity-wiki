@@ -393,14 +393,20 @@ export default function MapPage() {
     if (!tablaSistemas) return;
     const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     // El objetivo del mapa → el sistema que le corresponde cuando no se llaman igual.
-    const ALIAS: Record<string, string> = { ecosistemas: 'ecologia', tecnologia: 'informatica', gobernanza: 'politica', cultura: 'arte' };
+    const ALIAS: Record<string, string> = { ecosistemas: 'ecologia', tecnologia: 'informatica', gobernanza: 'politica', cultura: 'arte', empleo: 'economia' };
     fetch(`/api/bd/tablas/${encodeURIComponent(tablaSistemas)}?lectura=1`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).then(j => {
       const porNombre = new Map<string, { label: string; imagen: string | null }>();
       for (const f of j?.filas || []) if (f.pagina?.titulo) porNombre.set(plano(f.pagina.titulo), { label: f.pagina.titulo, imagen: f.pagina.imagen || null });
       const m: Record<string, { label: string; imagen: string | null }> = {};
-      for (const k of ['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas', 'educacion', 'movilidad', 'energia', 'tecnologia', 'empleo', 'gobernanza', 'economia', 'cultura']) {
-        const s = porNombre.get(ALIAS[k] || k);
-        if (s) m[k] = s;
+      const claves = ['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas', 'educacion', 'movilidad', 'energia', 'tecnologia', 'empleo', 'gobernanza', 'economia', 'cultura'];
+      // Primero el sistema que se llama igual; después el equivalente, si ese sistema no lo ha tomado ya otro
+      // (Empleo → Economía solo si no hay un objetivo Economía). Cada sistema sale una vez.
+      const usados = new Set<string>();
+      for (const k of claves) { const s = porNombre.get(k); if (s) { m[k] = s; usados.add(k); } }
+      for (const k of claves) {
+        const a = ALIAS[k];
+        if (m[k] || !a || usados.has(a) || !porNombre.get(a)) continue;
+        m[k] = porNombre.get(a)!; usados.add(a);
       }
       setSistemasSitio(m);
     }).catch(() => {});
