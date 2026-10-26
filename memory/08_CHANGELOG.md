@@ -9953,3 +9953,8 @@ Eugenio: «un gradiente cercano al espectro de la luz visible: rojo lo más bajo
 - Galería (`Galeria.tsx`) y objetivos del termómetro: título centrado arriba, la nota debajo y después la imagen.
 - `BotonVista`: un botón negro con icono y «Ver mapa» / «Ver tabla», al final de la pastilla (en el móvil, solo el icono). Silueta del territorio de 51 px (como el logo) en pantallas medianas y grandes.
 - Donar: negro con corazón y letras blancas. Logo: icono 51 px y nombre 1,55 rem.
+
+## 2026-10-26 · La ruta de un indicador: Sistemas de la Humanidad › sistema › objetivo › indicador (Programador 8)
+Eugenio: «en un indicador la ruta decía “Evolución de la Humanidad › Objetivos e indicadores”; debería ser Sistemas de la Humanidad (la portada) › Movilidad › el objetivo › el indicador, con el icono y el desplegable para cambiar, aunque vaya debajo del menú».
+- `GET /api/ruta-relaciones/:pagina` (`server/rutaRelaciones.ts`): sube de la fila por su relación de un solo valor (primero la más concreta: el objetivo antes que el sistema; un territorio no es padre) hasta una base de datos de la portada. Cada paso trae sus hermanos (mismo padre) y su «Nombre en la ruta». Si no llega a la portada, no hay ruta y quedan las migas.
+- `RutaRelaciones.tsx`: la pastilla bajo la barra con el primer enlace (`sitio.rutaRaiz`, «Sistemas de la Humanidad») y los pasos desplegables. `PasoRuta`/`IconoPaso` pasan a `sitio/PasoRuta.tsx` (los usa también el termómetro).
