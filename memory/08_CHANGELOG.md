@@ -9889,3 +9889,8 @@ Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al ba
 - Donar en `#f8e038` (el amarillo del logo, medido en la imagen) con texto oscuro; también en el bloque «Donación».
 - Ruta: cada paso es una palabra (columna «Nombre en la ruta» de los objetivos; `ruta_nombre` en `/api/evolucion`) y un desplegable con sus hermanos (`PasoRuta`): los sistemas en el primer paso y, en un objetivo, los objetivos de su sistema. Con dos pasos, letra más pequeña. El h1 conserva el título entero para los lectores de pantalla.
 - `/api/evolucion` devuelve también `tabla_id` y, del padre, `fila_id` y `tabla_id`.
+
+## 2026-10-26 · 12 objetivos estratégicos en cada uno de los 18 sistemas (Programador 8)
+Eugenio: «añade 12 objetivos por cada área, como en Movilidad; reutiliza la tabla general de objetivos (una sola) y en cada sistema muestra la vista de los suyos».
+- Datos (SQL): 204 objetivos nuevos (17 sistemas × 12) en la misma tabla «Objetivos de los Sistemas», cada uno con nombre corto, «Nombre en la ruta» (una palabra), «Nombre completo», descripción, código (ENE-O01…), icono emoji, su página (termómetro de cabecera con indicadores y evaluaciones) y enlazado a su sistema y a España. Notas de momento al azar alrededor de la nota del sistema (1 + 0,9 × N). Aún sin indicadores (solo Movilidad los tiene).
+- Termómetro: las tarjetas de objetivos sin portada enseñan su icono; una página con termómetro fuera de un sitio (sin barra) pone su título encima del recuadro.
