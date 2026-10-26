@@ -251,7 +251,7 @@ function PanelDiagnostico({ fallos, grupos, territorio }: { fallos: string[]; gr
 // `datos.tabla_objetivos`: la base de datos de objetivos; se enseñan los que enlazan con
 // esta entrada y con el territorio elegido. `datos.tabla_indicadores`: la de indicadores;
 // se enseñan los de este objetivo, cumplidos o no. Nota = 1 + 0,9 × indicadores cumplidos.
-type Objetivo = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; nota: number | null; imagen: string | null; descripcion: string };
+type Objetivo = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; nota: number | null; imagen: string | null; icono: string | null; descripcion: string };
 type Estado = 'Acreditado' | 'No acreditado' | 'Parcial' | 'Sin evaluar';
 type Indicador = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; codigo: string; icono: string | null; unidad: string; estado: Estado; descripcion: string };
 const ESTADOS: Record<Estado, { clase: string; corto: string }> = {
@@ -297,7 +297,10 @@ function PanelObjetivos({ objetivos }: { objetivos: Objetivo[] }) {
               )}
             </div>
             <div className="mt-1.5 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl p-1.5">
-              {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="h-full w-full object-contain" /> : <Target className="h-8 w-8 text-slate-300" />}
+              {/* Su portada o, si no la tiene, su icono (los objetivos de los demás sistemas llevan un emoji). */}
+              {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="h-full w-full object-contain" />
+                : o.icono && !/^(https?:|\/)/.test(o.icono) ? <span className="text-5xl leading-none" aria-hidden>{o.icono}</span>
+                : o.icono ? <img src={miniatura(o.icono, 120)} alt="" className="h-14 w-14 object-contain" /> : <Target className="h-8 w-8 text-slate-300" />}
             </div>
           </div>
         );
@@ -414,10 +417,10 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const [leerMas, setLeerMas] = useState(false);
   const [verProps, setVerProps] = useState(false);
   // LA BARRA DEL SITIO (2026-10-26): el territorio y la ruta van arriba, en sus huecos (`CabeceraSitio`).
-  const [ranuras, setRanuras] = useState<{ terr: HTMLElement | null; ruta: HTMLElement | null }>({ terr: null, ruta: null });
+  const [ranuras, setRanuras] = useState<{ terr: HTMLElement | null; ruta: HTMLElement | null; mirado?: boolean }>({ terr: null, ruta: null });
   useEffect(() => {
     if (!comoCabecera || edicion) return;
-    const mirar = () => setRanuras({ terr: document.querySelector<HTMLElement>('[data-ranura-territorio]'), ruta: document.querySelector<HTMLElement>('[data-ranura-ruta]') });
+    const mirar = () => setRanuras({ terr: document.querySelector<HTMLElement>('[data-ranura-territorio]'), ruta: document.querySelector<HTMLElement>('[data-ranura-ruta]'), mirado: true });
     mirar();
     const t = window.setTimeout(mirar, 400);
     return () => window.clearTimeout(t);
@@ -490,7 +493,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
       setObjetivos(enlazadas(t, filaId, elegidoT || undefined).map((f: any) => ({
         fila_id: f.id, pagina_id: f.pagina_id || null, titulo: String(f.pagina?.titulo || celda(f, cTit) || 'Sin título'),
         numero: celda(f, cNum) !== null ? Number(celda(f, cNum)) : null, nota: celda(f, cNota) !== null ? Number(celda(f, cNota)) : null,
-        imagen: f.pagina?.imagen || null, descripcion: String(f.pagina?.descripcion || celda(f, cDesc) || ''),
+        imagen: f.pagina?.imagen || null, icono: f.pagina?.icono || null, descripcion: String(f.pagina?.descripcion || celda(f, cDesc) || ''),
       })));
     });
     return () => { vivo = false; };
@@ -628,6 +631,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
 
       {/* EL RECUADRO (2026-10-26, Eugenio: «así, como el del territorio»): el territorio, pequeño,
           a un lado; en el medio el nivel y la barra; a la derecha la nota en su círculo. */}
+      {/* Sin la barra del sitio (una página fuera de un sitio), el título va aquí. */}
+      {comoCabecera && !edicion && ranuras.mirado && !ranuras.ruta && <h1 className="text-center text-3xl font-black tracking-tight text-slate-900">{x.nombre}</h1>}
       <section data-resumen-sistema className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:gap-8', !ranuras.terr && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]')}>
         {/* Sin la barra del sitio (el editor), el territorio va aquí, a la izquierda. */}
         {!ranuras.terr && <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
