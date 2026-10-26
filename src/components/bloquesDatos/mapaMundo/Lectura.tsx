@@ -13,6 +13,9 @@ export const direccionMapa = (datos: Record<string, unknown>, enMarco: boolean) 
   // (2026-10-23) Un territorio concreto del mapa: encuadrado y con su ficha abierta.
   const foco = String(datos.foco || '').trim();
   if (foco) q.set('foco', foco);
+  // (2026-10-26) La base de datos de Sistemas del sitio: el menú del mapa toma sus nombres e imágenes.
+  const sistemas = String(datos.sistemas || '').trim();
+  if (sistemas) q.set('sistemas', sistemas);
   const s = q.toString();
   return `/mapa${s ? `?${s}` : ''}`;
 };

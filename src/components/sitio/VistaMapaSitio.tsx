@@ -5,6 +5,7 @@ import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { cn } from '../../utils/cn';
+import { raizDe } from './CabeceraSitio';
 
 // ============================================================================
 // LA VISTA DE MAPA DEL SITIO (2026-10-26, Eugenio)
@@ -38,7 +39,7 @@ export function BotonVista() {
   const [mapa, cambiar] = useVistaMapa();
   const boton = (activo: boolean, etiqueta: string, icono: ReactNode, onClick: () => void) => (
     <button type="button" onClick={onClick} aria-pressed={activo} title={etiqueta} aria-label={etiqueta}
-      className={cn('grid h-7 w-8 place-items-center rounded-full transition-colors', activo ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900')}>
+      className={cn('grid h-7 w-7 place-items-center rounded-full transition-colors sm:w-8', activo ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900')}>
       {icono}
     </button>
   );
@@ -51,10 +52,13 @@ export function BotonVista() {
 }
 
 /** El mapa a todo lo ancho de la ventana y todo el alto que deja la barra. */
-export default function VistaMapaSitio() {
+export default function VistaMapaSitio({ raizId }: { raizId: string }) {
   const t = useTerritorioActual();
+  // La base de datos de Sistemas del sitio (`sitio.sistemas`): el menú del mapa toma sus nombres e imágenes.
+  const [sistemas, setSistemas] = useState<string | null>(null);
+  useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setSistemas(r?.config?.sitio?.sistemas || null); }); return () => { vivo = false; }; }, [raizId]);
   const slug = t ? plano(t.nombre) : 'espana';
-  const datos: Record<string, unknown> = { filtros: true };
+  const datos: Record<string, unknown> = { filtros: true, sistemas };
   if (ENCUADRADOS.has(slug) || !t?.mapa) datos.territorio = ENCUADRADOS.has(slug) ? slug : 'espana';
   else datos.foco = t.mapa;
   // Dónde acaba la barra (en el móvil ocupa dos líneas): el mapa llena lo que queda de ventana.
@@ -62,7 +66,9 @@ export default function VistaMapaSitio() {
   useEffect(() => {
     const el = document.querySelector<HTMLElement>('[data-cabecera-sitio]');
     if (!el) return;
-    const medir = () => setBarra(Math.round(el.getBoundingClientRect().bottom + window.scrollY));
+    // Arriba del todo antes de medir: con la página bajada, la barra (fija) daba un alto de más y el mapa se quedaba corto.
+    window.scrollTo(0, 0);
+    const medir = () => setBarra(Math.round(el.getBoundingClientRect().bottom));
     medir();
     const ro = new ResizeObserver(medir); ro.observe(el);
     // Sin pie ni desplazamiento: la ventana es la barra y el mapa.

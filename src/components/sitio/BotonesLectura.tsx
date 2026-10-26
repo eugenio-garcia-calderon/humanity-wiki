@@ -60,7 +60,9 @@ function VentanaPaginaPublica({ boton, onCerrar, esHija = false }: { boton: Boto
   );
 }
 
-export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false, plegado }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
+export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false, plegado, parte }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
+  /** La barra del sitio (2026-10-26) pinta por separado Donar y el menú (solo las tres rayas), con la cuenta en medio. */
+  parte?: 'donar' | 'menu';
   /** En una sola línea; lo que no cabe, en «Más ▾» (la cabecera del sitio, 2026-10-26). */
   unaLinea?: boolean;
   /** Todo en el menú desplegable, diga lo que diga la página (la barra del sitio, 2026-10-26). */
@@ -75,9 +77,16 @@ export default function BotonesLectura({ config, centrado, derecha, talla, unaLi
   const donar = typeof config?.donar === 'string' && config.donar ? (
     <a href={sitio ? sitio.enlacePagina(config.donar) : `/p/${config.donar}`} data-interno data-boton-donar
       // El amarillo del logo de Luz & Humanidad (2026-10-26, Eugenio: «un botón menos rojo»).
-      className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#f8e038] font-bold text-slate-900 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-[#efd320]', talla === 'xs' ? 'h-7 px-2.5 text-[11px]' : 'h-9 px-3.5 text-[13px]')}>
+      className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#f8e038] font-bold text-slate-900 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-[#efd320]', talla === 'xs' ? 'h-7 px-2.5 text-[11px]' : parte ? 'h-8 px-3 text-[12px]' : 'h-9 px-3.5 text-[13px]')}>
       <Heart className="h-4 w-4" fill="currentColor" /> Donar
     </a>
+  ) : null;
+  if (parte === 'donar') return donar;
+  if (parte === 'menu') return botones.length ? (
+    <>
+      <FilaBotones botones={derecha === false ? botones : [...botones].reverse()} sinMargen plegado soloIcono derechaAncho onAbrir={setAbierto} />
+      {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
+    </>
   ) : null;
   if (!botones.length) return donar;
   if (plegar) return (

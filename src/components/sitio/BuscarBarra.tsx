@@ -13,7 +13,8 @@ import { cn } from '../../utils/cn';
 // esta web; recicla lo que ya tenemos.» Es el mismo buscador del menú de los
 // sitios (`/api/sitio/buscar`, `BuscadorSitio.tsx`): mientras se escribe salen
 // los primeros resultados debajo; con Intro se abre la página de resultados.
-// En el móvil es una lupa que despliega la caja a todo lo ancho de la barra.
+// Una lupa que, al pulsarla, despliega la caja tapando lo demás de la derecha
+// de la barra (2026-10-26, Eugenio: «un 80 % más pequeño; si se pincha, se amplía»).
 
 type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta?: string | null };
 
@@ -53,17 +54,17 @@ export default function BuscarBarra({ raizId }: { raizId: string }) {
   const todos = () => `${sitio ? sitio.enlaceBuscar() : '/buscar'}?q=${encodeURIComponent(texto)}${sitio ? '' : `&sitio=${encodeURIComponent(raizId)}`}`;
 
   return (
-    <div ref={caja} data-buscar-barra className={cn('shrink-0', desplegada ? 'absolute inset-x-3 top-1/2 z-50 -translate-y-1/2' : 'relative')}>
-      {/* La lupa sola, en pantallas estrechas. */}
+    <div ref={caja} data-buscar-barra className={cn('shrink-0', desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
+      {/* La lupa sola, hasta que se pulsa. */}
       {!desplegada && (
         <button type="button" onClick={() => setDesplegada(true)} aria-label="Buscar en esta web" title="Buscar"
-          className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 hover:text-slate-950 lg:hidden">
+          className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 hover:text-slate-950">
           <Search className="h-4 w-4" />
         </button>
       )}
       <form role="search" onSubmit={e => { e.preventDefault(); if (texto.length >= 2) { cerrar(); ir(todos()); } }}
         className={cn('items-center gap-2 rounded-full border border-slate-200 bg-white px-3 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200',
-          desplegada ? 'flex h-11 shadow-lg' : 'hidden h-9 w-48 lg:flex xl:w-60')}>
+          desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
         <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
         <input ref={campo} type="search" value={q} placeholder="Buscar" aria-label="Buscar en esta web"
           onChange={e => { setQ(e.target.value); setAbierta(true); }} onFocus={() => setAbierta(true)}

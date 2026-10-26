@@ -248,6 +248,8 @@ function MandosPie({ s, pie, poner, titulo, opciones }: {
                 onCambio={v => pie({ legales: { ...p.legales, [d]: v } })} />
             ))}
             <Interruptor etiqueta="Línea © con el año y el nombre" valor={p.copyright} onCambio={v => pie({ copyright: v })} />
+            <Interruptor etiqueta="Mapa web con todas las páginas" valor={p.mapaWeb} onCambio={v => pie({ mapaWeb: v })} />
+            <Interruptor etiqueta="Enseñar el contacto" valor={p.mostrarContacto} onCambio={v => pie({ mostrarContacto: v })} />
           </Grupo>
 
           <Grupo titulo="Colores">

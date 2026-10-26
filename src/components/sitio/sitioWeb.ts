@@ -101,6 +101,10 @@ export type Pie = {
   legales: Record<DocLegal, boolean>;
   /** Línea «© 2026 Nombre». */
   copyright: boolean;
+  /** EL MAPA WEB (2026-10-26, Eugenio): todas las páginas del sitio, ordenadas por las del menú. Por defecto, sí. */
+  mapaWeb: boolean;
+  /** Enseñar el correo, el teléfono y la dirección (siguen usándose en los textos legales). */
+  mostrarContacto: boolean;
 };
 
 export type Sitio = {
@@ -137,6 +141,8 @@ export const PIE_POR_DEFECTO: Pie = {
   contacto: {}, enlaces: [],
   legales: { 'aviso-legal': true, privacidad: true, cookies: true },
   copyright: true,
+  mapaWeb: true,
+  mostrarContacto: true,
 };
 
 /** El sitio con todo lo que falte puesto por defecto. Una página vieja, o un

@@ -31,7 +31,7 @@ const ESTILO: Record<EstiloBotones, string> = {
 };
 
 /** La fila de botones, bajo el título y la descripción. */
-export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, acento, onAbrir, onQuitar, onAnadir, onReordenar }: {
+export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, soloIcono = false, acento, onAbrir, onQuitar, onAnadir, onReordenar }: {
   botones: BotonCabecera[];
   talla?: TallaBotones;
   estilo?: EstiloBotones;
@@ -45,6 +45,8 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
   enLinea?: boolean;
   /** Todos los botones recogidos en un menú ☰ que se abre en cascada (2026-10-21). */
   plegado?: boolean;
+  /** Plegado, solo el icono del menú. */
+  soloIcono?: boolean;
   /** El color de la web publicada, para el estilo «relleno». */
   acento?: string | null;
   onAbrir: (b: BotonCabecera) => void;
@@ -78,7 +80,7 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
   if (plegado) {
     return (
       <div className={cn('flex', !sinMargen && 'mt-3', centrado && 'justify-center', (derecha || derechaAncho) && 'justify-end')} role="navigation" aria-label="Apartados de la página">
-        <MenuPlegado botones={botones} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} onQuitar={onQuitar} onAnadir={onAnadir} />
+        <MenuPlegado botones={botones} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} onQuitar={onQuitar} onAnadir={onAnadir} soloIcono={soloIcono} />
       </div>
     );
   }
@@ -202,11 +204,13 @@ export function FilaBotonesUnaLinea({ botones, talla = 'm', estilo = 'relleno', 
  * cascada»). Las opciones caen una detrás de otra. El panel va en un portal
  * con posición fija: dentro de la barra fija lo cortaría su `overflow`.
  */
-function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir, mas = false }: {
+function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir, mas = false, soloIcono = false }: {
   botones: BotonCabecera[]; talla: TallaBotones; estilo: EstiloBotones; acento?: string | null;
   onAbrir: (b: BotonCabecera) => void; onQuitar?: (b: BotonCabecera) => void; onAnadir?: () => void;
   /** «Más ▾» en vez de «☰ Menú»: lo que no cabe en la fila de una línea. */
   mas?: boolean;
+  /** Solo las tres rayas, sin la palabra (la barra del sitio, 2026-10-26). */
+  soloIcono?: boolean;
 }) {
   const [abierto, setAbierto] = useState(false);
   const [listo, setListo] = useState(false);
@@ -230,9 +234,10 @@ function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnad
   return (
     <>
       <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-expanded={abierto} aria-haspopup="menu" data-menu-plegado
+        aria-label={soloIcono ? 'Menú' : undefined} title={soloIcono ? 'Menú' : undefined}
         style={estilo === 'relleno' && acento ? { backgroundColor: acento } : undefined}
-        className={cn('inline-flex items-center gap-2 rounded-full font-bold shadow-sm transition-colors', TALLA[talla], ESTILO[estilo])}>
-        {mas ? <>Más <ChevronDown className={cn('h-4 w-4 transition-transform', abierto && 'rotate-180')} /></> : <><Menu className="h-4 w-4" /> Menú</>}
+        className={cn('inline-flex items-center gap-2 rounded-full font-bold shadow-sm transition-colors', soloIcono ? 'h-10 w-10 justify-center border border-slate-200 bg-white text-slate-900 hover:bg-slate-50' : [TALLA[talla], ESTILO[estilo]])}>
+        {soloIcono ? <Menu className="h-5 w-5" /> : mas ? <>Más <ChevronDown className={cn('h-4 w-4 transition-transform', abierto && 'rotate-180')} /></> : <><Menu className="h-4 w-4" /> Menú</>}
       </button>
       {abierto && pos && createPortal(
         <div ref={panel} role="menu" style={{ top: pos.top, right: pos.right }}
