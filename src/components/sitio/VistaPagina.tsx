@@ -16,6 +16,7 @@ import { cn } from '../../utils/cn';
 import { completarSitio } from './sitioWeb';
 import CabeceraSitio from './CabeceraSitio';
 import PestanasTitulos from './PestanasTitulos';
+import RutaRelaciones from './RutaRelaciones';
 import VistaMapaSitio, { useVistaMapa } from './VistaMapaSitio';
 
 // ============================================================================
@@ -135,19 +136,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // sigue montada y escondida: su termómetro o su filtro son los que ponen el territorio en la barra.
   const [vistaMapa] = useVistaMapa();
   const mapa = conBarra && vistaMapa;
-  return (
-    <div onClickCapture={alPinchar}>
-    <MarcoLectura pagina={pagina} rutas={rutas}>
-      {/* LA CABECERA DEL SITIO Y LA RUTA CENTRADA (2026-10-26, Eugenio: «que aparezca Luz &
-          Humanidad como logo con el menú completo; y arriba centrado Movilidad en una ruta web,
-          con su imagen de portada sin ningún color»). Solo con el termómetro de cabecera. */}
-      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={cfg.barraSimple === true} />}
-      {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
-      <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
-      {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
-      <div hidden={mapa || undefined}>
-      {!termo && !sinCabecera && <div>
-      {migasContexto ? (
+  const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
             {migasContexto.map((m, i) => (
@@ -178,7 +167,24 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
             <li aria-current="page" className="hidden sm:block text-slate-700 truncate max-w-full">{pagina.titulo || 'Sin título'}</li>
           </ol>
         </nav>
-      )}
+      )}</>);
+  return (
+    <div onClickCapture={alPinchar}>
+    <MarcoLectura pagina={pagina} rutas={rutas}>
+      {/* LA CABECERA DEL SITIO Y LA RUTA CENTRADA (2026-10-26, Eugenio: «que aparezca Luz &
+          Humanidad como logo con el menú completo; y arriba centrado Movilidad en una ruta web,
+          con su imagen de portada sin ningún color»). Solo con el termómetro de cabecera. */}
+      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={cfg.barraSimple === true} />}
+      {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
+      {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
+      <div hidden={mapa || undefined}>
+      {!termo && !sinCabecera && <div>
+      {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
+          el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
+      {conBarra && !esRaiz && !pagina.virtual && !perfil
+        ? <RutaRelaciones paginaId={pagina.id} sinRuta={migasEl} />
+        : migasEl}
       </div>}
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
       <main id="contenido" tabIndex={-1} className="outline-none">
