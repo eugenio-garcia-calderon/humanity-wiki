@@ -297,9 +297,12 @@ function PanelObjetivos({ objetivos }: { objetivos: Objetivo[] }) {
                 </span>
               )}
             </div>
-            <div className="mt-1.5 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl p-1.5">
-              {/* Su portada o, si no la tiene, su icono (los objetivos de los demás sistemas llevan un emoji). */}
-              {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="h-full w-full object-contain" />
+            <div className="relative mt-1.5 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl p-1.5">
+              {/* Su portada o, si no la tiene, su icono (los objetivos de los demás sistemas llevan un emoji).
+                  The cover is absolutely positioned: `h-full` inside an auto-height grid
+                  track does not resolve, so an image with its own size (an SVG with
+                  width/height 240) overflowed the 16:10 box and was cut at the bottom. */}
+              {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-contain p-1.5" />
                 : o.icono && !/^(https?:|\/)/.test(o.icono) ? <span className="text-5xl leading-none" aria-hidden>{o.icono}</span>
                 : o.icono ? <img src={miniatura(o.icono, 120)} alt="" className="h-14 w-14 object-contain" /> : <Target className="h-8 w-8 text-slate-300" />}
             </div>
