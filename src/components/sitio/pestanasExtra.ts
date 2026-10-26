@@ -49,3 +49,24 @@ export const EVENTO_ABRIR_PESTANA = 'red:abrir-pestana';
 export function abrirPestanaRed(paginaId: string, id: string) {
   window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_PESTANA, { detail: { paginaId, id } }));
 }
+
+// ============================================================================
+// CÓMO SE ENSEÑA LA RED (2026-10-26, Eugenio: el perfil de una persona)
+// ============================================================================
+// «Si pinchas en un área del perfil, que salgan los proyectos de ese área; y
+// los proyectos, por defecto, más compactos.» El bloque `perfil` pone aquí un
+// filtro (las filas que sí) y pide tarjetas pequeñas; `RedRelaciones` lo aplica.
+export type OpcionesRed = { compacta?: boolean; filtro?: { etiqueta: string; filas: string[] } | null };
+const SIN_OPCIONES: OpcionesRed = {};
+const opciones = new Map<string, OpcionesRed>();
+export function ponerOpcionesRed(paginaId: string, o: OpcionesRed | null) {
+  if (o) opciones.set(paginaId, o); else opciones.delete(paginaId);
+  avisar();
+}
+export function useOpcionesRed(paginaId: string): OpcionesRed {
+  return useSyncExternalStore(
+    f => { oyentes.add(f); return () => { oyentes.delete(f); }; },
+    () => opciones.get(paginaId) || SIN_OPCIONES,
+    () => SIN_OPCIONES,
+  );
+}

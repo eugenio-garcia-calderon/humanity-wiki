@@ -54,6 +54,7 @@ import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
 import { registrarContribuir, identidadDeContribuidor } from './contribuir.js';
+import { registrarPerfil } from './perfil.js';
 import { registrarVaciado } from './cacheCorta.js';
 import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
@@ -290,6 +291,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
   { nombre: 'contribuir', montar: (app, db) => registrarContribuir(app, db), nota: 'Añadir entradas desde la página publicada (2026-10-20). DESPUÉS de «bd»: usa `bdInterno.crearFila`/`escribirCeldas`.' },
+  { nombre: 'perfil', montar: (app, db) => registrarPerfil(app, db), nota: 'El perfil de una persona (fila de «Personas» con página): datos, áreas y editar el suyo (2026-10-26).' },
   {
     nombre: 'bd/plantillaFicha',
     montar: (app, db) => registrarPlantillaFicha(app, db),

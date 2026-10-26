@@ -74,7 +74,9 @@ async function tablasDePagina(db: any, req: Request, paginaId: string): Promise<
   const recorrer = (n: any) => {
     if (Array.isArray(n)) { n.forEach(recorrer); return; }
     if (!n || typeof n !== 'object') return;
-    if (n.tipo === 'basedatos' && typeof (n.tabla_id || n.tablaId) === 'string') out.add(n.tabla_id || n.tablaId);
+    // `sinAnadir` (2026-10-26, Eugenio: «que no se pueda añadir una entrada en los sistemas de la humanidad»):
+    // ese bloque no ofrece «Añadir entrada» a nadie.
+    if (n.tipo === 'basedatos' && typeof (n.tabla_id || n.tablaId) === 'string' && !n.sinAnadir) out.add(n.tabla_id || n.tablaId);
     for (const v of Object.values(n)) if (v && typeof v === 'object') recorrer(v);
   };
   recorrer(config?.bloques);
