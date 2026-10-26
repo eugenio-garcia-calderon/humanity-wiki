@@ -9946,3 +9946,10 @@ Eugenio: «en donar, quita el territorio y buscar de la barra; la donación arri
 - `pestanasTitulos: 'lado'`: el título 1 del principio a todo lo ancho, la donación a la izquierda y las pestañas a la derecha, en la primera pantalla.
 - Bloque «Donación»: `frecuencia: 'mes'`, `importeMes`/`importeUnaVez` de partida y `nota` bajo el botón (con enlaces); en el editor.
 - (Arreglo) Las pestañas al lado, más pequeñas para que quepan las siete. Donar es una fila oculta del menú del sitio (así lleva la barra sin salir en el ☰).
+
+## 2026-10-26 · Colores del espectro, nota bajo el título, «Ver mapa / Ver tabla» y Donar en negro (Programador 8)
+Eugenio: «un gradiente cercano al espectro de la luz visible: rojo lo más bajo, verde el 5, amarillo un suspenso alto, azul claro un notable y morado o azul oscuro un sobresaliente, en toda la capa de evaluación (galerías y mapa)»; «la nota en la galería debajo del nombre, centrado, y debajo la imagen»; «Donar con fondo negro y letras blancas; el logo (nombre e icono) un 15 % mayor, el eslogan igual»; «“Ver mapa” en la galería y “Ver tabla” en el mapa, a la derecha de la nota; y el icono del territorio tan grande como el logo».
+- `scoreColor.ts`: 0-1 rojo, 2 rojo anaranjado, 3 naranja, 4 amarillo, 5 verde, 6 turquesa, 7 azul claro, 8 azul, 9 añil, 10 morado. `tonosDeNota` oscurece la tinta por luminancia (≥ 4,5:1 sobre blanco en todos). En el mapa, los números de las etiquetas y la media van en esa tinta y el texto de los círculos en blanco o negro según el fondo.
+- Galería (`Galeria.tsx`) y objetivos del termómetro: título centrado arriba, la nota debajo y después la imagen.
+- `BotonVista`: un botón negro con icono y «Ver mapa» / «Ver tabla», al final de la pastilla (en el móvil, solo el icono). Silueta del territorio de 51 px (como el logo) en pantallas medianas y grandes.
+- Donar: negro con corazón y letras blancas. Logo: icono 51 px y nombre 1,55 rem.

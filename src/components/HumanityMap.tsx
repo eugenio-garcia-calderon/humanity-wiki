@@ -6,7 +6,7 @@ import { mapDataProvider } from '../services/MapDataProvider';
 import { createRoot } from 'react-dom/client';
 import { Droplet, Wheat, Home, Heart, Users, Leaf, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { getColorForScore } from '../utils/scoreColor';
-import { textoNotaDePorcentaje } from '../utils/nota';
+import { textoNotaDePorcentaje, tonosDeNota, textoSobre } from '../utils/nota';
 import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../utils/indicatorIcons';
 import { LEVEL_COLORS, LEVEL_LABELS } from '../utils/metricIcons';
@@ -66,8 +66,8 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
             return (
               <div key={indicator.id} className="flex flex-col items-center text-center">
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[9px] leading-none shadow-sm"
-                  style={{ backgroundColor: score != null ? color : '#cbd5e1' }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[9px] leading-none shadow-sm"
+                  style={{ backgroundColor: score != null ? color : '#cbd5e1', color: score != null ? textoSobre(color) : '#ffffff' }}
                 >
                   {score != null ? textoNotaDePorcentaje(score) : 'N/D'}
                 </div>
@@ -106,7 +106,7 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
         <span>{feature.name}</span>
         <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
           Media
-          <span className="text-sm font-black" style={{ color: objectives.overall != null ? getColorForScore(objectives.overall) : '#94a3b8' }}>
+          <span className="text-sm font-black" style={{ color: objectives.overall != null ? tonosDeNota(objectives.overall / 10).tinta : '#94a3b8' }}>
             {objectives.overall != null ? textoNotaDePorcentaje(objectives.overall) : 'N/D'}
           </span>
         </div>
@@ -119,8 +119,8 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
           return (
             <div key={item.key} className="flex flex-col items-center">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[10px] leading-none shadow-sm"
-                style={{ backgroundColor: color }}
+                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] leading-none shadow-sm"
+                style={{ backgroundColor: color, color: hasData ? textoSobre(color) : '#ffffff' }}
               >
                 {hasData ? textoNotaDePorcentaje(item.score as number) : 'N/D'}
               </div>
@@ -666,7 +666,8 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           if (!isPolygon) {
             scoreLabel.className += ' absolute top-14';
           }
-          scoreLabel.style.color = !hasData ? '#94a3b8' : finalColor;
+          // El número, en la tinta legible de su color (2026-10-26: con el espectro, el amarillo y el azul claro no se leían sobre blanco).
+          scoreLabel.style.color = !hasData ? '#94a3b8' : finalColor === color ? tonosDeNota((score ?? 50) / 10).tinta : finalColor;
           // NOTA DEL 1 AL 10 (2026-10-25, Eugenio): el mapa calcula sobre 100 y lo dice sobre 10.
           scoreLabel.textContent = !hasData ? 'Sin datos' : textoNotaDePorcentaje(score);
           el.appendChild(scoreLabel);

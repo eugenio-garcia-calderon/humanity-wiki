@@ -289,8 +289,9 @@ function PanelObjetivos({ objetivos }: { objetivos: Objetivo[] }) {
         const t = o.nota !== null ? tonosDeNota(o.nota) : null;
         const contenido = (
           <div data-objetivo={o.numero ?? undefined} className="flex h-full flex-col rounded-2xl bg-white p-2 ring-1 ring-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_6px_18px_-8px_rgba(15,23,42,0.18)] transition-shadow hover:shadow-[0_2px_4px_rgba(15,23,42,0.06),0_12px_28px_-10px_rgba(15,23,42,0.25)]">
-            <div lang="es" className="flex min-h-[2.5rem] items-start justify-between gap-1.5 px-1 pt-0.5">
-              <p className="min-w-0 hyphens-auto text-[13px] font-black leading-tight text-slate-900">{o.titulo}</p>
+            {/* El nombre arriba y centrado, la nota debajo y después la imagen (2026-10-26, Eugenio). */}
+            <div lang="es" className="flex flex-col items-center gap-1.5 px-1 pt-0.5 text-center">
+              <p className="flex min-h-[2.2rem] min-w-0 items-center justify-center hyphens-auto text-[13px] font-black leading-tight text-slate-900">{o.titulo}</p>
               {o.nota !== null && t && (
                 <span className="inline-flex h-7 shrink-0 items-center rounded-full px-2 text-sm font-black tabular-nums leading-none shadow-sm" style={{ backgroundColor: t.color, color: textoSobre(t.color) }}>
                   {textoNota(o.nota)}<span className="ml-0.5 text-[8px] font-bold opacity-75">/10</span>

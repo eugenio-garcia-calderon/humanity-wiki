@@ -51,11 +51,12 @@ export default function CabeceraSitio({ raizId, ruta, simple = false }: { raizId
       {/* El logo, de tamaño fijo, con su eslogan debajo (un 10 % más pequeño, para que encaje bajo el nombre). */}
       <Link to="/" className="flex min-w-0 items-center gap-2.5 justify-self-start" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 96)} alt="" className="h-11 w-11 shrink-0 rounded-lg object-contain" />
-          : <span className="text-3xl leading-none">{icono}</span>)}
+          // Un 15 % mayor (2026-10-26, Eugenio): el icono y el nombre; el eslogan, igual.
+          ? <img src={miniatura(icono, 112)} alt="" className="h-[51px] w-[51px] shrink-0 rounded-lg object-contain" />
+          : <span className="text-[2.15rem] leading-none">{icono}</span>)}
         {raiz && (
           <span className="hidden min-w-0 flex-col leading-none lg:flex">
-            <span className="whitespace-nowrap text-[1.35rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
+            <span className="whitespace-nowrap text-[1.55rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
             {c.subtitulo && <span className="mt-1 whitespace-nowrap text-[10.8px] text-slate-500">{c.subtitulo}</span>}
           </span>
         )}
@@ -65,9 +66,9 @@ export default function CabeceraSitio({ raizId, ruta, simple = false }: { raizId
           una segunda línea a todo lo ancho. */}
       {simple ? <span className="hidden sm:block" /> : <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center max-sm:order-last sm:col-span-1">
         <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-          <BotonVista />
           <div data-ranura-territorio className="contents" />
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
+          <BotonVista />
         </div>
       </div>}
       <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">

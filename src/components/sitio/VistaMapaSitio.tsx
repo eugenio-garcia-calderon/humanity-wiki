@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutGrid, Map as IconoMapa } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
@@ -34,20 +34,17 @@ export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
   return [activa, cambiar];
 }
 
-/** El interruptor de la barra: contenido o mapa. */
+/** EL BOTÓN DE VISTA DE LA BARRA (2026-10-26, Eugenio: «añade la palabra: “Ver mapa” en la galería y “Ver tabla”
+ *  en el mapa, a la derecha de la calificación»). Un solo botón que dice a dónde lleva. */
 export function BotonVista() {
   const [mapa, cambiar] = useVistaMapa();
-  const boton = (activo: boolean, etiqueta: string, icono: ReactNode, onClick: () => void) => (
-    <button type="button" onClick={onClick} aria-pressed={activo} title={etiqueta} aria-label={etiqueta}
-      className={cn('grid h-7 w-7 place-items-center rounded-full transition-colors sm:w-8', activo ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900')}>
-      {icono}
-    </button>
-  );
+  const texto = mapa ? 'Ver tabla' : 'Ver mapa';
   return (
-    <div data-boton-vista role="group" aria-label="Vista" className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5">
-      {boton(!mapa, 'Vista de contenido', <LayoutGrid className="h-4 w-4" />, () => mapa && cambiar(false))}
-      {boton(mapa, 'Vista de mapa', <IconoMapa className="h-4 w-4" />, () => !mapa && cambiar(true))}
-    </div>
+    <button type="button" data-boton-vista onClick={() => cambiar(!mapa)} title={texto} aria-label={texto}
+      className="ml-1 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-slate-900 px-3 text-sm font-bold text-white transition-colors hover:bg-slate-700">
+      {mapa ? <LayoutGrid className="h-4 w-4" /> : <IconoMapa className="h-4 w-4" />}
+      <span className="hidden whitespace-nowrap sm:inline">{texto}</span>
+    </button>
   );
 }
 
