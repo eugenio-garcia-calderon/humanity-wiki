@@ -16,6 +16,7 @@ import { cn } from '../../utils/cn';
 import { completarSitio } from './sitioWeb';
 import CabeceraSitio from './CabeceraSitio';
 import PestanasTitulos from './PestanasTitulos';
+import VistaMapaSitio, { useVistaMapa } from './VistaMapaSitio';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -124,6 +125,10 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // Solo en los sitios que la piden (`sitio.barra`, hoy luzhumanidad.com): los demás conservan su cabecera.
   // También en la portada (2026-10-26, Eugenio: «la página principal con la misma estructura»), en lugar de su cabecera.
   const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true;
+  // LA VISTA DE MAPA (2026-10-26, `VistaMapaSitio.tsx`): el mapa a toda la pantalla bajo la barra. La página
+  // sigue montada y escondida: su termómetro o su filtro son los que ponen el territorio en la barra.
+  const [vistaMapa] = useVistaMapa();
+  const mapa = conBarra && vistaMapa;
   return (
     <div onClickCapture={alPinchar}>
     <MarcoLectura pagina={pagina} rutas={rutas}>
@@ -133,6 +138,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} />}
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
+      {mapa && <VistaMapaSitio />}
+      <div hidden={mapa || undefined}>
       {!termo && <div>
       {migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
@@ -203,7 +210,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
       </article>
       </main>
-      {pie}
+      </div>
+      {!mapa && pie}
     </MarcoLectura>
     </div>
   );

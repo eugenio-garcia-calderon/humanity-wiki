@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
+import BuscarBarra from './BuscarBarra';
+import { BotonVista } from './VistaMapaSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -56,6 +58,9 @@ export default function CabeceraSitio({ raizId, ruta }: { raizId: string; ruta?:
         <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
+        {/* Buscar en la web y cambiar a la vista de mapa (2026-10-26, Eugenio). */}
+        <BuscarBarra raizId={raizId} />
+        <BotonVista />
         {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} plegado talla="sm" /></Suspense>}
         <span data-hueco-cuenta="cabecera" className="contents" />
       </div>
