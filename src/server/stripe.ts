@@ -267,6 +267,41 @@ export function registerStripeRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // DONAR (2026-10-26, Eugenio: «un botón de donar; algo sencillo con Stripe»)
+  // ==========================================================================
+  // Sin cuenta: el bloque «Donación» de una página manda el importe y Stripe cobra
+  // en su propia página. La vuelta, a la misma ruta del sitio desde el que se dona.
+  app.post('/api/stripe/checkout/donacion', async (req: Request, res: Response) => {
+    try {
+      const cents = Math.round(Number(req.body?.importe_cents));
+      if (!Number.isFinite(cents) || cents < 100 || cents > 1000000) return res.status(400).json({ error: 'El importe tiene que estar entre 1 € y 10.000 €.' });
+      const paginaId = String(req.body?.pagina_id || '').slice(0, 64);
+      const ruta = typeof req.body?.ruta === 'string' && /^\/(?!\/)[^?#\s]{0,300}$/.test(req.body.ruta) ? req.body.ruta : '/';
+      // El sitio desde el que se dona (su dominio propio, si lo tiene); si no se sabe, la plataforma.
+      const origen = String(req.headers.origin || '');
+      const host = String(req.get('host') || '');
+      const base = origen && host && new URL(origen).host === host ? origen : APP_URL;
+      let nombre = 'Donación';
+      if (paginaId) {
+        const r = (await db.execute(sql`SELECT title FROM knowledge_windows WHERE id = ${paginaId} AND deleted_at IS NULL`)).rows[0] as any;
+        if (r?.title) nombre = `Donación · ${String(r.title).slice(0, 80)}`;
+      }
+      const session = await getStripe().checkout.sessions.create({
+        mode: 'payment',
+        submit_type: 'donate',
+        line_items: [{ price_data: { currency: 'eur', product_data: { name: nombre }, unit_amount: cents }, quantity: 1 }],
+        metadata: { kind: 'donacion', pagina_id: paginaId },
+        success_url: `${base}${ruta}?donacion=gracias`,
+        cancel_url: `${base}${ruta}?donacion=cancelada`,
+      });
+      res.json({ url: session.url });
+    } catch (e: any) {
+      console.error('checkout donacion error:', e);
+      res.status(500).json({ error: 'No se ha podido abrir el pago.' });
+    }
+  });
+
+  // ==========================================================================
   // PUNTOS DE WIKI CREATOR — comprar más saldo (2026-08-08, petición del usuario)
   // ==========================================================================
   /** 100 puntos por 100 €: el paquete que pidió el usuario, de momento el único. */

@@ -857,6 +857,8 @@ export function registerBdRoutes(app: Express, db: any) {
       const kc = kw?.config || {};
       const enl: Record<string, any[]> = (await enlacesDe(db, [fila.id]))[fila.id] || {};
       let territorio: string | null = null, territorioId: string | null = null, sistemaPagina: string | null = null;
+      // De qué es parte (un objetivo, de su sistema): el primer paso de la ruta de la barra del sitio.
+      let padre: { nombre: string; pagina_id: string | null } | null = null;
       // La base de datos de los territorios, para que el termómetro deje elegir otro.
       const colTerr = (cols as any[]).find(c => c.tipo === 'relacion' && !c.config?.rol && /territor/.test(sinTildes(c.nombre)));
       for (const c of cols as any[]) {
@@ -866,6 +868,7 @@ export function registerBdRoutes(app: Express, db: any) {
         if (/territor/.test(sinTildes(c.nombre))) { territorio = a.etiqueta || null; territorioId = a.id || null; }
         // Solo «Sistema original» (la copia de 2026-10-25, ya borrada): una columna «Sistema» de otra tabla (los objetivos) es solo un enlace.
         else if (!sistemaPagina && /^sistema original/.test(sinTildes(c.nombre)) && a.extra?.pagina_id) sistemaPagina = a.extra.pagina_id;
+        else if (!padre && /^(sistema|objetivo)$/.test(sinTildes(c.nombre).trim())) padre = { nombre: a.etiqueta || '', pagina_id: a.extra?.pagina_id || null };
       }
       let niveles: any[] = [];
       const tablaNiveles = req.query.niveles ? String(req.query.niveles) : null;
@@ -886,7 +889,7 @@ export function registerBdRoutes(app: Express, db: any) {
       res.json({
         nombre: titulo, nota: colNota && v[colNota.id] != null ? Number(v[colNota.id]) : null, territorio, territorio_id: territorioId,
         // Para cambiar la nota desde la cabecera del editor (`PUT /api/bd/filas/:id`).
-        fila_id: fila.id, columna_nota: colNota?.id || null,
+        fila_id: fila.id, columna_nota: colNota?.id || null, padre,
         tabla_territorios: colTerr?.config?.tabla_destino || null,
         // La cabecera de la página va dentro del termómetro (arriba, centrada).
         pagina: { icono: kc.icono || null, portada: kc.portada || null, subtitulo: typeof kc.subtitulo === 'string' ? kc.subtitulo : '' },

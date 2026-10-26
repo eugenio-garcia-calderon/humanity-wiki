@@ -436,7 +436,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                         ? <img src={miniatura(icono, 24)} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
                         : <span className="shrink-0">{icono}</span>)
                       : null}
-                    <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')} style={tonos ? { color: textoSobre(tonos.color) } : undefined}>{nombre || 'Sin título'}</span>
+                    <span className={cn('line-clamp-2 break-words', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
                   </p>
       );
       // LA NOTA A LA DERECHA DEL TÍTULO (2026-10-25, Eugenio: «el número a la
@@ -448,8 +448,8 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                   <div lang="es" className={cn('flex items-center justify-between gap-1.5 px-1', nombreArriba && !chica && 'min-h-[2.75rem]' /* con el título arriba, las imágenes alineadas aunque un título ocupe dos líneas */)}>
                     <div className="min-w-0 flex-1 text-left hyphens-auto [overflow-wrap:normal] [&_p]:justify-start [&_span]:[overflow-wrap:normal]">{nombreEl}</div>
                     <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
-                      className={cn('inline-flex shrink-0 items-center rounded-full bg-white font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : estrecha ? 'h-8 px-2 text-xl' : 'h-10 px-3 text-2xl sm:h-11 sm:text-[1.65rem]')}
-                      style={{ color: tonos.tinta }}>
+                      className={cn('inline-flex shrink-0 items-center rounded-full font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : estrecha ? 'h-8 px-2.5 text-lg' : 'h-10 px-3 text-2xl')}
+                      style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
                       <span className="flex items-baseline">{textoNota(nota)}<span className={cn('ml-0.5 font-bold opacity-70', chica || estrecha ? 'text-[8px]' : 'text-[10px]')}>/10</span></span>
                     </span>
                   </div>
@@ -530,10 +530,11 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
               // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
               // al contenido en forma de rectángulos»): la imagen con sus
               // esquinas redondeadas y el texto debajo, como un portfolio.
-              style={tonos && !copia ? { backgroundColor: tonos.color, color: textoSobre(tonos.color) } : undefined}
+              // SOLO LA NOTA CON COLOR (2026-10-26, Eugenio: «en vez del recuadro con el color de la puntuación,
+              // colorear solo el círculo de la nota; el resto, un cuadrado elegante con contorno y una sombra bonita»).
               data-nota={nota ?? undefined}
               className={cn('group relative text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl transition-opacity',
-                tonos && !copia && (chica ? 'rounded-xl p-1' : 'rounded-2xl p-2 transition-shadow hover:shadow-md'),
+                tonos && !copia && cn('bg-white ring-1 ring-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_6px_18px_-8px_rgba(15,23,42,0.18)] transition-shadow hover:shadow-[0_2px_4px_rgba(15,23,42,0.06),0_12px_28px_-10px_rgba(15,23,42,0.25)]', chica ? 'rounded-xl p-1' : 'rounded-2xl p-2'),
                 enLista && 'max-sm:flex max-sm:items-start max-sm:gap-3',
                 enCaja && !copia && (chica ? 'bg-white rounded-xl ring-1 ring-slate-200/70 p-1 shadow-sm' : 'bg-white rounded-2xl ring-1 ring-slate-200/70 p-2 shadow-sm'),
                 // Sin imagen, la tarjeta lleva su marco: si no, parecería una lista.
@@ -553,7 +554,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
               )}
               {nombreArriba && <div className="mb-2">{cabeceraEl}</div>}
               {/* CUADRADA Y SIN RECORTAR (2026-10-21, Eugenio): la imagen entera dentro de un cuadrado, con blanco arriba y abajo (o a los lados) si no es cuadrada. */}
-              <div className={cn('relative aspect-square bg-white border border-slate-100 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
+              <div className={cn('relative bg-white border border-slate-100 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', tonos ? 'aspect-[16/10] border-0' /* más bajas: tres filas en la pantalla */ : 'aspect-square', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
                     recolocable={false /* la imagen se ve entera: no hay nada que recolocar (2026-10-21) */ && (recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}
@@ -604,7 +605,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                 {/* La descripción de la página, si la tiene: imagen, título y
                     descripción, como en la propia página. */}
                 {!chica && conDescripcion && f.pagina?.descripcion && (
-                  <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')} style={tonos ? { color: textoSobre(tonos.color), opacity: 0.85 } : undefined}><TextoEnriquecido texto={f.pagina.descripcion} /></p>
+                  <p className={cn('text-slate-500 leading-snug line-clamp-2 whitespace-pre-line', legible ? 'text-sm' : 'text-xs')} ><TextoEnriquecido texto={f.pagina.descripcion} /></p>
                 )}
                 {otras.filter(c => !(tonos && c.id === colNota?.id)).map(c => {
                   // EDITAR DESDE LA TARJETA (2026-10-18): quien edita cambia cada propiedad visible

@@ -61,12 +61,14 @@ export function useTerritorios(tablaId: string | null | undefined, extra: Opcion
   }, [todos, extra]);
 }
 
-export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto, alinear = 'derecha' }: {
+export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir, className, sinMarco, compacto, mini, alinear = 'derecha' }: {
   opciones: Opcion[]; conDatos: Set<string>; elegido: string; onElegir: (id: string) => void; className?: string;
   /** Dentro de otro recuadro (el resumen del territorio): sin su propio borde. */
   sinMarco?: boolean;
   /** Más bajo (la cabecera compacta de una entrada). */
   compacto?: boolean;
+  /** Una pastilla pequeña («📍 España ▾») para la barra de arriba (2026-10-26). */
+  mini?: boolean;
   /** Hacia qué lado se abre la lista (a la izquierda cuando el botón está en el borde izquierdo). */
   alinear?: 'izquierda' | 'derecha';
 }) {
@@ -99,6 +101,14 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
   );
   return (
     <div ref={caja} data-elegir-territorio className={cn('relative inline-flex flex-col', alinear === 'izquierda' ? 'items-start' : 'items-center', className)}>
+      {mini ? (
+        <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
+          aria-label={`Territorio: ${nombre}. Cambiar de territorio`} title="Cambiar de territorio"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-300 bg-white pl-2.5 pr-2 text-[13px] font-black text-slate-900 shadow-sm hover:border-slate-400">
+          <MapPin className="h-4 w-4 text-slate-500" /> <span data-territorio-elegido className="max-w-[9rem] truncate">{nombre}</span>
+          <ChevronDown className={cn('h-3.5 w-3.5 text-slate-500 transition-transform', abierto && 'rotate-180')} />
+        </button>
+      ) : (
       <button ref={boton} type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="listbox" aria-expanded={abierto}
         aria-label={`Territorio: ${nombre}. Cambiar de territorio`}
         className={cn('group inline-flex items-center gap-3 rounded-2xl bg-white pr-3 transition-shadow', compacto ? 'py-1.5' : 'py-2.5', sinMarco ? 'pl-2 hover:bg-slate-50' : 'border-2 border-slate-900 pl-4 shadow-sm hover:shadow-lg')}>
@@ -111,6 +121,7 @@ export default function ElegirTerritorio({ opciones, conDatos, elegido, onElegir
           <span className={cn(compacto && 'max-sm:sr-only')}>Cambiar</span> <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', abierto && 'rotate-180')} />
         </span>
       </button>
+      )}
       {abierto && (
         // En el móvil, una hoja que sube desde abajo: el desplegable se salía por el borde izquierdo.
         <div className={cn('absolute top-full z-40', alinear === 'izquierda' ? 'left-0' : 'right-0', ' mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-2xl max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:pb-4')}>

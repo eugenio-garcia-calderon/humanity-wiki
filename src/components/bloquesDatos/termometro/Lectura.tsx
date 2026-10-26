@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Check, Target, TrendingUp, Undo2 } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronRight, Target, TrendingUp, Undo2 } from 'lucide-react';
 import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
+import { createPortal } from 'react-dom';
 import { cn } from '../../../utils/cn';
 import { miniatura } from '../../../utils/miniatura';
 import ElegirTerritorio, { territorioGuardado, guardarTerritorio, useTerritorios } from '../filtroTerritorio/ElegirTerritorio';
@@ -35,7 +36,7 @@ type Nivel = { nivel: number; titulo: string; descripcion: string; medidas: stri
 type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; slug: string };
 type Grupo = { nombre: string; slug: string; entradas: Entrada[] };
 type Datos = { nombre: string; nota: number | null; territorio: string | null; territorio_id: string | null; tabla_territorios: string | null;
-  fila_id?: string; columna_nota?: string | null;
+  fila_id?: string; columna_nota?: string | null; padre?: { nombre: string; pagina_id: string | null } | null;
   pagina?: { icono: string | null; portada: string | null; subtitulo: string }; diagnostico: string; niveles: Nivel[]; red: Grupo[] };
 
 /** Un texto con una idea por línea (o separadas por «;»), como lista. */
@@ -275,49 +276,34 @@ function enlazadas(t: FilasTabla, filaId: string, territorio?: string) {
 }
 const celda = (f: any, c?: any) => (c && f.celdas?.[c.id]?.estado === 'ok' ? f.celdas[c.id].valor : null);
 
-function PanelObjetivos({ objetivos, sistema, territorio }: { objetivos: Objetivo[]; sistema: string; territorio: string | null }) {
+function PanelObjetivos({ objetivos }: { objetivos: Objetivo[] }) {
   const sitio = useSitio();
-  const conNota = objetivos.filter(o => o.nota !== null);
-  const media = conNota.length ? conNota.reduce((a, o) => a + (o.nota as number), 0) / conNota.length : null;
-  const peor = conNota.length ? conNota.reduce((a, o) => ((o.nota as number) < (a.nota as number) ? o : a)) : null;
+  // (2026-10-26, Eugenio) Sin el texto de arriba («12 objetivos…», la media y el más bajo): solo las tarjetas,
+  // pequeñas, blancas con contorno y sombra, y solo la nota con su color.
   const orden = [...objetivos].sort((a, b) => (b.nota ?? -1) - (a.nota ?? -1) || (a.numero ?? 99) - (b.numero ?? 99));
   return (
-    <div data-objetivos>
-      <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <p className="text-sm text-slate-600"><b className="font-black text-slate-900">{objetivos.length} objetivos estratégicos</b> de {sistema}{territorio ? ` en ${territorio}` : ''}. Cada nota = 1 + 0,9 × indicadores cumplidos (de 10).</p>
-        {media !== null && (
-          <p className="flex items-center gap-2 text-sm text-slate-600">
-            <span className="rounded-full px-2.5 py-0.5 text-sm font-black tabular-nums" style={{ backgroundColor: colorDeNota(media), color: textoSobre(colorDeNota(media)) }}>{textoNota(Math.round(media * 10) / 10)}</span> de media
-            {peor && <> · el más bajo: <b className="font-bold text-slate-800">{peor.titulo}</b> ({textoNota(peor.nota)})</>}
-          </p>
-        )}
-      </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {orden.map(o => {
-          const t = o.nota !== null ? tonosDeNota(o.nota) : null;
-          const contenido = (
-            <div data-objetivo={o.numero ?? undefined} className="flex h-full flex-col rounded-2xl p-2 transition-shadow hover:shadow-md"
-              style={t ? { backgroundColor: t.color, color: textoSobre(t.color) } : { backgroundColor: '#e2e8f0' }}>
-              <div lang="es" className="flex min-h-[3.25rem] items-start justify-between gap-1.5 px-1 pt-0.5">
-                <p className="min-w-0 hyphens-auto text-[13px] font-black leading-tight">
-                  {o.numero !== null && <span className="mr-1 opacity-70">{String(o.numero).padStart(2, '0')}</span>}{o.titulo}
-                </p>
-                {o.nota !== null && t && (
-                  <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-white px-2 text-base font-black tabular-nums leading-none" style={{ color: t.tinta }}>
-                    {textoNota(o.nota)}<span className="ml-0.5 text-[8px] font-bold opacity-70">/10</span>
-                  </span>
-                )}
-              </div>
-              <div className="mt-1.5 grid aspect-[4/3] place-items-center overflow-hidden rounded-xl bg-white p-2">
-                {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="h-full w-full object-contain" /> : <Target className="h-8 w-8 text-slate-300" />}
-              </div>
+    <div data-objetivos className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {orden.map(o => {
+        const t = o.nota !== null ? tonosDeNota(o.nota) : null;
+        const contenido = (
+          <div data-objetivo={o.numero ?? undefined} className="flex h-full flex-col rounded-2xl bg-white p-2 ring-1 ring-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_6px_18px_-8px_rgba(15,23,42,0.18)] transition-shadow hover:shadow-[0_2px_4px_rgba(15,23,42,0.06),0_12px_28px_-10px_rgba(15,23,42,0.25)]">
+            <div lang="es" className="flex min-h-[2.5rem] items-start justify-between gap-1.5 px-1 pt-0.5">
+              <p className="min-w-0 hyphens-auto text-[13px] font-black leading-tight text-slate-900">{o.titulo}</p>
+              {o.nota !== null && t && (
+                <span className="inline-flex h-7 shrink-0 items-center rounded-full px-2 text-sm font-black tabular-nums leading-none shadow-sm" style={{ backgroundColor: t.color, color: textoSobre(t.color) }}>
+                  {textoNota(o.nota)}<span className="ml-0.5 text-[8px] font-bold opacity-75">/10</span>
+                </span>
+              )}
             </div>
-          );
-          return o.pagina_id
-            ? <Link key={o.fila_id} to={sitio ? sitio.enlacePagina(o.pagina_id) : `/paginas/${o.pagina_id}`} title={o.descripcion || o.titulo}>{contenido}</Link>
-            : <div key={o.fila_id}>{contenido}</div>;
-        })}
-      </div>
+            <div className="mt-1.5 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl p-1.5">
+              {o.imagen ? <img src={miniatura(o.imagen, 200)} alt="" loading="lazy" className="h-full w-full object-contain" /> : <Target className="h-8 w-8 text-slate-300" />}
+            </div>
+          </div>
+        );
+        return o.pagina_id
+          ? <Link key={o.fila_id} to={sitio ? sitio.enlacePagina(o.pagina_id) : `/paginas/${o.pagina_id}`} title={o.descripcion || o.titulo}>{contenido}</Link>
+          : <div key={o.fila_id}>{contenido}</div>;
+      })}
     </div>
   );
 }
@@ -383,6 +369,16 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
   const [encima, setEncima] = useState<number | null>(null);
   const [leerMas, setLeerMas] = useState(false);
   const [verProps, setVerProps] = useState(false);
+  // LA BARRA DEL SITIO (2026-10-26): el territorio y la ruta van arriba, en sus huecos (`CabeceraSitio`).
+  const [ranuras, setRanuras] = useState<{ terr: HTMLElement | null; ruta: HTMLElement | null }>({ terr: null, ruta: null });
+  useEffect(() => {
+    if (!comoCabecera || edicion) return;
+    const mirar = () => setRanuras({ terr: document.querySelector<HTMLElement>('[data-ranura-territorio]'), ruta: document.querySelector<HTMLElement>('[data-ranura-ruta]') });
+    mirar();
+    const t = window.setTimeout(mirar, 400);
+    return () => window.clearTimeout(t);
+  }, [comoCabecera, !!edicion]); // eslint-disable-line react-hooks/exhaustive-deps
+  const sitioRuta = useSitio();
   const [falloNota, setFalloNota] = useState<string | null>(null);
   useEffect(() => {
     if (!paginaId) return;
@@ -481,7 +477,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     const fallosTexto = ideas(x.diagnostico);
     const lista: PestanaExtra[] = [];
     const ocultar: string[] = [];
-    if (objetivos?.length) { lista.push({ id: 'objetivos', titulo: 'Objetivos', n: objetivos.length, contenido: <PanelObjetivos objetivos={objetivos} sistema={x.nombre} territorio={territorioNombre} /> }); ocultar.push('objetivos'); }
+    if (objetivos?.length) { lista.push({ id: 'objetivos', titulo: 'Objetivos', n: objetivos.length, contenido: <PanelObjetivos objetivos={objetivos} /> }); ocultar.push('objetivos'); }
     if (indicadores?.length) { lista.push({ id: 'indicadores', titulo: 'Indicadores', n: indicadores.length, contenido: <PanelIndicadores indicadores={indicadores} territorio={territorioNombre} /> }); ocultar.push('indicadores'); }
     if (medidas.length && nivelActual !== null) lista.push({
       id: 'salto', titulo: `Salto ${nivelActual}→${nivelActual + 1}`,
@@ -532,8 +528,26 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     </span>
   ) : null;
 
+  // Dónde va el texto del nivel: con el territorio dentro del recuadro, debajo en el móvil y en medio en el ordenador.
+  const centro = ranuras.terr ? 'col-start-1 row-start-1' : 'col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-1';
   return (
     <div data-termometro className={cn(comoCabecera ? 'mb-5' : 'my-6', 'space-y-3')}>
+      {ranuras.terr && x.tabla_territorios && opciones.length > 0 && createPortal(
+        <ElegirTerritorio mini alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
+          onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />, ranuras.terr)}
+      {/* La ruta, sin «Inicio»: «Movilidad», o «Movilidad › Intermodalidad y logística» en un objetivo. */}
+      {ranuras.ruta && createPortal(
+        <>
+          {x.padre?.nombre && (
+            <>
+              {x.padre.pagina_id
+                ? <Link to={sitioRuta ? sitioRuta.enlacePagina(x.padre.pagina_id) : `/paginas/${x.padre.pagina_id}`} className="shrink-0 truncate text-sm font-bold text-slate-500 hover:text-slate-900 hover:underline">{x.padre.nombre}</Link>
+                : <span className="shrink-0 truncate text-sm font-bold text-slate-500">{x.padre.nombre}</span>}
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+            </>
+          )}
+          {comoCabecera ? <h1 className="truncate text-xl font-black tracking-tight text-slate-900">{x.nombre}</h1> : <span className="truncate text-xl font-black">{x.nombre}</span>}
+        </>, ranuras.ruta)}
       {/* En el editor, el título y la imagen arriba y centrados, para cambiarlos ahí mismo (sin color, sobrio). */}
       {edicion && (
         <div className="flex items-center justify-center gap-2.5">
@@ -546,21 +560,22 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
 
       {/* EL RECUADRO (2026-10-26, Eugenio: «así, como el del territorio»): el territorio, pequeño,
           a un lado; en el medio el nivel y la barra; a la derecha la nota en su círculo. */}
-      <section data-resumen-sistema className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8">
-        <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
+      <section data-resumen-sistema className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:gap-8', !ranuras.terr && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]')}>
+        {/* Sin la barra del sitio (el editor), el territorio va aquí, a la izquierda. */}
+        {!ranuras.terr && <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
           {x.tabla_territorios && opciones.length > 0 && (
             <ElegirTerritorio compacto sinMarco alinear="izquierda" opciones={opciones} conDatos={conDatos} elegido={elegidoT}
               onElegir={id => { setTerr(id); guardarTerritorio(id, ''); setElegido(null); }} />
           )}
-        </div>
+        </div>}
 
         {sinNota ? (
-          <div data-sin-nota className="col-span-2 text-center lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:text-left">
+          <div data-sin-nota className={cn('text-center lg:text-left', centro)}>
             <p className="font-black text-slate-800">Todavía no hay nota de {x.nombre} para {territorioNombre}.</p>
             {propio && <button type="button" onClick={() => { setTerr(propio); guardarTerritorio(propio, ''); }} className="mt-2 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-slate-700">Ver {x.territorio}</button>}
           </div>
         ) : (
-          <div data-nivel-elegido aria-live="polite" className="col-span-2 min-w-0 lg:col-span-1 lg:col-start-2 lg:row-start-1">
+          <div data-nivel-elegido aria-live="polite" className={cn('min-w-0', centro)}>
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
                 {n === nivelActual ? `${titulo} en ${territorioNombre || 'este territorio'} · nivel ${n}` : rotulo}
@@ -585,7 +600,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           </div>
         )}
 
-        <div className="col-start-2 row-start-1 flex justify-end lg:col-start-3 lg:justify-center">{circulo}</div>
+        <div className={cn('col-start-2 row-start-1 flex justify-end lg:justify-center', !ranuras.terr && 'lg:col-start-3')}>{circulo}</div>
       </section>
       {falloNota && <p role="alert" className="text-xs font-bold text-rose-600">{falloNota}</p>}
 
