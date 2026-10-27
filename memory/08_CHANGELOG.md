@@ -9968,3 +9968,7 @@ Eugenio: «al igual que en Movilidad, desarrolla los indicadores de los otros ob
 - Datos (SQL, producción): 1.440 indicadores nuevos en el catálogo único «Indicadores» (BDTMVOBDMUL001), 10 por cada uno de los 12 objetivos de Agua, Alimentación, Vivienda, Salud, Convivencia, Ecología, Educación, Energía, Informática, Política, Economía y Cultura (los sistemas del mapa). Cada uno con su página y su ficha: código (`AGU-O01-H01`), finalidad, métrica, unidad, fórmula, fuente, umbral, periodicidad, verificación e icono; enlazado a su objetivo y a su sistema.
 - Su evaluación en España a 31/12/2025 en «Evaluaciones de indicadores»: acreditados tantos como da la nota ya guardada de cada objetivo (nota = 1 + 0,9 × N), elegidos al azar con semilla y marcados como provisionales.
 - Quedan sin indicadores Fabricación, Materias Primas, Relaciones, Telecomunicaciones y Vestimenta. Generador: `scratchpad/indsis/` (datos por sistema + `generar.mjs`).
+
+## 2026-10-27 · Indicadores sin «acreditado / no acreditado» (Programador 8)
+Eugenio: «quita lo de acreditado o no acreditado de todos los indicadores de la plataforma».
+- Termómetro (`PanelIndicadores`): las tarjetas de indicadores enseñan icono, código, nombre y unidad, sin la etiqueta de estado ni el borde verde; fuera también la línea «N de 10 indicadores acreditados → nota». Las evaluaciones siguen en su base de datos.

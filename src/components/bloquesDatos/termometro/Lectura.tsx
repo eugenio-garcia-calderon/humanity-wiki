@@ -321,26 +321,18 @@ function PanelObjetivos({ objetivos }: { objetivos: Objetivo[] }) {
 /** LOS INDICADORES DE UN OBJETIVO, EN GALERÍA (2026-10-26, Eugenio: «a cada indicador, un icono;
  *  y la vista de galería con esos iconos en todos los objetivos»): su icono, código, nombre y
  *  estado en el territorio (de «Evaluaciones de indicadores»); al pulsar, su ficha técnica. */
-function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[]; territorio: string | null }) {
+// SIN «ACREDITADO / NO ACREDITADO» (2026-10-27, Eugenio: «quita lo de acreditado o no acreditado de todos los
+// indicadores de la plataforma»): las tarjetas enseñan el indicador (icono, código, nombre y unidad), no su estado;
+// las evaluaciones siguen guardadas en su base de datos.
+function PanelIndicadores({ indicadores }: { indicadores: Indicador[]; territorio: string | null }) {
   const sitio = useSitio();
-  const cuenta = (e: Estado) => indicadores.filter(i => i.estado === e).length;
-  const n = cuenta('Acreditado');
-  const nota = Math.round((1 + 0.9 * n) * 10) / 10;
   const orden = [...indicadores].sort((a, b) => (a.numero ?? 99) - (b.numero ?? 99));
-  const resto = (['Parcial', 'No acreditado', 'Sin evaluar'] as Estado[]).filter(e => cuenta(e)).map(e => `${cuenta(e)} ${e.toLowerCase()}${cuenta(e) > 1 && e !== 'Sin evaluar' ? 's' : ''}`);
   return (
     <div data-indicadores>
-      <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-        <b className="font-black text-slate-900">{n} de {indicadores.length} indicadores acreditados{territorio ? ` en ${territorio}` : ''}</b>
-        {resto.length > 0 && <span>({resto.join(' · ')})</span>}
-        <span>→ nota 1 + 0,9 × {n} =</span>
-        <span className="rounded-full px-2.5 py-0.5 font-black tabular-nums" style={{ backgroundColor: colorDeNota(nota), color: textoSobre(colorDeNota(nota)) }}>{textoNota(nota)}</span>
-      </p>
       <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {orden.map(i => {
-          const e = ESTADOS[i.estado];
           const tarjeta = (
-            <div data-indicador={i.codigo || undefined} className={cn('flex h-full flex-col rounded-2xl border bg-white p-3 transition-shadow hover:shadow-md', i.estado === 'Acreditado' ? 'border-emerald-200' : 'border-slate-200')}>
+            <div data-indicador={i.codigo || undefined} className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-3 transition-shadow hover:shadow-md">
               {/* With a cover (a 16:10 drawing) it goes full width, like an objective card; a 48 px
                   square would make it unreadable. Without one, the emoji in its small square. */}
               {i.imagen ? (
@@ -352,13 +344,12 @@ function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[
                 </>
               ) : (
                 <div className="flex items-start justify-between gap-2">
-                  <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl', i.estado === 'Acreditado' ? 'bg-emerald-50' : 'bg-slate-50')} aria-hidden>{i.icono || '📏'}</span>
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-50 text-2xl" aria-hidden>{i.icono || '📏'}</span>
                   <span className="text-[11px] font-black tabular-nums text-slate-400">{i.codigo || (i.numero !== null ? `#${i.numero}` : '')}</span>
                 </div>
               )}
               <p lang="es" className="mt-2 hyphens-auto text-[13px] font-black leading-snug text-slate-900">{i.titulo}</p>
               {i.unidad && <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{i.unidad}</p>}
-              <div className="mt-auto pt-3"><span className={cn('inline-flex rounded-full px-2 py-0.5 text-[11px] font-black', e.clase)}>{e.corto}</span></div>
             </div>
           );
           return (
