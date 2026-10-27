@@ -255,7 +255,7 @@ function PanelDiagnostico({ fallos, grupos, territorio }: { fallos: string[]; gr
 // se enseñan los de este objetivo, cumplidos o no. Nota = 1 + 0,9 × indicadores cumplidos.
 type Objetivo = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; nota: number | null; imagen: string | null; icono: string | null; descripcion: string };
 type Estado = 'Acreditado' | 'No acreditado' | 'Parcial' | 'Sin evaluar';
-type Indicador = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; codigo: string; icono: string | null; unidad: string; estado: Estado; descripcion: string };
+type Indicador = { fila_id: string; pagina_id: string | null; titulo: string; numero: number | null; codigo: string; imagen: string | null; icono: string | null; unidad: string; estado: Estado; descripcion: string };
 const ESTADOS: Record<Estado, { clase: string; corto: string }> = {
   'Acreditado': { clase: 'bg-emerald-600 text-white', corto: '✓ Acreditado' },
   'Parcial': { clase: 'bg-amber-400 text-slate-900', corto: '◐ Parcial' },
@@ -341,10 +341,21 @@ function PanelIndicadores({ indicadores, territorio }: { indicadores: Indicador[
           const e = ESTADOS[i.estado];
           const tarjeta = (
             <div data-indicador={i.codigo || undefined} className={cn('flex h-full flex-col rounded-2xl border bg-white p-3 transition-shadow hover:shadow-md', i.estado === 'Acreditado' ? 'border-emerald-200' : 'border-slate-200')}>
-              <div className="flex items-start justify-between gap-2">
-                <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl', i.estado === 'Acreditado' ? 'bg-emerald-50' : 'bg-slate-50')} aria-hidden>{i.icono || '📏'}</span>
-                <span className="text-[11px] font-black tabular-nums text-slate-400">{i.codigo || (i.numero !== null ? `#${i.numero}` : '')}</span>
-              </div>
+              {/* With a cover (a 16:10 drawing) it goes full width, like an objective card; a 48 px
+                  square would make it unreadable. Without one, the emoji in its small square. */}
+              {i.imagen ? (
+                <>
+                  <span className="self-end text-[11px] font-black tabular-nums text-slate-400">{i.codigo || (i.numero !== null ? `#${i.numero}` : '')}</span>
+                  <div className="relative mt-1 aspect-[16/10] overflow-hidden rounded-xl">
+                    <img src={miniatura(i.imagen, 200)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-contain" />
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-start justify-between gap-2">
+                  <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl', i.estado === 'Acreditado' ? 'bg-emerald-50' : 'bg-slate-50')} aria-hidden>{i.icono || '📏'}</span>
+                  <span className="text-[11px] font-black tabular-nums text-slate-400">{i.codigo || (i.numero !== null ? `#${i.numero}` : '')}</span>
+                </div>
+              )}
               <p lang="es" className="mt-2 hyphens-auto text-[13px] font-black leading-snug text-slate-900">{i.titulo}</p>
               {i.unidad && <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{i.unidad}</p>}
               <div className="mt-auto pt-3"><span className={cn('inline-flex rounded-full px-2 py-0.5 text-[11px] font-black', e.clase)}>{e.corto}</span></div>
@@ -490,7 +501,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
       setIndicadores(enlazadas(t, filaId).map((f: any) => ({
         fila_id: f.id, pagina_id: f.pagina_id || null, titulo: String(celda(f, cTit) || f.pagina?.titulo || 'Sin título'),
         numero: celda(f, cNum) !== null ? Number(celda(f, cNum)) : null, codigo: String(celda(f, cCod) || ''), unidad: String(celda(f, cUni) || ''),
-        icono: f.pagina?.icono || null, descripcion: String(celda(f, cDesc) || ''),
+        imagen: f.pagina?.imagen || null, icono: f.pagina?.icono || null, descripcion: String(celda(f, cDesc) || ''),
         estado: ev ? (estados.get(f.id) || 'Sin evaluar') : (celda(f, cOk) === true ? 'Acreditado' : 'No acreditado'),
       })));
     });
