@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutGrid, Map as IconoMapa } from 'lucide-react';
+import { LayoutGrid, Map as IconoMapa, Target } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,30 +21,52 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
+export type Vista = 'tabla' | 'mapa' | 'circulos';
+
+/** La vista del sitio, en la dirección: `?vista=mapa`, `?vista=circulos` o nada (la tabla). */
+export function useVista(): [Vista, (v: Vista) => void] {
   const { search, pathname, hash } = useLocation();
   const ir = useNavigate();
-  const activa = new URLSearchParams(search).get('vista') === 'mapa';
-  const cambiar = (mapa: boolean) => {
+  const v = new URLSearchParams(search).get('vista');
+  const activa: Vista = v === 'mapa' || v === 'circulos' ? v : 'tabla';
+  const cambiar = (nueva: Vista) => {
     const q = new URLSearchParams(search);
-    if (mapa) q.set('vista', 'mapa'); else q.delete('vista');
+    q.delete('circulo');
+    if (nueva === 'tabla') q.delete('vista'); else q.set('vista', nueva);
     const s = q.toString();
     ir(`${pathname}${s ? `?${s}` : ''}${hash}`);
   };
   return [activa, cambiar];
 }
 
-/** EL BOTÓN DE VISTA DE LA BARRA (2026-10-26, Eugenio: «añade la palabra: “Ver mapa” en la galería y “Ver tabla”
- *  en el mapa, a la derecha de la calificación»). Un solo botón que dice a dónde lleva. */
+export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
+  const [v, cambiar] = useVista();
+  return [v === 'mapa', (mapa: boolean) => cambiar(mapa ? 'mapa' : 'tabla')];
+}
+
+const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
+  { v: 'tabla', texto: 'Tabla', Icono: LayoutGrid },
+  { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
+  { v: 'circulos', texto: 'Círculos', Icono: Target },
+];
+
+/** EL SELECTOR DE VISTA DE LA BARRA. Primero un botón que decía a dónde llevaba («Ver mapa» / «Ver tabla»,
+ *  2026-10-26); desde la tercera vista (2026-10-27, Eugenio: «una tercera vista de círculos, junto a la de mapa y
+ *  tabla») son tres botones juntos, el de la vista en la que estás en negro. */
 export function BotonVista() {
-  const [mapa, cambiar] = useVistaMapa();
-  const texto = mapa ? 'Ver tabla' : 'Ver mapa';
+  const [vista, cambiar] = useVista();
   return (
-    <button type="button" data-boton-vista onClick={() => cambiar(!mapa)} title={texto} aria-label={texto}
-      className="ml-1 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-slate-900 px-3 text-sm font-bold text-white transition-colors hover:bg-slate-700">
-      {mapa ? <LayoutGrid className="h-4 w-4" /> : <IconoMapa className="h-4 w-4" />}
-      <span className="hidden whitespace-nowrap sm:inline">{texto}</span>
-    </button>
+    <div role="group" aria-label="Vista" data-boton-vista className="ml-1 inline-flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-slate-100 p-0.5">
+      {VISTAS.map(({ v, texto, Icono }) => (
+        <button key={v} type="button" onClick={() => cambiar(v)} title={`Ver ${texto.toLowerCase()}`} aria-label={`Ver ${texto.toLowerCase()}`}
+          aria-pressed={vista === v} data-vista={v}
+          className={cn('inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors',
+            vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white hover:text-slate-900')}>
+          <Icono className="h-4 w-4" />
+          <span className="hidden whitespace-nowrap md:inline">{texto}</span>
+        </button>
+      ))}
+    </div>
   );
 }
 
