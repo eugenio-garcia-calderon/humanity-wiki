@@ -23,8 +23,8 @@ const ICONOS: Record<string, string> = { personas: '🧍', hogar: '🏠', socied
 // Un tono claro por anillo, del cálido del centro al verde del planeta.
 const TONOS = ['#fff4cc', '#fde7d3', '#ede7fb', '#e0ecfc', '#dff3e7', '#f1f5f9', '#fce7f3'];
 
-type Sistema = { id: string; titulo: string; imagen: string | null; descripcion: string; nota: number | null };
-type Circulo = { clave: string; nombre: string; icono: string; tono: string; sistemas: Sistema[]; nota: number | null };
+export type Sistema = { id: string; titulo: string; imagen: string | null; descripcion: string; nota: number | null };
+export type Circulo = { clave: string; nombre: string; icono: string; tono: string; sistemas: Sistema[]; nota: number | null };
 
 const media = (s: Sistema[]) => {
   const v = s.map(x => x.nota).filter((n): n is number => typeof n === 'number');
@@ -41,7 +41,7 @@ function medir(t: string, fuente: string) {
   return lienzo.measureText(t).width;
 }
 
-function useCirculos(raizId: string) {
+export function useCirculos(raizId: string) {
   const [circulos, setCirculos] = useState<Circulo[] | null>(null);
   useEffect(() => {
     let vivo = true;
