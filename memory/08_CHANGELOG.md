@@ -9962,3 +9962,9 @@ Eugenio: «en un indicador la ruta decía “Evolución de la Humanidad › Obje
 ### 2026-10-27 — Indicator cards show their cover; Mobility indicators illustrated
 - The 120 Mobility indicators (`BDTMVOBDMUL001`) got one-line covers in the same style as the objectives (`/uploads/2026/10/indicador-oNN-hNN.svg`, set in `config.portada` by SQL, previous values in `~/copias-manuales/portadas-indicadores-movilidad-2026-10-27.csv`).
 - The indicator card in `Lectura.tsx` only ever read the page's emoji. It now reads `pagina.imagen` too: with a cover it shows it full width at 16:10, like an objective card, because a 48 px square would make a drawing unreadable. Without a cover it keeps the emoji square.
+
+## 2026-10-27 · Indicadores de los objetivos de otros 12 sistemas (Programador 8, datos)
+Eugenio: «al igual que en Movilidad, desarrolla los indicadores de los otros objetivos (alimentación, salud, vivienda…)».
+- Datos (SQL, producción): 1.440 indicadores nuevos en el catálogo único «Indicadores» (BDTMVOBDMUL001), 10 por cada uno de los 12 objetivos de Agua, Alimentación, Vivienda, Salud, Convivencia, Ecología, Educación, Energía, Informática, Política, Economía y Cultura (los sistemas del mapa). Cada uno con su página y su ficha: código (`AGU-O01-H01`), finalidad, métrica, unidad, fórmula, fuente, umbral, periodicidad, verificación e icono; enlazado a su objetivo y a su sistema.
+- Su evaluación en España a 31/12/2025 en «Evaluaciones de indicadores»: acreditados tantos como da la nota ya guardada de cada objetivo (nota = 1 + 0,9 × N), elegidos al azar con semilla y marcados como provisionales.
+- Quedan sin indicadores Fabricación, Materias Primas, Relaciones, Telecomunicaciones y Vestimenta. Generador: `scratchpad/indsis/` (datos por sistema + `generar.mjs`).
