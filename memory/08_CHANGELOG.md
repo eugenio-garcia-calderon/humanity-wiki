@@ -9958,3 +9958,7 @@ Eugenio: «un gradiente cercano al espectro de la luz visible: rojo lo más bajo
 Eugenio: «en un indicador la ruta decía “Evolución de la Humanidad › Objetivos e indicadores”; debería ser Sistemas de la Humanidad (la portada) › Movilidad › el objetivo › el indicador, con el icono y el desplegable para cambiar, aunque vaya debajo del menú».
 - `GET /api/ruta-relaciones/:pagina` (`server/rutaRelaciones.ts`): sube de la fila por su relación de un solo valor (primero la más concreta: el objetivo antes que el sistema; un territorio no es padre) hasta una base de datos de la portada. Cada paso trae sus hermanos (mismo padre) y su «Nombre en la ruta». Si no llega a la portada, no hay ruta y quedan las migas.
 - `RutaRelaciones.tsx`: la pastilla bajo la barra con el primer enlace (`sitio.rutaRaiz`, «Sistemas de la Humanidad») y los pasos desplegables. `PasoRuta`/`IconoPaso` pasan a `sitio/PasoRuta.tsx` (los usa también el termómetro).
+
+### 2026-10-27 — Indicator cards show their cover; Mobility indicators illustrated
+- The 120 Mobility indicators (`BDTMVOBDMUL001`) got one-line covers in the same style as the objectives (`/uploads/2026/10/indicador-oNN-hNN.svg`, set in `config.portada` by SQL, previous values in `~/copias-manuales/portadas-indicadores-movilidad-2026-10-27.csv`).
+- The indicator card in `Lectura.tsx` only ever read the page's emoji. It now reads `pagina.imagen` too: with a cover it shows it full width at 16:10, like an objective card, because a 48 px square would make a drawing unreadable. Without a cover it keeps the emoji square.
