@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutGrid, Map as IconoMapa, Target } from 'lucide-react';
+import { LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,7 +21,8 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos';
+export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2'];
 
 /** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
  *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
@@ -30,7 +31,7 @@ export function useVista(porDefecto: Vista = 'tabla'): [Vista, (v: Vista) => voi
   const { search, pathname, hash } = useLocation();
   const ir = useNavigate();
   const v = new URLSearchParams(search).get('vista');
-  const activa: Vista = v === 'tabla' || v === 'mapa' || v === 'circulos' ? v : porDefecto;
+  const activa: Vista = VALIDAS.includes(v as Vista) ? v as Vista : porDefecto;
   const cambiar = (nueva: Vista) => {
     const q = new URLSearchParams(search);
     q.delete('circulo');
@@ -42,7 +43,7 @@ export function useVista(porDefecto: Vista = 'tabla'): [Vista, (v: Vista) => voi
 }
 
 /** La vista inicial que pide la configuración del sitio, si es una de las que hay. */
-export const vistaInicialDe = (config: any): Vista => (config?.vistaInicial === 'mapa' || config?.vistaInicial === 'circulos' ? config.vistaInicial : 'tabla');
+export const vistaInicialDe = (config: any): Vista => (VALIDAS.includes(config?.vistaInicial) ? config.vistaInicial : 'tabla');
 
 export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
   const [v, cambiar] = useVista();
@@ -53,6 +54,7 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'tabla', texto: 'Tabla', Icono: LayoutGrid },
   { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
   { v: 'circulos', texto: 'Círculos', Icono: Target },
+  { v: 'circulos2', texto: 'Círculo 2.0', Icono: Orbit },
 ];
 
 /** EL SELECTOR DE VISTA DE LA BARRA. Primero un botón que decía a dónde llevaba («Ver mapa» / «Ver tabla»,

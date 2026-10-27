@@ -9983,3 +9983,9 @@ Eugenio: «organízalo en círculos concéntricos: Personas, Hogar, Sociedad, Te
 Eugenio: «haz que por defecto la vista que se muestra en luzhumanidad.com sea la del círculo».
 - `sitio.vistaInicial` (`tabla` | `mapa` | `circulos`): la vista de la portada cuando la dirección no lleva `?vista=`. Con otra que la tabla, el botón «Tabla» pone `?vista=tabla`. Las demás páginas siguen abriendo en su contenido.
 - Datos (SQL, producción): `sitio.vistaInicial = 'circulos'` en la portada de luzhumanidad.com (KWMUO4S4V663).
+
+## 2026-10-27 · Cuarta vista del sitio: Círculo 2.0 (Programador 8)
+Eugenio: «una cuarta vista como la del círculo pero mucho más pro de UX, diseño y UI, un 9/10; genera un bot que te evalúe elegancia, comprensibilidad y estilo y sigue iterando… publícalo como Círculo 2.0».
+- `VistaCirculos2Sitio.tsx` (`?vista=circulos2`, botón «Círculo 2.0» en el selector de la barra): diagrama de anillos con una porción por sistema coloreada por su nota (escala de siempre, tintada), nombres sobre el arco, hueco de arriba con cada círculo y su media, y la nota media del territorio en el centro. Al pasar por una porción, ficha con portada, nota, comparación con su círculo y con el territorio, y los demás sistemas del círculo; selector horizontal de círculos; en el móvil, primer toque = ficha bajo el círculo, segundo = abrir. Página intermedia por círculo con minicírculo, tarjetas de sistemas y círculo anterior/siguiente.
+- Se dibuja compacto (solo notas) cuando el círculo mide menos de 540 px y cabe en ventanas de 650 px de alto.
+- Iterado con un bot evaluador (subagente) en 5 rondas: 6,1 → 7,4 → 7,9 → 8,2; Eugenio pidió publicarlo tal cual antes de llegar al 9.
