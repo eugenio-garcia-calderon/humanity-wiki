@@ -9978,3 +9978,8 @@ Eugenio: «organízalo en círculos concéntricos: Personas, Hogar, Sociedad, Te
 - Barra: el botón «Ver mapa / Ver tabla» pasa a ser un selector de tres (Tabla · Mapa · Círculos), el activo en negro; en el móvil, solo iconos. `useVista()` en `VistaMapaSitio.tsx` (`?vista=mapa|circulos`); `useVistaMapa` se queda como atajo.
 - `VistaCirculosSitio.tsx`: un círculo dentro de otro con los sistemas de cada anillo en pastillas (enlazan a su página) y, al lado, una tarjeta por círculo con su nota media. Pinchar un círculo abre su página intermedia (`?vista=circulos&circulo=sociedad`) con sus sistemas en tarjetas (portada, nota y descripción).
 - El reparto sale de la base de datos de Sistemas del sitio (`sitio.sistemas`): columna de selección «Círculo», cuyas opciones, en orden, son los anillos del centro hacia fuera. Las notas son la columna «Nota» de cada sistema; la del círculo, su media.
+
+## 2026-10-27 · luzhumanidad.com abre en la vista Círculos (Programador 8)
+Eugenio: «haz que por defecto la vista que se muestra en luzhumanidad.com sea la del círculo».
+- `sitio.vistaInicial` (`tabla` | `mapa` | `circulos`): la vista de la portada cuando la dirección no lleva `?vista=`. Con otra que la tabla, el botón «Tabla» pone `?vista=tabla`. Las demás páginas siguen abriendo en su contenido.
+- Datos (SQL, producción): `sitio.vistaInicial = 'circulos'` en la portada de luzhumanidad.com (KWMUO4S4V663).

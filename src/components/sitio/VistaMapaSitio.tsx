@@ -23,21 +23,26 @@ const ENCUADRADOS = new Set(['espana', 'europa']);
 
 export type Vista = 'tabla' | 'mapa' | 'circulos';
 
-/** La vista del sitio, en la dirección: `?vista=mapa`, `?vista=circulos` o nada (la tabla). */
-export function useVista(): [Vista, (v: Vista) => void] {
+/** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
+ *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
+ *  luzhumanidad.com sea la del círculo»), esa. */
+export function useVista(porDefecto: Vista = 'tabla'): [Vista, (v: Vista) => void] {
   const { search, pathname, hash } = useLocation();
   const ir = useNavigate();
   const v = new URLSearchParams(search).get('vista');
-  const activa: Vista = v === 'mapa' || v === 'circulos' ? v : 'tabla';
+  const activa: Vista = v === 'tabla' || v === 'mapa' || v === 'circulos' ? v : porDefecto;
   const cambiar = (nueva: Vista) => {
     const q = new URLSearchParams(search);
     q.delete('circulo');
-    if (nueva === 'tabla') q.delete('vista'); else q.set('vista', nueva);
+    if (nueva === porDefecto) q.delete('vista'); else q.set('vista', nueva);
     const s = q.toString();
     ir(`${pathname}${s ? `?${s}` : ''}${hash}`);
   };
   return [activa, cambiar];
 }
+
+/** La vista inicial que pide la configuración del sitio, si es una de las que hay. */
+export const vistaInicialDe = (config: any): Vista => (config?.vistaInicial === 'mapa' || config?.vistaInicial === 'circulos' ? config.vistaInicial : 'tabla');
 
 export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
   const [v, cambiar] = useVista();
@@ -53,8 +58,8 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
 /** EL SELECTOR DE VISTA DE LA BARRA. Primero un botón que decía a dónde llevaba («Ver mapa» / «Ver tabla»,
  *  2026-10-26); desde la tercera vista (2026-10-27, Eugenio: «una tercera vista de círculos, junto a la de mapa y
  *  tabla») son tres botones juntos, el de la vista en la que estás en negro. */
-export function BotonVista() {
-  const [vista, cambiar] = useVista();
+export function BotonVista({ porDefecto = 'tabla' }: { porDefecto?: Vista }) {
+  const [vista, cambiar] = useVista(porDefecto);
   return (
     <div role="group" aria-label="Vista" data-boton-vista className="ml-1 inline-flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-slate-100 p-0.5">
       {VISTAS.map(({ v, texto, Icono }) => (

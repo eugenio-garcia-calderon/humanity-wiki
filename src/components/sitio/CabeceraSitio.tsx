@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
-import { BotonVista } from './VistaMapaSitio';
+import { BotonVista, type Vista } from './VistaMapaSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -31,7 +31,9 @@ export function raizDe(id: string) {
   return p;
 }
 
-export default function CabeceraSitio({ raizId, ruta, simple = false }: { raizId: string; ruta?: ReactNode;
+export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInicial = 'tabla' }: { raizId: string; ruta?: ReactNode;
+  /** La vista sin `?vista=` en esta página (la portada puede abrir en otra que la tabla). */
+  vistaInicial?: Vista;
   /** Solo el logo, la cuenta y el menú (2026-10-26, Eugenio: «en la página de donar, quita el territorio y buscar»). */
   simple?: boolean;
 }) {
@@ -68,7 +70,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false }: { raizId
         <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
           <div data-ranura-territorio className="contents" />
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
-          <BotonVista />
+          <BotonVista porDefecto={vistaInicial} />
         </div>
       </div>}
       <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">

@@ -17,7 +17,7 @@ import { completarSitio } from './sitioWeb';
 import CabeceraSitio from './CabeceraSitio';
 import PestanasTitulos from './PestanasTitulos';
 import RutaRelaciones from './RutaRelaciones';
-import VistaMapaSitio, { useVista } from './VistaMapaSitio';
+import VistaMapaSitio, { useVista, vistaInicialDe } from './VistaMapaSitio';
 import VistaCirculosSitio from './VistaCirculosSitio';
 
 // ============================================================================
@@ -136,7 +136,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // LA VISTA DE MAPA (2026-10-26, `VistaMapaSitio.tsx`): el mapa a toda la pantalla bajo la barra. La página
   // sigue montada y escondida: su termómetro o su filtro son los que ponen el territorio en la barra.
   // LA VISTA DE CÍRCULOS (2026-10-27, `VistaCirculosSitio.tsx`): los sistemas en círculos concéntricos.
-  const [vista] = useVista();
+  // La portada abre en la vista que pida el sitio (`sitio.vistaInicial`); las demás páginas, en la suya.
+  const vistaInicial = esRaiz ? vistaInicialDe(pagina.sitio?.config) : 'tabla';
+  const [vista] = useVista(vistaInicial);
   const mapa = conBarra && vista === 'mapa';
   const circulos = conBarra && vista === 'circulos';
   const migasEl = (<>{migasContexto ? (
@@ -177,7 +179,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* LA CABECERA DEL SITIO Y LA RUTA CENTRADA (2026-10-26, Eugenio: «que aparezca Luz &
           Humanidad como logo con el menú completo; y arriba centrado Movilidad en una ruta web,
           con su imagen de portada sin ningún color»). Solo con el termómetro de cabecera. */}
-      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={cfg.barraSimple === true} />}
+      {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={cfg.barraSimple === true} vistaInicial={vistaInicial} />}
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
       {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
