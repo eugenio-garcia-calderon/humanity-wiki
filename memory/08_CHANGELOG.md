@@ -9972,3 +9972,9 @@ Eugenio: «al igual que en Movilidad, desarrolla los indicadores de los otros ob
 ## 2026-10-27 · Indicadores sin «acreditado / no acreditado» (Programador 8)
 Eugenio: «quita lo de acreditado o no acreditado de todos los indicadores de la plataforma».
 - Termómetro (`PanelIndicadores`): las tarjetas de indicadores enseñan icono, código, nombre y unidad, sin la etiqueta de estado ni el borde verde; fuera también la línea «N de 10 indicadores acreditados → nota». Las evaluaciones siguen en su base de datos.
+
+## 2026-10-27 · Tercera vista del sitio: Círculos (Programador 8)
+Eugenio: «organízalo en círculos concéntricos: Personas, Hogar, Sociedad, Tecnología y Planeta… mételo como una tercera vista, junto a la de mapa y tabla; si alguien pincha en Sociedad deberán aparecer todos los sistemas de Sociedad».
+- Barra: el botón «Ver mapa / Ver tabla» pasa a ser un selector de tres (Tabla · Mapa · Círculos), el activo en negro; en el móvil, solo iconos. `useVista()` en `VistaMapaSitio.tsx` (`?vista=mapa|circulos`); `useVistaMapa` se queda como atajo.
+- `VistaCirculosSitio.tsx`: un círculo dentro de otro con los sistemas de cada anillo en pastillas (enlazan a su página) y, al lado, una tarjeta por círculo con su nota media. Pinchar un círculo abre su página intermedia (`?vista=circulos&circulo=sociedad`) con sus sistemas en tarjetas (portada, nota y descripción).
+- El reparto sale de la base de datos de Sistemas del sitio (`sitio.sistemas`): columna de selección «Círculo», cuyas opciones, en orden, son los anillos del centro hacia fuera. Las notas son la columna «Nota» de cada sistema; la del círculo, su media.
