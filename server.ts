@@ -293,6 +293,8 @@ async function startServer() {
   // prioridad solo en esta ruta — el resto de la API sigue con el límite
   // pequeño de siempre.
   app.use('/api/ai/chat', express.json({ limit: '20mb' }));
+  // La opinión de los visitantes puede llevar hasta tres imágenes (ya reducidas en el navegador).
+  app.use('/api/sitio/opinion', express.json({ limit: '8mb' }));
   app.use(express.json());
 
   // 1.45 MEDICIÓN (2026-08-22). Va ANTES que todo lo demás porque mide el

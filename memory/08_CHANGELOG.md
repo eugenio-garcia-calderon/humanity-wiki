@@ -10073,3 +10073,13 @@ Eugenio: «mete una nueva rama que sea la economía, entre Sociedad y Técnica, 
   - Pasan de Sociedad a Economía los sectores Economía y Trabajo.
   - Sectores nuevos en Economía: Comercio, Finanzas, Fiscalidad, Consumo y Empresas (páginas KWMVECONUE01–05, sin nota todavía).
 - Ilustración de la rama en `public/circulos/economia.svg` (de `grupos.py`); las de los sectores, en `sistemas_nuevos.py`.
+
+## 2026-10-28 · Opinión con imágenes y dictado; calificaciones ocultas por defecto; rama Naturaleza (Programador 8)
+Eugenio: «permite añadir imágenes al feedback, quita el mensaje de "Sin cuenta…", el cuadro de texto más grande, con el dictado por voz que ya tenemos y el botón de enviar a la derecha»; «que las calificaciones estén ocultas por defecto y el botón de mostrarlas más escueto, simple, pequeño»; y «cambia Ecosistema por Naturaleza; en Naturaleza entran la física, la matemática, la biología, la química, etc.».
+- `BotonOpinion.tsx`:
+  - Cuadro de cinco líneas con dos botones dentro, abajo a la derecha: imágenes y micrófono (`useVoiceDictation` + `BotonMicrofono`; sin sesión, el reconocimiento del navegador).
+  - «Enviar» va a la derecha del cuadro. Fuera la frase de abajo.
+  - Hasta tres imágenes: se eligen, se pegan o se arrastran, y se reducen a 1.600 px en JPEG antes de enviarse.
+  - `POST /api/sitio/opinion` las guarda con `guardarArchivo` y las enlaza en la propuesta; si quien escribe tiene sesión, también como adjuntos. Admite peticiones de hasta 8 MB.
+- `utils/calificaciones.ts`: ocultas salvo que la persona haya pedido verlas en este navegador. `NotaCirculo` importa el interruptor para que no parpadeen. `BotonCalificaciones`: el ojo y «Notas», pequeño; la frase entera va en el título.
+- `VistaCirculoSitio.tsx`: la rama «naturaleza» usa la ilustración de siempre. Datos (SQL, tras el despliegue): «Ecosistema» pasa a «Naturaleza» y se añaden los sectores Física, Matemáticas, Biología, Química, Geología y Astronomía (portadas en `sistemas_nuevos.py`).

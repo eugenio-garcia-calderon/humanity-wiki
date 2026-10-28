@@ -17,6 +17,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { quienEscribe } from './agentesIA';
+import { guardarArchivo } from './uploads';
 
 // ══ LOS CUATRO ESTADOS ═══════════════════════════════════════════════════════
 // `propuesta` es de 2026-08-22 (Eugenio: «las creadas por otros usuarios cada X
@@ -336,7 +337,7 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
     try {
       if (String(req.body?.web || '').trim()) return res.json({ ok: true }); // el campo trampa: se finge que ha ido bien
       const texto = String(req.body?.texto || '').trim();
-      if (texto.length < 3) return res.status(400).json({ error: 'Escribe un poco más.' });
+      if (texto.length < 3 && !(Array.isArray(req.body?.imagenes) && req.body.imagenes.length)) return res.status(400).json({ error: 'Escribe un poco más.' });
       const ip = String((req.headers['x-forwarded-for'] as string || '').split(',')[0].trim() || req.ip || 'sin-ip');
       const ahora = Date.now();
       const recientes = (enviosPorIp.get(ip) || []).filter(t => ahora - t < 10 * 60_000);
@@ -348,12 +349,29 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       // Si quien escribe sí tiene sesión, la nota lleva su nombre.
       const quien = await quienEscribe(req, db).catch(() => null);
       const id = nuevoId();
-      const titulo = texto.replace(/\s+/g, ' ').slice(0, 120);
-      const detalle = `${texto.slice(0, 4000)}\n\n— Opinión enviada desde ${host}${desde}`;
+      // HASTA TRES IMÁGENES (2026-10-28, Eugenio: «permite también añadir imágenes a este feedback»): llegan como
+      // `data:` ya reducidas en el navegador y se guardan en el almacén de siempre (`guardarArchivo`). En la
+      // propuesta van como enlaces; si quien escribe tiene sesión, también como adjuntos del Hormiguero.
+      const imagenes: { url: string; bytes: number; type: string }[] = [];
+      for (const d of (Array.isArray(req.body?.imagenes) ? req.body.imagenes : []).slice(0, 3)) {
+        const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(d || ''));
+        if (!m) continue;
+        const bytes = Buffer.from(m[2], 'base64');
+        if (bytes.length > 2.5 * 1024 * 1024) continue;
+        try { imagenes.push(guardarArchivo(m[1], bytes)); } catch { /* formato o tamaño no admitido: se ignora */ }
+      }
+      const titulo = texto.replace(/\s+/g, ' ').slice(0, 120) || 'Opinión con imágenes';
+      const detalle = `${texto.slice(0, 4000)}${imagenes.length ? `\n\nImágenes:\n${imagenes.map(i => i.url).join('\n')}` : ''}\n\n— Opinión enviada desde ${host}${desde}`;
       await db.execute(sql`
         INSERT INTO incidencias (id, titulo, detalle, clase, autor_user_id, de_admin, estado, area, relevancia)
         VALUES (${id}, ${titulo}, ${detalle}, 'mejora', ${quien?.clase === 'persona' ? quien.id : null}, false, 'propuesta', 'general', 5)
       `);
+      if (quien?.clase === 'persona') for (const [k, i] of imagenes.entries()) {
+        await db.execute(sql`
+          INSERT INTO archivos (id, url, nombre, mime, bytes, clase, subido_por, incidencia_id)
+          VALUES (${`${id}I${k}`}, ${i.url}, ${`imagen-${k + 1}`}, ${i.type}, ${i.bytes}, 'imagen', ${quien.id}, ${id})
+        `).catch(() => {});
+      }
       res.json({ ok: true });
     } catch (e: any) {
       res.status(500).json({ error: 'No se ha podido enviar. Prueba otra vez.' });

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { colorDeNota, textoNota } from '../../utils/nota';
+import '../../utils/calificaciones'; // pone ya la clase de «ocultas» (por defecto) antes de pintar la primera nota
 import { cn } from '../../utils/cn';
 
 // ============================================================================
