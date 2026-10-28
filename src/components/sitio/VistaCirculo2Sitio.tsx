@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 import ElegirTerritorio from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { miniatura } from '../../utils/miniatura';
 import { useSitio } from './ContextoSitio';
 import { Arco } from './ArcoCapas';
-import { PanelCirculo, useCirculoElegido, useCirculosTerritorio } from './PanelCirculo';
+import { colsUnaFila, PanelCirculo, useCirculoElegido, useCirculosTerritorio } from './PanelCirculo';
 import { leerSistemas, type Circulo, type Sistema } from './circulosDatos';
 import NotaCirculo from './NotaCirculo';
 import { Eslabon, Union } from './Eslabon';
@@ -122,8 +122,8 @@ function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
             {/* Una palabra por temática (su «Nombre en la ruta»); el nombre entero, al pasar el ratón. TARJETAS GRANDES
                 (2026-10-28, Eugenio: «hay más hueco en el bloque 3 para hacer las tarjetas más grandes y visibles»): en
                 tres columnas y con filas iguales que llenan el alto del bloque, el dibujo arriba y la palabra debajo. */}
-            <ul className="grid min-h-0 flex-1 grid-cols-2 gap-2.5 md:grid-cols-3 md:[grid-template-rows:repeat(var(--filas),minmax(0,1fr))]"
-              style={{ ['--filas' as string]: Math.ceil(objetivos.length / 3) }} data-objetivos-sector>
+            <ul className="grid min-h-0 flex-1 grid-cols-2 gap-2.5 md:grid-cols-3 md:[grid-template-rows:repeat(var(--filas3),minmax(0,1fr))] lg:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))] lg:[grid-template-rows:repeat(var(--filas),minmax(0,1fr))]"
+              style={{ ['--filas3' as string]: Math.ceil(objetivos.length / 3), ['--cols' as string]: colsUnaFila(objetivos.length), ['--filas' as string]: Math.ceil(objetivos.length / colsUnaFila(objetivos.length)) }} data-objetivos-sector>
               {objetivos.map(o => {
                 const on = bloque === o.pagina_id, nota = o.pagina_id ? notas.get(o.pagina_id) : undefined;
                 return (
@@ -148,7 +148,7 @@ function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
   );
 }
 
-// LAS FILAS DE ABAJO: primero las cinco de siempre, con su nombre corto (las vacías no se pintan); después,
+// LAS PESTAÑAS DE ABAJO: primero las cinco de siempre, con su nombre corto, aunque estén vacías (se ven apagadas); después,
 // cualquier otra relación que tenga algo.
 const PESTANAS: Array<[RegExp, string]> = [[/proyecto/i, 'Proyectos'], [/soluci/i, 'Soluciones'], [/indicador/i, 'Indicadores'], [/persona/i, 'Personas'], [/publicaci/i, 'Publicaciones']];
 type Pestana = { clave: string; nombre: string; completo?: string; entradas: Entrada[] };
@@ -165,80 +165,61 @@ function pestanasDe(grupos: Grupo[], quitarObjetivos: boolean): Pestana[] {
   return [...fijas, ...otras];
 }
 
-/** Una fila de abajo: el titular grande a la izquierda y sus entradas en carrusel, tres a la vista. */
-function FilaCarrusel({ p, enlace }: { p: Pestana; enlace: (id: string) => string }) {
-  const pista = useRef<HTMLUListElement>(null);
-  const [bordes, setBordes] = useState({ ini: true, fin: true });
-  const medir = () => {
-    const el = pista.current;
-    if (el) setBordes({ ini: el.scrollLeft <= 2, fin: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
-  };
-  useEffect(() => {
-    medir();
-    const el = pista.current;
-    if (!el) return;
-    const o = new ResizeObserver(medir); o.observe(el);
-    return () => o.disconnect();
-  }, [p.entradas.length]);
-  const mover = (dir: number) => pista.current?.scrollBy({ left: dir * pista.current.clientWidth, behavior: 'smooth' });
-  const flecha = 'grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900 disabled:opacity-30';
-  return (
-    <section className="grid gap-4 border-t border-slate-200 py-7 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:gap-8" data-fila-detalle={p.nombre}>
-      <div className="flex items-start justify-between gap-3 md:flex-col md:justify-start">
-        <h3 className="text-3xl font-black uppercase tracking-tight text-slate-900 md:text-4xl" title={p.completo}>
-          {p.nombre} <span className="align-middle text-lg font-bold text-slate-400">{p.entradas.length}</span>
-        </h3>
-        {!(bordes.ini && bordes.fin) && (
-          <div className="flex shrink-0 gap-2">
-            <button type="button" onClick={() => mover(-1)} disabled={bordes.ini} aria-label="Anteriores" className={flecha}><ChevronLeft className="h-5 w-5" /></button>
-            <button type="button" onClick={() => mover(1)} disabled={bordes.fin} aria-label="Siguientes" className={flecha}><ChevronRight className="h-5 w-5" /></button>
-          </div>
-        )}
-      </div>
-      <ul ref={pista} onScroll={medir} className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:thin]" data-carrusel>
-        {p.entradas.map(x => {
-          const tarjeta = (
-            <>
-              <span className="relative block aspect-[16/10] w-full bg-slate-50">
-                {x.imagen ? <img src={miniatura(x.imagen, 480)} alt="" className="absolute inset-0 h-full w-full object-contain p-3" /> : x.icono ? <span className="grid h-full place-items-center text-5xl">{x.icono}</span> : null}
-              </span>
-              <span lang="es" className="hyphens-auto px-4 py-3 text-base font-bold leading-snug text-slate-900">{x.titulo}</span>
-            </>
-          );
-          const clase = 'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white';
-          return (
-            <li key={x.fila_id} className="shrink-0 snap-start basis-[82%] sm:basis-[calc((100%-1rem)/2)] lg:basis-[calc((100%-2rem)/3)]">
-              {x.pagina_id
-                ? <Link to={enlace(x.pagina_id)} onClick={() => window.scrollTo(0, 0)} className={`${clase} transition hover:-translate-y-0.5 hover:shadow-md`}>{tarjeta}</Link>
-                : <span className={clase}>{tarjeta}</span>}
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-
-/** Debajo: las relaciones de lo elegido (proyectos, soluciones, indicadores, personas, publicaciones…), una fila cada una
- *  (2026-10-28, Eugenio: «una fila por cada uno en vez de pestañas, en carrusel con 3 entradas, el titular grande a la
- *  izquierda y una línea de separación entre filas»). Las filas vacías no se pintan. */
+/** Debajo: las relaciones de lo elegido en pestañas horizontales (proyectos, soluciones, indicadores, personas,
+ *  publicaciones…). Las filas en carrusel duraron una tarde (2026-10-28, Eugenio: «muestra los proyectos, herramientas,
+ *  personas y fallos en modo de pestaña en horizontal, como estaba antes»). */
 function Detalle({ paginaId, titulo, grupos, quitarObjetivos, arriba }: {
   paginaId: string; titulo: string; grupos: Grupo[] | null; quitarObjetivos: boolean; arriba: number;
 }) {
   const sitio = useSitio();
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
-  const filas = useMemo(() => pestanasDe(grupos || [], quitarObjetivos).filter(p => p.entradas.length), [grupos, quitarObjetivos]);
+  const pestanas = useMemo(() => pestanasDe(grupos || [], quitarObjetivos), [grupos, quitarObjetivos]);
+  const [activa, setActiva] = useState<string | null>(null);
+  // Al cambiar de temática o de categoría, la primera pestaña con algo dentro.
+  useEffect(() => { setActiva(null); }, [paginaId]);
+  const elegida = pestanas.find(p => p.clave === activa) || pestanas.find(p => p.entradas.length) || pestanas[0];
   return (
-    // Al menos una pantalla de alto: al cambiar a una categoría con poco dentro, la ruta no se va con el desplazamiento.
-    <section data-detalle-circulo2 className="mt-6" style={{ minHeight: `calc(100dvh - ${arriba}px)` }}>
-      <div className="flex justify-end pb-3">
-        <Link to={enlace(paginaId)} onClick={() => window.scrollTo(0, 0)} className="inline-flex items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900" title={`Abrir la página de ${titulo}`}>
-          <span className="max-w-[16rem] truncate">{titulo}</span> <ArrowRight className="h-4 w-4" />
-        </Link>
+    // Al menos una pantalla de alto, para que la barra de las pestañas se quede pegada aunque haya pocas tarjetas.
+    <section data-detalle-circulo2 className="mt-5" style={{ minHeight: `calc(100dvh - ${arriba}px)` }}>
+      <div className="sticky z-30 -mx-4 border-y border-slate-200 bg-white/95 backdrop-blur sm:-mx-8" style={{ top: arriba }} data-pestanas-circulo>
+        <div className="flex items-center gap-3 px-4 py-2 sm:px-8">
+          <div role="tablist" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+            {pestanas.map(p => {
+              const on = p === elegida, vacia = !p.entradas.length;
+              return (
+                <button key={p.clave} type="button" role="tab" aria-selected={on} disabled={vacia} onClick={() => setActiva(p.clave)} data-pestana={p.nombre} title={p.completo}
+                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold transition-colors ${on ? 'bg-slate-900 text-white' : vacia ? 'text-slate-300' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
+                  {p.nombre} <span className={`text-xs ${on ? 'text-slate-300' : 'text-slate-400'}`}>{p.entradas.length}</span>
+                </button>
+              );
+            })}
+          </div>
+          <Link to={enlace(paginaId)} onClick={() => window.scrollTo(0, 0)} className="hidden shrink-0 items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900 sm:inline-flex" title={`Abrir la página de ${titulo}`}>
+            <span className="max-w-[16rem] truncate">{titulo}</span> <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
-      {!grupos ? <p className="border-t border-slate-200 py-6 text-sm text-slate-400">Cargando…</p>
-        : !filas.length ? <p className="border-t border-slate-200 py-6 text-sm text-slate-500">Todavía no tiene proyectos, soluciones, indicadores, personas ni publicaciones enlazados.</p>
-        : filas.map(p => <FilaCarrusel key={p.clave} p={p} enlace={enlace} />)}
+      <div className="pt-4" role="tabpanel">
+        {!grupos ? <p className="py-6 text-sm text-slate-400">Cargando…</p>
+          : !elegida?.entradas.length ? <p className="py-6 text-sm text-slate-500">Todavía no tiene proyectos, soluciones, indicadores, personas ni publicaciones enlazados.</p>
+          : (
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6" data-grupo-detalle={elegida.nombre}>
+              {elegida.entradas.map(x => (
+                <li key={x.fila_id}>
+                  {x.pagina_id ? (
+                    <Link to={enlace(x.pagina_id)} onClick={() => window.scrollTo(0, 0)}
+                      className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md">
+                      <span className="relative block aspect-[16/10] w-full bg-slate-50">
+                        {x.imagen ? <img src={miniatura(x.imagen, 240)} alt="" className="absolute inset-0 h-full w-full object-contain p-1.5" /> : x.icono ? <span className="grid h-full place-items-center text-3xl">{x.icono}</span> : null}
+                      </span>
+                      <span lang="es" className="hyphens-auto px-2.5 py-2 text-[13px] font-bold leading-tight text-slate-900">{x.titulo}</span>
+                    </Link>
+                  ) : <span className="block rounded-xl border border-slate-200 px-2.5 py-2 text-[13px] font-bold text-slate-900">{x.titulo}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+      </div>
     </section>
   );
 }
@@ -301,13 +282,10 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
     else poner({ circulo: x.clave, sector: null, bloque: null });
     if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-circulo-elegido-c2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   };
-  // Desde 768 px en columnas; el tercer bloque, el más ancho (Eugenio: «un hueco más grande para la tercera parte»),
-  // y el arco, más grande que al principio (Eugenio: «haz que el bloque 1 sea más grande»).
-  const rejilla = paso === 2 ? 'md:grid-cols-[minmax(0,5fr)_minmax(0,5fr)_minmax(0,8fr)] md:gap-6 xl:gap-8'
-    : paso === 1 ? 'md:grid-cols-[minmax(0,6fr)_minmax(0,9fr)] md:gap-10' : '';
-  // Con algo pinchado, los bloques miden un tercio largo de la pantalla (antes la mitad; Eugenio: «que sea más pequeño
-  // este menú expansivo de arriba, para ver fácilmente el contenido de abajo»): con seis categorías y seis temáticas,
-  // caben en dos o tres filas.
+  // UN SOLO SELECTOR A LA VEZ (2026-10-28, Eugenio: «quita el bloque 1, que esa información ya está arriba, y deja solo
+  // las categorías; y al elegir una, quita el bloque 2 y deja solo el 3: siempre solo un selector»). La ruta de la
+  // cabecera dice dónde se está y deja volver o cambiar. Con algo elegido, el bloque mide un tercio de la pantalla y
+  // reparte sus tarjetas en una fila.
   const medio = paso > 0 ? 'md:h-[max(250px,calc(36dvh))]' : '';
   // Cada paso con sus hermanos. Otro sector sube a los bloques (aún no hay categoría elegida); otra categoría o temática
   // cambia lo de abajo sin moverse.
@@ -345,21 +323,20 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
     // A todo lo ancho de la ventana (como el mapa): el arco pegado a la izquierda y sitio para los tres bloques.
     <div className="px-4 pt-1 sm:px-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }} data-vista-circulo2 data-paso={paso}>
       {selector}
-      <div className={`grid grid-cols-[minmax(0,1fr)] items-stretch gap-6 ${rejilla} ${medio}`} data-bloques-circulo>
-        <div className={`mx-auto flex w-full min-h-0 items-start ${paso === 0 ? 'max-w-[680px]' : 'max-w-[560px] md:mx-0'}`}>
-          {/* Sin nada pinchado, ninguna rama marcada (el ratón solo la ilumina). */}
-          <div className="w-full">
-            <Arco circulos={circulos} elegido={paso === 0 ? -1 : elegido} elegir={pincharRama} ver={ver} dibujoDe={dibujoPata}
-              clase={paso === 0 ? undefined : 'md:max-h-[max(250px,calc(36dvh))]'} />
-            {paso === 0 && <p className="mt-3 text-center text-sm font-semibold text-slate-500">Pincha una rama para ver sus sectores.</p>}
+      <div className={`grid grid-cols-[minmax(0,1fr)] items-stretch ${medio}`} data-bloques-circulo>
+        {paso === 0 && (
+          <div className="mx-auto w-full max-w-[680px]">
+            {/* Sin nada pinchado, ninguna rama marcada (el ratón solo la ilumina). */}
+            <Arco circulos={circulos} elegido={-1} elegir={pincharRama} ver={ver} dibujoDe={dibujoPata} />
+            <p className="mt-3 text-center text-sm font-semibold text-slate-500">Pincha una rama para ver sus categorías.</p>
           </div>
-        </div>
-        {paso >= 1 && (
+        )}
+        {paso === 1 && (
           <div className="min-h-0 min-w-0 animate-in fade-in duration-300">
-            <PanelCirculo c={c} t={t} apretado={paso === 2} ancla="data-circulo-elegido-c2" elegidoId={sector?.s.id || null}
+            <PanelCirculo c={c} t={t} ancho ancla="data-circulo-elegido-c2" elegidoId={null}
               alElegir={s => {
-                poner({ sector: s.id === sectorId ? null : s.id, bloque: null, circulo: c.clave });
-                if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-bloque-sector]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+                poner({ sector: s.id, bloque: null, circulo: c.clave });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }} />
           </div>
         )}
@@ -368,7 +345,7 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
             <BloqueSector s={sector.s} c={sector.c} grupos={gruposSector} notas={notas} bloque={bloqueId}
               alElegir={o => {
                 poner({ bloque: o.pagina_id === bloqueId ? null : o.pagina_id });
-                // Las pestañas ya asoman en la mitad de abajo; solo en el móvil hay que bajar hasta ellas.
+                // Las pestañas ya asoman debajo; solo en el móvil hay que bajar hasta ellas.
                 if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-detalle-circulo2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
               }} />
           </div>

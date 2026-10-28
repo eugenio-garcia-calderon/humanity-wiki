@@ -83,6 +83,26 @@ export function BotonVista({ porDefecto = 'tabla' }: { porDefecto?: Vista }) {
   );
 }
 
+/** Las vistas dentro del menú ☰ de la barra (2026-10-28, Eugenio: «pon más compacto el selector de las vistas y mételo en
+ *  el menú colapsable»): una fila de tres, con su icono y su nombre. */
+export function VistasMenu({ porDefecto = 'tabla', cerrar }: { porDefecto?: Vista; cerrar?: () => void }) {
+  const [vista, cambiar] = useVista(porDefecto);
+  return (
+    <div data-vistas-menu className="mb-1 border-b border-slate-100 px-1 pb-2 pt-1">
+      <p className="px-2 pb-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Vista</p>
+      <div role="group" aria-label="Vista" className="grid grid-cols-3 gap-1">
+        {VISTAS.map(({ v, texto, Icono }) => (
+          <button key={v} type="button" onClick={() => { cambiar(v); cerrar?.(); }} aria-pressed={vista === v} data-vista={v} title={`Ver ${texto.toLowerCase()}`}
+            className={cn('flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition-colors',
+              vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}>
+            <Icono className="h-[18px] w-[18px]" /> {texto}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** El mapa a todo lo ancho de la ventana y todo el alto que deja la barra. */
 export default function VistaMapaSitio({ raizId }: { raizId: string }) {
   const t = useTerritorioActual();

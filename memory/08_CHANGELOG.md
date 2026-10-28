@@ -10132,3 +10132,9 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
 - `CabeceraSitio`: a la izquierda, comprimido, el logo (el nombre solo en 2xl), las vistas, Calificaciones, Donar, la cuenta y el menú; en el centro, la pastilla de la ruta (territorio › sistema › temática); a la derecha, el buscador (sus resultados se abren hacia la izquierda). En el móvil: logo y cuenta arriba, vistas y buscador debajo, la ruta al final.
 - Vista Círculo: la ruta va en esa pastilla de la cabecera (hueco `data-ranura-ruta`), creciendo según se pincha: territorio › sector › categoría › temática, cada paso con su desplegable (`PasoRuta` acepta ahora `alElegir`). Desaparecen la barra fija de la ruta al bajar y el hueco `data-ranura-territorio-barra`. Su `Eslabon circulo` esconde el del filtro de territorio de la portada.
 - Más comprimido (mismo día): «Calificaciones» solo con el ojo y el buscador a 11 rem hasta 2xl, para que la ruta del centro se lea sin cortarse.
+
+## 2026-10-28 — Círculo con un solo selector, pestañas de vuelta y cabecera reordenada (Programador 8)
+- Vista Círculo: un solo bloque cada vez. Primero el arco; elegida una rama, solo sus categorías (en una fila de hasta seis, `PanelCirculo ancho`); elegida una categoría, solo sus temáticas. La ruta de la cabecera es la que deja volver o cambiar.
+- Las relaciones vuelven a pestañas horizontales pegadas bajo la cabecera (fuera las filas en carrusel).
+- Ruta de la cabecera solo con nombres: sin dibujos en los pasos (`PasoRuta`) ni la silueta del territorio (`ElegirTerritorio segmento`).
+- Cabecera: a la izquierda del todo Donar, la cuenta y el menú ☰; luego el logo con el nombre y el ojo de calificaciones. Ruta en el centro y el buscador pegado a su derecha. Las vistas pasan dentro del menú ☰ (`VistasMenu`, por `cabezaMenu` → `FilaBotones cabeza`); el panel del menú cae hacia la derecha si el botón está en la mitad izquierda.
