@@ -10065,3 +10065,11 @@ Eugenio: «cambia Humanología por Ser humano, Sociología por Sociedad, Tecnolo
   - Esa relación pasa a llamarse «Herramientas» (antes «Subtemas»). También agrupa Vehículo Solar, Vehículo Aerodinámico y Mini Casas.
   - Portadas en `sistemas_nuevos.py`.
 - `VistaCirculoSitio.tsx`: las ilustraciones de las ramas aceptan los nombres nuevos (y los de antes).
+
+## 2026-10-28 · Rama nueva: Economía, entre Sociedad y Técnica (Programador 8)
+Eugenio: «mete una nueva rama que sea la economía, entre Sociedad y Técnica, y agrega ahí lo propio de esa rama».
+- Datos (SQL, producción):
+  - Opción «Economía» en la columna «Pata», entre Sociedad y Técnica. Las ramas quedan así, de abajo arriba: Ser humano, Sociedad, Economía, Técnica, Ecosistema.
+  - Pasan de Sociedad a Economía los sectores Economía y Trabajo.
+  - Sectores nuevos en Economía: Comercio, Finanzas, Fiscalidad, Consumo y Empresas (páginas KWMVECONUE01–05, sin nota todavía).
+- Ilustración de la rama en `public/circulos/economia.svg` (de `grupos.py`); las de los sectores, en `sistemas_nuevos.py`.
