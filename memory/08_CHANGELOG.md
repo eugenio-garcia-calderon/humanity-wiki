@@ -10001,3 +10001,8 @@ Eugenio: «el nombre arriba de la nota y debajo "sobre 10"; el color en un círc
 - `CabeceraSitio.tsx`: primera fila con el logo, en el centro el selector de vista y el buscador (`BuscarBarra enLinea`, siempre abierto) y a la derecha Donar, cuenta y menú; segunda fila, centrada, con las ranuras del territorio y la ruta (solo se ve cuando el termómetro o el filtro ponen algo, `has-[[data-eslabon]]`). Los botones de vista llevan texto desde 1280 px.
 - Círculo 2.0: pasar el ratón por un anillo ya enseña sus sistemas a la derecha y se queda al salir; pinchar lo guarda en `?circulo=`.
 - (Mismo día) `NotaCirculo`: más holgura en los tamaños pequeños (54, 60 y 72 px); en producción «sobre 10» rozaba el aro en la barra y en las tarjetas.
+
+## 2026-10-28 · Quinta vista: Círculo 3.0 (Programador 8)
+Eugenio: «el círculo con los nombres, sin la nota; anillos más gordos y sin colores de notas: simplemente un selector. Hazlo en el 3.0 para no perder el 2.0… sin título ni subtítulo, sin "círculo 5 de 5", "Ecología en España" y la nota en la misma línea encima de las tarjetas, tarjetas más compactas que se vean sin bajar, el círculo a la izquierda y un 60 % para las tarjetas; y cambia Planeta por Ecología».
+- `VistaCirculos3Sitio.tsx` (`?vista=circulos3`, botón «Círculo 3.0»): anillos grises con solo el nombre, el elegido en negro; pasar el ratón ya cambia las tarjetas. A la derecha (3/5 del ancho), «Tecnología en España» con su `NotaCirculo` y las tarjetas en 2 columnas, con la imagen que se encoge con el alto de la ventana.
+- Datos (SQL, producción): la opción «Planeta» de la columna «Círculo» de Sistemas pasa a llamarse «Ecología» (cambia en todas las vistas). Textos e iconos aceptan la clave `ecologia`.
