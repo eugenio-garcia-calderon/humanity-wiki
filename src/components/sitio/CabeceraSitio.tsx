@@ -63,22 +63,28 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           </span>
         )}
       </Link>
-      {/* LA PASTILLA DEL CENTRO: la vista (contenido o mapa), el territorio y el sistema con su nota. El
-          territorio y el sistema los pone quien sabe (el termómetro o el filtro de la portada). En el móvil, en
+      {/* EL CENTRO (2026-10-28, Eugenio: «el selector de tabla, mapa, círculos y la barra de buscar, centrados; y
+          debajo, el selector de país y el de sistema u objetivos»): arriba, la vista y el buscador; en el móvil, en
           una segunda línea a todo lo ancho. */}
       {simple ? <span className="hidden sm:block" /> : <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center max-sm:order-last sm:col-span-1">
-        <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-          <div data-ranura-territorio className="contents" />
-          <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
+        <div className="flex min-w-0 max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
           <BotonVista porDefecto={vistaInicial} />
+          <BuscarBarra raizId={raizId} enLinea />
         </div>
       </div>}
       <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">
-        {!simple && <BuscarBarra raizId={raizId} />}
         {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
         <span data-hueco-cuenta="cabecera" className="contents" />
         {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu" /></Suspense>}
       </div>
+      {/* LA RUTA, DEBAJO: el territorio y el sistema (o el objetivo), cada uno con su nota en su círculo. Los pone quien
+          sabe (el termómetro o el filtro de la portada) en sus ranuras; sin nada dentro, la fila no se ve. */}
+      {!simple && <div data-ruta-barra className="col-span-2 hidden justify-center max-sm:order-last sm:col-span-3 has-[[data-eslabon]]:flex">
+        <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-1.5 shadow-sm">
+          <div data-ranura-territorio className="contents" />
+          <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
+        </div>
+      </div>}
     </header>
   );
 }

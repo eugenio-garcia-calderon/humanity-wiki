@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { colorDeNota, textoSobre, tonosDeNota } from '../../utils/nota';
+import { colorDeNota, tonosDeNota } from '../../utils/nota';
 import { miniatura } from '../../utils/miniatura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { useSitio } from './ContextoSitio';
 import { useCirculos, type Circulo } from './VistaCirculosSitio';
+import NotaCirculo from './NotaCirculo';
 
 // ============================================================================
 // CÍRCULO 2.0 (2026-10-28, Eugenio: «no se entiende, hazlo de nuevo, demasiado complejo»)
@@ -36,20 +37,10 @@ const mezcla = (hex: string, blanco: number) => {
   return `rgb(${c.map(v => Math.round(v + (255 - v) * blanco)).join(',')})`;
 };
 
-function Nota({ nota, grande = false }: { nota: number | null; grande?: boolean }) {
-  if (nota == null) return null;
-  const color = colorDeNota(nota);
-  return (
-    <span className={`inline-flex shrink-0 items-baseline rounded-full font-black tabular-nums ${grande ? 'px-3.5 py-1 text-2xl' : 'px-2.5 py-0.5 text-base'}`}
-      style={{ background: color, color: textoSobre(color) }}>
-      {coma(nota)}<span className={`ml-0.5 font-semibold opacity-70 ${grande ? 'text-sm' : 'text-xs'}`}>/10</span>
-    </span>
-  );
-}
-
-/** Los cinco círculos, uno dentro de otro. Cada anillo es un botón; el elegido, más intenso y con borde. */
-function Circulos({ circulos, elegido, elegir }: { circulos: Circulo[]; elegido: number; elegir: (i: number) => void }) {
-  const [encima, setEncima] = useState<number | null>(null);
+/** Los cinco círculos, uno dentro de otro. Cada anillo es un botón; el que se ve a la derecha, más intenso y con borde.
+ *  Pasar el ratón por un anillo ya lo enseña (2026-10-28, Eugenio: «al hacer hover en un anillo, las tarjetas del
+ *  lateral muestran lo que hay dentro»); se queda al salir, para poder ir a sus tarjetas sin que cambien. */
+function Circulos({ circulos, elegido, elegir, ver }: { circulos: Circulo[]; elegido: number; elegir: (i: number) => void; ver: (i: number) => void }) {
   const n = circulos.length, paso = (R1 - R0) / Math.max(1, n - 1);
   const radio = (i: number) => R0 + paso * i;
   return (
@@ -57,15 +48,15 @@ function Circulos({ circulos, elegido, elegir }: { circulos: Circulo[]; elegido:
       {[...circulos.keys()].reverse().map(i => {
         const c = circulos[i];
         const color = colorDe(c.nota);
-        const on = i === elegido, sobre = i === encima;
+        const on = i === elegido;
         const r = radio(i), rDentro = i === 0 ? 0 : radio(i - 1);
         const y = i === 0 ? C : C - (r + rDentro) / 2; // el rótulo, en medio de su anillo, arriba
         return (
           <g key={c.clave} role="button" tabIndex={0} aria-pressed={on} aria-label={`${c.nombre}: ${c.nota != null ? coma(c.nota) : 'sin nota'} sobre 10`}
             className="cursor-pointer outline-none [&:focus-visible>circle]:stroke-slate-900"
             onClick={() => elegir(i)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elegir(i); } }}
-            onMouseEnter={() => setEncima(i)} onMouseLeave={() => setEncima(null)} data-anillo-c2={c.clave}>
-            <circle cx={C} cy={C} r={r} fill={mezcla(color, on ? 0.45 : sobre ? 0.66 : 0.82)} stroke={on ? '#0f172a' : '#fff'} strokeWidth={on ? 5 : 8}
+            onMouseEnter={() => ver(i)} data-anillo-c2={c.clave}>
+            <circle cx={C} cy={C} r={r} fill={mezcla(color, on ? 0.45 : 0.82)} stroke={on ? '#0f172a' : '#fff'} strokeWidth={on ? 5 : 8}
               style={{ transition: 'fill .2s ease' }} />
             {/* Nombre y nota en una sola línea, grande: se lee también en el móvil. */}
             {i === 0 ? <>
@@ -91,8 +82,12 @@ export default function VistaCirculos2Sitio({ raizId }: { raizId: string }) {
   const { search, pathname, hash } = useLocation();
   const ir = useNavigate();
   const clave = new URLSearchParams(search).get('circulo');
-  const elegido = useMemo(() => Math.max(0, circulos?.findIndex(c => c.clave === clave) ?? 0), [circulos, clave]);
+  const deLaDireccion = useMemo(() => Math.max(0, circulos?.findIndex(c => c.clave === clave) ?? 0), [circulos, clave]);
+  // El que se ve: el último por el que ha pasado el ratón o, si no, el de la dirección.
+  const [visto, setVisto] = useState<number | null>(null);
+  const elegido = visto ?? deLaDireccion;
   const elegir = (i: number) => {
+    setVisto(null);
     const q = new URLSearchParams(search);
     q.set('circulo', circulos![i].clave);
     ir(`${pathname}?${q.toString()}${hash}`, { replace: true });
@@ -112,14 +107,14 @@ export default function VistaCirculos2Sitio({ raizId }: { raizId: string }) {
       </header>
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] lg:gap-12">
         <div className="mx-auto w-full max-w-[460px] lg:sticky lg:top-24">
-          <Circulos circulos={circulos} elegido={elegido} elegir={elegir} />
+          <Circulos circulos={circulos} elegido={elegido} elegir={elegir} ver={setVisto} />
           <p className="mt-3 text-center text-sm text-slate-500">Nota media de cada círculo en {territorio}, del 1 al 10.</p>
         </div>
         <section aria-live="polite" data-circulo-elegido-c2={c.clave}>
           <div className="text-sm font-bold uppercase tracking-[0.14em] text-slate-500">Círculo {elegido + 1} de {circulos.length}</div>
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <h2 className="text-4xl font-black tracking-tight text-slate-900">{c.nombre}</h2>
-            <Nota nota={c.nota} grande />
+            {c.nota != null && <NotaCirculo nota={Math.round(c.nota * 10) / 10} tam="tarjeta" titulo={`Media de ${c.nombre}`} />}
           </div>
           <p className="mt-2 text-lg text-slate-600">{DESCRIPCION[c.clave] || ''} Tiene {c.sistemas.length} sistemas:</p>
           <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -132,7 +127,7 @@ export default function VistaCirculos2Sitio({ raizId }: { raizId: string }) {
                   </span>
                   <span className="flex items-center justify-between gap-3 px-4 py-3">
                     <span className="text-lg font-extrabold text-slate-900">{s.titulo}</span>
-                    <span className="flex items-center gap-2"><Nota nota={s.nota} /><ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-900" /></span>
+                    <span className="flex items-center gap-2">{s.nota != null && <NotaCirculo nota={s.nota} tam="pequena" titulo={s.titulo} />}<ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-900" /></span>
                   </span>
                 </Link>
               </li>

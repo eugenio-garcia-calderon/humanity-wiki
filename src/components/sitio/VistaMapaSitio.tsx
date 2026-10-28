@@ -70,7 +70,7 @@ export function BotonVista({ porDefecto = 'tabla' }: { porDefecto?: Vista }) {
           className={cn('inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors',
             vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white hover:text-slate-900')}>
           <Icono className="h-4 w-4" />
-          <span className="hidden whitespace-nowrap md:inline">{texto}</span>
+          <span className="hidden whitespace-nowrap xl:inline">{texto}</span>
         </button>
       ))}
     </div>

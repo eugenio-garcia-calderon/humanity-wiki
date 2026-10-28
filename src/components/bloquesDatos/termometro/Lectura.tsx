@@ -5,6 +5,7 @@ import type { PropsLectura } from '../tipos';
 import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/nota';
 import { useSitio } from '../../sitio/ContextoSitio';
 import { createPortal } from 'react-dom';
+import NotaCirculo from '../../sitio/NotaCirculo';
 import { Eslabon, Union, NotaEslabon } from '../../sitio/Eslabon';
 import { PasoRuta, type OpcionRuta } from '../../sitio/PasoRuta';
 import { cn } from '../../../utils/cn';
@@ -293,11 +294,7 @@ function PanelObjetivos({ objetivos }: { objetivos: Objetivo[] }) {
             {/* El nombre arriba y centrado, la nota debajo y después la imagen (2026-10-26, Eugenio). */}
             <div lang="es" className="flex flex-col items-center gap-1.5 px-1 pt-0.5 text-center">
               <p className="flex min-h-[2.2rem] min-w-0 items-center justify-center hyphens-auto text-[13px] font-black leading-tight text-slate-900">{o.titulo}</p>
-              {o.nota !== null && t && (
-                <span className="inline-flex h-7 shrink-0 items-center rounded-full px-2 text-sm font-black tabular-nums leading-none shadow-sm" style={{ backgroundColor: t.color, color: textoSobre(t.color) }}>
-                  {textoNota(o.nota)}<span className="ml-0.5 text-[8px] font-bold opacity-75">/10</span>
-                </span>
-              )}
+              {o.nota !== null && t && <NotaCirculo nota={o.nota} tam="pequena" titulo={o.titulo} />}
             </div>
             <div className="relative mt-1.5 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl p-1.5">
               {/* Su portada o, si no la tiene, su icono (los objetivos de los demás sistemas llevan un emoji).
@@ -548,17 +545,14 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     ? <img src={miniatura(portada, 160)} alt="" className="h-full w-full object-contain" />
     : icono ? <span className="text-4xl leading-none">{icono}</span> : <span className="text-[10px] font-bold text-slate-400">Imagen</span>;
   const circulo = actual !== null && tonos ? (
-    <span data-nota-sistema aria-label={`Nota ${textoNota(actual)} sobre 10`}
-      className="relative grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center rounded-full font-black tabular-nums shadow-md lg:h-24 lg:w-24"
-      style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-      <span className="flex items-baseline text-3xl lg:text-4xl">{textoNota(actual)}<span className="ml-0.5 text-sm font-semibold">/10</span></span>
+    <NotaCirculo nota={actual} tam="grande" etiqueta={territorioNombre} titulo={`${x.nombre} en ${territorioNombre || ''}`} className="max-lg:scale-[0.8]">
       {edicion && x.columna_nota && (
         <select aria-label="Cambiar la nota" title="Cambiar la nota" value={Math.round(actual)} onChange={e => cambiarNota(Number(e.target.value))}
           className="absolute inset-0 cursor-pointer rounded-full opacity-0">
           {Array.from({ length: 10 }, (_, i) => i + 1).map(v => <option key={v} value={v}>{v}</option>)}
         </select>
       )}
-    </span>
+    </NotaCirculo>
   ) : null;
 
   // Dónde va el texto del nivel: con el territorio dentro del recuadro, debajo en el móvil y en medio en el ordenador.
