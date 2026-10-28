@@ -10044,3 +10044,14 @@ Eugenio: «añade en el menú superior un botón "Mostrar" / "Ocultar" calificac
 - `utils/calificaciones.ts`: un interruptor (recordado en `localStorage`, avisado a los demás documentos con el evento `storage`) que pone `sin-calificaciones` en <html>. `index.css` esconde todo lo marcado `data-calificacion`: `NotaCirculo` (tarjetas, objetivos, panel del Círculo, termómetro, territorio), la nota de la barra (`NotaEslabon`), el recuadro del termómetro con su escala de niveles, la pastilla de las celdas «Nota» y la propiedad «Nota» entera en las fichas, y las notas de las ventanas del mapa. El termómetro quita además la pestaña «Salto», y el mapa pinta los territorios en gris neutro y sin etiquetas de nota.
 - `BotonCalificaciones.tsx` en la barra, junto al buscador: «Ocultar calificaciones» / «Mostrar calificaciones» (solo el ojo en pantallas pequeñas).
 - `ArcoCapas.tsx`: centro a 700 y 1.500 (antes 200 y 1.000) y medio ángulo de 20°. La capa de abajo ya no es cinco veces más estrecha que la de arriba y todas llevan la misma letra. La elegida tiene el borde azul #3b82c4. El arco ocupa un poco más (10/21 del ancho, hasta 580 px).
+
+## 2026-10-28 · 13 sectores nuevos en las cuatro ramas (Programador 8, datos)
+Eugenio: «añade los sectores que faltan en cada una de las cuatro ramas principales, con una sola palabra; si en la imagen hay dos, la más adecuada».
+- Datos (SQL, producción): 13 sistemas nuevos en Sistemas, cada uno con su página (termómetro sin nota todavía), territorio España y su pata:
+  - Ecología: Biodiversidad, Clima, Suelos, Ecosistemas, Residuos.
+  - Tecnología: Infraestructuras, Ciencia, Automatización.
+  - Sociología: Justicia, Demografía, Trabajo.
+  - Humanología: Psicología, Conciencia.
+- Quedan Ecología con 8 sistemas, Tecnología con 8, Sociología con 7 y Humanología con 9.
+- Portadas de una línea en `portadas-ilustraciones/sistemas_nuevos.py` (`sistema-<clave>.svg`). Páginas KWMVSECNUE01–13, filas BDFMVSECNUE01–13.
+- «Desarrollo personal» no se añadió: ya está «Potencial humano». «Relaciones interpersonales» sigue en Humanología, aunque la tabla de Eugenio la ponía en Sociología.
