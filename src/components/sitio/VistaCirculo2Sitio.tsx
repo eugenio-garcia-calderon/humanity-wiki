@@ -100,29 +100,23 @@ const SIN_INTERES = /^(sistema|territorio|tema superior)$/i; // lo que ya se sab
 /** El nombre de una palabra: el «Nombre en la ruta» de la entrada, si lo tiene. */
 const corto = (e: Entrada) => e.corto || e.titulo;
 
-/** El tercer bloque: el sector elegido y sus objetivos, que se eligen aquí mismo. */
+/** El tercer bloque: la categoría elegida y sus temáticas, que se eligen aquí mismo. Igual de simple que el segundo
+ *  (2026-10-28, Eugenio: «no hace falta que pongas de nuevo Tecnología, ni el icono, ni subtítulo, ni el número de
+ *  temáticas: que ponga Movilidad y que aparezcan sus seis»). */
 function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
   s: Sistema; c: Circulo; grupos: Grupo[] | null; notas: Map<string, number>; bloque: string | null; alElegir: (e: Entrada) => void;
 }) {
   const objetivos = grupos?.find(esObjetivos)?.entradas || [];
   return (
     <section data-bloque-sector className="flex min-h-0 min-w-0 flex-col md:h-full">
-      <div className="mb-1.5 flex items-center gap-3">
-        <span className="relative block h-10 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-50">
-          {s.imagen && <img src={miniatura(s.imagen, 160)} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{c.nombre}</div>
-          <h3 className="text-xl font-black leading-tight tracking-tight text-slate-900">{s.titulo}</h3>
-        </div>
-        {s.nota != null && <NotaCirculo nota={s.nota} tam="pequena" titulo={s.titulo} />}
+      <div className="mb-3 flex items-center gap-2" title={`${c.nombre} › ${s.titulo}`}>
+        <h3 className="text-xl font-black tracking-tight text-slate-900">{s.titulo}</h3>
+        {s.nota != null && <NotaCirculo nota={s.nota} tam="barra" titulo={s.titulo} />}
       </div>
-      {s.descripcion && <p className="mb-1.5 line-clamp-1 text-sm leading-snug text-slate-600" title={s.descripcion}>{s.descripcion}</p>}
       {!grupos ? <p className="py-6 text-sm text-slate-400">Cargando…</p>
         : objetivos.length === 0 ? <p className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">{s.titulo} todavía no tiene temáticas. Debajo, lo que ya tiene enlazado.</p>
         : (
           <>
-            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Temáticas · {objetivos.length}</div>
             {/* Una palabra por objetivo (su «Nombre en la ruta»); el nombre entero, al pasar el ratón. */}
             <ul className="grid min-h-0 grid-cols-2 content-start gap-2 overflow-y-auto pb-1 xl:grid-cols-3" data-objetivos-sector>
               {objetivos.map(o => {
@@ -164,15 +158,15 @@ function pestanasDe(grupos: Grupo[], quitarObjetivos: boolean): Pestana[] {
   return [...fijas, ...otras];
 }
 
-/** La ruta pequeña de la barra pegada: rama › sector › objetivo. Pinchar en ella sube a los bloques. */
+/** La ruta de la barra pegada: sector › categoría › temática. Pinchar en ella sube a los bloques. */
 function Ruta({ pasos }: { pasos: Array<{ nombre: string; imagen?: string | null }> }) {
   return (
     <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} data-ruta-circulo title="Volver arriba"
-      className="flex min-w-0 shrink items-center gap-1 rounded-full bg-slate-100 py-1 pl-1 pr-3 text-[13px] font-bold text-slate-700 hover:bg-slate-200">
+      className="flex min-w-0 items-center gap-1.5 rounded-full py-0.5 pr-2 text-sm font-bold text-slate-600 hover:text-slate-900">
       {pasos.map((p, i) => (
         <span key={i} className="flex min-w-0 items-center gap-1">
-          {i > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
-          {p.imagen && <img src={p.imagen.startsWith('/circulos/') ? p.imagen : miniatura(p.imagen, 80)} alt="" className="h-6 w-8 shrink-0 rounded bg-white object-contain" />}
+          {i > 0 && <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />}
+          {p.imagen && <img src={p.imagen.startsWith('/circulos/') ? p.imagen : miniatura(p.imagen, 80)} alt="" className="h-7 w-9 shrink-0 rounded bg-slate-50 object-contain" />}
           <span className={`truncate ${i === pasos.length - 1 ? 'text-slate-900' : ''}`}>{p.nombre}</span>
         </span>
       ))}
@@ -195,10 +189,16 @@ function Detalle({ paginaId, titulo, grupos, quitarObjetivos, ruta, rutaVisible,
   return (
     // Al menos una pantalla de alto, para que la barra de las pestañas se quede pegada aunque haya pocas tarjetas.
     <section data-detalle-circulo2 className="mt-5" style={{ minHeight: `calc(100dvh - ${arriba}px)` }}>
-      {/* La barra de las pestañas, pegada bajo la cabecera al bajar; con la ruta delante en cuanto los bloques se van. */}
-      <div className="sticky z-30 -mx-4 border-y border-slate-200 bg-white/95 px-4 py-2 backdrop-blur sm:-mx-8 sm:px-8" style={{ top: arriba }} data-pestanas-circulo>
-        <div className="flex items-center gap-3">
-          {rutaVisible && <Ruta pasos={ruta} />}
+      {/* TRES PISOS AL BAJAR (2026-10-28, Eugenio: «el menú colapsable, separado de las pestañas y encima: arriba la barra
+          con el buscador y el territorio; luego el menú de las temáticas, Tecnología › Movilidad › Eficiencia; y debajo,
+          las pestañas»). Las dos se quedan pegadas bajo la cabecera; la ruta, solo cuando los bloques ya no se ven. */}
+      <div className="sticky z-30 -mx-4 border-y border-slate-200 bg-white/95 backdrop-blur sm:-mx-8" style={{ top: arriba }} data-pestanas-circulo>
+        {rutaVisible && (
+          <div className="flex items-center border-b border-slate-200 px-4 py-1.5 sm:px-8" data-menu-ruta>
+            <Ruta pasos={ruta} />
+          </div>
+        )}
+        <div className="flex items-center gap-3 px-4 py-2 sm:px-8">
           <div role="tablist" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
             {pestanas.map(p => {
               const on = p === elegida, vacia = !p.entradas.length;
