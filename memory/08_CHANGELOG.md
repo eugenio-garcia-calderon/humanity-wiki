@@ -10118,3 +10118,6 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
     - Las 216 temáticas se quedan en 126 (más 9 que eran categorías: 135): la que sobrevive se queda con los indicadores, proyectos y descripción de las otras, y con la nota media. Otras pasan de categoría (las de Economía, a Trabajo, Empresas, Finanzas y Consumo; Clima, Sequías e Inundaciones, a Climatología…).
     - Renombrados: la columna «Pata» → «Sector», «Objetivos» → «Temáticas» y la tabla «Objetivos de los Sistemas» → «Temáticas».
   - El Círculo acepta los dos nombres de cada columna. Rotula «Temáticas», mide un 36 % de la pantalla (antes el 50 %) y el botón de la galería se llama «Categorías».
+- (Mismo día) Tercer bloque simple y ruta en su propio piso (Eugenio: «en el tercer bloque, solo el nombre de la categoría: ni Tecnología, ni icono, ni subtítulo, ni el número de temáticas; y el menú colapsable, separado y encima de las pestañas: tres pisos»):
+  - `BloqueSector` queda con el título y sus temáticas, como el segundo bloque.
+  - Al bajar, la barra pegada tiene dos filas: la ruta sector › categoría › temática y, debajo, las pestañas.
