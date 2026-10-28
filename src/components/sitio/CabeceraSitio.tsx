@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
-import { BotonVista, type Vista } from './VistaMapaSitio';
+import { BotonVista, useVista, VISTAS_CON_TERRITORIO, type Vista } from './VistaMapaSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -40,6 +40,9 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   const [raiz, setRaiz] = useState<Raiz | null>(null);
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
+  // En las vistas que eligen el territorio en su título, sin la segunda fila (territorio y nota global).
+  const [vista] = useVista(vistaInicial);
+  const sinRuta = VISTAS_CON_TERRITORIO.includes(vista);
   return (
     // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
     // scroll»): pegada arriba y con fondo para que no se mezcle.
@@ -79,7 +82,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
       </div>
       {/* LA RUTA, DEBAJO: el territorio y el sistema (o el objetivo), cada uno con su nota en su círculo. Los pone quien
           sabe (el termómetro o el filtro de la portada) en sus ranuras; sin nada dentro, la fila no se ve. */}
-      {!simple && <div data-ruta-barra className="col-span-2 hidden justify-center max-sm:order-last sm:col-span-3 has-[[data-eslabon]]:flex">
+      {!simple && <div data-ruta-barra className={`col-span-2 hidden justify-center max-sm:order-last sm:col-span-3 ${sinRuta ? '' : 'has-[[data-eslabon]]:flex'}`}>
         <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-1.5 shadow-sm">
           <div data-ranura-territorio className="contents" />
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>

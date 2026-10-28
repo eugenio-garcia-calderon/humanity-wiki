@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CircleDot, LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
+import { Check, ChevronDown, CircleDot, Layers, LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,8 +21,10 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2' | 'circulos3';
-const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2', 'circulos3'];
+export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2' | 'circulos3' | 'circulos4';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2', 'circulos3', 'circulos4'];
+/** Las vistas que eligen el territorio en su título: sin ellas, la segunda fila de la barra (2026-10-28). */
+export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos3', 'circulos4'];
 
 /** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
  *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
@@ -56,24 +58,44 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'circulos', texto: 'Círculos', Icono: Target },
   { v: 'circulos2', texto: 'Círculo 2.0', Icono: Orbit },
   { v: 'circulos3', texto: 'Círculo 3.0', Icono: CircleDot },
+  { v: 'circulos4', texto: 'Círculo 4.0', Icono: Layers },
 ];
 
 /** EL SELECTOR DE VISTA DE LA BARRA. Primero un botón que decía a dónde llevaba («Ver mapa» / «Ver tabla»,
- *  2026-10-26); desde la tercera vista (2026-10-27, Eugenio: «una tercera vista de círculos, junto a la de mapa y
- *  tabla») son tres botones juntos, el de la vista en la que estás en negro. */
+ *  2026-10-26); con la tercera vista, botones juntos (2026-10-27); con seis, un menú plegado (2026-10-28, Eugenio:
+ *  «como ya hay muchas vistas, ponlas en un menú colapsado para seleccionar qué vista queremos»): el botón dice la
+ *  vista en la que estás y abre la lista. */
 export function BotonVista({ porDefecto = 'tabla' }: { porDefecto?: Vista }) {
   const [vista, cambiar] = useVista(porDefecto);
+  const [abierto, setAbierto] = useState(false);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e: MouseEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(false); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('mousedown', fuera); document.addEventListener('keydown', tecla);
+    return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', tecla); };
+  }, [abierto]);
+  const actual = VISTAS.find(x => x.v === vista) || VISTAS[0];
   return (
-    <div role="group" aria-label="Vista" data-boton-vista className="ml-1 inline-flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-slate-100 p-0.5">
-      {VISTAS.map(({ v, texto, Icono }) => (
-        <button key={v} type="button" onClick={() => cambiar(v)} title={`Ver ${texto.toLowerCase()}`} aria-label={`Ver ${texto.toLowerCase()}`}
-          aria-pressed={vista === v} data-vista={v}
-          className={cn('inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors',
-            vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white hover:text-slate-900')}>
-          <Icono className="h-4 w-4" />
-          <span className="hidden whitespace-nowrap xl:inline">{texto}</span>
-        </button>
-      ))}
+    <div ref={caja} data-boton-vista className="relative ml-1 shrink-0">
+      <button type="button" onClick={() => setAbierto(a => !a)} aria-haspopup="menu" aria-expanded={abierto} aria-label={`Vista: ${actual.texto}. Cambiar de vista`}
+        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-slate-900 pl-3 pr-2.5 text-sm font-bold text-white transition-colors hover:bg-slate-700" data-vista-actual={vista}>
+        <actual.Icono className="h-4 w-4" />
+        <span className="whitespace-nowrap">{actual.texto}</span>
+        <ChevronDown className={cn('h-4 w-4 opacity-70 transition-transform', abierto && 'rotate-180')} />
+      </button>
+      {abierto && (
+        <div role="menu" aria-label="Vistas" className="absolute left-0 top-full z-50 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl">
+          {VISTAS.map(({ v, texto, Icono }) => (
+            <button key={v} type="button" role="menuitemradio" aria-checked={vista === v} data-vista={v}
+              onClick={() => { cambiar(v); setAbierto(false); }}
+              className={cn('flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold', vista === v ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-50')}>
+              <Icono className="h-4 w-4 text-slate-500" /><span className="flex-1">{texto}</span>{vista === v && <Check className="h-4 w-4" />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
