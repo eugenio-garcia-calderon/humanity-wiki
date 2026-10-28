@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import ElegirTerritorio from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { miniatura } from '../../utils/miniatura';
 import { useSitio } from './ContextoSitio';
@@ -146,7 +146,7 @@ function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
   );
 }
 
-// LAS PESTAÑAS DE ABAJO: primero las cinco de siempre, con su nombre corto, aunque estén vacías (se ven apagadas); después,
+// LAS FILAS DE ABAJO: primero las cinco de siempre, con su nombre corto (las vacías no se pintan); después,
 // cualquier otra relación que tenga algo.
 const PESTANAS: Array<[RegExp, string]> = [[/proyecto/i, 'Proyectos'], [/soluci/i, 'Soluciones'], [/indicador/i, 'Indicadores'], [/persona/i, 'Personas'], [/publicaci/i, 'Publicaciones']];
 type Pestana = { clave: string; nombre: string; completo?: string; entradas: Entrada[] };
@@ -163,84 +163,148 @@ function pestanasDe(grupos: Grupo[], quitarObjetivos: boolean): Pestana[] {
   return [...fijas, ...otras];
 }
 
-/** La ruta de la barra pegada: sector › categoría › temática. Pinchar en ella sube a los bloques. */
-function Ruta({ pasos }: { pasos: Array<{ nombre: string; imagen?: string | null }> }) {
+type OpcionRuta = { id: string; nombre: string; imagen?: string | null };
+type PasoRuta = { nombre: string; imagen?: string | null; opciones: OpcionRuta[]; elegido: string | null; alElegir: (id: string) => void };
+
+const fotoRuta = (imagen: string, lado = 80) => (imagen.startsWith('/circulos/') ? imagen : miniatura(imagen, lado));
+
+/** La ruta de la barra pegada: sector › categoría › temática. Cada paso es un desplegable (2026-10-28, Eugenio: «que el
+ *  menú colapsado sea también un desplegable donde puedes cambiar y seleccionar otros elementos»): se cambia de sector,
+ *  de categoría o de temática sin subir a los bloques. La flecha del final sí sube. En el móvil, la lista va a todo lo
+ *  ancho bajo la barra (su `backdrop-blur` hace de marco para el `fixed`). */
+function Ruta({ pasos }: { pasos: PasoRuta[] }) {
+  const [abierto, setAbierto] = useState<number | null>(null);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (abierto == null) return;
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(null); };
+    const fuera = (e: MouseEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(null); };
+    document.addEventListener('keydown', tecla); document.addEventListener('mousedown', fuera);
+    return () => { document.removeEventListener('keydown', tecla); document.removeEventListener('mousedown', fuera); };
+  }, [abierto]);
   return (
-    <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} data-ruta-circulo title="Volver arriba"
-      className="flex min-w-0 items-center gap-1.5 rounded-full py-0.5 pr-2 text-sm font-bold text-slate-600 hover:text-slate-900">
+    <div ref={caja} className="flex min-w-0 items-center gap-1 text-sm font-bold text-slate-600" data-ruta-circulo>
       {pasos.map((p, i) => (
-        <span key={i} className="flex min-w-0 items-center gap-1">
+        <div key={i} className="relative flex min-w-0 items-center gap-1">
           {i > 0 && <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />}
-          {p.imagen && <img src={p.imagen.startsWith('/circulos/') ? p.imagen : miniatura(p.imagen, 80)} alt="" className="h-7 w-9 shrink-0 rounded bg-slate-50 object-contain" />}
-          <span className={`truncate ${i === pasos.length - 1 ? 'text-slate-900' : ''}`}>{p.nombre}</span>
-        </span>
+          <button type="button" onClick={() => setAbierto(abierto === i ? null : i)} aria-expanded={abierto === i} aria-haspopup="listbox" data-paso-ruta={i}
+            className={`flex min-w-0 items-center gap-1.5 rounded-lg py-0.5 pl-1 pr-1.5 hover:bg-slate-100 hover:text-slate-900 ${abierto === i ? 'bg-slate-100 text-slate-900' : ''}`}>
+            {p.imagen && <img src={fotoRuta(p.imagen)} alt="" className="h-7 w-9 shrink-0 rounded bg-slate-50 object-contain" />}
+            <span className={`truncate ${p.elegido ? (i === pasos.length - 1 ? 'text-slate-900' : '') : 'italic text-slate-400'}`}>{p.nombre}</span>
+            <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${abierto === i ? 'rotate-180' : ''}`} />
+          </button>
+          {abierto === i && (
+            <ul role="listbox" className="absolute left-0 top-full z-50 mt-1.5 max-h-[60dvh] w-72 max-sm:fixed max-sm:inset-x-4 max-sm:w-auto overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_18px_40px_-12px_rgba(15,23,42,0.3)]" data-desplegable-ruta>
+              {p.opciones.map(o => {
+                const on = o.id === p.elegido;
+                return (
+                  <li key={o.id}>
+                    <button type="button" role="option" aria-selected={on} onClick={() => { setAbierto(null); if (!on) p.alElegir(o.id); }} data-opcion-ruta={o.nombre}
+                      className={`flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left text-sm font-bold ${on ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`}>
+                      <span className="grid h-8 w-10 shrink-0 place-items-center rounded-md bg-white">
+                        {o.imagen && <img src={fotoRuta(o.imagen)} alt="" className="h-full w-full object-contain p-0.5" />}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">{o.nombre}</span>
+                      {on && <Check className="h-4 w-4 shrink-0" />}
+                    </button>
+                  </li>
+                );
+              })}
+              {!p.opciones.length && <li className="px-2 py-1.5 text-sm text-slate-400">Cargando…</li>}
+            </ul>
+          )}
+        </div>
       ))}
-    </button>
+      <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} title="Volver arriba" aria-label="Volver arriba"
+        className="ml-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-900">
+        <ArrowUp className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
-/** Debajo: las relaciones de lo elegido en pestañas (proyectos, soluciones, indicadores, personas, publicaciones…). */
+/** Una fila de abajo: el titular grande a la izquierda y sus entradas en carrusel, tres a la vista. */
+function FilaCarrusel({ p, enlace }: { p: Pestana; enlace: (id: string) => string }) {
+  const pista = useRef<HTMLUListElement>(null);
+  const [bordes, setBordes] = useState({ ini: true, fin: true });
+  const medir = () => {
+    const el = pista.current;
+    if (el) setBordes({ ini: el.scrollLeft <= 2, fin: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
+  };
+  useEffect(() => {
+    medir();
+    const el = pista.current;
+    if (!el) return;
+    const o = new ResizeObserver(medir); o.observe(el);
+    return () => o.disconnect();
+  }, [p.entradas.length]);
+  const mover = (dir: number) => pista.current?.scrollBy({ left: dir * pista.current.clientWidth, behavior: 'smooth' });
+  const flecha = 'grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900 disabled:opacity-30';
+  return (
+    <section className="grid gap-4 border-t border-slate-200 py-7 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:gap-8" data-fila-detalle={p.nombre}>
+      <div className="flex items-start justify-between gap-3 md:flex-col md:justify-start">
+        <h3 className="text-3xl font-black uppercase tracking-tight text-slate-900 md:text-4xl" title={p.completo}>
+          {p.nombre} <span className="align-middle text-lg font-bold text-slate-400">{p.entradas.length}</span>
+        </h3>
+        {!(bordes.ini && bordes.fin) && (
+          <div className="flex shrink-0 gap-2">
+            <button type="button" onClick={() => mover(-1)} disabled={bordes.ini} aria-label="Anteriores" className={flecha}><ChevronLeft className="h-5 w-5" /></button>
+            <button type="button" onClick={() => mover(1)} disabled={bordes.fin} aria-label="Siguientes" className={flecha}><ChevronRight className="h-5 w-5" /></button>
+          </div>
+        )}
+      </div>
+      <ul ref={pista} onScroll={medir} className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:thin]" data-carrusel>
+        {p.entradas.map(x => {
+          const tarjeta = (
+            <>
+              <span className="relative block aspect-[16/10] w-full bg-slate-50">
+                {x.imagen ? <img src={miniatura(x.imagen, 480)} alt="" className="absolute inset-0 h-full w-full object-contain p-3" /> : x.icono ? <span className="grid h-full place-items-center text-5xl">{x.icono}</span> : null}
+              </span>
+              <span lang="es" className="hyphens-auto px-4 py-3 text-base font-bold leading-snug text-slate-900">{x.titulo}</span>
+            </>
+          );
+          const clase = 'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white';
+          return (
+            <li key={x.fila_id} className="shrink-0 snap-start basis-[82%] sm:basis-[calc((100%-1rem)/2)] lg:basis-[calc((100%-2rem)/3)]">
+              {x.pagina_id
+                ? <Link to={enlace(x.pagina_id)} onClick={() => window.scrollTo(0, 0)} className={`${clase} transition hover:-translate-y-0.5 hover:shadow-md`}>{tarjeta}</Link>
+                : <span className={clase}>{tarjeta}</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/** Debajo: las relaciones de lo elegido (proyectos, soluciones, indicadores, personas, publicaciones…), una fila cada una
+ *  (2026-10-28, Eugenio: «una fila por cada uno en vez de pestañas, en carrusel con 3 entradas, el titular grande a la
+ *  izquierda y una línea de separación entre filas»). Las filas vacías no se pintan. */
 function Detalle({ paginaId, titulo, grupos, quitarObjetivos, ruta, rutaVisible, arriba }: {
   paginaId: string; titulo: string; grupos: Grupo[] | null; quitarObjetivos: boolean;
-  ruta: Array<{ nombre: string; imagen?: string | null }>; rutaVisible: boolean; arriba: number;
+  ruta: PasoRuta[]; rutaVisible: boolean; arriba: number;
 }) {
   const sitio = useSitio();
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
-  const pestanas = useMemo(() => pestanasDe(grupos || [], quitarObjetivos), [grupos, quitarObjetivos]);
-  const [activa, setActiva] = useState<string | null>(null);
-  // Al cambiar de objetivo o de sector, la primera pestaña con algo dentro.
-  useEffect(() => { setActiva(null); }, [paginaId]);
-  const elegida = pestanas.find(p => p.clave === activa) || pestanas.find(p => p.entradas.length) || pestanas[0];
+  const filas = useMemo(() => pestanasDe(grupos || [], quitarObjetivos).filter(p => p.entradas.length), [grupos, quitarObjetivos]);
   return (
-    // Al menos una pantalla de alto, para que la barra de las pestañas se quede pegada aunque haya pocas tarjetas.
-    <section data-detalle-circulo2 className="mt-5" style={{ minHeight: `calc(100dvh - ${arriba}px)` }}>
-      {/* TRES PISOS AL BAJAR (2026-10-28, Eugenio: «el menú colapsable, separado de las pestañas y encima: arriba la barra
-          con el buscador y el territorio; luego el menú de las temáticas, Tecnología › Movilidad › Eficiencia; y debajo,
-          las pestañas»). Las dos se quedan pegadas bajo la cabecera; la ruta, solo cuando los bloques ya no se ven. */}
-      <div className="sticky z-30 -mx-4 border-y border-slate-200 bg-white/95 backdrop-blur sm:-mx-8" style={{ top: arriba }} data-pestanas-circulo>
-        {rutaVisible && (
-          <div className="flex items-center border-b border-slate-200 px-4 py-1.5 sm:px-8" data-menu-ruta>
-            <Ruta pasos={ruta} />
-          </div>
-        )}
-        <div className="flex items-center gap-3 px-4 py-2 sm:px-8">
-          <div role="tablist" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
-            {pestanas.map(p => {
-              const on = p === elegida, vacia = !p.entradas.length;
-              return (
-                <button key={p.clave} type="button" role="tab" aria-selected={on} disabled={vacia} onClick={() => setActiva(p.clave)} data-pestana={p.nombre} title={p.completo}
-                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold transition-colors ${on ? 'bg-slate-900 text-white' : vacia ? 'text-slate-300' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
-                  {p.nombre} <span className={`text-xs ${on ? 'text-slate-300' : 'text-slate-400'}`}>{p.entradas.length}</span>
-                </button>
-              );
-            })}
-          </div>
-          <Link to={enlace(paginaId)} onClick={() => window.scrollTo(0, 0)} className="hidden shrink-0 items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900 sm:inline-flex" title={`Abrir la página de ${titulo}`}>
-            <span className="max-w-[16rem] truncate">{titulo}</span> <ArrowRight className="h-4 w-4" />
-          </Link>
+    // Al menos una pantalla de alto: al cambiar a una categoría con poco dentro, la ruta no se va con el desplazamiento.
+    <section data-detalle-circulo2 className="mt-6" style={{ minHeight: `calc(100dvh - ${arriba}px)` }}>
+      {/* LA RUTA AL BAJAR (Eugenio: «arriba la barra con el buscador y el territorio; debajo, el menú Tecnología ›
+          Movilidad › Eficiencia»): fija bajo la cabecera, solo cuando los bloques ya no se ven, y sin empujar nada. */}
+      {rutaVisible && (
+        <div className="fixed inset-x-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-1.5 backdrop-blur animate-in fade-in sm:px-8" style={{ top: arriba }} data-menu-ruta>
+          <Ruta pasos={ruta} />
         </div>
+      )}
+      <div className="flex justify-end pb-3">
+        <Link to={enlace(paginaId)} onClick={() => window.scrollTo(0, 0)} className="inline-flex items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900" title={`Abrir la página de ${titulo}`}>
+          <span className="max-w-[16rem] truncate">{titulo}</span> <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
-      <div className="pt-4" role="tabpanel">
-        {!grupos ? <p className="py-6 text-sm text-slate-400">Cargando…</p>
-          : !elegida?.entradas.length ? <p className="py-6 text-sm text-slate-500">Todavía no tiene proyectos, soluciones, indicadores, personas ni publicaciones enlazados.</p>
-          : (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6" data-grupo-detalle={elegida.nombre}>
-              {elegida.entradas.map(x => (
-                <li key={x.fila_id}>
-                  {x.pagina_id ? (
-                    <Link to={enlace(x.pagina_id)} onClick={() => window.scrollTo(0, 0)}
-                      className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md">
-                      <span className="relative block aspect-[16/10] w-full bg-slate-50">
-                        {x.imagen ? <img src={miniatura(x.imagen, 240)} alt="" className="absolute inset-0 h-full w-full object-contain p-1.5" /> : x.icono ? <span className="grid h-full place-items-center text-3xl">{x.icono}</span> : null}
-                      </span>
-                      <span lang="es" className="hyphens-auto px-2.5 py-2 text-[13px] font-bold leading-tight text-slate-900">{x.titulo}</span>
-                    </Link>
-                  ) : <span className="block rounded-xl border border-slate-200 px-2.5 py-2 text-[13px] font-bold text-slate-900">{x.titulo}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-      </div>
+      {!grupos ? <p className="border-t border-slate-200 py-6 text-sm text-slate-400">Cargando…</p>
+        : !filas.length ? <p className="border-t border-slate-200 py-6 text-sm text-slate-500">Todavía no tiene proyectos, soluciones, indicadores, personas ni publicaciones enlazados.</p>
+        : filas.map(p => <FilaCarrusel key={p.clave} p={p} enlace={enlace} />)}
     </section>
   );
 }
@@ -314,17 +378,28 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
     else poner({ circulo: x.clave, sector: null, bloque: null });
     if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-circulo-elegido-c2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   };
-  // Desde 768 px en columnas; el tercer bloque, el más ancho (Eugenio: «un hueco más grande para la tercera parte»).
-  const rejilla = paso === 2 ? 'md:grid-cols-[minmax(0,3fr)_minmax(0,6fr)_minmax(0,9fr)] md:gap-6 xl:gap-8'
-    : paso === 1 ? 'md:grid-cols-[minmax(0,5fr)_minmax(0,10fr)] md:gap-10' : '';
+  // Desde 768 px en columnas; el tercer bloque, el más ancho (Eugenio: «un hueco más grande para la tercera parte»),
+  // y el arco, más grande que al principio (Eugenio: «haz que el bloque 1 sea más grande»).
+  const rejilla = paso === 2 ? 'md:grid-cols-[minmax(0,5fr)_minmax(0,5fr)_minmax(0,8fr)] md:gap-6 xl:gap-8'
+    : paso === 1 ? 'md:grid-cols-[minmax(0,6fr)_minmax(0,9fr)] md:gap-10' : '';
   // Con algo pinchado, los bloques miden un tercio largo de la pantalla (antes la mitad; Eugenio: «que sea más pequeño
   // este menú expansivo de arriba, para ver fácilmente el contenido de abajo»): con seis categorías y seis temáticas,
   // caben en dos o tres filas.
   const medio = paso > 0 ? 'md:h-[max(250px,calc(36dvh))]' : '';
-  const ruta = [
-    { nombre: (sector?.c || c).nombre, imagen: dibujoPata((sector?.c || c).clave) },
-    ...(sector ? [{ nombre: sector.s.titulo, imagen: sector.s.imagen }] : []),
-    ...(objetivo ? [{ nombre: corto(objetivo), imagen: objetivo.imagen }] : []),
+  // Cada paso de la ruta con sus hermanos, para el desplegable. Otro sector sube a los bloques (aún no hay categoría
+  // elegida); otra categoría o temática cambia lo de abajo sin moverse.
+  const rama = sector?.c || c;
+  const tematicas = gruposSector?.find(esObjetivos)?.entradas.filter(e => e.pagina_id) || [];
+  const ruta: PasoRuta[] = [
+    { nombre: rama.nombre, imagen: dibujoPata(rama.clave), elegido: rama.clave,
+      opciones: circulos.map(x => ({ id: x.clave, nombre: x.nombre, imagen: dibujoPata(x.clave) })),
+      alElegir: id => { poner({ circulo: id, sector: null, bloque: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+    ...(sector ? [{ nombre: sector.s.titulo, imagen: sector.s.imagen, elegido: sector.s.id,
+      opciones: rama.sistemas.map(x => ({ id: x.id, nombre: x.titulo, imagen: x.imagen })),
+      alElegir: (id: string) => poner({ circulo: rama.clave, sector: id, bloque: null }) }] : []),
+    ...(sector ? [{ nombre: objetivo ? corto(objetivo) : 'Temática', imagen: objetivo?.imagen, elegido: objetivo?.pagina_id || null,
+      opciones: tematicas.map(e => ({ id: e.pagina_id!, nombre: corto(e), imagen: e.imagen })),
+      alElegir: (id: string) => poner({ bloque: id }) }] : []),
   ];
   return (
     // A todo lo ancho de la ventana (como el mapa): el arco pegado a la izquierda y sitio para los tres bloques.

@@ -10122,3 +10122,8 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - `BloqueSector` queda con el título y sus temáticas, como el segundo bloque.
   - Al bajar, la barra pegada tiene dos filas: la ruta sector › categoría › temática y, debajo, las pestañas.
 - (Mismo día) Temáticas grandes en el tercer bloque (Eugenio: «hay más hueco en el bloque 3 para hacer las tarjetas más grandes y visibles»): tres columnas con filas iguales que llenan el alto del bloque, el dibujo arriba y la palabra debajo, como las categorías del segundo bloque sin elegir.
+
+## 2026-10-28 — Círculo: bloque 1 más grande, ruta con desplegables y filas en carrusel (Programador 8)
+- Arco más ancho: con los tres bloques, 5fr · 5fr · 8fr (antes 3 · 6 · 9); con dos, 6fr · 9fr. Las pastillas de categoría parten en dos líneas en vez de cortar («Telecomunica-ciones»).
+- La ruta fija al bajar (sector › categoría › temática) es ahora un desplegable en cada paso: cambia de sector (sube a los bloques), de categoría o de temática sin moverse. Flecha ↑ para volver arriba. Va `fixed` bajo la cabecera, sin empujar el contenido.
+- Las pestañas de abajo pasan a filas: titular grande en mayúsculas a la izquierda, carrusel de 3 tarjetas (2 en tableta, 1 y pico en móvil) con flechas, y una línea entre filas. Las vacías no se pintan.

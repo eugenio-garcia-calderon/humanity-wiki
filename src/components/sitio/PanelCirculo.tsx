@@ -103,7 +103,7 @@ export function PanelCirculo({ c, t, ancla, alElegir, elegidoId = null, apretado
                 </span>
                 <span className={`flex min-w-0 items-center justify-between gap-2 ${apretado ? 'flex-1' : 'px-3 py-1.5'}`}>
                   {/* Las palabras largas («Telecomunicaciones») se parten por sílabas antes que empujar la nota fuera. */}
-                  <span lang="es" className={`min-w-0 hyphens-auto font-extrabold leading-tight text-slate-900 ${apretado ? 'truncate text-[13px]' : cols >= 5 ? 'text-sm' : 'text-base'}`}>{s.titulo}</span>
+                  <span lang="es" className={`min-w-0 hyphens-auto font-extrabold leading-tight text-slate-900 ${apretado ? 'line-clamp-2 break-words text-[13px]' : cols >= 5 ? 'text-sm' : 'text-base'}`}>{s.titulo}</span>
                   {s.nota != null && !apretado && <NotaCirculo nota={s.nota} tam="barra" titulo={s.titulo} />}
                 </span>
               </Link>
