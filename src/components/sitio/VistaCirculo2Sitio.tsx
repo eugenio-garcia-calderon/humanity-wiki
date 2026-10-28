@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import ElegirTerritorio from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { miniatura } from '../../utils/miniatura';
 import { useSitio } from './ContextoSitio';
@@ -9,6 +9,8 @@ import { Arco } from './ArcoCapas';
 import { PanelCirculo, useCirculoElegido, useCirculosTerritorio } from './PanelCirculo';
 import { leerSistemas, type Circulo, type Sistema } from './circulosDatos';
 import NotaCirculo from './NotaCirculo';
+import { Eslabon, Union } from './Eslabon';
+import { PasoRuta } from './PasoRuta';
 
 // ============================================================================
 // LA VISTA «CÍRCULO» — TRES BLOQUES EN LA MISMA PÁGINA (nació como Círculo 2.0, 2026-10-28, Eugenio;
@@ -163,66 +165,6 @@ function pestanasDe(grupos: Grupo[], quitarObjetivos: boolean): Pestana[] {
   return [...fijas, ...otras];
 }
 
-type OpcionRuta = { id: string; nombre: string; imagen?: string | null };
-type PasoRuta = { nombre: string; imagen?: string | null; opciones: OpcionRuta[]; elegido: string | null; alElegir: (id: string) => void };
-
-const fotoRuta = (imagen: string, lado = 80) => (imagen.startsWith('/circulos/') ? imagen : miniatura(imagen, lado));
-
-/** La ruta de la barra pegada: sector › categoría › temática. Cada paso es un desplegable (2026-10-28, Eugenio: «que el
- *  menú colapsado sea también un desplegable donde puedes cambiar y seleccionar otros elementos»): se cambia de sector,
- *  de categoría o de temática sin subir a los bloques. La flecha del final sí sube. En el móvil, la lista va a todo lo
- *  ancho bajo la barra (su `backdrop-blur` hace de marco para el `fixed`). */
-function Ruta({ pasos }: { pasos: PasoRuta[] }) {
-  const [abierto, setAbierto] = useState<number | null>(null);
-  const caja = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (abierto == null) return;
-    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(null); };
-    const fuera = (e: MouseEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(null); };
-    document.addEventListener('keydown', tecla); document.addEventListener('mousedown', fuera);
-    return () => { document.removeEventListener('keydown', tecla); document.removeEventListener('mousedown', fuera); };
-  }, [abierto]);
-  return (
-    <div ref={caja} className="flex min-w-0 items-center gap-1 text-sm font-bold text-slate-600" data-ruta-circulo>
-      {pasos.map((p, i) => (
-        <div key={i} className="relative flex min-w-0 items-center gap-1">
-          {i > 0 && <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />}
-          <button type="button" onClick={() => setAbierto(abierto === i ? null : i)} aria-expanded={abierto === i} aria-haspopup="listbox" data-paso-ruta={i}
-            className={`flex min-w-0 items-center gap-1.5 rounded-lg py-0.5 pl-1 pr-1.5 hover:bg-slate-100 hover:text-slate-900 ${abierto === i ? 'bg-slate-100 text-slate-900' : ''}`}>
-            {p.imagen && <img src={fotoRuta(p.imagen)} alt="" className="h-7 w-9 shrink-0 rounded bg-slate-50 object-contain" />}
-            <span className={`truncate ${p.elegido ? (i === pasos.length - 1 ? 'text-slate-900' : '') : 'italic text-slate-400'}`}>{p.nombre}</span>
-            <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${abierto === i ? 'rotate-180' : ''}`} />
-          </button>
-          {abierto === i && (
-            <ul role="listbox" className="absolute left-0 top-full z-50 mt-1.5 max-h-[60dvh] w-72 max-sm:fixed max-sm:inset-x-4 max-sm:w-auto overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_18px_40px_-12px_rgba(15,23,42,0.3)]" data-desplegable-ruta>
-              {p.opciones.map(o => {
-                const on = o.id === p.elegido;
-                return (
-                  <li key={o.id}>
-                    <button type="button" role="option" aria-selected={on} onClick={() => { setAbierto(null); if (!on) p.alElegir(o.id); }} data-opcion-ruta={o.nombre}
-                      className={`flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left text-sm font-bold ${on ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`}>
-                      <span className="grid h-8 w-10 shrink-0 place-items-center rounded-md bg-white">
-                        {o.imagen && <img src={fotoRuta(o.imagen)} alt="" className="h-full w-full object-contain p-0.5" />}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">{o.nombre}</span>
-                      {on && <Check className="h-4 w-4 shrink-0" />}
-                    </button>
-                  </li>
-                );
-              })}
-              {!p.opciones.length && <li className="px-2 py-1.5 text-sm text-slate-400">Cargando…</li>}
-            </ul>
-          )}
-        </div>
-      ))}
-      <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} title="Volver arriba" aria-label="Volver arriba"
-        className="ml-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-900">
-        <ArrowUp className="h-4 w-4" />
-      </button>
-    </div>
-  );
-}
-
 /** Una fila de abajo: el titular grande a la izquierda y sus entradas en carrusel, tres a la vista. */
 function FilaCarrusel({ p, enlace }: { p: Pestana; enlace: (id: string) => string }) {
   const pista = useRef<HTMLUListElement>(null);
@@ -280,9 +222,8 @@ function FilaCarrusel({ p, enlace }: { p: Pestana; enlace: (id: string) => strin
 /** Debajo: las relaciones de lo elegido (proyectos, soluciones, indicadores, personas, publicaciones…), una fila cada una
  *  (2026-10-28, Eugenio: «una fila por cada uno en vez de pestañas, en carrusel con 3 entradas, el titular grande a la
  *  izquierda y una línea de separación entre filas»). Las filas vacías no se pintan. */
-function Detalle({ paginaId, titulo, grupos, quitarObjetivos, ruta, rutaVisible, arriba }: {
-  paginaId: string; titulo: string; grupos: Grupo[] | null; quitarObjetivos: boolean;
-  ruta: PasoRuta[]; rutaVisible: boolean; arriba: number;
+function Detalle({ paginaId, titulo, grupos, quitarObjetivos, arriba }: {
+  paginaId: string; titulo: string; grupos: Grupo[] | null; quitarObjetivos: boolean; arriba: number;
 }) {
   const sitio = useSitio();
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
@@ -290,13 +231,6 @@ function Detalle({ paginaId, titulo, grupos, quitarObjetivos, ruta, rutaVisible,
   return (
     // Al menos una pantalla de alto: al cambiar a una categoría con poco dentro, la ruta no se va con el desplazamiento.
     <section data-detalle-circulo2 className="mt-6" style={{ minHeight: `calc(100dvh - ${arriba}px)` }}>
-      {/* LA RUTA AL BAJAR (Eugenio: «arriba la barra con el buscador y el territorio; debajo, el menú Tecnología ›
-          Movilidad › Eficiencia»): fija bajo la cabecera, solo cuando los bloques ya no se ven, y sin empujar nada. */}
-      {rutaVisible && (
-        <div className="fixed inset-x-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-1.5 backdrop-blur animate-in fade-in sm:px-8" style={{ top: arriba }} data-menu-ruta>
-          <Ruta pasos={ruta} />
-        </div>
-      )}
       <div className="flex justify-end pb-3">
         <Link to={enlace(paginaId)} onClick={() => window.scrollTo(0, 0)} className="inline-flex items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900" title={`Abrir la página de ${titulo}`}>
           <span className="max-w-[16rem] truncate">{titulo}</span> <ArrowRight className="h-4 w-4" />
@@ -347,25 +281,14 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
   const objetivo = useMemo(() => gruposSector?.find(esObjetivos)?.entradas.find(e => e.pagina_id === bloqueId) || null, [gruposSector, bloqueId]);
   const gruposObjetivo = useRed(objetivo?.pagina_id || null);
 
-  // El selector de territorio, en la barra de arriba (su hueco lo deja `CabeceraSitio`).
+  // LA RUTA, EN LA CABECERA (2026-10-28, Eugenio: «a medida que se va haciendo clic, la ruta arriba, centrada, como en
+  // las páginas de las temáticas»): el territorio y, según se pincha, sector › categoría › temática, cada uno con su
+  // desplegable para cambiar a un hermano. Va en el hueco `data-ranura-ruta` de `CabeceraSitio`.
   const [hueco, setHueco] = useState<Element | null>(null);
-  useEffect(() => { setHueco(document.querySelector('[data-ranura-territorio-barra]')); }, []);
-  // La ruta de la barra pegada sale cuando los bloques ya no se ven.
+  useEffect(() => { setHueco(document.querySelector('[data-ranura-ruta]')); }, []);
   const arriba = useAltoCabecera();
-  const bloques = useRef<HTMLDivElement>(null);
-  const [bloquesFuera, setBloquesFuera] = useState(false);
-  useEffect(() => {
-    const el = bloques.current;
-    if (!el) return;
-    const o = new IntersectionObserver(([e]) => setBloquesFuera(!e.isIntersecting && e.boundingClientRect.top < 0), { rootMargin: `-${arriba + 60}px 0px 0px 0px` });
-    o.observe(el);
-    return () => o.disconnect();
-  }, [arriba, !!circulos?.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const selector = hueco && t.conTerritorio ? createPortal(
-    <ElegirTerritorio mini alinear="izquierda" opciones={t.opciones} conDatos={t.conDatos} elegido={t.territorio} onElegir={t.elegirTerritorio} />, hueco) : null;
   if (!circulos) return <div className="py-24 text-center text-slate-400">Cargando…</div>;
-  if (!circulos.length || !c) return <div className="py-24 text-center text-slate-500">{selector}Las categorías aún no tienen sector: añade a su base de datos una columna de selección «Sector».</div>;
+  if (!circulos.length || !c) return <div className="py-24 text-center text-slate-500">Las categorías aún no tienen sector: añade a su base de datos una columna de selección «Sector».</div>;
   // SE ABRE SEGÚN SE PINCHA (2026-10-28, Eugenio: «al principio, según pinchas en una categoría, se divide la pantalla
   // en dos; si pinchas en una de sus secciones, en tres; así el tamaño se mantiene grande cuando no profundizamos y se
   // hace más pequeño a medida que profundizamos»). Paso 0: solo el arco, grande. Paso 1: el arco y la rama pinchada.
@@ -386,26 +309,43 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
   // este menú expansivo de arriba, para ver fácilmente el contenido de abajo»): con seis categorías y seis temáticas,
   // caben en dos o tres filas.
   const medio = paso > 0 ? 'md:h-[max(250px,calc(36dvh))]' : '';
-  // Cada paso de la ruta con sus hermanos, para el desplegable. Otro sector sube a los bloques (aún no hay categoría
-  // elegida); otra categoría o temática cambia lo de abajo sin moverse.
+  // Cada paso con sus hermanos. Otro sector sube a los bloques (aún no hay categoría elegida); otra categoría o temática
+  // cambia lo de abajo sin moverse.
   const rama = sector?.c || c;
   const tematicas = gruposSector?.find(esObjetivos)?.entradas.filter(e => e.pagina_id) || [];
-  const ruta: PasoRuta[] = [
-    { nombre: rama.nombre, imagen: dibujoPata(rama.clave), elegido: rama.clave,
-      opciones: circulos.map(x => ({ id: x.clave, nombre: x.nombre, imagen: dibujoPata(x.clave) })),
-      alElegir: id => { poner({ circulo: id, sector: null, bloque: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
-    ...(sector ? [{ nombre: sector.s.titulo, imagen: sector.s.imagen, elegido: sector.s.id,
-      opciones: rama.sistemas.map(x => ({ id: x.id, nombre: x.titulo, imagen: x.imagen })),
-      alElegir: (id: string) => poner({ circulo: rama.clave, sector: id, bloque: null }) }] : []),
-    ...(sector ? [{ nombre: objetivo ? corto(objetivo) : 'Temática', imagen: objetivo?.imagen, elegido: objetivo?.pagina_id || null,
-      opciones: tematicas.map(e => ({ id: e.pagina_id!, nombre: corto(e), imagen: e.imagen })),
-      alElegir: (id: string) => poner({ bloque: id }) }] : []),
-  ];
+  const selector = hueco ? createPortal(
+    <Eslabon circulo>
+      {t.conTerritorio && <ElegirTerritorio segmento alinear="izquierda" opciones={t.opciones} conDatos={t.conDatos} elegido={t.territorio} onElegir={t.elegirTerritorio} />}
+      {paso > 0 && (
+        <>
+          {t.conTerritorio && <Union />}
+          <PasoRuta etiqueta={rama.nombre} titulo={rama.nombre} icono={dibujoPata(rama.clave)} actual={rama.clave} apagado={!!sector}
+            opciones={circulos.map(x => ({ id: x.clave, nombre: x.nombre, icono: dibujoPata(x.clave) }))}
+            alElegir={id => { poner({ circulo: id, sector: null, bloque: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+        </>
+      )}
+      {sector && (
+        <>
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+          <PasoRuta etiqueta={sector.s.titulo} titulo={sector.s.titulo} icono={sector.s.imagen} actual={sector.s.id} apagado={!!objetivo}
+            opciones={rama.sistemas.map(x => ({ id: x.id, nombre: x.titulo, icono: x.imagen }))}
+            alElegir={id => poner({ circulo: rama.clave, sector: id, bloque: null })} />
+        </>
+      )}
+      {objetivo && (
+        <>
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+          <PasoRuta etiqueta={corto(objetivo)} titulo={objetivo.titulo} icono={objetivo.imagen} actual={objetivo.pagina_id}
+            opciones={tematicas.map(e => ({ id: e.pagina_id!, nombre: corto(e), icono: e.imagen }))}
+            alElegir={id => poner({ bloque: id })} />
+        </>
+      )}
+    </Eslabon>, hueco) : null;
   return (
     // A todo lo ancho de la ventana (como el mapa): el arco pegado a la izquierda y sitio para los tres bloques.
     <div className="px-4 pt-1 sm:px-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }} data-vista-circulo2 data-paso={paso}>
       {selector}
-      <div ref={bloques} className={`grid grid-cols-[minmax(0,1fr)] items-stretch gap-6 ${rejilla} ${medio}`} data-bloques-circulo>
+      <div className={`grid grid-cols-[minmax(0,1fr)] items-stretch gap-6 ${rejilla} ${medio}`} data-bloques-circulo>
         <div className={`mx-auto flex w-full min-h-0 items-start ${paso === 0 ? 'max-w-[680px]' : 'max-w-[560px] md:mx-0'}`}>
           {/* Sin nada pinchado, ninguna rama marcada (el ratón solo la ilumina). */}
           <div className="w-full">
@@ -435,8 +375,8 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
         )}
       </div>
       {sector && (objetivo
-        ? <Detalle paginaId={objetivo.pagina_id!} titulo={objetivo.titulo} grupos={gruposObjetivo} quitarObjetivos={false} ruta={ruta} rutaVisible={bloquesFuera} arriba={arriba} />
-        : <Detalle paginaId={sector.s.id} titulo={sector.s.titulo} grupos={gruposSector} quitarObjetivos ruta={ruta} rutaVisible={bloquesFuera} arriba={arriba} />)}
+        ? <Detalle paginaId={objetivo.pagina_id!} titulo={objetivo.titulo} grupos={gruposObjetivo} quitarObjetivos={false} arriba={arriba} />
+        : <Detalle paginaId={sector.s.id} titulo={sector.s.titulo} grupos={gruposSector} quitarObjetivos arriba={arriba} />)}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
 import BotonCalificaciones from './BotonCalificaciones';
-import { BotonVista, useVista, VISTAS_CON_TERRITORIO, type Vista } from './VistaMapaSitio';
+import { BotonVista, type Vista } from './VistaMapaSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -41,61 +41,50 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   const [raiz, setRaiz] = useState<Raiz | null>(null);
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
-  // En las vistas que eligen el territorio en su título, sin la segunda fila (territorio y nota global).
-  const [vista] = useVista(vistaInicial);
-  const sinRuta = VISTAS_CON_TERRITORIO.includes(vista);
   return (
     // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
     // scroll»): pegada arriba y con fondo para que no se mezcle.
-    // DE BORDE A BORDE Y EN TRES PARTES (2026-10-26, Eugenio: «Luz & Humanidad mucho más a la izquierda; en el
-    // centro, bien grande, una sola pastilla con la vista, el territorio y el sistema; el resto, secundario y más
-    // pequeño en los laterales; el menú, solo las tres rayas a la derecha del todo y la foto a su izquierda»).
-    // EN FILA Y SIN PISARSE (2026-10-28): con el buscador y el territorio a la izquierda, la izquierda puede ser más ancha
-    // que la derecha; el selector de vista se centra en el hueco que queda en vez de en la ventana.
-    <header data-cabecera-sitio className="sticky top-0 z-40 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:flex-nowrap sm:px-6"
+    // LA RUTA EN EL CENTRO (2026-10-28, Eugenio: «la ruta arriba, como en las temáticas; lo demás muy a la izquierda,
+    // comprimido, para que la ruta quede centrada; y el buscador, a la derecha»). Tres columnas: a la izquierda el logo,
+    // las vistas, las calificaciones, Donar, la cuenta y el menú; en el centro, la pastilla de la ruta (el territorio y
+    // el sistema o la temática, o en la vista Círculo lo que se va pinchando); a la derecha, el buscador. En el móvil,
+    // la ruta baja a su propia línea.
+    <header data-cabecera-sitio className="sticky top-0 z-40 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:px-6 md:grid md:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)]"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       {/* A todo lo ancho de la ventana, sin barra de desplazamiento de lado. */}
       <style>{'html { overflow-x: clip; }'}</style>
-      {/* El logo, de tamaño fijo, con su eslogan debajo (un 10 % más pequeño, para que encaje bajo el nombre); y a su
-          derecha, el buscador (2026-10-28, Eugenio: «la barra de buscar al lado del logo, a la izquierda»). */}
-      <div className="flex min-w-0 shrink items-center gap-3">
-      <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
-        {icono && (/^(https?:|\/)/.test(icono)
-          // Un 15 % mayor (2026-10-26, Eugenio): el icono y el nombre; el eslogan, igual.
-          ? <img src={miniatura(icono, 112)} alt="" className="h-[51px] w-[51px] shrink-0 rounded-lg object-contain" />
-          : <span className="text-[2.15rem] leading-none">{icono}</span>)}
-        {raiz && (
-          <span className="hidden min-w-0 flex-col leading-none lg:flex">
-            <span className="whitespace-nowrap text-[1.55rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
-            {c.subtitulo && <span className="mt-1 whitespace-nowrap text-[10.8px] text-slate-500">{c.subtitulo}</span>}
+      {/* En el móvil este grupo se deshace (`contents`) para repartir sus piezas en líneas: arriba el logo y Donar, la
+          cuenta y el menú; debajo las vistas y el buscador; y al final la ruta. */}
+      <div className="contents md:col-start-1 md:flex md:min-w-0 md:items-center md:gap-1.5">
+        <Link to="/" className="mr-1 flex min-w-0 shrink-0 items-center gap-2" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
+          {icono && (/^(https?:|\/)/.test(icono)
+            ? <img src={miniatura(icono, 112)} alt="" className="h-[44px] w-[44px] shrink-0 rounded-lg object-contain" />
+            : <span className="text-[2rem] leading-none">{icono}</span>)}
+          {/* El nombre, solo si sobra sitio (la ruta manda). */}
+          {raiz && <span className="hidden whitespace-nowrap text-xl font-black tracking-tight text-slate-900 2xl:block">{raiz.titulo}</span>}
+        </Link>
+        {!simple && <span aria-hidden className="basis-full max-md:order-1 md:hidden" />}
+        {!simple && (
+          <span className="flex shrink-0 items-center gap-1.5 max-md:order-1">
+            <BotonVista porDefecto={vistaInicial} />
+            <BotonCalificaciones />
           </span>
         )}
-      </Link>
-      {!simple && <BuscarBarra raizId={raizId} enLinea />}
-      {/* El territorio de la vista Círculo, al lado del buscador (2026-10-28, Eugenio: «el selector de territorio,
-          arriba, al lado de la barra de buscar, y quítalo de las tarjetas»). Lo pone ahí `VistaCirculo2Sitio`. */}
-      {!simple && <div data-ranura-territorio-barra className="contents" />}
+        <span className="flex shrink-0 items-center gap-1.5 max-md:ml-auto">
+          {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
+          <span data-hueco-cuenta="cabecera" className="contents" />
+          {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu" /></Suspense>}
+        </span>
       </div>
-      {/* EL CENTRO (2026-10-28, Eugenio: «las vistas solo con los iconos, fuera del marco del buscador; y lo de las
-          calificaciones, también separado»): el selector de vista, solo iconos, y al lado, aparte, «Calificaciones».
-          En el móvil, en una segunda línea a todo lo ancho. */}
-      {simple ? <span className="hidden flex-1 sm:block" /> : <div data-centro-barra className="flex min-w-0 items-center justify-center gap-2 max-sm:order-last max-sm:basis-full sm:flex-1">
-        <BotonVista porDefecto={vistaInicial} />
-        <BotonCalificaciones />
-      </div>}
-      <div className="relative ml-auto flex min-w-0 shrink-0 items-center justify-end gap-1.5 sm:ml-0">
-        {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
-        <span data-hueco-cuenta="cabecera" className="contents" />
-        {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu" /></Suspense>}
-      </div>
-      {/* LA RUTA, DEBAJO: el territorio y el sistema (o el objetivo), cada uno con su nota en su círculo. Los pone quien
-          sabe (el termómetro o el filtro de la portada) en sus ranuras; sin nada dentro, la fila no se ve. */}
-      {!simple && <div data-ruta-barra className={`hidden basis-full justify-center max-sm:order-last ${sinRuta ? '' : 'has-[[data-eslabon]]:flex'}`}>
+      {/* LA RUTA: el territorio y el sistema (o la temática), cada uno con su desplegable. La ponen quienes saben (el
+          termómetro, el filtro de la portada o la vista Círculo) en sus ranuras; sin nada dentro, no se ve. */}
+      {!simple && <div data-ruta-barra className="hidden min-w-0 justify-center has-[[data-eslabon]]:flex max-md:order-last max-md:basis-full md:col-start-2">
         <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-1.5 shadow-sm">
           <div data-ranura-territorio className="contents" />
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
         </div>
       </div>}
+      {!simple && <div className="flex min-w-0 justify-end max-md:order-1 max-md:ml-auto md:col-start-3"><BuscarBarra raizId={raizId} enLinea /></div>}
     </header>
   );
 }

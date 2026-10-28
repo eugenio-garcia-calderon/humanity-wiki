@@ -11,8 +11,14 @@ import NotaCirculo from './NotaCirculo';
 
 // Segunda vuelta (2026-10-26, Eugenio: «quita el icono del eslabón y que el sistema se lea sin cortarse»):
 // la pastilla es la de la barra (`CabeceraSitio`, con el botón de vista delante); aquí solo van las piezas.
-export function Eslabon({ children }: { children: ReactNode }) {
-  return <div data-eslabon className="flex min-w-0 max-w-full items-center gap-0.5">{children}</div>;
+// `circulo`: el de la vista Círculo, que manda sobre el del filtro de la portada (ese se esconde mientras está este).
+export function Eslabon({ children, circulo }: { children: ReactNode; circulo?: boolean }) {
+  return (
+    <div data-eslabon data-eslabon-circulo={circulo || undefined} className="flex min-w-0 max-w-full items-center gap-0.5">
+      {circulo && <style>{'[data-ranura-ruta]:has([data-eslabon-circulo]) > [data-eslabon]:not([data-eslabon-circulo]) { display: none; }'}</style>}
+      {children}
+    </div>
+  );
 }
 
 /** Entre el territorio y el sistema: una raya fina (sin icono). */

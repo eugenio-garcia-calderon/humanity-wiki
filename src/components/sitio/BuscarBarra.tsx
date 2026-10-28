@@ -81,7 +81,7 @@ export default function BuscarBarra({ raizId, enLinea = false }: { raizId: strin
         )}
       </form>
       {abierta && texto.length >= 2 && res && (
-        <div data-resultados-barra className={cn('absolute top-full z-50 mt-2 w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl', enLinea ? 'left-1/2 -translate-x-1/2' : 'right-0')}>
+        <div data-resultados-barra className={cn('absolute top-full z-50 mt-2 w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl', 'right-0')}>
           {res.length === 0 ? <p className="px-3 py-3 text-sm text-slate-500">Nada con «{texto}».</p> : (
             <ul>
               {res.map(r => (
