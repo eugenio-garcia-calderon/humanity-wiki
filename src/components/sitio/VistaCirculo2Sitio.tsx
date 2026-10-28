@@ -285,8 +285,9 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
   // UN SOLO SELECTOR A LA VEZ (2026-10-28, Eugenio: «quita el bloque 1, que esa información ya está arriba, y deja solo
   // las categorías; y al elegir una, quita el bloque 2 y deja solo el 3: siempre solo un selector»). La ruta de la
   // cabecera dice dónde se está y deja volver o cambiar. Con algo elegido, el bloque mide un tercio de la pantalla y
-  // reparte sus tarjetas en una fila.
-  const medio = paso > 0 ? 'md:h-[max(250px,calc(36dvh))]' : '';
+  // reparte sus tarjetas en una fila. Y elegida una temática, tampoco se ven las demás («si se selecciona una tarjeta,
+  // el resto no se ven y se marca solo en la ruta»): quedan sus pestañas, y la ruta deja cambiarla.
+  const medio = paso > 0 && !bloqueId ? 'md:h-[max(250px,calc(36dvh))]' : '';
   // Cada paso con sus hermanos. Otro sector sube a los bloques (aún no hay categoría elegida); otra categoría o temática
   // cambia lo de abajo sin moverse.
   const rama = sector?.c || c;
@@ -340,13 +341,12 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
               }} />
           </div>
         )}
-        {paso === 2 && sector && (
+        {paso === 2 && sector && !bloqueId && (
           <div className="min-h-0 min-w-0 animate-in fade-in duration-300">
             <BloqueSector s={sector.s} c={sector.c} grupos={gruposSector} notas={notas} bloque={bloqueId}
               alElegir={o => {
                 poner({ bloque: o.pagina_id === bloqueId ? null : o.pagina_id });
-                // Las pestañas ya asoman debajo; solo en el móvil hay que bajar hasta ellas.
-                if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-detalle-circulo2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }} />
           </div>
         )}
