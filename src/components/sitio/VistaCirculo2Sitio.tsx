@@ -36,7 +36,11 @@ import NotaCirculo from './NotaCirculo';
 // bloques miden media pantalla; debajo, las relaciones en pestañas, cuya barra se queda pegada bajo la cabecera con la
 // ruta delante en cuanto los bloques salen de la vista. El territorio se elige en la barra de arriba.
 
-const PATAS = /^patas?$/i;
+// SECTORES, CATEGORÍAS Y TEMÁTICAS (2026-10-28, Eugenio): los cinco del arco son los sectores (la columna «Sector»,
+// antes «Pata»); dentro, las categorías (las filas de Sistemas, como mucho seis por sector); y dentro de cada una,
+// sus temáticas (la relación «Temáticas», antes «Objetivos», como mucho seis).
+const PATAS = /^(patas?|sector(es)?)$/i;
+const TEMATICAS = /^(objetivos?|tem[aá]ticas?)$/i;
 const DIBUJOS: Record<string, string> = {
   'ser-humano': 'personas', sociedad: 'sociedad', economia: 'economia', tecnologia: 'tecnologia', tecnica: 'tecnologia', naturaleza: 'ecologia', ecosistema: 'ecologia',
 };
@@ -75,7 +79,7 @@ function useNotasObjetivos(raizId: string) {
     let p = notasObjetivos.get(raizId);
     if (!p) {
       p = leerSistemas(raizId).then(async j => {
-        const tabla = (j?.columnas || []).find((c: any) => c.tipo === 'relacion' && /^objetivos$/i.test(String(c.nombre).trim()))?.config?.tabla_destino;
+        const tabla = (j?.columnas || []).find((c: any) => c.tipo === 'relacion' && TEMATICAS.test(String(c.nombre).trim()))?.config?.tabla_destino;
         if (!tabla) return new Map();
         const o = await fetch(`/api/bd/tablas/${encodeURIComponent(tabla)}?lectura=1`, { credentials: 'include' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
         const col = (o?.columnas || []).find((c: any) => c.tipo === 'nota');
@@ -91,7 +95,7 @@ function useNotasObjetivos(raizId: string) {
   return notas;
 }
 
-const esObjetivos = (g: Grupo) => /^objetivos?$/i.test(g.nombre.trim());
+const esObjetivos = (g: Grupo) => TEMATICAS.test(g.nombre.trim());
 const SIN_INTERES = /^(sistema|territorio|tema superior)$/i; // lo que ya se sabe por el contexto
 /** El nombre de una palabra: el «Nombre en la ruta» de la entrada, si lo tiene. */
 const corto = (e: Entrada) => e.corto || e.titulo;
@@ -103,24 +107,24 @@ function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
   const objetivos = grupos?.find(esObjetivos)?.entradas || [];
   return (
     <section data-bloque-sector className="flex min-h-0 min-w-0 flex-col md:h-full">
-      <div className="mb-2 flex items-center gap-3">
-        <span className="relative block h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-50">
+      <div className="mb-1.5 flex items-center gap-3">
+        <span className="relative block h-10 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-50">
           {s.imagen && <img src={miniatura(s.imagen, 160)} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />}
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{c.nombre}</div>
-          <h3 className="text-2xl font-black leading-tight tracking-tight text-slate-900">{s.titulo}</h3>
+          <h3 className="text-xl font-black leading-tight tracking-tight text-slate-900">{s.titulo}</h3>
         </div>
         {s.nota != null && <NotaCirculo nota={s.nota} tam="pequena" titulo={s.titulo} />}
       </div>
-      {s.descripcion && <p className="mb-2 line-clamp-2 text-sm leading-snug text-slate-600">{s.descripcion}</p>}
+      {s.descripcion && <p className="mb-1.5 line-clamp-1 text-sm leading-snug text-slate-600" title={s.descripcion}>{s.descripcion}</p>}
       {!grupos ? <p className="py-6 text-sm text-slate-400">Cargando…</p>
-        : objetivos.length === 0 ? <p className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">{s.titulo} todavía no tiene objetivos. Debajo, lo que ya tiene enlazado.</p>
+        : objetivos.length === 0 ? <p className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">{s.titulo} todavía no tiene temáticas. Debajo, lo que ya tiene enlazado.</p>
         : (
           <>
-            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Objetivos · {objetivos.length}</div>
+            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Temáticas · {objetivos.length}</div>
             {/* Una palabra por objetivo (su «Nombre en la ruta»); el nombre entero, al pasar el ratón. */}
-            <ul className="grid min-h-0 grid-cols-2 content-start gap-2 overflow-y-auto pb-1 lg:grid-cols-3" data-objetivos-sector>
+            <ul className="grid min-h-0 grid-cols-2 content-start gap-2 overflow-y-auto pb-1 xl:grid-cols-3" data-objetivos-sector>
               {objetivos.map(o => {
                 const on = bloque === o.pagina_id, nota = o.pagina_id ? notas.get(o.pagina_id) : undefined;
                 return (
@@ -292,7 +296,7 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
   const selector = hueco && t.conTerritorio ? createPortal(
     <ElegirTerritorio mini alinear="izquierda" opciones={t.opciones} conDatos={t.conDatos} elegido={t.territorio} onElegir={t.elegirTerritorio} />, hueco) : null;
   if (!circulos) return <div className="py-24 text-center text-slate-400">Cargando…</div>;
-  if (!circulos.length || !c) return <div className="py-24 text-center text-slate-500">{selector}Los sistemas aún no tienen rama: añade a su base de datos una columna de selección «Pata».</div>;
+  if (!circulos.length || !c) return <div className="py-24 text-center text-slate-500">{selector}Las categorías aún no tienen sector: añade a su base de datos una columna de selección «Sector».</div>;
   // SE ABRE SEGÚN SE PINCHA (2026-10-28, Eugenio: «al principio, según pinchas en una categoría, se divide la pantalla
   // en dos; si pinchas en una de sus secciones, en tres; así el tamaño se mantiene grande cuando no profundizamos y se
   // hace más pequeño a medida que profundizamos»). Paso 0: solo el arco, grande. Paso 1: el arco y la rama pinchada.
@@ -308,8 +312,10 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
   // Desde 768 px en columnas; el tercer bloque, el más ancho (Eugenio: «un hueco más grande para la tercera parte»).
   const rejilla = paso === 2 ? 'md:grid-cols-[minmax(0,3fr)_minmax(0,6fr)_minmax(0,9fr)] md:gap-6 xl:gap-8'
     : paso === 1 ? 'md:grid-cols-[minmax(0,5fr)_minmax(0,10fr)] md:gap-10' : '';
-  // Con algo pinchado, los bloques miden media pantalla (y lo de dentro se encoge para caber).
-  const medio = paso > 0 ? 'md:h-[max(340px,calc(50dvh-10px))]' : '';
+  // Con algo pinchado, los bloques miden un tercio largo de la pantalla (antes la mitad; Eugenio: «que sea más pequeño
+  // este menú expansivo de arriba, para ver fácilmente el contenido de abajo»): con seis categorías y seis temáticas,
+  // caben en dos o tres filas.
+  const medio = paso > 0 ? 'md:h-[max(250px,calc(36dvh))]' : '';
   const ruta = [
     { nombre: (sector?.c || c).nombre, imagen: dibujoPata((sector?.c || c).clave) },
     ...(sector ? [{ nombre: sector.s.titulo, imagen: sector.s.imagen }] : []),
@@ -324,7 +330,7 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
           {/* Sin nada pinchado, ninguna rama marcada (el ratón solo la ilumina). */}
           <div className="w-full">
             <Arco circulos={circulos} elegido={paso === 0 ? -1 : elegido} elegir={pincharRama} ver={ver} dibujoDe={dibujoPata}
-              clase={paso === 0 ? undefined : 'md:max-h-[max(340px,calc(50dvh-10px))]'} />
+              clase={paso === 0 ? undefined : 'md:max-h-[max(250px,calc(36dvh))]'} />
             {paso === 0 && <p className="mt-3 text-center text-sm font-semibold text-slate-500">Pincha una rama para ver sus sectores.</p>}
           </div>
         </div>
