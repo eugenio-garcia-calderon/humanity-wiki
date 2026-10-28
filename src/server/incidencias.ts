@@ -323,6 +323,43 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
   /** GET /api/incidencias/cuenta — para el punto del botón de la hormiga.
    *  Solo el número, como la campana: pedir la lista entera para pintar un
    *  punto es traerse un tablero para mirar un color. */
+  // ══ LA OPINIÓN DE LOS VISITANTES DE UN SITIO (2026-10-28) ═══════════════
+  // Eugenio: «recupera el botón de feedback flotante para que la gente ponga
+  // comentarios de mejora… con una opción de texto rápido y enviar sin necesidad
+  // de entrar en otra página». En un sitio (luzhumanidad.com) quien opina casi
+  // nunca tiene cuenta: esta ruta no la pide. Entra como PROPUESTA en el
+  // Hormiguero, igual que la de cualquiera que no es del equipo, con la página
+  // desde la que se escribió. Para que no sea un buzón de spam: un campo trampa
+  // que las personas no ven y, como mucho, 5 envíos cada 10 minutos por IP.
+  const enviosPorIp = new Map<string, number[]>();
+  app.post('/api/sitio/opinion', async (req: Request, res: Response) => {
+    try {
+      if (String(req.body?.web || '').trim()) return res.json({ ok: true }); // el campo trampa: se finge que ha ido bien
+      const texto = String(req.body?.texto || '').trim();
+      if (texto.length < 3) return res.status(400).json({ error: 'Escribe un poco más.' });
+      const ip = String((req.headers['x-forwarded-for'] as string || '').split(',')[0].trim() || req.ip || 'sin-ip');
+      const ahora = Date.now();
+      const recientes = (enviosPorIp.get(ip) || []).filter(t => ahora - t < 10 * 60_000);
+      if (recientes.length >= 5) return res.status(429).json({ error: 'Has enviado varias seguidas. Prueba dentro de un rato.' });
+      enviosPorIp.set(ip, [...recientes, ahora]);
+      if (enviosPorIp.size > 5000) enviosPorIp.clear();
+      const desde = String(req.body?.pagina || '').slice(0, 300);
+      const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').slice(0, 100);
+      // Si quien escribe sí tiene sesión, la nota lleva su nombre.
+      const quien = await quienEscribe(req, db).catch(() => null);
+      const id = nuevoId();
+      const titulo = texto.replace(/\s+/g, ' ').slice(0, 120);
+      const detalle = `${texto.slice(0, 4000)}\n\n— Opinión enviada desde ${host}${desde}`;
+      await db.execute(sql`
+        INSERT INTO incidencias (id, titulo, detalle, clase, autor_user_id, de_admin, estado, area, relevancia)
+        VALUES (${id}, ${titulo}, ${detalle}, 'mejora', ${quien?.clase === 'persona' ? quien.id : null}, false, 'propuesta', 'general', 5)
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(500).json({ error: 'No se ha podido enviar. Prueba otra vez.' });
+    }
+  });
+
   app.get('/api/incidencias/cuenta', async (_req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`

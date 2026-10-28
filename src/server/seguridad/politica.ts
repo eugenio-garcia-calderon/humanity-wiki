@@ -111,6 +111,7 @@ const REVISADAS: Entrada[] = [
     nota: 'de un admin o de un agente entra en «esperando»; de cualquier otro, en «propuesta»' },
   { m: 'PUT', ruta: '/api/incidencias/:id', guardia: { tipo: 'agente' } },
   { m: 'DELETE', ruta: '/api/incidencias/:id', guardia: { tipo: 'agente' }, nota: 'solo la propia, o admin' },
+  { m: 'POST', ruta: '/api/sitio/opinion', guardia: { tipo: 'publica', porque: 'los visitantes de un sitio dejan sugerencias sin cuenta; entra como propuesta, con campo trampa y 5 envíos cada 10 minutos por IP' } },
 
   // ── El navegador remoto: cada sesión es un Chromium de verdad ──────────
   { m: 'POST', ruta: '/api/navegador/remoto', guardia: { tipo: 'sesion' } },

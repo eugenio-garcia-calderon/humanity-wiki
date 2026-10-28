@@ -18,11 +18,8 @@ import CabeceraSitio from './CabeceraSitio';
 import PestanasTitulos from './PestanasTitulos';
 import RutaRelaciones from './RutaRelaciones';
 import VistaMapaSitio, { useVista, vistaInicialDe } from './VistaMapaSitio';
-import VistaCirculosSitio from './VistaCirculosSitio';
-import VistaCirculos2Sitio from './VistaCirculos2Sitio';
-import VistaCirculos3Sitio from './VistaCirculos3Sitio';
-import VistaCirculos4Sitio from './VistaCirculos4Sitio';
-import VistaCirculos5Sitio from './VistaCirculos5Sitio';
+import VistaCirculoSitio from './VistaCirculoSitio';
+import BotonOpinion from './BotonOpinion';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -139,20 +136,12 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true;
   // LA VISTA DE MAPA (2026-10-26, `VistaMapaSitio.tsx`): el mapa a toda la pantalla bajo la barra. La página
   // sigue montada y escondida: su termómetro o su filtro son los que ponen el territorio en la barra.
-  // LA VISTA DE CÍRCULOS (2026-10-27, `VistaCirculosSitio.tsx`): los sistemas en círculos concéntricos.
   // La portada abre en la vista que pida el sitio (`sitio.vistaInicial`); las demás páginas, en la suya.
   const vistaInicial = esRaiz ? vistaInicialDe(pagina.sitio?.config) : 'tabla';
   const [vista] = useVista(vistaInicial);
   const mapa = conBarra && vista === 'mapa';
+  // LA VISTA «CÍRCULO» (2026-10-28, `VistaCirculoSitio.tsx`): las cuatro patas en un arco y sus sistemas al lado.
   const circulos = conBarra && vista === 'circulos';
-  // CÍRCULO 2.0 (2026-10-27, `VistaCirculos2Sitio.tsx`): los mismos círculos como diagrama de anillos.
-  const circulos2 = conBarra && vista === 'circulos2';
-  // CÍRCULO 3.0 (2026-10-28, `VistaCirculos3Sitio.tsx`): el círculo como simple selector y las tarjetas al lado.
-  const circulos3 = conBarra && vista === 'circulos3';
-  // CÍRCULO 4.0 (2026-10-28, `VistaCirculos4Sitio.tsx`): las capas en un arco, de Personas (abajo) a Ecología.
-  const circulos4 = conBarra && vista === 'circulos4';
-  // CÍRCULO 5.0 (2026-10-28, `VistaCirculos5Sitio.tsx`): el mismo arco con cuatro patas (columna «Pata»).
-  const circulos5 = conBarra && vista === 'circulos5';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -195,12 +184,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
       {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
-      {circulos && <VistaCirculosSitio raizId={pagina.sitio!.raizId} />}
-      {circulos2 && <VistaCirculos2Sitio raizId={pagina.sitio!.raizId} />}
-      {circulos3 && <VistaCirculos3Sitio raizId={pagina.sitio!.raizId} />}
-      {circulos4 && <VistaCirculos4Sitio raizId={pagina.sitio!.raizId} />}
-      {circulos5 && <VistaCirculos5Sitio raizId={pagina.sitio!.raizId} />}
-      <div hidden={mapa || circulos || circulos2 || circulos3 || circulos4 || circulos5 || undefined}>
+      {circulos && <VistaCirculoSitio raizId={pagina.sitio!.raizId} />}
+      <div hidden={mapa || circulos || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
@@ -247,6 +232,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       </main>
       </div>
       {!mapa && pie}
+      {/* ¿QUÉ MEJORARÍAS? (2026-10-28, `BotonOpinion.tsx`): el botón de opinión, abajo y centrado, en todas las páginas
+          de un sitio; y un hueco al final para que no tape lo último del pie. */}
+      {pagina.sitio && <><div aria-hidden className="h-20" /><BotonOpinion /></>}
     </MarcoLectura>
     </div>
   );

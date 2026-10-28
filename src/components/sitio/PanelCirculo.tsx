@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import ElegirTerritorio, { guardarTerritorio, territorioGuardado, useTerritorios } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { useSitio } from './ContextoSitio';
-import { armarCirculos, columnaTerritorio, leerSistemas, type Circulo } from './VistaCirculosSitio';
+import { armarCirculos, columnaTerritorio, leerSistemas, type Circulo } from './circulosDatos';
 import NotaCirculo from './NotaCirculo';
 
 // ============================================================================
