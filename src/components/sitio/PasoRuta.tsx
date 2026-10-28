@@ -7,13 +7,14 @@ import { miniatura } from '../../utils/miniatura';
 
 /** UN PASO DE LA RUTA DE LA BARRA, DESPLEGABLE (2026-10-26, Eugenio: «que Movilidad sea un desplegable
  *  y pueda elegir otro sistema, igual que el territorio»). Una palabra; al pulsar, sus hermanos. */
-export type OpcionRuta = { id: string; nombre: string; pagina_id: string; icono?: string | null };
+export type OpcionRuta = { id: string; nombre: string; pagina_id?: string | null; icono?: string | null };
 /** El icono de un paso: su portada (un dibujo) o su emoji. */
 export function IconoPaso({ icono }: { icono?: string | null }) {
   if (!icono) return null;
   return /^(https?:|\/)/.test(icono) ? <img src={miniatura(icono, 48)} alt="" className="h-6 w-6 shrink-0 object-contain" /> : <span className="text-lg leading-none" aria-hidden>{icono}</span>;
 }
-export function PasoRuta({ etiqueta, titulo, opciones, actual, h1, apagado, icono }: { etiqueta: string; titulo: string; opciones: OpcionRuta[]; actual: string | null; h1?: boolean; apagado?: boolean; icono?: string | null }) {
+/** Con `alElegir`, cada opción es un botón que cambia lo elegido en la misma página (la vista Círculo); sin él, un enlace. */
+export function PasoRuta({ etiqueta, titulo, opciones, actual, h1, apagado, icono, alElegir }: { etiqueta: string; titulo: string; opciones: OpcionRuta[]; actual: string | null; h1?: boolean; apagado?: boolean; icono?: string | null; alElegir?: (id: string) => void }) {
   const sitio = useSitio();
   const [abierto, setAbierto] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
@@ -43,14 +44,17 @@ export function PasoRuta({ etiqueta, titulo, opciones, actual, h1, apagado, icon
       </button>
       {abierto && (
         <ul role="listbox" className="absolute left-1/2 top-full z-50 mt-2 max-h-80 w-64 -translate-x-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-2xl">
-          {opciones.map(o => (
-            <li key={o.id}>
-              <Link to={sitio ? sitio.enlacePagina(o.pagina_id) : `/paginas/${o.pagina_id}`} role="option" aria-selected={o.id === actual} onClick={() => setAbierto(false)}
-                className={cn('flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold', o.id === actual ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-50')}>
-                <span className="flex-1 truncate">{o.nombre}</span>{o.id === actual && <Check className="h-4 w-4" />}
-              </Link>
-            </li>
-          ))}
+          {opciones.map(o => {
+            const clase = cn('flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold', o.id === actual ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-50');
+            const dentro = <>{alElegir && <IconoPaso icono={o.icono} />}<span className="flex-1 truncate">{o.nombre}</span>{o.id === actual && <Check className="h-4 w-4" />}</>;
+            return (
+              <li key={o.id}>
+                {alElegir
+                  ? <button type="button" role="option" aria-selected={o.id === actual} data-opcion-ruta={o.nombre} onClick={() => { setAbierto(false); if (o.id !== actual) alElegir(o.id); }} className={clase}>{dentro}</button>
+                  : <Link to={sitio ? sitio.enlacePagina(o.pagina_id || '') : `/paginas/${o.pagina_id}`} role="option" aria-selected={o.id === actual} onClick={() => setAbierto(false)} className={clase}>{dentro}</Link>}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

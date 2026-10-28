@@ -10127,3 +10127,7 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
 - Arco más ancho: con los tres bloques, 5fr · 5fr · 8fr (antes 3 · 6 · 9); con dos, 6fr · 9fr. Las pastillas de categoría parten en dos líneas en vez de cortar («Telecomunica-ciones»).
 - La ruta fija al bajar (sector › categoría › temática) es ahora un desplegable en cada paso: cambia de sector (sube a los bloques), de categoría o de temática sin moverse. Flecha ↑ para volver arriba. Va `fixed` bajo la cabecera, sin empujar el contenido.
 - Las pestañas de abajo pasan a filas: titular grande en mayúsculas a la izquierda, carrusel de 3 tarjetas (2 en tableta, 1 y pico en móvil) con flechas, y una línea entre filas. Las vacías no se pintan.
+
+## 2026-10-28 — Cabecera en tres columnas con la ruta en el centro (Programador 8)
+- `CabeceraSitio`: a la izquierda, comprimido, el logo (el nombre solo en 2xl), las vistas, Calificaciones, Donar, la cuenta y el menú; en el centro, la pastilla de la ruta (territorio › sistema › temática); a la derecha, el buscador (sus resultados se abren hacia la izquierda). En el móvil: logo y cuenta arriba, vistas y buscador debajo, la ruta al final.
+- Vista Círculo: la ruta va en esa pastilla de la cabecera (hueco `data-ranura-ruta`), creciendo según se pincha: territorio › sector › categoría › temática, cada paso con su desplegable (`PasoRuta` acepta ahora `alElegir`). Desaparecen la barra fija de la ruta al bajar y el hueco `data-ranura-territorio-barra`. Su `Eslabon circulo` esconde el del filtro de territorio de la portada.
