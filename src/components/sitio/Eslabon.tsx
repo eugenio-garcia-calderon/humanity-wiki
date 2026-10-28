@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { colorDeNota, textoNota, textoSobre } from '../../utils/nota';
+import NotaCirculo from './NotaCirculo';
 
 // ============================================================================
 // EL ESLABÓN DE LA BARRA (2026-10-26, Eugenio)
@@ -20,14 +20,7 @@ export function Union() {
   return <span aria-hidden className="mx-0.5 h-6 w-px shrink-0 bg-slate-200" />;
 }
 
-/** La nota, con su color, al final del eslabón. */
+/** La nota al final del eslabón: en su círculo blanco con el aro de su color (2026-10-28, `NotaCirculo`). */
 export function NotaEslabon({ nota, titulo }: { nota: number; titulo?: string }) {
-  const c = colorDeNota(nota);
-  return (
-    <span data-nota-barra aria-label={`${titulo ? `${titulo}: ` : ''}nota ${textoNota(nota)} sobre 10`}
-      className="ml-1 inline-flex h-9 shrink-0 items-baseline gap-0.5 rounded-full px-3 pt-[7px] text-base font-black tabular-nums leading-none"
-      style={{ backgroundColor: c, color: textoSobre(c) }}>
-      {textoNota(nota)}<span className="text-[10px] font-bold opacity-75">/10</span>
-    </span>
-  );
+  return <span data-nota-barra className="ml-1 inline-flex"><NotaCirculo nota={nota} tam="barra" titulo={titulo} /></span>;
 }

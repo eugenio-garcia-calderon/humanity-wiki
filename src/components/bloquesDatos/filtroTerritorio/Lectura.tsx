@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import NotaCirculo from '../../sitio/NotaCirculo';
 import { Eslabon, NotaEslabon } from '../../sitio/Eslabon';
 import type { PropsLectura } from '../tipos';
 import { ponerFiltroPagina } from './filtroPagina';
@@ -66,12 +67,7 @@ export function SelectorTerritorio({ datos }: { datos: Record<string, unknown> }
   // UN SOLO RECUADRO (2026-10-25, Eugenio: «España a la izquierda y la nota media
   // a la derecha en el mismo recuadro unificado»): el territorio, lo mejor y lo
   // peor con la leyenda en medio, y la media en grande a la derecha.
-  const circulo = media !== null && (
-    <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full font-black tabular-nums shadow-md" style={{ backgroundColor: colorDeNota(media), color: textoSobre(colorDeNota(media)) }}
-      aria-label={`Media de ${nombre}: ${textoNota(Math.round(media * 10) / 10)} sobre 10`}>
-      <span className="flex items-baseline text-4xl">{textoNota(Math.round(media * 10) / 10)}<span className="ml-0.5 text-sm font-semibold">/10</span></span>
-    </span>
-  );
+  const circulo = media !== null && <NotaCirculo nota={Math.round(media * 10) / 10} tam="grande" etiqueta={nombre} titulo={`Media de ${nombre}`} />;
   const centro = media !== null ? (
     <div data-resumen-territorio className="min-w-0">
       <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Media de {nombre} · {suyas.length} sistemas</p>

@@ -18,13 +18,17 @@ import { cn } from '../../utils/cn';
 
 type Resultado = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta?: string | null };
 
-export default function BuscarBarra({ raizId }: { raizId: string }) {
+export default function BuscarBarra({ raizId, enLinea = false }: { raizId: string;
+  /** Siempre abierta, como una caja de texto en el centro de la barra (2026-10-28, Eugenio: «el selector de tabla, mapa,
+   *  círculos y la barra de buscar, centrados»). Sin ella, la lupa que se despliega a la derecha. */
+  enLinea?: boolean }) {
   const sitio = useSitio();
   const ir = useNavigate();
   const [q, setQ] = useState('');
   const [res, setRes] = useState<Resultado[] | null>(null);
   const [abierta, setAbierta] = useState(false);
-  const [desplegada, setDesplegada] = useState(false);
+  const [desplegadaSola, setDesplegada] = useState(false);
+  const desplegada = enLinea || desplegadaSola;
   const caja = useRef<HTMLDivElement>(null);
   const campo = useRef<HTMLInputElement>(null);
   const texto = q.trim();
@@ -47,14 +51,14 @@ export default function BuscarBarra({ raizId }: { raizId: string }) {
     document.addEventListener('mousedown', fuera);
     return () => document.removeEventListener('mousedown', fuera);
   }, [abierta, desplegada]);
-  useEffect(() => { if (desplegada) campo.current?.focus(); }, [desplegada]);
+  useEffect(() => { if (desplegadaSola) campo.current?.focus(); }, [desplegadaSola]);
 
   const cerrar = () => { setAbierta(false); setDesplegada(false); setQ(''); };
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
   const todos = () => `${sitio ? sitio.enlaceBuscar() : '/buscar'}?q=${encodeURIComponent(texto)}${sitio ? '' : `&sitio=${encodeURIComponent(raizId)}`}`;
 
   return (
-    <div ref={caja} data-buscar-barra className={cn('shrink-0', desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
+    <div ref={caja} data-buscar-barra className={cn('shrink-0', enLinea ? 'relative w-[9.5rem] sm:w-44 xl:w-56' : desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
       {/* La lupa sola, hasta que se pulsa. */}
       {!desplegada && (
         <button type="button" onClick={() => setDesplegada(true)} aria-label="Buscar en esta web" title="Buscar"
@@ -64,20 +68,20 @@ export default function BuscarBarra({ raizId }: { raizId: string }) {
       )}
       <form role="search" onSubmit={e => { e.preventDefault(); if (texto.length >= 2) { cerrar(); ir(todos()); } }}
         className={cn('items-center gap-2 rounded-full border border-slate-200 bg-white px-3 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200',
-          desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
+          enLinea ? 'flex h-9' : desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
         <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
         <input ref={campo} type="search" value={q} placeholder="Buscar" aria-label="Buscar en esta web"
           onChange={e => { setQ(e.target.value); setAbierta(true); }} onFocus={() => setAbierta(true)}
           onKeyDown={e => { if (e.key === 'Escape') { cerrar(); (e.target as HTMLInputElement).blur(); } }}
           className="h-full min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-900 outline-none focus-visible:!outline-none placeholder:font-medium placeholder:text-slate-400 [&::-webkit-search-cancel-button]:hidden" />
-        {(q || desplegada) && (
+        {(q || desplegadaSola) && (
           <button type="button" onClick={cerrar} aria-label="Cerrar la búsqueda" className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X className="h-3.5 w-3.5" />
           </button>
         )}
       </form>
       {abierta && texto.length >= 2 && res && (
-        <div data-resultados-barra className="absolute right-0 top-full z-50 mt-2 w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl">
+        <div data-resultados-barra className={cn('absolute top-full z-50 mt-2 w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl', enLinea ? 'left-1/2 -translate-x-1/2' : 'right-0')}>
           {res.length === 0 ? <p className="px-3 py-3 text-sm text-slate-500">Nada con «{texto}».</p> : (
             <ul>
               {res.map(r => (

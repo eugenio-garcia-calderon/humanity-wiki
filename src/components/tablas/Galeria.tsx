@@ -14,6 +14,7 @@ import { BarraComparar, MAX_COMPARAR_GALERIA, MarcaComparar, tablaComparable, us
 import MenuAcciones, { type AccionMenu } from './MenuAcciones';
 import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 import { tonosDeNota, textoNota, textoSobre } from '../../utils/nota';
+import NotaCirculo from '../sitio/NotaCirculo';
 import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
@@ -446,11 +447,8 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                   // Las palabras largas se parten por sílabas («Telecomu-nicaciones»), nunca por una letra cualquiera.
                   <div lang="es" data-cabecera-nota className="flex flex-col items-center gap-1.5 px-1 text-center">
                     <div className={cn('flex w-full min-w-0 items-center justify-center hyphens-auto [overflow-wrap:normal] [&_p]:justify-center [&_span]:[overflow-wrap:normal]', nombreArriba && !chica && 'min-h-[2.6rem]' /* las notas y las imágenes alineadas aunque un título ocupe dos líneas */)}>{nombreEl}</div>
-                    <span data-nota-grande aria-label={`Nota ${textoNota(nota)} sobre 10`}
-                      className={cn('inline-flex shrink-0 items-center rounded-full font-black tabular-nums leading-none shadow-sm', chica ? 'h-7 px-2 text-sm' : estrecha ? 'h-8 px-2.5 text-lg' : 'h-10 px-3 text-2xl')}
-                      style={{ backgroundColor: tonos.color, color: textoSobre(tonos.color) }}>
-                      <span className="flex items-baseline">{textoNota(nota)}<span className={cn('ml-0.5 font-bold opacity-70', chica || estrecha ? 'text-[8px]' : 'text-[10px]')}>/10</span></span>
-                    </span>
+                    {/* La nota en su círculo blanco con el aro de su color y «sobre 10» (2026-10-28, `NotaCirculo`). */}
+                    <span data-nota-grande className="inline-flex"><NotaCirculo nota={nota} tam={chica ? 'barra' : estrecha ? 'pequena' : 'tarjeta'} /></span>
                   </div>
       ) : nombreEl;
           return (
