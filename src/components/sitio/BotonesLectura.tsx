@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import { FilaBotones, FilaBotonesUnaLinea, VentanaBoton, botonesDe, type BotonCabecera, type TallaBotones } from '../knowledge/BotonesCabecera';
 import { BarraFija } from '../knowledge/BarraFija';
@@ -60,7 +60,9 @@ function VentanaPaginaPublica({ boton, onCerrar, esHija = false }: { boton: Boto
   );
 }
 
-export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false, plegado, parte }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
+export default function BotonesLectura({ config, centrado, derecha, talla, unaLinea = false, plegado, parte, cabezaMenu }: { config: any; centrado: boolean; derecha?: boolean; talla?: TallaBotones;
+  /** Con `parte="menu"`: lo que va arriba del todo del menú (las vistas del sitio, 2026-10-28). */
+  cabezaMenu?: (cerrar: () => void) => ReactNode;
   /** La barra del sitio (2026-10-26) pinta por separado Donar y el menú (solo las tres rayas), con la cuenta en medio. */
   parte?: 'donar' | 'menu';
   /** En una sola línea; lo que no cabe, en «Más ▾» (la cabecera del sitio, 2026-10-26). */
@@ -82,9 +84,9 @@ export default function BotonesLectura({ config, centrado, derecha, talla, unaLi
     </a>
   ) : null;
   if (parte === 'donar') return donar;
-  if (parte === 'menu') return botones.length ? (
+  if (parte === 'menu') return botones.length || cabezaMenu ? (
     <>
-      <FilaBotones botones={derecha === false ? botones : [...botones].reverse()} sinMargen plegado soloIcono derechaAncho onAbrir={setAbierto} />
+      <FilaBotones botones={derecha === false ? botones : [...botones].reverse()} sinMargen plegado soloIcono derechaAncho cabeza={cabezaMenu} onAbrir={setAbierto} />
       {abierto && <VentanaPaginaPublica boton={abierto} esHija={hijaIds.has(abierto.id)} onCerrar={() => setAbierto(null)} />}
     </>
   ) : null;

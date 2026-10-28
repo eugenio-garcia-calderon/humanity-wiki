@@ -28,7 +28,8 @@ export function PasoRuta({ etiqueta, titulo, opciones, actual, h1, apagado, icon
   const Texto = h1 ? 'h1' : 'span';
   const contenido = (
     <span className="inline-flex min-w-0 items-center gap-1.5">
-      <span className="hidden sm:contents"><IconoPaso icono={icono} /></span>
+      {/* Sin dibujo en la cadena, solo el nombre (2026-10-28, Eugenio: «quita las imágenes del árbol encadenado para que
+          ocupe menos espacio: Tecnología › Movilidad › Eficiencia»); el `icono` queda para quien lo quiera. */}
       {/* La misma letra que el territorio (2026-10-26): base y negrita. */}
       <Texto title={titulo} className={cn('truncate text-base font-black tracking-tight sm:text-lg', apagado ? 'text-slate-600' : 'text-slate-900')}>
         {etiqueta}{h1 && etiqueta !== titulo && <span className="sr-only"> · {titulo}</span>}

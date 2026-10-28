@@ -31,7 +31,7 @@ const ESTILO: Record<EstiloBotones, string> = {
 };
 
 /** La fila de botones, bajo el título y la descripción. */
-export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, soloIcono = false, acento, onAbrir, onQuitar, onAnadir, onReordenar }: {
+export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado = false, derecha = false, derechaAncho = false, sinMargen = false, enLinea = false, plegado = false, soloIcono = false, cabeza, acento, onAbrir, onQuitar, onAnadir, onReordenar }: {
   botones: BotonCabecera[];
   talla?: TallaBotones;
   estilo?: EstiloBotones;
@@ -45,6 +45,8 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
   enLinea?: boolean;
   /** Todos los botones recogidos en un menú ☰ que se abre en cascada (2026-10-21). */
   plegado?: boolean;
+  /** Plegado: algo más arriba del todo del menú (la barra del sitio pone ahí las vistas, 2026-10-28). */
+  cabeza?: (cerrar: () => void) => ReactNode;
   /** Plegado, solo el icono del menú. */
   soloIcono?: boolean;
   /** El color de la web publicada, para el estilo «relleno». */
@@ -76,11 +78,11 @@ export function FilaBotones({ botones, talla = 'm', estilo = 'relleno', centrado
     lista.splice(antes ? i : i + 1, 0, movido);
     onReordenar(lista);
   };
-  if (!botones.length && !onAnadir) return null;
+  if (!botones.length && !onAnadir && !cabeza) return null;
   if (plegado) {
     return (
       <div className={cn('flex', !sinMargen && 'mt-3', centrado && 'justify-center', (derecha || derechaAncho) && 'justify-end')} role="navigation" aria-label="Apartados de la página">
-        <MenuPlegado botones={botones} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} onQuitar={onQuitar} onAnadir={onAnadir} soloIcono={soloIcono} />
+        <MenuPlegado botones={botones} talla={talla} estilo={estilo} acento={acento} onAbrir={onAbrir} onQuitar={onQuitar} onAnadir={onAnadir} soloIcono={soloIcono} cabeza={cabeza} />
       </div>
     );
   }
@@ -204,23 +206,25 @@ export function FilaBotonesUnaLinea({ botones, talla = 'm', estilo = 'relleno', 
  * cascada»). Las opciones caen una detrás de otra. El panel va en un portal
  * con posición fija: dentro de la barra fija lo cortaría su `overflow`.
  */
-function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir, mas = false, soloIcono = false }: {
+function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnadir, mas = false, soloIcono = false, cabeza }: {
   botones: BotonCabecera[]; talla: TallaBotones; estilo: EstiloBotones; acento?: string | null;
   onAbrir: (b: BotonCabecera) => void; onQuitar?: (b: BotonCabecera) => void; onAnadir?: () => void;
   /** «Más ▾» en vez de «☰ Menú»: lo que no cabe en la fila de una línea. */
   mas?: boolean;
   /** Solo las tres rayas, sin la palabra (la barra del sitio, 2026-10-26). */
   soloIcono?: boolean;
+  cabeza?: (cerrar: () => void) => ReactNode;
 }) {
   const [abierto, setAbierto] = useState(false);
   const [listo, setListo] = useState(false);
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; right?: number; left?: number } | null>(null);
   const boton = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!abierto) { setListo(false); return; }
     const r = boton.current?.getBoundingClientRect();
-    if (r) setPos({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
+    // En la mitad izquierda de la ventana el panel cae hacia la derecha (el menú del sitio va a la izquierda del todo).
+    if (r) setPos(r.left < window.innerWidth / 2 ? { top: r.bottom + 8, left: Math.max(8, r.left) } : { top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
     const raf = requestAnimationFrame(() => setListo(true));
     const fuera = (e: PointerEvent) => { if (!panel.current?.contains(e.target as Node) && !boton.current?.contains(e.target as Node)) setAbierto(false); };
     const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
@@ -240,8 +244,9 @@ function MenuPlegado({ botones, talla, estilo, acento, onAbrir, onQuitar, onAnad
         {soloIcono ? <Menu className="h-5 w-5" /> : mas ? <>Más <ChevronDown className={cn('h-4 w-4 transition-transform', abierto && 'rotate-180')} /></> : <><Menu className="h-4 w-4" /> Menú</>}
       </button>
       {abierto && pos && createPortal(
-        <div ref={panel} role="menu" style={{ top: pos.top, right: pos.right }}
+        <div ref={panel} role="menu" style={{ top: pos.top, right: pos.right, left: pos.left }}
           className="fixed z-[9996] w-64 max-w-[calc(100vw-1rem)] rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl">
+          {cabeza?.(() => setAbierto(false))}
           {botones.map((b, i) => (
             <div key={b.id} style={{ transitionDelay: `${i * 45}ms` }}
               className={cn('group/op flex items-center rounded-xl transition-[opacity,transform] duration-200 ease-out', listo ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0')}>

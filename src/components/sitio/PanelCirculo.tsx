@@ -68,7 +68,10 @@ export function useCirculoElegido(circulos: Circulo[] | null, ancla: string) {
 //    iguales), con más columnas cuantos más sectores haya.
 //  - Con un sector elegido (`apretado`): pastillas bajas, un dibujo pequeño y la palabra; las no elegidas, en gris y a
 //    media luz.
-export function PanelCirculo({ c, t, ancla, alElegir, elegidoId = null, apretado = false }: {
+/** A todo lo ancho, hasta seis en una fila; con más, en dos. */
+export const colsUnaFila = (n: number) => (n <= 6 ? Math.max(n, 3) : Math.ceil(n / 2));
+
+export function PanelCirculo({ c, t, ancla, alElegir, elegidoId = null, apretado = false, ancho = false }: {
   c: Circulo; t: ReturnType<typeof useCirculosTerritorio>;
   /** El atributo con el que se marca la sección (para bajar hasta ella en el móvil). */
   ancla: string;
@@ -78,19 +81,23 @@ export function PanelCirculo({ c, t, ancla, alElegir, elegidoId = null, apretado
   elegidoId?: string | null;
   /** Con un sector elegido: pastillas pequeñas, para dejar sitio al tercer bloque. */
   apretado?: boolean;
+  /** Solo, a todo lo ancho (la vista Círculo, desde que hay un solo selector a la vez): una fila de hasta seis. */
+  ancho?: boolean;
 }) {
   const sitio = useSitio();
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
   const n = c.sistemas.length;
-  const cols = apretado ? (n > 8 ? 3 : 2) : n > 10 ? 5 : n > 6 ? 4 : 3;
+  const cols = apretado ? (n > 8 ? 3 : 2) : ancho ? colsUnaFila(n) : n > 10 ? 5 : n > 6 ? 4 : 3;
   return (
     <section aria-live="polite" {...{ [ancla]: c.clave }} className="flex min-h-0 flex-col md:h-full">
       <div className="mb-3 flex items-center gap-2">
         <h2 className={`${apretado ? 'text-xl' : 'text-3xl'} font-black tracking-tight text-slate-900 transition-all`}>{c.nombre}</h2>
         {c.nota != null && <NotaCirculo nota={Math.round(c.nota * 10) / 10} tam={apretado ? 'barra' : 'pequena'} titulo={`${c.nombre} en ${t.nombreTerritorio}`} />}
       </div>
-      <ul className={`grid min-h-0 flex-1 gap-2 ${apretado ? 'content-start overflow-y-auto' : 'grid-cols-2 sm:grid-cols-3 md:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))] md:[grid-template-rows:repeat(var(--filas),minmax(0,1fr))]'}`}
-        style={{ ...(apretado ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } : {}), ['--cols' as string]: cols, ['--filas' as string]: Math.ceil(n / cols) }}
+      <ul className={`grid min-h-0 flex-1 gap-2 ${apretado ? 'content-start overflow-y-auto'
+        : ancho ? 'grid-cols-2 sm:grid-cols-3 md:[grid-template-rows:repeat(var(--filas3),minmax(0,1fr))] lg:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))] lg:[grid-template-rows:repeat(var(--filas),minmax(0,1fr))]'
+        : 'grid-cols-2 sm:grid-cols-3 md:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))] md:[grid-template-rows:repeat(var(--filas),minmax(0,1fr))]'}`}
+        style={{ ...(apretado ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } : {}), ['--cols' as string]: cols, ['--filas' as string]: Math.ceil(n / cols), ['--filas3' as string]: Math.ceil(n / 3) }}
         data-cols={cols}>
         {c.sistemas.map(s => {
           const on = elegidoId === s.id, apagada = apretado && !on;
