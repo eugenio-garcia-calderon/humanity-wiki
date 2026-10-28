@@ -58,7 +58,7 @@ export default function BuscarBarra({ raizId, enLinea = false }: { raizId: strin
   const todos = () => `${sitio ? sitio.enlaceBuscar() : '/buscar'}?q=${encodeURIComponent(texto)}${sitio ? '' : `&sitio=${encodeURIComponent(raizId)}`}`;
 
   return (
-    <div ref={caja} data-buscar-barra className={cn('shrink-0', enLinea ? 'relative w-[9.5rem] sm:w-44 xl:w-56' : desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
+    <div ref={caja} data-buscar-barra className={cn('shrink-0', enLinea ? 'relative w-[9.5rem] sm:w-44 2xl:w-56' : desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
       {/* La lupa sola, hasta que se pulsa. */}
       {!desplegada && (
         <button type="button" onClick={() => setDesplegada(true)} aria-label="Buscar en esta web" title="Buscar"

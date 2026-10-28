@@ -11,7 +11,8 @@ export default function BotonCalificaciones() {
     <button type="button" onClick={() => ponerCalificacionesOcultas(!ocultas)} aria-pressed={!ocultas} title={texto} aria-label={texto} data-boton-calificaciones
       className={`inline-flex h-8 shrink-0 items-center gap-1 rounded-full border px-2.5 text-xs font-bold transition-colors ${ocultas ? 'border-slate-200 bg-white text-slate-500 hover:text-slate-900' : 'border-slate-900 bg-slate-900 text-white hover:bg-slate-700'}`}>
       {ocultas ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-      <span className="hidden sm:inline">Calificaciones</span>
+      {/* La palabra, solo si sobra sitio: la ruta del centro de la cabecera manda (2026-10-28, «comprímelo»). */}
+      <span className="hidden 2xl:inline">Calificaciones</span>
     </button>
   );
 }
