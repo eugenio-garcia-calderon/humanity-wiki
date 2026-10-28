@@ -10115,6 +10115,6 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
     - Cada sector tiene 6 categorías. Relaciones pasa a Sociedad y Ciencia a Naturaleza.
     - Psicología, Somática y Potencial pasan a ser temáticas de Conciencia; Física, Matemáticas, Biología, Química, Geología y Astronomía, temáticas de Ciencia.
     - Se borran Biodiversidad, Ecosistemas, Geología (suelos), Fiscalidad y Automatización como categorías: ya están como temáticas.
-    - Las 216 temáticas se unen en 152: la que sobrevive se queda con los indicadores, proyectos y descripción de las otras, y con la nota media. Otras pasan de categoría (las de Economía, a Trabajo, Empresas, Finanzas y Consumo; Clima, Sequías e Inundaciones, a Climatología…).
+    - Las 216 temáticas se quedan en 126 (más 9 que eran categorías: 135): la que sobrevive se queda con los indicadores, proyectos y descripción de las otras, y con la nota media. Otras pasan de categoría (las de Economía, a Trabajo, Empresas, Finanzas y Consumo; Clima, Sequías e Inundaciones, a Climatología…).
     - Renombrados: la columna «Pata» → «Sector», «Objetivos» → «Temáticas» y la tabla «Objetivos de los Sistemas» → «Temáticas».
   - El Círculo acepta los dos nombres de cada columna. Rotula «Temáticas», mide un 36 % de la pantalla (antes el 50 %) y el botón de la galería se llama «Categorías».
