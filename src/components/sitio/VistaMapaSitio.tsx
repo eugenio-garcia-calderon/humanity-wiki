@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Check, ChevronDown, CircleDot, Layers, LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
+import { Check, ChevronDown, CircleDot, Columns4, Layers, LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,10 +21,10 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2' | 'circulos3' | 'circulos4';
-const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2', 'circulos3', 'circulos4'];
+export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2' | 'circulos3' | 'circulos4' | 'circulos5';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2', 'circulos3', 'circulos4', 'circulos5'];
 /** Las vistas que eligen el territorio en su título: sin ellas, la segunda fila de la barra (2026-10-28). */
-export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos3', 'circulos4'];
+export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos3', 'circulos4', 'circulos5'];
 
 /** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
  *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
@@ -59,6 +59,7 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'circulos2', texto: 'Círculo 2.0', Icono: Orbit },
   { v: 'circulos3', texto: 'Círculo 3.0', Icono: CircleDot },
   { v: 'circulos4', texto: 'Círculo 4.0', Icono: Layers },
+  { v: 'circulos5', texto: 'Círculo 5.0', Icono: Columns4 },
 ];
 
 /** EL SELECTOR DE VISTA DE LA BARRA. Primero un botón que decía a dónde llevaba («Ver mapa» / «Ver tabla»,
