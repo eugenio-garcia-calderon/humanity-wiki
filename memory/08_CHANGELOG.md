@@ -10023,3 +10023,12 @@ Eugenio: «un círculo 5.0 con 4 patas: la humanología, la sociología, la tecn
   - sistema nuevo «Potencial humano» (página KWMVPOTHUM0001, fila BDFMVPOTHUM0001, territorio España, sin nota todavía), con portada `sistema-potencial-humano.svg`, de `grupos.py`.
   - «Relaciones» pasa a llamarse «Relaciones interpersonales».
 - Vivienda se queda en Humanología: Eugenio no dijo dónde, y con Hogar desaparecido va con las demás necesidades básicas.
+
+## 2026-10-28 · Política: instituciones; e indicadores de los 5 sistemas que faltaban (Programador 8, datos)
+Eugenio: «en Política, fusiona la rendición de cuentas con transparencia y añade como objetivo instituciones, con las alianzas entre estados, el estado-nación, las regiones y los municipios». Y: «¿te queda algo por hacer? hazlo».
+- Datos (SQL, producción). Copia previa en `~/copias-manuales/politica-transparencia-cuentas-2026-10-28.tsv`.
+  - POL-O04 «Rendición de cuentas» se fusiona en POL-O02, que ahora se llama «Transparencia y rendición de cuentas». Sus 10 indicadores pasan a POL-O02 como H11 a H20 (20 en total) y POL-O04 queda borrado (borrado suave).
+  - Objetivo nuevo POL-O13 «Instituciones» (sin nota todavía), con 4 indicadores: Alianzas entre Estados, Estado-nación, Regiones y Municipios. Portadas de una línea en `portadas-ilustraciones/instituciones.py`.
+  - 600 indicadores nuevos para Fabricación, Materias Primas, Relaciones interpersonales, Telecomunicaciones y Vestimenta (10 por objetivo), con sus evaluaciones provisionales para España, coherentes con la nota de cada objetivo. Ahora los 18 sistemas tienen indicadores (2.164 en total).
+  - Generador: `scratchpad/indsis/generar-resto.mjs` con los datos de `FAB/MAT/REL/TEL/VES.mjs`.
+- Pendiente: las portadas de esos 600 indicadores (de momento llevan su icono) y la nota de «Instituciones» y de «Potencial humano».
