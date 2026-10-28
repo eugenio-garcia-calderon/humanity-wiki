@@ -10121,3 +10121,4 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
 - (Mismo día) Tercer bloque simple y ruta en su propio piso (Eugenio: «en el tercer bloque, solo el nombre de la categoría: ni Tecnología, ni icono, ni subtítulo, ni el número de temáticas; y el menú colapsable, separado y encima de las pestañas: tres pisos»):
   - `BloqueSector` queda con el título y sus temáticas, como el segundo bloque.
   - Al bajar, la barra pegada tiene dos filas: la ruta sector › categoría › temática y, debajo, las pestañas.
+- (Mismo día) Temáticas grandes en el tercer bloque (Eugenio: «hay más hueco en el bloque 3 para hacer las tarjetas más grandes y visibles»): tres columnas con filas iguales que llenan el alto del bloque, el dibujo arriba y la palabra debajo, como las categorías del segundo bloque sin elegir.
