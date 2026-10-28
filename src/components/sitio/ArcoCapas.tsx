@@ -31,18 +31,24 @@ function franja(r1: number, r2: number) {
 }
 
 /** El arco: una franja por capa, de la de dentro (abajo) a la de fuera (arriba), con su ilustración y su nombre. */
-export function Arco({ circulos, elegido, elegir, ver, dibujoDe }: {
+// LA ELEGIDA DESTACA (2026-10-28, Eugenio: «si pincho en Técnica, el resto de ramas en un tono más gris,
+// semitransparentes, incluidas las imágenes, que pierdan fuerza y se vea que estoy en Técnica; y la palabra Técnica,
+// un poco más grande que el resto»). Con una elegida, las demás van en gris y a media luz (el ratón las devuelve un
+// poco) y su nombre, un 20 % más pequeño; la elegida conserva la letra más grande que cabe en su franja.
+export function Arco({ circulos, elegido, elegir, ver, dibujoDe, clase = 'max-h-[calc(100dvh-150px)]' }: {
   circulos: Circulo[]; elegido: number; elegir: (i: number) => void; ver: (i: number) => void; dibujoDe: (clave: string) => string | null;
+  /** El alto máximo del dibujo (en la vista con bloques, el de la mitad de arriba de la pantalla). */
+  clase?: string;
 }) {
   const [encima, setEncima] = useState<number | null>(null);
   const n = circulos.length, grosor = (R1 - R0) / n;
   return (
-    <svg viewBox={`0 0 ${f(ANCHO)} ${f(ALTO)}`} className="mx-auto block h-auto w-full max-h-[calc(100dvh-150px)]" role="group" aria-label="Elige una capa" data-arco-c4>
+    <svg viewBox={`0 0 ${f(ANCHO)} ${f(ALTO)}`} className={`mx-auto block h-auto w-full ${clase}`} role="group" aria-label="Elige una capa" data-arco-c4>
       {/* La capa elegida, la última: así su borde no queda tapado por la de encima. */}
       {[...circulos.keys()].sort((a, b) => Number(a === elegido) - Number(b === elegido)).map(i => {
         const c = circulos[i];
         const r1 = R0 + i * grosor, r2 = r1 + grosor, rm = (r1 + r2) / 2;
-        const on = i === elegido, sobre = i === encima && !on;
+        const on = i === elegido, sobre = i === encima && !on, apagada = elegido >= 0 && !on;
         const y = CY - rm;
         const dibujo = dibujoDe(c.clave);
         const altoDibujo = grosor * 0.56, anchoDibujo = altoDibujo * 1.6;
@@ -50,13 +56,14 @@ export function Arco({ circulos, elegido, elegir, ver, dibujoDe }: {
           <g key={c.clave} role="button" tabIndex={0} aria-pressed={on} aria-label={c.nombre}
             className="cursor-pointer outline-none [&:focus-visible>path]:stroke-[#3b82c4]"
             onClick={() => elegir(i)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elegir(i); } }}
-            onMouseEnter={() => { setEncima(i); ver(i); }} onMouseLeave={() => setEncima(null)} data-capa-c4={c.clave}>
+            onMouseEnter={() => { setEncima(i); ver(i); }} onMouseLeave={() => setEncima(null)} data-capa-c4={c.clave} data-apagada={apagada || undefined}
+            style={{ opacity: apagada ? (sobre ? 0.7 : 0.38) : 1, filter: apagada ? 'grayscale(1)' : undefined, transition: 'opacity .2s ease, filter .2s ease' }}>
             {/* La elegida, blanca y con el borde del azul de las ilustraciones (2026-10-28, Eugenio). */}
             <path d={franja(r1, r2)} fill={on ? '#ffffff' : sobre ? '#e2e8f0' : i % 2 ? '#eef2f6' : '#f6f8fa'}
               stroke={on ? '#3b82c4' : '#ffffff'} strokeWidth={on ? 8 : 10} strokeLinejoin="round" style={{ transition: 'fill .15s ease' }} />
             {dibujo && <image href={dibujo} x={CX - anchoDibujo / 2} y={y - grosor * 0.42} width={anchoDibujo} height={altoDibujo} preserveAspectRatio="xMidYMid meet" style={{ pointerEvents: 'none' }} />}
             {/* La letra, la que quepa en el ancho de la franja a esa altura (la de abajo es la más estrecha). */}
-            <text x={CX} y={y + grosor * 0.36} textAnchor="middle" fontSize={Math.min(40, (2 * (rm - grosor * 0.36) * Math.sin(MEDIO * Math.PI / 180) * 0.86) / (c.nombre.length * 0.6))} fontWeight={800} fill={on ? '#0f172a' : '#334155'} style={{ pointerEvents: 'none' }}>{c.nombre}</text>
+            <text x={CX} y={y + grosor * 0.36} textAnchor="middle" fontSize={Math.min(on ? 48 : 40, (2 * (rm - grosor * 0.36) * Math.sin(MEDIO * Math.PI / 180) * 0.86) / (c.nombre.length * 0.6)) * (apagada ? 0.8 : 1)} fontWeight={on ? 900 : 800} fill={on ? '#0f172a' : '#334155'} style={{ pointerEvents: 'none' }}>{c.nombre}</text>
           </g>
         );
       })}

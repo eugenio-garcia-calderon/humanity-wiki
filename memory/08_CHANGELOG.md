@@ -10103,3 +10103,10 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - El selector de vista tiene solo iconos (Círculo, Sectores, Mapa), en su propio marco; «Calificaciones» (antes «Notas») va aparte; el buscador, a la derecha del logo.
   - El Círculo abre sus dos y tres columnas desde 768 px (antes 1.024).
   - Sectores (galería BDVMVDSF63U1KGL) se agrupa por la columna «Pata», en el orden del arco; el grupo «Sin pata» (las herramientas) queda oculto.
+- (Mismo día) Círculo con foco, media pantalla y pestañas (Eugenio: «si pincho en Técnica, el resto de ramas en gris y semitransparentes, y la palabra más grande; si pincho en Movilidad, el resto de tarjetas más compactas y con menos color; los tres bloques en la mitad de arriba; una sola palabra por tarjeta; abajo, pestañas de proyectos, soluciones, indicadores, personas y publicaciones; al bajar, la ruta fija en pequeño bajo el menú; el territorio arriba, junto al buscador; Técnica → Tecnología»):
+  - `ArcoCapas`: con una rama elegida, las demás en gris al 38 % y con la letra un 20 % menor.
+  - `PanelCirculo`: sin territorio en el título; con la rama sola, rejilla que llena media pantalla; con un sector elegido, pastillas bajas y las demás en gris.
+  - Objetivos con su «Nombre en la ruta»: la red (`redDePagina`) devuelve `corto` en cada entrada.
+  - Debajo, pestañas fijas (Proyectos, Soluciones, Indicadores, Personas, Publicaciones y otras relaciones). Su barra se pega bajo la cabecera y lleva delante la ruta rama › sector › objetivo cuando los bloques salen de la vista.
+  - El territorio, en la barra (`data-ranura-territorio-barra`, portal desde `VistaCirculo2Sitio`). La cabecera pasa de rejilla a fila flexible para no pisarse.
+  - Datos de producción: la opción de Pata «Técnica» pasa a «Tecnología»; Relaciones interpersonales → Relaciones, Potencial humano → Potencial y Materias Primas → Materiales. Copias en ~/copias-manuales/*-2026-10-28.
