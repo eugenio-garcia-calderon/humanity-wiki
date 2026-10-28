@@ -10098,3 +10098,8 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Paso 1, con `?circulo=`: el arco y el panel de la rama.
   - Paso 2, con `?sector=`: los tres bloques y el detalle debajo.
   - Volver a pinchar la rama o el sector lo cierra.
+- (Mismo día) Barra y vista Círculo (Eugenio: «elimina el 1.0»; «las vistas solo con iconos, fuera del marco del buscador; calificaciones aparte; el buscador al lado del logo»):
+  - Se borra el antiguo Círculo (`VistaCirculoSitio.tsx`); `?vista=circulos` pinta ahora el que era Círculo 2.0, y `?vista=circulo2` lleva a él.
+  - El selector de vista tiene solo iconos (Círculo, Sectores, Mapa), en su propio marco; «Calificaciones» (antes «Notas») va aparte; el buscador, a la derecha del logo.
+  - El Círculo abre sus dos y tres columnas desde 768 px (antes 1.024).
+  - Sectores (galería BDVMVDSF63U1KGL) se agrupa por la columna «Pata», en el orden del arco; el grupo «Sin pata» (las herramientas) queda oculto.

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layers, LayoutGrid, Map as IconoMapa, Orbit } from 'lucide-react';
+import { Layers, LayoutGrid, Map as IconoMapa } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,12 +21,13 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulo2';
-const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulo2'];
+export type Vista = 'tabla' | 'mapa' | 'circulos';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos'];
 // Las direcciones de las vistas de círculos retiradas (2026-10-28) llevan a la que queda.
-const ANTIGUAS: Record<string, Vista> = { circulos2: 'circulos', circulos3: 'circulos', circulos4: 'circulos', circulos5: 'circulos' };
+// Desde el 2026-10-28 (Eugenio: «elimina el Círculo 1.0») «circulos» es el antiguo Círculo 2.0, y `circulo2` lleva a él.
+const ANTIGUAS: Record<string, Vista> = { circulos2: 'circulos', circulos3: 'circulos', circulos4: 'circulos', circulos5: 'circulos', circulo2: 'circulos' };
 /** Las vistas que eligen el territorio en su título: sin ellas, la segunda fila de la barra (2026-10-28). */
-export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos', 'circulo2'];
+export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos'];
 
 /** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
  *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
@@ -58,8 +59,6 @@ export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
 // por "Sectores"»): tres vistas, juntas; el menú plegado de cuando había seis ya no hace falta.
 const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'circulos', texto: 'Círculo', Icono: Layers },
-  // Círculo 2.0 (2026-10-28): el mismo arco con el sector y sus objetivos en la misma página (`VistaCirculo2Sitio.tsx`).
-  { v: 'circulo2', texto: 'Círculo 2.0', Icono: Orbit },
   { v: 'tabla', texto: 'Sectores', Icono: LayoutGrid },
   { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
 ];
@@ -70,14 +69,14 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
 export function BotonVista({ porDefecto = 'tabla' }: { porDefecto?: Vista }) {
   const [vista, cambiar] = useVista(porDefecto);
   return (
-    <div role="group" aria-label="Vista" data-boton-vista className="ml-1 inline-flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-slate-100 p-0.5">
+    // Solo los iconos (2026-10-28, Eugenio: «las vistas solo con los iconos, sin las palabras»); el nombre, en el título.
+    <div role="group" aria-label="Vista" data-boton-vista className="inline-flex h-10 shrink-0 items-center gap-0.5 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
       {VISTAS.map(({ v, texto, Icono }) => (
         <button key={v} type="button" onClick={() => cambiar(v)} title={`Ver ${texto.toLowerCase()}`} aria-label={`Ver ${texto.toLowerCase()}`}
           aria-pressed={vista === v} data-vista={v}
-          className={cn('inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-bold transition-colors',
-            vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white hover:text-slate-900')}>
-          <Icono className="h-4 w-4" />
-          <span className="hidden whitespace-nowrap sm:inline">{texto}</span>
+          className={cn('grid h-8 w-10 place-items-center rounded-full transition-colors',
+            vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}>
+          <Icono className="h-[18px] w-[18px]" />
         </button>
       ))}
     </div>
