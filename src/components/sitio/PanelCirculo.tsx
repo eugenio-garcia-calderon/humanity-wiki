@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import ElegirTerritorio, { guardarTerritorio, territorioGuardado, useTerritorios } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
 import { useSitio } from './ContextoSitio';
-import { armarCirculos, columnaTerritorio, leerSistemas, type Circulo } from './circulosDatos';
+import { armarCirculos, columnaTerritorio, leerSistemas, type Circulo, type Sistema } from './circulosDatos';
 import NotaCirculo from './NotaCirculo';
 
 // ============================================================================
@@ -60,20 +60,27 @@ export function useCirculoElegido(circulos: Circulo[] | null, ancla: string) {
   return { elegido, ver, elegir };
 }
 
-export function PanelCirculo({ c, t, compacto = false, ancla }: {
+export function PanelCirculo({ c, t, compacto = false, ancla, alElegir, elegidoId = null, estrecho = false }: {
   c: Circulo; t: ReturnType<typeof useCirculosTerritorio>;
   /** Las tarjetas encogen la imagen con el alto de la ventana para que quepan sin bajar. */
   compacto?: boolean;
   /** El atributo con el que se marca la sección (para bajar hasta ella en el móvil). */
   ancla: string;
+  /** Círculo 2.0: pinchar una tarjeta la elige aquí mismo en vez de abrir su página. */
+  alElegir?: (s: Sistema) => void;
+  /** La tarjeta elegida (Círculo 2.0), marcada con el azul de las ilustraciones. */
+  elegidoId?: string | null;
+  /** En una columna estrecha (el centro de Círculo 2.0): como mucho tres columnas y el título más pequeño. */
+  estrecho?: boolean;
 }) {
   const sitio = useSitio();
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
-  const cols = c.sistemas.length > 9 ? 4 : c.sistemas.length > 4 ? 3 : 2;
+  const n = c.sistemas.length;
+  const cols = estrecho ? (n > 6 ? 3 : 2) : n > 9 ? 4 : n > 4 ? 3 : 2;
   return (
     <section aria-live="polite" {...{ [ancla]: c.clave }}>
       <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-2">
-        <h2 className="text-3xl font-black tracking-tight text-slate-900">{c.nombre} <span className="font-bold text-slate-500">en</span></h2>
+        <h2 className={`${estrecho ? 'text-2xl' : 'text-3xl'} font-black tracking-tight text-slate-900`}>{c.nombre} <span className="font-bold text-slate-500">en</span></h2>
         {t.conTerritorio
           ? <ElegirTerritorio segmento alinear="izquierda" opciones={t.opciones} conDatos={t.conDatos} elegido={t.territorio} onElegir={t.elegirTerritorio} />
           : <span className="text-3xl font-black tracking-tight text-slate-900">{t.nombreTerritorio}</span>}
@@ -86,8 +93,8 @@ export function PanelCirculo({ c, t, compacto = false, ancla }: {
         style={{ ['--filas' as string]: Math.ceil(c.sistemas.length / cols) }}>
         {c.sistemas.map(s => (
           <li key={s.id}>
-            <Link to={enlace(s.id)} onClick={() => window.scrollTo(0, 0)} data-sistema-panel
-              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg">
+            <Link to={enlace(s.id)} onClick={e => { if (alElegir) { e.preventDefault(); alElegir(s); return; } window.scrollTo(0, 0); }} data-sistema-panel aria-current={elegidoId === s.id || undefined}
+              className={`group flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition hover:-translate-y-0.5 hover:shadow-lg ${elegidoId === s.id ? 'border-[#3b82c4] ring-2 ring-[#3b82c4]' : 'border-slate-200 hover:border-slate-300'}`}>
               <span className={`relative block aspect-[2/1] w-full bg-slate-50 ${compacto ? 'lg:aspect-auto lg:h-[clamp(64px,calc((100dvh-300px)/var(--filas)-70px),170px)]' : ''}`}>
                 {s.imagen && <img src={miniatura(s.imagen, 380)} alt="" className="absolute inset-0 h-full w-full object-contain p-2" />}
               </span>
