@@ -17,9 +17,10 @@ type Tam = 'barra' | 'pequena' | 'tarjeta' | 'grande';
 // Tamaños en píxeles y en estilo propio (no en clases): dentro de una tarjeta, las clases de letra de quien la
 // contiene podían ganar a las suyas y «sobre 10» salía más grande, pegado al aro.
 const MEDIDAS: Record<Tam, { lado: number; aro: number; cifra: number; sobre: number; etiqueta: number }> = {
-  barra: { lado: 46, aro: 3, cifra: 17, sobre: 8, etiqueta: 0 },
-  pequena: { lado: 54, aro: 3, cifra: 20, sobre: 8.5, etiqueta: 0 },
-  tarjeta: { lado: 66, aro: 4, cifra: 25, sobre: 9.5, etiqueta: 0 },
+  // «sobre 10» cae donde el círculo ya se estrecha: el lado deja holgura para que no roce el aro.
+  barra: { lado: 54, aro: 3, cifra: 18, sobre: 7.5, etiqueta: 0 },
+  pequena: { lado: 60, aro: 3, cifra: 20, sobre: 8, etiqueta: 0 },
+  tarjeta: { lado: 72, aro: 4, cifra: 25, sobre: 9.5, etiqueta: 0 },
   grande: { lado: 120, aro: 5, cifra: 42, sobre: 13, etiqueta: 14 },
 };
 
