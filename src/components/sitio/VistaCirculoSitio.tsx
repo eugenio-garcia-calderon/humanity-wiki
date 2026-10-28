@@ -23,8 +23,8 @@ export default function VistaCirculoSitio({ raizId }: { raizId: string }) {
   if (!circulos.length) return <div className="py-24 text-center text-slate-500">Los sistemas aún no tienen pata: añade a su base de datos una columna de selección «Pata».</div>;
   const c = circulos[Math.min(elegido, circulos.length - 1)];
   return (
-    <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] items-start gap-6 pt-1 lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] lg:gap-10" data-vista-circulo>
-      <div className="mx-auto w-full max-w-[520px] lg:sticky lg:top-24 lg:mx-0">
+    <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] items-start gap-6 pt-1 lg:grid-cols-[minmax(0,10fr)_minmax(0,11fr)] lg:gap-10" data-vista-circulo>
+      <div className="mx-auto w-full max-w-[580px] lg:sticky lg:top-24 lg:mx-0">
         <Arco circulos={circulos} elegido={elegido} elegir={elegir} ver={ver} dibujoDe={dibujoPata} />
       </div>
       <PanelCirculo c={c} t={t} compacto ancla="data-circulo-elegido" />

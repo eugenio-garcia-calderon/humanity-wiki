@@ -22,5 +22,5 @@ export function Union() {
 
 /** La nota al final del eslabón: en su círculo blanco con el aro de su color (2026-10-28, `NotaCirculo`). */
 export function NotaEslabon({ nota, titulo }: { nota: number; titulo?: string }) {
-  return <span data-nota-barra className="ml-1 inline-flex"><NotaCirculo nota={nota} tam="barra" titulo={titulo} /></span>;
+  return <span data-nota-barra data-calificacion className="ml-1 inline-flex"><NotaCirculo nota={nota} tam="barra" titulo={titulo} /></span>;
 }

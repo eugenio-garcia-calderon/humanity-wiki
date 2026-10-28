@@ -6,6 +6,7 @@ import { tonosDeNota, textoNota, textoSobre, colorDeNota } from '../../../utils/
 import { useSitio } from '../../sitio/ContextoSitio';
 import { createPortal } from 'react-dom';
 import NotaCirculo from '../../sitio/NotaCirculo';
+import { useCalificacionesOcultas } from '../../../utils/calificaciones';
 import { Eslabon, Union, NotaEslabon } from '../../sitio/Eslabon';
 import { PasoRuta, type OpcionRuta } from '../../sitio/PasoRuta';
 import { cn } from '../../../utils/cn';
@@ -373,6 +374,7 @@ export type EdicionCabecera = {
 export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, unknown>; paginaId?: string }) {
   const comoCabecera = d.comoCabecera === true;
   const edicion = (d.edicion || null) as EdicionCabecera | null;
+  const califOcultas = useCalificacionesOcultas();
   const [x, setX] = useState<Datos | null | 'fallo'>(null);
   const [elegido, setElegido] = useState<number | null>(null);
   const [encima, setEncima] = useState<number | null>(null);
@@ -509,7 +511,8 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     const ocultar: string[] = [];
     if (objetivos?.length) { lista.push({ id: 'objetivos', titulo: 'Objetivos', n: objetivos.length, contenido: <PanelObjetivos objetivos={objetivos} /> }); ocultar.push('objetivos'); }
     if (indicadores?.length) { lista.push({ id: 'indicadores', titulo: 'Indicadores', n: indicadores.length, contenido: <PanelIndicadores indicadores={indicadores} territorio={territorioNombre} /> }); ocultar.push('indicadores'); }
-    if (medidas.length && nivelActual !== null) lista.push({
+    // El salto de nivel es parte de la calificación: con las calificaciones ocultas, fuera (2026-10-28).
+    if (medidas.length && nivelActual !== null && !califOcultas) lista.push({
       id: 'salto', titulo: `Salto ${nivelActual}→${nivelActual + 1}`,
       contenido: <div className="max-w-3xl"><Salto desde={x.niveles.find(v => v.nivel === nivelActual) || { nivel: nivelActual, titulo: '' }}
         hasta={x.niveles.find(v => v.nivel === nivelActual + 1) || { nivel: nivelActual + 1, titulo: '' }} medidas={medidas} /></div>,
@@ -518,7 +521,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
     if (fallosTexto.length || cuenta(fallos)) lista.push({ id: 'diagnostico', titulo: 'Diagnóstico', n: fallosTexto.length + cuenta(fallos), contenido: <PanelDiagnostico fallos={fallosTexto} grupos={fallos} territorio={territorioNombre} /> });
     if (cuenta(mejoras)) lista.push({ id: 'plan', titulo: 'Plan', n: cuenta(mejoras), contenido: <div className="max-w-3xl"><p className="mb-3 text-sm text-slate-600">Las mejoras propuestas, sus líneas de trabajo y los puntos concretos.</p><Grupos grupos={mejoras} /></div> });
     ponerPestanasExtra(paginaId, lista, ocultar);
-  }, [paginaId, x, sinNota, nivelActual, medidas, territorioNombre, objetivos, indicadores]);
+  }, [paginaId, x, sinNota, nivelActual, medidas, territorioNombre, objetivos, indicadores, califOcultas]);
   useEffect(() => () => { if (paginaId) quitarPestanasExtra(paginaId); }, [paginaId]);
 
   if (!paginaId) return <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-xs font-bold text-slate-400">El termómetro va en la página de un sistema.</p>;
@@ -595,7 +598,7 @@ export function VistaTermometro({ datos: d, paginaId }: { datos: Record<string, 
           a un lado; en el medio el nivel y la barra; a la derecha la nota en su círculo. */}
       {/* Sin la barra del sitio (una página fuera de un sitio), el título va aquí. */}
       {comoCabecera && !edicion && ranuras.mirado && !ranuras.ruta && <h1 className="text-center text-3xl font-black tracking-tight text-slate-900">{x.nombre}</h1>}
-      <section data-resumen-sistema className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:gap-8', !ranuras.ruta && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]')}>
+      <section data-resumen-sistema data-calificacion className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:gap-8', !ranuras.ruta && 'lg:grid-cols-[auto_minmax(0,1fr)_auto]')}>
         {/* Sin la barra del sitio (el editor), el territorio va aquí, a la izquierda. */}
         {!ranuras.ruta && <div className="col-start-1 row-start-1 flex lg:border-r lg:border-slate-100 lg:pr-6">
           {x.tabla_territorios && opciones.length > 0 && (

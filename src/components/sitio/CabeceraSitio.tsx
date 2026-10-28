@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
+import BotonCalificaciones from './BotonCalificaciones';
 import { BotonVista, useVista, VISTAS_CON_TERRITORIO, type Vista } from './VistaMapaSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
@@ -73,6 +74,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
         <div className="flex min-w-0 max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
           <BotonVista porDefecto={vistaInicial} />
           <BuscarBarra raizId={raizId} enLinea />
+          <BotonCalificaciones />
         </div>
       </div>}
       <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">

@@ -7,6 +7,9 @@ import { createRoot } from 'react-dom/client';
 import { Droplet, Wheat, Home, Heart, Users, Leaf, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { getColorForScore } from '../utils/scoreColor';
 import { textoNotaDePorcentaje, tonosDeNota, textoSobre } from '../utils/nota';
+import { useCalificacionesOcultas } from '../utils/calificaciones';
+// Con las calificaciones ocultas (2026-10-28, `utils/calificaciones.ts`), los territorios en un gris neutro, sin colores de nota.
+const SIN_CALIFICAR = '#dbe3ec';
 import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../utils/indicatorIcons';
 import { LEVEL_COLORS, LEVEL_LABELS } from '../utils/metricIcons';
@@ -65,7 +68,7 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
             const color = score != null ? getColorForScore(score) : '#94a3b8';
             return (
               <div key={indicator.id} className="flex flex-col items-center text-center">
-                <div
+                <div data-calificacion
                   className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[9px] leading-none shadow-sm"
                   style={{ backgroundColor: score != null ? color : '#cbd5e1', color: score != null ? textoSobre(color) : '#ffffff' }}
                 >
@@ -106,7 +109,7 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
         <span>{feature.name}</span>
         <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
           Media
-          <span className="text-sm font-black" style={{ color: objectives.overall != null ? tonosDeNota(objectives.overall / 10).tinta : '#94a3b8' }}>
+          <span data-calificacion className="text-sm font-black" style={{ color: objectives.overall != null ? tonosDeNota(objectives.overall / 10).tinta : '#94a3b8' }}>
             {objectives.overall != null ? textoNotaDePorcentaje(objectives.overall) : 'N/D'}
           </span>
         </div>
@@ -118,7 +121,7 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
           const color = hasData ? getColorForScore(item.score as number) : '#cbd5e1';
           return (
             <div key={item.key} className="flex flex-col items-center">
-              <div
+              <div data-calificacion
                 className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] leading-none shadow-sm"
                 style={{ backgroundColor: color, color: hasData ? textoSobre(color) : '#ffffff' }}
               >
@@ -158,6 +161,7 @@ function StationTooltip({ properties }: { properties: any }) {
 }
 
 export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, activeMetricId, limites, rellenoLimites }: HumanityMapProps) {
+  const ocultas = useCalificacionesOcultas();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [zoom, setZoom] = useState(2.4);
@@ -542,7 +546,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
             score = objs ? (objs[activeObjective] ?? 50) : 50;
             hasData = true;
           }
-          const fillColor = !hasData ? NO_DATA_COLOR : getColorForScore(score ?? 50);
+          const fillColor = ocultas ? SIN_CALIFICAR : !hasData ? NO_DATA_COLOR : getColorForScore(score ?? 50);
 
           const styledFeature = {
             ...feature,
@@ -623,7 +627,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
             hasData = score != null;
           }
           const isDrilledDown = !!activeMarkerId || !!activeIndicatorId;
-          const color = !hasData ? NO_DATA_COLOR : getColorForScore(score ?? 50);
+          const color = ocultas ? SIN_CALIFICAR : !hasData ? NO_DATA_COLOR : getColorForScore(score ?? 50);
 
           let finalColor = color;
           let dotBorder = 'border-white';
@@ -670,7 +674,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           scoreLabel.style.color = !hasData ? '#94a3b8' : finalColor === color ? tonosDeNota((score ?? 50) / 10).tinta : finalColor;
           // NOTA DEL 1 AL 10 (2026-10-25, Eugenio): el mapa calcula sobre 100 y lo dice sobre 10.
           scoreLabel.textContent = !hasData ? 'Sin datos' : textoNotaDePorcentaje(score);
-          el.appendChild(scoreLabel);
+          if (!ocultas) el.appendChild(scoreLabel);
 
           if (!isPolygon) {
             el.addEventListener('mouseenter', () => {
@@ -725,7 +729,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
 
     const timer = setTimeout(loadPostGISViewportData, 150);
     return () => clearTimeout(timer);
-  }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId]);
+  }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, ocultas]);
 
   // Load measurement-station markers (droplet+lens icon + risk-level label) for the active metric
   useEffect(() => {

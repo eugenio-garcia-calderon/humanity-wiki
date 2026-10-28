@@ -38,7 +38,7 @@ export default function NotaCirculo({ nota, tam = 'tarjeta', etiqueta, titulo, c
   const m = MEDIDAS[tam];
   const conEtiqueta = tam === 'grande' && !!etiqueta;
   return (
-    <span data-nota-circulo aria-label={`${titulo || etiqueta ? `${titulo || etiqueta}: ` : ''}${textoNota(nota)} sobre 10`}
+    <span data-nota-circulo data-calificacion aria-label={`${titulo || etiqueta ? `${titulo || etiqueta}: ` : ''}${textoNota(nota)} sobre 10`}
       className={cn('relative inline-flex shrink-0 flex-col items-center justify-center rounded-full bg-white text-center tabular-nums leading-none shadow-[0_2px_6px_-2px_rgba(15,23,42,0.18)]', className)}
       style={{ width: m.lado, height: m.lado, border: `${m.aro}px solid ${colorDeNota(nota)}` }}>
       {conEtiqueta && <span className="block max-w-[85%] truncate font-bold text-slate-600" style={{ fontSize: m.etiqueta, lineHeight: 1, marginBottom: 4 }}>{etiqueta}</span>}
