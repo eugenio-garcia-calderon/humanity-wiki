@@ -10110,3 +10110,11 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Debajo, pestañas fijas (Proyectos, Soluciones, Indicadores, Personas, Publicaciones y otras relaciones). Su barra se pega bajo la cabecera y lleva delante la ruta rama › sector › objetivo cuando los bloques salen de la vista.
   - El territorio, en la barra (`data-ranura-territorio-barra`, portal desde `VistaCirculo2Sitio`). La cabecera pasa de rejilla a fila flexible para no pisarse.
   - Datos de producción: la opción de Pata «Técnica» pasa a «Tecnología»; Relaciones interpersonales → Relaciones, Potencial humano → Potencial y Materias Primas → Materiales. Copias en ~/copias-manuales/*-2026-10-28.
+- (Mismo día) Sectores, categorías y temáticas (Eugenio: «como máximo 6 tarjetas por sector y 6 temáticas por categoría; unifica; los indicadores pasan a llamarse temáticas; más pequeño el menú de arriba para ver el contenido de abajo»):
+  - Datos de producción (`scratchpad/reorg/generar.py`, copia en ~/copias-manuales/reorg-*-2026-10-28.tsv):
+    - Cada sector tiene 6 categorías. Relaciones pasa a Sociedad y Ciencia a Naturaleza.
+    - Psicología, Somática y Potencial pasan a ser temáticas de Conciencia; Física, Matemáticas, Biología, Química, Geología y Astronomía, temáticas de Ciencia.
+    - Se borran Biodiversidad, Ecosistemas, Geología (suelos), Fiscalidad y Automatización como categorías: ya están como temáticas.
+    - Las 216 temáticas se unen en 152: la que sobrevive se queda con los indicadores, proyectos y descripción de las otras, y con la nota media. Otras pasan de categoría (las de Economía, a Trabajo, Empresas, Finanzas y Consumo; Clima, Sequías e Inundaciones, a Climatología…).
+    - Renombrados: la columna «Pata» → «Sector», «Objetivos» → «Temáticas» y la tabla «Objetivos de los Sistemas» → «Temáticas».
+  - El Círculo acepta los dos nombres de cada columna. Rotula «Temáticas», mide un 36 % de la pantalla (antes el 50 %) y el botón de la galería se llama «Categorías».

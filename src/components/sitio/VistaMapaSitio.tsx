@@ -59,7 +59,7 @@ export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
 // por "Sectores"»): tres vistas, juntas; el menú plegado de cuando había seis ya no hace falta.
 const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'circulos', texto: 'Círculo', Icono: Layers },
-  { v: 'tabla', texto: 'Sectores', Icono: LayoutGrid },
+  { v: 'tabla', texto: 'Categorías', Icono: LayoutGrid },
   { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
 ];
 
