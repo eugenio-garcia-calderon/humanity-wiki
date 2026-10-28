@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layers, LayoutGrid, Map as IconoMapa } from 'lucide-react';
+import { Layers, LayoutGrid, Map as IconoMapa, Orbit } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,12 +21,12 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos';
-const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos'];
+export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulo2';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulo2'];
 // Las direcciones de las vistas de círculos retiradas (2026-10-28) llevan a la que queda.
 const ANTIGUAS: Record<string, Vista> = { circulos2: 'circulos', circulos3: 'circulos', circulos4: 'circulos', circulos5: 'circulos' };
 /** Las vistas que eligen el territorio en su título: sin ellas, la segunda fila de la barra (2026-10-28). */
-export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos'];
+export const VISTAS_CON_TERRITORIO: Vista[] = ['circulos', 'circulo2'];
 
 /** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
  *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
@@ -58,6 +58,8 @@ export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
 // por "Sectores"»): tres vistas, juntas; el menú plegado de cuando había seis ya no hace falta.
 const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'circulos', texto: 'Círculo', Icono: Layers },
+  // Círculo 2.0 (2026-10-28): el mismo arco con el sector y sus objetivos en la misma página (`VistaCirculo2Sitio.tsx`).
+  { v: 'circulo2', texto: 'Círculo 2.0', Icono: Orbit },
   { v: 'tabla', texto: 'Sectores', Icono: LayoutGrid },
   { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
 ];

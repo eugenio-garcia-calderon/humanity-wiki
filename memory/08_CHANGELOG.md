@@ -10084,3 +10084,12 @@ Eugenio: «permite añadir imágenes al feedback, quita el mensaje de "Sin cuent
 - `utils/calificaciones.ts`: ocultas salvo que la persona haya pedido verlas en este navegador. `NotaCirculo` importa el interruptor para que no parpadeen. `BotonCalificaciones`: el ojo y «Notas», pequeño; la frase entera va en el título.
 - `VistaCirculoSitio.tsx`: la rama «naturaleza» usa la ilustración de siempre. Datos (SQL, tras el despliegue): «Ecosistema» pasa a «Naturaleza» y se añaden los sectores Física, Matemáticas, Biología, Química, Geología y Astronomía (portadas en `sistemas_nuevos.py`).
 - (Mismo día) `PanelCirculo`: con más de nueve sectores, cuatro columnas y letra más pequeña. Naturaleza tiene 14 (Ecología, Agua, Materias Primas, Biodiversidad, Clima, Suelos, Ecosistemas, Residuos, Física, Matemáticas, Biología, Química, Geología, Astronomía).
+
+## 2026-10-28 · Vista «Círculo 2.0»: arco, ramas y el sector elegido en la misma página (Programador 8)
+Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el centro, y al pinchar un sector (Economía → Finanzas) que en vez de abrir su página me abra sus indicadores aquí, en el lateral derecho; y si pincho, por ejemplo, en Salud mental, debajo sus proyectos, personas, herramientas… sin llevarme a otra página».
+- `VistaCirculo2Sitio.tsx` (`?vista=circulo2`, «Círculo 2.0» en el selector):
+  - A todo lo ancho de la ventana, con tres columnas: el arco a la izquierda, el panel de la rama en el centro (`PanelCirculo` con `estrecho` y `alElegir`) y, al elegir un sector, su bloque a la derecha con sus objetivos.
+  - Al elegir un objetivo, debajo y a todo lo ancho salen sus relaciones (indicadores, proyectos, personas, herramientas…). Si no hay ninguno elegido, salen las del sector. Llevan un enlace para abrir su página.
+  - Las relaciones vienen de `GET /api/bd/paginas/:id/red`, una vez por visita. Las notas de los objetivos salen de la base de datos de Objetivos.
+  - Lo elegido va en `?sector=` y `?bloque=`.
+- `PanelCirculo`: `alElegir`, `elegidoId` (borde azul) y `estrecho` (como mucho tres columnas).
