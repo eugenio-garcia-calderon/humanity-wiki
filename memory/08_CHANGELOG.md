@@ -10154,3 +10154,8 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
 - La pirámide pasa a la estructura de seis niveles de Eugenio (mismo día: «no lo hagas con las categorías anteriores, sino con esta estructura»): Supervivencia, Seguridad, Comunidad, Autonomía, Conocimiento y Trascendencia (`NIVELES`).
   - Fuera de cada nivel: su necesidad y sus temáticas. Las que empiezan por el nombre de una categoría nuestra van en negrita y la abren en la vista Círculo.
   - Cara izquierda: el dibujo de una categoría afín. Cara derecha: el nombre del nivel.
+- La pirámide, más elegante (mismo día, con la infografía de 20minutos como modelo). Se ve de frente, con la cara izquierda en sombra.
+  - Un solo azul, en degradado del hondo de abajo al casi blanco de la cúspide.
+  - Rayas blancas finas entre pisos, sin bordes de tinta y sin dibujos.
+  - Número en un círculo blanco. Cinta clara hacia la derecha con el título grande en mayúsculas.
+  - La necesidad y las temáticas aparecen solo al pasar el ratón o al pinchar el piso; los demás pisos se apagan. En el móvil, un acordeón.
