@@ -69,6 +69,7 @@ export function PanelCirculo({ c, t, compacto = false, ancla }: {
 }) {
   const sitio = useSitio();
   const enlace = (id: string) => (sitio ? sitio.enlacePagina(id) : `/p/${id}`);
+  const cols = c.sistemas.length > 9 ? 4 : c.sistemas.length > 4 ? 3 : 2;
   return (
     <section aria-live="polite" {...{ [ancla]: c.clave }}>
       <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-2">
@@ -79,10 +80,10 @@ export function PanelCirculo({ c, t, compacto = false, ancla }: {
         {c.nota != null && <NotaCirculo nota={Math.round(c.nota * 10) / 10} tam="pequena" titulo={`${c.nombre} en ${t.nombreTerritorio}`} />}
       </div>
       {c.nota == null && <p className="-mt-2 mb-3 text-sm font-semibold text-slate-500">Todavía no hay notas para {t.nombreTerritorio}.</p>}
-      {/* Con más de cuatro sistemas, tres columnas; la imagen se encoge según las filas que haya, para que se vean
+      {/* Con más de cuatro sistemas, tres columnas, y con más de nueve, cuatro (Naturaleza tiene 14); la imagen se encoge según las filas que haya, para que se vean
           todas sin bajar. */}
-      <ul className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${c.sistemas.length > 4 ? 'lg:grid-cols-3' : ''}`}
-        style={{ ['--filas' as string]: Math.ceil(c.sistemas.length / (c.sistemas.length > 4 ? 3 : 2)) }}>
+      <ul className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${cols === 4 ? 'lg:grid-cols-4' : cols === 3 ? 'lg:grid-cols-3' : ''}`}
+        style={{ ['--filas' as string]: Math.ceil(c.sistemas.length / cols) }}>
         {c.sistemas.map(s => (
           <li key={s.id}>
             <Link to={enlace(s.id)} onClick={() => window.scrollTo(0, 0)} data-sistema-panel
@@ -92,7 +93,7 @@ export function PanelCirculo({ c, t, compacto = false, ancla }: {
               </span>
               <span className="flex items-center justify-between gap-3 px-4 py-1.5">
                 {/* Las palabras largas («Telecomunicaciones») se parten por sílabas antes que empujar la nota fuera. */}
-                <span lang="es" className={`min-w-0 hyphens-auto font-extrabold leading-tight text-slate-900 ${c.sistemas.length > 4 ? 'text-base' : 'text-lg'}`}>{s.titulo}</span>
+                <span lang="es" className={`min-w-0 hyphens-auto font-extrabold leading-tight text-slate-900 ${cols === 4 ? 'text-sm' : cols === 3 ? 'text-base' : 'text-lg'}`}>{s.titulo}</span>
                 {s.nota != null && <NotaCirculo nota={s.nota} tam="barra" titulo={s.titulo} />}
               </span>
             </Link>
