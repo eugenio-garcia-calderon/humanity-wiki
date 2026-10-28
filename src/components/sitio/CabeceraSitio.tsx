@@ -50,13 +50,15 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
     // DE BORDE A BORDE Y EN TRES PARTES (2026-10-26, Eugenio: «Luz & Humanidad mucho más a la izquierda; en el
     // centro, bien grande, una sola pastilla con la vista, el territorio y el sistema; el resto, secundario y más
     // pequeño en los laterales; el menú, solo las tres rayas a la derecha del todo y la foto a su izquierda»).
-    <header data-cabecera-sitio className="sticky top-0 z-40 mb-4 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:grid-cols-[1fr_auto_1fr] sm:px-6"
+    // EN FILA Y SIN PISARSE (2026-10-28): con el buscador y el territorio a la izquierda, la izquierda puede ser más ancha
+    // que la derecha; el selector de vista se centra en el hueco que queda en vez de en la ventana.
+    <header data-cabecera-sitio className="sticky top-0 z-40 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:flex-nowrap sm:px-6"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       {/* A todo lo ancho de la ventana, sin barra de desplazamiento de lado. */}
       <style>{'html { overflow-x: clip; }'}</style>
       {/* El logo, de tamaño fijo, con su eslogan debajo (un 10 % más pequeño, para que encaje bajo el nombre); y a su
           derecha, el buscador (2026-10-28, Eugenio: «la barra de buscar al lado del logo, a la izquierda»). */}
-      <div className="flex min-w-0 items-center gap-3 justify-self-start">
+      <div className="flex min-w-0 shrink items-center gap-3">
       <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
           // Un 15 % mayor (2026-10-26, Eugenio): el icono y el nombre; el eslogan, igual.
@@ -70,22 +72,25 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
         )}
       </Link>
       {!simple && <BuscarBarra raizId={raizId} enLinea />}
+      {/* El territorio de la vista Círculo, al lado del buscador (2026-10-28, Eugenio: «el selector de territorio,
+          arriba, al lado de la barra de buscar, y quítalo de las tarjetas»). Lo pone ahí `VistaCirculo2Sitio`. */}
+      {!simple && <div data-ranura-territorio-barra className="contents" />}
       </div>
       {/* EL CENTRO (2026-10-28, Eugenio: «las vistas solo con los iconos, fuera del marco del buscador; y lo de las
           calificaciones, también separado»): el selector de vista, solo iconos, y al lado, aparte, «Calificaciones».
           En el móvil, en una segunda línea a todo lo ancho. */}
-      {simple ? <span className="hidden sm:block" /> : <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center gap-2 max-sm:order-last sm:col-span-1">
+      {simple ? <span className="hidden flex-1 sm:block" /> : <div data-centro-barra className="flex min-w-0 items-center justify-center gap-2 max-sm:order-last max-sm:basis-full sm:flex-1">
         <BotonVista porDefecto={vistaInicial} />
         <BotonCalificaciones />
       </div>}
-      <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">
+      <div className="relative ml-auto flex min-w-0 shrink-0 items-center justify-end gap-1.5 sm:ml-0">
         {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
         <span data-hueco-cuenta="cabecera" className="contents" />
         {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu" /></Suspense>}
       </div>
       {/* LA RUTA, DEBAJO: el territorio y el sistema (o el objetivo), cada uno con su nota en su círculo. Los pone quien
           sabe (el termómetro o el filtro de la portada) en sus ranuras; sin nada dentro, la fila no se ve. */}
-      {!simple && <div data-ruta-barra className={`col-span-2 hidden justify-center max-sm:order-last sm:col-span-3 ${sinRuta ? '' : 'has-[[data-eslabon]]:flex'}`}>
+      {!simple && <div data-ruta-barra className={`hidden basis-full justify-center max-sm:order-last ${sinRuta ? '' : 'has-[[data-eslabon]]:flex'}`}>
         <div className="flex min-w-0 max-w-full items-center gap-1 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-1.5 shadow-sm">
           <div data-ranura-territorio className="contents" />
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>

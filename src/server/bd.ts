@@ -90,6 +90,8 @@ export type { Celda } from './bd/celdas';
  *  de datos está conectada una página, por grupos (una columna de relación = un
  *  grupo, una pestaña), con lo que hace falta para enseñarlas en galería. */
 export type EntradaRed = { fila_id: string; pagina_id: string | null; titulo: string; slug: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null;
+  /** (2026-10-28) Su «Nombre en la ruta», de una palabra, si su tabla tiene esa columna (los objetivos). */
+  corto?: string | null;
   /** (2026-10-22) Llega por un subtema: su nombre («Fotovoltaica»). Sin valor, es de la propia página. */
   via?: string | null };
 export type GrupoRed = { columna_id: string; nombre: string; slug: string; tabla_destino: string | null; tabla_titulo: string | null; entradas: EntradaRed[];
@@ -1564,9 +1566,11 @@ export function registerBdRoutes(app: Express, db: any) {
       const destino = c.destino;
       if (destino && 'error' in (await puedeConTabla(quien, destino, false))) continue;
       const filas = lista.length ? (await db.execute(sql`
-        SELECT id, pagina_id, COALESCE(oculta, false) AS oculta FROM bd_filas
+        SELECT id, pagina_id, valores, COALESCE(oculta, false) AS oculta FROM bd_filas
         WHERE id = ANY(string_to_array(${lista.map((x: any) => x.id).join(',')}, ',')) AND deleted_at IS NULL
       `)).rows as any[] : [];
+      // El nombre de una palabra de cada entrada (columna «Nombre en la ruta»), para las tarjetas pequeñas del Círculo.
+      const colCorto = destino && filas.length ? ((await columnasDe(destino)) as any[]).find(x => x.tipo === 'texto' && /nombre en la ruta/.test(String(x.nombre).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) : null;
       const porId = new Map(filas.filter(f => !f.oculta).map(f => [f.id, f]));
       const tarj = await tarjetasDe(filas.map(f => f.pagina_id).filter(Boolean));
       const t = destino ? (await db.execute(sql`SELECT titulo FROM bd_tablas WHERE id = ${destino}`)).rows[0] as any : null;
@@ -1583,7 +1587,8 @@ export function registerBdRoutes(app: Express, db: any) {
         let s = slugDe(titulo) || String(f.id).toLowerCase();
         while (vistos.has(s)) s += '-2';
         vistos.add(s);
-        entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null, via: a.via || null });
+        const corto = colCorto ? String(f.valores?.[colCorto.id] || '').trim() || null : null;
+        entradas.push({ fila_id: f.id, pagina_id: f.pagina_id || null, titulo, slug: s, imagen: k?.imagen || null, icono: k?.icono || null, resumen: k?.resumen || '', descripcion: k?.descripcion || null, via: a.via || null, corto });
       }
       const vistasRed = permisoTabla?.config?.vistasRed || {};
       if (entradas.length || conVacios) grupos.push({ columna_id: c.id, nombre: c.nombre, slug, tabla_destino: destino, tabla_titulo: t?.titulo || null, entradas, vinculo: c.vinculo, vista: vistasRed[c.id] ?? null });
