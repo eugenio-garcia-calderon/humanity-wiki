@@ -228,7 +228,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable, alDerecha =
       window.addEventListener('pointermove', mover); window.addEventListener('pointerup', soltarAncho);
     };
     return (
-      <div key={c.id}
+      <div key={c.id} data-calificacion={c.tipo === 'nota' ? '' : undefined /* la propiedad «Nota» entera se oculta con las calificaciones */}
         // ARRASTRAR PARA ORDENAR, COMO LOS BLOQUES (2026-10-18, Eugenio): en la
         // rejilla cae a la izquierda o a la derecha según la mitad de la casilla
         // sobre la que se suelte; en la lista, arriba o abajo.

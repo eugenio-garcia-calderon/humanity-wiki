@@ -273,7 +273,7 @@ export default function CeldaTabla({
     return (
       <div onClick={() => { if (puedeEditar) { setBorrador(valorParaEditar(celda, columna)); setEditando(true); } }}
         className={cn('flex items-center px-2 py-1.5 min-h-[38px]', enFicha ? 'justify-start' : 'justify-end', puedeEditar && 'cursor-text hover:bg-slate-50')} title={`Nota: ${texto} sobre 10`}>
-        <span className={cn('inline-flex items-baseline gap-0.5 rounded-full font-black tabular-nums', enFicha ? 'px-3 py-1 text-xl' : 'px-2.5 py-0.5 text-sm')}
+        <span data-calificacion className={cn('inline-flex items-baseline gap-0.5 rounded-full font-black tabular-nums', enFicha ? 'px-3 py-1 text-xl' : 'px-2.5 py-0.5 text-sm')}
           style={{ backgroundColor: t.fondo, color: t.tinta, boxShadow: `inset 0 0 0 1px ${t.borde}` }}>
           {texto}<span className="text-[0.6em] font-bold opacity-60">/10</span>
         </span>

@@ -111,3 +111,8 @@ html, body { overscroll-behavior-x: none; }
    (bot de UX, 2026-10-25: el buscador de territorios). */
 :is(.sitio-foco, .sitio-lectura) [data-sin-contorno]:focus-visible { outline: none; }
 
+
+/* MOSTRAR U OCULTAR LAS CALIFICACIONES (2026-10-28, `utils/calificaciones.ts`): con la clase en <html>, todo lo
+   marcado como calificación desaparece a la vez: las notas en su círculo, la de la barra, el recuadro del
+   termómetro con su escala de niveles, la propiedad «Nota» de las fichas y las notas del mapa. */
+.sin-calificaciones [data-calificacion] { display: none !important; }

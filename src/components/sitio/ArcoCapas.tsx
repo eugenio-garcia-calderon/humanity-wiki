@@ -12,8 +12,13 @@ import type { Circulo } from './circulosDatos';
 // línea, como las portadas) están en `public/circulos/<clave>.svg`; las genera
 // `portadas-ilustraciones/grupos.py`.
 
-const MEDIO = 28;          // medio ángulo del arco, en grados (56° en total, los «unos 60» que pidió Eugenio)
-const R0 = 200, R1 = 1000; // radio del borde de abajo de Personas y del de arriba de Ecología
+// EL CENTRO, LEJOS (2026-10-28, Eugenio: «que Humanología tenga el mismo tamaño que el resto; que el centro esté más
+// lejos de Humanología y así los anillos de abajo sean más grandes: una proporción mucho más igual entre el corte de
+// arriba y el de abajo»). Antes el centro estaba a 200 del borde de abajo y a 1.000 del de arriba: la capa de abajo
+// era cinco veces más estrecha que la de arriba y su nombre no cabía. Ahora, a 700 y 1.500, la diferencia es de
+// poco más del doble y todas las capas llevan la misma letra.
+const MEDIO = 20;          // medio ángulo del arco, en grados
+const R0 = 700, R1 = 1500; // radio del borde de abajo de la capa de dentro y del de arriba de la de fuera
 const PAD = 8;
 const ANCHO = 2 * R1 * Math.sin(MEDIO * Math.PI / 180) + 2 * PAD;
 const ALTO = R1 - R0 * Math.cos(MEDIO * Math.PI / 180) + 2 * PAD;
@@ -43,11 +48,12 @@ export function Arco({ circulos, elegido, elegir, ver, dibujoDe }: {
         const altoDibujo = grosor * 0.56, anchoDibujo = altoDibujo * 1.6;
         return (
           <g key={c.clave} role="button" tabIndex={0} aria-pressed={on} aria-label={c.nombre}
-            className="cursor-pointer outline-none [&:focus-visible>path]:stroke-slate-400"
+            className="cursor-pointer outline-none [&:focus-visible>path]:stroke-[#3b82c4]"
             onClick={() => elegir(i)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elegir(i); } }}
             onMouseEnter={() => { setEncima(i); ver(i); }} onMouseLeave={() => setEncima(null)} data-capa-c4={c.clave}>
+            {/* La elegida, blanca y con el borde del azul de las ilustraciones (2026-10-28, Eugenio). */}
             <path d={franja(r1, r2)} fill={on ? '#ffffff' : sobre ? '#e2e8f0' : i % 2 ? '#eef2f6' : '#f6f8fa'}
-              stroke={on ? '#0f172a' : '#ffffff'} strokeWidth={on ? 7 : 10} strokeLinejoin="round" style={{ transition: 'fill .15s ease' }} />
+              stroke={on ? '#3b82c4' : '#ffffff'} strokeWidth={on ? 8 : 10} strokeLinejoin="round" style={{ transition: 'fill .15s ease' }} />
             {dibujo && <image href={dibujo} x={CX - anchoDibujo / 2} y={y - grosor * 0.42} width={anchoDibujo} height={altoDibujo} preserveAspectRatio="xMidYMid meet" style={{ pointerEvents: 'none' }} />}
             {/* La letra, la que quepa en el ancho de la franja a esa altura (la de abajo es la más estrecha). */}
             <text x={CX} y={y + grosor * 0.36} textAnchor="middle" fontSize={Math.min(40, (2 * (rm - grosor * 0.36) * Math.sin(MEDIO * Math.PI / 180) * 0.86) / (c.nombre.length * 0.6))} fontWeight={800} fill={on ? '#0f172a' : '#334155'} style={{ pointerEvents: 'none' }}>{c.nombre}</text>
