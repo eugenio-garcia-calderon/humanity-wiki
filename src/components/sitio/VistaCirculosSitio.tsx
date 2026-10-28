@@ -19,7 +19,7 @@ import { raizDe } from './CabeceraSitio';
 // un sistema abre la página del sistema.
 
 const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const ICONOS: Record<string, string> = { personas: '🧍', hogar: '🏠', sociedad: '🏛', tecnologia: '⚙️', planeta: '🌍' };
+const ICONOS: Record<string, string> = { personas: '🧍', hogar: '🏠', sociedad: '🏛', tecnologia: '⚙️', planeta: '🌍', ecologia: '🌍' };
 // Un tono claro por anillo, del cálido del centro al verde del planeta.
 const TONOS = ['#fff4cc', '#fde7d3', '#ede7fb', '#e0ecfc', '#dff3e7', '#f1f5f9', '#fce7f3'];
 

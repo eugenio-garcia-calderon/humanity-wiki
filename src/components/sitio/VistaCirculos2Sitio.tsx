@@ -26,6 +26,7 @@ const DESCRIPCION: Record<string, string> = {
   sociedad: 'Cómo convivimos, decidimos y compartimos.',
   tecnologia: 'Lo que fabricamos, movemos y conectamos.',
   planeta: 'Lo que nos sostiene a todos.',
+  ecologia: 'Lo que nos sostiene a todos.',
 };
 
 const C = 500, R0 = 130, R1 = 494; // centro y radios del círculo del centro y del último

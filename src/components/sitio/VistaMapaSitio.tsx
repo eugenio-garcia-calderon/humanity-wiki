@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
+import { CircleDot, LayoutGrid, Map as IconoMapa, Orbit, Target } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,8 +21,8 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2';
-const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2'];
+export type Vista = 'tabla' | 'mapa' | 'circulos' | 'circulos2' | 'circulos3';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'circulos2', 'circulos3'];
 
 /** La vista del sitio, en la dirección: `?vista=tabla|mapa|circulos`. Sin nada, la de por defecto: la tabla o,
  *  en la portada de un sitio con `sitio.vistaInicial` (2026-10-27, Eugenio: «que por defecto la vista de
@@ -55,6 +55,7 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
   { v: 'circulos', texto: 'Círculos', Icono: Target },
   { v: 'circulos2', texto: 'Círculo 2.0', Icono: Orbit },
+  { v: 'circulos3', texto: 'Círculo 3.0', Icono: CircleDot },
 ];
 
 /** EL SELECTOR DE VISTA DE LA BARRA. Primero un botón que decía a dónde llevaba («Ver mapa» / «Ver tabla»,
