@@ -41,33 +41,57 @@ function medir(t: string, fuente: string) {
   return lienzo.measureText(t).width;
 }
 
+/** La base de datos de Sistemas del sitio (`sitio.sistemas`), leída una vez por visita. */
+const sistemasDe = new Map<string, Promise<any>>();
+export function leerSistemas(raizId: string): Promise<any> {
+  let p = sistemasDe.get(raizId);
+  if (!p) {
+    p = raizDe(raizId).then(r => {
+      const tabla = r?.config?.sitio?.sistemas;
+      return tabla ? fetch(`/api/bd/tablas/${encodeURIComponent(tabla)}?lectura=1`, { credentials: 'include' }).then(x => (x.ok ? x.json() : null)).catch(() => null) : null;
+    });
+    sistemasDe.set(raizId, p);
+  }
+  return p;
+}
+
+/** La relación de cada sistema con su territorio (la columna «Territorio»), si la hay. */
+export function columnaTerritorio(j: any): { id: string; tabla: string | null } | null {
+  const c = (j?.columnas || []).find((x: any) => x.tipo === 'relacion' && /^territorio/i.test(String(x.nombre).trim()));
+  return c ? { id: c.id, tabla: c.config?.tabla_destino || null } : null;
+}
+
+/** Los círculos con sus sistemas. Con `territorio`, solo las notas de ese territorio (2026-10-28, Círculo 3.0 y 4.0:
+ *  el territorio se elige en el título); si no tiene ninguna, los mismos sistemas sin nota. */
+export function armarCirculos(j: any, territorio?: string | null): Circulo[] {
+  const cols: any[] = j?.columnas || [];
+  const colCirculo = cols.find(c => c.tipo === 'seleccion' && /^c[ií]rculos?$/i.test(String(c.nombre).trim()));
+  const colNota = cols.find(c => c.tipo === 'nota');
+  const colT = columnaTerritorio(j);
+  if (!colCirculo) return [];
+  const lista: Circulo[] = (colCirculo.opciones || []).map((o: any, i: number) => {
+    const clave = plano(String(o.label || ''));
+    return { clave, nombre: String(o.label || ''), icono: ICONOS[clave] || '◯', tono: TONOS[i % TONOS.length], sistemas: [], nota: null, _id: o.id } as Circulo & { _id: string };
+  });
+  const filas = (j?.filas || []).filter((f: any) => !f.oculta && f.pagina_id && f.celdas?.[colCirculo.id]?.valor);
+  const deT = (f: any) => { const v = colT ? f.celdas?.[colT.id]?.valor : null; return Array.isArray(v) ? v.includes(territorio) : v === territorio; };
+  const suyas = territorio && colT ? filas.filter(deT) : filas;
+  const sinNota = !!territorio && !!colT && suyas.length === 0;
+  for (const f of sinNota ? filas : suyas) {
+    const c = lista.find(x => (x as any)._id === f.celdas[colCirculo.id].valor);
+    if (!c || c.sistemas.some(s => s.titulo === f.pagina?.titulo)) continue;
+    const n = colNota && !sinNota ? f.celdas?.[colNota.id]?.valor : null;
+    c.sistemas.push({ id: f.pagina_id, titulo: f.pagina?.titulo || 'Sin título', imagen: f.pagina?.imagen || null, descripcion: f.pagina?.descripcion || '', nota: typeof n === 'number' ? n : null });
+  }
+  for (const c of lista) c.nota = media(c.sistemas);
+  return lista.filter(c => c.sistemas.length);
+}
+
 export function useCirculos(raizId: string) {
   const [circulos, setCirculos] = useState<Circulo[] | null>(null);
   useEffect(() => {
     let vivo = true;
-    raizDe(raizId).then(async r => {
-      const tabla = r?.config?.sitio?.sistemas;
-      if (!tabla) { if (vivo) setCirculos([]); return; }
-      const j = await fetch(`/api/bd/tablas/${encodeURIComponent(tabla)}?lectura=1`, { credentials: 'include' }).then(x => (x.ok ? x.json() : null)).catch(() => null);
-      const cols: any[] = j?.columnas || [];
-      const colCirculo = cols.find(c => c.tipo === 'seleccion' && /^c[ií]rculos?$/i.test(String(c.nombre).trim()));
-      const colNota = cols.find(c => c.tipo === 'nota');
-      if (!colCirculo) { if (vivo) setCirculos([]); return; }
-      const lista: Circulo[] = (colCirculo.opciones || []).map((o: any, i: number) => {
-        const clave = plano(String(o.label || ''));
-        return { clave, nombre: String(o.label || ''), icono: ICONOS[clave] || '◯', tono: TONOS[i % TONOS.length], sistemas: [], nota: null, _id: o.id } as Circulo & { _id: string };
-      });
-      for (const f of j?.filas || []) {
-        if (f.oculta || !f.pagina_id) continue;
-        const v = f.celdas?.[colCirculo.id]?.valor;
-        const c = lista.find(x => (x as any)._id === v);
-        if (!c) continue;
-        const n = colNota ? f.celdas?.[colNota.id]?.valor : null;
-        c.sistemas.push({ id: f.pagina_id, titulo: f.pagina?.titulo || 'Sin título', imagen: f.pagina?.imagen || null, descripcion: f.pagina?.descripcion || '', nota: typeof n === 'number' ? n : null });
-      }
-      for (const c of lista) c.nota = media(c.sistemas);
-      if (vivo) setCirculos(lista.filter(c => c.sistemas.length));
-    });
+    leerSistemas(raizId).then(j => { if (vivo) setCirculos(j ? armarCirculos(j) : []); });
     return () => { vivo = false; };
   }, [raizId]);
   return circulos;
