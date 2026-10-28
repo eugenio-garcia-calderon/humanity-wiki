@@ -9989,3 +9989,8 @@ Eugenio: «una cuarta vista como la del círculo pero mucho más pro de UX, dise
 - `VistaCirculos2Sitio.tsx` (`?vista=circulos2`, botón «Círculo 2.0» en el selector de la barra): diagrama de anillos con una porción por sistema coloreada por su nota (escala de siempre, tintada), nombres sobre el arco, hueco de arriba con cada círculo y su media, y la nota media del territorio en el centro. Al pasar por una porción, ficha con portada, nota, comparación con su círculo y con el territorio, y los demás sistemas del círculo; selector horizontal de círculos; en el móvil, primer toque = ficha bajo el círculo, segundo = abrir. Página intermedia por círculo con minicírculo, tarjetas de sistemas y círculo anterior/siguiente.
 - Se dibuja compacto (solo notas) cuando el círculo mide menos de 540 px y cabe en ventanas de 650 px de alto.
 - Iterado con un bot evaluador (subagente) en 5 rondas: 6,1 → 7,4 → 7,9 → 8,2; Eugenio pidió publicarlo tal cual antes de llegar al 9.
+
+## 2026-10-28 · Círculo 2.0, rehecho en simple (Programador 8)
+Eugenio: «no se entiende, hazlo de nuevo, demasiado complejo».
+- `VistaCirculos2Sitio.tsx` reescrito con una sola idea: «elige un círculo y ves sus sistemas». A la izquierda, cinco círculos concéntricos con solo su nombre y su nota media (el elegido, más intenso y con borde); a la derecha, los sistemas de ese círculo en tarjetas grandes con ilustración y nota, que abren su página. El círculo elegido va en `?circulo=` (sin él, Personas); en el móvil, al elegir, baja hasta los sistemas.
+- Fuera el diagrama de porciones, la ficha al pasar, la cuña de rótulos, el selector y la página intermedia de la primera versión.
