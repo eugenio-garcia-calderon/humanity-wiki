@@ -117,19 +117,24 @@ function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
         : objetivos.length === 0 ? <p className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">{s.titulo} todavía no tiene temáticas. Debajo, lo que ya tiene enlazado.</p>
         : (
           <>
-            {/* Una palabra por objetivo (su «Nombre en la ruta»); el nombre entero, al pasar el ratón. */}
-            <ul className="grid min-h-0 grid-cols-2 content-start gap-2 overflow-y-auto pb-1 xl:grid-cols-3" data-objetivos-sector>
+            {/* Una palabra por temática (su «Nombre en la ruta»); el nombre entero, al pasar el ratón. TARJETAS GRANDES
+                (2026-10-28, Eugenio: «hay más hueco en el bloque 3 para hacer las tarjetas más grandes y visibles»): en
+                tres columnas y con filas iguales que llenan el alto del bloque, el dibujo arriba y la palabra debajo. */}
+            <ul className="grid min-h-0 flex-1 grid-cols-2 gap-2.5 md:grid-cols-3 md:[grid-template-rows:repeat(var(--filas),minmax(0,1fr))]"
+              style={{ ['--filas' as string]: Math.ceil(objetivos.length / 3) }} data-objetivos-sector>
               {objetivos.map(o => {
                 const on = bloque === o.pagina_id, nota = o.pagina_id ? notas.get(o.pagina_id) : undefined;
                 return (
-                  <li key={o.fila_id}>
+                  <li key={o.fila_id} className="min-h-0">
                     <button type="button" onClick={() => alElegir(o)} aria-pressed={on} data-objetivo-sector={o.titulo} title={o.titulo}
-                      className={`flex h-12 w-full items-center gap-2 rounded-xl border bg-white pr-2 text-left transition hover:shadow-md ${on ? 'border-[#3b82c4] ring-2 ring-[#3b82c4]' : bloque ? 'border-slate-200 opacity-70 hover:opacity-100' : 'border-slate-200 hover:border-slate-300'}`}>
-                      <span className="relative block h-full w-14 shrink-0 overflow-hidden rounded-l-xl bg-slate-50">
-                        {o.imagen ? <img src={miniatura(o.imagen, 120)} alt="" className="absolute inset-0 h-full w-full object-contain p-0.5" /> : o.icono ? <span className="grid h-full place-items-center text-xl">{o.icono}</span> : null}
+                      className={`flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${on ? 'border-[#3b82c4] ring-2 ring-[#3b82c4]' : bloque ? 'border-slate-200 opacity-70 hover:opacity-100' : 'border-slate-200 hover:border-slate-300'}`}>
+                      <span className="relative block w-full bg-slate-50 max-md:aspect-[2/1] md:min-h-[40px] md:flex-1">
+                        {o.imagen ? <img src={miniatura(o.imagen, 380)} alt="" className="absolute inset-0 h-full w-full object-contain p-2" /> : o.icono ? <span className="grid h-full place-items-center text-3xl">{o.icono}</span> : null}
                       </span>
-                      <span lang="es" className="min-w-0 flex-1 truncate text-[13px] font-bold leading-tight text-slate-900">{corto(o)}</span>
-                      {nota != null && <NotaCirculo nota={nota} tam="barra" titulo={o.titulo} className="scale-[0.7]" />}
+                      <span className="flex min-w-0 items-center justify-between gap-2 px-3 py-1.5">
+                        <span lang="es" className="min-w-0 truncate text-base font-extrabold leading-tight text-slate-900">{corto(o)}</span>
+                        {nota != null && <NotaCirculo nota={nota} tam="barra" titulo={o.titulo} />}
+                      </span>
                     </button>
                   </li>
                 );
