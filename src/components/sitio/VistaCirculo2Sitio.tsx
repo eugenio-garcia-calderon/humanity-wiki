@@ -9,7 +9,8 @@ import { leerSistemas, type Circulo, type Sistema } from './circulosDatos';
 import NotaCirculo from './NotaCirculo';
 
 // ============================================================================
-// CÍRCULO 2.0 — TRES BLOQUES EN LA MISMA PÁGINA (2026-10-28, Eugenio)
+// LA VISTA «CÍRCULO» — TRES BLOQUES EN LA MISMA PÁGINA (nació como Círculo 2.0, 2026-10-28, Eugenio;
+// el mismo día, «elimina el 1.0», y pasó a ser la vista «Círculo», `?vista=circulos`)
 // ============================================================================
 // «El arco con las cinco categorías todavía más a la izquierda y un poco más
 // pequeño; las ramas en el centro, un poco más pequeñas; y cuando pinche, por
@@ -208,15 +209,16 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
     const x = circulos[i];
     if (ramaPinchada && x.clave === q.get('circulo')) poner({ circulo: null, sector: null, bloque: null });
     else poner({ circulo: x.clave, sector: null, bloque: null });
-    if (window.innerWidth < 1024) setTimeout(() => document.querySelector('[data-circulo-elegido-c2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-circulo-elegido-c2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   };
-  const rejilla = paso === 2 ? 'lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)_minmax(0,7fr)] lg:gap-8'
-    : paso === 1 ? 'lg:grid-cols-[minmax(0,6fr)_minmax(0,9fr)] lg:gap-10' : '';
+  // Desde 768 px ya en columnas (en una ventana de 1.000 px se apilaban): con tres, el arco más estrecho hasta 1.280 px.
+  const rejilla = paso === 2 ? 'md:grid-cols-[minmax(0,3fr)_minmax(0,7fr)_minmax(0,7fr)] xl:grid-cols-[minmax(0,5fr)_minmax(0,8fr)_minmax(0,7fr)] md:gap-6 xl:gap-8'
+    : paso === 1 ? 'md:grid-cols-[minmax(0,6fr)_minmax(0,9fr)] md:gap-10' : '';
   return (
     // A todo lo ancho de la ventana (como el mapa): el arco pegado a la izquierda y sitio para los tres bloques.
     <div className="px-4 pt-1 sm:px-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }} data-vista-circulo2 data-paso={paso}>
       <div className={`grid grid-cols-[minmax(0,1fr)] items-start gap-6 ${rejilla}`}>
-        <div className={`mx-auto w-full lg:sticky lg:top-24 ${paso === 0 ? 'max-w-[680px]' : paso === 1 ? 'max-w-[560px] lg:mx-0' : 'max-w-[420px] lg:mx-0'}`}>
+        <div className={`mx-auto w-full md:sticky md:top-24 ${paso === 0 ? 'max-w-[680px]' : paso === 1 ? 'max-w-[560px] md:mx-0' : 'max-w-[420px] md:mx-0'}`}>
           {/* Sin nada pinchado, ninguna rama marcada (el ratón solo la ilumina). */}
           <Arco circulos={circulos} elegido={paso === 0 ? -1 : elegido} elegir={pincharRama} ver={ver} dibujoDe={dibujoPata} />
           {paso === 0 && <p className="mt-3 text-center text-sm font-semibold text-slate-500">Pincha una rama para ver sus sectores.</p>}
@@ -226,7 +228,7 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
             <PanelCirculo c={c} t={t} compacto estrecho={paso === 2} ancla="data-circulo-elegido-c2" elegidoId={sector?.s.id || null}
               alElegir={s => {
                 poner({ sector: s.id === sectorId ? null : s.id, bloque: null, circulo: c.clave });
-                if (window.innerWidth < 1024) setTimeout(() => document.querySelector('[data-bloque-sector]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+                if (window.innerWidth < 768) setTimeout(() => document.querySelector('[data-bloque-sector]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
               }} />
           </div>
         )}

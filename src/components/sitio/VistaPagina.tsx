@@ -18,7 +18,6 @@ import CabeceraSitio from './CabeceraSitio';
 import PestanasTitulos from './PestanasTitulos';
 import RutaRelaciones from './RutaRelaciones';
 import VistaMapaSitio, { useVista, vistaInicialDe } from './VistaMapaSitio';
-import VistaCirculoSitio from './VistaCirculoSitio';
 import VistaCirculo2Sitio from './VistaCirculo2Sitio';
 import BotonOpinion from './BotonOpinion';
 
@@ -141,10 +140,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const vistaInicial = esRaiz ? vistaInicialDe(pagina.sitio?.config) : 'tabla';
   const [vista] = useVista(vistaInicial);
   const mapa = conBarra && vista === 'mapa';
-  // LA VISTA «CÍRCULO» (2026-10-28, `VistaCirculoSitio.tsx`): las cuatro patas en un arco y sus sistemas al lado.
+  // LA VISTA «CÍRCULO» (2026-10-28, `VistaCirculo2Sitio.tsx`, el antiguo Círculo 2.0): el arco, la rama y el sector
+  // elegido con sus objetivos, que se abren según se pincha, sin cambiar de página.
   const circulos = conBarra && vista === 'circulos';
-  // CÍRCULO 2.0 (2026-10-28, `VistaCirculo2Sitio.tsx`): arco, ramas y el sector elegido con sus objetivos, sin cambiar de página.
-  const circulo2 = conBarra && vista === 'circulo2';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -187,9 +185,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {/* Saltar al contenido, para quien va con el teclado (bot de UX, ronda 3). */}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
       {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
-      {circulos && <VistaCirculoSitio raizId={pagina.sitio!.raizId} />}
-      {circulo2 && <VistaCirculo2Sitio raizId={pagina.sitio!.raizId} />}
-      <div hidden={mapa || circulos || circulo2 || undefined}>
+      {circulos && <VistaCirculo2Sitio raizId={pagina.sitio!.raizId} />}
+      <div hidden={mapa || circulos || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}

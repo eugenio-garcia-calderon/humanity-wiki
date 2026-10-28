@@ -54,8 +54,10 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       {/* A todo lo ancho de la ventana, sin barra de desplazamiento de lado. */}
       <style>{'html { overflow-x: clip; }'}</style>
-      {/* El logo, de tamaño fijo, con su eslogan debajo (un 10 % más pequeño, para que encaje bajo el nombre). */}
-      <Link to="/" className="flex min-w-0 items-center gap-2.5 justify-self-start" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
+      {/* El logo, de tamaño fijo, con su eslogan debajo (un 10 % más pequeño, para que encaje bajo el nombre); y a su
+          derecha, el buscador (2026-10-28, Eugenio: «la barra de buscar al lado del logo, a la izquierda»). */}
+      <div className="flex min-w-0 items-center gap-3 justify-self-start">
+      <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
           // Un 15 % mayor (2026-10-26, Eugenio): el icono y el nombre; el eslogan, igual.
           ? <img src={miniatura(icono, 112)} alt="" className="h-[51px] w-[51px] shrink-0 rounded-lg object-contain" />
@@ -67,15 +69,14 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           </span>
         )}
       </Link>
-      {/* EL CENTRO (2026-10-28, Eugenio: «el selector de tabla, mapa, círculos y la barra de buscar, centrados; y
-          debajo, el selector de país y el de sistema u objetivos»): arriba, la vista y el buscador; en el móvil, en
-          una segunda línea a todo lo ancho. */}
-      {simple ? <span className="hidden sm:block" /> : <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center max-sm:order-last sm:col-span-1">
-        <div className="flex min-w-0 max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-          <BotonVista porDefecto={vistaInicial} />
-          <BuscarBarra raizId={raizId} enLinea />
-          <BotonCalificaciones />
-        </div>
+      {!simple && <BuscarBarra raizId={raizId} enLinea />}
+      </div>
+      {/* EL CENTRO (2026-10-28, Eugenio: «las vistas solo con los iconos, fuera del marco del buscador; y lo de las
+          calificaciones, también separado»): el selector de vista, solo iconos, y al lado, aparte, «Calificaciones».
+          En el móvil, en una segunda línea a todo lo ancho. */}
+      {simple ? <span className="hidden sm:block" /> : <div data-centro-barra className="col-span-2 flex min-w-0 items-center justify-center gap-2 max-sm:order-last sm:col-span-1">
+        <BotonVista porDefecto={vistaInicial} />
+        <BotonCalificaciones />
       </div>}
       <div className="relative flex min-w-0 items-center justify-end gap-1.5 justify-self-end">
         {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
