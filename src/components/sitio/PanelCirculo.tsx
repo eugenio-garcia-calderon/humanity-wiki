@@ -20,7 +20,7 @@ import NotaCirculo from './NotaCirculo';
 // tarjetas»).
 
 /** Los círculos del sitio con las notas del territorio elegido, y el selector de ese territorio. */
-export function useCirculosTerritorio(raizId: string) {
+export function useCirculosTerritorio(raizId: string, columna?: RegExp) {
   const [j, setJ] = useState<any>(undefined);
   useEffect(() => { let vivo = true; leerSistemas(raizId).then(x => { if (vivo) setJ(x || null); }); return () => { vivo = false; }; }, [raizId]);
   const colT = j ? columnaTerritorio(j) : null;
@@ -35,7 +35,7 @@ export function useCirculosTerritorio(raizId: string) {
   useEffect(() => { if (defecto && !territorio) setTerritorio(territorioGuardado(defecto)); }, [defecto]); // eslint-disable-line react-hooks/exhaustive-deps
   const opciones = useTerritorios(colT?.tabla || null);
   const conDatos = useMemo(() => new Set(conNotas), [conNotas]);
-  const circulos = useMemo(() => (j === undefined ? null : j ? armarCirculos(j, colT ? territorio || defecto : null) : []), [j, colT, territorio, defecto]);
+  const circulos = useMemo(() => (j === undefined ? null : j ? armarCirculos(j, colT ? territorio || defecto : null, columna) : []), [j, colT, territorio, defecto]); // eslint-disable-line react-hooks/exhaustive-deps
   const elegirTerritorio = (id: string) => { setTerritorio(id); guardarTerritorio(id, defecto); };
   const nombreTerritorio = opciones.find(o => o.id === (territorio || defecto))?.nombre || 'España';
   return { circulos, territorio: territorio || defecto, nombreTerritorio, opciones, conDatos, elegirTerritorio, conTerritorio: !!colT && opciones.length > 0 };
@@ -79,16 +79,20 @@ export function PanelCirculo({ c, t, compacto = false, ancla }: {
         {c.nota != null && <NotaCirculo nota={Math.round(c.nota * 10) / 10} tam="pequena" titulo={`${c.nombre} en ${t.nombreTerritorio}`} />}
       </div>
       {c.nota == null && <p className="-mt-2 mb-3 text-sm font-semibold text-slate-500">Todavía no hay notas para {t.nombreTerritorio}.</p>}
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {/* Con más de cuatro sistemas, tres columnas; la imagen se encoge según las filas que haya, para que se vean
+          todas sin bajar. */}
+      <ul className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${c.sistemas.length > 4 ? 'lg:grid-cols-3' : ''}`}
+        style={{ ['--filas' as string]: Math.ceil(c.sistemas.length / (c.sistemas.length > 4 ? 3 : 2)) }}>
         {c.sistemas.map(s => (
           <li key={s.id}>
             <Link to={enlace(s.id)} onClick={() => window.scrollTo(0, 0)} data-sistema-panel
               className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg">
-              <span className={`relative block aspect-[2/1] w-full bg-slate-50 ${compacto ? 'lg:aspect-auto lg:h-[clamp(90px,calc((100dvh-380px)/2),170px)]' : ''}`}>
+              <span className={`relative block aspect-[2/1] w-full bg-slate-50 ${compacto ? 'lg:aspect-auto lg:h-[clamp(64px,calc((100dvh-300px)/var(--filas)-70px),170px)]' : ''}`}>
                 {s.imagen && <img src={miniatura(s.imagen, 380)} alt="" className="absolute inset-0 h-full w-full object-contain p-2" />}
               </span>
               <span className="flex items-center justify-between gap-3 px-4 py-1.5">
-                <span className="text-lg font-extrabold text-slate-900">{s.titulo}</span>
+                {/* Las palabras largas («Telecomunicaciones») se parten por sílabas antes que empujar la nota fuera. */}
+                <span lang="es" className={`min-w-0 hyphens-auto font-extrabold leading-tight text-slate-900 ${c.sistemas.length > 4 ? 'text-base' : 'text-lg'}`}>{s.titulo}</span>
                 {s.nota != null && <NotaCirculo nota={s.nota} tam="barra" titulo={s.titulo} />}
               </span>
             </Link>

@@ -14,7 +14,7 @@ import { PanelCirculo, useCirculoElegido, useCirculosTerritorio } from './PanelC
 // más arriba. Las ilustraciones (de una línea, como las portadas) están en
 // `public/circulos/<clave>.svg`; las genera `portadas-ilustraciones/grupos.py`.
 
-const MEDIO = 22;          // medio ángulo del arco, en grados (44° en total: más alto que ancho)
+const MEDIO = 28;          // medio ángulo del arco, en grados (56° en total, los «unos 60» que pidió Eugenio)
 const R0 = 200, R1 = 1000; // radio del borde de abajo de Personas y del de arriba de Ecología
 const PAD = 8;
 const ANCHO = 2 * R1 * Math.sin(MEDIO * Math.PI / 180) + 2 * PAD;
@@ -27,9 +27,13 @@ function franja(r1: number, r2: number) {
   return `M${f(x1)} ${f(y1)}A${r2} ${r2} 0 0 1 ${f(x2)} ${f(y2)}L${f(x3)} ${f(y3)}A${r1} ${r1} 0 0 0 ${f(x4)} ${f(y4)}Z`;
 }
 const ILUSTRADOS = new Set(['personas', 'hogar', 'sociedad', 'tecnologia', 'ecologia', 'planeta']);
+const dibujoCirculo = (clave: string) => (ILUSTRADOS.has(clave) ? `/circulos/${clave === 'planeta' ? 'ecologia' : clave}.svg` : null);
 
-/** El arco: una franja por círculo, de Personas (abajo) a Ecología (arriba), con su ilustración y su nombre. */
-function Arco({ circulos, elegido, elegir, ver }: { circulos: Circulo[]; elegido: number; elegir: (i: number) => void; ver: (i: number) => void }) {
+/** El arco: una franja por círculo, de Personas (abajo) a Ecología (arriba), con su ilustración y su nombre.
+ *  También lo usa Círculo 5.0, con sus cuatro patas y sus dibujos (`dibujoDe`). */
+export function Arco({ circulos, elegido, elegir, ver, dibujoDe = dibujoCirculo }: {
+  circulos: Circulo[]; elegido: number; elegir: (i: number) => void; ver: (i: number) => void; dibujoDe?: (clave: string) => string | null;
+}) {
   const [encima, setEncima] = useState<number | null>(null);
   const n = circulos.length, grosor = (R1 - R0) / n;
   return (
@@ -40,7 +44,7 @@ function Arco({ circulos, elegido, elegir, ver }: { circulos: Circulo[]; elegido
         const r1 = R0 + i * grosor, r2 = r1 + grosor, rm = (r1 + r2) / 2;
         const on = i === elegido, sobre = i === encima && !on;
         const y = CY - rm;
-        const dibujo = ILUSTRADOS.has(c.clave) ? `/circulos/${c.clave === 'planeta' ? 'ecologia' : c.clave}.svg` : null;
+        const dibujo = dibujoDe(c.clave);
         const altoDibujo = grosor * 0.56, anchoDibujo = altoDibujo * 1.6;
         return (
           <g key={c.clave} role="button" tabIndex={0} aria-pressed={on} aria-label={c.nombre}
@@ -50,7 +54,8 @@ function Arco({ circulos, elegido, elegir, ver }: { circulos: Circulo[]; elegido
             <path d={franja(r1, r2)} fill={on ? '#ffffff' : sobre ? '#e2e8f0' : i % 2 ? '#eef2f6' : '#f6f8fa'}
               stroke={on ? '#0f172a' : '#ffffff'} strokeWidth={on ? 7 : 10} strokeLinejoin="round" style={{ transition: 'fill .15s ease' }} />
             {dibujo && <image href={dibujo} x={CX - anchoDibujo / 2} y={y - grosor * 0.42} width={anchoDibujo} height={altoDibujo} preserveAspectRatio="xMidYMid meet" style={{ pointerEvents: 'none' }} />}
-            <text x={CX} y={y + grosor * 0.36} textAnchor="middle" fontSize={40} fontWeight={800} fill={on ? '#0f172a' : '#334155'} style={{ pointerEvents: 'none' }}>{c.nombre}</text>
+            {/* La letra, la que quepa en el ancho de la franja a esa altura (la de abajo es la más estrecha). */}
+            <text x={CX} y={y + grosor * 0.36} textAnchor="middle" fontSize={Math.min(40, (2 * (rm - grosor * 0.36) * Math.sin(MEDIO * Math.PI / 180) * 0.86) / (c.nombre.length * 0.6))} fontWeight={800} fill={on ? '#0f172a' : '#334155'} style={{ pointerEvents: 'none' }}>{c.nombre}</text>
           </g>
         );
       })}

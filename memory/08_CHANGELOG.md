@@ -10013,3 +10013,13 @@ Eugenio: «en el 3.0, si pincho un anillo, que luego al mover el ratón no se ha
 - `VistaCirculosSitio.tsx`: `leerSistemas` (una lectura por visita) y `armarCirculos(j, territorio)`, que toma solo las notas de las filas de ese territorio (columna «Territorio»); sin ninguna, los mismos sistemas sin nota.
 - `VistaCirculos4Sitio.tsx` (`?vista=circulos4`): un arco de 44° con el centro abajo; cada capa es una franja curva, Personas abajo y Ecología arriba, con su ilustración de una línea (`public/circulos/<clave>.svg`, de `portadas-ilustraciones/grupos.py`) y su nombre. La elegida, blanca con borde oscuro y dibujada la última.
 - Barra: el selector de vista es un menú plegado (la vista actual y una lista de seis); en Círculo 3.0 y 4.0 no se ve la segunda fila (territorio y nota global).
+
+## 2026-10-28 · Círculo 5.0: cuatro patas (Programador 8)
+Eugenio: «un círculo 5.0 con 4 patas: la humanología, la sociología, la tecnología y la ecología; en la humanología, lo de Personas, una tarjeta de Potencial humano y Relaciones, llamado Relaciones interpersonales; y Energía, en tecnología».
+- `VistaCirculos5Sitio.tsx` (`?vista=circulos5`, «Círculo 5.0» en el menú de vistas): el arco de la 4.0 (`Arco`, ahora exportado y con `dibujoDe`) con el reparto de la columna «Pata». `armarCirculos` y `useCirculosTerritorio` aceptan la columna que reparte.
+- Arco: 56° en vez de 44° (los «unos 60») y el nombre de cada capa con la letra que cabe en su franja. Tarjetas: tres columnas con más de cuatro sistemas y la imagen ajustada a las filas que haya; las palabras largas se parten por sílabas.
+- Datos (SQL, producción; copia en `~/copias-manuales/relaciones-antes-2026-10-28.tsv`):
+  - columna de selección «Pata» (BDCMVPATA00001) en Sistemas. Humanología: Alimentación, Salud, Vestimenta, Educación, Vivienda, Relaciones interpersonales y Potencial humano. Sociología: Convivencia, Cultura, Economía y Política. Tecnología: Informática, Telecomunicaciones, Movilidad, Fabricación y Energía. Ecología: Agua, Ecología y Materias Primas.
+  - sistema nuevo «Potencial humano» (página KWMVPOTHUM0001, fila BDFMVPOTHUM0001, territorio España, sin nota todavía), con portada `sistema-potencial-humano.svg`, de `grupos.py`.
+  - «Relaciones» pasa a llamarse «Relaciones interpersonales».
+- Vivienda se queda en Humanología: Eugenio no dijo dónde, y con Hogar desaparecido va con las demás necesidades básicas.

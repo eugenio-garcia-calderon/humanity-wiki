@@ -63,9 +63,10 @@ export function columnaTerritorio(j: any): { id: string; tabla: string | null } 
 
 /** Los círculos con sus sistemas. Con `territorio`, solo las notas de ese territorio (2026-10-28, Círculo 3.0 y 4.0:
  *  el territorio se elige en el título); si no tiene ninguna, los mismos sistemas sin nota. */
-export function armarCirculos(j: any, territorio?: string | null): Circulo[] {
+export function armarCirculos(j: any, territorio?: string | null, columna: RegExp = /^c[ií]rculos?$/i): Circulo[] {
   const cols: any[] = j?.columnas || [];
-  const colCirculo = cols.find(c => c.tipo === 'seleccion' && /^c[ií]rculos?$/i.test(String(c.nombre).trim()));
+  // La columna de selección que reparte los sistemas: «Círculo» (5 círculos) o, en Círculo 5.0, «Pata» (4 patas).
+  const colCirculo = cols.find(c => c.tipo === 'seleccion' && columna.test(String(c.nombre).trim()));
   const colNota = cols.find(c => c.tipo === 'nota');
   const colT = columnaTerritorio(j);
   if (!colCirculo) return [];

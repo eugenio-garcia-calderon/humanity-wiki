@@ -22,6 +22,7 @@ import VistaCirculosSitio from './VistaCirculosSitio';
 import VistaCirculos2Sitio from './VistaCirculos2Sitio';
 import VistaCirculos3Sitio from './VistaCirculos3Sitio';
 import VistaCirculos4Sitio from './VistaCirculos4Sitio';
+import VistaCirculos5Sitio from './VistaCirculos5Sitio';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -150,6 +151,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const circulos3 = conBarra && vista === 'circulos3';
   // CÍRCULO 4.0 (2026-10-28, `VistaCirculos4Sitio.tsx`): las capas en un arco, de Personas (abajo) a Ecología.
   const circulos4 = conBarra && vista === 'circulos4';
+  // CÍRCULO 5.0 (2026-10-28, `VistaCirculos5Sitio.tsx`): el mismo arco con cuatro patas (columna «Pata»).
+  const circulos5 = conBarra && vista === 'circulos5';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -196,7 +199,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {circulos2 && <VistaCirculos2Sitio raizId={pagina.sitio!.raizId} />}
       {circulos3 && <VistaCirculos3Sitio raizId={pagina.sitio!.raizId} />}
       {circulos4 && <VistaCirculos4Sitio raizId={pagina.sitio!.raizId} />}
-      <div hidden={mapa || circulos || circulos2 || circulos3 || circulos4 || undefined}>
+      {circulos5 && <VistaCirculos5Sitio raizId={pagina.sitio!.raizId} />}
+      <div hidden={mapa || circulos || circulos2 || circulos3 || circulos4 || circulos5 || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
