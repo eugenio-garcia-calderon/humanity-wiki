@@ -10142,3 +10142,12 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
 ## 2026-10-28 — Donar y perfil a la derecha; la temática elegida esconde las demás (Programador 8)
 - Cabecera: el menú ☰ sigue a la izquierda del todo; Donar y la cuenta pasan a la derecha del todo, después del buscador.
 - Vista Círculo: elegida una temática, desaparece su bloque (como la rama y la categoría); quedan sus pestañas y la ruta de arriba la marca y deja cambiarla.
+
+## 2026-10-28 — Vista «Pirámide» (Programador 8)
+- Vista nueva `?vista=piramide` (`VistaPiramideSitio.tsx`), en el menú ☰ junto a Círculo, Categorías y Mapa.
+- Dibujo: una pirámide en 3D de cinco pisos, inspirada en la de Maslow. De abajo arriba: Ser humano, Sociedad, Economía, Tecnología y Naturaleza.
+  - Cara izquierda, más clara: el dibujo de cada sector (`dibujoPata`).
+  - Cara derecha: el nombre en mayúsculas, tumbado sobre la cara.
+  - Fuera, en una columna: sus categorías, con una raya del color del piso.
+- Pinchar un piso abre el sector en la vista Círculo; pinchar una categoría abre la categoría.
+- En el móvil, los pisos van en una columna.

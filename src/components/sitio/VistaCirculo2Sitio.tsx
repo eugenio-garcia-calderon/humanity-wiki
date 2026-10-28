@@ -46,7 +46,7 @@ const TEMATICAS = /^(objetivos?|tem[aá]ticas?)$/i;
 const DIBUJOS: Record<string, string> = {
   'ser-humano': 'personas', sociedad: 'sociedad', economia: 'economia', tecnologia: 'tecnologia', tecnica: 'tecnologia', naturaleza: 'ecologia', ecosistema: 'ecologia',
 };
-const dibujoPata = (clave: string) => (DIBUJOS[clave] ? `/circulos/${DIBUJOS[clave]}.svg` : null);
+export const dibujoPata = (clave: string) => (DIBUJOS[clave] ? `/circulos/${DIBUJOS[clave]}.svg` : null);
 
 type Entrada = { fila_id: string; pagina_id: string | null; titulo: string; imagen: string | null; icono: string | null; descripcion: string | null; corto?: string | null };
 type Grupo = { columna_id: string; nombre: string; entradas: Entrada[] };

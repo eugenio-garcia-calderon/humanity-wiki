@@ -19,6 +19,7 @@ import PestanasTitulos from './PestanasTitulos';
 import RutaRelaciones from './RutaRelaciones';
 import VistaMapaSitio, { useVista, vistaInicialDe } from './VistaMapaSitio';
 import VistaCirculo2Sitio from './VistaCirculo2Sitio';
+import VistaPiramideSitio from './VistaPiramideSitio';
 import BotonOpinion from './BotonOpinion';
 
 // ============================================================================
@@ -143,6 +144,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // LA VISTA «CÍRCULO» (2026-10-28, `VistaCirculo2Sitio.tsx`, el antiguo Círculo 2.0): el arco, la rama y el sector
   // elegido con sus objetivos, que se abren según se pincha, sin cambiar de página.
   const circulos = conBarra && vista === 'circulos';
+  // LA PIRÁMIDE (2026-10-28, `VistaPiramideSitio.tsx`): los cinco sectores en una pirámide en 3D.
+  const piramide = conBarra && vista === 'piramide';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -186,7 +189,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:shadow-lg">Saltar al contenido</a>
       {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
       {circulos && <VistaCirculo2Sitio raizId={pagina.sitio!.raizId} />}
-      <div hidden={mapa || circulos || undefined}>
+      {piramide && <VistaPiramideSitio raizId={pagina.sitio!.raizId} />}
+      <div hidden={mapa || circulos || piramide || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
