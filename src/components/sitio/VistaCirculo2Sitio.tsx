@@ -146,7 +146,7 @@ function BloqueSector({ s, c, grupos, notas, bloque, alElegir }: {
 // LAS PESTAÑAS DE ABAJO: primero las cinco de siempre, con su nombre corto, aunque estén vacías (se ven apagadas); después,
 // cualquier otra relación que tenga algo.
 const PESTANAS: Array<[RegExp, string]> = [[/proyecto/i, 'Proyectos'], [/soluci/i, 'Soluciones'], [/indicador/i, 'Indicadores'], [/persona/i, 'Personas'], [/publicaci/i, 'Publicaciones']];
-type Pestana = { clave: string; nombre: string; entradas: Entrada[] };
+type Pestana = { clave: string; nombre: string; completo?: string; entradas: Entrada[] };
 function pestanasDe(grupos: Grupo[], quitarObjetivos: boolean): Pestana[] {
   const lista = grupos.filter(g => !SIN_INTERES.test(g.nombre.trim()) && !(quitarObjetivos && esObjetivos(g)));
   const usados = new Set<Grupo>();
@@ -155,7 +155,8 @@ function pestanasDe(grupos: Grupo[], quitarObjetivos: boolean): Pestana[] {
     gs.forEach(g => usados.add(g));
     return { clave: nombre.toLowerCase(), nombre, entradas: gs.flatMap(g => g.entradas) };
   });
-  const otras = lista.filter(g => !usados.has(g) && g.entradas.length).map(g => ({ clave: g.columna_id, nombre: g.nombre, entradas: g.entradas }));
+  // También de una palabra («Mejoras de los Sistemas» → «Mejoras»); el nombre entero, al pasar el ratón.
+  const otras = lista.filter(g => !usados.has(g) && g.entradas.length).map(g => ({ clave: g.columna_id, nombre: g.nombre.trim().split(/\s+/)[0], completo: g.nombre, entradas: g.entradas }));
   return [...fijas, ...otras];
 }
 
@@ -198,7 +199,7 @@ function Detalle({ paginaId, titulo, grupos, quitarObjetivos, ruta, rutaVisible,
             {pestanas.map(p => {
               const on = p === elegida, vacia = !p.entradas.length;
               return (
-                <button key={p.clave} type="button" role="tab" aria-selected={on} disabled={vacia} onClick={() => setActiva(p.clave)} data-pestana={p.nombre}
+                <button key={p.clave} type="button" role="tab" aria-selected={on} disabled={vacia} onClick={() => setActiva(p.clave)} data-pestana={p.nombre} title={p.completo}
                   className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold transition-colors ${on ? 'bg-slate-900 text-white' : vacia ? 'text-slate-300' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
                   {p.nombre} <span className={`text-xs ${on ? 'text-slate-300' : 'text-slate-400'}`}>{p.entradas.length}</span>
                 </button>
