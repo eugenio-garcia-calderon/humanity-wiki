@@ -10138,3 +10138,7 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
 - Las relaciones vuelven a pestañas horizontales pegadas bajo la cabecera (fuera las filas en carrusel).
 - Ruta de la cabecera solo con nombres: sin dibujos en los pasos (`PasoRuta`) ni la silueta del territorio (`ElegirTerritorio segmento`).
 - Cabecera: a la izquierda del todo Donar, la cuenta y el menú ☰; luego el logo con el nombre y el ojo de calificaciones. Ruta en el centro y el buscador pegado a su derecha. Las vistas pasan dentro del menú ☰ (`VistasMenu`, por `cabezaMenu` → `FilaBotones cabeza`); el panel del menú cae hacia la derecha si el botón está en la mitad izquierda.
+
+## 2026-10-28 — Donar y perfil a la derecha; la temática elegida esconde las demás (Programador 8)
+- Cabecera: el menú ☰ sigue a la izquierda del todo; Donar y la cuenta pasan a la derecha del todo, después del buscador.
+- Vista Círculo: elegida una temática, desaparece su bloque (como la rama y la categoría); quedan sus pestañas y la ruta de arriba la marca y deja cambiarla.

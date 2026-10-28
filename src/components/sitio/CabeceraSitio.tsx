@@ -44,23 +44,20 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   return (
     // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
     // scroll»): pegada arriba y con fondo para que no se mezcle.
-    // LA RUTA EN EL CENTRO (2026-10-28, Eugenio): tres columnas. A la izquierda del todo Donar, la cuenta y el menú ☰
-    // (con las vistas dentro: «mételo en el menú colapsable»); luego el logo con el nombre de la plataforma y el ojo de
-    // las calificaciones. En el centro, la pastilla de la ruta (el territorio y el sistema o la temática, o en la vista
-    // Círculo lo que se va pinchando). Pegado a su derecha, el buscador. En el móvil, la ruta baja a su propia línea.
+    // LA RUTA EN EL CENTRO (2026-10-28, Eugenio): tres columnas. A la izquierda del todo el menú ☰ (con las vistas
+    // dentro: «mételo en el menú colapsable»); luego el logo con el nombre de la plataforma y el ojo de las
+    // calificaciones. En el centro, la pastilla de la ruta (el territorio y el sistema o la temática, o en la vista
+    // Círculo lo que se va pinchando). Pegado a su derecha, el buscador; y a la derecha del todo, Donar y la cuenta
+    // («Donar y perfil a la derecha»). En el móvil, la ruta baja a su propia línea.
     <header data-cabecera-sitio className="sticky top-0 z-40 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:px-6 md:grid md:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)]"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       {/* A todo lo ancho de la ventana, sin barra de desplazamiento de lado. */}
       <style>{'html { overflow-x: clip; }'}</style>
-      {/* En el móvil este grupo se deshace (`contents`) para repartir sus piezas en líneas: arriba Donar, la cuenta, el
-          menú y el logo; debajo las calificaciones y el buscador; y al final la ruta. */}
+      {/* En el móvil los grupos se deshacen (`contents`) para repartir sus piezas en líneas: arriba el menú, el logo,
+          Donar y la cuenta; debajo las calificaciones y el buscador; y al final la ruta. */}
       <div className="contents md:col-start-1 md:flex md:min-w-0 md:items-center md:gap-2">
-        <span className="flex shrink-0 items-center gap-1.5">
-          {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
-          <span data-hueco-cuenta="cabecera" className="contents" />
-          {raiz && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu"
-            cabezaMenu={simple ? undefined : cerrar => <VistasMenu porDefecto={vistaInicial} cerrar={cerrar} />} /></Suspense>}
-        </span>
+        {raiz && <span className="flex shrink-0 items-center"><Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu"
+          cabezaMenu={simple ? undefined : cerrar => <VistasMenu porDefecto={vistaInicial} cerrar={cerrar} />} /></Suspense></span>}
         <Link to="/" className="ml-1 flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
           {icono && (/^(https?:|\/)/.test(icono)
             ? <img src={miniatura(icono, 112)} alt="" className="h-[46px] w-[46px] shrink-0 rounded-lg object-contain" />
@@ -84,7 +81,13 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           <nav data-ranura-ruta aria-label="Estás en" className="flex min-w-0 items-center gap-1">{ruta}</nav>
         </div>
       </div>}
-      {!simple && <div className="flex min-w-0 justify-start max-md:order-1 max-md:ml-auto md:col-start-3"><BuscarBarra raizId={raizId} enLinea /></div>}
+      <div className="contents md:col-start-3 md:flex md:min-w-0 md:items-center md:gap-2">
+        {!simple && <div className="flex min-w-0 max-md:order-1 max-md:ml-auto"><BuscarBarra raizId={raizId} enLinea /></div>}
+        <span className="ml-auto flex shrink-0 items-center gap-1.5">
+          {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
+          <span data-hueco-cuenta="cabecera" className="contents" />
+        </span>
+      </div>
     </header>
   );
 }
