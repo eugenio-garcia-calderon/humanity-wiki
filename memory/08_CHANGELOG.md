@@ -10151,3 +10151,6 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Fuera, en una columna: sus categorías, con una raya del color del piso.
 - Pinchar un piso abre el sector en la vista Círculo; pinchar una categoría abre la categoría.
 - En el móvil, los pisos van en una columna.
+- La pirámide pasa a la estructura de seis niveles de Eugenio (mismo día: «no lo hagas con las categorías anteriores, sino con esta estructura»): Supervivencia, Seguridad, Comunidad, Autonomía, Conocimiento y Trascendencia (`NIVELES`).
+  - Fuera de cada nivel: su necesidad y sus temáticas. Las que empiezan por el nombre de una categoría nuestra van en negrita y la abren en la vista Círculo.
+  - Cara izquierda: el dibujo de una categoría afín. Cara derecha: el nombre del nivel.
