@@ -23,7 +23,8 @@ import NotaCirculo from './NotaCirculo';
 // relaciones del objetivo elegido (o del sector, si aún no se ha elegido ninguno):
 // indicadores, proyectos, personas, herramientas… Las relaciones salen de la misma
 // red que pinta las pestañas de cada página (`GET /api/bd/paginas/:id/red`).
-// Lo elegido va en la dirección (`?sector=` y `?bloque=`) para poder compartirlo.
+// Lo elegido va en la dirección (`?circulo=`, `?sector=` y `?bloque=`) para poder compartirlo. Los bloques se abren
+// según se pincha: primero solo el arco, luego dos columnas y luego tres.
 
 const PATAS = /^patas?$/i;
 const DIBUJOS: Record<string, string> = {
@@ -174,7 +175,7 @@ function Detalle({ paginaId, titulo, descripcion, grupos, quitarObjetivos }: {
 export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
   const t = useCirculosTerritorio(raizId, PATAS);
   const { circulos } = t;
-  const { elegido, ver, elegir } = useCirculoElegido(circulos, 'data-circulo-elegido-c2');
+  const { elegido, ver } = useCirculoElegido(circulos, 'data-circulo-elegido-c2');
   const { search, pathname, hash } = useLocation();
   const ir = useNavigate();
   const q = new URLSearchParams(search);
@@ -185,7 +186,7 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
     ir(`${pathname}?${n.toString()}${hash}`, { replace: true });
   };
   const notas = useNotasObjetivos(raizId);
-  const c = circulos?.length ? circulos[Math.min(elegido, circulos.length - 1)] : null;
+  const c = circulos?.length ? circulos[Math.min(elegido, circulos.length - 1)] : null; // la pinchada (o, sin pinchar, la del ratón)
   // El sector elegido, esté en la rama que se ve o no (se puede haber pasado el ratón por otra).
   const sector = useMemo(() => {
     for (const x of circulos || []) { const s = x.sistemas.find(y => y.id === sectorId); if (s) return { s, c: x }; }
@@ -197,25 +198,47 @@ export default function VistaCirculo2Sitio({ raizId }: { raizId: string }) {
 
   if (!circulos) return <div className="py-24 text-center text-slate-400">Cargando…</div>;
   if (!circulos.length || !c) return <div className="py-24 text-center text-slate-500">Los sistemas aún no tienen rama: añade a su base de datos una columna de selección «Pata».</div>;
+  // SE ABRE SEGÚN SE PINCHA (2026-10-28, Eugenio: «al principio, según pinchas en una categoría, se divide la pantalla
+  // en dos; si pinchas en una de sus secciones, en tres; así el tamaño se mantiene grande cuando no profundizamos y se
+  // hace más pequeño a medida que profundizamos»). Paso 0: solo el arco, grande. Paso 1: el arco y la rama pinchada.
+  // Paso 2: los tres bloques. Volver a pinchar lo elegido lo cierra (la rama, o el sector).
+  const ramaPinchada = circulos.some(x => x.clave === q.get('circulo'));
+  const paso = sector ? 2 : ramaPinchada ? 1 : 0;
+  const pincharRama = (i: number) => {
+    const x = circulos[i];
+    if (ramaPinchada && x.clave === q.get('circulo')) poner({ circulo: null, sector: null, bloque: null });
+    else poner({ circulo: x.clave, sector: null, bloque: null });
+    if (window.innerWidth < 1024) setTimeout(() => document.querySelector('[data-circulo-elegido-c2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  };
+  const rejilla = paso === 2 ? 'lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)_minmax(0,7fr)] lg:gap-8'
+    : paso === 1 ? 'lg:grid-cols-[minmax(0,6fr)_minmax(0,9fr)] lg:gap-10' : '';
   return (
     // A todo lo ancho de la ventana (como el mapa): el arco pegado a la izquierda y sitio para los tres bloques.
-    <div className="px-4 pt-1 sm:px-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }} data-vista-circulo2>
-      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)_minmax(0,7fr)] lg:gap-8">
-        <div className="mx-auto w-full max-w-[420px] lg:sticky lg:top-24 lg:mx-0">
-          <Arco circulos={circulos} elegido={elegido} elegir={i => { elegir(i); }} ver={ver} dibujoDe={dibujoPata} />
+    <div className="px-4 pt-1 sm:px-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }} data-vista-circulo2 data-paso={paso}>
+      <div className={`grid grid-cols-[minmax(0,1fr)] items-start gap-6 ${rejilla}`}>
+        <div className={`mx-auto w-full lg:sticky lg:top-24 ${paso === 0 ? 'max-w-[680px]' : paso === 1 ? 'max-w-[560px] lg:mx-0' : 'max-w-[420px] lg:mx-0'}`}>
+          {/* Sin nada pinchado, ninguna rama marcada (el ratón solo la ilumina). */}
+          <Arco circulos={circulos} elegido={paso === 0 ? -1 : elegido} elegir={pincharRama} ver={ver} dibujoDe={dibujoPata} />
+          {paso === 0 && <p className="mt-3 text-center text-sm font-semibold text-slate-500">Pincha una rama para ver sus sectores.</p>}
         </div>
-        <PanelCirculo c={c} t={t} compacto estrecho ancla="data-circulo-elegido-c2" elegidoId={sector?.s.id || null}
-          alElegir={s => {
-            poner({ sector: s.id, bloque: null, circulo: c.clave });
-            if (window.innerWidth < 1024) setTimeout(() => document.querySelector('[data-bloque-sector]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-          }} />
-        <div className="min-w-0">
-          {sector && <BloqueSector s={sector.s} c={sector.c} grupos={gruposSector} notas={notas} bloque={bloqueId}
-            alElegir={o => {
-              poner({ bloque: o.pagina_id === bloqueId ? null : o.pagina_id });
-              setTimeout(() => document.querySelector('[data-detalle-circulo2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-            }} />}
-        </div>
+        {paso >= 1 && (
+          <div className="min-w-0 animate-in fade-in duration-300">
+            <PanelCirculo c={c} t={t} compacto estrecho={paso === 2} ancla="data-circulo-elegido-c2" elegidoId={sector?.s.id || null}
+              alElegir={s => {
+                poner({ sector: s.id === sectorId ? null : s.id, bloque: null, circulo: c.clave });
+                if (window.innerWidth < 1024) setTimeout(() => document.querySelector('[data-bloque-sector]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+              }} />
+          </div>
+        )}
+        {paso === 2 && sector && (
+          <div className="min-w-0 animate-in fade-in duration-300">
+            <BloqueSector s={sector.s} c={sector.c} grupos={gruposSector} notas={notas} bloque={bloqueId}
+              alElegir={o => {
+                poner({ bloque: o.pagina_id === bloqueId ? null : o.pagina_id });
+                setTimeout(() => document.querySelector('[data-detalle-circulo2]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+              }} />
+          </div>
+        )}
       </div>
       {sector && (objetivo
         ? <Detalle paginaId={objetivo.pagina_id!} titulo={objetivo.titulo} descripcion={objetivo.descripcion} grupos={gruposObjetivo} quitarObjetivos={false} />

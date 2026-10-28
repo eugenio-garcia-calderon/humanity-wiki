@@ -10093,3 +10093,8 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Las relaciones vienen de `GET /api/bd/paginas/:id/red`, una vez por visita. Las notas de los objetivos salen de la base de datos de Objetivos.
   - Lo elegido va en `?sector=` y `?bloque=`.
 - `PanelCirculo`: `alElegir`, `elegidoId` (borde azul) y `estrecho` (como mucho tres columnas).
+- (Mismo día) Círculo 2.0 se abre según se pincha (Eugenio: «al pinchar una categoría, la pantalla se divide en dos; al pinchar una de sus secciones, en tres; el tamaño se mantiene grande y se hace más pequeño a medida que profundizamos»):
+  - Paso 0: solo el arco, de hasta 680 px y centrado.
+  - Paso 1, con `?circulo=`: el arco y el panel de la rama.
+  - Paso 2, con `?sector=`: los tres bloques y el detalle debajo.
+  - Volver a pinchar la rama o el sector lo cierra.
