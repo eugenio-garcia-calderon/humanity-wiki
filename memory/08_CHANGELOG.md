@@ -10055,3 +10055,13 @@ Eugenio: «añade los sectores que faltan en cada una de las cuatro ramas princi
 - Quedan Ecología con 8 sistemas, Tecnología con 8, Sociología con 7 y Humanología con 9.
 - Portadas de una línea en `portadas-ilustraciones/sistemas_nuevos.py` (`sistema-<clave>.svg`). Páginas KWMVSECNUE01–13, filas BDFMVSECNUE01–13.
 - «Desarrollo personal» no se añadió: ya está «Potencial humano». «Relaciones interpersonales» sigue en Humanología, aunque la tabla de Eugenio la ponía en Sociología.
+
+## 2026-10-28 · Las ramas, en singular (Ser humano, Sociedad, Técnica, Ecosistema), Somática y sus herramientas (Programador 8)
+Eugenio: «cambia Humanología por Ser humano, Sociología por Sociedad, Tecnología por Técnica y Ecología por Ecosistema, en singular; en Ser humano mete la Somática, y dentro, como herramientas, el Contact Improvisación y la Biodanza».
+- Datos (SQL, producción). Copia previa en `~/copias-manuales/patas-subtemas-antes-2026-10-28.tsv`.
+  - Las opciones de la columna «Pata» pasan a Ser humano, Sociedad, Técnica y Ecosistema.
+  - Sector nuevo «Somática» en Ser humano (KWMVSOMATI01).
+  - De Somática cuelgan «Contact Improvisación» y «Biodanza» (KWMVSOMATI02 y 03), con la relación madre/hijos de Sistemas.
+  - Esa relación pasa a llamarse «Herramientas» (antes «Subtemas»). También agrupa Vehículo Solar, Vehículo Aerodinámico y Mini Casas.
+  - Portadas en `sistemas_nuevos.py`.
+- `VistaCirculoSitio.tsx`: las ilustraciones de las ramas aceptan los nombres nuevos (y los de antes).

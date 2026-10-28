@@ -12,7 +12,13 @@ import { PanelCirculo, useCirculoElegido, useCirculosTerritorio } from './PanelC
 // (`PanelCirculo`: «Tecnología en [territorio ▾]», su nota y sus tarjetas).
 
 const PATAS = /^patas?$/i;
-const DIBUJOS: Record<string, string> = { humanologia: 'personas', sociologia: 'sociedad', tecnologia: 'tecnologia', ecologia: 'ecologia' };
+// La ilustración de cada rama. Desde el 2026-10-28 (Eugenio: «cambia Humanología por Ser humano, Sociología por
+// Sociedad, Tecnología por Técnica y Ecología por Ecosistema, en singular») las ramas se llaman así; se aceptan
+// también los nombres anteriores.
+const DIBUJOS: Record<string, string> = {
+  'ser-humano': 'personas', sociedad: 'sociedad', tecnica: 'tecnologia', ecosistema: 'ecologia',
+  humanologia: 'personas', sociologia: 'sociedad', tecnologia: 'tecnologia', ecologia: 'ecologia',
+};
 const dibujoPata = (clave: string) => (DIBUJOS[clave] ? `/circulos/${DIBUJOS[clave]}.svg` : null);
 
 export default function VistaCirculoSitio({ raizId }: { raizId: string }) {
