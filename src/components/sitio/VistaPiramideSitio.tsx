@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { useCirculosTerritorio } from './PanelCirculo';
 import type { Circulo, Sistema } from './circulosDatos';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LA VISTA «PIRÁMIDE» (2026-10-28, Eugenio)
@@ -15,7 +16,8 @@ import type { Circulo, Sistema } from './circulosDatos';
 // La pirámide de frente con su cara izquierda en sombra, pisos separados por una raya fina, el número en un círculo
 // blanco y, desde cada piso, una cinta clara hacia la derecha con el título en grande. Al pasar el ratón (o pinchar)
 // un piso, en su cinta aparecen la necesidad y las temáticas; las que son una de nuestras categorías la abren en la
-// vista Círculo. En el móvil, los pisos en una columna que se despliegan al tocarlos.
+// vista Círculo. Pulsar un piso («no funcionan los botones al pulsarlo») abre debajo ese nivel con sus temáticas en
+// tarjetas: las que son una categoría nuestra llevan a ella. En el móvil, los pisos en una columna que se despliegan al tocarlos.
 
 const PATAS = /^(patas?|sector(es)?)$/i;
 
@@ -94,6 +96,12 @@ export default function VistaPiramideSitio({ raizId }: { raizId: string }) {
     window.scrollTo(0, 0);
   };
   const N = NIVELES.length;
+  // Pulsar un piso lo abre debajo (y baja hasta él); pulsarlo otra vez lo cierra.
+  const pulsar = (i: number) => {
+    setFijo(f => (f === i ? null : i));
+    setTimeout(() => document.querySelector('[data-nivel-abierto]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  };
+  const nivel = fijo !== null ? NIVELES[fijo] : null;
   const temas = (t: string[]) => t.map((x, k) => {
     const e = buscar(x);
     return (
@@ -131,9 +139,9 @@ export default function VistaPiramideSitio({ raizId }: { raizId: string }) {
           const lineas = renglones(n.tematicas, buscar);
           const altoTexto = 32 + lineas.length * 28;
           return (
-            <g key={n.nombre} className="pir-piso" data-piso={n.nombre} onMouseEnter={() => setEncima(i)} onClick={() => setFijo(f => (f === i ? null : i))}
+            <g key={n.nombre} className="pir-piso" data-piso={n.nombre} onMouseEnter={() => setEncima(i)} onClick={() => pulsar(i)}
               role="button" tabIndex={0} aria-expanded={on} aria-label={`${n.nombre}: ${n.necesidad}`}
-              onFocus={() => setEncima(i)} onBlur={() => setEncima(null)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFijo(f => (f === i ? null : i)); } }}>
+              onFocus={() => setEncima(i)} onBlur={() => setEncima(null)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pulsar(i); } }}>
               <g className="pir-cara" opacity={apagado ? 0.55 : 1}>
                 <polygon points={pts(...lado)} fill={azul(i, N, 0.22)} />
                 <polygon points={pts(...frente)} fill={azul(i, N)} />
@@ -162,6 +170,38 @@ export default function VistaPiramideSitio({ raizId }: { raizId: string }) {
           );
         })}
       </svg>
+      {/* EL NIVEL PULSADO, debajo de la pirámide (desde 768 px): sus temáticas en tarjetas. */}
+      {nivel && fijo !== null && (
+        <section data-nivel-abierto className="mt-6 hidden scroll-mt-24 border-t border-slate-200 pt-8 md:block">
+          <div className="mb-5 flex items-baseline gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-2xl font-bold text-white" style={{ background: azul(Math.min(fijo, 2), N) }}>{fijo + 1}</span>
+            <div>
+              <h2 className="text-4xl font-bold uppercase tracking-wide text-slate-900" style={{ fontFamily: LETRA_TITULO }}>{nivel.nombre}</h2>
+              <p className="mt-1 text-lg font-semibold text-slate-600">{nivel.necesidad}</p>
+            </div>
+          </div>
+          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
+            {nivel.tematicas.map(t => {
+              const e = buscar(t), nombre = t.charAt(0).toUpperCase() + t.slice(1);
+              return (
+                <li key={t}>
+                  {e ? (
+                    <button type="button" onClick={() => abrir(e)} data-tarjeta-tematica={nombre}
+                      className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg">
+                      <span className="relative block aspect-[16/10] w-full bg-slate-50">
+                        {e.s.imagen && <img src={miniatura(e.s.imagen, 320)} alt="" className="absolute inset-0 h-full w-full object-contain p-2" />}
+                      </span>
+                      <span className="px-3 py-2.5 text-base font-bold text-slate-900">{nombre}</span>
+                    </button>
+                  ) : (
+                    <span className="flex h-full min-h-[3.25rem] items-center rounded-2xl border border-dashed border-slate-200 px-3 py-2.5 text-base font-semibold text-slate-500" title="Todavía no es una categoría de la plataforma">{nombre}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
       {/* EN EL MÓVIL: los pisos de arriba abajo, del azul claro al hondo; al tocar uno, se despliega lo que contiene. */}
       <ol className="space-y-1.5 md:hidden" aria-label="Pirámide de las necesidades">
         {[...NIVELES].reverse().map(n => {

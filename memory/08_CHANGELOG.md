@@ -10159,3 +10159,4 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Rayas blancas finas entre pisos, sin bordes de tinta y sin dibujos.
   - Número en un círculo blanco. Cinta clara hacia la derecha con el título grande en mayúsculas.
   - La necesidad y las temáticas aparecen solo al pasar el ratón o al pinchar el piso; los demás pisos se apagan. En el móvil, un acordeón.
+- Pulsar un piso de la pirámide hace algo (Eugenio: «no funcionan los botones al pulsarlo»; antes solo lo dejaba fijo, igual que el ratón). Ahora abre debajo ese nivel: número, título y necesidad, y sus temáticas en tarjetas. Las que son una categoría nuestra llevan su dibujo y la abren en la vista Círculo; las demás van en gris con borde discontinuo. Pulsarlo otra vez lo cierra.
