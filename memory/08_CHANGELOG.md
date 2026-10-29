@@ -10160,3 +10160,12 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Número en un círculo blanco. Cinta clara hacia la derecha con el título grande en mayúsculas.
   - La necesidad y las temáticas aparecen solo al pasar el ratón o al pinchar el piso; los demás pisos se apagan. En el móvil, un acordeón.
 - Pulsar un piso de la pirámide hace algo (Eugenio: «no funcionan los botones al pulsarlo»; antes solo lo dejaba fijo, igual que el ratón). Ahora abre debajo ese nivel: número, título y necesidad, y sus temáticas en tarjetas. Las que son una categoría nuestra llevan su dibujo y la abren en la vista Círculo; las demás van en gris con borde discontinuo. Pulsarlo otra vez lo cierra.
+- Vista nueva «Sociedad» (`?vista=sociedad`, `VistaSociedadSitio.tsx`, 2026-10-29). Parte de la foto de post-its de Eugenio: una pizarra de post-its amarillos (React Flow, con los puntos de conexión y la flecha flotante de «Esquemas», que pasa a `knowledge/aristaFlotante.tsx`).
+  - Las tarjetas: Objetivos; Recursos, Poder político y Valores; Justicia, Ley y Economía; Gestión (pública | privada); Técnicas.
+  - Las flechas llevan nombre: objetivos de los actores, recursos, principios, poder legislativo, reglas de seguridad, económicas y técnicas, poder ejecutivo, recaudación e inversión, sistemas e infraestructuras, y el ciclo «bienes y servicios vuelven a los objetivos».
+  - A la izquierda, el selector de Actores (de individuo a planeta, `?actor=`): todas las tarjetas cambian a lo de esa escala.
+  - Conciencia · Educación y Ecología son dos membranas alrededor de todo, con lo de cada escala en su borde.
+  - Las tarjetas se arrastran, se pueden tirar flechas nuevas y nombrarlas con doble clic. La colocación se recuerda en el navegador de cada uno y «Recolocar» la devuelve a la de la foto.
+  - En el móvil, una columna en el orden del ciclo; de la Ley salen las tres reglas.
+  - Lo que coincide con una categoría abre la vista Círculo.
+  - Dos vueltas de un bot calificador: 6,5 → 7,5, con sus mejoras aplicadas.

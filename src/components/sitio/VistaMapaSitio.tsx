@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layers, LayoutGrid, Map as IconoMapa, Pyramid } from 'lucide-react';
+import { Layers, LayoutGrid, Map as IconoMapa, Pyramid, StickyNote } from 'lucide-react';
 import { MarcoCargando } from '../knowledge/BotonesCabecera';
 import { direccionMapa } from '../bloquesDatos/mapaMundo/Lectura';
 import { useTerritorioActual } from '../bloquesDatos/filtroTerritorio/ElegirTerritorio';
@@ -21,8 +21,8 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 /** Los territorios que el mapa sabe encuadrar sin abrir su ficha (`ENCUADRES` en `pages/Map.tsx`). */
 const ENCUADRADOS = new Set(['espana', 'europa']);
 
-export type Vista = 'tabla' | 'mapa' | 'circulos' | 'piramide';
-const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'piramide'];
+export type Vista = 'tabla' | 'mapa' | 'circulos' | 'piramide' | 'sociedad';
+const VALIDAS: Vista[] = ['tabla', 'mapa', 'circulos', 'piramide', 'sociedad'];
 // Las direcciones de las vistas de círculos retiradas (2026-10-28) llevan a la que queda.
 // Desde el 2026-10-28 (Eugenio: «elimina el Círculo 1.0») «circulos» es el antiguo Círculo 2.0, y `circulo2` lleva a él.
 const ANTIGUAS: Record<string, Vista> = { circulos2: 'circulos', circulos3: 'circulos', circulos4: 'circulos', circulos5: 'circulos', circulo2: 'circulos' };
@@ -63,6 +63,8 @@ const VISTAS: { v: Vista; texto: string; Icono: typeof LayoutGrid }[] = [
   { v: 'mapa', texto: 'Mapa', Icono: IconoMapa },
   // La pirámide de los cinco sectores (2026-10-28, `VistaPiramideSitio.tsx`).
   { v: 'piramide', texto: 'Pirámide', Icono: Pyramid },
+  // La pizarra de post-its de la sociedad, con el selector de actores (2026-10-29, `VistaSociedadSitio.tsx`).
+  { v: 'sociedad', texto: 'Sociedad', Icono: StickyNote },
 ];
 
 /** EL SELECTOR DE VISTA DE LA BARRA: los botones juntos en una pastilla, el de la vista en la que estás en negro.
@@ -92,7 +94,7 @@ export function VistasMenu({ porDefecto = 'tabla', cerrar }: { porDefecto?: Vist
   return (
     <div data-vistas-menu className="mb-1 border-b border-slate-100 px-1 pb-2 pt-1">
       <p className="px-2 pb-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Vista</p>
-      <div role="group" aria-label="Vista" className="grid grid-cols-4 gap-1">
+      <div role="group" aria-label="Vista" className="grid grid-cols-3 gap-1">
         {VISTAS.map(({ v, texto, Icono }) => (
           <button key={v} type="button" onClick={() => { cambiar(v); cerrar?.(); }} aria-pressed={vista === v} data-vista={v} title={`Ver ${texto.toLowerCase()}`}
             className={cn('flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition-colors',
