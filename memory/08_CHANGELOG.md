@@ -10170,3 +10170,4 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Lo que coincide con una categoría abre la vista Círculo.
   - Dos vueltas de un bot calificador: 6,5 → 7,5, con sus mejoras aplicadas.
 - La barra del sitio, más compacta (2026-10-29, Eugenio: «reduce el espacio superior del menú, el icono del logo y el tamaño del feedback»): pegada arriba sin el hueco del margen de la página, el logo de 46 a 34 px, y el botón «¿Qué mejorarías?» de 56 a 40 px de alto.
+- Sociedad: la Gestión se divide en tres tarjetas (2026-10-29, Eugenio). La empresa produce; la Administración pública le saca el dinero con los impuestos; y con él financia los Servicios públicos (salud, educación…). Flechas nuevas: mercado y trabajo, impuestos, los financia, bienes y productos, y sistemas e infraestructuras.

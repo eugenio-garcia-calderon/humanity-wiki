@@ -24,7 +24,8 @@ import { cn } from '../../utils/cn';
 //   · el PODER POLÍTICO bebe de los dos para debatir, planear y decidir cómo cumplir esos objetivos, y con el poder
 //     legislativo cambia la LEY;
 //   · la ley da reglas de seguridad a la JUSTICIA, reglas económicas a la ECONOMÍA y reglas técnicas a las TÉCNICAS;
-//   · la GESTIÓN (pública o privada) ejecuta: recauda, invierte, atiende y mantiene sistemas e infraestructuras;
+//   · la GESTIÓN, en tres (2026-10-29, Eugenio: «divide la de administración y gestión en tres»): LA EMPRESA produce; LA
+//     ADMINISTRACIÓN PÚBLICA le saca el dinero con los impuestos; y con él paga los SERVICIOS PÚBLICOS (salud, educación…);
 //   · y las técnicas producen los bienes que vuelven a cubrir los objetivos (el ciclo de la hoja de la derecha).
 // A un lado, el selector de ACTORES: la misma lógica vale para una persona, una familia, un pueblo, una ciudad, una
 // región, un país, un continente o el planeta, y al elegir uno las tarjetas se ajustan a esa escala (en una familia, la
@@ -64,9 +65,6 @@ type Tarjeta = {
   quien?: string;
   color?: 'amarillo' | 'lila' | 'verde';
   ancho?: number;
-  /** Gestión: lo público y lo privado, por escala. */
-  publico?: string[][];
-  privado?: string[][];
   /** Técnicas: las técnicas con lo que producen. */
   tecnicas?: Array<[string, string]>;
 };
@@ -149,18 +147,41 @@ const TARJETAS: Tarjeta[] = [
       ['Mercado único', 'Euro y Banco Central Europeo', 'Fondos de cohesión'],
       ['Comercio mundial (OMC)', 'FMI y Banco Mundial', 'Cadenas de suministro'],
     ] },
-  { id: 'gestion', titulo: 'Gestión · Administración', ancho: 420,
-    lema: ['Servicio o producto', 'Recaudación', 'Inversión y gasto', 'Atención', 'Sistemas e infraestructuras'],
-    quien: 'Funcionarios, empresarios, trabajadores', nivel: [],
-    publico: [
-      ['DNI y trámites', 'Declaración de la renta'], ['Empadronamiento', 'Ayudas familiares'], ['Ayuntamiento', 'Consultorio', 'Escuela'],
-      ['Ayuntamiento', 'Transporte público', 'Recogida de basuras'], ['Gobierno regional', 'Sanidad y educación'],
-      ['Ministerios', 'Hacienda', 'Seguridad Social'], ['Comisión Europea', 'Agencias europeas'], ['Agencias de la ONU (OMS, FAO…)'],
-    ],
-    privado: [
-      ['Su trabajo o negocio', 'Su presupuesto'], ['Cuentas de casa', 'Tareas domésticas'], ['Tiendas', 'Bares', 'Talleres'],
-      ['Empresas', 'Comercio', 'Servicios'], ['Industria', 'Cooperativas agrarias'], ['Grandes empresas', 'Bancos', 'Pymes'],
-      ['Multinacionales europeas'], ['Multinacionales', 'Fundaciones y ONG'],
+  { id: 'servicios', titulo: 'Servicios públicos', lema: ['Salud', 'Educación', 'Agua', 'Transporte', 'Seguridad', 'Cultura'],
+    quien: 'Médicos, maestros, bomberos, conductores',
+    nivel: [
+      ['Médico de cabecera', 'Becas de estudio'],
+      ['Pediatra', 'Colegio', 'Ayudas por hijo'],
+      ['Consultorio', 'Escuela', 'Biblioteca'],
+      ['Hospital', 'Institutos', 'Transporte público', 'Recogida de basuras'],
+      ['Red de hospitales', 'Universidades', 'Carreteras regionales'],
+      ['Sanidad pública', 'Educación pública', 'Pensiones'],
+      ['Programas europeos de salud', 'Erasmus', 'Fondos de cohesión'],
+      ['OMS', 'UNICEF', 'Programa Mundial de Alimentos'],
+    ] },
+  { id: 'administracion', titulo: 'La Administración pública', lema: ['Recaudación', 'Presupuesto', 'Inversión y gasto', 'Atención'],
+    quien: 'Funcionarios',
+    nivel: [
+      ['DNI y trámites', 'Declaración de la renta'],
+      ['Empadronamiento', 'Ayudas familiares', 'Impuesto de la vivienda'],
+      ['Ayuntamiento del pueblo', 'Junta vecinal'],
+      ['Ayuntamiento', 'Impuestos municipales', 'Licencias'],
+      ['Gobierno regional', 'Impuestos cedidos'],
+      ['Ministerios', 'Hacienda', 'Seguridad Social'],
+      ['Comisión Europea', 'Presupuesto de la Unión'],
+      ['Naciones Unidas', 'Cuotas de los países'],
+    ] },
+  { id: 'empresa', titulo: 'La empresa', lema: ['Bienes y servicios', 'Empleo', 'Inversión', 'Beneficio'],
+    quien: 'Empresarios, trabajadores, autónomos',
+    nivel: [
+      ['Su trabajo o negocio', 'Autónomos', 'Su presupuesto'],
+      ['Negocio familiar', 'Cuentas de casa'],
+      ['Tiendas', 'Bares', 'Talleres'],
+      ['Empresas', 'Comercio', 'Servicios privados'],
+      ['Industria', 'Cooperativas agrarias', 'Turismo'],
+      ['Grandes empresas', 'Bancos', 'Pymes'],
+      ['Multinacionales europeas', 'Mercado único'],
+      ['Multinacionales', 'Fundaciones y ONG'],
     ] },
   { id: 'tecnicas', titulo: 'Técnicas · Ciencias', ancho: 1280, lema: ['Reglas técnicas que garantizan seguridad, calidad y ecología'],
     quien: 'Ingenieros, médicos, técnicos, investigadores',
@@ -206,7 +227,8 @@ const TARJETAS: Tarjeta[] = [
 ];
 const POR_ID = Object.fromEntries(TARJETAS.map(t => [t.id, t])) as Record<string, Tarjeta>;
 
-/** La colocación de la foto: objetivos arriba; recursos, política y valores; justicia, ley y economía; gestión; técnicas.
+/** La colocación de la foto: objetivos arriba; recursos, política y valores; justicia, ley y economía; servicios públicos,
+ *  administración y empresa; técnicas.
  *  Educación y ecología no son tarjetas sueltas: son las dos membranas que envuelven a todas. */
 const ANCHO = 300;
 const L = -640, C = -150, R = 340;
@@ -214,7 +236,7 @@ const INICIO: Record<string, { x: number; y: number }> = {
   objetivos: { x: C, y: 0 },
   recursos: { x: L, y: 360 }, politica: { x: C, y: 360 }, valores: { x: R, y: 360 },
   justicia: { x: L, y: 730 }, ley: { x: C, y: 730 }, economia: { x: R, y: 730 },
-  gestion: { x: C - 60, y: 1110 },
+  servicios: { x: L, y: 1110 }, administracion: { x: C, y: 1110 }, empresa: { x: R, y: 1110 },
   tecnicas: { x: L, y: 1470 },
 };
 /** Las flechas de la lógica de Eugenio, con lo que lleva cada una. */
@@ -226,9 +248,12 @@ const FLECHAS: Array<[string, string, string, string?]> = [
   ['ley', 'justicia', 'reglas de seguridad'],
   ['ley', 'economia', 'reglas económicas'],
   ['ley', 'tecnicas', 'reglas técnicas', 'escalon'],
-  ['ley', 'gestion', 'poder ejecutivo'],
-  ['economia', 'gestion', 'recaudación e inversión'],
-  ['gestion', 'tecnicas', 'sistemas e infraestructuras'],
+  ['ley', 'administracion', 'poder ejecutivo'],
+  ['economia', 'empresa', 'mercado y trabajo'],
+  ['empresa', 'administracion', 'impuestos'],
+  ['administracion', 'servicios', 'los financia'],
+  ['empresa', 'tecnicas', 'bienes y productos'],
+  ['servicios', 'tecnicas', 'sistemas e infraestructuras'],
   ['tecnicas', 'objetivos', 'bienes y servicios', 'vuelta'],
 ];
 const NUCLEO = Object.keys(INICIO);
@@ -259,7 +284,7 @@ const flechasBase = (): Edge[] => FLECHAS.map(([s, t, label, tipo]) => ({
 }));
 
 // Cada uno deja la pizarra a su gusto en su navegador (sin cuenta); «Recolocar» la devuelve a la foto.
-const LLAVE = 'luz-sociedad-v3';
+const LLAVE = 'luz-sociedad-v4';
 type Guardado = { pos: Record<string, { x: number; y: number }>; flechas: Array<{ id: string; source: string; target: string; label?: string; tipo?: string }> };
 function leer(): Guardado | null {
   try { const j = JSON.parse(localStorage.getItem(LLAVE) || 'null'); return j && j.pos && Array.isArray(j.flechas) ? j : null; } catch { return null; }
@@ -304,12 +329,7 @@ function Contenido({ t }: { t: Tarjeta }) {
   const escala = (
     <div key={nivel} className="soc-fundido mt-3 border-t border-slate-900/15 pt-2.5" data-escala-bloque>
       <p className="mb-1 text-[13px] font-black uppercase tracking-[0.12em] text-slate-900" data-escala>{ACTORES[nivel].nombre}</p>
-      {t.publico && t.privado ? (
-        <div className="grid grid-cols-2 gap-3">
-          <div><p className="mb-0.5 text-[12px] font-black uppercase tracking-wide text-slate-600">Público</p><Lista items={t.publico[nivel]} /></div>
-          <div className="border-l border-slate-900/15 pl-3"><p className="mb-0.5 text-[12px] font-black uppercase tracking-wide text-slate-600">Privado</p><Lista items={t.privado[nivel]} /></div>
-        </div>
-      ) : t.tecnicas ? (
+      {t.tecnicas ? (
         <p className="text-[18px] font-semibold leading-snug">{enLinea(t.nivel[nivel])}</p>
       ) : <Lista items={t.nivel[nivel]} />}
     </div>
@@ -401,7 +421,7 @@ function Vuelta({ id, source, target, style, markerEnd, data }: EdgeProps) {
 }
 
 /** Una flecha que sale por la izquierda y baja (la ley → las técnicas, por el pasillo entre la justicia y la ley, para no
- *  cruzar la gestión, que está debajo del centro como en la foto). */
+ *  cruzar la administración, que está debajo del centro como en la foto). */
 function Escalon({ id, source, target, style, markerEnd, data }: EdgeProps) {
   const a = useInternalNode(source), b = useInternalNode(target);
   if (!a || !b) return null;
@@ -463,8 +483,10 @@ function ColumnaMovil() {
           <div className="ml-1 border-l-2 border-slate-400 pl-3" data-ramas-ley>
             {RAMAS.map(([id, flecha]) => <Paso key={id} id={id} flecha={flecha} />)}
           </div>
-          <Paso id="gestion" flecha="poder ejecutivo · recaudación e inversión" />
-          <Paso flecha="mantiene los sistemas e infraestructuras de las técnicas" final />
+          <Paso id="empresa" flecha="de la economía: mercado y trabajo" />
+          <Paso id="administracion" flecha="impuestos · y de la ley, el poder ejecutivo" />
+          <Paso id="servicios" flecha="los financia" />
+          <Paso flecha="sistemas e infraestructuras de las técnicas" final />
           <p className="mt-3 text-center"><span className={pill}>↺ bienes y servicios: vuelven a cubrir los objetivos</span></p>
         </div>
       </div>
