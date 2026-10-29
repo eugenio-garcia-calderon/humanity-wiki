@@ -163,8 +163,9 @@ export default function BotonOpinion() {
         </div>
       ) : (
         <button type="button" onClick={() => setAbierto(true)} data-abrir-opinion
-          className="pointer-events-auto inline-flex h-14 items-center gap-2.5 rounded-full bg-amber-400 px-7 text-base font-black text-slate-900 shadow-[0_12px_30px_-8px_rgba(217,119,6,0.55)] ring-4 ring-white transition hover:-translate-y-0.5 hover:bg-amber-300">
-          <MessageSquareHeart className="h-6 w-6" /> ¿Qué mejorarías?
+          className="pointer-events-auto inline-flex h-10 items-center gap-2 rounded-full bg-amber-400 px-4 text-sm font-black text-slate-900 shadow-[0_10px_24px_-8px_rgba(217,119,6,0.5)] ring-2 ring-white transition hover:-translate-y-0.5 hover:bg-amber-300">
+          {/* Más pequeño (2026-10-29, Eugenio: «reduce el tamaño del feedback»). */}
+          <MessageSquareHeart className="h-[18px] w-[18px]" /> ¿Qué mejorarías?
         </button>
       )}
     </div>
