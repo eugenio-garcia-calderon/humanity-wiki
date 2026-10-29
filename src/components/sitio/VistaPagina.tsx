@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
@@ -20,6 +20,8 @@ import RutaRelaciones from './RutaRelaciones';
 import VistaMapaSitio, { useVista, vistaInicialDe } from './VistaMapaSitio';
 import VistaCirculo2Sitio from './VistaCirculo2Sitio';
 import VistaPiramideSitio from './VistaPiramideSitio';
+// La pizarra lleva React Flow, que pesa: se descarga solo al abrir la vista Sociedad.
+const VistaSociedadSitio = lazy(() => import('./VistaSociedadSitio'));
 import BotonOpinion from './BotonOpinion';
 
 // ============================================================================
@@ -146,6 +148,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const circulos = conBarra && vista === 'circulos';
   // LA PIRÁMIDE (2026-10-28, `VistaPiramideSitio.tsx`): los cinco sectores en una pirámide en 3D.
   const piramide = conBarra && vista === 'piramide';
+  // LA SOCIEDAD (2026-10-29, `VistaSociedadSitio.tsx`): los post-its de Eugenio en una pizarra, con el selector de actores.
+  const sociedad = conBarra && vista === 'sociedad';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -190,7 +194,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {mapa && <VistaMapaSitio raizId={pagina.sitio!.raizId} />}
       {circulos && <VistaCirculo2Sitio raizId={pagina.sitio!.raizId} />}
       {piramide && <VistaPiramideSitio raizId={pagina.sitio!.raizId} />}
-      <div hidden={mapa || circulos || piramide || undefined}>
+      {sociedad && <Suspense fallback={null}><VistaSociedadSitio raizId={pagina.sitio!.raizId} /></Suspense>}
+      <div hidden={mapa || circulos || piramide || sociedad || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
