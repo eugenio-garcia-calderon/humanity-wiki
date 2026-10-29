@@ -49,9 +49,10 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
     // calificaciones. En el centro, la pastilla de la ruta (el territorio y el sistema o la temática, o en la vista
     // Círculo lo que se va pinchando). Pegado a su derecha, el buscador; y a la derecha del todo, Donar y la cuenta
     // («Donar y perfil a la derecha»). En el móvil, la ruta baja a su propia línea.
-    <header data-cabecera-sitio className="sticky top-0 z-40 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:px-6 md:grid md:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)]"
+    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-1.5 backdrop-blur sm:-mt-5 sm:px-6 md:grid md:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)]"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
-      {/* A todo lo ancho de la ventana, sin barra de desplazamiento de lado. */}
+      {/* A todo lo ancho de la ventana, sin barra de desplazamiento de lado. Pegada arriba del todo, sin el hueco del margen
+          de la página (2026-10-29, Eugenio: «reduce el espacio superior del menú»). */}
       <style>{'html { overflow-x: clip; }'}</style>
       {/* En el móvil los grupos se deshacen (`contents`) para repartir sus piezas en líneas: arriba el menú, el logo,
           Donar y la cuenta; debajo las calificaciones y el buscador; y al final la ruta. */}
@@ -60,8 +61,8 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           cabezaMenu={simple ? undefined : cerrar => <VistasMenu porDefecto={vistaInicial} cerrar={cerrar} />} /></Suspense></span>}
         <Link to="/" className="ml-1 flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
           {icono && (/^(https?:|\/)/.test(icono)
-            ? <img src={miniatura(icono, 112)} alt="" className="h-[46px] w-[46px] shrink-0 rounded-lg object-contain" />
-            : <span className="text-[2rem] leading-none">{icono}</span>)}
+            ? <img src={miniatura(icono, 112)} alt="" className="h-[34px] w-[34px] shrink-0 rounded-lg object-contain" />
+            : <span className="text-[1.6rem] leading-none">{icono}</span>)}
           {/* El nombre de la plataforma (de vuelta el mismo día: «recupera el nombre»); el eslogan, si sobra sitio. */}
           {raiz && (
             <span className="hidden min-w-0 flex-col leading-none lg:flex">
