@@ -123,6 +123,69 @@ const DIBUJOS: Record<string, ReactElement> = {
       <path d="M8 40c3-2 5-4 8-4" fill="none" stroke={OSCURO} strokeWidth="1.3" />
     </>
   ),
+  // La cruz médica con el pulso que sigue vivo.
+  salud: (
+    <>
+      <circle cx="32" cy="20" r="14" fill={CELESTE} stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M32 13v14M25 20h14" stroke={AZUL} strokeWidth="2.4" />
+      <path d="M4 36h12l3-6 4 10 3-6h10" fill="none" stroke={OSCURO} strokeWidth="1.3" />
+    </>
+  ),
+  // El rayo que sale del sol: la energía propia.
+  energia: (
+    <>
+      <circle cx="18" cy="13" r="6" fill={CELESTE} stroke={AZUL} strokeWidth="1.3" />
+      <path d="M18 3v3M26 8l-2 2M28 13h-3M10 8l2 2M8 13H5" stroke={AZUL} strokeWidth="1.2" />
+      <path d="M38 4L26 24h8l-6 16 16-22h-9z" fill={CELESTE} stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M46 34h12M50 38h8" stroke={OSCURO} strokeWidth="1.3" />
+    </>
+  ),
+  // El morro del tren rápido sobre su vía.
+  movilidad: (
+    <>
+      <path d="M8 30h30c8 0 14-3 16-8 1-3-1-6-6-6H20c-6 0-10 5-12 14z" fill={CELESTE} stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M22 21h22M14 26h36" stroke={AZUL} strokeWidth="1.2" />
+      <circle cx="18" cy="33" r="3" fill="#fff" stroke={OSCURO} strokeWidth="1.3" />
+      <circle cx="36" cy="33" r="3" fill="#fff" stroke={OSCURO} strokeWidth="1.3" />
+      <path d="M4 40h56" stroke={OSCURO} strokeWidth="1.3" />
+    </>
+  ),
+  // La espiga y la manzana: del campo al plato.
+  alimentacion: (
+    <>
+      <path d="M20 40V14" stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M20 16c-6-1-8-5-8-10 5 0 8 3 8 10zM20 16c6-1 8-5 8-10-5 0-8 3-8 10zM20 26c-6-1-8-5-8-10 5 0 8 3 8 10zM20 26c6-1 8-5 8-10-5 0-8 3-8 10z" fill={CELESTE} stroke={AZUL} strokeWidth="1.2" />
+      <circle cx="44" cy="28" r="10" fill={CELESTE} stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M44 18c0-3 1-5 4-6" fill="none" stroke={OSCURO} strokeWidth="1.3" />
+    </>
+  ),
+  // La gota sobre el agua embalsada.
+  agua: (
+    <>
+      <path d="M32 3C24 13 20 19 20 26a12 12 0 0 0 24 0c0-7-4-13-12-23z" fill={CELESTE} stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M27 27a5 5 0 0 0 5 5" fill="none" stroke={AZUL} strokeWidth="1.3" />
+      <path d="M6 41c4 0 4-2 8-2s4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2" fill="none" stroke={AZUL} strokeWidth="1.2" />
+    </>
+  ),
+  // La casa en obra, con su grúa.
+  vivienda: (
+    <>
+      <path d="M10 38V22l12-9 12 9v16z" fill={CELESTE} stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M18 38v-8h8v8" fill="#fff" stroke={OSCURO} strokeWidth="1.2" />
+      <path d="M40 38V10h4M40 14h16M52 14v5" stroke={AZUL} strokeWidth="1.3" />
+      <path d="M50 19h5v5h-5z" fill={CELESTE} stroke={AZUL} strokeWidth="1.2" />
+      <path d="M6 38h52" stroke={OSCURO} strokeWidth="1.3" />
+    </>
+  ),
+  // La antena que conecta el país.
+  comunicacion: (
+    <>
+      <path d="M32 40V18" stroke={OSCURO} strokeWidth="1.5" />
+      <path d="M26 40h12M29 27l-7 13M35 27l7 13" stroke={OSCURO} strokeWidth="1.3" />
+      <circle cx="32" cy="14" r="4" fill={CELESTE} stroke={AZUL} strokeWidth="1.4" />
+      <path d="M23 14a9 9 0 0 1 18 0M16 14a16 16 0 0 1 32 0" fill="none" stroke={AZUL} strokeWidth="1.2" />
+    </>
+  ),
 };
 
 /** El dibujo de un sistema, al tamaño que pida la tarjeta o el panel. */
