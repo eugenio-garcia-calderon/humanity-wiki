@@ -10171,3 +10171,11 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Dos vueltas de un bot calificador: 6,5 → 7,5, con sus mejoras aplicadas.
 - La barra del sitio, más compacta (2026-10-29, Eugenio: «reduce el espacio superior del menú, el icono del logo y el tamaño del feedback»): pegada arriba sin el hueco del margen de la página, el logo de 46 a 34 px, y el botón «¿Qué mejorarías?» de 56 a 40 px de alto.
 - Sociedad: la Gestión se divide en tres tarjetas (2026-10-29, Eugenio). La empresa produce; la Administración pública le saca el dinero con los impuestos; y con él financia los Servicios públicos (salud, educación…). Flechas nuevas: mercado y trabajo, impuestos, los financia, bienes y productos, y sistemas e infraestructuras.
+- Vista nueva «Flujo» (`?vista=flujo`, 2026-10-30): el sistema operativo de España, el centro de control del país.
+  - La pizarra de post-its de Sociedad, pero aquí mandan las CONEXIONES: cada flecha lleva su nombre en una pastilla y al pincharla (o pinchar la línea) se abre un panel con todo lo que pasa por ella. Ejemplo: la flecha ley→empresa abre «regulación empresarial»: nacer, contratar, tributar, competir y cerrar.
+  - 13 sistemas y 18 conexiones, cada uno con: cómo funciona, piezas clave, indicadores de España con semáforo y fuente (INE, Eurostat, CGPJ, MITECO…), fallos del sistema y mejoras propuestas. TODO el contenido en `flujoDatos.ts` (editable sin tocar la vista); los dibujos de una línea en `flujoDibujos.tsx`.
+  - El ciclo principal va numerado 1-6 en tinta (demandas → poder legislativo → poder ejecutivo → presupuestos → infraestructuras → cubre las necesidades); las transversales en gris fino.
+  - Cada tarjeta lleva una barra de salud segmentada (cuántos indicadores van bien/regular/mal) y dos datos gancho. Arriba, las constantes vitales del país. Minimapa abajo a la izquierda. `?detalle=ley>empresa` en la dirección para compartir.
+  - Los paneles navegan: las píldoras DE→A abren el sistema y cada sistema lista sus conexiones.
+  - Hecho con 3 bots creadores en paralelo (político-jurídico, económico, base/transversales) y 2 evaluadores en dos vueltas: datos 7,5→9; visión general 7→8,5 con todas sus mejoras aplicadas.
+  - En el móvil, la columna con las mismas tarjetas y las conexiones como pastillas.
