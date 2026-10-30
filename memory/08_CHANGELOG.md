@@ -10179,3 +10179,10 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Los paneles navegan: las píldoras DE→A abren el sistema y cada sistema lista sus conexiones.
   - Hecho con 3 bots creadores en paralelo (político-jurídico, económico, base/transversales) y 2 evaluadores en dos vueltas: datos 7,5→9; visión general 7→8,5 con todas sus mejoras aplicadas.
   - En el móvil, la columna con las mismas tarjetas y las conexiones como pastillas.
+- La vista Flujo, rediseñada como cadena circular (2026-10-30, Eugenio, con su foto de la cadena como guía).
+  - Los 8 eslabones del ciclo en una rueda numerada 1-8 (objetivos → política → ley → economía → empresa → administración → servicios → técnicas → cierra en objetivos); alrededor, Valores y Educación arriba, Justicia a la derecha, Ecología y Recursos a la izquierda. Ya no está todo conectado con todo: la cadena manda y las transversales van en gris fino.
+  - Las TÉCNICAS, desglosadas en 7 tarjetas propias (Salud, Agua, Alimentación, Vivienda, Energía, Movilidad, Comunicación), en abanico junto a su tarjeta madre, cada una con su detalle completo; la madre se reenfoca a la ciencia (I+D, publicaciones, patentes).
+  - Tarjetas blanco hueso con esquinas redondeadas sobre tablero gris, y un color por sistema siguiendo el espectro: morado para lo abstracto (Valores) hasta rojo para lo vital (Objetivos).
+  - Los fallos van emparejados con su mejora (`arreglos`: parejas [fallo, mejora] en `flujoDatos.ts`, 163 parejas); el panel los enseña como fallo → ↳ mejora.
+  - Zoom semántico: de lejos cada tarjeta enseña solo su nombre y un dato en grande, y las pastillas del ciclo no encogen; de cerca, todo el detalle. Tablero con límites y «Recolocar» siempre visible.
+  - 3 bots creadores (técnicas y los dos emparejadores) y 1 ronda de evaluación (contenido 9, diseño 5 → sus 5 mejoras aplicadas; Eugenio pidió una sola ronda).
