@@ -22,6 +22,7 @@ import VistaCirculo2Sitio from './VistaCirculo2Sitio';
 import VistaPiramideSitio from './VistaPiramideSitio';
 // La pizarra lleva React Flow, que pesa: se descarga solo al abrir la vista Sociedad.
 const VistaSociedadSitio = lazy(() => import('./VistaSociedadSitio'));
+const VistaFlujoSitio = lazy(() => import('./VistaFlujoSitio'));
 import BotonOpinion from './BotonOpinion';
 
 // ============================================================================
@@ -150,6 +151,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const piramide = conBarra && vista === 'piramide';
   // LA SOCIEDAD (2026-10-29, `VistaSociedadSitio.tsx`): los post-its de Eugenio en una pizarra, con el selector de actores.
   const sociedad = conBarra && vista === 'sociedad';
+  // EL FLUJO (2026-10-30, `VistaFlujoSitio.tsx`): el sistema operativo de España, con el detalle de cada conexión.
+  const flujo = conBarra && vista === 'flujo';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -195,7 +198,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {circulos && <VistaCirculo2Sitio raizId={pagina.sitio!.raizId} />}
       {piramide && <VistaPiramideSitio raizId={pagina.sitio!.raizId} />}
       {sociedad && <Suspense fallback={null}><VistaSociedadSitio raizId={pagina.sitio!.raizId} /></Suspense>}
-      <div hidden={mapa || circulos || piramide || sociedad || undefined}>
+      {flujo && <Suspense fallback={null}><VistaFlujoSitio /></Suspense>}
+      <div hidden={mapa || circulos || piramide || sociedad || flujo || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}

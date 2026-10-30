@@ -70,7 +70,7 @@ html, body { overscroll-behavior-x: none; }
    cabecera incluidas, sin tocar cada tamaño por separado. */
 .pagina-chica { zoom: 0.9; }
 /* La barra del sitio y la vista de mapa van a tamaño normal aunque la página tenga la letra pequeña (2026-10-26). */
-.pagina-chica [data-cabecera-sitio], .pagina-chica [data-vista-mapa], .pagina-chica [data-vista-sociedad] { zoom: 1.1111; }
+.pagina-chica [data-cabecera-sitio], .pagina-chica [data-vista-mapa], .pagina-chica [data-vista-sociedad], .pagina-chica [data-vista-flujo] { zoom: 1.1111; }
 /* La búsqueda dentro de la página (`BuscarEnPagina.tsx`), con la API de
    resaltado del navegador: pinta sin tocar el DOM del editor. */
 ::highlight(busqueda) { background-color: rgb(254 240 138); color: inherit; }
