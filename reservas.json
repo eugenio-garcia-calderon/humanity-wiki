@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0161_calendario_arte.sql",
+      "motivo": "Calendario Arte para la Humanidad (agente en la nube)",
+      "desde": "2026-11-04T22:40:45.683Z"
+    }
+  ]
 }
