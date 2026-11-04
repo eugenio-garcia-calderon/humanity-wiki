@@ -1,0 +1,218 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3a3f7a"/>
+      <stop offset="0.3" stop-color="#6a5a9a"/>
+      <stop offset="0.5" stop-color="#d8a86a"/>
+      <stop offset="0.72" stop-color="#9a8a84"/>
+      <stop offset="1" stop-color="#4a4a52"/>
+    </linearGradient>
+    <radialGradient id="haloLuna" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff4c8" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#fff4c8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="copa" cx="0.4" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#1f8a7a"/>
+      <stop offset="0.7" stop-color="#1a5a5a"/>
+      <stop offset="1" stop-color="#2a3a44"/>
+    </radialGradient>
+    <linearGradient id="raiz" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c88a4a"/>
+      <stop offset="0.55" stop-color="#a8703a"/>
+      <stop offset="1" stop-color="#6a5448"/>
+    </linearGradient>
+    <linearGradient id="suelo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3a6a4a"/>
+      <stop offset="0.5" stop-color="#5a4a32"/>
+      <stop offset="1" stop-color="#3a3836"/>
+    </linearGradient>
+    <radialGradient id="huevo" cx="0.4" cy="0.35" r="0.6">
+      <stop offset="0" stop-color="#fffbe6"/>
+      <stop offset="1" stop-color="#ffcf5a"/>
+    </radialGradient>
+    <radialGradient id="haloCorazon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffd86a" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#ffd86a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1485" height="850" fill="url(#cielo)"/>
+
+  <!-- LUZ: luna amable y estrellas -->
+  <circle cx="230" cy="160" r="140" fill="url(#haloLuna)"/>
+  <circle cx="230" cy="160" r="66" fill="#fff0c0"/>
+  <circle cx="262" cy="140" r="58" fill="#4a4682"/>
+  <g fill="#fff0c0">
+    <polygon points="120,80 126,94 140,100 126,106 120,120 114,106 100,100 114,94"/>
+    <polygon points="380,110 384,120 394,124 384,128 380,138 376,128 366,124 376,120"/>
+    <polygon points="330,260 334,270 344,274 334,278 330,288 326,278 316,274 326,270"/>
+    <circle cx="80" cy="250" r="4"/><circle cx="440" cy="60" r="4"/><circle cx="180" cy="320" r="3"/>
+  </g>
+
+  <!-- SOMBRA: reloj grande al fondo derecho -->
+  <g opacity="0.95">
+    <circle cx="1220" cy="190" r="125" fill="#2e2e36" stroke="#8a8a94" stroke-width="12"/>
+    <circle cx="1220" cy="190" r="100" fill="#d8d4c8"/>
+    <g stroke="#2e2e36" stroke-width="8" stroke-linecap="round">
+      <path d="M1220,98 L1220,116"/><path d="M1220,264 L1220,282"/>
+      <path d="M1128,190 L1146,190"/><path d="M1294,190 L1312,190"/>
+    </g>
+    <path d="M1220,190 L1220,118" stroke="#1a1a1e" stroke-width="10" stroke-linecap="round"/>
+    <path d="M1220,190 L1278,222" stroke="#c83a2a" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="1220" cy="190" r="10" fill="#1a1a1e"/>
+    <!-- campanas de despertador -->
+    <path d="M1120,90 Q1110,40 1160,52Z" fill="#8a8a94"/>
+    <path d="M1320,90 Q1330,40 1280,52Z" fill="#8a8a94"/>
+  </g>
+
+  <!-- suelo -->
+  <path d="M0,720 Q740,690 1485,720 L1485,850 L0,850Z" fill="url(#suelo)"/>
+
+  <!-- AGUA: arroyo en el lado luminoso -->
+  <path d="M0,790 C150,760 300,800 470,770 C540,758 600,770 650,790 L650,812 C590,795 540,786 470,796 C300,826 150,786 0,816Z" fill="#5ad0d0"/>
+  <path d="M60,795 q30,-10 60,0 M260,792 q30,-10 60,0" stroke="#d8fbf8" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- PLANTAS MEDICINALES (izquierda) -->
+  <g>
+    <!-- lavanda -->
+    <g stroke="#3f7a3a" stroke-width="5" stroke-linecap="round">
+      <path d="M150,760 L140,620"/><path d="M175,760 L180,600"/><path d="M200,760 L215,630"/>
+    </g>
+    <g fill="#8a5ac8">
+      <ellipse cx="140" cy="615" rx="8" ry="26"/><ellipse cx="180" cy="595" rx="8" ry="28"/><ellipse cx="216" cy="625" rx="8" ry="26"/>
+    </g>
+    <!-- manzanilla -->
+    <g stroke="#3f7a3a" stroke-width="5" stroke-linecap="round">
+      <path d="M300,770 L290,660"/><path d="M330,770 L345,680"/><path d="M360,770 L380,650"/>
+    </g>
+    <g fill="#fffbe6">
+      <circle cx="290" cy="655" r="18"/><circle cx="345" cy="676" r="16"/><circle cx="380" cy="645" r="18"/>
+    </g>
+    <g fill="#f3b41c">
+      <circle cx="290" cy="655" r="7"/><circle cx="345" cy="676" r="6"/><circle cx="380" cy="645" r="7"/>
+    </g>
+    <!-- aloe -->
+    <g fill="#5aa86a">
+      <path d="M470,770 Q440,700 452,650 Q470,710 482,770Z"/>
+      <path d="M482,770 Q500,690 530,660 Q510,720 494,770Z"/>
+      <path d="M476,770 Q470,690 480,630 Q492,700 488,770Z"/>
+    </g>
+  </g>
+
+  <!-- PIES-RAICES -->
+  <g fill="none" stroke-linecap="round" stroke="#a8703a">
+    <path d="M700,690 C690,730 650,760 580,780" stroke-width="16"/>
+    <path d="M705,700 C700,750 690,790 660,830" stroke-width="12"/>
+    <path d="M720,700 C720,760 730,800 740,840" stroke-width="12"/>
+    <path d="M770,690 C780,740 830,770 900,785" stroke-width="16" stroke="#8a6448"/>
+    <path d="M765,700 C770,750 790,790 820,830" stroke-width="12" stroke="#8a6448"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke="#c88a4a" stroke-width="5">
+    <path d="M610,772 C600,790 590,800 570,806"/>
+    <path d="M640,765 C640,785 630,800 620,815"/>
+  </g>
+
+  <!-- CUERPO de raices -->
+  <path d="M690,330 C640,345 625,400 640,470 C650,540 680,600 690,700 L790,700 C800,600 830,540 840,470 C855,400 840,345 790,330Z" fill="url(#raiz)" stroke="#5a3a1e" stroke-width="6"/>
+  <!-- vetas de raiz en el cuerpo -->
+  <g fill="none" stroke="#e0a868" stroke-width="5" stroke-linecap="round" opacity="0.8">
+    <path d="M700,345 C670,420 690,520 712,690"/>
+    <path d="M740,340 C730,440 750,560 738,690"/>
+    <path d="M780,345 C810,430 790,540 770,690"/>
+    <path d="M712,500 C690,520 670,520 660,500"/>
+    <path d="M770,520 C795,540 815,535 828,515"/>
+  </g>
+
+  <!-- BRAZO IZQUIERDO (luz): rama/raiz que sostiene agua y hierbas -->
+  <path d="M650,360 C590,380 560,440 540,520 C530,560 520,590 510,610" fill="none" stroke="#a8703a" stroke-width="30" stroke-linecap="round"/>
+  <path d="M650,360 C590,380 560,440 540,520 C530,560 520,590 510,610" fill="none" stroke="#e0a868" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+  <!-- mano-cuenco con agua -->
+  <path d="M470,600 Q510,660 560,600Z" fill="#a8703a" stroke="#5a3a1e" stroke-width="4"/>
+  <ellipse cx="515" cy="602" rx="44" ry="10" fill="#5ad0d0"/>
+  <g fill="#5ad0d0">
+    <path d="M500,640 Q505,655 500,665 Q495,655 500,640Z"/>
+    <path d="M520,660 Q525,675 520,685 Q515,675 520,660Z"/>
+  </g>
+  <!-- hojitas brotando del brazo -->
+  <g fill="#6cc06a">
+    <ellipse cx="575" cy="420" rx="22" ry="9" transform="rotate(-40 575 420)"/>
+    <ellipse cx="548" cy="490" rx="22" ry="9" transform="rotate(-20 548 490)"/>
+    <ellipse cx="610" cy="378" rx="18" ry="8" transform="rotate(-60 610 378)"/>
+  </g>
+
+  <!-- BRAZO DERECHO (sombra): cables -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M830,360 C900,380 940,450 960,540 C970,580 990,610 1020,630" stroke="#1d1d22" stroke-width="12"/>
+    <path d="M830,370 C890,400 920,460 945,545 C955,585 980,620 1010,640" stroke="#3a3a44" stroke-width="10"/>
+    <path d="M832,350 C910,370 955,440 975,530 C985,575 1005,600 1035,615" stroke="#7a2a2a" stroke-width="8"/>
+    <!-- cables sueltos que se enredan -->
+    <path d="M1020,630 C1060,650 1050,700 1090,720 C1130,740 1150,700 1180,730" stroke="#1d1d22" stroke-width="8"/>
+    <path d="M1010,640 C1000,690 1040,720 1010,760" stroke="#3a3a44" stroke-width="7"/>
+  </g>
+  <!-- enchufe -->
+  <rect x="1172" y="716" width="34" height="26" rx="4" fill="#1d1d22"/>
+  <path d="M1206,722 L1220,722 M1206,736 L1220,736" stroke="#8a8a94" stroke-width="5"/>
+  <!-- pastillas cayendo del brazo -->
+  <g>
+    <g transform="rotate(30 960 610)"><rect x="940" y="600" width="40" height="18" rx="9" fill="#f2f2f2"/><rect x="960" y="600" width="20" height="18" rx="9" fill="#c83a5a"/></g>
+    <g transform="rotate(-20 1060 580)"><rect x="1040" y="570" width="40" height="18" rx="9" fill="#f2f2f2"/><rect x="1060" y="570" width="20" height="18" rx="9" fill="#4a7ac8"/></g>
+    <circle cx="1000" cy="690" r="11" fill="#f2f2f2" stroke="#b8b8c0" stroke-width="2"/>
+    <circle cx="1100" cy="650" r="10" fill="#f2f2f2" stroke="#b8b8c0" stroke-width="2"/>
+    <g transform="rotate(60 1120 780)"><rect x="1100" y="770" width="40" height="18" rx="9" fill="#f2f2f2"/><rect x="1120" y="770" width="20" height="18" rx="9" fill="#c83a5a"/></g>
+    <circle cx="1050" cy="790" r="10" fill="#f2f2f2" stroke="#b8b8c0" stroke-width="2"/>
+  </g>
+  <!-- cadena del reloj que ata la muneca -->
+  <path d="M1170,300 C1120,400 1060,470 975,555" stroke="#8a8a94" stroke-width="7" fill="none" stroke-dasharray="14 7"/>
+  <g fill="none" stroke="#8a8a94" stroke-width="7">
+    <ellipse cx="962" cy="560" rx="30" ry="14" transform="rotate(-30 962 560)"/>
+    <ellipse cx="968" cy="580" rx="30" ry="14" transform="rotate(-30 968 580)"/>
+  </g>
+
+  <!-- CORAZON-NIDO -->
+  <circle cx="740" cy="430" r="95" fill="url(#haloCorazon)"/>
+  <path d="M680,420 Q740,490 800,420 Q790,470 740,478 Q690,470 680,420Z" fill="#7a4a1e"/>
+  <g fill="none" stroke="#c88a4a" stroke-width="5" stroke-linecap="round">
+    <path d="M676,422 Q740,470 804,422"/>
+    <path d="M684,438 Q740,480 796,438"/>
+    <path d="M694,452 Q740,486 786,452"/>
+  </g>
+  <ellipse cx="722" cy="425" rx="17" ry="22" fill="url(#huevo)"/>
+  <ellipse cx="757" cy="425" rx="17" ry="22" fill="url(#huevo)"/>
+
+  <!-- CUELLO -->
+  <path d="M715,300 L765,300 L770,340 L710,340Z" fill="#a8703a" stroke="#5a3a1e" stroke-width="5"/>
+
+  <!-- CABEZA: rostro sereno -->
+  <ellipse cx="740" cy="270" rx="58" ry="66" fill="#b8804a" stroke="#5a3a1e" stroke-width="5"/>
+  <path d="M708,268 Q720,278 732,268" stroke="#3a2210" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M748,268 Q760,278 772,268" stroke="#3a2210" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M726,306 Q740,314 754,306" stroke="#3a2210" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- COPA-CEREBRO -->
+  <!-- tronco que nace de la cabeza -->
+  <path d="M730,215 C728,190 724,170 718,150 M750,215 C752,190 758,170 764,150" stroke="#5a3a1e" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M600,140 C580,60 680,10 740,22 C810,10 905,60 885,140 C905,210 820,240 740,226 C660,240 580,210 600,140Z" fill="url(#copa)" stroke="#123a3a" stroke-width="6"/>
+  <!-- neuronas-ramas luminosas (izquierda) -->
+  <g fill="none" stroke="#ffe27a" stroke-width="5" stroke-linecap="round">
+    <path d="M740,215 C735,180 700,150 650,140"/>
+    <path d="M700,165 C690,130 680,100 660,70"/>
+    <path d="M740,215 C740,160 735,110 740,45"/>
+    <path d="M738,120 C715,105 690,95 680,60"/>
+  </g>
+  <g fill="#fff4b0">
+    <circle cx="650" cy="140" r="11"/><circle cx="660" cy="70" r="10"/><circle cx="740" cy="45" r="11"/>
+    <circle cx="680" cy="60" r="8"/><circle cx="700" cy="165" r="7"/><circle cx="738" cy="120" r="7"/>
+    <circle cx="622" cy="128" r="4"/><circle cx="640" cy="160" r="4"/><circle cx="645" cy="58" r="4"/>
+  </g>
+  <!-- ramas de la derecha: apagadas y enmaranadas -->
+  <g fill="none" stroke="#6a7070" stroke-width="5" stroke-linecap="round">
+    <path d="M740,215 C750,180 790,160 840,150 C860,145 850,120 820,125"/>
+    <path d="M780,170 C800,130 790,100 815,70 C830,60 845,80 830,95"/>
+    <path d="M742,130 C770,110 790,90 800,60"/>
+  </g>
+  <g fill="#3a4040">
+    <circle cx="820" cy="125" r="8"/><circle cx="830" cy="95" r="7"/><circle cx="800" cy="60" r="8"/>
+  </g>
+  <!-- chispa roja de tension -->
+  <polygon points="856,160 872,152 864,168 880,166 858,184 864,170 850,172" fill="#e8402e"/>
+</svg>

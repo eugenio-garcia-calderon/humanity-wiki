@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 4 · Bosque y Naturaleza — un ciervo de frente cuya cornamenta es un bosque entero; bajo sus patas, raíces y micelio.
+       Luz: la mitad izquierda de la cornamenta es verde, con pájaros, setas y flores.
+       Sombra: la mitad derecha está calcinada: ramas negras, brasas y humo (incendios, tala). -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f7e2a6"/>
+      <stop offset="0.45" stop-color="#e9c47e"/>
+      <stop offset="0.6" stop-color="#c98a5a"/>
+      <stop offset="1" stop-color="#5b3a3c"/>
+    </linearGradient>
+    <radialGradient id="resplandor" cx="80%" cy="35%" r="45%">
+      <stop offset="0" stop-color="#ff7a2e" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ff7a2e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tierra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6b4325"/>
+      <stop offset="1" stop-color="#2e1a12"/>
+    </linearGradient>
+    <linearGradient id="ceniza" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4142"/>
+      <stop offset="1" stop-color="#231d1f"/>
+    </linearGradient>
+    <linearGradient id="pelaje" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9934a"/>
+      <stop offset="1" stop-color="#9a5530"/>
+    </linearGradient>
+    <linearGradient id="pelajeSombra" gradientUnits="userSpaceOnUse" x1="600" y1="0" x2="900" y2="0">
+      <stop offset="0" stop-color="#2a1618" stop-opacity="0"/>
+      <stop offset="0.45" stop-color="#2a1618" stop-opacity="0"/>
+      <stop offset="0.6" stop-color="#2a1618" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#2a1618" stop-opacity="0.6"/>
+    </linearGradient>
+    <radialGradient id="copa" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#b8e07a"/>
+      <stop offset="0.6" stop-color="#5aa84e"/>
+      <stop offset="1" stop-color="#2f6e3e"/>
+    </radialGradient>
+    <radialGradient id="brasa" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fff0a0"/>
+      <stop offset="0.4" stop-color="#ff8a2a"/>
+      <stop offset="1" stop-color="#ff5a1a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nodo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset="0.5" stop-color="#f5e6a8" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#f5e6a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="hojas" width="28" height="28" patternUnits="userSpaceOnUse">
+      <polygon points="14,3 22,14 14,25 6,14" fill="none" stroke="#e9f7c4" stroke-width="2" stroke-opacity="0.45"/>
+      <path d="M14 3V25" stroke="#e9f7c4" stroke-width="1.5" stroke-opacity="0.35"/>
+    </pattern>
+    <pattern id="pelo" width="30" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 0L15 14L30 0" fill="none" stroke="#7a3f22" stroke-width="2" stroke-opacity="0.45"/>
+    </pattern>
+    <filter id="brillo" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="humo" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <clipPath id="ciervo">
+      <path d="M665 560L655 692H693L702 560Z"/>
+      <path d="M783 560L795 692H833L820 560Z"/>
+      <path d="M742 380C820 380 860 450 855 520C850 575 810 600 742 600C674 600 634 575 629 520C624 450 664 380 742 380Z"/>
+      <path d="M700 330L692 420H792L784 330Z"/>
+      <path d="M794 290C844 280 884 300 894 320C864 335 814 330 784 310Z"/>
+      <path d="M742 250C800 250 812 300 800 350C790 395 770 430 742 440C714 430 694 395 684 350C672 300 684 250 742 250Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Cielo: luz verde-dorada a la izquierda, resplandor de incendio a la derecha -->
+  <path d="M0 0H1485V850H0Z" fill="url(#cielo)"/>
+  <path d="M0 0H1485V850H0Z" fill="url(#resplandor)"/>
+  <!-- Humo -->
+  <g fill="#3b3236" opacity="0.55" filter="url(#humo)">
+    <ellipse cx="1180" cy="90" rx="200" ry="60"/>
+    <ellipse cx="1330" cy="180" rx="160" ry="70"/>
+    <ellipse cx="1050" cy="40" rx="140" ry="40"/>
+  </g>
+
+  <!-- Suelo: tierra viva a la izquierda, ceniza a la derecha -->
+  <path d="M0 640C300 625 500 650 742 645C980 640 1200 630 1485 645V850H0Z" fill="url(#tierra)"/>
+  <path d="M800 643C980 640 1200 630 1485 645V850H860Z" fill="url(#ceniza)"/>
+  <!-- Hierba a la izquierda -->
+  <g fill="#5aa84e">
+    <path d="M60 640L72 600L84 640Z"/><path d="M140 636L150 606L162 636Z"/><path d="M240 634L250 596L262 634Z"/>
+    <path d="M360 638L372 604L384 638Z"/><path d="M470 643L480 610L492 643Z"/><path d="M560 645L570 616L582 645Z"/>
+  </g>
+  <!-- Tocones talados a la derecha -->
+  <g stroke="#1a1416" stroke-width="3">
+    <path d="M1100 640V600H1150V640Z" fill="#5a3a2a"/>
+    <ellipse cx="1125" cy="600" rx="25" ry="8" fill="#c9a074"/>
+    <path d="M1300 645V590H1362V645Z" fill="#5a3a2a"/>
+    <ellipse cx="1331" cy="590" rx="31" ry="10" fill="#c9a074"/>
+  </g>
+  <g fill="none" stroke="#8a6040" stroke-width="2"><ellipse cx="1125" cy="600" rx="12" ry="4"/><ellipse cx="1331" cy="590" rx="16" ry="5"/></g>
+
+  <!-- Raíces y micelio bajo las patas -->
+  <g fill="none" stroke-linecap="round">
+    <g stroke="#3a2214" stroke-width="10">
+      <path d="M690 690C670 730 600 750 520 760C440 770 380 800 300 810"/>
+      <path d="M690 690C680 740 650 790 640 840"/>
+      <path d="M795 690C810 740 860 770 930 780C1000 790 1060 810 1120 830"/>
+      <path d="M795 690C800 740 820 790 840 840"/>
+    </g>
+    <g stroke="#3a2214" stroke-width="5">
+      <path d="M520 760C480 730 420 720 360 730M560 755C540 790 520 820 480 840"/>
+      <path d="M930 780C960 750 1010 740 1060 745M960 784C980 810 1000 830 1040 845"/>
+    </g>
+    <!-- Red de hongos: hilos blancos con nodos luminosos -->
+    <g stroke="#f3e8c4" stroke-width="2.5" opacity="0.85">
+      <path d="M120 760L240 720L360 730L470 790L640 800L742 760L840 800L1000 760L1120 790L1260 740L1400 780"/>
+      <path d="M240 720L300 810L470 790M640 800L700 840M742 760L790 840M1000 760L1060 840M1260 740L1330 830"/>
+      <path d="M60 820L180 800L300 810M840 800L960 830L1120 790"/>
+    </g>
+  </g>
+  <g filter="url(#brillo)">
+    <circle cx="240" cy="720" r="14" fill="url(#nodo)"/><circle cx="470" cy="790" r="16" fill="url(#nodo)"/>
+    <circle cx="742" cy="760" r="18" fill="url(#nodo)"/><circle cx="360" cy="730" r="11" fill="url(#nodo)"/>
+    <circle cx="300" cy="810" r="12" fill="url(#nodo)"/><circle cx="640" cy="800" r="12" fill="url(#nodo)"/>
+    <circle cx="1000" cy="760" r="11" fill="url(#nodo)" opacity="0.6"/><circle cx="1260" cy="740" r="9" fill="url(#nodo)" opacity="0.45"/>
+  </g>
+
+  <!-- ===== CORNAMENTA-BOSQUE ===== -->
+  <!-- Lado izquierdo: ramas vivas -->
+  <g fill="none" stroke="#6a3f22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M700 270C660 220 600 200 520 190C460 182 410 150 380 100" stroke-width="22"/>
+    <path d="M620 205C600 150 610 100 640 60" stroke-width="15"/>
+    <path d="M520 190C470 220 400 230 330 220" stroke-width="15"/>
+    <path d="M440 160C420 120 430 80 460 50" stroke-width="11"/>
+    <path d="M380 100C340 90 300 70 270 40" stroke-width="10"/>
+    <path d="M330 220C290 250 260 270 220 270" stroke-width="10"/>
+  </g>
+  <!-- Copas de árboles en las puntas -->
+  <g stroke="#2a5a33" stroke-width="3">
+    <circle cx="640" cy="70" r="58" fill="url(#copa)"/>
+    <circle cx="460" cy="60" r="52" fill="url(#copa)"/>
+    <circle cx="290" cy="60" r="56" fill="url(#copa)"/>
+    <circle cx="225" cy="250" r="54" fill="url(#copa)"/>
+    <circle cx="350" cy="200" r="48" fill="url(#copa)"/>
+    <circle cx="545" cy="160" r="46" fill="url(#copa)"/>
+  </g>
+  <g>
+    <circle cx="640" cy="70" r="58" fill="url(#hojas)"/>
+    <circle cx="460" cy="60" r="52" fill="url(#hojas)"/>
+    <circle cx="290" cy="60" r="56" fill="url(#hojas)"/>
+    <circle cx="225" cy="250" r="54" fill="url(#hojas)"/>
+    <circle cx="350" cy="200" r="48" fill="url(#hojas)"/>
+    <circle cx="545" cy="160" r="46" fill="url(#hojas)"/>
+  </g>
+  <!-- Pájaros -->
+  <g fill="#2f6fb0" stroke="#173a5e" stroke-width="2">
+    <g transform="translate(545 105)">
+      <ellipse cx="0" cy="0" rx="18" ry="12"/><circle cx="14" cy="-8" r="8"/>
+      <path d="M21 -9L31 -6L21 -4Z" fill="#f2b544"/><path d="M-16 0L-30 -6L-26 6Z"/>
+    </g>
+    <g transform="translate(160 160) scale(-1 1)">
+      <ellipse cx="0" cy="0" rx="16" ry="11"/><circle cx="13" cy="-7" r="7"/>
+      <path d="M19 -8L28 -5L19 -3Z" fill="#f2b544"/><path d="M-14 0L-28 -6L-24 6Z"/>
+    </g>
+  </g>
+  <path d="M120 80Q138 66 150 82Q162 66 180 80" fill="none" stroke="#2a3a52" stroke-width="4" stroke-linecap="round"/>
+  <path d="M90 130Q104 120 113 132Q122 120 136 130" fill="none" stroke="#2a3a52" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Flores -->
+  <g>
+    <g transform="translate(400 250)"><circle r="9" fill="#e2557a"/><circle r="4" fill="#ffe18a"/></g>
+    <g transform="translate(600 140)"><circle r="8" fill="#f2f0ff"/><circle r="3.5" fill="#f2b544"/></g>
+    <g transform="translate(250 300)"><circle r="9" fill="#9a6bd1"/><circle r="4" fill="#ffe18a"/></g>
+    <g transform="translate(680 105)"><circle r="7" fill="#e2557a"/><circle r="3" fill="#ffe18a"/></g>
+  </g>
+
+  <!-- Lado derecho: ramas calcinadas -->
+  <g fill="none" stroke="#151112" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M785 270C825 220 885 200 965 190C1025 182 1075 150 1105 100" stroke-width="22"/>
+    <path d="M865 205C885 150 875 100 845 60" stroke-width="15"/>
+    <path d="M965 190C1015 220 1085 230 1155 220" stroke-width="15"/>
+    <path d="M1045 160C1065 120 1055 80 1025 50" stroke-width="11"/>
+    <path d="M1105 100C1145 90 1185 70 1215 40" stroke-width="10"/>
+    <path d="M1155 220C1195 250 1225 270 1265 270" stroke-width="10"/>
+    <path d="M845 60L825 35M845 60L870 40M1025 50L1005 25M1215 40L1240 30M1265 270L1290 255M1265 270L1285 290M1155 220L1180 200" stroke-width="6"/>
+  </g>
+  <!-- Grietas de brasa en las ramas -->
+  <g fill="none" stroke="#ff7a2a" stroke-width="3" stroke-linecap="round">
+    <path d="M820 230L840 222M900 196L925 192M1000 182L1020 172M1060 150L1075 130M870 150L873 130M1090 222L1115 222"/>
+  </g>
+  <!-- Brasas y chispas -->
+  <g filter="url(#brillo)">
+    <circle cx="1105" cy="100" r="16" fill="url(#brasa)"/>
+    <circle cx="845" cy="60" r="14" fill="url(#brasa)"/>
+    <circle cx="1155" cy="220" r="15" fill="url(#brasa)"/>
+    <circle cx="965" cy="190" r="13" fill="url(#brasa)"/>
+    <circle cx="1265" cy="270" r="12" fill="url(#brasa)"/>
+    <g fill="#ffb347">
+      <circle cx="1180" cy="150" r="4"/><circle cx="1240" cy="190" r="3"/><circle cx="930" cy="120" r="3.5"/>
+      <circle cx="1300" cy="320" r="3"/><circle cx="1060" cy="260" r="3"/><circle cx="1210" cy="340" r="2.5"/>
+    </g>
+  </g>
+  <!-- Ceniza cayendo -->
+  <g fill="#8a8085" opacity="0.8">
+    <circle cx="1190" cy="420" r="3"/><circle cx="1250" cy="480" r="2.5"/><circle cx="1120" cy="520" r="3"/>
+    <circle cx="1350" cy="430" r="2.5"/><circle cx="1290" cy="560" r="3"/><circle cx="1050" cy="460" r="2"/>
+  </g>
+
+  <!-- ===== CIERVO DE FRENTE ===== -->
+  <!-- Patas -->
+  <g fill="url(#pelaje)" stroke="#5a2d18" stroke-width="4" stroke-linejoin="round">
+    <path d="M665 560L655 680H690L702 560Z"/>
+    <path d="M783 560L795 680H830L820 560Z"/>
+  </g>
+  <g fill="#2a1a12">
+    <path d="M652 672H693L690 692H655Z"/><path d="M792 672H833L830 692H795Z"/>
+  </g>
+  <!-- Pecho / cuerpo -->
+  <path d="M742 380C820 380 860 450 855 520C850 575 810 600 742 600C674 600 634 575 629 520C624 450 664 380 742 380Z"
+        fill="url(#pelaje)" stroke="#5a2d18" stroke-width="4"/>
+  <path d="M742 380C820 380 860 450 855 520C850 575 810 600 742 600C674 600 634 575 629 520C624 450 664 380 742 380Z" fill="url(#pelo)"/>
+  <!-- Babero claro con rombos -->
+  <path d="M742 420C775 440 790 490 742 560C694 490 709 440 742 420Z" fill="#f4e2c6" stroke="#5a2d18" stroke-width="3"/>
+  <g fill="#d9934a"><path d="M742 450L752 465L742 480L732 465Z"/><path d="M742 495L750 507L742 519L734 507Z"/></g>
+  <!-- Cuello -->
+  <path d="M700 330L692 420H792L784 330Z" fill="url(#pelaje)" stroke="#5a2d18" stroke-width="4"/>
+  <!-- Orejas -->
+  <path d="M690 290C640 280 600 300 590 320C620 335 670 330 700 310Z" fill="#c97e40" stroke="#5a2d18" stroke-width="4"/>
+  <path d="M630 312C650 308 670 308 688 306" fill="none" stroke="#f4c9a2" stroke-width="6" stroke-linecap="round"/>
+  <path d="M794 290C844 280 884 300 894 320C864 335 814 330 784 310Z" fill="#7a4a30" stroke="#3a2018" stroke-width="4"/>
+  <path d="M854 312C834 308 814 308 796 306" fill="none" stroke="#a87a62" stroke-width="6" stroke-linecap="round"/>
+  <!-- Cabeza -->
+  <path d="M742 250C800 250 812 300 800 350C790 395 770 430 742 440C714 430 694 395 684 350C672 300 684 250 742 250Z"
+        fill="url(#pelaje)" stroke="#5a2d18" stroke-width="4"/>
+  <!-- Mitad derecha del ciervo ensombrecida -->
+  <path d="M600 240H900V700H600Z" fill="url(#pelajeSombra)" clip-path="url(#ciervo)"/>
+  <!-- Frente ornamental: triángulos -->
+  <g fill="#f4e2c6" stroke="#5a2d18" stroke-width="2">
+    <polygon points="742,268 756,292 728,292"/>
+    <polygon points="742,300 752,318 732,318"/>
+  </g>
+  <!-- Hocico -->
+  <path d="M742 395C764 395 772 415 765 430C758 442 726 442 719 430C712 415 720 395 742 395Z" fill="#f4e2c6" stroke="#5a2d18" stroke-width="3"/>
+  <ellipse cx="742" cy="412" rx="15" ry="9" fill="#2a1a12"/>
+  <!-- Ojos -->
+  <ellipse cx="712" cy="335" rx="11" ry="14" fill="#2a1a12"/>
+  <circle cx="709" cy="331" r="4" fill="#ffffff"/>
+  <ellipse cx="772" cy="335" rx="11" ry="14" fill="#2a1a12"/>
+  <circle cx="769" cy="331" r="3.5" fill="#ff9a4a"/>
+  <!-- Base de la cornamenta (pedículos) -->
+  <g stroke-width="5" stroke-linecap="round">
+    <path d="M712 262L700 270" stroke="#6a3f22"/>
+    <path d="M772 262L785 270" stroke="#151112"/>
+  </g>
+
+  <!-- Setas al pie (luz) -->
+  <g stroke="#5a2d18" stroke-width="3">
+    <path d="M520 640V610H534V640Z" fill="#f4e2c6"/>
+    <path d="M502 612C502 588 552 588 552 612Z" fill="#d9442f"/>
+    <path d="M590 643V620H600V643Z" fill="#f4e2c6"/>
+    <path d="M577 622C577 604 613 604 613 622Z" fill="#e9a23b"/>
+    <path d="M420 636V614H430V636Z" fill="#f4e2c6"/>
+    <path d="M408 616C408 600 442 600 442 616Z" fill="#d9442f"/>
+  </g>
+  <g fill="#fff4dc"><circle cx="516" cy="600" r="3"/><circle cx="534" cy="598" r="3"/><circle cx="425" cy="607" r="2.5"/></g>
+</svg>

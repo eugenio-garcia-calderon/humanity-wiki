@@ -1,0 +1,274 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 1 · Cosmos y Vida — tardígrado-nebulosa. Luz: especies nacen a la izquierda. Sombra: especies apagadas caen a la derecha. -->
+  <defs>
+    <radialGradient id="cielo" cx="35%" cy="45%" r="85%">
+      <stop offset="0" stop-color="#3d2a72"/>
+      <stop offset="0.5" stop-color="#1d1442"/>
+      <stop offset="1" stop-color="#0a0a1c"/>
+    </radialGradient>
+    <radialGradient id="haloCalido" cx="20%" cy="48%" r="38%">
+      <stop offset="0" stop-color="#f4b94a" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#f4b94a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="haloFrio" cx="86%" cy="60%" r="40%">
+      <stop offset="0" stop-color="#5d6b80" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#5d6b80" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebulosa" cx="45%" cy="40%" r="65%">
+      <stop offset="0" stop-color="#fff2bf"/>
+      <stop offset="0.3" stop-color="#f4c24f"/>
+      <stop offset="0.68" stop-color="#d9782a"/>
+      <stop offset="1" stop-color="#7d2f63"/>
+    </radialGradient>
+    <radialGradient id="nebulosaGris" cx="40%" cy="40%" r="65%">
+      <stop offset="0" stop-color="#b9bccb"/>
+      <stop offset="0.5" stop-color="#6c7186"/>
+      <stop offset="1" stop-color="#2e3244"/>
+    </radialGradient>
+    <radialGradient id="nebulosaMedia" cx="40%" cy="40%" r="65%">
+      <stop offset="0" stop-color="#e9d9a8"/>
+      <stop offset="0.45" stop-color="#b7905a"/>
+      <stop offset="1" stop-color="#4f3a55"/>
+    </radialGradient>
+    <linearGradient id="pataGris" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7b7f92"/>
+      <stop offset="1" stop-color="#3a3d4e"/>
+    </linearGradient>
+    <linearGradient id="pata" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d98a32"/>
+      <stop offset="1" stop-color="#8e3d4f"/>
+    </linearGradient>
+    <linearGradient id="frio" gradientUnits="userSpaceOnUse" x1="700" y1="0" x2="1130" y2="0">
+      <stop offset="0" stop-color="#26324a" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#2c3448" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#1c2232" stop-opacity="0.92"/>
+    </linearGradient>
+    <radialGradient id="planetaT" cx="35%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#bff6ee"/>
+      <stop offset="0.6" stop-color="#2fb3a6"/>
+      <stop offset="1" stop-color="#14605f"/>
+    </radialGradient>
+    <radialGradient id="planetaV" cx="35%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#e6c3ff"/>
+      <stop offset="0.6" stop-color="#9157c9"/>
+      <stop offset="1" stop-color="#4a2477"/>
+    </radialGradient>
+    <linearGradient id="estela" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#9aa0ad" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#9aa0ad" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="rombos" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M15 3L27 15L15 27L3 15Z" fill="none" stroke="#fff4c8" stroke-width="2" stroke-opacity="0.55"/>
+      <circle cx="15" cy="15" r="2.5" fill="#fff4c8" fill-opacity="0.6"/>
+    </pattern>
+    <filter id="brillo" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cuerpo">
+      <ellipse cx="1000" cy="420" rx="115" ry="135"/>
+      <ellipse cx="870" cy="410" rx="125" ry="158"/>
+      <ellipse cx="735" cy="405" rx="128" ry="165"/>
+      <ellipse cx="600" cy="410" rx="122" ry="155"/>
+      <ellipse cx="475" cy="425" rx="95" ry="112"/>
+      <path d="M765 520C760 590 770 630 800 640C830 630 840 590 835 520Z"/>
+      <path d="M905 510C900 580 910 620 940 630C970 620 980 580 975 510Z"/>
+      <path d="M1040 470C1060 540 1080 575 1110 580C1135 565 1130 520 1100 450Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fondo -->
+  <path d="M0 0H1485V850H0Z" fill="url(#cielo)"/>
+  <path d="M0 0H1485V850H0Z" fill="url(#haloCalido)"/>
+  <path d="M0 0H1485V850H0Z" fill="url(#haloFrio)"/>
+
+  <!-- Estrellas -->
+  <g fill="#fff6d8">
+    <circle cx="60" cy="60" r="2"/><circle cx="170" cy="95" r="1.5"/><circle cx="340" cy="60" r="2.5"/>
+    <circle cx="470" cy="130" r="1.5"/><circle cx="560" cy="40" r="2"/><circle cx="880" cy="60" r="1.5"/>
+    <circle cx="990" cy="130" r="2"/><circle cx="1110" cy="50" r="2.5"/><circle cx="1280" cy="90" r="1.5"/>
+    <circle cx="1430" cy="60" r="2"/><circle cx="40" cy="760" r="2"/><circle cx="420" cy="790" r="1.5"/>
+    <circle cx="610" cy="760" r="2.5"/><circle cx="860" cy="800" r="1.5"/><circle cx="1010" cy="740" r="2"/>
+    <circle cx="1180" cy="800" r="1.5"/><circle cx="1450" cy="520" r="2"/><circle cx="1130" cy="180" r="1.5"/>
+    <circle cx="20" cy="400" r="1.5"/><circle cx="700" cy="820" r="1.5"/>
+  </g>
+
+  <!-- Planetas y células que nacen del lomo -->
+  <g>
+    <path d="M640 250C630 225 610 215 595 210M720 240C712 215 700 200 690 190M800 245C810 210 818 180 820 160M760 238C762 200 762 140 760 112"
+          fill="none" stroke="#f7d27a" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" opacity="0.8"/>
+    <circle cx="690" cy="168" r="30" fill="url(#planetaT)"/>
+    <ellipse cx="690" cy="168" rx="54" ry="13" fill="none" stroke="#f7d27a" stroke-width="4" transform="rotate(-18 690 168)"/>
+    <circle cx="822" cy="138" r="20" fill="url(#planetaV)"/>
+    <circle cx="588" cy="196" r="24" fill="#b9f0c7" fill-opacity="0.35" stroke="#c8f7d2" stroke-width="3"/>
+    <circle cx="592" cy="192" r="9" fill="#7ad39a"/>
+    <circle cx="760" cy="92" r="16" fill="#b9f0c7" fill-opacity="0.35" stroke="#c8f7d2" stroke-width="2.5"/>
+    <circle cx="763" cy="90" r="6" fill="#7ad39a"/>
+    <circle cx="900" cy="200" r="11" fill="#f2a65a"/>
+  </g>
+
+  <!-- Patas (detrás del cuerpo) -->
+  <g fill="url(#pata)" stroke="#5b2440" stroke-width="3">
+    <path d="M495 515C490 585 500 625 530 635C560 625 570 585 565 515Z"/>
+    <path d="M625 525C620 595 630 635 660 645C690 635 700 595 695 525Z"/>
+    <path d="M765 520C760 590 770 630 800 640C830 630 840 590 835 520Z"/>
+    <path d="M905 510C900 580 910 620 940 630C970 620 980 580 975 510Z"/>
+    <path d="M1040 470C1060 540 1080 575 1110 580C1135 565 1130 520 1100 450Z"/>
+  </g>
+  <g fill="url(#pataGris)" stroke="#2a2d3a" stroke-width="3">
+    <path d="M905 510C900 580 910 620 940 630C970 620 980 580 975 510Z"/>
+    <path d="M1040 470C1060 540 1080 575 1110 580C1135 565 1130 520 1100 450Z"/>
+  </g>
+  <g fill="none" stroke="#fff0b8" stroke-width="3" stroke-linecap="round">
+    <path d="M512 632Q504 655 490 660M524 638Q520 662 512 672M536 638Q540 662 548 672M548 632Q556 655 570 660"/>
+    <path d="M642 642Q634 665 620 670M654 648Q650 672 642 682M666 648Q670 672 678 682M678 642Q686 665 700 670"/>
+    <path d="M782 637Q774 660 760 665M794 643Q790 667 782 677M806 643Q810 667 818 677M818 637Q826 660 840 665"/>
+  </g>
+  <g fill="none" stroke="#9a9eae" stroke-width="3" stroke-linecap="round">
+    <path d="M922 627Q914 650 900 655M934 633Q930 657 922 667M946 633Q950 657 958 667M958 627Q966 650 980 655"/>
+    <path d="M1100 582Q1105 605 1098 618M1112 578Q1124 598 1124 612M1122 570Q1138 585 1145 598"/>
+  </g>
+  <g fill="none" stroke="#5b2440" stroke-width="2" opacity="0.6">
+    <path d="M500 560Q530 572 562 560M502 595Q530 607 560 595M630 570Q660 582 692 570M632 605Q660 617 690 605M770 565Q800 577 832 565M772 600Q800 612 830 600M910 555Q940 567 972 555M912 590Q940 602 970 590"/>
+  </g>
+
+  <!-- Cuerpo segmentado: nebulosa dorada -->
+  <g stroke="#6b2a3e" stroke-width="4">
+    <ellipse cx="1000" cy="420" rx="115" ry="135" fill="url(#nebulosaGris)"/>
+    <ellipse cx="870" cy="410" rx="125" ry="158" fill="url(#nebulosaMedia)"/>
+    <ellipse cx="735" cy="405" rx="128" ry="165" fill="url(#nebulosa)"/>
+    <ellipse cx="600" cy="410" rx="122" ry="155" fill="url(#nebulosa)"/>
+    <ellipse cx="475" cy="425" rx="95" ry="112" fill="url(#nebulosa)"/>
+  </g>
+  <!-- Ornamento: rombos y anillos concéntricos -->
+  <g>
+    <ellipse cx="1000" cy="420" rx="70" ry="88" fill="url(#rombos)"/>
+    <ellipse cx="870" cy="410" rx="78" ry="105" fill="url(#rombos)"/>
+    <ellipse cx="735" cy="405" rx="80" ry="110" fill="url(#rombos)"/>
+    <ellipse cx="600" cy="410" rx="76" ry="102" fill="url(#rombos)"/>
+  </g>
+  <g fill="none" stroke="#fff0c0" stroke-width="2.5" opacity="0.7">
+    <ellipse cx="1000" cy="420" rx="95" ry="115"/>
+    <ellipse cx="870" cy="410" rx="103" ry="135"/>
+    <ellipse cx="735" cy="405" rx="106" ry="142"/>
+    <ellipse cx="600" cy="410" rx="100" ry="132"/>
+    <ellipse cx="475" cy="425" rx="72" ry="88"/>
+    <ellipse cx="475" cy="425" rx="48" ry="62"/>
+  </g>
+  <!-- Placas dorsales triangulares -->
+  <g fill="#ffe18a" stroke="#6b2a3e" stroke-width="3" stroke-linejoin="round">
+    <polygon points="580,262 600,228 620,262"/>
+    <polygon points="715,248 735,210 755,248"/>
+    <polygon points="850,260 870,222 890,260"/>
+    <polygon points="982,292 1000,262 1018,292" fill="#8f93a5"/>
+  </g>
+  <!-- Polvo de estrellas dentro de la nebulosa -->
+  <g fill="#ffffff">
+    <circle cx="640" cy="360" r="4"/><circle cx="700" cy="460" r="3"/><circle cx="760" cy="330" r="5"/>
+    <circle cx="820" cy="470" r="3"/><circle cx="560" cy="460" r="3"/><circle cx="905" cy="380" r="4"/>
+  </g>
+
+  <!-- Hocico-boca y ojo -->
+  <ellipse cx="388" cy="432" rx="32" ry="40" fill="url(#nebulosa)" stroke="#6b2a3e" stroke-width="4"/>
+  <ellipse cx="380" cy="432" rx="17" ry="24" fill="#3b1430" stroke="#ffe18a" stroke-width="3"/>
+  <circle cx="455" cy="385" r="10" fill="#2a0f2a"/>
+  <circle cx="452" cy="382" r="3.5" fill="#fff6d8"/>
+
+  <!-- Sombra: el lado derecho se enfría -->
+  <path d="M0 0H1485V850H0Z" fill="url(#frio)" clip-path="url(#cuerpo)"/>
+
+  <!-- LUZ: especies que brotan como chispas -->
+  <g filter="url(#brillo)">
+    <path d="M360 410C330 380 300 360 270 345M355 450C310 460 260 470 225 470M362 470C340 520 300 560 270 580M352 395C320 320 290 260 270 230"
+          fill="none" stroke="#ffe7a0" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>
+    <g fill="#ffd36b" transform="translate(255 340) scale(1.3)">
+      <path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/>
+    </g>
+    <g fill="#5fe0cf" transform="translate(190 470) scale(1.6)">
+      <path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/>
+    </g>
+    <g fill="#ffe7a0" transform="translate(90 330) scale(1)">
+      <path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/>
+    </g>
+    <g fill="#ffd36b" transform="translate(255 215) scale(1.4)">
+      <path d="M-32 -4C-18 -18 -8 -14 0 2C8 -14 18 -18 32 -4C18 -10 8 -4 0 10C-8 -4 -18 -10 -32 -4Z"/>
+    </g>
+    <g fill="#ffe7a0" transform="translate(125 175) scale(1.1)">
+      <path d="M-32 -4C-18 -18 -8 -14 0 2C8 -14 18 -18 32 -4C18 -10 8 -4 0 10C-8 -4 -18 -10 -32 -4Z"/>
+    </g>
+    <g fill="#5fe0cf" transform="translate(95 600) scale(1.2)">
+      <path d="M-32 -4C-18 -18 -8 -14 0 2C8 -14 18 -18 32 -4C18 -10 8 -4 0 10C-8 -4 -18 -10 -32 -4Z"/>
+    </g>
+    <g transform="translate(250 610) scale(1.5)">
+      <path d="M0 40C2 10 -2 -15 10 -40" fill="none" stroke="#9be08a" stroke-width="3" stroke-linecap="round"/>
+      <g fill="#9be08a">
+        <ellipse cx="-11" cy="28" rx="12" ry="4" transform="rotate(-25 -11 28)"/>
+        <ellipse cx="12" cy="24" rx="12" ry="4" transform="rotate(25 12 24)"/>
+        <ellipse cx="-10" cy="12" rx="11" ry="4" transform="rotate(-30 -10 12)"/>
+        <ellipse cx="12" cy="8" rx="11" ry="4" transform="rotate(20 12 8)"/>
+        <ellipse cx="-6" cy="-6" rx="9" ry="3.5" transform="rotate(-35 -6 -6)"/>
+        <ellipse cx="14" cy="-10" rx="9" ry="3.5" transform="rotate(15 14 -10)"/>
+        <ellipse cx="2" cy="-24" rx="7" ry="3" transform="rotate(-40 2 -24)"/>
+        <ellipse cx="16" cy="-28" rx="7" ry="3" transform="rotate(10 16 -28)"/>
+      </g>
+    </g>
+    <g transform="translate(70 450) scale(1.1)">
+      <path d="M0 40C2 10 -2 -15 10 -40" fill="none" stroke="#ffd36b" stroke-width="3" stroke-linecap="round"/>
+      <g fill="#ffd36b">
+        <ellipse cx="-11" cy="28" rx="12" ry="4" transform="rotate(-25 -11 28)"/>
+        <ellipse cx="12" cy="24" rx="12" ry="4" transform="rotate(25 12 24)"/>
+        <ellipse cx="-10" cy="12" rx="11" ry="4" transform="rotate(-30 -10 12)"/>
+        <ellipse cx="12" cy="8" rx="11" ry="4" transform="rotate(20 12 8)"/>
+        <ellipse cx="-6" cy="-6" rx="9" ry="3.5" transform="rotate(-35 -6 -6)"/>
+        <ellipse cx="14" cy="-10" rx="9" ry="3.5" transform="rotate(15 14 -10)"/>
+      </g>
+    </g>
+    <g fill="#fff3c4">
+      <circle cx="320" cy="300" r="4"/><circle cx="160" cy="260" r="3"/><circle cx="310" cy="520" r="4"/>
+      <circle cx="150" cy="380" r="3"/><circle cx="190" cy="560" r="3"/><circle cx="40" cy="250" r="3"/>
+      <circle cx="330" cy="660" r="3"/><circle cx="40" cy="520" r="2.5"/>
+    </g>
+  </g>
+
+  <!-- SOMBRA: especies apagadas que caen como meteoritos fríos -->
+  <g>
+    <polygon points="1182,262 1198,248 1300,120" fill="url(#estela)"/>
+    <polygon points="1282,436 1298,420 1410,300" fill="url(#estela)"/>
+    <polygon points="1388,232 1402,218 1480,130" fill="url(#estela)"/>
+    <polygon points="1232,632 1248,616 1350,500" fill="url(#estela)"/>
+    <polygon points="1372,708 1388,694 1480,590" fill="url(#estela)"/>
+    <polygon points="1182,512 1196,500 1270,420" fill="url(#estela)"/>
+  </g>
+  <g fill="#6f7483" stroke="#3c404c" stroke-width="2">
+    <g transform="translate(1190 260) rotate(-40) scale(1.3)">
+      <path d="M-32 -4C-18 -18 -8 -14 0 2C8 -14 18 -18 32 -4C18 -10 8 -4 0 10C-8 -4 -18 -10 -32 -4Z"/>
+    </g>
+    <g transform="translate(1290 430) rotate(-45) scale(1.5)">
+      <path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/>
+    </g>
+    <g transform="translate(1395 228) rotate(-48) scale(1)">
+      <path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/>
+    </g>
+    <g transform="translate(1240 625) rotate(-40) scale(1.2)">
+      <path d="M-32 -4C-18 -18 -8 -14 0 2C8 -14 18 -18 32 -4C18 -10 8 -4 0 10C-8 -4 -18 -10 -32 -4Z"/>
+    </g>
+    <g transform="translate(1188 506) rotate(-50) scale(0.9)">
+      <path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/>
+    </g>
+  </g>
+  <g transform="translate(1380 700) rotate(-130) scale(1.2)">
+    <path d="M0 40C2 10 -2 -15 10 -40" fill="none" stroke="#6f7483" stroke-width="3" stroke-linecap="round"/>
+    <g fill="#6f7483">
+      <ellipse cx="-11" cy="28" rx="12" ry="4" transform="rotate(-25 -11 28)"/>
+      <ellipse cx="12" cy="24" rx="12" ry="4" transform="rotate(25 12 24)"/>
+      <ellipse cx="-10" cy="12" rx="11" ry="4" transform="rotate(-30 -10 12)"/>
+      <ellipse cx="12" cy="8" rx="11" ry="4" transform="rotate(20 12 8)"/>
+      <ellipse cx="-6" cy="-6" rx="9" ry="3.5" transform="rotate(-35 -6 -6)"/>
+      <ellipse cx="14" cy="-10" rx="9" ry="3.5" transform="rotate(15 14 -10)"/>
+    </g>
+  </g>
+  <g fill="#555a68">
+    <circle cx="1150" cy="330" r="4"/><circle cx="1340" cy="560" r="3"/><circle cx="1440" cy="400" r="4"/>
+    <circle cx="1160" cy="720" r="3"/><circle cx="1330" cy="780" r="4"/>
+  </g>
+</svg>

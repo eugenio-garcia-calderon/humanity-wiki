@@ -1,0 +1,219 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7fd3d0"/>
+      <stop offset="0.35" stop-color="#f3d68a"/>
+      <stop offset="0.6" stop-color="#9a6a72"/>
+      <stop offset="1" stop-color="#2a2428"/>
+    </linearGradient>
+    <linearGradient id="suelo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4f8f3a"/>
+      <stop offset="0.45" stop-color="#7a6a3a"/>
+      <stop offset="1" stop-color="#2b2724"/>
+    </linearGradient>
+    <linearGradient id="laton" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4c560"/>
+      <stop offset="0.5" stop-color="#c4862a"/>
+      <stop offset="1" stop-color="#7a4d16"/>
+    </linearGradient>
+    <radialGradient id="sol" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset="0.45" stop-color="#ffd23f"/>
+      <stop offset="1" stop-color="#f08a1c"/>
+    </radialGradient>
+    <radialGradient id="haloSol" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe680" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#ffe680" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="haloIzq" cx="0.25" cy="0.4" r="0.45">
+      <stop offset="0" stop-color="#fffbe0" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#fffbe0" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="celdas" width="46" height="26" patternUnits="userSpaceOnUse">
+      <rect width="46" height="26" fill="#1f5aa0"/>
+      <rect x="2" y="2" width="42" height="22" fill="#2d74c4"/>
+      <polygon points="4,4 22,4 4,16" fill="#8cc8ff" opacity="0.45"/>
+    </pattern>
+    <pattern id="plumas" width="30" height="24" patternUnits="userSpaceOnUse">
+      <rect width="30" height="24" fill="#c4862a"/>
+      <path d="M0,0 Q15,22 30,0" fill="#e8b04a" stroke="#7a4d16" stroke-width="2.5"/>
+      <circle cx="15" cy="20" r="2.5" fill="#7a4d16"/>
+    </pattern>
+    <pattern id="ladrillo" width="40" height="20" patternUnits="userSpaceOnUse">
+      <rect width="40" height="20" fill="#5e3c30"/>
+      <path d="M0,0 H40 M0,10 H40 M20,0 V10 M0,10 V20 M40,10 V20" stroke="#2a1a16" stroke-width="2.5"/>
+    </pattern>
+  </defs>
+
+  <rect width="1485" height="850" fill="url(#cielo)"/>
+  <rect width="1485" height="850" fill="url(#haloIzq)"/>
+
+  <!-- humo de fondo (lado sombra) -->
+  <g fill="#1d1a1c">
+    <circle cx="1300" cy="90" r="110" opacity="0.8"/>
+    <circle cx="1440" cy="160" r="130" opacity="0.9"/>
+    <circle cx="1470" cy="20" r="100" opacity="0.9"/>
+    <circle cx="1380" cy="300" r="90" opacity="0.7"/>
+  </g>
+
+  <!-- suelo -->
+  <path d="M0,700 Q740,665 1485,705 L1485,850 L0,850Z" fill="url(#suelo)"/>
+
+  <!-- HUERTO (izquierda) -->
+  <g>
+    <path d="M50,760 Q200,735 380,760 L380,795 L50,795Z" fill="#6b4422"/>
+    <g stroke="#2f7a2a" stroke-width="5" stroke-linecap="round" fill="none">
+      <path d="M100,760 L100,712"/><path d="M160,758 L160,700"/><path d="M220,756 L220,694"/>
+      <path d="M280,756 L280,700"/><path d="M340,758 L340,710"/>
+    </g>
+    <g fill="#46a83a">
+      <ellipse cx="88" cy="720" rx="15" ry="7" transform="rotate(-30 88 720)"/>
+      <ellipse cx="112" cy="716" rx="15" ry="7" transform="rotate(30 112 716)"/>
+      <ellipse cx="148" cy="708" rx="17" ry="8" transform="rotate(-30 148 708)"/>
+      <ellipse cx="172" cy="704" rx="17" ry="8" transform="rotate(30 172 704)"/>
+      <ellipse cx="206" cy="700" rx="18" ry="9" transform="rotate(-30 206 700)"/>
+      <ellipse cx="234" cy="696" rx="18" ry="9" transform="rotate(30 234 696)"/>
+      <ellipse cx="268" cy="706" rx="17" ry="8" transform="rotate(-30 268 706)"/>
+      <ellipse cx="292" cy="702" rx="17" ry="8" transform="rotate(30 292 702)"/>
+      <ellipse cx="328" cy="716" rx="15" ry="7" transform="rotate(-30 328 716)"/>
+      <ellipse cx="352" cy="712" rx="15" ry="7" transform="rotate(30 352 712)"/>
+    </g>
+    <circle cx="160" cy="730" r="11" fill="#e8402e"/>
+    <circle cx="280" cy="730" r="11" fill="#e8402e"/>
+    <circle cx="220" cy="724" r="10" fill="#f3a21c"/>
+    <circle cx="100" cy="738" r="8" fill="#9a3fb0"/>
+  </g>
+
+  <!-- rayos de energia del ala al huerto -->
+  <g stroke="#ffe25a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M330,500 L300,560 L325,566 L270,660"/>
+    <path d="M400,560 L380,610 L402,616 L350,690"/>
+  </g>
+
+  <!-- ALA IZQUIERDA: plumas de placas solares (pivote 640,390) -->
+  <g transform="translate(640 390)">
+    <g transform="rotate(40)">
+      <path d="M-40,-20 L-300,-32 L-340,0 L-300,32 L-40,20Z" fill="url(#celdas)" stroke="#c4862a" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(22)">
+      <path d="M-40,-20 L-320,-34 L-362,0 L-320,34 L-40,20Z" fill="url(#celdas)" stroke="#c4862a" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(4)">
+      <path d="M-40,-20 L-310,-34 L-352,0 L-310,34 L-40,20Z" fill="url(#celdas)" stroke="#c4862a" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(-14)">
+      <path d="M-40,-20 L-282,-32 L-322,0 L-282,32 L-40,20Z" fill="url(#celdas)" stroke="#c4862a" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(-32)">
+      <path d="M-40,-20 L-245,-30 L-282,0 L-245,30 L-40,20Z" fill="url(#celdas)" stroke="#c4862a" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+    <!-- hombro de laton -->
+    <path d="M10,-80 C-90,-90 -160,-30 -170,40 C-120,80 -40,90 20,70Z" fill="url(#laton)" stroke="#5a3810" stroke-width="6"/>
+    <g fill="#5a3810"><circle cx="-60" cy="-30" r="6"/><circle cx="-110" cy="20" r="6"/><circle cx="-40" cy="40" r="6"/></g>
+  </g>
+
+  <!-- ALA DERECHA: plumas-chimenea (pivote 850,390) -->
+  <!-- humo que sale de las chimeneas -->
+  <g fill="#232023">
+    <circle cx="1120" cy="135" r="42"/><circle cx="1160" cy="90" r="56"/><circle cx="1230" cy="60" r="66"/>
+    <circle cx="1210" cy="220" r="44"/><circle cx="1260" cy="175" r="56"/><circle cx="1320" cy="140" r="66"/>
+    <circle cx="1230" cy="330" r="40"/><circle cx="1280" cy="290" r="52"/><circle cx="1345" cy="260" r="62"/>
+  </g>
+  <g transform="translate(850 390)">
+    <g transform="rotate(-40)">
+      <path d="M40,-20 L300,-28 L300,28 L40,20Z" fill="url(#ladrillo)" stroke="#1d1414" stroke-width="5"/>
+      <rect x="296" y="-38" width="44" height="76" fill="#2e221e" stroke="#1d1414" stroke-width="4"/>
+    </g>
+    <g transform="rotate(-22)">
+      <path d="M40,-20 L320,-28 L320,28 L40,20Z" fill="url(#ladrillo)" stroke="#1d1414" stroke-width="5"/>
+      <rect x="316" y="-38" width="44" height="76" fill="#2e221e" stroke="#1d1414" stroke-width="4"/>
+    </g>
+    <g transform="rotate(-4)">
+      <path d="M40,-20 L310,-28 L310,28 L40,20Z" fill="url(#ladrillo)" stroke="#1d1414" stroke-width="5"/>
+      <rect x="306" y="-38" width="44" height="76" fill="#2e221e" stroke="#1d1414" stroke-width="4"/>
+    </g>
+    <!-- plumas inferiores: cables enredados -->
+    <g fill="none" stroke-linecap="round" stroke-width="8">
+      <path d="M40,0 C120,60 160,-20 230,50 C290,110 250,160 320,190" stroke="#151515" transform="rotate(10)"/>
+      <path d="M40,10 C100,90 200,20 240,110 C270,170 210,210 260,260" stroke="#3a3a3a" transform="rotate(12)"/>
+      <path d="M40,20 C110,40 140,140 220,120 C280,105 300,200 250,240" stroke="#8a2a22" transform="rotate(18)"/>
+      <path d="M40,0 C80,80 40,160 120,190 C190,215 200,280 170,320" stroke="#1d1d1d" transform="rotate(20)"/>
+    </g>
+    <!-- hombro de laton oscurecido -->
+    <path d="M-10,-80 C90,-90 160,-30 170,40 C120,80 40,90 -20,70Z" fill="#6a5434" stroke="#3a2a14" stroke-width="6"/>
+    <g fill="#3a2a14"><circle cx="60" cy="-30" r="6"/><circle cx="110" cy="20" r="6"/><circle cx="40" cy="40" r="6"/></g>
+  </g>
+  <!-- chispa de cortocircuito al final de un cable -->
+  <polygon points="1048,672 1076,680 1054,690 1070,710 1040,694 1030,712 1034,686" fill="#ff6a1c"/>
+
+  <!-- PATAS -->
+  <g fill="#7a4d16">
+    <rect x="684" y="660" width="22" height="50"/>
+    <rect x="786" y="660" width="22" height="50"/>
+  </g>
+  <g stroke="#7a4d16" stroke-width="10" stroke-linecap="round" fill="none">
+    <path d="M695,705 L669,725 M695,705 L695,730 M695,705 L721,725"/>
+    <path d="M797,705 L771,725 M797,705 L797,730 M797,705 L823,725"/>
+  </g>
+
+  <!-- CUERPO -->
+  <path d="M745,250 C900,250 940,420 900,560 C870,660 820,690 745,690 C670,690 620,660 590,560 C550,420 590,250 745,250Z" fill="url(#plumas)" stroke="#5a3810" stroke-width="7"/>
+
+  <!-- sol en el pecho -->
+  <circle cx="745" cy="520" r="160" fill="url(#haloSol)"/>
+  <g stroke="#ffd23f" stroke-width="9" stroke-linecap="round">
+    <path d="M745,412 L745,390"/><path d="M745,628 L745,650"/>
+    <path d="M637,520 L615,520"/><path d="M853,520 L875,520"/>
+    <path d="M669,444 L653,428"/><path d="M821,596 L837,612"/>
+    <path d="M821,444 L837,428"/><path d="M669,596 L653,612"/>
+  </g>
+  <circle cx="745" cy="520" r="90" fill="#7a4d16"/>
+  <circle cx="745" cy="520" r="80" fill="url(#sol)"/>
+  <circle cx="745" cy="520" r="55" fill="none" stroke="#f08a1c" stroke-width="4" stroke-dasharray="10 8"/>
+
+  <!-- CABEZA -->
+  <path d="M600,140 L650,215 L840,215 L890,140 L860,300 L630,300Z" fill="url(#laton)" stroke="#5a3810" stroke-width="7"/>
+  <path d="M600,140 L640,175 L650,215Z" fill="#7a4d16"/>
+  <path d="M890,140 L850,175 L840,215Z" fill="#7a4d16"/>
+
+  <!-- ojo izquierdo: engranaje luminoso -->
+  <g transform="translate(680 250)">
+    <g fill="#c4862a" stroke="#5a3810" stroke-width="3">
+      <rect x="-9" y="-62" width="18" height="18"/><rect x="-9" y="44" width="18" height="18"/>
+      <rect x="-62" y="-9" width="18" height="18"/><rect x="44" y="-9" width="18" height="18"/>
+      <rect x="-9" y="-62" width="18" height="18" transform="rotate(45)"/>
+      <rect x="-9" y="44" width="18" height="18" transform="rotate(45)"/>
+      <rect x="-62" y="-9" width="18" height="18" transform="rotate(45)"/>
+      <rect x="44" y="-9" width="18" height="18" transform="rotate(45)"/>
+    </g>
+    <circle r="50" fill="#c4862a" stroke="#5a3810" stroke-width="4"/>
+    <circle r="36" fill="#fff6c8"/>
+    <circle r="22" fill="#2ab0a8"/>
+    <circle r="11" fill="#111"/>
+    <circle cx="-6" cy="-7" r="4" fill="#fff"/>
+  </g>
+  <!-- ojo derecho: engranaje apagado -->
+  <g transform="translate(810 250)">
+    <g fill="#6a5434" stroke="#3a2a14" stroke-width="3">
+      <rect x="-9" y="-62" width="18" height="18"/><rect x="-9" y="44" width="18" height="18"/>
+      <rect x="-62" y="-9" width="18" height="18"/><rect x="44" y="-9" width="18" height="18"/>
+      <rect x="-9" y="-62" width="18" height="18" transform="rotate(45)"/>
+      <rect x="-9" y="44" width="18" height="18" transform="rotate(45)"/>
+      <rect x="-62" y="-9" width="18" height="18" transform="rotate(45)"/>
+      <rect x="44" y="-9" width="18" height="18" transform="rotate(45)"/>
+    </g>
+    <circle r="50" fill="#6a5434" stroke="#3a2a14" stroke-width="4"/>
+    <circle r="36" fill="#b8a888"/>
+    <circle r="22" fill="#5a4a3a"/>
+    <circle r="11" fill="#1a1a1a"/>
+  </g>
+  <!-- pico -->
+  <polygon points="725,285 765,285 745,335" fill="#3a2a14"/>
+  <!-- circuito en la frente -->
+  <g stroke="#2ab0a8" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M745,220 L745,180 L715,165"/>
+    <path d="M745,180 L775,165"/>
+  </g>
+  <circle cx="715" cy="165" r="6" fill="#2ab0a8"/>
+  <circle cx="775" cy="165" r="6" fill="#2ab0a8"/>
+</svg>

@@ -100,6 +100,7 @@ import { registrarEstadisticas } from './estadisticas.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
+import { registerCalendarioArteRoutes } from './calendarioArte.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
@@ -348,6 +349,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'menu', montar: (app, db) => registerMenuRoutes(app, db) },
   { nombre: 'mensajes', montar: (app, db) => registerMensajesRoutes(app, db) },
   { nombre: 'calendario', montar: (app, db) => registerCalendarioRoutes(app, db) },
+  {
+    nombre: 'calendario-arte',
+    montar: (app, db) => registerCalendarioArteRoutes(app, db),
+    nota: 'Calendario Arte para la Humanidad: doce meses editables, carpeta de referencias y buzón de ideas. '
+        + 'Comprueba el nivel, así que va después de la autenticación.',
+  },
   { nombre: 'personas', montar: (app, db) => registerPersonasRoutes(app, db) },
   { nombre: 'guardar', montar: (app, db) => registerGuardarRoutes(app, db) },
   { nombre: 'veracidad', montar: (app, db) => registerVeracidadRoutes(app, db) },
