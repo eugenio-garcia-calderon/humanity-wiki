@@ -1,0 +1,269 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 10 · Alimentación: gallo-huerto con plumaje de frutas y verduras; patas-raíz en tierra viva; bajo una pata, comida desperdiciada y plástico -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f8dc8f"/>
+      <stop offset="0.45" stop-color="#f0b066"/>
+      <stop offset="0.7" stop-color="#9c6478"/>
+      <stop offset="1" stop-color="#3a2a48"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="380" cy="260" r="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff5cf" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#fff5cf" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="soil" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6e4022"/>
+      <stop offset="0.5" stop-color="#5a3620"/>
+      <stop offset="0.68" stop-color="#3d3236"/>
+      <stop offset="1" stop-color="#262030"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7da83a"/>
+      <stop offset="0.5" stop-color="#8e9a36"/>
+      <stop offset="0.68" stop-color="#5c5550"/>
+      <stop offset="1" stop-color="#3a3340"/>
+    </linearGradient>
+    <pattern id="scales" patternUnits="userSpaceOnUse" width="36" height="30">
+      <rect width="36" height="30" fill="#c8562a"/>
+      <path d="M0,0 L18,26 L36,0" fill="#e07a34"/>
+      <path d="M9,0 L18,13 L27,0" fill="#f4b247"/>
+    </pattern>
+    <linearGradient id="bodyShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2a1830" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#2a1830" stop-opacity="0"/>
+      <stop offset="1" stop-color="#2a1830" stop-opacity="0.45"/>
+    </linearGradient>
+    <radialGradient id="pumpkin" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#d9661c"/>
+    </radialGradient>
+    <radialGradient id="pome" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#ef5a5a"/>
+      <stop offset="1" stop-color="#a51f35"/>
+    </radialGradient>
+    <clipPath id="bodyClip">
+      <path d="M610,380 C560,470 600,590 720,620 C820,645 930,600 960,520 C990,440 960,370 900,345 C820,315 690,330 610,380Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- cielo -->
+  <rect width="1485" height="850" fill="url(#sky)"/>
+  <rect width="1485" height="850" fill="url(#glow)"/>
+  <!-- sol ornamental en la luz -->
+  <circle cx="230" cy="170" r="70" fill="#ffe7a0"/>
+  <circle cx="230" cy="170" r="92" fill="none" stroke="#ffe7a0" stroke-width="5" stroke-dasharray="14 12"/>
+  <circle cx="230" cy="170" r="48" fill="none" stroke="#f3b950" stroke-width="4"/>
+  <!-- bruma gris en la sombra -->
+  <g fill="#231a30" opacity="0.45">
+    <ellipse cx="1330" cy="560" rx="260" ry="60"/>
+    <ellipse cx="1240" cy="610" rx="200" ry="40"/>
+  </g>
+
+  <!-- suelo: hierba y tierra -->
+  <path d="M0,660 Q400,640 760,662 T1485,655 V850 H0 Z" fill="url(#soil)"/>
+  <path d="M0,660 Q400,640 760,662 T1485,655 V684 Q1100,676 760,690 T0,686 Z" fill="url(#grass)"/>
+  <!-- capas de tierra viva -->
+  <g fill="none" stroke="#8a5530" stroke-width="3" opacity="0.6">
+    <path d="M0,740 Q300,725 640,745"/>
+    <path d="M0,800 Q300,785 640,805"/>
+  </g>
+  <!-- lombrices -->
+  <g fill="none" stroke="#e98a8a" stroke-width="10" stroke-linecap="round">
+    <path d="M120,760 q20,-18 40,0 t40,0 t30,-6"/>
+    <path d="M380,815 q18,-16 36,0 t36,0"/>
+    <path d="M560,740 q14,14 28,0 t28,0"/>
+  </g>
+  <g fill="#f0c890" opacity="0.8">
+    <circle cx="250" cy="790" r="5"/><circle cx="470" cy="770" r="4"/><circle cx="80" cy="820" r="4"/><circle cx="330" cy="735" r="4"/>
+  </g>
+  <!-- brotes -->
+  <g stroke="#4f7d22" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M60,664 v-26 M60,646 q-14,-10 -22,-2 M60,650 q14,-10 22,-2"/>
+    <path d="M470,662 v-22 M470,648 q12,-10 20,-2"/>
+    <path d="M560,664 v-28 M560,644 q-14,-10 -22,-2 M560,648 q14,-10 22,-2"/>
+  </g>
+
+  <!-- cesta compartida (luz) -->
+  <g>
+    <!-- figura que ofrece -->
+    <circle cx="95" cy="520" r="20" fill="#2a7f7a"/>
+    <path d="M68,664 q-4,-104 27,-124 q30,20 26,124z" fill="#2fa39a"/>
+    <path d="M114,566 q40,8 64,26" stroke="#2fa39a" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <!-- figura que recibe -->
+    <circle cx="410" cy="530" r="18" fill="#7a3d5c"/>
+    <path d="M386,664 q-4,-96 24,-114 q28,18 24,114z" fill="#a0466b"/>
+    <path d="M392,574 q-36,6 -60,22" stroke="#a0466b" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <!-- niño -->
+    <circle cx="460" cy="590" r="13" fill="#c06a2a"/>
+    <path d="M444,664 q-2,-50 16,-64 q18,14 16,64z" fill="#d9823a"/>
+    <!-- frutas en la cesta -->
+    <circle cx="210" cy="582" r="24" fill="url(#pome)"/>
+    <circle cx="258" cy="574" r="26" fill="url(#pumpkin)"/>
+    <circle cx="300" cy="586" r="20" fill="#7cae3c"/>
+    <g fill="#6a3a8c"><circle cx="232" cy="560" r="9"/><circle cx="244" cy="552" r="9"/><circle cx="238" cy="568" r="9"/></g>
+    <path d="M196,560 q2,-24 18,-24 q10,0 10,18z" fill="#f1e2c4"/>
+    <!-- cesta -->
+    <path d="M168,590 h168 l-18,74 h-132z" fill="#b27a3c" stroke="#6b4420" stroke-width="4"/>
+    <g stroke="#7a4e24" stroke-width="3">
+      <path d="M172,612 h160 M176,636 h152"/>
+      <path d="M200,590 l6,74 M232,590 l3,74 M268,590 l-1,74 M302,590 l-5,74"/>
+    </g>
+    <path d="M178,590 q74,-90 148,0" fill="none" stroke="#8a5a2a" stroke-width="8"/>
+  </g>
+
+  <!-- ===== COLA: plumas que terminan en frutos de temporada ===== -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M900,390 C900,280 880,190 860,120" stroke="#2a9d8f" stroke-width="40"/>
+    <path d="M900,390 C900,280 880,190 860,120" stroke="#7fd6c6" stroke-width="8" stroke-dasharray="18 14"/>
+    <path d="M910,390 C950,270 990,170 1010,100" stroke="#e7a92f" stroke-width="40"/>
+    <path d="M910,390 C950,270 990,170 1010,100" stroke="#fde08a" stroke-width="8" stroke-dasharray="18 14"/>
+    <path d="M920,400 C1000,300 1080,220 1140,170" stroke="#7b3f8c" stroke-width="40"/>
+    <path d="M920,400 C1000,300 1080,220 1140,170" stroke="#c597d6" stroke-width="8" stroke-dasharray="18 14"/>
+    <path d="M930,410 C1040,360 1140,310 1220,280" stroke="#c4452e" stroke-width="40"/>
+    <path d="M930,410 C1040,360 1140,310 1220,280" stroke="#f39a7a" stroke-width="8" stroke-dasharray="18 14"/>
+    <path d="M935,430 C1050,430 1160,420 1240,410" stroke="#3f7a3a" stroke-width="40"/>
+    <path d="M935,430 C1050,430 1160,420 1240,410" stroke="#9fd07a" stroke-width="8" stroke-dasharray="18 14"/>
+  </g>
+  <!-- berenjena -->
+  <g transform="translate(856,95) rotate(-15)">
+    <path d="M0,-50 C34,-50 40,10 22,40 C10,60 -14,60 -24,40 C-40,10 -32,-50 0,-50Z" fill="#5a2a6e"/>
+    <path d="M-20,-48 q20,-14 40,0 l-8,10 l-12,-4 l-12,4z" fill="#4f7d22"/>
+    <path d="M-10,-30 q-8,30 4,60" stroke="#9a6ab8" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- calabaza -->
+  <g transform="translate(1012,80)">
+    <ellipse cx="-24" cy="0" rx="30" ry="42" fill="url(#pumpkin)"/>
+    <ellipse cx="24" cy="0" rx="30" ry="42" fill="url(#pumpkin)"/>
+    <ellipse cx="0" cy="0" rx="32" ry="46" fill="url(#pumpkin)" stroke="#b9541a" stroke-width="3"/>
+    <path d="M-2,-46 q4,-20 16,-24" stroke="#4f7d22" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- uvas -->
+  <g transform="translate(1150,160)" fill="#6a3a8c" stroke="#3e1f55" stroke-width="2">
+    <circle cx="-26" cy="-10" r="17"/><circle cx="4" cy="-14" r="17"/><circle cx="32" cy="-8" r="17"/>
+    <circle cx="-14" cy="18" r="17"/><circle cx="16" cy="16" r="17"/>
+    <circle cx="0" cy="44" r="17"/>
+    <path d="M10,-30 q14,-28 34,-24 q-6,18 -30,22z" fill="#4f7d22" stroke="none"/>
+  </g>
+  <!-- granada -->
+  <g transform="translate(1238,272)">
+    <circle r="46" fill="url(#pome)" stroke="#7a1428" stroke-width="3"/>
+    <polygon points="38,-30 56,-40 50,-22 66,-16 48,-8" fill="#a51f35"/>
+    <path d="M-18,-6 a26,26 0 0 1 30,-18" stroke="#ffb0b0" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- setas -->
+  <g transform="translate(1262,405)">
+    <path d="M-10,0 h20 v46 h-20z" fill="#efe2c2"/>
+    <path d="M-48,4 C-48,-40 48,-40 48,4z" fill="#b5652e"/>
+    <circle cx="-18" cy="-14" r="6" fill="#f5d8a8"/><circle cx="12" cy="-20" r="5" fill="#f5d8a8"/><circle cx="28" cy="-6" r="5" fill="#f5d8a8"/>
+    <path d="M18,26 h14 v28 h-14z" fill="#efe2c2"/>
+    <path d="M6,30 C6,4 46,4 46,30z" fill="#c97a3a"/>
+  </g>
+
+  <!-- ===== PATAS-RAÍZ ===== -->
+  <!-- pata izquierda: raíz que se hunde en tierra viva -->
+  <g fill="none" stroke="#e0a33a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M720,600 L705,672" stroke-width="22"/>
+    <path d="M705,672 C690,720 640,740 590,760" stroke-width="14"/>
+    <path d="M705,672 C700,730 690,780 670,830" stroke-width="14"/>
+    <path d="M705,672 C730,720 760,750 790,770" stroke-width="12"/>
+    <path d="M600,756 C570,770 540,770 515,790 M670,800 C650,810 630,826 620,846 M770,762 C760,790 740,810 735,830" stroke-width="6" stroke="#c98a2a"/>
+  </g>
+
+  <!-- ===== CUERPO ===== -->
+  <!-- tronco con escamas geométricas -->
+  <path d="M610,380 C560,470 600,590 720,620 C820,645 930,600 960,520 C990,440 960,370 900,345 C820,315 690,330 610,380Z" fill="url(#scales)" stroke="#6b2f18" stroke-width="5"/>
+  <g clip-path="url(#bodyClip)">
+    <rect x="560" y="330" width="440" height="320" fill="url(#bodyShade)"/>
+  </g>
+  <!-- cuello con plumas-hoja doradas -->
+  <path d="M600,430 C570,350 520,300 498,240 L582,222 C612,290 650,330 700,380Z" fill="#e39a32"/>
+  <g fill="#f6c552" stroke="#b86a1a" stroke-width="2">
+    <path d="M520,262 q-30,40 -18,90 q22,-40 34,-80z"/>
+    <path d="M548,268 q-32,48 -20,104 q24,-46 36,-94z"/>
+    <path d="M578,282 q-34,52 -20,116 q26,-50 38,-104z"/>
+    <path d="M606,300 q-34,52 -22,118 q28,-50 40,-104z"/>
+  </g>
+  <!-- ala de hojas de acelga/col -->
+  <g stroke="#2e5a1e" stroke-width="3">
+    <path d="M690,470 C740,400 880,390 950,450 C880,500 760,520 690,470Z" fill="#5f9e3a"/>
+    <path d="M700,500 C760,440 890,450 940,500 C870,540 760,550 700,500Z" fill="#7cb84a"/>
+    <path d="M710,530 C770,490 880,500 920,540 C860,570 770,575 710,530Z" fill="#9fcf5c"/>
+  </g>
+  <g fill="none" stroke="#e4f2c0" stroke-width="3" opacity="0.8">
+    <path d="M700,470 C780,450 870,450 945,452 M760,460 l-10,-22 M820,456 l-6,-26 M880,454 l2,-24"/>
+    <path d="M712,500 C790,488 870,492 935,500 M780,492 l-8,-20 M850,492 l0,-22"/>
+    <path d="M722,530 C790,524 860,528 915,540"/>
+  </g>
+
+  <!-- cabeza -->
+  <circle cx="525" cy="215" r="62" fill="#d9822b" stroke="#6b2f18" stroke-width="5"/>
+  <!-- cresta de guindillas -->
+  <g fill="#d42a2a" stroke="#7a1414" stroke-width="3">
+    <path d="M490,165 C470,120 476,80 494,60 C506,90 512,130 506,162z"/>
+    <path d="M520,156 C510,100 522,58 546,40 C552,80 548,120 538,156z"/>
+    <path d="M554,162 C560,112 580,82 606,74 C600,110 588,140 570,170z"/>
+  </g>
+  <g fill="#4f7d22">
+    <path d="M492,166 h18 l-4,10 h-10z"/><path d="M518,156 h22 l-4,10 h-14z"/><path d="M552,162 h20 l-6,10 h-12z"/>
+  </g>
+  <!-- pico de grano de maíz -->
+  <path d="M468,200 L408,222 L468,240z" fill="#f2c230" stroke="#9a6a10" stroke-width="3"/>
+  <path d="M468,220 L420,222" stroke="#9a6a10" stroke-width="3"/>
+  <!-- barba de rábanos -->
+  <g>
+    <path d="M478,252 C450,262 446,300 468,320 C486,300 494,272 478,252Z" fill="#d6336c" stroke="#7a1440" stroke-width="3"/>
+    <path d="M468,320 l-2,14" stroke="#f3e6e6" stroke-width="4" stroke-linecap="round"/>
+    <path d="M508,262 C488,276 490,306 508,320 C524,304 526,278 508,262Z" fill="#e0457a" stroke="#7a1440" stroke-width="3"/>
+  </g>
+  <!-- ojo ornamental -->
+  <circle cx="515" cy="205" r="20" fill="#fff4d6" stroke="#6b2f18" stroke-width="3"/>
+  <circle cx="515" cy="205" r="12" fill="#2a9d8f"/>
+  <circle cx="515" cy="205" r="6" fill="#1b1a2a"/>
+  <circle cx="510" cy="200" r="3" fill="#ffffff"/>
+  <!-- triángulos decorativos en la mejilla -->
+  <g fill="#f6c552"><polygon points="548,232 566,244 548,256"/><polygon points="566,214 580,224 566,234"/></g>
+
+  <!-- ===== SOMBRA: comida desperdiciada y envases bajo la pata ===== -->
+  <g stroke="#1e1824" stroke-width="3">
+    <!-- montón -->
+    <path d="M820,672 q120,-80 280,-70 q120,10 170,72z" fill="#4a4048"/>
+    <!-- bandeja de plástico con film -->
+    <path d="M930,610 h120 l-12,34 h-96z" fill="#9aa4ac"/>
+    <path d="M930,610 h120" stroke="#d8e2ea" stroke-width="4"/>
+    <!-- botella tirada -->
+    <g transform="translate(1100,630) rotate(-18)">
+      <path d="M-60,-16 h84 q12,0 18,8 h16 v16 h-16 q-6,8 -18,8 h-84z" fill="#7fa6b8" opacity="0.9"/>
+      <rect x="40" y="-8" width="12" height="16" fill="#3f5a6a"/>
+    </g>
+    <!-- pan duro -->
+    <path d="M860,646 q20,-36 70,-34 q40,2 40,32z" fill="#8a6a3e"/>
+    <path d="M880,634 l10,-14 M905,630 l8,-16 M930,632 l6,-16" stroke="#5a4428"/>
+    <!-- manzana podrida -->
+    <circle cx="1010" cy="660" r="20" fill="#6e5032"/>
+    <circle cx="1002" cy="656" r="7" fill="#3a2a1c" stroke="none"/>
+    <!-- piel de plátano -->
+    <path d="M1150,668 q20,-30 40,-30 q-6,20 -24,34z" fill="#8c7a3a"/>
+    <path d="M1180,668 q30,-22 48,-14 q-16,14 -40,18z" fill="#7a6a32"/>
+    <!-- bolsa de plástico -->
+    <path d="M1190,600 q-10,-40 14,-46 q6,16 20,0 q22,10 10,52 q-22,14 -44,-6z" fill="#b8c2c8" opacity="0.85"/>
+    <!-- lata -->
+    <rect x="1250" y="636" width="34" height="46" rx="4" fill="#6c7078"/>
+    <ellipse cx="1267" cy="636" rx="17" ry="5" fill="#9aa0a8"/>
+  </g>
+  <!-- moscas -->
+  <g fill="#1b1622">
+    <circle cx="980" cy="580" r="4"/><circle cx="1040" cy="560" r="4"/><circle cx="1120" cy="575" r="4"/><circle cx="1210" cy="540" r="4"/>
+  </g>
+  <g fill="none" stroke="#1b1622" stroke-width="2" opacity="0.6">
+    <path d="M985,585 q20,10 40,-12 q15,-14 30,10"/>
+    <path d="M1125,580 q30,-20 50,-6 q20,14 35,-30"/>
+  </g>
+  <!-- envase que se hunde en la tierra gris -->
+  <path d="M1340,700 l50,-8 l10,40 l-52,8z" fill="#8a949c" stroke="#1e1824" stroke-width="3"/>
+  <path d="M1080,760 l40,-10 l8,28 l-40,10z" fill="#6c767e" stroke="#1e1824" stroke-width="3"/>
+  <!-- pata derecha: apoyada sobre el desperdicio, apagada y gris -->
+  <g fill="none" stroke="#8c7a52" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M850,598 L900,622 L922,636" stroke-width="20"/>
+    <path d="M922,636 L972,628 M922,636 L966,652 M922,636 L938,662 M922,636 L888,646" stroke-width="9"/>
+  </g>
+</svg>
