@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 2 · Relaciones — dos tórtolas cuyas colas forman un corazón-nudo de cintas.
+       Luz: nido con huevos luminosos entre ambas. Sombra: a la derecha la cinta se vuelve alambre de espino que aprieta el ala. -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f7c873"/>
+      <stop offset="0.38" stop-color="#eea36a"/>
+      <stop offset="0.55" stop-color="#9a6a8c"/>
+      <stop offset="0.72" stop-color="#43395f"/>
+      <stop offset="1" stop-color="#1f1b30"/>
+    </linearGradient>
+    <radialGradient id="sol" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fff6d6"/>
+      <stop offset="0.5" stop-color="#ffe3a0" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#ffe3a0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="huevoLuz" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fffbe8"/>
+      <stop offset="0.45" stop-color="#ffe9a8" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#ffd36b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="huevo" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.6" stop-color="#fff0c2"/>
+      <stop offset="1" stop-color="#f2c45e"/>
+    </radialGradient>
+    <linearGradient id="plumaCalida" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6e3cf"/>
+      <stop offset="1" stop-color="#d9967a"/>
+    </linearGradient>
+    <linearGradient id="plumaFria" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b3aac6"/>
+      <stop offset="1" stop-color="#5d5577"/>
+    </linearGradient>
+    <linearGradient id="alaCalida" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c8743f"/>
+      <stop offset="1" stop-color="#8a3f3a"/>
+    </linearGradient>
+    <linearGradient id="alaFria" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6a6283"/>
+      <stop offset="1" stop-color="#3a3450"/>
+    </linearGradient>
+    <linearGradient id="cintaDer" gradientUnits="userSpaceOnUse" x1="742" y1="0" x2="900" y2="0">
+      <stop offset="0" stop-color="#e2557a"/>
+      <stop offset="1" stop-color="#6d6478"/>
+    </linearGradient>
+    <pattern id="escamas" width="34" height="24" patternUnits="userSpaceOnUse">
+      <path d="M0 0Q17 24 34 0" fill="none" stroke="#3f1c1c" stroke-width="2.5" stroke-opacity="0.55"/>
+      <polygon points="17,4 23,14 17,20 11,14" fill="#ffd27a" fill-opacity="0.8"/>
+    </pattern>
+    <pattern id="escamasFrias" width="34" height="24" patternUnits="userSpaceOnUse">
+      <path d="M0 0Q17 24 34 0" fill="none" stroke="#1d1a2a" stroke-width="2.5" stroke-opacity="0.6"/>
+      <polygon points="17,4 23,14 17,20 11,14" fill="#9b93b3" fill-opacity="0.7"/>
+    </pattern>
+    <filter id="brillo" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fondo: amanecer cálido a la izquierda, noche fría a la derecha -->
+  <path d="M0 0H1485V850H0Z" fill="url(#cielo)"/>
+  <circle cx="300" cy="230" r="230" fill="url(#sol)"/>
+  <!-- Colinas suaves -->
+  <path d="M0 720C200 680 420 700 742 730C1050 760 1280 700 1485 720V850H0Z" fill="#5a3a4a" opacity="0.35"/>
+  <!-- Nubes de tormenta a la derecha -->
+  <g fill="#15121f" opacity="0.55">
+    <ellipse cx="1250" cy="120" rx="170" ry="45"/>
+    <ellipse cx="1360" cy="95" rx="120" ry="40"/>
+    <ellipse cx="1180" cy="150" rx="110" ry="30"/>
+  </g>
+
+  <!-- ========== TÓRTOLA IZQUIERDA (luz) ========== -->
+  <g>
+    <!-- Plumas de la cola hacia el nudo -->
+    <g stroke="#7a3a35" stroke-width="3" stroke-linejoin="round">
+      <path d="M545 540L700 660L728 640L590 520Z" fill="#c8743f"/>
+      <path d="M520 560L690 690L710 664L560 545Z" fill="#e0a05e"/>
+    </g>
+    <!-- Cuerpo -->
+    <path d="M612 250C560 262 480 300 440 370C405 435 425 520 500 560C560 592 650 585 700 540C740 500 745 430 720 370C705 330 690 290 690 255Z"
+          fill="url(#plumaCalida)" stroke="#7a3a35" stroke-width="4"/>
+    <!-- Ala -->
+    <path d="M470 320C560 300 650 330 680 400C640 480 560 530 450 560C415 490 420 380 470 320Z"
+          fill="url(#alaCalida)" stroke="#7a3a35" stroke-width="4"/>
+    <path d="M470 320C560 300 650 330 680 400C640 480 560 530 450 560C415 490 420 380 470 320Z" fill="url(#escamas)"/>
+    <!-- Remeras largas -->
+    <g fill="#5e2b2e" stroke="#3f1c1c" stroke-width="2">
+      <path d="M455 540L380 640L405 645L480 548Z"/>
+      <path d="M480 548L420 660L445 660L505 552Z"/>
+      <path d="M505 552L462 672L488 668L530 552Z"/>
+    </g>
+    <!-- Cabeza -->
+    <circle cx="650" cy="220" r="46" fill="#f2dccb" stroke="#7a3a35" stroke-width="4"/>
+    <polygon points="688,206 736,224 688,238" fill="#e2a24a" stroke="#7a3a35" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="662" cy="208" r="9" fill="#2a1414"/>
+    <circle cx="665" cy="205" r="3" fill="#fff"/>
+    <!-- Collar a rayas de tórtola -->
+    <g stroke="#2a1414" stroke-width="5" stroke-linecap="round">
+      <path d="M610 262L626 282M622 258L638 278M634 255L650 275"/>
+    </g>
+    <g stroke="#fff4e0" stroke-width="3" stroke-linecap="round">
+      <path d="M616 260L632 280M628 256L644 276"/>
+    </g>
+  </g>
+
+  <!-- ========== TÓRTOLA DERECHA (sombra), espejo ========== -->
+  <g transform="translate(1485 0) scale(-1 1)">
+    <g stroke="#2a2438" stroke-width="3" stroke-linejoin="round">
+      <path d="M545 540L700 660L728 640L590 520Z" fill="#6a6283"/>
+      <path d="M520 560L690 690L710 664L560 545Z" fill="#8d84a6"/>
+    </g>
+    <path d="M612 250C560 262 480 300 440 370C405 435 425 520 500 560C560 592 650 585 700 540C740 500 745 430 720 370C705 330 690 290 690 255Z"
+          fill="url(#plumaFria)" stroke="#2a2438" stroke-width="4"/>
+    <!-- Ala encogida, apretada -->
+    <path d="M480 330C560 315 640 340 670 400C635 465 565 505 470 528C440 470 440 380 480 330Z"
+          fill="url(#alaFria)" stroke="#2a2438" stroke-width="4"/>
+    <path d="M480 330C560 315 640 340 670 400C635 465 565 505 470 528C440 470 440 380 480 330Z" fill="url(#escamasFrias)"/>
+    <g fill="#2e2940" stroke="#1d1a2a" stroke-width="2">
+      <path d="M470 520L430 600L452 604L492 526Z"/>
+      <path d="M492 526L462 612L484 612L515 528Z"/>
+    </g>
+    <circle cx="650" cy="220" r="46" fill="#bfb6cf" stroke="#2a2438" stroke-width="4"/>
+    <polygon points="688,206 736,224 688,238" fill="#9a8a6a" stroke="#2a2438" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="662" cy="208" r="9" fill="#14111c"/>
+    <circle cx="665" cy="205" r="3" fill="#d8d4e4"/>
+    <g stroke="#14111c" stroke-width="5" stroke-linecap="round">
+      <path d="M610 262L626 282M622 258L638 278M634 255L650 275"/>
+    </g>
+  </g>
+
+  <!-- ========== CORAZÓN-NUDO: mitad de cinta dorada (luz) y mitad de alambre de espino (sombra) ========== -->
+  <!-- Cinta dorada: sale de la cola izquierda y dibuja la mitad izquierda del corazón -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M742 805C680 750 584 700 584 630C584 545 694 540 742 600" stroke="#7a3a35" stroke-width="34"/>
+    <path d="M742 805C680 750 584 700 584 630C584 545 694 540 742 600" stroke="#f2b544" stroke-width="26"/>
+    <path d="M742 805C680 750 584 700 584 630C584 545 694 540 742 600" stroke="#fff1c4" stroke-width="3" stroke-dasharray="12 9"/>
+    <path d="M610 700C540 720 470 700 400 730C330 760 280 800 230 780C195 765 210 730 245 735" stroke="#7a3a35" stroke-width="26"/>
+    <path d="M610 700C540 720 470 700 400 730C330 760 280 800 230 780C195 765 210 730 245 735" stroke="#f2b544" stroke-width="18"/>
+  </g>
+  <!-- Alambre de espino: mitad derecha del corazón -->
+  <g fill="none" stroke="#1d1a26" stroke-linecap="round">
+    <path d="M742 600C790 540 900 545 900 630C900 700 800 750 742 805" stroke-width="7"/>
+    <path d="M742 600C790 540 900 545 900 630C900 700 800 750 742 805" stroke-width="3" stroke="#6d6680" transform="translate(-3 -3)"/>
+    <path d="M746 582L767 589M758 596L754 575M782 559L799 573M789 577L793 555M825 550L835 570M824 569L836 551M868 559L868 581M859 576L878 565M901 591L888 609M883 598L905 601M910 634L889 643M891 632L908 645M896 676L875 676M880 666L891 686M871 710L849 704M857 696L863 718M840 738L820 730M828 723L832 745M809 763L789 754M797 748L800 769M778 787L757 779M766 772L769 794" stroke-width="5"/>
+  </g>
+  <!-- El alambre sube y aprieta el ala de la tórtola derecha -->
+  <g fill="none" stroke="#1d1a26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M880 690C990 690 1080 610 1070 540C1062 480 930 505 800 478C770 470 775 425 810 420C920 410 1000 445 1065 412C1095 395 1075 350 1040 350C980 345 900 330 840 352" stroke-width="7"/>
+    <path d="M892 680L904 698M893 699L903 679M927 676L942 691M931 694L937 673M959 666L977 679M967 683L970 661M990 651L1010 661M1000 667L1000 645M1018 631L1039 637M1031 645L1026 623M1041 606L1063 607M1057 616L1047 597M1057 577L1078 572M1075 583L1060 567M1061 546L1078 532M1080 543L1060 535M1049 522L1048 500M1058 506L1039 517M1018 511L1011 491M1022 493L1007 509M983 506L973 486M984 487L972 505M947 504L938 484M949 485L936 503M911 501L901 482M912 482L900 501M875 498L866 478M877 479L864 497M839 494L831 474M842 475L828 493M803 489L797 467M808 470L792 486M771 456L790 446M790 457L771 445M791 416L809 429M799 434L801 412M830 409L842 428M831 428L841 409M866 409L876 428M865 428L877 409M902 411L912 430M901 430L913 411M939 414L948 434M937 433L950 415M974 416L984 436M973 435L985 417M1009 417L1022 435M1011 436L1020 416M1042 411L1058 426M1048 429L1052 408M1067 399L1089 396M1085 406L1071 389M1067 375L1074 354M1081 362L1060 366M1043 360L1034 340M1044 341L1032 359M1007 356L998 336M1009 337L996 355M971 353L962 333M973 334L960 352M936 350L926 331M937 331L925 350M901 350L889 332M900 331L890 351M867 354L852 338M862 336L856 357" stroke-width="5"/>
+  </g>
+  <!-- Nudo central -->
+  <circle cx="742" cy="604" r="22" fill="#e2557a" stroke="#5a2438" stroke-width="4"/>
+  <path d="M730 596Q742 614 754 596" fill="none" stroke="#5a2438" stroke-width="3"/>
+  <!-- Gotas rojas donde aprieta el alambre y plumas que caen -->
+  <g fill="#9b2c45">
+    <ellipse cx="1072" cy="590" rx="6" ry="9"/><ellipse cx="1050" cy="640" rx="5" ry="8"/><ellipse cx="830" cy="510" rx="5" ry="8"/>
+  </g>
+  <g fill="#8d84a6" stroke="#2a2438" stroke-width="2">
+    <path d="M1150 560C1170 540 1195 545 1200 560C1185 572 1165 575 1150 560Z" transform="rotate(30 1175 560)"/>
+    <path d="M1230 660C1250 640 1275 645 1280 660C1265 672 1245 675 1230 660Z" transform="rotate(-20 1255 660)"/>
+    <path d="M1140 740C1160 720 1185 725 1190 740C1175 752 1155 755 1140 740Z" transform="rotate(50 1165 740)"/>
+  </g>
+  <!-- ========== NIDO CON HUEVOS LUMINOSOS ========== -->
+  <circle cx="742" cy="440" r="135" fill="url(#huevoLuz)"/>
+  <g filter="url(#brillo)">
+    <ellipse cx="712" cy="438" rx="24" ry="32" fill="url(#huevo)"/>
+    <ellipse cx="772" cy="438" rx="24" ry="32" fill="url(#huevo)"/>
+    <ellipse cx="742" cy="425" rx="26" ry="35" fill="url(#huevo)"/>
+  </g>
+  <path d="M650 450C660 510 700 525 742 525C784 525 824 510 834 450C800 470 690 470 650 450Z" fill="#8a5a32" stroke="#4e2f1a" stroke-width="4"/>
+  <g fill="none" stroke="#c99257" stroke-width="3" stroke-linecap="round">
+    <path d="M662 465C700 480 790 480 822 465"/>
+    <path d="M672 488C710 500 775 500 812 488"/>
+    <path d="M690 508C720 515 765 515 795 508"/>
+    <path d="M650 450L690 500M700 470L740 520M760 470L790 512M820 462L800 500"/>
+  </g>
+</svg>

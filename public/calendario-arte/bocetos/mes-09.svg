@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 9 · Economía: abeja-hormiga que carga una colmena compartida; la otra mitad es una torre de monedas que se desmorona -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f7d98e"/>
+      <stop offset="0.42" stop-color="#eea95a"/>
+      <stop offset="0.62" stop-color="#9a5a6e"/>
+      <stop offset="1" stop-color="#2b2142"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="560" cy="300" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff3c4" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#ffd77a" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffd77a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="groundL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6f8a2f"/>
+      <stop offset="0.45" stop-color="#8a7a2c"/>
+      <stop offset="0.65" stop-color="#5a4a52"/>
+      <stop offset="1" stop-color="#2e2836"/>
+    </linearGradient>
+    <linearGradient id="honey" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd860"/>
+      <stop offset="1" stop-color="#e8921c"/>
+    </linearGradient>
+    <pattern id="comb" patternUnits="userSpaceOnUse" x="482" y="97" width="62.354" height="108">
+      <rect width="62.354" height="108" fill="#b8620f"/>
+      <polygon points="0,-33 29,-17 29,16 0,33 -29,17 -29,-17" fill="url(#honey)"/>
+      <polygon points="62,-33 91,-17 91,16 62,33 34,17 34,-17" fill="url(#honey)"/>
+      <polygon points="0,75 29,92 29,124 0,141 -29,125 -29,92" fill="url(#honey)"/>
+      <polygon points="62,75 91,92 91,124 62,141 34,125 34,92" fill="url(#honey)"/>
+      <polygon points="31,21 60,38 60,70 31,87 3,71 3,38" fill="url(#honey)"/>
+      <polygon points="31,30 50,41 50,52 31,41 12,52 12,41" fill="#fff1b0" opacity="0.55"/>
+    </pattern>
+    <pattern id="coinrows" patternUnits="userSpaceOnUse" x="0" y="97" width="58" height="18">
+      <rect width="58" height="18" fill="#8d7c4e"/>
+      <rect y="0" width="58" height="3" fill="#c2ad72"/>
+      <rect y="15" width="58" height="3" fill="#4a3e2c"/>
+      <path d="M8,5v8M18,5v8M28,5v8M38,5v8M48,5v8" stroke="#6c5d3c" stroke-width="2"/>
+    </pattern>
+    <linearGradient id="coinTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d9c58a"/>
+      <stop offset="1" stop-color="#9c8858"/>
+    </linearGradient>
+    <linearGradient id="coinSide" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a6a42"/>
+      <stop offset="1" stop-color="#4a3e2a"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1c1430" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1c1430" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#bff0e6" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#4cc2b4" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="abd" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e09a2e"/>
+      <stop offset="1" stop-color="#6b4a3a"/>
+    </linearGradient>
+    <clipPath id="abdClip"><ellipse cx="800" cy="605" rx="185" ry="105"/></clipPath>
+  </defs>
+
+  <!-- cielo -->
+  <rect width="1485" height="850" fill="url(#sky)"/>
+  <rect width="1485" height="850" fill="url(#sun)"/>
+  <!-- rayos ornamentales en el lado luminoso -->
+  <g stroke="#fff2c0" stroke-width="6" opacity="0.35" stroke-linecap="round">
+    <path d="M560,300L40,40M560,300L20,300M560,300L120,600M560,300L330,10"/>
+  </g>
+  <!-- nubes oscuras en el lado de sombra -->
+  <g fill="#1d1630" opacity="0.5">
+    <ellipse cx="1300" cy="120" rx="210" ry="45"/>
+    <ellipse cx="1180" cy="180" rx="150" ry="30"/>
+  </g>
+
+  <!-- suelo -->
+  <path d="M0,720 Q370,700 740,722 T1485,716 V850 H0 Z" fill="url(#groundL)"/>
+  <path d="M0,760 Q370,745 740,765 T1485,758" stroke="#3e3020" stroke-width="3" fill="none" opacity="0.4"/>
+  <!-- semillas y brotes (luz) -->
+  <g stroke="#3f6b1e" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M60,722 v-30 M60,700 q-16,-10 -24,-2 M60,705 q16,-12 26,-4"/>
+    <path d="M300,728 v-26 M300,708 q-14,-10 -22,-2 M300,712 q14,-10 22,-2"/>
+    <path d="M330,740 v-18 M330,728 q10,-8 18,-2"/>
+  </g>
+  <g fill="#f3c14a">
+    <ellipse cx="96" cy="770" rx="7" ry="4"/><ellipse cx="150" cy="790" rx="7" ry="4"/>
+    <ellipse cx="240" cy="772" rx="7" ry="4"/><ellipse cx="370" cy="795" rx="7" ry="4"/>
+  </g>
+
+  <!-- arco de intercambio: miel y semillas que circulan desde la colmena -->
+  <path d="M560,110 C420,10 160,60 120,250 C100,380 140,520 170,630" fill="none" stroke="#ffe08a" stroke-width="5" stroke-dasharray="2 22" stroke-linecap="round"/>
+  <g fill="#f4b52e" stroke="#b8620f" stroke-width="2">
+    <path d="M300,62 q8,14 0,22 q-8,-8 0,-22z"/>
+    <path d="M150,170 q8,14 0,22 q-8,-8 0,-22z"/>
+    <path d="M118,350 q8,14 0,22 q-8,-8 0,-22z"/>
+    <path d="M140,500 q8,14 0,22 q-8,-8 0,-22z"/>
+  </g>
+
+  <!-- figuras pequeñas que comparten (luz) -->
+  <g>
+    <circle cx="120" cy="612" r="17" fill="#7a3d5c"/>
+    <path d="M98,720 q-4,-70 22,-88 q26,18 22,88z" fill="#a0466b"/>
+    <path d="M140,650 l40,-12" stroke="#a0466b" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="210" cy="618" r="16" fill="#2a7f7a"/>
+    <path d="M190,720 q-4,-66 20,-84 q24,18 20,84z" fill="#2fa39a"/>
+    <path d="M195,652 l-18,-12" stroke="#2fa39a" stroke-width="10" stroke-linecap="round"/>
+    <!-- celda de miel que se pasan -->
+    <polygon points="178,610 194,619 194,637 178,646 162,637 162,619" fill="url(#honey)" stroke="#b8620f" stroke-width="3"/>
+    <circle cx="262" cy="640" r="12" fill="#c06a2a"/>
+    <path d="M248,722 q-2,-52 14,-68 q16,16 14,68z" fill="#d9823a"/>
+  </g>
+
+  <!-- ===== ABEJA-HORMIGA ===== -->
+  <!-- patas traseras (lado lejano, más oscuras) -->
+  <g fill="none" stroke="#4a2c16" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" opacity="0.8">
+    <path d="M470,620 L430,690 L452,732"/>
+    <path d="M540,625 L610,690 L640,734"/>
+    <path d="M560,630 L700,700 L790,736"/>
+  </g>
+  <!-- alas -->
+  <path d="M495,525 C420,380 300,240 170,250 C140,330 300,470 495,540z" fill="url(#wing)" stroke="#1f7d74" stroke-width="4"/>
+  <path d="M500,520 C470,360 420,210 330,150 C280,200 330,400 500,535z" fill="url(#wing)" stroke="#1f7d74" stroke-width="4"/>
+  <g stroke="#1f7d74" stroke-width="3" fill="none" opacity="0.8">
+    <path d="M495,532 L220,270 M420,460 L250,330 L330,290 L420,460 M340,385 L300,300"/>
+    <path d="M500,525 L340,170 M470,400 L380,250 L440,260 L470,400"/>
+  </g>
+  <!-- abdomen con franjas ornamentales -->
+  <ellipse cx="800" cy="605" rx="185" ry="105" fill="url(#abd)" stroke="#3b2414" stroke-width="5"/>
+  <g clip-path="url(#abdClip)">
+    <path d="M690,480 l-30,130 l30,110 h40 l-30,-110 l30,-130z" fill="#3b2414"/>
+    <path d="M800,480 l-30,130 l30,110 h40 l-30,-110 l30,-130z" fill="#3b2414"/>
+    <path d="M910,480 l-30,130 l30,110 h40 l-30,-110 l30,-130z" fill="#2a1b12"/>
+    <g fill="#ffd56a" opacity="0.8">
+      <polygon points="645,600 660,585 675,600 660,615"/>
+      <polygon points="755,600 770,585 785,600 770,615"/>
+    </g>
+    <rect x="620" y="480" width="370" height="240" fill="url(#shade)"/>
+  </g>
+  <!-- aguijón -->
+  <path d="M982,610 l40,8 l-40,12z" fill="#2a1b12"/>
+  <!-- cintura -->
+  <ellipse cx="605" cy="595" rx="26" ry="20" fill="#9c5a1e" stroke="#3b2414" stroke-width="4"/>
+  <!-- tórax con rombos -->
+  <ellipse cx="510" cy="585" rx="88" ry="70" fill="#d98c2b" stroke="#3b2414" stroke-width="5"/>
+  <g fill="#8f4f15">
+    <polygon points="470,585 490,560 510,585 490,610"/>
+    <polygon points="515,585 535,560 555,585 535,610"/>
+    <polygon points="492,548 505,532 518,548 505,564" fill="#f6c25a"/>
+    <polygon points="492,622 505,606 518,622 505,638" fill="#f6c25a"/>
+  </g>
+  <!-- cabeza -->
+  <circle cx="350" cy="555" r="72" fill="#e3a03a" stroke="#3b2414" stroke-width="5"/>
+  <ellipse cx="335" cy="540" rx="34" ry="42" fill="#1f8f88" stroke="#0f4a46" stroke-width="4"/>
+  <ellipse cx="335" cy="540" rx="22" ry="28" fill="none" stroke="#7fe0d4" stroke-width="3"/>
+  <ellipse cx="335" cy="540" rx="10" ry="13" fill="none" stroke="#7fe0d4" stroke-width="3"/>
+  <circle cx="326" cy="526" r="6" fill="#ffffff" opacity="0.8"/>
+  <!-- mandíbulas sosteniendo una semilla -->
+  <path d="M300,600 q-30,10 -40,40 q22,-8 44,-22z" fill="#5a3418"/>
+  <path d="M325,615 q-14,24 -42,30 q20,-22 30,-36z" fill="#5a3418"/>
+  <ellipse cx="270" cy="640" rx="14" ry="9" fill="#f3c14a" stroke="#8a5a14" stroke-width="3"/>
+  <!-- antenas -->
+  <g fill="none" stroke="#3b2414" stroke-width="7" stroke-linecap="round">
+    <path d="M360,488 C350,420 300,400 270,420 C250,435 262,458 282,450"/>
+    <path d="M390,495 C410,430 450,410 470,420 C488,430 480,452 462,446"/>
+  </g>
+  <!-- patas delanteras (lado cercano) -->
+  <g fill="none" stroke="#5a3418" stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M455,630 L395,690 L360,734"/>
+    <path d="M515,645 L545,700 L520,736"/>
+    <path d="M575,630 L680,700 L740,738"/>
+  </g>
+
+  <!-- ===== COLMENA HEXAGONAL ===== -->
+  <!-- mitad luminosa: panal de miel compartida -->
+  <polygon points="720,97 602,97 485,300 602,503 720,503" fill="url(#comb)"/>
+  <!-- mitad oscura: monedas apiladas -->
+  <polygon points="720,97 838,97 955,300 838,503 720,503" fill="url(#coinrows)"/>
+  <polygon points="720,97 838,97 955,300 838,503 720,503" fill="url(#shade)"/>
+  <!-- grieta central -->
+  <path d="M720,97 L732,150 L712,200 L734,255 L710,310 L730,365 L714,420 L728,470 L720,503" fill="none" stroke="#2b2142" stroke-width="6" stroke-linejoin="round"/>
+  <!-- contorno -->
+  <polygon points="602,97 838,97 955,300 838,503 602,503 485,300" fill="none" stroke="#5a3418" stroke-width="8" stroke-linejoin="round"/>
+  <!-- brillo sobre el panal -->
+  <path d="M520,300 L612,140 L700,140" fill="none" stroke="#fff4c4" stroke-width="5" opacity="0.6" stroke-linecap="round"/>
+  <!-- semillas en algunas celdas -->
+  <g fill="#6b3d12">
+    <ellipse cx="582" cy="171" rx="8" ry="12"/>
+    <ellipse cx="520" cy="279" rx="8" ry="12"/>
+    <ellipse cx="582" cy="387" rx="8" ry="12"/>
+    <ellipse cx="676" cy="441" rx="8" ry="12"/>
+  </g>
+  <!-- miel que gotea hacia el suelo fértil -->
+  <path d="M560,503 q6,30 0,52 q-10,-14 0,-52z" fill="#f4b52e"/>
+
+  <!-- torre de monedas que se inclina y se desmorona -->
+  <g stroke="#2e2618" stroke-width="2">
+    <path d="M742,97v12a52,13 0 0 0 104,0v-12z" fill="url(#coinSide)"/><ellipse cx="794" cy="97" rx="52" ry="13" fill="url(#coinTop)"/>
+    <path d="M744,82v12a52,13 0 0 0 104,0v-12z" fill="url(#coinSide)"/><ellipse cx="796" cy="82" rx="52" ry="13" fill="url(#coinTop)"/>
+    <path d="M749,67v12a52,13 0 0 0 104,0v-12z" fill="url(#coinSide)"/><ellipse cx="801" cy="67" rx="52" ry="13" fill="url(#coinTop)"/>
+    <path d="M757,52v12a52,13 0 0 0 104,0v-12z" fill="url(#coinSide)"/><ellipse cx="809" cy="52" rx="52" ry="13" fill="url(#coinTop)"/>
+    <path d="M768,37v12a52,13 0 0 0 104,0v-12z" fill="url(#coinSide)"/><ellipse cx="820" cy="37" rx="52" ry="13" fill="url(#coinTop)"/>
+    <!-- monedas sueltas cayendo -->
+    <g transform="translate(905,45) rotate(25)"><path d="M-46,0v11a46,12 0 0 0 92,0v-11z" fill="url(#coinSide)"/><ellipse rx="46" ry="12" fill="url(#coinTop)"/></g>
+    <g transform="translate(985,120) rotate(55)"><path d="M-44,0v11a44,12 0 0 0 88,0v-11z" fill="url(#coinSide)"/><ellipse rx="44" ry="12" fill="url(#coinTop)"/></g>
+    <g transform="translate(1040,235) rotate(-20)"><path d="M-44,0v11a44,12 0 0 0 88,0v-11z" fill="url(#coinSide)"/><ellipse rx="44" ry="12" fill="url(#coinTop)"/></g>
+    <g transform="translate(1110,330) rotate(70)"><path d="M-42,0v11a42,12 0 0 0 84,0v-11z" fill="url(#coinSide)"/><ellipse rx="42" ry="12" fill="url(#coinTop)"/></g>
+    <g transform="translate(1000,360) rotate(10)"><path d="M-40,0v11a40,11 0 0 0 80,0v-11z" fill="url(#coinSide)"/><ellipse rx="40" ry="11" fill="url(#coinTop)"/></g>
+    <g transform="translate(1160,450) rotate(-35)"><path d="M-42,0v11a42,12 0 0 0 84,0v-11z" fill="url(#coinSide)"/><ellipse rx="42" ry="12" fill="url(#coinTop)"/></g>
+    <g transform="translate(1260,520) rotate(40)"><path d="M-40,0v11a40,11 0 0 0 80,0v-11z" fill="url(#coinSide)"/><ellipse rx="40" ry="11" fill="url(#coinTop)"/></g>
+    <g transform="translate(1085,540) rotate(-60)"><path d="M-40,0v11a40,11 0 0 0 80,0v-11z" fill="url(#coinSide)"/><ellipse rx="40" ry="11" fill="url(#coinTop)"/></g>
+  </g>
+  <!-- trazos de caída -->
+  <g stroke="#d8c8a0" stroke-width="3" opacity="0.4" stroke-linecap="round">
+    <path d="M950,70 l-20,-25 M1030,170 l-18,-30 M1150,390 l-14,-34 M1240,470 l-14,-30"/>
+  </g>
+
+  <!-- montón de monedas aplastando figuras pequeñas (sombra) -->
+  <path d="M1100,724 q90,-110 190,-100 q70,10 110,100z" fill="#6f6040" stroke="#2e2618" stroke-width="3"/>
+  <g fill="#a8955f" stroke="#2e2618" stroke-width="2">
+    <ellipse cx="1180" cy="690" rx="34" ry="9"/><ellipse cx="1240" cy="665" rx="34" ry="9"/>
+    <ellipse cx="1300" cy="650" rx="34" ry="9"/><ellipse cx="1350" cy="690" rx="34" ry="9"/>
+    <ellipse cx="1270" cy="705" rx="34" ry="9"/><ellipse cx="1210" cy="716" rx="34" ry="9"/>
+  </g>
+  <g fill="#2b2142">
+    <!-- figura agachada protegiéndose -->
+    <circle cx="1065" cy="660" r="15"/>
+    <path d="M1040,726 q0,-50 25,-54 q24,6 22,54z"/>
+    <path d="M1052,655 l-12,-30 M1078,655 l12,-30" stroke="#2b2142" stroke-width="9" stroke-linecap="round"/>
+    <!-- figura medio enterrada, brazo que asoma -->
+    <circle cx="1325" cy="600" r="14"/>
+    <path d="M1310,640 q2,-26 15,-28 q14,2 15,28z"/>
+    <path d="M1340,610 l20,-34" stroke="#2b2142" stroke-width="8" stroke-linecap="round"/>
+    <!-- figura que huye -->
+    <circle cx="1430" cy="650" r="13"/>
+    <path d="M1412,722 q2,-52 18,-60 q18,8 16,60z"/>
+  </g>
+</svg>

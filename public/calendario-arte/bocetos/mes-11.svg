@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 11 · Política: aves distintas sostienen con el pico un mismo hilo que teje la esfera-mundo; un ave mayor con corona de papel tira del hilo y lo deshilacha -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f6dc96"/>
+      <stop offset="0.4" stop-color="#eab06a"/>
+      <stop offset="0.64" stop-color="#8f5a78"/>
+      <stop offset="1" stop-color="#271d3c"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="560" cy="380" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff4cc" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#fff4cc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="globe" cx="0.36" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#6fd6c8"/>
+      <stop offset="0.55" stop-color="#2a9a95"/>
+      <stop offset="1" stop-color="#1b5f6e"/>
+    </radialGradient>
+    <linearGradient id="globeShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a1230" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#1a1230" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1a1230" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7f9a3c"/>
+      <stop offset="0.5" stop-color="#8a7f40"/>
+      <stop offset="0.7" stop-color="#4c4250"/>
+      <stop offset="1" stop-color="#231c2e"/>
+    </linearGradient>
+    <clipPath id="ball"><circle cx="690" cy="420" r="250"/></clipPath>
+    <clipPath id="leftHalf"><rect x="0" y="0" width="800" height="850"/></clipPath>
+    <clipPath id="rightHalf"><rect x="800" y="0" width="700" height="850"/></clipPath>
+  </defs>
+
+  <!-- cielo -->
+  <rect width="1485" height="850" fill="url(#sky)"/>
+  <rect width="1485" height="850" fill="url(#halo)"/>
+  <!-- nube oscura del lado de sombra -->
+  <g fill="#1a1430" opacity="0.5">
+    <ellipse cx="1300" cy="110" rx="220" ry="46"/>
+    <ellipse cx="1390" cy="170" rx="160" ry="30"/>
+  </g>
+  <!-- suelo -->
+  <path d="M0,730 Q380,712 760,732 T1485,724 V850 H0 Z" fill="url(#ground)"/>
+  <!-- agua somera para la garza -->
+  <ellipse cx="270" cy="760" rx="220" ry="28" fill="#7cc8c0" opacity="0.7"/>
+  <ellipse cx="270" cy="760" rx="150" ry="16" fill="none" stroke="#e8fff8" stroke-width="3" opacity="0.6"/>
+
+  <!-- voces que se cruzan: arcos punteados entre las aves del lado luminoso -->
+  <g fill="none" stroke="#fff3c0" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 18" opacity="0.9">
+    <path d="M430,250 Q560,60 690,120"/>
+    <path d="M420,330 Q250,480 470,640"/>
+    <path d="M560,690 Q700,800 860,690"/>
+    <path d="M760,110 Q980,100 920,240"/>
+  </g>
+
+  <!-- ===== ESFERA-MUNDO TEJIDA ===== -->
+  <circle cx="690" cy="420" r="250" fill="url(#globe)"/>
+  <!-- tierras ornamentales -->
+  <g clip-path="url(#ball)" fill="#d9a441" stroke="#9a6a1c" stroke-width="3">
+    <path d="M520,250 q60,-40 120,-10 q30,30 -10,60 q-40,30 -20,70 q10,40 -40,50 q-50,0 -60,-50 q-10,-60 10,-120z"/>
+    <path d="M700,300 q50,-30 110,0 q40,30 10,70 q-30,30 -70,10 q-40,-20 -50,-80z"/>
+    <path d="M640,470 q50,-20 80,20 q20,50 -10,110 q-30,40 -60,0 q-30,-60 -10,-130z"/>
+    <path d="M820,470 q50,-10 70,30 q0,40 -40,50 q-40,0 -30,-80z"/>
+  </g>
+  <!-- tejido sano (mitad izquierda): paralelos y meridianos dorados bien entrelazados -->
+  <g clip-path="url(#leftHalf)">
+    <g clip-path="url(#ball)" fill="none" stroke="#ffe59a" stroke-width="5">
+      <ellipse cx="690" cy="218" rx="147" ry="21"/>
+      <ellipse cx="690" cy="273" rx="202" ry="28"/>
+      <ellipse cx="690" cy="343" rx="238" ry="33"/>
+      <ellipse cx="690" cy="420" rx="250" ry="35"/>
+      <ellipse cx="690" cy="497" rx="238" ry="33"/>
+      <ellipse cx="690" cy="567" rx="202" ry="28"/>
+      <ellipse cx="690" cy="622" rx="147" ry="21"/>
+      <ellipse cx="690" cy="420" rx="77" ry="250"/>
+      <ellipse cx="690" cy="420" rx="147" ry="250"/>
+      <ellipse cx="690" cy="420" rx="202" ry="250"/>
+      <ellipse cx="690" cy="420" rx="238" ry="250"/>
+    </g>
+    <!-- nudos de cruce en rombo -->
+    <g fill="#ffd25a" stroke="#a8721c" stroke-width="2">
+      <polygon points="543,343 551,333 559,343 551,353"/>
+      <polygon points="488,420 496,410 504,420 496,430"/>
+      <polygon points="543,497 551,487 559,497 551,507"/>
+      <polygon points="613,273 621,263 629,273 621,283"/>
+      <polygon points="613,567 621,557 629,567 621,577"/>
+      <polygon points="682,420 690,410 698,420 690,430"/>
+      <polygon points="682,218 690,208 698,218 690,228"/>
+      <polygon points="682,622 690,612 698,622 690,632"/>
+    </g>
+  </g>
+  <!-- tejido dañado (mitad derecha): hilos rotos y flojos -->
+  <g clip-path="url(#rightHalf)">
+    <g clip-path="url(#ball)" fill="none" stroke="#bfae86" stroke-width="4" stroke-dasharray="46 30" opacity="0.85">
+      <ellipse cx="690" cy="273" rx="202" ry="28"/>
+      <ellipse cx="690" cy="420" rx="250" ry="35"/>
+      <ellipse cx="690" cy="567" rx="202" ry="28"/>
+      <ellipse cx="690" cy="420" rx="147" ry="250"/>
+      <ellipse cx="690" cy="420" rx="238" ry="250"/>
+    </g>
+  </g>
+  <circle cx="690" cy="420" r="250" fill="url(#globeShade)"/>
+  <!-- desgarro: hueco oscuro donde se ha deshecho el tejido -->
+  <path d="M905,300 q-40,40 -30,110 q10,70 40,110 q30,-60 25,-120 q-5,-60 -35,-100z" fill="#1a1230" opacity="0.75"/>
+  <circle cx="690" cy="420" r="250" fill="none" stroke="#7a4e1c" stroke-width="6"/>
+  <!-- brillo -->
+  <path d="M520,260 a220,220 0 0 1 120,-80" fill="none" stroke="#e8fff8" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- EL HILO COMÚN: un cordón dorado que rodea el mundo; cada ave lo sostiene con el pico -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M821,193 A262,262 0 1 0 840,635" stroke="#7a4e1c" stroke-width="14"/>
+    <path d="M821,193 A262,262 0 1 0 840,635" stroke="#ffd75e" stroke-width="9"/>
+    <path d="M821,193 A262,262 0 1 0 840,635" stroke="#fff6cf" stroke-width="3" stroke-dasharray="12 10"/>
+    <!-- parte del cordón ya deshilachada (lado oscuro) -->
+    <path d="M821,193 A262,262 0 0 1 840,635" stroke="#9c8c6a" stroke-width="5" stroke-dasharray="40 26"/>
+    <!-- tirones hacia el pico del ave coronada -->
+    <path d="M821,193 C900,220 1000,300 1082,338" stroke="#bfae86" stroke-width="6"/>
+    <path d="M840,635 C930,560 1020,420 1082,342" stroke="#bfae86" stroke-width="6"/>
+  </g>
+  <!-- hilos deshilachados que el ave coronada arrastra hacia sí -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M915,330 C980,300 1030,330 1080,322" stroke="#bfae86" stroke-width="6"/>
+    <path d="M935,410 C990,380 1030,360 1082,334" stroke="#bfae86" stroke-width="6"/>
+    <path d="M915,510 C990,470 1040,380 1084,342" stroke="#bfae86" stroke-width="6"/>
+    <!-- fibras sueltas -->
+    <path d="M980,318 l-10,-26 M1010,330 l4,-28 M995,392 l-24,10 M1020,374 l6,24 M1010,440 l-26,6 M1040,400 l14,22" stroke="#9c8c6a" stroke-width="3"/>
+    <path d="M915,510 q-10,40 10,70 q20,30 -10,60" stroke="#9c8c6a" stroke-width="4"/>
+  </g>
+
+  <!-- ===== GARZA (izquierda, de pie en el agua) ===== -->
+  <g>
+    <path d="M250,560 L240,760 M290,560 L300,760" stroke="#3e4a5a" stroke-width="7" stroke-linecap="round"/>
+    <path d="M200,500 C190,440 260,420 330,450 C370,470 370,540 320,570 C270,600 210,570 200,500Z" fill="#9fb4c8" stroke="#3e4a5a" stroke-width="4"/>
+    <!-- plumas del ala en patrón de triángulos -->
+    <g fill="#7b93ac">
+      <polygon points="230,470 270,470 250,500"/><polygon points="270,480 310,480 290,510"/>
+      <polygon points="240,510 280,510 260,540"/><polygon points="280,520 320,520 300,550"/>
+    </g>
+    <path d="M200,520 L140,590 L190,560z" fill="#7b93ac"/>
+    <!-- cuello en S -->
+    <path d="M320,460 C370,420 320,360 350,310 C370,280 400,270 420,280" fill="none" stroke="#c8d6e4" stroke-width="26" stroke-linecap="round"/>
+    <path d="M320,460 C370,420 320,360 350,310 C370,280 400,270 420,280" fill="none" stroke="#3e4a5a" stroke-width="3" stroke-dasharray="6 14"/>
+    <!-- cabeza y pico -->
+    <circle cx="425" cy="280" r="22" fill="#e2ecf4" stroke="#3e4a5a" stroke-width="4"/>
+    <path d="M412,266 q-30,-16 -50,-8" stroke="#2c3644" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M440,272 L500,292 L440,290z" fill="#e6a62a" stroke="#8a5a10" stroke-width="2"/>
+    <circle cx="430" cy="276" r="5" fill="#1b1a2a"/>
+  </g>
+
+  <!-- ===== JILGUERO (abajo izquierda, posado) ===== -->
+  <g>
+    <path d="M520,690 L512,730 M545,690 L550,730" stroke="#4a3624" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="520" cy="650" rx="58" ry="44" fill="#d9b88a" stroke="#4a3624" stroke-width="4"/>
+    <!-- ala negra con barra amarilla -->
+    <path d="M470,640 C500,610 560,620 570,660 C540,680 490,680 470,640Z" fill="#232028"/>
+    <path d="M486,650 C510,636 545,640 560,656" stroke="#f5cf2a" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M470,650 L420,680 L462,672z" fill="#232028"/>
+    <!-- cabeza -->
+    <circle cx="582" cy="616" r="30" fill="#f2ede4" stroke="#4a3624" stroke-width="4"/>
+    <path d="M556,606 C562,586 590,582 604,592 L590,606z" fill="#232028"/>
+    <ellipse cx="604" cy="616" rx="11" ry="15" fill="#d42a2a"/>
+    <circle cx="588" cy="612" r="4" fill="#1b1a2a"/>
+    <path d="M608,620 L630,612 L610,630z" fill="#e8d0b0" stroke="#4a3624" stroke-width="2"/>
+  </g>
+
+  <!-- ===== GOLONDRINA (arriba, en vuelo) ===== -->
+  <g>
+    <path d="M610,150 L560,190 L585,155 L545,170z" fill="#1d2a5a"/>
+    <path d="M640,135 C600,80 560,60 510,70 C560,95 590,120 620,150z" fill="#22336e" stroke="#121a3a" stroke-width="3"/>
+    <path d="M660,138 C700,80 740,60 800,62 C750,92 710,120 680,150z" fill="#22336e" stroke="#121a3a" stroke-width="3"/>
+    <ellipse cx="660" cy="148" rx="48" ry="20" fill="#2a3e80" stroke="#121a3a" stroke-width="3"/>
+    <path d="M630,156 q30,14 60,0" fill="#f4ead8"/>
+    <circle cx="704" cy="140" r="16" fill="#2a3e80" stroke="#121a3a" stroke-width="3"/>
+    <path d="M700,150 a12,10 0 0 0 16,-2" fill="#c0432e"/>
+    <circle cx="708" cy="136" r="3" fill="#ffffff"/>
+    <path d="M718,138 L734,142 L718,146z" fill="#121a3a"/>
+  </g>
+
+  <!-- ===== CUERVO (abajo, en el centro) ===== -->
+  <g>
+    <path d="M830,740 L824,770 M860,740 L866,770" stroke="#1b1622" stroke-width="6" stroke-linecap="round"/>
+    <path d="M770,700 C780,660 840,640 890,660 C930,680 920,740 860,748 C810,752 770,740 770,700Z" fill="#2a2338" stroke="#120e1a" stroke-width="4"/>
+    <g fill="#4b3f70">
+      <polygon points="810,680 840,680 825,705"/><polygon points="845,690 875,690 860,715"/>
+      <polygon points="800,710 830,710 815,735"/>
+    </g>
+    <path d="M900,690 L960,720 L900,720z" fill="#2a2338"/>
+    <circle cx="772" cy="672" r="28" fill="#2a2338" stroke="#120e1a" stroke-width="4"/>
+    <circle cx="764" cy="664" r="5" fill="#f2d070"/>
+    <path d="M748,668 L712,676 L748,686z" fill="#3a3248" stroke="#120e1a" stroke-width="2"/>
+  </g>
+
+  <!-- ===== AVE MAYOR CON CORONA DE PAPEL (derecha, sombra) ===== -->
+  <g>
+    <!-- patas aferradas a una roca -->
+    <path d="M1180,690 L1170,740 M1240,690 L1250,740" stroke="#141020" stroke-width="12" stroke-linecap="round"/>
+    <path d="M1080,760 q60,-40 160,-30 q100,10 140,40 v20 h-300z" fill="#2c2438"/>
+    <!-- cuerpo -->
+    <path d="M1110,520 C1100,420 1170,360 1250,370 C1340,380 1380,470 1360,580 C1340,680 1260,710 1190,700 C1130,690 1115,610 1110,520Z" fill="#3a3046" stroke="#141020" stroke-width="5"/>
+    <!-- ala con plumas afiladas -->
+    <path d="M1220,430 C1320,420 1400,500 1420,640 L1380,600 L1370,650 L1340,610 L1320,660 L1300,610 C1260,560 1220,500 1220,430Z" fill="#2a2234" stroke="#141020" stroke-width="4"/>
+    <g fill="none" stroke="#5a4a6e" stroke-width="3">
+      <path d="M1240,460 C1300,470 1350,520 1380,590"/>
+      <path d="M1236,500 C1290,520 1320,560 1340,610"/>
+    </g>
+    <!-- cuello y cabeza que tiran hacia atrás -->
+    <path d="M1150,430 C1130,370 1150,300 1190,270" fill="none" stroke="#3a3046" stroke-width="64" stroke-linecap="round"/>
+    <circle cx="1180" cy="262" r="50" fill="#3a3046" stroke="#141020" stroke-width="5"/>
+    <!-- ojo frío -->
+    <circle cx="1160" cy="254" r="10" fill="#d8d0b8"/>
+    <circle cx="1160" cy="254" r="4" fill="#141020"/>
+    <path d="M1144,240 l34,6" stroke="#141020" stroke-width="5" stroke-linecap="round"/>
+    <!-- pico ganchudo apretando los hilos -->
+    <path d="M1136,270 C1110,280 1090,300 1082,338 C1100,322 1120,312 1140,300z" fill="#8a7a5a" stroke="#141020" stroke-width="3"/>
+    <path d="M1082,338 l-6,14 l14,-8z" fill="#141020"/>
+    <!-- corona de papel arrugado -->
+    <path d="M1140,214 L1136,150 L1160,184 L1176,138 L1194,182 L1218,146 L1222,212 Z" fill="#efe6cf" stroke="#8a7f68" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M1160,184 L1162,212 M1194,182 L1192,212" stroke="#c9bfa4" stroke-width="2"/>
+    <path d="M1150,170 l10,6 M1205,166 l-8,10" stroke="#c9bfa4" stroke-width="2"/>
+  </g>
+  <!-- cada pico prende el cordón -->
+  <g fill="none" stroke="#ffd75e" stroke-width="7" stroke-linecap="round">
+    <path d="M498,290 q-14,-6 -24,-14"/>
+    <path d="M732,143 q2,10 0,18"/>
+    <path d="M628,618 q-6,30 -14,52"/>
+    <path d="M712,678 l0,4"/>
+  </g>
+</svg>

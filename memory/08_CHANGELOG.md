@@ -10187,3 +10187,13 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Zoom semántico: de lejos cada tarjeta enseña solo su nombre y un dato en grande, y las pastillas del ciclo no encogen; de cerca, todo el detalle. Tablero con límites y «Recolocar» siempre visible.
   - 3 bots creadores (técnicas y los dos emparejadores) y 1 ronda de evaluación (contenido 9, diseño 5 → sus 5 mejoras aplicadas; Eugenio pidió una sola ronda).
 - Nueva página desde el menú lateral de páginas (2026-11-04, Eugenio). Tres caminos en el árbol (`ArbolPaginas.tsx`), como en Notion: la fila «Nueva página» al pie crea una suelta; el «+» que aparece al pasar por una página o una carpeta crea dentro; y el clic derecho ofrece «Nueva página dentro». La página nace sin título (`POST /api/documentos`), se mete donde toque (`/mover`) y se entra directo a escribirla.
+- Calendario Arte para la Humanidad 2027 (`/calendario-arte`, 2026-11-04, Eugenio, con su boceto a mano y cinco murales de referencia).
+  - Doce meses, doce temas de la humanidad: Cosmos y Vida, Relaciones, Agua, Bosque y Naturaleza, Arte, Tecnología y Energía, Hogar y Vivienda, Salud y Bienestar, Economía, Alimentación, Política, Valores (energía + tecnología y vida + cosmos fusionados, para que economía y política tengan mes propio).
+  - Cada mes es un A3 vertical = dos A4 apaisados. Hoja 1: tema, frase inspiradora e ilustración (sin letras). Hoja 2: calendario con una enseñanza por día (75 %), y abajo la herramienta del mes (lista, pasos, sopa de letras o texto) junto al recuadro «Iniciativa del mes» (25 %). QR pequeño en la esquina hacia la ficha «Conocer más».
+  - Todo se edita en su sitio desde cualquier dispositivo (nivel 3+), se guarda solo y avisa si otra persona guardó entretanto (409). «Restaurar original del mes» deshace.
+  - Carpeta de referencias por mes y carpeta de estilo común; ninguna se imprime.
+  - «Exportar»: A3 o A4 apaisado, un mes o los doce, a tamaño real y solo con el contenido definitivo (diálogo de impresión → Guardar como PDF).
+  - «Principios de diseño»: los requisitos de Eugenio como titulares explicados, editables y ampliables, con evaluación Cumple / A medias / No cumple de cada mes.
+  - «Ideas»: buzón de mejoras (nivel 1+) que la IA lee en `/api/calendario-arte/2027/ideas.txt` o con «Copiar para la IA», y que se marcan hechas.
+  - «Conocer más» (a donde lleva el QR): frase, datos con fuente, la iniciativa elegida y cómo apoyarla. Los editores eligen la iniciativa entre candidatas investigadas.
+  - Contenido inicial: 365 frases diarias y 12 herramientas (4 bots), 12 frases inspiradoras, 12 encargos de ilustración con luz y sombra, y 12 bocetos SVG de composición (3 bots). Los bocetos llevan la marca «Boceto» en pantalla.

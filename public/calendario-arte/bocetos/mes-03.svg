@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 3 · Agua — una ballena cuyo cuerpo es un río que baja de la montaña y desemboca en el mar.
+       Luz: cabeza y cuerpo de agua turquesa con peces, algas y un niño flotando en calma.
+       Sombra: la cola está hecha de botellas, redes y una mancha de petróleo que gotea al mar. -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color="#ffe1a0"/>
+      <stop offset="0.5" stop-color="#f3b07a"/>
+      <stop offset="1" stop-color="#7e5a8c"/>
+    </linearGradient>
+    <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3fc3c0"/>
+      <stop offset="1" stop-color="#145a78"/>
+    </linearGradient>
+    <linearGradient id="montana" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a5a9a"/>
+      <stop offset="1" stop-color="#4b3263"/>
+    </linearGradient>
+    <linearGradient id="montana2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b17d6a"/>
+      <stop offset="1" stop-color="#6e4a55"/>
+    </linearGradient>
+    <linearGradient id="cuerpo" gradientUnits="userSpaceOnUse" x1="170" y1="0" x2="1060" y2="0">
+      <stop offset="0" stop-color="#7ff0e3"/>
+      <stop offset="0.45" stop-color="#2fc0c4"/>
+      <stop offset="0.75" stop-color="#1d8a9c"/>
+      <stop offset="0.9" stop-color="#3c5458"/>
+      <stop offset="1" stop-color="#2b3236"/>
+    </linearGradient>
+    <linearGradient id="vientre" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e8fff9" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="rio" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bff6f0"/>
+      <stop offset="1" stop-color="#3dbfc4"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fffbe6" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#fffbe6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="crudo" cx="40%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#3a2f4a"/>
+      <stop offset="0.6" stop-color="#14121a"/>
+      <stop offset="1" stop-color="#0a090d"/>
+    </radialGradient>
+    <pattern id="ondas" width="60" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 20Q15 6 30 20T60 20" fill="none" stroke="#e6fffb" stroke-width="2.5" stroke-opacity="0.45"/>
+      <path d="M0 36Q15 26 30 36T60 36" fill="none" stroke="#0f6c7a" stroke-width="2" stroke-opacity="0.3"/>
+    </pattern>
+    <pattern id="red" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <path d="M0 0H26M0 0V26" fill="none" stroke="#c9b48a" stroke-width="2.5" stroke-opacity="0.85"/>
+    </pattern>
+    <clipPath id="clipCuerpo">
+      <path d="M170 560C170 440 300 400 480 405C680 412 860 380 1010 318L1050 352C900 440 720 520 520 600C380 652 200 664 170 560Z"/>
+    </clipPath>
+    <filter id="brillo" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Cielo -->
+  <path d="M0 0H1485V850H0Z" fill="url(#cielo)"/>
+  <circle cx="230" cy="150" r="70" fill="#fff4cf" opacity="0.9"/>
+  <circle cx="230" cy="150" r="110" fill="#fff4cf" opacity="0.25"/>
+
+  <!-- Montañas (derecha) -->
+  <path d="M820 560L1000 170L1130 300L1310 110L1485 360V560Z" fill="url(#montana)"/>
+  <path d="M1030 560L1200 380L1300 470L1420 330L1485 400V560Z" fill="url(#montana2)" opacity="0.85"/>
+  <!-- Nieve geométrica -->
+  <path d="M1310 110L1255 200L1280 190L1300 215L1322 185L1345 205L1365 185Z" fill="#fff7ec"/>
+  <path d="M1000 170L972 228L990 220L1004 240L1020 218L1038 232Z" fill="#fff7ec"/>
+  <g fill="none" stroke="#3b2850" stroke-width="2" opacity="0.5">
+    <path d="M1310 110L1250 330M1310 110L1380 300M1000 170L960 400"/>
+  </g>
+
+  <!-- Mar -->
+  <path d="M0 560H1485V850H0Z" fill="url(#mar)"/>
+  <path d="M0 560H1485V850H0Z" fill="url(#ondas)"/>
+
+  <!-- Río que baja de la montaña y se convierte en la ballena -->
+  <path d="M1012 190C985 235 1030 262 1005 295C985 322 1010 335 1036 330L1048 356C990 368 930 340 955 290C975 250 935 225 985 182Z"
+        fill="url(#rio)" stroke="#1d8a9c" stroke-width="2"/>
+  <path d="M992 205C962 240 1000 270 975 305" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- ===== COLA: botellas, redes y petróleo (sombra) ===== -->
+  <!-- Mancha de petróleo en el mar -->
+  <ellipse cx="1190" cy="640" rx="250" ry="55" fill="url(#crudo)" opacity="0.95"/>
+  <ellipse cx="1160" cy="630" rx="140" ry="22" fill="none" stroke="#6a4c8a" stroke-width="3" opacity="0.55"/>
+  <ellipse cx="1240" cy="652" rx="90" ry="14" fill="none" stroke="#3f7a6a" stroke-width="3" opacity="0.5"/>
+  <!-- Petróleo que gotea de la aleta al mar -->
+  <g fill="#0e0d12">
+    <path d="M1235 462C1237 512 1227 552 1240 600C1245 615 1265 615 1267 600C1277 552 1260 512 1255 466Z"/>
+    <path d="M1160 440C1162 480 1155 520 1165 570C1170 590 1190 590 1190 570C1192 520 1182 480 1180 448Z"/>
+    <path d="M1085 385C1087 410 1080 440 1088 470C1092 485 1108 485 1108 470C1110 445 1102 415 1102 398Z"/>
+    <ellipse cx="1098" cy="520" rx="7" ry="11"/><ellipse cx="1238" cy="560" rx="6" ry="9"/>
+  </g>
+  <!-- Aleta caudal en V -->
+  <path d="M1028 326C1075 290 1140 205 1250 175C1250 235 1210 290 1140 336C1215 350 1265 400 1280 470C1180 460 1100 415 1046 356Z"
+        fill="#26282e" stroke="#0e0f12" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M1028 326C1075 290 1140 205 1250 175C1250 235 1210 290 1140 336C1215 350 1265 400 1280 470C1180 460 1100 415 1046 356Z"
+        fill="url(#red)"/>
+  <!-- Cuerdas de red sueltas -->
+  <g fill="none" stroke="#c9b48a" stroke-width="3" stroke-linecap="round">
+    <path d="M1250 175C1272 165 1282 185 1302 170C1317 160 1332 175 1347 165"/>
+    <path d="M1280 470C1300 485 1295 505 1320 512"/>
+  </g>
+  <!-- Botellas -->
+  <g stroke="#0e0f12" stroke-width="2.5">
+    <g transform="translate(1150 270) rotate(-50) scale(1)">
+      <path d="M-6 -38H6V-28C14 -24 16 -18 16 -10V34C16 38 14 40 10 40H-10C-14 40 -16 38 -16 34V-10C-16 -18 -14 -24 -6 -28Z" fill="#8fd1c4" fill-opacity="0.9"/>
+      <path d="M-7 -46H7V-38H-7Z" fill="#e2553a"/>
+      <path d="M-16 0H16V14H-16Z" fill="#e8d6a8"/>
+    </g>
+    <g transform="translate(1205 222) rotate(-45) scale(0.7)">
+      <path d="M-6 -38H6V-28C14 -24 16 -18 16 -10V34C16 38 14 40 10 40H-10C-14 40 -16 38 -16 34V-10C-16 -18 -14 -24 -6 -28Z" fill="#a7c6e6" fill-opacity="0.9"/>
+      <path d="M-7 -46H7V-38H-7Z" fill="#3a6fd1"/>
+    </g>
+    <g transform="translate(1150 395) rotate(55) scale(1)">
+      <path d="M-6 -38H6V-28C14 -24 16 -18 16 -10V34C16 38 14 40 10 40H-10C-14 40 -16 38 -16 34V-10C-16 -18 -14 -24 -6 -28Z" fill="#7a4b2a" fill-opacity="0.95"/>
+      <path d="M-7 -46H7V-38H-7Z" fill="#c9b48a"/>
+    </g>
+    <g transform="translate(1225 435) rotate(70) scale(0.7)">
+      <path d="M-6 -38H6V-28C14 -24 16 -18 16 -10V34C16 38 14 40 10 40H-10C-14 40 -16 38 -16 34V-10C-16 -18 -14 -24 -6 -28Z" fill="#8fd1c4" fill-opacity="0.9"/>
+      <path d="M-7 -46H7V-38H-7Z" fill="#e2553a"/>
+    </g>
+  </g>
+  <!-- ===== CUERPO DE LA BALLENA (luz) ===== -->
+  <path d="M170 560C170 440 300 400 480 405C680 412 860 380 1010 318L1050 352C900 440 720 520 520 600C380 652 200 664 170 560Z"
+        fill="url(#cuerpo)" stroke="#0f5a6a" stroke-width="5"/>
+  <g clip-path="url(#clipCuerpo)">
+    <path d="M0 300H1100V700H0Z" fill="url(#ondas)"/>
+    <path d="M150 560C320 600 600 560 900 420L1100 400V700H150Z" fill="url(#vientre)"/>
+    <!-- Surcos ventrales ornamentales -->
+    <g fill="none" stroke="#e8fff9" stroke-width="3" opacity="0.75" stroke-linecap="round">
+      <path d="M190 600C280 630 380 625 470 600"/>
+      <path d="M210 620C300 645 390 640 470 618"/>
+      <path d="M240 640C320 655 400 652 460 636"/>
+    </g>
+    <!-- Algas -->
+    <g fill="none" stroke="#5fd08a" stroke-width="7" stroke-linecap="round">
+      <path d="M420 640C400 600 440 580 420 540C405 510 430 490 420 470"/>
+      <path d="M470 630C460 600 490 585 480 555"/>
+      <path d="M640 570C620 540 655 520 640 490C630 470 650 455 645 440"/>
+      <path d="M690 555C682 530 705 515 698 492"/>
+    </g>
+    <!-- Halo de calma alrededor del niño -->
+    <ellipse cx="560" cy="470" rx="140" ry="70" fill="url(#halo)"/>
+  </g>
+  <!-- Ojo y boca -->
+  <circle cx="300" cy="512" r="15" fill="#0f3a48"/>
+  <circle cx="296" cy="508" r="5" fill="#ffffff"/>
+  <circle cx="300" cy="512" r="24" fill="none" stroke="#e8fff9" stroke-width="2.5" opacity="0.8"/>
+  <path d="M176 575C230 590 300 588 370 572" fill="none" stroke="#0f5a6a" stroke-width="4" stroke-linecap="round"/>
+  <!-- Aleta pectoral -->
+  <path d="M430 590C440 640 470 690 520 720C520 680 500 630 470 595Z" fill="#2fb3b8" stroke="#0f5a6a" stroke-width="4"/>
+  <!-- Surtidor de agua -->
+  <g fill="none" stroke="#e8fff9" stroke-width="5" stroke-linecap="round">
+    <path d="M360 410C350 360 330 330 300 315"/>
+    <path d="M365 408C365 355 370 325 385 300"/>
+    <path d="M370 410C385 365 410 345 440 335"/>
+  </g>
+  <g fill="#e8fff9"><circle cx="296" cy="312" r="7"/><circle cx="388" cy="295" r="7"/><circle cx="446" cy="333" r="7"/></g>
+
+  <!-- Peces dentro del cuerpo -->
+  <g filter="url(#brillo)">
+    <g fill="#ffb347" transform="translate(760 450) rotate(-15)"><path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/></g>
+    <g fill="#ffd36b" transform="translate(830 420) rotate(-20) scale(0.8)"><path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/></g>
+    <g fill="#ff8a5b" transform="translate(370 470) scale(0.9)"><path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/></g>
+    <g fill="#ffd36b" transform="translate(700 520) rotate(-10) scale(0.75)"><path d="M-30 0C-14 -16 12 -16 24 0L40 -13L36 0L40 13L24 0C12 16 -14 16 -30 0Z"/></g>
+    <g fill="#ffe7a0"><circle cx="480" cy="440" r="5"/><circle cx="660" cy="430" r="4"/><circle cx="600" cy="520" r="4"/><circle cx="880" cy="400" r="4"/></g>
+  </g>
+
+  <!-- Niño flotando boca arriba, en calma -->
+  <g stroke="#7a3f2a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M530 462L500 440M530 478L505 500" fill="none" stroke="#f0c39a" stroke-width="11"/>
+    <path d="M600 462L635 445M600 478L640 492" fill="none" stroke="#f0c39a" stroke-width="12"/>
+    <path d="M522 452C540 444 590 444 606 452C612 462 612 478 606 488C590 496 540 496 522 488Z" fill="#f2b544"/>
+    <circle cx="502" cy="470" r="22" fill="#f0c39a"/>
+    <path d="M482 462C488 445 512 442 522 456C512 452 496 452 482 462Z" fill="#3a2418"/>
+  </g>
+  <path d="M495 476Q500 480 505 476" fill="none" stroke="#3a2418" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M490 466Q494 469 498 466M506 466Q510 469 514 466" fill="none" stroke="#3a2418" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

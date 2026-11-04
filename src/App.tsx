@@ -33,6 +33,7 @@ const AdminUsuarios = lazy(() => import('./pages/AdminUsuarios'));
 const Archivos = lazy(() => import('./pages/Archivos'));
 const BaseDeDatos = lazy(() => import('./pages/BaseDeDatos'));
 const Calendario = lazy(() => import('./pages/Calendario'));
+const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const MisVideos = lazy(() => import('./pages/MisVideos'));
 const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
 const Challenges = lazy(() => import('./pages/Challenges'));
@@ -440,6 +441,9 @@ export default function App() {
                 <Route path="preferencias" element={<Preferencias />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
+                {/* Calendario Arte para la Humanidad (2026-11-04): doce hojas A3
+                    editables e imprimibles. No es el calendario de citas. */}
+                <Route path="calendario-arte" element={<CalendarioArte />} />
                 <Route path="mis-videos" element={<MisVideos />} />
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />

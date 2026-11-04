@@ -468,3 +468,7 @@ threshold, checked only on that null path here).
 - `textoEnvioTienda` shows «Envío 4,99 €, gratis desde 50 €» when an offer has no `envio` of its own, but `totalOferta` and `ordenarOfertas` still treat that offer's shipping as unknown (counted as 0, sorted after known ones). Accepted because the order rule is the ethics code's and changing it deserves its own PR and test.
 - Right fix: derive `envio_centimos` server-side from the shop rule and the price, flagged as derived, and let the cart use the same value. About 1 h today; grows with every place that reads `envio_centimos` (today 4).
 - Update (W5, round 3 fix 1): the cart now counts the shop rule in each shop's total (`envioCompraTienda`, shared by the cart quote). The sheet's `totalOferta`/`ordenarOfertas` still do not; that half of the debt stands.
+
+## Calendario Arte: no edit history (2026-11-04)
+- `calendario_arte_meses` keeps only the current version of each month; an overwritten phrase cannot be recovered (Constitution rule 4 asks for history where the entity has it). Accepted to ship the first version; «Restaurar original del mes» covers the worst case. Right fix: write the previous `contenido` to `entity_history` on each PUT, ~30 min today.
+- The day phrases, datos clave and iniciativa candidates are drafts produced by bots and were not verified one by one by a person; the «Una enseñanza cada día» principle is the checklist for that review before printing.
