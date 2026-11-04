@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 850">
+  <!-- Mes 12 · Valores: lobo y cordero dormidos, enroscados en un yin-yang ornamental, rodeados de manos que se ofrecen; en un rincón, la sombra de un lobo con dientes y una flecha clavada -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stop-color="#f8e2a0"/>
+      <stop offset="0.42" stop-color="#eeb46c"/>
+      <stop offset="0.7" stop-color="#8a5676"/>
+      <stop offset="1" stop-color="#211a36"/>
+    </linearGradient>
+    <radialGradient id="warm" cx="640" cy="400" r="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff6d6" stop-opacity="0.95"/>
+      <stop offset="0.6" stop-color="#ffe2a0" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ffe2a0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="corner" cx="1400" cy="800" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0e0a18" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#0e0a18" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="wool" patternUnits="userSpaceOnUse" width="40" height="40">
+      <rect width="40" height="40" fill="#f6ead2"/>
+      <circle cx="20" cy="20" r="14" fill="none" stroke="#e2cfa8" stroke-width="3"/>
+      <circle cx="20" cy="20" r="6" fill="none" stroke="#e2cfa8" stroke-width="3"/>
+      <circle cx="0" cy="0" r="8" fill="none" stroke="#e8d7b4" stroke-width="3"/>
+      <circle cx="40" cy="0" r="8" fill="none" stroke="#e8d7b4" stroke-width="3"/>
+      <circle cx="0" cy="40" r="8" fill="none" stroke="#e8d7b4" stroke-width="3"/>
+      <circle cx="40" cy="40" r="8" fill="none" stroke="#e8d7b4" stroke-width="3"/>
+    </pattern>
+    <pattern id="fur" patternUnits="userSpaceOnUse" width="34" height="30">
+      <rect width="34" height="30" fill="#4d4a72"/>
+      <path d="M0,0 L17,26 L34,0" fill="#5d5a86"/>
+      <path d="M10,0 L17,11 L24,0" fill="#7c79a6"/>
+    </pattern>
+  </defs>
+
+  <!-- cielo: cálido a la izquierda, noche fría a la derecha -->
+  <rect width="1485" height="850" fill="url(#sky)"/>
+  <rect width="1485" height="850" fill="url(#warm)"/>
+  <rect width="1485" height="850" fill="url(#corner)"/>
+  <!-- estrellas frías -->
+  <g fill="#cfc8e8" opacity="0.7">
+    <circle cx="1240" cy="80" r="3"/><circle cx="1330" cy="140" r="2.5"/><circle cx="1420" cy="70" r="3"/>
+    <circle cx="1380" cy="250" r="2.5"/><circle cx="1180" cy="190" r="2"/><circle cx="1450" cy="330" r="2"/>
+  </g>
+  <!-- rayos suaves -->
+  <g stroke="#fff4cc" stroke-width="6" opacity="0.3" stroke-linecap="round">
+    <path d="M720,425 L60,60 M720,425 L0,430 M720,425 L120,840 M720,425 L330,0"/>
+  </g>
+
+  <!-- suelo -->
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b98a4a"/>
+      <stop offset="0.55" stop-color="#8a6a4a"/>
+      <stop offset="0.75" stop-color="#3a2e3e"/>
+      <stop offset="1" stop-color="#151020"/>
+    </linearGradient>
+  </defs>
+  <path d="M0,792 Q740,770 1485,792 V850 H0 Z" fill="url(#ground)"/>
+
+  <!-- ===== MANOS QUE SE OFRECEN ===== -->
+  <g transform="translate(589,750) rotate(22)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#2a9d8f"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#c98a5a" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#c98a5a" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+  <g transform="translate(417,600) rotate(60)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#a0466b"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#8a5434" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#8a5434" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+  <g transform="translate(373,376) rotate(98)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#e0a33a"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#f0c8a0" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#f0c8a0" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+  <g transform="translate(477,173) rotate(136)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#4c6fb0"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#5e3a26" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#5e3a26" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+  <g transform="translate(683,77) rotate(174)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#7b3f8c"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#d9a070" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#d9a070" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+  <g transform="translate(905,128) rotate(212)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#c4452e"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#a8683e" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#a8683e" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+  <g transform="translate(1049,305) rotate(250)">
+    <path d="M-30,26 L-32,130 L32,130 L30,26Z" fill="#3f7a3a"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#4a2c1c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-19,-22 L-21,-60 M-6,-26 L-7,-72 M7,-26 L8,-68 M19,-20 L22,-54 M-24,4 L-46,-20" fill="none" stroke="#e6b48a" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-26,-30 Q0,-38 26,-30 L28,8 Q28,32 0,34 Q-28,32 -28,8Z" fill="#e6b48a" stroke="#4a2c1c" stroke-width="3"/>
+  </g>
+
+
+  <!-- ===== PALOMA CON RAMA DE OLIVO (luz) ===== -->
+  <g>
+    <path d="M150,190 C120,120 140,60 190,40 C200,100 210,150 200,190z" fill="#ffffff" stroke="#b9a98a" stroke-width="3"/>
+    <path d="M190,190 C200,110 250,70 300,70 C280,130 250,170 220,200z" fill="#fbf6ea" stroke="#b9a98a" stroke-width="3"/>
+    <g stroke="#d8ccb0" stroke-width="2" fill="none">
+      <path d="M160,150 l30,-6 M165,120 l28,-8 M210,160 l40,-30 M225,175 l40,-24"/>
+    </g>
+    <ellipse cx="200" cy="205" rx="62" ry="26" fill="#ffffff" stroke="#b9a98a" stroke-width="3"/>
+    <path d="M140,205 L96,186 L104,206 L92,224 Z" fill="#fbf6ea" stroke="#b9a98a" stroke-width="3"/>
+    <circle cx="262" cy="196" r="20" fill="#ffffff" stroke="#b9a98a" stroke-width="3"/>
+    <circle cx="268" cy="192" r="3.5" fill="#2a2030"/>
+    <path d="M280,196 L298,202 L280,206z" fill="#e0a33a"/>
+    <!-- rama de olivo -->
+    <path d="M292,204 C330,220 360,250 380,290" fill="none" stroke="#6b5a2a" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#7c9a46" stroke="#4f6a2a" stroke-width="2">
+      <ellipse cx="318" cy="208" rx="16" ry="6" transform="rotate(-20 318 208)"/>
+      <ellipse cx="330" cy="232" rx="16" ry="6" transform="rotate(40 330 232)"/>
+      <ellipse cx="352" cy="236" rx="16" ry="6" transform="rotate(-30 352 236)"/>
+      <ellipse cx="358" cy="264" rx="16" ry="6" transform="rotate(50 358 264)"/>
+      <ellipse cx="380" cy="268" rx="16" ry="6" transform="rotate(-10 380 268)"/>
+    </g>
+    <circle cx="372" cy="288" r="6" fill="#4a3a5a"/>
+  </g>
+
+  <!-- ===== YIN-YANG: LOBO Y CORDERO ===== -->
+  <!-- aros ornamentales -->
+  <circle cx="720" cy="425" r="282" fill="none" stroke="#ffe4a0" stroke-width="5" stroke-dasharray="4 16" stroke-linecap="round"/>
+  <circle cx="720" cy="425" r="266" fill="#7a4e1c"/>
+  <circle cx="720" cy="425" r="260" fill="#f2c66a"/>
+  <g fill="#c98a2a">
+    <polygon points="720,163 728,171 720,179 712,171"/>
+    <polygon points="982,425 990,433 982,441 974,433" transform="translate(-8,-8)"/>
+    <polygon points="720,671 728,679 720,687 712,679"/>
+    <polygon points="458,425 466,433 458,441 450,433" transform="translate(8,-8)"/>
+  </g>
+  <!-- mitad lobo (oscura, cabeza arriba) -->
+  <circle cx="720" cy="425" r="250" fill="url(#fur)"/>
+  <!-- mitad cordero (clara, cabeza abajo) -->
+  <path d="M720,175 A250,250 0 0 0 720,675 A125,125 0 0 0 720,425 A125,125 0 0 1 720,175 Z" fill="url(#wool)"/>
+  <path d="M720,175 A125,125 0 0 0 720,425 A125,125 0 0 1 720,675" fill="none" stroke="#7a4e1c" stroke-width="5"/>
+  <circle cx="720" cy="425" r="250" fill="none" stroke="#7a4e1c" stroke-width="5"/>
+
+  <!-- cola del lobo (se enrosca hacia abajo por la derecha) -->
+  <path d="M955,470 C950,560 900,630 820,662 C860,640 900,600 912,560 C880,600 840,630 790,650 C860,600 920,540 930,470z" fill="#7c79a6" stroke="#2c2846" stroke-width="3"/>
+  <!-- patas dormidas del lobo -->
+  <g fill="#5d5a86" stroke="#2c2846" stroke-width="3">
+    <ellipse cx="880" cy="350" rx="44" ry="20" transform="rotate(60 880 350)"/>
+    <ellipse cx="870" cy="440" rx="44" ry="20" transform="rotate(80 870 440)"/>
+  </g>
+
+  <!-- cabeza del lobo dormido (arriba, mirando al cordero) -->
+  <g>
+    <polygon points="672,238 660,182 706,228" fill="#4d4a72" stroke="#2c2846" stroke-width="3"/>
+    <polygon points="676,232 668,198 696,226" fill="#c9a6c8"/>
+    <polygon points="720,232 742,180 756,240" fill="#4d4a72" stroke="#2c2846" stroke-width="3"/>
+    <ellipse cx="700" cy="292" rx="78" ry="60" fill="#6a6796" stroke="#2c2846" stroke-width="4"/>
+    <!-- hocico hacia la izquierda y abajo, apoyado -->
+    <path d="M650,282 C620,300 600,322 596,340 C620,346 660,342 690,330z" fill="#8a87b6" stroke="#2c2846" stroke-width="3"/>
+    <ellipse cx="598" cy="338" rx="11" ry="8" fill="#1e1a30"/>
+    <!-- ojo cerrado -->
+    <path d="M668,280 q16,12 32,0" fill="none" stroke="#f6ead2" stroke-width="5" stroke-linecap="round"/>
+    <!-- máscara ornamental -->
+    <polygon points="722,262 742,250 762,262 742,274" fill="#9c99c8"/>
+    <polygon points="742,286 756,278 770,286 756,294" fill="#9c99c8"/>
+  </g>
+
+  <!-- patas dormidas del cordero -->
+  <g stroke="#c8b48a" stroke-width="3">
+    <path d="M548,520 q-6,-40 14,-70 l18,8 q-16,26 -12,62z" fill="#f8ecd4"/>
+    <path d="M566,420 q-2,-40 22,-62 l16,12 q-20,20 -18,52z" fill="#f8ecd4"/>
+    <path d="M548,520 l20,0 l-2,12 l-16,0z" fill="#3a2e2a"/>
+    <path d="M566,420 l20,-2 l0,12 l-18,2z" fill="#3a2e2a"/>
+  </g>
+
+  <!-- cabeza del cordero dormido (abajo, mirando al lobo) -->
+  <g>
+    <ellipse cx="682" cy="578" rx="34" ry="14" fill="#e8c8a8" stroke="#8a6a4a" stroke-width="3" transform="rotate(25 682 578)"/>
+    <ellipse cx="748" cy="560" rx="66" ry="52" fill="#f8e6cc" stroke="#8a6a4a" stroke-width="4"/>
+    <!-- copete de lana -->
+    <g fill="#ffffff" stroke="#d8c4a0" stroke-width="3">
+      <circle cx="712" cy="520" r="18"/><circle cx="740" cy="510" r="20"/><circle cx="770" cy="516" r="17"/>
+    </g>
+    <!-- hocico hacia la derecha y arriba -->
+    <path d="M790,548 C820,540 846,520 852,500 C836,494 806,504 780,520z" fill="#f2d8b8" stroke="#8a6a4a" stroke-width="3"/>
+    <ellipse cx="848" cy="502" rx="8" ry="6" fill="#c46a7a"/>
+    <!-- ojo cerrado -->
+    <path d="M744,560 q14,10 28,0" fill="none" stroke="#4a3424" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="726" cy="584" r="8" fill="#f2a0a0" opacity="0.6"/>
+  </g>
+
+
+  <!-- ===== SOMBRA: lobo con dientes y flecha clavada (rincón) ===== -->
+  <!-- interior de la boca -->
+  <polygon points="1118,556 1236,596 1128,622" fill="#5a1424"/>
+  <path d="M1485,850 L1485,520 C1450,500 1410,480 1385,470 L1395,395 L1350,445 L1325,385 L1305,452 C1260,465 1220,490 1190,515 L1118,556 L1236,596 L1128,622 C1170,640 1220,655 1250,690 C1270,730 1280,790 1290,850 Z" fill="#0b0814"/>
+  <!-- pelo erizado -->
+  <path d="M1380,470 l26,-10 l-6,24 l34,-6 l-12,22 l40,0 l-20,20" fill="#0b0814"/>
+  <!-- dientes -->
+  <g fill="#e8e2d6">
+    <polygon points="1128,560 1144,564 1136,582"/>
+    <polygon points="1150,567 1166,572 1158,590"/>
+    <polygon points="1173,575 1189,580 1180,598"/>
+    <polygon points="1196,583 1212,588 1203,602"/>
+    <polygon points="1206,601 1222,597 1215,584"/>
+    <polygon points="1182,607 1198,603 1191,588"/>
+    <polygon points="1158,613 1174,609 1167,594"/>
+    <polygon points="1138,618 1152,614 1146,600"/>
+  </g>
+  <!-- ojo hostil -->
+  <path d="M1268,500 l40,-8 l-34,20z" fill="#e0542a"/>
+  <!-- flecha clavada en el cuello de la sombra -->
+  <g>
+    <path d="M1060,790 L1275,676" stroke="#8a7458" stroke-width="7" stroke-linecap="round"/>
+    <path d="M1066,786 L1040,812 L1078,806z M1066,786 L1046,760 L1084,776z" fill="#c4452e"/>
+    <path d="M1088,772 L1064,796 L1100,790z M1088,772 L1068,748 L1104,764z" fill="#c4452e"/>
+    <!-- grieta donde entra -->
+    <path d="M1275,676 l18,-16 M1275,676 l22,6 M1275,676 l6,20" stroke="#5a1424" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
