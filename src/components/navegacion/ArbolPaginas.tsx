@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import CompartidasConmigo from '../acceso/CompartidasConmigo';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronRight, FileText, FolderKanban, Boxes, Loader2, Trash2, Star } from 'lucide-react';
+import { ChevronRight, FilePlus2, FileText, FolderKanban, Boxes, Loader2, Plus, Trash2, Star } from 'lucide-react';
 import FavoritosRecientes from '../espacio/FavoritosRecientes';
 import { alternarFavorito, useEspacio, type TipoEspacio } from '../../utils/espacio';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
@@ -41,6 +41,14 @@ import { t as tr } from '../../i18n';
 // FAVORITOS (2026-10-06, #14). El mismo clic derecho ofrece «Añadir a
 // favoritos» —a páginas, carpetas y bases de datos— y los favoritos y
 // recientes salen en `FavoritosRecientes`, arriba del árbol.
+//
+// NUEVA PÁGINA DESDE AQUÍ (2026-11-04, Eugenio: «permite la creación de nueva
+// página desde el menú lateral de páginas»). Tres caminos, como en Notion:
+//   · la fila «Nueva página» al pie del árbol crea una suelta;
+//   · el «+» que aparece al pasar por una página o una carpeta crea dentro;
+//   · y el clic derecho ofrece lo mismo.
+// La página nace sin título (`POST /api/documentos`), se mete donde toque y
+// se entra directo a escribirla.
 
 type Nodo = { id: string; tipo: 'pagina' | 'bd' | 'fila'; titulo: string; icono: string | null; hijas: string[] };
 type Carpeta = { id: string; titulo: string; slug: string; icono: string | null; padre_id: string | null; paginas: string[] };
@@ -75,6 +83,8 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
   const [arrastrando, setArrastrando] = useState(false);
   /** Lo que se arrastra: el id de una página, o `carpeta:<id>`. */
   const arrastrada = useRef<string | null>(null);
+  /** Para que un doble clic en «Nueva página» no cree dos. */
+  const creando = useRef(false);
   const aqui = useLocation().pathname;
 
   const pedir = useCallback(() => {
@@ -203,6 +213,35 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
     if (dentroDe) alternar(`carpeta:${dentroDe}`, true);
     pedir();
     window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+  };
+
+  /** Crear una página: suelta, dentro de otra o en una carpeta; y entrar a escribirla. */
+  const crearPagina = async (destino?: { pagina?: string; carpeta?: string }) => {
+    setMenu(null);
+    if (creando.current) return;
+    creando.current = true;
+    try {
+      const r = await fetch('/api/documentos', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proyecto_id: destino?.carpeta }),
+      }).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : {};
+      if (!r?.ok || !j.id) { setAviso({ texto: j.error || tr('No se ha podido crear la página.'), error: true }); return; }
+      if (destino?.pagina) {
+        // Nace suelta y se mete dentro: es el mismo viaje que al arrastrarla.
+        const m = await fetch(`/api/paginas/${j.id}/mover`, {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dentro_de: destino.pagina }),
+        }).catch(() => null);
+        if (!m?.ok) setAviso({ texto: tr('La página se ha creado, pero suelta: no se ha podido meter dentro.'), error: true });
+        else alternar(destino.pagina, true);
+      }
+      if (destino?.carpeta) alternar(`carpeta:${destino.carpeta}`, true);
+      pedir();
+      window.dispatchEvent(new CustomEvent('humanity:menu-cambiado'));
+      navigate(`/paginas/${j.id}`);
+      onIr?.();
+    } finally { creando.current = false; }
   };
 
   /** Una página y todas las que cuelgan de ella: a la papelera van juntas. */
@@ -334,6 +373,13 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
               {contenido}
             </button>
           )}
+          {n.tipo === 'pagina' && !resaltada && (
+            <button type="button" onClick={e => { e.stopPropagation(); crearPagina({ pagina: n.id }); }}
+              title={tr('Nueva página dentro de «{titulo}»', { titulo: n.titulo })} aria-label={`Nueva página dentro de ${n.titulo}`} data-crear-dentro={n.id}
+              className="mr-1 hidden h-6 w-6 shrink-0 place-items-center rounded text-slate-400 hover:bg-slate-200 hover:text-slate-900 group-hover/arbol:grid">
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
           {resaltada && <span className="pointer-events-none absolute right-2 text-[10px] font-black text-emerald-700">{tr('Meter dentro')}</span>}
         </div>
         {tiene && abierta && (
@@ -372,6 +418,13 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
             <IconoNodo carpeta={c.icono} />
             <span className="min-w-0 flex-1 truncate">{c.titulo}</span>
           </Link>
+          {sobre !== clave && (
+            <button type="button" onClick={e => { e.stopPropagation(); crearPagina({ carpeta: c.id }); }}
+              title={tr('Nueva página en «{titulo}»', { titulo: c.titulo })} aria-label={`Nueva página en ${c.titulo}`} data-crear-en-carpeta={c.id}
+              className="mr-1 hidden h-6 w-6 shrink-0 place-items-center rounded text-slate-400 hover:bg-slate-200 hover:text-slate-900 group-hover/arbol:grid">
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
           {sobre === clave && <span className="pointer-events-none absolute right-2 text-[10px] font-black text-emerald-700">{tr('Meter dentro')}</span>}
         </div>
         {abierta && (
@@ -391,6 +444,11 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
       <FavoritosRecientes onIr={onIr} carpetas={arbol.carpetas} />
       {hijasDe(null).map(c => carpetaFila(c, 0))}
       {arbol.raiz.map(id => nodos[id] && fila(nodos[id], 0))}
+      <button type="button" onClick={() => crearPagina()} data-nueva-pagina
+        className="group/nueva mx-0.5 flex items-center rounded-lg py-1.5 pr-2 text-left text-[13px] font-semibold text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-900">
+        <span className="ml-1 grid h-7 w-5 shrink-0 place-items-center"><Plus className="h-4 w-4" /></span>
+        <span className="pl-1">{tr('Nueva página')}</span>
+      </button>
       {/* Lo que otras personas han compartido contigo (#12). */}
       <CompartidasConmigo onIr={onIr} />
       {/* Soltar aquí saca una página de donde estuviera, a la raíz. */}
@@ -409,7 +467,7 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
       {menu && createPortal(
         <div role="menu" ref={cajaMenu} aria-label={`Opciones de ${menu.titulo}`}
           onContextMenu={e => e.preventDefault()}
-          style={{ left: Math.min(menu.x, window.innerWidth - 216), top: Math.min(menu.y, window.innerHeight - 110) }}
+          style={{ left: Math.min(menu.x, window.innerWidth - 216), top: Math.min(menu.y, window.innerHeight - 150) }}
           className="fixed z-[200] w-52 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
           <p className="truncate px-2.5 pb-1 pt-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">{menu.titulo}</p>
           {(() => {
@@ -422,6 +480,13 @@ export default function ArbolPaginas({ onIr }: { onIr?: () => void }) {
               </button>
             );
           })()}
+          {menu.tipo !== 'bd' && (
+            <button type="button" role="menuitem"
+              onClick={() => crearPagina(menu.tipo === 'carpeta' ? { carpeta: menu.id } : { pagina: menu.id })}
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none">
+              <FilePlus2 className="h-4 w-4 text-slate-400" /> {tr('Nueva página dentro')}
+            </button>
+          )}
           {menu.tipo !== 'bd' && (
             <button type="button" role="menuitem" onClick={() => borrar(menu)}
               className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-semibold text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:outline-none">
