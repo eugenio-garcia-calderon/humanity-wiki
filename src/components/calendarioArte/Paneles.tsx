@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { X, Upload, Loader2, Trash2, ImageIcon, Check, Ban, RotateCcw, Copy, Send, Plus, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
-import { subirArchivo } from '../../utils/subir';
+import { subirImagenCalendario } from './subirImagen';
 import type { ContenidoMes, Referencia } from '../../data/calendarioArteTipos';
 import type { DatoClave, IniciativaCandidata } from '../../data/calendarioArteInvestigacion';
 import { NOMBRES_MES } from './HojaMes';
@@ -47,9 +47,9 @@ export function PanelCarpeta({ mes, referencias, puedeEditar, alGuardar, alUsarC
     for (const f of Array.from(archivos)) {
       i++;
       setSubiendo(`Subiendo ${i} de ${archivos.length}…`);
-      const r = await subirArchivo(f);
-      if (r.error) { setError(`${f.name}: ${r.error}`); continue; }
-      nuevas.push({ url: r.url! });
+      const r = await subirImagenCalendario(f);
+      if ('error' in r) { setError(`${f.name}: ${r.error}`); continue; }
+      nuevas.push({ url: r.url });
     }
     setSubiendo(null);
     if (nuevas.length) await alGuardar([...referencias, ...nuevas]);
@@ -451,7 +451,7 @@ export function PanelConocer({ contenido: c, datos, candidatas, puedeEditar, alE
 
       {puedeEditar && (
         <section className="rounded-xl border border-dashed border-slate-300 p-3">
-          <h3 className="text-sm font-semibold text-slate-700">Elegir la iniciativa (solo editores)</h3>
+          <h3 className="text-sm font-semibold text-slate-700">Elegir la iniciativa</h3>
           <p className="mb-2 text-xs text-slate-500">
             Candidatas encontradas por la investigación. Comprobad cada una antes de comprometer dinero con ella.
           </p>
@@ -487,6 +487,96 @@ export function PanelConocer({ contenido: c, datos, candidatas, puedeEditar, alE
             className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-sky-400"
           />
         </section>
+      )}
+    </PanelLateral>
+  );
+}
+
+// ── HISTORIAL (2026-11-05) ────────────────────────────────────────────────
+// La edición está abierta a cualquiera; esto es lo que lo hace razonable.
+// Antes de cada cambio se guarda una copia (como mucho cada 10 minutos
+// mientras se edita) y cualquiera puede devolver el mes a una de ellas.
+
+interface Copia {
+  id: number;
+  version: number;
+  motivo: string;
+  created_at: string;
+  tema: string | null;
+  lema: string | null;
+  dias: number;
+  referencias: number;
+  autor: string | null;
+}
+
+export function PanelHistorial({ anio, mes, alRestaurado, alCerrar }: {
+  anio: number;
+  mes: number;
+  alRestaurado: () => void;
+  alCerrar: () => void;
+}) {
+  const [copias, setCopias] = useState<Copia[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [trabajando, setTrabajando] = useState<number | null>(null);
+
+  const cargar = async () => {
+    try {
+      const r = await fetch(`/api/calendario-arte/${anio}/${mes}/historial`, { credentials: 'include' });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      setCopias(j);
+    } catch (e: any) { setError(e.message || 'No se ha podido cargar el historial.'); setCopias([]); }
+  };
+  useEffect(() => { cargar(); }, [anio, mes]);
+
+  const restaurar = async (c: Copia) => {
+    if (!confirm(`¿Dejar ${mes === 0 ? 'los principios y la carpeta de estilo' : NOMBRES_MES[mes - 1]} como estaba el ${new Date(c.created_at).toLocaleString('es-ES')}? Lo de ahora también se guarda en el historial.`)) return;
+    setTrabajando(c.id); setError(null);
+    try {
+      const r = await fetch(`/api/calendario-arte/historial/${c.id}/restaurar`, { method: 'POST', credentials: 'include' });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'No se ha podido restaurar.');
+      alRestaurado();
+      await cargar();
+    } catch (e: any) { setError(e.message); }
+    setTrabajando(null);
+  };
+
+  return (
+    <PanelLateral titulo={`Historial · ${mes === 0 ? 'Común a todo el año' : NOMBRES_MES[mes - 1]}`} alCerrar={alCerrar}>
+      <p className="mb-3 text-sm text-slate-500">
+        Cualquiera con el enlace puede editar este calendario. Antes de cada cambio se guarda una copia
+        de cómo estaba el mes; si alguien lo estropea, elige una copia y pulsa «Restaurar».
+      </p>
+      {error && <p className="mb-3 rounded bg-rose-50 p-2 text-sm text-rose-700">{error}</p>}
+      {copias === null ? (
+        <Loader2 className="mx-auto h-5 w-5 animate-spin text-slate-400" />
+      ) : copias.length === 0 ? (
+        <p className="text-sm text-slate-400">Todavía no hay copias: este mes no se ha cambiado desde que existe el historial.</p>
+      ) : (
+        <ul className="space-y-2">
+          {copias.map(c => (
+            <li key={c.id} className="rounded-lg border border-slate-200 p-3 text-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-800">{new Date(c.created_at).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                  <p className="text-xs text-slate-500">
+                    {c.autor || 'Visitante sin cuenta'} · {c.motivo}
+                  </p>
+                  {(c.tema || c.lema) && (
+                    <p className="mt-1 truncate text-xs italic text-slate-600">{[c.tema, c.lema].filter(Boolean).join(' — ')}</p>
+                  )}
+                  <p className="text-[11px] text-slate-400">
+                    {c.dias ? `${c.dias} frases editadas` : 'frases originales'} · {c.referencias} referencias
+                  </p>
+                </div>
+                <Button variant="outline" className="shrink-0 gap-1 px-2 py-1 text-[9px]" disabled={trabajando !== null} onClick={() => restaurar(c)}>
+                  {trabajando === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}Restaurar
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </PanelLateral>
   );
