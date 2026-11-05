@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/avisoInstalar.ts",
-      "motivo": "Aeromóvil Gota: página propia /aeromovil (agente en la nube)",
-      "desde": "2026-11-05T10:28:59.775Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/seguridad/politica.ts",
       "motivo": "Aeromóvil Gota: rutas del buzón de mejoras",
       "desde": "2026-11-05T10:34:42.658Z"
