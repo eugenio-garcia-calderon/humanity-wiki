@@ -17,6 +17,12 @@
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Aeromóvil: chasis Tour Easy y autoguardado",
       "desde": "2026-11-05T14:17:20.311Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
+      "motivo": "Aeromóvil: chasis Tour Easy y autoguardado",
+      "desde": "2026-11-05T14:17:25.363Z"
     }
   ]
 }
