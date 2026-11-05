@@ -10197,3 +10197,8 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - «Ideas»: buzón de mejoras (nivel 1+) que la IA lee en `/api/calendario-arte/2027/ideas.txt` o con «Copiar para la IA», y que se marcan hechas.
   - «Conocer más» (a donde lleva el QR): frase, datos con fuente, la iniciativa elegida y cómo apoyarla. Los editores eligen la iniciativa entre candidatas investigadas.
   - Contenido inicial: 365 frases diarias y 12 herramientas (4 bots), 12 frases inspiradoras, 12 encargos de ilustración con luz y sombra, y 12 bocetos SVG de composición (3 bots). Los bocetos llevan la marca «Boceto» en pantalla.
+- Calendario Arte para la Humanidad: versión final de imprenta (2026-11-05).
+  - Las 12 ilustraciones definitivas en estilo mural pictórico, cada una con su lado luz y su lado sombra, sin letras. Hechas por 4 bots ilustradores y revisadas por un bot evaluador estético (una o dos rondas de correcciones por mes). Se sirven como JPG de 3508 px de ancho (≈300 ppp en A4); las fuentes vectoriales viven en `design/calendario-arte/` porque tardan hasta 50 s en pintarse.
+  - Las 365 frases diarias y las 12 herramientas, revisadas por dos bots correctores (88 cambios: datos dudosos, días mundiales, teléfonos de ayuda, repeticiones, ortografía).
+  - Investigación completa: 7-8 datos con fuente y 4-5 iniciativas candidatas por mes, para elegir la del mes en «Conocer más».
+  - La página del calendario, en «Mis páginas» de Eugenio (favorita), con el calendario insertado.

@@ -109,6 +109,11 @@ export const INVESTIGACION_POR_MES: Record<number, { datos_clave: DatoClave[]; i
         "url": "https://www.who.int/es/news-room/30-06-2025-social-connection-linked-to-improved-heath-and-reduced-risk-of-early-death"
       },
       {
+        "dato": "Entre adolescentes, hasta 1 de cada 5 se siente solo, según la OMS.",
+        "fuente": "OMS (2025), vía Chequeado",
+        "url": "https://chequeado.com/el-explicador/salud-mental-1-de-cada-5-adolescentes-en-el-mundo-se-ven-afectados-por-la-soledad/"
+      },
+      {
         "dato": "1 de cada 5 personas en España sufre soledad no deseada.",
         "fuente": "Barómetro de la Soledad No Deseada en España 2024",
         "url": "https://lamoncloa.gob.es/serviciosdeprensa/notasprensa/derechos-sociales-consumo-agenda-2030/Documents/2024/10-06-24-barometro-soledad-2024.pdf"
@@ -129,7 +134,118 @@ export const INVESTIGACION_POR_MES: Record<number, { datos_clave: DatoClave[]; i
         "url": "https://news.harvard.edu/gazette/story/2023/02/work-out-daily-ok-but-how-socially-fit-are-you"
       }
     ],
-    "iniciativas": []
+    "iniciativas": [
+      {
+        "nombre": "Fundación Grandes Amigos",
+        "que_hace": "Acompaña a personas mayores que viven solas con voluntariado y crea redes vecinales como el programa Grandes Vecinos.",
+        "ambito": "España (Madrid, Barcelona y otras ciudades)",
+        "web": "https://grandesamigos.org",
+        "por_que": "Combate la soledad no deseada creando amistad y comunidad.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Fundación Adopta Un Abuelo",
+        "que_hace": "Une a jóvenes voluntarios con personas mayores en residencias o en sus casas mediante visitas y llamadas.",
+        "ambito": "España",
+        "web": "https://adoptaunabuelo.org",
+        "por_que": "Crea lazos entre generaciones y alivia la soledad de los mayores.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Fundación ANAR",
+        "que_hace": "Teléfono y chat gratuitos y confidenciales para niños, adolescentes y familias en riesgo, con apoyo psicológico y jurídico.",
+        "ambito": "España",
+        "web": "https://www.anar.org",
+        "por_que": "Protege a la infancia y ayuda a las familias a cuidar sus vínculos.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Equimundo",
+        "que_hace": "Organización que promueve paternidades cuidadoras, masculinidades sanas y la prevención de la violencia en las relaciones.",
+        "ambito": "Internacional",
+        "web": "https://equimundo.org",
+        "por_que": "Impulsa relaciones igualitarias, cuidado compartido y sin violencia.",
+        "donaciones": "sí"
+      }
+    ]
+  },
+  "3": {
+    "datos_clave": [
+      {
+        "dato": "2.100 millones de personas (1 de cada 4) aún no tienen agua potable segura.",
+        "fuente": "OMS y UNICEF, informe JMP (agosto 2025)",
+        "url": "https://www.who.int/news/item/26-08-2025-1-in-4-people-globally-still-lack-access-to-safe-drinking-water---who--unicef"
+      },
+      {
+        "dato": "La ONU afirma que el mundo ha entrado en una era de «bancarrota hídrica» global.",
+        "fuente": "Universidad de las Naciones Unidas, UNU-INWEH (enero 2026)",
+        "url": "https://unu.edu/inweh/news/world-enters-era-of-global-water-bankruptcy"
+      },
+      {
+        "dato": "El calor acumulado en los océanos batió un nuevo récord en 2025.",
+        "fuente": "Cheng et al., Advances in Atmospheric Sciences (2026), vía UCAR",
+        "url": "https://impacts.ucar.edu/en/publications/ocean-heat-content-sets-another-record-in-2025/"
+      },
+      {
+        "dato": "Cada año llegan a ríos, lagos y mares entre 19 y 23 millones de toneladas de plástico.",
+        "fuente": "PNUMA (Programa de la ONU para el Medio Ambiente)",
+        "url": "https://www.unep.org/plastic-pollution"
+      },
+      {
+        "dato": "La agricultura usa cerca del 70 % del agua dulce que se extrae en el mundo.",
+        "fuente": "FAO AQUASTAT, vía Our World in Data",
+        "url": "https://ourworldindata.org/grapher/agricultural-water-as-a-share-of-total-water-withdrawals"
+      },
+      {
+        "dato": "Casi la mitad de los acuíferos de España (353 de 804) está en mal estado.",
+        "fuente": "Planes hidrológicos 2022-2027, vía iAgua",
+        "url": "https://www.iagua.es/noticias/redaccion/los-planes-2022-2027-situan-en-mal-estado-353-de-las-804-masas-de-agua-subterranea-espanolas"
+      },
+      {
+        "dato": "En 2022 el Mar Menor fue el primer ecosistema de Europa con personalidad jurídica.",
+        "fuente": "Ley 19/2022, BOE",
+        "url": "https://www.boe.es/eli/es/l/2022/09/30/19"
+      },
+      {
+        "dato": "En 2026 entró en vigor el Tratado de Alta Mar, que busca proteger el 30 % del océano.",
+        "fuente": "ONU, vía Dawn (enero 2026)",
+        "url": "https://www.dawn.com/news/1967482"
+      }
+    ],
+    "iniciativas": [
+      {
+        "nombre": "ONGAWA Ingeniería para el Desarrollo Humano",
+        "que_hace": "ONG de desarrollo que garantiza el derecho humano al agua y al saneamiento en comunidades de África y América Latina.",
+        "ambito": "España (Madrid) / Internacional",
+        "web": "https://ongawa.org",
+        "por_que": "Lleva agua segura a quien no la tiene, con enfoque de derechos humanos.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "ANSE (Asociación de Naturalistas del Sureste)",
+        "que_hace": "Asociación que protege el Mar Menor y la costa de Murcia y restaura humedales como las salinas de Marchamalo.",
+        "ambito": "España / local (Región de Murcia)",
+        "web": "https://www.asociacionanse.org",
+        "por_que": "Defiende un ecosistema acuático emblemático y amenazado de España.",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "Surfrider Foundation Europe",
+        "que_hace": "ONG que protege océanos, ríos y costas frente a la contaminación con ciencia ciudadana, recogidas de residuos e incidencia.",
+        "ambito": "Europa (con antena en España)",
+        "web": "https://surfrider.eu",
+        "por_que": "Combate el plástico y la contaminación en el agua implicando a la ciudadanía.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "charity: water",
+        "que_hace": "ONG que financia pozos, sistemas de agua y saneamiento con socios locales en países con escasez de agua potable.",
+        "ambito": "Internacional",
+        "web": "https://www.charitywater.org",
+        "por_que": "El 100 % de las donaciones públicas va a proyectos de agua.",
+        "donaciones": "sí"
+      }
+    ]
   },
   "4": {
     "datos_clave": [
@@ -300,15 +416,73 @@ export const INVESTIGACION_POR_MES: Record<number, { datos_clave: DatoClave[]; i
       {
         "dato": "Unos 2.200 millones de personas en el mundo siguen sin usar Internet (2025).",
         "fuente": "UIT, Facts and Figures 2025",
-        "url": "https://www.itu.int/ff2025"
+        "url": "https://www.itu.int/itu-d/reports/statistics/facts-figures-2025/"
       },
       {
-        "dato": "En 2024 se instaló un récord de 585 GW renovables: más del 90 % de la nueva potencia eléctrica.",
+        "dato": "En 2025 el mundo instaló un récord de casi 700 GW de potencia renovable.",
+        "fuente": "IRENA, Renewable Capacity Statistics 2026",
+        "url": "https://www.irena.org/News/pressreleases/2026/Apr/Near-700-GW-Surge-in-2025-Proves-Renewable-Energy-Resilience-ES"
+      },
+      {
+        "dato": "Las renovables ya son casi la mitad (49 %) de la potencia eléctrica instalada del mundo.",
+        "fuente": "IRENA, Renewable Capacity Statistics 2026",
+        "url": "https://www.irena.org/Publications/2026/Mar/Renewable-capacity-statistics-2026"
+      },
+      {
+        "dato": "En 2024 se instalaron 585 GW renovables: más del 90 % de toda la nueva potencia eléctrica.",
         "fuente": "IRENA, Renewable Capacity Statistics 2025",
         "url": "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Mar/IRENA_DAT_RE_Capacity_Statistics_2025.pdf"
+      },
+      {
+        "dato": "En 2025 el 56,6 % de la electricidad generada en España fue renovable.",
+        "fuente": "Red Eléctrica, balance 2025 (vía Review Energy)",
+        "url": "https://www.review-energy.com/otras-fuentes/espana-aumenta-su-consumo-electrico-y-alcanza-un-56-6-de-generacion-renovable-en-2025"
+      },
+      {
+        "dato": "El consumo eléctrico de los centros de datos se duplicará de aquí a 2030, impulsado por la IA.",
+        "fuente": "Agencia Internacional de la Energía, Energy and AI (2025)",
+        "url": "https://www.iea.org/reports/energy-and-ai/executive-summary"
+      },
+      {
+        "dato": "La basura electrónica crece cinco veces más rápido que su reciclaje documentado.",
+        "fuente": "UNITAR / UIT, Global E-waste Monitor 2024",
+        "url": "https://unitar.org/index.php/about/news-stories/press/global-e-waste-monitor-2024-electronic-waste-rising-five-times-faster-documented-e-waste-recycling"
       }
     ],
-    "iniciativas": []
+    "iniciativas": [
+      {
+        "nombre": "Som Energia",
+        "que_hace": "Cooperativa de consumo de energía verde sin ánimo de lucro: comercializa y produce electricidad renovable e impulsa autoconsumo colectivo.",
+        "ambito": "España (sede en Girona)",
+        "web": "https://www.somenergia.coop/es/",
+        "por_que": "Energía renovable en manos de la ciudadanía, con gestión democrática y comunidades energéticas.",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "ECODES (Fundación Ecología y Desarrollo)",
+        "que_hace": "Fundación que combate la pobreza energética (iniciativa «Ni un hogar sin energía») y apoya comunidades energéticas y acción climática.",
+        "ambito": "España (sede en Zaragoza)",
+        "web": "https://ecodes.org/",
+        "por_que": "Une transición energética y justicia social: que nadie se quede sin luz ni calefacción.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Fundación Esplai Ciudadanía Comprometida",
+        "que_hace": "Fundación que reduce la brecha digital con formación TIC, la Red Conecta de puntos de inclusión digital y digitalización de ONG.",
+        "ambito": "España",
+        "web": "https://fundacionesplai.org/",
+        "por_que": "Lleva la tecnología a quienes se quedan fuera: personas mayores, jóvenes vulnerables y entidades.",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "AlgorithmWatch",
+        "que_hace": "ONG que investiga y vigila los sistemas automatizados y la IA para proteger los derechos y combatir la discriminación algorítmica.",
+        "ambito": "Internacional (Berlín y Zúrich)",
+        "web": "https://algorithmwatch.org/en/",
+        "por_que": "Defiende una IA ética, transparente y al servicio de las personas.",
+        "donaciones": "sí"
+      }
+    ]
   },
   "7": {
     "datos_clave": [
@@ -525,7 +699,48 @@ export const INVESTIGACION_POR_MES: Record<number, { datos_clave: DatoClave[]; i
         "url": "https://www.caritas.es/main-files/uploads/2025/11/20251105_NdP_IXInformeFOESSA.pdf"
       }
     ],
-    "iniciativas": []
+    "iniciativas": [
+      {
+        "nombre": "REAS Red de Redes de Economía Alternativa y Solidaria",
+        "que_hace": "Red estatal que agrupa redes territoriales y sectoriales de economía solidaria; impulsa mercados sociales y la auditoría social.",
+        "ambito": "España",
+        "web": "https://www.economiasolidaria.org",
+        "por_que": "Articula desde hace 30 años la economía social y solidaria en España",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "Coop57",
+        "que_hace": "Cooperativa de servicios financieros éticos: con el ahorro de sus socias presta dinero a cooperativas y entidades de la economía social.",
+        "ambito": "España (Cataluña, Madrid, Andalucía y otras)",
+        "web": "https://coop57.coop",
+        "por_que": "Finanzas éticas cooperativas: el ahorro se queda en proyectos transformadores",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "Emaús Fundación Social",
+        "que_hace": "Fundación que une economía circular e inclusión: recoge, repara y revende ropa, muebles y aparatos y crea empleo para personas vulnerables.",
+        "ambito": "local (Gipuzkoa, País Vasco)",
+        "web": "https://www.emaus.com",
+        "por_que": "Une reutilización de residuos y empleo para personas en exclusión",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Oikocredit",
+        "que_hace": "Cooperativa internacional de inversión de impacto que financia microfinanzas, agricultura y energía renovable en África, Asia y América Latina.",
+        "ambito": "Internacional",
+        "web": "https://www.oikocredit.coop",
+        "por_que": "50 años llevando finanzas éticas a comunidades de bajos ingresos",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "Ellen MacArthur Foundation",
+        "que_hace": "Organización benéfica británica que impulsa la transición a una economía circular con investigación, educación y redes de empresas y gobiernos.",
+        "ambito": "Internacional",
+        "web": "https://www.ellenmacarthurfoundation.org",
+        "por_que": "Referente mundial que difunde y promueve la economía circular",
+        "donaciones": "sí"
+      }
+    ]
   },
   "10": {
     "datos_clave": [
@@ -674,12 +889,109 @@ export const INVESTIGACION_POR_MES: Record<number, { datos_clave: DatoClave[]; i
         "donaciones": "no consta"
       },
       {
+        "nombre": "Fundación Ciudadana Civio",
+        "que_hace": "Periodismo de datos y vigilancia de los poderes públicos: investiga y explica presupuestos, BOE, contratos y ayudas, y defiende el acceso a datos públicos.",
+        "ambito": "España",
+        "web": "https://civio.es/",
+        "por_que": "Refuerza la transparencia y el derecho a saber, con independencia y sin partidismo.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Access Info Europe",
+        "que_hace": "ONG con sede en Madrid que defiende el derecho de acceso a la información pública en España y Europa, con litigios, campañas e investigación.",
+        "ambito": "Internacional (sede en Madrid)",
+        "web": "https://www.access-info.org/es/",
+        "por_que": "Defiende el derecho ciudadano a saber qué deciden las instituciones y por qué.",
+        "donaciones": "no consta"
+      },
+      {
         "nombre": "CIVICUS",
         "que_hace": "Alianza mundial de sociedad civil que mide y defiende el espacio cívico (libertad de asociación, reunión y expresión) con el CIVICUS Monitor.",
         "ambito": "Internacional",
         "web": "https://www.civicus.org/",
         "por_que": "Protege las libertades que hacen posible la participación ciudadana en todo el mundo.",
         "donaciones": "no consta"
+      }
+    ]
+  },
+  "12": {
+    "datos_clave": [
+      {
+        "dato": "En 2025 hubo 65 conflictos armados con Estados implicados, el nivel más alto desde 1946.",
+        "fuente": "Uppsala Conflict Data Program (UCDP), Universidad de Uppsala, junio 2026",
+        "url": "https://www.uu.se/en/press/press-releases/2026/2026-06-09-ucdp-record-number-of-conflicts-between-states"
+      },
+      {
+        "dato": "El Índice de Paz Global 2026 sitúa la paz mundial en su nivel más bajo registrado.",
+        "fuente": "Institute for Economics and Peace, Global Peace Index 2026",
+        "url": "https://www.visionofhumanity.org/record-conflicts-drive-peace-to-historic-low-as-ai-warfare-surges/"
+      },
+      {
+        "dato": "El gasto militar mundial batió récord en 2025: 2,89 billones de dólares.",
+        "fuente": "SIPRI, Trends in World Military Expenditure 2025",
+        "url": "https://www.sipri.org/publications/2026/sipri-fact-sheets/trends-world-military-expenditure-2025"
+      },
+      {
+        "dato": "117 millones de personas vivían desplazadas por la fuerza a finales de 2025.",
+        "fuente": "ACNUR, Tendencias Globales 2025 (junio 2026)",
+        "url": "https://www.acnur.org/tendencias-globales"
+      },
+      {
+        "dato": "1 de cada 5 niños y niñas del mundo (unos 520 millones) vivía en zonas de conflicto en 2024.",
+        "fuente": "PRIO / Save the Children, Children affected by armed conflict 1990–2024",
+        "url": "https://www.prio.org/comments/1829"
+      },
+      {
+        "dato": "Los delitos e incidentes de odio en España subieron un 23,6 % en 2025: récord histórico.",
+        "fuente": "Ministerio del Interior, Informe sobre delitos de odio 2025",
+        "url": "https://www.interior.gob.es/opencms/es/detalle/articulo/Los-delitos-e-incidentes-de-odio-aumentaron-un-236-por-ciento-en-2025-y-registraron-la-mayor-cifra-de-la-serie-historica/"
+      },
+      {
+        "dato": "En 2024, la mitad de los delitos de odio en España fueron por racismo o xenofobia.",
+        "fuente": "Ministerio del Interior, Informe sobre delitos de odio 2024 (vía EFE/ABC)",
+        "url": "https://www.abc.com.py/internacionales/2025/07/18/la-mitad-de-los-delitos-de-odio-en-espana-en-2024-fueron-por-racismo-segun-informe/"
+      }
+    ],
+    "iniciativas": [
+      {
+        "nombre": "Gernika Gogoratuz – Centro de Investigación por la Paz",
+        "que_hace": "Centro nacido de la memoria del bombardeo de Gernika que investiga, educa y acompaña procesos de paz, reconciliación y transformación de conflictos.",
+        "ambito": "local (Gernika, Euskadi)",
+        "web": "https://www.gernikagogoratuz.org/",
+        "por_que": "Convierte la memoria de la guerra en educación para la paz y la convivencia.",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "CEAR (Comisión Española de Ayuda al Refugiado)",
+        "que_hace": "ONG que acoge y acompaña a personas refugiadas y migrantes en España, con asistencia jurídica, inclusión y defensa del derecho de asilo.",
+        "ambito": "España",
+        "web": "https://www.cear.es/",
+        "por_que": "Defiende la dignidad y los derechos humanos de quienes huyen de guerras y persecución.",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "Asociación Comunicación Noviolenta (ACNV)",
+        "que_hace": "Asociación que difunde la Comunicación No Violenta de Marshall Rosenberg en España con formación y actividades; recauda microdonaciones en Teaming.",
+        "ambito": "España",
+        "web": "https://www.teaming.net/asociacion-comunicacion-noviolenta-acnv",
+        "por_que": "Encaja de lleno con la CNV que el calendario propone practicar este mes.",
+        "donaciones": "sí"
+      },
+      {
+        "nombre": "Peace Brigades International (PBI)",
+        "que_hace": "Envía equipos internacionales de acompañamiento protector a defensoras y defensores de derechos humanos amenazados; tiene sección en el Estado español.",
+        "ambito": "Internacional / España",
+        "web": "https://peacebrigades.org/en",
+        "por_que": "Protege, desde la noviolencia, a quienes defienden los derechos humanos.",
+        "donaciones": "no consta"
+      },
+      {
+        "nombre": "Center for Nonviolent Communication (CNVC)",
+        "que_hace": "Organización sin ánimo de lucro fundada por Marshall Rosenberg que forma y certifica en CNV y la difunde por todo el mundo.",
+        "ambito": "Internacional",
+        "web": "https://www.cnvc.org/",
+        "por_que": "Es la entidad de origen de la CNV, eje de la franja de este mes.",
+        "donaciones": "sí"
       }
     ]
   }
