@@ -306,8 +306,8 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
                 // El número y, a continuación en la misma línea, la frase
                 // (Eugenio: «aprovecha el espacio al lado del número… para que
                 // haya un hueco más grande debajo para anotar cosas»).
-                <div className="leading-snug text-stone-700" style={{ fontSize: '8pt' }}>
-                  <span className={cn('ca-titulo font-bold', acento.texto)} style={{ fontSize: '13pt', lineHeight: 1, marginRight: '1.2mm' }}>{d}</span>
+                <div className="leading-snug text-stone-700" style={{ fontSize: '9pt' }}>
+                  <span className={cn('ca-titulo font-bold', acento.texto)} style={{ fontSize: '14pt', lineHeight: 1, marginRight: '1.3mm' }}>{d}</span>
                   <Editable
                     as="span"
                     valor={c.dias[d - 1] ?? ''}
