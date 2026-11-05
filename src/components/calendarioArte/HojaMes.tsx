@@ -56,9 +56,14 @@ interface Props {
   /** La ilustración original del mes (la del código): es el «Diseño 1» cuando
    *  la que se imprime ahora es el 2. */
   imagenOriginal?: string;
+  /** En el «calendario completo» (los doce meses seguidos) las ilustraciones se
+   *  cargan al acercarse, no las veinticuatro de golpe. NUNCA en la copia que
+   *  se imprime: está fuera de pantalla, no se cargarían y la impresión
+   *  esperaría para siempre a que terminaran. */
+  perezosa?: boolean;
 }
 
-export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen, diseno, alVerDiseno, imagenOriginal }: Props) {
+export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen, diseno, alVerDiseno, imagenOriginal, perezosa }: Props) {
   const acento = ACENTOS[(c.mes - 1) % 12];
   const esBoceto = !!c.imagen?.startsWith('/calendario-arte/bocetos/');
   // Si la imagen no carga, se dice («ilustración pendiente») en vez de
@@ -125,6 +130,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
               <img
                 key={n}
                 src={url}
+                loading={perezosa ? 'lazy' : undefined}
                 alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${n})`}
                 className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
                 style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%`, opacity: visto === url ? 1 : 0 }}
@@ -133,6 +139,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
           ) : c.imagen && imagenRota !== c.imagen ? (
             <img
               src={c.imagen}
+              loading={perezosa ? 'lazy' : undefined}
               alt={`Ilustración de ${nombre}: ${c.tema}`}
               className="absolute inset-0 h-full w-full object-cover"
               style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%` }}

@@ -1,18 +1,19 @@
 // ============================================================================
-// LA PORTADA DEL CALENDARIO (2026-11-05, Eugenio: «una página de portada del
-// calendario donde aparezcan los temas y las ilustraciones en pequeño»)
+// LA PORTADA DEL CALENDARIO
 // ============================================================================
-// Mismo formato que un mes: A3 vertical = dos A4 apaisados, para que se
-// imprima y se exporte igual que el resto (en A4 sale como dos páginas).
-//   · Arriba: título, año, presentación, la nota de la recaudación y el QR.
-//   · Abajo: los doce temas, cada uno con su ilustración en pequeño.
-// Los textos se editan en su sitio y viven en la hoja 0 (`portada`), junto a
-// los principios de diseño. Los temas y las ilustraciones NO se editan aquí:
-// salen de cada mes, así la portada nunca contradice al calendario.
+// 2026-11-05, Eugenio: primero «una página de portada donde aparezcan los temas
+// y las ilustraciones en pequeño»; después «elimina las franjas de colores y
+// compacta la portada en una sola página con el título y las 12 temáticas».
+// Es UNA hoja A4 apaisada (297 × 210 mm): título arriba, los doce temas en dos
+// filas de seis y, al pie, el QR, la nota de la recaudación y quién lo hace.
+// En A3 sale en la mitad de arriba de la hoja, donde va la ilustración de los meses.
+// Los textos se editan en su sitio y viven en la hoja 0 (`portada`). Los temas
+// y las ilustraciones NO se editan aquí: salen de cada mes, así la portada
+// nunca contradice al calendario.
 import { cn } from '../../utils/cn';
 import type { ContenidoMes, PortadaCalendario } from '../../data/calendarioArteTipos';
 import { Editable } from './Editable';
-import { ACENTOS, NOMBRES_MES, ANCHO_MM, ALTO_MM } from './HojaMes';
+import { ACENTOS, NOMBRES_MES, ANCHO_MM } from './HojaMes';
 import { CodigoQR } from './CodigoQR';
 
 /** La ilustración final pesa ~1,5 MB: en la portada se usa su miniatura
@@ -31,98 +32,62 @@ interface Props {
   portada: PortadaCalendario;
   editando: boolean;
   alCambiar: (cambio: Partial<PortadaCalendario>) => void;
-  /** En pantalla, pinchar un tema abre su mes. Al imprimir no se pasa. */
+  /** En pantalla, pinchar un tema lleva a su mes. Al imprimir no se pasa. */
   alAbrirMes?: (mes: number) => void;
 }
 
+/** Alto de la portada: una sola página A4 apaisada. */
+export const ALTO_PORTADA_MM = 210;
+
 export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAbrirMes }: Props) {
   return (
-    <div className="ca-hoja relative overflow-hidden bg-white text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_MM}mm` }}>
-      {/* ── HOJA 1: EL TÍTULO ─────────────────────────────────────────── */}
-      <div className="ca-mitad relative flex flex-col items-center justify-center overflow-hidden bg-stone-50 text-center" style={{ height: '210mm', padding: '16mm 30mm 14mm' }}>
-        {/* Una franja con los doce colores del año, arriba y abajo. */}
-        <div className="absolute inset-x-0 top-0 flex" style={{ height: '5mm' }}>
-          {ACENTOS.map((a, i) => <div key={i} className={cn('flex-1', a.fondo)} />)}
-        </div>
-
-        <span className="font-sans uppercase text-stone-400" style={{ fontSize: '10pt', letterSpacing: '0.45em' }}>Calendario {anio}</span>
-        <Editable
-          as="h1"
-          valor={p.titulo}
-          editando={editando}
-          multilinea={false}
-          alCambiar={v => alCambiar({ titulo: v })}
-          className="ca-titulo font-semibold leading-none text-stone-800"
-          style={{ fontSize: '46pt', marginTop: '6mm' }}
-        />
-        <Editable
-          as="p"
-          valor={p.subtitulo}
-          editando={editando}
-          alCambiar={v => alCambiar({ subtitulo: v })}
-          vacio="Subtítulo"
-          className="italic text-stone-500"
-          style={{ fontSize: '16pt', marginTop: '5mm' }}
-        />
-        <div className="flex items-center" style={{ gap: '2.5mm', margin: '9mm 0' }}>
-          {ACENTOS.map((a, i) => <span key={i} className={cn('rounded-full', a.fondo)} style={{ width: '2.6mm', height: '2.6mm' }} />)}
-        </div>
-        <Editable
-          as="p"
-          valor={p.texto}
-          editando={editando}
-          alCambiar={v => alCambiar({ texto: v })}
-          vacio="Presentación del calendario"
-          className="leading-relaxed text-stone-700"
-          style={{ fontSize: '13pt', maxWidth: '200mm' }}
-        />
-
-        <div className="flex items-center text-left" style={{ gap: '6mm', marginTop: '10mm', maxWidth: '210mm' }}>
-          <div className="flex shrink-0 flex-col items-center leading-none">
-            <CodigoQR url={URL_CALENDARIO} lado="22mm" />
-            <span className="font-sans text-stone-400" style={{ fontSize: '6pt', marginTop: '1mm' }}>Conoce más</span>
-          </div>
+    <div className="ca-hoja relative overflow-hidden bg-white text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_PORTADA_MM}mm` }}>
+      <div className="ca-mitad flex flex-col overflow-hidden" style={{ height: `${ALTO_PORTADA_MM}mm`, padding: '11mm 11mm 7mm' }}>
+        {/* ── EL TÍTULO ─────────────────────────────────────────────────── */}
+        <div className="flex flex-col items-center text-center">
+          <span className="font-sans uppercase text-stone-400" style={{ fontSize: '8pt', letterSpacing: '0.45em' }}>Calendario {anio}</span>
+          <Editable
+            as="h1"
+            valor={p.titulo}
+            editando={editando}
+            multilinea={false}
+            alCambiar={v => alCambiar({ titulo: v })}
+            className="ca-titulo font-semibold leading-none text-stone-800"
+            style={{ fontSize: '36pt', marginTop: '3mm' }}
+          />
           <Editable
             as="p"
-            valor={p.recaudacion}
+            valor={p.subtitulo}
             editando={editando}
-            alCambiar={v => alCambiar({ recaudacion: v })}
-            vacio="A qué se destina lo recaudado"
+            alCambiar={v => alCambiar({ subtitulo: v })}
+            vacio="Subtítulo"
+            className="italic text-stone-500"
+            style={{ fontSize: '13pt', marginTop: '2.5mm' }}
+          />
+          <Editable
+            as="p"
+            valor={p.texto}
+            editando={editando}
+            alCambiar={v => alCambiar({ texto: v })}
+            vacio="Presentación del calendario"
             className="leading-snug text-stone-600"
-            style={{ fontSize: '10.5pt' }}
+            style={{ fontSize: '9pt', maxWidth: '215mm', marginTop: '2.5mm' }}
           />
         </div>
 
-        <Editable
-          as="p"
-          valor={p.pie}
-          editando={editando}
-          multilinea={false}
-          alCambiar={v => alCambiar({ pie: v })}
-          vacio="Quién lo hace"
-          className="absolute inset-x-0 font-sans uppercase text-stone-400"
-          style={{ bottom: '8mm', fontSize: '7.5pt', letterSpacing: '0.3em' }}
-        />
-      </div>
-
-      {/* ── HOJA 2: LOS DOCE TEMAS ────────────────────────────────────── */}
-      <div className="ca-mitad flex flex-col" style={{ height: '210mm', padding: '9mm 9mm 8mm' }}>
-        <div className="flex items-baseline justify-between" style={{ marginBottom: '4mm' }}>
-          <h2 className="ca-titulo font-semibold text-stone-800" style={{ fontSize: '20pt' }}>Los doce temas</h2>
-          <span className="font-sans uppercase text-stone-400" style={{ fontSize: '7pt', letterSpacing: '0.25em' }}>Arte para la Humanidad · {anio}</span>
-        </div>
-        <div className="grid flex-1 grid-cols-4" style={{ gap: '4mm', gridTemplateRows: 'repeat(3, minmax(0, 1fr))' }}>
+        {/* ── LOS DOCE TEMAS ────────────────────────────────────────────── */}
+        <div className="grid min-h-0 flex-1 grid-cols-6" style={{ gap: '3mm', marginTop: '6mm', gridTemplateRows: 'repeat(2, minmax(0, 1fr))' }}>
           {meses.map(m => {
             const a = ACENTOS[(m.mes - 1) % 12];
             const img = miniaturaDe(m.imagen);
-            const Caja: any = alAbrirMes && !editando ? 'button' : 'div';
+            const Caja: any = alAbrirMes ? 'button' : 'div';
             return (
               <Caja
                 key={m.mes}
-                {...(Caja === 'button' ? { type: 'button', onClick: () => alAbrirMes!(m.mes), title: `Abrir ${NOMBRES_MES[m.mes - 1]}` } : {})}
-                className={cn('flex min-h-0 flex-col overflow-hidden rounded-[2.5mm] border bg-white text-left', a.borde, Caja === 'button' && 'transition hover:shadow-lg')}
+                {...(Caja === 'button' ? { type: 'button', onClick: () => alAbrirMes!(m.mes), title: `Ir a ${NOMBRES_MES[m.mes - 1]}` } : {})}
+                className={cn('flex min-h-0 flex-col overflow-hidden rounded-[2mm] border bg-white text-left', a.borde, Caja === 'button' && 'transition hover:shadow-lg')}
               >
-                <div className={cn('relative w-full overflow-hidden', a.suave)} style={{ aspectRatio: '297 / 170' }}>
+                <div className={cn('relative min-h-0 w-full flex-1 overflow-hidden', a.suave)}>
                   {img && (
                     <img
                       src={img}
@@ -132,16 +97,43 @@ export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAb
                     />
                   )}
                 </div>
-                <div className="flex flex-1 flex-col" style={{ padding: '1.8mm 2.5mm' }}>
-                  <span className="font-sans uppercase text-stone-400" style={{ fontSize: '6pt', letterSpacing: '0.2em' }}>{NOMBRES_MES[m.mes - 1]}</span>
-                  <span className={cn('ca-titulo font-semibold leading-tight', a.texto)} style={{ fontSize: '10.5pt' }}>{m.tema}</span>
+                <div className="flex shrink-0 flex-col" style={{ padding: '1.5mm 2mm 1.8mm' }}>
+                  <span className="font-sans uppercase text-stone-400" style={{ fontSize: '5.5pt', letterSpacing: '0.2em' }}>{NOMBRES_MES[m.mes - 1]}</span>
+                  <span className={cn('ca-titulo font-semibold leading-tight', a.texto)} style={{ fontSize: '9.5pt' }}>{m.tema}</span>
                   {m.lema && (
-                    <span className="line-clamp-3 italic leading-snug text-stone-500" style={{ fontSize: '6.8pt', marginTop: '0.8mm' }}>{m.lema}</span>
+                    <span className="line-clamp-2 italic leading-snug text-stone-500" style={{ fontSize: '6pt', marginTop: '0.6mm' }}>{m.lema}</span>
                   )}
                 </div>
               </Caja>
             );
           })}
+        </div>
+
+        {/* ── EL PIE: QR, RECAUDACIÓN Y QUIÉN LO HACE ──────────────────── */}
+        <div className="flex shrink-0 items-center" style={{ gap: '4mm', marginTop: '4.5mm' }}>
+          <div className="flex shrink-0 flex-col items-center leading-none">
+            <CodigoQR url={URL_CALENDARIO} lado="15mm" />
+            <span className="font-sans text-stone-400" style={{ fontSize: '5pt', marginTop: '0.8mm' }}>Conoce más</span>
+          </div>
+          <Editable
+            as="p"
+            valor={p.recaudacion}
+            editando={editando}
+            alCambiar={v => alCambiar({ recaudacion: v })}
+            vacio="A qué se destina lo recaudado"
+            className="min-w-0 flex-1 leading-snug text-stone-600"
+            style={{ fontSize: '8.5pt' }}
+          />
+          <Editable
+            as="p"
+            valor={p.pie}
+            editando={editando}
+            multilinea={false}
+            alCambiar={v => alCambiar({ pie: v })}
+            vacio="Quién lo hace"
+            className="shrink-0 text-right font-sans uppercase text-stone-400"
+            style={{ fontSize: '6.5pt', letterSpacing: '0.25em', maxWidth: '90mm' }}
+          />
         </div>
       </div>
     </div>
