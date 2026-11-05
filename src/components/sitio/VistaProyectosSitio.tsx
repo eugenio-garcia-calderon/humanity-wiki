@@ -112,7 +112,6 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const tSistemas = raiz?.config?.sitio?.sistemas;
     const colArea = (proyectos.conexiones || []).find(c => c.tabla_id === tSistemas)?.columna_id || '';
     const colEstado = cols.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || cols.find(c => c.tipo === 'seleccion');
-    const colProgreso = cols.find(c => c.tipo === 'porcentaje' && c.nombre === 'Progreso') || cols.find(c => c.tipo === 'porcentaje');
 
     // Las categorías: nombre e ilustración (la portada de su fila de Sistemas), solo las que tienen proyectos.
     const sistemaDe = new Map<string, { nombre: string; imagen: string | null; orden: number }>();
@@ -125,7 +124,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const areas = [...usos.keys()]
       .map(id => ({ id, slug: plano(sistemaDe.get(id)?.nombre || id), nombre: sistemaDe.get(id)?.nombre || '', imagen: sistemaDe.get(id)?.imagen || null, n: usos.get(id) || 0, orden: sistemaDe.get(id)?.orden ?? 999 }))
       .filter(a => a.nombre)
-      .sort((a, b) => a.orden - b.orden);
+      // De más a menos proyectos, de izquierda a derecha (2026-11-05, Eugenio: «Energía tiene 16,
+      // está lo más a la izquierda posible»); a igualdad, el orden de la tabla de Sistemas.
+      .sort((a, b) => b.n - a.n || a.orden - b.orden);
 
     // Los proyectos: activos primero, y dentro el orden de la tabla.
     const opciones = new Map((colEstado?.opciones || []).map(o => [o.id, o]));
@@ -136,16 +137,21 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const filas = [...proyectos.filas]
       .filter(f => f.pagina_id && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
       .sort((a, b) => peso(a) - peso(b) || a.orden - b.orden);
-    return { colNombre, colArea, colEstado, colProgreso, opciones, areas, filas };
+    return { colNombre, colArea, colEstado, opciones, areas, filas };
   }, [proyectos, sistemas, raiz]);
 
   // Las personas: su foto (la portada de su página) y su nombre.
   const gente = useMemo(() => {
     if (!personas) return null;
+    // Sus columnas se encuentran por la tabla a la que apuntan: Sistemas (sus áreas) y Proyectos.
+    const tSistemas = raiz?.config?.sitio?.sistemas, tProyectos = raiz?.config?.sitio?.proyectos;
+    const colAreas = (personas.conexiones || []).find(c => c.tabla_id === tSistemas)?.columna_id || '';
+    const colProy = (personas.conexiones || []).find(c => c.tabla_id === tProyectos)?.columna_id || '';
     return personas.filas
       .filter(f => f.pagina_id && String(f.pagina?.titulo || '').trim())
-      .map(f => ({ id: f.pagina_id!, nombre: String(f.pagina?.titulo || '').trim(), foto: f.pagina?.imagen || null }));
-  }, [personas]);
+      .map(f => ({ id: f.pagina_id!, nombre: String(f.pagina?.titulo || '').trim(), foto: f.pagina?.imagen || null,
+        areas: lista(f.celdas[colAreas]?.valor), proyectos: lista(f.celdas[colProy]?.valor) }));
+  }, [personas, raiz]);
 
   useBajarAlAncla(!!modelo);
 
@@ -154,6 +160,13 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
 
   const activa = modelo.areas.find(a => a.slug === area) || null;
   const visibles = activa ? modelo.filas.filter(f => lista(f.celdas[modelo.colArea]?.valor).includes(activa.id)) : modelo.filas;
+  // LAS PERSONAS DEL ÁREA ELEGIDA (2026-11-05, Eugenio: «si se escoge Movilidad, que solo te
+  // enseñe personas relacionadas con esa categoría»): las que tienen esa área en sus Áreas, o
+  // trabajan en un proyecto de esa área.
+  const proyectosDelArea = activa ? new Set(visibles.map(f => f.id)) : null;
+  const genteVisible = gente && activa
+    ? gente.filter(p => p.areas.includes(activa.id) || p.proyectos.some(x => proyectosDelArea!.has(x)))
+    : gente;
   const elegir = (slug: string) => { setArea(slug); ponerArea(slug); window.scrollTo({ top: 0 }); };
 
   const tile = (activo: boolean) => cn(
@@ -205,13 +218,12 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           const enc = f.pagina?.encuadre;
           const estadoId = String(f.celdas[modelo.colEstado?.id || '']?.valor || '');
           const estado = modelo.opciones.get(estadoId) || null;
-          const progreso = Number(f.celdas[modelo.colProgreso?.id || '']?.valor);
           const sus = lista(f.celdas[modelo.colArea]?.valor).map(id => modelo.areas.find(a => a.id === id)?.nombre).filter(Boolean) as string[];
           return (
             <li key={f.id} className="relative">
               <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
                 className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100">
+                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {/* 400 y no 420: con 420 la miniatura saltaba al ancho 1600 (el doble retina
                       busca el escalón siguiente) y cada portada tardaba segundos en fabricarse. */}
                   {img ? (
@@ -222,26 +234,18 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                   ) : (
                     <div className="grid h-full w-full place-items-center text-3xl font-black text-slate-300">{nombre.slice(0, 1)}</div>
                   )}
+                  {/* El estado (Activo, Completado, Ideación…), dentro de la imagen, abajo a la derecha
+                      (2026-11-05, Eugenio). El avance en porcentaje ya no se enseña. */}
+                  {estado && (
+                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur">
+                      <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
+                      {estado.label}
+                    </span>
+                  )}
                 </div>
                 <div className="p-4">
                   <h2 className="text-lg font-black leading-snug text-slate-900">{nombre}</h2>
                   {sus.length > 0 && <p className="mt-0.5 truncate text-xs font-semibold text-slate-400">{sus.join(' · ')}</p>}
-                  <div className="mt-3 flex items-center gap-2">
-                    {estado && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
-                        <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
-                        {estado.label}
-                      </span>
-                    )}
-                    {Number.isFinite(progreso) && (
-                      <span className="flex min-w-0 flex-1 items-center gap-2" title={`Avance: ${Math.round(progreso)}%`}>
-                        <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100">
-                          <span className="block h-full rounded-full bg-emerald-500" style={{ width: `${Math.max(0, Math.min(100, progreso))}%` }} />
-                        </span>
-                        <span className="text-[11px] font-bold tabular-nums text-slate-400">{Math.round(progreso)}%</span>
-                      </span>
-                    )}
-                  </div>
                 </div>
               </Link>
               {equipo && f.pagina_id && (
@@ -260,11 +264,15 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       {/* LAS PERSONAS, AL FINAL DE LA PORTADA (2026-11-05, Eugenio: «que la base de datos de
           personas esté en la página inicial y que te haga un scroll down hasta allí»). El menú
           baja hasta aquí (`sitio.anclas`, en `VistaPagina`) en vez de abrir otra página. */}
-      {gente && gente.length > 0 && (
+      {gente && gente.length > 0 && genteVisible && (
         <section data-ancla="personas" className="mt-16 scroll-mt-24">
-          <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">Personas</h2>
+          <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+            {activa ? <>Personas del área de <span className="text-slate-700">{activa.nombre}</span></> : 'Personas'}
+            <span className="ml-1.5 text-slate-300">{genteVisible.length}</span>
+          </h2>
+          {genteVisible.length === 0 && <p className="mt-4 text-center text-sm text-slate-400">Todavía no hay personas en esta área.</p>}
           <ul className="mt-6 grid list-none grid-cols-3 gap-x-3 gap-y-6 p-0 sm:grid-cols-5 lg:grid-cols-8">
-            {gente.map(p => (
+            {genteVisible.map(p => (
               <li key={p.id}>
                 <Link to={sitio ? sitio.enlacePagina(p.id) : `/p/${p.id}`} className="group flex flex-col items-center gap-2 text-center">
                   {p.foto
