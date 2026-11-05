@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "Aeromóvil Gota: página de Eugenio en su menú lateral",
-      "desde": "2026-11-05T11:11:36.586Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/seguridad/politica.ts",
       "motivo": "Aeromóvil Gota: página de Eugenio en su menú lateral",
       "desde": "2026-11-05T11:11:39.224Z"
