@@ -10239,3 +10239,5 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Pestaña Medidas: diámetros, superficies, población, densidad, km de cada tipo de vía, árboles, paneles y el programa de edificios con m² por escala; CSV.
   - Pestaña Planos: planta y alzado frontal en DXF (AutoCAD R12, metros, una capa por tipo de elemento) de la ciudad, un pueblo, una comunidad, una familia o un nido; planta a color en SVG; captura PNG; parámetros en JSON y enlace que reabre el diseño.
   - Nada se guarda en el servidor: los parámetros viven en el navegador y en el enlace (`#p=…`).
+- Arquitectura es de Eugenio y sale en su menú lateral (2026-11-05, Eugenio: «añade a eugenio@lighthumanity.org para que le aparezca en sus páginas»).
+  - Migración 0166, igual que la 0165 del Aeromóvil: proyecto «Comunidad Circular Humana» y, dentro, la página «Arquitectura · Comunidad Circular Humana», las dos de la cuenta eugenio@lighthumanity.org, con `config.ruta = '/arquitectura'`. Si la cuenta no existe, no hace nada; si ya existen, no las pisa.
