@@ -14,8 +14,8 @@
 //
 // Logarithmic depth buffer: the camera goes from 120 km away to a few metres.
 
-import { useEffect, useMemo, useRef } from 'react';
-import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
+import { lazy, Suspense, useEffect, useMemo, useRef } from 'react';
+import { Canvas, events as eventosR3F, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, OrthographicCamera, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Mundo, Edificio } from './geometria';
@@ -24,10 +24,13 @@ import { prototipo, type Prototipo } from './prototipos';
 import { textura, TAM } from './texturas';
 
 export type Modo = 'perspectiva' | 'cenital' | 'frontal';
+
+// Its own chunk: downloaded the first time someone presses "Animar", never before.
+const Animacion = lazy(() => import('./Animacion'));
 export interface Objetivo { cx: number; cy: number; radio: number; nonce: number }
 
 const ORDEN = ['campo', 'cesped', 'agricultura', 'parque', 'produccion', 'suelo', 'camino', 'huerto', 'gota', 'bosque',
-  'bancalA', 'bancalB', 'bancalC', 'bancalD', 'senda', 'plaza', 'agua', 'vertipuerto', 'calzada', 'bici', 'peatonal', 'via', 'marca'];
+  'bancalA', 'bancalB', 'bancalC', 'bancalD', 'senda', 'plaza', 'agua', 'vertipuerto', 'calzada', 'bici', 'peatonal', 'isleta', 'via', 'marca'];
 
 function colorCapa(capa: string): string {
   if (capa.startsWith('enlace-')) return SISTEMA[capa.slice(7)]?.color ?? '#ffffff';
@@ -385,8 +388,23 @@ function Director({ modo, objetivo, onEscala }: { modo: Modo; objetivo: Objetivo
 
 export interface Captura { png: () => string }
 
-export function Escena({ mundo, modo, objetivo, seleccion, onPick, onEscala, capturaRef }: {
-  mundo: Mundo; modo: Modo; objetivo: Objetivo; seleccion: number | null;
+/** R3F's pointer events, but with the camera's world matrix refreshed before the ray is
+ *  cast. Measured 2026-11-05: in the top and front views the camera's quaternion was
+ *  right (straight down) but its matrixWorld still looked at the city centre from when
+ *  the camera was created, so a click on the community picked the city's security annex. */
+const eventosAlDia: typeof eventosR3F = (store) => {
+  const base = eventosR3F(store);
+  return {
+    ...base,
+    compute: (event, state, previous) => {
+      state.camera.updateMatrixWorld();
+      base.compute?.(event, state, previous);
+    },
+  };
+};
+
+export function Escena({ mundo, modo, objetivo, seleccion, onPick, onEscala, capturaRef, animar = false }: {
+  mundo: Mundo; modo: Modo; objetivo: Objetivo; seleccion: number | null; animar?: boolean;
   onPick: (id: number) => void; onEscala: (m: number) => void; capturaRef: React.MutableRefObject<Captura | null>;
 }) {
   const rotulos = useMemo<Rotulo[]>(() => [
@@ -396,6 +414,7 @@ export function Escena({ mundo, modo, objetivo, seleccion, onPick, onEscala, cap
   return (
     <Canvas
       gl={{ logarithmicDepthBuffer: true, antialias: true }}
+      events={eventosAlDia}
       dpr={[1, 2]}
       onPointerMissed={() => onPick(-1)}
       onCreated={({ gl, scene }) => {
@@ -427,6 +446,7 @@ export function Escena({ mundo, modo, objetivo, seleccion, onPick, onEscala, cap
       <Farolas mundo={mundo} />
       <LineasCota mundo={mundo} />
       <Rotulos items={rotulos} />
+      {animar && <Suspense fallback={null}><Animacion mundo={mundo} /></Suspense>}
     </Canvas>
   );
 }
