@@ -25,7 +25,7 @@ import {
   PARAMETROS_POR_DEFECTO, DIAMETRO_RUEDA, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
   type MaterialCarenado, type MaterialChasis, type Parametros, type Puerta, type Pulgadas,
 } from '../components/aeromovil/geometria';
-import { MenuDisenos, aDiseno, deDiseno, type Diseno } from '../components/aeromovil/Disenos';
+import { MenuDisenos, aDiseno, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
 import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
@@ -124,6 +124,8 @@ export default function Aeromovil() {
     const Q = deDiseno(d.parametros || {});
     setP(Q); setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(Q)) });
   }, []);
+  const alGuardado = useCallback((d: Diseno) => setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) }), []);
+  const guardadoWeb = useAutoguardado(P, actual, alGuardado);
   // `?diseno=ID` abre ese diseño (es el enlace que se comparte desde el menú).
   useEffect(() => {
     const id = Number(new URLSearchParams(loc.search).get('diseno'));
@@ -174,9 +176,9 @@ export default function Aeromovil() {
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5">
           <Logo />
           {dueno?.nombre && <span className="-ml-3 text-xs text-slate-500">de {dueno.nombre}</span>}
-          <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno}
+          <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); }}
-            alGuardado={d => setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) })} />
+            alGuardado={alGuardado} />
           <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
             {SECCIONES.map(s => {
               const Icono = s.icono, activa = seccion === s.k;
