@@ -11,12 +11,6 @@
       "ruta": "drizzle/0163_calendario_arte_propuestas_imagenes.sql",
       "motivo": "Calendario Arte: imágenes en propuestas de mejora",
       "desde": "2026-11-05T09:47:31.791Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/seguridad/clasificacion.ts",
-      "motivo": "Aeromóvil: clasificar sus tablas",
-      "desde": "2026-11-05T11:59:23.426Z"
     }
   ]
 }
