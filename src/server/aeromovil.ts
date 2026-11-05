@@ -10,10 +10,14 @@
 // `aeromovil_tareas` (`drizzle/0164_aeromovil.sql`). Un comentario ES una
 // tarea pendiente: cambia de estado, no de tabla.
 //
-// ── QUIÉN PUEDE QUÉ: CUALQUIERA, CON FRENO ────────────────────────────────
-// Igual que el Calendario Arte: proponer y marcar como hecha no pide cuenta.
-// Lo sostienen un freno por IP y hora (`frenos`), un campo trampa para robots
-// y un tope de tamaño. Nada se borra: «descartada» se puede reabrir.
+// ── QUIÉN PUEDE QUÉ ───────────────────────────────────────────────────────
+// · Comentar (proponer una mejora): cualquiera, sin cuenta. Lo sostienen un
+//   freno por IP y hora (`frenos`), un campo trampa para robots y un tope.
+// · Decidir (en curso, hecha, descartada, reabrir): el DUEÑO del Aeromóvil o
+//   un administrador (2026-11-05, Eugenio: «haz que la página sea de la
+//   propiedad de eugenio@lighthumanity.org»). El dueño es quien creó la página
+//   `KW_AEROMOVIL_GOTA` (migración 0165), la que sale en su menú lateral.
+//   Si esa fila no existe, solo deciden los administradores.
 //
 // `/api/aeromovil/tareas.txt` devuelve las pendientes en texto plano para
 // pegárselas a la IA: «haz las tareas de esta lista».
@@ -49,8 +53,35 @@ async function conRitmo(db: any, req: Request, res: Response): Promise<boolean> 
 }
 
 const COLUMNAS = sql`id, area, texto, autor, origen, estado, respuesta, created_at, resuelta_at`;
+/** La página del menú lateral cuyo creador es el dueño del Aeromóvil. */
+const PAGINA_DUENO = 'KW_AEROMOVIL_GOTA';
+
+async function dueno(db: any): Promise<{ id: string | null; nombre: string | null }> {
+  const r = await db.execute(sql`
+    SELECT w.creator_user_id AS id, coalesce(u.display_name, u.name) AS nombre
+    FROM knowledge_windows w LEFT JOIN users u ON u.id = w.creator_user_id
+    WHERE w.id = ${PAGINA_DUENO} AND w.archived_at IS NULL AND w.deleted_at IS NULL
+  `);
+  const f = r.rows[0] as any;
+  return { id: f?.id ?? null, nombre: f?.nombre ?? null };
+}
+
+const puedeDecidir = (req: Request, d: { id: string | null }) =>
+  !!req.user && ((d.id !== null && req.user.id === d.id) || (req.user.roleLevel ?? 0) >= 4);
 
 export function registerAeromovilRoutes(app: Express, db: any) {
+  /** GET /api/aeromovil/dueno — de quién es y si quien mira puede decidir. */
+  app.get('/api/aeromovil/dueno', async (req: Request, res: Response) => {
+    try {
+      const d = await dueno(db);
+      res.set('Cache-Control', 'no-store');
+      res.json({ nombre: d.nombre, puedeDecidir: puedeDecidir(req, d), sesion: !!req.user });
+    } catch (e: any) {
+      console.error('aeromovil dueno:', e);
+      res.status(500).json({ error: 'No se ha podido saber de quién es la página.' });
+    }
+  });
+
   /** GET /api/aeromovil/tareas[?estado=pendiente] */
   app.get('/api/aeromovil/tareas', async (req: Request, res: Response) => {
     try {
@@ -116,7 +147,9 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       if (!Number.isInteger(id) || !ESTADOS.includes(estado)) {
         return res.status(400).json({ error: 'Estado no válido: pendiente, en_curso, hecha o descartada.' });
       }
-      if (!(await conRitmo(db, req, res))) return;
+      const d = await dueno(db);
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión con la cuenta del dueño para cambiar el estado de las tareas.' });
+      if (!puedeDecidir(req, d)) return res.status(403).json({ error: `Solo ${d.nombre || 'el dueño del Aeromóvil'} puede marcar las tareas. Tú puedes comentar.` });
       const respuesta = req.body?.respuesta == null ? null : String(req.body.respuesta).slice(0, MAX_TEXTO);
       const r = await db.execute(sql`
         UPDATE aeromovil_tareas

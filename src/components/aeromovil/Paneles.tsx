@@ -99,7 +99,15 @@ export function FormularioMejora({ areaInicial = 'general', alEnviar }: { areaIn
   );
 }
 
-export function VistaTareas({ tareas, recargar, error }: { tareas: Tarea[] | null; recargar: () => void; error: string | null }) {
+export interface Dueno { nombre: string | null; puedeDecidir: boolean; sesion: boolean }
+
+export async function cargarDueno(): Promise<Dueno> {
+  const r = await fetch('/api/aeromovil/dueno', { credentials: 'include' });
+  if (!r.ok) return { nombre: null, puedeDecidir: false, sesion: false };
+  return r.json();
+}
+
+export function VistaTareas({ tareas, recargar, error, dueno }: { tareas: Tarea[] | null; recargar: () => void; error: string | null; dueno: Dueno | null }) {
   const [filtro, setFiltro] = useState<'abiertas' | 'todas'>('abiertas');
   const [cambiando, setCambiando] = useState<number | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -119,6 +127,9 @@ export function VistaTareas({ tareas, recargar, error }: { tareas: Tarea[] | nul
           <div>
             <h2 className="text-xl font-semibold text-slate-900">Tareas pendientes para mejorar el diseño</h2>
             <p className="text-sm text-slate-600">Cada comentario de mejora entra aquí como tarea. La IA las lee desde <a className="text-teal-700 underline" href="/api/aeromovil/tareas.txt" target="_blank" rel="noreferrer">la lista en texto</a>.</p>
+            <p className="text-sm text-slate-600">{dueno?.puedeDecidir
+              ? 'Eres el dueño del Aeromóvil: tú marcas las tareas como en curso, hechas o descartadas.'
+              : `Cualquiera puede comentar; las marca como hechas o descartadas ${dueno?.nombre || 'el dueño del Aeromóvil'}${dueno?.sesion ? '' : ' (con su cuenta iniciada)'}.`}</p>
           </div>
           <div className="flex rounded-lg border border-slate-200 bg-white p-0.5" role="group" aria-label="Filtro">
             {(['abiertas', 'todas'] as const).map(f => (
@@ -144,7 +155,7 @@ export function VistaTareas({ tareas, recargar, error }: { tareas: Tarea[] | nul
               <p className="mt-2 whitespace-pre-wrap text-sm text-slate-900">{t.texto}</p>
               {t.respuesta && <p className="mt-1 text-sm text-slate-600">↳ {t.respuesta}</p>}
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {cambiando === t.id ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : (t.estado === 'pendiente' || t.estado === 'en_curso') ? (<>
+                {!dueno?.puedeDecidir ? null : cambiando === t.id ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : (t.estado === 'pendiente' || t.estado === 'en_curso') ? (<>
                   {t.estado === 'pendiente' && <Button variant="outline" onClick={() => cambiar(t, 'en_curso')} className="px-2.5 py-1 text-xs normal-case tracking-normal"><Timer className="mr-1 h-3.5 w-3.5" />En curso</Button>}
                   <Button variant="outline" onClick={() => cambiar(t, 'hecha')} className="px-2.5 py-1 text-xs normal-case tracking-normal"><Check className="mr-1 h-3.5 w-3.5" />Hecha</Button>
                   <Button variant="ghost" onClick={() => cambiar(t, 'descartada')} className="px-2.5 py-1 text-xs normal-case tracking-normal"><X className="mr-1 h-3.5 w-3.5" />Descartar</Button>

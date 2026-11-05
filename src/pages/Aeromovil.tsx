@@ -25,7 +25,7 @@ import {
   PARAMETROS_POR_DEFECTO, DIAMETRO_RUEDA, ajustarCarenado, areas, calcular, crearModelo,
   type Parametros, type Puerta, type Pulgadas,
 } from '../components/aeromovil/geometria';
-import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarTareas, type Tarea } from '../components/aeromovil/Paneles';
+import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 
 const CLAVE = 'aeromovil.parametros.v2';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -130,6 +130,9 @@ export default function Aeromovil() {
   // Fetch propio a propósito: el buzón solo lo usa esta página (excepción de src/pages/CLAUDE.md).
   const recargar = useCallback(() => { cargarTareas().then(t => { setTareas(t); setErrorTareas(null); }).catch(e => setErrorTareas(e.message)); }, []);
   useEffect(() => { recargar(); }, [recargar]);
+  // De quién es el Aeromóvil (el creador de su página en el menú lateral) y si quien mira puede decidir.
+  const [dueno, setDueno] = useState<Dueno | null>(null);
+  useEffect(() => { cargarDueno().then(setDueno).catch(() => setDueno(null)); }, []);
   const abiertas = tareas?.filter(t => t.estado === 'pendiente' || t.estado === 'en_curso').length;
 
   useEffect(() => { document.title = 'Aeromóvil Gota · humanity.wiki'; }, []);
@@ -142,6 +145,7 @@ export default function Aeromovil() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5">
           <Logo />
+          {dueno?.nombre && <span className="-ml-3 text-xs text-slate-500">de {dueno.nombre}</span>}
           <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
             {SECCIONES.map(s => {
               const Icono = s.icono, activa = seccion === s.k;
@@ -308,7 +312,7 @@ export default function Aeromovil() {
         </aside>
       </main>
 
-      {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} />}
+      {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}
       {seccion === 'exportar' && <VistaExportar modelo={modelo} visor={visor} porDefecto={porDefecto} resultados={res} />}
