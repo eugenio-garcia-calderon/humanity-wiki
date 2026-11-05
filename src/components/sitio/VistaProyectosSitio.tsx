@@ -1,25 +1,32 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { LayoutGrid, Pencil, Plus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useSitio } from './ContextoSitio';
 import { raizDe } from './CabeceraSitio';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LA VISTA «PROYECTOS» — EL LABORATORIO (2026-11-05, la reestructuración)
 // ============================================================================
 // Eugenio: «luzhumanidad.com pasa a ser una landing page donde se puede hacer
 // clic y ver sus proyectos; con varias vistas para verlos por categoría o ver
-// todos». La portada del laboratorio: todos los proyectos de la base de datos
-// de Proyectos (`sitio.proyectos`) en tarjetas, con las categorías —sus Áreas
-// de innovación, las filas de Sistemas— como filtros arriba. «Todos» es el
-// filtro de inicio, y el elegido viaja en la dirección (`?area=`) para poder
-// compartirlo. El filtro cambia con `replaceState`, no con el enrutador, por
-// la misma razón que el selector de actores de la vista Sociedad.
+// todos». Y en la segunda vuelta (mismo día): sin titular —el nombre ya está
+// en la barra—, el selector de categorías en UNA sola línea compacta (el
+// nombre, su ilustración debajo y el número de proyectos), las portadas por
+// su miniatura y cargadas de arriba abajo, y la base de datos de Personas al
+// final de la página (el menú baja hasta ella en vez de abrirla aparte).
 //
 // Los datos salen de las mismas tablas de siempre, por la lectura pública
 // (`/api/bd/tablas/:id?lectura=1`): nada se duplica. La columna de categorías
 // se encuentra sola: es la relación que apunta a la tabla de Sistemas del
-// sitio (`sitio.sistemas`), así que si un día cambia de nombre, esto sigue.
+// sitio (`sitio.sistemas`); las ilustraciones de las categorías son las
+// portadas de esas filas de Sistemas. El filtro viaja en la dirección
+// (`?area=`, con `replaceState`, como el selector de actores de Sociedad).
+//
+// Quien gestiona la web (`es_equipo` en `/api/sitio-miembros/:raiz/estado`)
+// ve el lápiz de cada proyecto y «Añadir»: se abren en el editor de
+// humanity.wiki, que es donde se escribe.
 
 const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -38,6 +45,8 @@ type Tabla = {
 };
 
 const lista = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
+const pide = (t: string) => fetch(`/api/bd/tablas/${encodeURIComponent(t)}?lectura=1`, { credentials: 'include' })
+  .then(x => (x.ok ? x.json() : null)).catch(() => null);
 
 /** El área elegida, en la dirección (`?area=energia`). */
 function areaDeLaDireccion(): string {
@@ -50,11 +59,28 @@ function ponerArea(slug: string) {
   window.history.replaceState(null, '', `${window.location.pathname}${s ? `?${s}` : ''}${window.location.hash}`);
 }
 
+/** Baja hasta el ancla del `#` de la dirección (p. ej. `#personas`, desde el menú). */
+function useBajarAlAncla(listo: boolean) {
+  useEffect(() => {
+    if (!listo) return;
+    const bajar = () => {
+      const nombre = window.location.hash.slice(1);
+      if (!nombre) return;
+      document.querySelector(`[data-ancla="${CSS.escape(nombre)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    bajar();
+    window.addEventListener('hashchange', bajar);
+    return () => window.removeEventListener('hashchange', bajar);
+  }, [listo]);
+}
+
 export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
   const sitio = useSitio();
   const [raiz, setRaiz] = useState<{ titulo: string; config: any } | null>(null);
   const [proyectos, setProyectos] = useState<Tabla | null>(null);
   const [sistemas, setSistemas] = useState<Tabla | null>(null);
+  const [personas, setPersonas] = useState<Tabla | null>(null);
+  const [equipo, setEquipo] = useState(false);
   const [fallo, setFallo] = useState(false);
   const [area, setArea] = useState(() => areaDeLaDireccion());
 
@@ -63,15 +89,18 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     raizDe(raizId).then(async r => {
       if (!vivo) return;
       setRaiz(r);
-      const tProyectos = r?.config?.sitio?.proyectos, tSistemas = r?.config?.sitio?.sistemas;
+      const tProyectos = r?.config?.sitio?.proyectos, tSistemas = r?.config?.sitio?.sistemas, tPersonas = r?.config?.sitio?.personas;
       if (!tProyectos) { setFallo(true); return; }
-      const pide = (t: string) => fetch(`/api/bd/tablas/${encodeURIComponent(t)}?lectura=1`, { credentials: 'include' })
-        .then(x => (x.ok ? x.json() : null)).catch(() => null);
       const [p, s] = await Promise.all([pide(tProyectos), tSistemas ? pide(tSistemas) : null]);
       if (!vivo) return;
       if (!p) { setFallo(true); return; }
       setProyectos(p); setSistemas(s);
+      // Las personas, después de los proyectos: la página carga de arriba abajo.
+      if (tPersonas) pide(tPersonas).then(x => { if (vivo) setPersonas(x); });
     });
+    // El lápiz y «Añadir», solo para quien gestiona la web.
+    fetch(`/api/sitio-miembros/${encodeURIComponent(raizId)}/estado`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null)).then(j => { if (vivo) setEquipo(!!j?.es_equipo); }).catch(() => {});
     return () => { vivo = false; };
   }, [raizId]);
 
@@ -85,16 +114,16 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const colEstado = cols.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || cols.find(c => c.tipo === 'seleccion');
     const colProgreso = cols.find(c => c.tipo === 'porcentaje' && c.nombre === 'Progreso') || cols.find(c => c.tipo === 'porcentaje');
 
-    // Las categorías con nombre, en el orden de la tabla de Sistemas, solo las que tienen proyectos.
-    const nombreDe = new Map<string, { nombre: string; orden: number }>();
+    // Las categorías: nombre e ilustración (la portada de su fila de Sistemas), solo las que tienen proyectos.
+    const sistemaDe = new Map<string, { nombre: string; imagen: string | null; orden: number }>();
     (sistemas?.filas || []).forEach((f, i) => {
       const n = String(f.pagina?.titulo || f.celdas[sistemas?.columna_titulo || '']?.valor || '').trim();
-      if (n) nombreDe.set(f.id, { nombre: n, orden: i });
+      if (n) sistemaDe.set(f.id, { nombre: n, imagen: f.pagina?.imagen || null, orden: i });
     });
     const usos = new Map<string, number>();
     for (const f of proyectos.filas) for (const a of lista(f.celdas[colArea]?.valor)) usos.set(a, (usos.get(a) || 0) + 1);
     const areas = [...usos.keys()]
-      .map(id => ({ id, slug: plano(nombreDe.get(id)?.nombre || id), nombre: nombreDe.get(id)?.nombre || '', n: usos.get(id) || 0, orden: nombreDe.get(id)?.orden ?? 999 }))
+      .map(id => ({ id, slug: plano(sistemaDe.get(id)?.nombre || id), nombre: sistemaDe.get(id)?.nombre || '', imagen: sistemaDe.get(id)?.imagen || null, n: usos.get(id) || 0, orden: sistemaDe.get(id)?.orden ?? 999 }))
       .filter(a => a.nombre)
       .sort((a, b) => a.orden - b.orden);
 
@@ -110,6 +139,16 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     return { colNombre, colArea, colEstado, colProgreso, opciones, areas, filas };
   }, [proyectos, sistemas, raiz]);
 
+  // Las personas: su foto (la portada de su página) y su nombre.
+  const gente = useMemo(() => {
+    if (!personas) return null;
+    return personas.filas
+      .filter(f => f.pagina_id && String(f.pagina?.titulo || '').trim())
+      .map(f => ({ id: f.pagina_id!, nombre: String(f.pagina?.titulo || '').trim(), foto: f.pagina?.imagen || null }));
+  }, [personas]);
+
+  useBajarAlAncla(!!modelo);
+
   if (fallo) return <div className="py-24 text-center text-sm text-slate-500">No se han podido cargar los proyectos. Inténtalo dentro de un momento.</div>;
   if (!modelo || !raiz) return <div className="grid min-h-[50vh] place-items-center py-24 text-sm text-slate-400 animate-pulse">Cargando los proyectos…</div>;
 
@@ -117,36 +156,50 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
   const visibles = activa ? modelo.filas.filter(f => lista(f.celdas[modelo.colArea]?.valor).includes(activa.id)) : modelo.filas;
   const elegir = (slug: string) => { setArea(slug); ponerArea(slug); window.scrollTo({ top: 0 }); };
 
+  const tile = (activo: boolean) => cn(
+    'flex h-[72px] w-[84px] shrink-0 flex-col items-center justify-between rounded-xl border px-1 py-1.5 transition-colors',
+    activo ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+  );
+
   return (
     <div data-vista-proyectos className="mx-auto w-full max-w-[1280px] px-4 pb-20 sm:px-6">
-      {/* La presentación del laboratorio: el nombre y el subtítulo de la portada, editables desde la página. */}
-      <header className="mx-auto max-w-3xl pb-8 pt-10 text-center sm:pt-14">
-        <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">{raiz.titulo}</h1>
-        {raiz.config?.subtitulo && <p className="mt-3 text-lg font-medium text-slate-600">{String(raiz.config.subtitulo)}</p>}
-        <p className="mt-2 text-sm text-slate-400">{modelo.filas.length} proyectos · {modelo.areas.length} categorías</p>
-      </header>
-
-      {/* Las categorías: «Todos» y un botón por área de innovación, con su cuenta. */}
-      <nav aria-label="Categorías" className="sticky top-0 z-30 -mx-4 mb-8 overflow-x-auto bg-white/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 sm:[scrollbar-width:none]">
-        <div className="flex w-max min-w-full items-center justify-start gap-1.5 sm:w-full sm:flex-wrap sm:justify-center">
-          <button type="button" onClick={() => elegir('')} aria-pressed={!activa}
-            className={cn('h-9 shrink-0 rounded-full border px-4 text-sm font-bold transition-colors',
-              !activa ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900')}>
-            Todos
+      {/* LAS CATEGORÍAS, EN UNA SOLA LÍNEA (2026-11-05, Eugenio: «que ocupe solo una línea…
+          que ponga igual energía y debajo esté la ilustración y que aparezca el número de
+          proyectos, todo mucho más compacto»). El nombre arriba, su ilustración debajo y la
+          cuenta; si no caben, la línea se desliza de lado. */}
+      <nav aria-label="Categorías" className="sticky top-0 z-30 -mx-4 overflow-x-auto bg-white/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 [scrollbar-width:none]">
+        <div className="flex w-max min-w-full items-center justify-start gap-1.5 lg:justify-center">
+          <button type="button" onClick={() => elegir('')} aria-pressed={!activa} className={tile(!activa)}>
+            <span className="text-[11px] font-black leading-none">Todos</span>
+            <LayoutGrid className={cn('h-6 w-6', !activa ? 'text-white/80' : 'text-slate-400')} strokeWidth={1.5} />
+            <span className={cn('text-[10px] font-bold leading-none', !activa ? 'text-white/70' : 'text-slate-400')}>{modelo.filas.length}</span>
           </button>
           {modelo.areas.map(a => (
-            <button key={a.id} type="button" onClick={() => elegir(a.slug)} aria-pressed={activa?.id === a.id}
-              className={cn('h-9 shrink-0 rounded-full border px-4 text-sm font-bold transition-colors',
-                activa?.id === a.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900')}>
-              {a.nombre} <span className={cn('font-semibold', activa?.id === a.id ? 'text-slate-300' : 'text-slate-400')}>{a.n}</span>
+            <button key={a.id} type="button" onClick={() => elegir(a.slug)} aria-pressed={activa?.id === a.id} title={`${a.nombre}: ${a.n} proyectos`} className={tile(activa?.id === a.id)}>
+              <span className="max-w-full truncate text-[11px] font-black leading-none">{a.nombre}</span>
+              {a.imagen
+                ? <img src={miniatura(a.imagen, 72)} alt="" loading="lazy" decoding="async" className={cn('h-7 w-14 rounded object-cover', activa?.id === a.id && 'opacity-90')} />
+                : <span aria-hidden className="h-7 w-14 rounded bg-slate-100" />}
+              <span className={cn('text-[10px] font-bold leading-none', activa?.id === a.id ? 'text-white/70' : 'text-slate-400')}>{a.n}</span>
             </button>
           ))}
         </div>
       </nav>
 
-      {/* Las tarjetas: la portada del proyecto, su nombre, su estado y su avance. */}
-      <ul className="grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
-        {visibles.map(f => {
+      {/* Quien gestiona la web añade o edita desde aquí; se abre en el editor de humanity.wiki. */}
+      {equipo && (
+        <div className="mt-2 flex items-center justify-end gap-2">
+          <a href={`https://humanity.wiki/paginas/${encodeURIComponent(raizId)}`} target="_blank" rel="noopener noreferrer"
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 hover:border-slate-300 hover:text-slate-900">
+            <Plus className="h-3.5 w-3.5" /> Añadir proyecto
+          </a>
+        </div>
+      )}
+
+      {/* Las tarjetas: la portada del proyecto (su miniatura), su nombre, su estado y su avance.
+          Las primeras cargan ya y con prioridad; el resto, al acercarse: de arriba abajo. */}
+      <ul className="mt-4 grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        {visibles.map((f, i) => {
           const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
           const img = f.pagina?.imagen || null;
           const enc = f.pagina?.encuadre;
@@ -155,12 +208,14 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           const progreso = Number(f.celdas[modelo.colProgreso?.id || '']?.valor);
           const sus = lista(f.celdas[modelo.colArea]?.valor).map(id => modelo.areas.find(a => a.id === id)?.nombre).filter(Boolean) as string[];
           return (
-            <li key={f.id}>
+            <li key={f.id} className="relative">
               <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
                 className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {img ? (
-                    <img src={img} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    <img src={miniatura(img, 420)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
+                      {...(i < 3 ? { fetchPriority: 'high' as const } : {})}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
                   ) : (
                     <div className="grid h-full w-full place-items-center text-3xl font-black text-slate-300">{nombre.slice(0, 1)}</div>
@@ -187,11 +242,39 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                   </div>
                 </div>
               </Link>
+              {equipo && f.pagina_id && (
+                <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
+                  title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
+                  className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
+                  <Pencil className="h-4 w-4" />
+                </a>
+              )}
             </li>
           );
         })}
       </ul>
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}
+
+      {/* LAS PERSONAS, AL FINAL DE LA PORTADA (2026-11-05, Eugenio: «que la base de datos de
+          personas esté en la página inicial y que te haga un scroll down hasta allí»). El menú
+          baja hasta aquí (`sitio.anclas`, en `VistaPagina`) en vez de abrir otra página. */}
+      {gente && gente.length > 0 && (
+        <section data-ancla="personas" className="mt-16 scroll-mt-24">
+          <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">Personas</h2>
+          <ul className="mt-6 grid list-none grid-cols-3 gap-x-3 gap-y-6 p-0 sm:grid-cols-5 lg:grid-cols-8">
+            {gente.map(p => (
+              <li key={p.id}>
+                <Link to={sitio ? sitio.enlacePagina(p.id) : `/p/${p.id}`} className="group flex flex-col items-center gap-2 text-center">
+                  {p.foto
+                    ? <img src={miniatura(p.foto, 96)} alt="" loading="lazy" decoding="async" className="h-16 w-16 rounded-full object-cover ring-1 ring-slate-200 transition-transform group-hover:scale-105" />
+                    : <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-lg font-black text-slate-400">{p.nombre.slice(0, 1)}</span>}
+                  <span className="text-xs font-bold leading-tight text-slate-700 group-hover:text-slate-950">{p.nombre}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
