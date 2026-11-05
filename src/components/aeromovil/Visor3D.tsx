@@ -17,9 +17,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import {
-  ARM_UP, CELULA, HIP_Y, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, YS, enZona,
+  ARM_UP, CELULA, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, enZona,
   type Modelo, type Piel,
 } from './geometria';
+import type { Referencia } from './referencias';
 
 export const CAPAS = [
   { k: 'carenado', n: 'Carenado', color: 'bg-zinc-300' },
@@ -50,6 +51,10 @@ interface Props {
   cotas: boolean;
   abierta: boolean;
   vista: Vista;
+  /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
+  referencia?: Referencia | null;
+  modoRef?: 'no' | 'comparar' | 'sola';
+  alinear?: 'eje' | 'morro' | 'lado';
 }
 
 const VISTAS: Record<Vista, [number, number, number]> = {
@@ -433,19 +438,19 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
   for (const zs of [-1, 1]) tube(s, [PIV[0], PIV[1], zs * 0.075], [rax[0], rax[1], zs * 0.075], 0.032, M.susp);
   tube(s, [PIV[0], PIV[1], -0.08], [PIV[0], PIV[1], 0.08], 0.03, M.black);
   tube(s, [PIV[0], PIV[1], 0], [rock[0], rock[1], 0], 0.03, M.susp);
-  const fm: [number, number] = [m.xCruceta, YS + 0.02], mid: [number, number] = [fm[0] + (rock[0] - fm[0]) * 0.55, fm[1] + (rock[1] - fm[1]) * 0.55];
+  const fm: [number, number] = [m.xCruceta, m.ys + 0.02], mid: [number, number] = [fm[0] + (rock[0] - fm[0]) * 0.55, fm[1] + (rock[1] - fm[1]) * 0.55];
   tube(s, [fm[0], fm[1], 0], [mid[0], mid[1], 0], 0.055, M.black);
   tube(s, [mid[0], mid[1], 0], [rock[0], rock[1], 0], 0.02, M.stanch);
   const A = m.ARM_A, ca = Math.cos(ph), sa = Math.sin(ph);
-  for (const yy of [YS, YS + ARM_UP]) for (const dx of [-0.03, 0.03]) tube(s, [m.xL + dx, yy - A * sa, -A * ca], [m.xL + dx, yy + A * sa, A * ca], 0.025, M.susp);
+  for (const yy of [m.ys, m.ys + ARM_UP]) for (const dx of [-0.03, 0.03]) tube(s, [m.xL + dx, yy - A * sa, -A * ca], [m.xL + dx, yy + A * sa, A * ca], 0.025, M.susp);
   const lw: Record<number, [number, number]> = {};
   for (const zs of [-1, 1]) {
     const z = zs * A * ca, dy = zs * A * sa;
-    tube(s, [m.xL, YS + dy - 0.02, z], [m.xL, YS + ARM_UP + dy + 0.02, z], 0.035, M.alu);
+    tube(s, [m.xL, Math.min(m.ys, m.rL) + dy - 0.02, z], [m.xL, m.ys + ARM_UP + dy + 0.02, z], 0.035, M.alu);
     tube(s, [m.xL, m.rL + dy, z], [m.xL, m.rL + dy, z + zs * 0.08], 0.02, M.black);
     lw[zs] = [z + zs * 0.08, dy];
   }
-  tube(s, [m.xL, YS + ARM_UP + 0.04, 0], [m.xL, YS + 0.25 * sa, 0.25 * ca], 0.03, M.black);
+  tube(s, [m.xL, m.ys + ARM_UP + 0.04, 0], [m.xL, m.ys + 0.25 * sa, 0.25 * ca], 0.03, M.black);
 
   rueda(G.ruedas, M, fwc[0], fwc[1], 0, m.rF);
   rueda(G.ruedas, M, rax[0], rax[1], 0, m.rR);
@@ -459,15 +464,57 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
     tube(mo, [BB[0], BB[1], zs * 0.05], [pe[0], pe[1], zs * 0.07], 0.02, M.black);
     tube(mo, [pe[0], pe[1], zs * 0.07], [pe[0], pe[1], zs * 0.16], 0.02, M.black);
   }
-  box(mo, [m.xPas + 0.55, YS + m.P.spineD / 2000 + 0.025, 0], [0.20, 0.05, 0.07], M.black);
+  box(mo, [m.xPas + 0.55, m.ys + m.P.spineD / 2000 + 0.025, 0], [0.20, 0.05, 0.07], M.black);
   const cable = new THREE.CatmullRomCurve3(([
-    [BB[0], BB[1] - 0.05, 0.05], [BB[0] - 0.25, YS + 0.06, 0.05], [m.xPas + 0.55, YS + 0.07, 0.04],
+    [BB[0], BB[1] - 0.05, 0.05], [BB[0] - 0.25, m.ys + 0.06, 0.05], [m.xPas + 0.55, m.ys + 0.07, 0.04],
     [PIV[0], PIV[1] + 0.05, 0.05], [rax[0] + 0.05, rax[1] + 0.04, 0.05],
   ] as V3[]).map(p => new THREE.Vector3(...p)));
   mo.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 80, 0.006, 6, false), M.motor));
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, vista }, ref) {
+
+/** Un velomóvil de referencia: piel de secciones superelípticas, cabina y ruedas. */
+function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: boolean) {
+  vaciar(g);
+  const p = r.perfil, nv = 64, n = p.x.length;
+  const pos: number[] = [], idx: number[] = [], col: number[] = [];
+  const cabina = r.cabinaX ? [Math.min(...r.cabinaX), Math.max(...r.cabinaX)] : null;
+  const colCuerpo = new THREE.Color(fantasma ? 0x14a3b5 : 0xe4e0d6), colCab = new THREE.Color(r.cabina === 'cupula' ? 0x22323d : 0x0f1215);
+  for (let i = 0; i < n; i++) {
+    const zc = (p.top[i] + p.bot[i]) / 2, aT = (p.top[i] - p.bot[i]) / 2;
+    for (let j = 0; j <= nv; j++) {
+      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? 2.5 : 3.2;
+      const ez = Math.sign(c) * Math.pow(Math.abs(c), 2 / nn), ey = Math.sign(sn) * Math.pow(Math.abs(sn), 2 / nn);
+      pos.push(p.x[i], zc + aT * ey, p.hw[i] * ez);
+      const enCab = !!cabina && p.x[i] <= cabina[1] && p.x[i] >= cabina[0] && sn > Math.sin(0.22 * Math.PI);
+      const cc = enCab ? colCab : colCuerpo; col.push(cc.r, cc.g, cc.b);
+    }
+  }
+  for (let i = 0; i < n - 1; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j, b = a + nv + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  const mat = fantasma
+    // The ghost is drawn over our car (no depth test): when both overlap in the
+    // side view, an opaque body would otherwise hide the very thing compared.
+    ? new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, opacity: 0.22, depthWrite: false, depthTest: false, side: THREE.FrontSide, roughness: 0.4 })
+    : new THREE.MeshPhysicalMaterial({ vertexColors: true, metalness: 0.2, roughness: 0.35, clearcoat: 1, side: THREE.DoubleSide });
+  const piel = new THREE.Mesh(geo, mat); piel.castShadow = !fantasma; if (fantasma) piel.renderOrder = 5; g.add(piel);
+  if (fantasma) {
+    const encima = (color: number, opacity = 1) => new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthTest: false, depthWrite: false });
+    const bordes = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), encima(0x0e7383, 0.45));
+    bordes.renderOrder = 6; g.add(bordes);
+    // Contorno lateral y de planta, nítidos, para leer la diferencia de tamaño
+    const lado = p.x.map((x, i) => new THREE.Vector3(x, p.top[i], 0)).concat(p.x.map((x, i) => new THREE.Vector3(x, p.bot[i], 0)).reverse());
+    const l1 = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(lado), encima(0x0b6270)); l1.renderOrder = 7; g.add(l1);
+    const planta = p.x.map((x, i) => new THREE.Vector3(x, 0.006, p.hw[i])).concat(p.x.map((x, i) => new THREE.Vector3(x, 0.006, -p.hw[i])).reverse());
+    const l2 = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(planta), encima(0x0b6270)); l2.renderOrder = 7; g.add(l2);
+  }
+  for (const w of r.ruedas) rueda(g, M, w.x, w.d / 2, w.z, w.d / 2);
+  g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
+}
+
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, vista, referencia = null, modoRef = 'no', alinear = 'eje' }, ref) {
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
 
@@ -510,6 +557,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const G = {} as Record<CapaId, THREE.Group>;
     for (const c of CAPAS) { G[c.k] = new THREE.Group(); G[c.k].name = c.n; coche.add(G[c.k]); }
     const grupoCotas = new THREE.Group(); grupoCotas.visible = false; scene.add(grupoCotas);
+    const grupoRef = new THREE.Group(); grupoRef.visible = false; scene.add(grupoRef);
     const puertasG = new Map<string, THREE.Group[]>();
 
     const resize = () => {
@@ -521,7 +569,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let ultimo = performance.now(), tc = 0, acc = 0, raf = 0;
     const st = {
-      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, puertasG, tween: null as any,
+      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, puertasG, tween: null as any,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, colocarPuertas: (() => {}) as () => void,
     };
@@ -574,7 +622,22 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }, [modelo]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
-  useEffect(() => { const st = estado.current; if (st) st.grupoCotas.visible = verCotas; }, [verCotas]);
+  useEffect(() => { const st = estado.current; if (st) st.grupoCotas.visible = verCotas && modoRef !== 'sola'; }, [verCotas, modoRef]);
+
+  // El otro velomóvil: se dibuja aparte (no se inclina con el nuestro) y se
+  // coloca por el eje delantero, por el morro o al lado.
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    const g: THREE.Group = st.grupoRef;
+    if (!referencia || modoRef === 'no') { g.visible = false; st.coche.visible = true; return; }
+    construirReferencia(g, st.M, referencia, modoRef === 'comparar');
+    const morroRef = referencia.perfil.x[0];
+    g.position.set(0, 0, 0);
+    if (modoRef === 'comparar' && alinear === 'morro') g.position.x = modelo.xn - morroRef;
+    if (modoRef === 'comparar' && alinear === 'lado') g.position.z = -(modelo.P.W / 2 + referencia.W / 2 + 0.35);
+    g.visible = true;
+    st.coche.visible = modoRef !== 'sola';
+  }, [referencia, modoRef, alinear, modelo]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
 
   useEffect(() => {

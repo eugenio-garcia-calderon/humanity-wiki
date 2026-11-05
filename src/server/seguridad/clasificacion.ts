@@ -165,6 +165,7 @@ export const CLASIFICACION: Clase[] = [
   c('roadmap_items', 'MEDIA', 'BAJA', 'MEDIA', 'MEDIA', 'el plan de trabajo publicado'),
   c('aeromovil_tareas', 'MEDIA', 'BAJA', 'MEDIA', 'BAJA', 'comentarios de mejora del Aeromóvil, abiertos y sin cuenta; nada se borra'),
   c('aeromovil_disenos', 'MEDIA', 'BAJA', 'MEDIA', 'BAJA', 'configuraciones guardadas del Aeromóvil; cambiarlas cambia lo que se fabrica a partir de ellas'),
+  c('aeromovil_referencias', 'BAJA', 'BAJA', 'MEDIA', 'BAJA', 'siluetas de otros velomóviles para comparar; sin fotos ni datos personales'),
   c('incidencias', 'MEDIA', 'MEDIA', 'ALTA', 'ALTA', 'el hormiguero: quién pidió qué y quién lo contestó'),
   c('ai_proposed_actions', 'MEDIA', 'MEDIA', 'ALTA', 'ALTA', 'lo que la IA propone hacer y quién lo aprobó'),
 

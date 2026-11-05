@@ -479,7 +479,7 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
   });
 
   // ── DISEÑOS NUEVOS: LA COLA DEL DIBUJANTE AUTOMÁTICO ─────────────────────
-  // Ver `drizzle/0168_calendario_arte_disenos.sql`. El botón apunta el encargo;
+  // Ver `drizzle/0169_calendario_arte_disenos.sql`. El botón apunta el encargo;
   // lo dibuja una tarea programada de Claude en la cuenta de Eugenio, que llama
   // a `robot/pasada` al empezar y marca cada encargo con PATCH al terminar.
 
