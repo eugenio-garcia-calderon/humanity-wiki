@@ -33,6 +33,10 @@ export interface Referencia {
   cabina: Cabina;
   /** Zona de cristal o abertura, en x (m): de dónde a dónde. */
   cabinaX?: [number, number];
+  /** Tramo transparente en toda la vuelta (un morro de plástico claro), en x (m). */
+  transparenteX?: [number, number];
+  /** Color de la carrocería al verlo solo (el fantasma de «Comparar» es siempre turquesa). */
+  color?: number;
   ruedas: RuedaRef[];
   perfil: PerfilRef;
   notas?: string;
@@ -63,6 +67,31 @@ function perfilGota(o: {
 
 const d20 = 0.508;
 
+/**
+ * Una cápsula: morro en cono redondeado, cuerpo casi recto y trasera roma.
+ * `morro` y `cola` son la fracción del largo que ocupa cada extremo;
+ * `yMorro` y `yCola`, la altura (m) a la que se cierra cada punta.
+ */
+function perfilCapsula(o: {
+  xn: number; L: number; H: number; W: number; clear: number;
+  morro: number; cola: number; yMorro: number; yCola: number; caidaTecho: number;
+}): PerfilRef {
+  const N = 90, x: number[] = [], top: number[] = [], bot: number[] = [], hw: number[] = [];
+  for (let i = 0; i <= N; i++) {
+    const u = (1 - Math.cos(Math.PI * i / N)) / 2;
+    const T = o.H - o.H * o.caidaTecho * Math.pow(Math.max(0, (u - 0.5) / 0.5), 1.6);
+    let s = 1, y0 = o.yMorro;
+    if (u < o.morro) { const a = (o.morro - u) / o.morro; s = Math.pow(Math.max(0, 1 - a * a), 0.62); }
+    else if (u > 1 - o.cola) { const a = (u - (1 - o.cola)) / o.cola; s = Math.pow(Math.max(0, 1 - a * a), 0.5); y0 = o.yCola; }
+    else y0 = o.yMorro + (o.yCola - o.yMorro) * (u - o.morro) / Math.max(0.01, 1 - o.morro - o.cola);
+    x.push(o.xn - u * o.L);
+    top.push(y0 + (T - y0) * s);
+    bot.push(y0 - (y0 - o.clear) * Math.min(1, s * 1.25));
+    hw.push(o.W / 2 * Math.pow(s, 0.85));
+  }
+  return { x, top, bot, hw };
+}
+
 /** Los de catálogo: medidas publicadas, curvas aproximadas. */
 export const CATALOGO: Referencia[] = [
   {
@@ -89,6 +118,22 @@ export const CATALOGO: Referencia[] = [
     ruedas: [{ x: 0, z: 0.265, d: d20 }, { x: 0, z: -0.265, d: d20 }, { x: -1.15, z: 0.27, d: d20 }, { x: -1.15, z: -0.27, d: d20 }],
     perfil: perfilGota({ xn: 0.62, L: 2.835, H: 0.88, W: 0.76, clear: 0.08, pmax: 0.48, nariz: 0.32, cola: 0.55 }),
     notas: 'Velomóvil de carbono de Velomobiel.nl, sin motor de serie. La cabeza del ciclista sale por la abertura (o va bajo una capota). Batalla y vías estimadas.',
+  },
+  {
+    // 2026-11-05, Eugenio, con una foto: «modela también este velomóvil para
+    // poder compararlo con el nuestro». Marca y modelo sin identificar.
+    // Lectura de la foto (de 3/4, sin escala): morro de plástico transparente
+    // con los faros dentro y una horquilla blanca debajo (una rueda delante),
+    // parabrisas en el techo y ventanilla larga a cada lado, y la parte roma y
+    // redondeada detrás, con las dos ruedas de atrás asomando en las esquinas.
+    // Todas las medidas son estimadas a ojo.
+    id: 'cat-rojo-2004', nombre: 'Velomóvil rojo (foto de 2004)', origen: 'catalogo',
+    fuente: 'Una sola foto de 3/4 enviada por Eugenio, sin marca ni medidas. Todo estimado a ojo: unos 3,0 × 0,80 × 1,05 m, una rueda delante y dos detrás de 20″.',
+    L: 3.0, W: 0.80, H: 1.05, clear: 0.10, batalla: 2.10, plazas: 1, cabina: 'cerrada', cabinaX: [-0.30, -1.90], transparenteX: [0.45, 0.07],
+    ruedas: [{ x: 0, z: 0, d: d20 }, { x: -2.10, z: 0.29, d: d20 }, { x: -2.10, z: -0.29, d: d20 }],
+    perfil: perfilCapsula({ xn: 0.45, L: 3.0, H: 1.05, W: 0.80, clear: 0.10, morro: 0.40, cola: 0.10, yMorro: 0.30, yCola: 0.50, caidaTecho: 0.18 }),
+    color: 0xc4161c,
+    notas: 'Si la parte transparente fuera la cola y no el morro, el vehículo iría al revés: dímelo y lo giro. Con una foto de perfil y su largo real se puede rehacer más fiel desde «Crear un modelo 3D desde fotos».',
   },
 ];
 
