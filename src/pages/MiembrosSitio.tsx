@@ -168,7 +168,7 @@ type Decir = (r: Response, ok?: string) => Promise<{ ok: boolean; j: any }>;
 // editar o administrar, en un desplegable.» Es el permiso sobre la página raíz
 // de la web (y todo lo que cuelga de ella), el mismo que da «Compartir»
 // (`/api/permisos/pagina/:id/persona`). La CATEGORÍA dice qué ve como miembro
-// en la web publicada; el PERMISO, qué puede hacer con la página en Wiki Creator.
+// en la web publicada; el PERMISO, qué puede hacer con la página en Humanity.Wiki.
 const PERMISOS_PAGINA: Array<[string, string]> = [['', 'Solo miembro'], ['ver', 'Puede ver'], ['comentar', 'Puede comentar'], ['editar', 'Puede editar'], ['admin', 'Puede administrar']];
 function SelectorPermiso({ m, raiz, decir, alCambiar }: { m: any; raiz: string; decir: Decir; alCambiar: () => void }) {
   if (m.es_duenyo) return <span className="inline-flex h-9 items-center rounded-lg bg-violet-50 px-2.5 text-xs font-bold text-violet-700" title="Creó la web: lo puede todo">Dueño</span>;
@@ -183,7 +183,7 @@ function SelectorPermiso({ m, raiz, decir, alCambiar }: { m: any; raiz: string; 
   const rol = m.rol || '';
   return (
     <select value={rol} onChange={e => cambiar(e.target.value)} aria-label={`Permiso de ${m.email} sobre la web`}
-      title="Qué puede hacer con la web en Wiki Creator (además de lo que ve como miembro)"
+      title="Qué puede hacer con la web en Humanity.Wiki (además de lo que ve como miembro)"
       className={cn('h-9 max-w-[160px] rounded-lg border px-2 text-xs font-bold',
         rol === 'admin' ? 'border-violet-200 bg-violet-50 text-violet-700' : rol === 'editar' ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
           : rol === 'comentar' ? 'border-sky-200 bg-sky-50 text-sky-700' : rol === 'ver' ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-200 bg-white text-slate-500')}>

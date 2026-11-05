@@ -56,6 +56,7 @@ import { registerBdRoutes } from './bd.js';
 import { registrarContribuir, identidadDeContribuidor } from './contribuir.js';
 import { registrarPerfil } from './perfil.js';
 import { registrarMapaWeb } from './mapaWeb.js';
+import { registrarCreaciones } from './creaciones.js';
 import { registrarRutaRelaciones } from './rutaRelaciones.js';
 import { registrarVaciado } from './cacheCorta.js';
 import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
@@ -297,6 +298,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'contribuir', montar: (app, db) => registrarContribuir(app, db), nota: 'Añadir entradas desde la página publicada (2026-10-20). DESPUÉS de «bd»: usa `bdInterno.crearFila`/`escribirCeldas`.' },
   { nombre: 'perfil', montar: (app, db) => registrarPerfil(app, db), nota: 'El perfil de una persona (fila de «Personas» con página): datos, áreas y editar el suyo (2026-10-26).' },
   { nombre: 'mapa-web', montar: (app, db) => registrarMapaWeb(app, db), nota: 'El mapa web del pie de un sitio: portada y páginas del menú con lo que cuelga de ellas (2026-10-26).' },
+  { nombre: 'creaciones', montar: (app, db) => registrarCreaciones(app, db), nota: 'Las creaciones publicadas, para la portada de Humanity.Wiki (2026-11-05).' },
   { nombre: 'ruta-relaciones', montar: (app, db) => registrarRutaRelaciones(app, db), nota: 'La ruta de una entrada subiendo por sus relaciones de un solo valor hasta la portada (2026-10-26).' },
   {
     nombre: 'bd/plantillaFicha',

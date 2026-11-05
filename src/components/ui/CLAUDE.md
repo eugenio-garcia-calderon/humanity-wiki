@@ -65,6 +65,7 @@ be rewritten later.
 | `Card` | — |
 | `Badge` | `default` `success` `warning` `danger` `info` |
 | `Button` | `primary` `outline` `ghost` |
+| `Deslizador` (in `Deslizador.tsx`) | `tono`: `oscuro` `claro` — labelled range slider with value and unit |
 
 ## Primitives that are missing
 

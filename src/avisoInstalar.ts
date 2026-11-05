@@ -66,6 +66,8 @@ export function ofrecerInstalacion() {
   if (location.pathname.startsWith("/calendario-arte")) return;
   // Lo mismo para el Aeromóvil Gota (2026-11-05): página propia.
   if (location.pathname.startsWith("/aeromovil")) return;
+  // Y para Arquitectura (2026-11-05): el mundo 3D a pantalla completa.
+  if (location.pathname.startsWith("/arquitectura")) return;
 
   const caja = document.createElement("div");
   caja.setAttribute("role", "dialog");

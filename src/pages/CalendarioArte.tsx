@@ -14,7 +14,7 @@
 //   se llena con el botón de abajo, «Añadir propuesta de mejora».
 //
 // PÁGINA PROPIA (2026-11-05, Eugenio): vive FUERA del Layout de la plataforma.
-// Quien diseña entra por el enlace, sin cuenta, y no debe ver Wiki Creator:
+// Quien diseña entra por el enlace, sin cuenta, y no debe ver Humanity.Wiki:
 // ni sus herramientas, ni iniciar sesión, ni el buscador, ni el feedback o la
 // IA flotantes. Lleva su logo («Arte para la Humanidad») y su propio menú.
 //
@@ -34,7 +34,7 @@ import { PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../co
 import { VistaCarpetas } from '../components/calendarioArte/VistaCarpetas';
 import { BotonPropuesta } from '../components/calendarioArte/BotonPropuesta';
 import { TIPOGRAFIAS, TIPOGRAFIA_POR_DEFECTO, cargarTipografias, estiloTipografia, type EleccionTipografia } from '../components/calendarioArte/tipografias';
-import { HojaPortada } from '../components/calendarioArte/HojaPortada';
+import { HojaPortada, ALTO_PORTADA_MM } from '../components/calendarioArte/HojaPortada';
 import { INVESTIGACION_POR_MES } from '../data/calendarioArteInvestigacion';
 import { PRINCIPIOS_POR_DEFECTO, type Principio } from '../data/calendarioArtePrincipios';
 import { CALENDARIO_ARTE_ANIO, CALENDARIO_ARTE_POR_DEFECTO } from '../data/calendarioArte';
@@ -59,7 +59,7 @@ function mezclar(base: ContenidoMes, cambios?: Partial<ContenidoMes>): Contenido
 }
 
 /** La hoja a tamaño real, encogida para que quepa en la pantalla. */
-function HojaEscalada({ children }: { children: React.ReactNode }) {
+function HojaEscalada({ children, altoMm = ALTO_MM }: { children: React.ReactNode; altoMm?: number }) {
   const caja = useRef<HTMLDivElement>(null);
   const [escala, setEscala] = useState(0.5);
   useLayoutEffect(() => {
@@ -73,7 +73,7 @@ function HojaEscalada({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <div ref={caja} className="w-full">
-      <div style={{ height: ALTO_MM * MM_A_PX * escala, width: ANCHO_MM * MM_A_PX * escala }} className="mx-auto shadow-xl ring-1 ring-stone-200">
+      <div style={{ height: altoMm * MM_A_PX * escala, width: ANCHO_MM * MM_A_PX * escala }} className="mx-auto shadow-xl ring-1 ring-stone-200">
         <div style={{ transform: `scale(${escala})`, transformOrigin: 'top left', width: `${ANCHO_MM}mm` }}>{children}</div>
       </div>
     </div>
@@ -98,8 +98,10 @@ function Logo() {
 export default function CalendarioArte() {
   const [params, setParams] = useSearchParams();
   const anio = CALENDARIO_ARTE_ANIO;
-  // `mes` 0 es la PORTADA (2026-11-05): es lo que se ve al entrar sin `?mes=`.
-  // Las flechas dan la vuelta: portada → enero → … → diciembre → portada.
+  // `mes` 0 es el CALENDARIO COMPLETO (2026-11-05, Eugenio: «que se pueda ver
+  // el calendario entero haciendo scroll down sin pinchar en cada mes»): la
+  // portada y debajo los doce meses seguidos. Es lo que se ve al entrar sin
+  // `?mes=`. Las flechas dan la vuelta: completo → enero → … → diciembre → completo.
   const mesParam = params.get('mes');
   const mes = mesParam === null ? 0 : Math.min(12, Math.max(0, Math.trunc(Number(mesParam)) || 0));
   const esPortada = mes === 0;
@@ -114,6 +116,10 @@ export default function CalendarioArte() {
     p.set('vista', 'carpetas'); if (c === null) p.delete('carpeta'); else p.set('carpeta', String(c)); return p;
   }, { replace: true });
 
+  // Al cambiar de vista se empieza arriba: viniendo del calendario completo
+  // (muy largo) el mes suelto aparecería ya bajado o en blanco.
+  useEffect(() => { window.scrollTo({ top: 0 }); }, [mes, enCarpetas, carpeta]);
+
   const [guardados, setGuardados] = useState<Record<number, Guardado>>({});
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
@@ -125,6 +131,9 @@ export default function CalendarioArte() {
   const [menuMovil, setMenuMovil] = useState(false);
   const [menuLetra, setMenuLetra] = useState(false);
   const [recargaIdeas, setRecargaIdeas] = useState(0);
+  // Qué diseño se está mirando (1 o 2). Nulo = el que se imprime. Se mantiene
+  // al pasar de mes, para comparar el año entero en el mismo diseño.
+  const [disenoVisto, setDisenoVisto] = useState<1 | 2 | null>(null);
   const [estado, setEstado] = useState<EstadoGuardado>('listo');
   const [mensaje, setMensaje] = useState<string | null>(null);
   // `?conocer=1` es a donde lleva el QR impreso: abre directamente la ficha del tema.
@@ -134,7 +143,9 @@ export default function CalendarioArte() {
   const [menuExportar, setMenuExportar] = useState(false);
   const [imprimiendo, setImprimiendo] = useState<number[] | null>(null);
   const [formato, setFormato] = useState<'a3' | 'a4'>('a3');
-  const [subiendoImagen, setSubiendoImagen] = useState(false);
+  // El mes cuya ilustración se está subiendo (en el calendario completo hay doce).
+  const [subiendoImagen, setSubiendoImagen] = useState<number | null>(null);
+  const mesSubida = useRef(0);
   const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
   const entradaImagen = useRef<HTMLInputElement>(null);
 
@@ -278,14 +289,16 @@ export default function CalendarioArte() {
 
   const subirIlustracion = async (f: File | undefined) => {
     if (!f) return;
-    setSubiendoImagen(true);
+    const m = mesSubida.current || mes;
+    if (!m) return;
+    setSubiendoImagen(m);
     // Se sube el ORIGINAL, sin comprimir: es lo que va a imprenta. Solo las
     // fotos HEIC del iPhone pasan por la conversión (el servidor no las admite).
     // Por la puerta del calendario, que no pide cuenta (2026-11-05).
     const r = await subirImagenCalendario(f, { original: true });
-    setSubiendoImagen(false);
+    setSubiendoImagen(null);
     if ('error' in r) { setMensaje(r.error); setEstado('error'); return; }
-    cambiar(mes, { imagen: r.url });
+    cambiar(m, { imagen: r.url });
   };
 
   // ── EXPORTAR / IMPRIMIR ──────────────────────────────────────────────────
@@ -346,6 +359,23 @@ export default function CalendarioArte() {
   const carpetas: Record<number, Referencia[]> = Object.fromEntries(Array.from({ length: 13 }, (_, i) => [i, guardados[i]?.referencias ?? []]));
   const vistaLetra = estiloTipografia(eleccionLetra) as React.CSSProperties;
 
+  /** La hoja de un mes en pantalla, editable y con el cambio de diseño. */
+  const hojaDeMes = (m: ContenidoMes, perezosa: boolean) => (
+    <HojaMes
+      anio={anio}
+      contenido={m}
+      editando={editando}
+      alCambiar={c => cambiar(m.mes, c)}
+      alElegirImagen={() => { mesSubida.current = m.mes; entradaImagen.current?.click(); }}
+      alAbrirCarpeta={() => irACarpeta(m.mes)}
+      subiendoImagen={subiendoImagen === m.mes}
+      diseno={disenoVisto ?? (m.alternativa && m.imagen === m.alternativa ? 2 : 1)}
+      alVerDiseno={setDisenoVisto}
+      imagenOriginal={CALENDARIO_ARTE_POR_DEFECTO[m.mes - 1]?.imagen}
+      perezosa={perezosa}
+    />
+  );
+
   /** Un botón del menú del proyecto. */
   const itemMenu = (activo: boolean, onClick: () => void, icono: React.ReactNode, texto: string) => (
     <Button variant={activo ? 'primary' : 'ghost'} onClick={() => { onClick(); setMenuMovil(false); }}
@@ -361,7 +391,7 @@ export default function CalendarioArte() {
       {/* ── CABECERA PROPIA: LOGO + MENÚ DEL PROYECTO ──────────────────── */}
       <header className="ca-no-imprimir sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-3 py-2">
-          <button type="button" onClick={() => irAMes(0)} className="mr-auto min-w-0 text-left" title="Ir a la portada"><Logo /></button>
+          <button type="button" onClick={() => irAMes(0)} className="mr-auto min-w-0 text-left" title="Ver el calendario completo"><Logo /></button>
 
           <nav className="hidden items-center gap-1 lg:flex">
             {itemMenu(!enCarpetas, () => irAMes(mes), <Eye className="h-4 w-4" />, 'Calendario')}
@@ -402,12 +432,12 @@ export default function CalendarioArte() {
           </nav>
         )}
 
-        {/* Portada y los doce meses */}
+        {/* El calendario completo y los doce meses sueltos */}
         {!enCarpetas && (
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 pb-2">
             <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes - 1)} aria-label="Anterior"><ChevronLeft className="h-4 w-4" /></Button>
             <Button variant={esPortada ? 'primary' : 'ghost'} className={cn('shrink-0 px-2.5 py-1.5 normal-case tracking-normal text-xs', !esPortada && 'text-stone-500')} onClick={() => irAMes(0)}>
-              Portada
+              Calendario completo
             </Button>
             {meses.map(m => (
               <Button key={m.mes} variant={m.mes === mes ? 'primary' : 'ghost'}
@@ -496,21 +526,30 @@ export default function CalendarioArte() {
         </div>
       ) : (
         <div className="ca-no-imprimir mx-auto max-w-6xl px-3 py-5" style={vistaLetra}>
-          <HojaEscalada>
-            {esPortada ? (
-              <HojaPortada anio={anio} meses={meses} portada={portada} editando={editando} alCambiar={cambiarPortada} alAbrirMes={irAMes} />
-            ) : (
-              <HojaMes
-                anio={anio}
-                contenido={actual}
-                editando={editando}
-                alCambiar={c => cambiar(mes, c)}
-                alElegirImagen={() => entradaImagen.current?.click()}
-                alAbrirCarpeta={() => irACarpeta(mes)}
-                subiendoImagen={subiendoImagen}
-              />
-            )}
-          </HojaEscalada>
+          {esPortada ? (
+            // EL CALENDARIO COMPLETO: la portada y debajo los doce meses, con
+            // scroll. Pinchar un tema de la portada baja hasta su mes.
+            <div className="space-y-10">
+              <HojaEscalada altoMm={ALTO_PORTADA_MM}>
+                <HojaPortada anio={anio} meses={meses} portada={portada} editando={editando} alCambiar={cambiarPortada}
+                  alAbrirMes={m => document.getElementById(`ca-mes-${m}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+              </HojaEscalada>
+              {meses.map(m => (
+                <section key={m.mes} id={`ca-mes-${m.mes}`} className="scroll-mt-36">
+                  <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <h2 className="text-sm font-semibold text-stone-700">{NOMBRES_MES[m.mes - 1]} · {m.tema}</h2>
+                    <span className="ml-auto flex items-center gap-1">
+                      <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={() => irAMes(m.mes)}><Eye className="h-3.5 w-3.5" />Solo este mes</Button>
+                      <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={() => irACarpeta(m.mes)}><FolderOpen className="h-3.5 w-3.5" />Carpeta</Button>
+                    </span>
+                  </div>
+                  <HojaEscalada>{hojaDeMes(m, true)}</HojaEscalada>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <HojaEscalada>{hojaDeMes(actual, false)}</HojaEscalada>
+          )}
           <input ref={entradaImagen} type="file" accept="image/*" className="hidden" onChange={e => { subirIlustracion(e.target.files?.[0]); e.target.value = ''; }} />
         </div>
       )}

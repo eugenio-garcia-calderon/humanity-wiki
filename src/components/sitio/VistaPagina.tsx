@@ -17,12 +17,13 @@ import { completarSitio } from './sitioWeb';
 import CabeceraSitio from './CabeceraSitio';
 import PestanasTitulos from './PestanasTitulos';
 import RutaRelaciones from './RutaRelaciones';
-import VistaMapaSitio, { useVista, vistaInicialDe } from './VistaMapaSitio';
+import VistaMapaSitio, { useVista, vistaInicialDe, vistasDe } from './VistaMapaSitio';
 import VistaCirculo2Sitio from './VistaCirculo2Sitio';
 import VistaPiramideSitio from './VistaPiramideSitio';
 // La pizarra lleva React Flow, que pesa: se descarga solo al abrir la vista Sociedad.
 const VistaSociedadSitio = lazy(() => import('./VistaSociedadSitio'));
 const VistaFlujoSitio = lazy(() => import('./VistaFlujoSitio'));
+const VistaProyectosSitio = lazy(() => import('./VistaProyectosSitio'));
 import BotonOpinion from './BotonOpinion';
 
 // ============================================================================
@@ -142,7 +143,10 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // sigue montada y escondida: su termómetro o su filtro son los que ponen el territorio en la barra.
   // La portada abre en la vista que pida el sitio (`sitio.vistaInicial`); las demás páginas, en la suya.
   const vistaInicial = esRaiz ? vistaInicialDe(pagina.sitio?.config) : 'tabla';
-  const [vista] = useVista(vistaInicial);
+  const [elegida] = useVista(vistaInicial);
+  // Solo las vistas de este sitio (`sitio.vistas`, 2026-11-05): un `?vista=` que ya no
+  // es suyo —un enlace viejo de Luz a las de la humanidad— enseña la página normal.
+  const vista = vistasDe(pagina.sitio?.config).includes(elegida) ? elegida : null;
   const mapa = conBarra && vista === 'mapa';
   // LA VISTA «CÍRCULO» (2026-10-28, `VistaCirculo2Sitio.tsx`, el antiguo Círculo 2.0): el arco, la rama y el sector
   // elegido con sus objetivos, que se abren según se pincha, sin cambiar de página.
@@ -153,6 +157,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const sociedad = conBarra && vista === 'sociedad';
   // EL FLUJO (2026-10-30, `VistaFlujoSitio.tsx`): el sistema operativo de España, con el detalle de cada conexión.
   const flujo = conBarra && vista === 'flujo';
+  // EL LABORATORIO (2026-11-05, `VistaProyectosSitio.tsx`): los proyectos en tarjetas, por categoría.
+  const proyectos = conBarra && vista === 'proyectos';
   const migasEl = (<>{migasContexto ? (
         <nav aria-label="Estás en" className="mb-4">
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-base text-slate-600">
@@ -199,7 +205,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {piramide && <VistaPiramideSitio raizId={pagina.sitio!.raizId} />}
       {sociedad && <Suspense fallback={null}><VistaSociedadSitio raizId={pagina.sitio!.raizId} /></Suspense>}
       {flujo && <Suspense fallback={null}><VistaFlujoSitio /></Suspense>}
-      <div hidden={mapa || circulos || piramide || sociedad || flujo || undefined}>
+      {proyectos && <Suspense fallback={null}><VistaProyectosSitio raizId={pagina.sitio!.raizId} /></Suspense>}
+      <div hidden={mapa || circulos || piramide || sociedad || flujo || proyectos || undefined}>
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
