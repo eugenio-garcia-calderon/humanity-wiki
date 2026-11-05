@@ -121,8 +121,9 @@ function Carpeta({ meses, originales, carpetas, mes, editando, alAbrir, alGuarda
   const ilustraciones: { url: string; nota?: string; fija?: string }[] = [];
   const ya = new Set<string>();
   const poner = (url: string | undefined, extra: { nota?: string; fija?: string }) => { if (url && !ya.has(url)) { ya.add(url); ilustraciones.push({ url, ...extra }); } };
-  if (m) poner(m.imagen, { fija: m.imagen === original ? 'Original' : undefined });
-  poner(original, { fija: 'Original' });
+  if (m) poner(m.imagen, { fija: m.imagen === original ? 'Diseño 1' : m.imagen === m.alternativa ? 'Diseño 2' : undefined });
+  poner(original, { fija: 'Diseño 1' });
+  if (m) poner(m.alternativa, { fija: 'Diseño 2' });
   refs.filter(r => tipoDe(r) === 'ilustracion').forEach(r => poner(r.url, { nota: r.nota }));
 
   const bocetos: { url: string; nota?: string; fija?: string }[] = mes > 0 ? [{ url: bocetoOriginal(mes), fija: 'Boceto original' }] : [];
