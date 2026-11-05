@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "drizzle/0168_aeromovil_referencias.sql",
-      "motivo": "Aeromóvil: otros velomóviles",
-      "desde": "2026-11-05T12:39:39.468Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/seguridad/politica.ts",
       "motivo": "Aeromóvil: otros velomóviles",
       "desde": "2026-11-05T12:39:42.205Z"
