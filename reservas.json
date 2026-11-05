@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Aeromóvil: altura de los bajos",
-      "desde": "2026-11-05T13:29:14.974Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Aeromóvil: altura de los bajos",
       "desde": "2026-11-05T13:29:18.249Z"
