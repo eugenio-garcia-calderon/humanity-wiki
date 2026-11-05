@@ -58,6 +58,23 @@ export function SubpaginaEnEspacio() {
   );
 }
 
+/**
+ * LA HUMANIDAD — `humanity.wiki/humanidad` (2026-11-05, la reestructuración).
+ * La página «La Humanidad» (copiada de la portada de luzhumanidad.com, con sus
+ * vistas de círculo, pirámide, sociedad y flujo) es parte fija de la
+ * plataforma: una dirección corta propia, sin arroba. Es una página publicada
+ * normal —sus datos siguen en las tablas de siempre— servida con el contexto
+ * del espacio de Eugenio (`@luz`), que es donde viven sus subpáginas.
+ */
+export const HUMANIDAD_PORTADA_ID = 'KWMHUMANIDAD';
+export function LaHumanidad() {
+  return (
+    <ProveedorSitio sitio={sitioEnCasa('luz')}>
+      <SubpaginaSitio propio={false} idFijo={HUMANIDAD_PORTADA_ID} />
+    </ProveedorSitio>
+  );
+}
+
 /** En casa: `humanity.wiki/@quien/p/:id`. */
 export function SubpaginaEnCasa() {
   const { arroba } = useParams();
