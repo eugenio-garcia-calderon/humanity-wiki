@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Aeromóvil: otros velomóviles",
-      "desde": "2026-11-05T12:55:35.813Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Aeromóvil: otros velomóviles",
       "desde": "2026-11-05T12:55:38.491Z"
