@@ -320,7 +320,7 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       edificio({ tipo: `anexo${nivel}`, sistema: k, codigo, nombre, funcion, forma: 'caja', ...xy(c), ancho: w, fondo: d, alto: 4.5 * pls, plantas: pls, rot: fr.ang(th) - Math.PI / 2, techo: 'plano', color: k, ambito, escala: ESCALAS[nivel], superficie: w0 * d0 * escalaAn * escalaAn * pls });
       if (rotular) etiqueta(c, codigo, Math.max(4, Math.max(w, d) * 0.45), ambito, 4.5 * pls + 3);
       // the coloured links to the children responsible for this system
-      if (responsables && posHijo) for (const u of responsables[k]) tira(`enlace-${k}`, fr.pol(rAnillo + d / 2, th), posHijo(u), Math.max(0.6, diam * 0.03), ambito);
+      if (responsables && posHijo) for (const u of responsables[k]) tira(`enlace-${k}`, fr.pol(rAnillo + d / 2, th), posHijo(u), nivel === 1 ? 0.45 : Math.max(1, diam * 0.03), ambito);
     });
     return rPlaza;
   };
