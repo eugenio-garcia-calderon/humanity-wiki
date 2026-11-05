@@ -56,7 +56,7 @@ if len(sys.argv) > 1 and sys.argv[1].endswith(".json"):
 WHEEL_D = {"16": 0.405, "20": 0.508, "24": 0.61, "26": 0.66, "28": 0.70}
 TIRE_W = 0.055        # neumático 2,2"
 SKIN = 0.001          # carenado: 1 mm carbono-lino (la pieza CAD es la superficie exterior)
-YS = 0.20             # altura del eje de la viga central
+YS = 0.20             # altura del eje de la viga central con los bajos a BAJOS_BASE (se recalcula abajo)
 SEAT_GAP = 0.235      # semiseparación de los dos asientos traseros (3 cm entre ellos)
 TRAVEL_F = 0.17       # recorrido horquilla
 TRAVEL_R = 0.15       # recorrido rueda trasera
@@ -73,8 +73,14 @@ Lf = xn - xt
 Hb = P["H"] - P["clear"]
 xP = -P["xPil"]       # cadera del piloto
 xRr = -P["xPas"]      # cadera de los pasajeros
-BB = (min(-0.40, xP + 0.90), 0.48)    # pedalier (generador): sigue al asiento del piloto
-HIP_Y = 0.36
+# Altura de los bajos (2026-11-05): el interior entero sube y baja con
+# P["clear"]; YS y HIP_Y valen 0,20 y 0,36 con los bajos a BAJOS_BASE.
+# Igual que crearModelo() en geometria.ts.
+BAJOS_BASE = 0.13
+DY = P["clear"] - BAJOS_BASE
+YS = 0.20 + DY
+HIP_Y = 0.36 + DY
+BB = (min(-0.40, xP + 0.90), max(0.48, YS + 0.10))    # pedalier: sigue al asiento del piloto; no sube con el suelo
 _HOMBRO = (xP - math.sin(math.radians(P["recPil"])) * 0.5, HIP_Y + math.cos(math.radians(P["recPil"])) * 0.5)
 PUNO = (_HOMBRO[0] + 0.40, _HOMBRO[1] - 0.09)   # puños del manillar: donde caen las manos
 MASTIL = {"x": xP + 0.46, "top": PUNO[1] - 0.06, "ancho": 0.20}
@@ -239,7 +245,7 @@ def occ_pts(hx, pilot):
     H = (hx, HIP_Y)
     S = (hx + d[0] * 0.50, HIP_Y + d[1] * 0.50)
     C = (hx + d[0] * 0.70, HIP_Y + d[1] * 0.70)
-    F = (BB[0], BB[1]) if pilot else (min(hx + 0.56, xL - 0.145), 0.17)
+    F = (BB[0], BB[1]) if pilot else (min(hx + 0.56, xL - 0.145), 0.17 + DY)
     K = ik_knee(H, F, 0.45, 0.47)
     return H, S, C, K, F, d
 
@@ -377,11 +383,11 @@ def build():
         # Dirección indirecta sobre el asiento: mástil entre las rodillas,
         # manillar a la altura del pecho y bieleta hasta la horquilla.
         "Mastil del manillar": comp([ht((MASTIL["x"], 0, YS + sd / 2), (MASTIL["x"], 0, MASTIL["top"]), 0.035),
-                                     ht((MASTIL["x"], 0, 0.42), (MASTIL["x"] - 0.26, 0, YS + sd / 2 - 0.005), 0.025)]),
+                                     ht((MASTIL["x"], 0, 0.42 + DY), (MASTIL["x"] - 0.26, 0, YS + sd / 2 - 0.005), 0.025)]),
         "Direccion (manillar)": comp([tube((MASTIL["x"], 0, MASTIL["top"]), (MASTIL["x"] - 0.07, 0, MASTIL["top"] + 0.03), 0.032),
                                       ht((MASTIL["x"] - 0.07, -MASTIL["ancho"], MASTIL["top"] + 0.03), (MASTIL["x"] - 0.07, MASTIL["ancho"], MASTIL["top"] + 0.03), 0.0222, 0.0018)]
                                      + [ht((MASTIL["x"] - 0.07, s_ * MASTIL["ancho"], MASTIL["top"] + 0.03), (PUNO[0] - 0.05, s_ * MASTIL["ancho"], PUNO[1] - 0.005), 0.0222, 0.0018) for s_ in (-1, 1)]
-                                     + [tube((MASTIL["x"], 0.075, 0.50), (htb[0] - 0.02, 0.085, htb[1] - 0.02), 0.012)]),
+                                     + [tube((MASTIL["x"], 0.075, 0.50 + DY), (htb[0] - 0.02, 0.085, htb[1] - 0.02), 0.012)]),
         "Poste basculante": ht((xL, 0, YS), (xL, 0, YS + ARM_UP + 0.04), 0.04),
     }
     L["Chasis"] = ch
@@ -423,7 +429,7 @@ def build():
     for s in (-1, 1):
         lat = s * ARM_A * math.cos(ph)
         dy = -s * ARM_A * math.sin(ph)
-        pg.append(ht((xL, lat, YS + dy - 0.02), (xL, lat, YS + ARM_UP + dy + 0.02), 0.035))   # mangueta
+        pg.append(ht((xL, lat, min(YS, rL) + dy - 0.02), (xL, lat, YS + ARM_UP + dy + 0.02), 0.035))   # mangueta
         pg.append(ht((xL, lat, rL + dy), (xL, lat + s * 0.08, rL + dy), 0.02))               # eje
     # amortiguador / bloqueo de inclinación
     pg.append(ht((xL, 0, YS + ARM_UP + 0.04), (xL, 0.25 * math.cos(ph), YS - 0.25 * math.sin(ph)), 0.03))
