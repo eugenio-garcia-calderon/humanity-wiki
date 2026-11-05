@@ -11,12 +11,6 @@
       "ruta": "drizzle/0163_calendario_arte_propuestas_imagenes.sql",
       "motivo": "Calendario Arte: imágenes en propuestas de mejora",
       "desde": "2026-11-05T09:47:31.791Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/aeromovil.ts",
-      "motivo": "Aeromóvil: otros velomóviles",
-      "desde": "2026-11-05T12:55:43.624Z"
     }
   ]
 }
