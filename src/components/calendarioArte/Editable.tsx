@@ -16,6 +16,17 @@ interface Props {
   style?: React.CSSProperties;
 }
 
+/** El texto tal como se escribió. `innerText` devuelve lo que SE VE, y un
+ *  título con `uppercase` saldría en mayúsculas y se guardaría así («Valores»
+ *  pasaba a «VALORES» al editarlo). Se quita el estilo un instante para leer. */
+function leer(el: HTMLElement): string {
+  const antes = el.style.textTransform;
+  el.style.textTransform = 'none';
+  const t = el.innerText;
+  el.style.textTransform = antes;
+  return t;
+}
+
 export function Editable({ valor, editando, alCambiar, className, vacio = 'Escribe aquí…', multilinea = true, as = 'span', style }: Props) {
   const ref = useRef<HTMLElement>(null);
   const Tag = as as any;
@@ -24,7 +35,7 @@ export function Editable({ valor, editando, alCambiar, className, vacio = 'Escri
   // y no se está escribiendo en este campo, se refleja.
   useEffect(() => {
     const el = ref.current;
-    if (el && document.activeElement !== el && el.innerText !== valor) el.innerText = valor;
+    if (el && document.activeElement !== el && leer(el) !== valor) el.innerText = valor;
   }, [valor, editando]);
 
   if (!editando) {
@@ -38,7 +49,9 @@ export function Editable({ valor, editando, alCambiar, className, vacio = 'Escri
       data-vacio={vacio}
       style={style}
       className={cn(
-        'whitespace-pre-line outline-none rounded-sm cursor-text ring-1 ring-sky-300/60 hover:ring-sky-400 focus:ring-2 focus:ring-sky-500 focus:bg-white/80',
+        // Se ve igual que impreso; el marco solo aparece al pasar o al escribir
+        // (2026-11-05: la edición está siempre activa, como en las páginas).
+        'whitespace-pre-line outline-none rounded-sm cursor-text hover:ring-1 hover:ring-sky-300 focus:ring-2 focus:ring-sky-500 focus:bg-white/80',
         'empty:before:content-[attr(data-vacio)] empty:before:text-slate-400',
         className,
       )}
@@ -52,7 +65,7 @@ export function Editable({ valor, editando, alCambiar, className, vacio = 'Escri
         document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
       }}
       onBlur={(e: React.FocusEvent<HTMLElement>) => {
-        const v = e.currentTarget.innerText.replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+        const v = leer(e.currentTarget).replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').trim();
         if (v !== valor) alCambiar(v);
       }}
     />

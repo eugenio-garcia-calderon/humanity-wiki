@@ -35,7 +35,28 @@ export interface ContenidoMes {
   evaluacion_nota?: string;
 }
 
+/** Qué es cada imagen de la carpeta de un mes. Sin tipo = referencia. */
+export type TipoCarpeta = 'ilustracion' | 'boceto' | 'referencia';
+
 export interface Referencia {
   url: string;
   nota?: string;
+  tipo?: TipoCarpeta;
 }
+
+/** Los textos de la portada (hoja 0, campo `portada`). Vacío = el original. */
+export interface PortadaCalendario {
+  titulo: string;
+  subtitulo: string;
+  texto: string;
+  recaudacion: string;
+  pie: string;
+}
+
+export const PORTADA_POR_DEFECTO: PortadaCalendario = {
+  titulo: 'Arte para la Humanidad',
+  subtitulo: 'Doce temas para mirar el mundo con otros ojos',
+  texto: 'Cada mes, una ilustración con la luz y la sombra de un tema que nos atañe a todos, una enseñanza para cada día y una herramienta para ponerla en práctica.',
+  recaudacion: 'Parte de lo recaudado con este calendario apoya iniciativas que mejoran cada una de estas áreas de la humanidad.',
+  pie: 'Asociación Luz & Humanidad · humanity.wiki',
+};

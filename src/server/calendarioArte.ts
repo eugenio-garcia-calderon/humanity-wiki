@@ -92,14 +92,21 @@ function urlImagenValida(u: unknown): u is string {
     && (u.startsWith('/uploads/') || u.startsWith('/calendario-arte/'));
 }
 
-/** Limpia la lista de referencias: url válida y una nota corta opcional. */
-function limpiarReferencias(lista: unknown): { url: string; nota?: string }[] | null {
+/** Qué es cada imagen de la carpeta del mes (2026-11-05): una ilustración
+ *  candidata, un boceto o una referencia de inspiración. Sin tipo = referencia
+ *  (así estaban guardadas las de antes). */
+const TIPOS_CARPETA = new Set(['ilustracion', 'boceto', 'referencia']);
+
+/** Limpia la carpeta: url válida, tipo conocido y una nota corta opcional. */
+function limpiarReferencias(lista: unknown): { url: string; nota?: string; tipo?: string }[] | null {
   if (!Array.isArray(lista) || lista.length > MAX_REFERENCIAS) return null;
-  const out: { url: string; nota?: string }[] = [];
+  const out: { url: string; nota?: string; tipo?: string }[] = [];
   for (const r of lista) {
     if (!r || !urlImagenValida((r as any).url)) return null;
-    const nota = typeof (r as any).nota === 'string' ? (r as any).nota.slice(0, 500) : undefined;
-    out.push(nota ? { url: (r as any).url, nota } : { url: (r as any).url });
+    const x: { url: string; nota?: string; tipo?: string } = { url: (r as any).url };
+    if (typeof (r as any).nota === 'string' && (r as any).nota.trim()) x.nota = (r as any).nota.slice(0, 500);
+    if (TIPOS_CARPETA.has((r as any).tipo)) x.tipo = (r as any).tipo;
+    out.push(x);
   }
   return out;
 }
@@ -346,7 +353,7 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
   // ── BUZÓN DE IDEAS ────────────────────────────────────────────────────────
 
   const listarIdeas = async (anio: number, estado: string | null) => db.execute(sql`
-    SELECT i.id, i.mes, i.texto, i.estado, i.respuesta, i.created_at, i.resuelta_at,
+    SELECT i.id, i.mes, i.texto, i.imagenes, i.estado, i.respuesta, i.created_at, i.resuelta_at,
            COALESCE(u.display_name, u.name) AS autor
     FROM calendario_arte_ideas i
     LEFT JOIN users u ON u.id = i.created_by
@@ -380,7 +387,8 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
       if (!anio) return res.status(400).type('text/plain').send('Año no válido.');
       const r = await listarIdeas(anio, 'pendiente');
       const lineas = (r.rows as any[]).map(i =>
-        `#${i.id} [${i.mes ? `mes ${i.mes}` : 'general'}] ${String(i.texto).replace(/\s+/g, ' ').trim()}`);
+        `#${i.id} [${i.mes ? `mes ${i.mes}` : 'general'}] ${String(i.texto).replace(/\s+/g, ' ').trim()}`
+        + ((i.imagenes || []) as string[]).map(u => `\n    imagen: https://humanity.wiki${u}`).join(''));
       res.set('Cache-Control', 'no-store');
       res.type('text/plain; charset=utf-8').send(
         `Calendario Arte para la Humanidad ${anio} — ideas pendientes (${lineas.length})\n\n${lineas.join('\n')}\n`);
@@ -394,15 +402,19 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
     try {
       const anio = anioValido(req.params.anio);
       if (!anio) return res.status(400).json({ error: 'Año no válido.' });
-      const texto = String(req.body?.texto ?? '').trim();
-      if (!texto) return res.status(400).json({ error: 'Escribe la idea antes de enviarla.' });
+      // Campo trampa: invisible para las personas. Un robot lo rellena y se le
+      // contesta «bien» sin guardar nada, para que no aprenda a esquivarlo.
+      if (String(req.body?.web ?? '').trim()) return res.json({ id: 0, estado: 'pendiente' });
+      const imagenes = Array.isArray(req.body?.imagenes) ? (req.body.imagenes as unknown[]).filter(urlImagenValida).slice(0, 3) : [];
+      const texto = String(req.body?.texto ?? '').trim() || (imagenes.length ? '(propuesta con imágenes)' : '');
+      if (!texto) return res.status(400).json({ error: 'Escribe la propuesta antes de enviarla.' });
       if (texto.length > MAX_IDEA) return res.status(400).json({ error: `La idea es demasiado larga (máximo ${MAX_IDEA} caracteres).` });
       const mes = req.body?.mes == null || req.body?.mes === '' ? null : mesValido(req.body.mes);
       if (!(await conRitmo(db, FRENO_IDEA, req, res))) return;
       const r = await db.execute(sql`
-        INSERT INTO calendario_arte_ideas (anio, mes, texto, created_by)
-        VALUES (${anio}, ${mes}, ${texto}, ${req.user?.id ?? null})
-        RETURNING id, mes, texto, estado, respuesta, created_at, resuelta_at
+        INSERT INTO calendario_arte_ideas (anio, mes, texto, imagenes, created_by)
+        VALUES (${anio}, ${mes}, ${texto}, ${JSON.stringify(imagenes)}::jsonb, ${req.user?.id ?? null})
+        RETURNING id, mes, texto, imagenes, estado, respuesta, created_at, resuelta_at
       `);
       res.json(r.rows[0]);
     } catch (e: any) {
@@ -427,7 +439,7 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
             respuesta = COALESCE(${respuesta}, respuesta),
             resuelta_at = CASE WHEN ${estado} = 'pendiente' THEN NULL ELSE now() END
         WHERE id = ${id}
-        RETURNING id, mes, texto, estado, respuesta, created_at, resuelta_at
+        RETURNING id, mes, texto, imagenes, estado, respuesta, created_at, resuelta_at
       `);
       if (!r.rows.length) return res.status(404).json({ error: 'Esa idea no existe.' });
       res.json(r.rows[0]);
