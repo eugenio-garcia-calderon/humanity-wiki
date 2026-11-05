@@ -23,6 +23,12 @@
       "ruta": "src/App.tsx",
       "motivo": "Aeromóvil Gota: página propia /aeromovil (agente en la nube)",
       "desde": "2026-11-05T10:28:54.855Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "Aeromóvil Gota: página propia /aeromovil (agente en la nube)",
+      "desde": "2026-11-05T10:28:57.354Z"
     }
   ]
 }
