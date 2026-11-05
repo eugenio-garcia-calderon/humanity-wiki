@@ -17,7 +17,7 @@
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, ClipboardList, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw } from 'lucide-react';
+import { Bike, Box, ClipboardList, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -26,15 +26,18 @@ import {
   type MaterialCarenado, type MaterialChasis, type Parametros, type Puerta, type Pulgadas,
 } from '../components/aeromovil/geometria';
 import { MenuDisenos, aDiseno, deDiseno, type Diseno } from '../components/aeromovil/Disenos';
+import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
+import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 
 const CLAVE = 'aeromovil.parametros.v4';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 const m2 = (v: number) => `${fmt(v)} m`;
 
-type Seccion = 'diseno' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
+  { k: 'otros', n: 'Otros velomóviles', ruta: '/aeromovil/otros', icono: Bike },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
   { k: 'planos', n: 'Planos', ruta: '/aeromovil/planos', icono: Ruler },
@@ -144,6 +147,11 @@ export default function Aeromovil() {
   const [abierta, setAbierta] = useState(false);
   const [vista, setVista] = useState<Vista>('iso');
   const visor = useRef<VisorHandle | null>(null);
+  // Otro velomóvil en el visor: solo, o junto al nuestro para comparar.
+  const [referencia, setReferencia] = useState<Referencia | null>(null);
+  const [modoRef, setModoRef] = useState<'no' | 'comparar' | 'sola'>('no');
+  const [alinear, setAlinear] = useState<'eje' | 'morro' | 'lado'>('eje');
+  const verRef = (r: Referencia, modo: 'comparar' | 'sola') => { setReferencia(r); setModoRef(modo); setVista('side'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); };
 
   const [tareas, setTareas] = useState<Tarea[] | null>(null);
   const [errorTareas, setErrorTareas] = useState<string | null>(null);
@@ -190,7 +198,36 @@ export default function Aeromovil() {
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <section className="relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50 lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]" aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} vista={vista} />
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} vista={vista}
+            referencia={referencia} modoRef={modoRef} alinear={alinear} />
+          {referencia && modoRef !== 'no' && (
+            <div className="absolute right-3 top-3 z-10 flex max-w-[min(92%,560px)] flex-col gap-2 rounded-xl border border-teal-200 bg-white/95 p-2.5 shadow-sm backdrop-blur">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <GitCompare className="h-4 w-4 text-teal-700" />
+                <span className="text-sm font-semibold text-slate-900">{modoRef === 'comparar' ? `Comparando con ${referencia.nombre}` : referencia.nombre}</span>
+                <span className="ml-auto flex gap-1">
+                  <Button variant="outline" aria-pressed={modoRef === 'comparar'} onClick={() => setModoRef(modoRef === 'comparar' ? 'sola' : 'comparar')}
+                    className="px-2 py-1 text-xs normal-case tracking-normal">{modoRef === 'comparar' ? 'Ver solo' : 'Comparar'}</Button>
+                  <Button variant="ghost" aria-label="Quitar el otro velomóvil" onClick={() => setModoRef('no')} className="px-1.5 py-1"><X className="h-4 w-4" /></Button>
+                </span>
+              </div>
+              {modoRef === 'comparar' && (
+                <>
+                  <div className="flex flex-wrap items-center gap-1 text-xs text-slate-600" role="group" aria-label="Alinear">
+                    Alinear:
+                    {([['eje', 'por la rueda delantera'], ['morro', 'por el morro'], ['lado', 'al lado']] as const).map(([k, n]) => (
+                      <Button key={k} variant="outline" aria-pressed={alinear === k} onClick={() => setAlinear(k)}
+                        className={cn('px-2 py-0.5 text-[11px] normal-case tracking-normal', alinear === k && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
+                    ))}
+                  </div>
+                  <details className="text-xs">
+                    <summary className="cursor-pointer text-teal-700">Tabla de medidas</summary>
+                    <div className="mt-1 max-h-56 overflow-y-auto"><TablaComparacion propia={fichaPropia(modelo, res)} otra={fichaComparable(referencia)} nombre={referencia.nombre} /></div>
+                  </details>
+                </>
+              )}
+            </div>
+          )}
           <div className="pointer-events-none absolute left-3 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">Tándem 1+2 · rombo basculante · pedaleo asistido</div>
           <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-1.5">
             <div className="flex overflow-hidden rounded-lg border border-slate-200 bg-white" role="group" aria-label="Vistas">
@@ -370,6 +407,7 @@ export default function Aeromovil() {
         </aside>
       </main>
 
+      {seccion === 'otros' && <VistaOtros modelo={modelo} resultados={res} puedeDecidir={!!dueno?.puedeDecidir} alVer={r => verRef(r, 'sola')} alComparar={r => verRef(r, 'comparar')} />}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}

@@ -168,6 +168,8 @@ const REVISADAS: Entrada[] = [
   { m: 'POST', ruta: '/api/aeromovil/disenos', guardia: { tipo: 'publica', porque: 'Guardar diseños del Aeromóvil sin cuenta (Eugenio, 2026-11-05). Freno de 120 por hora e IP, tope de 20 kB y campo trampa.' } },
   { m: 'PUT', ruta: '/api/aeromovil/disenos/:id', guardia: { tipo: 'publica', porque: 'Cambiar un diseño: la ruta exige ser su creador (cuenta o clave de creación) o el dueño del Aeromóvil; sin cuenta vale la clave.' } },
   { m: 'DELETE', ruta: '/api/aeromovil/disenos/:id', guardia: { tipo: 'publica', porque: 'Archivar un diseño, con la misma regla que cambiarlo. No borra: archived_at.' } },
+  { m: 'POST', ruta: '/api/aeromovil/referencias', guardia: { tipo: 'publica', porque: 'Guardar la silueta de otro velomóvil creada desde fotos, sin cuenta (Eugenio, 2026-11-05). Se guarda la silueta, nunca la foto. Freno por IP, tope de 40 kB y campo trampa.' } },
+  { m: 'DELETE', ruta: '/api/aeromovil/referencias/:id', guardia: { tipo: 'publica', porque: 'Archivar una silueta: la ruta exige ser su creador (cuenta o clave de creación) o el dueño del Aeromóvil.' } },
 
   // Telecomunicaciones: todo exige sesión, y lo que va sobre una llamada
   // comprueba además que quien llama es una de las dos puntas.

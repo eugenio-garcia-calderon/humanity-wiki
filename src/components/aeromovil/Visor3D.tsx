@@ -20,6 +20,7 @@ import {
   ARM_UP, CELULA, HIP_Y, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, YS, enZona,
   type Modelo, type Piel,
 } from './geometria';
+import type { Referencia } from './referencias';
 
 export const CAPAS = [
   { k: 'carenado', n: 'Carenado', color: 'bg-zinc-300' },
@@ -50,6 +51,10 @@ interface Props {
   cotas: boolean;
   abierta: boolean;
   vista: Vista;
+  /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
+  referencia?: Referencia | null;
+  modoRef?: 'no' | 'comparar' | 'sola';
+  alinear?: 'eje' | 'morro' | 'lado';
 }
 
 const VISTAS: Record<Vista, [number, number, number]> = {
@@ -467,7 +472,49 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
   mo.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 80, 0.006, 6, false), M.motor));
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, vista }, ref) {
+
+/** Un velomóvil de referencia: piel de secciones superelípticas, cabina y ruedas. */
+function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: boolean) {
+  vaciar(g);
+  const p = r.perfil, nv = 64, n = p.x.length;
+  const pos: number[] = [], idx: number[] = [], col: number[] = [];
+  const cabina = r.cabinaX ? [Math.min(...r.cabinaX), Math.max(...r.cabinaX)] : null;
+  const colCuerpo = new THREE.Color(fantasma ? 0x14a3b5 : 0xe4e0d6), colCab = new THREE.Color(r.cabina === 'cupula' ? 0x22323d : 0x0f1215);
+  for (let i = 0; i < n; i++) {
+    const zc = (p.top[i] + p.bot[i]) / 2, aT = (p.top[i] - p.bot[i]) / 2;
+    for (let j = 0; j <= nv; j++) {
+      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? 2.5 : 3.2;
+      const ez = Math.sign(c) * Math.pow(Math.abs(c), 2 / nn), ey = Math.sign(sn) * Math.pow(Math.abs(sn), 2 / nn);
+      pos.push(p.x[i], zc + aT * ey, p.hw[i] * ez);
+      const enCab = !!cabina && p.x[i] <= cabina[1] && p.x[i] >= cabina[0] && sn > Math.sin(0.22 * Math.PI);
+      const cc = enCab ? colCab : colCuerpo; col.push(cc.r, cc.g, cc.b);
+    }
+  }
+  for (let i = 0; i < n - 1; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j, b = a + nv + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  const mat = fantasma
+    // The ghost is drawn over our car (no depth test): when both overlap in the
+    // side view, an opaque body would otherwise hide the very thing compared.
+    ? new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, opacity: 0.22, depthWrite: false, depthTest: false, side: THREE.FrontSide, roughness: 0.4 })
+    : new THREE.MeshPhysicalMaterial({ vertexColors: true, metalness: 0.2, roughness: 0.35, clearcoat: 1, side: THREE.DoubleSide });
+  const piel = new THREE.Mesh(geo, mat); piel.castShadow = !fantasma; if (fantasma) piel.renderOrder = 5; g.add(piel);
+  if (fantasma) {
+    const encima = (color: number, opacity = 1) => new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthTest: false, depthWrite: false });
+    const bordes = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), encima(0x0e7383, 0.45));
+    bordes.renderOrder = 6; g.add(bordes);
+    // Contorno lateral y de planta, nítidos, para leer la diferencia de tamaño
+    const lado = p.x.map((x, i) => new THREE.Vector3(x, p.top[i], 0)).concat(p.x.map((x, i) => new THREE.Vector3(x, p.bot[i], 0)).reverse());
+    const l1 = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(lado), encima(0x0b6270)); l1.renderOrder = 7; g.add(l1);
+    const planta = p.x.map((x, i) => new THREE.Vector3(x, 0.006, p.hw[i])).concat(p.x.map((x, i) => new THREE.Vector3(x, 0.006, -p.hw[i])).reverse());
+    const l2 = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(planta), encima(0x0b6270)); l2.renderOrder = 7; g.add(l2);
+  }
+  for (const w of r.ruedas) rueda(g, M, w.x, w.d / 2, w.z, w.d / 2);
+  g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
+}
+
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, vista, referencia = null, modoRef = 'no', alinear = 'eje' }, ref) {
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
 
@@ -510,6 +557,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const G = {} as Record<CapaId, THREE.Group>;
     for (const c of CAPAS) { G[c.k] = new THREE.Group(); G[c.k].name = c.n; coche.add(G[c.k]); }
     const grupoCotas = new THREE.Group(); grupoCotas.visible = false; scene.add(grupoCotas);
+    const grupoRef = new THREE.Group(); grupoRef.visible = false; scene.add(grupoRef);
     const puertasG = new Map<string, THREE.Group[]>();
 
     const resize = () => {
@@ -521,7 +569,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let ultimo = performance.now(), tc = 0, acc = 0, raf = 0;
     const st = {
-      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, puertasG, tween: null as any,
+      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, puertasG, tween: null as any,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, colocarPuertas: (() => {}) as () => void,
     };
@@ -574,7 +622,22 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }, [modelo]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
-  useEffect(() => { const st = estado.current; if (st) st.grupoCotas.visible = verCotas; }, [verCotas]);
+  useEffect(() => { const st = estado.current; if (st) st.grupoCotas.visible = verCotas && modoRef !== 'sola'; }, [verCotas, modoRef]);
+
+  // El otro velomóvil: se dibuja aparte (no se inclina con el nuestro) y se
+  // coloca por el eje delantero, por el morro o al lado.
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    const g: THREE.Group = st.grupoRef;
+    if (!referencia || modoRef === 'no') { g.visible = false; st.coche.visible = true; return; }
+    construirReferencia(g, st.M, referencia, modoRef === 'comparar');
+    const morroRef = referencia.perfil.x[0];
+    g.position.set(0, 0, 0);
+    if (modoRef === 'comparar' && alinear === 'morro') g.position.x = modelo.xn - morroRef;
+    if (modoRef === 'comparar' && alinear === 'lado') g.position.z = -(modelo.P.W / 2 + referencia.W / 2 + 0.35);
+    g.visible = true;
+    st.coche.visible = modoRef !== 'sola';
+  }, [referencia, modoRef, alinear, modelo]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
 
   useEffect(() => {

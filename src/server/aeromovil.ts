@@ -265,4 +265,72 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       res.status(500).json({ error: 'No se ha podido quitar el diseño.' });
     }
   });
+
+  // ── OTROS VELOMÓVILES CREADOS DESDE FOTOS (migración 0168) ────────────────
+  // Se guarda la silueta, nunca la foto. Mismas reglas que los diseños.
+  const MAX_REFERENCIA = 40_000;
+  const COLS_REF = sql`id, nombre, datos, autor, created_at`;
+  const numero = (v: any, a: number, b: number) => typeof v === 'number' && Number.isFinite(v) && v >= a && v <= b;
+  /** Lo mínimo para que el visor pueda dibujarla sin romperse. */
+  const datosValidos = (d: any) => {
+    if (!d || typeof d !== 'object' || JSON.stringify(d).length > MAX_REFERENCIA) return false;
+    const p = d.perfil;
+    if (!p || !['x', 'top', 'bot', 'hw'].every(k => Array.isArray(p[k]) && p[k].length >= 8 && p[k].length <= 400 && p[k].every((v: any) => numero(v, -12, 12)))) return false;
+    if (new Set([p.x.length, p.top.length, p.bot.length, p.hw.length]).size !== 1) return false;
+    return numero(d.L, 0.5, 12) && numero(d.W, 0.2, 4) && numero(d.H, 0.3, 4) && Array.isArray(d.ruedas) && d.ruedas.length <= 8
+      && d.ruedas.every((w: any) => numero(w?.x, -12, 12) && numero(w?.z, -3, 3) && numero(w?.d, 0.2, 1.2));
+  };
+
+  /** GET /api/aeromovil/referencias — los velomóviles creados desde fotos. */
+  app.get('/api/aeromovil/referencias', async (_req: Request, res: Response) => {
+    try {
+      const r = await db.execute(sql`SELECT ${COLS_REF} FROM aeromovil_referencias WHERE archived_at IS NULL ORDER BY created_at DESC LIMIT 100`);
+      res.set('Cache-Control', 'no-store');
+      res.json(r.rows);
+    } catch (e: any) {
+      console.error('aeromovil referencias:', e);
+      res.status(500).json({ error: 'No se han podido leer los otros velomóviles.' });
+    }
+  });
+
+  /** POST /api/aeromovil/referencias — { nombre, datos, autor? } → la referencia y su clave. */
+  app.post('/api/aeromovil/referencias', async (req: Request, res: Response) => {
+    try {
+      if (String(req.body?.web ?? '').trim()) return res.json({ referencia: null, clave: null });
+      const nombre = nombreValido(req.body?.nombre);
+      if (!nombre) return res.status(400).json({ error: 'Ponle un nombre al velomóvil.' });
+      if (!datosValidos(req.body?.datos)) return res.status(400).json({ error: 'La silueta no es válida: revisa el recorte, el largo y las ruedas.' });
+      const autor = String(req.body?.autor ?? '').trim().slice(0, MAX_AUTOR) || null;
+      if (!(await conRitmo(db, req, res, FRENO_DISENO))) return;
+      const clave = randomBytes(18).toString('base64url');
+      const r = await db.execute(sql`
+        INSERT INTO aeromovil_referencias (nombre, datos, autor, clave_hash, created_by)
+        VALUES (${nombre}, ${JSON.stringify(req.body.datos)}::jsonb, ${autor}, ${huella(clave)}, ${req.user?.id ?? null})
+        RETURNING ${COLS_REF}
+      `);
+      res.json({ referencia: r.rows[0], clave });
+    } catch (e: any) {
+      console.error('aeromovil referencia post:', e);
+      res.status(500).json({ error: 'No se ha podido guardar el velomóvil.' });
+    }
+  });
+
+  /** DELETE /api/aeromovil/referencias/:id — se archiva. Body { clave? }. */
+  app.delete('/api/aeromovil/referencias/:id', async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'Velomóvil no válido.' });
+      const r = await db.execute(sql`SELECT clave_hash, created_by FROM aeromovil_referencias WHERE id = ${id} AND archived_at IS NULL`);
+      const f = r.rows[0] as any;
+      if (!f) return res.status(404).json({ error: 'Ese velomóvil no existe.' });
+      const clave = String(req.body?.clave ?? '');
+      const puede = puedeDecidir(req, await dueno(db)) || (!!req.user && f.created_by === req.user.id)
+        || (!!clave && !!f.clave_hash && huella(clave) === f.clave_hash);
+      if (!puede) return res.status(403).json({ error: 'Solo quien lo creó o el dueño del Aeromóvil puede quitarlo.' });
+      await db.execute(sql`UPDATE aeromovil_referencias SET archived_at = now() WHERE id = ${id}`);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(500).json({ error: 'No se ha podido quitar el velomóvil.' });
+    }
+  });
 }
