@@ -2,21 +2,9 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0161_calendario_arte.sql",
-      "motivo": "Calendario Arte para la Humanidad (agente en la nube)",
-      "desde": "2026-11-04T22:40:45.683Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/App.tsx",
-      "motivo": "Calendario Arte para la Humanidad (agente en la nube)",
-      "desde": "2026-11-04T22:40:48.531Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "Calendario Arte para la Humanidad (agente en la nube)",
-      "desde": "2026-11-04T22:40:50.876Z"
+      "ruta": "drizzle/0162_calendario_arte_historial.sql",
+      "motivo": "Calendario Arte: historial y edición abierta (agente en la nube)",
+      "desde": "2026-11-05T09:19:18.951Z"
     }
   ]
 }
