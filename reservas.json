@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/seguridad/politica.ts",
-      "motivo": "Aeromóvil: otros velomóviles",
-      "desde": "2026-11-05T12:39:42.205Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "Aeromóvil: otros velomóviles",
       "desde": "2026-11-05T12:39:44.924Z"
