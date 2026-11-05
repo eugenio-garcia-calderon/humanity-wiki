@@ -902,6 +902,24 @@ export function registrarSitios(app: Express, db: any) {
   app.get(/^\/(?!api\/|assets\/|uploads\/)[^.]*$/, async (req: Request, res: Response, next: NextFunction) => {
     (req as any)._t0 = Date.now();
     try {
+      // LOS ENLACES VIEJOS A LAS VISTAS DE LA HUMANIDAD (2026-11-05, la
+      // reestructuración): el círculo, la pirámide, la sociedad, el flujo, el
+      // mapa y los sectores de luzhumanidad.com viven ahora en
+      // humanity.wiki/humanidad. Un 301 con la misma consulta, para que ningún
+      // enlace guardado se rompa. Cae aquí también quien llega sin `?vista=`
+      // pero con lo que solo tienen esas vistas (`?circulo=`, `?actor=`,
+      // `?detalle=`…), porque la dirección pierde `vista` cuando es la de por
+      // defecto. La vista nueva del laboratorio (`?vista=proyectos`, `?area=`)
+      // se queda donde está. Antes del apaño de desarrollo: así se puede
+      // probar en local con la cabecera Host.
+      if (/(^|\.)luzhumanidad\.com$/i.test(req.hostname)) {
+        const VISTAS_HUMANIDAD = new Set(['tabla', 'mapa', 'circulos', 'piramide', 'sociedad', 'flujo', 'circulos2', 'circulos3', 'circulos4', 'circulos5', 'circulo2']);
+        const SUYOS = ['circulo', 'sector', 'bloque', 'actor', 'detalle'];
+        if (VISTAS_HUMANIDAD.has(String(req.query.vista || '')) || (!req.query.vista && SUYOS.some(p => req.query[p] != null))) {
+          const q = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+          return res.redirect(301, `https://humanity.wiki/humanidad${q}`);
+        }
+      }
       if (process.env.NODE_ENV !== 'production') return next();
       if (!String(req.headers.accept || '').includes('text/html')) return next();
       const s = sitioDe(req);
