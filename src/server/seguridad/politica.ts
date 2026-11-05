@@ -165,6 +165,9 @@ const REVISADAS: Entrada[] = [
   { m: 'PATCH', ruta: '/api/calendario-arte/ideas/:id', guardia: { tipo: 'publica', porque: 'Marcar ideas como hechas; se pueden reabrir.' } },
   { m: 'POST', ruta: '/api/aeromovil/tareas', guardia: { tipo: 'publica', porque: 'Buzón de mejoras del Aeromóvil abierto sin cuenta (Eugenio, 2026-11-05). Freno de 30 por hora e IP y campo trampa.' } },
   { m: 'PATCH', ruta: '/api/aeromovil/tareas/:id', guardia: { tipo: 'propietario' }, nota: 'Dueño = creador de la página KW_AEROMOVIL_GOTA (migración 0165) o administrador. aeromovil.ts: puedeDecidir()' },
+  { m: 'POST', ruta: '/api/aeromovil/disenos', guardia: { tipo: 'publica', porque: 'Guardar diseños del Aeromóvil sin cuenta (Eugenio, 2026-11-05). Freno de 120 por hora e IP, tope de 20 kB y campo trampa.' } },
+  { m: 'PUT', ruta: '/api/aeromovil/disenos/:id', guardia: { tipo: 'publica', porque: 'Cambiar un diseño: la ruta exige ser su creador (cuenta o clave de creación) o el dueño del Aeromóvil; sin cuenta vale la clave.' } },
+  { m: 'DELETE', ruta: '/api/aeromovil/disenos/:id', guardia: { tipo: 'publica', porque: 'Archivar un diseño, con la misma regla que cambiarlo. No borra: archived_at.' } },
 
   // Telecomunicaciones: todo exige sesión, y lo que va sobre una llamada
   // comprueba además que quien llama es una de las dos puntas.
