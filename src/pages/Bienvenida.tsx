@@ -1,8 +1,9 @@
-import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileText, Globe2, Map as MapIcon, ListChecks, Table2, Store, Sparkles,
   CalendarDays, Gamepad2, Database, Globe, Compass, MessageSquare, Scale,
+  Search, ArrowRight, Plane, Palette,
 } from 'lucide-react';
 import { OBJETIVOS } from '../utils/objetivos';
 import {
@@ -67,6 +68,90 @@ const HERRAMIENTAS: Herramienta[] = [
   { nombre: 'Navegador', que: 'Guarda lo que encuentres en internet.', icono: Globe, Previa: PreviaNavegador },
 ];
 
+// ── LAS CREACIONES (2026-11-05, la reestructuración) ────────────────────────
+// Eugenio: «la gente a través del buscador en esa página web podrá ver todas
+// las creaciones». Lo publicado con la herramienta, debajo del titular: La
+// Humanidad destacada, los sitios publicados (de `/api/creaciones`, que no es
+// una lista a mano: quien publique mañana sale solo) y las dos creaciones que
+// son páginas propias de la plataforma. El buscador filtra por nombre y
+// resumen; con un solo creador no hace falta pedirle nada al servidor.
+
+type Creacion = { id: string; titulo: string; resumen: string | null; imagen: string | null; url: string; Icono?: any };
+const CREACIONES_FIJAS: Creacion[] = [
+  { id: 'aeromovil', titulo: 'Aeromóvil Gota', resumen: 'El vehículo volador de la casa: diseño 3D, plan y planos.', imagen: null, url: '/aeromovil', Icono: Plane },
+  { id: 'calendario-arte', titulo: 'Calendario de Arte', resumen: 'Un calendario que se diseña entre todos, mes a mes.', imagen: null, url: '/calendario-arte', Icono: Palette },
+];
+
+function TarjetaCreacion({ c, grande = false }: { c: Creacion; grande?: boolean }) {
+  const dentro = c.url.startsWith('/');
+  const Icono = c.Icono || Globe2;
+  const cuerpo = (
+    <>
+      <div className={grande ? 'grid aspect-[21/9] w-full place-items-center overflow-hidden bg-slate-900' : 'grid aspect-[16/9] w-full place-items-center overflow-hidden bg-slate-50'}>
+        {c.imagen
+          ? <img src={c.imagen} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+          : <Icono className={grande ? 'h-12 w-12 text-emerald-400' : 'h-9 w-9 text-slate-300'} />}
+      </div>
+      <div className="px-4 py-3">
+        <h3 className="inline-flex items-center gap-1.5 text-[15px] font-black text-slate-900">
+          {c.titulo} <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-emerald-600" />
+        </h3>
+        {c.resumen && <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-slate-500">{c.resumen}</p>}
+      </div>
+    </>
+  );
+  const clase = 'group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg';
+  return dentro
+    ? <Link to={c.url} className={clase}>{cuerpo}</Link>
+    : <a href={c.url} className={clase}>{cuerpo}</a>;
+}
+
+function Creaciones() {
+  const [publicadas, setPublicadas] = useState<Creacion[]>([]);
+  const [busca, setBusca] = useState('');
+  useEffect(() => {
+    let vivo = true;
+    fetch('/api/creaciones').then(r => (r.ok ? r.json() : null))
+      .then(j => { if (vivo && j?.creaciones) setPublicadas(j.creaciones); }).catch(() => {});
+    return () => { vivo = false; };
+  }, []);
+  const todas = useMemo(() => {
+    const vistas = new Set(publicadas.map(c => c.id));
+    return [...publicadas, ...CREACIONES_FIJAS.filter(c => !vistas.has(c.id))];
+  }, [publicadas]);
+  const q = busca.trim().toLocaleLowerCase('es');
+  const filtradas = q ? todas.filter(c => `${c.titulo} ${c.resumen || ''}`.toLocaleLowerCase('es').includes(q)) : todas;
+  const humanidad = filtradas.find(c => c.url === '/humanidad');
+  const resto = filtradas.filter(c => c !== humanidad);
+  return (
+    <section className="mt-4">
+      <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+        Las creaciones
+      </h2>
+      <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500">
+        Lo que ya está hecho con la herramienta. De momento crea Eugenio; pronto, más creadores.
+      </p>
+      <label className="mx-auto mt-5 flex h-11 max-w-md items-center gap-2 rounded-full border border-slate-200 bg-white px-4 shadow-sm focus-within:border-emerald-300">
+        <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+        <input type="search" value={busca} onChange={e => setBusca(e.target.value)} placeholder="Busca una creación…"
+          aria-label="Buscar una creación" className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+      </label>
+      {/* La Humanidad, destacada: el mapa vivo de los temas de la humanidad. */}
+      {humanidad && (
+        <div className="mx-auto mt-6 max-w-3xl">
+          <TarjetaCreacion c={{ ...humanidad, resumen: humanidad.resumen || 'Los temas de la humanidad en un mapa vivo: el círculo, la pirámide, la sociedad y el flujo.' }} grande />
+        </div>
+      )}
+      {resto.length > 0 && (
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {resto.map(c => <TarjetaCreacion key={c.id} c={c} />)}
+        </div>
+      )}
+      {filtradas.length === 0 && <p className="mt-6 text-center text-sm text-slate-400">No hay ninguna creación con ese nombre todavía.</p>}
+    </section>
+  );
+}
+
 /** El botón. Se repite arriba y abajo del todo — es el mismo, no dos. */
 function BotonCrearCuenta({ grande = false }: { grande?: boolean }) {
   return (
@@ -118,14 +203,14 @@ export default function Bienvenida() {
             lo que hay debajo del nombre —lo que esto ES— y ahí sí puede
             explicar, porque ya no tiene que identificar. */}
         <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
-          wiki<span className="text-emerald-600">.creator</span>
+          Humanity<span className="text-emerald-600">.Wiki</span>
         </h1>
         <p className="mt-2 text-sm font-bold uppercase tracking-[0.18em] text-slate-400 sm:text-base">
-          La red de conocimiento
+          La herramienta de crear proyectos
         </p>
         <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
-          Agregar el conocimiento de la humanidad y repartir lo que genere entre
-          quienes lo crean.
+          Crea tus proyectos y tus páginas web, compártelos con el mundo y
+          reparte lo que generen entre quienes los crean.
         </p>
         <div className="mt-5">
           <BotonCrearCuenta grande />
@@ -156,6 +241,9 @@ export default function Bienvenida() {
           Gratis. Empiezas con puntos para usar la IA y el Mercado.
         </p>
       </header>
+
+      {/* Las creaciones publicadas, con su buscador. */}
+      <Creaciones />
 
       {/* ── LAS HERRAMIENTAS ───────────────────────────────────────────────
           Rejilla de tarjetas, cada una con su dibujo arriba. En un móvil van a
