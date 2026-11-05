@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 // ============================================================================
 // EXPLORAR, TEMAS Y OBJETIVOS LLEVAN A HUMANIDAD WIKI (2026-10-18, fase 3)
 // ============================================================================
-// Eugenio separó las dos cosas: Wiki Creator es la herramienta de crear y
+// Eugenio separó las dos cosas: Humanity.Wiki es la herramienta de crear y
 // Humanidad Wiki es una página hecha con ella, en su perfil. Quien llega a
 // `/explorar`, `/temas` u `/objetivos` va a esa página, por su dirección
 // pública (`/@quien/p/:id`), que es la que deja ver sus subpáginas sin tener

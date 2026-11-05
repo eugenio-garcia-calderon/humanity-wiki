@@ -7,7 +7,7 @@ import { VistaMenuTemas } from '../components/bloquesDatos/menuTemas/Lectura';
 import { temasDeLaHumanidad } from '../components/bloquesDatos/menuTemas/temas';
 
 // LA PLANTILLA «HUMANIDAD WIKI», A UN CLIC (2026-10-18). Cualquiera con cuenta la crea en su
-// perfil y luego la cambia como quiera: es una página normal de Wiki Creator.
+// perfil y luego la cambia como quiera: es una página normal de Humanity.Wiki.
 export default function PlantillaHumanidad() {
   const { user } = useAuth();
   const navigate = useNavigate();
