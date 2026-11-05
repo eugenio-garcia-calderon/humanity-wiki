@@ -172,7 +172,7 @@ export function laminas(m: Modelo, paso: number, fecha: string): Lamina[] {
     h.cota(X(m.sf), Y(0), X(m.sf), Y(0.20), `${mm(0.20)}`, -18);
     h.texto(X(m.BB[0]), Y(m.BB[1]) - 0.165 * k - 2, 'pedalier-generador', 'tc', 'middle');
     h.texto(X(m.PIV[0]), Y(m.PIV[1]) + 5, 'pivote basculante', 'tc', 'middle');
-    h.texto(X(0), Y(m.rF) - m.rF * k - 8, 'horquilla 170 mm, 65°', 'tc', 'middle');
+    h.texto(X(0), Y(m.rF) - m.rF * k - 8, `horquilla 170 mm, ${90 - P.horquilla}°`, 'tc', 'middle');
     // Planta
     h.texto(30, 172, 'PLANTA', 'th');
     for (const t of tubos) {

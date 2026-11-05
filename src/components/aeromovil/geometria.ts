@@ -27,9 +27,13 @@ export interface Parametros {
   track: number;    // ancho del eje lateral: centro a centro de las laterales (m)
   xPil: number;     // asiento del piloto: distancia de la cadera al eje delantero (m)
   xPas: number;     // asientos traseros: distancia de la cadera al eje delantero (m)
-  overF: number;    // morro por delante de la rueda delantera (m)
-  tail: number;     // cola por detrás de la rueda trasera (m)
+  recPil: number;   // reclinado del respaldo del piloto (° desde la vertical)
+  recPas: number;   // reclinado de los respaldos traseros (° desde la vertical)
+  overF: number;    // hueco del morro: del borde de la rueda delantera a la punta del carenado (m)
+  tail: number;     // hueco de la cola: del borde de la rueda trasera al final del carenado (m)
+  horquilla: number;// inclinación del eje de dirección respecto a la vertical (°); + = arriba hacia atrás (bici)
   tailRound: number;// redondez de la punta de cola (0 = punta, 0,7 = muy roma)
+  morro: number;    // forma del morro (0 = elíptico, 1 = muy romo, para pegarlo a la rueda)
   auto: boolean;    // ancho y alto ajustados a los ocupantes
   holgura: number;  // holgura interior con ajuste automático (m)
   W: number;        // ancho máximo (m), manual o calculado
@@ -49,26 +53,71 @@ export interface Parametros {
   pedal: number;    // potencia de pedaleo (W)
   speed: number;    // velocidad de cálculo (km/h)
   sol: number;      // horas de sol pico al día (kWh/m²·día)
+  // ── Masas (2026-11-05, Eugenio: «estimar el peso… pudiendo modificar los
+  // parámetros, como el peso de las ruedas, del motor, del chasis») ──────────
+  matChasis: MaterialChasis;   // material de los tubos
+  extraChasis: number;         // uniones, pletinas, soportes y tornillería (kg)
+  mRueda: number;              // una rueda completa con neumático y disco (kg)
+  mSuspension: number;         // horquilla + amortiguadores + rótulas (kg)
+  mMotor: number;              // motor de buje (kg)
+  mGenerador: number;          // generador de pedalier con bielas (kg)
+  mBateria: number;            // una batería (kg); lleva cuatro
+  mAsiento: number;            // una carcasa de asiento con su cojín (kg)
+  matCarenado: MaterialCarenado;
+  espCarenado: number;         // espesor del laminado (mm)
+  espCristal: number;          // espesor del policarbonato (mm)
+  mSolarM2: number;            // paneles flexibles laminados (kg/m²)
+  mVarios: number;             // cableado, luces, frenos, controlador (kg)
 }
 
+export type MaterialChasis = 'al6061' | 'cromoly' | 'carbono';
+export type MaterialCarenado = 'carbonoLino' | 'vidrio' | 'carbono';
+/** Densidad (kg/m³) y límite elástico usable en la viga (MPa, ya soldada/pegada). */
+export const MATERIALES_CHASIS: Record<MaterialChasis, { n: string; densidad: number; limite: number }> = {
+  al6061: { n: 'Aluminio 6061-T6', densidad: 2700, limite: 240 },
+  cromoly: { n: 'Acero cromoly 4130', densidad: 7850, limite: 460 },
+  carbono: { n: 'Tubo de carbono', densidad: 1550, limite: 500 },
+};
+/** Masa del laminado por m² y por mm de espesor, con resina (kg/m²·mm). */
+export const MATERIALES_CARENADO: Record<MaterialCarenado, { n: string; kgm2mm: number }> = {
+  carbonoLino: { n: 'Carbono-lino', kgm2mm: 1.35 },
+  vidrio: { n: 'Fibra de vidrio', kgm2mm: 1.85 },
+  carbono: { n: 'Fibra de carbono', kgm2mm: 1.55 },
+};
+/** Mínimo y máximo de cada deslizador de masa: el rango «en el que nos manejamos». */
+export const RANGOS_MASA = {
+  extraChasis: [0.8, 5], mRueda: [1.2, 3.5], mSuspension: [2.5, 8], mMotor: [2.5, 6], mGenerador: [1.2, 4],
+  mBateria: [2.2, 4], mAsiento: [0.8, 4], espCarenado: [0.6, 3], espCristal: [1.5, 5], mSolarM2: [1.2, 3.5], mVarios: [3, 15],
+} as const;
+
+// Los de un diseño nuevo: los que Eugenio fijó el 2026-11-05 a las 13:01
+// («pon estos datos por defecto cuando se genere un nuevo diseño»). Lo que su
+// pantalla de entonces enseñaba como palabra y no como número se recuperó
+// ajustándolo a sus cifras (largo 4,00 m, volumen 3,27 m³, rueda delantera a
+// 0,6 cm, suelo a 7,8 cm…): ruedas delantera y trasera de 24″, cola «roma» =
+// 0,75, plenitud «afilada» = 1,2, fondo «plano» = 4,5. La forma del morro y el
+// reclinado no existían aún: morro elíptico (0), respaldos a 28° y horquilla a
+// 25°, como entonces. Con la horquilla más adelantada (menos grados) y ruedas
+// de 24″ el tubo de dirección se sale del morro: las comprobaciones lo avisan.
 export const PARAMETROS_POR_DEFECTO: Parametros = {
-  B: 3.05, wF: '20', wL: '20', xLm: 1.50, track: 0.88, xPil: 1.30, xPas: 2.15,
-  overF: 0.40, tail: 0.45, tailRound: 0.45, auto: true, holgura: 0.05, W: 1.46, H: 1.25,
-  pmax: 0.48, full: 0.8, tipH: 0.48, nU: 2.6, nL: 2.6, clear: 0.14, puerta: 'cabina',
-  spineD: 76.2, spineT: 3.0, tiltMax: 20, comp: 0, mOcc: 80, pedal: 100, speed: 25, sol: 4.5,
+  B: 2.60, wF: '24', wL: '20', xLm: 1.22, track: 1.05, xPil: 1.12, xPas: 1.92, recPil: 28, recPas: 28, horquilla: 25,
+  overF: 0.40, tail: 0.39, tailRound: 0.75, morro: 0, auto: false, holgura: 0.05, W: 1.29, H: 1.28,
+  pmax: 0.60, full: 1.2, tipH: 0.70, nU: 2.6, nL: 4.5, clear: 0.21, puerta: 'cabina',
+  spineD: 76.2, spineT: 3.0, tiltMax: 19, comp: 0, mOcc: 83, pedal: 200, speed: 25, sol: 4.5,
+  matChasis: 'al6061', extraChasis: 2.2, mRueda: 1.9, mSuspension: 4.2, mMotor: 3.6, mGenerador: 2.1, mBateria: 2.9,
+  mAsiento: 1.8, matCarenado: 'carbonoLino', espCarenado: 1.0, espCristal: 3.0, mSolarM2: 2.2, mVarios: 8,
 };
 
 export const DIAMETRO_RUEDA: Record<Pulgadas, number> = { '16': 0.405, '20': 0.508, '24': 0.61, '26': 0.66, '28': 0.70 };
 export const TIRE_W = 0.055;
 export const YS = 0.20;
-export const REC = 28 * Math.PI / 180;
 export const SEAT_GAP = 0.235;
-export const HEAD = 25 * Math.PI / 180;
 export const TRAVEL_F = 0.17;
 export const TRAVEL_R = 0.15;
 export const ARM_UP = 0.18;
 export const HIP_Y = 0.36;
-export const AX: [number, number] = [-Math.sin(HEAD), Math.cos(HEAD)];
+/** Desplazamiento de la horquilla (offset). El modelo lleva las barras sobre el eje de dirección (corona sin desplazamiento): así el avance sale positivo también con la horquilla poco inclinada. */
+export const OFFSET_HORQUILLA = 0;
 /** Una célula solar de 6 pulgadas: el tamaño del cuadriculado de los paneles. */
 export const CELULA = 0.1565;
 /** Rendimiento de los paneles (células de silicio monocristalino flexibles). */
@@ -104,6 +153,14 @@ export function crearModelo(P: Parametros) {
   const BB: [number, number] = [Math.min(-0.40, xPil + 0.90), 0.48];
   const PIV: [number, number] = [xR + 0.68, YS + 0.03];
   const A2C = rF + 0.06 + TRAVEL_F + 0.07;
+  // Eje de dirección, hacia arriba. 2026-11-05, Eugenio: «que se pueda
+  // modificar la inclinación de la horquilla… más inclinada hacia delante para
+  // dejar más hueco al pedal». Menos grados = la parte de arriba se va hacia
+  // delante y se aleja de los pies.
+  const HEAD = P.horquilla * Math.PI / 180;
+  const AX: [number, number] = [-Math.sin(HEAD), Math.cos(HEAD)];
+  /** Avance (trail): lo que estabiliza la dirección. Bici de paseo ≈ 6 cm. */
+  const avance = (rF * Math.sin(HEAD) - OFFSET_HORQUILLA) / Math.cos(HEAD);
   const ARM_A = P.track / 2 - 0.08;
 
   // ── El perfil: morro elíptico, cola en coseno y punta redondeada ─────────
@@ -118,7 +175,9 @@ export function crearModelo(P: Parametros) {
   const tapa = Math.min(0.45, Math.max(0.02, (sCorte * Math.min(P.W / 2, Hb / 2) * 0.95) / Math.max(0.05, largoCola)));
   const prof = (u: number) => {
     if (u <= 0 || u >= 1) return 0;
-    if (u < p) { const a = (p - u) / p; return Math.sqrt(Math.max(0, 1 - a * a)); }
+    // Morro: elipse (exponente 0,5) que se vuelve más roma al subir `morro`,
+    // para poder acercar la punta del carenado a la rueda delantera.
+    if (u < p) { const a = (p - u) / p; return Math.pow(Math.max(0, 1 - a * a), 0.5 - 0.32 * P.morro); }
     const t = (u - p) / (1 - p);
     if (P.tailRound <= 0.001) return base(t);
     if (t <= 1 - tapa) return base(t * tCorte / (1 - tapa));
@@ -155,7 +214,14 @@ export function crearModelo(P: Parametros) {
   const htb: [number, number] = [crown[0] + AX[0] * 0.02, crown[1] + AX[1] * 0.02];
   const htt: [number, number] = [crown[0] + AX[0] * 0.16, crown[1] + AX[1] * 0.16];
   const sf = BB[0] - 0.02, sr = PIV[0] - 0.06;
-  const st: [number, number] = [htt[0] + AX[0] * 0.05, htt[1] + AX[1] * 0.05];
+  // El manillar: el mástil va delante del asiento, entre las rodillas; los
+  // puños quedan 40 cm por delante del hombro y a la altura del esternón.
+  // Reclinado de cada fila (2026-11-05, Eugenio: «permite ajustar el
+  // reclinamiento del asiento tanto del piloto como de los pasajeros»).
+  const recDe = (piloto: boolean) => (piloto ? P.recPil : P.recPas) * Math.PI / 180;
+  const hombroPil: [number, number] = [xPil - Math.sin(recDe(true)) * 0.5, HIP_Y + Math.cos(recDe(true)) * 0.5];
+  const puno: [number, number] = [hombroPil[0] + 0.40, hombroPil[1] - 0.09];
+  const mastil = { x: xPil + 0.46, top: puno[1] - 0.06, anchoPunos: 0.20 };
   const xCruceta = xPas - 0.08;   // travesaño de los asientos traseros y anclaje del amortiguador
 
   /** El chasis fabricable, tubo a tubo (lo que dibujan el visor y el plano). */
@@ -172,9 +238,20 @@ export function crearModelo(P: Parametros) {
       { nombre: 'Soporte asiento trasero izq.', grupo: 'Chasis', a: [xCruceta, YS, SEAT_GAP], b: [xCruceta, HIP_Y - 0.09, SEAT_GAP], d: 0.025, pared: 0.002, material: AL },
       { nombre: 'Soporte asiento trasero der.', grupo: 'Chasis', a: [xCruceta, YS, -SEAT_GAP], b: [xCruceta, HIP_Y - 0.09, -SEAT_GAP], d: 0.025, pared: 0.002, material: AL },
       { nombre: 'Poste del basculante', grupo: 'Chasis', a: [xL, YS, 0], b: [xL, YS + ARM_UP + 0.04, 0], d: 0.04, pared: 0.003, material: AL },
-      { nombre: 'Potencia de dirección', grupo: 'Dirección', a: [htt[0], htt[1], 0], b: [st[0], st[1], 0], d: 0.028, pared: 0, material: 'Comprado (potencia MTB)', comprado: true },
-      { nombre: 'Barra de mando', grupo: 'Dirección', a: [st[0], st[1], 0], b: [xPil + 0.48, 0.66, 0], d: 0.022, pared: 0.002, material: AL },
-      { nombre: 'Manillar', grupo: 'Dirección', a: [xPil + 0.48, 0.64, -0.25], b: [xPil + 0.48, 0.64, 0.25], d: 0.022, pared: 0.002, material: AL },
+      // Dirección indirecta sobre el asiento (2026-11-05, Eugenio: «que el
+      // manillar sea más realista… posición de las manos»). Un mástil entre
+      // las rodillas del piloto lleva el manillar a la altura del pecho, con
+      // los puños donde caen las manos con los codos doblados; una bieleta
+      // transmite el giro del mástil a la horquilla.
+      { nombre: 'Mástil del manillar', grupo: 'Chasis', a: [mastil.x, YS + P.spineD / 2000, 0], b: [mastil.x, mastil.top, 0], d: 0.035, pared: 0.002, material: AL },
+      { nombre: 'Tirante del mástil', grupo: 'Chasis', a: [mastil.x, 0.42, 0], b: [mastil.x - 0.26, YS + P.spineD / 2000 - 0.005, 0], d: 0.025, pared: 0.002, material: AL },
+      { nombre: 'Potencia del manillar', grupo: 'Dirección', a: [mastil.x, mastil.top, 0], b: [mastil.x - 0.07, mastil.top + 0.03, 0], d: 0.032, pared: 0, material: 'Comprado (potencia MTB 70 mm)', comprado: true },
+      { nombre: 'Manillar, barra central', grupo: 'Dirección', a: [mastil.x - 0.07, mastil.top + 0.03, -mastil.anchoPunos], b: [mastil.x - 0.07, mastil.top + 0.03, mastil.anchoPunos], d: 0.0222, pared: 0.0018, material: AL },
+      { nombre: 'Manillar, puño izq.', grupo: 'Dirección', a: [mastil.x - 0.07, mastil.top + 0.03, mastil.anchoPunos], b: [puno[0] - 0.05, puno[1] - 0.005, mastil.anchoPunos], d: 0.0222, pared: 0.0018, material: AL },
+      { nombre: 'Manillar, puño der.', grupo: 'Dirección', a: [mastil.x - 0.07, mastil.top + 0.03, -mastil.anchoPunos], b: [puno[0] - 0.05, puno[1] - 0.005, -mastil.anchoPunos], d: 0.0222, pared: 0.0018, material: AL },
+      { nombre: 'Bieleta de dirección', grupo: 'Dirección', a: [mastil.x, 0.50, 0.075], b: [htb[0] - 0.02, htb[1] - 0.02, 0.085], d: 0.012, pared: 0, material: 'Varilla M8 con rótulas', comprado: true },
+      { nombre: 'Brazo de mando del mástil', grupo: 'Dirección', a: [mastil.x, 0.50, 0], b: [mastil.x, 0.50, 0.075], d: 0.02, pared: 0, material: 'Pletina 6061 8 mm' },
+      { nombre: 'Brazo de mando de la horquilla', grupo: 'Dirección', a: [htb[0], htb[1] - 0.02, 0], b: [htb[0] - 0.02, htb[1] - 0.02, 0.085], d: 0.02, pared: 0, material: 'Pletina 6061 8 mm' },
     ];
     for (const s of [-1, 1]) {
       t.push({ nombre: `Basculante trasero, brazo ${s > 0 ? 'izq.' : 'der.'}`, grupo: 'Suspensión', a: [PIV[0], PIV[1], s * 0.075], b: [xR, rR, s * 0.075], d: 0.032, pared: 0.002, material: AL });
@@ -198,17 +275,23 @@ export function crearModelo(P: Parametros) {
   /** Puntos del maniquí: cadera, hombro, cabeza, rodilla y pie. */
   const occPts = (piloto: boolean) => {
     const hx = piloto ? xPil : xPas;
+    const REC = recDe(piloto);
     const d: [number, number] = [-Math.sin(REC), Math.cos(REC)];
     const H: [number, number] = [hx, HIP_Y];
     const S: [number, number] = [hx + d[0] * 0.5, HIP_Y + d[1] * 0.5];
     const C: [number, number] = [hx + d[0] * 0.7, HIP_Y + d[1] * 0.7];
     // Los pies de atrás se quedan detrás del paralelogramo de las laterales.
     const F: [number, number] = piloto ? [BB[0], BB[1]] : [Math.min(hx + 0.56, xL - 0.145), 0.17];
-    return { H, S, C, K: ikKnee(H, F, 0.45, 0.47), F, d, hx };
+    // Manos: el piloto en los puños del manillar; los pasajeros sobre los muslos.
+    const K = ikKnee(H, F, 0.45, 0.47);
+    const mano: [number, number] = piloto ? [puno[0], puno[1]] : [H[0] + (K[0] - H[0]) * 0.62, H[1] + (K[1] - H[1]) * 0.62 + 0.07];
+    const anchoMano = piloto ? mastil.anchoPunos : 0.13;
+    return { H, S, C, K, F, d, hx, mano, anchoMano };
   };
   /** Contorno lateral de la carcasa de un asiento (superficie y cara inferior). */
   const perfilAsiento = (piloto: boolean) => {
     const hx = piloto ? xPil : xPas;
+    const REC = recDe(piloto);
     const d = [-Math.sin(REC), Math.cos(REC)], pb = [-Math.cos(REC), -Math.sin(REC)];
     const top: [number, number][] = [[hx + 0.40, HIP_Y - 0.04], [hx + 0.22, HIP_Y - 0.085], [hx + 0.02, HIP_Y - 0.10]];
     for (const t of [0.12, 0.32, 0.52, 0.66]) top.push([hx + d[0] * t + pb[0] * 0.11, HIP_Y + d[1] * t + pb[1] * 0.11]);
@@ -273,7 +356,7 @@ export function crearModelo(P: Parametros) {
   }
 
   return {
-    P, rF, rR, rL, xn, xt, xR, xL, xPil, xPas, BB, Lf, Hb, PIV, A2C, ARM_A, crown, htt, sf, sr, xCruceta,
+    P, AX, avance, recDe, mastil, puno, rF, rR, rL, xn, xt, xR, xL, xPil, xPas, BB, Lf, Hb, PIV, A2C, ARM_A, crown, htt, sf, sr, xCruceta,
     frame, sec, gap, uDeX, occPts, perfilAsiento, tubosChasis, zonasPiel, puertas,
   };
 }
@@ -339,13 +422,15 @@ export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
   Cd = Math.min(0.5, Math.max(0.12, Cd));
   const CdA = Cd * A;
 
-  const D = P.spineD / 1000, t = P.spineT / 1000;
-  const spineKg = Math.PI * ((D / 2) ** 2 - (D / 2 - t) ** 2) * Math.abs(m.sf - m.sr) * 2700;
-  const masas: Record<string, number> = {
-    Chasis: spineKg + 2.2, 'Suspensión': 4.2, Ruedas: 4 * 1.9, Asientos: 3 * 1.8, Motor: 3.6 + 2.1 + 0.6,
-    'Baterías': 4 * 2.9, Carenado: ar.carroceria * 1.5, Cristales: ar.cristal * 3.6, 'Paneles solares': ar.solar * 2.2, Varios: 8,
-  };
+  const masas = estimarMasas(m, ar, P);
   const mVeh = Object.values(masas).reduce((a, b) => a + b, 0), mTot = mVeh + 3 * P.mOcc;
+  // El rango posible: todo al mínimo (y los materiales más ligeros) y todo al máximo.
+  const extremo = (lado: 0 | 1) => {
+    const Q: Parametros = { ...P, matChasis: lado ? 'cromoly' : 'carbono', matCarenado: lado ? 'vidrio' : 'carbonoLino' };
+    for (const [k, r] of Object.entries(RANGOS_MASA)) (Q as any)[k] = r[lado];
+    return Object.values(estimarMasas(m, ar, Q)).reduce((a, b) => a + b, 0);
+  };
+  const rangoMasa: [number, number] = [extremo(0), extremo(1)];
 
   const v = P.speed / 3.6, Crr = 0.0065, eta = 0.85;
   const Paero = 0.5 * 1.2 * CdA * v ** 3, Proll = Crr * mTot * 9.81 * v, Pw = (Paero + Proll) / eta;
@@ -368,7 +453,7 @@ export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
     Mmax = Math.max(Mmax, F * a * b / L); R[k] += F * b / L; R[k + 1] += F * a / L;
   }
   const Dm = P.spineD, Wmod = Math.PI * (Dm ** 4 - (Dm - 2 * P.spineT) ** 4) / (32 * Dm);
-  const tension = 2.5 * Mmax * 1000 / Wmod, seguridad = 240 / tension;
+  const tension = 2.5 * Mmax * 1000 / Wmod, seguridad = MATERIALES_CHASIS[P.matChasis].limite / tension;
   const cargaRueda = Math.max(R[0] / 9.81 + mVeh / 4, R[1] / 2 / 9.81 + mVeh / 4, R[2] / 9.81 + mVeh / 4);
 
   // Holguras
@@ -386,7 +471,17 @@ export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
     for (let k = 0; k < 72; k++) { const a = 2 * Math.PI * k / 72, y = cy + r * Math.sin(a); if (y > P.clear + 0.06) mn = Math.min(mn, m.gap(x + r * Math.cos(a), y, z)); }
     return mn;
   };
-  ch.push({ nombre: 'Rueda delantera con la horquilla comprimida', holgura: wg(AX[0] * TRAVEL_F, 0, m.rF, m.rF + AX[1] * TRAVEL_F), minimo: 0.02 });
+  ch.push({ nombre: 'Rueda delantera con la horquilla comprimida', holgura: wg(m.AX[0] * TRAVEL_F, 0, m.rF, m.rF + m.AX[1] * TRAVEL_F), minimo: 0.02 });
+  // Pies y bielas contra la horquilla, en vista lateral: la distancia del
+  // círculo del pedal (biela 165 mm + pie) a las barras y al tubo de dirección.
+  const dSeg = (p: [number, number], a: [number, number], b: [number, number]) => {
+    const vx = b[0] - a[0], vy = b[1] - a[1], t = Math.max(0, Math.min(1, ((p[0] - a[0]) * vx + (p[1] - a[1]) * vy) / (vx * vx + vy * vy)));
+    return Math.hypot(p[0] - a[0] - t * vx, p[1] - a[1] - t * vy);
+  };
+  const ejeF: [number, number] = [0, m.rF];
+  ch.push({ nombre: 'Pedales a la horquilla', holgura: Math.min(dSeg(m.BB, ejeF, m.crown) - 0.025, dSeg(m.BB, m.crown, m.htt) - 0.03) - 0.165 - 0.07, minimo: 0.03 });
+  ch.push({ nombre: 'Avance de la dirección (estabilidad)', holgura: m.avance, minimo: 0.04 });
+  ch.push({ nombre: 'Tubo de dirección dentro del carenado', holgura: m.gap(m.htt[0], m.htt[1] + 0.06, 0.04), minimo: 0.02 });
   ch.push({ nombre: 'Rueda trasera comprimida', holgura: wg(m.xR, 0, m.rR, m.rR + TRAVEL_R), minimo: 0.02 });
   ch.push({ nombre: `Rueda lateral interior a ${P.tiltMax}°`, holgura: h.lateral, minimo: 0.01 });
   const ph = P.tiltMax * Math.PI / 180;
@@ -401,22 +496,47 @@ export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
   ch.push({ nombre: 'Pies traseros al paralelogramo', holgura: (m.xL - 0.045) - (of.F[0] + 0.08), minimo: 0.01 });
   ch.push({ nombre: 'Respaldo trasero a la rueda trasera', holgura: Math.hypot(of.H[0] - 0.10 - m.xR, of.H[1] - m.rR) - m.rR - TRAVEL_R * 0.5, minimo: 0.02 });
   // Rodillas de atrás contra el respaldo del piloto, a la altura de la rodilla.
-  const tR = Math.max(0, (of.K[1] - (HIP_Y - 0.052)) / Math.cos(REC));
+  const REC = P.recPil * Math.PI / 180;
+  const tR = Math.max(0, (of.K[1] - (HIP_Y - 0.11 * Math.sin(REC))) / Math.cos(REC));
   const xRespaldo = m.xPil - 0.11 * Math.cos(REC) - Math.sin(REC) * tR;
   ch.push({ nombre: 'Rodillas traseras al respaldo del piloto', holgura: (xRespaldo - 0.02) - (of.K[0] + 0.07), minimo: 0.03 });
 
   return {
-    A, FR, Cd, CdA, vol, Paero, Proll, Pw, WhKm, pedWhKm, autonomia, vmax: vmax * 3.6, masas, mVeh, mTot,
+    A, FR, Cd, CdA, vol, Paero, Proll, Pw, WhKm, pedWhKm, autonomia, vmax: vmax * 3.6, masas, mVeh, mTot, rangoMasa,
     Mmax, tension, seguridad, cargaRueda, solarPico, solarDia, kmSol, areas: ar, comprobaciones: ch,
   };
 }
 export type Resultados = ReturnType<typeof calcular>;
 
+/** Masa de cada parte (kg), a partir de los tubos del modelo y los deslizadores de masa. */
+export function estimarMasas(m: Modelo, ar: { carroceria: number; cristal: number; solar: number }, P: Parametros) {
+  const mat = MATERIALES_CHASIS[P.matChasis];
+  let tubos = 0, tubosSusp = 0;
+  for (const t of m.tubosChasis()) {
+    if (t.comprado) continue;
+    const area = t.pared ? Math.PI * ((t.d / 2) ** 2 - (t.d / 2 - t.pared) ** 2) : Math.PI * (t.d / 2) ** 2 * 0.35;
+    const kg = area * largoTubo(t) * mat.densidad;
+    if (t.grupo === 'Suspensión') tubosSusp += kg; else tubos += kg;
+  }
+  return {
+    Chasis: tubos + P.extraChasis,
+    'Suspensión': tubosSusp + P.mSuspension,
+    Ruedas: 4 * P.mRueda,
+    Asientos: 3 * P.mAsiento,
+    'Motor y generador': P.mMotor + P.mGenerador,
+    'Baterías': 4 * P.mBateria,
+    Carenado: ar.carroceria * P.espCarenado * MATERIALES_CARENADO[P.matCarenado].kgm2mm,
+    Cristales: ar.cristal * P.espCristal * 1.2,
+    'Paneles solares': ar.solar * P.mSolarM2,
+    Varios: P.mVarios,
+  } as Record<string, number>;
+}
+
 /** Lo que entiende `aeromovil_cad.py` (sus nombres de parámetro). W y H ya resueltos. */
 export function parametrosCAD(P: Parametros) {
   return {
     B: P.B, wF: P.wF, wL: P.wL, fL: +(P.xLm / P.B).toFixed(4), track: P.track, xPil: P.xPil, xPas: P.xPas,
-    overF: P.overF, tail: P.tail, tailRound: P.tailRound, W: P.W, H: P.H, pmax: P.pmax, full: P.full, tipH: P.tipH,
+    recPil: P.recPil, recPas: P.recPas, horquilla: P.horquilla, overF: P.overF, tail: P.tail, tailRound: P.tailRound, morro: P.morro, W: P.W, H: P.H, pmax: P.pmax, full: P.full, tipH: P.tipH,
     nU: P.nU, nL: P.nL, clear: P.clear, puerta: P.puerta, spineD: P.spineD, spineT: P.spineT,
   };
 }

@@ -23,28 +23,32 @@ from OCP.gp import gp_Pnt
 
 # ------------------------------------------------------------------ parámetros
 P = dict(
-    B=3.05,       # batalla = longitud del chasis, eje delantero a eje trasero (m)
-    wF="20",      # rueda delantera y trasera (pulgadas de bici)
-    wL="20",      # ruedas laterales basculantes
-    fL=0.4918,    # eje de las laterales (fracción de la batalla desde delante)
-    track=0.88,   # ancho del eje lateral: centro a centro (m)
-    xPil=1.30,    # cadera del piloto: distancia al eje delantero (m)
-    xPas=2.15,    # cadera de los pasajeros: distancia al eje delantero (m)
-    tilt=0.0,     # inclinación de la carrocería para el modelo (grados)
-    overF=0.40,   # morro por delante de la rueda delantera (m)
-    tail=0.45,    # cola por detrás de la rueda trasera (m)
-    tailRound=0.45,  # redondez de la punta de cola (0 = en punta)
-    W=1.472,      # ancho máximo del carenado (m); el visor lo calcula con «ajustar a los ocupantes»
-    H=1.248,      # alto total sobre el suelo (m); ídem
-    pmax=0.48,    # posición del espesor máximo (fracción de la longitud)
-    full=0.8,     # plenitud de cola (menor = cola más llena)
-    tipH=0.48,    # altura de la punta de cola (fracción del alto del carenado)
-    nU=2.6,       # redondez de la sección superior (2 = elipse)
-    nL=2.6,       # forma del fondo (2 = redondo, 5 = plano)
-    clear=0.14,   # altura libre del fondo del carenado (m)
-    puerta="cabina",  # cabina | gaviota | aptera (solo se dibuja en el visor)
-    spineD=76.2,  # tubo central: diámetro (mm)
-    spineT=3.0,   # tubo central: espesor de pared (mm)
+    B=2.6,              # batalla = longitud del chasis, eje delantero a eje trasero (m)
+    wF="24",            # rueda delantera y trasera (pulgadas de bici)
+    wL="20",            # ruedas laterales basculantes
+    fL=0.4692,          # eje de las laterales (fracción de la batalla desde delante)
+    track=1.05,         # ancho del eje lateral: centro a centro (m)
+    xPil=1.12,          # cadera del piloto: distancia al eje delantero (m)
+    xPas=1.92,          # cadera de los pasajeros: distancia al eje delantero (m)
+    tilt=0.0,           # inclinación de la carrocería para el modelo (grados)
+    recPil=28,          # reclinado del respaldo del piloto (°)
+    recPas=28,          # reclinado de los respaldos traseros (°)
+    horquilla=25,       # inclinación del eje de dirección respecto a la vertical (°)
+    overF=0.4,          # hueco del morro: borde de la rueda delantera a la punta (m)
+    tail=0.39,          # hueco de la cola: borde de la rueda trasera al final (m)
+    tailRound=0.75,     # redondez de la punta de cola (0 = en punta)
+    morro=0,            # forma del morro (0 = elíptico, 1 = muy romo)
+    W=1.29,             # ancho máximo del carenado (m)
+    H=1.28,             # alto total sobre el suelo (m)
+    pmax=0.6,           # posición del espesor máximo (fracción de la longitud)
+    full=1.2,           # plenitud de cola (menor = cola más llena)
+    tipH=0.7,           # altura de la punta de cola (fracción del alto del carenado)
+    nU=2.6,             # redondez de la sección superior (2 = elipse)
+    nL=4.5,             # forma del fondo (2 = redondo, 5 = plano)
+    clear=0.21,         # altura libre del fondo del carenado (m)
+    puerta="cabina",    # cabina | gaviota | aptera (solo se dibuja en el visor)
+    spineD=76.2,        # tubo central: diámetro (mm)
+    spineT=3,           # tubo central: espesor de pared (mm)
 )
 if len(sys.argv) > 1 and sys.argv[1].endswith(".json"):
     P.update(json.load(open(sys.argv[1])))
@@ -53,9 +57,7 @@ WHEEL_D = {"16": 0.405, "20": 0.508, "24": 0.61, "26": 0.66, "28": 0.70}
 TIRE_W = 0.055        # neumático 2,2"
 SKIN = 0.001          # carenado: 1 mm carbono-lino (la pieza CAD es la superficie exterior)
 YS = 0.20             # altura del eje de la viga central
-REC = math.radians(28)  # reclinado de respaldos
 SEAT_GAP = 0.235      # semiseparación de los dos asientos traseros (3 cm entre ellos)
-HEAD = math.radians(25)  # ángulo de dirección respecto a la vertical (65° de lanzamiento)
 TRAVEL_F = 0.17       # recorrido horquilla
 TRAVEL_R = 0.15       # recorrido rueda trasera
 ARM_UP = 0.18         # separación vertical de los brazos del paralelogramo
@@ -73,8 +75,13 @@ xP = -P["xPil"]       # cadera del piloto
 xRr = -P["xPas"]      # cadera de los pasajeros
 BB = (min(-0.40, xP + 0.90), 0.48)    # pedalier (generador): sigue al asiento del piloto
 HIP_Y = 0.36
+_HOMBRO = (xP - math.sin(math.radians(P["recPil"])) * 0.5, HIP_Y + math.cos(math.radians(P["recPil"])) * 0.5)
+PUNO = (_HOMBRO[0] + 0.40, _HOMBRO[1] - 0.09)   # puños del manillar: donde caen las manos
+MASTIL = {"x": xP + 0.46, "top": PUNO[1] - 0.06, "ancho": 0.20}
 PIV = (xR + 0.68, YS + 0.03)  # pivote del basculante
+HEAD = math.radians(P["horquilla"])       # eje de dirección respecto a la vertical
 AX = (-math.sin(HEAD), math.cos(HEAD))  # eje de dirección hacia arriba
+rec = lambda pilot: math.radians(P["recPil"] if pilot else P["recPas"])  # reclinado de cada fila
 A2C = rF + 0.06 + TRAVEL_F + 0.07       # eje a corona
 ARM_A = P["track"] / 2 - 0.08           # longitud del brazo del paralelogramo
 
@@ -99,7 +106,7 @@ def prof(u):
         return 0.0
     if u < p:
         a = (p - u) / p
-        return math.sqrt(max(0.0, 1 - a * a))
+        return max(0.0, 1 - a * a) ** (0.5 - 0.32 * P["morro"])
     t = (u - p) / (1 - p)
     if P["tailRound"] <= 0.001:
         return _base(t)
@@ -227,6 +234,7 @@ def ik_knee(h, f, l1, l2):
 
 
 def occ_pts(hx, pilot):
+    REC = rec(pilot)
     d = (-math.sin(REC), math.cos(REC))
     H = (hx, HIP_Y)
     S = (hx + d[0] * 0.50, HIP_Y + d[1] * 0.50)
@@ -236,8 +244,9 @@ def occ_pts(hx, pilot):
     return H, S, C, K, F, d
 
 
-def seat_solid(hx, lat, w):
-    H, S, C, K, F, d = occ_pts(hx, False)
+def seat_solid(hx, lat, w, pilot=False):
+    H, S, C, K, F, d = occ_pts(hx, pilot)
+    REC = rec(pilot)
     pb = (-math.cos(REC), -math.sin(REC))
     top = [(hx + 0.40, HIP_Y - 0.04), (hx + 0.22, HIP_Y - 0.085), (hx + 0.02, HIP_Y - 0.10)]
     for t in (0.12, 0.32, 0.52, 0.66):
@@ -260,12 +269,12 @@ def occupant(hx, lat, pilot):
     p = lambda q, l=lat: (q[0], l, q[1])
     parts = [cq.Solid.makeSphere(0.11 * M, V(C[0], lat, C[1])),
              tube(p((H[0] + d[0] * 0.02, H[1] + d[1] * 0.02)), p(S), 0.26)]
-    hand = (xP + 0.42, 0.60) if pilot else (H[0] + 0.30, H[1] + 0.16)
+    hand = PUNO if pilot else (H[0] + (K[0] - H[0]) * 0.62, H[1] + (K[1] - H[1]) * 0.62 + 0.07)
     for s in (-1, 1):
         fl = lat + s * (0.12 if pilot else 0.09)
         parts.append(tube(p(H, lat + s * 0.09), p(K, fl), 0.13))
         parts.append(tube(p(K, fl), p(F, fl), 0.09))
-        parts.append(tube(p(S, lat + s * 0.17), p(hand, lat + s * (0.24 if pilot else 0.17)), 0.07))
+        parts.append(tube(p(S, lat + s * 0.17), p(hand, lat + s * (MASTIL["ancho"] if pilot else 0.13)), 0.07))
     return comp(parts)
 
 
@@ -365,9 +374,14 @@ def build():
         "Soportes asientos": comp([ht((xP + 0.10, 0, YS), (xP + 0.10, 0, HIP_Y - 0.11), 0.03)] +
                                   [ht((xRr - 0.08, s * SEAT_GAP, YS), (xRr - 0.08, s * SEAT_GAP, HIP_Y - 0.09), 0.025)
                                    for s in (-1, 1)]),
-        "Direccion (manillar)": comp([ht((htt[0], 0, htt[1]), (htt[0] + AX[0] * 0.05, 0, htt[1] + AX[1] * 0.05), 0.028),
-                                      ht((htt[0] + AX[0] * 0.05, 0, htt[1] + AX[1] * 0.05), (xP + 0.48, 0, 0.66), 0.022),
-                                      ht((xP + 0.48, -0.25, 0.64), (xP + 0.48, 0.25, 0.64), 0.022)]),
+        # Dirección indirecta sobre el asiento: mástil entre las rodillas,
+        # manillar a la altura del pecho y bieleta hasta la horquilla.
+        "Mastil del manillar": comp([ht((MASTIL["x"], 0, YS + sd / 2), (MASTIL["x"], 0, MASTIL["top"]), 0.035),
+                                     ht((MASTIL["x"], 0, 0.42), (MASTIL["x"] - 0.26, 0, YS + sd / 2 - 0.005), 0.025)]),
+        "Direccion (manillar)": comp([tube((MASTIL["x"], 0, MASTIL["top"]), (MASTIL["x"] - 0.07, 0, MASTIL["top"] + 0.03), 0.032),
+                                      ht((MASTIL["x"] - 0.07, -MASTIL["ancho"], MASTIL["top"] + 0.03), (MASTIL["x"] - 0.07, MASTIL["ancho"], MASTIL["top"] + 0.03), 0.0222, 0.0018)]
+                                     + [ht((MASTIL["x"] - 0.07, s_ * MASTIL["ancho"], MASTIL["top"] + 0.03), (PUNO[0] - 0.05, s_ * MASTIL["ancho"], PUNO[1] - 0.005), 0.0222, 0.0018) for s_ in (-1, 1)]
+                                     + [tube((MASTIL["x"], 0.075, 0.50), (htb[0] - 0.02, 0.085, htb[1] - 0.02), 0.012)]),
         "Poste basculante": ht((xL, 0, YS), (xL, 0, YS + ARM_UP + 0.04), 0.04),
     }
     L["Chasis"] = ch
@@ -427,7 +441,7 @@ def build():
                    "Rueda lateral der": wheel(xL, lw["der"][0], rL + lw["der"][1])}
 
     print("· asientos y ocupantes")
-    L["Asientos"] = {"Asiento piloto": seat_solid(xP, 0, 0.42),
+    L["Asientos"] = {"Asiento piloto": seat_solid(xP, 0, 0.42, True),
                      "Asiento trasero izq": seat_solid(xRr, SEAT_GAP, 0.44),
                      "Asiento trasero der": seat_solid(xRr, -SEAT_GAP, 0.44)}
     L["Ocupantes"] = {"Piloto": occupant(xP, 0, True), "Pasajero izq": occupant(xRr, SEAT_GAP, False),

@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import {
-  AX, ARM_UP, CELULA, HIP_Y, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, YS, enZona,
+  ARM_UP, CELULA, HIP_Y, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, YS, enZona,
   type Modelo, type Piel,
 } from './geometria';
 
@@ -87,6 +87,13 @@ function materiales() {
     rim: new THREE.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.25 }),
     seat: new THREE.MeshPhysicalMaterial({ color: 0x2a2d31, metalness: 0.2, roughness: 0.45, clearcoat: 0.6 }),
     skin: new THREE.MeshStandardMaterial({ color: 0xc9a27c, metalness: 0, roughness: 0.75 }),
+    ropaPiloto: new THREE.MeshStandardMaterial({ color: 0x2f4f5f, metalness: 0, roughness: 0.85 }),
+    ropaPasajero: new THREE.MeshStandardMaterial({ color: 0x6b5d52, metalness: 0, roughness: 0.85 }),
+    pantalon: new THREE.MeshStandardMaterial({ color: 0x2b2f38, metalness: 0, roughness: 0.9 }),
+    zapato: new THREE.MeshStandardMaterial({ color: 0x1d1d1f, metalness: 0.1, roughness: 0.6 }),
+    pelo: new THREE.MeshStandardMaterial({ color: 0x3a2a20, metalness: 0, roughness: 0.9 }),
+    soldadura: new THREE.MeshStandardMaterial({ color: 0x9aa2aa, metalness: 0.8, roughness: 0.4 }),
+    carcasa: new THREE.MeshStandardMaterial({ color: 0x18191b, metalness: 0.4, roughness: 0.35 }),
     motor: new THREE.MeshStandardMaterial({ color: 0xb5533a, metalness: 0.55, roughness: 0.35 }),
     batt: new THREE.MeshStandardMaterial({ color: 0x2f7fd0, metalness: 0.3, roughness: 0.45 }),
     spoke: new THREE.LineBasicMaterial({ color: 0x9aa1a8 }),
@@ -204,16 +211,66 @@ function asiento(g: THREE.Object3D, M: Mats, m: Modelo, piloto: boolean, lat: nu
   const mesh = new THREE.Mesh(geo, M.seat); mesh.castShadow = true; g.add(mesh);
 }
 
+/** Cápsula de `a` a `b` con radio `r`, ensanchada de lado (`ancho`) y aplanada de fondo (`fondo`). */
+function capsula(g: THREE.Object3D, a: V3, b: V3, r: number, mat: THREE.Material, ancho = 1, fondo = 1) {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), y = B.clone().sub(A), L = y.length();
+  if (L < 1e-4) return;
+  y.normalize();
+  let z = new THREE.Vector3(0, 0, 1); z.addScaledVector(y, -z.dot(y));
+  if (z.lengthSq() < 1e-6) z = new THREE.Vector3(1, 0, 0); z.normalize();
+  const x = new THREE.Vector3().crossVectors(y, z);
+  const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(0.001, L), 6, 16), mat);
+  mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z));
+  mesh.position.copy(A).addScaledVector(y, L / 2);
+  mesh.scale.set(fondo, 1, ancho);
+  mesh.castShadow = true; g.add(mesh);
+}
+
+/** Codo o rodilla en 3D: dos huesos de `a` a `b`, doblados hacia `polo`. */
+function articulacion(a: V3, b: V3, l1: number, l2: number, polo: V3): V3 {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), ab = B.clone().sub(A);
+  const d = Math.min(ab.length(), l1 + l2 - 1e-3), u = ab.clone().normalize();
+  const x = (l1 * l1 - l2 * l2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, l1 * l1 - x * x));
+  const p = new THREE.Vector3(...polo); p.addScaledVector(u, -p.dot(u)).normalize();
+  const c = A.clone().addScaledVector(u, x).addScaledVector(p, h);
+  return [c.x, c.y, c.z];
+}
+
+/** Maniquí articulado: cabeza, cuello, tronco, pelvis, brazos con codos y piernas con pies. */
 function ocupante(g: THREE.Object3D, M: Mats, m: Modelo, lat: number, piloto: boolean) {
-  const o = m.occPts(piloto), p = (q: [number, number], l = lat): V3 => [q[0], q[1], l];
-  sphere(g, p(o.C), 0.11, M.skin);
-  tube(g, p([o.H[0] + o.d[0] * 0.02, o.H[1] + o.d[1] * 0.02]), p(o.S), 0.26, M.skin);
-  const mano: [number, number] = piloto ? [m.xPil + 0.42, 0.60] : [o.H[0] + 0.30, o.H[1] + 0.16];
+  const o = m.occPts(piloto), d = o.d;
+  const ropa = piloto ? M.ropaPiloto : M.ropaPasajero;
+  const en = (q: [number, number], l: number): V3 => [q[0], q[1], l];
+  const lo = (t: number): [number, number] => [o.H[0] + d[0] * t, o.H[1] + d[1] * t];
+  const atras = [-d[1], d[0]] as [number, number];   // perpendicular al tronco, hacia el respaldo
+  // Tronco: pelvis, abdomen y pecho, más anchos que hondos
+  capsula(g, en(lo(-0.02), lat), en(lo(0.10), lat), 0.12, M.pantalon, 1.35, 0.85);
+  capsula(g, en(lo(0.12), lat), en(lo(0.30), lat), 0.12, ropa, 1.25, 0.8);
+  capsula(g, en(lo(0.30), lat), en(lo(0.47), lat), 0.135, ropa, 1.35, 0.8);
+  // Cuello y cabeza (un poco más alta que ancha), con pelo
+  capsula(g, en(lo(0.52), lat), en(lo(0.60), lat), 0.045, M.skin);
+  const cab = new THREE.Mesh(new THREE.SphereGeometry(0.098, 28, 20), M.skin);
+  cab.position.set(o.C[0], o.C[1], lat); cab.scale.set(1.05, 1.12, 0.88); cab.rotation.z = -Math.atan2(d[0], d[1]); cab.castShadow = true; g.add(cab);
+  const pelo = new THREE.Mesh(new THREE.SphereGeometry(0.102, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), M.pelo);
+  pelo.position.copy(cab.position); pelo.scale.copy(cab.scale); pelo.rotation.z = cab.rotation.z;
+  pelo.position.x += atras[0] * 0.008; pelo.position.y += atras[1] * 0.008; g.add(pelo);
   for (const s of [-1, 1]) {
-    const fl = lat + s * (piloto ? 0.12 : 0.09);
-    tube(g, p(o.H, lat + s * 0.09), p(o.K, fl), 0.13, M.skin);
-    tube(g, p(o.K, fl), p(o.F, fl), 0.09, M.skin);
-    tube(g, p(o.S, lat + s * 0.17), p(mano, lat + s * (piloto ? 0.24 : 0.17)), 0.07, M.skin);
+    // Pierna: muslo y pantorrilla, rodilla ya calculada en el plano; pie según dónde apoya
+    const zc = lat + s * 0.09, zp = lat + s * (piloto ? 0.11 : 0.10);
+    const cad = en(o.H, zc), rod = en(o.K, (zc + zp) / 2), tob = en(o.F, zp);
+    capsula(g, cad, rod, 0.068, M.pantalon);
+    capsula(g, rod, tob, 0.052, M.pantalon);
+    const sx = o.F[0] - o.K[0], sy = o.F[1] - o.K[1], sl = Math.hypot(sx, sy) || 1;
+    const pie: V3 = piloto ? [tob[0] - sy / sl * 0.17, tob[1] + sx / sl * 0.17, zp] : [tob[0] + 0.18, tob[1] - 0.02, zp];
+    capsula(g, tob, pie, 0.042, M.zapato, 1.1, 0.8);
+    // Brazo: hombro, codo hacia fuera y abajo, mano en el puño o sobre el muslo
+    const hom = en(lo(0.46), lat + s * 0.19);
+    sphere(g, hom, 0.06, ropa);
+    const manoP: V3 = [o.mano[0], o.mano[1], lat + s * o.anchoMano];
+    const codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * 0.7]);
+    capsula(g, hom, codo, 0.046, ropa);
+    capsula(g, codo, manoP, 0.038, M.skin);
+    sphere(g, manoP, 0.045, M.skin, [1.25, 0.8, 0.95]);
   }
 }
 
@@ -231,7 +288,14 @@ function accesorios(g: THREE.Object3D, M: Mats, m: Modelo) {
     const s = sphere(g, q, 0.05, M.faro, [0.45, 0.42, 1.25]); s.lookAt(q[0] + 1, q[1], q[2]);
   }
   // Pilotos traseros: franja roja y tercera luz de freno
-  anillo(0.972, M.piloto, 0.010);
+  // Pilotos traseros: dos faros con carcasa y luz de posición y freno,
+  // y la tercera luz de freno en lo alto de la cola.
+  for (const th of [0.12 * Math.PI, 0.88 * Math.PI]) {
+    const q = sobre(0.955, th, 0.0), f = m.frame(0.955), n = new THREE.Vector3(-0.6, q[1] - f.zc, q[2]).normalize();
+    const caja = sphere(g, q, 0.09, M.carcasa, [0.55, 0.62, 0.3]); caja.lookAt(q[0] + n.x, q[1] + n.y, q[2] + n.z);
+    const lente = sphere(g, [q[0] + n.x * 0.02, q[1] + n.y * 0.02, q[2] + n.z * 0.02], 0.078, M.piloto, [0.62, 0.66, 0.28]);
+    lente.lookAt(q[0] + n.x * 2, q[1] + n.y * 2, q[2] + n.z * 2);
+  }
   const fr = sobre(0.93, Math.PI / 2, 0.006); box(g, fr, [0.02, 0.018, 0.22], M.piloto);
   // Intermitentes: delante a los lados y detrás, ámbar
   for (const [th, mat] of [[0.02 * Math.PI, M.intermitenteI], [0.98 * Math.PI, M.intermitenteD]] as const) {
@@ -315,7 +379,20 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
   }
   accesorios(G.carenado, M, m);
 
-  for (const t of m.tubosChasis()) if (t.grupo !== 'Suspensión') tube(G.chasis, t.a, t.b, t.d, t.grupo === 'Dirección' ? M.black : M.alu);
+  const tubos = m.tubosChasis();
+  for (const t of tubos) if (t.grupo !== 'Suspensión') tube(G.chasis, t.a, t.b, t.d, t.grupo === 'Dirección' ? M.black : M.alu);
+  // Uniones soldadas: donde el extremo de un tubo toca a otro, un cordón
+  // (esfera algo mayor que el tubo) en vez de dos cilindros que se cruzan.
+  const soldables = tubos.filter(t => t.grupo === 'Chasis');
+  const dSeg = (p: V3, a: V3, b: V3) => {
+    const v = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], w = [p[0] - a[0], p[1] - a[1], p[2] - a[2]];
+    const tt = Math.max(0, Math.min(1, (w[0] * v[0] + w[1] * v[1] + w[2] * v[2]) / (v[0] ** 2 + v[1] ** 2 + v[2] ** 2 || 1)));
+    return Math.hypot(w[0] - tt * v[0], w[1] - tt * v[1], w[2] - tt * v[2]);
+  };
+  for (const t of soldables) for (const p of [t.a, t.b]) {
+    const toca = soldables.some(o => o !== t && dSeg(p, o.a, o.b) < o.d / 2 + t.d / 2 + 0.004);
+    if (toca) sphere(G.chasis, p, t.d / 2 * 1.18, M.soldadura);
+  }
   asiento(G.asientos, M, m, true, 0, 0.42);
   asiento(G.asientos, M, m, false, SEAT_GAP, 0.44);
   asiento(G.asientos, M, m, false, -SEAT_GAP, 0.44);
@@ -330,7 +407,7 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
 
 /** La parte que se mueve: suspensiones comprimidas, paralelogramo inclinado, ruedas y motor. */
 function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coche: THREE.Group, inclinacion: number) {
-  const ph = inclinacion * Math.PI / 180, c = m.P.comp;
+  const ph = inclinacion * Math.PI / 180, c = m.P.comp, AX = m.AX;
   coche.rotation.x = ph;
   vaciar(G.suspension); vaciar(G.ruedas); vaciar(G.motor);
   const s = G.suspension;
