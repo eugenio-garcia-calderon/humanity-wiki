@@ -213,7 +213,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                 className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {img ? (
-                    <img src={miniatura(img, 420)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
+                    {/* 400 y no 420: con 420 la miniatura saltaba al ancho 1600 (el doble retina
+                        busca el escalón siguiente) y cada portada tardaba segundos en fabricarse. */}
+                    <img src={miniatura(img, 400)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
                       {...(i < 3 ? { fetchPriority: 'high' as const } : {})}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
