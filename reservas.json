@@ -17,6 +17,12 @@
       "ruta": "drizzle/0164_aeromovil.sql",
       "motivo": "Aeromóvil Gota: página propia /aeromovil (agente en la nube)",
       "desde": "2026-11-05T10:28:52.199Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/App.tsx",
+      "motivo": "Aeromóvil Gota: página propia /aeromovil (agente en la nube)",
+      "desde": "2026-11-05T10:28:54.855Z"
     }
   ]
 }
