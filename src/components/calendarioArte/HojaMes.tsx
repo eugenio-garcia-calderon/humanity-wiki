@@ -8,7 +8,7 @@
 // La hoja se dibuja SIEMPRE en milímetros reales. En pantalla se escala para
 // que quepa; al imprimir se usa tal cual, así lo que ves es lo que sale.
 import { useState } from 'react';
-import { FolderOpen, ImagePlus, Loader2, Plus, X } from 'lucide-react';
+import { Check, FolderOpen, ImagePlus, Loader2, Plus, Printer, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { ContenidoMes, FranjaMes, TipoFranja } from '../../data/calendarioArteTipos';
 import { Editable } from './Editable';
@@ -47,15 +47,32 @@ interface Props {
   /** Abre la carpeta del mes para elegir otra ilustración guardada. */
   alAbrirCarpeta?: () => void;
   subiendoImagen?: boolean;
+  /** DISEÑO 1 / DISEÑO 2 (2026-11-05, Eugenio: «un botón que permita transicionar
+   *  entre el diseño 1 y el diseño 2, bastante evidente, en la esquina superior
+   *  izquierda de la imagen»). Solo en pantalla: al imprimir no se pasa y sale
+   *  `imagen`, la elegida. */
+  diseno?: 1 | 2;
+  alVerDiseno?: (d: 1 | 2) => void;
+  /** La ilustración original del mes (la del código): es el «Diseño 1» cuando
+   *  la que se imprime ahora es el 2. */
+  imagenOriginal?: string;
 }
 
-export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen }: Props) {
+export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen, diseno, alVerDiseno, imagenOriginal }: Props) {
   const acento = ACENTOS[(c.mes - 1) % 12];
   const esBoceto = !!c.imagen?.startsWith('/calendario-arte/bocetos/');
   // Si la imagen no carga, se dice («ilustración pendiente») en vez de
   // imprimir el icono de imagen rota del navegador.
   const [imagenRota, setImagenRota] = useState<string | null>(null);
   const nombre = NOMBRES_MES[c.mes - 1];
+
+  // Los dos diseños. El 2 es `alternativa`; el 1 es la que se imprime, salvo
+  // que la que se imprime sea precisamente el 2 (entonces, la original).
+  const d2 = c.alternativa;
+  const d1 = c.imagen && c.imagen !== d2 ? c.imagen : (imagenOriginal ?? c.imagen);
+  const comparar = !!(alVerDiseno && d2 && d1);
+  const visto = comparar ? (diseno === 2 ? d2 : d1) : c.imagen;
+  const disenoImpreso: 1 | 2 = c.imagen === d2 ? 2 : 1;
 
   const primerDia = (new Date(anio, c.mes - 1, 1).getDay() + 6) % 7; // lunes = 0
   const diasMes = new Date(anio, c.mes, 0).getDate();
@@ -101,7 +118,19 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
           />
         </div>
         <div className="group relative flex-1 overflow-hidden" style={{ margin: '0 9mm 9mm', borderRadius: '3mm' }}>
-          {c.imagen && imagenRota !== c.imagen ? (
+          {comparar ? (
+            // Las dos, una encima de otra: cambiar de diseño es un fundido, no
+            // un salto, y la segunda ya está cargada cuando se pulsa.
+            ([[1, d1], [2, d2]] as const).map(([n, url]) => (
+              <img
+                key={n}
+                src={url}
+                alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${n})`}
+                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
+                style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%`, opacity: visto === url ? 1 : 0 }}
+              />
+            ))
+          ) : c.imagen && imagenRota !== c.imagen ? (
             <img
               src={c.imagen}
               alt={`Ilustración de ${nombre}: ${c.tema}`}
@@ -114,8 +143,39 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
               <p className="font-sans uppercase tracking-[0.3em] text-stone-400" style={{ fontSize: '9pt' }}>Ilustración pendiente</p>
             </div>
           )}
+          {comparar && (
+            <div className="ca-no-imprimir absolute left-4 top-4 z-10 flex flex-col items-start gap-2 font-sans">
+              <div role="radiogroup" aria-label="Diseño de la ilustración" className="flex rounded-full bg-white/95 p-1.5 shadow-xl ring-1 ring-black/10">
+                {([1, 2] as const).map(n => (
+                  <button
+                    key={n}
+                    type="button"
+                    role="radio"
+                    aria-checked={diseno === n}
+                    onClick={() => alVerDiseno!(n)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-base font-bold transition-colors',
+                      diseno === n ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100',
+                    )}
+                  >
+                    Diseño {n}
+                    {disenoImpreso === n && <Check className="h-4 w-4" aria-label="se imprime" />}
+                  </button>
+                ))}
+              </div>
+              {diseno !== disenoImpreso ? (
+                editando && (
+                  <Button type="button" onClick={() => alCambiar({ imagen: visto })} className="gap-2 rounded-full shadow-lg">
+                    <Printer className="h-4 w-4" />Imprimir el diseño {diseno}
+                  </Button>
+                )
+              ) : (
+                <span className="rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">✓ Este es el que se imprime</span>
+              )}
+            </div>
+          )}
           {esBoceto && (
-            <span className="ca-no-imprimir absolute left-3 top-3 rounded-full bg-black/60 px-3 py-1 font-sans text-xs font-semibold text-white">
+            <span className="ca-no-imprimir absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-1 font-sans text-xs font-semibold text-white">
               Boceto de composición — no es la ilustración final
             </span>
           )}

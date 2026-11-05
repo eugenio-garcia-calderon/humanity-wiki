@@ -125,6 +125,9 @@ export default function CalendarioArte() {
   const [menuMovil, setMenuMovil] = useState(false);
   const [menuLetra, setMenuLetra] = useState(false);
   const [recargaIdeas, setRecargaIdeas] = useState(0);
+  // Qué diseño se está mirando (1 o 2). Nulo = el que se imprime. Se mantiene
+  // al pasar de mes, para comparar el año entero en el mismo diseño.
+  const [disenoVisto, setDisenoVisto] = useState<1 | 2 | null>(null);
   const [estado, setEstado] = useState<EstadoGuardado>('listo');
   const [mensaje, setMensaje] = useState<string | null>(null);
   // `?conocer=1` es a donde lleva el QR impreso: abre directamente la ficha del tema.
@@ -508,6 +511,9 @@ export default function CalendarioArte() {
                 alElegirImagen={() => entradaImagen.current?.click()}
                 alAbrirCarpeta={() => irACarpeta(mes)}
                 subiendoImagen={subiendoImagen}
+                diseno={disenoVisto ?? (actual.alternativa && actual.imagen === actual.alternativa ? 2 : 1)}
+                alVerDiseno={setDisenoVisto}
+                imagenOriginal={CALENDARIO_ARTE_POR_DEFECTO[mes - 1]?.imagen}
               />
             )}
           </HojaEscalada>

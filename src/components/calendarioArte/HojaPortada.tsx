@@ -19,7 +19,7 @@ import { CodigoQR } from './CodigoQR';
  *  (900 px, de sobra para 67 mm impresos a 300 ppp). Si alguien subió otra
  *  ilustración, se usa esa tal cual: la portada enseña lo que tiene el mes. */
 export function miniaturaDe(url?: string): string | undefined {
-  const m = url?.match(/^\/calendario-arte\/ilustraciones\/(mes-\d{2})\.jpg$/);
+  const m = url?.match(/^\/calendario-arte\/ilustraciones\/(mes-\d{2}(?:-b)?)\.jpg$/);
   return m ? `/calendario-arte/miniaturas/${m[1]}.jpg` : url;
 }
 
