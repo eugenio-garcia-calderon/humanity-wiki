@@ -5,12 +5,6 @@
       "ruta": "drizzle/0169_calendario_arte_disenos.sql",
       "motivo": "Calendario Arte: cola de diseños nuevos (0168 lo cogió el Aeromóvil)",
       "desde": "2026-11-05T14:01:08.413Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
-      "motivo": "Aeromóvil: chasis Tour Easy y autoguardado",
-      "desde": "2026-11-05T14:17:25.363Z"
     }
   ]
 }
