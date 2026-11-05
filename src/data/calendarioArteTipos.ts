@@ -21,6 +21,9 @@ export interface ContenidoMes {
   ilustracion_idea: string;
   /** `/uploads/...` o https. Vacío = todavía sin ilustración. */
   imagen?: string;
+  /** Diseño 2 (2026-11-05): otra ilustración del mismo tema para comparar.
+   *  La que se imprime sigue siendo `imagen`; esta solo se ve al cambiar. */
+  alternativa?: string;
   /** Encuadre de la ilustración dentro de su media hoja, en %. */
   imagen_x?: number;
   imagen_y?: number;

@@ -114,6 +114,7 @@ function limpiarReferencias(lista: unknown): { url: string; nota?: string; tipo?
 /** ¿Hay alguna imagen de fuera en el contenido? (ilustración o cualquier campo `imagen`). */
 function imagenesValidas(contenido: any): boolean {
   if (contenido?.imagen && !urlImagenValida(contenido.imagen)) return false;
+  if (contenido?.alternativa && !urlImagenValida(contenido.alternativa)) return false;
   return true;
 }
 
