@@ -480,3 +480,9 @@ threshold, checked only on that null path here).
 - Hex colours for 3D materials and drawing canvases live in `src/components/aeromovil/` (Visor3D, planos), not as tokens: they are material and print colours, not UI. ~20 values.
 - The published STEP/STL are for the default parameters only; changing a default in `geometria.ts` requires re-running the script and replacing `public/aeromovil/*.zip` (5.7 MB + 2.4 MB in the repo).
 - Performance estimates (Cd, energy, solar, beam stress) are first-order formulas, labelled as estimates on screen. Replace with CFD and FEA results when stage 1 of the plan is done.
+
+## Arquitectura (2026-11-05)
+- Two DXF writers now exist: `src/components/aeromovil/planos.ts` (mm, entities only) and `src/components/arquitectura/exportar.ts` (R12 with layer table, metres). Rule of two: lift one `src/utils/dxf.ts` both use — ~30 min today, more with a third.
+- Hex colours for 3D materials and plan layers live in `src/components/arquitectura/paleta.ts` (~60 values), same precedent as `juego/` and `aeromovil/`: material and print colours, not UI tokens.
+- The building programme (m², functions per scale) is the design sheet's proposal, shown as orientative; it is not an architectural brief. City size follows the ring rule literally (≈28 km across with the defaults); the "Separación" and "Radio de la comunidad" sliders are the levers.
+- `detalle: ciudad` draws ~240 000 instanced trees; fine on a desktop GPU, heavy on phones. If phones need the whole city, add distance-based LOD (~2 h).
