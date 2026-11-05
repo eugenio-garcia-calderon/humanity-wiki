@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import {
-  ARM_UP, CELULA, HIP_Y, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, YS, enZona,
+  ARM_UP, CELULA, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, enZona,
   type Modelo, type Piel,
 } from './geometria';
 import type { Referencia } from './referencias';
@@ -438,19 +438,19 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
   for (const zs of [-1, 1]) tube(s, [PIV[0], PIV[1], zs * 0.075], [rax[0], rax[1], zs * 0.075], 0.032, M.susp);
   tube(s, [PIV[0], PIV[1], -0.08], [PIV[0], PIV[1], 0.08], 0.03, M.black);
   tube(s, [PIV[0], PIV[1], 0], [rock[0], rock[1], 0], 0.03, M.susp);
-  const fm: [number, number] = [m.xCruceta, YS + 0.02], mid: [number, number] = [fm[0] + (rock[0] - fm[0]) * 0.55, fm[1] + (rock[1] - fm[1]) * 0.55];
+  const fm: [number, number] = [m.xCruceta, m.ys + 0.02], mid: [number, number] = [fm[0] + (rock[0] - fm[0]) * 0.55, fm[1] + (rock[1] - fm[1]) * 0.55];
   tube(s, [fm[0], fm[1], 0], [mid[0], mid[1], 0], 0.055, M.black);
   tube(s, [mid[0], mid[1], 0], [rock[0], rock[1], 0], 0.02, M.stanch);
   const A = m.ARM_A, ca = Math.cos(ph), sa = Math.sin(ph);
-  for (const yy of [YS, YS + ARM_UP]) for (const dx of [-0.03, 0.03]) tube(s, [m.xL + dx, yy - A * sa, -A * ca], [m.xL + dx, yy + A * sa, A * ca], 0.025, M.susp);
+  for (const yy of [m.ys, m.ys + ARM_UP]) for (const dx of [-0.03, 0.03]) tube(s, [m.xL + dx, yy - A * sa, -A * ca], [m.xL + dx, yy + A * sa, A * ca], 0.025, M.susp);
   const lw: Record<number, [number, number]> = {};
   for (const zs of [-1, 1]) {
     const z = zs * A * ca, dy = zs * A * sa;
-    tube(s, [m.xL, YS + dy - 0.02, z], [m.xL, YS + ARM_UP + dy + 0.02, z], 0.035, M.alu);
+    tube(s, [m.xL, Math.min(m.ys, m.rL) + dy - 0.02, z], [m.xL, m.ys + ARM_UP + dy + 0.02, z], 0.035, M.alu);
     tube(s, [m.xL, m.rL + dy, z], [m.xL, m.rL + dy, z + zs * 0.08], 0.02, M.black);
     lw[zs] = [z + zs * 0.08, dy];
   }
-  tube(s, [m.xL, YS + ARM_UP + 0.04, 0], [m.xL, YS + 0.25 * sa, 0.25 * ca], 0.03, M.black);
+  tube(s, [m.xL, m.ys + ARM_UP + 0.04, 0], [m.xL, m.ys + 0.25 * sa, 0.25 * ca], 0.03, M.black);
 
   rueda(G.ruedas, M, fwc[0], fwc[1], 0, m.rF);
   rueda(G.ruedas, M, rax[0], rax[1], 0, m.rR);
@@ -464,9 +464,9 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
     tube(mo, [BB[0], BB[1], zs * 0.05], [pe[0], pe[1], zs * 0.07], 0.02, M.black);
     tube(mo, [pe[0], pe[1], zs * 0.07], [pe[0], pe[1], zs * 0.16], 0.02, M.black);
   }
-  box(mo, [m.xPas + 0.55, YS + m.P.spineD / 2000 + 0.025, 0], [0.20, 0.05, 0.07], M.black);
+  box(mo, [m.xPas + 0.55, m.ys + m.P.spineD / 2000 + 0.025, 0], [0.20, 0.05, 0.07], M.black);
   const cable = new THREE.CatmullRomCurve3(([
-    [BB[0], BB[1] - 0.05, 0.05], [BB[0] - 0.25, YS + 0.06, 0.05], [m.xPas + 0.55, YS + 0.07, 0.04],
+    [BB[0], BB[1] - 0.05, 0.05], [BB[0] - 0.25, m.ys + 0.06, 0.05], [m.xPas + 0.55, m.ys + 0.07, 0.04],
     [PIV[0], PIV[1] + 0.05, 0.05], [rax[0] + 0.05, rax[1] + 0.04, 0.05],
   ] as V3[]).map(p => new THREE.Vector3(...p)));
   mo.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 80, 0.006, 6, false), M.motor));
