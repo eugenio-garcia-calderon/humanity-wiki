@@ -20,7 +20,7 @@ export const NOMBRES_MES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 /** Un acento por mes, en clases de Tailwind (nada de colores a mano). */
-const ACENTOS: { texto: string; borde: string; fondo: string; suave: string }[] = [
+export const ACENTOS: { texto: string; borde: string; fondo: string; suave: string }[] = [
   { texto: 'text-indigo-700', borde: 'border-indigo-300', fondo: 'bg-indigo-600', suave: 'bg-indigo-50' },   // Cosmos y Vida
   { texto: 'text-rose-700', borde: 'border-rose-300', fondo: 'bg-rose-600', suave: 'bg-rose-50' },           // Relaciones
   { texto: 'text-sky-700', borde: 'border-sky-300', fondo: 'bg-sky-600', suave: 'bg-sky-50' },               // Agua

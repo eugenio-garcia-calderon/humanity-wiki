@@ -24,14 +24,15 @@ import { cn } from '../utils/cn';
 import { subirImagenCalendario } from '../components/calendarioArte/subirImagen';
 import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM } from '../components/calendarioArte/HojaMes';
 import { PanelCarpeta, PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
+import { HojaPortada } from '../components/calendarioArte/HojaPortada';
 import { INVESTIGACION_POR_MES } from '../data/calendarioArteInvestigacion';
 import { PRINCIPIOS_POR_DEFECTO, type Principio } from '../data/calendarioArtePrincipios';
 import { CALENDARIO_ARTE_ANIO, CALENDARIO_ARTE_POR_DEFECTO } from '../data/calendarioArte';
-import type { ContenidoMes, Referencia } from '../data/calendarioArteTipos';
+import { PORTADA_POR_DEFECTO, type ContenidoMes, type PortadaCalendario, type Referencia } from '../data/calendarioArteTipos';
 
 interface Guardado {
   // En la hoja 0 (lo común del año) el contenido es `{ principios }`.
-  contenido: Partial<ContenidoMes> & { principios?: Principio[] };
+  contenido: Partial<ContenidoMes> & { principios?: Principio[]; portada?: Partial<PortadaCalendario> };
   referencias: Referencia[];
   version: number;
 }
@@ -72,8 +73,12 @@ function HojaEscalada({ children }: { children: React.ReactNode }) {
 export default function CalendarioArte() {
   const [params, setParams] = useSearchParams();
   const anio = CALENDARIO_ARTE_ANIO;
-  const mes = Math.min(12, Math.max(1, Number(params.get('mes')) || 1));
-  const irAMes = (m: number) => setParams(p => { p.set('mes', String(((m - 1 + 12) % 12) + 1)); return p; }, { replace: true });
+  // `mes` 0 es la PORTADA (2026-11-05): es lo que se ve al entrar sin `?mes=`.
+  // Las flechas dan la vuelta: portada → enero → … → diciembre → portada.
+  const mesParam = params.get('mes');
+  const mes = mesParam === null ? 0 : Math.min(12, Math.max(0, Math.trunc(Number(mesParam)) || 0));
+  const esPortada = mes === 0;
+  const irAMes = (m: number) => setParams(p => { p.set('mes', String(((m % 13) + 13) % 13)); return p; }, { replace: true });
 
   const [guardados, setGuardados] = useState<Record<number, Guardado>>({});
   const [cargando, setCargando] = useState(true);
@@ -137,7 +142,8 @@ export default function CalendarioArte() {
     () => CALENDARIO_ARTE_POR_DEFECTO.map(base => mezclar(base, guardados[base.mes]?.contenido)),
     [guardados],
   );
-  const actual = meses[mes - 1];
+  // En la portada no hay mes: se usa enero para que los ganchos no cambien de forma.
+  const actual = meses[Math.max(1, mes) - 1];
 
   // ── GUARDAR ──────────────────────────────────────────────────────────────
   const guardadosRef = useRef(guardados);
@@ -261,6 +267,8 @@ export default function CalendarioArte() {
 
   const refsMes = guardados[mes]?.referencias ?? [];
   const principios = guardados[0]?.contenido.principios ?? PRINCIPIOS_POR_DEFECTO;
+  const portada: PortadaCalendario = { ...PORTADA_POR_DEFECTO, ...(guardados[0]?.contenido.portada ?? {}) };
+  const cambiarPortada = (c: Partial<PortadaCalendario>) => cambiar(0, { portada: { ...(guardados[0]?.contenido.portada ?? {}), ...c } });
 
   return (
     <div className="h-full overflow-y-auto bg-stone-100">
@@ -279,15 +287,19 @@ export default function CalendarioArte() {
             </p>
           </div>
 
-          <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('carpeta')}>
-            <FolderOpen className="h-4 w-4" />Carpeta{refsMes.length ? ` (${refsMes.length})` : ''}
+          <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel(esPortada ? 'estilo' : 'carpeta')}>
+            <FolderOpen className="h-4 w-4" />Carpeta{!esPortada && refsMes.length ? ` (${refsMes.length})` : ''}
           </Button>
-          <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('conocer')}>
-            <Info className="h-4 w-4" />Conocer más
-          </Button>
-          <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('principios')}>
-            <Compass className="h-4 w-4" />Principios
-          </Button>
+          {!esPortada && (
+            <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('conocer')}>
+              <Info className="h-4 w-4" />Conocer más
+            </Button>
+          )}
+          {!esPortada && (
+            <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('principios')}>
+              <Compass className="h-4 w-4" />Principios
+            </Button>
+          )}
           <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('ideas')}>
             <Lightbulb className="h-4 w-4" />Ideas{pendientes ? ` (${pendientes})` : ''}
           </Button>
@@ -303,11 +315,11 @@ export default function CalendarioArte() {
             {menuExportar && (
               <div className="absolute right-0 top-full z-40 mt-1 w-72 rounded-xl border border-stone-200 bg-white p-2 shadow-xl">
                 <p className="px-3 pb-1 pt-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">A3 vertical (ilustración + calendario en una hoja)</p>
-                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a3')}>Este mes ({NOMBRES_MES[mes - 1]})</Button>
-                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar(meses.map(m => m.mes), 'a3')}>Los 12 meses</Button>
+                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a3')}>{esPortada ? 'Solo la portada' : `Este mes (${NOMBRES_MES[mes - 1]})`}</Button>
+                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([0, ...meses.map(m => m.mes)], 'a3')}>Portada y los 12 meses</Button>
                 <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">A4 apaisado (dos páginas por mes)</p>
-                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a4')}>Este mes ({NOMBRES_MES[mes - 1]})</Button>
-                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar(meses.map(m => m.mes), 'a4')}>Los 12 meses</Button>
+                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a4')}>{esPortada ? 'Solo la portada' : `Este mes (${NOMBRES_MES[mes - 1]})`}</Button>
+                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([0, ...meses.map(m => m.mes)], 'a4')}>Portada y los 12 meses</Button>
                 <p className="px-3 pb-1 pt-2 text-[11px] leading-snug text-stone-500">
                   Se abre el diálogo de impresión a tamaño real, solo con el contenido definitivo. Para un PDF de
                   imprenta elige «Guardar como PDF», el mismo tamaño (A3 o A4), márgenes <b>Ninguno</b> y activa
@@ -320,7 +332,14 @@ export default function CalendarioArte() {
 
         {/* Los doce meses */}
         <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 pb-2">
-          <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes - 1)} aria-label="Mes anterior"><ChevronLeft className="h-4 w-4" /></Button>
+          <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes - 1)} aria-label="Anterior"><ChevronLeft className="h-4 w-4" /></Button>
+          <Button
+            variant={esPortada ? 'primary' : 'ghost'}
+            className={cn('shrink-0 px-2.5 py-1.5 normal-case tracking-normal text-xs', !esPortada && 'text-stone-500')}
+            onClick={() => irAMes(0)}
+          >
+            Portada
+          </Button>
           {meses.map(m => (
             <Button
               key={m.mes}
@@ -332,13 +351,13 @@ export default function CalendarioArte() {
               {NOMBRES_MES[m.mes - 1].slice(0, 3)}
             </Button>
           ))}
-          <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes + 1)} aria-label="Mes siguiente"><ChevronRight className="h-4 w-4" /></Button>
+          <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes + 1)} aria-label="Siguiente"><ChevronRight className="h-4 w-4" /></Button>
         </div>
 
         {editando && (
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1 border-t border-stone-100 px-3 py-2 text-xs text-stone-600">
             <span>Pulsa cualquier texto de la hoja para cambiarlo. Se guarda solo. Cualquiera con este enlace puede editar: si algo se estropea, está todo en el <b>Historial</b>.</span>
-            {actual.imagen && (
+            {!esPortada && actual.imagen && (
               <>
                 <label className="flex items-center gap-1">Encuadre ↔
                   <input type="range" min={0} max={100} value={actual.imagen_x ?? 50} onChange={e => cambiar(mes, { imagen_x: Number(e.target.value) })} />
@@ -350,7 +369,7 @@ export default function CalendarioArte() {
               </>
             )}
             <Button variant="ghost" className="ml-auto gap-1 px-2 py-1 text-[10px]" onClick={() => setPanel('historial')}><History className="h-3 w-3" />Historial</Button>
-            <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={restaurarMes}><RotateCcw className="h-3 w-3" />Volver al original del mes</Button>
+            {!esPortada && <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={restaurarMes}><RotateCcw className="h-3 w-3" />Volver al original del mes</Button>}
             {avisoImagen && <p className="w-full text-amber-700">{avisoImagen}</p>}
           </div>
         )}
@@ -371,14 +390,18 @@ export default function CalendarioArte() {
       {/* ── LA HOJA ────────────────────────────────────────────────────── */}
       <div className="ca-no-imprimir mx-auto max-w-6xl px-3 py-5">
         <HojaEscalada>
-          <HojaMes
-            anio={anio}
-            contenido={actual}
-            editando={editando}
-            alCambiar={c => cambiar(mes, c)}
-            alElegirImagen={() => entradaImagen.current?.click()}
-            subiendoImagen={subiendoImagen}
-          />
+          {esPortada ? (
+            <HojaPortada anio={anio} meses={meses} portada={portada} editando={editando} alCambiar={cambiarPortada} alAbrirMes={irAMes} />
+          ) : (
+            <HojaMes
+              anio={anio}
+              contenido={actual}
+              editando={editando}
+              alCambiar={c => cambiar(mes, c)}
+              alElegirImagen={() => entradaImagen.current?.click()}
+              subiendoImagen={subiendoImagen}
+            />
+          )}
         </HojaEscalada>
         <input ref={entradaImagen} type="file" accept="image/*" className="hidden" onChange={e => { subirIlustracion(e.target.files?.[0]); e.target.value = ''; }} />
       </div>
@@ -446,7 +469,9 @@ export default function CalendarioArte() {
           ni el contenedor con scroll recorten las hojas al imprimir. */}
       {imprimiendo && createPortal(
         <div className="ca-impresion">
-          {imprimiendo.map(m => (
+          {imprimiendo.map(m => m === 0 ? (
+            <HojaPortada key={0} anio={anio} meses={meses} portada={portada} editando={false} alCambiar={() => {}} />
+          ) : (
             <HojaMes key={m} anio={anio} contenido={meses[m - 1]} editando={false} alCambiar={() => {}} />
           ))}
         </div>,

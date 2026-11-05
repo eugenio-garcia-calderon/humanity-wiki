@@ -13,3 +13,10 @@ python3 -c "from PIL import Image; Image.open('/tmp/mes-01.png').convert('RGB').
 ```
 
 `public/calendario-arte/bocetos/` keeps the first composition sketches.
+
+The cover uses 900 px thumbnails in `public/calendario-arte/miniaturas/mes-XX.jpg`.
+After replacing a final JPG, regenerate its thumbnail:
+
+```bash
+python3 -c "from PIL import Image; im=Image.open('public/calendario-arte/ilustraciones/mes-01.jpg'); im.resize((900, round(im.height*900/im.width)), Image.LANCZOS).save('public/calendario-arte/miniaturas/mes-01.jpg', quality=85, optimize=True, progressive=True)"
+```

@@ -139,7 +139,7 @@ export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCamb
 }) {
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [texto, setTexto] = useState('');
-  const [mes, setMes] = useState<string>(String(mesActual));
+  const [mes, setMes] = useState<string>(mesActual ? String(mesActual) : '');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
