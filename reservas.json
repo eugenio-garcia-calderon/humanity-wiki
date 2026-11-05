@@ -29,6 +29,12 @@
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "Aeromóvil: otros velomóviles",
       "desde": "2026-11-05T12:39:44.924Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Aeromóvil: otros velomóviles",
+      "desde": "2026-11-05T12:55:35.813Z"
     }
   ]
 }
