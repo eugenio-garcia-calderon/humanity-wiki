@@ -80,10 +80,10 @@ BAJOS_BASE = 0.13
 DY = P["clear"] - BAJOS_BASE
 YS = 0.20 + DY
 HIP_Y = 0.36 + DY
-BB = (min(-0.40, xP + 0.90), max(0.48, YS + 0.10))    # pedalier: sigue al asiento del piloto; no sube con el suelo
+BB = (min(-0.43, xP + 0.90), max(0.48, YS + 0.10))    # pedalier: sigue al asiento del piloto; no sube con el suelo
 _HOMBRO = (xP - math.sin(math.radians(P["recPil"])) * 0.5, HIP_Y + math.cos(math.radians(P["recPil"])) * 0.5)
 PUNO = (_HOMBRO[0] + 0.40, _HOMBRO[1] - 0.09)   # puños del manillar: donde caen las manos
-MASTIL = {"x": xP + 0.46, "top": PUNO[1] - 0.06, "ancho": 0.20}
+ANCHO_PUNOS = 0.22
 PIV = (xR + 0.68, YS + 0.03)  # pivote del basculante
 HEAD = math.radians(P["horquilla"])       # eje de dirección respecto a la vertical
 AX = (-math.sin(HEAD), math.cos(HEAD))  # eje de dirección hacia arriba
@@ -250,24 +250,68 @@ def occ_pts(hx, pilot):
     return H, S, C, K, F, d
 
 
+def grosor_base():
+    """Espesor de la base del asiento: lo que cabe entre la viga y la cadera (como en geometria.ts)."""
+    return max(0.012, min(0.04, (HIP_Y - 0.10) - (YS + P["spineD"] / 2000) - 0.003))
+
+
+def asiento_piezas(hx, pilot):
+    """Base, respaldo, cabecero y marco del asiento ligero (2026-11-05). Igual que asientoPiezas()."""
+    REC, g = rec(pilot), grosor_base()
+    d, pb = (-math.sin(REC), math.cos(REC)), (-math.cos(REC), -math.sin(REC))
+    en = lambda t, o: (hx + d[0] * t + pb[0] * o, HIP_Y + d[1] * t + pb[1] * o)
+    arriba = [(hx + 0.34, HIP_Y - 0.055), (hx + 0.22, HIP_Y - 0.085), (hx + 0.06, HIP_Y - 0.10), (hx - 0.05, HIP_Y - 0.10)]
+    base = arriba + [(q[0], q[1] - g) for q in reversed(arriba)]
+    panel = lambda t0, t1, o0, o1: [en(t0, o0), en(t1, o0), en(t1, o1), en(t0, o1)]
+    marco = [(hx - 0.04, HIP_Y - 0.10 - g), en(0.10, 0.142), en(0.58, 0.142), en(0.70, 0.15)]
+    return base, panel(0.06, 0.58, 0.105, 0.135), panel(0.63, 0.77, 0.105, 0.145), marco
+
+
 def seat_solid(hx, lat, w, pilot=False):
-    H, S, C, K, F, d = occ_pts(hx, pilot)
-    REC = rec(pilot)
-    pb = (-math.cos(REC), -math.sin(REC))
-    top = [(hx + 0.40, HIP_Y - 0.04), (hx + 0.22, HIP_Y - 0.085), (hx + 0.02, HIP_Y - 0.10)]
-    for t in (0.12, 0.32, 0.52, 0.66):
-        top.append((hx + d[0] * t + pb[0] * 0.11, HIP_Y + d[1] * t + pb[1] * 0.11))
-    top.append((top[-1][0] + 0.06, top[-1][1] + 0.05))
-    th = 0.012  # carcasa de fibra de carbono 12 mm (sándwich)
-    def nrm(i):
-        a = top[max(i - 1, 0)]; b = top[min(i + 1, len(top) - 1)]
-        tx, ty = b[0] - a[0], b[1] - a[1]
-        L = math.hypot(tx, ty)
-        return (ty / L, -tx / L)
-    bot = [(p[0] + nrm(i)[0] * th, p[1] + nrm(i)[1] * th) for i, p in enumerate(top)]
-    pts = [(p[0] * M, p[1] * M) for p in top] + [(p[0] * M, p[1] * M) for p in reversed(bot)]
-    return (cq.Workplane(cq.Plane(origin=(0, lat * M, 0), xDir=(1, 0, 0), normal=(0, -1, 0)))
-            .polyline(pts).close().extrude(w / 2 * M, both=True)).val()
+    base, respaldo, cabecero, marco = asiento_piezas(hx, pilot)
+    def pieza(pts, ancho):
+        return (cq.Workplane(cq.Plane(origin=(0, lat * M, 0), xDir=(1, 0, 0), normal=(0, -1, 0)))
+                .polyline([(q[0] * M, q[1] * M) for q in pts]).close().extrude(ancho / 2 * M, both=True)).val()
+    parts = [pieza(base, w - 0.10), pieza(respaldo, w - 0.10), pieza(cabecero, (0.24 if pilot else 0.22) - 0.02)]
+    for s_ in (-1, 1):
+        z = lat + s_ * (w / 2 - 0.09)
+        parts += [tube((marco[i][0], z, marco[i][1]), (marco[i + 1][0], z, marco[i + 1][1]), 0.018) for i in range(len(marco) - 1)]
+    return comp(parts)
+
+
+def muestrear_curva(pts, n=24):
+    """Catmull-Rom por los puntos de paso: la misma curva que muestrearCurva() en geometria.ts."""
+    if len(pts) < 3:
+        return list(pts)
+    o, Q = [], [pts[0]] + list(pts) + [pts[-1]]
+    k = max(2, round(n / (len(pts) - 1)))
+    for i in range(1, len(Q) - 2):
+        p0, p1, p2, p3 = Q[i - 1], Q[i], Q[i + 1], Q[i + 2]
+        for j in range(k):
+            t = j / k; t2 = t * t; t3 = t2 * t
+            o.append(tuple(0.5 * ((2 * p1[c]) + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2
+                                  + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3) for c in range(3)))
+    o.append(tuple(pts[-1]))
+    return o
+
+
+def tubo_curvo(pts, d, wall=0.002):
+    """Tubo curvado como cadena de tramos rectos que se solapan. pts en (x, lat, up)."""
+    q = muestrear_curva(pts, 16)
+    partes = []
+    for a, b in zip(q, q[1:]):
+        L = math.dist(a, b)
+        if L < 1e-4:
+            continue
+        e = [(b[c] - a[c]) / L * d * 0.3 for c in range(3)]   # solape para tapar la junta de cada tramo
+        partes.append(ht(tuple(a[c] - e[c] for c in range(3)), tuple(b[c] + e[c] for c in range(3)), d, wall))
+    return comp(partes)
+
+
+def bez(p, t):
+    u = 1 - t
+    w = [u * u, 2 * u * t, t * t] if len(p) == 3 else [u ** 3, 3 * u * u * t, 3 * u * t * t, t ** 3]
+    return (sum(k * q[0] for k, q in zip(w, p)), sum(k * q[1] for k, q in zip(w, p)))
 
 
 def occupant(hx, lat, pilot):
@@ -280,7 +324,7 @@ def occupant(hx, lat, pilot):
         fl = lat + s * (0.12 if pilot else 0.09)
         parts.append(tube(p(H, lat + s * 0.09), p(K, fl), 0.13))
         parts.append(tube(p(K, fl), p(F, fl), 0.09))
-        parts.append(tube(p(S, lat + s * 0.17), p(hand, lat + s * (MASTIL["ancho"] if pilot else 0.13)), 0.07))
+        parts.append(tube(p(S, lat + s * 0.17), p(hand, lat + s * (ANCHO_PUNOS if pilot else 0.13)), 0.07))
     return comp(parts)
 
 
@@ -299,7 +343,7 @@ def zonas_piel():
     """Las mismas zonas que el visor: (nombre, piel, u0, u1, θ0, θ1)."""
     c_pil = occ_pts(xP, True)[2][0]
     c_pas = occ_pts(xRr, False)[2][0]
-    u_p0, u_p1 = u_de_x(BB[0] + 0.10), u_de_x(c_pil + 0.22)
+    u_p0, u_p1 = u_de_x(BB[0] + 0.13), u_de_x(c_pil + 0.22)
     u_v1, u_s1 = u_de_x(c_pas - 0.05), min(0.95, u_de_x(xR - rR * 0.3))
     pi = math.pi
     return [("Parabrisas", "cristal", u_p0, u_p1, 0.13 * pi, 0.87 * pi),
@@ -364,30 +408,46 @@ def build():
     L["Paneles solares"] = solares
 
     print("· chasis")
-    sf = BB[0] - 0.02
-    sr = PIV[0] - 0.06
+    # Cuadro al estilo de las reclinadas de batalla larga (2026-11-05): tubo
+    # bajo en cuello de cisne de la dirección al pedalier, viga inferior del
+    # pedalier a la viga central (punto M, delante del asiento del piloto),
+    # barra superior curva que baja entre las piernas hasta M, barra de unión
+    # y manillar chopper directo a la horquilla. Igual que geometria.ts.
+    Mp = (xP + 0.32, YS)
+    sf, sr = Mp[0], PIV[0] - 0.06
     crown = (xF + AX[0] * A2C, rF + AX[1] * A2C)
     htb = (crown[0] + AX[0] * 0.02, crown[1] + AX[1] * 0.02)
     htt = (crown[0] + AX[0] * 0.16, crown[1] + AX[1] * 0.16)
     sd = P["spineD"] / 1000
+    c_bajo = [htb, (BB[0] - 0.11, htb[1] - 0.14), BB]
+    c_sup = [htt, (htt[0] - 0.20, htt[1] - 0.20), (Mp[0] + 0.30, Mp[1] + 0.16), Mp]
+    u_sup = bez(c_sup, 0.6)
+    u_inf = (BB[0] + (Mp[0] - BB[0]) * 0.4, BB[1] + (Mp[1] - BB[1]) * 0.4)
+    en3 = lambda q, lat=0.0: (q[0], lat, q[1])
+    potencia = (htt[0] + AX[0] * 0.035, htt[1] + AX[1] * 0.035)
+    abraz = (potencia[0] - 0.07, potencia[1] - 0.03)
+    def manillar(s_):
+        return [(abraz[0], 0, abraz[1]), (abraz[0] - 0.06, s_ * 0.12, abraz[1] - 0.01),
+                (abraz[0] + (PUNO[0] - abraz[0]) * 0.55, s_ * (ANCHO_PUNOS + 0.08), abraz[1] + (PUNO[1] - abraz[1]) * 0.4),
+                (PUNO[0] + 0.10, s_ * ANCHO_PUNOS, PUNO[1] + 0.015), (PUNO[0] - 0.06, s_ * ANCHO_PUNOS, PUNO[1] - 0.01)]
+    resp = lambda t, o: (xP - math.sin(rec(True)) * t - math.cos(rec(True)) * o, HIP_Y + math.cos(rec(True)) * t - math.sin(rec(True)) * o)
     ch = {
         "Viga central": ht((sf, 0, YS), (sr, 0, YS), sd, P["spineT"] / 1000),
-        "Tubo de direccion": ht((htb[0], 0, htb[1]), (htt[0], 0, htt[1]), 0.05),
-        "Tubo diagonal": ht((htb[0], 0, htb[1]), (sf + 0.03, 0, YS), 0.045),
-        "Soporte pedalier": comp([ht((sf, 0, YS), (BB[0], 0, BB[1]), 0.04),
-                                  ht((BB[0], 0, BB[1]), (htt[0], 0, htt[1]), 0.035)]),
+        "Tubo de direccion": ht(en3(htb), en3(htt), 0.05),
+        "Tubo bajo (cuello de cisne)": tubo_curvo([en3(bez(c_bajo, t)) for t in (0, 0.25, 0.5, 0.75, 1)], 0.045),
+        "Viga inferior": ht(en3(BB), en3(Mp), 0.045),
+        "Barra superior curva": tubo_curvo([en3(bez(c_sup, t)) for t in (0, 0.2, 0.4, 0.6, 0.8, 1)], 0.04),
+        "Barra de union": ht(en3(u_sup), en3(u_inf), 0.03),
+        "Caja del pedalier": ht((BB[0], -0.034, BB[1]), (BB[0], 0.034, BB[1]), 0.045, 0.004),
         "Travesano asientos": ht((xRr - 0.08, -0.33, YS), (xRr - 0.08, 0.33, YS), 0.035),
-        "Soportes asientos": comp([ht((xP + 0.10, 0, YS), (xP + 0.10, 0, HIP_Y - 0.11), 0.03)] +
-                                  [ht((xRr - 0.08, s * SEAT_GAP, YS), (xRr - 0.08, s * SEAT_GAP, HIP_Y - 0.09), 0.025)
+        "Soportes asientos": comp([ht((xP - 0.10, 0, YS), en3(resp(0.36, 0.145)), 0.025)] +
+                                  [ht((xRr - 0.08, s * SEAT_GAP, YS), (xRr - 0.08, s * SEAT_GAP, HIP_Y - 0.10 - grosor_base()), 0.025)
                                    for s in (-1, 1)]),
-        # Dirección indirecta sobre el asiento: mástil entre las rodillas,
-        # manillar a la altura del pecho y bieleta hasta la horquilla.
-        "Mastil del manillar": comp([ht((MASTIL["x"], 0, YS + sd / 2), (MASTIL["x"], 0, MASTIL["top"]), 0.035),
-                                     ht((MASTIL["x"], 0, 0.42 + DY), (MASTIL["x"] - 0.26, 0, YS + sd / 2 - 0.005), 0.025)]),
-        "Direccion (manillar)": comp([tube((MASTIL["x"], 0, MASTIL["top"]), (MASTIL["x"] - 0.07, 0, MASTIL["top"] + 0.03), 0.032),
-                                      ht((MASTIL["x"] - 0.07, -MASTIL["ancho"], MASTIL["top"] + 0.03), (MASTIL["x"] - 0.07, MASTIL["ancho"], MASTIL["top"] + 0.03), 0.0222, 0.0018)]
-                                     + [ht((MASTIL["x"] - 0.07, s_ * MASTIL["ancho"], MASTIL["top"] + 0.03), (PUNO[0] - 0.05, s_ * MASTIL["ancho"], PUNO[1] - 0.005), 0.0222, 0.0018) for s_ in (-1, 1)]
-                                     + [tube((MASTIL["x"], 0.075, 0.50 + DY), (htb[0] - 0.02, 0.085, htb[1] - 0.02), 0.012)]),
+        "Direccion (manillar chopper y frenos)": comp(
+            [tube(en3(potencia), en3(abraz), 0.032)]
+            + [tubo_curvo(manillar(s_), 0.0222, 0.0018) for s_ in (-1, 1)]
+            + [tube((PUNO[0] + 0.07, s_ * (ANCHO_PUNOS - 0.03), PUNO[1] + 0.01), (PUNO[0] + 0.07, s_ * (ANCHO_PUNOS + 0.02), PUNO[1] - 0.03), 0.024) for s_ in (-1, 1)]
+            + [tube((PUNO[0] + 0.07, s_ * (ANCHO_PUNOS + 0.03), PUNO[1] - 0.03), (PUNO[0] - 0.06, s_ * (ANCHO_PUNOS + 0.035), PUNO[1] - 0.045), 0.012) for s_ in (-1, 1)]),
         "Poste basculante": ht((xL, 0, YS), (xL, 0, YS + ARM_UP + 0.04), 0.04),
     }
     L["Chasis"] = ch
