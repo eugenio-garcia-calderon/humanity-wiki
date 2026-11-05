@@ -35,6 +35,7 @@ const BaseDeDatos = lazy(() => import('./pages/BaseDeDatos'));
 const Calendario = lazy(() => import('./pages/Calendario'));
 const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const Aeromovil = lazy(() => import('./pages/Aeromovil'));
+const Arquitectura = lazy(() => import('./pages/Arquitectura'));
 const MisVideos = lazy(() => import('./pages/MisVideos'));
 const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
 const Challenges = lazy(() => import('./pages/Challenges'));
@@ -324,6 +325,10 @@ export default function App() {
                   Eugenio). Su menú es el del Aeromóvil (diseño 3D, tareas,
                   plan, planos, exportar a CAD); no se ve Humanity.Wiki. */}
               <Route path="aeromovil/*" element={<Aeromovil />} />
+              {/* Arquitectura: el mundo 3D editable de la Comunidad Circular Humana
+                  (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
+                  cuenta y fuera del Layout, como el calendario. */}
+              <Route path="arquitectura" element={<Arquitectura />} />
               <Route path="formulario/:token" element={<FormularioPublico />} />
               {/* Seguir un pedido en el dominio principal (2026-10-18). Los
                   WhatsApp de compra ya enlazaban `humanity.wiki/pedido?codigo=…`
