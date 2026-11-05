@@ -67,12 +67,16 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           {raiz && (
             <span className="hidden min-w-0 flex-col leading-none lg:flex">
               <span className="whitespace-nowrap text-[1.4rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
-              {c.subtitulo && <span className="mt-1 hidden whitespace-nowrap text-[10px] text-slate-500 2xl:block">{c.subtitulo}</span>}
+              {/* El eslogan, debajo del nombre (2026-11-05, Eugenio: «que esté debajo de Luz y
+                  Humanidad, del logo de arriba a la izquierda»). Antes solo salía en pantallas 2xl. */}
+              {c.subtitulo && <span className="mt-1 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{c.subtitulo}</span>}
             </span>
           )}
         </Link>
         {!simple && <span aria-hidden className="basis-full max-md:order-1 md:hidden" />}
-        {!simple && <span className="flex shrink-0 items-center max-md:order-1"><BotonCalificaciones /></span>}
+        {/* El ojo de las calificaciones, salvo que el sitio lo apague (`sitio.calificaciones: false`;
+            2026-11-05, Eugenio: «quítalo de ocultar y mostrar las calificaciones» en el laboratorio). */}
+        {!simple && c.sitio?.calificaciones !== false && <span className="flex shrink-0 items-center max-md:order-1"><BotonCalificaciones /></span>}
       </div>
       {/* LA RUTA: el territorio y el sistema (o la temática), cada uno con su desplegable. La ponen quienes saben (el
           termómetro, el filtro de la portada o la vista Círculo) en sus ranuras; sin nada dentro, no se ve. */}

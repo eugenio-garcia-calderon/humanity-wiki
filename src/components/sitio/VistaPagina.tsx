@@ -127,6 +127,20 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
     const href = a.getAttribute('href') || '';
     if (!href.startsWith('/')) return;
     e.preventDefault();
+    // UNA PÁGINA DEL MENÚ QUE VIVE EN LA PORTADA (2026-11-05, Eugenio: «cuando pinches en
+    // Personas, en vez de abrirte la página, que la base de datos esté en la página inicial
+    // y que te haga un scroll down hasta allí»). `sitio.anclas` empareja páginas con su
+    // ancla en la portada: en la portada se baja hasta ella; desde otra página se vuelve a
+    // la portada con el `#`, y la vista baja al montarse (`useBajarAlAncla`).
+    const anclas: Record<string, string> = pagina.sitio?.config?.anclas || {};
+    const ancla = Object.entries(anclas).find(([pid]) => href === `/p/${pid}` || href.endsWith(`/p/${pid}`))?.[1];
+    if (ancla && pagina.sitio?.raizId) {
+      const el = esRaiz ? document.querySelector(`[data-ancla="${CSS.escape(ancla)}"]`) : null;
+      if (el) { history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${ancla}`); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      const inicio = sitio ? sitio.enlacePagina(pagina.sitio.raizId) : '/';
+      navegar(`${inicio}#${ancla}`);
+      return;
+    }
     navegar(href);
     window.scrollTo(0, 0);
   };
