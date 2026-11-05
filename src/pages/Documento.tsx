@@ -414,6 +414,10 @@ function EditorPagina() {
       .then(async r => {
         let j = await r.json();
         if (!r.ok) throw new Error(j.error || 'No se ha podido cargar.');
+        // Página que es la puerta de una pantalla propia (`config.ruta`,
+        // 2026-11-05: el Aeromóvil Gota). Se va allí en vez de abrir el editor.
+        const ruta = j.config?.ruta;
+        if (typeof ruta === 'string' && /^\/[a-z0-9][a-z0-9\-\/]*$/i.test(ruta)) { navigate(ruta, { replace: true }); return; }
         tituloBase.current = j.title || '';
         const bor = await leerBorrador(winId);
         // La BASE de la próxima fusión es lo que tiene el servidor, no el borrador.

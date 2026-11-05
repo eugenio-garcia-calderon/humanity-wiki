@@ -467,7 +467,7 @@ export function registerMenuRoutes(app: Express, db: any) {
           ORDER BY orden, created_at LIMIT 100
         `),
         db.execute(sql`
-          SELECT id, title, config->>'icono' AS icono FROM knowledge_windows
+          SELECT id, title, config->>'icono' AS icono, config->>'ruta' AS ruta FROM knowledge_windows
           WHERE proyecto_id = ${pid} AND kind = 'pagina'
             AND archived_at IS NULL AND deleted_at IS NULL
           ORDER BY updated_at DESC NULLS LAST LIMIT 100
@@ -559,7 +559,11 @@ export function registerMenuRoutes(app: Express, db: any) {
         id: t.id, label: t.titulo, icono: t.icono, destino: `/tareas?tarea=${encodeURIComponent(t.id)}`, estado: t.estado,
       })));
       rama('paginas', 'Páginas', 'pagina', (paginas.rows as any[]).map(w => ({
-        id: w.id, label: w.title, icono: w.icono, destino: `/paginas/${w.id}`,
+        // Una página puede ser la puerta de una pantalla propia de la
+        // plataforma (`config.ruta`, 2026-11-05: el Aeromóvil Gota). Solo
+        // rutas internas y sencillas: nunca otra web ni un `//host`.
+        id: w.id, label: w.title, icono: w.icono,
+        destino: typeof w.ruta === 'string' && /^\/[a-z0-9][a-z0-9\-\/]*$/i.test(w.ruta) ? w.ruta : `/paginas/${w.id}`,
       })));
       rama('guardados', 'Guardados', '', (guardados.rows as any[]).map(g => ({
         id: g.id, label: g.title, destino: `/archivos?abrir=${encodeURIComponent(g.id)}`,

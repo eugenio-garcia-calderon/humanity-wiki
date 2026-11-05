@@ -34,6 +34,7 @@ const Archivos = lazy(() => import('./pages/Archivos'));
 const BaseDeDatos = lazy(() => import('./pages/BaseDeDatos'));
 const Calendario = lazy(() => import('./pages/Calendario'));
 const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
+const Aeromovil = lazy(() => import('./pages/Aeromovil'));
 const MisVideos = lazy(() => import('./pages/MisVideos'));
 const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
 const Challenges = lazy(() => import('./pages/Challenges'));
@@ -318,6 +319,10 @@ export default function App() {
                   cuenta, y no debe ver Wiki Creator: ni herramientas, ni iniciar
                   sesión, ni buscador, ni el feedback o la IA flotantes. */}
               <Route path="calendario-arte" element={<CalendarioArte />} />
+              {/* Aeromóvil Gota: página PROPIA, fuera del Layout (2026-11-05,
+                  Eugenio). Su menú es el del Aeromóvil (diseño 3D, tareas,
+                  plan, planos, exportar a CAD); no se ve Wiki Creator. */}
+              <Route path="aeromovil/*" element={<Aeromovil />} />
               <Route path="formulario/:token" element={<FormularioPublico />} />
               {/* Seguir un pedido en el dominio principal (2026-10-18). Los
                   WhatsApp de compra ya enlazaban `humanity.wiki/pedido?codigo=…`

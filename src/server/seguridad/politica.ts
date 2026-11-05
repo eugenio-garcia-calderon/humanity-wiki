@@ -163,6 +163,8 @@ const REVISADAS: Entrada[] = [
   { m: 'POST', ruta: '/api/calendario-arte/subir', guardia: { tipo: 'publica', porque: 'Solo imágenes, 10 MB, freno de 40 por hora e IP. /api/uploads sigue pidiendo sesión.' } },
   { m: 'POST', ruta: '/api/calendario-arte/:anio/ideas', guardia: { tipo: 'publica', porque: 'Buzón de ideas abierto, con freno de 30 por hora e IP.' } },
   { m: 'PATCH', ruta: '/api/calendario-arte/ideas/:id', guardia: { tipo: 'publica', porque: 'Marcar ideas como hechas; se pueden reabrir.' } },
+  { m: 'POST', ruta: '/api/aeromovil/tareas', guardia: { tipo: 'publica', porque: 'Buzón de mejoras del Aeromóvil abierto sin cuenta (Eugenio, 2026-11-05). Freno de 30 por hora e IP y campo trampa.' } },
+  { m: 'PATCH', ruta: '/api/aeromovil/tareas/:id', guardia: { tipo: 'propietario' }, nota: 'Dueño = creador de la página KW_AEROMOVIL_GOTA (migración 0165) o administrador. aeromovil.ts: puedeDecidir()' },
 
   // Telecomunicaciones: todo exige sesión, y lo que va sobre una llamada
   // comprueba además que quien llama es una de las dos puntas.
