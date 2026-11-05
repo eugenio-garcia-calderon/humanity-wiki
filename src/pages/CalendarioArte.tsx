@@ -5,11 +5,18 @@
 // ilustración arriba (A4 apaisado), franja con una herramienta o juego, y el
 // mes con una frase pedagógica por día abajo (A4 apaisado).
 //
-// · Todo se edita en su sitio, desde cualquier dispositivo, y se guarda solo.
-// · Cada mes tiene una carpeta de referencias para el proceso creativo.
+// · Todo se edita en su sitio, desde cualquier dispositivo y sin cuenta, y se
+//   guarda solo (con historial para deshacer).
+// · Cada mes tiene su carpeta: ilustraciones, bocetos y referencias.
 // · «Exportar» imprime o guarda en PDF solo el contenido definitivo, a tamaño
 //   real: sin botones, sin carpeta, sin marcas de edición.
-// · «Ideas» es el buzón que la IA lee para implementar mejoras pendientes.
+// · «Tareas de mejora» es el buzón que la IA lee para implementar mejoras;
+//   se llena con el botón de abajo, «Añadir propuesta de mejora».
+//
+// PÁGINA PROPIA (2026-11-05, Eugenio): vive FUERA del Layout de la plataforma.
+// Quien diseña entra por el enlace, sin cuenta, y no debe ver Wiki Creator:
+// ni sus herramientas, ni iniciar sesión, ni el buscador, ni el feedback o la
+// IA flotantes. Lleva su logo («Arte para la Humanidad») y su propio menú.
 //
 // El contenido por defecto está en `src/data/calendarioArte.ts`; lo que se
 // edita aquí vive en `calendario_arte_meses` (ver `src/server/calendarioArte.ts`).
@@ -17,13 +24,16 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Pencil, Eye, FolderOpen, Lightbulb, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw,
+  Pencil, Eye, FolderOpen, ListChecks, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw, Type, Menu, X,
 } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { subirImagenCalendario } from '../components/calendarioArte/subirImagen';
-import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM } from '../components/calendarioArte/HojaMes';
-import { PanelCarpeta, PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
+import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM, ACENTOS } from '../components/calendarioArte/HojaMes';
+import { PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
+import { VistaCarpetas } from '../components/calendarioArte/VistaCarpetas';
+import { BotonPropuesta } from '../components/calendarioArte/BotonPropuesta';
+import { TIPOGRAFIAS, TIPOGRAFIA_POR_DEFECTO, cargarTipografias, estiloTipografia, type EleccionTipografia } from '../components/calendarioArte/tipografias';
 import { HojaPortada } from '../components/calendarioArte/HojaPortada';
 import { INVESTIGACION_POR_MES } from '../data/calendarioArteInvestigacion';
 import { PRINCIPIOS_POR_DEFECTO, type Principio } from '../data/calendarioArtePrincipios';
@@ -32,7 +42,7 @@ import { PORTADA_POR_DEFECTO, type ContenidoMes, type PortadaCalendario, type Re
 
 interface Guardado {
   // En la hoja 0 (lo común del año) el contenido es `{ principios }`.
-  contenido: Partial<ContenidoMes> & { principios?: Principio[]; portada?: Partial<PortadaCalendario> };
+  contenido: Partial<ContenidoMes> & { principios?: Principio[]; portada?: Partial<PortadaCalendario>; tipografia?: EleccionTipografia };
   referencias: Referencia[];
   version: number;
 }
@@ -70,6 +80,21 @@ function HojaEscalada({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** El logo provisional: doce puntos de los colores del año en círculo y el nombre. */
+function Logo() {
+  return (
+    <span className="flex items-center gap-2.5">
+      <span className="relative h-8 w-8 shrink-0" aria-hidden>
+        {ACENTOS.map((a, i) => {
+          const ang = (i / 12) * Math.PI * 2 - Math.PI / 2;
+          return <span key={i} className={cn('absolute h-[7px] w-[7px] rounded-full', a.fondo)} style={{ left: `${50 + 36 * Math.cos(ang)}%`, top: `${50 + 36 * Math.sin(ang)}%`, transform: 'translate(-50%, -50%)' }} />;
+        })}
+      </span>
+      <span className="font-serif text-[17px] font-semibold leading-tight text-stone-800 sm:text-lg">Arte para la Humanidad</span>
+    </span>
+  );
+}
+
 export default function CalendarioArte() {
   const [params, setParams] = useSearchParams();
   const anio = CALENDARIO_ARTE_ANIO;
@@ -78,18 +103,32 @@ export default function CalendarioArte() {
   const mesParam = params.get('mes');
   const mes = mesParam === null ? 0 : Math.min(12, Math.max(0, Math.trunc(Number(mesParam)) || 0));
   const esPortada = mes === 0;
-  const irAMes = (m: number) => setParams(p => { p.set('mes', String(((m % 13) + 13) % 13)); return p; }, { replace: true });
+  // La otra vista: las carpetas (`?vista=carpetas`, y `&carpeta=N` dentro de una).
+  const enCarpetas = params.get('vista') === 'carpetas';
+  const carpetaParam = params.get('carpeta');
+  const carpeta = carpetaParam === null ? null : Math.min(12, Math.max(0, Math.trunc(Number(carpetaParam)) || 0));
+  const irAMes = (m: number) => setParams(p => {
+    p.set('mes', String(((m % 13) + 13) % 13)); p.delete('vista'); p.delete('carpeta'); return p;
+  }, { replace: true });
+  const irACarpeta = (c: number | null) => setParams(p => {
+    p.set('vista', 'carpetas'); if (c === null) p.delete('carpeta'); else p.set('carpeta', String(c)); return p;
+  }, { replace: true });
 
   const [guardados, setGuardados] = useState<Record<number, Guardado>>({});
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [puedeEditar, setPuedeEditar] = useState(false);
-  const [puedeProponer, setPuedeProponer] = useState(false);
-  const [editando, setEditando] = useState(false);
+  // Se edita siempre, como en las páginas: pinchar un texto es cambiarlo. La
+  // «Vista final» quita los marcos y botones para ver cómo quedará impreso.
+  const [vistaFinal, setVistaFinal] = useState(false);
+  const editando = puedeEditar && !vistaFinal;
+  const [menuMovil, setMenuMovil] = useState(false);
+  const [menuLetra, setMenuLetra] = useState(false);
+  const [recargaIdeas, setRecargaIdeas] = useState(0);
   const [estado, setEstado] = useState<EstadoGuardado>('listo');
   const [mensaje, setMensaje] = useState<string | null>(null);
   // `?conocer=1` es a donde lleva el QR impreso: abre directamente la ficha del tema.
-  const [panel, setPanel] = useState<'carpeta' | 'estilo' | 'ideas' | 'principios' | 'conocer' | 'historial' | null>(
+  const [panel, setPanel] = useState<'ideas' | 'principios' | 'conocer' | 'historial' | null>(
     () => (params.get('conocer') === '1' ? 'conocer' : null));
   const [pendientes, setPendientes] = useState<number | null>(null);
   const [menuExportar, setMenuExportar] = useState(false);
@@ -115,7 +154,6 @@ export default function CalendarioArte() {
       for (const f of j.meses as any[]) mapa[f.mes] = { contenido: f.contenido ?? {}, referencias: f.referencias ?? [], version: f.version ?? 0 };
       setGuardados(mapa);
       setPuedeEditar(!!j.puedeEditar);
-      setPuedeProponer(!!j.puedeProponer);
       setEstado('listo');
     } catch (e: any) {
       setErrorCarga(e.message || 'No se ha podido cargar el calendario.');
@@ -130,6 +168,11 @@ export default function CalendarioArte() {
   // Que los buscadores no lo indexen (Eugenio, 2026-11-05). El servidor ya
   // manda `X-Robots-Tag: noindex`; la etiqueta es para quien solo lee el HTML
   // ya pintado. Se quita al salir: el resto de la plataforma sí se indexa.
+  useEffect(() => {
+    const titulo = document.title;
+    document.title = `Arte para la Humanidad ${anio}`;
+    return () => { document.title = titulo; };
+  }, [anio]);
   useEffect(() => {
     const m = document.createElement('meta');
     m.name = 'robots';
@@ -148,6 +191,8 @@ export default function CalendarioArte() {
   // ── GUARDAR ──────────────────────────────────────────────────────────────
   const guardadosRef = useRef(guardados);
   guardadosRef.current = guardados;
+  const eleccionLetraRef = useRef<EleccionTipografia>(TIPOGRAFIA_POR_DEFECTO);
+  eleccionLetraRef.current = { ...TIPOGRAFIA_POR_DEFECTO, ...(guardados[0]?.contenido.tipografia ?? {}) };
 
   const enviarPendientes = useCallback(async () => {
     const lista = [...sucios.current];
@@ -254,6 +299,7 @@ export default function CalendarioArte() {
     // Antes de abrir el diálogo, que estén cargadas todas las ilustraciones:
     // si no, el PDF sale con huecos en blanco.
     const t = window.setTimeout(async () => {
+      await cargarTipografias(eleccionLetraRef.current);
       const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('.ca-impresion img'));
       await Promise.all(imgs.map(i => i.complete ? Promise.resolve() : new Promise(res => { i.onload = i.onerror = () => res(null); })));
       if (vivo) window.print();
@@ -261,119 +307,164 @@ export default function CalendarioArte() {
     return () => { vivo = false; window.clearTimeout(t); window.removeEventListener('afterprint', fin); };
   }, [imprimiendo]);
 
+  // ── TIPO DE LETRA ────────────────────────────────────────────────────────
+  const eleccionLetra: EleccionTipografia = { ...TIPOGRAFIA_POR_DEFECTO, ...(guardados[0]?.contenido.tipografia ?? {}) };
+  useEffect(() => { cargarTipografias(eleccionLetra); }, [eleccionLetra.titulos, eleccionLetra.texto]);
+  const elegirLetra = (c: Partial<EleccionTipografia>) => cambiar(0, { tipografia: { ...eleccionLetra, ...c } });
+
+  // ── CARPETAS ─────────────────────────────────────────────────────────────
+  /** Poner otra ilustración en el calendario sin perder la que había: si la
+   *  de ahora no está guardada en la carpeta (ni es la original), se guarda. */
+  const usarIlustracion = async (m: number, url: string) => {
+    const ahora = meses[m - 1]?.imagen;
+    const original = CALENDARIO_ARTE_POR_DEFECTO[m - 1]?.imagen;
+    const refs = guardados[m]?.referencias ?? [];
+    if (ahora && ahora !== original && !refs.some(r => r.url === ahora)) {
+      await guardarReferencias(m)([...refs, { url: ahora, tipo: 'ilustracion' }]);
+    }
+    cambiar(m, { imagen: url });
+  };
+  const pedirIlustracionIA = async (m: number): Promise<boolean> => {
+    try {
+      const r = await fetch(`/api/calendario-arte/${anio}/ideas`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mes: m, texto: `Generar una ilustración nueva para ${NOMBRES_MES[m - 1]} (${meses[m - 1]?.tema}) a partir del encargo, los bocetos y las referencias de su carpeta (humanity.wiki/calendario-arte?vista=carpetas&carpeta=${m}). Guardarla en la carpeta como ilustración, sin quitar la actual.` }),
+      });
+      if (!r.ok) return false;
+      setRecargaIdeas(n => n + 1); setPendientes(p => (p ?? 0) + 1);
+      return true;
+    } catch { return false; }
+  };
+
   if (cargando) {
-    return <div className="flex h-full items-center justify-center text-sm text-slate-400"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Cargando el calendario…</div>;
+    return <div className="flex min-h-[100dvh] items-center justify-center bg-stone-100 text-sm text-stone-400"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Cargando el calendario…</div>;
   }
 
-  const refsMes = guardados[mes]?.referencias ?? [];
   const principios = guardados[0]?.contenido.principios ?? PRINCIPIOS_POR_DEFECTO;
   const portada: PortadaCalendario = { ...PORTADA_POR_DEFECTO, ...(guardados[0]?.contenido.portada ?? {}) };
   const cambiarPortada = (c: Partial<PortadaCalendario>) => cambiar(0, { portada: { ...(guardados[0]?.contenido.portada ?? {}), ...c } });
+  const carpetas: Record<number, Referencia[]> = Object.fromEntries(Array.from({ length: 13 }, (_, i) => [i, guardados[i]?.referencias ?? []]));
+  const vistaLetra = estiloTipografia(eleccionLetra) as React.CSSProperties;
+
+  /** Un botón del menú del proyecto. */
+  const itemMenu = (activo: boolean, onClick: () => void, icono: React.ReactNode, texto: string) => (
+    <Button variant={activo ? 'primary' : 'ghost'} onClick={() => { onClick(); setMenuMovil(false); }}
+      className={cn('justify-start gap-1.5 px-3 normal-case tracking-normal text-sm', !activo && 'text-stone-600')}>
+      {icono}{texto}
+    </Button>
+  );
 
   return (
-    <div className="h-full overflow-y-auto bg-stone-100">
+    <div className="min-h-[100dvh] bg-stone-100 pb-24 text-stone-800">
       <style>{CSS_PANTALLA + (formato === 'a3' ? CSS_A3 : CSS_A4)}</style>
 
-      {/* ── BARRA SUPERIOR ─────────────────────────────────────────────── */}
-      <div className="ca-no-imprimir sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-3 py-2">
-          <div className="mr-auto min-w-0">
-            <h1 className="truncate text-base font-semibold text-stone-800">Calendario Arte para la Humanidad {anio}</h1>
-            <p className="text-xs text-stone-500">
-              {estado === 'guardando' && <span className="inline-flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Guardando…</span>}
-              {estado === 'pendiente' && 'Cambios sin guardar…'}
-              {estado === 'listo' && (editando ? <span className="inline-flex items-center gap-1 text-emerald-600"><Check className="h-3 w-3" />Todo guardado</span> : '12 meses · 12 ilustraciones')}
-              {(estado === 'error' || estado === 'conflicto') && <span className="inline-flex items-center gap-1 text-rose-600"><AlertTriangle className="h-3 w-3" />{mensaje}</span>}
-            </p>
-          </div>
+      {/* ── CABECERA PROPIA: LOGO + MENÚ DEL PROYECTO ──────────────────── */}
+      <header className="ca-no-imprimir sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-3 py-2">
+          <button type="button" onClick={() => irAMes(0)} className="mr-auto min-w-0 text-left" title="Ir a la portada"><Logo /></button>
 
-          <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel(esPortada ? 'estilo' : 'carpeta')}>
-            <FolderOpen className="h-4 w-4" />Carpeta{!esPortada && refsMes.length ? ` (${refsMes.length})` : ''}
-          </Button>
-          {!esPortada && (
-            <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('conocer')}>
-              <Info className="h-4 w-4" />Conocer más
-            </Button>
-          )}
-          {!esPortada && (
-            <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('principios')}>
-              <Compass className="h-4 w-4" />Principios
-            </Button>
-          )}
-          <Button variant="outline" className="gap-1.5 px-3" onClick={() => setPanel('ideas')}>
-            <Lightbulb className="h-4 w-4" />Ideas{pendientes ? ` (${pendientes})` : ''}
-          </Button>
-          {puedeEditar && (
-            <Button variant={editando ? 'primary' : 'outline'} className="gap-1.5 px-3" onClick={() => { if (editando) enviarPendientes(); setEditando(e => !e); }}>
-              {editando ? <><Eye className="h-4 w-4" />Ver</> : <><Pencil className="h-4 w-4" />Editar</>}
-            </Button>
-          )}
+          <nav className="hidden items-center gap-1 lg:flex">
+            {itemMenu(!enCarpetas, () => irAMes(mes), <Eye className="h-4 w-4" />, 'Calendario')}
+            {itemMenu(enCarpetas, () => irACarpeta(null), <FolderOpen className="h-4 w-4" />, 'Carpetas')}
+            {itemMenu(panel === 'principios', () => setPanel('principios'), <Compass className="h-4 w-4" />, 'Principios')}
+            {itemMenu(panel === 'ideas', () => setPanel('ideas'), <ListChecks className="h-4 w-4" />, `Tareas de mejora${pendientes ? ` (${pendientes})` : ''}`)}
+          </nav>
           <div className="relative">
             <Button className="gap-1.5 px-3" onClick={() => setMenuExportar(v => !v)} disabled={!!imprimiendo}>
-              {imprimiendo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Exportar
+              {imprimiendo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}<span className="hidden sm:inline">Exportar</span>
             </Button>
             {menuExportar && (
               <div className="absolute right-0 top-full z-40 mt-1 w-72 rounded-xl border border-stone-200 bg-white p-2 shadow-xl">
                 <p className="px-3 pb-1 pt-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">A3 vertical (ilustración + calendario en una hoja)</p>
-                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a3')}>{esPortada ? 'Solo la portada' : `Este mes (${NOMBRES_MES[mes - 1]})`}</Button>
+                {!enCarpetas && <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a3')}>{esPortada ? 'Solo la portada' : `Este mes (${NOMBRES_MES[mes - 1]})`}</Button>}
                 <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([0, ...meses.map(m => m.mes)], 'a3')}>Portada y los 12 meses</Button>
                 <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">A4 apaisado (dos páginas por mes)</p>
-                <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a4')}>{esPortada ? 'Solo la portada' : `Este mes (${NOMBRES_MES[mes - 1]})`}</Button>
+                {!enCarpetas && <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([mes], 'a4')}>{esPortada ? 'Solo la portada' : `Este mes (${NOMBRES_MES[mes - 1]})`}</Button>}
                 <Button variant="ghost" className="w-full justify-start normal-case tracking-normal text-sm" onClick={() => exportar([0, ...meses.map(m => m.mes)], 'a4')}>Portada y los 12 meses</Button>
                 <p className="px-3 pb-1 pt-2 text-[11px] leading-snug text-stone-500">
                   Se abre el diálogo de impresión a tamaño real, solo con el contenido definitivo. Para un PDF de
                   imprenta elige «Guardar como PDF», el mismo tamaño (A3 o A4), márgenes <b>Ninguno</b> y activa
-                  <b> Gráficos de fondo</b>. Textos e ilustraciones vectoriales salen a resolución completa.
+                  <b> Gráficos de fondo</b>.
                 </p>
               </div>
             )}
           </div>
-        </div>
-
-        {/* Los doce meses */}
-        <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 pb-2">
-          <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes - 1)} aria-label="Anterior"><ChevronLeft className="h-4 w-4" /></Button>
-          <Button
-            variant={esPortada ? 'primary' : 'ghost'}
-            className={cn('shrink-0 px-2.5 py-1.5 normal-case tracking-normal text-xs', !esPortada && 'text-stone-500')}
-            onClick={() => irAMes(0)}
-          >
-            Portada
+          <Button variant="ghost" className="px-2 lg:hidden" onClick={() => setMenuMovil(v => !v)} aria-label="Menú">
+            {menuMovil ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-          {meses.map(m => (
-            <Button
-              key={m.mes}
-              variant={m.mes === mes ? 'primary' : 'ghost'}
-              className={cn('shrink-0 px-2.5 py-1.5 normal-case tracking-normal text-xs', m.mes !== mes && 'text-stone-500')}
-              onClick={() => irAMes(m.mes)}
-              title={m.tema}
-            >
-              {NOMBRES_MES[m.mes - 1].slice(0, 3)}
-            </Button>
-          ))}
-          <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes + 1)} aria-label="Siguiente"><ChevronRight className="h-4 w-4" /></Button>
         </div>
+        {menuMovil && (
+          <nav className="mx-auto grid max-w-6xl gap-1 border-t border-stone-100 px-3 py-2 lg:hidden">
+            {itemMenu(!enCarpetas, () => irAMes(mes), <Eye className="h-4 w-4" />, 'Calendario')}
+            {itemMenu(enCarpetas, () => irACarpeta(null), <FolderOpen className="h-4 w-4" />, 'Carpetas')}
+            {itemMenu(panel === 'principios', () => setPanel('principios'), <Compass className="h-4 w-4" />, 'Principios de diseño')}
+            {itemMenu(panel === 'ideas', () => setPanel('ideas'), <ListChecks className="h-4 w-4" />, `Tareas de mejora${pendientes ? ` (${pendientes})` : ''}`)}
+          </nav>
+        )}
 
-        {editando && (
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1 border-t border-stone-100 px-3 py-2 text-xs text-stone-600">
-            <span>Pulsa cualquier texto de la hoja para cambiarlo. Se guarda solo. Cualquiera con este enlace puede editar: si algo se estropea, está todo en el <b>Historial</b>.</span>
-            {!esPortada && actual.imagen && (
-              <>
-                <label className="flex items-center gap-1">Encuadre ↔
-                  <input type="range" min={0} max={100} value={actual.imagen_x ?? 50} onChange={e => cambiar(mes, { imagen_x: Number(e.target.value) })} />
-                </label>
-                <label className="flex items-center gap-1">↕
-                  <input type="range" min={0} max={100} value={actual.imagen_y ?? 50} onChange={e => cambiar(mes, { imagen_y: Number(e.target.value) })} />
-                </label>
-                <Button variant="ghost" className="px-2 py-1 text-[10px] text-rose-600" onClick={() => cambiar(mes, { imagen: '' })}>Quitar ilustración</Button>
-              </>
-            )}
-            <Button variant="ghost" className="ml-auto gap-1 px-2 py-1 text-[10px]" onClick={() => setPanel('historial')}><History className="h-3 w-3" />Historial</Button>
-            {!esPortada && <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={restaurarMes}><RotateCcw className="h-3 w-3" />Volver al original del mes</Button>}
-            {avisoImagen && <p className="w-full text-amber-700">{avisoImagen}</p>}
+        {/* Portada y los doce meses */}
+        {!enCarpetas && (
+          <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 pb-2">
+            <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes - 1)} aria-label="Anterior"><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant={esPortada ? 'primary' : 'ghost'} className={cn('shrink-0 px-2.5 py-1.5 normal-case tracking-normal text-xs', !esPortada && 'text-stone-500')} onClick={() => irAMes(0)}>
+              Portada
+            </Button>
+            {meses.map(m => (
+              <Button key={m.mes} variant={m.mes === mes ? 'primary' : 'ghost'}
+                className={cn('shrink-0 px-2.5 py-1.5 normal-case tracking-normal text-xs', m.mes !== mes && 'text-stone-500')}
+                onClick={() => irAMes(m.mes)} title={m.tema}>
+                {NOMBRES_MES[m.mes - 1].slice(0, 3)}
+              </Button>
+            ))}
+            <Button variant="ghost" className="px-1.5" onClick={() => irAMes(mes + 1)} aria-label="Siguiente"><ChevronRight className="h-4 w-4" /></Button>
           </div>
         )}
-      </div>
+
+        {/* Herramientas de la hoja: guardar, letra, vista final, historial… */}
+        {!enCarpetas && puedeEditar && (
+          <div className="mx-auto flex max-w-6xl flex-col gap-1 border-t border-stone-100 px-3 py-1.5 text-xs text-stone-600 md:flex-row md:flex-wrap md:items-center md:gap-x-3">
+            <span className="min-w-0">
+              {estado === 'guardando' && <span className="inline-flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Guardando…</span>}
+              {estado === 'pendiente' && 'Cambios sin guardar…'}
+              {estado === 'listo' && (editando ? <span className="inline-flex items-center gap-1 text-emerald-700"><Check className="h-3 w-3" />Pincha cualquier texto para cambiarlo<span className="hidden sm:inline"> · se guarda solo</span></span> : 'Vista final: así se imprimirá')}
+              {(estado === 'error' || estado === 'conflicto') && <span className="inline-flex items-center gap-1 text-rose-600"><AlertTriangle className="h-3 w-3" />{mensaje}</span>}
+            </span>
+            <span className="-mx-1 flex flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap md:mx-0 md:ml-auto md:flex-wrap md:overflow-visible">
+              {!esPortada && editando && actual.imagen && (
+                <>
+                  <label className="hidden items-center gap-1 md:flex">↔<input type="range" min={0} max={100} value={actual.imagen_x ?? 50} onChange={e => cambiar(mes, { imagen_x: Number(e.target.value) })} className="w-20" /></label>
+                  <label className="hidden items-center gap-1 md:flex">↕<input type="range" min={0} max={100} value={actual.imagen_y ?? 50} onChange={e => cambiar(mes, { imagen_y: Number(e.target.value) })} className="w-20" /></label>
+                </>
+              )}
+              <span className="relative">
+                <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={() => setMenuLetra(v => !v)}><Type className="h-3.5 w-3.5" />Letra</Button>
+                {menuLetra && (
+                  <div className="absolute right-0 top-full z-40 mt-1 w-64 space-y-2 rounded-xl border border-stone-200 bg-white p-3 shadow-xl">
+                    {(['titulos', 'texto'] as const).map(k => (
+                      <label key={k} className="block text-xs font-semibold text-stone-600">
+                        {k === 'titulos' ? 'Títulos' : 'Texto'}
+                        <select value={eleccionLetra[k]} onChange={e => elegirLetra({ [k]: e.target.value })}
+                          className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm font-normal">
+                          {TIPOGRAFIAS.map(t => <option key={t.id} value={t.id} style={{ fontFamily: t.familia }}>{t.nombre}</option>)}
+                        </select>
+                      </label>
+                    ))}
+                    <p className="text-[11px] text-stone-400">Se aplica a la portada y a los doce meses, también al exportar.</p>
+                  </div>
+                )}
+              </span>
+              {!esPortada && <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={() => setPanel('conocer')}><Info className="h-3.5 w-3.5" />Conocer más</Button>}
+              {!esPortada && <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={() => irACarpeta(mes)}><FolderOpen className="h-3.5 w-3.5" />Carpeta del mes</Button>}
+              <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={() => setPanel('historial')}><History className="h-3.5 w-3.5" />Historial</Button>
+              {!esPortada && editando && <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={restaurarMes}><RotateCcw className="h-3.5 w-3.5" />Volver al original</Button>}
+              <Button variant={vistaFinal ? 'primary' : 'outline'} className="gap-1 px-2 py-1 text-[10px]" onClick={() => { if (!vistaFinal) enviarPendientes(); setVistaFinal(v => !v); }}>
+                {vistaFinal ? <><Pencil className="h-3.5 w-3.5" />Volver a editar</> : <><Eye className="h-3.5 w-3.5" />Vista final</>}
+              </Button>
+            </span>
+            {avisoImagen && editando && !esPortada && <p className="w-full text-amber-700">{avisoImagen}</p>}
+          </div>
+        )}
+      </header>
 
       {errorCarga && (
         <div className="ca-no-imprimir mx-auto mt-4 max-w-3xl rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
@@ -387,46 +478,51 @@ export default function CalendarioArte() {
         </div>
       )}
 
-      {/* ── LA HOJA ────────────────────────────────────────────────────── */}
-      <div className="ca-no-imprimir mx-auto max-w-6xl px-3 py-5">
-        <HojaEscalada>
-          {esPortada ? (
-            <HojaPortada anio={anio} meses={meses} portada={portada} editando={editando} alCambiar={cambiarPortada} alAbrirMes={irAMes} />
-          ) : (
-            <HojaMes
-              anio={anio}
-              contenido={actual}
-              editando={editando}
-              alCambiar={c => cambiar(mes, c)}
-              alElegirImagen={() => entradaImagen.current?.click()}
-              subiendoImagen={subiendoImagen}
-            />
-          )}
-        </HojaEscalada>
-        <input ref={entradaImagen} type="file" accept="image/*" className="hidden" onChange={e => { subirIlustracion(e.target.files?.[0]); e.target.value = ''; }} />
-      </div>
+      {enCarpetas ? (
+        <div className="ca-no-imprimir">
+          <VistaCarpetas
+            meses={meses}
+            originales={CALENDARIO_ARTE_POR_DEFECTO}
+            carpetas={carpetas}
+            abierta={carpeta}
+            editando={puedeEditar}
+            alAbrir={irACarpeta}
+            alGuardar={(m, refs) => guardarReferencias(m)(refs)}
+            alUsarIlustracion={usarIlustracion}
+            alCambiarMes={(m, c) => cambiar(m, c)}
+            alVerMes={irAMes}
+            alPedirIA={pedirIlustracionIA}
+          />
+        </div>
+      ) : (
+        <div className="ca-no-imprimir mx-auto max-w-6xl px-3 py-5" style={vistaLetra}>
+          <HojaEscalada>
+            {esPortada ? (
+              <HojaPortada anio={anio} meses={meses} portada={portada} editando={editando} alCambiar={cambiarPortada} alAbrirMes={irAMes} />
+            ) : (
+              <HojaMes
+                anio={anio}
+                contenido={actual}
+                editando={editando}
+                alCambiar={c => cambiar(mes, c)}
+                alElegirImagen={() => entradaImagen.current?.click()}
+                alAbrirCarpeta={() => irACarpeta(mes)}
+                subiendoImagen={subiendoImagen}
+              />
+            )}
+          </HojaEscalada>
+          <input ref={entradaImagen} type="file" accept="image/*" className="hidden" onChange={e => { subirIlustracion(e.target.files?.[0]); e.target.value = ''; }} />
+        </div>
+      )}
 
-      {panel === 'carpeta' && (
-        <PanelCarpeta
-          mes={mes}
-          referencias={refsMes}
-          puedeEditar={puedeEditar}
-          alGuardar={guardarReferencias(mes)}
-          alUsarComoIlustracion={url => { cambiar(mes, { imagen: url }); setPanel(null); }}
-          alCerrar={() => setPanel(null)}
-        />
+      {/* Abajo y centrado, siempre: proponer una mejora (texto, voz o imágenes). */}
+      <BotonPropuesta anio={anio} mes={enCarpetas ? (carpeta || null) : (esPortada ? null : mes)}
+        alEnviada={() => { setRecargaIdeas(n => n + 1); setPendientes(p => (p ?? 0) + 1); }} />
+
+      {panel === 'historial' && (
+        <PanelHistorial anio={anio} mes={mes} alRestaurado={() => { sucios.current.delete(mes); cargar(); }} alCerrar={() => setPanel(null)} />
       )}
-      {panel === 'estilo' && (
-        <PanelCarpeta
-          mes={0}
-          referencias={guardados[0]?.referencias ?? []}
-          puedeEditar={puedeEditar}
-          alGuardar={guardarReferencias(0)}
-          alUsarComoIlustracion={() => {}}
-          alCerrar={() => setPanel('principios')}
-        />
-      )}
-      {panel === 'conocer' && (
+      {panel === 'conocer' && !esPortada && (
         <PanelConocer
           contenido={actual}
           datos={INVESTIGACION_POR_MES[mes]?.datos_clave ?? []}
@@ -437,38 +533,34 @@ export default function CalendarioArte() {
           alCerrar={() => { setPanel(null); if (params.get('conocer')) setParams(p => { p.delete('conocer'); return p; }, { replace: true }); }}
         />
       )}
-      {panel === 'historial' && (
-        <PanelHistorial anio={anio} mes={mes} alRestaurado={() => { sucios.current.delete(mes); cargar(); }} alCerrar={() => setPanel(null)} />
-      )}
       {panel === 'principios' && (
         <PanelPrincipios
           principios={principios}
           puedeEditar={puedeEditar}
-          mes={mes}
+          mes={Math.max(1, mes)}
           evaluacion={actual.evaluacion ?? {}}
           nota={actual.evaluacion_nota ?? ''}
           alGuardarPrincipios={p => cambiar(0, { principios: p })}
-          alEvaluar={(evaluacion, evaluacion_nota) => cambiar(mes, { evaluacion, evaluacion_nota })}
-          alAbrirEstilo={() => setPanel('estilo')}
+          alEvaluar={(evaluacion, evaluacion_nota) => cambiar(Math.max(1, mes), { evaluacion, evaluacion_nota })}
+          alAbrirEstilo={() => { setPanel(null); irACarpeta(0); }}
           alCerrar={() => setPanel(null)}
         />
       )}
       {panel === 'ideas' && (
         <PanelIdeas
           anio={anio}
-          mesActual={mes}
-          puedeProponer={puedeProponer}
           puedeEditar={puedeEditar}
+          recarga={recargaIdeas}
           alCambiarPendientes={setPendientes}
           alCerrar={() => setPanel(null)}
         />
       )}
 
       {/* ── LO QUE SE IMPRIME ──────────────────────────────────────────── */}
-      {/* Fuera de la aplicación (directamente en <body>), para que ni el menú
-          ni el contenedor con scroll recorten las hojas al imprimir. */}
+      {/* Fuera de la aplicación (directamente en <body>), para que nada
+          recorte las hojas al imprimir. */}
       {imprimiendo && createPortal(
-        <div className="ca-impresion">
+        <div className="ca-impresion" style={vistaLetra}>
           {imprimiendo.map(m => m === 0 ? (
             <HojaPortada key={0} anio={anio} meses={meses} portada={portada} editando={false} alCambiar={() => {}} />
           ) : (
@@ -483,6 +575,13 @@ export default function CalendarioArte() {
 
 // Fuera de pantalla mientras se prepara la impresión.
 const CSS_PANTALLA = `
+.ca-hoja { font-family: var(--ca-texto, ui-serif, Georgia, Cambria, "Times New Roman", serif); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* El navegador del móvil agranda el texto de las columnas que cree estrechas
+   («text autosizing») y la hoja deja de parecerse a lo impreso. Lo desactivan
+   el text-size-adjust (Safari) y un max-height enorme (Chrome, que no aumenta
+   bloques con la altura acotada). :where() no pesa: cualquier clase gana. */
+.ca-hoja :where(*) { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; max-height: 1000000px; }
+.ca-hoja .ca-titulo { font-family: var(--ca-titulos, inherit); }
 @media screen {
   .ca-impresion { position: fixed; left: -100000px; top: 0; }
 }

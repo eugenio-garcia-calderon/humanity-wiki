@@ -313,6 +313,11 @@ export default function App() {
               {/* El formulario público de una base de datos: `/formulario/:token`.
                   También fuera del Layout, y antes de `:arroba/:slug`, al que
                   se parece. */}
+              {/* Calendario Arte para la Humanidad: página PROPIA, fuera del Layout
+                  (2026-11-05, Eugenio). Quien diseña entra por el enlace, sin
+                  cuenta, y no debe ver Wiki Creator: ni herramientas, ni iniciar
+                  sesión, ni buscador, ni el feedback o la IA flotantes. */}
+              <Route path="calendario-arte" element={<CalendarioArte />} />
               <Route path="formulario/:token" element={<FormularioPublico />} />
               {/* Seguir un pedido en el dominio principal (2026-10-18). Los
                   WhatsApp de compra ya enlazaban `humanity.wiki/pedido?codigo=…`
@@ -441,9 +446,6 @@ export default function App() {
                 <Route path="preferencias" element={<Preferencias />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
-                {/* Calendario Arte para la Humanidad (2026-11-04): doce hojas A3
-                    editables e imprimibles. No es el calendario de citas. */}
-                <Route path="calendario-arte" element={<CalendarioArte />} />
                 <Route path="mis-videos" element={<MisVideos />} />
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />

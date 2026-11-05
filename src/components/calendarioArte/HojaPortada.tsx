@@ -37,7 +37,7 @@ interface Props {
 
 export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAbrirMes }: Props) {
   return (
-    <div className="ca-hoja relative overflow-hidden bg-white font-serif text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_MM}mm` }}>
+    <div className="ca-hoja relative overflow-hidden bg-white text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_MM}mm` }}>
       {/* ── HOJA 1: EL TÍTULO ─────────────────────────────────────────── */}
       <div className="ca-mitad relative flex flex-col items-center justify-center overflow-hidden bg-stone-50 text-center" style={{ height: '210mm', padding: '16mm 30mm 14mm' }}>
         {/* Una franja con los doce colores del año, arriba y abajo. */}
@@ -52,7 +52,7 @@ export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAb
           editando={editando}
           multilinea={false}
           alCambiar={v => alCambiar({ titulo: v })}
-          className="font-semibold leading-none text-stone-800"
+          className="ca-titulo font-semibold leading-none text-stone-800"
           style={{ fontSize: '46pt', marginTop: '6mm' }}
         />
         <Editable
@@ -108,7 +108,7 @@ export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAb
       {/* ── HOJA 2: LOS DOCE TEMAS ────────────────────────────────────── */}
       <div className="ca-mitad flex flex-col" style={{ height: '210mm', padding: '9mm 9mm 8mm' }}>
         <div className="flex items-baseline justify-between" style={{ marginBottom: '4mm' }}>
-          <h2 className="font-semibold text-stone-800" style={{ fontSize: '20pt' }}>Los doce temas</h2>
+          <h2 className="ca-titulo font-semibold text-stone-800" style={{ fontSize: '20pt' }}>Los doce temas</h2>
           <span className="font-sans uppercase text-stone-400" style={{ fontSize: '7pt', letterSpacing: '0.25em' }}>Arte para la Humanidad · {anio}</span>
         </div>
         <div className="grid flex-1 grid-cols-4" style={{ gap: '4mm', gridTemplateRows: 'repeat(3, minmax(0, 1fr))' }}>
@@ -134,7 +134,7 @@ export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAb
                 </div>
                 <div className="flex flex-1 flex-col" style={{ padding: '1.8mm 2.5mm' }}>
                   <span className="font-sans uppercase text-stone-400" style={{ fontSize: '6pt', letterSpacing: '0.2em' }}>{NOMBRES_MES[m.mes - 1]}</span>
-                  <span className={cn('font-semibold leading-tight', a.texto)} style={{ fontSize: '10.5pt' }}>{m.tema}</span>
+                  <span className={cn('ca-titulo font-semibold leading-tight', a.texto)} style={{ fontSize: '10.5pt' }}>{m.tema}</span>
                   {m.lema && (
                     <span className="line-clamp-3 italic leading-snug text-stone-500" style={{ fontSize: '6.8pt', marginTop: '0.8mm' }}>{m.lema}</span>
                   )}

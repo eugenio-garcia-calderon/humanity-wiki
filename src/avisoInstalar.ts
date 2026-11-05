@@ -60,6 +60,10 @@ function silenciar() {
 
 export function ofrecerInstalacion() {
   if (!esIOS() || !esSafari() || yaInstalada() || silenciado()) return;
+  // El Calendario Arte para la Humanidad es una página propia, sin nada de la
+  // plataforma (2026-11-05, Eugenio): quien entra a diseñar no ha venido a
+  // instalar Humanity.
+  if (location.pathname.startsWith("/calendario-arte")) return;
 
   const caja = document.createElement("div");
   caja.setAttribute("role", "dialog");

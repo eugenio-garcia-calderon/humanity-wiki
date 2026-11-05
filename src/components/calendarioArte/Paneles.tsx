@@ -24,126 +24,35 @@ export function PanelLateral({ titulo, alCerrar, children }: { titulo: string; a
   );
 }
 
-// ── CARPETA DE REFERENCIAS ────────────────────────────────────────────────
-
-export function PanelCarpeta({ mes, referencias, puedeEditar, alGuardar, alUsarComoIlustracion, alCerrar }: {
-  mes: number;
-  referencias: Referencia[];
-  puedeEditar: boolean;
-  alGuardar: (r: Referencia[]) => Promise<boolean>;
-  alUsarComoIlustracion: (url: string) => void;
-  alCerrar: () => void;
-}) {
-  const entrada = useRef<HTMLInputElement>(null);
-  const [subiendo, setSubiendo] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [grande, setGrande] = useState<string | null>(null);
-
-  const subir = async (archivos: FileList | null) => {
-    if (!archivos?.length) return;
-    setError(null);
-    const nuevas: Referencia[] = [];
-    let i = 0;
-    for (const f of Array.from(archivos)) {
-      i++;
-      setSubiendo(`Subiendo ${i} de ${archivos.length}…`);
-      const r = await subirImagenCalendario(f);
-      if ('error' in r) { setError(`${f.name}: ${r.error}`); continue; }
-      nuevas.push({ url: r.url });
-    }
-    setSubiendo(null);
-    if (nuevas.length) await alGuardar([...referencias, ...nuevas]);
-  };
-
-  return (
-    <PanelLateral titulo={mes === 0 ? 'Carpeta de estilo (todo el año)' : `Carpeta de referencias · ${NOMBRES_MES[mes - 1]}`} alCerrar={alCerrar}>
-      <p className="mb-3 text-sm text-slate-500">
-        {mes === 0
-          ? 'Referencias del estilo de ilustración que comparten los doce meses.'
-          : 'Fotos e imágenes de inspiración para la ilustración de este mes.'} No salen al imprimir ni al exportar.
-      </p>
-      {puedeEditar && (
-        <>
-          <input ref={entrada} type="file" accept="image/*" multiple className="hidden" onChange={e => { subir(e.target.files); e.target.value = ''; }} />
-          <Button className="mb-4 w-full gap-2" onClick={() => entrada.current?.click()} disabled={!!subiendo}>
-            {subiendo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            {subiendo ?? 'Añadir imágenes'}
-          </Button>
-        </>
-      )}
-      {error && <p className="mb-3 rounded bg-rose-50 p-2 text-sm text-rose-700">{error}</p>}
-      {referencias.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 p-8 text-center text-sm text-slate-400">
-          <ImageIcon className="h-8 w-8" />
-          La carpeta de este mes está vacía.
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {referencias.map((r, i) => (
-            <div key={r.url + i} className="overflow-hidden rounded-lg border border-slate-200">
-              <img src={r.url} alt={r.nota || `Referencia ${i + 1}`} className="aspect-square w-full cursor-zoom-in object-cover" onClick={() => setGrande(r.url)} />
-              {puedeEditar ? (
-                <div className="space-y-1 p-1.5">
-                  <input
-                    defaultValue={r.nota ?? ''}
-                    placeholder="Nota…"
-                    onBlur={e => {
-                      const nota = e.target.value.trim();
-                      if (nota !== (r.nota ?? '')) alGuardar(referencias.map((x, j) => j === i ? { ...x, nota: nota || undefined } : x));
-                    }}
-                    className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs outline-none focus:ring-1 focus:ring-sky-400"
-                  />
-                  <div className="flex gap-1">
-                    {mes !== 0 && <Button variant="outline" className="flex-1 px-1 py-1 text-[9px]" onClick={() => alUsarComoIlustracion(r.url)}>Usar como ilustración</Button>}
-                    <Button
-                      variant="ghost"
-                      className="px-1.5 py-1 text-rose-600"
-                      aria-label="Quitar de la carpeta"
-                      onClick={() => { if (confirm('¿Quitar esta imagen de la carpeta?')) alGuardar(referencias.filter((_, j) => j !== i)); }}
-                    ><Trash2 className="h-3.5 w-3.5" /></Button>
-                  </div>
-                </div>
-              ) : r.nota ? <p className="p-1.5 text-xs text-slate-600">{r.nota}</p> : null}
-            </div>
-          ))}
-        </div>
-      )}
-      {grande && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4" onClick={() => setGrande(null)}>
-          <img src={grande} alt="" className="max-h-full max-w-full object-contain" />
-        </div>
-      )}
-    </PanelLateral>
-  );
-}
-
 // ── BUZÓN DE IDEAS ────────────────────────────────────────────────────────
 
 export interface Idea {
   id: number;
   mes: number | null;
   texto: string;
+  imagenes?: string[];
   estado: 'pendiente' | 'hecha' | 'descartada';
   respuesta: string | null;
   autor?: string | null;
   created_at: string;
 }
 
-export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCambiarPendientes, alCerrar }: {
+/** TAREAS PENDIENTES DE MEJORA (2026-11-05). La lista de lo que la gente ha
+ *  propuesto con el botón de abajo. La IA la lee cuando se le pide («haz las
+ *  tareas pendientes del calendario») y las va marcando como hechas. */
+export function PanelIdeas({ anio, puedeEditar, recarga, alCambiarPendientes, alCerrar }: {
   anio: number;
-  mesActual: number;
-  puedeProponer: boolean;
   puedeEditar: boolean;
+  /** Cambia cada vez que se envía una propuesta, para volver a leer la lista. */
+  recarga: number;
   alCambiarPendientes: (n: number) => void;
   alCerrar: () => void;
 }) {
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
-  const [texto, setTexto] = useState('');
-  const [mes, setMes] = useState<string>(mesActual ? String(mesActual) : '');
-  const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [verCerradas, setVerCerradas] = useState(false);
+  const [grande, setGrande] = useState<string | null>(null);
 
   const cargar = async () => {
     try {
@@ -152,25 +61,9 @@ export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCamb
       if (!r.ok) throw new Error(j.error);
       setIdeas(j);
       alCambiarPendientes((j as Idea[]).filter(i => i.estado === 'pendiente').length);
-    } catch (e: any) { setError(e.message || 'No se han podido cargar las ideas.'); setIdeas([]); }
+    } catch (e: any) { setError(e.message || 'No se han podido cargar las tareas.'); setIdeas([]); }
   };
-  useEffect(() => { cargar(); }, [anio]);
-
-  const enviar = async () => {
-    if (!texto.trim()) return;
-    setEnviando(true); setError(null);
-    try {
-      const r = await fetch(`/api/calendario-arte/${anio}/ideas`, {
-        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto, mes: mes || null }),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error);
-      setTexto('');
-      await cargar();
-    } catch (e: any) { setError(e.message || 'No se ha podido enviar la idea.'); }
-    setEnviando(false);
-  };
+  useEffect(() => { cargar(); }, [anio, recarga]);
 
   const cambiarEstado = async (id: number, estado: Idea['estado']) => {
     const r = await fetch(`/api/calendario-arte/ideas/${id}`, {
@@ -185,19 +78,27 @@ export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCamb
   const cerradas = (ideas ?? []).filter(i => i.estado !== 'pendiente');
 
   const copiarParaIA = async () => {
-    const lista = pendientes.map(i => `#${i.id} [${i.mes ? NOMBRES_MES[i.mes - 1] : 'General'}] ${i.texto}`).join('\n');
-    const mensaje = `Calendario Arte para la Humanidad ${anio} (humanity.wiki/calendario-arte). Implementa estas ideas pendientes y márcalas como hechas:\n\n${lista}`;
+    const lista = pendientes.map(i => `#${i.id} [${i.mes ? NOMBRES_MES[i.mes - 1] : 'General'}] ${i.texto}`
+      + (i.imagenes ?? []).map(u => `\n    imagen: ${location.origin}${u}`).join('')).join('\n');
+    const mensaje = `Calendario Arte para la Humanidad ${anio} (humanity.wiki/calendario-arte). Implementa estas tareas de mejora pendientes y márcalas como hechas:\n\n${lista}`;
     try { await navigator.clipboard.writeText(mensaje); setCopiado(true); setTimeout(() => setCopiado(false), 2500); }
     catch { setError('No he podido copiar. Abre la lista en texto y cópiala a mano.'); }
   };
 
-  const Fila = ({ i }: { i: Idea }) => (
-    <li className={cn('rounded-lg border p-3 text-sm', i.estado === 'pendiente' ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200 bg-slate-50 text-slate-500')}>
+  const fila = (i: Idea) => (
+    <li key={i.id} className={cn('rounded-lg border p-3 text-sm', i.estado === 'pendiente' ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200 bg-slate-50 text-slate-500')}>
       <div className="mb-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
         <span>#{i.id} · {i.mes ? NOMBRES_MES[i.mes - 1] : 'General'}{i.autor ? ` · ${i.autor}` : ''}</span>
         <span>{new Date(i.created_at).toLocaleDateString('es-ES')}</span>
       </div>
       <p className={cn('whitespace-pre-line', i.estado === 'descartada' && 'line-through')}>{i.texto}</p>
+      {!!i.imagenes?.length && (
+        <div className="mt-2 flex gap-2">
+          {i.imagenes.map(u => (
+            <img key={u} src={u} alt="" onClick={() => setGrande(u)} className="h-14 w-14 cursor-zoom-in rounded-lg border border-slate-200 object-cover" />
+          ))}
+        </div>
+      )}
       {i.respuesta && <p className="mt-1 rounded bg-white p-1.5 text-xs text-slate-600">↳ {i.respuesta}</p>}
       {puedeEditar && (
         <div className="mt-2 flex gap-1">
@@ -215,33 +116,11 @@ export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCamb
   );
 
   return (
-    <PanelLateral titulo="Ideas y mejoras" alCerrar={alCerrar}>
+    <PanelLateral titulo="Tareas pendientes de mejora" alCerrar={alCerrar}>
       <p className="mb-3 text-sm text-slate-500">
-        Deja aquí cualquier idea o corrección. La IA las lee cuando se lo pidáis
-        («haz las tareas pendientes del calendario») y las va marcando como hechas.
+        Lo que se propone con el botón «Añadir propuesta de mejora». La IA lo lee cuando se lo pedís
+        («haz las tareas pendientes del calendario») y lo va marcando como hecho.
       </p>
-      {puedeProponer ? (
-        <div className="mb-5 space-y-2">
-          <textarea
-            value={texto}
-            onChange={e => setTexto(e.target.value)}
-            rows={3}
-            placeholder="Ej.: en marzo, cambiar la frase del día 14 por un dato sobre los ríos de España"
-            className="w-full rounded-lg border border-slate-300 p-2 text-sm outline-none focus:ring-2 focus:ring-sky-400"
-          />
-          <div className="flex gap-2">
-            <select value={mes} onChange={e => setMes(e.target.value)} className="flex-1 rounded-lg border border-slate-300 px-2 text-sm">
-              <option value="">General (todo el calendario)</option>
-              {NOMBRES_MES.map((n, i) => <option key={n} value={i + 1}>{n}</option>)}
-            </select>
-            <Button className="gap-1" onClick={enviar} disabled={enviando || !texto.trim()}>
-              {enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Enviar
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <p className="mb-5 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">Inicia sesión para proponer ideas.</p>
-      )}
       {error && <p className="mb-3 rounded bg-rose-50 p-2 text-sm text-rose-700">{error}</p>}
 
       <div className="mb-2 flex items-center justify-between">
@@ -255,9 +134,9 @@ export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCamb
       {ideas === null ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-slate-400" />
       ) : pendientes.length === 0 ? (
-        <p className="text-sm text-slate-400">No hay ideas pendientes.</p>
+        <p className="text-sm text-slate-400">No hay tareas pendientes.</p>
       ) : (
-        <ul className="space-y-2">{pendientes.map(i => <Fila key={i.id} i={i} />)}</ul>
+        <ul className="space-y-2">{pendientes.map(fila)}</ul>
       )}
       <p className="mt-2 text-[11px] text-slate-400">
         En texto plano: <a className="underline" href={`/api/calendario-arte/${anio}/ideas.txt`} target="_blank" rel="noreferrer">/api/calendario-arte/{anio}/ideas.txt</a>
@@ -268,7 +147,12 @@ export function PanelIdeas({ anio, mesActual, puedeProponer, puedeEditar, alCamb
           <Button variant="ghost" className="px-0 text-[10px]" onClick={() => setVerCerradas(v => !v)}>
             {verCerradas ? 'Ocultar' : 'Ver'} hechas y descartadas ({cerradas.length})
           </Button>
-          {verCerradas && <ul className="mt-2 space-y-2">{cerradas.map(i => <Fila key={i.id} i={i} />)}</ul>}
+          {verCerradas && <ul className="mt-2 space-y-2">{cerradas.map(fila)}</ul>}
+        </div>
+      )}
+      {grande && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4" onClick={() => setGrande(null)}>
+          <img src={grande} alt="" className="max-h-full max-w-full object-contain" />
         </div>
       )}
     </PanelLateral>

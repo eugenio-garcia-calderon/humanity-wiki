@@ -8,7 +8,7 @@
 // La hoja se dibuja SIEMPRE en milímetros reales. En pantalla se escala para
 // que quepa; al imprimir se usa tal cual, así lo que ves es lo que sale.
 import { useState } from 'react';
-import { ImagePlus, Loader2 } from 'lucide-react';
+import { FolderOpen, ImagePlus, Loader2, Plus, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { ContenidoMes, FranjaMes, TipoFranja } from '../../data/calendarioArteTipos';
 import { Editable } from './Editable';
@@ -44,10 +44,12 @@ interface Props {
   editando: boolean;
   alCambiar: (cambio: Partial<ContenidoMes>) => void;
   alElegirImagen?: () => void;
+  /** Abre la carpeta del mes para elegir otra ilustración guardada. */
+  alAbrirCarpeta?: () => void;
   subiendoImagen?: boolean;
 }
 
-export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, subiendoImagen }: Props) {
+export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen }: Props) {
   const acento = ACENTOS[(c.mes - 1) % 12];
   const esBoceto = !!c.imagen?.startsWith('/calendario-arte/bocetos/');
   // Si la imagen no carga, se dice («ilustración pendiente») en vez de
@@ -71,7 +73,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
 
   return (
     <div
-      className="ca-hoja relative bg-white text-stone-800 font-serif overflow-hidden"
+      className="ca-hoja relative bg-white text-stone-800 overflow-hidden"
       style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_MM}mm` }}
     >
       {/* ── HOJA 1 (A4 apaisado): TEMA, FRASE E ILUSTRACIÓN ───────────────── */}
@@ -85,7 +87,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
             editando={editando}
             multilinea={false}
             alCambiar={v => alCambiar({ tema: v })}
-            className={cn('font-semibold uppercase leading-none', acento.texto)}
+            className={cn('ca-titulo font-semibold uppercase leading-none', acento.texto)}
             style={{ fontSize: '24pt', letterSpacing: '0.12em' }}
           />
           <Editable
@@ -98,7 +100,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
             style={{ fontSize: '13pt', marginTop: '3mm', maxWidth: '240mm' }}
           />
         </div>
-        <div className="relative flex-1 overflow-hidden" style={{ margin: '0 9mm 9mm', borderRadius: '3mm' }}>
+        <div className="group relative flex-1 overflow-hidden" style={{ margin: '0 9mm 9mm', borderRadius: '3mm' }}>
           {c.imagen && imagenRota !== c.imagen ? (
             <img
               src={c.imagen}
@@ -117,40 +119,31 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
               Boceto de composición — no es la ilustración final
             </span>
           )}
-          {editando && alElegirImagen && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={alElegirImagen}
-              className="ca-no-imprimir absolute right-4 top-4 gap-2 rounded-full bg-white/95 font-sans shadow-lg hover:bg-white"
-            >
-              {subiendoImagen ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-              {c.imagen ? 'Cambiar ilustración' : 'Subir ilustración'}
-            </Button>
+          {/* Al pasar por la ilustración: elegir otra de la carpeta o subir una
+              nueva. En el móvil (sin «pasar por encima») se ven siempre. */}
+          {editando && (alElegirImagen || alAbrirCarpeta) && (
+            <div className="ca-no-imprimir absolute right-4 top-4 flex gap-2 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+              {alAbrirCarpeta && (
+                <Button type="button" variant="outline" onClick={alAbrirCarpeta} className="gap-2 rounded-full bg-white/95 font-sans shadow-lg hover:bg-white">
+                  <FolderOpen className="h-4 w-4" />Elegir de la carpeta
+                </Button>
+              )}
+              {alElegirImagen && (
+                <Button type="button" variant="outline" onClick={alElegirImagen} className="gap-2 rounded-full bg-white/95 font-sans shadow-lg hover:bg-white">
+                  {subiendoImagen ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                  {c.imagen ? 'Subir otra' : 'Subir ilustración'}
+                </Button>
+              )}
+            </div>
           )}
         </div>
-        {/* El encargo para quien ilustra: luz, sombra y escena. Solo en pantalla. */}
-        {editando && (
-          <div className="ca-no-imprimir absolute inset-x-0 bottom-0 bg-white/95 font-sans" style={{ padding: '2mm 12mm' }}>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Encargo de la ilustración</span>
-            <Editable
-              as="p"
-              valor={c.ilustracion_idea}
-              editando
-              alCambiar={v => alCambiar({ ilustracion_idea: v })}
-              vacio="Escena, parte luminosa y parte oscura del tema…"
-              className="text-stone-600"
-              style={{ fontSize: '9pt' }}
-            />
-          </div>
-        )}
       </div>
 
       {/* ── HOJA 2 (A4 apaisado): CALENDARIO 75 % + HERRAMIENTA 25 % ─────── */}
       <div className="ca-mitad flex flex-col" style={{ height: '210mm', padding: '6mm 9mm 7mm' }}>
         <div className="flex items-baseline justify-between" style={{ marginBottom: '2mm' }}>
           <div className="flex items-baseline" style={{ gap: '4mm' }}>
-            <h3 className={cn('font-bold leading-none', acento.texto)} style={{ fontSize: '30pt' }}>{nombre}</h3>
+            <h3 className={cn('ca-titulo font-bold leading-none', acento.texto)} style={{ fontSize: '30pt' }}>{nombre}</h3>
             <Editable
               valor={c.subtitulo}
               editando={editando}
@@ -190,7 +183,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
             >
               {d && (
                 <>
-                  <div className={cn('font-bold leading-none', acento.texto)} style={{ fontSize: '11pt' }}>{d}</div>
+                  <div className={cn('ca-titulo font-bold leading-none', acento.texto)} style={{ fontSize: '11pt' }}>{d}</div>
                   <Editable
                     as="div"
                     valor={c.dias[d - 1] ?? ''}
@@ -225,7 +218,7 @@ function Iniciativa({ c, editando, acento, alCambiar }: {
     <div className={cn('flex flex-col rounded-[4mm] overflow-hidden', acento.suave)} style={{ width: '74mm', padding: '3mm 4mm' }}>
       <span className={cn('font-sans font-bold uppercase tracking-[0.18em]', acento.texto)} style={{ fontSize: '7pt' }}>Iniciativa del mes</span>
       <Editable as="p" valor={i.nombre} editando={editando} multilinea={false} alCambiar={v => alCambiar({ ...i, nombre: v })}
-        vacio="Iniciativa por elegir" className="font-bold leading-tight text-stone-800" style={{ fontSize: '10pt', marginTop: '1mm' }} />
+        vacio="Iniciativa por elegir" className="ca-titulo font-bold leading-tight text-stone-800" style={{ fontSize: '10pt', marginTop: '1mm' }} />
       {vacia && !editando && <p className="italic text-stone-500" style={{ fontSize: '8pt' }}>Iniciativa por elegir</p>}
       <Editable as="p" valor={i.texto} editando={editando} alCambiar={v => alCambiar({ ...i, texto: v })}
         vacio="Qué hace y por qué la apoyamos…" className="flex-1 leading-snug text-stone-600" style={{ fontSize: '7.5pt', marginTop: '1mm' }} />
@@ -250,83 +243,104 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
 }) {
   const cambiar = (c: Partial<FranjaMes>) => alCambiar({ ...f, ...c });
   const sopa = f.tipo === 'sopa' ? generarSopa(f.items) : null;
+  const cambiarItem = (i: number, v: string) => {
+    const items = [...f.items];
+    if (v) items[i] = f.tipo === 'sopa' ? normalizarPalabra(v) : v; else items.splice(i, 1);
+    cambiar({ items });
+  };
+  const quitar = (i: number) => cambiar({ items: f.items.filter((_, k) => k !== i) });
+  const anadir = () => cambiar({ items: [...f.items, f.tipo === 'sopa' ? 'PALABRA' : 'Nuevo elemento'] });
+
+  /** Cada elemento se edita en su sitio, como cualquier otro texto de la hoja.
+   *  Funciones que devuelven JSX y NO componentes: un componente declarado aquí
+   *  dentro sería «otro» en cada pintado y React desmontaría el campo mientras
+   *  alguien escribe en él. */
+  const item = (it: string, i: number) => (
+    <span className="group/item relative min-w-0 flex-1">
+      <Editable valor={it} editando={editando} multilinea={false} alCambiar={v => cambiarItem(i, v)} className="leading-snug" />
+      {editando && (
+        <button type="button" onClick={() => quitar(i)} aria-label="Quitar"
+          className="ca-no-imprimir absolute -right-1 -top-1 hidden h-4 w-4 place-items-center rounded-full bg-stone-700 text-white group-hover/item:grid">
+          <X className="h-2.5 w-2.5" />
+        </button>
+      )}
+    </span>
+  );
+  const botonAnadir = (texto: string) => editando ? (
+    <button type="button" onClick={anadir}
+      className="ca-no-imprimir inline-flex items-center gap-1 rounded-full border border-dashed border-stone-300 px-2 font-sans text-stone-400 opacity-0 transition-opacity hover:border-stone-500 hover:text-stone-600 group-hover:opacity-100"
+      style={{ fontSize: '7pt' }}>
+      <Plus className="h-3 w-3" />{texto}
+    </button>
+  ) : null;
 
   return (
-    <div className={cn('flex-1 min-w-0 rounded-[4mm] border-2 flex overflow-hidden', acento.borde)} style={{ padding: '3mm 5mm', gap: '4mm' }}>
+    <div className={cn('group relative flex-1 min-w-0 rounded-[4mm] border-2 flex overflow-hidden', acento.borde)} style={{ padding: '3mm 5mm', gap: '4mm' }}>
+      {editando && (
+        <select
+          value={f.tipo}
+          onChange={e => cambiar({ tipo: e.target.value as TipoFranja })}
+          title="Tipo de herramienta"
+          className="ca-no-imprimir absolute right-2 top-2 z-10 rounded border border-stone-300 bg-white px-1 py-0.5 font-sans text-xs opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100"
+        >
+          {TIPOS.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+        </select>
+      )}
       <div className="flex flex-col" style={{ width: f.tipo === 'texto' ? '100%' : '58mm', flexShrink: 0 }}>
-        {editando && (
-          <select
-            value={f.tipo}
-            onChange={e => cambiar({ tipo: e.target.value as TipoFranja })}
-            className="ca-no-imprimir mb-1 self-start rounded border border-stone-300 bg-white px-1 py-0.5 font-sans text-xs"
-          >
-            {TIPOS.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-          </select>
-        )}
         <Editable as="h3" valor={f.titulo} editando={editando} multilinea={false} alCambiar={v => cambiar({ titulo: v })}
-          vacio="Título de la herramienta" className={cn('font-sans font-bold uppercase tracking-[0.18em] leading-tight', acento.texto)} style={{ fontSize: '9pt' }} />
+          vacio="Título de la herramienta" className={cn('ca-titulo font-bold uppercase tracking-[0.18em] leading-tight', acento.texto)} style={{ fontSize: '9pt' }} />
         <Editable as="p" valor={f.texto} editando={editando} alCambiar={v => cambiar({ texto: v })}
           vacio="Cómo se usa…" className="leading-snug text-stone-600" style={{ fontSize: '8pt', marginTop: '1.5mm' }} />
       </div>
 
-      {f.tipo !== 'texto' && (
-        editando && f.tipo !== 'sopa' ? (
-          <ItemsEditables f={f} cambiar={cambiar} />
-        ) : f.tipo === 'sopa' && sopa ? (
-          <div className="flex flex-1 min-w-0" style={{ gap: '4mm' }}>
-            <div className="grid font-sans font-semibold text-stone-700" style={{ gridTemplateColumns: `repeat(${sopa.filas[0].length}, 4.1mm)`, gridAutoRows: '4.1mm', fontSize: '8pt' }}>
-              {sopa.filas.flat().map((l, i) => <div key={i} className="flex items-center justify-center">{l}</div>)}
-            </div>
-            <div className="flex-1 min-w-0">
-              {editando ? (
-                <ItemsEditables f={f} cambiar={cambiar} ayuda="Una palabra por línea (sin tildes)" />
-              ) : (
-                <ul className="font-sans text-stone-600 columns-2" style={{ fontSize: '7.5pt', columnGap: '3mm' }}>
-                  {f.items.map(normalizarPalabra).filter(Boolean).map(p => (
-                    <li key={p} className={cn(!sopa.colocadas.includes(p) && 'line-through text-rose-500')}>{p}</li>
-                  ))}
-                </ul>
-              )}
-              {sopa.noCaben.length > 0 && (
-                <p className="ca-no-imprimir font-sans text-rose-600" style={{ fontSize: '7pt' }}>
-                  No caben en la sopa: {sopa.noCaben.join(', ')}. Acórtalas o quita alguna.
-                </p>
-              )}
-            </div>
+      {f.tipo === 'sopa' && sopa ? (
+        <div className="flex flex-1 min-w-0" style={{ gap: '4mm' }}>
+          <div className="grid font-sans font-semibold text-stone-700" style={{ gridTemplateColumns: `repeat(${sopa.filas[0].length}, 4.1mm)`, gridAutoRows: '4.1mm', fontSize: '8pt' }}>
+            {sopa.filas.flat().map((l, i) => <div key={i} className="flex items-center justify-center">{l}</div>)}
           </div>
-        ) : (
-          <ul className={cn('flex-1 min-w-0 font-sans text-stone-700', f.tipo === 'pasos' ? 'columns-2' : 'columns-3')} style={{ fontSize: '8pt', columnGap: '5mm' }}>
+          <div className="flex-1 min-w-0">
+            <ul className="grid font-sans text-stone-600" style={{
+              fontSize: '7.5pt', columnGap: '3mm', gridAutoFlow: 'column', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gridTemplateRows: `repeat(${Math.max(1, Math.ceil(f.items.length / 2))}, auto)`,
+            }}>
+              {f.items.map((p, i) => (
+                <li key={i} className={cn('flex break-inside-avoid', !sopa.colocadas.includes(normalizarPalabra(p)) && 'text-rose-500 line-through')}>
+                  {item(normalizarPalabra(p), i)}
+                </li>
+              ))}
+            </ul>
+            {botonAnadir('Añadir palabra')}
+            {sopa.noCaben.length > 0 && (
+              <p className="ca-no-imprimir font-sans text-rose-600" style={{ fontSize: '7pt' }}>
+                No caben en la sopa: {sopa.noCaben.join(', ')}. Acórtalas o quita alguna.
+              </p>
+            )}
+          </div>
+        </div>
+      ) : f.tipo !== 'texto' ? (
+        <div className="flex-1 min-w-0">
+          {/* Rejilla que se llena por columnas (como un texto a dos o tres
+              columnas) y no `columns-*`: el móvil agranda el texto de las
+              cajas multicolumna y la hoja dejaba de parecerse a la impresa. */}
+          <ul className="grid font-sans text-stone-700" style={{
+            fontSize: '8pt', columnGap: '5mm', gridAutoFlow: 'column',
+            gridTemplateColumns: `repeat(${f.tipo === 'pasos' ? 2 : 3}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${Math.max(1, Math.ceil(f.items.length / (f.tipo === 'pasos' ? 2 : 3)))}, auto)`,
+          }}>
             {f.items.map((it, i) => (
-              <li key={i} className="flex items-start break-inside-avoid" style={{ gap: '1.6mm', marginBottom: '1.3mm' }}>
+              <li key={i} className="flex items-start" style={{ gap: '1.6mm', marginBottom: '1.3mm' }}>
                 {f.tipo === 'pasos' ? (
                   <span className={cn('shrink-0 rounded-full text-white text-center font-bold leading-[3.6mm]', acento.fondo)} style={{ width: '3.6mm', height: '3.6mm', fontSize: '6pt' }}>{i + 1}</span>
                 ) : (
                   <span className={cn('shrink-0 rounded-full border', acento.borde)} style={{ width: '3.2mm', height: '3.2mm', marginTop: '0.3mm' }} />
                 )}
-                <span className="leading-snug">{it}</span>
+                {item(it, i)}
               </li>
             ))}
           </ul>
-        )
-      )}
+          {botonAnadir('Añadir')}
+        </div>
+      ) : null}
     </div>
-  );
-}
-
-/** En edición, los elementos de la lista se escriben uno por línea. */
-function ItemsEditables({ f, cambiar, ayuda = 'Un elemento por línea' }: { f: FranjaMes; cambiar: (c: Partial<FranjaMes>) => void; ayuda?: string }) {
-  return (
-    <label className="ca-no-imprimir flex flex-1 min-w-0 flex-col font-sans">
-      <span className="text-[10px] text-stone-400">{ayuda}</span>
-      <textarea
-        defaultValue={f.items.join('\n')}
-        key={f.items.join('\n')}
-        onBlur={e => {
-          const items = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
-          if (items.join('\n') !== f.items.join('\n')) cambiar({ items });
-        }}
-        className="flex-1 resize-none rounded border border-sky-300 bg-white/90 p-1 text-xs leading-snug outline-none focus:ring-2 focus:ring-sky-500"
-      />
-    </label>
   );
 }

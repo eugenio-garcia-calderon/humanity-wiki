@@ -10212,3 +10212,9 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Los textos se editan en su sitio (hoja 0, campo `portada`); temas, frases e ilustraciones salen de cada mes, así la portada nunca contradice al calendario.
   - Miniaturas de 900 px en `public/calendario-arte/miniaturas/` (~75 kB cada una). Si alguien sube otra ilustración, la portada usa esa.
   - «Exportar» ofrece «Solo la portada» y «Portada y los 12 meses» (13 páginas en A3, 26 en A4).
+- Calendario Arte: página propia para diseñadores (2026-11-05, Eugenio).
+  - `/calendario-arte` vive fuera del Layout: logo provisional «Arte para la Humanidad» (doce puntos de color + nombre) y su propio menú (Calendario, Carpetas, Principios, Tareas de mejora, Exportar). Sin nada de Wiki Creator: ni herramientas, ni iniciar sesión, ni buscador, ni feedback/IA flotantes, ni el aviso de instalar la app. Título de pestaña propio.
+  - Todo se edita al pincharlo, como las páginas: tema, frase, días, títulos, la herramienta y CADA elemento de sus listas (con añadir/quitar al pasar), la sopa de letras palabra a palabra, la iniciativa. «Vista final» quita marcos y botones.
+  - Tipo de letra elegible (títulos y texto) entre 12 familias servidas desde nuestro dominio (@fontsource, nada de Google Fonts). Se aplica a la portada, los meses y la exportación.
+  - Carpetas: una por mes (y una de estilo común) con tres cajones: ilustraciones (la del calendario, la original y otras versiones, con «Usar en el calendario» sin perder la anterior), bocetos (el original y los subidos) y referencias. El encargo de la ilustración se edita ahí. «Pedir a la IA una ilustración nueva» crea la tarea de mejora correspondiente.
+  - «Añadir propuesta de mejora», abajo y centrado, como en los sitios: texto, dictado por voz e imágenes (hasta 3), sin cuenta. Va a «Tareas de mejora» con el mes en el que estabas (migración 0163: imágenes en las propuestas).

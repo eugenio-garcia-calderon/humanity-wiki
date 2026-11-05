@@ -35,9 +35,13 @@ export interface ContenidoMes {
   evaluacion_nota?: string;
 }
 
+/** Qué es cada imagen de la carpeta de un mes. Sin tipo = referencia. */
+export type TipoCarpeta = 'ilustracion' | 'boceto' | 'referencia';
+
 export interface Referencia {
   url: string;
   nota?: string;
+  tipo?: TipoCarpeta;
 }
 
 /** Los textos de la portada (hoja 0, campo `portada`). Vacío = el original. */
