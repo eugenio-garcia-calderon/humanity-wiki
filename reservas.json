@@ -5,6 +5,12 @@
       "ruta": "drizzle/0168_calendario_arte_disenos.sql",
       "motivo": "Calendario Arte: cola de diseños nuevos (agente en la nube)",
       "desde": "2026-11-05T13:09:32.371Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Aeromóvil: velomóvil rojo",
+      "desde": "2026-11-05T13:55:11.588Z"
     }
   ]
 }
