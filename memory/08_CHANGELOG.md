@@ -10231,3 +10231,12 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Migración 0165: proyecto «Aeromóvil Gota» y, dentro, la página «Aeromóvil Gota», las dos de la cuenta eugenio@lighthumanity.org. Si la cuenta no existe, no hace nada; si ya existen, no las pisa.
   - Una página puede ser la puerta de una pantalla propia: `config.ruta` (solo rutas internas). El menú lleva a `/aeromovil` y abrir `/paginas/KW_AEROMOVIL_GOTA` también redirige allí.
   - El dueño (el creador de esa página) o un administrador marca las tareas como en curso, hechas o descartadas; comentar sigue abierto a cualquiera. La cabecera dice de quién es.
+- Aeromóvil Gota, segunda ronda (2026-11-05, Eugenio).
+  - Nuevos deslizadores: inclinación de la horquilla (con el avance de la dirección), hueco del morro y de la cola a sus ruedas (desde 5 cm), forma del morro (de elíptico a romo, para pegarlo a la rueda) y reclinado del piloto y de los pasajeros.
+  - Manillar realista: dirección indirecta sobre el asiento, con mástil entre las rodillas, puños a la altura del pecho y bieleta a la horquilla; las manos del piloto van a los puños con los codos doblados.
+  - Maniquíes articulados (pelvis, tronco, cuello, cabeza con pelo, brazos con codo, piernas con pies, ropa) y cordones de soldadura en las uniones de tubos.
+  - Pilotos traseros: dos faros con carcasa y luz de posición y freno, más la tercera luz; ya no es una franja.
+  - Peso: desglose por partes, materiales de chasis y carenado, deslizadores de masa (ruedas, motor, generador, baterías, asientos, suspensión, espesores, paneles, varios) y la barra «todo ligero ↔ todo pesado».
+  - Diseños guardados (migración 0166): menú «Diseños» en la barra superior para guardar, guardar como nuevo, empezar uno nuevo, quitar y compartir por enlace (`?diseno=ID`). Cualquiera crea; cambia o quita quien lo creó (cuenta o clave de su navegador) o el dueño.
+  - Medidas por defecto de un diseño nuevo: las que fijó Eugenio a las 13:01 (batalla 2,60, eje lateral 1,22, vía 1,05, ruedas 24″/20″, piloto 1,12, pasajeros 1,92, ancho 1,29, alto 1,28…). Las palabras de su pantalla («roma», «afilada», «plano») se tradujeron a números ajustándolos a sus cifras. STEP y STL regenerados con ellas.
+  - Los parámetros guardados en el navegador cambian de clave (`aeromovil.parametros.v4`): quien tuviera medidas guardadas en su navegador ve las nuevas por defecto.
