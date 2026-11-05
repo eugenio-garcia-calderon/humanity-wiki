@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/seguridad/politica.ts",
-      "motivo": "Aeromóvil: rutas de diseños",
-      "desde": "2026-11-05T11:58:46.147Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "Aeromóvil: clasificar sus tablas",
       "desde": "2026-11-05T11:59:23.426Z"
