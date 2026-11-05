@@ -20,6 +20,8 @@ import { OrbitControls, OrthographicCamera, PerspectiveCamera } from '@react-thr
 import * as THREE from 'three';
 import type { Mundo, Edificio } from './geometria';
 import { SUELO, SISTEMA, EDIFICIO, COPAS, CIELO } from './paleta';
+import { prototipo, type Prototipo } from './prototipos';
+import { textura, TAM } from './texturas';
 
 export type Modo = 'perspectiva' | 'cenital' | 'frontal';
 export interface Objetivo { cx: number; cy: number; radio: number; nonce: number }
@@ -33,12 +35,53 @@ function colorCapa(capa: string): string {
 }
 
 // ---------------------------------------------------------------- ground
+/** Road markings drawn on top of the asphalt (render only; the DXF has its own EJES layer). */
+function marcas(m: Mundo, push: (capa: string) => number[], tri: (a: number[], ...p: number[]) => void) {
+  const a = push('marca');
+  const raya = 3, hueco = 6, w = 0.15;
+  // dashed centre line + solid edge lines along every ring of road
+  for (const r of m.anillos) {
+    if (r.capa !== 'calzada') continue;
+    const rm = (r.r0 + r.r1) / 2;
+    const L = (r.a1 - r.a0) * rm;
+    const n = Math.floor(L / (raya + hueco));
+    for (let i = 0; i < n; i++) {
+      const t0 = r.a0 + ((i * (raya + hueco)) / rm), t1 = t0 + raya / rm;
+      arco(a, tri, r.cx, r.cy, rm - w / 2, rm + w / 2, t0, t1, 1);
+    }
+    if (r.detalle) {
+      const segs = Math.max(8, Math.min(720, Math.ceil(L / 4)));
+      arco(a, tri, r.cx, r.cy, r.r0 + 0.25, r.r0 + 0.37, r.a0, r.a1, segs);
+      arco(a, tri, r.cx, r.cy, r.r1 - 0.37, r.r1 - 0.25, r.a0, r.a1, segs);
+    }
+  }
+  // straight roads (corridors and spokes): the same dashes along their axis
+  for (const s of m.superficies) {
+    if (s.capa !== 'calzada' || s.pts.length !== 8) continue;
+    const q = s.pts;
+    const ax = (q[0] + q[6]) / 2, ay = (q[1] + q[7]) / 2, bx = (q[2] + q[4]) / 2, by = (q[3] + q[5]) / 2;
+    const L = Math.hypot(bx - ax, by - ay); if (L < 1) continue;
+    const ux = (bx - ax) / L, uy = (by - ay) / L, nx = -uy * w / 2, ny = ux * w / 2;
+    for (let d = 0; d + raya < L; d += raya + hueco) {
+      const x0 = ax + ux * d, y0 = ay + uy * d, x1 = x0 + ux * raya, y1 = y0 + uy * raya;
+      tri(a, x0 - nx, y0 - ny, x1 - nx, y1 - ny, x1 + nx, y1 + ny); tri(a, x0 - nx, y0 - ny, x1 + nx, y1 + ny, x0 + nx, y0 + ny);
+    }
+  }
+}
+function arco(a: number[], tri: (a: number[], ...p: number[]) => void, cx: number, cy: number, r0: number, r1: number, t0: number, t1: number, n: number) {
+  for (let i = 0; i < n; i++) {
+    const u0 = t0 + (t1 - t0) * i / n, u1 = t0 + (t1 - t0) * (i + 1) / n;
+    const c0 = Math.cos(u0), s0 = Math.sin(u0), c1 = Math.cos(u1), s1 = Math.sin(u1);
+    tri(a, cx + r0 * c0, cy + r0 * s0, cx + r1 * c0, cy + r1 * s0, cx + r1 * c1, cy + r1 * s1);
+    tri(a, cx + r0 * c0, cy + r0 * s0, cx + r1 * c1, cy + r1 * s1, cx + r0 * c1, cy + r0 * s1);
+  }
+}
+
 function construirSuelos(m: Mundo) {
   const porCapa = new Map<string, number[]>();
   const push = (capa: string) => { let a = porCapa.get(capa); if (!a) { a = []; porCapa.set(capa, a); } return a; };
-  const tri = (a: number[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number) => {
-    a.push(x1, 0, -y1, x2, 0, -y2, x3, 0, -y3);
-  };
+  // positions stored as plan x,y pairs; turned into 3D (x, 0, -y) + world-space UVs below
+  const tri = (a: number[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number) => { a.push(x1, y1, x2, y2, x3, y3); };
   for (const s of m.superficies) {
     const a = push(s.capa), q = s.pts;
     if (q.length === 8) { tri(a, q[0], q[1], q[2], q[3], q[4], q[5]); tri(a, q[0], q[1], q[4], q[5], q[6], q[7]); continue; }
@@ -48,16 +91,9 @@ function construirSuelos(m: Mundo) {
     for (const [i, j, k] of caras) tri(a, contorno[i].x, contorno[i].y, contorno[j].x, contorno[j].y, contorno[k].x, contorno[k].y);
   }
   for (const r of m.anillos) {
-    const a = push(r.capa);
     const len = (r.a1 - r.a0) * r.r1;
     const n = Math.max(6, Math.min(r.detalle ? 720 : 160, Math.ceil(len / (r.detalle ? 3 : 30))));
-    for (let i = 0; i < n; i++) {
-      const t0 = r.a0 + (r.a1 - r.a0) * i / n, t1 = r.a0 + (r.a1 - r.a0) * (i + 1) / n;
-      const c0 = Math.cos(t0), s0 = Math.sin(t0), c1 = Math.cos(t1), s1 = Math.sin(t1);
-      const ax = r.cx + r.r0 * c0, ay = r.cy + r.r0 * s0, bx = r.cx + r.r1 * c0, by = r.cy + r.r1 * s0;
-      const cx = r.cx + r.r1 * c1, cy = r.cy + r.r1 * s1, dx = r.cx + r.r0 * c1, dy = r.cy + r.r0 * s1;
-      tri(a, ax, ay, bx, by, cx, cy); tri(a, ax, ay, cx, cy, dx, dy);
-    }
+    arco(push(r.capa), tri as any, r.cx, r.cy, r.r0, r.r1, r.a0, r.a1, n);
   }
   for (const d of m.discos) {
     const a = push(d.capa);
@@ -67,14 +103,29 @@ function construirSuelos(m: Mundo) {
       tri(a, d.cx, d.cy, d.cx + d.r * Math.cos(t0), d.cy + d.r * Math.sin(t0), d.cx + d.r * Math.cos(t1), d.cy + d.r * Math.sin(t1));
     }
   }
+  marcas(m, push, tri as any);
   const capas = [...porCapa.keys()].sort((x, y) => {
     const ix = x.startsWith('enlace-') ? 999 : ORDEN.indexOf(x), iy = y.startsWith('enlace-') ? 999 : ORDEN.indexOf(y);
     return ix - iy;
   });
   return capas.map((capa, i) => {
+    const xy = porCapa.get(capa)!;
+    const nv = xy.length / 2;
+    const pos = new Float32Array(nv * 3);
+    const tex = textura(capa);
+    const uv = tex ? new Float32Array(nv * 2) : null;
+    const k = 1 / (TAM[capa] ?? 10);
+    for (let v = 0; v < nv; v++) {
+      const x = xy[v * 2], y = xy[v * 2 + 1];
+      pos[v * 3] = x; pos[v * 3 + 2] = -y;
+      if (uv) { uv[v * 2] = x * k; uv[v * 2 + 1] = y * k; }
+    }
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(porCapa.get(capa)!, 3));
-    const mat = new THREE.MeshBasicMaterial({ color: colorCapa(capa), depthTest: false, depthWrite: false, side: THREE.DoubleSide });
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    if (uv) g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    const mat = tex
+      ? new THREE.MeshBasicMaterial({ map: tex, depthTest: false, depthWrite: false, side: THREE.DoubleSide })
+      : new THREE.MeshBasicMaterial({ color: colorCapa(capa), depthTest: false, depthWrite: false, side: THREE.DoubleSide });
     return { capa, g, mat, orden: -1000 + i };
   });
 }
@@ -87,6 +138,7 @@ function Suelos({ mundo }: { mundo: Mundo }) {
 
 // ---------------------------------------------------------------- instancing helper
 interface Inst { x: number; y: number; z: number; rx?: number; ry: number; sx: number; sy: number; sz: number; color: string; ref?: number }
+/** Draws one prototype many times: one geometry, one GPU call, N copies. */
 function Instancias({ geo, items, mat, onPick }: { geo: THREE.BufferGeometry; items: Inst[]; mat: THREE.Material; onPick?: (ref: number) => void }) {
   const ref = useRef<THREE.InstancedMesh>(null);
   useEffect(() => {
@@ -116,101 +168,99 @@ function Instancias({ geo, items, mat, onPick }: { geo: THREE.BufferGeometry; it
   );
 }
 
-const GEO = {
-  caja: (() => { const g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0); return g; })(),
-  cilindro: (() => { const g = new THREE.CylinderGeometry(0.5, 0.5, 1, 40); g.translate(0, 0.5, 0); return g; })(),
-  hex: (() => { const g = new THREE.CylinderGeometry(1, 1, 1, 6); g.translate(0, 0.5, 0); return g; })(),
-  techoHex: (() => { const g = new THREE.CylinderGeometry(1.1, 1.1, 1, 6); g.translate(0, 0.5, 0); return g; })(),
-  cono: (() => { const g = new THREE.CylinderGeometry(0.17, 0.56, 1, 40); g.translate(0, 0.5, 0); return g; })(),
-  copa: new THREE.IcosahedronGeometry(1, 0),
-  panel: new THREE.BoxGeometry(1, 1, 1),
-  coche: (() => { const g = new THREE.BoxGeometry(4.4, 1.5, 1.9); g.translate(0, 0.75, 0); return g; })(),
-  bus: (() => { const g = new THREE.BoxGeometry(9, 3, 2.5); g.translate(0, 1.5, 0); return g; })(),
-  bici: (() => { const g = new THREE.BoxGeometry(1.7, 1, 0.25); g.translate(0, 0.5, 0); return g; })(),
-  tren: (() => { const g = new THREE.BoxGeometry(80, 4, 3.2); g.translate(0, 2, 0); return g; })(),
-  aeronave: (() => {
-    const partes = [new THREE.BoxGeometry(9, 1.6, 1.6), new THREE.BoxGeometry(1.8, 0.25, 12), new THREE.BoxGeometry(1, 0.2, 4)];
-    partes[0].translate(0, 1.6, 0); partes[1].translate(0.5, 2.1, 0); partes[2].translate(-4, 2.2, 0);
-    const pos: number[] = [], nor: number[] = [];
-    partes.forEach(p => { const q = p.toNonIndexed(); pos.push(...(q.attributes.position.array as any)); nor.push(...(q.attributes.normal.array as any)); });
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-    return g;
-  })(),
-};
+// One shared material for every prototype: the colours are in the vertices.
+let MATERIAL: THREE.MeshStandardMaterial | null = null;
+const material = () => MATERIAL ??= new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0.02 });
 
+const RESALTE = '#ffd54a';
 function colorEdificio(e: Edificio) {
   if (e.color in SISTEMA) return SISTEMA[e.color].color;
   return EDIFICIO[e.color] ?? '#cccccc';
 }
 
 function Edificios({ mundo, onPick, seleccion }: { mundo: Mundo; onPick: (id: number) => void; seleccion: number | null }) {
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0.0 }), []);
-  const vidrio = useMemo(() => new THREE.MeshStandardMaterial({ roughness: 0.15, metalness: 0.1, emissive: new THREE.Color('#5ec8ff'), emissiveIntensity: 0.25 }), []);
   const grupos = useMemo(() => {
-    const cajas: Inst[] = [], cil: Inst[] = [], hex: Inst[] = [], techosHex: Inst[] = [], conos: Inst[] = [], tragaluces: Inst[] = [];
+    const g: Record<Prototipo, Inst[]> = {} as any;
+    const add = (k: Prototipo, it: Inst) => (g[k] ??= []).push(it);
     for (const e of mundo.edificios) {
       const sel = e.id === seleccion;
-      const col = sel ? '#ffffff' : colorEdificio(e);
       const base = { x: e.x, y: -e.y, ry: e.rot, ref: e.id };
-      if (e.forma === 'caja') cajas.push({ ...base, z: 0, sx: e.ancho, sy: e.alto, sz: e.fondo, color: col });
-      else if (e.forma === 'cilindro') {
-        cil.push({ ...base, z: 0, sx: e.ancho, sy: e.alto, sz: e.ancho, color: col });
-        if (e.techo === 'cono') {
-          const h = e.ancho * 0.22;
-          conos.push({ ...base, z: e.alto, sx: e.ancho, sy: h, sz: e.ancho, color: sel ? '#ffffff' : EDIFICIO.teja });
-          tragaluces.push({ ...base, z: e.alto + h - 0.05, sx: e.ancho * 0.34, sy: 0.25, sz: e.ancho * 0.34, color: EDIFICIO.tragaluz });
-        }
-      } else {
+      if (e.tipo === 'nido') {
         const hp = e.alto / e.plantas;
-        for (let k = 0; k < e.plantas; k++) {
-          hex.push({ ...base, z: k * hp, sx: e.ancho, sy: hp - 0.25, sz: e.ancho, color: sel ? '#ffffff' : (k === 1 ? '#e7d3b8' : k === 2 ? '#f3e6d4' : EDIFICIO.muroNido) });
-        }
-        techosHex.push({ ...base, z: e.alto - 0.05, sx: e.ancho, sy: 0.45, sz: e.ancho, color: EDIFICIO.teja });
+        for (let k = 0; k < e.plantas; k++) add('nidoPlanta', { ...base, z: k * hp, sx: e.ancho, sy: hp, sz: e.ancho, color: sel ? RESALTE : k === 1 ? '#f1e3cf' : k === 2 ? '#f7eee2' : EDIFICIO.muroNido });
+        add('nidoTecho', { ...base, z: e.alto, sx: e.ancho, sy: e.ancho, sz: e.ancho, color: sel ? RESALTE : '#ffffff' });
+      } else if (e.forma === 'cilindro') {
+        add('socialMuro', { ...base, z: 0, sx: e.ancho, sy: e.alto, sz: e.ancho, color: sel ? RESALTE : EDIFICIO.muroSocial });
+        add('socialTecho', { ...base, z: e.alto, sx: e.ancho, sy: e.ancho, sz: e.ancho, color: sel ? RESALTE : '#ffffff' });
+      } else if (e.tipo === 'escaparate') {
+        add('tienda', { ...base, z: 0, sx: e.ancho, sy: e.alto, sz: e.fondo, color: sel ? RESALTE : '#f6efe4' });
+      } else if (e.tipo === 'fabrica') {
+        add('nave', { ...base, z: 0, sx: e.ancho, sy: e.alto, sz: e.fondo, color: sel ? RESALTE : '#d9dde1' });
+      } else {
+        const hp = e.alto / e.plantas, col = sel ? RESALTE : colorEdificio(e);
+        for (let k = 0; k < e.plantas; k++) add('anexoPlanta', { ...base, z: k * hp, sx: e.ancho, sy: hp, sz: e.fondo, color: col });
+        add('anexoTecho', { ...base, z: e.alto, sx: e.ancho, sy: 1, sz: e.fondo, color: sel ? RESALTE : '#' + new THREE.Color('#ffffff').lerp(new THREE.Color(col), 0.65).getHexString() });
       }
     }
-    return { cajas, cil, hex, techosHex, conos, tragaluces };
+    return g;
   }, [mundo, seleccion]);
+  return <>{(Object.keys(grupos) as Prototipo[]).map(k => <Instancias key={k} geo={prototipo(k)} items={grupos[k]} mat={material()} onPick={onPick} />)}</>;
+}
+
+function Arboles({ mundo }: { mundo: Mundo }) {
+  // Full model (trunk + two crowns) inside the focused community, a light one elsewhere.
+  const { cerca, lejos } = useMemo(() => {
+    const a = mundo.arboles, cerca: Inst[] = [], lejos: Inst[] = [];
+    const foco = `p${mundo.foco.p}/c${mundo.foco.c}`;
+    for (let i = 0, k = 0; i < a.length; i += 5, k++) {
+      const r = a[i + 2], h = Math.max(a[i + 3], r * 2.2);
+      const amb = mundo.arbolesAmbito[k];
+      const it = { x: a[i], y: -a[i + 1], z: 0, ry: i * 0.37, sx: r, sy: h, sz: r, color: COPAS[(a[i + 4] | 0) % COPAS.length] };
+      (amb === foco || amb.startsWith(foco + '/') ? cerca : lejos).push(it);
+    }
+    return { cerca, lejos };
+  }, [mundo]);
   return (
     <>
-      <Instancias geo={GEO.caja} items={grupos.cajas} mat={mat} onPick={onPick} />
-      <Instancias geo={GEO.cilindro} items={grupos.cil} mat={mat} onPick={onPick} />
-      <Instancias geo={GEO.hex} items={grupos.hex} mat={mat} onPick={onPick} />
-      <Instancias geo={GEO.techoHex} items={grupos.techosHex} mat={mat} onPick={onPick} />
-      <Instancias geo={GEO.cono} items={grupos.conos} mat={mat} onPick={onPick} />
-      <Instancias geo={GEO.cilindro} items={grupos.tragaluces} mat={vidrio} />
+      <Instancias geo={prototipo('arbolDetalle')} items={cerca} mat={material()} />
+      <Instancias geo={prototipo('arbolSimple')} items={lejos} mat={material()} />
     </>
   );
 }
 
-function Arboles({ mundo }: { mundo: Mundo }) {
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ roughness: 0.9, flatShading: true }), []);
+function Paneles({ mundo }: { mundo: Mundo }) {
+  const items = useMemo(() => mundo.paneles.map(p => ({ x: p.x, y: -p.y, z: 0, ry: p.rot, sx: p.ancho, sy: 1, sz: p.fondo, color: '#ffffff' })), [mundo]);
+  return <Instancias geo={prototipo('mesaSolar')} items={items} mat={material()} />;
+}
+
+const TINTES_COCHE = ['#f4f4f4', '#c9d3dc', '#5c86b0', '#b84a3e', '#2f3b45', '#e0c068'];
+function Vehiculos({ mundo }: { mundo: Mundo }) {
+  const por = useMemo(() => {
+    const t: Record<string, Inst[]> = { coche: [], bus: [], bici: [], tren: [], aeronave: [] };
+    mundo.vehiculos.forEach((v, i) => {
+      const color = v.tipo === 'coche' ? TINTES_COCHE[i % TINTES_COCHE.length] : v.tipo === 'bus' ? '#9cc3e6' : v.tipo === 'bici' ? ['#2e7d32', '#1565c0', '#c62828', '#f9a825'][i % 4] : '#ffffff';
+      t[v.tipo].push({ x: v.x, y: -v.y, z: 0, ry: v.rot, sx: 1, sy: 1, sz: 1, color });
+    });
+    return t;
+  }, [mundo]);
+  return <>{Object.entries(por).map(([k, items]) => <Instancias key={k} geo={prototipo(k as Prototipo)} items={items} mat={material()} />)}</>;
+}
+
+/** Street lamps every ~32 m along the pedestrian rings drawn in detail. */
+function Farolas({ mundo }: { mundo: Mundo }) {
   const items = useMemo(() => {
-    const a = mundo.arboles, out: Inst[] = [];
-    for (let i = 0; i < a.length; i += 5) {
-      const r = a[i + 2], h = a[i + 3];
-      out.push({ x: a[i], y: -a[i + 1], z: h * 0.55, ry: i * 0.37, sx: r, sy: Math.max(r, h * 0.42), sz: r, color: COPAS[(a[i + 4] | 0) % COPAS.length] });
+    const out: Inst[] = [];
+    for (const r of mundo.anillos) {
+      if (r.capa !== 'peatonal' || !r.detalle || r.r1 > 3000) continue;
+      const rm = r.r1 - 0.4, n = Math.floor(((r.a1 - r.a0) * rm) / 32);
+      for (let i = 0; i < n; i++) {
+        const t = r.a0 + (i + 0.5) * (r.a1 - r.a0) / n;
+        out.push({ x: r.cx + rm * Math.cos(t), y: -(r.cy + rm * Math.sin(t)), z: 0, ry: t + Math.PI, sx: 1, sy: 1, sz: 1, color: '#ffffff' });
+      }
     }
     return out;
   }, [mundo]);
-  return <Instancias geo={GEO.copa} items={items} mat={mat} />;
-}
-
-function Paneles({ mundo }: { mundo: Mundo }) {
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: EDIFICIO.panel, roughness: 0.3, metalness: 0.4 }), []);
-  const items = useMemo(() => mundo.paneles.map(p => ({ x: p.x, y: -p.y, z: 1.3, rx: -0.44, ry: p.rot, sx: p.ancho, sy: 0.08, sz: p.fondo, color: EDIFICIO.panel })), [mundo]);
-  return <Instancias geo={GEO.panel} items={items} mat={mat} />;
-}
-
-function Vehiculos({ mundo }: { mundo: Mundo }) {
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.2 }), []);
-  const por = useMemo(() => {
-    const t: Record<string, Inst[]> = { coche: [], bus: [], bici: [], tren: [], aeronave: [] };
-    for (const v of mundo.vehiculos) t[v.tipo].push({ x: v.x, y: -v.y, z: 0, ry: v.rot, sx: 1, sy: 1, sz: 1, color: EDIFICIO[v.tipo] });
-    return t;
-  }, [mundo]);
-  return <>{Object.entries(por).map(([k, items]) => <Instancias key={k} geo={(GEO as any)[k]} items={items} mat={mat} />)}</>;
+  return <Instancias geo={prototipo('farola')} items={items} mat={material()} />;
 }
 
 // ---------------------------------------------------------------- labels and dimension lines
@@ -367,13 +417,14 @@ export function Escena({ mundo, modo, objetivo, seleccion, onPick, onEscala, cap
       />
       <Capturador capturaRef={capturaRef} />
       <Director modo={modo} objetivo={objetivo} onEscala={onEscala} />
-      <hemisphereLight args={['#ffffff', '#6b8f5a', 1.1]} />
+      <hemisphereLight args={['#ffffff', '#6b8f5a', 1.25]} />
       <directionalLight position={[-3000, 6000, 2500]} intensity={1.6} />
       <Suelos mundo={mundo} />
       <Edificios mundo={mundo} onPick={onPick} seleccion={seleccion} />
       <Arboles mundo={mundo} />
       <Paneles mundo={mundo} />
       <Vehiculos mundo={mundo} />
+      <Farolas mundo={mundo} />
       <LineasCota mundo={mundo} />
       <Rotulos items={rotulos} />
     </Canvas>
