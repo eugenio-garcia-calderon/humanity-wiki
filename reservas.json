@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
-      "motivo": "Aeromóvil: otros velomóviles",
-      "desde": "2026-11-05T12:55:41.033Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/server/aeromovil.ts",
       "motivo": "Aeromóvil: otros velomóviles",
       "desde": "2026-11-05T12:55:43.624Z"
