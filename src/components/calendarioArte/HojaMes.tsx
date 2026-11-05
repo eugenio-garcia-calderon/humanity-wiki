@@ -8,7 +8,7 @@
 // La hoja se dibuja SIEMPRE en milímetros reales. En pantalla se escala para
 // que quepa; al imprimir se usa tal cual, así lo que ves es lo que sale.
 import { useState } from 'react';
-import { Check, FolderOpen, ImagePlus, Loader2, Plus, Printer, X } from 'lucide-react';
+import { Check, FolderOpen, ImagePlus, Loader2, Plus, Printer, Sparkles, Star, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { ContenidoMes, FranjaMes, TipoFranja } from '../../data/calendarioArteTipos';
 import { Editable } from './Editable';
@@ -47,15 +47,19 @@ interface Props {
   /** Abre la carpeta del mes para elegir otra ilustración guardada. */
   alAbrirCarpeta?: () => void;
   subiendoImagen?: boolean;
-  /** DISEÑO 1 / DISEÑO 2 (2026-11-05, Eugenio: «un botón que permita transicionar
+  /** LOS DISEÑOS (2026-11-05). Eugenio: «un botón que permita transicionar
    *  entre el diseño 1 y el diseño 2, bastante evidente, en la esquina superior
-   *  izquierda de la imagen»). Solo en pantalla: al imprimir no se pasa y sale
-   *  `imagen`, la elegida. */
-  diseno?: 1 | 2;
-  alVerDiseno?: (d: 1 | 2) => void;
-  /** La ilustración original del mes (la del código): es el «Diseño 1» cuando
-   *  la que se imprime ahora es el 2. */
-  imagenOriginal?: string;
+   *  izquierda»; después el 3, la estrella de favorito y «Crear nuevo diseño».
+   *  Solo en pantalla: al imprimir no se pasa y sale `imagen`, la elegida. */
+  disenos?: DisenoVista[];
+  /** El que se está mirando (por defecto, el favorito). */
+  visto?: string;
+  favorito?: string;
+  alVer?: (url: string) => void;
+  alFavorito?: (url: string) => void;
+  /** Diseños pedidos con el botón que aún no están listos. */
+  encargos?: EncargoDiseno[];
+  alCrearDiseno?: () => void;
   /** En el «calendario completo» (los doce meses seguidos) las ilustraciones se
    *  cargan al acercarse, no las veinticuatro de golpe. NUNCA en la copia que
    *  se imprime: está fuera de pantalla, no se cargarían y la impresión
@@ -63,7 +67,21 @@ interface Props {
   perezosa?: boolean;
 }
 
-export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen, diseno, alVerDiseno, imagenOriginal, perezosa }: Props) {
+/** Un diseño en el selector: su imagen y su número («Diseño 3»). */
+export interface DisenoVista { url: string; n: number; generado?: boolean; nota?: string | null }
+/** Un diseño pedido que todavía no está: en cola, dibujándose o fallido. */
+export interface EncargoDiseno { id: number; mes: number; estado: 'en_cola' | 'dibujando' | 'error'; listo_hacia: string | null; prompt: string; nota?: string | null }
+
+/** «hacia las 15:40» o «mañana hacia las 9:10». */
+export function horaDe(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const hoy = new Date();
+  const hora = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return d.toDateString() === hoy.toDateString() ? `hacia las ${hora}` : `el ${d.toLocaleDateString('es-ES', { weekday: 'long' })} hacia las ${hora}`;
+}
+
+export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImagen, alAbrirCarpeta, subiendoImagen, disenos, visto: vistoProp, favorito, alVer, alFavorito, encargos, alCrearDiseno, perezosa }: Props) {
   const acento = ACENTOS[(c.mes - 1) % 12];
   const esBoceto = !!c.imagen?.startsWith('/calendario-arte/bocetos/');
   // Si la imagen no carga, se dice («ilustración pendiente») en vez de
@@ -71,13 +89,15 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
   const [imagenRota, setImagenRota] = useState<string | null>(null);
   const nombre = NOMBRES_MES[c.mes - 1];
 
-  // Los dos diseños. El 2 es `alternativa`; el 1 es la que se imprime, salvo
-  // que la que se imprime sea precisamente el 2 (entonces, la original).
-  const d2 = c.alternativa;
-  const d1 = c.imagen && c.imagen !== d2 ? c.imagen : (imagenOriginal ?? c.imagen);
-  const comparar = !!(alVerDiseno && d2 && d1);
-  const visto = comparar ? (diseno === 2 ? d2 : d1) : c.imagen;
-  const disenoImpreso: 1 | 2 = c.imagen === d2 ? 2 : 1;
+  // Con varios diseños se apilan las imágenes y se funde de una a otra. Solo
+  // se cargan las que alguien ha mirado: tres o más ilustraciones de imprenta
+  // por mes, en el calendario completo, serían más de cien megas de golpe.
+  const comparar = !!(alVer && disenos && disenos.length > 0);
+  const visto = comparar ? (vistoProp ?? c.imagen) : c.imagen;
+  const nVisto = disenos?.find(d => d.url === visto)?.n;
+  const [cargadas, setCargadas] = useState<string[]>([]);
+  const apiladas = comparar ? disenos!.filter(d => d.url === visto || cargadas.includes(d.url)) : [];
+  if (comparar && visto && !cargadas.includes(visto)) setCargadas(v => [...v, visto]);
 
   const primerDia = (new Date(anio, c.mes - 1, 1).getDay() + 6) % 7; // lunes = 0
   const diasMes = new Date(anio, c.mes, 0).getDate();
@@ -124,16 +144,15 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
         </div>
         <div className="group relative flex-1 overflow-hidden" style={{ margin: '0 9mm 9mm', borderRadius: '3mm' }}>
           {comparar ? (
-            // Las dos, una encima de otra: cambiar de diseño es un fundido, no
-            // un salto, y la segunda ya está cargada cuando se pulsa.
-            ([[1, d1], [2, d2]] as const).map(([n, url]) => (
+            // Una encima de otra: cambiar de diseño es un fundido, no un salto.
+            apiladas.map(d => (
               <img
-                key={n}
-                src={url}
+                key={d.url}
+                src={d.url}
                 loading={perezosa ? 'lazy' : undefined}
-                alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${n})`}
+                alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${d.n})`}
                 className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
-                style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%`, opacity: visto === url ? 1 : 0 }}
+                style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%`, opacity: visto === d.url ? 1 : 0 }}
               />
             ))
           ) : c.imagen && imagenRota !== c.imagen ? (
@@ -151,33 +170,66 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
             </div>
           )}
           {comparar && (
-            <div className="ca-no-imprimir absolute left-4 top-4 z-10 flex flex-col items-start gap-2 font-sans">
-              <div role="radiogroup" aria-label="Diseño de la ilustración" className="flex rounded-full bg-white/95 p-1.5 shadow-xl ring-1 ring-black/10">
-                {([1, 2] as const).map(n => (
+            <div className="ca-no-imprimir absolute left-4 top-4 z-10 flex max-w-[70%] flex-col items-start gap-2 font-sans">
+              <div role="radiogroup" aria-label="Diseño de la ilustración" className="flex flex-wrap rounded-[1.6rem] bg-white/95 p-1.5 shadow-xl ring-1 ring-black/10">
+                {disenos!.map(d => (
                   <button
-                    key={n}
+                    key={d.url}
                     type="button"
                     role="radio"
-                    aria-checked={diseno === n}
-                    onClick={() => alVerDiseno!(n)}
+                    aria-checked={visto === d.url}
+                    onClick={() => alVer!(d.url)}
+                    title={d.nota || undefined}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-base font-bold transition-colors',
-                      diseno === n ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100',
+                      'inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-base font-bold transition-colors',
+                      visto === d.url ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100',
                     )}
                   >
-                    Diseño {n}
-                    {disenoImpreso === n && <Check className="h-4 w-4" aria-label="se imprime" />}
+                    Diseño {d.n}
+                    {favorito === d.url && <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-label="favorito" />}
+                    {c.imagen === d.url && <Printer className="h-3.5 w-3.5 opacity-70" aria-label="se imprime" />}
                   </button>
                 ))}
               </div>
-              {diseno !== disenoImpreso ? (
-                editando && (
-                  <Button type="button" onClick={() => alCambiar({ imagen: visto })} className="gap-2 rounded-full shadow-lg">
-                    <Printer className="h-4 w-4" />Imprimir el diseño {diseno}
+              <div className="flex flex-wrap items-center gap-2">
+                {visto === favorito ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1.5 text-sm font-bold text-stone-900 shadow-lg">
+                    <Star className="h-4 w-4 fill-stone-900" />Tu favorito
+                  </span>
+                ) : editando && alFavorito && visto && (
+                  <Button type="button" variant="outline" onClick={() => alFavorito(visto)} className="gap-1.5 rounded-full bg-white/95 shadow-lg hover:bg-white">
+                    <Star className="h-4 w-4 text-amber-500" />Marcar como favorito
                   </Button>
-                )
-              ) : (
-                <span className="rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">✓ Este es el que se imprime</span>
+                )}
+                {visto === c.imagen ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white"><Check className="h-3.5 w-3.5" />Es el que se imprime</span>
+                ) : editando && visto && (
+                  <Button type="button" variant="outline" onClick={() => alCambiar({ imagen: visto })} className="gap-1.5 rounded-full bg-white/95 shadow-lg hover:bg-white">
+                    <Printer className="h-4 w-4" />Imprimir el diseño {nVisto}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+          {/* «Crear nuevo diseño» y lo que está en camino: abajo a la derecha. */}
+          {(alCrearDiseno || (encargos && encargos.length > 0)) && (
+            <div className="ca-no-imprimir absolute bottom-4 right-4 z-10 flex max-w-[60%] flex-col items-end gap-2 font-sans">
+              {encargos?.map(e => (
+                <span key={e.id} title={e.prompt}
+                  className={cn('inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg',
+                    e.estado === 'error' ? 'bg-rose-600 text-white' : 'bg-white/95 text-stone-700 ring-1 ring-black/10')}>
+                  {e.estado === 'error' ? <X className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {e.estado === 'error'
+                    ? `Diseño nuevo: no se pudo dibujar${e.nota ? ` (${e.nota.slice(0, 80)})` : ''}`
+                    : e.estado === 'dibujando'
+                      ? `Dibujando un diseño nuevo${horaDe(e.listo_hacia) ? ` · listo ${horaDe(e.listo_hacia)}` : '…'}`
+                      : `Diseño nuevo en cola${horaDe(e.listo_hacia) ? ` · listo ${horaDe(e.listo_hacia)}` : ''}`}
+                </span>
+              ))}
+              {alCrearDiseno && editando && (
+                <Button type="button" onClick={alCrearDiseno} className="gap-2 rounded-full shadow-xl">
+                  <Sparkles className="h-4 w-4" />Crear nuevo diseño
+                </Button>
               )}
             </div>
           )}
@@ -207,10 +259,12 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
       </div>
 
       {/* ── HOJA 2 (A4 apaisado): CALENDARIO 75 % + HERRAMIENTA 25 % ─────── */}
-      <div className="ca-mitad flex flex-col" style={{ height: '210mm', padding: '6mm 9mm 7mm' }}>
-        <div className="flex items-baseline justify-between" style={{ marginBottom: '2mm' }}>
+      {/* 2026-11-05, Eugenio: cabecera y franja más bajas para que los
+          cuadrados de los días crezcan y quede sitio para anotar. */}
+      <div className="ca-mitad flex flex-col" style={{ height: '210mm', padding: '4.5mm 9mm 6mm' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: '1.5mm' }}>
           <div className="flex items-baseline" style={{ gap: '4mm' }}>
-            <h3 className={cn('ca-titulo font-bold leading-none', acento.texto)} style={{ fontSize: '30pt' }}>{nombre}</h3>
+            <h3 className={cn('ca-titulo font-bold leading-none', acento.texto)} style={{ fontSize: '22pt' }}>{nombre}</h3>
             <Editable
               valor={c.subtitulo}
               editando={editando}
@@ -218,17 +272,17 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
               alCambiar={v => alCambiar({ subtitulo: v })}
               vacio="Subtítulo del mes"
               className="italic text-stone-500"
-              style={{ fontSize: '11pt' }}
+              style={{ fontSize: '10pt' }}
             />
           </div>
           <div className="flex items-center" style={{ gap: '3mm' }}>
             <div className="text-right leading-none">
               <span className="font-sans uppercase tracking-[0.25em] text-stone-400" style={{ fontSize: '7pt' }}>Arte para la Humanidad</span>
-              <span className={cn('block font-bold', acento.texto)} style={{ fontSize: '18pt' }}>{anio}</span>
+              <span className={cn('block font-bold', acento.texto)} style={{ fontSize: '14pt' }}>{anio}</span>
             </div>
             {/* El QR, pequeño y en la esquina: lleva a «Conocer más» del tema. */}
             <div className="flex flex-col items-center leading-none">
-              <CodigoQR url={c.qr_url || urlConocerMas(c.mes)} lado="13mm" />
+              <CodigoQR url={c.qr_url || urlConocerMas(c.mes)} lado="11mm" />
               <span className="font-sans text-stone-400" style={{ fontSize: '5pt', marginTop: '0.6mm' }}>Conoce más</span>
             </div>
           </div>
@@ -249,25 +303,26 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
               style={{ padding: '1.2mm 1.6mm' }}
             >
               {d && (
-                <>
-                  <div className={cn('ca-titulo font-bold leading-none', acento.texto)} style={{ fontSize: '11pt' }}>{d}</div>
+                // El número y, a continuación en la misma línea, la frase
+                // (Eugenio: «aprovecha el espacio al lado del número… para que
+                // haya un hueco más grande debajo para anotar cosas»).
+                <div className="leading-snug text-stone-700" style={{ fontSize: '8pt' }}>
+                  <span className={cn('ca-titulo font-bold', acento.texto)} style={{ fontSize: '13pt', lineHeight: 1, marginRight: '1.2mm' }}>{d}</span>
                   <Editable
-                    as="div"
+                    as="span"
                     valor={c.dias[d - 1] ?? ''}
                     editando={editando}
                     alCambiar={v => cambiarDia(d, v)}
                     vacio="Frase del día…"
-                    className="leading-snug text-stone-700"
-                    style={{ fontSize: '6.6pt', marginTop: '0.8mm' }}
                   />
-                </>
+                </div>
               )}
             </div>
           ))}
         </div>
 
         {/* El 25 % de abajo: la herramienta del mes y la iniciativa que apoya. */}
-        <div className="flex shrink-0" style={{ height: '44mm', marginTop: '3mm', gap: '3mm' }}>
+        <div className="flex shrink-0" style={{ height: '41mm', marginTop: '2.5mm', gap: '3mm' }}>
           <Franja franja={c.franja} editando={editando} acento={acento} alCambiar={franja => alCambiar({ franja })} />
           <Iniciativa c={c} editando={editando} acento={acento} alCambiar={iniciativa => alCambiar({ iniciativa })} />
         </div>
@@ -342,7 +397,7 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
   ) : null;
 
   return (
-    <div className={cn('group relative flex-1 min-w-0 rounded-[4mm] border-2 flex overflow-hidden', acento.borde)} style={{ padding: '3mm 5mm', gap: '4mm' }}>
+    <div className={cn('group relative flex-1 min-w-0 rounded-[4mm] border-2 flex overflow-hidden', acento.borde)} style={{ padding: '2.4mm 4.5mm', gap: '4mm' }}>
       {editando && (
         <select
           value={f.tipo}
@@ -357,12 +412,12 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
         <Editable as="h3" valor={f.titulo} editando={editando} multilinea={false} alCambiar={v => cambiar({ titulo: v })}
           vacio="Título de la herramienta" className={cn('ca-titulo font-bold uppercase tracking-[0.18em] leading-tight', acento.texto)} style={{ fontSize: '9pt' }} />
         <Editable as="p" valor={f.texto} editando={editando} alCambiar={v => cambiar({ texto: v })}
-          vacio="Cómo se usa…" className="leading-snug text-stone-600" style={{ fontSize: '8pt', marginTop: '1.5mm' }} />
+          vacio="Cómo se usa…" className="leading-snug text-stone-600" style={{ fontSize: '7.6pt', marginTop: '1.2mm' }} />
       </div>
 
       {f.tipo === 'sopa' && sopa ? (
         <div className="flex flex-1 min-w-0" style={{ gap: '4mm' }}>
-          <div className="grid font-sans font-semibold text-stone-700" style={{ gridTemplateColumns: `repeat(${sopa.filas[0].length}, 4.1mm)`, gridAutoRows: '4.1mm', fontSize: '8pt' }}>
+          <div className="grid font-sans font-semibold text-stone-700" style={{ gridTemplateColumns: `repeat(${sopa.filas[0].length}, 3.8mm)`, gridAutoRows: '3.8mm', fontSize: '7.6pt' }}>
             {sopa.filas.flat().map((l, i) => <div key={i} className="flex items-center justify-center">{l}</div>)}
           </div>
           <div className="flex-1 min-w-0">
@@ -390,12 +445,12 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
               columnas) y no `columns-*`: el móvil agranda el texto de las
               cajas multicolumna y la hoja dejaba de parecerse a la impresa. */}
           <ul className="grid font-sans text-stone-700" style={{
-            fontSize: '8pt', columnGap: '5mm', gridAutoFlow: 'column',
+            fontSize: '7.6pt', columnGap: '5mm', gridAutoFlow: 'column',
             gridTemplateColumns: `repeat(${f.tipo === 'pasos' ? 2 : 3}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${Math.max(1, Math.ceil(f.items.length / (f.tipo === 'pasos' ? 2 : 3)))}, auto)`,
           }}>
             {f.items.map((it, i) => (
-              <li key={i} className="flex items-start" style={{ gap: '1.6mm', marginBottom: '1.3mm' }}>
+              <li key={i} className="flex items-start" style={{ gap: '1.6mm', marginBottom: '0.9mm' }}>
                 {f.tipo === 'pasos' ? (
                   <span className={cn('shrink-0 rounded-full text-white text-center font-bold leading-[3.6mm]', acento.fondo)} style={{ width: '3.6mm', height: '3.6mm', fontSize: '6pt' }}>{i + 1}</span>
                 ) : (

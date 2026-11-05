@@ -68,7 +68,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Busca «Un punto azul pálido», la foto de la Tierra que tomó la sonda Voyager 1 en 1990."
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-01.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-01-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-01.jpg",
+      "/calendario-arte/ilustraciones/mes-01-b.jpg",
+      "/calendario-arte/ilustraciones/mes-01-c.jpg"
+    ]
   },
   {
     "mes": 2,
@@ -121,7 +125,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué has aprendido este mes sobre cómo quieres querer y ser querido?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-02.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-02-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-02.jpg",
+      "/calendario-arte/ilustraciones/mes-02-b.jpg",
+      "/calendario-arte/ilustraciones/mes-02-c.jpg"
+    ]
   },
   {
     "mes": 3,
@@ -177,7 +185,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué gesto para ahorrar agua mantendrás todo el año? Escríbelo y pégalo junto al grifo."
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-03.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-03-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-03.jpg",
+      "/calendario-arte/ilustraciones/mes-03-b.jpg",
+      "/calendario-arte/ilustraciones/mes-03-c.jpg"
+    ]
   },
   {
     "mes": 4,
@@ -232,7 +244,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué pequeño gesto por la naturaleza puedes convertir en hábito a partir de mañana?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-04.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-04-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-04.jpg",
+      "/calendario-arte/ilustraciones/mes-04-b.jpg",
+      "/calendario-arte/ilustraciones/mes-04-c.jpg"
+    ]
   },
   {
     "mes": 5,
@@ -292,7 +308,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué afición creativa te comprometes a cuidar el resto del año?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-05.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-05-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-05.jpg",
+      "/calendario-arte/ilustraciones/mes-05-b.jpg",
+      "/calendario-arte/ilustraciones/mes-05-c.jpg"
+    ]
   },
   {
     "mes": 6,
@@ -348,7 +368,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hoy: elige un hábito de ahorro de energía y mantenlo todo el verano."
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-06.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-06-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-06.jpg",
+      "/calendario-arte/ilustraciones/mes-06-b.jpg",
+      "/calendario-arte/ilustraciones/mes-06-c.jpg"
+    ]
   },
   {
     "mes": 7,
@@ -407,7 +431,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hogar no es metros cuadrados: es seguridad, cuidado y pertenencia. ¿Cómo cuidas el tuyo?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-07.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-07-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-07.jpg",
+      "/calendario-arte/ilustraciones/mes-07-b.jpg",
+      "/calendario-arte/ilustraciones/mes-07-c.jpg"
+    ]
   },
   {
     "mes": 8,
@@ -463,7 +491,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "El bienestar se construye con hábitos pequeños repetidos. ¿Cuál vas a mantener?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-08.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-08-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-08.jpg",
+      "/calendario-arte/ilustraciones/mes-08-b.jpg",
+      "/calendario-arte/ilustraciones/mes-08-c.jpg"
+    ]
   },
   {
     "mes": 9,
@@ -519,7 +551,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Una economía sana es la que cuida a las personas y al planeta. ¿Cómo aportas tú?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-09.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-09-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-09.jpg",
+      "/calendario-arte/ilustraciones/mes-09-b.jpg",
+      "/calendario-arte/ilustraciones/mes-09-c.jpg"
+    ]
   },
   {
     "mes": 10,
@@ -580,7 +616,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Cierre del mes: ¿qué hábito de alimentación quieres conservar desde hoy?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-10.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-10-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-10.jpg",
+      "/calendario-arte/ilustraciones/mes-10-b.jpg",
+      "/calendario-arte/ilustraciones/mes-10-c.jpg"
+    ]
   },
   {
     "mes": 11,
@@ -635,7 +675,11 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Cierre del mes: ¿qué pequeño paso darás para participar más en tu comunidad?"
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-11.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-11-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-11.jpg",
+      "/calendario-arte/ilustraciones/mes-11-b.jpg",
+      "/calendario-arte/ilustraciones/mes-11-c.jpg"
+    ]
   },
   {
     "mes": 12,
@@ -691,6 +735,10 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Último día del año: elige un valor que te guíe en el próximo. Que haya paz."
     ],
     "imagen": "/calendario-arte/ilustraciones/mes-12.jpg",
-    "alternativa": "/calendario-arte/ilustraciones/mes-12-b.jpg"
+    "disenos": [
+      "/calendario-arte/ilustraciones/mes-12.jpg",
+      "/calendario-arte/ilustraciones/mes-12-b.jpg",
+      "/calendario-arte/ilustraciones/mes-12-c.jpg"
+    ]
   }
 ];

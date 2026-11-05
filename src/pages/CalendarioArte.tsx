@@ -24,12 +24,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Pencil, Eye, FolderOpen, ListChecks, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw, Type, Menu, X,
+  Pencil, Eye, FolderOpen, ListChecks, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw, Type, Menu, X, Star,
 } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { subirImagenCalendario } from '../components/calendarioArte/subirImagen';
-import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM, ACENTOS } from '../components/calendarioArte/HojaMes';
+import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM, ACENTOS, type DisenoVista, type EncargoDiseno } from '../components/calendarioArte/HojaMes';
+import { NuevoDiseno, AvisoDisenoListo, type EstadoRobot } from '../components/calendarioArte/NuevoDiseno';
 import { PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
 import { VistaCarpetas } from '../components/calendarioArte/VistaCarpetas';
 import { BotonPropuesta } from '../components/calendarioArte/BotonPropuesta';
@@ -95,6 +96,12 @@ function Logo() {
   );
 }
 
+/** Un diseño pedido con «Crear nuevo diseño», tal como lo da el servidor. */
+interface DisenoServidor {
+  id: number; mes: number; prompt: string; estado: 'en_cola' | 'dibujando' | 'listo' | 'error' | 'descartado';
+  url: string | null; nota: string | null; listo_hacia: string | null; created_at: string; terminado_at: string | null;
+}
+
 export default function CalendarioArte() {
   const [params, setParams] = useSearchParams();
   const anio = CALENDARIO_ARTE_ANIO;
@@ -131,9 +138,18 @@ export default function CalendarioArte() {
   const [menuMovil, setMenuMovil] = useState(false);
   const [menuLetra, setMenuLetra] = useState(false);
   const [recargaIdeas, setRecargaIdeas] = useState(0);
-  // Qué diseño se está mirando (1 o 2). Nulo = el que se imprime. Se mantiene
-  // al pasar de mes, para comparar el año entero en el mismo diseño.
-  const [disenoVisto, setDisenoVisto] = useState<1 | 2 | null>(null);
+  // Qué diseño se mira. Por defecto el FAVORITO de cada mes (Eugenio: «se
+  // enseñe el favorito cuando se carga la página»). `modoVista` cambia los doce
+  // meses a la vez (para comparar el año entero en el diseño 1, 2 o 3) y
+  // `vistoPorMes` es lo que alguien eligió en un mes concreto.
+  const [modoVista, setModoVista] = useState<'fav' | number>('fav');
+  const [vistoPorMes, setVistoPorMes] = useState<Record<number, string>>({});
+  // Los diseños pedidos con «Crear nuevo diseño» (cola del dibujante automático).
+  const [disenosIA, setDisenosIA] = useState<DisenoServidor[]>([]);
+  const [robot, setRobot] = useState<EstadoRobot | null>(null);
+  const [creandoMes, setCreandoMes] = useState<number | null>(null);
+  const [avisos, setAvisos] = useState<{ mes: number; url: string }[]>([]);
+  const estadosPrevios = useRef<Map<number, string> | null>(null);
   const [estado, setEstado] = useState<EstadoGuardado>('listo');
   const [mensaje, setMensaje] = useState<string | null>(null);
   // `?conocer=1` es a donde lleva el QR impreso: abre directamente la ficha del tema.
@@ -175,6 +191,35 @@ export default function CalendarioArte() {
       .then(r => r.ok ? r.json() : null).then(j => { if (Array.isArray(j)) setPendientes(j.length); }).catch(() => {});
   }, [anio]);
   useEffect(() => { cargar(); }, [cargar]);
+
+  // ── DISEÑOS NUEVOS ───────────────────────────────────────────────────────
+  // Se leen al entrar y, mientras haya alguno en camino, cada 30 segundos.
+  // Cuando uno pasa a «listo», aviso: «Diseño listo · Ver».
+  const cargarDisenos = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/calendario-arte/${anio}/disenos`, { credentials: 'include' });
+      if (!r.ok) return;
+      const j = await r.json();
+      const lista: DisenoServidor[] = j.disenos ?? [];
+      const antes = estadosPrevios.current;
+      if (antes) {
+        const nuevos = lista.filter(d => d.estado === 'listo' && d.url && (antes.get(d.id) === 'en_cola' || antes.get(d.id) === 'dibujando'));
+        if (nuevos.length) setAvisos(v => [...v, ...nuevos.map(d => ({ mes: d.mes, url: d.url! }))]);
+      }
+      estadosPrevios.current = new Map(lista.map(d => [d.id, d.estado]));
+      setDisenosIA(lista);
+      setRobot(j.robot ?? null);
+    } catch { /* sin red: se reintenta en la siguiente vuelta */ }
+  }, [anio]);
+  useEffect(() => { cargarDisenos(); }, [cargarDisenos]);
+  const hayEnCamino = disenosIA.some(d => d.estado === 'en_cola' || d.estado === 'dibujando');
+  useEffect(() => {
+    if (!hayEnCamino) return;
+    const t = window.setInterval(cargarDisenos, 30_000);
+    const alVolver = () => { if (!document.hidden) cargarDisenos(); };
+    document.addEventListener('visibilitychange', alVolver);
+    return () => { window.clearInterval(t); document.removeEventListener('visibilitychange', alVolver); };
+  }, [hayEnCamino, cargarDisenos]);
 
   // Que los buscadores no lo indexen (Eugenio, 2026-11-05). El servidor ya
   // manda `X-Robots-Tag: noindex`; la etiqueta es para quien solo lee el HTML
@@ -359,22 +404,59 @@ export default function CalendarioArte() {
   const carpetas: Record<number, Referencia[]> = Object.fromEntries(Array.from({ length: 13 }, (_, i) => [i, guardados[i]?.referencias ?? []]));
   const vistaLetra = estiloTipografia(eleccionLetra) as React.CSSProperties;
 
-  /** La hoja de un mes en pantalla, editable y con el cambio de diseño. */
-  const hojaDeMes = (m: ContenidoMes, perezosa: boolean) => (
-    <HojaMes
-      anio={anio}
-      contenido={m}
-      editando={editando}
-      alCambiar={c => cambiar(m.mes, c)}
-      alElegirImagen={() => { mesSubida.current = m.mes; entradaImagen.current?.click(); }}
-      alAbrirCarpeta={() => irACarpeta(m.mes)}
-      subiendoImagen={subiendoImagen === m.mes}
-      diseno={disenoVisto ?? (m.alternativa && m.imagen === m.alternativa ? 2 : 1)}
-      alVerDiseno={setDisenoVisto}
-      imagenOriginal={CALENDARIO_ARTE_POR_DEFECTO[m.mes - 1]?.imagen}
-      perezosa={perezosa}
-    />
-  );
+  // ── LOS DISEÑOS DE CADA MES ──────────────────────────────────────────────
+  /** Los de la casa (1, 2, 3… del código), los pedidos que ya están listos y,
+   *  si alguien subió otra ilustración, esa también. */
+  const disenosDe = (m: ContenidoMes): DisenoVista[] => {
+    const casa = m.disenos ?? (m.imagen ? [m.imagen] : []);
+    const urls = [...casa];
+    for (const d of disenosIA) if (d.mes === m.mes && d.estado === 'listo' && d.url && !urls.includes(d.url)) urls.push(d.url);
+    if (m.imagen && !urls.includes(m.imagen)) urls.push(m.imagen);
+    return urls.map((url, i) => ({ url, n: i + 1, generado: !casa.includes(url), nota: disenosIA.find(d => d.url === url)?.prompt ?? null }));
+  };
+  /** Sin elegir, el favorito es el Diseño 2 (Eugenio, 2026-11-05: «marca como
+   *  favoritos todos los diseños número 2, son los mejores hasta ahora»). */
+  const favoritoDe = (m: ContenidoMes, lista: DisenoVista[]) =>
+    m.favorito && lista.some(d => d.url === m.favorito) ? m.favorito : (lista[1]?.url ?? lista[0]?.url);
+  const vistoDe = (m: ContenidoMes, lista = disenosDe(m)) => {
+    const elegido = vistoPorMes[m.mes];
+    if (elegido && lista.some(d => d.url === elegido)) return elegido;
+    if (modoVista !== 'fav' && lista[modoVista - 1]) return lista[modoVista - 1].url;
+    return favoritoDe(m, lista);
+  };
+  /** Lo pedido para el mes que aún no está (y los fallos del último día). */
+  const encargosDe = (mes: number): EncargoDiseno[] => disenosIA
+    .filter(d => d.mes === mes && (d.estado === 'en_cola' || d.estado === 'dibujando'
+      || (d.estado === 'error' && Date.now() - new Date(d.terminado_at ?? d.created_at).getTime() < 86_400_000)))
+    .map(d => ({ id: d.id, mes: d.mes, estado: d.estado as EncargoDiseno['estado'], listo_hacia: d.listo_hacia, prompt: d.prompt, nota: d.nota }));
+  const maxDisenosCasa = Math.max(1, ...meses.map(m => m.disenos?.length ?? 1));
+
+  /** La hoja de un mes en pantalla, editable y con el cambio de diseño. En la
+   *  «Vista final» no hay selector: se ve lo que se imprime. */
+  const hojaDeMes = (m: ContenidoMes, perezosa: boolean) => {
+    const lista = disenosDe(m);
+    return (
+      <HojaMes
+        anio={anio}
+        contenido={m}
+        editando={editando}
+        alCambiar={c => cambiar(m.mes, c)}
+        alElegirImagen={() => { mesSubida.current = m.mes; entradaImagen.current?.click(); }}
+        alAbrirCarpeta={() => irACarpeta(m.mes)}
+        subiendoImagen={subiendoImagen === m.mes}
+        {...(editando ? {
+          disenos: lista,
+          visto: vistoDe(m, lista),
+          favorito: favoritoDe(m, lista),
+          alVer: (url: string) => setVistoPorMes(v => ({ ...v, [m.mes]: url })),
+          alFavorito: (url: string) => cambiar(m.mes, { favorito: url }),
+          encargos: encargosDe(m.mes),
+          alCrearDiseno: () => setCreandoMes(m.mes),
+        } : {})}
+        perezosa={perezosa}
+      />
+    );
+  };
 
   /** Un botón del menú del proyecto. */
   const itemMenu = (activo: boolean, onClick: () => void, icono: React.ReactNode, texto: string) => (
@@ -530,8 +612,24 @@ export default function CalendarioArte() {
             // EL CALENDARIO COMPLETO: la portada y debajo los doce meses, con
             // scroll. Pinchar un tema de la portada baja hasta su mes.
             <div className="space-y-10">
+              {editando && (
+                <div className="-mb-6 flex flex-wrap items-center justify-center gap-1 text-xs text-stone-500">
+                  <span className="mr-1">Ver en los doce meses:</span>
+                  <Button variant={modoVista === 'fav' ? 'primary' : 'ghost'} className="gap-1 px-2.5 py-1 normal-case tracking-normal text-xs"
+                    onClick={() => { setModoVista('fav'); setVistoPorMes({}); }}>
+                    <Star className="h-3.5 w-3.5" />Favoritos
+                  </Button>
+                  {Array.from({ length: maxDisenosCasa }, (_, i) => i + 1).map(n => (
+                    <Button key={n} variant={modoVista === n ? 'primary' : 'ghost'} className="px-2.5 py-1 normal-case tracking-normal text-xs"
+                      onClick={() => { setModoVista(n); setVistoPorMes({}); }}>
+                      Diseño {n}
+                    </Button>
+                  ))}
+                </div>
+              )}
               <HojaEscalada altoMm={ALTO_PORTADA_MM}>
                 <HojaPortada anio={anio} meses={meses} portada={portada} editando={editando} alCambiar={cambiarPortada}
+                  imagenes={editando ? Object.fromEntries(meses.map(m => [m.mes, vistoDe(m)])) : undefined}
                   alAbrirMes={m => document.getElementById(`ca-mes-${m}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
               </HojaEscalada>
               {meses.map(m => (
@@ -594,6 +692,35 @@ export default function CalendarioArte() {
           alCerrar={() => setPanel(null)}
         />
       )}
+
+      {creandoMes !== null && (
+        <NuevoDiseno
+          anio={anio}
+          mes={creandoMes}
+          tema={meses[creandoMes - 1]?.tema ?? ''}
+          robot={robot}
+          alCerrar={() => setCreandoMes(null)}
+          alPedido={e => {
+            if (e.id) {
+              setDisenosIA(v => [...v.filter(d => d.id !== e.id), { ...e, url: null, created_at: new Date().toISOString(), terminado_at: null } as DisenoServidor]);
+              estadosPrevios.current?.set(e.id, e.estado);
+            }
+            if (e.robot) setRobot(e.robot);
+            setCreandoMes(null);
+            cargarDisenos();
+          }}
+        />
+      )}
+      {avisos[0] && (() => {
+        const a = avisos[0];
+        const m = meses[a.mes - 1];
+        const n = m ? disenosDe(m).find(d => d.url === a.url)?.n ?? 0 : 0;
+        return (
+          <AvisoDisenoListo mes={a.mes} n={n}
+            alVer={() => { setVistoPorMes(v => ({ ...v, [a.mes]: a.url })); setVistaFinal(false); irAMes(a.mes); setAvisos(v => v.slice(1)); }}
+            alCerrar={() => setAvisos(v => v.slice(1))} />
+        );
+      })()}
 
       {/* ── LO QUE SE IMPRIME ──────────────────────────────────────────── */}
       {/* Fuera de la aplicación (directamente en <body>), para que nada
