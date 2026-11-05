@@ -53,12 +53,6 @@
       "ruta": "src/server/aeromovil.ts",
       "motivo": "Aeromóvil: otros velomóviles",
       "desde": "2026-11-05T12:55:43.624Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "Aeromóvil: otros velomóviles",
-      "desde": "2026-11-05T12:55:46.289Z"
     }
   ]
 }
