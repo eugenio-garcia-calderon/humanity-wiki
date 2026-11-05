@@ -101,6 +101,7 @@ import { registerMenuRoutes } from './menu.js';
 import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
 import { registerCalendarioArteRoutes } from './calendarioArte.js';
+import { registerAeromovilRoutes } from './aeromovil.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
@@ -354,6 +355,12 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registerCalendarioArteRoutes(app, db),
     nota: 'Calendario Arte para la Humanidad: doce meses editables, carpeta de referencias y buzón de ideas. '
         + 'Comprueba el nivel, así que va después de la autenticación.',
+  },
+  {
+    nombre: 'aeromovil',
+    montar: (app, db) => registerAeromovilRoutes(app, db),
+    nota: 'Aeromóvil Gota: buzón de comentarios de mejora que son las tareas pendientes del diseño. '
+        + 'Lee req.user (opcional), así que va después de la autenticación.',
   },
   { nombre: 'personas', montar: (app, db) => registerPersonasRoutes(app, db) },
   { nombre: 'guardar', montar: (app, db) => registerGuardarRoutes(app, db) },
