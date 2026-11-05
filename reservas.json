@@ -29,6 +29,12 @@
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "Aeromóvil: clasificar sus tablas",
       "desde": "2026-11-05T11:59:23.426Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0166_arquitectura_de_eugenio.sql",
+      "motivo": "Arquitectura: página en el menú de Eugenio (nube)",
+      "desde": "2026-11-05T12:02:45.668Z"
     }
   ]
 }
