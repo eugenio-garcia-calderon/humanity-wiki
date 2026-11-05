@@ -10202,3 +10202,8 @@ Eugenio: «el arco todavía más a la izquierda y más pequeño, las ramas en el
   - Las 365 frases diarias y las 12 herramientas, revisadas por dos bots correctores (88 cambios: datos dudosos, días mundiales, teléfonos de ayuda, repeticiones, ortografía).
   - Investigación completa: 7-8 datos con fuente y 4-5 iniciativas candidatas por mes, para elegir la del mes en «Conocer más».
   - La página del calendario, en «Mis páginas» de Eugenio (favorita), con el calendario insertado.
+- Calendario Arte: edición abierta a cualquiera sin cuenta y fuera de Google (2026-11-05, Eugenio).
+  - Cualquiera con el enlace edita textos, ilustraciones, carpetas, principios e ideas, y sube imágenes, sin registrarse.
+  - Historial por mes con «Restaurar» (copia antes de cada cambio, como mucho cada 10 minutos mientras se edita, y siempre antes de restaurar o volver al original).
+  - Freno por conexión y hora: 600 guardados, 40 imágenes, 30 ideas. Imágenes solo subidas desde el calendario.
+  - Google no lo indexa: cabecera `X-Robots-Tag: noindex` en la página, sus imágenes y su API, y etiqueta `robots` en la página.

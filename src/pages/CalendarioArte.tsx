@@ -17,13 +17,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Pencil, Eye, FolderOpen, Lightbulb, Download, Compass, Info, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw,
+  Pencil, Eye, FolderOpen, Lightbulb, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw,
 } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
-import { subirArchivo } from '../utils/subir';
+import { subirImagenCalendario } from '../components/calendarioArte/subirImagen';
 import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM } from '../components/calendarioArte/HojaMes';
-import { PanelCarpeta, PanelIdeas, PanelPrincipios, PanelConocer } from '../components/calendarioArte/Paneles';
+import { PanelCarpeta, PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
 import { INVESTIGACION_POR_MES } from '../data/calendarioArteInvestigacion';
 import { PRINCIPIOS_POR_DEFECTO, type Principio } from '../data/calendarioArtePrincipios';
 import { CALENDARIO_ARTE_ANIO, CALENDARIO_ARTE_POR_DEFECTO } from '../data/calendarioArte';
@@ -84,7 +84,7 @@ export default function CalendarioArte() {
   const [estado, setEstado] = useState<EstadoGuardado>('listo');
   const [mensaje, setMensaje] = useState<string | null>(null);
   // `?conocer=1` es a donde lleva el QR impreso: abre directamente la ficha del tema.
-  const [panel, setPanel] = useState<'carpeta' | 'estilo' | 'ideas' | 'principios' | 'conocer' | null>(
+  const [panel, setPanel] = useState<'carpeta' | 'estilo' | 'ideas' | 'principios' | 'conocer' | 'historial' | null>(
     () => (params.get('conocer') === '1' ? 'conocer' : null));
   const [pendientes, setPendientes] = useState<number | null>(null);
   const [menuExportar, setMenuExportar] = useState(false);
@@ -121,6 +121,17 @@ export default function CalendarioArte() {
       .then(r => r.ok ? r.json() : null).then(j => { if (Array.isArray(j)) setPendientes(j.length); }).catch(() => {});
   }, [anio]);
   useEffect(() => { cargar(); }, [cargar]);
+
+  // Que los buscadores no lo indexen (Eugenio, 2026-11-05). El servidor ya
+  // manda `X-Robots-Tag: noindex`; la etiqueta es para quien solo lee el HTML
+  // ya pintado. Se quita al salir: el resto de la plataforma sí se indexa.
+  useEffect(() => {
+    const m = document.createElement('meta');
+    m.name = 'robots';
+    m.content = 'noindex, nofollow, noarchive, noimageindex';
+    document.head.appendChild(m);
+    return () => { m.remove(); };
+  }, []);
 
   const meses = useMemo(
     () => CALENDARIO_ARTE_POR_DEFECTO.map(base => mezclar(base, guardados[base.mes]?.contenido)),
@@ -193,7 +204,7 @@ export default function CalendarioArte() {
   };
 
   const restaurarMes = async () => {
-    if (!confirm(`¿Volver ${NOMBRES_MES[mes - 1]} al contenido original? Se pierden los textos editados de este mes (la carpeta de referencias se conserva).`)) return;
+    if (!confirm(`¿Volver ${NOMBRES_MES[mes - 1]} al contenido original? Lo de ahora queda guardado en el Historial (la carpeta de referencias se conserva).`)) return;
     const r = await fetch(`/api/calendario-arte/${anio}/${mes}`, { method: 'DELETE', credentials: 'include' });
     if (!r.ok) { const j = await r.json().catch(() => ({})); setMensaje(j.error || 'No se ha podido restaurar.'); setEstado('error'); return; }
     sucios.current.delete(mes);
@@ -219,10 +230,10 @@ export default function CalendarioArte() {
     setSubiendoImagen(true);
     // Se sube el ORIGINAL, sin comprimir: es lo que va a imprenta. Solo las
     // fotos HEIC del iPhone pasan por la conversión (el servidor no las admite).
-    const heic = /hei[cf]/i.test(f.type) || /\.hei[cf]$/i.test(f.name);
-    const r = heic ? await subirArchivo(f) : await subirArchivo(f, f.type || 'image/jpeg');
+    // Por la puerta del calendario, que no pide cuenta (2026-11-05).
+    const r = await subirImagenCalendario(f, { original: true });
     setSubiendoImagen(false);
-    if (r.error) { setMensaje(r.error); setEstado('error'); return; }
+    if ('error' in r) { setMensaje(r.error); setEstado('error'); return; }
     cambiar(mes, { imagen: r.url });
   };
 
@@ -326,7 +337,7 @@ export default function CalendarioArte() {
 
         {editando && (
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1 border-t border-stone-100 px-3 py-2 text-xs text-stone-600">
-            <span>Pulsa cualquier texto de la hoja para cambiarlo. Se guarda solo.</span>
+            <span>Pulsa cualquier texto de la hoja para cambiarlo. Se guarda solo. Cualquiera con este enlace puede editar: si algo se estropea, está todo en el <b>Historial</b>.</span>
             {actual.imagen && (
               <>
                 <label className="flex items-center gap-1">Encuadre ↔
@@ -338,7 +349,8 @@ export default function CalendarioArte() {
                 <Button variant="ghost" className="px-2 py-1 text-[10px] text-rose-600" onClick={() => cambiar(mes, { imagen: '' })}>Quitar ilustración</Button>
               </>
             )}
-            <Button variant="ghost" className="ml-auto gap-1 px-2 py-1 text-[10px]" onClick={restaurarMes}><RotateCcw className="h-3 w-3" />Restaurar original del mes</Button>
+            <Button variant="ghost" className="ml-auto gap-1 px-2 py-1 text-[10px]" onClick={() => setPanel('historial')}><History className="h-3 w-3" />Historial</Button>
+            <Button variant="ghost" className="gap-1 px-2 py-1 text-[10px]" onClick={restaurarMes}><RotateCcw className="h-3 w-3" />Volver al original del mes</Button>
             {avisoImagen && <p className="w-full text-amber-700">{avisoImagen}</p>}
           </div>
         )}
@@ -401,6 +413,9 @@ export default function CalendarioArte() {
           alCambiarQR={qr_url => cambiar(mes, { qr_url })}
           alCerrar={() => { setPanel(null); if (params.get('conocer')) setParams(p => { p.delete('conocer'); return p; }, { replace: true }); }}
         />
+      )}
+      {panel === 'historial' && (
+        <PanelHistorial anio={anio} mes={mes} alRestaurado={() => { sucios.current.delete(mes); cargar(); }} alCerrar={() => setPanel(null)} />
       )}
       {panel === 'principios' && (
         <PanelPrincipios

@@ -470,5 +470,6 @@ threshold, checked only on that null path here).
 - Update (W5, round 3 fix 1): the cart now counts the shop rule in each shop's total (`envioCompraTienda`, shared by the cart quote). The sheet's `totalOferta`/`ordenarOfertas` still do not; that half of the debt stands.
 
 ## Calendario Arte: no edit history (2026-11-04)
-- `calendario_arte_meses` keeps only the current version of each month; an overwritten phrase cannot be recovered (Constitution rule 4 asks for history where the entity has it). Accepted to ship the first version; «Restaurar original del mes» covers the worst case. Right fix: write the previous `contenido` to `entity_history` on each PUT, ~30 min today.
+- ~~No edit history~~ — resolved 2026-11-05 with `calendario_arte_historial` (migration 0162), required once editing opened to anyone. It is its own table, not `entity_history`: snapshots are whole months, at most one per 10 minutes while editing.
+- Open editing (2026-11-05): anonymous uploads go to the same `uploads/` disk as everything else, braked at 40 images per hour per IP but with no global cap and no sweep of images nobody references. If it gets abused: a daily global cap (~20 min) and a sweep of calendar uploads not referenced by any month or history row (~1 h).
 - The day phrases, datos clave and iniciativa candidates are drafts produced by bots and were not verified one by one by a person; the «Una enseñanza cada día» principle is the checklist for that review before printing.

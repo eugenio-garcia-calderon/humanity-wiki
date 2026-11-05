@@ -151,16 +151,18 @@ const REVISADAS: Entrada[] = [
   { m: 'PUT', ruta: '/api/textos/:clave', guardia: { tipo: 'nivel', minimo: 4 },
     nota: 'los textos de las páginas públicas son la voz de la plataforma' },
   { m: 'DELETE', ruta: '/api/textos/:clave', guardia: { tipo: 'nivel', minimo: 4 } },
-  // Calendario Arte para la Humanidad (2026-11-04). Lo que acaba impreso lo
-  // editan solo generadores de conocimiento o más; proponer ideas, cualquiera
-  // con sesión. Ver `src/server/calendarioArte.ts`.
-  { m: 'PUT', ruta: '/api/calendario-arte/:anio/:mes', guardia: { tipo: 'nivel', minimo: 3 },
-    nota: 'Contenido que se imprime y se reparte: no basta con una cuenta recién creada.' },
-  { m: 'PUT', ruta: '/api/calendario-arte/:anio/:mes/referencias', guardia: { tipo: 'nivel', minimo: 3 } },
-  { m: 'DELETE', ruta: '/api/calendario-arte/:anio/:mes', guardia: { tipo: 'nivel', minimo: 3 },
-    nota: 'Vuelve al contenido del código; no borra la carpeta de referencias.' },
-  { m: 'POST', ruta: '/api/calendario-arte/:anio/ideas', guardia: { tipo: 'nivel', minimo: 1 } },
-  { m: 'PATCH', ruta: '/api/calendario-arte/ideas/:id', guardia: { tipo: 'nivel', minimo: 3 } },
+  // Calendario Arte para la Humanidad. Abierto a cualquiera, sin cuenta, desde
+  // 2026-11-05 por decisión de Eugenio («que cualquier persona sin necesidad de
+  // registrarse pueda editar»). Lo que lo sostiene: historial con «Restaurar»
+  // antes de cada cambio, freno por IP y hora, e imágenes solo subidas aquí.
+  // Ver `src/server/calendarioArte.ts`.
+  { m: 'PUT', ruta: '/api/calendario-arte/:anio/:mes', guardia: { tipo: 'publica', porque: 'Edición abierta del calendario (Eugenio, 2026-11-05). Copia en el historial antes de cada cambio y freno por IP.' } },
+  { m: 'PUT', ruta: '/api/calendario-arte/:anio/:mes/referencias', guardia: { tipo: 'publica', porque: 'Edición abierta del calendario. Solo imágenes subidas aquí; copia en el historial.' } },
+  { m: 'DELETE', ruta: '/api/calendario-arte/:anio/:mes', guardia: { tipo: 'publica', porque: 'Volver al original; antes se guarda copia, así que se deshace con Restaurar.' } },
+  { m: 'POST', ruta: '/api/calendario-arte/historial/:id/restaurar', guardia: { tipo: 'publica', porque: 'Deshacer lo que estropee alguien, también sin cuenta. Guarda copia de lo actual antes.' } },
+  { m: 'POST', ruta: '/api/calendario-arte/subir', guardia: { tipo: 'publica', porque: 'Solo imágenes, 10 MB, freno de 40 por hora e IP. /api/uploads sigue pidiendo sesión.' } },
+  { m: 'POST', ruta: '/api/calendario-arte/:anio/ideas', guardia: { tipo: 'publica', porque: 'Buzón de ideas abierto, con freno de 30 por hora e IP.' } },
+  { m: 'PATCH', ruta: '/api/calendario-arte/ideas/:id', guardia: { tipo: 'publica', porque: 'Marcar ideas como hechas; se pueden reabrir.' } },
 
   // Telecomunicaciones: todo exige sesión, y lo que va sobre una llamada
   // comprueba además que quien llama es una de las dos puntas.

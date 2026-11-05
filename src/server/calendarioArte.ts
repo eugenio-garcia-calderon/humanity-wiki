@@ -6,27 +6,71 @@
 // dispositivo, con una carpeta de referencias por mes y un buzón de ideas que
 // la IA lee de vez en cuando para implementar las mejoras pendientes.
 //
-// Tablas en `drizzle/0161_calendario_arte.sql`. El contenido por defecto vive
-// en `src/data/calendarioArte.ts`: aquí solo se guarda lo que alguien cambió.
+// Tablas en `drizzle/0161_calendario_arte.sql` y `0162_…_historial.sql`. El
+// contenido por defecto vive en `src/data/calendarioArte.ts`: aquí solo se
+// guarda lo que alguien cambió.
 //
-// ── QUIÉN PUEDE QUÉ ────────────────────────────────────────────────────────
-// Leer: cualquiera (es una página pública, como un calendario colgado).
-// Proponer una idea: cualquiera con sesión (nivel 1).
-// Editar textos, imágenes, referencias y cerrar ideas: nivel 3
-// («generador de conocimiento») o más. Es contenido que se va a imprimir y
-// repartir: abrirlo a nivel 1 sería dejar que cualquier cuenta nueva cambie
-// lo que acaba en papel.
-import type { Express, Request, Response } from 'express';
+// ── QUIÉN PUEDE QUÉ: CUALQUIERA (2026-11-05) ──────────────────────────────
+// Eugenio: «haz que cualquier persona sin necesidad de registrarse pueda
+// editar el contenido desde este enlace, pero que no se indexe en Google».
+// Hasta ese día editar pedía nivel 3. Ahora todas las rutas de escritura están
+// abiertas, y lo que sostiene eso son tres piezas, no la buena fe:
+//
+//   1. HISTORIAL. Antes de cambiar un mes se guarda una copia (como mucho una
+//      cada 10 minutos mientras se edita, y siempre antes de restaurar). Lo
+//      que estropee alguien se deshace con «Restaurar», también sin cuenta.
+//   2. RITMO. Un freno por IP y por hora en `frenos` (el limitador de la casa):
+//      quien escribe a mano no lo nota; un bucle sí. Las fotos tienen el suyo,
+//      más estricto, porque ocupan disco de verdad.
+//   3. NADA DE FUERA. Las imágenes solo pueden ser subidas aquí o de la
+//      propia carpeta del calendario: un enlace https a otra web permitiría a
+//      cualquiera meter una imagen que rastrea a quien abre la página.
+//
+// Y para que Google no lo indexe: `X-Robots-Tag: noindex` en la página, en
+// sus imágenes y en su API (más la etiqueta `robots` que pone la propia página).
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import { sql } from 'drizzle-orm';
-import { ROLE } from './auth.js';
-
-const NIVEL_EDITAR = ROLE.KNOWLEDGE;
-const NIVEL_IDEA = ROLE.USER;
+import { guardarArchivo } from './uploads';
+import { ipDe, ritmo, esperaPendiente, type Regla } from './limites/index.js';
 
 /** Un mes entero cabe holgado en 60 kB (31 frases, franja, textos). */
 const MAX_CONTENIDO = 200_000;
 const MAX_REFERENCIAS = 200;
 const MAX_IDEA = 4_000;
+/** Cada cuánto, como mucho, se guarda una copia mientras alguien edita. */
+const MINUTOS_ENTRE_COPIAS = 10;
+/** Copias que se conservan por mes. */
+const COPIAS_POR_MES = 300;
+
+// ── LOS FRENOS ─────────────────────────────────────────────────────────────
+// El contador de `frenos` no baja solo, así que la clave lleva la HORA: cada
+// hora empieza limpia y el barrido de 2 días se lleva las viejas. 600
+// guardados por hora es ~10 por minuto sin parar durante una hora: el
+// autoguardado de una persona escribiendo no llega; un bucle sí.
+const FRENO_ESCRITURA: Regla = { puerta: 'calendario-escritura', gracia: 600, baseSegundos: 30, topeSegundos: 900, alFallar: 'cerrar' };
+const FRENO_SUBIDA: Regla = { puerta: 'calendario-subida', gracia: 40, baseSegundos: 60, topeSegundos: 3600, alFallar: 'cerrar' };
+const FRENO_IDEA: Regla = { puerta: 'calendario-idea', gracia: 30, baseSegundos: 60, topeSegundos: 3600, alFallar: 'cerrar' };
+
+const horaActual = () => new Date().toISOString().slice(0, 13);
+
+/** Comprueba y anota el ritmo. Devuelve false (y ya contestó) si hay que esperar. */
+async function conRitmo(db: any, regla: Regla, req: Request, res: Response): Promise<boolean> {
+  const quien = `${ipDe(req)}@${horaActual()}`;
+  try {
+    const espera = await esperaPendiente(db, regla, quien);
+    if (espera > 0) {
+      res.setHeader('Retry-After', String(espera));
+      res.status(429).json({ error: `Demasiados cambios seguidos desde esta conexión. Prueba en ${espera < 60 ? `${espera} segundos` : Math.ceil(espera / 60) === 1 ? '1 minuto' : `${Math.ceil(espera / 60)} minutos`}.` });
+      return false;
+    }
+  } catch (e: any) {
+    console.error('calendario-arte: freno roto', e?.message || e);
+    res.status(503).json({ error: 'No se puede comprobar el límite de cambios. Prueba en un momento.' });
+    return false;
+  }
+  ritmo(db, regla, quien);
+  return true;
+}
 
 function anioValido(v: unknown): number | null {
   const n = Number(v);
@@ -42,21 +86,10 @@ function hojaValida(v: unknown): number | null {
   return Number.isInteger(n) && n >= 0 && n <= 12 ? n : null;
 }
 
-/** Solo imágenes subidas a la plataforma o enlaces https. Nada de
- *  `javascript:` ni `data:` gigantes metidos en la base de datos. */
+/** Solo imágenes subidas a la plataforma o de la carpeta del calendario. */
 function urlImagenValida(u: unknown): u is string {
   return typeof u === 'string' && u.length < 2_000
-    && (u.startsWith('/uploads/') || u.startsWith('/calendario-arte/') || u.startsWith('https://'));
-}
-
-function nivel(req: Request): number {
-  return req.user?.roleLevel ?? 0;
-}
-
-function exigir(req: Request, res: Response, min: number, que: string): boolean {
-  if (!req.user) { res.status(401).json({ error: 'Debes iniciar sesión.' }); return false; }
-  if (nivel(req) < min) { res.status(403).json({ error: `${que} requiere nivel ${min} o superior.` }); return false; }
-  return true;
+    && (u.startsWith('/uploads/') || u.startsWith('/calendario-arte/'));
 }
 
 /** Limpia la lista de referencias: url válida y una nota corta opcional. */
@@ -71,7 +104,53 @@ function limpiarReferencias(lista: unknown): { url: string; nota?: string }[] | 
   return out;
 }
 
+/** ¿Hay alguna imagen de fuera en el contenido? (ilustración o cualquier campo `imagen`). */
+function imagenesValidas(contenido: any): boolean {
+  if (contenido?.imagen && !urlImagenValida(contenido.imagen)) return false;
+  return true;
+}
+
+const IMAGENES_SUBIBLES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif']);
+
 export function registerCalendarioArteRoutes(app: Express, db: any) {
+  // ── QUE GOOGLE NO LO INDEXE ───────────────────────────────────────────────
+  // Va antes que el comodín de la aplicación (server.ts) porque los módulos se
+  // montan antes; solo pone la cabecera y deja pasar. Cubre la página
+  // (`/calendario-arte` y `/calendario-arte/`), sus imágenes y su API.
+  // A propósito NO se pone en `robots.txt`: si se prohíbe rastrear, Google no
+  // llega a leer el `noindex` y puede indexar la dirección igualmente.
+  app.use(['/calendario-arte', '/api/calendario-arte'], (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, noimageindex');
+    next();
+  });
+
+  /** Guarda una copia del mes tal como está ahora, si toca. */
+  const copiar = async (anio: number, mes: number, motivo: string, siempre = false) => {
+    try {
+      await db.execute(sql`
+        INSERT INTO calendario_arte_historial (anio, mes, contenido, referencias, version, autor_user_id, motivo)
+        SELECT m.anio, m.mes, m.contenido, m.referencias, m.version, m.updated_by, ${motivo}
+        FROM calendario_arte_meses m
+        WHERE m.anio = ${anio} AND m.mes = ${mes}
+          AND (${siempre} OR NOT EXISTS (
+            SELECT 1 FROM calendario_arte_historial h
+            WHERE h.anio = ${anio} AND h.mes = ${mes}
+              AND h.created_at > now() - (${MINUTOS_ENTRE_COPIAS}::int || ' minutes')::interval
+          ))
+      `);
+      await db.execute(sql`
+        DELETE FROM calendario_arte_historial
+        WHERE anio = ${anio} AND mes = ${mes} AND id NOT IN (
+          SELECT id FROM calendario_arte_historial WHERE anio = ${anio} AND mes = ${mes}
+          ORDER BY created_at DESC LIMIT ${COPIAS_POR_MES})
+      `);
+    } catch (e: any) {
+      // Sin copia no se escribe: abrir la edición solo es aceptable porque se
+      // puede deshacer. Si no se puede guardar el «antes», no hay «después».
+      throw new Error('No se ha podido guardar la copia de seguridad del mes; el cambio no se ha aplicado. ' + (e?.message || ''));
+    }
+  };
+
   /** GET /api/calendario-arte/:anio — lo editado de los doce meses. */
   app.get('/api/calendario-arte/:anio', async (req: Request, res: Response) => {
     try {
@@ -82,12 +161,9 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
         FROM calendario_arte_meses WHERE anio = ${anio} ORDER BY mes
       `);
       res.set('Cache-Control', 'no-store');
-      res.json({
-        anio,
-        meses: r.rows,
-        puedeEditar: nivel(req) >= NIVEL_EDITAR,
-        puedeProponer: nivel(req) >= NIVEL_IDEA,
-      });
+      // Abierto a todos: lo dice el servidor para que la pantalla no tenga
+      // que adivinarlo (y para poder cerrarlo mañana cambiando una línea).
+      res.json({ anio, meses: r.rows, puedeEditar: true, puedeProponer: true, sesion: !!req.user });
     } catch (e: any) {
       console.error('calendario-arte get:', e);
       res.status(500).json({ error: e.message });
@@ -102,7 +178,6 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
    */
   app.put('/api/calendario-arte/:anio/:mes', async (req: Request, res: Response) => {
     try {
-      if (!exigir(req, res, NIVEL_EDITAR, 'Editar el calendario')) return;
       const anio = anioValido(req.params.anio);
       const mes = hojaValida(req.params.mes);
       if (!anio || mes === null) return res.status(400).json({ error: 'Año o mes no válido.' });
@@ -112,14 +187,16 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
       }
       const texto = JSON.stringify(contenido);
       if (texto.length > MAX_CONTENIDO) return res.status(413).json({ error: 'El contenido de este mes es demasiado grande.' });
-      if (contenido.imagen && !urlImagenValida(contenido.imagen)) {
-        return res.status(400).json({ error: 'La ilustración tiene que ser una imagen subida a la plataforma.' });
+      if (!imagenesValidas(contenido)) {
+        return res.status(400).json({ error: 'La ilustración tiene que ser una imagen subida desde el calendario.' });
       }
+      if (!(await conRitmo(db, FRENO_ESCRITURA, req, res))) return;
       const version = Number(req.body?.version ?? 0);
 
+      await copiar(anio, mes, 'edición');
       const r = await db.execute(sql`
         INSERT INTO calendario_arte_meses (anio, mes, contenido, version, updated_by, updated_at)
-        VALUES (${anio}, ${mes}, ${texto}::jsonb, 1, ${req.user!.id}, now())
+        VALUES (${anio}, ${mes}, ${texto}::jsonb, 1, ${req.user?.id ?? null}, now())
         ON CONFLICT (anio, mes) DO UPDATE
           SET contenido = EXCLUDED.contenido,
               version = calendario_arte_meses.version + 1,
@@ -145,15 +222,16 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
    */
   app.put('/api/calendario-arte/:anio/:mes/referencias', async (req: Request, res: Response) => {
     try {
-      if (!exigir(req, res, NIVEL_EDITAR, 'Cambiar la carpeta de referencias')) return;
       const anio = anioValido(req.params.anio);
       const mes = hojaValida(req.params.mes);
       if (!anio || mes === null) return res.status(400).json({ error: 'Año o mes no válido.' });
       const referencias = limpiarReferencias(req.body?.referencias);
-      if (!referencias) return res.status(400).json({ error: `Lista de referencias no válida (máximo ${MAX_REFERENCIAS} imágenes subidas a la plataforma).` });
+      if (!referencias) return res.status(400).json({ error: `Lista de referencias no válida (máximo ${MAX_REFERENCIAS} imágenes subidas desde el calendario).` });
+      if (!(await conRitmo(db, FRENO_ESCRITURA, req, res))) return;
+      await copiar(anio, mes, 'carpeta');
       const r = await db.execute(sql`
         INSERT INTO calendario_arte_meses (anio, mes, referencias, version, updated_by, updated_at)
-        VALUES (${anio}, ${mes}, ${JSON.stringify(referencias)}::jsonb, 0, ${req.user!.id}, now())
+        VALUES (${anio}, ${mes}, ${JSON.stringify(referencias)}::jsonb, 0, ${req.user?.id ?? null}, now())
         ON CONFLICT (anio, mes) DO UPDATE
           SET referencias = EXCLUDED.referencias, updated_by = EXCLUDED.updated_by, updated_at = now()
         RETURNING mes, contenido, referencias, version, updated_at
@@ -168,16 +246,18 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
   /**
    * DELETE /api/calendario-arte/:anio/:mes — volver al contenido original del
    * código. Las referencias NO se tocan: son trabajo de alguien, no un ajuste.
+   * Antes se guarda una copia, así que también esto se puede deshacer.
    */
   app.delete('/api/calendario-arte/:anio/:mes', async (req: Request, res: Response) => {
     try {
-      if (!exigir(req, res, NIVEL_EDITAR, 'Restaurar el calendario')) return;
       const anio = anioValido(req.params.anio);
       const mes = hojaValida(req.params.mes);
       if (!anio || mes === null) return res.status(400).json({ error: 'Año o mes no válido.' });
+      if (!(await conRitmo(db, FRENO_ESCRITURA, req, res))) return;
+      await copiar(anio, mes, 'antes de volver al original', true);
       await db.execute(sql`
         UPDATE calendario_arte_meses
-        SET contenido = '{}'::jsonb, version = version + 1, updated_by = ${req.user!.id}, updated_at = now()
+        SET contenido = '{}'::jsonb, version = version + 1, updated_by = ${req.user?.id ?? null}, updated_at = now()
         WHERE anio = ${anio} AND mes = ${mes}
       `);
       res.json({ success: true });
@@ -185,6 +265,83 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
       res.status(500).json({ error: e.message });
     }
   });
+
+  // ── HISTORIAL ─────────────────────────────────────────────────────────────
+
+  /** GET /api/calendario-arte/:anio/:mes/historial — las copias guardadas. */
+  app.get('/api/calendario-arte/:anio/:mes/historial', async (req: Request, res: Response) => {
+    try {
+      const anio = anioValido(req.params.anio);
+      const mes = hojaValida(req.params.mes);
+      if (!anio || mes === null) return res.status(400).json({ error: 'Año o mes no válido.' });
+      const r = await db.execute(sql`
+        SELECT h.id, h.version, h.motivo, h.created_at,
+               h.contenido->>'tema' AS tema, h.contenido->>'lema' AS lema,
+               jsonb_array_length(COALESCE(h.contenido->'dias', '[]'::jsonb)) AS dias,
+               jsonb_array_length(h.referencias) AS referencias,
+               COALESCE(u.display_name, u.name) AS autor
+        FROM calendario_arte_historial h
+        LEFT JOIN users u ON u.id = h.autor_user_id
+        WHERE h.anio = ${anio} AND h.mes = ${mes}
+        ORDER BY h.created_at DESC
+        LIMIT ${COPIAS_POR_MES}
+      `);
+      res.set('Cache-Control', 'no-store');
+      res.json(r.rows);
+    } catch (e: any) {
+      console.error('calendario-arte historial:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** POST /api/calendario-arte/historial/:id/restaurar — dejar el mes como en esa copia. */
+  app.post('/api/calendario-arte/historial/:id/restaurar', async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'Copia no válida.' });
+      const c = await db.execute(sql`SELECT anio, mes, contenido, referencias FROM calendario_arte_historial WHERE id = ${id}`);
+      const copia = c.rows[0] as any;
+      if (!copia) return res.status(404).json({ error: 'Esa copia ya no existe.' });
+      if (!(await conRitmo(db, FRENO_ESCRITURA, req, res))) return;
+      // Lo de ahora también se guarda: restaurar por error se deshace igual.
+      await copiar(copia.anio, copia.mes, 'antes de restaurar', true);
+      const r = await db.execute(sql`
+        INSERT INTO calendario_arte_meses (anio, mes, contenido, referencias, version, updated_by, updated_at)
+        VALUES (${copia.anio}, ${copia.mes}, ${JSON.stringify(copia.contenido)}::jsonb, ${JSON.stringify(copia.referencias)}::jsonb, 1, ${req.user?.id ?? null}, now())
+        ON CONFLICT (anio, mes) DO UPDATE
+          SET contenido = EXCLUDED.contenido, referencias = EXCLUDED.referencias,
+              version = calendario_arte_meses.version + 1, updated_by = EXCLUDED.updated_by, updated_at = now()
+        RETURNING mes, contenido, referencias, version, updated_at
+      `);
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('calendario-arte restaurar:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── SUBIR IMÁGENES SIN CUENTA ─────────────────────────────────────────────
+  // `/api/uploads` pide sesión (y debe seguir pidiéndola: sirve a toda la
+  // plataforma). Esta puerta es solo para el calendario y solo admite
+  // imágenes, con el mismo tope de tamaño que la general y su propio freno.
+  app.post('/api/calendario-arte/subir',
+    express.raw({ type: 'application/octet-stream', limit: 12 * 1024 * 1024 }),
+    async (req: Request, res: Response) => {
+      try {
+        const tipo = String(req.query.type || '').toLowerCase().split(';')[0].trim();
+        if (!IMAGENES_SUBIBLES.has(tipo)) {
+          return res.status(400).json({ error: 'Aquí solo se pueden subir imágenes (JPG, PNG, WebP, GIF o AVIF).' });
+        }
+        const bytes = req.body as Buffer;
+        if (!Buffer.isBuffer(bytes) || bytes.length === 0) return res.status(400).json({ error: 'La imagen llegó vacía.' });
+        if (!(await conRitmo(db, FRENO_SUBIDA, req, res))) return;
+        res.json(guardarArchivo(tipo, bytes));
+      } catch (e: any) {
+        console.error('calendario-arte subir:', e);
+        res.status(/supera/.test(e?.message || '') ? 413 : 500).json({ error: e.message });
+      }
+    },
+  );
 
   // ── BUZÓN DE IDEAS ────────────────────────────────────────────────────────
 
@@ -235,16 +392,16 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
   /** POST /api/calendario-arte/:anio/ideas — { texto, mes? } */
   app.post('/api/calendario-arte/:anio/ideas', async (req: Request, res: Response) => {
     try {
-      if (!exigir(req, res, NIVEL_IDEA, 'Proponer una idea')) return;
       const anio = anioValido(req.params.anio);
       if (!anio) return res.status(400).json({ error: 'Año no válido.' });
       const texto = String(req.body?.texto ?? '').trim();
       if (!texto) return res.status(400).json({ error: 'Escribe la idea antes de enviarla.' });
       if (texto.length > MAX_IDEA) return res.status(400).json({ error: `La idea es demasiado larga (máximo ${MAX_IDEA} caracteres).` });
       const mes = req.body?.mes == null || req.body?.mes === '' ? null : mesValido(req.body.mes);
+      if (!(await conRitmo(db, FRENO_IDEA, req, res))) return;
       const r = await db.execute(sql`
         INSERT INTO calendario_arte_ideas (anio, mes, texto, created_by)
-        VALUES (${anio}, ${mes}, ${texto}, ${req.user!.id})
+        VALUES (${anio}, ${mes}, ${texto}, ${req.user?.id ?? null})
         RETURNING id, mes, texto, estado, respuesta, created_at, resuelta_at
       `);
       res.json(r.rows[0]);
@@ -257,12 +414,12 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
   /** PATCH /api/calendario-arte/ideas/:id — { estado, respuesta? } */
   app.patch('/api/calendario-arte/ideas/:id', async (req: Request, res: Response) => {
     try {
-      if (!exigir(req, res, NIVEL_EDITAR, 'Cerrar una idea')) return;
       const id = Number(req.params.id);
       const estado = String(req.body?.estado ?? '');
       if (!Number.isInteger(id) || !['pendiente', 'hecha', 'descartada'].includes(estado)) {
         return res.status(400).json({ error: 'Estado no válido: pendiente, hecha o descartada.' });
       }
+      if (!(await conRitmo(db, FRENO_IDEA, req, res))) return;
       const respuesta = req.body?.respuesta == null ? null : String(req.body.respuesta).slice(0, MAX_IDEA);
       const r = await db.execute(sql`
         UPDATE calendario_arte_ideas

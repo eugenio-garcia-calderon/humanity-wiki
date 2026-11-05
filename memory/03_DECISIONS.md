@@ -979,3 +979,8 @@ Options: (a) server-side PDF with the Playwright already in dependencies; (b) `w
 
 ## 2026-11-04 — Calendario Arte: who edits
 Editing what ends up printed needs level 3; proposing an idea, level 1. Reading is public, because the QR on paper has to open without an account. Declared in `seguridad/politica.ts`.
+
+## 2026-11-05 — Calendario Arte: editing open to anyone, without an account
+Eugenio: «haz que cualquier persona sin necesidad de registrarse pueda editar el contenido desde este enlace, pero que no se indexe en Google». This supersedes the 2026-11-04 decision («Editing what ends up printed needs level 3»).
+Options for "anyone": (a) open routes, made safe by history + rate brake; (b) a secret edit token in the URL, with the public link read-only; (c) keep login. Chose (a) because it is literally what was asked («desde este enlace»). What makes it acceptable: a snapshot before every change (at most one per 10 minutes while editing, always before restore/reset), restore available to anyone, the house brake (`frenos`) keyed by IP and hour (600 writes, 40 images, 30 ideas per hour), and images only from our own uploads (an external URL would let anyone plant a tracking pixel). Constitution rule 2 («toda entidad tiene autor»): anonymous edits are recorded with author NULL, shown as «Visitante sin cuenta»; no IP is stored anywhere (the brake keys expire in 2 days). Switching to (b) later: ~1 h (token column, check in the five write routes, read-only UI without it).
+Not indexed: `X-Robots-Tag: noindex, nofollow, noarchive, noimageindex` on `/calendario-arte*` and `/api/calendario-arte*` plus a `robots` meta tag from the page. Deliberately not in `robots.txt`: a blocked URL can still be indexed because Google never reads its `noindex`.
