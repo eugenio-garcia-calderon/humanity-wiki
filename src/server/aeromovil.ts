@@ -170,7 +170,7 @@ export function registerAeromovilRoutes(app: Express, db: any) {
     }
   });
 
-  // ── DISEÑOS GUARDADOS (migración 0166) ────────────────────────────────────
+  // ── DISEÑOS GUARDADOS (migración 0167) ────────────────────────────────────
   // Eugenio: «guardar configuraciones y tener varios diseños… que estén en el
   // menú». Crear: cualquiera. Cambiar o quitar: el dueño, un administrador o
   // quien lo creó (con la clave que se le dio al crearlo, guardada en su navegador).
