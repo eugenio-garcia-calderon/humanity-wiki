@@ -14,7 +14,7 @@
 //   se llena con el botón de abajo, «Añadir propuesta de mejora».
 //
 // PÁGINA PROPIA (2026-11-05, Eugenio): vive FUERA del Layout de la plataforma.
-// Quien diseña entra por el enlace, sin cuenta, y no debe ver Wiki Creator:
+// Quien diseña entra por el enlace, sin cuenta, y no debe ver Humanity.Wiki:
 // ni sus herramientas, ni iniciar sesión, ni el buscador, ni el feedback o la
 // IA flotantes. Lleva su logo («Arte para la Humanidad») y su propio menú.
 //

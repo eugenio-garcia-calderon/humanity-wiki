@@ -3,12 +3,12 @@ import { temasDeLaHumanidad } from '../components/bloquesDatos/menuTemas/temas';
 // ============================================================================
 // LA PLANTILLA «HUMANIDAD WIKI» (2026-10-18, Humanidad Wiki, fase 2)
 // ============================================================================
-// Eugenio: Humanidad Wiki no es código de Wiki Creator, es una página hecha
-// CON Wiki Creator, que cualquiera puede construir o replicar. Esta función la
+// Eugenio: Humanidad Wiki no es código de Humanity.Wiki, es una página hecha
+// CON Humanity.Wiki, que cualquiera puede construir o replicar. Esta función la
 // monta con la sesión de quien la pide y con las mismas llamadas que usa el
 // editor: una página por tema con su bloque «Contenido de un tema», y una
 // principal con el «Menú de temas» apuntando a ellas. Las subpáginas cuelgan de
-// la principal por sus bloques «Página», que es como Wiki Creator anida (y como
+// la principal por sus bloques «Página», que es como Humanity.Wiki anida (y como
 // heredan si se ven o no al publicar). Nace privada: publicarla es decisión de
 // quien la crea.
 

@@ -94,6 +94,7 @@ const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const FormularioPublico = lazy(() => import('./pages/FormularioPublico'));
 const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnCasa })));
+const LaHumanidad = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.LaHumanidad })));
 const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
 const BuscadorEnEspacio = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnEspacio })));
 const BuscadorEnCasa = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnCasa })));
@@ -317,12 +318,12 @@ export default function App() {
                   se parece. */}
               {/* Calendario Arte para la Humanidad: página PROPIA, fuera del Layout
                   (2026-11-05, Eugenio). Quien diseña entra por el enlace, sin
-                  cuenta, y no debe ver Wiki Creator: ni herramientas, ni iniciar
+                  cuenta, y no debe ver Humanity.Wiki: ni herramientas, ni iniciar
                   sesión, ni buscador, ni el feedback o la IA flotantes. */}
               <Route path="calendario-arte" element={<CalendarioArte />} />
               {/* Aeromóvil Gota: página PROPIA, fuera del Layout (2026-11-05,
                   Eugenio). Su menú es el del Aeromóvil (diseño 3D, tareas,
-                  plan, planos, exportar a CAD); no se ve Wiki Creator. */}
+                  plan, planos, exportar a CAD); no se ve Humanity.Wiki. */}
               <Route path="aeromovil/*" element={<Aeromovil />} />
               {/* Arquitectura: el mundo 3D editable de la Comunidad Circular Humana
                   (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
@@ -333,6 +334,12 @@ export default function App() {
                   WhatsApp de compra ya enlazaban `humanity.wiki/pedido?codigo=…`
                   y esta ruta sólo existía en el subdominio de cada tienda. */}
               <Route path="pedido" element={<MiPedido />} />
+              {/* LA HUMANIDAD, PARTE FIJA DE LA PLATAFORMA (2026-11-05, Eugenio:
+                  la reestructuración). Las vistas de los temas de la humanidad
+                  —círculo, pirámide, sociedad, flujo— que vivían en la portada
+                  de luzhumanidad.com, ahora en `humanity.wiki/humanidad`.
+                  Luz & Humanidad queda como el laboratorio de proyectos. */}
+              <Route path="humanidad" element={<LaHumanidad />} />
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />

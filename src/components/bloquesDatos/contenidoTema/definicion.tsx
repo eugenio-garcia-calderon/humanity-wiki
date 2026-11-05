@@ -9,7 +9,7 @@ import { definirBloque } from '../tipos';
 // publicaciones, carpetas, lienzos, personas y contenido de fuera sobre un
 // tema), dentro de cualquier página. Lee lo mismo: `/api/feed-tema/:id`, lo
 // público. Con esto, la página de cada tema de Humanidad Wiki es una página
-// normal hecha con Wiki Creator.
+// normal hecha con Humanity.Wiki.
 export default definirBloque({
   tipo: 'contenidoTema',
   label: 'Contenido de un tema',

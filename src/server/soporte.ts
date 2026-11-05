@@ -15,7 +15,7 @@ import { guardian, ritmo, ipDe, type Regla } from './limites/index.js';
 // Eugenio: «tiene atención al usuario y atención al cliente que necesite
 // resolver dudas sobre determinados productos. Se hace a través de un chat».
 //
-// Quien visita una web hecha con Wiki Creator escribe en el bloque «Chat de
+// Quien visita una web hecha con Humanity.Wiki escribe en el bloque «Chat de
 // ayuda», y el EQUIPO DEL SITIO (quien puede editar la página raíz) le
 // contesta desde ese mismo bloque, que a ellos les enseña la bandeja.
 //

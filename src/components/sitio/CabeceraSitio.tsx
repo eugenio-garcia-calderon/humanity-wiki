@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
 import BotonCalificaciones from './BotonCalificaciones';
-import { VistasMenu, type Vista } from './VistaMapaSitio';
+import { VistasMenu, vistasDe, type Vista } from './VistaMapaSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -58,7 +58,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           Donar y la cuenta; debajo las calificaciones y el buscador; y al final la ruta. */}
       <div className="contents md:col-start-1 md:flex md:min-w-0 md:items-center md:gap-2">
         {raiz && <span className="flex shrink-0 items-center"><Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu"
-          cabezaMenu={simple ? undefined : cerrar => <VistasMenu porDefecto={vistaInicial} cerrar={cerrar} />} /></Suspense></span>}
+          cabezaMenu={simple ? undefined : cerrar => <VistasMenu porDefecto={vistaInicial} vistas={vistasDe(c.sitio)} cerrar={cerrar} />} /></Suspense></span>}
         <Link to="/" className="ml-1 flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
           {icono && (/^(https?:|\/)/.test(icono)
             ? <img src={miniatura(icono, 112)} alt="" className="h-[34px] w-[34px] shrink-0 rounded-lg object-contain" />

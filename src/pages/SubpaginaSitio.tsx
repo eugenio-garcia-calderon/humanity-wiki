@@ -12,7 +12,7 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 // ============================================================================
 // Lo que se abre al pinchar una tarjeta de la galería de una página publicada.
 // Eugenio: «cuando se pincha en un elemento de la base de datos vuelve a
-// aparecer el menú general de Wiki Creator, y eso es un error. Tiene que
+// aparecer el menú general de Humanity.Wiki, y eso es un error. Tiene que
 // permanecer en ese dominio como si fuese una página».
 //
 // Quién puede verla lo decide el servidor (`sitios.ts`): la página si está
@@ -54,6 +54,23 @@ export function SubpaginaEnEspacio() {
   return (
     <ProveedorSitio sitio={sitioConAnfitrion(null)}>
       <SubpaginaSitio propio />
+    </ProveedorSitio>
+  );
+}
+
+/**
+ * LA HUMANIDAD — `humanity.wiki/humanidad` (2026-11-05, la reestructuración).
+ * La página «La Humanidad» (copiada de la portada de luzhumanidad.com, con sus
+ * vistas de círculo, pirámide, sociedad y flujo) es parte fija de la
+ * plataforma: una dirección corta propia, sin arroba. Es una página publicada
+ * normal —sus datos siguen en las tablas de siempre— servida con el contexto
+ * del espacio de Eugenio (`@luz`), que es donde viven sus subpáginas.
+ */
+export const HUMANIDAD_PORTADA_ID = 'KWMHUMANIDAD';
+export function LaHumanidad() {
+  return (
+    <ProveedorSitio sitio={sitioEnCasa('luz')}>
+      <SubpaginaSitio propio={false} idFijo={HUMANIDAD_PORTADA_ID} />
     </ProveedorSitio>
   );
 }

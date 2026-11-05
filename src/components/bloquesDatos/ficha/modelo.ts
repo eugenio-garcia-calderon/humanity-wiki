@@ -8,7 +8,7 @@
 // what Google is told cannot say two different things.
 //
 // ── WHAT A ROW IS FOR A SHEET ───────────────────────────────────────────────
-// A Wiki Creator database row (`bd_filas`) with its page. A sheet needs the
+// A Humanity.Wiki database row (`bd_filas`) with its page. A sheet needs the
 // whole table — the comparator and «the best per criterion» look at the
 // siblings — plus the rows its relation columns point to (brand, offers,
 // claims, recalls).

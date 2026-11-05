@@ -50,6 +50,12 @@ export function useVista(porDefecto: Vista = 'tabla'): [Vista, (v: Vista) => voi
 /** La vista inicial que pide la configuración del sitio, si es una de las que hay. */
 export const vistaInicialDe = (config: any): Vista => (VALIDAS.includes(config?.vistaInicial) ? config.vistaInicial : ANTIGUAS[config?.vistaInicial] || 'tabla');
 
+/** LAS VISTAS DE ESTE SITIO (2026-11-05, la reestructuración): `sitio.vistas` dice cuáles
+ *  tiene. Sin la lista, todas, como siempre: así ningún sitio de antes pierde nada.
+ *  Luz & Humanidad se queda con la de proyectos y La Humanidad con las demás. */
+export const vistasDe = (config: any): Vista[] =>
+  Array.isArray(config?.vistas) ? (config.vistas as unknown[]).filter((v): v is Vista => VALIDAS.includes(v as Vista)) : VALIDAS;
+
 export function useVistaMapa(): [boolean, (mapa: boolean) => void] {
   const [v, cambiar] = useVista();
   return [v === 'mapa', (mapa: boolean) => cambiar(mapa ? 'mapa' : 'tabla')];
@@ -91,13 +97,16 @@ export function BotonVista({ porDefecto = 'tabla' }: { porDefecto?: Vista }) {
 
 /** Las vistas dentro del menú ☰ de la barra (2026-10-28, Eugenio: «pon más compacto el selector de las vistas y mételo en
  *  el menú colapsable»): una fila de tres, con su icono y su nombre. */
-export function VistasMenu({ porDefecto = 'tabla', cerrar }: { porDefecto?: Vista; cerrar?: () => void }) {
+export function VistasMenu({ porDefecto = 'tabla', vistas, cerrar }: { porDefecto?: Vista; vistas?: Vista[]; cerrar?: () => void }) {
   const [vista, cambiar] = useVista(porDefecto);
+  // Solo las vistas de este sitio (`sitio.vistas`); con una o ninguna no hay nada que elegir.
+  const lista = vistas ? VISTAS.filter(({ v }) => vistas.includes(v)) : VISTAS;
+  if (lista.length < 2) return null;
   return (
     <div data-vistas-menu className="mb-1 border-b border-slate-100 px-1 pb-2 pt-1">
       <p className="px-2 pb-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Vista</p>
       <div role="group" aria-label="Vista" className="grid grid-cols-3 gap-1">
-        {VISTAS.map(({ v, texto, Icono }) => (
+        {lista.map(({ v, texto, Icono }) => (
           <button key={v} type="button" onClick={() => { cambiar(v); cerrar?.(); }} aria-pressed={vista === v} data-vista={v} title={`Ver ${texto.toLowerCase()}`}
             className={cn('flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition-colors',
               vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}>
