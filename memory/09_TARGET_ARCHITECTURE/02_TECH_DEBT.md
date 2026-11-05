@@ -474,3 +474,9 @@ threshold, checked only on that null path here).
 - Open editing (2026-11-05): anonymous uploads go to the same `uploads/` disk as everything else, braked at 40 images per hour per IP but with no global cap and no sweep of images nobody references. If it gets abused: a daily global cap (~20 min) and a sweep of calendar uploads not referenced by any month or history row (~1 h).
 - The day phrases, datos clave and iniciativa candidates are drafts produced by bots and were not verified one by one by a person; the «Una enseñanza cada día» principle is the checklist for that review before printing.
 - Calendario Arte on phones (2026-11-05): in Chrome's mobile emulation the game lists in the 25 % box render larger than printed (text autosizing), despite `text-size-adjust: 100%` and the max-height trick in `CalendarioArte.tsx`. Print/PDF and desktop are correct. Not verified on a real Android/iOS device; if it shows there, render the sheet as a fixed-size layer (e.g. `zoom` instead of `transform: scale`) — ~1 h.
+
+## Aeromóvil Gota (2026-11-05)
+- Geometry duplicated in TS (viewer, drawings) and Python (STEP). A change in one without the other makes the STEP disagree with the drawings. Unifying means running the TS model server-side to emit the section points the script lofts (~3 h), or porting the STEP build to opencascade.js in the browser (~1-2 days, ~10 MB of wasm).
+- Hex colours for 3D materials and drawing canvases live in `src/components/aeromovil/` (Visor3D, planos), not as tokens: they are material and print colours, not UI. ~20 values.
+- The published STEP/STL are for the default parameters only; changing a default in `geometria.ts` requires re-running the script and replacing `public/aeromovil/*.zip` (5.7 MB + 2.4 MB in the repo).
+- Performance estimates (Cd, energy, solar, beam stress) are first-order formulas, labelled as estimates on screen. Replace with CFD and FEA results when stage 1 of the plan is done.

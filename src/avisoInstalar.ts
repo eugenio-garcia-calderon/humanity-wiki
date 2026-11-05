@@ -64,6 +64,8 @@ export function ofrecerInstalacion() {
   // plataforma (2026-11-05, Eugenio): quien entra a diseñar no ha venido a
   // instalar Humanity.
   if (location.pathname.startsWith("/calendario-arte")) return;
+  // Lo mismo para el Aeromóvil Gota (2026-11-05): página propia.
+  if (location.pathname.startsWith("/aeromovil")) return;
 
   const caja = document.createElement("div");
   caja.setAttribute("role", "dialog");
