@@ -500,15 +500,25 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   const pos: number[] = [], idx: number[] = [], col: number[] = [];
   const cabina = r.cabinaX ? [Math.min(...r.cabinaX), Math.max(...r.cabinaX)] : null;
   const colCuerpo = new THREE.Color(fantasma ? 0x14a3b5 : (r.color ?? 0xe4e0d6)), colCab = new THREE.Color(r.cabina === 'cupula' ? 0x22323d : 0x0f1215);
+  const lb = !fantasma ? r.librea : undefined;
+  const cDel = lb && new THREE.Color(lb.delante), cDet = lb && new THREE.Color(lb.detras), cAb = lb && new THREE.Color(lb.abajo), cRay = lb && new THREE.Color(lb.colorRayas ?? lb.abajo);
+  const nA = r.seccion?.arriba ?? r.formaArriba ?? 2.5, nB = r.seccion?.abajo ?? 3.2;
   for (let i = 0; i < n; i++) {
     const zc = (p.top[i] + p.bot[i]) / 2, aT = (p.top[i] - p.bot[i]) / 2;
     for (let j = 0; j <= nv; j++) {
-      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? (r.formaArriba ?? 2.5) : 3.2;
+      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? nA : nB;
       const ez = Math.sign(c) * Math.pow(Math.abs(c), 2 / nn), ey = Math.sign(sn) * Math.pow(Math.abs(sn), 2 / nn);
-      pos.push(p.x[i], zc + aT * ey, p.hw[i] * ez);
+      const y = zc + aT * ey;
+      pos.push(p.x[i], y, p.hw[i] * ez);
       const enCab = !!cabina && p.x[i] <= cabina[1] && p.x[i] >= cabina[0] && sn > Math.sin(0.22 * Math.PI);
       const enClaro = !!r.transparenteX && p.x[i] <= Math.max(...r.transparenteX) && p.x[i] >= Math.min(...r.transparenteX);
-      const cc = enCab || enClaro ? colCab : colCuerpo; col.push(cc.r, cc.g, cc.b);
+      let cc = enCab || enClaro ? colCab : colCuerpo;
+      if (lb) {
+        const abajo = y < p.bot[i] + (p.top[i] - p.bot[i]) * lb.alturaAbajo;
+        const raya = !abajo && !!lb.rayas?.some(([a, b]) => p.x[i] <= Math.max(a, b) && p.x[i] >= Math.min(a, b));
+        cc = abajo ? cAb! : raya ? cRay! : p.x[i] > lb.corteX ? cDel! : cDet!;
+      }
+      col.push(cc.r, cc.g, cc.b);
     }
   }
   for (let i = 0; i < n - 1; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j, b = a + nv + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
@@ -530,6 +540,30 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
     const l1 = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(lado), encima(0x0b6270)); l1.renderOrder = 7; g.add(l1);
     const planta = p.x.map((x, i) => new THREE.Vector3(x, 0.006, p.hw[i])).concat(p.x.map((x, i) => new THREE.Vector3(x, 0.006, -p.hw[i])).reverse());
     const l2 = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(planta), encima(0x0b6270)); l2.renderOrder = 7; g.add(l2);
+  }
+  // Cúpula de cristal aparte, encima del cuerpo (solo la mitad de arriba de la sección).
+  if (r.cupula) {
+    const cu = r.cupula, nc = 40, cp: number[] = [], ci: number[] = [];
+    for (let i = 0; i < cu.x.length; i++) for (let j = 0; j <= nc; j++) {
+      const th = Math.PI * j / nc, c = Math.cos(th), sn = Math.sin(th);
+      const ez = Math.sign(c) * Math.pow(Math.abs(c), 2 / 2.2), ey = Math.pow(sn, 2 / 2.2);
+      cp.push(cu.x[i], cu.base[i] + (cu.top[i] - cu.base[i]) * ey, cu.hw[i] * ez);
+    }
+    for (let i = 0; i < cu.x.length - 1; i++) for (let j = 0; j < nc; j++) { const a = i * (nc + 1) + j, b = a + nc + 1; ci.push(a, b, a + 1, a + 1, b, b + 1); }
+    const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3)); cg.setIndex(ci); cg.computeVertexNormals();
+    const cm = fantasma
+      ? new THREE.MeshStandardMaterial({ color: 0x14a3b5, transparent: true, opacity: 0.22, depthWrite: false, depthTest: false, side: THREE.DoubleSide })
+      : new THREE.MeshPhysicalMaterial({ color: 0x0e151c, metalness: 0.2, roughness: 0.05, clearcoat: 1, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+    const cupula = new THREE.Mesh(cg, cm); if (fantasma) cupula.renderOrder = 5; g.add(cupula);
+    if (fantasma) {
+      const l = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(cu.x.map((x, i) => new THREE.Vector3(x, cu.top[i], 0)).concat(cu.x.map((x, i) => new THREE.Vector3(x, cu.base[i] + 0.06, 0)).reverse())),
+        new THREE.LineBasicMaterial({ color: 0x0b6270, transparent: true, depthTest: false, depthWrite: false }));
+      l.renderOrder = 7; g.add(l);
+    }
+  }
+  if (!fantasma) for (const f of r.faros ?? []) {
+    const faro = new THREE.Mesh(new THREE.CapsuleGeometry(0.012, f.largo, 4, 8), new THREE.MeshStandardMaterial({ color: 0xdfe9ff, emissive: 0x9fc4ff, emissiveIntensity: 0.6, roughness: 0.2 }));
+    faro.position.set(f.x, f.y, f.z); faro.rotation.set(0, Math.sign(f.z) * 0.9, Math.PI / 2 + 0.25); faro.scale.set(1, 1, 0.5); g.add(faro);
   }
   for (const w of r.ruedas) rueda(g, M, w.x, w.d / 2, w.z, w.d / 2);
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
