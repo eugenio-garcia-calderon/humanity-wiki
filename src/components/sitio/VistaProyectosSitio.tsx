@@ -33,7 +33,7 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 type Celda = { estado?: string; valor?: unknown };
 type Fila = {
   id: string; pagina_id: string | null; orden: number; oculta?: boolean;
-  pagina?: { titulo?: string; imagen?: string | null; resumen?: string | null; encuadre?: { x?: number; y?: number } | null } | null;
+  pagina?: { titulo?: string; imagen?: string | null; resumen?: string | null; descripcion?: string | null; encuadre?: { x?: number; y?: number } | null } | null;
   celdas: Record<string, Celda>;
 };
 type Columna = { id: string; nombre: string; tipo: string; opciones?: Array<{ id: string; color?: string | null; label: string }> };
@@ -229,9 +229,11 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
         </div>
       )}
 
-      {/* Las tarjetas: la portada del proyecto (su miniatura), su nombre, su estado y su avance.
-          Las primeras cargan ya y con prioridad; el resto, al acercarse: de arriba abajo. */}
-      <ul className="mt-4 grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
+          la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
+          blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
+          dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
+      <ul className="mt-4 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2">
         {visibles.map((f, i) => {
           const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
           const img = f.pagina?.imagen || null;
@@ -239,50 +241,48 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           const estadoId = String(f.celdas[modelo.colEstado?.id || '']?.valor || '');
           const estado = modelo.opciones.get(estadoId) || null;
           const sus = lista(f.celdas[modelo.colArea]?.valor).map(id => modelo.areas.find(a => a.id === id)?.nombre).filter(Boolean) as string[];
-          // EL FOCO PRINCIPAL (2026-11-06, Eugenio: «que ocupe todo en horizontal pero no tanto
-          // en vertical; que se vean las otras tres tarjetas debajo sin hacer scroll»): toda la
-          // fila, con la foto apaisada y baja, y el nombre más grande.
-          const foco = FOCO.has(estado?.label || '');
+          const descripcion = (f.pagina?.descripcion || '').trim();
+          const principal = FOCO.has(estado?.label || '');
           return (
-            <li key={f.id} className={cn('relative', foco && 'sm:col-span-2 lg:col-span-3')}>
+            <li key={f.id} className="relative">
               <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
-                className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div className={cn('relative w-full overflow-hidden bg-slate-100', foco ? 'aspect-[16/9] sm:aspect-auto sm:h-[300px]' : 'aspect-[16/9]')}>
-                  {/* 400 y no 420: con 420 la miniatura saltaba al ancho 1600 (el doble retina
-                      busca el escalón siguiente) y cada portada tardaba segundos en fabricarse. */}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {img ? (
-                    <img src={miniatura(img, foco ? 800 : 400)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
-                      {...(i < 3 ? { fetchPriority: 'high' as const } : {})}
-                      // En el foco la foto no marca el alto (una vertical estiraba la tarjeta y abría
-                      // un hueco a su lado): se pinta encima, del alto que dan las dos filas.
-                      className={cn('h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]', foco && 'sm:absolute sm:inset-0')}
+                    <img src={miniatura(img, 400)} alt="" loading={i < 4 ? 'eager' : 'lazy'} decoding="async"
+                      {...(i < 2 ? { fetchPriority: 'high' as const } : {})}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
                   ) : (
-                    <div className="grid h-full w-full place-items-center text-3xl font-black text-slate-300">{nombre.slice(0, 1)}</div>
+                    <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
                   )}
-                  {/* El estado (Activo, Completado, Ideación…), dentro de la imagen, abajo a la derecha
-                      (2026-11-05, Eugenio). El avance en porcentaje ya no se enseña. */}
+                  <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+                  {/* Arriba, el año (a la izquierda) y el estado (a la derecha). */}
                   {modelo.fecha(f) && (
-                    <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur">
-                      {foco ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)}
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
+                      {principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)}
                     </span>
                   )}
                   {estado && (
-                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur">
+                    <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
                       <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
                       {estado.label}
                     </span>
                   )}
+                  <h2 className="absolute inset-x-0 bottom-0 p-4 text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:p-5 sm:text-3xl">{nombre}</h2>
                 </div>
-                <div className="p-4">
-                  <h2 className={cn('font-black leading-snug text-slate-900', foco ? 'text-2xl' : 'text-lg')}>{nombre}</h2>
-                  {sus.length > 0 && <p className="mt-0.5 truncate text-xs font-semibold text-slate-400">{sus.join(' · ')}</p>}
-                </div>
+                {(descripcion || sus.length > 0) && (
+                  <div className="px-4 py-3 sm:px-5">
+                    {descripcion
+                      ? <p className="line-clamp-2 text-sm leading-snug text-slate-500">{descripcion}</p>
+                      : <p className="truncate text-xs font-semibold text-slate-400">{sus.join(' · ')}</p>}
+                  </div>
+                )}
               </Link>
               {equipo && f.pagina_id && (
                 <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
                   title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
-                  className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
+                  className="absolute right-3 top-12 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
                   <Pencil className="h-4 w-4" />
                 </a>
               )}
