@@ -23,7 +23,7 @@
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bike, Box, Camera, ClipboardList, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
+import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -85,15 +85,33 @@ function Logo({ nombre }: { nombre: string }) {
   );
 }
 
-function Deslizador({ id, etiqueta, valor, min, max, paso, mostrar, alCambiar, desactivado }: {
-  id: string; etiqueta: string; valor: number; min: number; max: number; paso: number; mostrar: string; alCambiar: (v: number) => void; desactivado?: boolean;
+/**
+ * Deslizador compacto (2026-11-07, Eugenio: «más compacto para que quepan más
+ * parámetros en menos espacio»). Con `centro` (el valor del diseño por
+ * defecto), el recorrido se recoloca para que ese valor quede en el punto
+ * medio: así se ve de un vistazo si un parámetro se ha movido y hacia dónde.
+ * El recorrido conserva su anchura mientras cabe dentro de los límites
+ * físicos; si no cabe, se estrecha de forma simétrica (y nunca por debajo de
+ * un tercio).
+ */
+function Deslizador({ id, etiqueta, valor, min, max, paso, mostrar, alCambiar, desactivado, centro }: {
+  id: string; etiqueta: string; valor: number; min: number; max: number; paso: number; mostrar: string; alCambiar: (v: number) => void; desactivado?: boolean; centro?: number;
 }) {
+  let lo = min, hi = max;
+  if (centro != null && Number.isFinite(centro)) {
+    const span = max - min, mitad = span / 2;
+    lo = centro - mitad; hi = centro + mitad;
+    if (lo < min) { lo = min; hi = centro + (centro - min); }
+    if (hi > max) { hi = max; lo = centro - (max - centro); }
+    if (hi - lo < span / 3) { lo = Math.max(min, centro - span / 6); hi = Math.min(max, lo + span / 3); lo = Math.max(min, hi - span / 3); }
+  }
+  const fuera = valor < lo || valor > hi;
   return (
-    <div className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3', desactivado && 'opacity-60')}>
-      <label htmlFor={id} className="text-sm text-slate-700">{etiqueta}</label>
-      <output htmlFor={id} className="font-mono text-xs tabular-nums text-slate-900">{mostrar}</output>
-      <input id={id} type="range" min={min} max={max} step={paso} value={valor} disabled={desactivado}
-        onChange={e => alCambiar(Number(e.target.value))} className="col-span-2 mt-1 w-full accent-teal-700" />
+    <div className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2', desactivado && 'opacity-60')}>
+      <label htmlFor={id} className="truncate text-[12px] leading-tight text-slate-700" title={etiqueta}>{etiqueta}</label>
+      <output htmlFor={id} className={cn('font-mono text-[11px] tabular-nums', fuera ? 'text-amber-700' : 'text-slate-900')}>{mostrar}</output>
+      <input id={id} type="range" min={fuera ? Math.min(lo, valor) : lo} max={fuera ? Math.max(hi, valor) : hi} step={paso} value={valor} disabled={desactivado}
+        onChange={e => alCambiar(Number(e.target.value))} className="col-span-2 -mt-0.5 h-1.5 w-full accent-teal-700" />
     </div>
   );
 }
@@ -129,7 +147,7 @@ function MapaGaraje({ garaje, largo, ancho, morro, alMover, alGirar }: { garaje:
 
 function Bloque({ titulo, nota, children }: { titulo: string; nota?: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3.5">
+    <section className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3">
       <h3 className="flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
         {titulo}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}
       </h3>
@@ -141,8 +159,8 @@ function Bloque({ titulo, nota, children }: { titulo: string; nota?: string; chi
 function Selector<T extends string>({ id, etiqueta, valor, opciones, alCambiar }: { id: string; etiqueta: string; valor: T; opciones: { k: T; n: string }[]; alCambiar: (v: T) => void }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <label htmlFor={id} className="text-sm text-slate-700">{etiqueta}</label>
-      <select id={id} value={valor} onChange={e => alCambiar(e.target.value as T)} className="rounded-md border border-slate-300 bg-white px-2 py-1 font-mono text-xs">
+      <label htmlFor={id} className="text-[12px] text-slate-700">{etiqueta}</label>
+      <select id={id} value={valor} onChange={e => alCambiar(e.target.value as T)} className="rounded-md border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[11px]">
         {opciones.map(o => <option key={o.k} value={o.k}>{o.n}</option>)}
       </select>
     </div>
@@ -158,8 +176,8 @@ function cargarParametros(): Parametros {
 }
 
 /** Los deslizadores y las cifras del Aeromóvil 1. */
-function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: {
-  P: Parametros; Pa: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: Modelo;
+function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavegar, dep }: {
+  P: Parametros; Pa: Parametros; D: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: Modelo;
   neumaticos: { k: Neumatico; n: string }[]; malas: number; alNavegar: (ruta: string) => void; dep: IdDepartamento;
 }) {
   const a1 = res.a1!;
@@ -224,39 +242,39 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: 
 
       {dep === 'carroceria' && (<>
       <Bloque titulo="Carrocería y cúpula" nota={`${m2(Pa.W)} × ${m2(Pa.H)}`}>
-        <Deslizador id="a1-L" etiqueta="Largo total" valor={P.L} min={2.6} max={4.4} paso={0.01} mostrar={m2(P.L)} alCambiar={v => set('L', v)} />
-        <Deslizador id="a1-fm" etiqueta="Voladizo del morro" valor={P.fMorro} min={0.15} max={0.40} paso={0.005} mostrar={`${Math.round(P.fMorro * 100)} % del largo · ${m2(P.fMorro * P.L)}`} alCambiar={v => set('fMorro', v)} />
-        <Deslizador id="a1-W" etiqueta="Ancho máximo" valor={P.W} min={1.2} max={2.0} paso={0.01} mostrar={m2(P.W)} alCambiar={v => set('W', v)} />
-        <Deslizador id="a1-H" etiqueta="Alto total (techo de la cúpula)" valor={P.H} min={1.0} max={1.7} paso={0.01} mostrar={m2(P.H)} alCambiar={v => set('H', v)} />
-        <Deslizador id="a1-deck" etiqueta="Altura de la cubierta" valor={P.deck} min={0.55} max={0.85} paso={0.005} mostrar={m2(P.deck * P.H)} alCambiar={v => set('deck', v)} />
+        <Deslizador id="a1-L" etiqueta="Largo total" valor={P.L} centro={D.L} min={2.6} max={4.4} paso={0.01} mostrar={m2(P.L)} alCambiar={v => set('L', v)} />
+        <Deslizador id="a1-fm" etiqueta="Voladizo del morro" valor={P.fMorro} centro={D.fMorro} min={0.15} max={0.40} paso={0.005} mostrar={`${Math.round(P.fMorro * 100)} % del largo · ${m2(P.fMorro * P.L)}`} alCambiar={v => set('fMorro', v)} />
+        <Deslizador id="a1-W" etiqueta="Ancho máximo" valor={P.W} centro={D.W} min={1.2} max={2.0} paso={0.01} mostrar={m2(P.W)} alCambiar={v => set('W', v)} />
+        <Deslizador id="a1-H" etiqueta="Alto total (techo de la cúpula)" valor={P.H} centro={D.H} min={1.0} max={1.7} paso={0.01} mostrar={m2(P.H)} alCambiar={v => set('H', v)} />
+        <Deslizador id="a1-deck" etiqueta="Altura de la cubierta" valor={P.deck} centro={D.deck} min={0.55} max={0.85} paso={0.005} mostrar={m2(P.deck * P.H)} alCambiar={v => set('deck', v)} />
         <p className="-mt-2 text-xs text-slate-500">La cubierta es el techo de la carrocería baja; de ahí para arriba es cúpula de cristal.</p>
-        <Deslizador id="a1-mo" etiqueta="Redondez del morro" valor={P.morroA1} min={0.2} max={1} paso={0.05} mostrar={`${fmt((0.04 + 0.10 * P.morroA1 + P.posMorro) * P.L * 100, 0)} cm de punta redonda · ${P.morroA1 > 0.85 ? 'romo' : 'Aptera'}`} alCambiar={v => set('morroA1', v)} />
-        <Deslizador id="a1-pm" etiqueta="Alcance de la pieza del morro" valor={P.posMorro} min={-0.03} max={0.15} paso={0.01} mostrar={`${P.posMorro >= 0 ? '+' : ''}${(P.posMorro * P.L * 100).toFixed(0)} cm`} alCambiar={v => set('posMorro', v)} />
-        <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
+        <Deslizador id="a1-mo" etiqueta="Redondez del morro" valor={P.morroA1} centro={D.morroA1} min={0.2} max={1} paso={0.05} mostrar={`${fmt((0.04 + 0.10 * P.morroA1 + P.posMorro) * P.L * 100, 0)} cm de punta redonda · ${P.morroA1 > 0.85 ? 'romo' : 'Aptera'}`} alCambiar={v => set('morroA1', v)} />
+        <Deslizador id="a1-pm" etiqueta="Alcance de la pieza del morro" valor={P.posMorro} centro={D.posMorro} min={-0.03} max={0.15} paso={0.01} mostrar={`${P.posMorro >= 0 ? '+' : ''}${(P.posMorro * P.L * 100).toFixed(0)} cm`} alCambiar={v => set('posMorro', v)} />
+        <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} centro={D.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
         <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
           <div><div className="text-sm font-medium text-slate-800">Opción Jaguar</div><div className="text-xs text-slate-500">la carrocería envuelve las ruedas con un abombamiento redondo, como el D-Type</div></div>
           <Button variant="outline" aria-pressed={P.jaguar} onClick={() => set('jaguar', !P.jaguar)} className={cn('shrink-0 px-3 py-1.5 text-xs normal-case tracking-normal', P.jaguar && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{P.jaguar ? 'Activada' : 'Activar'}</Button>
         </div>
         {P.jaguar && (<>
-          <Deslizador id="a1-jh" etiqueta="Jaguar: cuánto sobresale" valor={P.jagAlto} min={0.01} max={0.15} paso={0.005} mostrar={`${fmt(P.jagAlto * 100, 1)} cm sobre la rueda`} alCambiar={v => set('jagAlto', v)} />
-          <Deslizador id="a1-jl" etiqueta="Jaguar: largo del abombamiento" valor={P.jagLargo} min={0.6} max={2.0} paso={0.05} mostrar={m2(P.jagLargo)} alCambiar={v => set('jagLargo', v)} />
-          <Deslizador id="a1-ja" etiqueta="Jaguar: alcance en vertical" valor={P.jagAncho} min={0.12} max={0.5} paso={0.01} mostrar={P.jagAncho < 0.2 ? 'solo la cintura' : P.jagAncho > 0.4 ? 'hasta el hombro' : 'cintura y flanco'} alCambiar={v => set('jagAncho', v)} />
+          <Deslizador id="a1-jh" etiqueta="Jaguar: cuánto sobresale" valor={P.jagAlto} centro={D.jagAlto} min={0.01} max={0.15} paso={0.005} mostrar={`${fmt(P.jagAlto * 100, 1)} cm sobre la rueda`} alCambiar={v => set('jagAlto', v)} />
+          <Deslizador id="a1-jl" etiqueta="Jaguar: largo del abombamiento" valor={P.jagLargo} centro={D.jagLargo} min={0.6} max={2.0} paso={0.05} mostrar={m2(P.jagLargo)} alCambiar={v => set('jagLargo', v)} />
+          <Deslizador id="a1-ja" etiqueta="Jaguar: alcance en vertical" valor={P.jagAncho} centro={D.jagAncho} min={0.12} max={0.5} paso={0.01} mostrar={P.jagAncho < 0.2 ? 'solo la cintura' : P.jagAncho > 0.4 ? 'hasta el hombro' : 'cintura y flanco'} alCambiar={v => set('jagAncho', v)} />
         </>)}
         <p className="-mt-2 text-xs text-slate-500">Parabrisas plano (como el VW XL1) con montantes inclinados, una ventanilla a cada lado y el panel solar en la parte plana del techo, que baja en una sola curva hasta la cola (como el Aptera).</p>
-        <Deslizador id="a1-parab" etiqueta="Inclinación del parabrisas" valor={P.parabrisas} min={0.12} max={0.32} paso={0.005} mostrar={`${m2(P.parabrisas * P.L)} de largo · ${P.parabrisas < 0.17 ? 'empinado' : P.parabrisas > 0.26 ? 'muy tumbado' : 'tumbado'}`} alCambiar={v => set('parabrisas', v)} />
-        <Deslizador id="a1-techo" etiqueta="Caída del techo" valor={P.techo} min={1} max={3} paso={0.05} mostrar={P.techo < 1.25 ? 'recta desde el pico' : P.techo > 2.2 ? 'alto hasta el final' : 'curva suave (Aptera)'} alCambiar={v => set('techo', v)} />
-        <Deslizador id="a1-solar" etiqueta="Techo solar: dónde empieza" valor={P.inicioSolar} min={0} max={0.6} paso={0.01} mostrar={`${fmt(P.inicioSolar * 100, 0)} cm tras el parabrisas`} alCambiar={v => set('inicioSolar', v)} />
-        <Deslizador id="a1-c0" etiqueta="Parabrisas: dónde empieza" valor={P.cupX0} min={0.08} max={0.35} paso={0.005} mostrar={`${m2(P.cupX0 * P.L)} del morro`} alCambiar={v => set('cupX0', v)} />
-        <Deslizador id="a1-c1" etiqueta="Cúpula: dónde acaba" valor={P.cupX1} min={0.70} max={0.995} paso={0.005} mostrar={`${m2((1 - P.cupX1) * P.L)} de la cola`} alCambiar={v => set('cupX1', v)} />
-        <Deslizador id="a1-cw" etiqueta="Cabina: ancho de la base" valor={P.cupW} min={0.35} max={0.75} paso={0.01} mostrar={m2(P.cupW * P.W)} alCambiar={v => set('cupW', v)} />
-        <Deslizador id="a1-tw" etiqueta="Cabina: ancho del techo" valor={P.techoW} min={0.5} max={1} paso={0.01} mostrar={`${m2(P.techoW * P.cupW * P.W)} · ${P.techoW > 0.95 ? 'costados verticales' : P.techoW < 0.7 ? 'muy inclinados' : 'inclinados (XL1)'}`} alCambiar={v => set('techoW', v)} />
-        <Deslizador id="a1-nU" etiqueta="Sección superior de la carrocería" valor={P.nU} min={2.0} max={3.4} paso={0.1} mostrar={P.nU < 2.3 ? 'elíptica' : P.nU > 2.9 ? 'cuadrada' : 'redondeada'} alCambiar={v => set('nU', v)} />
-        <Deslizador id="a1-nL" etiqueta="Fondo" valor={P.nL} min={2.0} max={5.0} paso={0.1} mostrar={P.nL < 2.6 ? 'redondo' : P.nL > 3.6 ? 'plano' : 'semiplano'} alCambiar={v => set('nL', v)} />
+        <Deslizador id="a1-parab" etiqueta="Inclinación del parabrisas" valor={P.parabrisas} centro={D.parabrisas} min={0.12} max={0.32} paso={0.005} mostrar={`${m2(P.parabrisas * P.L)} de largo · ${P.parabrisas < 0.17 ? 'empinado' : P.parabrisas > 0.26 ? 'muy tumbado' : 'tumbado'}`} alCambiar={v => set('parabrisas', v)} />
+        <Deslizador id="a1-techo" etiqueta="Caída del techo" valor={P.techo} centro={D.techo} min={1} max={3} paso={0.05} mostrar={P.techo < 1.25 ? 'recta desde el pico' : P.techo > 2.2 ? 'alto hasta el final' : 'curva suave (Aptera)'} alCambiar={v => set('techo', v)} />
+        <Deslizador id="a1-solar" etiqueta="Techo solar: dónde empieza" valor={P.inicioSolar} centro={D.inicioSolar} min={0} max={0.6} paso={0.01} mostrar={`${fmt(P.inicioSolar * 100, 0)} cm tras el parabrisas`} alCambiar={v => set('inicioSolar', v)} />
+        <Deslizador id="a1-c0" etiqueta="Parabrisas: dónde empieza" valor={P.cupX0} centro={D.cupX0} min={0.08} max={0.35} paso={0.005} mostrar={`${m2(P.cupX0 * P.L)} del morro`} alCambiar={v => set('cupX0', v)} />
+        <Deslizador id="a1-c1" etiqueta="Cúpula: dónde acaba" valor={P.cupX1} centro={D.cupX1} min={0.70} max={0.995} paso={0.005} mostrar={`${m2((1 - P.cupX1) * P.L)} de la cola`} alCambiar={v => set('cupX1', v)} />
+        <Deslizador id="a1-cw" etiqueta="Cabina: ancho de la base" valor={P.cupW} centro={D.cupW} min={0.35} max={0.75} paso={0.01} mostrar={m2(P.cupW * P.W)} alCambiar={v => set('cupW', v)} />
+        <Deslizador id="a1-tw" etiqueta="Cabina: ancho del techo" valor={P.techoW} centro={D.techoW} min={0.5} max={1} paso={0.01} mostrar={`${m2(P.techoW * P.cupW * P.W)} · ${P.techoW > 0.95 ? 'costados verticales' : P.techoW < 0.7 ? 'muy inclinados' : 'inclinados (XL1)'}`} alCambiar={v => set('techoW', v)} />
+        <Deslizador id="a1-nU" etiqueta="Sección superior de la carrocería" valor={P.nU} centro={D.nU} min={2.0} max={3.4} paso={0.1} mostrar={P.nU < 2.3 ? 'elíptica' : P.nU > 2.9 ? 'cuadrada' : 'redondeada'} alCambiar={v => set('nU', v)} />
+        <Deslizador id="a1-nL" etiqueta="Fondo" valor={P.nL} centro={D.nL} min={2.0} max={5.0} paso={0.1} mostrar={P.nL < 2.6 ? 'redondo' : P.nL > 3.6 ? 'plano' : 'semiplano'} alCambiar={v => set('nL', v)} />
       </Bloque>
       <Bloque titulo="Material y espesores">
         <Selector id="a1-matK" etiqueta="Material de la carrocería" valor={P.matCarenado} opciones={(Object.keys(MATERIALES_CARENADO) as MaterialCarenado[]).map(k => ({ k, n: MATERIALES_CARENADO[k].n }))} alCambiar={v => set('matCarenado', v)} />
-        <Deslizador id="a1-eK" etiqueta="Espesor de la carrocería" valor={P.espCarenado} min={RANGOS_MASA_A1.espCarenado[0]} max={RANGOS_MASA_A1.espCarenado[1]} paso={0.1} mostrar={`${fmt(P.espCarenado, 1)} mm`} alCambiar={v => set('espCarenado', v)} />
-        <Deslizador id="a1-eV" etiqueta="Espesor de la cúpula (policarbonato)" valor={P.espCristal} min={RANGOS_MASA_A1.espCristal[0]} max={RANGOS_MASA_A1.espCristal[1]} paso={0.5} mostrar={`${fmt(P.espCristal, 1)} mm`} alCambiar={v => set('espCristal', v)} />
+        <Deslizador id="a1-eK" etiqueta="Espesor de la carrocería" valor={P.espCarenado} centro={D.espCarenado} min={RANGOS_MASA_A1.espCarenado[0]} max={RANGOS_MASA_A1.espCarenado[1]} paso={0.1} mostrar={`${fmt(P.espCarenado, 1)} mm`} alCambiar={v => set('espCarenado', v)} />
+        <Deslizador id="a1-eV" etiqueta="Espesor de la cúpula (policarbonato)" valor={P.espCristal} centro={D.espCristal} min={RANGOS_MASA_A1.espCristal[0]} max={RANGOS_MASA_A1.espCristal[1]} paso={0.5} mostrar={`${fmt(P.espCristal, 1)} mm`} alCambiar={v => set('espCristal', v)} />
       </Bloque>
       </>)}
 
@@ -271,12 +289,12 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: 
           ))}
         </div>
         <ComparacionChasis modelo={modelo} />
-        <Deslizador id="a1-cl" etiqueta="Altura de los bajos" valor={P.clear} min={0.10} max={0.30} paso={0.005} mostrar={`${fmt(P.clear * 100, 1)} cm al suelo`} alCambiar={v => set('clear', v)} />
+        <Deslizador id="a1-cl" etiqueta="Altura de los bajos" valor={P.clear} centro={D.clear} min={0.10} max={0.30} paso={0.005} mostrar={`${fmt(P.clear * 100, 1)} cm al suelo`} alCambiar={v => set('clear', v)} />
         <p className="-mt-2 text-xs text-slate-500">Sube y baja todo el interior: suelo, batería, asiento y piloto. El Twizy lleva 12 cm.</p>
         <Selector id="a1-sd" etiqueta="Largueros Ø" valor={String(P.spineD)} opciones={['32', '40', '50', '60'].map(k => ({ k, n: `${k} mm` }))} alCambiar={v => set('spineD', Number(v))} />
         <Selector id="a1-st" etiqueta="Pared de los largueros" valor={String(P.spineT)} opciones={['1.5', '2', '2.5', '3'].map(k => ({ k, n: `${k.replace('.', ',')} mm` }))} alCambiar={v => set('spineT', Number(v))} />
         <Selector id="a1-matC" etiqueta="Material del chasis" valor={P.matChasis} opciones={(Object.keys(MATERIALES_CHASIS) as MaterialChasis[]).map(k => ({ k, n: MATERIALES_CHASIS[k].n }))} alCambiar={v => set('matChasis', v)} />
-        <Deslizador id="a1-xC" etiqueta="Uniones, chapas y tornillería" valor={P.extraChasis} min={RANGOS_MASA_A1.extraChasis[0]} max={RANGOS_MASA_A1.extraChasis[1]} paso={0.5} mostrar={`${fmt(P.extraChasis, 1)} kg`} alCambiar={v => set('extraChasis', v)} />
+        <Deslizador id="a1-xC" etiqueta="Uniones, chapas y tornillería" valor={P.extraChasis} centro={D.extraChasis} min={RANGOS_MASA_A1.extraChasis[0]} max={RANGOS_MASA_A1.extraChasis[1]} paso={0.5} mostrar={`${fmt(P.extraChasis, 1)} kg`} alCambiar={v => set('extraChasis', v)} />
       </Bloque>
       <Bloque titulo="Estructura" nota="estimación">
         <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-[13px]">
@@ -293,39 +311,39 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: 
 
       {dep === 'rodaje' && (<>
       <Bloque titulo="Ejes, ruedas y suspensión" nota="clase Twizy">
-        <Deslizador id="a1-B" etiqueta="Batalla: eje delantero a trasero" valor={P.B} min={1.3} max={Math.min(2.6, P.L - 0.9)} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
-        <Deslizador id="a1-vF" etiqueta="Vía delantera" valor={P.viaF} min={0.9} max={1.5} paso={0.01} mostrar={m2(P.viaF)} alCambiar={v => set('viaF', v)} />
-        <Deslizador id="a1-vR" etiqueta="Vía trasera" valor={P.viaR} min={0.8} max={1.5} paso={0.01} mostrar={m2(P.viaR)} alCambiar={v => set('viaR', v)} />
+        <Deslizador id="a1-B" etiqueta="Batalla: eje delantero a trasero" valor={P.B} centro={D.B} min={1.3} max={Math.min(2.6, P.L - 0.9)} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
+        <Deslizador id="a1-vF" etiqueta="Vía delantera" valor={P.viaF} centro={D.viaF} min={0.9} max={1.5} paso={0.01} mostrar={m2(P.viaF)} alCambiar={v => set('viaF', v)} />
+        <Deslizador id="a1-vR" etiqueta="Vía trasera" valor={P.viaR} centro={D.viaR} min={0.8} max={1.5} paso={0.01} mostrar={m2(P.viaR)} alCambiar={v => set('viaR', v)} />
         <Selector id="a1-nF" etiqueta="Neumáticos delanteros" valor={P.neumF} opciones={neumaticos} alCambiar={v => set('neumF', v)} />
         <Selector id="a1-nR" etiqueta="Neumáticos traseros" valor={P.neumR} opciones={neumaticos} alCambiar={v => set('neumR', v)} />
-        <Deslizador id="a1-comp" etiqueta="Compresión de la suspensión" valor={P.comp} min={0} max={1} paso={0.05} mostrar={`${Math.round(P.comp * 100)} %`} alCambiar={v => set('comp', v)} />
-        <Deslizador id="a1-mR" etiqueta="Una rueda con neumático" valor={P.mRueda} min={RANGOS_MASA_A1.mRueda[0]} max={RANGOS_MASA_A1.mRueda[1]} paso={0.1} mostrar={`${fmt(P.mRueda, 1)} kg`} alCambiar={v => set('mRueda', v)} />
-        <Deslizador id="a1-mS" etiqueta="Cuatro McPherson con manguetas" valor={P.mSuspension} min={RANGOS_MASA_A1.mSuspension[0]} max={RANGOS_MASA_A1.mSuspension[1]} paso={0.5} mostrar={`${fmt(P.mSuspension, 1)} kg`} alCambiar={v => set('mSuspension', v)} />
-        <Deslizador id="a1-mF" etiqueta="Un freno de disco con pinza" valor={P.mFrenos} min={RANGOS_MASA_A1.mFrenos[0]} max={RANGOS_MASA_A1.mFrenos[1]} paso={0.1} mostrar={`${fmt(P.mFrenos, 1)} kg`} alCambiar={v => set('mFrenos', v)} />
-        <Deslizador id="a1-mD" etiqueta="Dirección completa" valor={P.mDireccion} min={RANGOS_MASA_A1.mDireccion[0]} max={RANGOS_MASA_A1.mDireccion[1]} paso={0.5} mostrar={`${fmt(P.mDireccion, 1)} kg`} alCambiar={v => set('mDireccion', v)} />
+        <Deslizador id="a1-comp" etiqueta="Compresión de la suspensión" valor={P.comp} centro={D.comp} min={0} max={1} paso={0.05} mostrar={`${Math.round(P.comp * 100)} %`} alCambiar={v => set('comp', v)} />
+        <Deslizador id="a1-mR" etiqueta="Una rueda con neumático" valor={P.mRueda} centro={D.mRueda} min={RANGOS_MASA_A1.mRueda[0]} max={RANGOS_MASA_A1.mRueda[1]} paso={0.1} mostrar={`${fmt(P.mRueda, 1)} kg`} alCambiar={v => set('mRueda', v)} />
+        <Deslizador id="a1-mS" etiqueta="Cuatro McPherson con manguetas" valor={P.mSuspension} centro={D.mSuspension} min={RANGOS_MASA_A1.mSuspension[0]} max={RANGOS_MASA_A1.mSuspension[1]} paso={0.5} mostrar={`${fmt(P.mSuspension, 1)} kg`} alCambiar={v => set('mSuspension', v)} />
+        <Deslizador id="a1-mF" etiqueta="Un freno de disco con pinza" valor={P.mFrenos} centro={D.mFrenos} min={RANGOS_MASA_A1.mFrenos[0]} max={RANGOS_MASA_A1.mFrenos[1]} paso={0.1} mostrar={`${fmt(P.mFrenos, 1)} kg`} alCambiar={v => set('mFrenos', v)} />
+        <Deslizador id="a1-mD" etiqueta="Dirección completa" valor={P.mDireccion} centro={D.mDireccion} min={RANGOS_MASA_A1.mDireccion[0]} max={RANGOS_MASA_A1.mDireccion[1]} paso={0.5} mostrar={`${fmt(P.mDireccion, 1)} kg`} alCambiar={v => set('mDireccion', v)} />
       </Bloque>
       </>)}
 
       {dep === 'propulsion' && (<>
       <Bloque titulo="Motor y transmisión" nota={`${P.kWNom}/${P.kWPico} kW`}>
-        <Deslizador id="a1-kn" etiqueta="Potencia nominal" valor={P.kWNom} min={4} max={40} paso={0.5} mostrar={`${fmt(P.kWNom, 1)} kW`} alCambiar={v => set('kWNom', v)} />
-        <Deslizador id="a1-kp" etiqueta="Potencia máxima" valor={P.kWPico} min={P.kWNom} max={80} paso={0.5} mostrar={`${fmt(P.kWPico, 1)} kW`} alCambiar={v => set('kWPico', v)} />
-        <Deslizador id="a1-v" etiqueta="Velocidad de cálculo" valor={P.speed} min={30} max={160} paso={5} mostrar={`${P.speed} km/h`} alCambiar={v => set('speed', v)} />
-        <Deslizador id="a1-mM" etiqueta="Motor" valor={P.mMotor} min={RANGOS_MASA_A1.mMotor[0]} max={RANGOS_MASA_A1.mMotor[1]} paso={0.5} mostrar={`${fmt(P.mMotor, 1)} kg`} alCambiar={v => set('mMotor', v)} />
-        <Deslizador id="a1-mI" etiqueta="Inversor" valor={P.mInversor} min={RANGOS_MASA_A1.mInversor[0]} max={RANGOS_MASA_A1.mInversor[1]} paso={0.5} mostrar={`${fmt(P.mInversor, 1)} kg`} alCambiar={v => set('mInversor', v)} />
-        <Deslizador id="a1-mRe" etiqueta="Reductora con diferencial" valor={P.mReductora} min={RANGOS_MASA_A1.mReductora[0]} max={RANGOS_MASA_A1.mReductora[1]} paso={0.5} mostrar={`${fmt(P.mReductora, 1)} kg`} alCambiar={v => set('mReductora', v)} />
+        <Deslizador id="a1-kn" etiqueta="Potencia nominal" valor={P.kWNom} centro={D.kWNom} min={4} max={40} paso={0.5} mostrar={`${fmt(P.kWNom, 1)} kW`} alCambiar={v => set('kWNom', v)} />
+        <Deslizador id="a1-kp" etiqueta="Potencia máxima" valor={P.kWPico} centro={D.kWPico} min={P.kWNom} max={80} paso={0.5} mostrar={`${fmt(P.kWPico, 1)} kW`} alCambiar={v => set('kWPico', v)} />
+        <Deslizador id="a1-v" etiqueta="Velocidad de cálculo" valor={P.speed} centro={D.speed} min={30} max={160} paso={5} mostrar={`${P.speed} km/h`} alCambiar={v => set('speed', v)} />
+        <Deslizador id="a1-mM" etiqueta="Motor" valor={P.mMotor} centro={D.mMotor} min={RANGOS_MASA_A1.mMotor[0]} max={RANGOS_MASA_A1.mMotor[1]} paso={0.5} mostrar={`${fmt(P.mMotor, 1)} kg`} alCambiar={v => set('mMotor', v)} />
+        <Deslizador id="a1-mI" etiqueta="Inversor" valor={P.mInversor} centro={D.mInversor} min={RANGOS_MASA_A1.mInversor[0]} max={RANGOS_MASA_A1.mInversor[1]} paso={0.5} mostrar={`${fmt(P.mInversor, 1)} kg`} alCambiar={v => set('mInversor', v)} />
+        <Deslizador id="a1-mRe" etiqueta="Reductora con diferencial" valor={P.mReductora} centro={D.mReductora} min={RANGOS_MASA_A1.mReductora[0]} max={RANGOS_MASA_A1.mReductora[1]} paso={0.5} mostrar={`${fmt(P.mReductora, 1)} kg`} alCambiar={v => set('mReductora', v)} />
       </Bloque>
       </>)}
 
       {dep === 'energia' && (<>
       <Bloque titulo="Batería y energía solar" nota={`${a1.bateriaKg.toFixed(0)} kg · ${a1.bateriaL.toFixed(0)} L`}>
-        <Deslizador id="a1-kwh" etiqueta="Batería" valor={P.kWh} min={5} max={45} paso={0.5} mostrar={`${fmt(P.kWh, 1)} kWh`} alCambiar={v => set('kWh', v)} />
-        <Deslizador id="a1-wkg" etiqueta="Densidad del paquete (masa)" valor={P.whKg} min={100} max={220} paso={5} mostrar={`${P.whKg} Wh/kg`} alCambiar={v => set('whKg', v)} />
-        <Deslizador id="a1-wl" etiqueta="Densidad del paquete (volumen)" valor={P.whL} min={120} max={320} paso={5} mostrar={`${P.whL} Wh/L`} alCambiar={v => set('whL', v)} />
+        <Deslizador id="a1-kwh" etiqueta="Batería" valor={P.kWh} centro={D.kWh} min={5} max={45} paso={0.5} mostrar={`${fmt(P.kWh, 1)} kWh`} alCambiar={v => set('kWh', v)} />
+        <Deslizador id="a1-wkg" etiqueta="Densidad del paquete (masa)" valor={P.whKg} centro={D.whKg} min={100} max={220} paso={5} mostrar={`${P.whKg} Wh/kg`} alCambiar={v => set('whKg', v)} />
+        <Deslizador id="a1-wl" etiqueta="Densidad del paquete (volumen)" valor={P.whL} centro={D.whL} min={120} max={320} paso={5} mostrar={`${P.whL} Wh/L`} alCambiar={v => set('whL', v)} />
         <p className="-mt-2 text-xs text-slate-500">Celdas NMC en paquete: 150-180 Wh/kg y 200-250 Wh/L. LFP: 110-130 Wh/kg. El Twizy lleva 6,1 kWh en 100 kg.</p>
-        <Deslizador id="a1-altBat" etiqueta="Altura de la batería" valor={P.altBat} min={-0.06} max={0.10} paso={0.005} mostrar={Math.abs(P.altBat) < 0.003 ? 'sobre el suelo del chasis' : P.altBat < 0 ? `${fmt(-P.altBat * 100, 1)} cm bajo el suelo` : `${fmt(P.altBat * 100, 1)} cm sobre el suelo`} alCambiar={v => set('altBat', v)} />
-        <Deslizador id="a1-sol" etiqueta="Sol al día (horas pico)" valor={P.sol} min={1.5} max={7} paso={0.1} mostrar={`${fmt(P.sol, 1)} h`} alCambiar={v => set('sol', v)} />
-        <Deslizador id="a1-mP" etiqueta="Paneles solares por m²" valor={P.mSolarM2} min={RANGOS_MASA_A1.mSolarM2[0]} max={RANGOS_MASA_A1.mSolarM2[1]} paso={0.1} mostrar={`${fmt(P.mSolarM2, 1)} kg/m²`} alCambiar={v => set('mSolarM2', v)} />
+        <Deslizador id="a1-altBat" etiqueta="Altura de la batería" valor={P.altBat} centro={D.altBat} min={-0.06} max={0.10} paso={0.005} mostrar={Math.abs(P.altBat) < 0.003 ? 'sobre el suelo del chasis' : P.altBat < 0 ? `${fmt(-P.altBat * 100, 1)} cm bajo el suelo` : `${fmt(P.altBat * 100, 1)} cm sobre el suelo`} alCambiar={v => set('altBat', v)} />
+        <Deslizador id="a1-sol" etiqueta="Sol al día (horas pico)" valor={P.sol} centro={D.sol} min={1.5} max={7} paso={0.1} mostrar={`${fmt(P.sol, 1)} h`} alCambiar={v => set('sol', v)} />
+        <Deslizador id="a1-mP" etiqueta="Paneles solares por m²" valor={P.mSolarM2} centro={D.mSolarM2} min={RANGOS_MASA_A1.mSolarM2[0]} max={RANGOS_MASA_A1.mSolarM2[1]} paso={0.1} mostrar={`${fmt(P.mSolarM2, 1)} kg/m²`} alCambiar={v => set('mSolarM2', v)} />
       </Bloque>
       </>)}
 
@@ -337,21 +355,21 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: 
               className={cn('flex-1 px-3 py-1.5 text-xs normal-case tracking-normal', P.plazas === k && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
           ))}
         </div>
-        <Deslizador id="a1-xPil" etiqueta="Piloto: cadera al eje delantero" valor={P.xPil} min={0.10} max={1.30} paso={0.01} mostrar={m2(P.xPil)} alCambiar={v => set('xPil', v)} />
-        <Deslizador id="a1-recPil" etiqueta="Reclinado del piloto" valor={P.recPil} min={15} max={60} paso={1} mostrar={`${P.recPil}°`} alCambiar={v => set('recPil', v)} />
-        <Deslizador id="a1-altPil" etiqueta="Altura del asiento del piloto" valor={P.altPil} min={0.06} max={0.30} paso={0.005} mostrar={`${fmt(P.altPil * 100, 1)} cm sobre la batería`} alCambiar={v => set('altPil', v)} />
+        <Deslizador id="a1-xPil" etiqueta="Piloto: cadera al eje delantero" valor={P.xPil} centro={D.xPil} min={0.10} max={1.30} paso={0.01} mostrar={m2(P.xPil)} alCambiar={v => set('xPil', v)} />
+        <Deslizador id="a1-recPil" etiqueta="Reclinado del piloto" valor={P.recPil} centro={D.recPil} min={15} max={60} paso={1} mostrar={`${P.recPil}°`} alCambiar={v => set('recPil', v)} />
+        <Deslizador id="a1-altPil" etiqueta="Altura del asiento del piloto" valor={P.altPil} centro={D.altPil} min={0.06} max={0.30} paso={0.005} mostrar={`${fmt(P.altPil * 100, 1)} cm sobre la batería`} alCambiar={v => set('altPil', v)} />
         {P.plazas === 2 && <>
-          <Deslizador id="a1-xPas" etiqueta="Pasajero: cadera al eje delantero" valor={P.xPas} min={P.xPil + 0.60} max={P.xPil + 1.20} paso={0.01} mostrar={m2(P.xPas)} alCambiar={v => set('xPas', v)} />
-          <Deslizador id="a1-recPas" etiqueta="Reclinado del pasajero" valor={P.recPas} min={15} max={85} paso={1} mostrar={`${P.recPas}°`} alCambiar={v => set('recPas', v)} />
-          <Deslizador id="a1-volAlt" etiqueta="Volante: altura" valor={P.volAlt} min={-0.10} max={0.12} paso={0.01} mostrar={`${P.volAlt >= 0 ? '+' : ''}${fmt(P.volAlt * 100, 0)} cm`} alCambiar={v => set('volAlt', v)} />
-          <Deslizador id="a1-volDist" etiqueta="Volante: distancia al piloto" valor={P.volDist} min={-0.12} max={0.15} paso={0.01} mostrar={`${P.volDist >= 0 ? '+' : ''}${fmt(P.volDist * 100, 0)} cm`} alCambiar={v => set('volDist', v)} />
-          <Deslizador id="a1-pedDist" etiqueta="Pedales: distancia al piloto" valor={P.pedDist} min={-0.15} max={0.15} paso={0.01} mostrar={`${P.pedDist >= 0 ? '+' : ''}${fmt(P.pedDist * 100, 0)} cm`} alCambiar={v => set('pedDist', v)} />
-          <Deslizador id="a1-pedAlt" etiqueta="Pedales: altura" valor={P.pedAlt} min={-0.08} max={0.12} paso={0.01} mostrar={`${P.pedAlt >= 0 ? '+' : ''}${fmt(P.pedAlt * 100, 0)} cm`} alCambiar={v => set('pedAlt', v)} />
-          <Deslizador id="a1-altPas" etiqueta="Altura del asiento del pasajero" valor={P.altPas} min={0.06} max={0.30} paso={0.005} mostrar={`${fmt(P.altPas * 100, 1)} cm sobre la batería`} alCambiar={v => set('altPas', v)} />
+          <Deslizador id="a1-xPas" etiqueta="Pasajero: cadera al eje delantero" valor={P.xPas} centro={D.xPas} min={P.xPil + 0.60} max={P.xPil + 1.20} paso={0.01} mostrar={m2(P.xPas)} alCambiar={v => set('xPas', v)} />
+          <Deslizador id="a1-recPas" etiqueta="Reclinado del pasajero" valor={P.recPas} centro={D.recPas} min={15} max={85} paso={1} mostrar={`${P.recPas}°`} alCambiar={v => set('recPas', v)} />
+          <Deslizador id="a1-volAlt" etiqueta="Volante: altura" valor={P.volAlt} centro={D.volAlt} min={-0.10} max={0.12} paso={0.01} mostrar={`${P.volAlt >= 0 ? '+' : ''}${fmt(P.volAlt * 100, 0)} cm`} alCambiar={v => set('volAlt', v)} />
+          <Deslizador id="a1-volDist" etiqueta="Volante: distancia al piloto" valor={P.volDist} centro={D.volDist} min={-0.12} max={0.15} paso={0.01} mostrar={`${P.volDist >= 0 ? '+' : ''}${fmt(P.volDist * 100, 0)} cm`} alCambiar={v => set('volDist', v)} />
+          <Deslizador id="a1-pedDist" etiqueta="Pedales: distancia al piloto" valor={P.pedDist} centro={D.pedDist} min={-0.15} max={0.15} paso={0.01} mostrar={`${P.pedDist >= 0 ? '+' : ''}${fmt(P.pedDist * 100, 0)} cm`} alCambiar={v => set('pedDist', v)} />
+          <Deslizador id="a1-pedAlt" etiqueta="Pedales: altura" valor={P.pedAlt} centro={D.pedAlt} min={-0.08} max={0.12} paso={0.01} mostrar={`${P.pedAlt >= 0 ? '+' : ''}${fmt(P.pedAlt * 100, 0)} cm`} alCambiar={v => set('pedAlt', v)} />
+          <Deslizador id="a1-altPas" etiqueta="Altura del asiento del pasajero" valor={P.altPas} centro={D.altPas} min={0.06} max={0.30} paso={0.005} mostrar={`${fmt(P.altPas * 100, 1)} cm sobre la batería`} alCambiar={v => set('altPas', v)} />
         </>}
         <p className="text-xs text-slate-500">Sin pedales: los pies van en un reposapiés y las manos en un volante pequeño. Los asientos apoyan sobre los módulos de batería (9 cm, pegados al suelo del chasis); el pasajero va tumbado tipo Fórmula 1 con las piernas a los lados del asiento del piloto. Respaldo curvo y reposacabezas casi vertical: la cabeza va recta aunque el tronco vaya tumbado. La altura del vehículo sobre el suelo es «Altura de los bajos», en «Tamaño y ruedas».</p>
-            <Deslizador id="a1-mOcc" etiqueta="Masa por ocupante" valor={P.mOcc} min={50} max={110} paso={1} mostrar={`${P.mOcc} kg`} alCambiar={v => set('mOcc', v)} />
-        <Deslizador id="a1-mA" etiqueta="Un asiento" valor={P.mAsiento} min={RANGOS_MASA_A1.mAsiento[0]} max={RANGOS_MASA_A1.mAsiento[1]} paso={0.5} mostrar={`${fmt(P.mAsiento, 1)} kg`} alCambiar={v => set('mAsiento', v)} />
+            <Deslizador id="a1-mOcc" etiqueta="Masa por ocupante" valor={P.mOcc} centro={D.mOcc} min={50} max={110} paso={1} mostrar={`${P.mOcc} kg`} alCambiar={v => set('mOcc', v)} />
+        <Deslizador id="a1-mA" etiqueta="Un asiento" valor={P.mAsiento} centro={D.mAsiento} min={RANGOS_MASA_A1.mAsiento[0]} max={RANGOS_MASA_A1.mAsiento[1]} paso={0.5} mostrar={`${fmt(P.mAsiento, 1)} kg`} alCambiar={v => set('mAsiento', v)} />
       </Bloque>
       </>)}
 
@@ -376,7 +394,7 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: 
 
       {dep === 'fabricacion' && (<>
       <Bloque titulo="Varios" nota="lo que no tiene ficha propia">
-        <Deslizador id="a1-mV" etiqueta="Varios: cables, cargador, luces, cierres" valor={P.mVarios} min={RANGOS_MASA_A1.mVarios[0]} max={RANGOS_MASA_A1.mVarios[1]} paso={1} mostrar={`${fmt(P.mVarios, 0)} kg`} alCambiar={v => set('mVarios', v)} />
+        <Deslizador id="a1-mV" etiqueta="Varios: cables, cargador, luces, cierres" valor={P.mVarios} centro={D.mVarios} min={RANGOS_MASA_A1.mVarios[0]} max={RANGOS_MASA_A1.mVarios[1]} paso={1} mostrar={`${fmt(P.mVarios, 0)} kg`} alCambiar={v => set('mVarios', v)} />
       </Bloque>
       <Bloque titulo="Componentes" nota="ficha de cada pieza">
         <BotonesComponentes P={P} res={res} modelo={modelo} alNavegar={alNavegar} />
@@ -392,6 +410,14 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar, dep }: 
   );
 }
 
+const ICONO_DEP: Record<IdDepartamento, typeof Box> = { proyecto: ClipboardList, carroceria: Car, chasis: Frame, rodaje: CircleDot, propulsion: Zap, energia: BatteryCharging, interior: Armchair, accesos: DoorOpen, luces: Lightbulb, fabricacion: Factory, homologacion: ShieldCheck };
+/** Qué capas del 3D son de cada departamento (para «Mostrar solo …»). Sin entrada = se ve todo. */
+const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
+  carroceria: ['carenado', 'cristales', 'solar'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor', 'transmision'],
+  energia: ['baterias', 'solar'], interior: ['asientos', 'ocupantes', 'direccion'], accesos: ['carenado', 'cristales'], luces: ['carenado'],
+};
+const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top: 'Planta', front: 'Frontal', back: 'Trasera' };
+const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la energía', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
 const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
 
 export default function Aeromovil() {
@@ -415,6 +441,9 @@ export default function Aeromovil() {
   }, []);
   const alGuardado = useCallback((d: Diseno) => setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) }), []);
   const guardadoWeb = useAutoguardado(P, actual, alGuardado);
+  // Los valores del diseño por defecto (el «Aptera Like»): el punto medio de cada deslizador (2026-11-07, Eugenio).
+  const [D, setD] = useState<Parametros>(PARAMETROS_POR_DEFECTO);
+  useEffect(() => { cargarDisenoPorDefecto().then(d => { if (d) setD(deDiseno(d.parametros || {})); }); }, []);
   // Quien llega por primera vez (sin nada guardado en este navegador) abre el
   // diseño por defecto de la web, si hay uno (2026-11-06, Eugenio).
   useEffect(() => {
@@ -439,22 +468,25 @@ export default function Aeromovil() {
   const esA1 = modelo.tipo === 'a1';
   const nombreVehiculo = esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota';
   const NOMBRE_VISTA: Record<Vista, string> = { iso: 'tres cuartos delantera', side: 'lateral', top: 'planta (desde arriba)', front: 'frontal', back: 'trasera' };
-  const crearRender = async () => {
+  // «Pedir render» (2026-11-07, Eugenio: «quita lo de crear render con Gemini,
+  // que gasta dinero; mantenlo bajo una petición a Claude Code con nuestra
+  // suscripción»): se descarga la captura de la vista actual y se deja una
+  // tarea en «Tareas» con el diseño, la vista y la descripción, para que la
+  // atienda la sesión de Claude Code. Claude no genera imágenes: lo que puede
+  // hacer con esa petición es mejorar el 3D o preparar el encargo; se dice en pantalla.
+  const pedirRender = async () => {
     if (!visor.current || render.estado === 'creando') return;
-    if (!dueno?.sesion) { setRender({ estado: 'error', error: 'Inicia sesión para crear un render: cada imagen cuesta dinero y por eso solo se hace con sesión.', vista }); return; }
     setRender({ estado: 'creando', vista });
     try {
       const captura = await visor.current.capturar();
-      const descripcion = esA1
-        ? `cuatro ruedas totalmente carenadas, cúpula con parabrisas plano y pilares inclinados, una ventanilla a cada lado, techo plano cubierto de paneles solares que desciende hasta la cola, ${P.plazas === 2 ? 'piloto y pasajero en tándem' : 'monoplaza'}, puertas de ala de gaviota, unos ${P.L.toFixed(1)} m de largo`
-        : 'velomóvil triciclo con carrocería en forma de gota, cúpula transparente, pedaleo asistido, unos 3 m de largo';
-      const q = new URLSearchParams({ vista: NOMBRE_VISTA[vista], descripcion });
-      const r = await fetch(`/api/aeromovil/render?${q}`, { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/octet-stream' }, body: captura });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.imagen) throw new Error(j.error || `No se ha podido crear el render (${r.status}).`);
-      setRender({ estado: 'listo', imagen: j.imagen, vista });
+      const url = URL.createObjectURL(captura); const a = document.createElement('a'); a.href = url; a.download = `${nombreVehiculo.replace(/\s+/g, '_')}_${vista}_${new Date().toISOString().slice(0, 10)}.jpg`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+      let autor = ''; try { autor = localStorage.getItem('aeromovil.autor') || ''; } catch { /* nada */ }
+      const texto = `Render pedido: vista ${NOMBRE_VISTA[vista]} del diseño «${actual?.nombre ?? 'sin guardar'}» (${esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota'}, ${m2(modelo.Lf)} × ${m2(Pa.W)} × ${m2(Pa.H)}). La captura se descargó en el navegador de quien lo pidió; adjuntarla a la sesión de Claude Code.`;
+      const r = await fetch('/api/aeromovil/tareas', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto, area: 'planos', autor, web: '' }) });
+      if (!r.ok) throw new Error((await r.json().catch(() => null))?.error || 'No se ha podido apuntar la petición.');
+      setRender({ estado: 'listo', vista });
     } catch (e: any) {
-      setRender({ estado: 'error', error: e?.message || 'No se ha podido crear el render.', vista });
+      setRender({ estado: 'error', error: e?.message || 'No se ha podido pedir el render.', vista });
     }
   };
   const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
@@ -470,8 +502,18 @@ export default function Aeromovil() {
   const [maleteros, setMaleteros] = useState(false);
   const [sinPasajero, setSinPasajero] = useState(false);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
+  const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
+  const [capasAbierto, setCapasAbierto] = useState(false);
+  const [vistaAbierta, setVistaAbierta] = useState(false);
   const [dep, setDep] = useState<IdDepartamento>(() => { try { return (localStorage.getItem('aeromovil.departamento') as IdDepartamento) || 'carroceria'; } catch { return 'carroceria'; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.departamento', dep); } catch { /* sin memoria */ } }, [dep]);
+  // «Mostrar solo …»: deja visibles solo las capas del departamento; al quitarlo (o al ir a «Proyecto») se ve todo.
+  useEffect(() => {
+    const todas = Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>;
+    if (!soloDep || dep === 'proyecto') { setVisibles(todas); return; }
+    const suyas = CAPAS_DEP[dep]; if (!suyas) { setVisibles(todas); return; }
+    setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, suyas.includes(c.k)])) as Record<CapaId, boolean>);
+  }, [soloDep, dep]);
   // El garaje: qué vehículos se ven y dónde están (eje delantero en el suelo, m). Se recuerda en este navegador.
   type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number };
   const [garaje, setGaraje] = useState<PlazaGaraje[]>(() => {
@@ -516,7 +558,6 @@ export default function Aeromovil() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5">
           <Logo nombre={nombreVehiculo} />
-          {dueno?.nombre && <span className="-ml-3 text-xs text-slate-500">de {dueno.nombre}</span>}
           <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
@@ -532,10 +573,18 @@ export default function Aeromovil() {
               );
             })}
           </nav>
-          <span className="ml-auto hidden font-mono text-xs text-slate-500 lg:inline">
-            {m2(modelo.Lf)} × {m2(Pa.W)} × {m2(Pa.H)} · {Math.round(res.mVeh)} kg
-          </span>
         </div>
+        {seccion === 'diseno' && esA1 && (
+          <nav className="border-t border-slate-100 bg-white" aria-label="Departamentos">
+            <div className="mx-auto flex max-w-[1600px] gap-0.5 overflow-x-auto px-2 py-1">
+              {DEPARTAMENTOS.map(d => { const Icono = ICONO_DEP[d.id], activo = dep === d.id; return (
+                <Button key={d.id} variant="ghost" aria-pressed={activo} onClick={() => { setDep(d.id); setSoloDep(false); }} title={d.lema}
+                  className={cn('shrink-0 flex-col gap-0.5 px-2.5 py-1 text-[11px] normal-case tracking-normal', activo ? 'bg-teal-700 text-white hover:bg-teal-800' : 'text-slate-600')}>
+                  <Icono className="h-4 w-4" />{NOMBRE_CORTO[d.id]}
+                </Button>); })}
+            </div>
+          </nav>
+        )}
       </header>
 
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
@@ -576,54 +625,81 @@ export default function Aeromovil() {
             {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
             {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
           </div>
-          <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-1.5">
-            <div className="flex overflow-hidden rounded-lg border border-slate-200 bg-white" role="group" aria-label="Vistas">
-              {([['iso', '3/4'], ['side', 'Lateral'], ['top', 'Planta'], ['front', 'Frontal'], ['back', 'Trasera']] as [Vista, string][]).map(([k, n]) => (
-                <Button key={k} variant="ghost" aria-pressed={vista === k} onClick={() => setVista(k)}
-                  className={cn('rounded-none px-3 py-1.5 text-xs normal-case tracking-normal', vista === k && 'bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
-              ))}
+          <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-1">
+            {/* Vista: un solo botón que despliega las cinco (2026-11-07, Eugenio: «colapsa lo de la vista en un menú») */}
+            <div className="relative">
+              <Button variant="outline" aria-expanded={vistaAbierta} onClick={() => { setVistaAbierta(v => !v); setCapasAbierto(false); }} className="bg-white px-2 py-1 text-[11px] normal-case tracking-normal">
+                Vista: {VISTAS_NOMBRE[vista]}<ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+              {vistaAbierta && (
+                <div className="absolute bottom-full left-0 z-20 mb-1 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg" role="menu">
+                  {(Object.keys(VISTAS_NOMBRE) as Vista[]).map(k => (
+                    <Button key={k} variant="ghost" role="menuitem" aria-pressed={vista === k} onClick={() => { setVista(k); setVistaAbierta(false); }}
+                      className={cn('justify-start rounded-none px-3 py-1 text-[11px] normal-case tracking-normal', vista === k && 'bg-teal-700 text-white hover:bg-teal-800')}>{VISTAS_NOMBRE[k]}</Button>
+                  ))}
+                </div>
+              )}
             </div>
+            {/* Capas: colapsadas en un botón (2026-11-07, Eugenio: «quita el menú de capas de la derecha y ponlo colapsado abajo») */}
+            <div className="relative">
+              <Button variant="outline" aria-expanded={capasAbierto} onClick={() => { setCapasAbierto(v => !v); setVistaAbierta(false); }} className="bg-white px-2 py-1 text-[11px] normal-case tracking-normal">
+                <Layers3 className="mr-1 h-3 w-3" />Capas{CAPAS.some(c => !visibles[c.k]) ? ` (${CAPAS.filter(c => visibles[c.k]).length}/${CAPAS.length})` : ''}
+              </Button>
+              {capasAbierto && (
+                <div className="absolute bottom-full left-0 z-20 mb-1 grid w-72 grid-cols-2 gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg" role="group" aria-label="Capas">
+                  {capas.map(c => (
+                    <Button key={c.k} variant="ghost" aria-pressed={visibles[c.k]} onClick={() => setVisibles(v => ({ ...v, [c.k]: !v[c.k] }))}
+                      className={cn('justify-start gap-1.5 px-1.5 py-1 text-left text-[11px] font-medium normal-case tracking-normal', !visibles[c.k] && 'text-slate-400')}>
+                      <span className={cn('h-2.5 w-2.5 shrink-0 rounded-sm', visibles[c.k] ? c.color : 'bg-transparent ring-1 ring-slate-300')} />{c.n}
+                    </Button>
+                  ))}
+                  <Button variant="ghost" onClick={() => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setSoloDep(false); }} className="col-span-2 px-1.5 py-1 text-[11px] normal-case tracking-normal text-teal-800">Ver todo</Button>
+                </div>
+              )}
+            </div>
+            {esA1 && dep !== 'proyecto' && CAPAS_DEP[dep] && (
+              <Button variant="outline" aria-pressed={soloDep} onClick={() => setSoloDep(v => !v)}
+                className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[dep] ?? NOMBRE_CORTO[dep].toLowerCase()}`}
+              </Button>
+            )}
             {([['Cotas', verCotas, setVerCotas], ['Rayos X', rayosX, setRayosX], ['Corte', corte, setCorte], [esA1 ? 'Girar ruedas' : 'Simular curva', curva, setCurva]] as [string, boolean, (v: boolean) => void][]).map(([n, v, f]) => (
               <Button key={n} variant="outline" aria-pressed={v} onClick={() => f(!v)}
-                className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
+                className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
             ))}
             <Button variant="outline" aria-pressed={abierta} onClick={() => setAbierta(!abierta)}
-              className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', abierta && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-              <DoorOpen className="mr-1 h-3.5 w-3.5" />{abierta ? 'Cerrar' : 'Abrir'} {Pa.puerta === 'cabina' ? 'cúpula' : 'puertas'}
+              className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', abierta && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {Pa.puerta === 'cabina' ? 'cúpula' : 'puertas'}
             </Button>
             {esA1 && (
               <Button variant="outline" aria-pressed={maleteros} onClick={() => setMaleteros(!maleteros)}
-                className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', maleteros && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                <Package className="mr-1 h-3.5 w-3.5" />{maleteros ? 'Cerrar' : 'Abrir'} maleteros
+                className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', maleteros && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+                <Package className="mr-1 h-3 w-3" />{maleteros ? 'Cerrar' : 'Abrir'} maleteros
               </Button>
             )}
             {esA1 && P.plazas === 2 && (
               <Button variant="outline" aria-pressed={sinPasajero} onClick={() => { setSinPasajero(!sinPasajero); if (!sinPasajero) setVerCotas(true); }}
                 title="Quita al pasajero y su asiento y acota el espacio que queda detrás: maletero o cama"
-                className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', sinPasajero && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+                className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', sinPasajero && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
                 {sinPasajero ? 'Con pasajero' : 'Sin pasajero'}
               </Button>
             )}
-            <Button variant="outline" onClick={crearRender} disabled={render.estado === 'creando'}
-              title="Una fotografía realista de la vista que estás viendo, como si el vehículo ya estuviera fabricado"
-              className="ml-auto border-amber-500 bg-amber-500 px-3 py-1.5 text-xs normal-case tracking-normal text-white hover:bg-amber-600">
-              <Camera className="mr-1 h-3.5 w-3.5" />{render.estado === 'creando' ? 'Creando render…' : 'Crear render'}
+            <Button variant="outline" onClick={pedirRender} disabled={render.estado === 'creando'}
+              title="Descarga la captura de esta vista y deja la petición en Tareas para la sesión de Claude Code (sin coste)"
+              className="ml-auto bg-white px-2 py-1 text-[11px] normal-case tracking-normal">
+              <Camera className="mr-1 h-3 w-3" />Pedir render
             </Button>
           </div>
           {render.estado !== 'nada' && (
-            <div className="absolute inset-0 z-20 flex flex-col bg-slate-900/85 p-3 text-white" role="dialog" aria-label="Render fotorrealista">
+            <div className="absolute inset-0 z-20 flex flex-col bg-slate-900/85 p-3 text-white" role="dialog" aria-label="Petición de render">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[11px] uppercase tracking-wider">Render · vista {render.vista ? NOMBRE_VISTA[render.vista] : ''}</span>
-                {render.estado === 'listo' && render.imagen && (
-                  <a href={render.imagen} download={`${nombreVehiculo.replace(/\s+/g, '_')}_render_${render.vista}.png`}
-                    className="ml-auto inline-flex items-center rounded-md bg-white/15 px-2.5 py-1 text-xs hover:bg-white/25"><Download className="mr-1 h-3.5 w-3.5" />Descargar</a>
-                )}
-                <Button variant="ghost" onClick={() => setRender({ estado: 'nada' })} aria-label="Cerrar" className={cn('px-2 py-1 text-white hover:bg-white/15', render.estado !== 'listo' && 'ml-auto')}><X className="h-4 w-4" /></Button>
+                <Button variant="ghost" onClick={() => setRender({ estado: 'nada' })} aria-label="Cerrar" className="ml-auto px-2 py-1 text-white hover:bg-white/15"><X className="h-4 w-4" /></Button>
               </div>
               <div className="mt-2 flex min-h-0 flex-1 items-center justify-center">
-                {render.estado === 'creando' && <p className="animate-pulse text-sm">Creando la fotografía… suele tardar entre 10 y 30 segundos.</p>}
+                {render.estado === 'creando' && <p className="animate-pulse text-sm">Capturando la vista y apuntando la petición…</p>}
                 {render.estado === 'error' && <p className="max-w-md text-center text-sm text-amber-200">{render.error}</p>}
-                {render.estado === 'listo' && render.imagen && <img src={render.imagen} alt={`Render fotorrealista, vista ${render.vista}`} className="max-h-full max-w-full rounded-lg object-contain shadow-xl" />}
+                {render.estado === 'listo' && <p className="max-w-md text-center text-sm">La captura se ha descargado y la petición está en «Tareas». La atiende la sesión de Claude Code con la suscripción, sin coste por imagen. Ojo: Claude no genera fotografías; lo que puede hacer es mejorar el 3D o preparar el encargo de render a partir de esa captura.</p>}
               </div>
             </div>
           )}
@@ -632,16 +708,6 @@ export default function Aeromovil() {
         </div>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
-          {esA1 && (
-            <nav className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-2" aria-label="Departamentos">
-              {DEPARTAMENTOS.map(d => (
-                <Button key={d.id} variant="ghost" aria-pressed={dep === d.id} onClick={() => setDep(d.id)} title={d.lema}
-                  className={cn('px-2 py-1 text-[11px] normal-case tracking-normal', dep === d.id ? 'bg-teal-700 text-white hover:bg-teal-800' : 'text-slate-600')}>
-                  {NOMBRE_CORTO[d.id]}
-                </Button>
-              ))}
-            </nav>
-          )}
           {(!esA1 || dep === 'proyecto') && <Bloque titulo="Vehículo">
             <div className="flex flex-col gap-1.5" role="radiogroup" aria-label="Tipo de vehículo">
               {VEHICULOS.map(o => (
@@ -653,16 +719,6 @@ export default function Aeromovil() {
               ))}
             </div>
           </Bloque>}
-          <Bloque titulo="Capas" nota="clic para ocultar">
-            <div className="grid grid-cols-2 gap-1.5">
-              {capas.map(c => (
-                <Button key={c.k} variant="outline" aria-pressed={visibles[c.k]} onClick={() => setVisibles(v => ({ ...v, [c.k]: !v[c.k] }))}
-                  className={cn('justify-start gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !visibles[c.k] && 'border-dashed text-slate-400')}>
-                  <span className={cn('h-3 w-3 shrink-0 rounded-sm', visibles[c.k] ? c.color : 'bg-transparent ring-1 ring-slate-300')} />{c.n}
-                </Button>
-              ))}
-            </div>
-          </Bloque>
 
           {(!esA1 || dep === 'proyecto') && <Bloque titulo="Garaje" nota="otros vehículos al lado">
             <div className="flex flex-col gap-1.5">
@@ -676,7 +732,7 @@ export default function Aeromovil() {
             <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el plano para acercarlo o apartarlo; doble clic lo gira un cuarto de vuelta. Los modelos los va haciendo un bot, uno a uno.</p>
           </Bloque>}
 
-          {esA1 ? <LadoA1 P={P} Pa={Pa} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} /> : (<>
+          {esA1 ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} /> : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
             <Deslizador id="am-xL" etiqueta="Eje lateral desde la rueda delantera" valor={P.xLm} min={1.1} max={Math.min(2.3, P.B - 0.8)} paso={0.01} mostrar={m2(P.xLm)} alCambiar={v => set('xLm', v)} />
