@@ -44,11 +44,15 @@ type Tabla = {
   conexiones?: Array<{ tabla_id: string; columna_id: string }>;
 };
 
+// El orden de los estados (2026-11-06, Eugenio: «el proyecto futuro súbelo arriba, cerca del
+// desarrollo principal actual»). Los nombres viejos siguen valiendo por si vuelven.
 const PESO_ESTADO: Record<string, number> = {
-  'Foco principal': 0, 'En seguimiento': 1, 'Activo': 1, 'Completado': 2,
-  'Proyecto futuro': 4, 'Desarrollo futuro': 4, 'Ideación': 5,
+  'Desarrollo principal actual': 0, 'Foco principal': 0,
+  'Proyecto futuro': 1, 'Desarrollo futuro': 1,
+  'En desarrollo': 2, 'En seguimiento': 2, 'Activo': 2,
+  'Completado': 3, 'Ideación': 5,
 };
-const FOCO = 'Foco principal';
+const FOCO = new Set(['Desarrollo principal actual', 'Foco principal']);
 
 const lista = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 const pide = (t: string) => fetch(`/api/bd/tablas/${encodeURIComponent(t)}?lectura=1`, { credentials: 'include' })
@@ -134,13 +138,12 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       // está lo más a la izquierda posible»); a igualdad, el orden de la tabla de Sistemas.
       .sort((a, b) => b.n - a.n || a.orden - b.orden);
 
-    // Los proyectos, por su estado (2026-11-06, Eugenio): delante el «Foco principal» (que
-    // además ocupa dos columnas), luego «En seguimiento», los completados, los que no tienen
-    // estado y al final lo que está por venir («Proyecto futuro», «Desarrollo futuro»,
-    // «Ideación»). Dentro de cada grupo, el orden de la tabla. Las entradas ocultas no salen
-    // (quien edita las recibe del servidor; aquí es la cara pública).
+    // Los proyectos, por su estado (`PESO_ESTADO`): el desarrollo principal actual (a toda la
+    // fila), los proyectos futuros, los que están en desarrollo, los completados, los que no
+    // tienen estado y al final la ideación. Dentro de cada grupo, el orden de la tabla. Las
+    // entradas ocultas no salen (quien edita las recibe del servidor; aquí es la cara pública).
     const opciones = new Map((colEstado?.opciones || []).map(o => [o.id, o]));
-    const peso = (f: Fila) => PESO_ESTADO[opciones.get(String(f.celdas[colEstado?.id || '']?.valor || ''))?.label || ''] ?? 3;
+    const peso = (f: Fila) => PESO_ESTADO[opciones.get(String(f.celdas[colEstado?.id || '']?.valor || ''))?.label || ''] ?? 4;
     const filas = [...proyectos.filas]
       .filter(f => !f.oculta && f.pagina_id && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
       .sort((a, b) => peso(a) - peso(b) || a.orden - b.orden);
@@ -210,7 +213,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       </nav>}
 
       {/* Quien gestiona la web añade o edita desde aquí; se abre en el editor de humanity.wiki. */}
-      {equipo && (
+      {equipo && !escaparate && (
         <div className="mt-2 flex items-center justify-end gap-2">
           <a href={`https://humanity.wiki/paginas/${encodeURIComponent(raizId)}`} target="_blank" rel="noopener noreferrer"
             className="inline-flex h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 hover:border-slate-300 hover:text-slate-900">
@@ -232,7 +235,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           // EL FOCO PRINCIPAL (2026-11-06, Eugenio: «que ocupe todo en horizontal pero no tanto
           // en vertical; que se vean las otras tres tarjetas debajo sin hacer scroll»): toda la
           // fila, con la foto apaisada y baja, y el nombre más grande.
-          const foco = estado?.label === FOCO;
+          const foco = FOCO.has(estado?.label || '');
           return (
             <li key={f.id} className={cn('relative', foco && 'sm:col-span-2 lg:col-span-3')}>
               <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
