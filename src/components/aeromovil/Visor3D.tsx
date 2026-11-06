@@ -585,14 +585,12 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
   }
   // Barra de luz trasera en la punta misma de la cola, como el Aptera.
   { const barra: V3[] = []; for (let k = 0; k <= 24; k++) barra.push(sobre(0.993, (0.14 + 0.72 * k / 24) * Math.PI, 0.003)); tira(barra, 0.007, M.piloto); }
-  // Matrículas (2026-11-06, Eugenio: «2727 ES, con la etiqueta de Europa»): la
-  // delantera de frente en la punta del morro, la trasera en la cola.
+  // Matrícula (2026-11-06, Eugenio: «2727 ES, con la etiqueta de Europa»): en la cola.
   const placa = (c: V3, normal: THREE.Vector3) => {
     const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.11), M.matricula); pl.position.set(...c); pl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal.clone().normalize()); g.add(pl);
     const marco = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.13), M.black); marco.position.copy(pl.position).addScaledVector(normal.clone().normalize(), -0.002); marco.quaternion.copy(pl.quaternion); g.add(marco);
   };
-  // La delantera va 3 cm por delante de la punta, sobre un soporte negro, porque la punta es una semiesfera y la taparía por el centro.
-  { const f0 = m.frame(0.006), y0 = (f0.top + f0.bot) / 2 - 0.02; placa([f0.x + 0.032, y0, 0], new THREE.Vector3(1, 0, 0)); box(g, [f0.x + 0.012, y0, 0], [0.03, 0.08, 0.30], M.black); }
+  // Solo la trasera (2026-11-07, Eugenio: «quita la matrícula frontal y deja solo la trasera»); el morro queda limpio con el logo arriba.
   { const f1 = m.frame(0.996); placa([f1.x - 0.006, (f1.top + f1.bot) / 2 - 0.02, 0], new THREE.Vector3(-1, 0, 0)); }
   // Logo de Luz & Humanidad, circular y amarillo, en lo alto del morro (donde
   // el XL1 lleva el suyo), sobre la pieza azul, tumbado sobre la chapa.
