@@ -268,9 +268,12 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
   // quede pegado al borde al llegar.
   const esTitulo = b.tipo === 'titulo1' || b.tipo === 'titulo2' || b.tipo === 'titulo3';
 
+  // LA ENTRADILLA (2026-11-06, Eugenio: «como una nota de prensa: titular, subtitular…»): un
+  // párrafo con `estilo: 'entradilla'` se lee más grande, justo debajo del titular.
+  const entradilla = b.tipo === 'parrafo' && b.estilo === 'entradilla';
   const texto = (extra?: string) => (
     <div id={esTitulo && b.id ? String(b.id) : undefined}
-         className={cn(CLASES_TEXTO[b.tipo] || CLASES_TEXTO.parrafo, esTitulo && 'scroll-mt-20', extra)}
+         className={cn(entradilla ? 'text-lg sm:text-xl leading-snug font-medium text-slate-600' : CLASES_TEXTO[b.tipo] || CLASES_TEXTO.parrafo, esTitulo && 'scroll-mt-20', extra)}
          style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
       <TextoEnriquecido texto={b.texto || ''} />
     </div>

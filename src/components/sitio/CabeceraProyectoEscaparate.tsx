@@ -56,10 +56,12 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
   const principal = estado?.label === 'Desarrollo principal actual' || estado?.label === 'Foco principal';
 
   return (
-    <header data-cabecera-proyecto className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+    <header data-cabecera-proyecto className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
       <div className="min-w-0">
         {/* La portada, grande, con el título y las propiedades encima. */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100">
+        {/* Más baja que antes (2026-11-06, Eugenio: «haz un poco más pequeña la portada para que
+            haya hueco para la nota de prensa»): 21:9 en pantalla ancha. */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 lg:aspect-[21/9]">
           {cfg.portada && (
             <img src={miniatura(cfg.portada, 800)} alt={typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? `${pagina.titulo}: ${cfg.subtitulo.trim()}` : pagina.titulo} fetchPriority="high" decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
@@ -68,7 +70,7 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 p-5 sm:p-7">
             <div className="min-w-0 max-w-3xl">
-              <h1 className="text-3xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-5xl">{pagina.titulo}</h1>
+              <h1 className="text-3xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-4xl">{pagina.titulo}</h1>
               {typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-2 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] sm:text-base">{cfg.subtitulo.trim()}</p>}
             </div>
             <div className="flex shrink-0 items-center gap-2">
