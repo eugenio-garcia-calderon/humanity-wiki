@@ -21,10 +21,11 @@
 //
 // `/api/aeromovil/tareas.txt` devuelve las pendientes en texto plano para
 // pegárselas a la IA: «haz las tareas de esta lista».
-import type { Express, Request, Response } from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { createHash, randomBytes } from 'node:crypto';
 import { ipDe, ritmo, esperaPendiente, type Regla } from './limites/index.js';
+import { generarImagenDesdeImagen } from './ai/provider.js';
 
 const MAX_TEXTO = 4_000;
 const MAX_AUTOR = 80;
@@ -55,6 +56,10 @@ async function conRitmo(db: any, req: Request, res: Response, regla: Regla = FRE
   ritmo(db, regla, quien);
   return true;
 }
+
+// Renders fotorrealistas: cada uno cuesta dinero (Gemini), así que hace falta sesión y 12 por hora y conexión.
+const FRENO_RENDER: Regla = { puerta: 'aeromovil-render', gracia: 12, baseSegundos: 300, topeSegundos: 3600, alFallar: 'cerrar' };
+const MAX_CAPTURA = 5_000_000;   // la captura del visor (bytes)
 
 const COLUMNAS = sql`id, area, texto, autor, origen, estado, respuesta, created_at, resuelta_at`;
 /** La página del menú lateral cuyo creador es el dueño del Aeromóvil. */
@@ -294,6 +299,42 @@ export function registerAeromovilRoutes(app: Express, db: any) {
   });
 
   /** POST /api/aeromovil/referencias — { nombre, datos, autor? } → la referencia y su clave. */
+  /**
+   * POST /api/aeromovil/render?vista=…&descripcion=… — el cuerpo es la captura
+   * del visor en PNG o JPEG (application/octet-stream; el JSON global de
+   * server.ts solo admite 100 kB y server.ts está congelado) → { imagen:
+   * dataURL } Un render fotorrealista de ESA vista, como si el vehículo
+   * estuviera fabricado (2026-11-06, Eugenio: «un botón que cree una vista
+   * hiperrealista como si fuese una fotografía del vehículo en la vida
+   * real»). Con sesión, porque cada imagen cuesta.
+   */
+  app.post('/api/aeromovil/render', express.raw({ type: 'application/octet-stream', limit: '6mb' }), async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión para crear un render: cada imagen cuesta dinero.' });
+    if (!(await conRitmo(db, req, res, FRENO_RENDER))) return;
+    const cuerpo: Buffer | undefined = Buffer.isBuffer(req.body) ? req.body : undefined;
+    if (!cuerpo || cuerpo.length < 1000 || cuerpo.length > MAX_CAPTURA) return res.status(400).json({ error: 'Falta la captura del visor o es demasiado grande.' });
+    const esPng = cuerpo[0] === 0x89 && cuerpo[1] === 0x50, esJpeg = cuerpo[0] === 0xff && cuerpo[1] === 0xd8;
+    if (!esPng && !esJpeg) return res.status(400).json({ error: 'La captura tiene que ser PNG o JPEG.' });
+    const m = [null, esPng ? 'image/png' : 'image/jpeg', cuerpo.toString('base64')] as const;
+    const vista = String(req.query.vista || '').slice(0, 20), descripcion = String(req.query.descripcion || '').slice(0, 600);
+    const prompt = [
+      'Convierte esta captura de un modelo 3D en una fotografía hiperrealista del mismo vehículo ya fabricado, visto en la vida real.',
+      'Respeta exactamente la forma, las proporciones, el punto de vista y el encuadre de la captura: es la misma vista, no otra.',
+      'Es un vehículo eléctrico ligero de carrocería aerodinámica: ' + (descripcion || 'cuatro ruedas carenadas, cúpula con parabrisas plano, paneles solares en el techo y en el lomo.'),
+      'Pintura blanca perlada con reflejos reales, paneles solares de células monocristalinas, cristales con reflejos, neumáticos y llantas reales, juntas de puertas y pequeñas imperfecciones de fabricación.',
+      'Escenario: una carretera asfaltada junto al mar con luz natural de media tarde, sombras suaves y coherentes, profundidad de campo de una cámara réflex con objetivo de 50 mm.',
+      'Sin textos, cotas, líneas de acotación, rejillas, maniquíes de ordenador ni marcas de agua: si en la captura hay personas, deben ser personas reales dentro del vehículo.',
+      vista ? `Vista: ${vista}.` : '',
+    ].filter(Boolean).join(' ');
+    try {
+      const img = await generarImagenDesdeImagen(prompt, { mimeType: m[1], base64: m[2] });
+      res.json({ imagen: `data:${img.mimeType};base64,${img.base64}` });
+    } catch (e: any) {
+      console.error('aeromovil render', e?.message || e);
+      res.status(502).json({ error: e?.message || 'No se ha podido crear el render.' });
+    }
+  });
+
   app.post('/api/aeromovil/referencias', async (req: Request, res: Response) => {
     try {
       if (String(req.body?.web ?? '').trim()) return res.json({ referencia: null, clave: null });

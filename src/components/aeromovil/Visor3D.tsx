@@ -44,6 +44,8 @@ export type Vista = 'iso' | 'side' | 'top' | 'front' | 'back';
 export interface VisorHandle {
   /** STL binario de las capas visibles, en milímetros y con Z arriba (como el STEP). */
   exportarSTL: (capas: CapaId[]) => Blob;
+  /** Captura lo que se ve ahora mismo (misma cámara, mismas capas) como JPEG; es la base del render fotorrealista. */
+  capturar: () => Promise<Blob>;
 }
 
 interface Props {
@@ -1083,6 +1085,20 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       const datos = new STLExporter().parse(grupo, { binary: true }) as DataView;
       return new Blob([datos.buffer as ArrayBuffer], { type: 'model/stl' });
     },
+    capturar: () => new Promise<Blob>((resolver, fallar) => {
+      const st = estado.current; if (!st) return fallar(new Error('El visor no está listo.'));
+      // Un fotograma recién pintado, por si el bucle aún no ha dibujado este estado
+      // Sin cotas: en una fotografía no hay líneas de acotación, y la IA tiende a dibujarlas si las ve
+      const cotas = st.grupoCotas.visible; st.grupoCotas.visible = false;
+      st.renderer.render(st.scene, st.camera);
+      st.grupoCotas.visible = cotas;
+      const cv = st.renderer.domElement as HTMLCanvasElement;
+      // El lienzo es transparente; el JPEG no admite transparencia y lo pondría negro: se compone sobre el fondo claro de la página
+      const copia = document.createElement('canvas'); copia.width = cv.width; copia.height = cv.height;
+      const ctx = copia.getContext('2d'); if (!ctx) return fallar(new Error('No se ha podido capturar el visor.'));
+      ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0, 0, copia.width, copia.height); ctx.drawImage(cv, 0, 0);
+      copia.toBlob(b => b ? resolver(b) : fallar(new Error('No se ha podido capturar el visor.')), 'image/jpeg', 0.92);
+    }),
   }), []);
 
   return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : 'Modelo 3D del Aeromóvil Gota'} />;
