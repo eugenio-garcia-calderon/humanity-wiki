@@ -69,7 +69,10 @@ const SZ = {
   // Techo plano sobre la cabina y bajada constante hasta la cola, como el Aptera.
   cupTop: suave([[0.19, 0.66], [0.22, 0.78], [0.26, 0.86], [0.30, 0.92], [0.36, 0.985], [0.42, 1.0], [0.60, 1.0], [0.65, 0.99], [0.70, 0.962], [0.75, 0.914], [0.80, 0.85], [0.85, 0.77], [0.90, 0.67], [0.95, 0.56], [1, 0.43]]),
   // La cola de la cúpula se queda ancha hasta el final (corte Kamm, como el Aptera), no en aleta.
-  cupHw: suave([[0.19, 0.40], [0.25, 0.44], [0.30, 0.46], [0.45, 0.48], [0.60, 0.46], [0.75, 0.42], [0.90, 0.36], [0.97, 0.32], [1, 0.30]]),
+  // Una sola curva en planta, sin hombro ni inflexión (2026-11-06, Eugenio:
+  // «la cabina no sigue un trazo curvo, hay como una S»): el ancho crece
+  // despacio hasta el máximo sobre el piloto y baja despacio a la cola.
+  cupHw: suave([[0.19, 0.38], [0.25, 0.42], [0.32, 0.455], [0.40, 0.475], [0.47, 0.48], [0.55, 0.472], [0.65, 0.45], [0.75, 0.42], [0.90, 0.36], [0.97, 0.32], [1, 0.30]]),
   cupX0: 0.19, cupX1: 0.99, cupW: 0.48,
   // Dónde está el ancho máximo de la sección, en fracción de la altura de la carrocería (0,5 = a media altura).
   ecuador: 0.40,
@@ -184,7 +187,6 @@ export function crearModeloA1(P: Parametros) {
     const cierre = Math.min(1, Math.max(0, (uC1 - u) / 0.014));
     let top = Math.max(deck + 0.004, base + (yCupula(SZ.cupTop(um)) - base) * cierre);
     let hw = Math.max(0.004, SZ.cupHw(um) * (SZ.W / 2) * (P.W / SZ.W) * (P.cupW / SZ.cupW));
-    const w = pesoPlano(u);
     if (u <= uW1) {
       // De perfil: casi recto de la base al borde de arriba, con la panza suave del Aptera.
       // El parabrisas sale del capó sin cambio de inclinación (2026-11-06,
@@ -203,7 +205,8 @@ export function crearModeloA1(P: Parametros) {
       const sTail = (u - uPico) / (uC1 - uPico), yPico = yCupula(1), yCola = yCupula(SZ.cupTop(SZ.cupX1));
       top = Math.max(deck + 0.004, base + (yPico - Math.pow(sTail, P.techo) * (yPico - yCola) - base) * cierre);
     }
-    hw *= 1 - 0.05 * w;
+    // (El parabrisas ya no se estrecha un 5 % aparte: ese escalón, al soltarse
+    // detrás del montante, era la «S» de la unión cúpula-carrocería en planta.)
     return { s: 1, x: xDeU(u), zc: base, top, bot: base, hw };
   };
   // Exponente de la sección (techo plano) y cuánto caen hacia dentro los costados (0 = verticales).
