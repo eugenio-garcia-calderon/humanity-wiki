@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0172_aeromovil_1_cabina_solar.sql",
+      "motivo": "Archivar el diseño «parabrisas plano», ya es el de serie",
+      "desde": "2026-11-06T17:06:52.242Z"
+    }
+  ]
 }
