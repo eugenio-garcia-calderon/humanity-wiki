@@ -473,14 +473,14 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
     tira(arriba, R, M.black);
     for (const s of [1, -1]) {
       const th = (t: number) => (s > 0 ? t : Math.PI - t);
-      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 - m.uBase) * k / 12; pilar.push(sobreC(u, th(Math.max(m.thPilar(u), m.thBase(u) + 0.02)), hund)); }
+      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 - m.uBase) * k / 12; pilar.push(sobreC(u, th(Math.max(m.thPilar(u), m.thAlfeizar(u))), hund)); }
       tira(pilar, R, M.black);
       const techo: V3[] = []; for (let k = 0; k <= 14; k++) techo.push(sobreC(m.uW1 + (m.uVentA - m.uW1) * k / 14, th(m.thVentana), hund2));
       tira(techo, r2, M.black);
       const trasera: V3[] = []; for (let k = 0; k <= 10; k++) { const u = m.uVentA + (m.uVent1 - m.uVentA) * k / 10; trasera.push(sobreC(u, th(Math.max(m.thTrasera(u), m.thBase(u) + 0.02)), hund2)); }
       tira(trasera, r2, M.black);
       // La barra de abajo va por donde la cúpula sale de la carrocería: recta sobre el hombro.
-      const abajo: V3[] = []; for (let k = 0; k <= 24; k++) { const u = m.uBase + (m.uVent1 - m.uBase) * k / 24; abajo.push(sobreC(u, th(m.thBase(u) + 0.02), hund2)); }
+      const abajo: V3[] = []; for (let k = 0; k <= 24; k++) { const u = m.uBase + (m.uVent1 - m.uBase) * k / 24; abajo.push(sobreC(u, th(m.thAlfeizar(u)), hund2)); }
       tira(abajo, r2, M.black);
       // Corte de la puerta: por delante y por detrás, de la base al centro del techo
       for (const p of m.puertas.filter(q => q.tipo === 'puerta' && q.superficie === 'cupula' && (s > 0 ? q.id === 'izq' : q.id === 'der'))) {
