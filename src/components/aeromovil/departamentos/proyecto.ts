@@ -31,7 +31,7 @@ export const DEPARTAMENTO: Departamento = {
     'Mantener la documentación del prototipo (qué se montó de verdad, con qué pieza y a qué precio) para que la unidad 2 no empiece de cero.',
   ],
   parametros: [],
-  componentes: ['equipo'],
+  componentes: ['varios'],
   tareas: [
     {
       titulo: 'Arrancar: nombrar responsables y fijar la semana 0',

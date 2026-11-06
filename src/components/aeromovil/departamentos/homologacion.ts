@@ -1,12 +1,435 @@
 import type { Departamento } from './tipos';
 
-// Pendiente: el contenido lo escribe un bot (2026-11-06). Mientras, solo el nombre y qué deslizadores son suyos.
+// Escrito por un bot el 2026-11-06 a partir del modelo del Aeromóvil 1
+// (3,94 m, ≈ 385 kg con dos asientos, batería de 27 kWh ≈ 164 kg, motor de
+// 15 kW nominales y 32 kW de pico, objetivo 140 km/h), de las fichas de
+// `componentes.ts`, del changelog y de los textos legales leídos ese día
+// (Reglamento (UE) 168/2013 y sus anexos, Reglamento 3/2014, RD 750/2010,
+// guía del Ministerio v1.3 de diciembre de 2025, sede de la DGT). Lo que no se
+// pudo leer lleva «por confirmar».
+//
+// Vocabulario:
+// · Homologación: el permiso oficial que dice que un vehículo cumple la ley
+//   y puede matricularse. Sin ella no hay matrícula ni seguro normal.
+// · Categoría L7e-CP: «cuadriciclo pesado para pasajeros» en la ley europea.
+//   Es la categoría del Renault Twizy, del Microlino y del Silence S04.
+// · Homologación individual: la de un solo vehículo, que inspecciona un
+//   servicio técnico y resuelve el Ministerio de Industria (RD 750/2010).
+// · Serie corta nacional (NKS): homologación de tipo válida solo en España
+//   para pocas unidades al año (150 para L7e-C).
+// · Servicio técnico: laboratorio designado por el Ministerio para hacer los
+//   ensayos y los informes (IDIADA, INSIA, INTA, TÜV Rheinland…).
+// · Reglamento UN (UNECE): normas técnicas de la ONU numeradas (R78 frenos,
+//   R10 compatibilidad electromagnética, R100 seguridad eléctrica, R16
+//   cinturones…) que la ley europea hace obligatorias.
+// · Placas rojas: matrícula temporal de empresa para mover y probar
+//   vehículos sin matricular. Placas verdes: la temporal de particulares.
+// · Masa en orden de marcha: el peso del vehículo listo para rodar, sin
+//   conductor y, en los eléctricos, SIN la batería de tracción (artículo 5
+//   del Reglamento 168/2013).
 export const DEPARTAMENTO: Departamento = {
   id: 'homologacion', nombre: 'Homologación, seguridad y ensayos', lema: 'lo que exige la ley para que ruede: categoría, ensayos, documentación',
-  mision: 'Pendiente de escribir.',
-  responsabilidades: [],
+  mision: 'Separar con claridad dos metas que la gente confunde: rodar en pruebas en un circuito privado (no hace falta homologar nada; hace falta seguro, sentido común y un protocolo) y matricular el Aeromóvil 1 para la calle (hace falta una categoría, un fabricante inscrito, un servicio técnico, una lista de ensayos y una resolución del Ministerio). Este departamento elige la categoría que menos cuesta y que no cierra puertas, reparte a los demás departamentos lo que la norma les exige, y lleva el calendario y el presupuesto de los ensayos. Y pone sobre la mesa la contradicción que ya existe en el proyecto: la categoría L7e-CP limita la velocidad de diseño a 90 km/h, y el objetivo del Aeromóvil 1 son 140.',
+  responsabilidades: [
+    'Categoría: elegir entre L7e-CP (cuadriciclo pesado: masa en orden de marcha ≤ 450 kg sin batería, potencia continua ≤ 15 kW, velocidad máxima por construcción ≤ 90 km/h, habitáculo cerrado, hasta 4 plazas), L7e-A2 (quad pesado de carretera con dos asientos no a horcajadas: ≤ 15 kW, sin límite de velocidad en la definición) o M1 (turismo, con toda la reglamentación de coches). Hoy el Aeromóvil 1 pesa ≈ 385 kg con una batería de ≈ 164 kg: ≈ 221 kg en orden de marcha, muy dentro del límite.',
+    'Mapa de requisitos: para la categoría elegida, la lista del anexo II del Reglamento (UE) 168/2013 y, para cada punto, el anexo del Reglamento 3/2014 (seguridad funcional), 44/2014 (construcción) o 134/2014 (medioambiente y propulsión) y el reglamento UN que corresponde, con el departamento responsable y el estado.',
+    'Vía administrativa: homologación individual (RD 750/2010, artículo 4.4 y anexo II apéndice 4, número HIA-xxxxx), serie corta nacional (anexo III del 168/2013: 150 unidades al año para L7e-C; número e9*NKS168/2013*…) o homologación de tipo europea. Y qué pide cada una.',
+    'Condición de fabricante: quién firma como fabricante (persona, empresa o asociación), inscripción en el Registro de Fabricantes y Firmas autorizadas del Ministerio, código WMI (las tres primeras letras del número de bastidor), placa del fabricante. Los prototipos solo pueden matricularse a nombre del fabricante que los desarrolla (RD 750/2010, art. 5.2).',
+    'Rodar en pruebas: qué hace falta para un circuito privado (nada legal más que el seguro de responsabilidad civil y el permiso del circuito) y qué hace falta para la vía pública sin matricular (placas rojas de empresa: pruebas o ensayos de investigación, con libro-talonario y tasa 1.4 de 20,61 €).',
+    'Ensayos: cuáles, dónde (IDIADA, INSIA, CTAG, INTA, TÜV Rheinland Ibérica), en qué orden, con qué muestras y a qué precio; y cuáles se pueden hacer con componentes ya homologados (luces, cristales, neumáticos, cinturones) para no ensayarlos.',
+    'Seguridad pasiva voluntaria: en L7e no hay ensayo de choque obligatorio. Euro NCAP (2014 y 2016) dio 1–2 estrellas a todos los cuadriciclos pesados que probó y pidió a los legisladores «requisitos más realistas». Este departamento decide qué se hace de más y lo justifica.',
+    'Seguridad eléctrica: alta tensión (96 V de batería), interbloqueo, aislamiento, etiquetado y procedimiento de rescate, antes de que nadie se siente dentro con la batería conectada.',
+    'Documentación: ficha reducida de características, acta de ensayo del servicio técnico (anexo I del RD 750/2010), declaración de conformidad del fabricante, manual de usuario, plano de masas y dimensiones.',
+    'Matriculación: inspección unitaria en ITV antes de matricular (RD 750/2010, art. 5), tarjeta ITV, alta en la DGT, impuesto de matriculación (exento en eléctricos; por confirmar) y seguro.',
+    'Vía alternativa: vehículo de competición o de exhibición si la homologación se alarga (pasaporte técnico de la RFEdA para circuitos; placas rojas para exhibiciones), sin cerrar la puerta a matricular después.',
+    'Avisar a los demás departamentos, por escrito y a tiempo, de lo que la norma les exige: desempañado (Interior), testigos (Interior), cinturones homologados (Interior), antirrobo (Accesos), luces con marca E (Luces), limitador de velocidad y potencia continua ≤ 15 kW (Propulsión), espacio para la matrícula (Carrocería).',
+  ],
   parametros: [],
   componentes: [],
-  tareas: [], decisiones: [], partners: [], mensajes: [], referencias: [],
-  revisado: { fecha: '2026-11-06', por: 'nadie todavía' },
+  tareas: [
+    {
+      titulo: '[Ambos] Decidir la categoría y fijar los límites de diseño',
+      detalle: 'Reunión con Eugenio con tres columnas: L7e-CP (≤ 450 kg sin batería, ≤ 15 kW continuos, ≤ 90 km/h por construcción, ≤ 4 plazas), L7e-A2 (≤ 15 kW, 2 plazas, sin tope de velocidad en la definición pero «requisitos adicionales» que hay que leer en el 3/2014 y el 44/2014) y M1 (turismo). Para cada una: qué permite (velocidad legal, autovías, permiso de conducir B), qué cuesta (ensayos) y cuánto tarda. Datos de hoy: 221 kg en orden de marcha, 15 kW nominales / 32 kW de pico, objetivo 140 km/h, y una regla del Reglamento General de Circulación (art. 48, extracto consultado) que limita los cuadriciclos a 70 km/h en cualquier vía (confirmar en el BOE). Salir con la categoría firmada y los tres límites escritos en el modelo.',
+      prioridad: 'alta', semanas: 1,
+      entregable: 'Categoría elegida y hoja de límites (masa, potencia continua, velocidad por construcción) para todos los departamentos',
+    },
+    {
+      titulo: '[Ambos] Tabla de requisitos aplicables con reglamento, anexo y responsable',
+      detalle: 'Copiar las filas del anexo II del Reglamento 168/2013 marcadas para la categoría elegida (para L7e-C: A1–A3, B1–B4, B6–B9, B11–B14, B17, B18, C1–C3, C5–C7, C10, C11, C13, C14; y las «IF» B5, B15, B16, C4, C8, C9, que aplican solo si se cumple una condición) y, para cada una, el anexo del 3/2014, 44/2014 o 134/2014, el reglamento UN (R78 frenos, R10 EMC, R9 ruido ≤ 80 dB(A), R43 cristales, R16/R14 cinturones, R39 velocímetro, R46 espejos, R100 seguridad eléctrica…), si se cumple con componentes ya homologados o con ensayo propio, el departamento responsable y el estado. Es el documento que gobierna todo lo demás.',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Ambos] Decidir la categoría y fijar los límites de diseño'],
+      entregable: 'Hoja de requisitos (≈ 30 filas) con responsable y estado',
+    },
+    {
+      titulo: '[Ambos] Constituir el «fabricante» e inscribirlo en el Registro del Ministerio',
+      detalle: 'Decidir quién es el fabricante a efectos legales (ver decisión) y hacer el trámite: inscripción en el Registro de Fabricantes y Firmas autorizadas de la Subdirección General de Calidad y Seguridad Industrial, solicitud de código WMI para el número de bastidor, placa del fabricante. La guía del Ministerio (v1.3, dic. 2025) dice que un fabricante no inscrito puede pedir la homologación individual «como titular del vehículo», pero el artículo 5.2 del RD 750/2010 solo deja matricular prototipos a nombre del fabricante que los desarrolla: pedir al Ministerio por escrito cuál de los dos caminos vale para nosotros.',
+      prioridad: 'alta', semanas: 4,
+      dependeDe: ['[Ambos] Decidir la categoría y fijar los límites de diseño'],
+      entregable: 'Fabricante inscrito (o respuesta escrita del Ministerio sobre la vía del titular) y código WMI',
+    },
+    {
+      titulo: '[Pruebas] Lista mínima para rodar en circuito privado',
+      detalle: 'En un circuito privado cerrado al tráfico no hace falta ni matrícula ni homologación. Hace falta: seguro de responsabilidad civil que cubra pruebas de un prototipo sin matricular, extintor a mano, cinturones montados, casco en las primeras salidas, corte de emergencia de alta tensión accesible desde fuera (seta roja), frenos probados en parado, neumáticos y presiones, lastre que simule al pasajero, y un responsable que firme la lista antes de cada salida. Escribirla en una página.',
+      prioridad: 'alta', semanas: 1,
+      entregable: 'Lista de comprobación de una página, firmada antes de cada salida',
+    },
+    {
+      titulo: '[Pruebas] Elegir circuito y pedir condiciones',
+      detalle: 'Pedir a dos o tres circuitos (el Circuito del Jarama del RACE, cerca de Madrid; y otros que Eugenio prefiera) el precio de media jornada en día laborable para un prototipo eléctrico sin matricular, qué seguro exigen, si admiten vehículos sin homologar, si hay boxes con enchufe de 230 V para el cargador de 3,3 kW, y qué fechas tienen. Los laboratorios (IDIADA, CTAG) también alquilan pista, con instrumentación.',
+      prioridad: 'alta', semanas: 1,
+      entregable: 'Tabla de circuitos con precio, requisitos de seguro y fechas',
+    },
+    {
+      titulo: '[Pruebas] Seguro para pruebas de un prototipo sin matricular',
+      detalle: 'Un vehículo sin matrícula no se asegura como un coche (MAPFRE lo explica en su web: la matrícula es lo que identifica el vehículo). Hay tres caminos: póliza de responsabilidad civil del circuito o del evento (preguntar al circuito), póliza de responsabilidad civil general del fabricante que cubra ensayos, o seguro ligado a las placas rojas cuando se tengan (las gestorías de placas, como Veritas Gestión, lo tramitan). Pedir presupuesto por los tres y elegir antes de la primera salida.',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Pruebas] Elegir circuito y pedir condiciones'],
+      entregable: 'Póliza contratada que nombra el prototipo y las pruebas',
+    },
+    {
+      titulo: '[Pruebas] Seguridad eléctrica antes de la primera salida',
+      detalle: 'Antes de que la batería de 96 V y 27 kWh se conecte con alguien dentro: interbloqueo que corta la alta tensión al abrir la caja (ya en la ficha «Cableado HV»), fusible y contactores, precarga, medida de aislamiento entre alta tensión y chasis, seta de corte exterior, etiquetas naranja, guantes y procedimiento de rescate escrito. Usar como guía los puntos del anexo IV del Reglamento 3/2014 (seguridad eléctrica) y del UN R100, aunque el ensayo oficial venga después.',
+      prioridad: 'alta', semanas: 2,
+      entregable: 'Acta de pruebas eléctricas propia (aislamiento, interbloqueo, corte) y procedimiento de rescate',
+    },
+    {
+      titulo: '[Pruebas] Prueba propia de frenos con instrumentación',
+      detalle: 'Con un acelerómetro o un GPS de 10 Hz, medir la deceleración media y la distancia desde 50 y desde 90 km/h, la fuerza en el pedal, el reparto delante/detrás y el comportamiento con el freno regenerativo encendido y apagado, con lastre de dos ocupantes. Comparar con lo que pide UN R78 para la categoría (deceleración mínima y fuerza máxima en el pedal, por confirmar con el texto) antes de pagar el ensayo de laboratorio.',
+      prioridad: 'alta', semanas: 1,
+      dependeDe: ['[Pruebas] Lista mínima para rodar en circuito privado'],
+      entregable: 'Informe de frenada con cifras y comparación con R78',
+    },
+    {
+      titulo: '[Pruebas] Protocolo de pruebas por escalones de velocidad',
+      detalle: 'Plan de salidas: 30, 50, 70, 90 y después, solo si la categoría lo permite o en circuito, 110 y 140 km/h; en cada escalón, lista de lo que se mira (ruido, vibración, temperatura del motor y del inversor, consumo, estabilidad en curva, frenada, viento en las juntas). Telemetría mínima por CAN (velocidad, corriente, tensión, temperaturas). Nadie sube un escalón sin el informe del anterior.',
+      prioridad: 'media', semanas: 1,
+      dependeDe: ['[Pruebas] Lista mínima para rodar en circuito privado'],
+      entregable: 'Protocolo de pruebas y plantilla de informe por salida',
+    },
+    {
+      titulo: '[Pruebas] Placas rojas para transportar y probar en vía pública',
+      detalle: 'La DGT concede la matrícula temporal de empresa (placas rojas, serie S para vehículos no matriculados) a fabricantes, carroceros, importadores y laboratorios oficiales, para «pruebas o ensayos de investigación», transporte y exhibición. Requisitos: empresa del sector con licencia de apertura y alta en el IAE, libro-talonario (se rellena un boletín por cada viaje con vehículo, conductor y ruta), tasa 1.4 de 20,61 €; validez un año; seguro aparte. Las placas verdes no sirven: son para particulares con un vehículo pendiente de matricular que ya tiene ITV. Pedirlas en cuanto exista el fabricante.',
+      prioridad: 'media', semanas: 3,
+      dependeDe: ['[Ambos] Constituir el «fabricante» e inscribirlo en el Registro del Ministerio'],
+      entregable: 'Placas rojas y libro-talonario a nombre del fabricante',
+    },
+    {
+      titulo: '[Matricular] Reunión de arranque con la autoridad y un servicio técnico',
+      detalle: 'Escribir a la Subdirección General de Calidad y Seguridad Industrial (Ministerio de Industria y Turismo) y a un servicio técnico designado (IDIADA, INSIA, INTA o TÜV Rheinland Ibérica) con la hoja de requisitos y el modelo 3D, y pedir una reunión previa: confirmar categoría, vía (individual o serie corta), qué ensayos exigen y cuáles aceptan con componentes homologados, qué «requisitos alternativos» admiten para un vehículo singular (RD 750/2010, art. 4.4), plazos y tasas. Hacerlo antes de fabricar el chasis definitivo: lo que digan cambia el chasis.',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Ambos] Tabla de requisitos aplicables con reglamento, anexo y responsable'],
+      entregable: 'Acta de la reunión con la lista de ensayos exigidos y los requisitos alternativos admitidos',
+    },
+    {
+      titulo: '[Matricular] Elegir servicio técnico y laboratorios, con presupuesto',
+      detalle: 'Enviar los mensajes preparados a IDIADA, INSIA, CTAG, INTA y TÜV Rheinland Ibérica con la hoja de requisitos. Comparar precio, plazo, cercanía (INSIA e INTA están en Madrid; IDIADA en Tarragona; CTAG en Pontevedra) y qué parte de la lista cubre cada uno con acreditación. Un solo servicio técnico firma el acta; los ensayos pueden repartirse.',
+      prioridad: 'alta', semanas: 3,
+      dependeDe: ['[Matricular] Reunión de arranque con la autoridad y un servicio técnico'],
+      entregable: 'Servicio técnico contratado y calendario de ensayos con precio',
+    },
+    {
+      titulo: '[Matricular] Ensayo de frenos (UN R78)',
+      detalle: 'Ensayo oficial de frenado para categoría L (el anexo III del 3/2014 remite al reglamento UN de frenos de categoría L, R78; por confirmar si para L7e se admite R13 de coches). Vehículo con lastre, instrumentación del laboratorio, en pista. Si la categoría elegida exige ABS (obligatorio solo en L3e según el anexo VIII del 168/2013; por confirmar para L7e) cambia la ficha «Frenos».',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto', '[Pruebas] Prueba propia de frenos con instrumentación'],
+      entregable: 'Informe de ensayo R78 favorable',
+    },
+    {
+      titulo: '[Matricular] Seguridad eléctrica y batería (anexo IV del 3/2014 / UN R100)',
+      detalle: 'Ensayo de seguridad eléctrica del vehículo (protección contra contacto, aislamiento, interbloqueo, carga) y, según lo que exija el servicio técnico, de la batería como componente (UN R100 parte II: vibración, choque térmico, sobrecarga, cortocircuito; por confirmar si se exige en L7e o basta con la declaración del fabricante del paquete). Si la batería se compra hecha a un integrador, pedirle su certificado R100 y ahorrarse el ensayo.',
+      prioridad: 'alta', semanas: 3,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto', '[Pruebas] Seguridad eléctrica antes de la primera salida'],
+      entregable: 'Informe de seguridad eléctrica y certificado R100 de la batería',
+    },
+    {
+      titulo: '[Matricular] Compatibilidad electromagnética (UN R10)',
+      detalle: 'Ensayo de emisiones e inmunidad del vehículo completo en cámara (IDIADA y CTAG lo tienen acreditado). El inversor, el cargador y el convertidor son las fuentes; si cada uno trae su propio certificado R10 como componente, el ensayo de vehículo es más corto. Pedir los certificados a los proveedores antes de comprar.',
+      prioridad: 'media', semanas: 1,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto'],
+      entregable: 'Informe R10 del vehículo y certificados de componentes',
+    },
+    {
+      titulo: '[Matricular] Luces, cristales, neumáticos, espejos y velocímetro con componentes ya homologados',
+      detalle: 'Comprar faros, pilotos e intermitentes con marca E (ficha «Luces»), policarbonato de acristalamiento conforme a UN R43 (comprobar que el Lexan Margard de la ficha «Cristales» tiene homologación como acristalamiento de vehículo; si no, hay que ensayarlo), neumáticos con marca E, espejos conformes a UN R46 y velocímetro conforme a UN R39. Con eso, el servicio técnico solo comprueba la instalación (anexo IX del 3/2014 para las luces: posición, ángulos, colores) y no hace ensayos de componente.',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Ambos] Tabla de requisitos aplicables con reglamento, anexo y responsable'],
+      entregable: 'Carpeta con los certificados de cada componente y plano de instalación de luces',
+    },
+    {
+      titulo: '[Matricular] Ruido (UN R9, ≤ 80 dB(A)) y aviso acústico opcional',
+      detalle: 'Medida de ruido en marcha según UN R9 (el anexo VI del 168/2013 fija 80 dB(A) para L7e-C): un eléctrico pasa de sobra; lo que suena es la reductora y la rodadura. El sistema de aviso acústico para peatones (AVAS) está permitido en categoría L, no es obligatorio (anexo IV del 168/2013, por confirmar): decidir si se monta por seguridad.',
+      prioridad: 'baja', semanas: 1,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto'],
+      entregable: 'Informe de ruido y decisión sobre el AVAS',
+    },
+    {
+      titulo: '[Matricular] Cinturones, anclajes, asientos y lo que ensaya Interior',
+      detalle: 'Ensayo de anclajes UN R14 (30 kN) sobre el chasis o una sección representativa, cinturones con marca E (UN R16) y comprobación de las plazas (anexo XIII del 3/2014), reposacabezas, desempañado (anexo VII), mandos y testigos (anexo VIII), salientes exteriores (C7), espacio para la matrícula (C13), antirrobo (C5). Interior y Accesos preparan las piezas; este departamento las lleva al laboratorio y guarda los informes.',
+      prioridad: 'alta', semanas: 3,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto'],
+      entregable: 'Informes de R14 y de las comprobaciones de interior y accesos',
+    },
+    {
+      titulo: '[Matricular] Velocidad máxima, potencia continua y limitador (Reglamento 134/2014, anexo X)',
+      detalle: 'La potencia que cuenta para la categoría es la continua (la de 30 minutos, medida como en UN R85), no la de pico. El motor de la ficha (Motenergy ME1616, 20 kW nominales) está por encima de los 15 kW de L7e: hay que elegir un motor cuya potencia continua sea ≤ 15 kW o limitar por software en el inversor y preguntar al servicio técnico si acepta ese recorte como «potencia nominal continua» (las medidas antimanipulación del 44/2014 lo miran). Para L7e-C, además, limitador a 90 km/h por construcción. Pasar las dos cosas a Propulsión.',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Ambos] Decidir la categoría y fijar los límites de diseño'],
+      entregable: 'Motor/inversor conformes y ensayo de velocidad y potencia según anexo X',
+    },
+    {
+      titulo: '[Matricular] Masas y dimensiones, bastidor y placa del fabricante',
+      detalle: 'Pesar el vehículo en báscula oficial (masa en orden de marcha sin batería, masa máxima, reparto por eje), medir largo, ancho, alto, batalla y vías, grabar el número de bastidor (17 caracteres con el WMI del fabricante) en el chasis y fijar la placa del fabricante. Sale la ficha reducida de características.',
+      prioridad: 'media', semanas: 1,
+      dependeDe: ['[Ambos] Constituir el «fabricante» e inscribirlo en el Registro del Ministerio'],
+      entregable: 'Ficha reducida con masas, dimensiones y VIN',
+    },
+    {
+      titulo: '[Matricular] Seguridad pasiva voluntaria',
+      detalle: 'Según la decisión «Cuánta seguridad pasiva se añade»: desde una simulación por elementos finitos del chasis en choque frontal a 50 km/h hasta un ensayo de trineo (el INSIA tiene maniquíes Hybrid III 50 y 95) o un choque completo. No lo exige la ley en L7e; lo exigen los resultados de Euro NCAP (1–2 estrellas en todos los cuadriciclos probados en 2014 y 2016). Documentarlo aunque sea para decir que no se hizo y por qué.',
+      prioridad: 'media', semanas: 4,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto'],
+      entregable: 'Informe de seguridad pasiva (simulación o ensayo) con lo que se cambió',
+    },
+    {
+      titulo: '[Matricular] Expediente: acta, ficha reducida, declaración de conformidad y manual',
+      detalle: 'Reunir el acta de ensayo del servicio técnico (anexo I del RD 750/2010), la ficha reducida sellada, la declaración de conformidad en la que el fabricante asume la responsabilidad legal, el documento que acredite la condición de fabricante (ISO 9001 u otro equivalente, o el código WMI, según la guía del Ministerio), fotos (placa, VIN, 3/4 delantera y trasera) y el manual de usuario. Presentarlo al Ministerio y pagar la tasa (importe por confirmar).',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Matricular] Ensayo de frenos (UN R78)', '[Matricular] Seguridad eléctrica y batería (anexo IV del 3/2014 / UN R100)', '[Matricular] Compatibilidad electromagnética (UN R10)', '[Matricular] Cinturones, anclajes, asientos y lo que ensaya Interior', '[Matricular] Masas y dimensiones, bastidor y placa del fabricante'],
+      entregable: 'Resolución de homologación individual (HIA-xxxxx) del Ministerio',
+    },
+    {
+      titulo: '[Matricular] ITV previa, tarjeta ITV, DGT y seguro',
+      detalle: 'Con la resolución, ir a una estación ITV para la inspección unitaria previa a la matriculación (comprueba que el vehículo es el del expediente y su estado), obtener la tarjeta ITV (tipo AL para L7e, por confirmar), matricular en la DGT (prototipo: a nombre del fabricante, con anotación en la tarjeta, RD 750/2010 art. 5.2), liquidar el impuesto de matriculación (los eléctricos están exentos: por confirmar) y contratar el seguro obligatorio ya como vehículo matriculado.',
+      prioridad: 'alta', semanas: 2,
+      dependeDe: ['[Matricular] Expediente: acta, ficha reducida, declaración de conformidad y manual'],
+      entregable: 'Matrícula definitiva, tarjeta ITV y póliza',
+    },
+    {
+      titulo: '[Alternativa] Vía competición o exhibición si la homologación se alarga',
+      detalle: 'Preparar en paralelo: pasaporte técnico de la RFEdA o de una federación autonómica si se quiere correr en circuitos federados (por confirmar qué categoría admitiría un eléctrico de este tipo), exhibición en ferias y eventos con las placas rojas (la DGT las admite para «exhibición pública» y para museos), y presentación a la Shell Eco-marathon u otra competición de eficiencia si el vehículo cabe en su reglamento. Ninguna de las tres impide matricular después.',
+      prioridad: 'baja', semanas: 2,
+      dependeDe: ['[Pruebas] Placas rojas para transportar y probar en vía pública'],
+      entregable: 'Nota con las tres vías, sus requisitos y fechas de eventos',
+    },
+    {
+      titulo: '[Ambos] Calendario y presupuesto de homologación',
+      detalle: 'Con los presupuestos de los laboratorios y las tasas confirmadas, un calendario de pruebas (primer rodaje en circuito) y de homologación (hasta la matrícula) con el coste por hito, y el momento en que cada departamento tiene que entregar su parte. Revisarlo cada mes y escribir en `memory/` lo que cambie.',
+      prioridad: 'alta', semanas: 1,
+      dependeDe: ['[Matricular] Elegir servicio técnico y laboratorios, con presupuesto'],
+      entregable: 'Calendario y presupuesto con hitos, actualizado cada mes',
+    },
+  ],
+  decisiones: [
+    {
+      tema: 'Categoría: L7e-CP, L7e-A2 o M1',
+      contexto: 'El Aeromóvil 1 se diseñó con mecánica de Twizy (un L7e) y objetivo de 140 km/h. Según el anexo I del Reglamento 168/2013, L7e-C exige velocidad máxima por construcción ≤ 90 km/h; L7e-A2 (dos plazas no a horcajadas, ≤ 15 kW) no tiene tope de velocidad en su definición pero lleva «requisitos adicionales» (presentación de la Comisión; texto por leer) y un vehículo cerrado que supere 90 km/h cae en ella por eliminación. En España, además, el art. 48 del Reglamento General de Circulación (extracto) limita «vehículos de tres ruedas y cuadriciclos» a 70 km/h en cualquier vía, y para conducir un L7e hace falta el permiso B. M1 es la categoría de los coches: 120 km/h en autopista, pero toda la reglamentación de turismos (2018/858) y ensayos de choque salvo lo que la homologación individual exima (por confirmar).',
+      opciones: [
+        { nombre: 'L7e-CP, con limitador a 90 km/h', pros: 'La más barata y rápida; masa (221 kg sin batería) y plazas sobran; precedente español: Silence S04 L7e (14 kW, 85 km/h, 9.800 € sin batería); 150 unidades/año en serie corta', contras: 'Velocidad por construcción ≤ 90 km/h y, en España, 70 km/h legales en carretera (por confirmar); el objetivo de 140 se queda para el circuito; motor de 20 kW continuos de la ficha no cabe (≤ 15 kW)', coste: 'El más bajo de los tres: ensayos de frenos, eléctrico, EMC, ruido, anclajes, más la instalación de componentes homologados. Importes a presupuesto' },
+        { nombre: 'L7e-A2', pros: 'Mismo límite de 15 kW, sin tope de 90 km/h en la definición; 2 plazas justas; 30 unidades/año en serie corta', contras: 'Nadie en el equipo ha leído aún los requisitos adicionales de L7e-A2; es una subcategoría pensada para quads de carretera, no para un vehículo cerrado: el servicio técnico puede discutir la clasificación; el límite de 70 km/h del RGC seguiría aplicando', coste: 'Parecido a L7e-CP más el riesgo de discusión' },
+        { nombre: 'M1 (turismo) por homologación individual', pros: 'Velocidad legal de coche; autopistas; sin discusión de categoría', contras: 'Reglamentación de turismos: ESC, frenos R13-H, airbags no, pero choque frontal y lateral salvo exención por homologación individual (por confirmar en el anexo IV del 2018/858 y el RD 750/2010); masa y coste muy superiores; años', coste: 'Varias veces el de L7e; por confirmar con un servicio técnico' },
+      ],
+      recomendacion: 'Prototipo 1 como L7e-CP con limitador a 90 km/h y motor de ≤ 15 kW continuos; los 140 km/h se demuestran en circuito con el limitador quitado. Decidir M1 o L7e-A2 para una segunda versión con los datos del prototipo 1.',
+      porQue: 'Lo que Eugenio gana es un coche matriculable en meses y no en años, con la mecánica que ya tiene. Lo que pierde es la velocidad en carretera, que la ley española ya le quita a cualquier cuadriciclo. Y nada de lo que se homologa como L7e se tira si después se va a M1: se añade.',
+      cuando: 'antes de diseñar',
+    },
+    {
+      tema: 'Vía: homologación individual, serie corta nacional o tipo europeo',
+      contexto: 'El RD 750/2010 ofrece la homologación individual (un vehículo, resolución HIA) y la de tipo nacional de series cortas (anexo III del 168/2013: 150 unidades/año para L7e-C; número e9*NKS168/2013). La de tipo europea exige conformidad de la producción y una fábrica.',
+      opciones: [
+        { nombre: 'Homologación individual (RD 750/2010, art. 4.4)', pros: 'Pensada para un vehículo; la autoridad puede eximir de actos reglamentarios si se cumplen «requisitos alternativos»; es la vía de los prototipos', contras: 'Vale para ese vehículo; cada unidad nueva repite parte del trámite', coste: 'Ensayos + tasa del Ministerio + ITV + servicio técnico; importes a presupuesto' },
+        { nombre: 'Serie corta nacional (NKS)', pros: 'Hasta 150 L7e-C al año con un solo expediente; ya es una homologación de tipo', contras: 'Exige fabricante inscrito con evaluación inicial y conformidad de la producción; más documentación; sin certificado de conformidad europeo (solo matricula en España)', coste: 'Más que la individual la primera vez; mucho menos por unidad después' },
+        { nombre: 'Homologación de tipo europea', pros: 'Se vende en toda la UE', contras: 'Fábrica, conformidad de la producción, todos los ensayos sin exenciones; fuera de escala para un prototipo', coste: 'Fuera de escala' },
+      ],
+      recomendacion: 'Individual para el prototipo 1; preparar el expediente como si fuera a ser serie corta (mismos ensayos, mejor documentados) para no repetirlos.',
+      porQue: 'La individual es la única que admite «requisitos alternativos» para un vehículo singular, y cada informe de ensayo que se guarde sirve igual para la serie corta cuando haya cinco pedidos.',
+      cuando: 'antes de diseñar',
+    },
+    {
+      tema: 'Quién es el fabricante a efectos legales',
+      contexto: 'La homologación la pide un fabricante inscrito en el Registro del Ministerio o, según la guía v1.3, el titular del vehículo si no hay fabricante inscrito. Pero los prototipos solo se matriculan a nombre del fabricante que los desarrolla (art. 5.2). Eugenio no tiene empresa de automoción.',
+      opciones: [
+        { nombre: 'Eugenio como persona física y titular', pros: 'Sin constituir nada', contras: 'Sin placas rojas (son para empresas del sector); sin WMI; la vía del titular está pensada para vehículos ya hechos, no para prototipos; responsabilidad personal', coste: '0 € de constitución' },
+        { nombre: 'Sociedad limitada (o la entidad de Luz & Humanidad) inscrita como fabricante', pros: 'Placas rojas, WMI, inscripción en el Registro, seguro de empresa, y es lo que pide el art. 5.2', contras: 'Constituir e inscribir lleva semanas y tiene gastos; obligaciones fiscales', coste: 'Constitución y gestoría; importe por confirmar' },
+        { nombre: 'Acuerdo con un fabricante ya inscrito (p. ej. un carrocero o un taller homologador) que firme como fabricante', pros: 'Rápido; conocen el trámite', contras: 'El vehículo sería suyo a efectos legales; hay que pactar la propiedad y la responsabilidad', coste: 'Por negociar' },
+      ],
+      recomendacion: 'Entidad propia inscrita como fabricante, y preguntar por escrito al Ministerio, antes, si la vía del titular (persona física) sirve para un prototipo.',
+      porQue: 'Casi todo lo que viene después (placas rojas, VIN, matrícula del prototipo, seguro) pide un fabricante con nombre; vale más abrir ese camino ahora que descubrirlo en la ITV.',
+      cuando: 'antes de fabricar',
+    },
+    {
+      tema: 'Servicio técnico y laboratorios',
+      contexto: 'Un solo servicio técnico designado firma el acta de homologación individual; los ensayos pueden repartirse entre laboratorios acreditados. Candidatos leídos: IDIADA (Tarragona; servicio técnico con todo el 168/2013 y sus actos delegados en su acreditación ENAC), INSIA (Madrid; seguridad pasiva, R16/R17/R100), CTAG (Pontevedra; R14, R17, R10, baterías ISO 12405, clima, inflamabilidad), INTA (Madrid; tramita homologaciones individuales y actúa de enlace con el Ministerio), TÜV Rheinland Ibérica (servicio técnico de homologación individual; su web solo habla de M, N y O).',
+      opciones: [
+        { nombre: 'IDIADA como servicio técnico único', pros: 'Tiene todo el 168/2013 en su alcance acreditado (anexo ENAC 35/LE2594) y pista propia', contras: 'Tarragona; precios de gran fabricante (por confirmar)', coste: 'Por confirmar' },
+        { nombre: 'INTA como tramitador + INSIA y CTAG para ensayos', pros: 'INTA e INSIA en Madrid; INTA tiene el formulario de homologación individual y lleva la relación con el Ministerio; CTAG cubre anclajes, EMC y batería', contras: 'Tres interlocutores; hay que confirmar que INTA admite categoría L en su homologación individual (su formulario no lo dice)', coste: 'Por confirmar' },
+        { nombre: 'TÜV Rheinland Ibérica', pros: 'Red de ITV propia y experiencia en individuales', contras: 'Su página de homologación individual cubre M, N y O; categoría L por confirmar', coste: 'Por confirmar' },
+      ],
+      recomendacion: 'Pedir presupuesto a los cinco con la misma hoja de requisitos y elegir con precio, plazo y cercanía; si empatan, IDIADA por el alcance.',
+      porQue: 'Nadie en el equipo sabe hoy lo que cuesta cada ensayo; con cinco respuestas sobre la misma lista se sabe en tres semanas.',
+      cuando: 'antes de probar',
+    },
+    {
+      tema: 'Cuánta seguridad pasiva se añade sin que la ley la exija',
+      contexto: 'En L7e no hay ensayo de choque obligatorio. Euro NCAP probó cuadriciclos pesados en 2014 y 2016 (Aixam, Bajaj Qute, Chatenet, Microcar): 1–2 estrellas, «protección del conductor muy baja», y pidió a los legisladores requisitos más realistas, diciendo que «cambios sencillos de diseño mejorarían mucho la seguridad con poco peso y coste». El Aeromóvil tiene un chasis tubular con arco de seguridad y montantes de acero: hay con qué trabajar.',
+      opciones: [
+        { nombre: 'Nada más que lo obligatorio', pros: 'Cero coste', contras: 'Un vehículo de 385 kg a 90 km/h con el conductor a 0,62 m del eje delantero; Euro NCAP ya ha dicho lo que pasa', coste: '0 €' },
+        { nombre: 'Simulación por elementos finitos del chasis (frontal 50 km/h, lateral, vuelco) y rediseño', pros: 'Barata frente al ensayo; enseña dónde reforzar antes de soldar', contras: 'Una simulación vale lo que valen sus hipótesis; sin ensayo no se valida', coste: 'Horas de ingeniería (ver departamento Chasis); software por confirmar' },
+        { nombre: 'Ensayo de trineo con maniquí (INSIA) del habitáculo con asiento y cinturón', pros: 'Mide lo que le pasa al ocupante con el cinturón y el asiento reclinado reales', contras: 'Hay que construir una sección de chasis para romperla', coste: 'Por confirmar con el INSIA' },
+        { nombre: 'Choque frontal completo de un prototipo', pros: 'La verdad', contras: 'Se destruye un prototipo entero', coste: 'Un prototipo + el ensayo; fuera de escala para el prototipo 1' },
+      ],
+      recomendacion: 'Simulación del chasis ahora y ensayo de trineo del habitáculo cuando el asiento y los anclajes estén definidos.',
+      porQue: 'Es lo que Euro NCAP llama «cambios sencillos»: saber dónde doblar el tubo antes de soldarlo, y comprobar con un maniquí que el cinturón sujeta a un piloto reclinado 39°. Cuesta mucho menos que un prototipo.',
+      cuando: 'antes de fabricar',
+    },
+    {
+      tema: 'Frenos: hidráulico sin ABS, con ABS, o el sistema completo del Twizy',
+      contexto: 'La ficha «Frenos» prevé discos en las cuatro ruedas, doble circuito con servo eléctrico y freno de mano eléctrico. El ABS es obligatorio solo en L3e (anexo VIII del 168/2013); para L7e-C, por confirmar. El ensayo oficial es UN R78.',
+      opciones: [
+        { nombre: 'Hidráulico de doble circuito sin ABS (ficha)', pros: 'Sencillo; pasa R78 si el reparto es correcto; el freno regenerativo hace lo normal', contras: 'Sin ABS, el regenerativo en rueda trasera con mojado pide cuidado en la calibración', coste: 'Ficha: 4 × (55 + 95 + 30) + 150 ≈ 870 € (estimación del catálogo del proyecto)' },
+        { nombre: 'Con ABS de moto o de cuadriciclo', pros: 'Más seguro en mojado; mejor en la ITV si algún día lo exigen', contras: 'Módulo, sensores de rueda y calibración; peso; integración con el regenerativo', coste: 'Por confirmar' },
+        { nombre: 'Sistema completo de Twizy de desguace', pros: 'Ya pasó R78 en un L7e con masa parecida; un tercio del precio', contras: 'Usado; hay que revisar discos y bomba; el servo del Twizy no existe (freno sin asistencia)', coste: 'Ficha: ≈ 300 € las cuatro esquinas' },
+      ],
+      recomendacion: 'Hidráulico de doble circuito sin ABS en el prototipo 1, con el regenerativo limitado hasta que la prueba propia de frenos diga cuánto admite.',
+      porQue: 'Es lo que la norma pide y lo que el presupuesto admite; el ABS se decide con los datos de frenada del circuito, no antes.',
+      cuando: 'antes de comprar',
+    },
+    {
+      tema: 'Limitador de velocidad y potencia continua',
+      contexto: 'L7e-CP exige velocidad máxima por construcción ≤ 90 km/h y potencia continua ≤ 15 kW. El inversor puede limitar las dos cosas por software; el motor de la ficha (ME1616) da 20 kW continuos.',
+      opciones: [
+        { nombre: 'Limitar por software en el inversor (velocidad y potencia) y declarar 15 kW', pros: 'Sin cambiar piezas; se quita en circuito', contras: 'El servicio técnico puede no aceptar un recorte por software como potencia nominal continua (antimanipulación del 44/2014); por confirmar', coste: '0 €' },
+        { nombre: 'Motor de ≤ 15 kW continuos (p. ej. la alternativa de 15/30 kW de la ficha) y limitador de velocidad', pros: 'La potencia continua es la del motor: sin discusión', contras: 'La alternativa de la ficha pesa 28 kg (12 más); habrá que buscar un motor de 15 kW continuos ligero', coste: 'Ficha: 850 € el PMSM industrial de 15/30 kW' },
+      ],
+      recomendacion: 'Preguntar al servicio técnico en la reunión de arranque si acepta el recorte por software; si no, motor de 15 kW continuos.',
+      porQue: 'Es una pregunta de una línea que vale 12 kg de motor; se hace antes de comprar nada.',
+      cuando: 'antes de comprar',
+    },
+    {
+      tema: 'Vía alternativa mientras no hay matrícula',
+      contexto: 'La homologación individual puede tardar meses. El prototipo puede rodar y enseñarse sin matrícula de tres maneras.',
+      opciones: [
+        { nombre: 'Circuito privado con seguro de responsabilidad civil', pros: 'Desde el primer día; sin trámite', contras: 'Solo dentro del circuito; se transporta en remolque', coste: 'Alquiler de pista + seguro; por confirmar' },
+        { nombre: 'Placas rojas del fabricante', pros: 'Permite ir por carretera a pruebas y exhibiciones con el libro-talonario', contras: 'Exige empresa del sector; seguro aparte; un año de validez', coste: 'Tasa 1.4: 20,61 € (DGT) + seguro' },
+        { nombre: 'Vehículo de competición (pasaporte técnico RFEdA) o de exhibición', pros: 'Da un marco para correr y enseñar', contras: 'Hay que encajar en un reglamento deportivo existente (por confirmar cuál); no sirve para la calle', coste: 'Licencia y pasaporte; por confirmar' },
+      ],
+      recomendacion: 'Circuito privado ya, placas rojas en cuanto exista el fabricante, y la competición solo si aparece una prueba donde el Aeromóvil encaje.',
+      porQue: 'Las dos primeras son baratas y no compiten con la homologación; la tercera es una oportunidad, no una vía.',
+      cuando: 'antes de probar',
+    },
+  ],
+  partners: [
+    { nombre: 'Ministerio de Industria y Turismo – Subdirección General de Calidad y Seguridad Industrial', tipo: 'institución', pais: 'España', web: 'https://industria.gob.es/Calidad-Industrial/vehiculos/Paginas/homologacion-vehiculos.aspx', que: 'Autoridad de homologación española: resuelve las homologaciones individuales y de serie corta, lleva el Registro de Fabricantes, publica la Guía de Reglamentación sobre Homologación de Vehículos (v1.3, dic. 2025) y el Manual de Reformas.', porQue: 'Es quien firma la resolución; hay que hablar con ellos antes de fabricar el chasis definitivo.', estado: 'por contactar', verificado: true },
+    { nombre: 'Applus IDIADA', tipo: 'laboratorio', pais: 'España', web: 'https://www.applusidiada.com/', que: 'Servicio técnico designado (ENAC 35/LE2594) con el Reglamento 168/2013 y sus actos delegados en su alcance, más UN R10, R11, R14, R16, R17, R43, R9/R41; pista de pruebas en Santa Oliva (Tarragona) y laboratorio en Granollers. idiada@idiada.com.', porQue: 'El único de la lista cuyo anexo de acreditación ENAC incluye el Reglamento 168/2013 completo con sus actos delegados, además de pista propia.', estado: 'por contactar', verificado: true },
+    { nombre: 'INSIA – Universidad Politécnica de Madrid', tipo: 'laboratorio', pais: 'España', web: 'https://insia-upm.es/en/ensayos-y-homologaciones/', que: 'Instituto de investigación del automóvil de la UPM: laboratorio de seguridad pasiva (choque, retención: UN R16, R17, R94, R100; maniquíes Hybrid III), ensayos de neumáticos, acoplamientos y estructuras; autorizado por el Ministerio para diseñar ensayos de homologación en varios reglamentos. Campus Sur UPM, Madrid; +34 91 067 88 50.', porQue: 'Está en Madrid, asesora al Ministerio y puede hacer el ensayo de trineo del habitáculo.', estado: 'por contactar', verificado: true },
+    { nombre: 'CTAG – Centro Tecnológico de Automoción de Galicia', tipo: 'laboratorio', pais: 'España', web: 'https://ctag.com/', que: 'Laboratorio acreditado por ENAC (621/LE1230, 2025): anclajes R14, reposacabezas R17, EMC UN R10, baterías de tracción ISO 12405-4 y celdas IEC 62660, vibración, clima, niebla salina, inflamabilidad. Porriño (Pontevedra).', porQue: 'Cubre con acreditación la EMC, los anclajes y la batería, que son tres de los ensayos caros.', estado: 'por contactar', verificado: true },
+    { nombre: 'INTA – Instituto Nacional de Técnica Aeroespacial', tipo: 'laboratorio', pais: 'España', web: 'https://www.inta.es/', que: 'Organismo público que tramita homologaciones individuales según el RD 750/2010 y hace de enlace con el Ministerio: formulario de solicitud público, tarifas por categoría, entrega la resolución, el informe técnico y los documentos sellados para la ITV. Torrejón de Ardoz (Madrid).', porQue: 'Es el tramitador público más cercano a Madrid; hay que confirmar que admite categoría L (su formulario no lo dice).', estado: 'por contactar', verificado: true },
+    { nombre: 'TÜV Rheinland Ibérica', tipo: 'laboratorio', pais: 'España', web: 'https://www.tuv.com/spain/es/homologaciones-individuales-de-veh%C3%ADculos-completados.html', que: 'Servicio técnico designado para homologación individual de vehículos completados (su página habla de M, N y O), con red de estaciones ITV.', porQue: 'Segunda oferta de servicio técnico; confirmar si cubren categoría L.', estado: 'por contactar', verificado: true },
+    { nombre: 'Dirección General de Tráfico (DGT)', tipo: 'institución', pais: 'España', web: 'https://sede.dgt.gob.es/es/vehiculos/tramites-para-empresas/matriculas-temporales-placas-rojas/', que: 'Matrículas temporales de empresa (placas rojas S y V) para pruebas, ensayos de investigación, transporte y exhibición; placas verdes para particulares; matriculación definitiva.', porQue: 'Sin ellos el prototipo no sale del remolque en vía pública. Tasa 1.4: 20,61 €; validez un año.', estado: 'por contactar', verificado: true },
+    { nombre: 'Veritas Gestión', tipo: 'proveedor', pais: 'España', web: 'https://veritasgestion.com/trafico/placas-rojas-verdes/', que: 'Gestoría de tráfico que tramita placas rojas y verdes y el seguro asociado (también seguros por días).', porQue: 'Para no aprender el trámite de la DGT a base de citas; su página explica bien la diferencia entre placas S, V y verdes.', estado: 'por contactar', verificado: true },
+    { nombre: 'RACE (Real Automóvil Club de España)', tipo: 'institución', pais: 'España', web: 'https://www.race.es/matriculas-verdes', que: 'Club automovilístico; propietario del Circuito del Jarama (Madrid) y editor de guías prácticas sobre matrículas temporales y el Manual de Reformas.', porQue: 'Circuito privado cerca de Madrid para las primeras pruebas; la propiedad del Jarama es conocimiento general, no comprobado en esta sesión.', estado: 'por contactar', verificado: true },
+    { nombre: 'MAPFRE', tipo: 'proveedor', pais: 'España', web: 'https://www.mapfre.es/particulares/seguros-de-coche/articulos/seguro-coche-sin-matricula/', que: 'Aseguradora; su web explica que un vehículo sin matrícula no se asegura como un coche salvo con matrícula temporal (placas verdes, 60 días) o como vehículo histórico.', porQue: 'Primera puerta a la que llamar para una póliza de responsabilidad civil de pruebas; probablemente derive a un corredor especializado.', estado: 'por contactar', verificado: true },
+    { nombre: 'Euro NCAP', tipo: 'institución', pais: 'Bélgica', web: 'https://www.euroncap.com/', que: 'Programa europeo de ensayos de choque; probó cuadriciclos pesados en 2014 y 2016 (1–2 estrellas) y publicó los protocolos y resultados.', porQue: 'Referencia, no proveedor: sus informes dicen dónde fallan los cuadriciclos y son la base de la decisión de seguridad pasiva.', estado: 'por contactar', verificado: true },
+    { nombre: 'Silence Urban Ecomobility', tipo: 'fabricante', pais: 'España', web: 'https://www.silence.eco/es', que: 'Fabricante de Barcelona del S04 Nanocar, cuadriciclo eléctrico homologado en L6e (6 kW, 45 km/h) y L7e (14 kW, 85 km/h), con baterías extraíbles; vendido por Nissan en varios países europeos.', porQue: 'Es el precedente español más reciente de un L7e eléctrico homologado desde cero; su experiencia con laboratorios y Ministerio vale más que cualquier guía.', estado: 'por contactar', verificado: true },
+    { nombre: 'Hurtan Motor', tipo: 'fabricante', pais: 'España', que: 'Fabricante artesanal de Granada que homologa y matricula coches de serie muy corta desde hace tres décadas (Grand Albaycín sobre base Mazda MX-5).', porQue: 'Saben cómo se homologa un coche hecho a mano en España; una conversación de una hora ahorra meses. Web no comprobada en esta sesión.', estado: 'por contactar', verificado: false },
+    { nombre: 'Real Federación Española de Automovilismo (RFEdA)', tipo: 'institución', pais: 'España', que: 'Federación deportiva: licencias, pasaporte técnico de vehículos de competición y reglamentos de las pruebas.', porQue: 'La vía de competición si la homologación se alarga. Web no comprobada en esta sesión.', estado: 'por contactar', verificado: false },
+    { nombre: 'Centro Zaragoza', tipo: 'laboratorio', pais: 'España', que: 'Instituto de investigación de las aseguradoras (Pedrola, Zaragoza): ensayos de choque a baja velocidad, reparabilidad, seguridad.', porQue: 'Alternativa al INSIA para un ensayo de choque parcial a precio de aseguradora. Web no comprobada en esta sesión.', estado: 'por contactar', verificado: false },
+    { nombre: 'AEDIVE', tipo: 'comunidad', pais: 'España', que: 'Asociación empresarial para el desarrollo de la movilidad eléctrica en España; agrupa fabricantes, cargadores y servicios.', porQue: 'Contactos con fabricantes pequeños de L6e/L7e que ya han pasado por el Ministerio. Web no comprobada en esta sesión.', estado: 'por contactar', verificado: false },
+  ],
+  mensajes: [
+    {
+      para: 'Ministerio de Industria y Turismo – Subdirección General de Calidad y Seguridad Industrial', canal: 'correo', idioma: 'es',
+      asunto: 'Consulta previa: homologación individual de un prototipo de cuadriciclo pesado eléctrico (L7e-CP)',
+      cuerpo: 'Estimados señores:\n\nEstamos desarrollando en [ciudad] el Aeromóvil 1, un vehículo eléctrico ligero de cuatro ruedas de dos plazas (≈ 221 kg en orden de marcha sin batería, batería de 27 kWh, motor de 15 kW continuos), que queremos homologar individualmente conforme al Real Decreto 750/2010 como L7e-CP (Reglamento (UE) 168/2013).\n\nAntes de fabricar el chasis definitivo nos gustaría confirmar con ustedes:\n1. Si la clasificación L7e-CP es la adecuada para un vehículo cerrado de dos plazas en tándem con velocidad limitada por construcción a 90 km/h, o si procede L7e-A2.\n2. Si, no estando aún inscritos como fabricante, podemos solicitar la homologación individual como titular del vehículo (guía v1.3, apartado de homologación individual) o si para un prototipo es necesaria la inscripción previa en el Registro de Fabricantes (art. 5.2 del RD 750/2010).\n3. Qué actos reglamentarios del anexo II del Reglamento 168/2013 admiten requisitos alternativos para un vehículo singular y cuáles exigen ensayo.\n4. Si aceptan como potencia nominal continua la limitación por software del inversor.\n5. Las tasas aplicables y el plazo habitual de resolución.\n\nAdjuntamos [ficha reducida provisional y planos].\n\nAtentamente,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Confirmación de la categoría (L7e-CP o L7e-A2)', 'Si vale la vía del titular sin fabricante inscrito para un prototipo', 'Qué actos admiten requisitos alternativos y cuáles exigen ensayo', 'Si aceptan la limitación de potencia por software', 'Tasas y plazo'],
+    },
+    {
+      para: 'Applus IDIADA', canal: 'correo', idioma: 'es',
+      asunto: 'Presupuesto: homologación individual de un prototipo L7e-CP eléctrico (ensayos y servicio técnico)',
+      cuerpo: 'Buenos días,\n\nEstamos construyendo en [ciudad] el primer prototipo de un vehículo eléctrico ligero de cuatro ruedas, categoría L7e-CP: 3,94 m, ≈ 385 kg con batería de 27 kWh (≈ 221 kg en orden de marcha sin batería), motor de 15 kW continuos / 32 kW de pico, 96 V, chasis tubular de aluminio con arco de seguridad de acero, carrocería de composite, puertas de ala de gaviota, dos plazas en tándem. Queremos homologarlo individualmente (RD 750/2010).\n\n¿Podrían enviarnos un presupuesto orientativo, con plazo, de: actuación como servicio técnico para la homologación individual; ensayo de frenos (UN R78); seguridad eléctrica (anexo IV del Reglamento 3/2014 / UN R100); EMC (UN R10); ruido (UN R9); anclajes de cinturón (UN R14); velocidad máxima y potencia (Reglamento 134/2014, anexo X); y comprobaciones de instalación de luces, cristales, espejos, neumáticos, masas y dimensiones? Indíquennos también qué ensayos se evitan presentando certificados de componentes homologados, y el coste de media jornada de pista para pruebas propias.\n\nAdjuntamos [hoja de requisitos y planos].\n\nMuchas gracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Presupuesto y plazo como servicio técnico de homologación individual', 'Precio por ensayo: R78, seguridad eléctrica/R100, R10, R9, R14, anexo X del 134/2014', 'Qué ensayos se evitan con certificados de componentes', 'Precio de media jornada de pista'],
+    },
+    {
+      para: 'INSIA – Universidad Politécnica de Madrid', canal: 'correo', idioma: 'es',
+      asunto: 'Consulta: servicio técnico, ensayo de trineo y asesoría para un prototipo L7e-CP',
+      cuerpo: 'Buenos días,\n\nEstamos construyendo en [ciudad] el Aeromóvil 1, un cuadriciclo pesado eléctrico (L7e-CP) de dos plazas en tándem con el piloto reclinado unos 39°, chasis tubular de aluminio y arco de seguridad de acero. Queremos homologarlo individualmente y, aunque la categoría no exige ensayo de choque, hacer un ensayo de trineo del habitáculo con maniquí para validar asiento, cinturón y anclajes.\n\nNos gustaría saber: si pueden actuar como servicio técnico en la homologación individual de un vehículo de categoría L o, si no, en qué ensayos pueden intervenir; el presupuesto y plazo orientativos de un ensayo de trineo frontal a [50] km/h con Hybrid III del 50 y del 95 sobre una sección de chasis con asiento y cinturón; y si ofrecen asesoría previa sobre la posición de los anclajes con un asiento reclinado.\n\nAdjuntamos [planos del habitáculo].\n\nMuchas gracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Si pueden ser servicio técnico para categoría L o en qué ensayos intervienen', 'Presupuesto y plazo de un ensayo de trineo con Hybrid III 50 y 95', 'Asesoría previa sobre anclajes con asiento reclinado'],
+    },
+    {
+      para: 'CTAG – Centro Tecnológico de Automoción de Galicia', canal: 'correo', idioma: 'es',
+      asunto: 'Presupuesto: EMC (UN R10), anclajes (UN R14) y batería para un prototipo L7e eléctrico',
+      cuerpo: 'Buenos días,\n\nEstamos construyendo el primer prototipo de un vehículo eléctrico ligero de cuatro ruedas (L7e-CP, ≈ 385 kg, 96 V, batería de 27 kWh, inversor de 400 A, cargador de 3,3 kW) para homologación individual. Hemos visto su anexo de acreditación ENAC 621/LE1230 y nos gustaría un presupuesto orientativo, con plazo, de: ensayo de EMC del vehículo completo (UN R10); ensayo de anclajes de cinturón (UN R14, dos plazas) sobre el chasis o una sección; ensayos de la batería de tracción (ISO 12405-4 y, si lo ofrecen, UN R100 parte II); e inflamabilidad de los materiales del habitáculo (ISO 3795). Indíquennos qué muestras necesitan en cada caso.\n\nMuchas gracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Presupuesto y plazo de R10 vehículo completo', 'R14 en dos plazas y qué muestra necesitan', 'Ensayos de batería (ISO 12405-4, R100 parte II si lo ofrecen)', 'Inflamabilidad ISO 3795 de tapizados'],
+    },
+    {
+      para: 'INTA – Instituto Nacional de Técnica Aeroespacial', canal: 'correo', idioma: 'es',
+      asunto: 'Consulta: homologación individual de un vehículo de categoría L7e (prototipo eléctrico)',
+      cuerpo: 'Buenos días,\n\nHemos visto su formulario de solicitud de homologación individual conforme al RD 750/2010. Estamos desarrollando en [ciudad] un prototipo de cuadriciclo pesado eléctrico (L7e-CP, dos plazas, ≈ 221 kg en orden de marcha sin batería, 15 kW continuos) y querríamos saber si tramitan homologaciones individuales de vehículos de categoría L, qué ensayos realizan ustedes y cuáles subcontratan, las tarifas por categoría que menciona el formulario y el plazo habitual desde la entrega del vehículo hasta la resolución. También si es posible una reunión previa para revisar la documentación antes de presentar la solicitud.\n\nMuchas gracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Si tramitan homologación individual de categoría L', 'Qué ensayos hacen y cuáles subcontratan', 'Tarifas por categoría y plazo', 'Reunión previa'],
+    },
+    {
+      para: 'TÜV Rheinland Ibérica', canal: 'correo', idioma: 'es',
+      asunto: 'Consulta: servicio técnico para homologación individual de un cuadriciclo L7e eléctrico',
+      cuerpo: 'Buenos días,\n\nSu página de homologaciones individuales de vehículos completados habla de las categorías M, N y O. Estamos desarrollando un prototipo de cuadriciclo pesado eléctrico (categoría L7e-CP, Reglamento (UE) 168/2013) y querríamos saber si actúan como servicio técnico designado para la homologación individual de vehículos de categoría L, qué ensayos pueden realizar o coordinar y un presupuesto y plazo orientativos.\n\nMuchas gracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Si cubren categoría L como servicio técnico', 'Ensayos que realizan o coordinan', 'Presupuesto y plazo orientativos'],
+    },
+    {
+      para: 'Veritas Gestión', canal: 'correo', idioma: 'es',
+      asunto: 'Placas rojas y seguro para un prototipo de vehículo eléctrico sin matricular',
+      cuerpo: 'Buenos días,\n\nSomos [entidad], en proceso de inscripción como fabricante de vehículos. Tenemos un prototipo de cuadriciclo eléctrico sin matricular que necesitamos mover por carretera a pruebas y exhibiciones. ¿Podrían indicarnos qué documentación necesitan para tramitar la matrícula temporal de empresa (placas rojas S), el coste de su gestión, y qué seguro de responsabilidad civil ofrecen para ese permiso y, mientras llega, para pruebas en circuito privado de un vehículo sin matrícula?\n\nGracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Documentación para placas rojas S', 'Coste de la gestión', 'Seguro para placas rojas y para pruebas en circuito'],
+    },
+    {
+      para: 'RACE (Real Automóvil Club de España)', canal: 'correo', idioma: 'es',
+      asunto: 'Alquiler de pista para pruebas de un prototipo eléctrico sin matricular (Circuito del Jarama)',
+      cuerpo: 'Buenos días,\n\nEstamos desarrollando un prototipo de vehículo eléctrico ligero de cuatro ruedas (≈ 385 kg, 90–140 km/h) y necesitamos una pista cerrada para las primeras pruebas de rodaje, frenada y estabilidad. ¿Podrían indicarnos el precio de media jornada en día laborable para un solo vehículo, los requisitos de seguro que exigen para un prototipo sin matricular ni homologar, si disponen de box con toma de 230 V para cargar (3,3 kW), la presencia obligatoria de personal de pista o ambulancia, y las fechas disponibles en [mes]?\n\nGracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Precio de media jornada para un vehículo', 'Requisitos de seguro para prototipo sin matricular', 'Box con 230 V', 'Personal obligatorio y fechas'],
+    },
+    {
+      para: 'Silence Urban Ecomobility', canal: 'correo', idioma: 'es',
+      asunto: 'Petición de consejo: homologación L7e de un prototipo eléctrico (proyecto sin ánimo de lucro)',
+      cuerpo: 'Buenos días,\n\nSomos un proyecto de [ciudad] que está construyendo el Aeromóvil 1, un cuadriciclo eléctrico de dos plazas muy aerodinámico con paneles solares, que queremos homologar como L7e-CP en España. Ustedes han pasado por ese camino con el S04. No pedimos nada comercial: solo media hora de conversación con quien llevó la homologación para saber con qué servicio técnico trabajaron, qué ensayos resultaron más largos o caros de lo previsto, y qué harían distinto. A cambio compartiremos con gusto lo que aprendamos y los planos abiertos del proyecto ([web]).\n\nMuchas gracias por su tiempo,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Media hora de conversación con quien llevó la homologación', 'Qué servicio técnico usaron', 'Qué ensayos fueron más largos o caros', 'Qué harían distinto'],
+    },
+    {
+      para: 'Hurtan Motor', canal: 'correo', idioma: 'es',
+      asunto: 'Petición de consejo: homologar un vehículo hecho a mano en España',
+      cuerpo: 'Buenos días,\n\nSomos un proyecto de [ciudad] que está construyendo un prototipo de vehículo eléctrico ligero de dos plazas y vamos a homologarlo individualmente en España. Ustedes llevan treinta años homologando coches artesanales; nos gustaría pedirles media hora de conversación sobre cómo organizan el expediente, con qué servicio técnico trabajan, cómo gestionan la condición de fabricante y el número de bastidor, y qué errores evitar. Compartiremos lo que aprendamos de forma abierta.\n\nMuchas gracias,\n[nombre]\n[entidad]\n[teléfono]',
+      quePedimos: ['Media hora de conversación', 'Servicio técnico con el que trabajan', 'Cómo gestionan la condición de fabricante y el VIN', 'Errores a evitar'],
+    },
+  ],
+  referencias: [
+    { titulo: 'Reglamento (UE) 168/2013 (texto oficial, EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg/2013/168/oj', nota: 'La ley marco de homologación de vehículos de dos y tres ruedas y cuadriciclos.' },
+    { titulo: 'Reglamento 168/2013, anexo I: criterios de clasificación (L7e-A, L7e-B, L7e-C)', url: 'https://legislation.gov.uk/eur/2013/168/annex/I/2016-01-01', nota: 'L7e-C: ≤ 15 kW continuos, ≤ 90 km/h por construcción, habitáculo cerrado accesible por ≤ 3 lados; L7e-CP ≤ 4 plazas. L7e-A2: 2 plazas no a horcajadas, ≤ 15 kW.' },
+    { titulo: 'Reglamento 168/2013, artículo 5: masa en orden de marcha', url: 'https://legislation.gov.uk/eur/2013/168/article/5/2013-01-15', nota: 'Excluye el conductor (75 kg), el pasajero y, en eléctricos, las baterías de tracción. El Aeromóvil queda en ≈ 221 kg de 450 posibles.' },
+    { titulo: 'Reglamento 168/2013, anexos II (requisitos), III (series cortas) y IV', url: 'https://legislation.gov.uk/eur/2013/168/annexes/adopted?view=plain', nota: 'Anexo II: la lista de requisitos por categoría. Anexo III: 150 L7e-C al año en serie corta (30 para L7e-A). Anexo IV: ABS obligatorio solo en L3e; encendido automático de luces y dispositivo de curva seguro para L1e–L7e.' },
+    { titulo: 'Reglamento 168/2013, anexo VI: límites de ruido', url: 'https://www.legislation.gov.uk/eur/2013/168/annex/VI/data.pdf', nota: '80 dB(A) para L7e-C según UN R9.' },
+    { titulo: 'Reglamento Delegado (UE) 3/2014: seguridad funcional', url: 'https://eur-lex.europa.eu/eli/reg_del/2014/3/oj/eng', nota: 'Anexos III frenos, IV seguridad eléctrica, VII cristales y desempañado, VIII mandos y testigos, IX luces, X visión trasera, XII cinturones, XIII asientos, XIV dirección, XV neumáticos, XVII ocupantes y puertas, XVIII potencia y velocidad, XIX estructura.' },
+    { titulo: 'Reglamento 3/2014, capítulo II (artículos 3–23)', url: 'https://www.legislation.gov.uk/eur/2014/3/chapter/II/data.html', nota: 'Qué artículo y anexo trata cada tema; las referencias a L1–L7 de los reglamentos UN se leen como L1e–L7e.' },
+    { titulo: 'Reglamento Delegado (UE) 44/2014: construcción', url: 'https://eur-lex.europa.eu/eli/reg_del/2014/44/oj', nota: 'Antimanipulación, antirrobo, salientes, masas y dimensiones, OBD, placa de matrícula. Dirección oficial EUR-Lex (ELI); texto no abierto en esta sesión.' },
+    { titulo: 'Reglamento Delegado (UE) 134/2014: medio ambiente y propulsión', url: 'https://www.legislation.gov.uk/id/eur/2014/134', nota: 'Ensayos de ruido, velocidad máxima, par y potencia continua (anexo X).' },
+    { titulo: 'Reglamento de Ejecución (UE) 901/2014: requisitos administrativos (categoría L)', url: 'https://www.legislation.gov.uk/eur/2014/901/resources', nota: 'Modelos de ficha de características, certificados y numeración de homologación de categoría L. Nota: el Reglamento 2020/683 que se cita a veces es el equivalente para turismos y camiones (2018/858), no para L.' },
+    { titulo: 'Reglamento (UE) 2018/858: homologación de turismos (M1) — por si se va a M1', url: 'https://eur-lex.europa.eu/eli/reg/2018/858/oj?locale=es', nota: 'Homologación individual de M1 en el anexo IV, apéndice 2; las exenciones de ensayos de choque están por confirmar.' },
+    { titulo: 'Real Decreto 750/2010 (texto consolidado, BOE)', url: 'https://boe.es/buscar/pdf/2010/BOE-A-2010-9994-consolidado.pdf', nota: 'Art. 4.4 homologación individual y requisitos alternativos; art. 5 inspección en ITV y 5.2 prototipos a nombre del fabricante; art. 7.3 lo que se entrega al servicio técnico; anexo II (categoría L), apéndice 4 homologación individual HIA.' },
+    { titulo: 'Guía de Reglamentación sobre Homologación de Vehículos v1.3 (Ministerio, dic. 2025)', url: 'https://industria.gob.es/Calidad-Industrial/vehiculos/InfoAdicionalHomologacion/Gu%C3%ADa%20de%20Reglamentaci%C3%B3n%20sobre%20Homologaci%C3%B3n%20de%20veh%C3%ADculos%20v1.3.pdf', nota: 'Homologación individual pp. 15–16 (quién, documentos, inspección física por el servicio técnico); no trata tasas ni seguros.' },
+    { titulo: 'Resolución que aprueba la 7.ª revisión del Manual de Reformas de Vehículos (2022)', url: 'https://industria.gob.es/Calidad-Industrial/vehiculos/Documents/Resoluci%C3%B3n%20Revisi%C3%B3n%207%20Manual%20Reformas%20-%20acc.pdf', nota: 'El Manual de Reformas aplica a vehículos ya matriculados que se modifican; para el prototipo solo importa si se parte de un Twizy matriculado.' },
+    { titulo: 'Manual de Reformas de Importancia (copia en la web de ITV TÜV Rheinland)', url: 'https://itv-tuvrheinland.es/files/manual-reformas-importancia.pdf', nota: 'Para consulta rápida de códigos de reforma.' },
+    { titulo: 'Reglamento General de Vehículos, RD 2822/1998 (consolidado, BOE)', url: 'https://www.boe.es/eli/es/rd/1998/12/23/2822/con', nota: 'Permisos temporales de circulación (art. 44 y anexo XVIII), matriculación, ITV.' },
+    { titulo: 'Reglamento General de Circulación, RD 1428/2003 (consolidado, BOE)', url: 'https://www.boe.es/eli/es/rd/2003/11/21/1428/con', nota: 'Art. 38 (autopistas y autovías) y art. 48 (límites de velocidad; el extracto consultado da 70 km/h para cuadriciclos: confirmar aquí).' },
+    { titulo: 'Extracto del art. 48 RGC: límites de velocidad por tipo de vehículo', url: 'https://papelea.com/es/leyes/reglamento-general-de-circulacion/titulo-ii_capitulo-ii_seccion-1-limites-de-velocidad', nota: '«Vehículos de tres ruedas y cuadriciclos: 70 km/h»; cuadriciclos ligeros 45 km/h. Fuente secundaria; verificar en el BOE.' },
+    { titulo: 'Cómo conducir un cuadriciclo no ligero en España (practicatest)', url: 'https://practicatest.com/informacion/normativa-de-trafico/como-conducir-cuadriciclo-no-ligero', nota: 'Permiso B, puede circular por autopista y autovía, 70 km/h. Fuente secundaria.' },
+    { titulo: 'DGT: matriculación temporal para empresas (placas rojas)', url: 'https://sede.dgt.gob.es/es/vehiculos/tramites-para-empresas/matriculas-temporales-placas-rojas/', nota: 'Fabricantes, carroceros, importadores, laboratorios oficiales; pruebas o ensayos de investigación, transporte, exhibición; libro-talonario; tasa 1.4 de 20,61 €; un año.' },
+    { titulo: 'RACE: matrículas verdes (temporal de particulares)', url: 'https://www.race.es/matriculas-verdes', nota: '60 días, para vehículos pendientes de matricular que ya tienen ITV; tasa 20,61 €. No sirve para un prototipo.' },
+    { titulo: 'Veritas Gestión: placas rojas S y V frente a placas verdes', url: 'https://veritasgestion.com/trafico/placas-rojas-verdes/', nota: 'Tabla clara de quién puede pedir cada una y para qué; gestionan el seguro.' },
+    { titulo: 'MAPFRE: seguro de coche sin matrícula', url: 'https://www.mapfre.es/particulares/seguros-de-coche/articulos/seguro-coche-sin-matricula/', nota: 'Un vehículo sin matrícula no se asegura como un coche; excepciones: temporal (placas verdes) e históricos.' },
+    { titulo: 'INTA: solicitud de homologación individual (formulario)', url: 'https://www.inta.es/export/sites/default/.galleries/Galeria-PDF-Plataformas/Solicitud-de-HIndividual-V26.pdf', nota: 'Documentos que piden (ficha reducida, fotos de placa y VIN, 3/4 delantera y trasera), tarifas por categoría, pasos hasta la ITV.' },
+    { titulo: 'TÜV Rheinland Ibérica: homologaciones individuales de vehículos completados', url: 'https://www.tuv.com/spain/es/homologaciones-individuales-de-veh%C3%ADculos-completados.html', nota: 'Servicio técnico designado; exige fabricante inscrito en el registro del Ministerio y conformidad de la producción (para completados M, N, O).' },
+    { titulo: 'Applus IDIADA: anexo técnico de acreditación ENAC 35/LE2594', url: 'https://www.enac.es/documents/7020/31cbe02f-803a-439f-98c2-1e92454877dc', nota: 'Alcance como servicio técnico: 168/2013 y actos delegados, R10, R11, R14, R16, R17, R43, R9, R41…' },
+    { titulo: 'CTAG: anexo técnico de acreditación ENAC 621/LE1230 (2025)', url: 'https://ctag.com/wp-content/uploads/2025/10/621_LE1230.pdf', nota: 'R14, R17, R10, baterías ISO 12405-4, clima, vibración, inflamabilidad.' },
+    { titulo: 'INSIA-UPM: ensayos y homologaciones', url: 'https://insia-upm.es/en/ensayos-y-homologaciones/', nota: 'Autorizado por el Ministerio en varios reglamentos; neumáticos acreditados ENAC; contacto.' },
+    { titulo: 'INSIA-UPM: ensayos de seguridad pasiva', url: 'https://upm.es/recursosidi/offers-resources/servicios-cientifico-tecnologico/servicios-servicios-cientifico-tecnologico/ensayos-de-seguridad-pasiva/?print=pdf', nota: 'Choque y retención: R16, R17, R94, R100; maniquíes Hybrid III 50 y 95.' },
+    { titulo: 'Euro NCAP, 6 abril 2016: «Quadricycle safety at a standstill»', url: 'https://www.euroncap.com/nl/pers/persberichten/quadricycle-safety-at-a-standstill', nota: 'Aixam Crossover GTR 1★, Bajaj Qute 1★, Chatenet CH30 2★, Microcar M.GO 1★; «cambios sencillos de diseño mejorarían mucho la seguridad con poco peso y coste».' },
+    { titulo: 'ETSC: Euro NCAP says no progress on quadricycles', url: 'https://etsc.eu/euro-ncap-says-no-progress-on-quadricycles/', nota: 'Resumen del Consejo Europeo de Seguridad en el Transporte sobre los mismos ensayos.' },
+    { titulo: 'Silence S04: el L7e eléctrico español (Híbridos y Eléctricos)', url: 'https://www.hibridosyelectricos.com/coches/cuesta-8800-se-fabrica-en-espana-pero-es-nissan-quien-vende-este-rival-citroen-ami-en-europa_80508_102.html', nota: 'L6e 6 kW / 45 km/h desde 8.800 €; L7e 14 kW / 85 km/h desde 9.800 €, sin batería; fabricado en Barcelona.' },
+  ],
+  revisado: { fecha: '2026-11-06', por: 'bot de interior, accesos y homologación (Claude)' },
 };
