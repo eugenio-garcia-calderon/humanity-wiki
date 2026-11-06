@@ -159,15 +159,7 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar }: {
         <p className="-mt-2 text-xs text-slate-500">La cubierta es el techo de la carrocería baja; de ahí para arriba es cúpula de cristal.</p>
         <Deslizador id="a1-mo" etiqueta="Forma del morro" valor={P.morroA1} min={0} max={1} paso={0.05} mostrar={P.morroA1 < 0.35 ? 'afilado' : P.morroA1 > 0.65 ? 'romo' : 'como el SZEmission'} alCambiar={v => set('morroA1', v)} />
         <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
-        <div className="flex gap-1.5" role="radiogroup" aria-label="Parabrisas">
-          {([['burbuja', 'Parabrisas burbuja'], ['plano', 'Parabrisas plano']] as ['burbuja' | 'plano', string][]).map(([k, n]) => (
-            <Button key={k} variant="outline" role="radio" aria-checked={P.parabrisas === k} onClick={() => set('parabrisas', k)}
-              className={cn('flex-1 px-3 py-1.5 text-xs normal-case tracking-normal', P.parabrisas === k && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
-          ))}
-        </div>
-        <p className="-mt-2 text-xs text-slate-500">{P.parabrisas === 'plano'
-          ? 'Luna casi plana y estrecha, solo para el piloto (como el VW XL1), que sube del capó con la curva suave del Aptera. Detrás de los hombros, la cúpula de siempre.'
-          : 'La cúpula del SZEmission: el parabrisas es parte de una sola burbuja.'}</p>
+        <p className="-mt-2 text-xs text-slate-500">Parabrisas plano y estrecho (como el VW XL1) con montantes inclinados; techo solar plano que baja poco a poco hasta la cola (como el Aptera), con una ventanilla a cada lado.</p>
         <Deslizador id="a1-c0" etiqueta="Cúpula: dónde empieza" valor={P.cupX0} min={0.08} max={0.35} paso={0.005} mostrar={`${m2(P.cupX0 * P.L)} del morro`} alCambiar={v => set('cupX0', v)} />
         <Deslizador id="a1-c1" etiqueta="Cúpula: dónde acaba" valor={P.cupX1} min={0.70} max={0.995} paso={0.005} mostrar={`${m2((1 - P.cupX1) * P.L)} de la cola`} alCambiar={v => set('cupX1', v)} />
         <Deslizador id="a1-cw" etiqueta="Anchura de la cúpula" valor={P.cupW} min={0.35} max={0.75} paso={0.01} mostrar={m2(P.cupW * P.W)} alCambiar={v => set('cupW', v)} />

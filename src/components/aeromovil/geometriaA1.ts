@@ -66,7 +66,8 @@ const SZ = {
   // Ronda 3: parabrisas más vertical (≈47°) y envolvente, corona alta hasta
   // pasada la mitad del coche (el codo de la bajada en u ≈ 0,58), cola en
   // labio ancho (0,33 del semiancho) y no en punta.
-  cupTop: suave([[0.19, 0.66], [0.22, 0.78], [0.26, 0.86], [0.30, 0.92], [0.35, 0.97], [0.40, 0.99], [0.46, 1.0], [0.52, 0.985], [0.58, 0.955], [0.65, 0.88], [0.69, 0.82], [0.78, 0.69], [0.87, 0.59], [0.93, 0.52], [1, 0.43]]),
+  // Techo plano sobre la cabina y bajada constante hasta la cola, como el Aptera.
+  cupTop: suave([[0.19, 0.66], [0.22, 0.78], [0.26, 0.86], [0.30, 0.92], [0.36, 0.985], [0.42, 1.0], [0.55, 1.0], [0.62, 0.93], [0.70, 0.82], [0.78, 0.71], [0.87, 0.59], [0.93, 0.52], [1, 0.43]]),
   cupHw: suave([[0.19, 0.40], [0.25, 0.44], [0.30, 0.46], [0.45, 0.48], [0.60, 0.45], [0.75, 0.33], [0.90, 0.15], [0.97, 0.03], [1, 0.0]]),
   cupX0: 0.19, cupX1: 0.99, cupW: 0.48,
   // Dónde está el ancho máximo de la sección, en fracción de la altura de la carrocería (0,5 = a media altura).
@@ -132,19 +133,29 @@ export function crearModeloA1(P: Parametros) {
   const uC0 = P.cupX0, uC1 = P.cupX1;
   const uMedido = (u: number) => SZ.cupX0 + (u - uC0) / (uC1 - uC0) * (SZ.cupX1 - SZ.cupX0);
   const hundido = 0.06 * Hb / 0.56;           // cuánto se hunde la base en la carrocería
-  // Parabrisas plano (2026-11-06, Eugenio, con fotos del VW XL1 y del
-  // Aptera): «que sea plano el parabrisas como el XL1 pero más estrecho, ya
-  // que solo tiene que albergar al piloto… inspírate en el parabrisas del
-  // Aptera en cuanto a la curva que tiene». Entre la base del parabrisas (uC0)
-  // y su borde de arriba (uW1) la cúpula: (1) sube casi en línea recta, con
-  // la leve curva convexa del Aptera, en vez de abombarse; (2) su sección es
-  // un trapecio de esquinas redondeadas (exponente alto + caída hacia dentro),
-  // o sea un cristal casi plano de lado a lado; (3) es un 20 % más estrecha.
-  // Detrás de los hombros del piloto vuelve a ser la cúpula de siempre.
-  const plano = P.parabrisas === 'plano';
+  // Cabina (2026-11-06, Eugenio, con fotos del VW XL1 y del Aptera): «que sea
+  // plano el parabrisas como el XL1 pero más estrecho, ya que solo tiene que
+  // albergar al piloto… inspírate en el parabrisas del Aptera en cuanto a la
+  // curva que tiene… la unión entre la ventanilla lateral y el parabrisas,
+  // como el Aptera o el XL1, que tiene una barra… que el techo sea solar, no
+  // transparente, con ventanilla izquierda y derecha y el resto paneles
+  // solares… un techito que va bajando poco a poco hasta la cola, plano y
+  // lleno de paneles».
+  //
+  // La cúpula es una sola superficie (u a lo largo, θ alrededor: 0 costado
+  // izquierdo, π/2 techo, π costado derecho) con sección en trapecio de
+  // esquinas redondeadas: techo plano y costados que caen un poco hacia
+  // dentro. De uC0 a uW1 es el parabrisas: sube casi recto con la panza
+  // suave del Aptera, un 20 % más estrecho que la cabina. Los montantes van
+  // inclinados, de la esquina de abajo del parabrisas (uBase) a su borde de
+  // arriba (uW1): a la altura u, el parabrisas ocupa θ > thPilar(u) y la
+  // ventanilla θ < thPilar(u). Detrás del montante, hasta el arco principal,
+  // las ventanillas (cristal, en las puertas); todo lo demás es panel solar.
   const uW1 = Math.min(uC1 - 0.1, uC0 + 0.17);                // borde de arriba del parabrisas
+  const uBase = uC0 + 0.045;                                   // esquina de abajo del montante
+  const thVentana = 0.24 * Math.PI;                            // donde el costado se vuelve techo
+  const thPilar = (u: number) => Math.min(thVentana, Math.max(0, thVentana * (u - uBase) / (uW1 - uBase)));
   const pesoPlano = (u: number) => {
-    if (!plano || u < uC0) return 0;
     if (u <= uW1) return 1;
     const t = Math.min(1, (u - uW1) / 0.10); return 1 - t * t * (3 - 2 * t);
   };
@@ -155,19 +166,17 @@ export function crearModeloA1(P: Parametros) {
     let top = Math.max(deck + 0.004, base + (yCupula(SZ.cupTop(um)) - base) * cierre);
     let hw = Math.max(0.004, SZ.cupHw(um) * (SZ.W / 2) * (P.W / SZ.W) * (P.cupW / SZ.cupW) * cierre);
     const w = pesoPlano(u);
-    if (w > 0) {
-      if (u <= uW1) {
-        // De perfil: casi recto de la base al borde de arriba, con la panza suave del Aptera.
-        const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(SZ.cupTop(uMedido(uW1))), t = (u - uC0) / (uW1 - uC0);
-        top = Math.max(deck + 0.004, deck0 + (topW - deck0) * (1 - Math.pow(1 - t, 1.25)));
-      }
-      hw *= 1 - 0.20 * w;
+    if (u <= uW1) {
+      // De perfil: casi recto de la base al borde de arriba, con la panza suave del Aptera.
+      const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(SZ.cupTop(uMedido(uW1))), t = Math.max(0, (u - uC0) / (uW1 - uC0));
+      top = Math.max(deck + 0.004, deck0 + (topW - deck0) * (1 - Math.pow(1 - t, 1.25)));
     }
+    hw *= 1 - 0.20 * w;
     return { s: 1, x: xDeU(u), zc: base, top, bot: base, hw };
   };
-  // Exponente de la sección y cuánto caen hacia dentro los costados (0 = verticales).
-  const ncDe = (u: number) => 2.2 + 2.6 * pesoPlano(u);
-  const caidaDe = (u: number) => 0.28 * pesoPlano(u);
+  // Exponente de la sección (techo plano) y cuánto caen hacia dentro los costados (0 = verticales).
+  const ncDe = (u: number) => 4.4 + 0.4 * pesoPlano(u);
+  const caidaDe = (u: number) => 0.12 + 0.16 * pesoPlano(u);
   const uDeXC = (x: number) => (xn - x) / L;
   const secC = (f: Seccion, th: number, off = 0): P3 => {
     const u = uDeXC(f.x), NC = ncDe(u), k = caidaDe(u);
@@ -350,8 +359,12 @@ export function crearModeloA1(P: Parametros) {
     { nombre: 'Paneles solares del lomo izq.', piel: 'solar', u0: uSolar0, u1: 0.90, t0: 0.19 * Math.PI, t1: 0.38 * Math.PI },
     { nombre: 'Paneles solares del lomo der.', piel: 'solar', u0: uSolar0, u1: 0.90, t0: 0.62 * Math.PI, t1: 0.81 * Math.PI },
   ];
+  // La cúpula es panel solar salvo el parabrisas y las dos ventanillas.
+  const uVent1 = Math.min(uC1 - 0.25, uDeX(xH) + 0.09);          // las ventanillas pasan del arco principal: la parte de atrás es fija (custodia)
   const zonasCupula: ZonaPiel[] = [
-    { nombre: 'Paneles solares sobre el maletero', piel: 'solar', u0: uCabina1 + 0.02, u1: uC1 - 0.02, t0: 0.26 * Math.PI, t1: 0.74 * Math.PI },
+    { nombre: 'Parabrisas', piel: 'cristal', u0: uC0, u1: uW1, t0: 0, t1: Math.PI, tDe: u => [thPilar(u), Math.PI - thPilar(u)] },
+    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [0, u < uW1 ? thPilar(u) : thVentana] },
+    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - (u < uW1 ? thPilar(u) : thVentana), Math.PI] },
   ];
 
   // ── Puertas y maleteros ──────────────────────────────────────────────────
@@ -401,7 +414,7 @@ export function crearModeloA1(P: Parametros) {
   }
   const superficies: Superficie[] = [
     { id: 'cuerpo', frame, sec, tMax: 2 * Math.PI, u0: 0, u1: 1, zonas: zonasCuerpo, puertas: puertas.filter(p => p.superficie === 'cuerpo'), pielBase: 'carroceria' },
-    { id: 'cupula', frame: frameC, sec: secC, tMax: Math.PI, u0: uC0, u1: uC1, zonas: zonasCupula, puertas: puertas.filter(p => p.superficie === 'cupula'), pielBase: 'cristal' },
+    { id: 'cupula', frame: frameC, sec: secC, tMax: Math.PI, u0: uC0, u1: uC1, zonas: zonasCupula, puertas: puertas.filter(p => p.superficie === 'cupula'), pielBase: 'solar' },
   ];
   const zonasPiel = [...zonasCuerpo, ...zonasCupula];
 
@@ -423,7 +436,7 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, plano,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVent1, thVentana, thPilar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
     baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, pasosRueda,

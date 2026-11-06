@@ -165,11 +165,16 @@ function construirSuperficie(S: Superficie) {
       for (let k = 1; k < 28; k++) { const u = z.u0 + (z.u1 - z.u0) * k / 28; if (enRango(u)) us.push(u); }
       for (let k = 1; k < 20; k++) { const t = z.t0 + (z.t1 - z.t0) * k / 20; ts.push(cerrada ? ((t % T) + T) % T : Math.min(T, Math.max(0, t))); }
     }
+    // El montante inclinado del parabrisas: filas y columnas finas en su rectángulo, y el marco tapa el resto.
+    if (z.tDe && 'piel' in z && z.piel === 'cristal') {
+      for (let k = 1; k < 36; k++) { const u = z.u0 + (z.u1 - z.u0) * k / 36; if (enRango(u)) us.push(u); }
+      for (let k = 1; k < 12; k++) ts.push(z.t0 + (z.t1 - z.t0) * k / 12);
+    }
   }
   // Un borde que varía a lo largo (la banda negra en V) no se recorta: la
   // rejilla se deforma fila a fila para que ese borde caiga justo en dos
   // columnas de la malla, y así queda una línea limpia y no una escalera.
-  const banda = S.zonas.find(z => z.tDe);
+  const banda = S.zonas.find(z => z.tDe && z.piel === 'bajos');
   let medL = 0, medR = 0;
   if (banda) {
     for (let k = 0; k <= 20; k++) { const [a, b] = banda.tDe!(banda.u0 + (banda.u1 - banda.u0) * k / 20); medL += a / 21; medR += b / 21; }
@@ -201,13 +206,17 @@ function construirSuperficie(S: Superficie) {
     const n: V3 = [dt[1] * du[2] - dt[2] * du[1], dt[2] * du[0] - dt[0] * du[2], dt[0] * du[1] - dt[1] * du[0]];
     const L = Math.hypot(...n) || 1; return [n[0] / L, n[1] / L, n[2] / L];
   }));
+  // Coordenadas de textura: a lo largo, x; alrededor, la distancia recorrida
+  // sobre la sección desde θ = 0. Así las células solares siguen la piel
+  // también en los costados de la cúpula, donde z apenas cambia.
+  const arco: number[][] = pos.map(fila => { const o = [0]; for (let j = 1; j < fila.length; j++) o.push(o[j - 1] + Math.hypot(fila[j][0] - fila[j - 1][0], fila[j][1] - fila[j - 1][1], fila[j][2] - fila[j - 1][2])); return o; });
   type Cubo = { p: number[]; n: number[]; uv: number[]; i: number[]; mapa: Map<number, number> };
   const cubos = new Map<string, Cubo>();
   const meter = (c: Cubo, i: number, j: number) => {
     const k = i * nv + j; let v = c.mapa.get(k);
     if (v === undefined) {
       v = c.p.length / 3; c.mapa.set(k, v);
-      const q = pos[i][j]; c.p.push(...q); c.n.push(...nor[i][j]); c.uv.push(q[0] / CELULA, q[2] / CELULA);
+      const q = pos[i][j]; c.p.push(...q); c.n.push(...nor[i][j]); c.uv.push(q[0] / CELULA, arco[i][j] / CELULA);
     }
     return v;
   };
@@ -408,17 +417,27 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
     tira([0, 0.5, 1].map(k => sobre(0.93 + 0.04 * k, (s > 0 ? 0.26 - 0.10 * k : 0.74 + 0.10 * k) * Math.PI, 0.002)), 0.007, M.piloto);
     tira([0, 1].map(k => sobre(0.955 + 0.025 * k, (s > 0 ? 0.10 : 0.90) * Math.PI, 0.002)), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
   }
-  // Parabrisas plano: un marco oscuro fino en su borde de arriba (en arco,
-  // como el del Aptera) y en los dos montantes, para que se lea como una luna
-  // aparte del resto de la cúpula.
-  if (m.plano) {
-    const arriba: V3[] = []; for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1, (0.06 + 0.88 * k / 16) * Math.PI, 0.006));
-    tira(arriba, 0.010, M.black);
-    for (const th of [0.06 * Math.PI, 0.94 * Math.PI]) {
-      const montante: V3[] = []; for (let k = 0; k <= 10; k++) montante.push(sobreC(m.uC0 + 0.004 + (m.uW1 - m.uC0 - 0.004) * k / 10, th, 0.006));
-      tira(montante, 0.010, M.black);
+  // Marcos de la cabina: el arco de arriba del parabrisas, los dos montantes
+  // inclinados (de la esquina de abajo del parabrisas al techo, como en el
+  // XL1 y el Aptera) y el contorno de cada ventanilla.
+  {
+    const r = 0.011, arriba: V3[] = [];
+    for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1, (m.thVentana / Math.PI + (1 - 2 * m.thVentana / Math.PI) * k / 16) * Math.PI, 0.006));
+    tira(arriba, r, M.black);
+    for (const s of [1, -1]) {
+      const th = (t: number) => (s > 0 ? t : Math.PI - t);
+      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 - m.uBase) * k / 12; pilar.push(sobreC(u, th(m.thPilar(u)), 0.006)); }
+      tira(pilar, r, M.black);
+      const techo: V3[] = []; for (let k = 0; k <= 14; k++) techo.push(sobreC(m.uW1 + (m.uVent1 - m.uW1) * k / 14, th(m.thVentana), 0.005));
+      tira(techo, 0.007, M.black);
+      const trasera: V3[] = []; for (let k = 0; k <= 8; k++) trasera.push(sobreC(m.uVent1, th(m.thVentana * k / 8), 0.005));
+      tira(trasera, 0.007, M.black);
+      const abajo: V3[] = []; for (let k = 0; k <= 14; k++) abajo.push(sobreC(m.uBase + (m.uVent1 - m.uBase) * k / 14, th(0.012 * Math.PI), 0.005));
+      tira(abajo, 0.007, M.black);
     }
   }
+  // Barra de luz trasera a lo ancho del labio de cola, como en el XL1, que une los dos pilotos.
+  { const barra: V3[] = []; for (let k = 0; k <= 20; k++) barra.push(sobre(0.962, (0.20 + 0.60 * k / 20) * Math.PI, 0.003)); tira(barra, 0.006, M.piloto); }
   // Sin retrovisores: el SZEmission lleva una cámara en el techo de la cúpula.
   box(g, sobreC(m.uC0 + 0.30, Math.PI / 2, 0.012), [0.05, 0.03, 0.04], M.black);
   // Tercera luz de freno en lo alto de la cola de la cúpula
@@ -590,6 +609,9 @@ function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
     const caña = new THREE.Mesh(new THREE.CylinderGeometry(p.R, p.R, p.largo, 40, 1, true, Math.PI - arco / 2, arco), M.bajos);
     caña.position.set(p.x, p.y, p.z); caña.rotation.x = Math.PI / 2; caña.receiveShadow = true; caña.userData.componente = 'carroceria'; G.carenado.add(caña);
   }
+  // Salpicadero: una tabla oscura sobre el arco del salpicadero, bajo la base del parabrisas, con la pantalla.
+  { const tabla = cajaRedonda(G.direccion, [m.xD + 0.02, m.yDash - 0.02, 0], [0.30, 0.04, 0.72], M.black, 0.012); tabla.userData.componente = 'varios';
+    const pantalla = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.09, 0.16), M.glass); pantalla.position.set(m.xD - 0.10, m.yDash + 0.045, 0); pantalla.rotation.z = -0.3; pantalla.userData.componente = 'varios'; G.direccion.add(pantalla); }
   // Volante: aro inclinado, tres radios y el centro; la columna ya está en los tubos de Dirección.
   const v = m.volante, c: V3 = [v.c[0], v.c[1], 0];
   const aro = new THREE.Mesh(new THREE.TorusGeometry(v.r, 0.016, 12, 48), M.black); aro.position.set(...c); aro.rotation.y = Math.PI / 2; aro.rotation.x = -v.inclinacion; aro.castShadow = true; G.direccion.add(aro);
