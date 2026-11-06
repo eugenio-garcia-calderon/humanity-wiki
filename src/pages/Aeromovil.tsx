@@ -32,7 +32,7 @@ import {
   type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import { RANGOS_MASA_A1 } from '../components/aeromovil/geometriaA1';
-import { MenuDisenos, aDiseno, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
+import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
 import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
@@ -366,6 +366,14 @@ export default function Aeromovil() {
   }, []);
   const alGuardado = useCallback((d: Diseno) => setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) }), []);
   const guardadoWeb = useAutoguardado(P, actual, alGuardado);
+  // Quien llega por primera vez (sin nada guardado en este navegador) abre el
+  // diseño por defecto de la web, si hay uno (2026-11-06, Eugenio).
+  useEffect(() => {
+    let hayAlgo = false; try { hayAlgo = !!localStorage.getItem(CLAVE) || !!localStorage.getItem('aeromovil.diseno'); } catch { /* sin almacenamiento */ }
+    if (hayAlgo || new URLSearchParams(loc.search).get('diseno')) return;
+    cargarDisenoPorDefecto().then(d => { if (d) abrirDiseno(d); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // `?diseno=ID` abre ese diseño (es el enlace que se comparte desde el menú).
   useEffect(() => {
     const id = Number(new URLSearchParams(loc.search).get('diseno'));
@@ -458,7 +466,7 @@ export default function Aeromovil() {
           <Logo nombre={nombreVehiculo} />
           {dueno?.nombre && <span className="-ml-3 text-xs text-slate-500">de {dueno.nombre}</span>}
           <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
-            alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); }}
+            alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
             {SECCIONES.filter(s => s.k !== 'componentes' || esA1).map(s => {
