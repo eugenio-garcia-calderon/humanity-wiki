@@ -155,7 +155,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const colAreas = (personas.conexiones || []).find(c => c.tabla_id === tSistemas)?.columna_id || '';
     const colProy = (personas.conexiones || []).find(c => c.tabla_id === tProyectos)?.columna_id || '';
     return personas.filas
-      .filter(f => f.pagina_id && String(f.pagina?.titulo || '').trim())
+      .filter(f => !f.oculta && f.pagina_id && String(f.pagina?.titulo || '').trim())
       .map(f => ({ id: f.pagina_id!, nombre: String(f.pagina?.titulo || '').trim(), foto: f.pagina?.imagen || null,
         areas: lista(f.celdas[colAreas]?.valor), proyectos: lista(f.celdas[colProy]?.valor) }));
   }, [personas, raiz]);
@@ -165,7 +165,10 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
   if (fallo) return <div className="py-24 text-center text-sm text-slate-500">No se han podido cargar los proyectos. Inténtalo dentro de un momento.</div>;
   if (!modelo || !raiz) return <div className="grid min-h-[50vh] place-items-center py-24 text-sm text-slate-400 animate-pulse">Cargando los proyectos…</div>;
 
-  const activa = modelo.areas.find(a => a.slug === area) || null;
+  // EL ESCAPARATE (2026-11-06, Eugenio: «quita los filtros de energía, vivienda, movilidad…»):
+  // sin categorías, todos los proyectos.
+  const escaparate = raiz.config?.sitio?.escaparate === true;
+  const activa = escaparate ? null : modelo.areas.find(a => a.slug === area) || null;
   const visibles = activa ? modelo.filas.filter(f => lista(f.celdas[modelo.colArea]?.valor).includes(activa.id)) : modelo.filas;
   // LAS PERSONAS DEL ÁREA ELEGIDA (2026-11-05, Eugenio: «si se escoge Movilidad, que solo te
   // enseñe personas relacionadas con esa categoría»): las que tienen esa área en sus Áreas, o
@@ -187,7 +190,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           que ponga igual energía y debajo esté la ilustración y que aparezca el número de
           proyectos, todo mucho más compacto»). El nombre arriba, su ilustración debajo y la
           cuenta; si no caben, la línea se desliza de lado. */}
-      <nav aria-label="Categorías" className="sticky top-0 z-30 -mx-4 overflow-x-auto bg-white/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 [scrollbar-width:none]">
+      {!escaparate && <nav aria-label="Categorías" className="sticky top-0 z-30 -mx-4 overflow-x-auto bg-white/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 [scrollbar-width:none]">
         <div className="flex w-max min-w-full items-center justify-start gap-1.5 lg:justify-center">
           <button type="button" onClick={() => elegir('')} aria-pressed={!activa} className={tile(!activa)}>
             <span className="text-[11px] font-black leading-none">Todos</span>
@@ -204,7 +207,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
             </button>
           ))}
         </div>
-      </nav>
+      </nav>}
 
       {/* Quien gestiona la web añade o edita desde aquí; se abre en el editor de humanity.wiki. */}
       {equipo && (
@@ -226,15 +229,15 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           const estadoId = String(f.celdas[modelo.colEstado?.id || '']?.valor || '');
           const estado = modelo.opciones.get(estadoId) || null;
           const sus = lista(f.celdas[modelo.colArea]?.valor).map(id => modelo.areas.find(a => a.id === id)?.nombre).filter(Boolean) as string[];
-          // EL FOCO PRINCIPAL (2026-11-06, Eugenio: «que en vez de 1/3 ocupe 2/3»): dos
-          // columnas y dos filas, la imagen llena el alto y el nombre más grande.
+          // EL FOCO PRINCIPAL (2026-11-06, Eugenio: «que ocupe todo en horizontal pero no tanto
+          // en vertical; que se vean las otras tres tarjetas debajo sin hacer scroll»): toda la
+          // fila, con la foto apaisada y baja, y el nombre más grande.
           const foco = estado?.label === FOCO;
           return (
-            <li key={f.id} className={cn('relative', foco && 'sm:col-span-2 lg:row-span-2')}>
+            <li key={f.id} className={cn('relative', foco && 'sm:col-span-2 lg:col-span-3')}>
               <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
-                className={cn('group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
-                  foco && 'lg:flex lg:h-full lg:flex-col')}>
-                <div className={cn('relative aspect-[16/9] w-full overflow-hidden bg-slate-100', foco && 'lg:aspect-auto lg:min-h-0 lg:flex-1')}>
+                className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div className={cn('relative w-full overflow-hidden bg-slate-100', foco ? 'aspect-[16/9] sm:aspect-auto sm:h-[300px]' : 'aspect-[16/9]')}>
                   {/* 400 y no 420: con 420 la miniatura saltaba al ancho 1600 (el doble retina
                       busca el escalón siguiente) y cada portada tardaba segundos en fabricarse. */}
                   {img ? (
@@ -242,7 +245,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                       {...(i < 3 ? { fetchPriority: 'high' as const } : {})}
                       // En el foco la foto no marca el alto (una vertical estiraba la tarjeta y abría
                       // un hueco a su lado): se pinta encima, del alto que dan las dos filas.
-                      className={cn('h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]', foco && 'lg:absolute lg:inset-0')}
+                      className={cn('h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]', foco && 'sm:absolute sm:inset-0')}
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
                   ) : (
                     <div className="grid h-full w-full place-items-center text-3xl font-black text-slate-300">{nombre.slice(0, 1)}</div>
@@ -257,7 +260,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                   )}
                 </div>
                 <div className="p-4">
-                  <h2 className={cn('font-black leading-snug text-slate-900', foco ? 'text-2xl sm:text-3xl' : 'text-lg')}>{nombre}</h2>
+                  <h2 className={cn('font-black leading-snug text-slate-900', foco ? 'text-2xl' : 'text-lg')}>{nombre}</h2>
                   {sus.length > 0 && <p className="mt-0.5 truncate text-xs font-semibold text-slate-400">{sus.join(' · ')}</p>}
                 </div>
               </Link>

@@ -41,6 +41,9 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   const [raiz, setRaiz] = useState<Raiz | null>(null);
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
+  // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «quita el menú
+  // entero y la opción de iniciar sesión»): sin el ☰ y sin el hueco de la cuenta.
+  const escaparate = c.sitio?.escaparate === true;
   return (
     // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
     // scroll»): pegada arriba y con fondo para que no se mezcle.
@@ -57,7 +60,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
       {/* En el móvil los grupos se deshacen (`contents`) para repartir sus piezas en líneas: arriba el menú, el logo,
           Donar y la cuenta; debajo las calificaciones y el buscador; y al final la ruta. */}
       <div className="contents md:col-start-1 md:flex md:min-w-0 md:items-center md:gap-2">
-        {raiz && <span className="flex shrink-0 items-center"><Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu"
+        {raiz && !escaparate && <span className="flex shrink-0 items-center"><Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="menu"
           cabezaMenu={simple ? undefined : cerrar => <VistasMenu porDefecto={vistaInicial} vistas={vistasDe(c.sitio)} cerrar={cerrar} />} /></Suspense></span>}
         <Link to="/" className="ml-1 flex min-w-0 shrink-0 items-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
           {icono && (/^(https?:|\/)/.test(icono)
@@ -90,7 +93,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
         {!simple && <div className="flex min-w-0 max-md:order-1 max-md:ml-auto"><BuscarBarra raizId={raizId} enLinea /></div>}
         <span className="ml-auto flex shrink-0 items-center gap-1.5">
           {raiz && !simple && <Suspense fallback={null}><BotonesLectura config={c} centrado={false} parte="donar" /></Suspense>}
-          <span data-hueco-cuenta="cabecera" className="contents" />
+          {!escaparate && <span data-hueco-cuenta="cabecera" className="contents" />}
         </span>
       </div>
     </header>

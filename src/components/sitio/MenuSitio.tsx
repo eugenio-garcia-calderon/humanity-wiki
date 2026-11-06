@@ -311,6 +311,14 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   const hayContacto = p.mostrarContacto && !!(c.email || c.telefono || c.direccion);
   const legales = (Object.keys(NOMBRES_LEGALES) as DocLegal[]).filter(d => p.legales[d]);
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
+  if (p.sencillo) return (
+    <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
+      <div className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80">
+        {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
+        {c.email && <a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 min-h-11 hover:underline break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a>}
+      </div>
+    </footer>
+  );
   return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
       <div className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-12 grid gap-10', p.mapaWeb && rutas.raizId ? '@2xl:grid-cols-[minmax(12rem,16rem)_1fr]' : '@2xl:grid-cols-3')}>

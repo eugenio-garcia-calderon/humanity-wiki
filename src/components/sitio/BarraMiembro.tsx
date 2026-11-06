@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import MuroMiembros, { useCanjeEnlace, type Muro } from './MuroMiembros';
 import { useSitio } from './ContextoSitio';
+import { raizDe } from './CabeceraSitio';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -65,6 +66,10 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   const ir = useNavigate();
   const base = `/api/sitio-miembros/${encodeURIComponent(raiz)}`;
 
+  // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio: «quita la opción de iniciar sesión,
+  // para que nadie pueda iniciar sesión»): en ese sitio la cuenta no se pinta en ningún sitio.
+  const [escaparate, setEscaparate] = useState(false);
+  useEffect(() => { let vivo = true; raizDe(raiz).then(r => { if (vivo) setEscaparate(r?.config?.sitio?.escaparate === true); }); return () => { vivo = false; }; }, [raiz]);
   const cargar = () => fetch(`${base}/estado`, { credentials: 'include' }).then(r => r.json()).then(setE).catch(() => {});
   useEffect(() => { cargar(); }, [raiz]);
   // `sitio:sesion`: blocks that depend on who is signed in (the rating block)
@@ -94,6 +99,7 @@ export default function BarraMiembro({ raiz, paginaId, onCambio, conMenu }: {
   }, [visible, e]);
 
   // Con el menú encendido, aquí sólo queda el aviso del enlace mágico (el canje sigue siendo cosa de esta pieza).
+  if (escaparate) return null;
   if (conMenu) return avisoEnlace ? <p className="fixed bottom-4 left-4 z-[60] max-w-xs rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 shadow">{avisoEnlace}</p> : null;
   if (!e?.activo || (e.es_equipo && !e.yo && !e.persona)) return null;
   // Quien gestiona la web y entró con su sesión de humanity.wiki cuenta como dentro si tiene su página aquí.

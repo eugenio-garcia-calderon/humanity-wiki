@@ -6,6 +6,7 @@ import { AccionesPagina } from '../../sitio/RedRelaciones';
 import { ponerOpcionesRed, ponerPestanasExtra, quitarPestanasExtra } from '../../sitio/pestanasExtra';
 import { miniatura } from '../../../utils/miniatura';
 import { cn } from '../../../utils/cn';
+import { useEscaparate } from '../../sitio/escaparate';
 
 // ============================================================================
 // EL PERFIL DE UNA PERSONA (2026-10-26, Eugenio)
@@ -35,6 +36,10 @@ export default function Lectura({ paginaId }: PropsLectura) {
   const [p, setP] = useState<Perfil | null>(null);
   const [area, setArea] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
+  // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «que ponga el
+  // nombre en grande y ya está, y los proyectos con los que está asociado»): el nombre entero
+  // en una línea, sin seguir, conectar, compartir ni editar.
+  const escaparate = useEscaparate();
   const cargar = () => {
     if (!paginaId) return;
     fetch(`/api/perfil/${encodeURIComponent(paginaId)}`, { credentials: 'include' })
@@ -77,8 +82,8 @@ export default function Lectura({ paginaId }: PropsLectura) {
             ? <img src={miniatura(p.foto, 256)} alt="" className="h-[108px] w-[108px] shrink-0 rounded-full object-cover ring-1 ring-slate-200" />
             : <span className="grid h-[108px] w-[108px] shrink-0 place-items-center rounded-full bg-slate-100 text-4xl font-black text-slate-400">{nombrePila?.charAt(0) || '?'}</span>}
           <div className="min-w-0">
-            <h1 className="text-[2.6rem] font-black leading-none tracking-tight text-slate-900">{nombrePila}</h1>
-            {apellidos && <p className="mt-1.5 text-lg font-light leading-tight text-slate-500">{apellidos}</p>}
+            <h1 className="text-[2.6rem] font-black leading-none tracking-tight text-slate-900">{escaparate ? p.nombre : nombrePila}</h1>
+            {apellidos && !escaparate && <p className="mt-1.5 text-lg font-light leading-tight text-slate-500">{apellidos}</p>}
             {(p.localizacion || p.alcance) && (
               <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-semibold text-slate-500">
                 {p.localizacion && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {p.localizacion}</span>}
@@ -110,7 +115,7 @@ export default function Lectura({ paginaId }: PropsLectura) {
           </div>
         )}
       </div>
-      <div className="mt-5">
+      {!escaparate && <div className="mt-5">
         <AccionesPagina paginaId={paginaId || ''} nombre={nombrePila} extra={<>
           <Conectar nombre={nombrePila} correo={p.correo} />
           {p.puede_editar && (
@@ -120,7 +125,7 @@ export default function Lectura({ paginaId }: PropsLectura) {
             </button>
           )}
         </>} />
-      </div>
+      </div>}
       {editando && paginaId && <EditarPerfil paginaId={paginaId} p={p} onCerrar={() => setEditando(false)} />}
     </div>
   );
