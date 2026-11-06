@@ -137,6 +137,7 @@ export interface Parametros {
   // ── Masas (2026-11-05, Eugenio: «estimar el peso… pudiendo modificar los
   // parámetros, como el peso de las ruedas, del motor, del chasis») ──────────
   matChasis: MaterialChasis;   // material de los tubos
+  chasis: 'largueros' | 'celosia';   // Aeromóvil 1: versión 1 (largueros y travesaños) o versión 2 (celosía triangulada como el Caterham Seven)
   extraChasis: number;         // uniones, pletinas, soportes y tornillería (kg)
   mRueda: number;              // una rueda completa con neumático y disco (kg)
   mSuspension: number;         // horquilla + amortiguadores + rótulas (kg)
@@ -200,7 +201,7 @@ export const PARAMETROS_GOTA: Parametros = {
   overF: 0.40, tail: 0.39, tailRound: 0.75, morro: 0, auto: false, holgura: 0.05, W: 1.29, H: 1.28,
   pmax: 0.60, full: 1.2, tipH: 0.70, nU: 2.6, nL: 4.5, clear: 0.21, puerta: 'cabina',
   spineD: 76.2, spineT: 3.0, tiltMax: 19, comp: 0, mOcc: 83, pedal: 200, speed: 25, sol: 4.5,
-  matChasis: 'al6061', extraChasis: 2.2, mRueda: 1.9, mSuspension: 4.2, mMotor: 3.6, mGenerador: 2.1, mBateria: 2.9,
+  matChasis: 'al6061', chasis: 'largueros', extraChasis: 2.2, mRueda: 1.9, mSuspension: 4.2, mMotor: 3.6, mGenerador: 2.1, mBateria: 2.9,
   mAsiento: 1.8, matCarenado: 'carbonoLino', espCarenado: 1.0, espCristal: 3.0, mSolarM2: 2.2, mVarios: 8,
 };
 /**
@@ -214,7 +215,7 @@ export const PARAMETROS_A1: Parametros = {
   ...PARAMETROS_GOTA, disposicion: 'cuatro',
   B: 2.05, W: 1.55, H: 1.11, clear: 0.19, xPil: 0.62, xPas: 1.31, recPil: 39, recPas: 30, nU: 3.3, nL: 4.0, puerta: 'gaviota',
   spineD: 40, spineT: 2.0, comp: 0, mOcc: 80, pedal: 0, speed: 100, sol: 4.5,
-  matChasis: 'al6061', extraChasis: 6, mRueda: 8, mSuspension: 26, mMotor: 16, mGenerador: 0, mBateria: 0,
+  matChasis: 'al6061', chasis: 'largueros', extraChasis: 6, mRueda: 8, mSuspension: 26, mMotor: 16, mGenerador: 0, mBateria: 0,
   mAsiento: 7, matCarenado: 'carbono', espCarenado: 1.8, espCristal: 4.0, mSolarM2: 2.2, mVarios: 25,
 };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;
