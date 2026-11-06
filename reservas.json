@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0171_aeromovil_1_parabrisas_plano.sql",
+      "motivo": "Diseño del equipo: Aeromóvil 1 con parabrisas plano",
+      "desde": "2026-11-06T16:41:02.872Z"
+    }
+  ]
 }
