@@ -14,7 +14,7 @@ import { suspensionA1 } from './geometriaA1';
 
 export interface ParcheCAD { nombre: string; capa: string; piel: Piel; puerta: string; rejilla: P3[][] }
 
-const CAPA_DE: Record<Piel, string> = { carroceria: 'Carroceria', bajos: 'Carroceria', cristal: 'Cristales', solar: 'Paneles solares', hueco: '' };
+const CAPA_DE: Record<Piel, string> = { carroceria: 'Carroceria', bajos: 'Carroceria', cristal: 'Cristales', solar: 'Paneles solares', hueco: '', marco: 'Carroceria', morro: 'Carroceria' };
 const unicos = (v: number[]) => { v.sort((a, b) => a - b); const o: number[] = []; for (const x of v) if (!o.length || x - o[o.length - 1] > 1e-5) o.push(x); return o; };
 
 /**
@@ -46,7 +46,7 @@ export function parchesDe(S: Superficie): ParcheCAD[] {
       const zona = S.zonas.find(z => enZona(z, uc, tc));
       let piel: Piel = zona ? zona.piel : S.pielBase;
       if (piel === 'hueco') { fila.push(null); continue; }
-      if (piel === 'bajos') piel = 'carroceria';
+      if (piel === 'bajos' || piel === 'marco' || piel === 'morro') piel = 'carroceria';
       const puerta = S.puertas.find(z => enZona(z, uc, tc));
       const base = piel === 'solar' ? (zona?.nombre ?? 'Paneles solares') : S.id === 'cupula' ? 'Cúpula' : 'Carrocería';
       const nombre = `${puerta ? puerta.nombre + ' · ' : ''}${base}`;

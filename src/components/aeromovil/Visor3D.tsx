@@ -130,6 +130,9 @@ function materiales() {
     body: new THREE.MeshPhysicalMaterial({ color: 0xf4f5f6, metalness: 0.12, roughness: 0.38, roughnessMap: grano, bumpMap: grano, bumpScale: 0.0004, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.1, sheen: 0.15, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
     glass: new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
     solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0012, metalness: 0.3, roughness: 0.24, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3, side: THREE.DoubleSide }),
+    // Goma negra mate alrededor de los cristales, y la pieza azul marino del morro (Aptera).
+    goma: new THREE.MeshStandardMaterial({ color: 0x141516, metalness: 0.05, roughness: 0.85, side: THREE.DoubleSide }),
+    morro: new THREE.MeshPhysicalMaterial({ color: 0x182544, metalness: 0.2, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.1, side: THREE.DoubleSide }),
     bajos: new THREE.MeshPhysicalMaterial({ color: 0x1a1c1f, metalness: 0.2, roughness: 0.6, roughnessMap: grano, clearcoat: 0.35, side: THREE.DoubleSide }),
     techoInterior: new THREE.MeshStandardMaterial({ color: 0xcfd3d8, roughness: 0.9, metalness: 0, side: THREE.FrontSide }),
     cableHV: new THREE.MeshStandardMaterial({ color: 0xe8701a, metalness: 0.1, roughness: 0.6 }),
@@ -154,6 +157,7 @@ function materiales() {
     motor: new THREE.MeshStandardMaterial({ color: 0xb5533a, metalness: 0.55, roughness: 0.35 }),
     batt: new THREE.MeshStandardMaterial({ color: 0x2f7fd0, metalness: 0.3, roughness: 0.45 }),
     spoke: new THREE.LineBasicMaterial({ color: 0x9aa1a8 }),
+    logo: new THREE.MeshStandardMaterial({ map: (() => { const t = new THREE.TextureLoader().load('/logo-v2.png'); t.colorSpace = THREE.SRGBColorSpace; return t; })(), roughness: 0.4, metalness: 0.1 }),
     faro: new THREE.MeshStandardMaterial({ color: 0xf4f7fb, emissive: 0xf4f7fb, emissiveIntensity: 1.3 }),
     piloto: new THREE.MeshStandardMaterial({ color: 0xd33a2c, emissive: 0xd33a2c, emissiveIntensity: 1.3 }),
     intermitenteI: new THREE.MeshStandardMaterial({ color: 0xf29a1f, emissive: 0xf29a1f, emissiveIntensity: 0.15 }),
@@ -205,7 +209,7 @@ function construirSuperficie(S: Superficie) {
       for (let k = 1; k < 20; k++) { const t = z.t0 + (z.t1 - z.t0) * k / 20; ts.push(cerrada ? ((t % T) + T) % T : Math.min(T, Math.max(0, t))); }
     }
     // El montante inclinado del parabrisas: filas y columnas finas en su rectángulo, y el marco tapa el resto.
-    if (z.tDe && 'piel' in z && z.piel === 'cristal') {
+    if (z.tDe && 'piel' in z && (z.piel === 'cristal' || z.piel === 'marco' || z.piel === 'hueco')) {
       for (let k = 1; k < 36; k++) { const u = z.u0 + (z.u1 - z.u0) * k / 36; if (enRango(u)) us.push(u); }
       for (let k = 1; k < 12; k++) ts.push(z.t0 + (z.t1 - z.t0) * k / 12);
     }
@@ -447,37 +451,69 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
     const th = Math.asin(Math.pow(k, m.P.nU / 2));
     return lado > 0 ? th : Math.PI - th;
   };
+  // Luces como las del Aptera (2026-11-06, Eugenio): delante, una ceja de LED
+  // fina que arranca en la pieza azul del morro y sigue el hombro hacia atrás,
+  // y una barra blanca de luz diurna cruzando la punta; detrás, una barra roja
+  // justo en el borde de fuga de la cola, de lado a lado, con dos cantos.
   for (const s of [1, -1] as (1 | -1)[]) {
-    const faro = [0, 0.25, 0.5, 0.75, 1].map(k => { const u = 0.03 + 0.11 * k; return sobre(u, thAltura(u, (0.42 + 0.04 * k) * m.P.H, s), 0); });
-    tira(faro, 0.014, M.black);                           // el alojamiento, a ras de piel
-    tira(faro.map(q => [q[0] + 0.006, q[1] + 0.004, q[2] + s * 0.004] as V3), 0.008, M.faro);
-    tira([0, 1].map(k => { const u = 0.02 + 0.02 * k; return sobre(u, thAltura(u, 0.47 * m.P.H, s), 0.003); }), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
-    // Pilotos traseros: una rendija roja a ras de piel a cada lado del labio de cola.
-    tira([0, 0.5, 1].map(k => sobre(0.93 + 0.04 * k, (s > 0 ? 0.26 - 0.10 * k : 0.74 + 0.10 * k) * Math.PI, 0.002)), 0.007, M.piloto);
-    tira([0, 1].map(k => sobre(0.955 + 0.025 * k, (s > 0 ? 0.10 : 0.90) * Math.PI, 0.002)), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
+    const ceja = [0, 0.2, 0.4, 0.6, 0.8, 1].map(k => { const u = 0.025 + 0.15 * k; return sobre(u, thAltura(u, (0.44 + 0.06 * k) * m.P.H, s), 0); });
+    tira(ceja, 0.012, M.black);                           // el alojamiento, a ras de piel
+    tira(ceja.map(q => [q[0] + 0.005, q[1] + 0.003, q[2] + s * 0.004] as V3), 0.0065, M.faro);
+    tira([0, 1].map(k => { const u = 0.02 + 0.03 * k; return sobre(u, thAltura(u, 0.40 * m.P.H, s), 0.003); }), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
+    // Canto trasero: una pestaña roja vertical en cada esquina del labio de cola.
+    tira([0, 0.5, 1].map(k => sobre(0.985, (s > 0 ? 0.14 + 0.08 * k : 0.86 - 0.08 * k) * Math.PI, 0.003)), 0.006, M.piloto);
+  }
+  { const drl: V3[] = []; for (let k = 0; k <= 14; k++) drl.push(sobre(0.012, (0.30 + 0.40 * k / 14) * Math.PI, 0.003)); tira(drl, 0.005, M.faro); }
+  // Barra de luz trasera en la punta misma de la cola, como el Aptera.
+  { const barra: V3[] = []; for (let k = 0; k <= 24; k++) barra.push(sobre(0.993, (0.14 + 0.72 * k / 24) * Math.PI, 0.003)); tira(barra, 0.007, M.piloto); }
+  // Logo de Luz & Humanidad, circular y amarillo, en el centro de la pieza azul del morro.
+  { const f0 = m.frame(0.004), c: V3 = [f0.x + 0.004, (f0.top + f0.bot) / 2, 0];
+    const logo = new THREE.Mesh(new THREE.CircleGeometry(0.06, 48), M.logo); logo.position.set(...c); logo.rotation.y = Math.PI / 2; g.add(logo);
+    const aro = new THREE.Mesh(new THREE.TorusGeometry(0.061, 0.004, 8, 48), M.black); aro.position.set(...c); aro.rotation.y = Math.PI / 2; g.add(aro); }
+  // Retrovisores como los del Aptera: una gota pequeña en un tallo corto, en la
+  // base del montante, con el cristal mirando atrás.
+  for (const s of [1, -1] as (1 | -1)[]) {
+    const th = (t: number) => (s > 0 ? t : Math.PI - t), uR = m.uBase + 0.03;
+    const base = sobreC(uR, th(Math.max(m.thAlfeizar(uR) - 0.01, 0.02)), 0), punta: V3 = [base[0] - 0.03, base[1] + 0.02, base[2] + s * 0.10];
+    tube(g, base, punta, 0.016, M.black);
+    const pod = sphere(g, punta, 0.05, M.body, [1.05, 0.55, 0.42]);
+    pod.rotation.y = s * 0.15;
+    const cristal = new THREE.Mesh(new THREE.CircleGeometry(0.023, 24), M.glass); cristal.position.set(punta[0] - 0.052, punta[1], punta[2]); cristal.rotation.y = -Math.PI / 2; g.add(cristal);
   }
   // Marcos de la cabina, a ras del cristal (tubos hundidos casi del todo):
   // el arco de arriba del parabrisas, los dos montantes inclinados (XL1,
   // Aptera), el contorno de cada ventanilla con el borde trasero inclinado
   // como un pilar B, y la línea de corte de cada puerta de gaviota.
   {
-    const R = 0.016, hund = -0.012, r2 = 0.011, hund2 = -0.008, arriba: V3[] = [];
-    for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1, (m.thVentana / Math.PI + (1 - 2 * m.thVentana / Math.PI) * k / 16) * Math.PI, hund));
+    // Los marcos van por el borde EXTERIOR de la goma: así tapan el diente
+    // que deja la malla en todo borde inclinado, y la goma queda entre el
+    // marco y el cristal, como en un coche de verdad.
+    const R = 0.012, hund = -0.008, r2 = 0.009, hund2 = -0.006, gT = m.gomaT, gU = m.gomaU, arriba: V3[] = [];
+    for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1 + gU, (m.thVentana / Math.PI + (1 - 2 * m.thVentana / Math.PI) * k / 16) * Math.PI, hund));
     tira(arriba, R, M.black);
     for (const s of [1, -1]) {
       const th = (t: number) => (s > 0 ? t : Math.PI - t);
-      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 - m.uBase) * k / 12; pilar.push(sobreC(u, th(Math.max(m.thPilar(u), m.thAlfeizar(u))), hund)); }
+      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 + gU - m.uBase) * k / 12; pilar.push(sobreC(u, th(Math.max(m.thPilar(u) - gT, m.thAlfeizar(u) - gT, m.thBase(u) + 0.005)), hund)); }
       tira(pilar, R, M.black);
       const techo: V3[] = []; for (let k = 0; k <= 14; k++) techo.push(sobreC(m.uW1 + (m.uVentA - m.uW1) * k / 14, th(m.thVentana), hund2));
       tira(techo, r2, M.black);
-      const trasera: V3[] = []; for (let k = 0; k <= 10; k++) { const u = m.uVentA + (m.uVent1 - m.uVentA) * k / 10; trasera.push(sobreC(u, th(Math.max(m.thTrasera(u), m.thBase(u) + 0.02)), hund2)); }
+      const trasera: V3[] = []; for (let k = 0; k <= 10; k++) { const u = m.uVentA + (m.uVent1 - m.uVentA) * k / 10; trasera.push(sobreC(u, th(Math.min(m.thVentana, Math.max(m.thTrasera(u) + gT, m.thBase(u) + 0.02))), hund2)); }
       tira(trasera, r2, M.black);
       // La barra de abajo va por donde la cúpula sale de la carrocería: recta sobre el hombro.
-      const abajo: V3[] = []; for (let k = 0; k <= 24; k++) { const u = m.uBase + (m.uVent1 - m.uBase) * k / 24; abajo.push(sobreC(u, th(m.thAlfeizar(u)), hund2)); }
+      const abajo: V3[] = []; for (let k = 0; k <= 24; k++) { const u = m.uBase - gU + (m.uVent1 + 2 * gU - m.uBase) * k / 24; abajo.push(sobreC(u, th(Math.max(m.thAlfeizar(u) - gT, m.thBase(u) + 0.005)), hund2)); }
       tira(abajo, r2, M.black);
-      // Corte de la puerta: por delante y por detrás, de la base al centro del techo
+      // Líneas de corte de la puerta (2026-11-06, Eugenio: «visibles pero
+      // elegantes, como en el XL1 y el Aptera»): una ranura fina y oscura.
+      // En la cúpula, delante y detrás, del alféizar al canto del techo (el
+      // techo es fijo, así que la línea no sube al centro); en la carrocería,
+      // delante, detrás y por abajo, cerrando el panel lateral.
       for (const p of m.puertas.filter(q => q.tipo === 'puerta' && q.superficie === 'cupula' && (s > 0 ? q.id === 'izq' : q.id === 'der'))) {
-        for (const u of [p.u0, p.u1]) { const corte: V3[] = []; for (let k = 0; k <= 12; k++) corte.push(sobreC(u, th(0.5 * Math.PI * k / 12), -0.003)); tira(corte, 0.004, M.black); }
+        for (const u of [p.u0, p.u1]) { const corte: V3[] = []; for (let k = 0; k <= 10; k++) corte.push(sobreC(u, th(Math.max(m.thBase(u) + 0.005, m.thAlfeizar(u) - 0.04) + (m.thVentana - Math.max(m.thBase(u) + 0.005, m.thAlfeizar(u) - 0.04)) * k / 10), -0.0025)); tira(corte, 0.0035, M.goma); }
+      }
+      for (const p of m.puertas.filter(q => q.tipo === 'puerta' && q.superficie === 'cuerpo' && (s > 0 ? q.id === 'izq' : q.id === 'der'))) {
+        const [ta, tb] = s > 0 ? [p.t0, p.t1] : [p.t1, p.t0];   // ta = arriba (junto a la cúpula), tb = abajo
+        for (const u of [p.u0, p.u1]) { const corte: V3[] = []; for (let k = 0; k <= 10; k++) corte.push(sobre(u, ta + (tb - ta) * k / 10, -0.0025)); tira(corte, 0.0035, M.goma); }
+        const abajo: V3[] = []; for (let k = 0; k <= 16; k++) abajo.push(sobre(p.u0 + (p.u1 - p.u0) * k / 16, tb, -0.0025)); tira(abajo, 0.0035, M.goma);
       }
     }
   }
@@ -485,8 +521,6 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
   { const base = sobreC(m.uC0 + 0.56, Math.PI / 2, 0.002), punta = sobreC(m.uC0 + 0.60, Math.PI / 2, 0.045); tube(g, base, punta, 0.012, M.black); sphere(g, punta, 0.016, M.black); }
   // Tercera luz de freno en el borde de fuga del techo
   { const luz: V3[] = []; for (let k = 0; k <= 10; k++) luz.push(sobreC(m.uC1 - 0.03, (0.40 + 0.20 * k / 10) * Math.PI, 0.004)); tira(luz, 0.007, M.piloto); }
-  // Barra de luz trasera a lo ancho del labio de cola, como en el XL1, que une los dos pilotos.
-  { const barra: V3[] = []; for (let k = 0; k <= 20; k++) barra.push(sobre(0.962, (0.20 + 0.60 * k / 20) * Math.PI, 0.003)); tira(barra, 0.006, M.piloto); }
   // Limpiaparabrisas tumbado en la base del parabrisas
   const uL = m.uC0 + 0.012, piv = sobreC(uL, 0.36 * Math.PI, 0.010);
   const pts: V3[] = [];
@@ -600,9 +634,9 @@ function etiquetar(g: THREE.Object3D, componente: string) {
 function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, m: Modelo) {
   for (const k of ['carenado', 'cristales', 'solar', 'chasis', 'direccion', 'asientos', 'ocupantes', 'motor', 'transmision', 'baterias'] as CapaId[]) vaciar(G[k]);
   puertasG.clear();
-  const capaDe: Record<Piel, CapaId> = { carroceria: 'carenado', bajos: 'carenado', cristal: 'cristales', solar: 'solar', hueco: 'carenado' };
-  const matDe: Record<Piel, THREE.Material> = { carroceria: M.body, bajos: M.bajos, cristal: M.glass, solar: M.solar, hueco: M.body };
-  const compDe: Record<Piel, string> = { carroceria: 'carroceria', bajos: 'carroceria', cristal: 'cupula', solar: 'solar', hueco: 'carroceria' };
+  const capaDe: Record<Piel, CapaId> = { carroceria: 'carenado', bajos: 'carenado', cristal: 'cristales', solar: 'solar', hueco: 'carenado', marco: 'carenado', morro: 'carenado' };
+  const matDe: Record<Piel, THREE.Material> = { carroceria: M.body, bajos: M.bajos, cristal: M.glass, solar: M.solar, hueco: M.body, marco: M.goma, morro: M.morro };
+  const compDe: Record<Piel, string> = { carroceria: 'carroceria', bajos: 'carroceria', cristal: 'cupula', solar: 'solar', hueco: 'carroceria', marco: 'cupula', morro: 'carroceria' };
   for (const S of m.superficies) for (const pieza of construirSuperficie(S)) {
     const mesh = new THREE.Mesh(pieza.geo, matDe[pieza.piel]);
     mesh.castShadow = pieza.piel !== 'cristal'; mesh.receiveShadow = true;

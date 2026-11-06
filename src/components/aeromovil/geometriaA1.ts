@@ -181,10 +181,16 @@ export function crearModeloA1(P: Parametros) {
   const uBase = uC0 + 0.01;                                    // esquina de abajo del montante
   const thVentana = 0.24 * Math.PI;                            // donde el costado se vuelve techo
   const thPilar = (u: number) => Math.min(thVentana, Math.max(0, thVentana * (u - uBase) / (uW1 - uBase)));
-  const uPico = Math.max(uW1 + 0.02, 0.42);                     // el punto más alto del techo
+  // El techo es UNA curva (2026-11-06, Eugenio: «todo el techo tiene que ser
+  // una curva de radio casi uniforme, sin bollos»): el punto más alto es el
+  // borde de arriba del parabrisas y de ahí a la cola baja como
+  // pico − (pico − cola)·s^techo, cóncava en todo el tramo. La transición de
+  // sección (plana en el parabrisas, más redonda detrás) se reparte en 22 cm
+  // para que el canto del techo no haga un hombro.
+  const uPico = uW1;
   const pesoPlano = (u: number) => {
     if (u <= uW1) return 1;
-    const t = Math.min(1, (u - uW1) / 0.10); return 1 - t * t * (3 - 2 * t);
+    const t = Math.min(1, (u - uW1) / 0.22); return 1 - t * t * (3 - 2 * t);
   };
   const frameC = (u: number): Seccion => {
     const um = uMedido(u), deck = yCuerpo(SZ.top(u)), base = deck - hundido;
@@ -198,8 +204,8 @@ export function crearModeloA1(P: Parametros) {
       // Eugenio: «en la misma línea que el morro, como el Aptera, una curva
       // constante»): cúbica de Hermite que arranca con la pendiente del capó
       // en su base y llega casi horizontal al borde de arriba.
-      const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(SZ.cupTop(uMedido(uW1))), t = Math.max(0, (u - uC0) / (uW1 - uC0));
-      const Lw = uW1 - uC0, m0 = (yCuerpo(SZ.top(uC0)) - yCuerpo(SZ.top(uC0 - 0.02))) / 0.02 * Lw, m1 = 0.15 * (topW - deck0);
+      const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(1), t = Math.max(0, (u - uC0) / (uW1 - uC0));
+      const Lw = uW1 - uC0, m0 = (yCuerpo(SZ.top(uC0)) - yCuerpo(SZ.top(uC0 - 0.02))) / 0.02 * Lw, m1 = 0;   // llega horizontal: ahí arranca la curva del techo
       const t2 = t * t, t3 = t2 * t;
       top = Math.max(deck + 0.004, deck0 * (2 * t3 - 3 * t2 + 1) + m0 * (t3 - 2 * t2 + t) + topW * (-2 * t3 + 3 * t2) + m1 * (t3 - t2));
     } else if (u > uPico) {
@@ -271,8 +277,9 @@ export function crearModeloA1(P: Parametros) {
     const a = Math.acos((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d)), b = Math.atan2(dy, dx);
     return [h[0] + l1 * Math.cos(b + a), h[1] + l1 * Math.sin(b + a)];
   };
-  const volante = { c: [xPil + 0.44, hip + 0.34] as [number, number], r: 0.15, inclinacion: 35 * Math.PI / 180 };
-  const reposapies: [number, number] = [xPil + 0.86, yFloor + 0.16];
+  // Volante y pedales regulables (2026-11-06, Eugenio): `volAlt`/`volDist` y `pedAlt`/`pedDist` son desplazamientos sobre la posición de serie.
+  const volante = { c: [xPil + 0.44 + P.volDist, hip + 0.34 + P.volAlt] as [number, number], r: 0.15, inclinacion: 35 * Math.PI / 180 };
+  const reposapies: [number, number] = [xPil + 0.86 + P.pedDist, yFloor + 0.16 + P.pedAlt];
   // Ocupantes: tronco reclinado pero cabeza recta (el cuello endereza el
   // reclinado hasta dejar la cabeza a un tercio del ángulo), como en un
   // velomóvil. El pasajero va tumbado tipo Fórmula 1, con las piernas
@@ -418,8 +425,29 @@ export function crearModeloA1(P: Parametros) {
   // frontal»): el capó, y las dos franjas del lomo que corren a los lados de
   // la cúpula desde la base del parabrisas hasta la cola, por encima de la
   // línea del hombro (lo que mira al cielo; de ahí para abajo es flanco).
+  // Hueco de la cabina (2026-11-06, Eugenio: «el interior parece una piscina
+  // de líquido blanco: vacíalo, que se vean las piernas desde fuera»): la
+  // carrocería no sigue por debajo de la cúpula; se quita la piel que queda
+  // 2 cm por dentro de la cúpula, y lo que asoma entre esa línea y la unión
+  // es el alféizar.
+  const cacheHueco = new Map<number, [number, number]>();
+  const thHueco = (u: number): [number, number] => {
+    const k = Math.round(u * 2000); const c = cacheHueco.get(k); if (c) return c;
+    const f = frame(u), dentro = (th: number) => { const q = sec(f, th); return gapCupula(q[0], q[1], q[2]) > 0.02 && q[1] > f.zc; };
+    let r: [number, number] = [Math.PI, Math.PI];   // vacío
+    if (dentro(Math.PI / 2)) {
+      let a = 0, b = Math.PI / 2;
+      for (let i = 0; i < 16; i++) { const m = (a + b) / 2; if (dentro(m)) b = m; else a = m; }
+      r = [b, Math.PI - b];
+    }
+    cacheHueco.set(k, r); return r;
+  };
+  // La punta en azul marino como el Aptera (2026-11-06, Eugenio): hasta donde acaba la pieza redondeada.
+  const uNariz = Math.min(0.09, uRedondo);
   const zonasCuerpo: ZonaPiel[] = [
+    { nombre: 'Pieza del morro', piel: 'morro', u0: 0, u1: uNariz, t0: 0, t1: 2 * Math.PI },
     ...huecos,
+    { nombre: 'Hueco de la cabina', piel: 'hueco', u0: uC0 + 0.03, u1: uC1 - 0.08, t0: 0, t1: Math.PI, tDe: thHueco },
     { nombre: 'Bajos', piel: 'bajos', u0: 0.004, u1: 0.996, t0: Math.PI, t1: 2 * Math.PI, tDe: bandaDe },
     { nombre: 'Paneles solares del capó', piel: 'solar', u0: 0.045, u1: uC0 - 0.02, t0: 0.28 * Math.PI, t1: 0.72 * Math.PI },
     { nombre: 'Paneles solares del lomo izq.', piel: 'solar', u0: uC0 + 0.01, u1: 0.93, t0: 0.19 * Math.PI, t1: 0.42 * Math.PI },
@@ -460,12 +488,23 @@ export function crearModeloA1(P: Parametros) {
   const yEn = (u: number) => secC(frameC(u), thBase(u) + 0.02)[1];
   const yA = yEn(uBase), yB = yEn(uVent1);
   const thAlfeizar = (u: number) => thAltura(u, yA + (yB - yA) * (u - uBase) / (uVent1 - uBase));
+  // Gomas (2026-11-06, Eugenio: «mejora la credibilidad de las ventanillas»):
+  // cada cristal lleva alrededor una banda negra mate de unos 2,5 cm, que es
+  // la junta que tiene cualquier cristal pegado; y la ventanilla se parte en
+  // dos (piloto y pasajero) con un montante fino entre las dos cabezas.
+  const G_T = 0.035, G_U = 0.007;
+  const uDivisor = uDeX((occPts(true).C[0] + occPts(false).C[0]) / 2 - 0.05);
+  const thVentG = (u: number) => Math.max(thAlfeizar(u) - G_T, thBase(u) + 0.005), thVentH = (u: number) => Math.min(thVentana, thVent(u) + G_T);
   const zonasCupula: ZonaPiel[] = [
+    { nombre: 'Montante entre ventanillas', piel: 'marco', u0: uDivisor - 0.006, u1: uDivisor + 0.006, t0: 0, t1: Math.PI, tDe: u => [thVentG(u), Math.PI - thVentG(u)] },
     { nombre: 'Parabrisas', piel: 'cristal', u0: uC0, u1: uW1, t0: 0, t1: Math.PI, tDe: u => [Math.max(thPilar(u), thBase(u) + 0.02), Math.PI - Math.max(thPilar(u), thBase(u) + 0.02)] },
     { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [Math.max(thAlfeizar(u), thBase(u) + 0.005), thVent(u)] },
     { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVent(u), Math.PI - Math.max(thAlfeizar(u), thBase(u) + 0.005)] },
+    { nombre: 'Goma del parabrisas', piel: 'marco', u0: uC0, u1: uW1 + G_U, t0: 0, t1: Math.PI, tDe: u => [Math.max(thPilar(u) - G_T, thBase(u) + 0.005), Math.PI - Math.max(thPilar(u) - G_T, thBase(u) + 0.005)] },
+    { nombre: 'Goma de la ventanilla izquierda', piel: 'marco', u0: uBase - G_U, u1: uVent1 + G_U, t0: 0, t1: thVentana, tDe: u => [thVentG(u), thVentH(u)] },
+    { nombre: 'Goma de la ventanilla derecha', piel: 'marco', u0: uBase - G_U, u1: uVent1 + G_U, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVentH(u), Math.PI - thVentG(u)] },
     // Paneles solares: la parte plana del techo, del borde de arriba del parabrisas hasta la cola.
-    { nombre: 'Paneles solares del techo', piel: 'solar', u0: uW1 + 0.012, u1: uC1 - 0.025, t0: 0.27 * Math.PI, t1: 0.73 * Math.PI },
+    { nombre: 'Paneles solares del techo', piel: 'solar', u0: Math.min(uC1 - 0.10, uW1 + P.inicioSolar / L), u1: uC1 - 0.025, t0: 0.27 * Math.PI, t1: 0.73 * Math.PI },
   ];
 
   // ── Puertas y maleteros ──────────────────────────────────────────────────
@@ -542,7 +581,7 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, uNariz, gomaT: G_T, gomaU: G_U, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
     baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY,
