@@ -15,7 +15,7 @@ const leerClaves = (): Record<string, string> => { try { return JSON.parse(local
 
 /** Nuestra ficha, en los mismos términos que la de un velomóvil de referencia. */
 export function fichaPropia(m: Modelo, r: Resultados) {
-  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: 4, ejes: 3, via: m.P.track, plazas: 3, masa: r.mVeh, huella: m.Lf * m.P.W };
+  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: 4, ejes: 3, via: m.P.track, plazas: 3, masa: r.mVeh, cd: r.Cd as number | null, huella: m.Lf * m.P.W };
 }
 
 export function TablaComparacion({ propia, otra, nombre }: { propia: ReturnType<typeof fichaPropia>; otra: ReturnType<typeof fichaComparable>; nombre: string }) {
@@ -23,7 +23,7 @@ export function TablaComparacion({ propia, otra, nombre }: { propia: ReturnType<
     ['Largo', propia.L, otra.L, v => `${fmt(v)} m`], ['Ancho', propia.W, otra.W, v => `${fmt(v)} m`], ['Alto', propia.H, otra.H, v => `${fmt(v)} m`],
     ['Batalla', propia.batalla, otra.batalla, v => `${fmt(v)} m`], ['Vía más ancha', propia.via, otra.via, v => `${fmt(v)} m`],
     ['Ruedas', propia.ruedas, otra.ruedas, v => String(v)], ['Plazas', propia.plazas, otra.plazas, v => String(v)],
-    ['Masa', propia.masa, otra.masa, v => `${Math.round(v)} kg`], ['Huella (largo × ancho)', propia.huella, otra.huella, v => `${fmt(v)} m²`],
+    ['Masa', propia.masa, otra.masa, v => `${Math.round(v)} kg`], ['Cd (el nuestro, estimado)', propia.cd, otra.cd, v => v.toFixed(3).replace('.', ',')], ['Huella (largo × ancho)', propia.huella, otra.huella, v => `${fmt(v)} m²`],
   ];
   return (
     <div className="overflow-x-auto">

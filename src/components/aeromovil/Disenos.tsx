@@ -10,8 +10,17 @@
 // sin cuenta recibe una clave que se queda en SU navegador
 // (`aeromovil.claves`): con ella puede cambiarlo o quitarlo después. Sin la
 // clave, «Guardar» ofrece guardarlo como uno nuevo.
-import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, FilePlus2, FolderOpen, Link2, Loader2, Save, Trash2 } from 'lucide-react';
+//
+// Guardado automático (2026-11-05, Eugenio: «el diseño según lo voy
+// modificando se guarda solo?» → «hazlo»). Un diseño TUYO (su clave está en
+// este navegador) se guarda solo en la web unos segundos después de dejar de
+// tocar. Los demás no: el diseño base y los de otras personas se cambian con
+// «Guardar cambios», a propósito, porque guardar solo encima del trabajo de
+// otro en cuanto alguien mueve un deslizador no tiene vuelta atrás (los diseños
+// no tienen historial). Y un diseño sin guardar nunca se crea solo: cada
+// visitante que juega con los deslizadores llenaría la lista de todos.
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Check, ChevronDown, CloudOff, FilePlus2, FolderOpen, Link2, Loader2, Save, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { PARAMETROS_POR_DEFECTO, type Parametros } from './geometria';
@@ -19,16 +28,87 @@ import { PARAMETROS_POR_DEFECTO, type Parametros } from './geometria';
 export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; updated_at: string }
 
 const CLAVES = 'aeromovil.claves';
-const leerClaves = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(CLAVES) || '{}') || {}; } catch { return {}; } };
+export const leerClaves = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(CLAVES) || '{}') || {}; } catch { return {}; } };
 const guardarClave = (id: number, clave: string) => { try { localStorage.setItem(CLAVES, JSON.stringify({ ...leerClaves(), [id]: clave })); } catch { /* sin almacenamiento */ } };
 
 /** Solo los parámetros que sirven para el diseño; los de la vista (compresión) no viajan. */
 export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _c, ...resto } = P; return resto; };
 export const deDiseno = (d: Partial<Parametros>): Parametros => ({ ...PARAMETROS_POR_DEFECTO, ...d, comp: 0 });
 
-export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDecidir }: {
+export type DisenoAbierto = { id: number; nombre: string; base: string };
+export type EstadoGuardado =
+  | { tipo: 'sin-diseno' }          // nada abierto: los cambios solo están en este navegador
+  | { tipo: 'manual' }              // abierto, pero no creado desde este navegador: se guarda con el botón
+  | { tipo: 'al-dia' }              // tuyo y guardado
+  | { tipo: 'pendiente' }           // tuyo, con cambios que se guardarán solos en unos segundos
+  | { tipo: 'guardando' }
+  | { tipo: 'error'; mensaje: string; reintento?: number };
+
+/** Espera tras el último cambio, y separación mínima entre dos guardados (el
+ *  freno del servidor admite 120 por hora y conexión; así quedan como mucho 90). */
+const QUIETO_MS = 3000, ENTRE_GUARDADOS_MS = 40_000;
+
+/** Guarda solo en la web el diseño abierto, si es de este navegador. */
+export function useAutoguardado(P: Parametros, actual: DisenoAbierto | null, alGuardado: (d: Diseno) => void): EstadoGuardado {
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<{ mensaje: string; reintento?: number } | null>(null);
+  const ultimo = useRef(0);
+  const datos = JSON.stringify(aDiseno(P));
+  const clave = actual ? leerClaves()[actual.id] : undefined;
+  const cambiado = !!actual && datos !== actual.base;
+  // Lo que hay que guardar, para el guardado de emergencia al cerrar la página.
+  const pendiente = useRef<{ id: number; datos: string; clave: string } | null>(null);
+  pendiente.current = actual && clave && cambiado ? { id: actual.id, datos, clave } : null;
+
+  const guardar = useCallback(async (id: number, cuerpo: string, k: string) => {
+    setGuardando(true); ultimo.current = Date.now();
+    try {
+      const r = await fetch(`/api/aeromovil/disenos/${id}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ parametros: JSON.parse(cuerpo), clave: k }) });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) {
+        const espera = Number(r.headers.get('Retry-After')) || 0;
+        setError({ mensaje: j?.error || 'No se ha podido guardar en la web.', reintento: r.status === 429 && espera ? Date.now() + espera * 1000 : undefined });
+        return;
+      }
+      setError(null); alGuardado(j);
+    } catch {
+      setError({ mensaje: 'Sin conexión: se guardará en cuanto vuelva la red.', reintento: Date.now() + 15_000 });
+    } finally { setGuardando(false); }
+  }, [alGuardado]);
+
+  useEffect(() => {
+    if (!actual || !clave || !cambiado || guardando) return;
+    const ahora = Date.now();
+    let cuando = Math.max(ahora + QUIETO_MS, ultimo.current + ENTRE_GUARDADOS_MS);
+    if (error) { if (!error.reintento) return; cuando = Math.max(cuando, error.reintento); }   // un 403 o un 400 no se reintenta solo
+    const t = setTimeout(() => guardar(actual.id, datos, clave), cuando - ahora);
+    return () => clearTimeout(t);
+  }, [actual, clave, cambiado, datos, guardando, error, guardar]);
+
+  // Al cambiar de diseño, el error del anterior no vale.
+  useEffect(() => { setError(null); }, [actual?.id]);
+
+  // Si se cierra la página con cambios sin subir, se mandan en ese momento.
+  useEffect(() => {
+    const salir = () => {
+      const p = pendiente.current; if (!p) return;
+      try { fetch(`/api/aeromovil/disenos/${p.id}`, { method: 'PUT', credentials: 'include', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ parametros: JSON.parse(p.datos), clave: p.clave }) }); } catch { /* nada */ }
+    };
+    window.addEventListener('pagehide', salir);
+    return () => window.removeEventListener('pagehide', salir);
+  }, []);
+
+  if (!actual) return { tipo: 'sin-diseno' };
+  if (!clave) return { tipo: 'manual' };
+  if (guardando) return { tipo: 'guardando' };
+  if (error && cambiado) return { tipo: 'error', ...error };
+  return { tipo: cambiado ? 'pendiente' : 'al-dia' };
+}
+
+export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDecidir, estado }: {
   P: Parametros;
-  actual: { id: number; nombre: string; base: string } | null;
+  actual: DisenoAbierto | null;
+  estado: EstadoGuardado;
   alCargar: (d: Diseno) => void;
   alNuevo: () => void;
   alGuardado: (d: Diseno) => void;
@@ -101,7 +181,10 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
         className={cn('gap-1.5 px-3 py-1.5 text-sm normal-case tracking-normal text-slate-700', abierto && 'bg-slate-100')}>
         <FolderOpen className="h-4 w-4" />
         <span className="max-w-[14rem] truncate">{actual ? actual.nombre : 'Diseños'}</span>
-        {cambiado && <span className="h-2 w-2 rounded-full bg-amber-500" title="Cambios sin guardar" />}
+        {estado.tipo === 'guardando' && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" aria-label="Guardando en la web" />}
+        {estado.tipo === 'al-dia' && actual && <Check className="h-3.5 w-3.5 text-teal-700" aria-label="Guardado en la web" />}
+        {estado.tipo === 'error' && <CloudOff className="h-3.5 w-3.5 text-amber-600" aria-label="Sin guardar en la web" />}
+        {(estado.tipo === 'manual' || estado.tipo === 'pendiente') && cambiado && <span className="h-2 w-2 rounded-full bg-amber-500" title={estado.tipo === 'pendiente' ? 'Se guardará en unos segundos' : 'Cambios sin guardar'} />}
         <ChevronDown className="h-3.5 w-3.5" />
       </Button>
       {abierto && (
@@ -127,6 +210,13 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
               </Button>
             </form>
           )}
+          <p className={cn('px-2 py-1.5 text-xs', estado.tipo === 'error' ? 'text-amber-800' : 'text-slate-600')}>{
+            estado.tipo === 'sin-diseno' ? 'Tus cambios se guardan en este navegador. Para tenerlos en la web, guárdalo con un nombre: a partir de ahí se guarda solo.'
+            : estado.tipo === 'manual' ? 'Este diseño no lo creaste tú desde este navegador: tus cambios no se guardan solos. «Guardar cambios» los sube (si puedes cambiarlo) o «Guardar como nuevo» hace tu copia.'
+            : estado.tipo === 'error' ? `${estado.mensaje}${estado.reintento ? ' Se volverá a intentar solo.' : ''}`
+            : estado.tipo === 'guardando' ? 'Guardando en la web…'
+            : estado.tipo === 'pendiente' ? 'Se guarda solo en la web unos segundos después de cada cambio.'
+            : 'Guardado en la web. Cada cambio se guarda solo.'}</p>
           {aviso && <p className="px-2 py-1.5 text-xs text-slate-600">{aviso}</p>}
           {error && <p className="px-2 py-1.5 text-xs text-red-700">{error}</p>}
           {!lista && !error && <p className="flex items-center gap-2 px-2 py-2 text-xs text-slate-500"><Loader2 className="h-3.5 w-3.5 animate-spin" />Cargando…</p>}

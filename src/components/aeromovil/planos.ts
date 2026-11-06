@@ -9,7 +9,7 @@
 //   · CSV con la lista de corte de tubos.
 // Las láminas son dibujo técnico: líneas negras sobre papel blanco, en los
 // dos temas de color, porque se imprimen.
-import { SEAT_GAP, contornoSeccion, largoTubo, type Modelo, type Tubo } from './geometria';
+import { SEAT_GAP, contornoSeccion, largoTubo, tramosTubo, type Modelo, type Tubo } from './geometria';
 
 const A3 = { w: 420, h: 297 };
 const mm = (v: number) => Math.round(v * 1000);
@@ -157,11 +157,11 @@ export function laminas(m: Modelo, paso: number, fecha: string): Lamina[] {
     const X = (x: number) => 50 + (x - (m.xR - m.rR)) * k, Y = (y: number) => 140 - y * k, Z = (z: number) => 220 + z * k;
     h.texto(30, 26, 'ALZADO LATERAL', 'th');
     h.linea(X(m.xR - m.rR) - 10, Y(0), X(m.rF) + 10, Y(0), 'e');
-    for (const t of tubos) {
-      const dx = t.b[0] - t.a[0], dy = t.b[1] - t.a[1], L = Math.hypot(dx, dy);
-      if (L < 0.005) { h.circulo(X(t.a[0]), Y(t.a[1]), t.d / 2 * k, 'l'); continue; }
+    for (const t of tubos) for (const [a, b] of tramosTubo(t, 16)) {
+      const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+      if (L < 0.005) { if (!t.curva) h.circulo(X(a[0]), Y(a[1]), t.d / 2 * k, 'l'); continue; }
       const nx = -dy / L * t.d / 2, ny = dx / L * t.d / 2;
-      h.poli([[X(t.a[0] + nx), Y(t.a[1] + ny)], [X(t.b[0] + nx), Y(t.b[1] + ny)], [X(t.b[0] - nx), Y(t.b[1] - ny)], [X(t.a[0] - nx), Y(t.a[1] - ny)]], true, t.comprado ? 'o' : 'l');
+      h.poli([[X(a[0] + nx), Y(a[1] + ny)], [X(b[0] + nx), Y(b[1] + ny)], [X(b[0] - nx), Y(b[1] - ny)], [X(a[0] - nx), Y(a[1] - ny)]], true, t.comprado ? 'o' : 'l');
     }
     for (const [x, r] of [[0, m.rF], [m.xR, m.rR], [m.xL, m.rL]] as [number, number][]) { h.circulo(X(x), Y(r), r * k, 'o'); h.circulo(X(x), Y(r), 0.6, 'l'); }
     // Horquilla (comprada): eje de dirección
@@ -169,7 +169,7 @@ export function laminas(m: Modelo, paso: number, fecha: string): Lamina[] {
     h.circulo(X(m.BB[0]), Y(m.BB[1]), 0.165 * k, 'o');
     h.cota(X(m.xR), Y(m.rR), X(0), Y(m.rF), `batalla ${mm(P.B)}`, 34);
     h.cota(X(m.xL), Y(m.rL), X(0), Y(m.rF), `${mm(-m.xL)}`, 26);
-    h.cota(X(m.sf), Y(0), X(m.sf), Y(0.20), `${mm(0.20)}`, -18);
+    h.cota(X(m.sr), Y(0), X(m.sr), Y(m.ys), `${mm(m.ys)}`, -18);
     h.texto(X(m.BB[0]), Y(m.BB[1]) - 0.165 * k - 2, 'pedalier-generador', 'tc', 'middle');
     h.texto(X(m.PIV[0]), Y(m.PIV[1]) + 5, 'pivote basculante', 'tc', 'middle');
     h.texto(X(0), Y(m.rF) - m.rF * k - 8, `horquilla 170 mm, ${90 - P.horquilla}°`, 'tc', 'middle');
@@ -227,7 +227,7 @@ export function listaCorte(m: Modelo): FilaCorte[] {
   return m.tubosChasis().filter(t => !t.comprado).map((t, i) => {
     const L = largoTubo(t), area = t.pared ? Math.PI * ((t.d / 2) ** 2 - (t.d / 2 - t.pared) ** 2) : Math.PI * (t.d / 2) ** 2;
     return {
-      ref: `T${String(i + 1).padStart(2, '0')}`, pieza: t.nombre, material: t.material,
+      ref: `T${String(i + 1).padStart(2, '0')}`, pieza: t.curva ? `${t.nombre} (curvar con la plantilla del DXF)` : t.nombre, material: t.material,
       seccion: `${f1(t.d * 1000)} × ${t.pared ? f1(t.pared * 1000) : 'macizo'}`, largo: mm(L), masa: Math.round(area * L * 2700 * 1000), cantidad: 1,
     };
   });
@@ -306,13 +306,13 @@ export function dxfPerfiles(m: Modelo, paso: number) {
 export function dxfChasis(m: Modelo) {
   const d = new Dxf();
   const tubos: Tubo[] = m.tubosChasis();
-  for (const t of tubos) {
-    const dx = t.b[0] - t.a[0], dy = t.b[1] - t.a[1], L = Math.hypot(dx, dy);
+  for (const t of tubos) for (const [a, b] of tramosTubo(t, 24)) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
     const capa = t.comprado ? 'COMPRADO' : `TUBO_${Math.round(t.d * 1000)}`;
-    if (L < 0.005) { d.circulo(capa, t.a[0] * 1000, t.a[1] * 1000, t.d * 500); continue; }
+    if (L < 0.005) { if (!t.curva) d.circulo(capa, a[0] * 1000, a[1] * 1000, t.d * 500); continue; }
     const nx = -dy / L * t.d / 2, ny = dx / L * t.d / 2;
-    d.poli(capa, [[t.a[0] + nx, t.a[1] + ny], [t.b[0] + nx, t.b[1] + ny], [t.b[0] - nx, t.b[1] - ny], [t.a[0] - nx, t.a[1] - ny]].map(p => [p[0] * 1000, p[1] * 1000] as [number, number]), true);
-    d.linea('EJES_TUBOS', t.a[0] * 1000, t.a[1] * 1000, t.b[0] * 1000, t.b[1] * 1000);
+    d.poli(capa, [[a[0] + nx, a[1] + ny], [b[0] + nx, b[1] + ny], [b[0] - nx, b[1] - ny], [a[0] - nx, a[1] - ny]].map(p => [p[0] * 1000, p[1] * 1000] as [number, number]), true);
+    d.linea('EJES_TUBOS', a[0] * 1000, a[1] * 1000, b[0] * 1000, b[1] * 1000);
   }
   for (const [x, r] of [[0, m.rF], [m.xR, m.rR], [m.xL, m.rL]] as [number, number][]) { d.circulo('RUEDAS', x * 1000, r * 1000, r * 1000); d.circulo('EJES_RUEDAS', x * 1000, r * 1000, 6); }
   d.circulo('PEDALIER', m.BB[0] * 1000, m.BB[1] * 1000, 165);
