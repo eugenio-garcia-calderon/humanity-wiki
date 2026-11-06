@@ -44,6 +44,28 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «quita el menú
   // entero y la opción de iniciar sesión»): sin el ☰ y sin el hueco de la cuenta.
   const escaparate = c.sitio?.escaparate === true;
+  // EL ESCAPARATE, CENTRADO (2026-11-06, Eugenio: «el logotipo con el nombre y el subtítulo en el
+  // centro, y la barra de buscar más hacia la derecha»): tres columnas, la marca en medio y el
+  // buscador pegado a la derecha. En el móvil, la marca arriba y el buscador debajo, a la derecha.
+  if (escaparate) return (
+    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-1 items-center gap-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:-mt-5 sm:grid-cols-[1fr_auto_1fr] sm:px-6"
+      style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
+      <style>{'html { overflow-x: clip; }'}</style>
+      <span aria-hidden className="hidden sm:block" />
+      <Link to="/" className="flex min-w-0 items-center justify-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
+        {icono && (/^(https?:|\/)/.test(icono)
+          ? <img src={miniatura(icono, 112)} alt="" className="h-[38px] w-[38px] shrink-0 rounded-lg object-contain" />
+          : <span className="text-[1.6rem] leading-none">{icono}</span>)}
+        {raiz && (
+          <span className="flex min-w-0 flex-col leading-none">
+            <span className="whitespace-nowrap text-[1.4rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
+            {c.subtitulo && <span className="mt-1 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{c.subtitulo}</span>}
+          </span>
+        )}
+      </Link>
+      <div className="flex min-w-0 justify-end"><BuscarBarra raizId={raizId} enLinea /></div>
+    </header>
+  );
   return (
     // FIJA AL BAJAR (2026-10-26, Eugenio: «en la entrada de una base de datos el menú no se mantiene fijo al hacer
     // scroll»): pegada arriba y con fondo para que no se mezcle.
