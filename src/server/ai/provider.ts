@@ -596,6 +596,35 @@ export async function generarImagenNanoBanana(prompt: string): Promise<ImagenGen
   return { mimeType: imagePart.inlineData.mimeType || 'image/png', base64: imagePart.inlineData.data };
 }
 
+/**
+ * Imagen a partir de otra imagen (2026-11-06, Aeromóvil: «un render
+ * hiperrealista de la vista que el usuario esté viendo»). Mismo modelo y
+ * misma clave que `generarImagenNanoBanana`; la captura del visor va como
+ * parte `inlineData` delante del texto.
+ */
+export async function generarImagenDesdeImagen(prompt: string, imagen: ImagenGenerada): Promise<ImagenGenerada> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY no está configurada. Consíguela en aistudio.google.com/apikey y añádela a .env.');
+  }
+  const res = await fetch(`${GEMINI_API}/models/${NANO_BANANA_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ inlineData: { mimeType: imagen.mimeType, data: imagen.base64 } }, { text: prompt }] }],
+      generationConfig: { responseModalities: ['IMAGE'] },
+    }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`No se ha podido generar el render (${res.status}): ${detail.slice(0, 300)}`);
+  }
+  const json: any = await res.json();
+  const parts: any[] = json.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find(p => p.inlineData?.data);
+  if (!imagePart) throw new Error('El modelo no ha devuelto ninguna imagen.');
+  return { mimeType: imagePart.inlineData.mimeType || 'image/png', base64: imagePart.inlineData.data };
+}
+
 // ----------------------------------------------------------------------------
 // STREAMING — el texto según se genera (2026-08-08, para los documentos:
 // «según lo va generando aparece»). Solo Claude por ahora: es el único sitio

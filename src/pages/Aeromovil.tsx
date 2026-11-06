@@ -23,7 +23,7 @@
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bike, Box, ClipboardList, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
+import { Bike, Box, Camera, ClipboardList, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -334,6 +334,25 @@ export default function Aeromovil() {
   const res = useMemo(() => calcular(modelo, areas(modelo)), [modelo]);
   const esA1 = modelo.tipo === 'a1';
   const nombreVehiculo = esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota';
+  const NOMBRE_VISTA: Record<Vista, string> = { iso: 'tres cuartos delantera', side: 'lateral', top: 'planta (desde arriba)', front: 'frontal', back: 'trasera' };
+  const crearRender = async () => {
+    if (!visor.current || render.estado === 'creando') return;
+    if (!dueno?.sesion) { setRender({ estado: 'error', error: 'Inicia sesión para crear un render: cada imagen cuesta dinero y por eso solo se hace con sesión.', vista }); return; }
+    setRender({ estado: 'creando', vista });
+    try {
+      const captura = await visor.current.capturar();
+      const descripcion = esA1
+        ? `cuatro ruedas totalmente carenadas, cúpula con parabrisas plano y pilares inclinados, una ventanilla a cada lado, techo plano cubierto de paneles solares que desciende hasta la cola, ${P.plazas === 2 ? 'piloto y pasajero en tándem' : 'monoplaza'}, puertas de ala de gaviota, unos ${P.L.toFixed(1)} m de largo`
+        : 'velomóvil triciclo con carrocería en forma de gota, cúpula transparente, pedaleo asistido, unos 3 m de largo';
+      const q = new URLSearchParams({ vista: NOMBRE_VISTA[vista], descripcion });
+      const r = await fetch(`/api/aeromovil/render?${q}`, { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/octet-stream' }, body: captura });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.imagen) throw new Error(j.error || `No se ha podido crear el render (${r.status}).`);
+      setRender({ estado: 'listo', imagen: j.imagen, vista });
+    } catch (e: any) {
+      setRender({ estado: 'error', error: e?.message || 'No se ha podido crear el render.', vista });
+    }
+  };
   const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
   // Cambiar de vehículo carga su juego de medidas: los dos no comparten deslizadores.
   const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'cuatro' ? PARAMETROS_A1 : PARAMETROS_GOTA); setActual(null); } };
@@ -346,6 +365,8 @@ export default function Aeromovil() {
   const [abierta, setAbierta] = useState(false);
   const [maleteros, setMaleteros] = useState(false);
   const [vista, setVista] = useState<Vista>('iso');
+  // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
+  const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
   const visor = useRef<VisorHandle | null>(null);
   // Otro velomóvil en el visor: solo, o junto al nuestro para comparar.
   const [referencia, setReferencia] = useState<Referencia | null>(null);
@@ -456,7 +477,29 @@ export default function Aeromovil() {
                 <Package className="mr-1 h-3.5 w-3.5" />{maleteros ? 'Cerrar' : 'Abrir'} maleteros
               </Button>
             )}
+            <Button variant="outline" onClick={crearRender} disabled={render.estado === 'creando'}
+              title="Una fotografía realista de la vista que estás viendo, como si el vehículo ya estuviera fabricado"
+              className="ml-auto border-amber-500 bg-amber-500 px-3 py-1.5 text-xs normal-case tracking-normal text-white hover:bg-amber-600">
+              <Camera className="mr-1 h-3.5 w-3.5" />{render.estado === 'creando' ? 'Creando render…' : 'Crear render'}
+            </Button>
           </div>
+          {render.estado !== 'nada' && (
+            <div className="absolute inset-0 z-20 flex flex-col bg-slate-900/85 p-3 text-white" role="dialog" aria-label="Render fotorrealista">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] uppercase tracking-wider">Render · vista {render.vista ? NOMBRE_VISTA[render.vista] : ''}</span>
+                {render.estado === 'listo' && render.imagen && (
+                  <a href={render.imagen} download={`${nombreVehiculo.replace(/\s+/g, '_')}_render_${render.vista}.png`}
+                    className="ml-auto inline-flex items-center rounded-md bg-white/15 px-2.5 py-1 text-xs hover:bg-white/25"><Download className="mr-1 h-3.5 w-3.5" />Descargar</a>
+                )}
+                <Button variant="ghost" onClick={() => setRender({ estado: 'nada' })} aria-label="Cerrar" className={cn('px-2 py-1 text-white hover:bg-white/15', render.estado !== 'listo' && 'ml-auto')}><X className="h-4 w-4" /></Button>
+              </div>
+              <div className="mt-2 flex min-h-0 flex-1 items-center justify-center">
+                {render.estado === 'creando' && <p className="animate-pulse text-sm">Creando la fotografía… suele tardar entre 10 y 30 segundos.</p>}
+                {render.estado === 'error' && <p className="max-w-md text-center text-sm text-amber-200">{render.error}</p>}
+                {render.estado === 'listo' && render.imagen && <img src={render.imagen} alt={`Render fotorrealista, vista ${render.vista}`} className="max-h-full max-w-full rounded-lg object-contain shadow-xl" />}
+              </div>
+            </div>
+          )}
         </section>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
