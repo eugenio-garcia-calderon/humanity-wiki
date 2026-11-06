@@ -5,6 +5,7 @@ import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
 import { usePestanasExtra, useGruposOcultos, useOpcionesRed, EVENTO_ABRIR_PESTANA } from './pestanasExtra';
 import { miniatura } from '../../utils/miniatura';
+import { useEscaparate } from './escaparate';
 import CompartirRedes from './CompartirRedes';
 
 // ============================================================================
@@ -72,6 +73,7 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
   const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   // El filtro y el tamaño que pide un bloque de la página (el perfil: «los proyectos de este área»).
   const opcionesRed = useOpcionesRed(paginaId);
+  const escaparate = useEscaparate();
   const filtro = opcionesRed.filtro || null;
   const grupos = useMemo(() => {
     if (!grupos_) return grupos_;
@@ -267,6 +269,13 @@ export default function RedRelaciones({ paginaId, titulo, autorHandle, esRaiz, e
               {grupo.entradas.map(x => <FilaEntrada key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} />)}
             </div>
           ) : (
+          // EN EL ESCAPARATE (2026-11-06, Eugenio: «la tarjeta de los proyectos mucho más grande;
+          // si solo hay uno, todavía más; si hay varios, tres por línea»): tarjetas apaisadas.
+          escaparate ? (
+            <div className={cn('grid gap-5', grupo.entradas.length === 1 ? 'max-w-3xl grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3')}>
+              {grupo.entradas.map(x => <TarjetaGrande key={x.fila_id} x={x} href={enlaceEntrada(grupo, x)} sola={grupo.entradas.length === 1} />)}
+            </div>
+          ) :
           <div className={cn('grid gap-4 sm:gap-5', opcionesRed.compacta
             ? 'grid-cols-3 sm:[grid-template-columns:repeat(auto-fill,minmax(min(9.5rem,100%),1fr))]'
             : 'grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr))]')}>
@@ -334,6 +343,25 @@ function FilaEntrada({ x, href }: { x: Entrada; href: string }) {
         {texto && <span className="block truncate text-[12px] text-slate-500">{texto}</span>}
       </span>
       <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-700" />
+    </Link>
+  );
+}
+
+/** La tarjeta del escaparate: la portada apaisada a todo el ancho, el nombre y su texto. */
+function TarjetaGrande({ x, href, sola }: { x: Entrada; href: string; sola: boolean }) {
+  const texto = (x.descripcion || x.resumen || '').trim();
+  const tono = TONOS[(x.titulo.charCodeAt(0) || 0) % TONOS.length];
+  return (
+    <Link to={href} data-interno className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
+        {x.imagen
+          ? <img src={miniatura(x.imagen, sola ? 800 : 400)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+          : <span className={cn('grid h-full w-full place-items-center text-6xl font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase()}</span>}
+      </div>
+      <div className="p-4">
+        <p className={cn('font-black leading-snug text-slate-900', sola ? 'text-2xl' : 'text-lg')}>{x.titulo}</p>
+        {texto && <p className="mt-1 line-clamp-3 text-sm leading-snug text-slate-500">{texto}</p>}
+      </div>
     </Link>
   );
 }

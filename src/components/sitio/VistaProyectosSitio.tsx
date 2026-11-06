@@ -147,7 +147,14 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const filas = [...proyectos.filas]
       .filter(f => !f.oculta && f.pagina_id && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
       .sort((a, b) => peso(a) - peso(b) || a.orden - b.orden);
-    return { colNombre, colArea, colEstado, opciones, areas, filas };
+    // LA FECHA (2026-11-06, Eugenio: «añade la fecha de los proyectos; abajo a la izquierda
+    // sobre la imagen»): el año de su «Fecha Inicio» (o de la primera columna de fecha).
+    const colFecha = cols.find(c => c.tipo === 'fecha' && c.nombre === 'Fecha Inicio') || cols.find(c => c.tipo === 'fecha');
+    const fecha = (f: Fila): string | null => {
+      const m = /\b(\d{4})\b/.exec(String(colFecha ? f.celdas[colFecha.id]?.valor ?? '' : ''));
+      return m ? m[1] : null;
+    };
+    return { colNombre, colArea, colEstado, opciones, areas, filas, fecha };
   }, [proyectos, sistemas, raiz]);
 
   // Las personas: su foto (la portada de su página) y su nombre.
@@ -255,6 +262,11 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                   )}
                   {/* El estado (Activo, Completado, Ideación…), dentro de la imagen, abajo a la derecha
                       (2026-11-05, Eugenio). El avance en porcentaje ya no se enseña. */}
+                  {modelo.fecha(f) && (
+                    <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur">
+                      {foco ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)}
+                    </span>
+                  )}
                   {estado && (
                     <span className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-sm backdrop-blur">
                       <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
@@ -287,7 +299,6 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
         <section data-ancla="personas" className="mt-16 scroll-mt-24">
           <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">
             {activa ? <>Personas del área de <span className="text-slate-700">{activa.nombre}</span></> : 'Personas'}
-            <span className="ml-1.5 text-slate-300">{genteVisible.length}</span>
           </h2>
           {genteVisible.length === 0 && <p className="mt-4 text-center text-sm text-slate-400">Todavía no hay personas en esta área.</p>}
           <ul className="mt-6 grid list-none grid-cols-3 gap-x-3 gap-y-6 p-0 sm:grid-cols-5 lg:grid-cols-8">
