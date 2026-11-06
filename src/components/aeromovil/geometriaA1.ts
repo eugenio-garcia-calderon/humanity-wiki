@@ -155,7 +155,7 @@ export function crearModeloA1(P: Parametros) {
   // las ventanillas (cristal, en las puertas); todo lo demás es panel solar.
   // Ronda 1 del bot de cabina (vs XL1/Aptera): parabrisas más tumbado (cuerda ≈33°,
   // montante ≈35°), cabina más ancha, techo que baja en curva, no en recta.
-  const uW1 = Math.min(uC1 - 0.1, uC0 + 0.19);                // borde de arriba del parabrisas
+  const uW1 = Math.min(uC1 - 0.1, uC0 + P.parabrisas);         // borde de arriba del parabrisas (deslizador «Inclinación del parabrisas»)
   const uBase = uC0 + 0.01;                                    // esquina de abajo del montante
   const thVentana = 0.24 * Math.PI;                            // donde el costado se vuelve techo
   const thPilar = (u: number) => Math.min(thVentana, Math.max(0, thVentana * (u - uBase) / (uW1 - uBase)));
@@ -173,8 +173,14 @@ export function crearModeloA1(P: Parametros) {
     const w = pesoPlano(u);
     if (u <= uW1) {
       // De perfil: casi recto de la base al borde de arriba, con la panza suave del Aptera.
+      // El parabrisas sale del capó sin cambio de inclinación (2026-11-06,
+      // Eugenio: «en la misma línea que el morro, como el Aptera, una curva
+      // constante»): cúbica de Hermite que arranca con la pendiente del capó
+      // en su base y llega casi horizontal al borde de arriba.
       const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(SZ.cupTop(uMedido(uW1))), t = Math.max(0, (u - uC0) / (uW1 - uC0));
-      top = Math.max(deck + 0.004, deck0 + (topW - deck0) * (1 - Math.pow(1 - t, 1.25)));
+      const Lw = uW1 - uC0, m0 = (yCuerpo(SZ.top(uC0)) - yCuerpo(SZ.top(uC0 - 0.02))) / 0.02 * Lw, m1 = 0.15 * (topW - deck0);
+      const t2 = t * t, t3 = t2 * t;
+      top = Math.max(deck + 0.004, deck0 * (2 * t3 - 3 * t2 + 1) + m0 * (t3 - 2 * t2 + t) + topW * (-2 * t3 + 3 * t2) + m1 * (t3 - t2));
     } else if (u > uPico) {
       // El techo baja desde el pico hasta la cola en una sola curva, sin tramo
       // plano: altura = pico − (pico − cola)·s^techo, con s de 0 a 1. `techo`
@@ -420,10 +426,22 @@ export function crearModeloA1(P: Parametros) {
     for (let k = 0; k < 18; k++) { const m = (a + b) / 2; if (fuera(m)) b = m; else a = m; }
     return b;
   };
+  // El borde de abajo de la ventanilla es una recta (2026-11-06, Eugenio:
+  // «esa curva quítala, que sea plana») entre la unión cúpula-carrocería en
+  // la base del montante y en la esquina trasera; `thAltura` da el θ de la
+  // cúpula a esa altura en cada estación.
+  const thAltura = (u: number, y: number) => {
+    const f = frameC(u), ay = f.top - f.zc; if (ay < 0.01) return 0;
+    const yn = Math.min(0.98, Math.max(0.02, (y - f.zc) / ay));
+    return Math.asin(Math.pow(yn, ncDe(u) / 2));
+  };
+  const yEn = (u: number) => secC(frameC(u), thBase(u) + 0.02)[1];
+  const yA = yEn(uBase), yB = yEn(uVent1);
+  const thAlfeizar = (u: number) => thAltura(u, yA + (yB - yA) * (u - uBase) / (uVent1 - uBase));
   const zonasCupula: ZonaPiel[] = [
     { nombre: 'Parabrisas', piel: 'cristal', u0: uC0, u1: uW1, t0: 0, t1: Math.PI, tDe: u => [Math.max(thPilar(u), thBase(u) + 0.02), Math.PI - Math.max(thPilar(u), thBase(u) + 0.02)] },
-    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [thBase(u) + 0.02, thVent(u)] },
-    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVent(u), Math.PI - thBase(u) - 0.02] },
+    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [Math.max(thAlfeizar(u), thBase(u) + 0.005), thVent(u)] },
+    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVent(u), Math.PI - Math.max(thAlfeizar(u), thBase(u) + 0.005)] },
     // Paneles solares: la parte plana del techo, del borde de arriba del parabrisas hasta la cola.
     { nombre: 'Paneles solares del techo', piel: 'solar', u0: uW1 + 0.012, u1: uC1 - 0.025, t0: 0.27 * Math.PI, t1: 0.73 * Math.PI },
   ];
@@ -503,7 +521,7 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, thVentana, thPilar, thTrasera, thBase,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
     baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, pasosRueda,
