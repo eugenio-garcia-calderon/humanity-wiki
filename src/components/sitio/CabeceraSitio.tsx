@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
@@ -61,7 +61,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
             <span className="whitespace-nowrap text-[1.68rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
-            {c.subtitulo && <span data-eslogan className="mt-1 w-0 min-w-full whitespace-nowrap text-[11.5px] font-semibold text-slate-500 [text-align-last:justify] [text-align:justify]">{c.subtitulo}</span>}
+            {c.subtitulo && <Eslogan texto={c.subtitulo} />}
           </span>
         )}
       </Link>
@@ -121,5 +121,46 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
         </span>
       </div>
     </header>
+  );
+}
+
+/** EL ESLOGAN DEL ANCHO DEL NOMBRE, CON LAS LETRAS A LA MISMA DISTANCIA (2026-11-06, Eugenio:
+ *  «que las letras tengan la misma distancia entre ellas y encajen debajo del logotipo; hazlo
+ *  un poco más grande para que se cumpla»). Se mide lo que ocupa a su tamaño y el hueco que
+ *  falta hasta el ancho del nombre se reparte por igual entre todas las letras. */
+function Eslogan({ texto }: { texto: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  // El tamaño que llena un 88 % del ancho del nombre; el 12 % restante, repartido entre las letras.
+  const [medida, setMedida] = useState<{ tam: number; espacio: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current, nombre = el?.previousElementSibling as HTMLElement | null;
+    if (!el || !nombre) return;
+    // La letra del sistema cambia de dibujo según el tamaño (SF Text / SF Display), así que no
+    // escala en línea recta: se mide al tamaño de verdad y se corrige un par de veces.
+    const ancho = (tam: number) => {
+      const prueba = document.createElement('span');
+      prueba.textContent = texto;
+      const cs = getComputedStyle(el);
+      prueba.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;letter-spacing:0';
+      prueba.style.fontFamily = cs.fontFamily; prueba.style.fontWeight = cs.fontWeight; prueba.style.fontSize = `${tam}px`;
+      document.body.appendChild(prueba);
+      const w = prueba.getBoundingClientRect().width;
+      prueba.remove();
+      return w;
+    };
+    const medir = () => {
+      const total = nombre.getBoundingClientRect().width;
+      if (!total) return;
+      let tam = 12;
+      for (let i = 0; i < 3; i++) { const w = ancho(tam); if (!w) return; tam = Math.min(15, tam * (total * 0.88) / w); }
+      const huecos = Math.max(1, [...texto].length - 1);
+      setMedida({ tam, espacio: Math.max(0, (total - ancho(tam)) / huecos) });
+    };
+    medir();
+    document.fonts?.ready.then(medir).catch(() => {});
+  }, [texto]);
+  return (
+    <span ref={ref} data-eslogan className="mt-1 w-0 min-w-full whitespace-nowrap font-semibold text-slate-500"
+      style={{ fontSize: medida ? `${medida.tam}px` : '11.5px', letterSpacing: medida ? `${medida.espacio}px` : undefined }}>{texto}</span>
   );
 }
