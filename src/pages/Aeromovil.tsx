@@ -190,6 +190,15 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar }: {
         <Deslizador id="a1-mo" etiqueta="Redondez del morro" valor={P.morroA1} min={0.2} max={1} paso={0.05} mostrar={`${fmt((0.04 + 0.10 * P.morroA1 + P.posMorro) * P.L * 100, 0)} cm de punta redonda · ${P.morroA1 > 0.85 ? 'romo' : 'Aptera'}`} alCambiar={v => set('morroA1', v)} />
         <Deslizador id="a1-pm" etiqueta="Alcance de la pieza del morro" valor={P.posMorro} min={-0.03} max={0.15} paso={0.01} mostrar={`${P.posMorro >= 0 ? '+' : ''}${(P.posMorro * P.L * 100).toFixed(0)} cm`} alCambiar={v => set('posMorro', v)} />
         <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+          <div><div className="text-sm font-medium text-slate-800">Opción Jaguar</div><div className="text-xs text-slate-500">la carrocería envuelve las ruedas con un abombamiento redondo, como el D-Type</div></div>
+          <Button variant="outline" aria-pressed={P.jaguar} onClick={() => set('jaguar', !P.jaguar)} className={cn('shrink-0 px-3 py-1.5 text-xs normal-case tracking-normal', P.jaguar && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{P.jaguar ? 'Activada' : 'Activar'}</Button>
+        </div>
+        {P.jaguar && (<>
+          <Deslizador id="a1-jh" etiqueta="Jaguar: cuánto sobresale" valor={P.jagAlto} min={0.01} max={0.15} paso={0.005} mostrar={`${fmt(P.jagAlto * 100, 1)} cm sobre la rueda`} alCambiar={v => set('jagAlto', v)} />
+          <Deslizador id="a1-jl" etiqueta="Jaguar: largo del abombamiento" valor={P.jagLargo} min={0.6} max={2.0} paso={0.05} mostrar={m2(P.jagLargo)} alCambiar={v => set('jagLargo', v)} />
+          <Deslizador id="a1-ja" etiqueta="Jaguar: alcance en vertical" valor={P.jagAncho} min={0.12} max={0.5} paso={0.01} mostrar={P.jagAncho < 0.2 ? 'solo la cintura' : P.jagAncho > 0.4 ? 'hasta el hombro' : 'cintura y flanco'} alCambiar={v => set('jagAncho', v)} />
+        </>)}
         <p className="-mt-2 text-xs text-slate-500">Parabrisas plano (como el VW XL1) con montantes inclinados, una ventanilla a cada lado y el panel solar en la parte plana del techo, que baja en una sola curva hasta la cola (como el Aptera).</p>
         <Deslizador id="a1-parab" etiqueta="Inclinación del parabrisas" valor={P.parabrisas} min={0.12} max={0.32} paso={0.005} mostrar={`${m2(P.parabrisas * P.L)} de largo · ${P.parabrisas < 0.17 ? 'empinado' : P.parabrisas > 0.26 ? 'muy tumbado' : 'tumbado'}`} alCambiar={v => set('parabrisas', v)} />
         <Deslizador id="a1-techo" etiqueta="Caída del techo" valor={P.techo} min={1} max={3} paso={0.05} mostrar={P.techo < 1.25 ? 'recta desde el pico' : P.techo > 2.2 ? 'alto hasta el final' : 'curva suave (Aptera)'} alCambiar={v => set('techo', v)} />

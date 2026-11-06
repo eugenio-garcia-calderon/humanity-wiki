@@ -147,11 +147,30 @@ export function crearModeloA1(P: Parametros) {
     }
     return { s: hw / (P.W / 2), x: xDeU(u), zc: bot + (top - bot) * SZ.ecuador, top, bot, hw };
   };
+  // «Opción Jaguar» (2026-11-06, Eugenio, con el D-Type): sobre cada rueda la
+  // carrocería se abomba hacia fuera con una campana suave (coseno al cuadrado
+  // a lo largo y en vertical), centrada un poco por encima de la cintura, que
+  // se funde con el cuerpo sin arista. Es un desplazamiento sobre la piel: las
+  // comprobaciones de holgura siguen midiendo contra la piel sin abombar, que
+  // es el caso más desfavorable.
+  const bultoJaguar = (x: number, th: number): number => {
+    if (!P.jaguar || P.jagAlto <= 0) return 0;
+    let g = 0;
+    for (const xA of [0, xR]) { const d = Math.abs(x - xA) / (P.jagLargo / 2); if (d < 1) g = Math.max(g, Math.cos(Math.PI / 2 * d) ** 2); }
+    if (g === 0) return 0;
+    const W = Math.max(0.05, P.jagAncho) * Math.PI, thC = 0.10 * Math.PI;
+    const t = th <= Math.PI ? th : th - 2 * Math.PI;                     // −π..π, 0 = cintura izquierda
+    const dl = Math.abs(t - thC) / W, dr = Math.abs((Math.PI - t) - thC) / W;   // distancia angular a cada centro
+    const h = Math.max(dl < 1 ? Math.cos(Math.PI / 2 * dl) ** 2 : 0, dr < 1 ? Math.cos(Math.PI / 2 * dr) ** 2 : 0);
+    return P.jagAlto * g * h;
+  };
   const sec = (f: Seccion, th: number, off = 0): P3 => {
     const c = Math.cos(th), sn = Math.sin(th), up = sn >= 0, n = up ? P.nU : P.nL;
     const ez = spow(c, 2 / n), ey = spow(sn, 2 / n), k = Math.min(1, f.s * 6), o = off * k;
-    const y = f.zc + (up ? (f.top - f.zc + o) : (f.zc - f.bot + o)) * ey;
-    return [f.x, y, (f.hw + o) * ez];
+    let y = f.zc + (up ? (f.top - f.zc + o) : (f.zc - f.bot + o)) * ey, z = (f.hw + o) * ez;
+    const b = bultoJaguar(f.x, th);
+    if (b > 0) { const ry = y - f.zc, L2 = Math.hypot(ry, z) || 1; y += b * ry / L2; z += b * z / L2; }
+    return [f.x, y, z];
   };
   // ── La cúpula: media sección superelíptica apoyada en la cubierta ────────
   const uC0 = P.cupX0, uC1 = P.cupX1;
