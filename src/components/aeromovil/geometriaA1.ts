@@ -22,6 +22,7 @@
 //
 // Mismos ejes que el Aeromóvil Gota: x hacia delante con el eje delantero en
 // x = 0, y hacia arriba, z lateral (+ izquierda). Metros.
+import { tubosCelosia, type ContextoChasis } from './chasisCelosia';
 import {
   MATERIALES_CARENADO, MATERIALES_CHASIS, MASAS_FIJAS_A1, NEUMATICOS, RENDIMIENTO_SOLAR, BAJOS_BASE, contornoSeccion, largoTubo, masaFija,
   type Asiento, type Comprobacion, type Parametros, type P3, type PiezasAsiento, type PuertaDef, type PuntosOcupante, type Resultados, type Rueda,
@@ -384,7 +385,7 @@ export function crearModeloA1(P: Parametros) {
   // Los largueros van planos entre ejes y suben con el fondo de la carrocería
   // hacia el morro y la cola, para no asomar por debajo (ronda 2 del bot).
   const yLarg = (x: number) => Math.max(ys, frame(uDeX(x)).bot + 0.035);
-  const tubosChasis = (): Tubo[] => {
+  const tubosEstructuraV1 = (): Tubo[] => {
     const AL = MATERIALES_CHASIS[P.matChasis].n;
     const t: Tubo[] = [];
     const tubo = (nombre: string, a: P3, b: P3, d: number, pared: number, grupo: Tubo['grupo'] = 'Chasis', comprado = false, material = AL, curva?: P3[]) =>
@@ -427,6 +428,20 @@ export function crearModeloA1(P: Parametros) {
     // Arco bajo del maletero: sostiene el borde delantero del suelo plano
     tubo('Travesaño del suelo del maletero', [xH, yMaletero - 0.02, -0.30], [xH, yMaletero - 0.02, 0.30], 0.028, 0.002);
     for (const s of [1, -1]) tubo(`Pie del suelo del maletero ${s > 0 ? 'izq.' : 'der.'}`, [xH, yLarg(xH), s * zR], [xH, yMaletero - 0.02, s * 0.30], 0.025, 0.0015);
+    return t;
+  };
+  // Lo que ve el chasis en celosía (versión 2, `chasisCelosia.ts`): los puntos
+  // duros del coche, para que ancle en los mismos sitios que la versión 1.
+  const contextoChasis = (): ContextoChasis => ({
+    P, xF0, xR0, xR, ys, zR, xD, yDash, xH, xArco, uArco, ySill, zSill, yTow, zTF, yAmortR, yMaletero, rF, rR, yFloor, xPil, xPas, hip, hipPas,
+    yLarg, frame, uDeX, xDeU, secC, frameC, thBase, thPilar, uBase, uW1, gomaT: G_T, gomaU: G_U, baterias, motor, reposapies, volanteCentro, cremallera,
+    material: MATERIALES_CHASIS[P.matChasis].n, acero: ACERO,
+  });
+  /** Los tubos de la mecánica (suspensión, dirección, transmisión): iguales en las dos versiones del chasis. */
+  const tubosMecanica = (): Tubo[] => {
+    const t: Tubo[] = [];
+    const tubo = (nombre: string, a: P3, b: P3, d: number, pared: number, grupo: Tubo['grupo'] = 'Chasis', comprado = false, material = MATERIALES_CHASIS[P.matChasis].n, curva?: P3[]) =>
+      t.push({ nombre, grupo, a, b, d, pared, material, comprado, curva });
     // Suspensión McPherson: brazos inferiores (fabricados), amortiguadores y barras (compradas)
     for (const [nombre, xA, r, zA, zT] of [['delantera', 0, rF, P.viaF / 2, zTF], ['trasera', xR, rR, P.viaR / 2, zTR]] as [string, number, number, number, number][]) {
       for (const s of [1, -1]) {
@@ -457,6 +472,9 @@ export function crearModeloA1(P: Parametros) {
     for (const s of [1, -1]) tubo(`Palier ${s > 0 ? 'izq.' : 'der.'}`, [xR, rR, s * 0.16], [xR, rR, s * (P.viaR / 2 - 0.10)], 0.03, 0, 'Transmisión', true, 'Comprado (palier homocinético)');
     return t;
   };
+  /** Todos los tubos: la estructura (versión 1 o 2 según `P.chasis`) y la mecánica. */
+  const tubosEstructura = (): Tubo[] => (P.chasis === 'celosia' ? tubosCelosia(contextoChasis()) : tubosEstructuraV1());
+  const tubosChasis = (): Tubo[] => [...tubosEstructura(), ...tubosMecanica()];
 
   // ── La piel: bajos negros, paneles solares, huecos de rueda ─────────────
   const uCabina1 = Math.min(uC1 - 0.12, uDeX(ultimaCabeza - 0.34));    // donde acaba la cabina y empieza el maletero trasero
@@ -695,7 +713,7 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, uArco, uNariz, gomaT: G_T, gomaU: G_U, thPuertaArriba, thPuertaAbajo, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, tubosEstructuraV1, tubosMecanica, contextoChasis, uW1, uBase, uVentA, uVent1, uArco, uNariz, gomaT: G_T, gomaU: G_U, thPuertaArriba, thPuertaAbajo, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
     baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, espacioTrasero, sueloMaletero, yMaletero,
