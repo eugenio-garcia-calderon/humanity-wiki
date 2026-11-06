@@ -16,6 +16,10 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type ModeloGota, type ModeloA1, type Piel, type Superficie,
@@ -157,6 +161,17 @@ function texturasNeumatico() {
   const mk = (c: HTMLCanvasElement, srgb = false) => { const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
   return { color: mk(cc, true), relieve: mk(cb), rugosidad: mk(cr) };
 }
+/** Sombra de contacto bajo el neumático: una mancha oscura con borde difuso que ancla la rueda al suelo (la luz difusa no llega ahí). */
+let _sombraTex: THREE.Texture | null = null;
+function sombraContacto(r: number, w: number) {
+  if (!_sombraTex) {
+    const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d')!;
+    const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64); grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.45, 'rgba(255,255,255,0.85)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad; g.fillRect(0, 0, 128, 128); _sombraTex = new THREE.CanvasTexture(c);
+  }
+  const m = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.6, alphaMap: _sombraTex, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.scale.set(r * 0.75, w * 0.9, 1); m.position.y = -r + 0.004; m.renderOrder = -1; return m;
+}
 /** Perfil del neumático para el torno, de la pestaña interior a la exterior: flanco abombado, hombro redondo, banda de rodadura ligeramente bombeada. 17 puntos: los índices 5–11 son la banda (v de 0,3125 a 0,6875 en la textura). */
 const desplazarV = (t: THREE.Texture) => { const c = t.clone(); c.wrapT = THREE.RepeatWrapping; c.offset.y = 0.5; c.needsUpdate = true; return c; };
 function perfilNeumatico(r: number, w: number, rLlanta: number): THREE.Vector2[] {
@@ -235,12 +250,24 @@ function texturaAsfalto() {
   return t;
 }
 
+/**
+ * Calidad del visor (2026-11-07, Eugenio: «mejora la calidad del render de
+ * todos los componentes para que sea más fotorrealista»): en ordenador, con
+ * ratón, se activan la oclusión ambiental (GTAO: las sombras suaves en los
+ * rincones, bajo el coche, entre piezas), el cristal con transmisión y el
+ * antialias por multimuestreo; en móvil se queda lo de antes, que ya va justo.
+ */
+const CALIDAD_ALTA = typeof window !== 'undefined' && window.matchMedia?.('(pointer: fine)').matches && !/Mobi|Android/i.test(navigator.userAgent);
+
 function materiales() {
   const grano = texturaRuido(256, 128, 70, 3, 40), neum = texturasNeumatico(), llantaTx = texturasLlanta(), discoTx = texturasDisco(), relieveSolar = texturaSolar();
   return {
     // Pintura perlada: base blanca con grano metálico fino bajo un barniz brillante.
     body: new THREE.MeshPhysicalMaterial({ color: 0xf4f5f6, metalness: 0.12, roughness: 0.38, roughnessMap: grano, bumpMap: grano, bumpScale: 0.0004, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.1, sheen: 0.15, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
-    glass: new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
+    // Cristal: en calidad alta, transmisión de verdad (se ve el interior a través, con tinte y refracción); en media, el vidrio tintado de siempre.
+    glass: CALIDAD_ALTA
+      ? new THREE.MeshPhysicalMaterial({ color: 0x9fb3c4, metalness: 0, roughness: 0.03, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.5, transmission: 0.95, thickness: 0.006, ior: 1.52, attenuationColor: new THREE.Color(0x4f6b80), attenuationDistance: 0.25, side: THREE.DoubleSide })
+      : new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
     solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0012, metalness: 0.3, roughness: 0.24, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3, side: THREE.DoubleSide }),
     // Goma negra mate alrededor de los cristales, y la pieza azul marino del morro (Aptera).
     goma: new THREE.MeshStandardMaterial({ color: 0x141516, metalness: 0.05, roughness: 0.85, side: THREE.DoubleSide }),
@@ -746,6 +773,7 @@ function ruedaCoche(g: THREE.Object3D, M: Mats, x: number, y: number, z: number,
   const grp = new THREE.Group(); grp.position.set(x, y, z); grp.rotation.y = giro; g.add(grp);
   const s = Math.sign(z) || 1, rLlanta = 0.33 / 2;
   const neum = new THREE.Mesh(new THREE.LatheGeometry(perfilNeumatico(r, w, rLlanta), 96), M.tire); neum.rotation.x = Math.PI / 2; neum.castShadow = true; neum.receiveShadow = true; grp.add(neum);
+  grp.add(sombraContacto(r, w));
   // Llanta: pestaña pulida (el aro que asoma junto al caucho), cara de disco hundida 12 mm, y el cilindro interior
   const pest = new THREE.Mesh(new THREE.TorusGeometry(rLlanta + 0.004, 0.007, 10, 72), M.rim); pest.position.z = s * (w / 2 - 0.006); grp.add(pest);
   const perfilCara: THREE.Vector2[] = [new THREE.Vector2(rLlanta + 0.004, 0), new THREE.Vector2(rLlanta - 0.004, -0.004), new THREE.Vector2(rLlanta * 0.92, -0.012), new THREE.Vector2(rLlanta * 0.30, -0.016), new THREE.Vector2(rLlanta * 0.22, -0.026), new THREE.Vector2(0.001, -0.026)];
@@ -1142,16 +1170,33 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const grupoGaraje = new THREE.Group(); scene.add(grupoGaraje);
     const puertasG = new Map<string, THREE.Group[]>();
 
+    // Posproceso: color lineal en coma flotante con 4 muestras de antialias,
+    // oclusión ambiental y, al final, el mapeo tonal y el paso a sRGB.
+    const objetivo = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: CALIDAD_ALTA ? 4 : 0 });
+    const composer = new EffectComposer(renderer, objetivo);
+    composer.addPass(new RenderPass(scene, camera));
+    let aoPass: GTAOPass | null = null;
+    if (CALIDAD_ALTA) {
+      aoPass = new GTAOPass(scene, camera, 1, 1);
+      aoPass.output = GTAOPass.OUTPUT.Default;
+      aoPass.updateGtaoMaterial({ radius: 0.22, distanceExponent: 1, thickness: 1, scale: 1, samples: 16, distanceFallOff: 1, screenSpaceRadius: false });
+      aoPass.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 4, radiusExponent: 1, rings: 2, samples: 16 });
+      aoPass.blendIntensity = 0.9;
+      composer.addPass(aoPass);
+    }
+    composer.addPass(new OutputPass());
+    const dibujar = () => composer.render();
     const resize = () => {
       const r = cv.getBoundingClientRect();
       renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
+      const pr = renderer.getPixelRatio(); composer.setSize(r.width, r.height); composer.setPixelRatio(pr); aoPass?.setSize(r.width * pr, r.height * pr);
     };
     const ro = new ResizeObserver(resize); ro.observe(cv); resize();
 
     const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let ultimo = performance.now(), tc = 0, acc = 0, raf = 0;
     const st = {
-      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, grupoGaraje, puertasG, tween: null as any,
+      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, grupoGaraje, puertasG, dibujar, tween: null as any,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
     };
@@ -1202,7 +1247,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         M.intermitenteI.emissiveIntensity = st.inclinacion > 2 && enc ? 2.2 : 0.15;
         M.intermitenteD.emissiveIntensity = st.inclinacion < -2 && enc ? 2.2 : 0.15;
       }
-      controls.update(); renderer.render(scene, camera); raf = requestAnimationFrame(bucle);
+      controls.update(); dibujar(); raf = requestAnimationFrame(bucle);
     };
     raf = requestAnimationFrame(bucle);
     return () => {
@@ -1210,7 +1255,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       cv.removeEventListener('pointerdown', alBajar); cv.removeEventListener('pointerup', alSoltar);
       scene.traverse((o: any) => { o.geometry?.dispose?.(); });
       M.solar.map?.dispose();
-      Object.values(M).forEach(m => m.dispose()); pm.dispose(); renderer.dispose();
+      Object.values(M).forEach(m => m.dispose()); pm.dispose(); composer.dispose(); renderer.dispose();
     };
   }, []);
 
@@ -1266,7 +1311,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const { body, glass, solar, bajos } = st.M as Mats;
     for (const mt of [body, bajos]) { mt.transparent = rayosX; mt.opacity = rayosX ? 0.16 : 1; mt.depthWrite = !rayosX; }
     solar.transparent = rayosX; solar.opacity = rayosX ? 0.25 : 1; solar.depthWrite = !rayosX;
-    glass.opacity = rayosX ? 0.18 : 0.55;
+    if (CALIDAD_ALTA) { glass.transmission = rayosX ? 1 : 0.95; glass.attenuationDistance = rayosX ? 2 : 0.25; } else glass.opacity = rayosX ? 0.18 : 0.55;
     const cp = corte ? [st.plano] : [];
     for (const mt of [body, glass, solar, bajos]) { mt.clippingPlanes = cp; mt.needsUpdate = true; }
   }, [rayosX, corte]);
@@ -1312,7 +1357,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       // Un fotograma recién pintado, por si el bucle aún no ha dibujado este estado
       // Sin cotas: en una fotografía no hay líneas de acotación, y la IA tiende a dibujarlas si las ve
       const cotas = st.grupoCotas.visible; st.grupoCotas.visible = false;
-      st.renderer.render(st.scene, st.camera);
+      st.dibujar();
       st.grupoCotas.visible = cotas;
       const cv = st.renderer.domElement as HTMLCanvasElement;
       // El lienzo es transparente; el JPEG no admite transparencia y lo pondría negro: se compone sobre el fondo claro de la página
