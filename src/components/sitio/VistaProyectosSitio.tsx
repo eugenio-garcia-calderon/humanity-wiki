@@ -257,31 +257,27 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                     <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
                   )}
                   <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-                  {/* Arriba, el año y el área (a la izquierda; 2026-11-06, Eugenio: «añade el área de
-                      cada proyecto como una propiedad flotante en la imagen») y el estado (a la derecha). */}
-                  <div className="absolute left-3 top-3 flex max-w-[60%] flex-wrap gap-1.5">
-                    {modelo.fecha(f) && (
-                      <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
-                        {principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)}
-                      </span>
-                    )}
-                    {sus.slice(0, 2).map(a => (
-                      <span key={a} className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">{a}</span>
-                    ))}
-                  </div>
+                  {/* EL ESTADO, ARRIBA A LA IZQUIERDA Y MÁS GRANDE; EL AÑO Y EL ÁREA, DEBAJO DEL TÍTULO
+                      (2026-11-06, Eugenio: «las propiedades debajo de los títulos, en letra blanca con
+                      esa sombra, sin fondo, más pequeñas que el título»). */}
                   {estado && (
-                    <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
-                      <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
+                    <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3.5 py-1.5 text-sm font-bold text-slate-800 shadow-sm backdrop-blur">
+                      <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
                       {estado.label}
                     </span>
                   )}
-                  <h2 className="absolute inset-x-0 bottom-0 p-4 text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:p-5 sm:text-3xl">{nombre}</h2>
+                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                    <h2 className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl">{nombre}</h2>
+                    {(modelo.fecha(f) || sus.length > 0) && (
+                      <p className="mt-1 text-sm font-semibold text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
+                        {[modelo.fecha(f) && (principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)), ...sus.slice(0, 2)].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {(descripcion || sus.length > 0) && (
+                {descripcion && (
                   <div className="px-4 py-3 sm:px-5">
-                    {descripcion
-                      ? <p className="line-clamp-2 text-sm leading-snug text-slate-500">{descripcion}</p>
-                      : <p className="truncate text-xs font-semibold text-slate-400">{sus.join(' · ')}</p>}
+                    <p className="line-clamp-2 text-sm leading-snug text-slate-500">{descripcion}</p>
                   </div>
                 )}
               </Link>
