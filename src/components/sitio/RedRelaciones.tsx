@@ -355,7 +355,7 @@ function TarjetaGrande({ x, href, sola }: { x: Entrada; href: string; sola: bool
     <Link to={href} data-interno className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
         {x.imagen
-          ? <img src={miniatura(x.imagen, sola ? 800 : 400)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+          ? <img src={miniatura(x.imagen, sola ? 800 : 400)} alt={texto ? `${x.titulo}: ${texto}` : x.titulo} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
           : <span className={cn('grid h-full w-full place-items-center text-6xl font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase()}</span>}
       </div>
       <div className="p-4">
@@ -377,7 +377,7 @@ function Tarjeta({ x, href, grande = false }: { x: Entrada; href: string; grande
       {/* Cuadrada y sin recortar, como en las galerías (2026-10-21). */}
       <div className="relative grid aspect-square place-items-center overflow-hidden rounded-2xl border border-slate-100 bg-white transition-shadow group-hover:shadow-md">
         {x.imagen
-          ? <img src={miniatura(x.imagen, grande ? 320 : 220)} alt="" loading="lazy" className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]" />
+          ? <img src={miniatura(x.imagen, grande ? 320 : 220)} alt={x.titulo} loading="lazy" className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]" />
           : conImagen
             ? <span className="text-5xl">{x.icono}</span>
             : <span className={cn('grid h-full w-full place-items-center text-5xl font-black', tono)}>{x.titulo.trim().charAt(0).toUpperCase() || <FileText className="h-8 w-8" />}</span>}

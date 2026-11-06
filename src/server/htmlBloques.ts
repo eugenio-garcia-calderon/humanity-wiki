@@ -323,7 +323,7 @@ function bloqueEnHtml(b: any, ctx: ContextoHtml, hijos: (lista: any[]) => string
       const h = hrefSeguro(b.url || '');
       if (!h) return '';
       const pie = b.pie ? `<figcaption>${enLinea(b.pie, ctx)}</figcaption>` : '';
-      return `<figure><img src="${esc(miniatura(h, 1000))}" alt="${esc(b.pie || b.texto || '')}" loading="lazy">${pie}</figure>`;
+      return `<figure><img src="${esc(miniatura(h, 1000))}" alt="${esc(b.alt || b.pie || b.texto || '')}" loading="lazy">${pie}</figure>`;
     }
     case 'medio': {
       const h = hrefSeguro(b.url || '');

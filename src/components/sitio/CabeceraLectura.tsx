@@ -105,12 +105,12 @@ function cabeceraPorElementos(pagina: DatosPagina, esMovil: boolean) {
           // Al lado del título, un cuadrado: la imagen entera dentro (2026-10-21).
           <div style={{ width: ladoPortada(el('portada'), esMovil), height: ladoPortada(el('portada'), esMovil) }}
             className="grid place-items-center overflow-hidden rounded-2xl bg-white [&_img]:h-full [&_img]:w-full [&_img]:object-contain [&_video]:h-full [&_video]:w-full [&_video]:object-cover">
-            <MediaPortada src={cfg.portada} prioridad ancho={ladoPortada(el('portada'), esMovil)} className="h-full w-full object-contain" />
+            <MediaPortada src={cfg.portada} alt={[pagina.titulo, cfg.subtitulo].filter(Boolean).join(': ')} prioridad ancho={ladoPortada(el('portada'), esMovil)} className="h-full w-full object-contain" />
           </div>
         ) : (
           <div style={{ '--alto': `${altoPortada(c, el('portada'), esMovil)}px` } as any}
             className={cn('[&_img]:h-auto [&_img]:max-h-[var(--alto)] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain', der('portada') && 'flex justify-end')}>
-            <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} />
+            <MediaPortada src={cfg.portada} alt={[pagina.titulo, cfg.subtitulo].filter(Boolean).join(': ')} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} />
           </div>
         )) : null,
         botones: hayBotones ? (
@@ -147,7 +147,7 @@ function cabeceraDeAntes(pagina: DatosPagina, esMovil: boolean) {
         cabecera={cfg.cabecera}
         // `fetchPriority`: es lo primero que se ve, que no espere detrás
         // de los iconos y las imágenes de más abajo.
-        imagen={cfg.portada ? <MediaPortada src={cfg.portada} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} /> : null}
+        imagen={cfg.portada ? <MediaPortada src={cfg.portada} alt={[pagina.titulo, cfg.subtitulo].filter(Boolean).join(': ')} prioridad className={esVideoPortada(cfg.portada) ? 'rounded-2xl w-full' : 'rounded-2xl'} /> : null}
         cuerpo={<>
           {/* LOS BOTONES, A LA DERECHA DEL TÍTULO (2026-10-21, Eugenio: «que coincida con la
               barra al bajar: los botones siempre a la derecha por defecto»). En un teléfono, debajo. */}

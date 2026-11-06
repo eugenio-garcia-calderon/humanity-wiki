@@ -35,6 +35,7 @@ import { resolverDominio, esSubdominioDeSitio } from './dominios';
 import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
+import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
 import { asegurarRutas, asegurarRutaDePagina, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
@@ -620,6 +621,26 @@ export function registrarSitios(app: Express, db: any) {
         const w = await datosPagina(db, d.entidad_id);
         if (!w?.publico || !w.indexable) return res.status(404).type('txt').send('No existe ese fichero.');
         nombre = String(w.title || s.host); resumen = descripcionDe(w.config);
+        // UN ESCAPARATE (2026-11-06, SEO): los proyectos por área y el equipo, que es lo que
+        // enseña; no las páginas viejas que cuelgan del sitio.
+        if (w.config?.sitio?.escaparate === true) {
+          const m = await modeloEscaparate(db, w.id, w.config.sitio);
+          const seo = w.config.sitio.seo || {};
+          const desc = String(seo.descripcion || resumen || '').trim();
+          const txt = [
+            `# ${nombre}${w.config?.subtitulo ? ` · ${w.config.subtitulo}` : ''}`, '',
+            desc ? `> ${desc.replace(/\s+/g, ' ')}` : '', '',
+            ...m.secciones.flatMap(sec => [`## ${sec.titulo}`, '', ...sec.entradas.map(e => {
+              const p = m.proyectos.find(x => x.url === e.url);
+              const extra = [p?.estado, p?.ano].filter(Boolean).join(', ');
+              return `- [${e.titulo.replace(/[\[\]]/g, '')}](${base}${e.url})${p?.descripcion ? `: ${p.descripcion.replace(/\s+/g, ' ').slice(0, 200)}` : ''}${extra ? ` (${extra})` : ''}`;
+            }), '']),
+            '## Equipo', '',
+            ...m.personas.map(p => `- [${p.titulo.replace(/[\[\]]/g, '')}](${base}${p.url})`), '',
+            `Todas las direcciones: ${base}/sitemap.xml`, '',
+          ].join('\n');
+          return res.type('text/markdown').set('Cache-Control', 'public, max-age=300').send(txt);
+        }
         linea(nombre, `${base}/`, resumen);
         await conTablas(w, base);
         // Y las demás páginas del sitio, con sus bases de datos: las que
@@ -824,6 +845,12 @@ export function registrarSitios(app: Express, db: any) {
       duenyo = d.handle;
       if (d.entidad_id && d.entidad_tipo === 'pagina') {
         const w = await datosPagina(db, d.entidad_id);
+        // UN ESCAPARATE ANUNCIA SÓLO LO QUE ENSEÑA (2026-11-06, SEO): la portada, sus
+        // proyectos y sus personas por su dirección corta; ni pestañas, ni tablas, ni
+        // las páginas viejas que ya no enlaza nadie.
+        if (w?.publico && w.indexable && w.config?.sitio?.escaparate === true) {
+          return await urlsEscaparate(db, s.host, w);
+        }
         if (w?.publico && w.indexable) {
           const portada: UrlSitio = { loc: `https://${s.host}/`, mod: '', img: abs(w.config?.portada) };
           urls.push(portada);
@@ -921,7 +948,12 @@ export function registrarSitios(app: Express, db: any) {
         }
       }
       if (process.env.NODE_ENV !== 'production') return next();
-      if (!String(req.headers.accept || '').includes('text/html')) return next();
+      // Los robots de las redes (WhatsApp, Facebook, LinkedIn, X, Telegram…) piden con
+      // `Accept: */*`: sin esto se llevaban el fichero estático (o una carpeta con el mismo
+      // nombre, como /aeromovil) y la vista previa salía mal (2026-11-06, SEO).
+      const acepta = String(req.headers.accept || '');
+      const roboto = /bot|crawler|spider|facebookexternalhit|whatsapp|telegram|slack|discord|linkedin|twitter|skype|embedly|preview/i.test(String(req.headers['user-agent'] || ''));
+      if (!acepta.includes('text/html') && !(roboto && (!acepta || acepta.includes('*/*')))) return next();
       const s = sitioDe(req);
       // EL MAPA INCRUSTADO EN UN DOMINIO PROPIO (2026-10-22): `/mapa?embed=1` no es
       // una página del sitio. Antes se buscaba como tal (y se armaba la página
@@ -939,6 +971,16 @@ export function registrarSitios(app: Express, db: any) {
       // 301, que le dice a Google que traslade lo que sabía de la vieja.
       const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
       if (w?.redirigir) return res.redirect(301, w.redirigir + query);
+      // EN UN ESCAPARATE NO HAY PESTAÑAS (2026-11-06, SEO): la página de un proyecto lo
+      // enseña todo junto, así que `/aeromovil/equipo-humano` era la misma página otra
+      // vez. Un 301 a la suya; y una entrada abierta dentro de otra, a su dirección corta.
+      if ((w?.seccion || w?.contexto) && s.forma === 'dominio') {
+        const d = await dominioApunta(db, s.host);
+        if (d?.entidad_id && d.entidad_tipo === 'pagina' && await configEscaparate(db, d.entidad_id)) {
+          const destino = w.contexto && slugDe(w.title || '') ? `/${slugDe(w.title)}` : req.path.replace(/\/[^/]+\/?$/, '') || '/';
+          if (destino !== req.path) return res.redirect(301, destino + query);
+        }
+      }
       // `/p/:id` de una ficha que tiene dirección legible lleva a ella.
       if (w && !w.virtual && /^(\/@[^/]+)?\/p\/[^/]+\/?$/.test(req.path)) {
         await asegurarRutaDePagina(db, w.id).catch(e => console.error('sitios: ruta', e));
@@ -1004,7 +1046,7 @@ export function registrarSitios(app: Express, db: any) {
       const titulo = w.seccion?.nombre ? `${w.seccion.nombre} · ${w.title || tituloBase}` : w.contexto ? `${w.title || tituloBase} · ${w.contexto.madre.titulo}` : tituloBase;
       const desc = w.seccion?.nombre
         ? `${w.seccion.total} ${w.seccion.nombre.toLowerCase()} de ${w.title || tituloBase}: ${(w.seccion.muestra || []).join(', ')}${w.seccion.total > (w.seccion.muestra || []).length ? '…' : '.'}`
-        : (typeof m.descripcion === 'string' && m.descripcion.trim() && !w.red ? m.descripcion.trim() : '') || descripcionDe(cfg);
+        : (typeof m.descripcion === 'string' && m.descripcion.trim() && (!w.red || m.manda) ? m.descripcion.trim() : '') || descripcionDe(cfg);
       const img = imagenDe(cfg);
       const abs = (u: string) => /^https?:/.test(u) ? u : `https://${s.host}${u.startsWith('/') ? '' : '/'}${u}`;
       // La de una base de datos lleva su nombre en la dirección, venga como venga la visita.
@@ -1029,7 +1071,7 @@ export function registrarSitios(app: Express, db: any) {
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       // Las páginas de la red se indexan aunque la ficha de producto diga que está «flaca» (2026-10-21).
-      const indexable = w.perdida ? false : (m.indexable === false && !w.red) ? false : w.indexable !== false;
+      const indexable = w.perdida ? false : (m.indexable === false && (!w.red || m.manda)) ? false : w.indexable !== false;
       // FILTROS Y ORDENACIONES FUERA DEL ÍNDICE (SEO R8). Cada combinación de
       // `?…` es otra dirección con el mismo contenido: una página basura por
       // cada una. Se siguen sus enlaces, pero no se guarda; la canónica ya
@@ -1081,6 +1123,8 @@ export function registrarSitios(app: Express, db: any) {
       ].filter(Boolean).join('\n    ');
 
       let html = plantilla
+        // El idioma de las páginas publicadas: español (2026-11-06, SEO; decía «en»).
+        .replace(/<html lang="[^"]*"/, '<html lang="es"')
         .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${esc(propio ? titulo : `${titulo} · humanity.wiki`)}</title>`)
         .replace('</head>', () => `    ${meta}\n  </head>`);
       // En un sitio propio, el icono de la pestaña es el de la página. Un emoji
@@ -1338,13 +1382,19 @@ export function registrarSitios(app: Express, db: any) {
      *  a dónde se fue, para contestar con un 301. */
     const anterior = async (handle: string, slug: string, prefijo: string) => {
       const r = (await db.execute(sql`
-        SELECT w.id, w.slug FROM direcciones_anteriores d
+        SELECT w.id, w.slug, w.title,
+               EXISTS (SELECT 1 FROM bd_filas f WHERE f.pagina_id = w.id AND f.deleted_at IS NULL AND f.oculta = false) AS es_fila
+        FROM direcciones_anteriores d
         JOIN users u ON u.id = d.duenyo_user_id
         JOIN knowledge_windows w ON w.id = d.pagina_id AND w.deleted_at IS NULL AND w.archived_at IS NULL
         WHERE u.handle = ${handle.toLowerCase()} AND d.slug = ${slug.toLowerCase()}
       `)).rows[0] as any;
-      if (!r?.slug || r.slug === slug.toLowerCase() || !(await paginaVisible(db, r.id))) return null;
-      return { redirigir: `${prefijo}/${r.slug.split('/').map(encodeURIComponent).join('/')}` };
+      // Una entrada de una base de datos no tiene `slug`: se abre por su nombre (la red),
+      // así que su dirección de hoy es `/su-nombre` (2026-11-06: los proyectos de
+      // luzhumanidad.com cambiaron de nombre y sus direcciones viejas daban 404).
+      const destino = r?.slug || (r?.es_fila ? slugDe(r.title || '') : '');
+      if (!destino || destino === slug.toLowerCase() || !(await paginaVisible(db, r.id))) return null;
+      return { redirigir: `${prefijo}/${destino.split('/').map(encodeURIComponent).join('/')}` };
     };
 
     /** `categoria/producto`: la dirección legible de una ficha (SEO R2,

@@ -3,8 +3,10 @@ import { miniatura } from '../../utils/miniatura';
 
 // La portada, sea lo que sea: una imagen, un vídeo subido o un reproductor de YouTube o Vimeo.
 // Sin ganchos: la cabecera pública también se pinta en el servidor (`cabeceraSitio.tsx`).
-export default function MediaPortada({ src, className = '', prioridad = false, ancho = 1600 }: {
+export default function MediaPortada({ src, className = '', prioridad = false, ancho = 1600, alt = '' }: {
   src: string;
+  /** El texto alternativo: el título de la página (2026-11-06, SEO). */
+  alt?: string;
   /** El ancho al que se ve, para pedir su miniatura WebP (2026-10-22). */
   ancho?: number;
   className?: string;
@@ -25,5 +27,5 @@ export default function MediaPortada({ src, className = '', prioridad = false, a
   if (esArchivoVideo(src)) {
     return <video src={src} autoPlay muted loop playsInline preload="metadata" className={`object-cover bg-slate-900 ${className}`} />;
   }
-  return <img src={miniatura(src, ancho)} alt="" fetchPriority={prioridad ? 'high' : undefined} className={className} />;
+  return <img src={miniatura(src, ancho)} alt={alt} fetchPriority={prioridad ? 'high' : undefined} className={className} />;
 }

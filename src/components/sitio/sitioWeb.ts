@@ -108,6 +108,10 @@ export type Pie = {
   /** Una sola línea: los textos legales y el correo (2026-11-06, Eugenio en luzhumanidad.com:
    *  «quita el footer; deja solo los avisos legales, la política de privacidad y un correo»). */
   sencillo?: boolean;
+  /** EL MAPA DEL SITIO DE UN ESCAPARATE (2026-11-06, SEO): los proyectos por área. No se
+   *  guarda: lo calcula el servidor al servir la página (`seoEscaparate.ts`), así sale ya
+   *  escrito en el HTML para los buscadores. */
+  mapaProyectos?: Array<{ titulo: string; entradas: Array<{ titulo: string; url: string }> }>;
 };
 
 export type Sitio = {

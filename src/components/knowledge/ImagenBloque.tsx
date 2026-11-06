@@ -63,12 +63,12 @@ export function ImagenVista({ b, clase }: { b: Bloque; clase?: string }) {
   if (!b.url) return null;
   const R = relacionDe(b);
   if (!esMoldeada(b) || !R) {
-    return <img src={miniatura(b.url, 1000)} alt={b.pie || ''} loading="lazy" className={cn('w-full rounded-xl border border-slate-200', clase)} />;
+    return <img src={miniatura(b.url, 1000)} alt={b.alt || b.pie || ''} loading="lazy" className={cn('w-full rounded-xl border border-slate-200', clase)} />;
   }
   return (
     <div className={cn('relative overflow-hidden rounded-xl border border-slate-200 mx-auto max-w-full', clase)}
       style={{ width: `${b.anchoImagen || 100}%`, aspectRatio: `1 / ${R}` }}>
-      <Lienzo src={b.url} alt={b.pie || ''} recorte={b.recorte} />
+      <Lienzo src={b.url} alt={b.alt || b.pie || ''} recorte={b.recorte} />
     </div>
   );
 }

@@ -553,7 +553,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
               {/* CUADRADA Y SIN RECORTAR (2026-10-21, Eugenio): la imagen entera dentro de un cuadrado, con blanco arriba y abajo (o a los lados) si no es cuadrada. */}
               <div className={cn('relative bg-white border border-slate-100 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', tonos ? 'aspect-[16/10] border-0' /* más bajas: tres filas en la pantalla */ : 'aspect-square', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
                 {f.pagina?.imagen ? (
-                  <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
+                  <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null} alt={String(f.pagina?.titulo || '')}
                     recolocable={false /* la imagen se ve entera: no hay nada que recolocar (2026-10-21) */ && (recolocar ?? editable) && !sitio && !!f.pagina_id} compacta={chica}
                     onGuardar={async (x, y) => {
                       const r = await fetch(`/api/bd/filas/${f.id}/encuadre`, {
@@ -789,7 +789,9 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
  * `object-position` en %, así que vale igual para cualquier tamaño de
  * tarjeta y de pantalla.
  */
-function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, compacta = false }: {
+function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, compacta = false, alt = '' }: {
+  /** El texto alternativo: el nombre de la fila (2026-11-06, SEO). */
+  alt?: string;
   /** Tarjeta pequeña (XS, XXS): el botón va sin texto. */
   compacta?: boolean;
   src: string;
@@ -828,7 +830,7 @@ function ImagenTarjeta({ src, encuadre, recolocable, onGuardar, compacta = false
         setPos({ x: c(i.x - ((e.clientX - i.px) / i.w) * 100), y: c(i.y - ((e.clientY - i.py) / i.h) * 100) });
       } : undefined}
       onPointerUp={modo ? () => { inicio.current = null; } : undefined}>
-      <img src={miniatura(src, 400)} alt="" loading="lazy" draggable={false}
+      <img src={miniatura(src, 400)} alt={alt} loading="lazy" draggable={false}
         onError={e => { e.currentTarget.style.display = 'none'; }}
         style={{ objectPosition: `${visible.x}% ${visible.y}%` }}
         className={cn('w-full h-full object-contain select-none', !modo && 'group-hover:scale-[1.02] transition-transform')} />

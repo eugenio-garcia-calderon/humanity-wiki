@@ -61,7 +61,7 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
         {/* La portada, grande, con el título y las propiedades encima. */}
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100">
           {cfg.portada && (
-            <img src={miniatura(cfg.portada, 800)} alt="" fetchPriority="high" decoding="async"
+            <img src={miniatura(cfg.portada, 800)} alt={typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? `${pagina.titulo}: ${cfg.subtitulo.trim()}` : pagina.titulo} fetchPriority="high" decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
               style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
           )}
@@ -91,7 +91,7 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
                 <li key={p.fila_id}>
                   <Link to={enlace(p.pagina_id)} data-interno className="group inline-flex items-center gap-2">
                     {p.imagen
-                      ? <img src={miniatura(p.imagen, 64)} alt="" loading="lazy" className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200" />
+                      ? <img src={miniatura(p.imagen, 64)} alt={p.titulo} loading="lazy" className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200" />
                       : <span className="grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-400">{p.titulo.charAt(0)}</span>}
                     <span className="text-sm font-semibold text-slate-700 group-hover:underline">{p.titulo}</span>
                   </Link>

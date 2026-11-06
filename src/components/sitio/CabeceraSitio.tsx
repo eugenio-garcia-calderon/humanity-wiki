@@ -56,7 +56,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           (2026-11-06, Eugenio): la columna la marca el nombre y el eslogan se reparte a lo ancho. */}
       <Link to="/" className="flex min-w-0 items-center justify-center gap-3" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 112)} alt="" className="h-[46px] w-[46px] shrink-0 rounded-lg object-contain" />
+          ? <img src={miniatura(icono, 112)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[46px] w-[46px] shrink-0 rounded-lg object-contain" />
           : <span className="text-[1.9rem] leading-none">{icono}</span>)}
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">

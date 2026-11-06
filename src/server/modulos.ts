@@ -67,6 +67,7 @@ import { registrarSitios } from './sitios.js';
 import { registrarBuscadorSitio } from './buscadorSitio.js';
 import { registrarRutasFila } from './rutasFila.js';
 import { registrarSeoSitio } from './seoSitio.js';
+import { registrarSeoEscaparate } from './seoEscaparate.js';
 import { registrarIndexNow } from './indexNow.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
@@ -440,6 +441,9 @@ export const MODULOS: Modulo[] = [
   // dependen del orden respecto a `miembros`; el aviso de pago les llega desde `stripe.ts`.
   { nombre: 'soporte', montar: (app, db) => registrarSoporte(app, db) },
   { nombre: 'expertos', montar: (app, db) => registrarExpertos(app, db) },
+  // EL ÚLTIMO A PROPÓSITO: su ampliación de la página tiene que pasar después de la
+  // ficha de producto y de las valoraciones, que en un escaparate no aplican.
+  { nombre: 'seoEscaparate', montar: () => registrarSeoEscaparate(), nota: 'SEO de un sitio escaparate (luzhumanidad.com): títulos, descripciones, datos estructurados, sitemap y mapa del pie (2026-11-06).' },
 ];
 
 /**
