@@ -199,7 +199,9 @@ export const CATALOGO: Referencia[] = [
     // 2026-11-06, Eugenio, con fotos del SZEnergy Team: «modela este y busca
     // info en internet para hacerlo lo más preciso posible, llámalo Aeromóvil 1».
     // Es el SZEmission de la Universidad Széchenyi István (Győr, Hungría),
-    // UrbanConcept eléctrico de la Shell Eco-marathon.
+    // UrbanConcept eléctrico de la Shell Eco-marathon. Esa misma tarde el
+    // Aeromóvil 1 pasó a ser nuestro diseño paramétrico (geometriaA1.ts): un
+    // SZEmission un 30 % mayor. Esta ficha es el original, para compararlos.
     //   Publicado por el equipo: 95 kg en orden de carrera, Cd 0,1365, monocasco
     //   de composite de carbono en forma de gota modificada, motor PMS con
     //   correa dentada, batería LiPo de 350-530 Wh, 332 km/kWh en 2026.
@@ -210,7 +212,7 @@ export const CATALOGO: Referencia[] = [
     //   cúpula queda a la altura de la cadera de la gente. Alto, ancho, batalla,
     //   vías y altura libre se toman en el mínimo del reglamento; el largo, de
     //   la proporción largo/alto en las fotos de perfil (≈ 2,8).
-    id: 'cat-aeromovil-1', nombre: 'Aeromóvil 1', origen: 'catalogo',
+    id: 'cat-szemission', nombre: 'SZEmission (SZEnergy Team)', origen: 'catalogo',
     fuente: 'SZEmission del SZEnergy Team (Universidad Széchenyi, Győr). Publicado: 95 kg, Cd 0,1365, monocasco de carbono, una plaza. Forma y medidas leídas de las fotos de perfil, de frente y de 3/4, a escala con un alto de 1,03 m (el reglamento UrbanConcept pide entre 1,00 y 1,30).',
     enlaces: [
       { t: 'SZEmission, ficha del equipo', url: 'https://szenergy.hu/en/our-racing-cars/' },

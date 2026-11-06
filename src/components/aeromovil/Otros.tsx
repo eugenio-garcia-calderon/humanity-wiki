@@ -15,10 +15,12 @@ const leerClaves = (): Record<string, string> => { try { return JSON.parse(local
 
 /** Nuestra ficha, en los mismos términos que la de un velomóvil de referencia. */
 export function fichaPropia(m: Modelo, r: Resultados) {
-  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: 4, ejes: 3, via: m.P.track, plazas: 3, masa: r.mVeh, cd: r.Cd as number | null, huella: m.Lf * m.P.W };
+  const ejes = new Set(m.ruedas.map(w => Math.round(w.x * 100))).size;
+  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via: Math.max(m.via.del, m.via.tras), plazas: m.asientos.length, masa: r.mVeh, cd: r.Cd as number | null, huella: m.Lf * m.P.W };
 }
+export const nombreDe = (m: Modelo) => (m.tipo === 'a1' ? 'Aeromóvil 1' : 'Aeromóvil Gota');
 
-export function TablaComparacion({ propia, otra, nombre }: { propia: ReturnType<typeof fichaPropia>; otra: ReturnType<typeof fichaComparable>; nombre: string }) {
+export function TablaComparacion({ propia, otra, nombre, nuestro = 'Aeromóvil 1' }: { propia: ReturnType<typeof fichaPropia>; otra: ReturnType<typeof fichaComparable>; nombre: string; nuestro?: string }) {
   const filas: [string, number | null, number | null, (v: number) => string][] = [
     ['Largo', propia.L, otra.L, v => `${fmt(v)} m`], ['Ancho', propia.W, otra.W, v => `${fmt(v)} m`], ['Alto', propia.H, otra.H, v => `${fmt(v)} m`],
     ['Batalla', propia.batalla, otra.batalla, v => `${fmt(v)} m`], ['Vía más ancha', propia.via, otra.via, v => `${fmt(v)} m`],
@@ -28,7 +30,7 @@ export function TablaComparacion({ propia, otra, nombre }: { propia: ReturnType<
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[420px] text-sm">
-        <thead><tr className="text-left text-xs uppercase tracking-wider text-slate-500"><th className="py-1.5 font-semibold">Medida</th><th className="py-1.5 text-right font-semibold">Aeromóvil Gota</th><th className="py-1.5 text-right font-semibold">{nombre}</th><th className="py-1.5 text-right font-semibold">Diferencia</th></tr></thead>
+        <thead><tr className="text-left text-xs uppercase tracking-wider text-slate-500"><th className="py-1.5 font-semibold">Medida</th><th className="py-1.5 text-right font-semibold">{nuestro}</th><th className="py-1.5 text-right font-semibold">{nombre}</th><th className="py-1.5 text-right font-semibold">Diferencia</th></tr></thead>
         <tbody>
           {filas.map(([n, a, b, f]) => (
             <tr key={n} className="border-t border-slate-100">
@@ -229,7 +231,7 @@ export function VistaOtros({ modelo, resultados, alVer, alComparar, puedeDecidir
       {aviso && <p className="text-sm text-slate-600">{aviso}</p>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <h3 className="mb-2 font-semibold text-slate-900">Aeromóvil Gota frente a {sel.nombre}</h3>
-        <TablaComparacion propia={fichaPropia(modelo, resultados)} otra={fichaComparable(sel)} nombre={sel.nombre} />
+        <TablaComparacion propia={fichaPropia(modelo, resultados)} otra={fichaComparable(sel)} nombre={sel.nombre} nuestro={nombreDe(modelo)} />
         <p className="mt-2 text-xs text-slate-500">El Aeromóvil lleva tres plazas; los de referencia, una. Compara la huella por plaza: {fmt(modelo.Lf * modelo.P.W / 3)} m² frente a {fmt(fichaComparable(sel).huella / sel.plazas)} m².</p>
       </section>
       <CrearDesdeFotos alVer={alVer} alGuardado={cargar} />

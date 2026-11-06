@@ -17,25 +17,29 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import {
-  ARM_UP, CELULA, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
-  type Modelo, type Piel,
+  ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
+  type Modelo, type ModeloGota, type ModeloA1, type Piel, type Superficie,
 } from './geometria';
+import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 
+/** Las capas. `solo` limita una capa a un vehículo: la dirección y la transmisión son del Aeromóvil 1. */
 export const CAPAS = [
-  { k: 'carenado', n: 'Carenado', color: 'bg-zinc-300' },
+  { k: 'carenado', n: 'Carrocería', color: 'bg-zinc-300' },
   { k: 'cristales', n: 'Cristales', color: 'bg-sky-900' },
   { k: 'solar', n: 'Paneles solares', color: 'bg-indigo-900' },
   { k: 'chasis', n: 'Chasis', color: 'bg-zinc-400' },
   { k: 'suspension', n: 'Suspensión', color: 'bg-amber-500' },
-  { k: 'ruedas', n: 'Ruedas', color: 'bg-neutral-900' },
+  { k: 'direccion', n: 'Dirección', color: 'bg-stone-500', solo: 'a1' },
+  { k: 'ruedas', n: 'Ruedas y frenos', color: 'bg-neutral-900' },
   { k: 'asientos', n: 'Asientos', color: 'bg-zinc-700' },
   { k: 'ocupantes', n: 'Ocupantes', color: 'bg-orange-300' },
   { k: 'motor', n: 'Motor', color: 'bg-red-700' },
+  { k: 'transmision', n: 'Transmisión', color: 'bg-rose-900', solo: 'a1' },
   { k: 'baterias', n: 'Baterías', color: 'bg-blue-600' },
 ] as const;
 export type CapaId = typeof CAPAS[number]['k'];
-export type Vista = 'iso' | 'side' | 'top' | 'front';
+export type Vista = 'iso' | 'side' | 'top' | 'front' | 'back';
 
 export interface VisorHandle {
   /** STL binario de las capas visibles, en milímetros y con Z arriba (como el STEP). */
@@ -50,7 +54,11 @@ interface Props {
   curva: boolean;
   cotas: boolean;
   abierta: boolean;
+  /** Tapas de los maleteros abiertas (Aeromóvil 1). */
+  maleteros?: boolean;
   vista: Vista;
+  /** Al pinchar en una pieza: su componente (para ir a su página). */
+  alPinchar?: (componente: string) => void;
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
@@ -58,7 +66,7 @@ interface Props {
 }
 
 const VISTAS: Record<Vista, [number, number, number]> = {
-  iso: [-3.6, 2.8, -6.6], side: [-1.5, 0.9, -7.6], top: [-1.5, 8.8, 0.01], front: [5.4, 1.1, 0],
+  iso: [-3.6, 2.8, -6.6], side: [-1.5, 0.9, -7.6], top: [-1.5, 8.8, 0.01], front: [5.4, 1.1, 0], back: [-8.6, 1.2, 0.01],
 };
 
 type V3 = [number, number, number];
@@ -84,6 +92,11 @@ function materiales() {
     body: new THREE.MeshPhysicalMaterial({ color: 0xd5d9dd, metalness: 0.25, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08, side: THREE.DoubleSide }),
     glass: new THREE.MeshPhysicalMaterial({ color: 0x14212c, metalness: 0.1, roughness: 0.03, clearcoat: 1, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }),
     solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: texturaSolar(), metalness: 0.35, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, side: THREE.DoubleSide }),
+    bajos: new THREE.MeshPhysicalMaterial({ color: 0x1a1c1f, metalness: 0.2, roughness: 0.55, clearcoat: 0.4, side: THREE.DoubleSide }),
+    cableHV: new THREE.MeshStandardMaterial({ color: 0xe8701a, metalness: 0.1, roughness: 0.6 }),
+    muelle: new THREE.MeshStandardMaterial({ color: 0xc0392b, metalness: 0.5, roughness: 0.4 }),
+    llanta: new THREE.MeshPhysicalMaterial({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8 }),
+    pinza: new THREE.MeshStandardMaterial({ color: 0xb8352a, metalness: 0.5, roughness: 0.45 }),
     alu: new THREE.MeshStandardMaterial({ color: 0xa9b1b9, metalness: 0.85, roughness: 0.32 }),
     susp: new THREE.MeshStandardMaterial({ color: 0xde9223, metalness: 0.6, roughness: 0.3 }),
     stanch: new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.95, roughness: 0.15 }),
@@ -135,24 +148,53 @@ function vaciar(g: THREE.Object3D) {
 }
 const unicos = (v: number[]) => { v.sort((a, b) => a - b); const o: number[] = []; for (const x of v) if (!o.length || x - o[o.length - 1] > 1e-4) o.push(x); return o; };
 
-/** La piel: una rejilla (u, θ) que respeta los bordes de cristales, paneles y puertas. */
-function construirPiel(m: Modelo) {
-  const T = 2 * Math.PI;
+/** Una superficie de piel: una rejilla (u, θ) que respeta los bordes de cristales, paneles, puertas y huecos. */
+function construirSuperficie(S: Superficie) {
+  const T = S.tMax, cerrada = T > Math.PI * 1.5;
   const us: number[] = [], ts: number[] = [];
-  for (let i = 0; i <= 160; i++) us.push((1 - Math.cos(Math.PI * i / 160)) / 2);
-  for (let j = 0; j <= 112; j++) ts.push(T * j / 112);
-  for (const z of [...m.zonasPiel, ...m.puertas]) { us.push(z.u0, z.u1); ts.push(((z.t0 % T) + T) % T, ((z.t1 % T) + T) % T); }
+  const nU = 160, nT = cerrada ? 112 : 56;
+  for (let i = 0; i <= nU; i++) us.push(S.u0 + (S.u1 - S.u0) * (1 - Math.cos(Math.PI * i / nU)) / 2);
+  for (let j = 0; j <= nT; j++) ts.push(T * j / nT);
+  const enRango = (u: number) => u >= S.u0 - 1e-9 && u <= S.u1 + 1e-9;
+  for (const z of [...S.zonas, ...S.puertas]) {
+    if (enRango(z.u0)) us.push(z.u0); if (enRango(z.u1)) us.push(z.u1);
+    for (const t of [z.t0, z.t1]) { const tt = cerrada ? ((t % T) + T) % T : Math.min(T, Math.max(0, t)); ts.push(tt); }
+    // Un arco elíptico se recorta celda a celda: más celdas dentro de su
+    // rectángulo para que apenas se vean los dientes.
+    if (z.elipse) {
+      for (let k = 1; k < 28; k++) { const u = z.u0 + (z.u1 - z.u0) * k / 28; if (enRango(u)) us.push(u); }
+      for (let k = 1; k < 20; k++) { const t = z.t0 + (z.t1 - z.t0) * k / 20; ts.push(cerrada ? ((t % T) + T) % T : Math.min(T, Math.max(0, t))); }
+    }
+  }
+  // Un borde que varía a lo largo (la banda negra en V) no se recorta: la
+  // rejilla se deforma fila a fila para que ese borde caiga justo en dos
+  // columnas de la malla, y así queda una línea limpia y no una escalera.
+  const banda = S.zonas.find(z => z.tDe);
+  let medL = 0, medR = 0;
+  if (banda) {
+    for (let k = 0; k <= 20; k++) { const [a, b] = banda.tDe!(banda.u0 + (banda.u1 - banda.u0) * k / 20); medL += a / 21; medR += b / 21; }
+    ts.push(medL, medR);
+    for (let k = 1; k < 40; k++) { const u = banda.u0 + (banda.u1 - banda.u0) * k / 40; if (enRango(u)) us.push(u); }
+  }
   const U = unicos(us), TH = unicos(ts.map(t => (t >= T - 1e-6 ? T : t)));
   if (TH[TH.length - 1] < T) TH.push(T);
   const nu = U.length, nv = TH.length;
-  const pos: V3[][] = U.map(u => { const f = m.frame(u); return TH.map(t => m.sec(f, t)); });
+  const cerca = (t: number) => { let j = 0; for (let k = 1; k < nv; k++) if (Math.abs(TH[k] - t) < Math.abs(TH[j] - t)) j = k; return j; };
+  const jL = banda ? cerca(medL) : -1, jR = banda ? cerca(medR) : -1;
+  const real = (i: number, t: number) => {
+    if (!banda || jL < 1 || jR <= jL || jR >= nv - 1) return t;
+    const u = U[i]; if (u < banda.u0 || u > banda.u1) return t;
+    const [a, b] = banda.tDe!(u), pts: [number, number][] = [[0, 0], [TH[jL], a], [TH[jR], b], [T, T]];
+    for (let k = 0; k < 3; k++) if (t <= pts[k + 1][0]) { const [x0, y0] = pts[k], [x1, y1] = pts[k + 1]; return x1 > x0 ? y0 + (y1 - y0) * (t - x0) / (x1 - x0) : y1; }
+    return t;
+  };
+  const pos: V3[][] = U.map((u, i) => { const f = S.frame(u); return TH.map(t => S.sec(f, real(i, t))); });
   // Normales por diferencias finitas sobre la rejilla completa: así no hay
   // costuras de sombreado entre zonas vecinas.
   const nor: V3[][] = pos.map((fila, i) => fila.map((_, j) => {
-    if (i === 0) return [1, 0, 0] as V3;
-    if (i === nu - 1) return [-1, 0, 0] as V3;
-    const a = pos[i + 1][j], b = pos[i - 1][j];
-    const jp = j === nv - 1 ? 1 : j + 1, jm = j === 0 ? nv - 2 : j - 1;
+    const ip = Math.min(nu - 1, i + 1), im = Math.max(0, i - 1);
+    const a = pos[ip][j], b = pos[im][j];
+    const jp = j === nv - 1 ? (cerrada ? 1 : nv - 1) : j + 1, jm = j === 0 ? (cerrada ? nv - 2 : 0) : j - 1;
     const c = pos[i][jp], d = pos[i][jm];
     const du = [a[0] - b[0], a[1] - b[1], a[2] - b[2]], dt = [c[0] - d[0], c[1] - d[1], c[2] - d[2]];
     const n: V3 = [dt[1] * du[2] - dt[2] * du[1], dt[2] * du[0] - dt[0] * du[2], dt[0] * du[1] - dt[1] * du[0]];
@@ -169,10 +211,11 @@ function construirPiel(m: Modelo) {
     return v;
   };
   for (let i = 0; i < nu - 1; i++) for (let j = 0; j < nv - 1; j++) {
-    const uc = (U[i] + U[i + 1]) / 2, tc = (TH[j] + TH[j + 1]) / 2;
-    const zona = m.zonasPiel.find(z => enZona(z, uc, tc));
-    const piel: Piel = zona ? zona.piel : 'carroceria';
-    const puerta = m.puertas.find(z => enZona(z, uc, tc));
+    const uc = (U[i] + U[i + 1]) / 2, tc = (real(i, TH[j]) + real(i, TH[j + 1]) + real(i + 1, TH[j]) + real(i + 1, TH[j + 1])) / 4;
+    const zona = S.zonas.find(z => enZona(z, uc, tc));
+    const piel: Piel = zona ? zona.piel : S.pielBase;
+    if (piel === 'hueco') continue;
+    const puerta = S.puertas.find(z => enZona(z, uc, tc));
     const clave = `${puerta?.id ?? 'fijo'}|${piel}`;
     let c = cubos.get(clave);
     if (!c) { c = { p: [], n: [], uv: [], i: [], mapa: new Map() }; cubos.set(clave, c); }
@@ -296,8 +339,8 @@ function ocupante(g: THREE.Object3D, M: Mats, m: Modelo, lat: number, piloto: bo
   }
 }
 
-/** Faros, pilotos, intermitentes, retrovisores y limpiaparabrisas. */
-function accesorios(g: THREE.Object3D, M: Mats, m: Modelo) {
+/** Faros, pilotos, intermitentes, retrovisores y limpiaparabrisas del Aeromóvil Gota. */
+function accesorios(g: THREE.Object3D, M: Mats, m: ModeloGota) {
   const sobre = (u: number, th: number, off = 0.004) => m.sec(m.frame(u), th, off);
   const anillo = (u: number, mat: THREE.Material, r: number) => {
     const pts: THREE.Vector3[] = [];
@@ -309,7 +352,6 @@ function accesorios(g: THREE.Object3D, M: Mats, m: Modelo) {
     const q = sobre(0.028, th, 0.0);
     const s = sphere(g, q, 0.05, M.faro, [0.45, 0.42, 1.25]); s.lookAt(q[0] + 1, q[1], q[2]);
   }
-  // Pilotos traseros: franja roja y tercera luz de freno
   // Pilotos traseros: dos faros con carcasa y luz de posición y freno,
   // y la tercera luz de freno en lo alto de la cola.
   for (const th of [0.12 * Math.PI, 0.88 * Math.PI]) {
@@ -339,6 +381,43 @@ function accesorios(g: THREE.Object3D, M: Mats, m: Modelo) {
   for (let k = 0; k <= 12; k++) pts.push(new THREE.Vector3(...sobre(uL + 0.035 * k / 12, (0.34 + 0.28 * k / 12) * Math.PI, 0.012)));
   g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.005, 6), M.black));
   sphere(g, piv, 0.012, M.black);
+}
+
+/** Faros en rendija, pilotos, intermitentes, retrovisores, limpiaparabrisas y toma de carga del Aeromóvil 1. */
+function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
+  const sobre = (u: number, th: number, off = 0.004) => m.sec(m.frame(u), th, off);
+  const sobreC = (u: number, th: number, off = 0.004) => m.secC(m.frameC(u), th, off);
+  const tira = (pts: V3[], r: number, mat: THREE.Material) => {
+    const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 24, r, 8, false), mat); g.add(mesh); return mesh;
+  };
+  // Faros: dos rendijas largas y finas en la arista del hombro del morro, a
+  // la altura de la punta (0,42–0,46 del alto), embutidas en la piel, como en
+  // el SZEmission.
+  const thAltura = (u: number, y: number, lado: 1 | -1) => {
+    const f = m.frame(u), ay = Math.max(0.01, f.top - f.zc), k = Math.min(0.98, Math.max(0.02, (y - f.zc) / ay));
+    const th = Math.asin(Math.pow(k, m.P.nU / 2));
+    return lado > 0 ? th : Math.PI - th;
+  };
+  for (const s of [1, -1] as (1 | -1)[]) {
+    const faro = [0, 0.25, 0.5, 0.75, 1].map(k => { const u = 0.03 + 0.11 * k; return sobre(u, thAltura(u, (0.42 + 0.04 * k) * m.P.H, s), 0); });
+    tira(faro, 0.014, M.black);                           // el alojamiento, a ras de piel
+    tira(faro.map(q => [q[0] + 0.006, q[1] + 0.004, q[2] + s * 0.004] as V3), 0.008, M.faro);
+    tira([0, 1].map(k => { const u = 0.02 + 0.02 * k; return sobre(u, thAltura(u, 0.47 * m.P.H, s), 0.003); }), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
+    // Pilotos traseros: una rendija roja a ras de piel a cada lado del labio de cola.
+    tira([0, 0.5, 1].map(k => sobre(0.93 + 0.04 * k, (s > 0 ? 0.26 - 0.10 * k : 0.74 + 0.10 * k) * Math.PI, 0.002)), 0.007, M.piloto);
+    tira([0, 1].map(k => sobre(0.955 + 0.025 * k, (s > 0 ? 0.10 : 0.90) * Math.PI, 0.002)), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
+  }
+  // Sin retrovisores: el SZEmission lleva una cámara en el techo de la cúpula.
+  box(g, sobreC(m.uC0 + 0.30, Math.PI / 2, 0.012), [0.05, 0.03, 0.04], M.black);
+  // Tercera luz de freno en lo alto de la cola de la cúpula
+  box(g, sobreC(m.uC1 - 0.14, Math.PI / 2, 0.004), [0.02, 0.012, 0.18], M.piloto);
+  // Limpiaparabrisas tumbado en la base del parabrisas
+  const uL = m.uC0 + 0.012, piv = sobreC(uL, 0.36 * Math.PI, 0.010);
+  const pts: V3[] = [];
+  for (let k = 0; k <= 10; k++) pts.push(sobreC(uL + 0.004 * k, (0.37 + 0.28 * k / 10) * Math.PI, 0.010));
+  tira(pts, 0.005, M.black); sphere(g, piv, 0.012, M.black);
+  // Toma de carga: tapa cuadrada en el lado izquierdo de la cola
+  box(g, sobre(0.80, 0.09 * Math.PI, 0.003), [0.10, 0.08, 0.004], M.black);
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
@@ -374,37 +453,95 @@ function cotas(g: THREE.Object3D, M: Mats, m: Modelo) {
   cota([m.xR, y, zB], [0, y, zB], [[[m.xR, y, 0], [m.xR, y, zB - 0.04]], [[0, y, 0], [0, y, zB - 0.04]]], `batalla ${mm(P.B)}`, [-0.35, 0.11, 0.04]);
   const xA = m.xn + 0.40;
   cota([xA, y, -P.W / 2], [xA, y, P.W / 2], [[[m.xn - 0.2, y, -P.W / 2], [xA + 0.05, y, -P.W / 2]], [[m.xn - 0.2, y, P.W / 2], [xA + 0.05, y, P.W / 2]]], `ancho ${mm(P.W)}`, [0.12, 0.1, 0]);
-  const xH = m.xt - 0.30;
-  cota([xH, 0, zL], [xH, P.H, zL], [[[xH - 0.05, P.H, zL], [m.xn * 0 + m.frame(P.pmax).x, P.H, zL]]], `alto ${mm(P.H)}`, [-0.36, 0, 0]);
-  cota([m.xL, y, -P.track / 2], [m.xL, y, P.track / 2], [], `vía ${mm(P.track)}`, [0, 0.11, 0]);
+  const xH = m.xt - 0.30, xMax = m.tipo === 'a1' ? m.xn - 0.45 * m.Lf : m.frame(P.pmax).x;
+  cota([xH, 0, zL], [xH, P.H, zL], [[[xH - 0.05, P.H, zL], [xMax, P.H, zL]]], `alto ${mm(P.H)}`, [-0.36, 0, 0]);
+  if (m.tipo === 'a1') {
+    cota([0, y, -P.viaF / 2], [0, y, P.viaF / 2], [], `vía del. ${mm(P.viaF)}`, [0.30, 0.11, 0]);
+    cota([m.xR, y, -P.viaR / 2], [m.xR, y, P.viaR / 2], [], `vía tras. ${mm(P.viaR)}`, [-0.30, 0.11, 0]);
+  } else {
+    cota([m.xL, y, -P.track / 2], [m.xL, y, P.track / 2], [], `vía ${mm(P.track)}`, [0, 0.11, 0]);
+  }
+}
+
+/** Una caja con cantos redondeados (batería, reductora, inversor…). */
+function cajaRedonda(g: THREE.Object3D, c: V3, s: V3, mat: THREE.Material, r = 0.012) {
+  const sh = new THREE.Shape();
+  const w = s[0], h = s[1];
+  sh.moveTo(-w / 2 + r, -h / 2); sh.lineTo(w / 2 - r, -h / 2); sh.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+  sh.lineTo(w / 2, h / 2 - r); sh.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2); sh.lineTo(-w / 2 + r, h / 2);
+  sh.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r); sh.lineTo(-w / 2, -h / 2 + r); sh.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: s[2], bevelEnabled: true, bevelThickness: r * 0.6, bevelSize: r * 0.6, bevelSegments: 2, curveSegments: 4 });
+  geo.translate(0, 0, -s[2] / 2);
+  const mesh = new THREE.Mesh(geo, mat); mesh.position.set(...c); mesh.castShadow = true; g.add(mesh); return mesh;
+}
+
+/** Una rueda de coche: neumático, tapacubos plano, disco de freno y pinza. Gira `giro` radianes alrededor de la vertical. */
+function ruedaCoche(g: THREE.Object3D, M: Mats, x: number, y: number, z: number, r: number, w: number, disco: number, giro: number) {
+  const grp = new THREE.Group(); grp.position.set(x, y, z); grp.rotation.y = giro; g.add(grp);
+  const s = Math.sign(z) || 1, rLlanta = 0.33 / 2;
+  const perfil: THREE.Vector2[] = [
+    new THREE.Vector2(rLlanta, -w / 2), new THREE.Vector2(r - 0.035, -w / 2), new THREE.Vector2(r, -w / 2 + 0.03),
+    new THREE.Vector2(r, w / 2 - 0.03), new THREE.Vector2(r - 0.035, w / 2), new THREE.Vector2(rLlanta, w / 2),
+  ];
+  const neum = new THREE.Mesh(new THREE.LatheGeometry(perfil, 56), M.tire); neum.rotation.x = Math.PI / 2; neum.castShadow = true; grp.add(neum);
+  // Tapacubos plano por fuera (como el SZEmission) y llanta por dentro
+  const tapa = new THREE.Mesh(new THREE.CylinderGeometry(rLlanta + 0.004, rLlanta + 0.004, 0.012, 48), M.llanta); tapa.rotation.x = Math.PI / 2; tapa.position.z = s * (w / 2 - 0.004); grp.add(tapa);
+  const llanta = new THREE.Mesh(new THREE.CylinderGeometry(rLlanta, rLlanta - 0.01, w * 0.86, 48, 1, true), M.rim); llanta.rotation.x = Math.PI / 2; grp.add(llanta);
+  const tuerca = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.02, 16), M.black); tuerca.rotation.x = Math.PI / 2; tuerca.position.z = s * (w / 2 + 0.004); grp.add(tuerca);
+  // Disco ventilado y pinza, por dentro de la llanta
+  const d = new THREE.Mesh(new THREE.CylinderGeometry(disco / 2, disco / 2, 0.02, 48), M.rim); d.rotation.x = Math.PI / 2; d.position.z = -s * (w / 2 - 0.045); d.userData.componente = 'frenos'; grp.add(d);
+  const pinza = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.11, 0.05), M.pinza); pinza.position.set(-0.02, disco / 2 - 0.03, -s * (w / 2 - 0.045)); pinza.userData.componente = 'frenos'; grp.add(pinza);
+  return grp;
+}
+
+/** Muelle helicoidal alrededor de un eje. */
+function muelle(g: THREE.Object3D, a: V3, b: V3, r: number, vueltas: number, mat: THREE.Material) {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), eje = B.clone().sub(A), L = eje.length(); eje.normalize();
+  let u = new THREE.Vector3(0, 0, 1); u.addScaledVector(eje, -u.dot(eje)); if (u.lengthSq() < 1e-6) u = new THREE.Vector3(1, 0, 0); u.normalize();
+  const v = new THREE.Vector3().crossVectors(eje, u);
+  const pts: THREE.Vector3[] = [];
+  const n = Math.round(vueltas * 16);
+  for (let i = 0; i <= n; i++) { const t = i / n, ang = t * vueltas * 2 * Math.PI; pts.push(A.clone().addScaledVector(eje, t * L).addScaledVector(u, r * Math.cos(ang)).addScaledVector(v, r * Math.sin(ang))); }
+  const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), n * 2, 0.009, 8, false), mat); mesh.castShadow = true; g.add(mesh);
+}
+
+/** Marca todas las mallas de un grupo con el componente al que pertenecen (para el clic). */
+function etiquetar(g: THREE.Object3D, componente: string) {
+  g.traverse((o: any) => { if (o.isMesh && !o.userData.componente) o.userData.componente = componente; });
 }
 
 /** La parte fija: piel, accesorios, chasis, asientos, ocupantes, baterías. */
 function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, m: Modelo) {
-  for (const k of ['carenado', 'cristales', 'solar', 'chasis', 'asientos', 'ocupantes', 'baterias'] as CapaId[]) vaciar(G[k]);
+  for (const k of ['carenado', 'cristales', 'solar', 'chasis', 'direccion', 'asientos', 'ocupantes', 'motor', 'transmision', 'baterias'] as CapaId[]) vaciar(G[k]);
   puertasG.clear();
-  const capaDe: Record<Piel, CapaId> = { carroceria: 'carenado', cristal: 'cristales', solar: 'solar' };
-  const matDe: Record<Piel, THREE.Material> = { carroceria: M.body, cristal: M.glass, solar: M.solar };
-  for (const pieza of construirPiel(m)) {
+  const capaDe: Record<Piel, CapaId> = { carroceria: 'carenado', bajos: 'carenado', cristal: 'cristales', solar: 'solar', hueco: 'carenado' };
+  const matDe: Record<Piel, THREE.Material> = { carroceria: M.body, bajos: M.bajos, cristal: M.glass, solar: M.solar, hueco: M.body };
+  const compDe: Record<Piel, string> = { carroceria: 'carroceria', bajos: 'carroceria', cristal: 'cupula', solar: 'solar', hueco: 'carroceria' };
+  for (const S of m.superficies) for (const pieza of construirSuperficie(S)) {
     const mesh = new THREE.Mesh(pieza.geo, matDe[pieza.piel]);
     mesh.castShadow = pieza.piel !== 'cristal'; mesh.receiveShadow = true;
+    mesh.userData.componente = pieza.puerta === 'fijo' ? compDe[pieza.piel] : (pieza.puerta.startsWith('maletero') ? 'maleteros' : 'puertas');
     const capa = G[capaDe[pieza.piel]];
     if (pieza.puerta === 'fijo') { capa.add(mesh); continue; }
-    // Cada trozo de puerta cuelga de un pivote en su bisagra
-    const def = m.puertas.find(p => p.id === pieza.puerta)!;
+    // Cada trozo de puerta o tapa cuelga de un pivote en su bisagra
+    const def = S.puertas.find(p => p.id === pieza.puerta)!;
     const piv = new THREE.Group(); piv.position.set(...def.bisagra[0]);
-    piv.userData = { eje: new THREE.Vector3(...def.bisagra[1]).sub(new THREE.Vector3(...def.bisagra[0])).normalize(), angulo: def.angulo * Math.PI / 180 };
+    piv.userData = { eje: new THREE.Vector3(...def.bisagra[1]).sub(new THREE.Vector3(...def.bisagra[0])).normalize(), angulo: def.angulo * Math.PI / 180, tipo: def.tipo };
     mesh.position.set(-def.bisagra[0][0], -def.bisagra[0][1], -def.bisagra[0][2]);
     piv.add(mesh); capa.add(piv);
     if (!puertasG.has(pieza.puerta)) puertasG.set(pieza.puerta, []);
     puertasG.get(pieza.puerta)!.push(piv);
   }
-  accesorios(G.carenado, M, m);
+  if (m.tipo === 'a1') accesoriosA1(G.carenado, M, m); else accesorios(G.carenado, M, m);
+  etiquetar(G.carenado, 'luces');
 
   const tubos = m.tubosChasis();
   for (const t of tubos) if (t.grupo !== 'Suspensión') {
-    const mat = t.grupo === 'Dirección' ? (t.comprado ? M.black : M.alu) : M.alu;
-    if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, t.d < 0.01 ? M.black : mat); else tube(G.chasis, t.a, t.b, t.d, mat);
+    const destino = t.grupo === 'Dirección' && m.tipo === 'a1' ? G.direccion : t.grupo === 'Transmisión' ? G.transmision : G.chasis;
+    const mat = t.grupo === 'Dirección' ? (t.comprado ? M.black : M.alu) : t.grupo === 'Transmisión' ? M.black : M.alu;
+    const antes = destino.children.length;
+    if (t.curva) tuboCurvo(destino, t.curva, t.d, t.d < 0.01 ? M.black : mat); else tube(destino, t.a, t.b, t.d, mat);
+    for (let i = antes; i < destino.children.length; i++) destino.children[i].userData.componente = t.grupo === 'Dirección' ? 'direccion' : t.grupo === 'Transmisión' ? 'transmision' : 'chasis';
   }
   // Uniones soldadas: donde el extremo de un tubo toca a otro, un cordón
   // (esfera algo mayor que el tubo) en vez de dos cilindros que se cruzan.
@@ -416,22 +553,102 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
   };
   for (const t of soldables) for (const p of [t.a, t.b]) {
     const toca = soldables.some(o => o !== t && tramosTubo(o).some(([a, b]) => dSeg(p, a, b) < o.d / 2 + t.d / 2 + 0.004));
-    if (toca) sphere(G.chasis, p, t.d / 2 * 1.18, M.soldadura);
+    if (toca) sphere(G.chasis, p, t.d / 2 * 1.18, M.soldadura).userData.componente = 'chasis';
   }
-  asiento(G.asientos, M, m, true, 0, 0.42);
-  asiento(G.asientos, M, m, false, SEAT_GAP, 0.44);
-  asiento(G.asientos, M, m, false, -SEAT_GAP, 0.44);
-  ocupante(G.ocupantes, M, m, 0, true);
-  ocupante(G.ocupantes, M, m, SEAT_GAP, false);
-  ocupante(G.ocupantes, M, m, -SEAT_GAP, false);
-  const by = m.P.clear + 0.055;
-  for (const [x0, z0] of [[m.xPil - 0.05, 0.045], [m.xPil - 0.05, -0.145], [m.xPas, 0.17], [m.xPas, -0.27]]) {
-    box(G.baterias, [x0 + 0.185, by, z0 + 0.05], [0.37, 0.08, 0.10], M.batt);
+  for (const a of m.asientos) { asiento(G.asientos, M, m, a.piloto, a.lat, a.ancho); ocupante(G.ocupantes, M, m, a.lat, a.piloto); }
+  etiquetar(G.asientos, 'asientos');
+  if (m.tipo === 'a1') {
+    construirFijoA1(G, M, m);
+  } else {
+    const by = m.P.clear + 0.055;
+    for (const [x0, z0] of [[m.xPil - 0.05, 0.045], [m.xPil - 0.05, -0.145], [m.xPas, 0.17], [m.xPas, -0.27]]) {
+      box(G.baterias, [x0 + 0.185, by, z0 + 0.05], [0.37, 0.08, 0.10], M.batt);
+    }
+    etiquetar(G.baterias, 'bateria');
   }
 }
 
-/** La parte que se mueve: suspensiones comprimidas, paralelogramo inclinado, ruedas y motor. */
-function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coche: THREE.Group, inclinacion: number) {
+/** Lo fijo del Aeromóvil 1: volante, reposapiés, motor, reductora, inversor, cargador, baterías y cables. */
+function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
+  // Pasos de rueda: una media caña oscura sobre cada rueda, parte de la
+  // carrocería. Tapa el interior que se veía por el arco (la piel no tiene
+  // espesor) y es lo que un coche de verdad lleva ahí.
+  for (const p of m.pasosRueda) {
+    const caña = new THREE.Mesh(new THREE.CylinderGeometry(p.R, p.R, p.largo, 40, 1, true, Math.PI / 2, Math.PI), M.bajos);
+    caña.position.set(p.x, p.y, p.z); caña.rotation.x = Math.PI / 2; caña.receiveShadow = true; caña.userData.componente = 'carroceria'; G.carenado.add(caña);
+  }
+  // Volante: aro inclinado, tres radios y el centro; la columna ya está en los tubos de Dirección.
+  const v = m.volante, c: V3 = [v.c[0], v.c[1], 0];
+  const aro = new THREE.Mesh(new THREE.TorusGeometry(v.r, 0.016, 12, 48), M.black); aro.position.set(...c); aro.rotation.y = Math.PI / 2; aro.rotation.x = -v.inclinacion; aro.castShadow = true; G.direccion.add(aro);
+  const centro = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.03, 20), M.black); centro.position.set(...c); centro.rotation.z = Math.PI / 2; centro.rotation.y = 0; centro.quaternion.copy(aro.quaternion); centro.rotateX(Math.PI / 2); G.direccion.add(centro);
+  for (const ang of [Math.PI / 2, Math.PI / 2 + 2.2, Math.PI / 2 - 2.2]) {
+    const p = new THREE.Vector3(0, v.r * Math.sin(ang), v.r * Math.cos(ang)).applyQuaternion(aro.quaternion);
+    tube(G.direccion, c, [c[0] + p.x, c[1] + p.y, c[2] + p.z], 0.014, M.black);
+  }
+  // Cremallera: caja sobre el travesaño delantero
+  cajaRedonda(G.direccion, m.cremallera, [0.07, 0.07, 0.16], M.black, 0.01);
+  etiquetar(G.direccion, 'direccion');
+  // Reposapiés: una chapa inclinada con dos nervios
+  const rp = m.reposapies;
+  const chapa = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.22, 0.36), M.alu); chapa.position.set(rp[0] + 0.05, rp[1] + 0.06, 0); chapa.rotation.z = -0.5; chapa.castShadow = true; chapa.userData.componente = 'chasis'; G.chasis.add(chapa);
+  // Motor transversal, reductora con diferencial, inversor encima y cargador delante
+  const mo = new THREE.Mesh(new THREE.CylinderGeometry(m.motor.r, m.motor.r, m.motor.largo, 32), M.motor); mo.position.set(...m.motor.c); mo.rotation.x = Math.PI / 2; mo.castShadow = true; mo.userData.componente = 'motor'; G.motor.add(mo);
+  for (const k of [-1, 1]) { const tapa = new THREE.Mesh(new THREE.CylinderGeometry(m.motor.r * 0.7, m.motor.r * 0.7, 0.02, 32), M.black); tapa.position.set(m.motor.c[0], m.motor.c[1], m.motor.c[2] + k * (m.motor.largo / 2 + 0.01)); tapa.rotation.x = Math.PI / 2; tapa.userData.componente = 'motor'; G.motor.add(tapa); }
+  cajaRedonda(G.transmision, m.reductora.c, m.reductora.s, M.carcasa, 0.02).userData.componente = 'transmision';
+  cajaRedonda(G.motor, m.inversor.c, m.inversor.s, M.carcasa, 0.015).userData.componente = 'inversor';
+  cajaRedonda(G.motor, m.cargador.c, m.cargador.s, M.carcasa, 0.015).userData.componente = 'cargador';
+  // Baterías: cada módulo, con su tapa; cable naranja de alta tensión hasta el inversor
+  for (const b of m.baterias) {
+    const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+    cajaRedonda(G.baterias, [cx, cy, 0], [b.x1 - b.x0, b.y1 - b.y0, 2 * b.hz], M.batt, 0.015).userData.componente = 'bateria';
+    cajaRedonda(G.baterias, [cx, b.y1 + 0.012, 0], [(b.x1 - b.x0) * 0.6, 0.02, b.hz], M.black, 0.006).userData.componente = 'bateria';
+  }
+  const b0 = m.baterias[0];
+  const cable = new THREE.CatmullRomCurve3(([
+    [b0.x0, b0.y1 + 0.03, 0.25], [b0.x0 - 0.3, m.ys + 0.08, 0.28], [m.xR + 0.4, m.ys + 0.10, 0.25], [m.inversor.c[0], m.inversor.c[1] - 0.02, m.inversor.c[2] + 0.12],
+  ] as V3[]).map(p => new THREE.Vector3(...p)));
+  const cab = new THREE.Mesh(new THREE.TubeGeometry(cable, 60, 0.008, 8, false), M.cableHV); cab.userData.componente = 'bateria'; G.baterias.add(cab);
+  const cab2 = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(([[m.inversor.c[0], m.inversor.c[1] - 0.04, 0.1], [m.motor.c[0], m.motor.c[1] + m.motor.r, 0.05]] as V3[]).map(p => new THREE.Vector3(...p))), 12, 0.007, 8, false), M.cableHV); cab2.userData.componente = 'motor'; G.motor.add(cab2);
+}
+
+/** La parte que se mueve: según el vehículo, el rombo basculante o los McPherson con las ruedas giradas. */
+function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coche: THREE.Group, angulo: number) {
+  if (m.tipo === 'a1') construirMovilA1(G, M, m, coche, angulo); else construirMovilGota(G, M, m, coche, angulo);
+}
+
+/** Aeromóvil 1: cuatro McPherson con sus brazos, muelles y barras, y las ruedas (las delanteras giradas `giro` grados). */
+function construirMovilA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1, coche: THREE.Group, giro: number) {
+  coche.rotation.x = 0;
+  vaciar(G.suspension); vaciar(G.ruedas);
+  const s = G.suspension, c = m.P.comp;
+  for (let i = 0; i < 4; i++) {
+    const r = m.ruedas[i], q = suspensionA1(m, i, c), sg = q.s;
+    // Mangueta: del eje al vástago, y el pie hasta la rótula
+    tube(s, q.rotula, q.arriba, 0.034, M.alu);
+    tube(s, [r.x, r.r + c * 0.09, sg * (Math.abs(r.z) - 0.07)], [r.x, r.r + c * 0.09, sg * (Math.abs(r.z) - 0.02)], 0.03, M.black);
+    sphere(s, q.rotula, 0.024, M.black);
+    // Columna McPherson: cuerpo del amortiguador, vástago y muelle
+    const A = new THREE.Vector3(...q.arriba), B = new THREE.Vector3(...q.torreta), d = B.clone().sub(A), L = d.length(); d.normalize();
+    const mid: V3 = [A.x + d.x * L * 0.45, A.y + d.y * L * 0.45, A.z + d.z * L * 0.45];
+    tube(s, q.arriba, mid, 0.046, M.susp);
+    tube(s, mid, q.torreta, 0.022, M.stanch);
+    const m0: V3 = [A.x + d.x * L * 0.30, A.y + d.y * L * 0.30, A.z + d.z * L * 0.30], m1: V3 = [A.x + d.x * L * 0.92, A.y + d.y * L * 0.92, A.z + d.z * L * 0.92];
+    muelle(s, m0, m1, 0.062, 6, M.muelle);
+    const platoA = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.008, 24), M.black); platoA.position.set(...m0); platoA.quaternion.setFromUnitVectors(_up, d); s.add(platoA);
+    const platoB = platoA.clone(); platoB.position.set(...m1); s.add(platoB);
+    // Brazos inferiores en A y rótulas en el chasis
+    for (const [a, b] of q.brazos) { tube(s, a, b, 0.025, M.susp); sphere(s, a, 0.018, M.black); }
+    // Barra estabilizadora con su bieleta
+    if (sg > 0) tube(s, [r.x + 0.25, r.r - 0.02, -0.36], [r.x + 0.25, r.r - 0.02, 0.36], 0.018, M.black);
+    tube(s, [r.x + 0.25, r.r - 0.02, sg * 0.36], [r.x + 0.12, r.r - 0.07, sg * (Math.abs(r.z) - 0.18)], 0.012, M.black);
+    // La rueda, girada si es delantera
+    ruedaCoche(G.ruedas, M, r.x, r.r + c * 0.09, r.z, r.r, r.w, q.disco, q.del ? giro * Math.PI / 180 : 0);
+  }
+  etiquetar(G.suspension, 'suspension'); etiquetar(G.ruedas, 'ruedas');
+}
+
+/** Aeromóvil Gota: suspensiones comprimidas, paralelogramo inclinado, ruedas y motor. */
+function construirMovilGota(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloGota, coche: THREE.Group, inclinacion: number) {
   const ph = inclinacion * Math.PI / 180, c = m.P.comp, AX = m.AX;
   coche.rotation.x = ph;
   vaciar(G.suspension); vaciar(G.ruedas); vaciar(G.motor);
@@ -490,8 +707,8 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
     [PIV[0], PIV[1] + 0.05, 0.05], [rax[0] + 0.05, rax[1] + 0.04, 0.05],
   ] as V3[]).map(p => new THREE.Vector3(...p)));
   mo.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 80, 0.006, 6, false), M.motor));
+  etiquetar(G.suspension, 'suspension'); etiquetar(G.ruedas, 'ruedas'); etiquetar(G.motor, 'motor');
 }
-
 
 /** Un velomóvil de referencia: piel de secciones superelípticas, cabina y ruedas. */
 function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: boolean) {
@@ -569,7 +786,8 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, vista, referencia = null, modoRef = 'no', alinear = 'eje' }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
+  const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
 
@@ -626,15 +844,31 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const st = {
       renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, puertasG, tween: null as any,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
-      apertura: 0, aperturaObjetivo: 0, colocarPuertas: (() => {}) as () => void,
+      apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
     };
     estado.current = st;
     const colocarPuertas = () => {
       for (const lista of puertasG.values()) for (const piv of lista) {
-        piv.quaternion.setFromAxisAngle(piv.userData.eje, piv.userData.angulo * st.apertura);
+        piv.quaternion.setFromAxisAngle(piv.userData.eje, piv.userData.angulo * (piv.userData.tipo === 'maletero' ? st.aperturaMal : st.apertura));
       }
     };
     st.colocarPuertas = colocarPuertas;
+    // Clic en una pieza: si apenas se ha movido el ratón, es un clic y no un giro de cámara.
+    const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+    let bajada: [number, number] | null = null;
+    const alBajar = (e: PointerEvent) => { bajada = [e.clientX, e.clientY]; };
+    const alSoltar = (e: PointerEvent) => {
+      if (!bajada || Math.hypot(e.clientX - bajada[0], e.clientY - bajada[1]) > 6 || !pinchar.current) { bajada = null; return; }
+      bajada = null;
+      const r = cv.getBoundingClientRect();
+      ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ptr, camera);
+      const vis: THREE.Object3D[] = [];
+      coche.traverse((o: any) => { if (o.isMesh && o.visible && o.userData.componente) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) vis.push(o); } });
+      const hit = ray.intersectObjects(vis, false).find(h => !(h.object as any).material?.transparent || ((h.object as any).material.opacity ?? 1) > 0.3) ?? ray.intersectObjects(vis, false)[0];
+      if (hit) pinchar.current((hit.object as any).userData.componente);
+    };
+    cv.addEventListener('pointerdown', alBajar); cv.addEventListener('pointerup', alSoltar);
     const bucle = (ahora: number) => {
       const dt = Math.min(0.05, (ahora - ultimo) / 1000); ultimo = ahora;
       if (st.tween) {
@@ -643,15 +877,18 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         camera.position.lerpVectors(st.tween.from, st.tween.to, e); controls.target.lerpVectors(st.tween.tf, target, e);
         if (st.tween.t >= 1) st.tween = null;
       }
-      if (st.apertura !== st.aperturaObjetivo) {
+      if (st.apertura !== st.aperturaObjetivo || st.aperturaMal !== st.aperturaMalObjetivo) {
         const paso = reducir ? 1 : dt / 1.1;
-        st.apertura = st.aperturaObjetivo > st.apertura ? Math.min(st.aperturaObjetivo, st.apertura + paso) : Math.max(st.aperturaObjetivo, st.apertura - paso);
+        const avanzar = (v: number, o: number) => (o > v ? Math.min(o, v + paso) : Math.max(o, v - paso));
+        st.apertura = avanzar(st.apertura, st.aperturaObjetivo); st.aperturaMal = avanzar(st.aperturaMal, st.aperturaMalObjetivo);
         colocarPuertas();
       }
       if (st.curva && st.modelo) {
         tc += dt; acc += dt;
-        if (acc > 0.045) { acc = 0; st.inclinacion = st.modelo.P.tiltMax * Math.sin(tc * 1.1); construirMovil(G, M, st.modelo, coche, st.inclinacion); }
-        // Intermitente del lado hacia el que se inclina, a 1,5 parpadeos por segundo
+        // El Gota se inclina; el Aeromóvil 1 gira las ruedas delanteras.
+        const maximo = st.modelo.tipo === 'a1' ? GIRO_A1 : st.modelo.P.tiltMax;
+        if (acc > 0.045) { acc = 0; st.inclinacion = maximo * Math.sin(tc * 1.1); construirMovil(G, M, st.modelo, coche, st.inclinacion); }
+        // Intermitente del lado hacia el que se inclina o gira, a 1,5 parpadeos por segundo
         const enc = Math.floor(ahora / 333) % 2 === 0;
         M.intermitenteI.emissiveIntensity = st.inclinacion > 2 && enc ? 2.2 : 0.15;
         M.intermitenteD.emissiveIntensity = st.inclinacion < -2 && enc ? 2.2 : 0.15;
@@ -661,6 +898,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     raf = requestAnimationFrame(bucle);
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); controls.dispose();
+      cv.removeEventListener('pointerdown', alBajar); cv.removeEventListener('pointerup', alSoltar);
       scene.traverse((o: any) => { o.geometry?.dispose?.(); });
       M.solar.map?.dispose();
       Object.values(M).forEach(m => m.dispose()); pm.dispose(); renderer.dispose();
@@ -694,15 +932,16 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     st.coche.visible = modoRef !== 'sola';
   }, [referencia, modoRef, alinear, modelo]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
+  useEffect(() => { const st = estado.current; if (st) st.aperturaMalObjetivo = maleteros ? 1 : 0; }, [maleteros]);
 
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    const { body, glass, solar } = st.M as Mats;
-    body.transparent = rayosX; body.opacity = rayosX ? 0.16 : 1; body.depthWrite = !rayosX;
+    const { body, glass, solar, bajos } = st.M as Mats;
+    for (const mt of [body, bajos]) { mt.transparent = rayosX; mt.opacity = rayosX ? 0.16 : 1; mt.depthWrite = !rayosX; }
     solar.transparent = rayosX; solar.opacity = rayosX ? 0.25 : 1; solar.depthWrite = !rayosX;
     glass.opacity = rayosX ? 0.18 : 0.55;
     const cp = corte ? [st.plano] : [];
-    for (const mt of [body, glass, solar]) { mt.clippingPlanes = cp; mt.needsUpdate = true; }
+    for (const mt of [body, glass, solar, bajos]) { mt.clippingPlanes = cp; mt.needsUpdate = true; }
   }, [rayosX, corte]);
 
   useEffect(() => {
@@ -743,5 +982,5 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     },
   }), []);
 
-  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label="Modelo 3D del Aeromóvil Gota" />;
+  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : 'Modelo 3D del Aeromóvil Gota'} />;
 });

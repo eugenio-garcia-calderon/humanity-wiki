@@ -491,3 +491,12 @@ threshold, checked only on that null path here).
 - Curved tubes in the STEP are overlapping straight segments (16 per tube), not a swept spline: good for looking and for printing a template, not for a CAM bender. A real swept tube: ~1 h, with the risk of OCC sweep failures on tight bends.
 - /arquitectura animation (2026-11-05): agents do not see each other, do not stop at the roundabout or at crossings, and open lanes restart from their beginning (a car vanishes at the community edge and reappears at the other). Linking routes into a graph with turns is ~half a day if it is ever needed.
 - /arquitectura: the per-scale services in the pop-up for nest and family (`servicios.ts`) are my proposal, not from sheet J; community/village/city reuse sheet J. Eugenio should read them once.
+
+## Aeromóvil 1 (2026-11-06)
+- Component costs and supplier links in `src/components/aeromovil/componentes.ts` are November-2026 estimates typed by hand from public catalogues (Twizy spares, Motenergy, BloombergNEF pack prices ×3 for a prototype). Nobody asked a supplier. A price changes without the code knowing; moving the catalogue to a table Eugenio can edit is ~1 h, and a yearly check of the links is the cheaper fix.
+- Choosing an alternative patches parameters (e.g. `mMotor: 8`); moving the same slider afterwards keeps the alternative marked while the number no longer matches it. Clearing `variantes[id]` when its sliders move: ~20 min.
+- The A1 STEP is ~90 thickened B-spline patches (22 MB raw) instead of one lofted skin; opens fine but is heavy to edit. Lofting the exported `cuadernas` in the script: ~2 h.
+- Elliptical wheel-arch edges are cell-stepped in the viewer (refined to ~1 cm) and in the STEP; the band edge is mesh-aligned. Exact trimming of the arches: a per-cell polygon clip, ~2 h.
+- Steering lock is 22° (turning circle ≈ 9 m) so the steered, compressed tyre clears the arch lip by ≥ 2 cm; the Twizy's lock is larger. A wider nose plan or a deeper wheel well would allow more.
+- The Gota keeps its hand-written CadQuery script (`aeromovil_cad.py`); the A1 uses the exported-geometry script. Two export paths until the Gota is ported to `cad.ts` (~1 h).
+- Mannequin head clearance to the canopy is 12 cm at the default; the SZEmission's pilot sits lower in a tighter cockpit. Lowering the hip (battery module under the seat is 16 cm thick) would need the second module to grow: a slider for the under-seat module thickness, ~30 min.
