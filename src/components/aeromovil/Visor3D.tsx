@@ -499,15 +499,16 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   const p = r.perfil, nv = 64, n = p.x.length;
   const pos: number[] = [], idx: number[] = [], col: number[] = [];
   const cabina = r.cabinaX ? [Math.min(...r.cabinaX), Math.max(...r.cabinaX)] : null;
-  const colCuerpo = new THREE.Color(fantasma ? 0x14a3b5 : 0xe4e0d6), colCab = new THREE.Color(r.cabina === 'cupula' ? 0x22323d : 0x0f1215);
+  const colCuerpo = new THREE.Color(fantasma ? 0x14a3b5 : (r.color ?? 0xe4e0d6)), colCab = new THREE.Color(r.cabina === 'cupula' ? 0x22323d : 0x0f1215);
   for (let i = 0; i < n; i++) {
     const zc = (p.top[i] + p.bot[i]) / 2, aT = (p.top[i] - p.bot[i]) / 2;
     for (let j = 0; j <= nv; j++) {
-      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? 2.5 : 3.2;
+      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? (r.formaArriba ?? 2.5) : 3.2;
       const ez = Math.sign(c) * Math.pow(Math.abs(c), 2 / nn), ey = Math.sign(sn) * Math.pow(Math.abs(sn), 2 / nn);
       pos.push(p.x[i], zc + aT * ey, p.hw[i] * ez);
       const enCab = !!cabina && p.x[i] <= cabina[1] && p.x[i] >= cabina[0] && sn > Math.sin(0.22 * Math.PI);
-      const cc = enCab ? colCab : colCuerpo; col.push(cc.r, cc.g, cc.b);
+      const enClaro = !!r.transparenteX && p.x[i] <= Math.max(...r.transparenteX) && p.x[i] >= Math.min(...r.transparenteX);
+      const cc = enCab || enClaro ? colCab : colCuerpo; col.push(cc.r, cc.g, cc.b);
     }
   }
   for (let i = 0; i < n - 1; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j, b = a + nv + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }

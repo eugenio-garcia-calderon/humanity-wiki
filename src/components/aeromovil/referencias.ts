@@ -33,6 +33,15 @@ export interface Referencia {
   cabina: Cabina;
   /** Zona de cristal o abertura, en x (m): de dónde a dónde. */
   cabinaX?: [number, number];
+  /** Tramo transparente en toda la vuelta (un morro de plástico claro), en x (m). */
+  transparenteX?: [number, number];
+  /** Color de la carrocería al verlo solo (el fantasma de «Comparar» es siempre turquesa). */
+  color?: number;
+  /** Exponente de la mitad de arriba de la sección (2,5 por defecto): más bajo, techo
+   *  más estrecho que el cuerpo, como una cúpula sobre una carrocería ancha. */
+  formaArriba?: number;
+  /** Coeficiente de arrastre publicado. */
+  cd?: number;
   ruedas: RuedaRef[];
   perfil: PerfilRef;
   notas?: string;
@@ -63,6 +72,31 @@ function perfilGota(o: {
 
 const d20 = 0.508;
 
+/**
+ * Una cápsula: morro en cono redondeado, cuerpo casi recto y trasera roma.
+ * `morro` y `cola` son la fracción del largo que ocupa cada extremo;
+ * `yMorro` y `yCola`, la altura (m) a la que se cierra cada punta.
+ */
+function perfilCapsula(o: {
+  xn: number; L: number; H: number; W: number; clear: number;
+  morro: number; cola: number; yMorro: number; yCola: number; caidaTecho: number;
+}): PerfilRef {
+  const N = 90, x: number[] = [], top: number[] = [], bot: number[] = [], hw: number[] = [];
+  for (let i = 0; i <= N; i++) {
+    const u = (1 - Math.cos(Math.PI * i / N)) / 2;
+    const T = o.H - o.H * o.caidaTecho * Math.pow(Math.max(0, (u - 0.5) / 0.5), 1.6);
+    let s = 1, y0 = o.yMorro;
+    if (u < o.morro) { const a = (o.morro - u) / o.morro; s = Math.pow(Math.max(0, 1 - a * a), 0.62); }
+    else if (u > 1 - o.cola) { const a = (u - (1 - o.cola)) / o.cola; s = Math.pow(Math.max(0, 1 - a * a), 0.5); y0 = o.yCola; }
+    else y0 = o.yMorro + (o.yCola - o.yMorro) * (u - o.morro) / Math.max(0.01, 1 - o.morro - o.cola);
+    x.push(o.xn - u * o.L);
+    top.push(y0 + (T - y0) * s);
+    bot.push(y0 - (y0 - o.clear) * Math.min(1, s * 1.25));
+    hw.push(o.W / 2 * Math.pow(s, 0.85));
+  }
+  return { x, top, bot, hw };
+}
+
 /** Los de catálogo: medidas publicadas, curvas aproximadas. */
 export const CATALOGO: Referencia[] = [
   {
@@ -90,6 +124,50 @@ export const CATALOGO: Referencia[] = [
     perfil: perfilGota({ xn: 0.62, L: 2.835, H: 0.88, W: 0.76, clear: 0.08, pmax: 0.48, nariz: 0.32, cola: 0.55 }),
     notas: 'Velomóvil de carbono de Velomobiel.nl, sin motor de serie. La cabeza del ciclista sale por la abertura (o va bajo una capota). Batalla y vías estimadas.',
   },
+  {
+    // 2026-11-05, Eugenio, con una foto: «modela también este velomóvil para
+    // poder compararlo con el nuestro». Marca y modelo sin identificar.
+    // Lectura de la foto (de 3/4, sin escala): morro de plástico transparente
+    // con los faros dentro y una horquilla blanca debajo (una rueda delante),
+    // parabrisas en el techo y ventanilla larga a cada lado, y la parte roma y
+    // redondeada detrás, con las dos ruedas de atrás asomando en las esquinas.
+    // Todas las medidas son estimadas a ojo.
+    id: 'cat-rojo-2004', nombre: 'Velomóvil rojo (foto de 2004)', origen: 'catalogo',
+    fuente: 'Una sola foto de 3/4 enviada por Eugenio, sin marca ni medidas. Todo estimado a ojo: unos 3,0 × 0,80 × 1,05 m, una rueda delante y dos detrás de 20″.',
+    L: 3.0, W: 0.80, H: 1.05, clear: 0.10, batalla: 2.10, plazas: 1, cabina: 'cerrada', cabinaX: [-0.30, -1.90], transparenteX: [0.45, 0.07],
+    ruedas: [{ x: 0, z: 0, d: d20 }, { x: -2.10, z: 0.29, d: d20 }, { x: -2.10, z: -0.29, d: d20 }],
+    perfil: perfilCapsula({ xn: 0.45, L: 3.0, H: 1.05, W: 0.80, clear: 0.10, morro: 0.40, cola: 0.10, yMorro: 0.30, yCola: 0.50, caidaTecho: 0.18 }),
+    color: 0xc4161c,
+    notas: 'Si la parte transparente fuera la cola y no el morro, el vehículo iría al revés: dímelo y lo giro. Con una foto de perfil y su largo real se puede rehacer más fiel desde «Crear un modelo 3D desde fotos».',
+  },
+  {
+    // 2026-11-06, Eugenio, con fotos del SZEnergy Team: «modela este y busca
+    // info en internet para hacerlo lo más preciso posible, llámalo Aeromóvil 1».
+    // Es el SZEmission de la Universidad Széchenyi István (Győr, Hungría),
+    // UrbanConcept eléctrico de la Shell Eco-marathon.
+    //   Publicado por el equipo: 95 kg en orden de carrera, Cd 0,1365, monocasco
+    //   de composite de carbono en forma de gota modificada, motor PMS con
+    //   correa dentada, batería LiPo de 350-530 Wh, 332 km/kWh en 2026.
+    //   No publican medidas. El reglamento UrbanConcept fija: alto 1,00-1,30 m,
+    //   ancho 1,20-1,30 m, largo 2,20-3,50 m, batalla ≥ 1,20 m, vía ≥ 1,00 m
+    //   delante y ≥ 0,80 m detrás, altura libre ≥ 10 cm. Un coche de
+    //   eficiencia apura los mínimos, y las fotos lo confirman: el techo de la
+    //   cúpula queda a la altura de la cadera de la gente. Alto, ancho, batalla,
+    //   vías y altura libre se toman en el mínimo del reglamento; el largo, de
+    //   la proporción largo/alto en las fotos de perfil (≈ 2,8).
+    id: 'cat-aeromovil-1', nombre: 'Aeromóvil 1', origen: 'catalogo',
+    fuente: 'SZEmission del SZEnergy Team (Universidad Széchenyi, Győr). Publicado: 95 kg, Cd 0,1365, monocasco de carbono, una plaza. Medidas: alto, ancho, batalla y vías en el mínimo del reglamento UrbanConcept de la Shell Eco-marathon; el largo, estimado de las fotos.',
+    enlaces: [
+      { t: 'SZEmission, ficha del equipo', url: 'https://szenergy.hu/en/our-racing-cars/' },
+      { t: 'Presentación del coche 2026', url: 'https://alumni.sze.hu/en/?p=10203' },
+      { t: 'Reglas UrbanConcept (resumen)', url: 'https://areeweb.polito.it/didattica/h2polito/en/competitions/shell-eco-marathon.html' },
+    ],
+    L: 2.80, W: 1.20, H: 1.00, clear: 0.10, batalla: 1.20, plazas: 1, masa: 95, cd: 0.1365, cabina: 'cupula', cabinaX: [0.02, -0.98],
+    ruedas: [{ x: 0, z: 0.50, d: 0.50 }, { x: 0, z: -0.50, d: 0.50 }, { x: -1.20, z: 0.40, d: 0.50 }, { x: -1.20, z: -0.40, d: 0.50 }],
+    perfil: perfilGota({ xn: 0.75, L: 2.80, H: 1.00, W: 1.20, clear: 0.10, pmax: 0.40, nariz: 0.32, cola: 0.27, romo: 0.35 }),
+    color: 0xf2c200, formaArriba: 1.6,
+    notas: 'Ruedas de unos 50 cm, carenadas dentro de la carrocería. Por ser medidas de reglamento, el alto, el ancho, la batalla y las vías son las mínimas permitidas; si el equipo publica las suyas se cambian aquí.',
+  },
 ];
 
 /** Interpola el perfil en una x cualquiera (los x van de morro a cola, decrecientes). */
@@ -110,7 +188,7 @@ export function fichaComparable(r: Referencia) {
   const vias = r.ruedas.filter(w => Math.abs(w.z) > 0.01).map(w => 2 * Math.abs(w.z));
   return {
     L: r.L, W: r.W, H: r.H, batalla: r.batalla, ruedas: r.ruedas.length, ejes,
-    via: vias.length ? Math.max(...vias) : 0, plazas: r.plazas, masa: r.masa ?? null,
+    via: vias.length ? Math.max(...vias) : 0, plazas: r.plazas, masa: r.masa ?? null, cd: r.cd ?? null,
     huella: r.L * r.W,
   };
 }
