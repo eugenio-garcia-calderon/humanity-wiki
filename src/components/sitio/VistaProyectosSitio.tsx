@@ -32,7 +32,7 @@ const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 
 type Celda = { estado?: string; valor?: unknown };
 type Fila = {
-  id: string; pagina_id: string | null; orden: number;
+  id: string; pagina_id: string | null; orden: number; oculta?: boolean;
   pagina?: { titulo?: string; imagen?: string | null; resumen?: string | null; encuadre?: { x?: number; y?: number } | null } | null;
   celdas: Record<string, Celda>;
 };
@@ -43,6 +43,12 @@ type Tabla = {
   filas: Fila[];
   conexiones?: Array<{ tabla_id: string; columna_id: string }>;
 };
+
+const PESO_ESTADO: Record<string, number> = {
+  'Foco principal': 0, 'En seguimiento': 1, 'Activo': 1, 'Completado': 2,
+  'Proyecto futuro': 4, 'Desarrollo futuro': 4, 'Ideación': 5,
+};
+const FOCO = 'Foco principal';
 
 const lista = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 const pide = (t: string) => fetch(`/api/bd/tablas/${encodeURIComponent(t)}?lectura=1`, { credentials: 'include' })
@@ -128,14 +134,15 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       // está lo más a la izquierda posible»); a igualdad, el orden de la tabla de Sistemas.
       .sort((a, b) => b.n - a.n || a.orden - b.orden);
 
-    // Los proyectos: activos primero, y dentro el orden de la tabla.
+    // Los proyectos, por su estado (2026-11-06, Eugenio): delante el «Foco principal» (que
+    // además ocupa dos columnas), luego «En seguimiento», los completados, los que no tienen
+    // estado y al final lo que está por venir («Proyecto futuro», «Desarrollo futuro»,
+    // «Ideación»). Dentro de cada grupo, el orden de la tabla. Las entradas ocultas no salen
+    // (quien edita las recibe del servidor; aquí es la cara pública).
     const opciones = new Map((colEstado?.opciones || []).map(o => [o.id, o]));
-    const peso = (f: Fila) => {
-      const o = opciones.get(String(f.celdas[colEstado?.id || '']?.valor || ''));
-      return o?.label === 'Activo' ? 0 : o?.label === 'Completado' ? 1 : 2;
-    };
+    const peso = (f: Fila) => PESO_ESTADO[opciones.get(String(f.celdas[colEstado?.id || '']?.valor || ''))?.label || ''] ?? 3;
     const filas = [...proyectos.filas]
-      .filter(f => f.pagina_id && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
+      .filter(f => !f.oculta && f.pagina_id && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
       .sort((a, b) => peso(a) - peso(b) || a.orden - b.orden);
     return { colNombre, colArea, colEstado, opciones, areas, filas };
   }, [proyectos, sistemas, raiz]);
@@ -219,15 +226,19 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           const estadoId = String(f.celdas[modelo.colEstado?.id || '']?.valor || '');
           const estado = modelo.opciones.get(estadoId) || null;
           const sus = lista(f.celdas[modelo.colArea]?.valor).map(id => modelo.areas.find(a => a.id === id)?.nombre).filter(Boolean) as string[];
+          // EL FOCO PRINCIPAL (2026-11-06, Eugenio: «que en vez de 1/3 ocupe 2/3»): dos
+          // columnas y dos filas, la imagen llena el alto y el nombre más grande.
+          const foco = estado?.label === FOCO;
           return (
-            <li key={f.id} className="relative">
+            <li key={f.id} className={cn('relative', foco && 'sm:col-span-2 lg:row-span-2')}>
               <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
-                className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
+                className={cn('group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
+                  foco && 'lg:flex lg:h-full lg:flex-col')}>
+                <div className={cn('relative aspect-[16/9] w-full overflow-hidden bg-slate-100', foco && 'lg:aspect-auto lg:min-h-0 lg:flex-1')}>
                   {/* 400 y no 420: con 420 la miniatura saltaba al ancho 1600 (el doble retina
                       busca el escalón siguiente) y cada portada tardaba segundos en fabricarse. */}
                   {img ? (
-                    <img src={miniatura(img, 400)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
+                    <img src={miniatura(img, foco ? 800 : 400)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
                       {...(i < 3 ? { fetchPriority: 'high' as const } : {})}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
@@ -244,7 +255,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                   )}
                 </div>
                 <div className="p-4">
-                  <h2 className="text-lg font-black leading-snug text-slate-900">{nombre}</h2>
+                  <h2 className={cn('font-black leading-snug text-slate-900', foco ? 'text-2xl sm:text-3xl' : 'text-lg')}>{nombre}</h2>
                   {sus.length > 0 && <p className="mt-0.5 truncate text-xs font-semibold text-slate-400">{sus.join(' · ')}</p>}
                 </div>
               </Link>
