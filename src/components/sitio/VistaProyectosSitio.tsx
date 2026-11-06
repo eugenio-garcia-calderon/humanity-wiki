@@ -240,7 +240,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                   {img ? (
                     <img src={miniatura(img, foco ? 800 : 400)} alt="" loading={i < 6 ? 'eager' : 'lazy'} decoding="async"
                       {...(i < 3 ? { fetchPriority: 'high' as const } : {})}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      // En el foco la foto no marca el alto (una vertical estiraba la tarjeta y abría
+                      // un hueco a su lado): se pinta encima, del alto que dan las dos filas.
+                      className={cn('h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]', foco && 'lg:absolute lg:inset-0')}
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
                   ) : (
                     <div className="grid h-full w-full place-items-center text-3xl font-black text-slate-300">{nombre.slice(0, 1)}</div>
