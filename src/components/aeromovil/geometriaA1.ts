@@ -341,7 +341,24 @@ export function crearModeloA1(P: Parametros) {
   const yTow = Math.max(rF, rR) + 0.42;                          // torretas de los McPherson
   const zTF = P.viaF / 2 - 0.22, zTR = P.viaR / 2 - 0.22;
   const xD = xPil + 0.70, yDash = Math.min(hip + 0.42, frame(uDeX(xD + 0.17)).top - 0.07);   // arco del salpicadero, bajo el capó (que ahí ya baja hacia el morro)
-  const xH = (P.plazas === 2 ? xPas : xPil) - 0.50, yHoop = deckY - 0.03;   // arco principal, detrás del último asiento
+  // ── Motor, reductora, inversor y cargador ───────────────────────────────
+  // El motor va bajo y justo detrás de las caderas del pasajero (2026-11-06,
+  // Eugenio), pegado al suelo del chasis, delante del eje trasero; la
+  // reductora queda en el eje y el inversor detrás del eje, donde estaba el motor.
+  const xAtras = P.plazas === 2 ? xPas : xPil;
+  const motor = { c: [Math.min(xAtras - 0.36, xR + 0.16), yFloor + 0.105 + 0.015, 0.06] as P3, r: 0.105, largo: 0.26 };
+  const reductora = { c: [xR - 0.04, rR + 0.06, -0.02] as P3, s: [0.20, 0.18, 0.22] as P3 };
+  const inversor = { c: [xR - 0.30, rR + 0.12, 0] as P3, s: [0.24, 0.09, 0.30] as P3 };
+  const cargador = { c: [xPil + 0.85, yFloor + 0.30, 0.33] as P3, s: [0.22, 0.10, 0.20] as P3 };   // bajo el salpicadero, a la derecha de la pierna del piloto   // en el morro, bajo el capó, junto a la toma de carga
+  const xH = (P.plazas === 2 ? xPas : xPil) - 0.50;   // detrás del último asiento: borde delantero del suelo del maletero
+  const uArco = uDeX(occPts(true).C[0] - 0.30);     // arco de seguridad, 30 cm detrás del cuello del piloto (tras el reposacabezas)
+  const xArco = xDeU(uArco);                             // arco de seguridad entre piloto y pasajero
+  const yAmortR = ys + 0.16;                             // anclaje alto del amortiguador trasero tumbado (bajo el suelo del maletero)
+  // Suelo plano del maletero (2026-11-06, Eugenio: «una tapita plana… que si
+  // se tumba el asiento quede un hueco para dormir, como el Aptera»): por
+  // encima de todo lo que hay debajo (motor, inversor, cargador, amortiguadores).
+  const yMaletero = Math.max(motor.c[1] + motor.r, inversor.c[1] + inversor.s[1] / 2, reductora.c[1] + reductora.s[1] / 2, yAmortR + 0.03) + 0.02;
+  const ACERO = 'Acero 25CrMo4 (cromoly)';
   const ySill = yFloor + 0.22, zSill = 0.50;
   const volanteCentro: P3 = [volante.c[0], volante.c[1], 0];
   const cremallera: P3 = [0.10, yFloor + 0.16, 0];
@@ -359,32 +376,55 @@ export function crearModeloA1(P: Parametros) {
       tubo(`Larguero ${lado}`, [xF0, yLarg(xF0), s * zR], [xR0, yLarg(xR0), s * zR], P.spineD / 1000, P.spineT / 1000, 'Chasis', false, AL, paso);
       tubo(`Torreta delantera ${lado}, delante`, [0.35, yLarg(0.35), s * zR], [0.03, yTow, s * zTF], 0.032, 0.002);
       tubo(`Torreta delantera ${lado}, detrás`, [-0.32, yLarg(-0.32), s * zR], [0.03, yTow, s * zTF], 0.032, 0.002);
-      tubo(`Torreta trasera ${lado}, delante`, [xR + 0.32, yLarg(xR + 0.32), s * zR], [xR + 0.03, yTow, s * zTR], 0.032, 0.002);
-      tubo(`Torreta trasera ${lado}, detrás`, [xR - 0.32, yLarg(xR - 0.32), s * zR], [xR + 0.03, yTow, s * zTR], 0.032, 0.002);
       tubo(`Montante del salpicadero ${lado}`, [xD, yLarg(xD), s * zR], [xD, yDash, s * 0.36], 0.032, 0.002);
-      tubo(`Arco principal ${lado}`, [xH, yLarg(xH), s * zR], [xH, yHoop, s * 0.30], 0.038, 0.0025);
       tubo(`Estribo ${lado}`, [xD, ySill, s * zSill], [xH, ySill, s * zSill], 0.032, 0.002);
       tubo(`Pie del estribo delantero ${lado}`, [xD, yLarg(xD), s * zR], [xD, ySill, s * zSill], 0.025, 0.0015);
       tubo(`Pie del estribo trasero ${lado}`, [xH, yLarg(xH), s * zR], [xH, ySill, s * zSill], 0.025, 0.0015);
       tubo(`Diagonal salpicadero–torreta ${lado}`, [xD, yDash, s * 0.36], [0.03, yTow, s * zTF], 0.025, 0.0015);
-      tubo(`Diagonal arco–torreta trasera ${lado}`, [xH, yHoop, s * 0.30], [xR + 0.03, yTow, s * zTR], 0.025, 0.0015);
+      // Montante del parabrisas: barra de acero por dentro del canto del
+      // cristal, del estribo al techo; en ella se agarra la bisagra delantera.
+      { const pts: P3[] = []; for (let k = 0; k <= 8; k++) { const u = uBase + (uW1 + G_U - uBase) * k / 8; pts.push(secC(frameC(u), s > 0 ? Math.max(thPilar(u) - G_T, thBase(u) + 0.01) : Math.PI - Math.max(thPilar(u) - G_T, thBase(u) + 0.01), -0.024)); }
+        tubo(`Montante del parabrisas ${lado}`, [xDeU(uBase), ySill, s * zSill], pts[pts.length - 1], 0.030, 0.002, 'Chasis', false, ACERO, [[xDeU(uBase), ySill, s * zSill], ...pts]); }
+      // Pie del arco de seguridad: del larguero al estribo, bajo el arco
+      tubo(`Pie del arco de seguridad ${lado}`, [xArco, yLarg(xArco), s * zR], [xArco, ySill, s * zSill], 0.030, 0.002, 'Chasis', false, ACERO);
+      // Suspensión trasera baja (2026-11-06, Eugenio: «que la suspensión no
+      // tenga que estar tan grande y tan inclinada… compactando todo lo más
+      // bajo posible»): brazo tirado desde un pivote en el larguero y un
+      // amortiguador tumbado (≈30°) anclado bajo el suelo del maletero; sin torretas.
+      tubo(`Soporte del amortiguador trasero ${lado}`, [xR - 0.30, yLarg(xR - 0.30), s * zR], [xR - 0.30, yAmortR, s * 0.30], 0.028, 0.002);
     }
+    // Arco de seguridad entre el piloto y el pasajero: tubo de acero que sigue
+    // la cúpula por dentro, de estribo a estribo, pasando por el techo.
+    { const pts: P3[] = [[xArco, ySill, zSill]]; const fA = frameC(uArco), t0 = thBase(uArco) + 0.02;
+      for (let k = 0; k <= 20; k++) pts.push(secC(fA, t0 + (Math.PI - 2 * t0) * k / 20, -0.030));
+      pts.push([xArco, ySill, -zSill]);
+      tubo('Arco de seguridad', pts[0], pts[pts.length - 1], 0.038, 0.0025, 'Chasis', false, ACERO, pts); }
     for (const [n, x] of [['Travesaño delantero', xF0], ['Travesaño del eje delantero', 0.35], ['Travesaño del suelo', -0.32], ['Travesaño del asiento', xPil - 0.40], ['Travesaño del eje trasero', xR + 0.32], ['Travesaño del motor', xR - 0.32], ['Travesaño trasero', xR0]] as [string, number][]) {
       tubo(n, [x, yLarg(x), -zR], [x, yLarg(x), zR], 0.032, 0.002);
     }
     tubo('Travesaño de torretas delanteras', [0.03, yTow, -zTF], [0.03, yTow, zTF], 0.032, 0.002);
-    tubo('Travesaño de torretas traseras', [xR + 0.03, yTow, -zTR], [xR + 0.03, yTow, zTR], 0.032, 0.002);
+    tubo('Travesaño de amortiguadores traseros', [xR - 0.30, yAmortR, -0.30], [xR - 0.30, yAmortR, 0.30], 0.032, 0.002);
     tubo('Travesaño del salpicadero', [xD, yDash, -0.36], [xD, yDash, 0.36], 0.032, 0.002);
-    tubo('Travesaño del arco principal', [xH, yHoop, -0.30], [xH, yHoop, 0.30], 0.038, 0.0025);
+    // Arco bajo del maletero: sostiene el borde delantero del suelo plano
+    tubo('Travesaño del suelo del maletero', [xH, yMaletero - 0.02, -0.30], [xH, yMaletero - 0.02, 0.30], 0.028, 0.002);
+    for (const s of [1, -1]) tubo(`Pie del suelo del maletero ${s > 0 ? 'izq.' : 'der.'}`, [xH, yLarg(xH), s * zR], [xH, yMaletero - 0.02, s * 0.30], 0.025, 0.0015);
     // Suspensión McPherson: brazos inferiores (fabricados), amortiguadores y barras (compradas)
     for (const [nombre, xA, r, zA, zT] of [['delantera', 0, rF, P.viaF / 2, zTF], ['trasera', xR, rR, P.viaR / 2, zTR]] as [string, number, number, number, number][]) {
       for (const s of [1, -1]) {
         const lado = s > 0 ? 'izq.' : 'der.', rotula: P3 = [xA, r - 0.10, s * (zA - 0.06)];
         // Los anclajes al chasis, dentro de la huella de la rueda y por encima del fondo de la carrocería.
         const yAnc = (x: number) => Math.max(r - 0.06, frame(uDeX(x)).bot + 0.045);
-        tubo(`Brazo inferior ${nombre} ${lado}, delante`, [xA + 0.14, yAnc(xA + 0.14), s * zR], rotula, 0.025, 0.0025, 'Suspensión');
-        tubo(`Brazo inferior ${nombre} ${lado}, detrás`, [xA - 0.14, yAnc(xA - 0.14), s * zR], rotula, 0.025, 0.0025, 'Suspensión');
-        tubo(`Amortiguador McPherson ${nombre} ${lado}`, [xA, r + 0.14, s * (zA - 0.08)], [xA + 0.03, yTow, s * zT], 0.045, 0, 'Suspensión', true, 'Comprado (columna McPherson con muelle, clase Twizy)');
+        if (nombre === 'delantera') {
+          tubo(`Brazo inferior ${nombre} ${lado}, delante`, [xA + 0.14, yAnc(xA + 0.14), s * zR], rotula, 0.025, 0.0025, 'Suspensión');
+          tubo(`Brazo inferior ${nombre} ${lado}, detrás`, [xA - 0.14, yAnc(xA - 0.14), s * zR], rotula, 0.025, 0.0025, 'Suspensión');
+          tubo(`Amortiguador McPherson ${nombre} ${lado}`, [xA, r + 0.14, s * (zA - 0.08)], [xA + 0.03, yTow, s * zT], 0.045, 0, 'Suspensión', true, 'Comprado (columna McPherson con muelle, clase Twizy)');
+        } else {
+          // Brazo tirado: pivote en el larguero 38 cm por delante del eje, buje en la rueda; amortiguador tumbado hacia atrás y hacia dentro.
+          tubo(`Brazo tirado trasero ${lado}`, [xA + 0.38, yAnc(xA + 0.38) + 0.02, s * zR], [xA, r - 0.03, s * (zA - 0.06)], 0.030, 0.0025, 'Suspensión');
+          tubo(`Tirante del brazo trasero ${lado}`, [xA + 0.38, yAnc(xA + 0.38) + 0.02, s * zR], [xA - 0.06, r - 0.03, s * (zA - 0.10)], 0.022, 0.002, 'Suspensión');
+          tubo(`Amortiguador trasero ${lado}`, [xA - 0.05, r + 0.01, s * (zA - 0.13)], [xA - 0.30, yAmortR, s * 0.30], 0.045, 0, 'Suspensión', true, 'Comprado (amortiguador con muelle, tumbado)');
+        }
+        void zT;
       }
       // Hacia el centro del coche, donde el fondo es más bajo y la tapa.
       const xBarra = xA + (xA === 0 ? -0.25 : 0.25), yBarra = Math.max(r - 0.02, frame(uDeX(xBarra)).bot + 0.05);
@@ -511,13 +551,26 @@ export function crearModeloA1(P: Parametros) {
   // la junta que tiene cualquier cristal pegado; y la ventanilla se parte en
   // dos (piloto y pasajero) con un montante fino entre las dos cabezas.
   const G_T = 0.035, G_U = 0.007;
-  const uDivisor = uDeX((occPts(true).C[0] + occPts(false).C[0]) / 2 - 0.05);
+  // Arco de seguridad entre el piloto y el pasajero (2026-11-06, Eugenio: «una
+  // barra de acero que envuelva como una jaula hasta el techo, un poco más
+  // atrás de donde termina el asiento del piloto, y es ahí donde se abre la
+  // puerta; el pasajero entra echando el asiento adelante o por el hueco»).
+  // Va 14 cm detrás del reposacabezas del piloto; la puerta (solo la del
+  // piloto) va del montante del parabrisas a este arco, con las bisagras en
+  // el canto del techo entre las dos barras.
+  const uDivisor = uArco;
+  // Esquinas redondeadas de la puerta (como la del Aptera): cerca de cada
+  // borde vertical el canto de arriba baja en cuarto de círculo.
+  const R_U = 0.030, R_T = 0.07;
+  const redondeo = (d: number) => { if (d >= R_U) return 0; const k = (R_U - d) / R_U; return R_T * (1 - Math.sqrt(Math.max(0, 1 - k * k))); };
+  const thPuertaArriba = (u: number) => thVentana - redondeo(u - (uW1 + G_U)) - redondeo(uArco - u);
+  const thPuertaAbajo = (u: number) => Math.max(u < uW1 + G_U ? thPilar(u) + G_T : 0, thAlfeizar(u) - G_T - 0.01, thBase(u) + 0.005);
   const thVentG = (u: number) => Math.max(thAlfeizar(u) - G_T, thBase(u) + 0.005), thVentH = (u: number) => Math.min(thVentana, thVent(u) + G_T);
   const zonasCupula: ZonaPiel[] = [
-    { nombre: 'Montante entre ventanillas', piel: 'marco', u0: uDivisor - 0.006, u1: uDivisor + 0.006, t0: 0, t1: Math.PI, tDe: u => [thVentG(u), Math.PI - thVentG(u)] },
+    { nombre: 'Montante del arco de seguridad', piel: 'marco', u0: uDivisor - 0.008, u1: uDivisor + 0.012, t0: 0, t1: Math.PI, tDe: u => [thVentG(u), Math.PI - thVentG(u)] },
     { nombre: 'Parabrisas', piel: 'cristal', u0: uC0, u1: uW1, t0: 0, t1: Math.PI, tDe: u => [Math.max(thPilar(u), thBase(u) + 0.02), Math.PI - Math.max(thPilar(u), thBase(u) + 0.02)] },
-    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [Math.max(thAlfeizar(u), thBase(u) + 0.005), thVent(u)] },
-    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVent(u), Math.PI - Math.max(thAlfeizar(u), thBase(u) + 0.005)] },
+    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [Math.max(thAlfeizar(u), thBase(u) + 0.005), Math.min(thVent(u), u < uArco ? thPuertaArriba(u) - 0.012 : thVentana)] },
+    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - Math.min(thVent(u), u < uArco ? thPuertaArriba(u) - 0.012 : thVentana), Math.PI - Math.max(thAlfeizar(u), thBase(u) + 0.005)] },
     { nombre: 'Goma del parabrisas', piel: 'marco', u0: uC0, u1: uW1 + G_U, t0: 0, t1: Math.PI, tDe: u => [Math.max(thPilar(u) - G_T, thBase(u) + 0.005), Math.PI - Math.max(thPilar(u) - G_T, thBase(u) + 0.005)] },
     { nombre: 'Goma de la ventanilla izquierda', piel: 'marco', u0: uBase - G_U, u1: uVent1 + G_U, t0: 0, t1: thVentana, tDe: u => [thVentG(u), thVentH(u)] },
     { nombre: 'Goma de la ventanilla derecha', piel: 'marco', u0: uBase - G_U, u1: uVent1 + G_U, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVentH(u), Math.PI - thVentG(u)] },
@@ -529,22 +582,25 @@ export function crearModeloA1(P: Parametros) {
   const puertas: PuertaDef[] = [];
   // La puerta empieza detrás del parabrisas (que es fijo, ~30 cm de cúpula) y acaba en el arco principal.
   // La puerta llega hasta el arco principal, pero no más de 1,4 m: con pasajero el arco queda muy atrás.
-  const uD0 = Math.max(uDeX(xD + 0.02), uC0 + 0.08), uD1 = Math.min(uDeX(xH - 0.02), uD0 + 0.385);
-  const uDC0 = Math.max(uC0 + 0.015, uD0), uDC1 = Math.min(uCabina1 - 0.01, uD1);
+  // El panel lateral de la carrocería empieza detrás del salpicadero (delante
+  // está la rueda); la parte de cúpula empieza en el montante del parabrisas.
+  const uD0 = Math.max(uDeX(xD + 0.02), uC0 + 0.08), uD1 = uArco;
+  const uDC0 = uBase, uDC1 = uArco;
   const lineaCentro = (ua: number, ub: number): [P3, P3] => [secC(frameC(ua), Math.PI / 2), secC(frameC(ub), Math.PI / 2)];
   if (P.puerta === 'gaviota') {
-    // Alas de gaviota como las del Aptera (2026-11-06, Eugenio: «conserva el
-    // techo, que se abran solo la parte lateral, el techo no es parte de la
-    // puerta»): la puerta es la ventanilla con su costado de cúpula y el panel
-    // lateral de la carrocería; la bisagra va en el canto del techo (la línea
-    // donde el costado se vuelve techo), inclinada como ese canto.
+    // Alas de gaviota como las del Aptera (2026-11-06, Eugenio): la puerta es
+    // la ventanilla del piloto con su costado de cúpula (del montante del
+    // parabrisas al arco de seguridad, esquinas redondeadas) y el panel
+    // lateral de la carrocería; la bisagra va en el canto del techo, con un
+    // herraje en cada barra (montante y arco). Solo hay puerta del piloto.
     for (const s of [1, -1]) {
       const id = s > 0 ? 'izq' : 'der', nombre = `Puerta ${s > 0 ? 'izquierda' : 'derecha'}`;
       const th = (t: number) => (s > 0 ? t : Math.PI - t);
-      const bis: [P3, P3] = [secC(frameC(uDC0), th(thVentana)), secC(frameC(uDC1), th(thVentana))];
+      const bis: [P3, P3] = [secC(frameC(uW1 + G_U + 0.012), th(thVentana)), secC(frameC(uArco - 0.012), th(thVentana))];
       const fB = frame((uD0 + uD1) / 2), prueba = sec(fB, s > 0 ? 0.08 * Math.PI : 0.92 * Math.PI);
       const ang = abrirHaciaArriba(bis, prueba, 105);
-      puertas.push({ id, nombre, tipo: 'puerta', superficie: 'cupula', u0: uDC0, u1: uDC1, t0: s > 0 ? 0 : Math.PI - thVentana, t1: s > 0 ? thVentana : Math.PI, bisagra: bis, angulo: ang });
+      puertas.push({ id, nombre, tipo: 'puerta', superficie: 'cupula', u0: uDC0, u1: uDC1, t0: s > 0 ? 0 : Math.PI - thVentana, t1: s > 0 ? thVentana : Math.PI,
+        tDe: u => (s > 0 ? [thPuertaAbajo(u), thPuertaArriba(u)] : [Math.PI - thPuertaArriba(u), Math.PI - thPuertaAbajo(u)]), bisagra: bis, angulo: ang });
       puertas.push({ id, nombre, tipo: 'puerta', superficie: 'cuerpo', u0: uD0, u1: uD1, t0: s > 0 ? 0.04 * Math.PI : 0.66 * Math.PI, t1: s > 0 ? 0.34 * Math.PI : 0.96 * Math.PI, bisagra: bis, angulo: ang });
     }
   } else if (P.puerta === 'cabina') {
@@ -582,27 +638,26 @@ export function crearModeloA1(P: Parametros) {
   ];
   const zonasPiel = [...zonasCuerpo, ...zonasCupula];
 
-  // ── Motor, reductora, inversor y cargador ───────────────────────────────
-  // El motor va bajo y justo detrás de las caderas del pasajero (2026-11-06,
-  // Eugenio), pegado al suelo del chasis, delante del eje trasero; la
-  // reductora queda en el eje y el inversor detrás del eje, donde estaba el motor.
-  const xAtras = P.plazas === 2 ? xPas : xPil;
-  const motor = { c: [Math.min(xAtras - 0.36, xR + 0.16), yFloor + 0.105 + 0.015, 0.06] as P3, r: 0.105, largo: 0.26 };
-  const reductora = { c: [xR - 0.04, rR + 0.06, -0.02] as P3, s: [0.20, 0.18, 0.22] as P3 };
-  const inversor = { c: [xR - 0.30, rR + 0.12, 0] as P3, s: [0.24, 0.09, 0.30] as P3 };
-  const cargador = { c: [xR - 0.30, rR + 0.225, 0] as P3, s: [0.22, 0.10, 0.22] as P3 };
   const ruedas: Rueda[] = [
     { nombre: 'Rueda delantera izq.', x: 0, z: P.viaF / 2, r: rF, w: nF.w }, { nombre: 'Rueda delantera der.', x: 0, z: -P.viaF / 2, r: rF, w: nF.w },
     { nombre: 'Rueda trasera izq.', x: xR, z: P.viaR / 2, r: rR, w: nR.w }, { nombre: 'Rueda trasera der.', x: xR, z: -P.viaR / 2, r: rR, w: nR.w },
   ];
   const torretas = { yTow, zTF, zTR };
+  const sueloMaletero = (() => {
+    let x1 = xH, hz = 0;
+    for (let x = xH; x > xt + 0.05; x -= 0.02) {
+      let a = 0, b = 1.2; for (let i = 0; i < 12; i++) { const z = (a + b) / 2; if (gap(x, yMaletero + 0.01, z) > 0) a = z; else b = z; }
+      if (a < 0.15) break; x1 = x; hz = hz === 0 ? a - 0.02 : Math.min(hz, a - 0.02);
+    }
+    return { x0: xH, x1, y: yMaletero, hz: Math.max(0.1, hz) };
+  })();
   // Espacio trasero (2026-11-06, Eugenio: «hacer que desaparezca el copiloto
   // para ver el espacio que queda de maletero o de cama, con cotas»): del
   // respaldo del piloto hacia atrás, sobre el suelo (o la batería), hasta
   // donde el techo de la cúpula baja de 45 cm; ancho el de la cúpula a 25 cm
   // del suelo en el punto más estrecho del tramo, alto el del centro.
   const espacioTrasero = (() => {
-    const yS = Math.max(yFloor + 0.005, ...baterias.filter(b => b.x0 < xPil).map(b => b.y1));
+    const yS = Math.max(yFloor + 0.005, yMaletero, ...baterias.filter(b => b.x0 < xPil).map(b => b.y1));
     const x0 = occPts(true).S[0] - 0.10;
     let u = Math.max(uC0 + 0.02, uDeX(x0)), x1 = x0, hz = 9, alto = 0;
     for (; u < uC1 - 0.02; u += 0.005) {
@@ -621,11 +676,11 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, uNariz, gomaT: G_T, gomaU: G_U, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, uArco, uNariz, gomaT: G_T, gomaU: G_U, thPuertaArriba, thPuertaAbajo, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
-    baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, espacioTrasero,
-    xD, yDash, xH, yHoop, ySill, zSill, zR, xF0, xR0,
+    baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, espacioTrasero, sueloMaletero, yMaletero,
+    xD, yDash, xH, ySill, zSill, zR, xF0, xR0,
     nF, nR,
   };
 }
@@ -774,7 +829,7 @@ export function calcularA1(m: ModeloA1, ar: { carroceria: number; cristal: numbe
   ch.push({ nombre: `Rueda delantera girada ${GIRO_A1}° y hundida`, holgura: Math.min(ruedaCar(m.ruedas[0], GIRO_A1 * Math.PI / 180, TRAVEL_A1), ruedaCar(m.ruedas[0], -GIRO_A1 * Math.PI / 180, TRAVEL_A1)), minimo: 0.02 });
   ch.push({ nombre: 'Rueda trasera hundida', holgura: ruedaCar(m.ruedas[2], 0, TRAVEL_A1), minimo: 0.02 });
   ch.push({ nombre: 'Torretas de suspensión dentro de la carrocería', holgura: Math.min(m.gap(0.03, m.torretas.yTow + 0.03, m.torretas.zTF), m.gap(m.xR + 0.03, m.torretas.yTow + 0.03, m.torretas.zTR)), minimo: 0.02 });
-  ch.push({ nombre: 'Arco principal bajo la cubierta', holgura: Math.min(m.gap(m.xH, m.yHoop + 0.019, 0.30), m.gap(m.xH, m.yHoop + 0.019, 0)), minimo: 0.01 });
+  { const top = m.secC(m.frameC(m.uArco), Math.PI / 2, -0.030); ch.push({ nombre: 'Arco de seguridad bajo la cúpula', holgura: m.gap(top[0], top[1] + 0.019, top[2]), minimo: 0.005 }); }
   for (const b of m.baterias) {
     let mn = 9;
     for (const x of [b.x0, b.x1]) for (const z of [-b.hz, b.hz]) for (const y of [b.y0, b.y1]) mn = Math.min(mn, m.gap(x, y, z));

@@ -196,9 +196,9 @@ export const COMPONENTES: Componente[] = [
   },
   // ── Suspensión y dirección ────────────────────────────────────────────────
   {
-    id: 'suspension', corto: 'Suspensión', nombre: 'Suspensión McPherson', grupo: 'Suspensión y dirección', capa: 'suspension',
-    que: 'En cada rueda, una columna McPherson (muelle y amortiguador en uno) anclada a una torreta del chasis, un brazo inferior en A fabricado en tubo y una mangueta. Delante y detrás, barra estabilizadora. Es el esquema del Twizy, que a 140 km/h va bien.',
-    caracteristicas: [['Tipo', 'McPherson en las cuatro ruedas'], ['Recorrido', '90 mm'], ['Muelles', '≈ 25 N/mm delante · 30 N/mm detrás'], ['Brazos', 'tubo de aluminio Ø 25 × 2,5, soldados'], ['Estabilizadoras', 'Ø 18 mm delante y detrás'], ['Masa', '26 kg lo comprado + brazos del chasis']],
+    id: 'suspension', corto: 'Suspensión', nombre: 'Suspensión McPherson delante, brazos tirados detrás', grupo: 'Suspensión y dirección', capa: 'suspension',
+    que: 'Delante, en cada rueda una columna McPherson (muelle y amortiguador en uno) anclada a una torreta del chasis, un brazo inferior en A fabricado en tubo y una mangueta. Detrás, un brazo tirado por rueda con el amortiguador tumbado y anclado bajo el suelo del maletero: sin torretas, para que el maletero quede plano y lo más grande posible (2026-11-06). Delante y detrás, barra estabilizadora.',
+    caracteristicas: [['Tipo', 'McPherson delante · brazos tirados con amortiguador tumbado detrás'], ['Recorrido', '90 mm'], ['Muelles', '≈ 25 N/mm delante · 30 N/mm detrás'], ['Brazos', 'tubo de aluminio Ø 25 × 2,5, soldados'], ['Estabilizadoras', 'Ø 18 mm delante y detrás'], ['Masa', '26 kg lo comprado + brazos del chasis']],
     unidades: 4, masaKg: (_P, res) => res.masas['Suspensión'] ?? 0, costeEur: () => 4 * 130 + 4 * 60 + 2 * 90 + 4 * 40 + 120, parametroMasa: 'mSuspension', deslizador: 'Cuatro McPherson con manguetas',
     proveedores: [
       { nombre: 'Columnas McPherson de Twizy (KYB, Monroe, Autodoc)', url: 'https://www.autodoc.es/', nota: '≈ 130 € cada una' },
@@ -226,7 +226,7 @@ export const COMPONENTES: Componente[] = [
   // ── Estructura y carrocería ───────────────────────────────────────────────
   {
     id: 'chasis', corto: 'Chasis', nombre: 'Chasis tubular', grupo: 'Estructura y carrocería', capa: 'chasis',
-    que: 'Dos largueros entre ejes con travesaños, las torretas de la suspensión, el arco del salpicadero, el arco principal detrás del piloto y los estribos de las puertas. Soldado en tubo de aluminio 6061 y tratado T6 después de soldar. Lleva el peso del piloto y la batería y sostiene la carrocería.',
+    que: 'Dos largueros entre ejes con travesaños, las torretas delanteras, el arco del salpicadero, los estribos de las puertas y, en acero cromoly, los dos montantes del parabrisas y el arco de seguridad entre el piloto y el pasajero (en esas barras cierra y se articula la puerta). Soldado en tubo de aluminio 6061 y tratado T6 después de soldar. Lleva el peso del piloto y la batería y sostiene la carrocería.',
     caracteristicas: [['Material', 'aluminio 6061-T6'], ['Largueros', 'Ø 40 × 2 mm'], ['Resto', 'Ø 32 × 2 y Ø 25 × 1,5 mm'], ['Tratamiento', 'T6 tras soldar (recupera el 90 % de la resistencia)'], ['Coeficiente de seguridad', 'calculado en «Estructura»']],
     unidades: 1, masaKg: (_P, res) => res.masas.Chasis ?? 0,
     costeEur: (P, _r, m) => Math.round(metrosTubo(m) * EUR_M_TUBO[P.matChasis] + 900 + (P.matChasis === 'al6061' ? 300 : 0)), parametroMasa: 'extraChasis', deslizador: 'Uniones, chapas y tornillería (y el material)',
