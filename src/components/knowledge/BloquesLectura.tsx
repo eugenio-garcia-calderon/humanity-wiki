@@ -25,6 +25,8 @@ import { CargaEnOrden } from './CargaEnOrden';
 import { BdContribuible } from '../sitio/Contribuir';
 import { useEscaparate } from '../sitio/escaparate';
 import { miniatura } from '../../utils/miniatura';
+import { bloquesNoticia } from '../../utils/noticias';
+import GaleriaNoticias from '../sitio/TarjetaNoticia';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -109,11 +111,12 @@ function anchoEscaparate(b: any): string {
   return 'clear-both';
 }
 const esVideo = (b: any) => b?.tipo === 'medio' && (b.medio === 'youtube' || b.medio === 'vimeo');
-/** Escaparate: las imágenes sueltas seguidas forman una fila, como si llevaran el mismo `grupo`, y
+/** Las viñetas seguidas que son noticias van juntas (una galería de tarjetas). En un escaparate,
+ *  además, las imágenes sueltas seguidas forman una fila, como si llevaran el mismo `grupo`, y
  *  los vídeos seguidos van de dos en dos. Una imagen sola (sin vecinas) se queda suelta. */
-function juntarSueltas(filas: any[][]): any[][] {
+function juntarSueltas(filas: any[][], noticias: Set<any>, nota: boolean): any[][] {
   const out: any[][] = [];
-  const clase = (f: any[]) => f.length !== 1 ? null : f[0]?.tipo === 'imagen' && !f[0].grupo ? 'imagen' : esVideo(f[0]) ? 'video' : null;
+  const clase = (f: any[]) => f.length !== 1 ? null : noticias.has(f[0]) ? 'noticia' : !nota ? null : f[0]?.tipo === 'imagen' && !f[0].grupo ? 'imagen' : esVideo(f[0]) ? 'video' : null;
   let anterior: string | null = null;
   for (const f of filas) {
     const c = clase(f);
@@ -275,6 +278,8 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
   const anidado = useContext(Anidado);
   /** Columna de lectura y cosas pequeñas: sólo en un escaparate y en lo de primer nivel. */
   const nota = escaparate && !anidado && nivel === 0;
+  // Las viñetas que son noticias («En los medios»): tarjetas con portada y logo del medio.
+  const noticias = useMemo(() => bloquesNoticia(bloques, nota), [bloques, nota]);
   // UN ENLACE A UN BLOQUE (`#b-…`, 2026-09-30). El navegador salta al ancla
   // al cargar, pero aquí los bloques llegan después: se salta a mano y se
   // resalta un momento para que se vea a qué apuntaba el enlace.
@@ -333,7 +338,9 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
   return (
     // `flow-root`: la imagen que flota al lado del texto no se sale por debajo de la página.
     <div className={cn('space-y-2.5', nota && 'flow-root')}>
-      {(nota ? juntarSueltas(enFilas(bloques)) : enFilas(bloques)).map((fila, k) => fila.length === 1 ? uno(fila[0]) : nota && fila.every((b: any) => b?.tipo === 'imagen') ? (
+      {juntarSueltas(enFilas(bloques), noticias, nota).map((fila, k) => fila.every((b: any) => noticias.has(b)) ? (
+        <GaleriaNoticias key={`noticias-${fila[0].id || k}`} bloques={fila} />
+      ) : fila.length === 1 ? uno(fila[0]) : nota && fila.every((b: any) => b?.tipo === 'imagen') ? (
         // Escaparate: una fila de miniaturas (2 a 4), que se amplían al pulsarlas.
         <div key={`fila-${fila[0].grupo || fila[0].id}-${k}`} className={cn('clear-both grid gap-3 sm:gap-4 [&_figure_img]:aspect-[4/3] [&_figure_img]:object-cover', FILA_ESCAPARATE(fila.length))}>
           {fila.map((b: any) => <div key={`col-${b.id}`} className="min-w-0">{uno(b, true)}</div>)}

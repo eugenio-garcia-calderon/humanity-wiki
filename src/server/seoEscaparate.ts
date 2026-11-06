@@ -32,6 +32,26 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarAmpliacion } from './ampliarPagina';
 import { slugDe } from '../components/sitio/sitioWeb';
+import fs from 'fs';
+import path from 'path';
+import { bloquesNoticia, noticiaDeBloque, dominioDelMedio } from '../utils/noticias';
+import { uploadsDir } from './uploads';
+
+// LOS LOGOS DE LOS MEDIOS (2026-11-06, Eugenio: «destacando el medio con los logos de esos
+// periódicos»). Uno por dominio en /uploads/2026/11/logos/<dominio>.png (los baja y revisa
+// `notas/logos.py`). Toda viñeta de «En los medios» sin `logo` recibe el de su dominio al
+// servirse, también las que se añadan mañana desde el editor. La carpeta se lee cada 10 min.
+const CARPETA_LOGOS = '2026/11/logos';
+let logosEnDisco: { t: number; s: Set<string> } | null = null;
+export function logoDelMedio(url: string): string | null {
+  if (!logosEnDisco || Date.now() - logosEnDisco.t > 10 * 60_000) {
+    let s = new Set<string>();
+    try { s = new Set(fs.readdirSync(path.join(uploadsDir(), CARPETA_LOGOS)).filter(f => f.endsWith('.png')).map(f => f.slice(0, -4))); } catch { /* aún sin logos */ }
+    logosEnDisco = { t: Date.now(), s };
+  }
+  const d = dominioDelMedio(url);
+  return d && logosEnDisco.s.has(d) ? `/uploads/${CARPETA_LOGOS}/${d}.png` : null;
+}
 
 /** El orden de los estados en la portada (`VistaProyectosSitio.tsx`). */
 const PESO_ESTADO: Record<string, number> = {
@@ -49,7 +69,7 @@ type Persona = { pagina: string; fila: string; titulo: string; url: string; foto
 /** Una noticia que cita un proyecto (un enlace de las listas «En los medios» de su página). */
 export type Noticia = {
   titulo: string; url: string; medio: string; fecha: string | null; fechaTexto: string | null;
-  imagen: string | null; video: boolean; proyectos: Array<{ titulo: string; url: string }>;
+  imagen: string | null; logo: string | null; video: boolean; proyectos: Array<{ titulo: string; url: string }>;
 };
 type Modelo = {
   noticias: Noticia[];
@@ -82,21 +102,6 @@ const recorta = (t: string, n: number) => {
   const corte = s.slice(0, n - 1);
   return corte.slice(0, Math.max(corte.lastIndexOf(' '), n - 20)).replace(/[\s,.;:–-]+$/, '') + '…';
 };
-
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-/** La fecha escrita junto al enlace («24/03/2021», «06/2018», «2021-03-24», «2019»). */
-function fechaDe(t: string): { iso: string; texto: string } | null {
-  let m = /\b(\d{2})\/(\d{2})\/(\d{4})\b/.exec(t);
-  if (m) return { iso: `${m[3]}-${m[2]}-${m[1]}`, texto: `${Number(m[1])} ${MESES[Number(m[2]) - 1] || ''} ${m[3]}` };
-  m = /\b(\d{4})-(\d{2})-(\d{2})\b/.exec(t);
-  if (m) return { iso: `${m[1]}-${m[2]}-${m[3]}`, texto: `${Number(m[3])} ${MESES[Number(m[2]) - 1] || ''} ${m[1]}` };
-  m = /\b(\d{2})\/(\d{4})\b/.exec(t);
-  if (m) return { iso: `${m[2]}-${m[1]}`, texto: `${MESES[Number(m[1]) - 1] || ''} ${m[2]}` };
-  m = /\b(\d{4})-(\d{2})\b/.exec(t);
-  if (m) return { iso: `${m[1]}-${m[2]}`, texto: `${MESES[Number(m[2]) - 1] || ''} ${m[1]}` };
-  m = /\b(20\d{2}|19\d{2})\b/.exec(t);
-  return m ? { iso: m[1], texto: m[1] } : null;
-}
 
 async function construir(db: any, cfg: any): Promise<Modelo> {
   const tProy = String(cfg.proyectos || ''), tPers = String(cfg.personas || ''), tSist = String(cfg.sistemas || '');
@@ -189,25 +194,19 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
   const porUrl = new Map<string, Noticia>();
   const bloquesDe = new Map<string, any[]>(filas.map(f => [String(f.pagina_id), Array.isArray(f.bloques) ? f.bloques : []]));
   for (const p of proyectos) {
-    for (const b of bloquesDe.get(p.pagina) || []) {
-      if (b?.tipo !== 'lista' || typeof b.texto !== 'string') continue;
-      const m = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/.exec(b.texto);
-      if (!m) continue;
-      const ya = porUrl.get(m[2]);
-      if (ya) { if (!ya.proyectos.some(x => x.url === p.url)) ya.proyectos.push({ titulo: p.titulo, url: p.url }); continue; }
-      const resto = b.texto.replace(m[0], ' ');
-      const f = fechaDe(resto);
-      const yt = /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{6,})/.exec(m[2]);
-      let host = '';
-      try { host = new URL(m[2]).hostname.replace(/^www\./, ''); } catch { /* sin dominio */ }
-      porUrl.set(m[2], {
-        titulo: m[1].replace(/\*\*/g, '').trim(), url: m[2],
-        medio: ((/\*\*([^*]+)\*\*/.exec(resto) || [])[1] || host).replace(/\s*\(.*\)\s*$/, '').trim(),
-        fecha: f?.iso || null, fechaTexto: f?.texto || null,
-        imagen: typeof b.imagen === 'string' ? b.imagen : yt ? `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg` : null,
-        video: !!yt || /vimeo\.com|youtube\.com|youtu\.be/.test(m[2]),
-        proyectos: [{ titulo: p.titulo, url: p.url }],
-      });
+    // Solo las viñetas de «En los medios» (o marcadas `estilo: noticia`): una viñeta con enlace
+    // de otra sección («**Dónde verlo:** en humanity.wiki») no es una noticia (2026-11-06).
+    for (const b of bloquesNoticia(bloquesDe.get(p.pagina) || [], true)) {
+      const n = noticiaDeBloque(b);
+      if (!n) continue;
+      const ya = porUrl.get(n.url);
+      if (ya) {
+        if (!ya.proyectos.some(x => x.url === p.url)) ya.proyectos.push({ titulo: p.titulo, url: p.url });
+        if (!ya.imagen && n.imagen) ya.imagen = n.imagen;
+        if (!ya.logo && n.logo) ya.logo = n.logo;
+        continue;
+      }
+      porUrl.set(n.url, { ...n, logo: n.logo || logoDelMedio(n.url), proyectos: [{ titulo: p.titulo, url: p.url }] });
     }
   }
   const noticias = [...porUrl.values()].sort((x, y) => (y.fecha || '').localeCompare(x.fecha || '') || (y.imagen ? 1 : 0) - (x.imagen ? 1 : 0));
@@ -304,6 +303,13 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
     // así sale ya escrito en el HTML y no espera a ninguna consulta.
     if (cfg.pie?.sencillo) sitio.config = { ...cfg, pie: { ...cfg.pie, mapaProyectos: m.secciones } };
     rellenarAlts(pagina.config?.bloques, String(pagina.titulo || '').trim());
+    // Cada noticia de «En los medios», con el logo de su medio.
+    for (const b of bloquesNoticia(pagina.config?.bloques || [], true)) {
+      if (b.logo) continue;
+      const n = noticiaDeBloque(b);
+      const logo = n ? logoDelMedio(n.url) : null;
+      if (logo) b.logo = logo;
+    }
     // La imagen al compartir: si la portada es un vídeo, su miniatura (si no, `og:image`
     // apuntaba a la página de YouTube).
     if (pagina.config && !pagina.config.imagenCompartir && pagina.config.portada && imagenDeVerdad(pagina.config.portada) !== pagina.config.portada) {
