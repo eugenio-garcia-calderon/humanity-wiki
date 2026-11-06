@@ -318,8 +318,8 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
         <p className="mt-1 text-sm text-slate-600">Modelo sólido de la versión publicada (medidas por defecto). {porDefecto ? 'Coincide con lo que ves ahora.' : esA1 ? 'Has cambiado medidas: para un STEP con las tuyas, descarga la geometría y el script de abajo.' : 'Has cambiado medidas: para un STEP con las tuyas, descarga los parámetros y el script de abajo.'}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {esA1 ? <>
-            <a href="/aeromovil/Aeromovil_1_STEP.zip" download className="inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"><Download className="mr-1.5 h-4 w-4" />STEP (3,8 MB)</a>
-            <a href="/aeromovil/Aeromovil_1_STL_por_capas.zip" download className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><Download className="mr-1.5 h-4 w-4" />STL por capas (3,5 MB)</a>
+            <a href="/aeromovil/Aeromovil_1_STEP.zip" download className="inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"><Download className="mr-1.5 h-4 w-4" />STEP (4,1 MB)</a>
+            <a href="/aeromovil/Aeromovil_1_STL_por_capas.zip" download className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><Download className="mr-1.5 h-4 w-4" />STL por capas (4,6 MB)</a>
           </> : <>
             <a href="/aeromovil/Aeromovil_Gota_tandem_STEP.zip" download className="inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"><Download className="mr-1.5 h-4 w-4" />STEP (2,4 MB)</a>
             <a href="/aeromovil/Aeromovil_Gota_STL_por_capas.zip" download className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><Download className="mr-1.5 h-4 w-4" />STL por capas (2,2 MB)</a>
