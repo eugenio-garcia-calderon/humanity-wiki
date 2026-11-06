@@ -78,6 +78,11 @@ export interface Parametros {
   cupX0: number;    // dónde empieza la cúpula (fracción del largo desde el morro)
   cupX1: number;    // dónde acaba
   cupW: number;     // anchura de la cúpula (fracción del ancho)
+  inicioSolar: number; // dónde empieza el techo solar, en metros detrás del borde de arriba del parabrisas
+  volAlt: number;   // volante: más alto (+) o más bajo (−) que de serie (m)
+  volDist: number;  // volante: más lejos (+) o más cerca (−) del piloto (m)
+  pedDist: number;  // pedales/reposapiés: más lejos (+) o más cerca (−) del piloto (m)
+  pedAlt: number;   // pedales/reposapiés: más altos (+) o más bajos (−) (m)
   techo: number;    // caída del techo del pico a la cola: 1 = recta, más = se mantiene alto y cae al final (Aptera ≈ 1,6)
   parabrisas: number; // largo del parabrisas en fracción del largo (de su base a su borde de arriba): corto = empinado, largo = tumbado
   kWNom: number;    // potencia nominal del motor (kW)
@@ -171,7 +176,7 @@ export const RANGOS_MASA = {
 const A1_COMUN = {
   // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
   plazas: 2 as const, altPil: 0.14, altPas: 0.12, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
-  morroA1: 0.7, posMorro: 0, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, techo: 1.9, parabrisas: 0.21,
+  morroA1: 0.7, posMorro: 0, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, inicioSolar: 0.04, volAlt: 0, volDist: 0, pedDist: 0, pedAlt: 0, techo: 1.9, parabrisas: 0.21,
   kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
 };
 /** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */
@@ -250,7 +255,8 @@ export interface Zona {
   tDe?: (u: number) => [number, number];
 }
 /** 'bajos' es carrocería pintada de negro; 'hueco' es piel que no existe (los pasos de rueda). */
-export type Piel = 'carroceria' | 'cristal' | 'solar' | 'bajos' | 'hueco';
+/** `marco` es la goma negra mate alrededor de un cristal; `morro` la pieza azul marino de la punta (como el Aptera). Los dos son carrocería a efectos de peso y CAD. */
+export type Piel = 'carroceria' | 'cristal' | 'solar' | 'bajos' | 'hueco' | 'marco' | 'morro';
 export interface ZonaPiel extends Zona { piel: Piel; nombre: string }
 export interface ZonaPuerta extends Zona { id: string; nombre: string }
 /** Un trozo de piel que se abre: puerta o tapa de maletero, en la carrocería o en la cúpula. */
@@ -859,7 +865,7 @@ export function areas(m: Modelo) {
       const piel = zona ? zona.piel : S.pielBase;
       // Un panel solar va pegado sobre la piel: su superficie cuenta como panel y como carrocería (2026-11-06; antes solo como panel).
       if (piel === 'solar') { out.solar += s; out.carroceria += s; }
-      else if (piel !== 'hueco') out[piel === 'cristal' ? 'cristal' : 'carroceria'] += s;
+      else if (piel !== 'hueco') out[piel === 'cristal' ? 'cristal' : 'carroceria'] += s;   // marco y morro cuentan como carrocería
     }
   }
   return out;
