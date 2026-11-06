@@ -15,7 +15,7 @@ import { dentroDe, type Mundo, type Edificio, type Unidad } from './geometria';
 import { CAPA_DXF, SUELO, SISTEMA, EDIFICIO, COPAS } from './paleta';
 
 const CAPA_DE: Record<string, string> = {
-  campo: '', cesped: 'CESPED', suelo: 'SUELO_FAMILIAR', agricultura: 'AGRICULTURA', parque: 'PARQUE', produccion: 'PRODUCCION',
+  campo: '', cesped: 'CESPED', isleta: 'CESPED', suelo: 'SUELO_FAMILIAR', agricultura: 'AGRICULTURA', parque: 'PARQUE', produccion: 'PRODUCCION',
   huerto: 'HUERTO_NIDO', camino: 'CAMINO_GENERACIONAL', gota: 'GOTA', bosque: 'BOSQUE_COMESTIBLE',
   bancalA: 'BANCALES', bancalB: 'BANCALES', bancalC: 'BANCALES', bancalD: 'BANCALES', senda: 'SENDAS', plaza: 'PLAZA',
   agua: 'AGUA', calzada: 'VIA_VEHICULOS', bici: 'CARRIL_BICI', peatonal: 'PEATONAL', marca: 'EJES', via: 'FERROCARRIL', vertipuerto: 'VERTIPUERTO',
@@ -233,7 +233,7 @@ export function svgPlanta(m: Mundo, ambito: string, op: OpcionesPlano): string {
   const f = (v: number) => (Math.round(v * 100) / 100).toString();
   const P = (x: number, y: number) => { const [a, b] = T.p(x, y); return `${f(a)},${f(-b)}`; };
   const fill = (capa: string) => capa.startsWith('enlace-') ? SISTEMA[capa.slice(7)]?.color : SUELO[capa];
-  const orden = ['campo', 'cesped', 'agricultura', 'parque', 'produccion', 'suelo', 'camino', 'huerto', 'gota', 'bosque', 'bancalA', 'bancalB', 'bancalC', 'bancalD', 'senda', 'plaza', 'agua', 'vertipuerto', 'calzada', 'bici', 'peatonal', 'via', 'marca'];
+  const orden = ['campo', 'cesped', 'agricultura', 'parque', 'produccion', 'suelo', 'camino', 'huerto', 'gota', 'bosque', 'bancalA', 'bancalB', 'bancalC', 'bancalD', 'senda', 'plaza', 'agua', 'vertipuerto', 'calzada', 'bici', 'peatonal', 'isleta', 'via', 'marca'];
   const rank = (c: string) => c.startsWith('enlace-') ? 999 : orden.indexOf(c);
   type It = { r: number; svg: string };
   const items: It[] = [];

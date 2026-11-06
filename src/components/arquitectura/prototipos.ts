@@ -251,3 +251,6 @@ export function prototipo(n: Prototipo): THREE.BufferGeometry {
   if (!g) { g = fabricas[n](); cache.set(n, g); }
   return g;
 }
+
+/** Building blocks for models made elsewhere (the animation builds its own, on demand). */
+export const piezas = { pieza, unir, caja, cil, M, rueda };
