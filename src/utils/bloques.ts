@@ -142,6 +142,8 @@ export interface Bloque {
   lenguaje?: string;
   /** Imagen y medio. */
   url?: string;
+  /** Texto alternativo de una imagen (2026-11-06, SEO): si falta, el pie. */
+  alt?: string;
   pie?: string;
   /** Marcador (2026-10-02): lo que se leyó de la web al pegarla. Se guarda
    *  y no se vuelve a pedir en cada visita: la página publicada no debe

@@ -93,7 +93,10 @@ async function cargar(i: Idioma) {
 
 function aplicar(i: Idioma) {
   actual = i;
-  if (typeof document !== 'undefined') document.documentElement.lang = i;
+  // En un sitio publicado con dominio propio (`window.__SITIO__`) el idioma de la página
+  // es el de su contenido, no el de la interfaz de quien lo visita: Google lo pinta con
+  // un navegador en inglés y la dejaba en `lang="en"` (2026-11-06, SEO).
+  if (typeof document !== 'undefined' && !(window as any).__SITIO__) document.documentElement.lang = i;
   oyentes.forEach(f => f());
 }
 

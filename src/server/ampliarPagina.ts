@@ -36,6 +36,10 @@ export interface MetaPagina {
   jsonLd?: object | object[];
   /** `<meta>` extra: `{ property: 'product:price:amount', content: '149.99' }`. */
   metas?: Array<{ property?: string; name?: string; content: string }>;
+  /** Lo que dice esta ampliación manda también en las entradas de la red (por
+   *  defecto su descripción y su `noindex` no se aplican ahí). El escaparate
+   *  (`seoEscaparate.ts`) sabe exactamente qué es cada página. */
+  manda?: boolean;
 }
 
 export type Ampliacion = (db: any, req: Request | undefined, pagina: any) => Promise<void>;

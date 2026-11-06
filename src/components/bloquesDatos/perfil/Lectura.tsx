@@ -79,7 +79,7 @@ export default function Lectura({ paginaId }: PropsLectura) {
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 items-center gap-5">
           {p.foto
-            ? <img src={miniatura(p.foto, 256)} alt="" className="h-[108px] w-[108px] shrink-0 rounded-full object-cover ring-1 ring-slate-200" />
+            ? <img src={miniatura(p.foto, 256)} alt={p.nombre} className="h-[108px] w-[108px] shrink-0 rounded-full object-cover ring-1 ring-slate-200" />
             : <span className="grid h-[108px] w-[108px] shrink-0 place-items-center rounded-full bg-slate-100 text-4xl font-black text-slate-400">{nombrePila?.charAt(0) || '?'}</span>}
           <div className="min-w-0">
             <h1 className="text-[2.6rem] font-black leading-none tracking-tight text-slate-900">{escaparate ? p.nombre : nombrePila}</h1>

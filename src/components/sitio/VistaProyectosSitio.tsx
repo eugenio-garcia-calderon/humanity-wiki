@@ -249,7 +249,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                 className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {img ? (
-                    <img src={miniatura(img, 400)} alt="" loading={i < 4 ? 'eager' : 'lazy'} decoding="async"
+                    <img src={miniatura(img, 400)} alt={descripcion ? `${nombre}: ${descripcion}` : nombre} loading={i < 4 ? 'eager' : 'lazy'} decoding="async"
                       {...(i < 2 ? { fetchPriority: 'high' as const } : {})}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
@@ -308,7 +308,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
               <li key={p.id}>
                 <Link to={sitio ? sitio.enlacePagina(p.id) : `/p/${p.id}`} className="group flex flex-col items-center gap-2 text-center">
                   {p.foto
-                    ? <img src={miniatura(p.foto, 96)} alt="" loading="lazy" decoding="async" className="h-16 w-16 rounded-full object-cover ring-1 ring-slate-200 transition-transform group-hover:scale-105" />
+                    ? <img src={miniatura(p.foto, 96)} alt={p.nombre} loading="lazy" decoding="async" className="h-16 w-16 rounded-full object-cover ring-1 ring-slate-200 transition-transform group-hover:scale-105" />
                     : <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-lg font-black text-slate-400">{p.nombre.slice(0, 1)}</span>}
                   <span className="text-xs font-bold leading-tight text-slate-700 group-hover:text-slate-950">{p.nombre}</span>
                 </Link>

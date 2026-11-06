@@ -313,7 +313,26 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
   if (p.sencillo) return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
-      <div className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80">
+      {/* El mapa del sitio: los proyectos por área, con su dirección limpia (2026-11-06, SEO). */}
+      {Array.isArray(p.mapaProyectos) && p.mapaProyectos.length > 0 && (
+        <nav aria-label="Mapa del sitio" data-mapa-proyectos className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 pt-10 pb-8">
+          <p className={titulo}>Proyectos por área</p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-7 @2xl:grid-cols-3 @5xl:grid-cols-5">
+            {p.mapaProyectos.map(sec => (
+              <div key={sec.titulo} className="min-w-0">
+                <p className="text-sm font-black opacity-95">{sec.titulo}</p>
+                <ul className="mt-1.5 space-y-0.5">
+                  {sec.entradas.map(e => (
+                    <li key={e.url}><a href={e.url} data-interno="" className="block truncate py-0.5 text-[13px] opacity-70 hover:opacity-100 hover:underline">{e.titulo}</a></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </nav>
+      )}
+      <div style={Array.isArray(p.mapaProyectos) && p.mapaProyectos.length ? { borderColor: `${p.texto}26` } : undefined}
+        className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80', Array.isArray(p.mapaProyectos) && p.mapaProyectos.length > 0 && 'border-t')}>
         {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
         {c.email && <a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 min-h-11 hover:underline break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a>}
       </div>
