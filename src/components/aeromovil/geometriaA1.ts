@@ -137,9 +137,9 @@ export function crearModeloA1(P: Parametros) {
   const frameCrudo = (u: number) => ({ top: yCuerpo(SZ.top(u)), bot: yCuerpo(SZ.bot(u)), hw: Math.max(0.004, P.W / 2 * hwN(u)) });
   const frame = (u: number): Seccion => {
     let { top, bot, hw } = frameCrudo(u);
-    if (u < uRedondo && P.morroA1 > 0) {
+    if (u < uRedondo) {
       const R = frameCrudo(uRedondo), t = u / uRedondo, circ = Math.sqrt(1 - (1 - t) * (1 - t));
-      const peso = P.morroA1 * (1 - t) * (1 - t) * (1 + 2 * t);   // morroA1 en la punta, 0 (y plano) en la unión
+      const peso = (1 - t) * (1 - t) * (1 + 2 * t);   // 1 en la punta (siempre una semiesfera: nunca una punta afilada, 2026-11-06), 0 y plano en la unión
       const mid = (top + bot) / 2, mitadR = (R.top - R.bot) / 2;
       const kAlto = (1 - peso) * ((top - bot) / 2 / Math.max(1e-4, mitadR)) + peso * circ;
       const kAncho = (1 - peso) * (hw / R.hw) + peso * circ;
@@ -222,11 +222,24 @@ export function crearModeloA1(P: Parametros) {
   };
   // Exponente de la sección (techo plano) y cuánto caen hacia dentro los costados (0 = verticales).
   const ncDe = (u: number) => 4.4 + 3.6 * pesoPlano(u);
-  const caidaDe = (u: number) => 0.12 + 0.16 * pesoPlano(u);
+  // Cuánto se estrechan los costados de abajo a arriba (2026-11-06, Eugenio,
+  // con la foto frontal del XL1: «la cabina empieza ancha en el carenado y
+  // termina estrecha en el techo, con inclinación»): `techoW` es el ancho del
+  // techo en fracción de la base; en el parabrisas, un 8 % más de caída.
+  const caidaDe = (u: number) => Math.min(0.6, Math.max(0, 1 - P.techoW)) + 0.08 * pesoPlano(u);
   const uDeXC = (x: number) => (xn - x) / L;
+  // El exponente cambia con la altura (2026-11-06, Eugenio, señalando la base
+  // del parabrisas: «hay una protuberancia, la transición tiene que ser una
+  // curva homogénea»): abajo la sección es redonda (2,3), así el costado sale
+  // de la carrocería casi tangente en vez de clavarse en ella como una caja;
+  // arriba es plana como siempre. `ncEn` da el exponente a una altura dada.
+  const NC_BASE = 2.3;
+  const ncEn = (u: number, yn: number) => { const t = Math.min(1, Math.max(0, yn / 0.45)); return NC_BASE + (ncDe(u) - NC_BASE) * t * t * (3 - 2 * t); };
   const secC = (f: Seccion, th: number, off = 0): P3 => {
-    const u = uDeXC(f.x), NC = ncDe(u), k = caidaDe(u);
-    const c = Math.cos(th), sn = Math.max(0, Math.sin(th)), yn = Math.pow(sn, 2 / NC);
+    const u = uDeXC(f.x), k = caidaDe(u);
+    const c = Math.cos(th), sn = Math.max(0, Math.sin(th));
+    let NC = ncDe(u), yn = Math.pow(sn, 2 / NC);
+    for (let i = 0; i < 3; i++) { NC = ncEn(u, yn); yn = Math.pow(sn, 2 / NC); }
     return [f.x, f.zc + (f.top - f.zc + off) * yn, (f.hw + off) * (1 - k * yn) * spow(c, 2 / NC)];
   };
   /** Holgura radial (m) de un punto a la piel: la carrocería o, por encima de la cubierta, la cúpula. */
@@ -243,7 +256,7 @@ export function crearModeloA1(P: Parametros) {
     if (u <= uC0 + 0.002 || u >= uC1 - 0.002) return -1;
     const f = frameC(u), ay = f.top - f.zc;
     if (y < f.zc || ay < 0.01) return -1;
-    const NC = ncDe(u), yn = Math.min(1, (y - f.zc) / ay), hwY = f.hw * (1 - caidaDe(u) * yn);
+    const yn = Math.min(1, (y - f.zc) / ay), NC = ncEn(u, yn), hwY = f.hw * (1 - caidaDe(u) * yn);
     const v = Math.pow(Math.abs(z) / hwY, NC) + Math.pow(yn, NC);
     return Math.hypot(z, y - f.zc) * (1 / Math.pow(v, 1 / NC) - 1);
   };
@@ -256,18 +269,23 @@ export function crearModeloA1(P: Parametros) {
   const volBat = P.kWh * 1000 / P.whL / 1000;             // m³
   const T_MOD = 0.09;
   const modulos: { nombre: string; x0: number; x1: number; hz: number; t: number }[] = [
-    { nombre: 'Módulo bajo el piloto', x0: xPil - 0.46, x1: xPil + 0.56, hz: 0.42, t: 0 },
-    P.plazas === 2 ? { nombre: 'Módulo bajo el pasajero', x0: xPas - 0.42, x1: xPas + 0.52, hz: 0.40, t: 0 } : { nombre: 'Módulo trasero', x0: xPil - 1.10, x1: xPil - 0.50, hz: 0.36, t: 0 },
+    { nombre: 'Módulo bajo el piloto', x0: xPil - 0.46, x1: xPil + 0.68, hz: 0.42, t: 0 },
+    P.plazas === 2 ? { nombre: 'Módulo bajo el pasajero', x0: xPas - 0.20, x1: xPas + 0.52, hz: 0.40, t: 0 } : { nombre: 'Módulo trasero', x0: xPil - 1.10, x1: xPil - 0.50, hz: 0.36, t: 0 },
     { nombre: 'Módulo de la cola', x0: (P.plazas === 2 ? xPas : xPil) - 1.05, x1: (P.plazas === 2 ? xPas : xPil) - 0.46, hz: 0.30, t: 0 },
   ];
   let queda = volBat;
   for (const b of modulos) { const cap = (b.x1 - b.x0) * 2 * b.hz; b.t = Math.min(T_MOD, queda / cap); queda = Math.max(0, queda - cap * b.t); }
   if (queda > 1e-6) modulos[modulos.length - 1].t += queda / ((modulos[2].x1 - modulos[2].x0) * 2 * modulos[2].hz);   // lo que no cabe, en la cola, más gordo
   const bat1 = modulos[0], bat2 = modulos[1];
-  const baterias = modulos.filter(b => b.t > 0.005).map(b => ({ nombre: b.nombre, x0: b.x0, x1: b.x1, y0: yFloor + 0.005, y1: yFloor + 0.005 + b.t, hz: b.hz }));
-  // Altura de las caderas: suelo + módulo + asiento (deslizadores «Altura del asiento»).
-  const hip = yFloor + bat1.t + P.altPil;
-  const hipPas = yFloor + (P.plazas === 2 ? bat2.t : 0) + P.altPas;
+  // `altBat` (2026-11-06, Eugenio: «un slider para bajar la altura de la batería
+  // respecto al suelo del vehículo»): 0 = sobre el suelo del chasis; negativo
+  // = los módulos bajan hacia la panza (hay una comprobación de que no asomen).
+  const yBat = yFloor + 0.005 + P.altBat;
+  const baterias = modulos.filter(b => b.t > 0.005).map(b => ({ nombre: b.nombre, x0: b.x0, x1: b.x1, y0: yBat, y1: yBat + b.t, hz: b.hz }));
+  // Altura de las caderas: suelo + lo que asome el módulo por encima del suelo + asiento (deslizadores «Altura del asiento»).
+  const sobreSuelo = (t: number) => Math.max(0, t + P.altBat);
+  const hip = yFloor + sobreSuelo(bat1.t) + P.altPil;
+  const hipPas = yFloor + (P.plazas === 2 ? sobreSuelo(bat2.t) : 0) + P.altPas;
   const grosorBase = () => 0.03;
 
   // ── Piloto (y pasajero): reclinados, pies en el reposapiés, manos en el volante ──
@@ -322,7 +340,7 @@ export function crearModeloA1(P: Parametros) {
   const zR = 0.32, xF0 = 0.55, xR0 = xR - 0.45;
   const yTow = Math.max(rF, rR) + 0.42;                          // torretas de los McPherson
   const zTF = P.viaF / 2 - 0.22, zTR = P.viaR / 2 - 0.22;
-  const xD = xPil + 0.70, yDash = Math.min(hip + 0.42, deckY - 0.05);   // arco del salpicadero, bajo la cubierta
+  const xD = xPil + 0.70, yDash = Math.min(hip + 0.42, frame(uDeX(xD + 0.17)).top - 0.07);   // arco del salpicadero, bajo el capó (que ahí ya baja hacia el morro)
   const xH = (P.plazas === 2 ? xPas : xPil) - 0.50, yHoop = deckY - 0.03;   // arco principal, detrás del último asiento
   const ySill = yFloor + 0.22, zSill = 0.50;
   const volanteCentro: P3 = [volante.c[0], volante.c[1], 0];
@@ -483,7 +501,7 @@ export function crearModeloA1(P: Parametros) {
   const thAltura = (u: number, y: number) => {
     const f = frameC(u), ay = f.top - f.zc; if (ay < 0.01) return 0;
     const yn = Math.min(0.98, Math.max(0.02, (y - f.zc) / ay));
-    return Math.asin(Math.pow(yn, ncDe(u) / 2));
+    return Math.asin(Math.pow(yn, ncEn(u, yn) / 2));
   };
   const yEn = (u: number) => secC(frameC(u), thBase(u) + 0.02)[1];
   const yA = yEn(uBase), yB = yEn(uVent1);
@@ -564,16 +582,38 @@ export function crearModeloA1(P: Parametros) {
   ];
   const zonasPiel = [...zonasCuerpo, ...zonasCupula];
 
-  // ── Motor, reductora, inversor y cargador: detrás del eje trasero ────────
-  const motor = { c: [xR - 0.30, rR + 0.19, 0.08] as P3, r: 0.105, largo: 0.26 };
-  const reductora = { c: [xR - 0.09, rR + 0.065, -0.02] as P3, s: [0.20, 0.18, 0.22] as P3 };
-  const inversor = { c: [xR - 0.32, rR + 0.34, 0] as P3, s: [0.24, 0.09, 0.30] as P3 };
-  const cargador = { c: [xR + 0.45, yFloor + 0.08, -0.22] as P3, s: [0.22, 0.10, 0.16] as P3 };
+  // ── Motor, reductora, inversor y cargador ───────────────────────────────
+  // El motor va bajo y justo detrás de las caderas del pasajero (2026-11-06,
+  // Eugenio), pegado al suelo del chasis, delante del eje trasero; la
+  // reductora queda en el eje y el inversor detrás del eje, donde estaba el motor.
+  const xAtras = P.plazas === 2 ? xPas : xPil;
+  const motor = { c: [Math.min(xAtras - 0.36, xR + 0.16), yFloor + 0.105 + 0.015, 0.06] as P3, r: 0.105, largo: 0.26 };
+  const reductora = { c: [xR - 0.04, rR + 0.06, -0.02] as P3, s: [0.20, 0.18, 0.22] as P3 };
+  const inversor = { c: [xR - 0.30, rR + 0.12, 0] as P3, s: [0.24, 0.09, 0.30] as P3 };
+  const cargador = { c: [xR - 0.30, rR + 0.225, 0] as P3, s: [0.22, 0.10, 0.22] as P3 };
   const ruedas: Rueda[] = [
     { nombre: 'Rueda delantera izq.', x: 0, z: P.viaF / 2, r: rF, w: nF.w }, { nombre: 'Rueda delantera der.', x: 0, z: -P.viaF / 2, r: rF, w: nF.w },
     { nombre: 'Rueda trasera izq.', x: xR, z: P.viaR / 2, r: rR, w: nR.w }, { nombre: 'Rueda trasera der.', x: xR, z: -P.viaR / 2, r: rR, w: nR.w },
   ];
   const torretas = { yTow, zTF, zTR };
+  // Espacio trasero (2026-11-06, Eugenio: «hacer que desaparezca el copiloto
+  // para ver el espacio que queda de maletero o de cama, con cotas»): del
+  // respaldo del piloto hacia atrás, sobre el suelo (o la batería), hasta
+  // donde el techo de la cúpula baja de 45 cm; ancho el de la cúpula a 25 cm
+  // del suelo en el punto más estrecho del tramo, alto el del centro.
+  const espacioTrasero = (() => {
+    const yS = Math.max(yFloor + 0.005, ...baterias.filter(b => b.x0 < xPil).map(b => b.y1));
+    const x0 = occPts(true).S[0] - 0.10;
+    let u = Math.max(uC0 + 0.02, uDeX(x0)), x1 = x0, hz = 9, alto = 0;
+    for (; u < uC1 - 0.02; u += 0.005) {
+      const f = frameC(u); if (f.top - yS < 0.45) break;
+      x1 = xDeU(u);
+      let a = 0, b = 1.2; for (let i = 0; i < 14; i++) { const z = (a + b) / 2; if (gap(xDeU(u), yS + 0.25, z) > 0) a = z; else b = z; }   // medio ancho interior (carrocería o cúpula) a 25 cm del suelo
+      hz = Math.min(hz, a - 0.03);
+    }
+    const um = uDeX((x0 + x1) / 2); alto = frameC(um).top - 0.004 - yS;
+    return { x0, x1, y0: yS, y1: yS + alto, hz: Math.max(0.1, hz), largo: x0 - x1, ancho: 2 * Math.max(0.1, hz), alto, litros: Math.round((x0 - x1) * 2 * Math.max(0.1, hz) * alto * 1000) };
+  })();
   // Pasos de rueda: media caña oscura sobre cada rueda, que tapa el interior visto por el arco.
   // Media caña de ±55° alrededor de la vertical, y poco más ancha que el
   // neumático: así no asoma por fuera de la piel donde la cola se estrecha.
@@ -584,7 +624,7 @@ export function crearModeloA1(P: Parametros) {
     frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, uNariz, gomaT: G_T, gomaU: G_U, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
-    baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY,
+    baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, espacioTrasero,
     xD, yDash, xH, yHoop, ySill, zSill, zR, xF0, xR0,
     nF, nR,
   };
@@ -741,11 +781,12 @@ export function calcularA1(m: ModeloA1, ar: { carroceria: number; cristal: numbe
     ch.push({ nombre: `${b.nombre} de la batería dentro de la carrocería`, holgura: mn, minimo: 0.02 });
   }
   ch.push({ nombre: 'Batería: cabe en los módulos', holgura: 0.30 - (m.baterias[1] ? m.baterias[1].y1 - m.baterias[1].y0 : 0), minimo: 0.0 });
+  ch.push({ nombre: 'Batería dentro de la carrocería (no asoma por la panza)', holgura: Math.min(...m.baterias.map(b => Math.min(m.gapCuerpo(b.x0, b.y0, b.hz), m.gapCuerpo(b.x1, b.y0, b.hz), m.gapCuerpo((b.x0 + b.x1) / 2, b.y0, 0)))), minimo: 0.01 });
   {
     let mn = 9;
-    for (const [c, s] of [[m.motor.c, [m.motor.largo, m.motor.r * 2, m.motor.r * 2]], [m.reductora.c, m.reductora.s], [m.inversor.c, m.inversor.s]] as [P3, P3][])
+    for (const [c, s] of [[m.motor.c, [m.motor.r * 2, m.motor.r * 2, m.motor.largo]], [m.reductora.c, m.reductora.s], [m.inversor.c, m.inversor.s], [m.cargador.c, m.cargador.s]] as [P3, P3][])
       for (const dx of [-1, 1]) for (const dy of [-1, 1]) for (const dz of [-1, 1]) mn = Math.min(mn, m.gap(c[0] + dx * s[0] / 2, c[1] + dy * s[1] / 2, c[2] + dz * s[2] / 2));
-    ch.push({ nombre: 'Motor, reductora e inversor dentro de la cola', holgura: mn, minimo: 0.02 });
+    ch.push({ nombre: 'Motor, reductora, inversor y cargador dentro de la carrocería', holgura: mn, minimo: 0.02 });
   }
   // Hueco de la puerta: lo que pide la Shell Eco-marathon es 500 × 800 mm.
   const ancho = m.xDeU(uDoorMid(m, 0)) - m.xDeU(uDoorMid(m, 1));

@@ -58,6 +58,8 @@ interface Props {
   abierta: boolean;
   /** Tapas de los maleteros abiertas (Aeromóvil 1). */
   maleteros?: boolean;
+  /** Sin el pasajero ni su asiento, y con las cotas del espacio trasero que queda (Aeromóvil 1). */
+  sinPasajero?: boolean;
   vista: Vista;
   /** Al pinchar en una pieza: su componente (para ir a su página). */
   alPinchar?: (componente: string) => void;
@@ -100,15 +102,120 @@ function texturaRuido(tam: number, base: number, amp: number, semilla = 7, repet
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repetir, repetir); t.anisotropy = 4;
   return t;
 }
-/** Banda de rodadura: surcos finos a lo largo del neumático. */
-function texturaRodadura() {
-  const c = document.createElement('canvas'); c.width = 64; c.height = 256;
-  const g = c.getContext('2d')!; g.fillStyle = '#9a9a9a'; g.fillRect(0, 0, 64, 256);
-  g.fillStyle = '#3a3a3a';
-  for (const x of [6, 22, 38, 54]) g.fillRect(x, 0, 4, 256);
-  for (let y = 0; y < 256; y += 24) { g.fillRect(0, y, 64, 3); g.fillRect(12, y + 12, 8, 2); g.fillRect(44, y + 12, 8, 2); }
-  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 18);
-  return t;
+/**
+ * Neumático (2026-11-06, Eugenio: «mejora las texturas de las ruedas, máximo
+ * realismo»). Tres mapas sobre el mismo lienzo, en coordenadas del torno:
+ * u da la vuelta a la rueda, v recorre el perfil (flanco interior, banda de
+ * rodadura entre v = 0,3125 y 0,6875, flanco exterior; ver `PERFIL_NEUM`).
+ * Color: caucho casi negro, más claro en los tacos y oscuro en los surcos.
+ * Relieve: cuatro surcos circunferenciales, laminillas en V y la banda de
+ * rodadura más alta que el flanco; en el flanco, el aro de letras en relieve.
+ * Rugosidad: los tacos pulidos por el uso, los surcos y el flanco mates.
+ */
+function texturasNeumatico() {
+  const W = 2048, H = 512, v0 = 0.3125 * H, v1 = 0.6875 * H;
+  const lienzo = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return [c, c.getContext('2d')!] as const; };
+  const [cc, g] = lienzo(), [cb, gb] = lienzo(), [cr, gr] = lienzo();
+  let x = 5; const rnd = () => { x = (x * 1664525 + 1013904223) % 4294967296; return x / 4294967296; };
+  // Flancos: caucho mate con un grano fino
+  g.fillStyle = '#171717'; g.fillRect(0, 0, W, H);
+  gb.fillStyle = '#707070'; gb.fillRect(0, 0, W, H);
+  gr.fillStyle = '#e6e6e6'; gr.fillRect(0, 0, W, H);
+  for (let i = 0; i < 60000; i++) { const px = rnd() * W, py = rnd() * H, v = 20 + rnd() * 10; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(px, py, 2, 2); }
+  // Aro de letras en relieve en cada flanco (bloques, como un «AEROMOVIL 125/80 R13» sin letras legibles)
+  for (const [ya, yb] of [[v0 * 0.42, v0 * 0.58], [H - v0 * 0.58, H - v0 * 0.42]]) {
+    gb.fillStyle = '#7c7c7c'; gb.fillRect(0, ya - 6, W, yb - ya + 12);
+    let px = 0; while (px < W) { const w = 10 + rnd() * 22; if (rnd() > 0.2) { gb.fillStyle = '#9a9a9a'; gb.fillRect(px, ya, w, yb - ya); g.fillStyle = '#1e1e1e'; g.fillRect(px, ya, w, yb - ya); } px += w + 6 + (rnd() > 0.85 ? 40 : 0); }
+    gr.fillStyle = '#f2f2f2'; gr.fillRect(0, ya, W, yb - ya);
+  }
+  // Banda de rodadura: más alta (clara en el relieve), tacos pulidos
+  g.fillStyle = '#242424'; g.fillRect(0, v0, W, v1 - v0);
+  gb.fillStyle = '#c8c8c8'; gb.fillRect(0, v0, W, v1 - v0);
+  gr.fillStyle = '#b4b4b4'; gr.fillRect(0, v0, W, v1 - v0);
+  // Hombros redondeados: el relieve baja suavemente hacia el flanco
+  for (let k = 0; k < 14; k++) { const t = k / 14, v = 112 + (200 - 112) * t; gb.fillStyle = `rgb(${v},${v},${v})`; gb.fillRect(0, v0 - 14 + k, W, 1); gb.fillRect(0, v1 + 13 - k, W, 1); }
+  // Cuatro surcos circunferenciales (anchos de 8 a 11 px) y la laminilla central
+  const surcos = [0.16, 0.38, 0.62, 0.84];
+  for (const f of surcos) { const y = v0 + (v1 - v0) * f, a = f === 0.38 || f === 0.62 ? 11 : 8; g.fillStyle = '#0b0b0b'; g.fillRect(0, y - a / 2, W, a); gb.fillStyle = '#202020'; gb.fillRect(0, y - a / 2, W, a); gr.fillStyle = '#ffffff'; gr.fillRect(0, y - a / 2, W, a); }
+  // Laminillas en V (dibujo direccional): cada 48 px, inclinadas y desplazadas por costilla
+  g.strokeStyle = '#0e0e0e'; gb.strokeStyle = '#303030'; gr.strokeStyle = '#ffffff';
+  g.lineWidth = 3; gb.lineWidth = 3; gr.lineWidth = 3;
+  const costillas = [[0, 0.16], [0.16, 0.38], [0.38, 0.62], [0.62, 0.84], [0.84, 1]];
+  for (let px = 0; px < W; px += 48) for (let i = 0; i < costillas.length; i++) {
+    const [fa, fb] = costillas[i], ya = v0 + (v1 - v0) * fa + 5, yb = v0 + (v1 - v0) * fb - 5, lado = (v0 + v1) / 2 > (ya + yb) / 2 ? 1 : -1, off = (i * 17) % 48;
+    for (const ctx of [g, gb, gr]) { ctx.beginPath(); ctx.moveTo(px + off, ya); ctx.lineTo(px + off + lado * 18, yb); ctx.stroke(); }
+    // y una laminilla fina a mitad de camino
+    for (const ctx of [g, gb, gr]) { ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px + off + 24, ya); ctx.lineTo(px + off + 24 + lado * 18, yb); ctx.stroke(); ctx.lineWidth = 3; }
+  }
+  // Grano fino en los tacos (el caucho nunca es liso)
+  for (let i = 0; i < 40000; i++) { const px = rnd() * W, py = v0 + rnd() * (v1 - v0), v = 180 + rnd() * 50; gb.fillStyle = `rgb(${v},${v},${v})`; gb.fillRect(px, py, 1, 1); }
+  const mk = (c: HTMLCanvasElement, srgb = false) => { const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+  return { color: mk(cc, true), relieve: mk(cb), rugosidad: mk(cr) };
+}
+/** Perfil del neumático para el torno, de la pestaña interior a la exterior: flanco abombado, hombro redondo, banda de rodadura ligeramente bombeada. 17 puntos: los índices 5–11 son la banda (v de 0,3125 a 0,6875 en la textura). */
+const desplazarV = (t: THREE.Texture) => { const c = t.clone(); c.wrapT = THREE.RepeatWrapping; c.offset.y = 0.5; c.needsUpdate = true; return c; };
+function perfilNeumatico(r: number, w: number, rLlanta: number): THREE.Vector2[] {
+  const h = r - rLlanta, pts: THREE.Vector2[] = [];
+  const flanco = (t: number) => rLlanta + h * (0.08 + 0.80 * t);            // radio a lo largo del flanco
+  const abombo = (t: number) => w / 2 * (0.88 + 0.12 * Math.sin(Math.PI * Math.min(1, t * 1.15)));   // el flanco sobresale a media altura
+  for (let i = 0; i <= 4; i++) { const t = i / 4; pts.push(new THREE.Vector2(flanco(t), -abombo(t))); }
+  // Hombro y banda: siete puntos de -w/2·0.86 a +w/2·0.86 con bombeo de 4 mm en el centro
+  for (let i = 0; i <= 6; i++) { const t = i / 6, zz = (t - 0.5) * 2, hombro = i === 0 || i === 6 ? 0.012 : 0; pts.push(new THREE.Vector2(r - 0.004 * zz * zz - hombro, (t - 0.5) * w * 0.86)); }
+  for (let i = 4; i >= 0; i--) { const t = i / 4; pts.push(new THREE.Vector2(flanco(t), abombo(t))); }
+  return pts;
+}
+/**
+ * Cara de la llanta aerodinámica (disco casi cerrado, como el Aptera): metal
+ * cepillado con cinco ranuras de ventilación en forma de lágrima, el borde
+ * pulido y el centro hundido. Color + relieve + rugosidad en coordenadas del
+ * disco (u, v en [0, 1], centro en 0,5).
+ */
+function texturasLlanta() {
+  const N = 1024, mk = () => { const c = document.createElement('canvas'); c.width = c.height = N; return [c, c.getContext('2d')!] as const; };
+  const [cc, g] = mk(), [cb, gb] = mk(), [cr, gr] = mk(), C = N / 2;
+  let x = 9; const rnd = () => { x = (x * 1664525 + 1013904223) % 4294967296; return x / 4294967296; };
+  // Metal cepillado en círculos: anillos finos con brillo variable
+  g.fillStyle = '#c9ccd0'; g.fillRect(0, 0, N, N); gb.fillStyle = '#808080'; gb.fillRect(0, 0, N, N); gr.fillStyle = '#5a5a5a'; gr.fillRect(0, 0, N, N);
+  for (let r = 0; r < C; r += 1.5) { const v = 185 + (rnd() - 0.5) * 50; g.strokeStyle = `rgb(${v},${v + 2},${v + 5})`; g.lineWidth = 1.5; g.beginPath(); g.arc(C, C, r, 0, 2 * Math.PI); g.stroke(); }
+  // Centro hundido: más oscuro hacia el buje
+  const grad = g.createRadialGradient(C, C, 0, C, C, C); grad.addColorStop(0, 'rgba(70,74,80,0.55)'); grad.addColorStop(0.28, 'rgba(70,74,80,0.0)'); grad.addColorStop(0.93, 'rgba(255,255,255,0)'); grad.addColorStop(1, 'rgba(255,255,255,0.35)');
+  g.fillStyle = grad; g.fillRect(0, 0, N, N);
+  const gradB = gb.createRadialGradient(C, C, 0, C, C, C); gradB.addColorStop(0, '#404040'); gradB.addColorStop(0.3, '#808080'); gradB.addColorStop(0.9, '#808080'); gradB.addColorStop(1, '#b0b0b0');
+  gb.fillStyle = gradB; gb.fillRect(0, 0, N, N);
+  // Cinco ranuras en lágrima, de r = 0,38 a 0,82, giradas 12° (sentido de giro)
+  for (let k = 0; k < 5; k++) {
+    const a = 2 * Math.PI * k / 5 - Math.PI / 2;
+    for (const [ctx, col] of [[g, '#1c1e22'], [gb, '#2a2a2a'], [gr, '#f0f0f0']] as const) {
+      ctx.save(); ctx.translate(C, C); ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath();
+      ctx.moveTo(0.38 * C, -0.030 * C); ctx.quadraticCurveTo(0.60 * C, -0.075 * C, 0.82 * C, -0.040 * C); ctx.arc(0.82 * C, 0, 0.040 * C, -Math.PI / 2, Math.PI / 2);
+      ctx.quadraticCurveTo(0.60 * C, 0.075 * C, 0.38 * C, 0.030 * C); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    // bisel claro en el borde de ataque de cada ranura
+    g.save(); g.translate(C, C); g.rotate(a); g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 3; g.beginPath(); g.moveTo(0.40 * C, -0.034 * C); g.quadraticCurveTo(0.60 * C, -0.079 * C, 0.80 * C, -0.046 * C); g.stroke(); g.restore();
+  }
+  const tex = (c: HTMLCanvasElement, srgb = false) => { const t = new THREE.CanvasTexture(c); t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+  return { color: tex(cc, true), relieve: tex(cb), rugosidad: tex(cr) };
+}
+/** Matrícula europea: banda azul con las estrellas y la «E», y el número en negro sobre blanco. */
+function texturaMatricula(texto: string) {
+  const c = document.createElement('canvas'); c.width = 1040; c.height = 220; const g = c.getContext('2d')!;
+  g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, 1040, 220);
+  g.fillStyle = '#003399'; g.fillRect(0, 0, 100, 220);
+  g.fillStyle = '#ffcc00'; for (let k = 0; k < 12; k++) { const a = 2 * Math.PI * k / 12; g.beginPath(); g.arc(50 + 28 * Math.cos(a), 78 + 28 * Math.sin(a), 4, 0, 2 * Math.PI); g.fill(); }
+  g.fillStyle = '#ffffff'; g.font = '700 54px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('E', 50, 172);
+  g.fillStyle = '#111'; g.font = '700 150px "DIN Alternate", "Arial Narrow", sans-serif'; g.fillText(texto, 570, 112);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+}
+/** Disco de freno: hierro gris con el anillo de rozamiento rayado y los taladros. */
+function texturasDisco() {
+  const N = 512, mk = () => { const c = document.createElement('canvas'); c.width = c.height = N; return [c, c.getContext('2d')!] as const; };
+  const [cc, g] = mk(), [cb, gb] = mk(), C = N / 2;
+  g.fillStyle = '#6a6c6e'; g.fillRect(0, 0, N, N); gb.fillStyle = '#808080'; gb.fillRect(0, 0, N, N);
+  for (let r = 0.52 * C; r < C; r += 2) { const v = 95 + (r % 7) * 6; g.strokeStyle = `rgb(${v},${v},${v + 2})`; g.lineWidth = 1.5; g.beginPath(); g.arc(C, C, r, 0, 2 * Math.PI); g.stroke(); }
+  g.fillStyle = '#4a4c4e'; g.beginPath(); g.arc(C, C, 0.5 * C, 0, 2 * Math.PI); g.fill();
+  for (let k = 0; k < 24; k++) { const a = 2 * Math.PI * k / 24, rr = (0.64 + 0.14 * (k % 2)) * C; for (const [ctx, col] of [[g, '#2a2a2a'], [gb, '#101010']] as const) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(C + rr * Math.cos(a), C + rr * Math.sin(a), 0.018 * C, 0, 2 * Math.PI); ctx.fill(); } }
+  const tex = (c: HTMLCanvasElement, srgb = false) => { const t = new THREE.CanvasTexture(c); t.anisotropy = 4; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+  return { color: tex(cc, true), relieve: tex(cb) };
 }
 /** Asfalto: ruido grueso y oscuro con un velo claro, y una rejilla muy tenue de 50 cm. */
 function texturaAsfalto() {
@@ -124,7 +231,7 @@ function texturaAsfalto() {
 }
 
 function materiales() {
-  const grano = texturaRuido(256, 128, 70, 3, 40), rodadura = texturaRodadura(), relieveSolar = texturaSolar();
+  const grano = texturaRuido(256, 128, 70, 3, 40), neum = texturasNeumatico(), llantaTx = texturasLlanta(), discoTx = texturasDisco(), relieveSolar = texturaSolar();
   return {
     // Pintura perlada: base blanca con grano metálico fino bajo un barniz brillante.
     body: new THREE.MeshPhysicalMaterial({ color: 0xf4f5f6, metalness: 0.12, roughness: 0.38, roughnessMap: grano, bumpMap: grano, bumpScale: 0.0004, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.1, sheen: 0.15, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
@@ -143,8 +250,15 @@ function materiales() {
     susp: new THREE.MeshStandardMaterial({ color: 0xde9223, metalness: 0.6, roughness: 0.3 }),
     stanch: new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.95, roughness: 0.15 }),
     black: new THREE.MeshStandardMaterial({ color: 0x1b1c1e, metalness: 0.3, roughness: 0.5 }),
-    tire: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0, roughness: 0.92, bumpMap: rodadura, bumpScale: 0.004 }),
-    rim: new THREE.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.25 }),
+    // Caucho: el color, el relieve del dibujo y la rugosidad salen del mismo lienzo (ver `texturasNeumatico`); un poco de sheen para el velo mate del flanco.
+    tire: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: neum.color, bumpMap: neum.relieve, bumpScale: 0.0035, roughnessMap: neum.rugosidad, roughness: 1, metalness: 0, sheen: 0.35, sheenRoughness: 0.9, sheenColor: new THREE.Color(0x3a3a3a), envMapIntensity: 0.6 }),
+    // El mismo caucho para las ruedas de bici del Gota (toro): su v da la vuelta al tubo desde fuera, así que la banda va centrada en v = 0.
+    tireBici: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: desplazarV(neum.color), bumpMap: desplazarV(neum.relieve), bumpScale: 0.003, roughnessMap: desplazarV(neum.rugosidad), roughness: 1, metalness: 0, sheen: 0.35, sheenRoughness: 0.9, sheenColor: new THREE.Color(0x3a3a3a), envMapIntensity: 0.6 }),
+    // Cara de la llanta aerodinámica: metal cepillado con ranuras, barniz encima.
+    caraLlanta: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: llantaTx.color, bumpMap: llantaTx.relieve, bumpScale: 0.004, roughnessMap: llantaTx.rugosidad, roughness: 1, metalness: 0.85, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.2, side: THREE.DoubleSide }),
+    discoFreno: new THREE.MeshStandardMaterial({ color: 0xffffff, map: discoTx.color, bumpMap: discoTx.relieve, bumpScale: 0.002, metalness: 0.75, roughness: 0.45 }),
+    tuerca: new THREE.MeshPhysicalMaterial({ color: 0x9ea4aa, metalness: 0.95, roughness: 0.3, clearcoat: 0.5 }),
+    rim: new THREE.MeshPhysicalMaterial({ color: 0xcfd3d7, metalness: 0.95, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.3 }),
     seat: new THREE.MeshPhysicalMaterial({ color: 0x2a2d31, metalness: 0.2, roughness: 0.45, clearcoat: 0.6 }),
     skin: new THREE.MeshStandardMaterial({ color: 0xc9a27c, metalness: 0, roughness: 0.75 }),
     ropaPiloto: new THREE.MeshStandardMaterial({ color: 0x2f4f5f, metalness: 0, roughness: 0.85 }),
@@ -158,6 +272,7 @@ function materiales() {
     batt: new THREE.MeshStandardMaterial({ color: 0x2f7fd0, metalness: 0.3, roughness: 0.45 }),
     spoke: new THREE.LineBasicMaterial({ color: 0x9aa1a8 }),
     logo: new THREE.MeshStandardMaterial({ map: (() => { const t = new THREE.TextureLoader().load('/logo-v2.png'); t.colorSpace = THREE.SRGBColorSpace; return t; })(), roughness: 0.4, metalness: 0.1 }),
+    matricula: new THREE.MeshStandardMaterial({ map: texturaMatricula('2727 ES'), roughness: 0.5, metalness: 0.05 }),
     faro: new THREE.MeshStandardMaterial({ color: 0xf4f7fb, emissive: 0xf4f7fb, emissiveIntensity: 1.3 }),
     piloto: new THREE.MeshStandardMaterial({ color: 0xd33a2c, emissive: 0xd33a2c, emissiveIntensity: 1.3 }),
     intermitenteI: new THREE.MeshStandardMaterial({ color: 0xf29a1f, emissive: 0xf29a1f, emissiveIntensity: 0.15 }),
@@ -289,7 +404,7 @@ function construirSuperficie(S: Superficie) {
 
 function rueda(g: THREE.Object3D, M: Mats, x: number, y: number, z: number, r: number) {
   const w = new THREE.Group(); w.position.set(x, y, z); g.add(w);
-  const t = new THREE.Mesh(new THREE.TorusGeometry(r - TIRE_W / 2, TIRE_W / 2, 14, 64), M.tire); t.castShadow = true; w.add(t);
+  const t = new THREE.Mesh(new THREE.TorusGeometry(r - TIRE_W / 2, TIRE_W / 2, 18, 96), M.tireBici); t.castShadow = true; w.add(t);
   w.add(new THREE.Mesh(new THREE.TorusGeometry(r - 0.06, 0.011, 8, 64), M.rim));
   const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.10, 20), M.rim); hub.rotation.x = Math.PI / 2; w.add(hub);
   const rotor = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.003, 40), M.black); rotor.rotation.x = Math.PI / 2; rotor.position.z = 0.035; w.add(rotor);
@@ -463,13 +578,23 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
     // Canto trasero: una pestaña roja vertical en cada esquina del labio de cola.
     tira([0, 0.5, 1].map(k => sobre(0.985, (s > 0 ? 0.14 + 0.08 * k : 0.86 - 0.08 * k) * Math.PI, 0.003)), 0.006, M.piloto);
   }
-  { const drl: V3[] = []; for (let k = 0; k <= 14; k++) drl.push(sobre(0.012, (0.30 + 0.40 * k / 14) * Math.PI, 0.003)); tira(drl, 0.005, M.faro); }
   // Barra de luz trasera en la punta misma de la cola, como el Aptera.
   { const barra: V3[] = []; for (let k = 0; k <= 24; k++) barra.push(sobre(0.993, (0.14 + 0.72 * k / 24) * Math.PI, 0.003)); tira(barra, 0.007, M.piloto); }
-  // Logo de Luz & Humanidad, circular y amarillo, en el centro de la pieza azul del morro.
-  { const f0 = m.frame(0.004), c: V3 = [f0.x + 0.004, (f0.top + f0.bot) / 2, 0];
-    const logo = new THREE.Mesh(new THREE.CircleGeometry(0.06, 48), M.logo); logo.position.set(...c); logo.rotation.y = Math.PI / 2; g.add(logo);
-    const aro = new THREE.Mesh(new THREE.TorusGeometry(0.061, 0.004, 8, 48), M.black); aro.position.set(...c); aro.rotation.y = Math.PI / 2; g.add(aro); }
+  // Matrículas (2026-11-06, Eugenio: «2727 ES, con la etiqueta de Europa»): la
+  // delantera de frente en la punta del morro, la trasera en la cola.
+  const placa = (c: V3, normal: THREE.Vector3) => {
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.11), M.matricula); pl.position.set(...c); pl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal.clone().normalize()); g.add(pl);
+    const marco = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.13), M.black); marco.position.copy(pl.position).addScaledVector(normal.clone().normalize(), -0.002); marco.quaternion.copy(pl.quaternion); g.add(marco);
+  };
+  // La delantera va 3 cm por delante de la punta, sobre un soporte negro, porque la punta es una semiesfera y la taparía por el centro.
+  { const f0 = m.frame(0.006), y0 = (f0.top + f0.bot) / 2 - 0.02; placa([f0.x + 0.032, y0, 0], new THREE.Vector3(1, 0, 0)); box(g, [f0.x + 0.012, y0, 0], [0.03, 0.08, 0.30], M.black); }
+  { const f1 = m.frame(0.996); placa([f1.x - 0.006, (f1.top + f1.bot) / 2 - 0.02, 0], new THREE.Vector3(-1, 0, 0)); }
+  // Logo de Luz & Humanidad, circular y amarillo, en lo alto del morro (donde
+  // el XL1 lleva el suyo), sobre la pieza azul, tumbado sobre la chapa.
+  { const u = 0.055, p = sobre(u, Math.PI / 2, 0.003), a = sobre(u - 0.008, Math.PI / 2, 0), b = sobre(u + 0.008, Math.PI / 2, 0);
+    const t = new THREE.Vector3(b[0] - a[0], b[1] - a[1], 0).normalize(), n = new THREE.Vector3(-t.y, t.x, 0); if (n.y < 0) n.negate();
+    const logo = new THREE.Mesh(new THREE.CircleGeometry(0.055, 48), M.logo); logo.position.set(...p); logo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n); g.add(logo);
+    const aro = new THREE.Mesh(new THREE.TorusGeometry(0.056, 0.004, 8, 48), M.black); aro.position.copy(logo.position); aro.quaternion.copy(logo.quaternion); g.add(aro); }
   // Retrovisores como los del Aptera: una gota pequeña en un tallo corto, en la
   // base del montante, con el cristal mirando atrás.
   for (const s of [1, -1] as (1 | -1)[]) {
@@ -531,7 +656,7 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
-function cotas(g: THREE.Object3D, M: Mats, m: Modelo) {
+function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
   const etiqueta = (texto: string, p: V3) => {
     const c = document.createElement('canvas'); c.width = 512; c.height = 128;
     const x = c.getContext('2d')!;
@@ -568,6 +693,14 @@ function cotas(g: THREE.Object3D, M: Mats, m: Modelo) {
   if (m.tipo === 'a1') {
     cota([0, y, -P.viaF / 2], [0, y, P.viaF / 2], [], `vía del. ${mm(P.viaF)}`, [0.30, 0.11, 0]);
     cota([m.xR, y, -P.viaR / 2], [m.xR, y, P.viaR / 2], [], `vía tras. ${mm(P.viaR)}`, [-0.30, 0.11, 0]);
+    if (espacio) {
+      // El espacio trasero sin pasajero (maletero o cama): largo sobre el suelo, ancho y alto en el centro, y el volumen.
+      const e = m.espacioTrasero, ys = e.y0 + 0.01, xm = (e.x0 + e.x1) / 2;
+      cota([e.x0, ys, -e.hz], [e.x1, ys, -e.hz], [[[e.x0, ys, -e.hz], [e.x0, ys, e.hz]], [[e.x1, ys, -e.hz], [e.x1, ys, e.hz]]], `fondo ${mm(e.largo)}`, [0, 0.12, -0.05]);
+      cota([xm, ys, -e.hz], [xm, ys, e.hz], [], `ancho ${mm(e.ancho)}`, [0, 0.12, 0]);
+      cota([e.x1 + 0.25, e.y0, 0], [e.x1 + 0.25, e.y1, 0], [], `alto ${mm(e.alto)}`, [0, 0, 0.3]);
+      etiqueta(`≈ ${e.litros.toLocaleString('es-ES')} L · ${(e.largo).toFixed(2).replace('.', ',')} × ${(e.ancho).toFixed(2).replace('.', ',')} m`, [xm, e.y1 + 0.18, 0]);
+    }
   } else {
     cota([m.xL, y, -P.track / 2], [m.xL, y, P.track / 2], [], `vía ${mm(P.track)}`, [0, 0.11, 0]);
   }
@@ -585,22 +718,38 @@ function cajaRedonda(g: THREE.Object3D, c: V3, s: V3, mat: THREE.Material, r = 0
   const mesh = new THREE.Mesh(geo, mat); mesh.position.set(...c); mesh.castShadow = true; g.add(mesh); return mesh;
 }
 
-/** Una rueda de coche: neumático, tapacubos plano, disco de freno y pinza. Gira `giro` radianes alrededor de la vertical. */
+/**
+ * Una rueda de coche (2026-11-06, Eugenio: «las ruedas, a otro nivel, máximo
+ * realismo»): neumático torneado con flanco abombado, hombro redondo y el
+ * dibujo de la banda en relieve; llanta aerodinámica de disco casi cerrado
+ * con cinco ranuras, pestaña pulida, embellecedor central con el logo, cuatro
+ * tuercas y la válvula; disco de freno taladrado y pinza con latiguillo.
+ * Gira `giro` radianes alrededor de la vertical.
+ */
 function ruedaCoche(g: THREE.Object3D, M: Mats, x: number, y: number, z: number, r: number, w: number, disco: number, giro: number) {
   const grp = new THREE.Group(); grp.position.set(x, y, z); grp.rotation.y = giro; g.add(grp);
   const s = Math.sign(z) || 1, rLlanta = 0.33 / 2;
-  const perfil: THREE.Vector2[] = [
-    new THREE.Vector2(rLlanta, -w / 2), new THREE.Vector2(r - 0.035, -w / 2), new THREE.Vector2(r, -w / 2 + 0.03),
-    new THREE.Vector2(r, w / 2 - 0.03), new THREE.Vector2(r - 0.035, w / 2), new THREE.Vector2(rLlanta, w / 2),
-  ];
-  const neum = new THREE.Mesh(new THREE.LatheGeometry(perfil, 56), M.tire); neum.rotation.x = Math.PI / 2; neum.castShadow = true; grp.add(neum);
-  // Tapacubos plano por fuera (como el SZEmission) y llanta por dentro
-  const tapa = new THREE.Mesh(new THREE.CylinderGeometry(rLlanta + 0.004, rLlanta + 0.004, 0.012, 48), M.llanta); tapa.rotation.x = Math.PI / 2; tapa.position.z = s * (w / 2 - 0.004); grp.add(tapa);
-  const llanta = new THREE.Mesh(new THREE.CylinderGeometry(rLlanta, rLlanta - 0.01, w * 0.86, 48, 1, true), M.rim); llanta.rotation.x = Math.PI / 2; grp.add(llanta);
-  const tuerca = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.02, 16), M.black); tuerca.rotation.x = Math.PI / 2; tuerca.position.z = s * (w / 2 + 0.004); grp.add(tuerca);
-  // Disco ventilado y pinza, por dentro de la llanta
-  const d = new THREE.Mesh(new THREE.CylinderGeometry(disco / 2, disco / 2, 0.02, 48), M.rim); d.rotation.x = Math.PI / 2; d.position.z = -s * (w / 2 - 0.045); d.userData.componente = 'frenos'; grp.add(d);
-  const pinza = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.11, 0.05), M.pinza); pinza.position.set(-0.02, disco / 2 - 0.03, -s * (w / 2 - 0.045)); pinza.userData.componente = 'frenos'; grp.add(pinza);
+  const neum = new THREE.Mesh(new THREE.LatheGeometry(perfilNeumatico(r, w, rLlanta), 96), M.tire); neum.rotation.x = Math.PI / 2; neum.castShadow = true; neum.receiveShadow = true; grp.add(neum);
+  // Llanta: pestaña pulida (el aro que asoma junto al caucho), cara de disco hundida 12 mm, y el cilindro interior
+  const pest = new THREE.Mesh(new THREE.TorusGeometry(rLlanta + 0.004, 0.007, 10, 72), M.rim); pest.position.z = s * (w / 2 - 0.006); grp.add(pest);
+  const perfilCara: THREE.Vector2[] = [new THREE.Vector2(rLlanta + 0.004, 0), new THREE.Vector2(rLlanta - 0.004, -0.004), new THREE.Vector2(rLlanta * 0.92, -0.012), new THREE.Vector2(rLlanta * 0.30, -0.016), new THREE.Vector2(rLlanta * 0.22, -0.026), new THREE.Vector2(0.001, -0.026)];
+  const cara = new THREE.Mesh(new THREE.LatheGeometry(perfilCara, 72), M.caraLlanta); cara.rotation.x = s > 0 ? -Math.PI / 2 : Math.PI / 2;
+  // La textura de la cara es un disco plano (u, v con el centro en 0,5): se proyecta por (x, y) sobre el torno
+  { const geo = cara.geometry, p = geo.getAttribute('position') as THREE.BufferAttribute, uv = geo.getAttribute('uv') as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) uv.setXY(i, 0.5 + p.getX(i) / (2 * (rLlanta + 0.004)), 0.5 + p.getZ(i) / (2 * (rLlanta + 0.004))); uv.needsUpdate = true; }
+  cara.position.z = s * (w / 2 - 0.006); grp.add(cara);
+  const barril = new THREE.Mesh(new THREE.CylinderGeometry(rLlanta, rLlanta - 0.008, w * 0.86, 72, 1, true), M.rim); barril.rotation.x = Math.PI / 2; grp.add(barril);
+  // Embellecedor central con el logo, y cuatro tuercas hexagonales a 50 mm del centro
+  const capZ = s * (w / 2 - 0.006 - 0.026);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.036, 0.008, 32), M.black); cap.rotation.x = Math.PI / 2; cap.position.z = capZ + s * 0.002; grp.add(cap);
+  const logo = new THREE.Mesh(new THREE.CircleGeometry(0.026, 32), M.logo); logo.position.z = capZ + s * 0.0065; logo.rotation.y = s > 0 ? 0 : Math.PI; grp.add(logo);
+  for (let k = 0; k < 4; k++) { const a = Math.PI / 4 + k * Math.PI / 2, t = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.012, 6), M.tuerca); t.rotation.x = Math.PI / 2; t.position.set(0.052 * Math.cos(a), 0.052 * Math.sin(a), capZ + s * 0.004); grp.add(t); }
+  // Válvula en el borde de la llanta
+  { const v = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.028, 8), M.black); v.position.set(0, rLlanta * 0.93, s * (w / 2 - 0.006 - 0.004)); v.rotation.x = s * 0.5; v.rotation.z = 0.2; grp.add(v); }
+  // Disco de freno taladrado y pinza con latiguillo, por dentro de la llanta
+  const d = new THREE.Mesh(new THREE.CylinderGeometry(disco / 2, disco / 2, 0.022, 64), [M.discoFreno, M.discoFreno, M.discoFreno]); d.rotation.x = Math.PI / 2; d.position.z = -s * (w / 2 - 0.045); d.userData.componente = 'frenos'; grp.add(d);
+  { const geo = d.geometry, p = geo.getAttribute('position') as THREE.BufferAttribute, uv = geo.getAttribute('uv') as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) > 0.01) uv.setXY(i, 0.5 + p.getX(i) / disco, 0.5 + p.getZ(i) / disco); uv.needsUpdate = true; }
+  const pinza = cajaRedonda(grp, [-0.02, disco / 2 - 0.03, -s * (w / 2 - 0.045)], [0.075, 0.115, 0.052], M.pinza, 0.012); pinza.userData.componente = 'frenos';
+  tube(grp, [-0.02, disco / 2 + 0.02, -s * (w / 2 - 0.045)], [-0.08, disco / 2 + 0.08, -s * (w / 2 - 0.02)], 0.008, M.black);
   return grp;
 }
 
@@ -631,7 +780,7 @@ function etiquetar(g: THREE.Object3D, componente: string) {
 }
 
 /** La parte fija: piel, accesorios, chasis, asientos, ocupantes, baterías. */
-function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, m: Modelo) {
+function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, m: Modelo, sinPasajero = false) {
   for (const k of ['carenado', 'cristales', 'solar', 'chasis', 'direccion', 'asientos', 'ocupantes', 'motor', 'transmision', 'baterias'] as CapaId[]) vaciar(G[k]);
   puertasG.clear();
   const capaDe: Record<Piel, CapaId> = { carroceria: 'carenado', bajos: 'carenado', cristal: 'cristales', solar: 'solar', hueco: 'carenado', marco: 'carenado', morro: 'carenado' };
@@ -678,7 +827,7 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
     const toca = soldables.some(o => o !== t && tramosTubo(o).some(([a, b]) => dSeg(p, a, b) < o.d / 2 + t.d / 2 + 0.004));
     if (toca) sphere(G.chasis, p, t.d / 2 * 1.18, M.soldadura).userData.componente = 'chasis';
   }
-  for (const a of m.asientos) { asiento(G.asientos, M, m, a.piloto, a.lat, a.ancho); ocupante(G.ocupantes, M, m, a.lat, a.piloto); }
+  for (const a of m.asientos) { if (sinPasajero && !a.piloto) continue; asiento(G.asientos, M, m, a.piloto, a.lat, a.ancho); ocupante(G.ocupantes, M, m, a.lat, a.piloto); }
   etiquetar(G.asientos, 'asientos');
   if (m.tipo === 'a1') {
     construirFijoA1(G, M, m);
@@ -908,7 +1057,7 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
@@ -1051,11 +1200,11 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     st.modelo = modelo;
-    construirFijo(st.G, st.puertasG, st.M, modelo);
+    construirFijo(st.G, st.puertasG, st.M, modelo, sinPasajero);
     construirMovil(st.G, st.M, modelo, st.coche, st.curva ? st.inclinacion : 0);
-    vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, modelo);
+    vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, modelo, sinPasajero);
     st.colocarPuertas();
-  }, [modelo]);
+  }, [modelo, sinPasajero]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
   useEffect(() => { const st = estado.current; if (st) st.grupoCotas.visible = verCotas && modoRef !== 'sola'; }, [verCotas, modoRef]);
