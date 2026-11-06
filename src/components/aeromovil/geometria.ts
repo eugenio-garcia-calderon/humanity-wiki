@@ -62,6 +62,7 @@ export interface Parametros {
   cupX0: number;    // dónde empieza la cúpula (fracción del largo desde el morro)
   cupX1: number;    // dónde acaba
   cupW: number;     // anchura de la cúpula (fracción del ancho)
+  techo: number;    // caída del techo del pico a la cola: 1 = recta, más = se mantiene alto y cae al final (Aptera ≈ 1,6)
   kWNom: number;    // potencia nominal del motor (kW)
   kWPico: number;   // potencia máxima (kW)
   kWh: number;      // batería (kWh)
@@ -151,7 +152,7 @@ export const RANGOS_MASA = {
 const A1_COMUN = {
   // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
   plazas: 1 as const, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
-  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55,
+  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, techo: 1.6,
   kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
 };
 /** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */

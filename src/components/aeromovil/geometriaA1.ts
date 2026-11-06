@@ -158,6 +158,7 @@ export function crearModeloA1(P: Parametros) {
   const uBase = uC0 + 0.01;                                    // esquina de abajo del montante
   const thVentana = 0.24 * Math.PI;                            // donde el costado se vuelve techo
   const thPilar = (u: number) => Math.min(thVentana, Math.max(0, thVentana * (u - uBase) / (uW1 - uBase)));
+  const uPico = Math.max(uW1 + 0.02, 0.42);                     // el punto más alto del techo
   const pesoPlano = (u: number) => {
     if (u <= uW1) return 1;
     const t = Math.min(1, (u - uW1) / 0.10); return 1 - t * t * (3 - 2 * t);
@@ -173,6 +174,13 @@ export function crearModeloA1(P: Parametros) {
       // De perfil: casi recto de la base al borde de arriba, con la panza suave del Aptera.
       const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(SZ.cupTop(uMedido(uW1))), t = Math.max(0, (u - uC0) / (uW1 - uC0));
       top = Math.max(deck + 0.004, deck0 + (topW - deck0) * (1 - Math.pow(1 - t, 1.25)));
+    } else if (u > uPico) {
+      // El techo baja desde el pico hasta la cola en una sola curva, sin tramo
+      // plano: altura = pico − (pico − cola)·s^techo, con s de 0 a 1. `techo`
+      // es el deslizador «Caída del techo»: 1 = recta desde el pico, más = se
+      // mantiene alto más tiempo y cae más al final (2026-11-06, Eugenio).
+      const sTail = (u - uPico) / (uC1 - uPico), yPico = yCupula(1), yCola = yCupula(SZ.cupTop(SZ.cupX1));
+      top = Math.max(deck + 0.004, base + (yPico - Math.pow(sTail, P.techo) * (yPico - yCola) - base) * cierre);
     }
     hw *= 1 - 0.05 * w;
     return { s: 1, x: xDeU(u), zc: base, top, bot: base, hw };
@@ -321,25 +329,27 @@ export function crearModeloA1(P: Parametros) {
   // geométrico: en el fondo (exponente nL) z = hw·cos(θ)^(2/nL) y
   // y = zc − ay·sin(θ)^(2/nL), así que θ(z) = acos((z/hw)^(nL/2)) y
   // θ(y) = asin(((zc − y)/ay)^(nL/2)).
+  // 2026-11-06 (Eugenio): «que el chasis cubra por completo las ruedas sin
+  // dejar hueco, siguiendo la línea natural». Ya no hay arco en el costado:
+  // la piel pasa entera por encima de la rueda y solo queda abierto el fondo
+  // (de la línea de la rodadura hacia fuera y hasta la esquina baja), que no
+  // se ve desde el lado. `arcoY` es la altura de esa esquina, para que la
+  // comprobación de la rueda girada sepa desde dónde tiene que caber.
   const huecos: ZonaPiel[] = [];
-  const arcoY = { del: 0, tras: 0 };                    // altura a la que llega cada arco
+  const arcoY = { del: 0, tras: 0 };
   for (const [xA, r, zA, w, cual] of [[0, rF, P.viaF / 2, nF.w, 'del'], [xR, rR, P.viaR / 2, nR.w, 'tras']] as [number, number, number, number, 'del' | 'tras'][]) {
     const f = frame(uDeX(xA)), ay = f.zc - f.bot;
     const thZ = (z: number) => Math.acos(Math.pow(Math.min(1, Math.max(0, z / f.hw)), P.nL / 2));
     const thY = (y: number) => Math.asin(Math.pow(Math.min(1, Math.max(0, (f.zc - y) / ay)), P.nL / 2));
     const thFondo = thZ(zA - w / 2 - 0.035);          // borde interior del hueco, en el fondo
-    arcoY[cual] = Math.min(f.zc - 0.01, r + TRAVEL_A1 + 0.025);
-    const thArco = thY(arcoY[cual]);                     // lo alto del arco, en el costado: ajustado al neumático
-    const thEsq = thY(f.bot + 0.06);                     // la esquina entre fondo y costado
-    const u0 = uDeX(xA + r + 0.035), u1 = uDeX(xA - r - 0.035);
+    arcoY[cual] = f.bot + 0.115;
+    const thEsq = thY(arcoY[cual]);                      // la esquina baja entre fondo y costado
+    const u0 = uDeX(xA + r + 0.045), u1 = uDeX(xA - r - 0.045);
     for (const s of [1, -1]) {
       const lado = s > 0 ? 'izq.' : 'der.';
       const t = (th: number) => (s > 0 ? 2 * Math.PI - th : Math.PI + th);
       const [a, b] = s > 0 ? [t(thFondo), t(thEsq)] : [t(thEsq), t(thFondo)];
       huecos.push({ nombre: `Paso de rueda ${lado}, fondo`, piel: 'hueco', u0, u1, t0: a, t1: b });
-      // El arco: la elipse centrada en la esquina que sube hasta thArco
-      const [c, d] = s > 0 ? [t(2 * thEsq - thArco), t(thArco)] : [t(thArco), t(2 * thEsq - thArco)];
-      huecos.push({ nombre: `Paso de rueda ${lado}, arco`, piel: 'hueco', u0, u1, t0: c, t1: d, elipse: true });
     }
   }
   // La banda negra: todo lo que queda por debajo de una línea que es alta en
@@ -350,32 +360,47 @@ export function crearModeloA1(P: Parametros) {
     const th = Math.asin(Math.pow(Math.min(1, (f.zc - y) / ay), P.nL / 2));
     return [Math.PI + th, 2 * Math.PI - th];
   };
-  // Paneles solares: en el lomo, a los dos lados de la cúpula detrás de las
-  // puertas (la cúpula es estrecha y deja dos franjas anchas que miran al
-  // cielo), y sobre el maletero trasero en la cúpula. No en el capó: sube a
-  // 26° mirando al frente, da poco, y es donde van los faros como en el
-  // SZEmission (el bot evaluador leía el panel del morro como una «boca»).
-  const uSolar0 = uDeX(xH - 0.06);
+  // Paneles solares en la carrocería (2026-11-06, Eugenio: «que los paneles
+  // del carenado continúen por el lateral del vehículo y en la parte
+  // frontal»): el capó, y las dos franjas del lomo que corren a los lados de
+  // la cúpula desde la base del parabrisas hasta la cola, por encima de la
+  // línea del hombro (lo que mira al cielo; de ahí para abajo es flanco).
   const zonasCuerpo: ZonaPiel[] = [
     ...huecos,
     { nombre: 'Bajos', piel: 'bajos', u0: 0.004, u1: 0.996, t0: Math.PI, t1: 2 * Math.PI, tDe: bandaDe },
-    { nombre: 'Paneles solares del lomo izq.', piel: 'solar', u0: uSolar0, u1: 0.90, t0: 0.19 * Math.PI, t1: 0.38 * Math.PI },
-    { nombre: 'Paneles solares del lomo der.', piel: 'solar', u0: uSolar0, u1: 0.90, t0: 0.62 * Math.PI, t1: 0.81 * Math.PI },
+    { nombre: 'Paneles solares del capó', piel: 'solar', u0: 0.045, u1: uC0 - 0.02, t0: 0.28 * Math.PI, t1: 0.72 * Math.PI },
+    { nombre: 'Paneles solares del lomo izq.', piel: 'solar', u0: uC0 + 0.01, u1: 0.93, t0: 0.19 * Math.PI, t1: 0.42 * Math.PI },
+    { nombre: 'Paneles solares del lomo der.', piel: 'solar', u0: uC0 + 0.01, u1: 0.93, t0: 0.58 * Math.PI, t1: 0.81 * Math.PI },
   ];
-  // La cúpula es panel solar salvo el parabrisas y las dos ventanillas.
+  // La cúpula es carrocería (blanca, como el resto) con el panel solar en la
+  // parte plana del techo y cristal en el parabrisas y las dos ventanillas.
   // El borde trasero de la ventanilla va inclinado como un pilar B (u = uVentA
-  // arriba, uVent1 abajo); lo de atrás de la puerta es fijo (custodia).
+  // arriba, uVent1 abajo); lo de atrás de la puerta es fijo (custodia). El
+  // borde de abajo de la ventanilla es la línea donde la cúpula sale de la
+  // carrocería (`thBase`): así la barra de abajo va recta sobre el hombro y no
+  // sigue el serpenteo de la base hundida (2026-11-06, Eugenio).
   const uVentA = Math.min(uC1 - 0.30, uDeX(xH) + 0.00), uVent1 = uVentA + 0.06;
   const thTrasera = (u: number) => Math.min(thVentana, Math.max(0, thVentana * (uVent1 - u) / (uVent1 - uVentA)));
   const thVent = (u: number) => Math.min(u < uW1 ? thPilar(u) : thVentana, u > uVentA ? thTrasera(u) : thVentana);
+  /** θ (lado izquierdo) donde la cúpula cruza la piel de la carrocería en la estación u; 0 si no la cruza. */
+  const cacheBase = new Map<number, number>();
+  const thBase = (u: number) => {
+    const k = Math.round(u * 4000); const c = cacheBase.get(k); if (c !== undefined) return c;
+    const v = thBaseCalc(u); cacheBase.set(k, v); return v;
+  };
+  const thBaseCalc = (u: number) => {
+    const f = frameC(u); let a = 0, b = 0.5 * Math.PI;
+    const fuera = (th: number) => { const q = secC(f, th); return gapCuerpo(q[0], q[1], q[2]) < 0; };
+    if (fuera(0)) return 0;
+    for (let k = 0; k < 18; k++) { const m = (a + b) / 2; if (fuera(m)) b = m; else a = m; }
+    return b;
+  };
   const zonasCupula: ZonaPiel[] = [
-    { nombre: 'Parabrisas', piel: 'cristal', u0: uC0, u1: uW1, t0: 0, t1: Math.PI, tDe: u => [thPilar(u), Math.PI - thPilar(u)] },
-    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [0, thVent(u)] },
-    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVent(u), Math.PI] },
-    // Los flancos casi verticales de detrás no verían el sol: negro brillante, como el Aptera.
-    // (las ventanillas van antes en la lista y mandan donde se solapan)
-    { nombre: 'Flanco izquierdo', piel: 'bajos', u0: uVentA, u1: uC1 - 0.012, t0: 0, t1: 0.22 * Math.PI },
-    { nombre: 'Flanco derecho', piel: 'bajos', u0: uVentA, u1: uC1 - 0.012, t0: 0.78 * Math.PI, t1: Math.PI },
+    { nombre: 'Parabrisas', piel: 'cristal', u0: uC0, u1: uW1, t0: 0, t1: Math.PI, tDe: u => [Math.max(thPilar(u), thBase(u) + 0.02), Math.PI - Math.max(thPilar(u), thBase(u) + 0.02)] },
+    { nombre: 'Ventanilla izquierda', piel: 'cristal', u0: uBase, u1: uVent1, t0: 0, t1: thVentana, tDe: u => [thBase(u) + 0.02, thVent(u)] },
+    { nombre: 'Ventanilla derecha', piel: 'cristal', u0: uBase, u1: uVent1, t0: Math.PI - thVentana, t1: Math.PI, tDe: u => [Math.PI - thVent(u), Math.PI - thBase(u) - 0.02] },
+    // Paneles solares: la parte plana del techo, del borde de arriba del parabrisas hasta la cola.
+    { nombre: 'Paneles solares del techo', piel: 'solar', u0: uW1 + 0.012, u1: uC1 - 0.025, t0: 0.27 * Math.PI, t1: 0.73 * Math.PI },
   ];
 
   // ── Puertas y maleteros ──────────────────────────────────────────────────
@@ -425,7 +450,7 @@ export function crearModeloA1(P: Parametros) {
   }
   const superficies: Superficie[] = [
     { id: 'cuerpo', frame, sec, tMax: 2 * Math.PI, u0: 0, u1: 1, zonas: zonasCuerpo, puertas: puertas.filter(p => p.superficie === 'cuerpo'), pielBase: 'carroceria' },
-    { id: 'cupula', frame: frameC, sec: secC, tMax: Math.PI, u0: uC0, u1: uC1, zonas: zonasCupula, puertas: puertas.filter(p => p.superficie === 'cupula'), pielBase: 'solar' },
+    { id: 'cupula', frame: frameC, sec: secC, tMax: Math.PI, u0: uC0, u1: uC1, zonas: zonasCupula, puertas: puertas.filter(p => p.superficie === 'cupula'), pielBase: 'carroceria' },
   ];
   const zonasPiel = [...zonasCuerpo, ...zonasCupula];
 
@@ -447,7 +472,7 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, thVentana, thPilar, thTrasera,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, thVentana, thPilar, thTrasera, thBase,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
     baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, pasosRueda,
