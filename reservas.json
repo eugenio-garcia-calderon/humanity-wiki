@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0170_aeromovil_1_por_defecto.sql",
+      "motivo": "Aeromóvil 1 por defecto",
+      "desde": "2026-11-06T15:14:31.755Z"
+    }
+  ]
 }
