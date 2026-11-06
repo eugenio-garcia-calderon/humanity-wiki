@@ -483,7 +483,7 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   for (let i = 0; i < n; i++) {
     const zc = (p.top[i] + p.bot[i]) / 2, aT = (p.top[i] - p.bot[i]) / 2;
     for (let j = 0; j <= nv; j++) {
-      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? 2.5 : 3.2;
+      const th = 2 * Math.PI * j / nv, c = Math.cos(th), sn = Math.sin(th), nn = sn >= 0 ? (r.formaArriba ?? 2.5) : 3.2;
       const ez = Math.sign(c) * Math.pow(Math.abs(c), 2 / nn), ey = Math.sign(sn) * Math.pow(Math.abs(sn), 2 / nn);
       pos.push(p.x[i], zc + aT * ey, p.hw[i] * ez);
       const enCab = !!cabina && p.x[i] <= cabina[1] && p.x[i] >= cabina[0] && sn > Math.sin(0.22 * Math.PI);

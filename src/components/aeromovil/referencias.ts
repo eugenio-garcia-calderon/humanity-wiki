@@ -37,6 +37,11 @@ export interface Referencia {
   transparenteX?: [number, number];
   /** Color de la carrocería al verlo solo (el fantasma de «Comparar» es siempre turquesa). */
   color?: number;
+  /** Exponente de la mitad de arriba de la sección (2,5 por defecto): más bajo, techo
+   *  más estrecho que el cuerpo, como una cúpula sobre una carrocería ancha. */
+  formaArriba?: number;
+  /** Coeficiente de arrastre publicado. */
+  cd?: number;
   ruedas: RuedaRef[];
   perfil: PerfilRef;
   notas?: string;
@@ -135,6 +140,34 @@ export const CATALOGO: Referencia[] = [
     color: 0xc4161c,
     notas: 'Si la parte transparente fuera la cola y no el morro, el vehículo iría al revés: dímelo y lo giro. Con una foto de perfil y su largo real se puede rehacer más fiel desde «Crear un modelo 3D desde fotos».',
   },
+  {
+    // 2026-11-06, Eugenio, con fotos del SZEnergy Team: «modela este y busca
+    // info en internet para hacerlo lo más preciso posible, llámalo Aeromóvil 1».
+    // Es el SZEmission de la Universidad Széchenyi István (Győr, Hungría),
+    // UrbanConcept eléctrico de la Shell Eco-marathon.
+    //   Publicado por el equipo: 95 kg en orden de carrera, Cd 0,1365, monocasco
+    //   de composite de carbono en forma de gota modificada, motor PMS con
+    //   correa dentada, batería LiPo de 350-530 Wh, 332 km/kWh en 2026.
+    //   No publican medidas. El reglamento UrbanConcept fija: alto 1,00-1,30 m,
+    //   ancho 1,20-1,30 m, largo 2,20-3,50 m, batalla ≥ 1,20 m, vía ≥ 1,00 m
+    //   delante y ≥ 0,80 m detrás, altura libre ≥ 10 cm. Un coche de
+    //   eficiencia apura los mínimos, y las fotos lo confirman: el techo de la
+    //   cúpula queda a la altura de la cadera de la gente. Alto, ancho, batalla,
+    //   vías y altura libre se toman en el mínimo del reglamento; el largo, de
+    //   la proporción largo/alto en las fotos de perfil (≈ 2,8).
+    id: 'cat-aeromovil-1', nombre: 'Aeromóvil 1', origen: 'catalogo',
+    fuente: 'SZEmission del SZEnergy Team (Universidad Széchenyi, Győr). Publicado: 95 kg, Cd 0,1365, monocasco de carbono, una plaza. Medidas: alto, ancho, batalla y vías en el mínimo del reglamento UrbanConcept de la Shell Eco-marathon; el largo, estimado de las fotos.',
+    enlaces: [
+      { t: 'SZEmission, ficha del equipo', url: 'https://szenergy.hu/en/our-racing-cars/' },
+      { t: 'Presentación del coche 2026', url: 'https://alumni.sze.hu/en/?p=10203' },
+      { t: 'Reglas UrbanConcept (resumen)', url: 'https://areeweb.polito.it/didattica/h2polito/en/competitions/shell-eco-marathon.html' },
+    ],
+    L: 2.80, W: 1.20, H: 1.00, clear: 0.10, batalla: 1.20, plazas: 1, masa: 95, cd: 0.1365, cabina: 'cupula', cabinaX: [0.02, -0.98],
+    ruedas: [{ x: 0, z: 0.50, d: 0.50 }, { x: 0, z: -0.50, d: 0.50 }, { x: -1.20, z: 0.40, d: 0.50 }, { x: -1.20, z: -0.40, d: 0.50 }],
+    perfil: perfilGota({ xn: 0.75, L: 2.80, H: 1.00, W: 1.20, clear: 0.10, pmax: 0.40, nariz: 0.32, cola: 0.27, romo: 0.35 }),
+    color: 0xf2c200, formaArriba: 1.6,
+    notas: 'Ruedas de unos 50 cm, carenadas dentro de la carrocería. Por ser medidas de reglamento, el alto, el ancho, la batalla y las vías son las mínimas permitidas; si el equipo publica las suyas se cambian aquí.',
+  },
 ];
 
 /** Interpola el perfil en una x cualquiera (los x van de morro a cola, decrecientes). */
@@ -155,7 +188,7 @@ export function fichaComparable(r: Referencia) {
   const vias = r.ruedas.filter(w => Math.abs(w.z) > 0.01).map(w => 2 * Math.abs(w.z));
   return {
     L: r.L, W: r.W, H: r.H, batalla: r.batalla, ruedas: r.ruedas.length, ejes,
-    via: vias.length ? Math.max(...vias) : 0, plazas: r.plazas, masa: r.masa ?? null,
+    via: vias.length ? Math.max(...vias) : 0, plazas: r.plazas, masa: r.masa ?? null, cd: r.cd ?? null,
     huella: r.L * r.W,
   };
 }
