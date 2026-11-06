@@ -2,9 +2,9 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0169_calendario_arte_disenos.sql",
-      "motivo": "Calendario Arte: cola de diseños nuevos (0168 lo cogió el Aeromóvil)",
-      "desde": "2026-11-05T14:01:08.413Z"
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Aeromóvil 1",
+      "desde": "2026-11-06T11:28:53.704Z"
     }
   ]
 }
