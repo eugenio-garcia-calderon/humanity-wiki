@@ -61,10 +61,13 @@ const SZ = {
   // sección está a un 40 % de la altura de la carrocería, no a la mitad.
   top: suave([[0, 0.43], [0.05, 0.49], [0.10, 0.55], [0.15, 0.615], [0.19, 0.66], [0.25, 0.65], [0.30, 0.64], [0.46, 0.63], [0.55, 0.63], [0.64, 0.61], [0.72, 0.585], [0.80, 0.54], [0.90, 0.47], [0.96, 0.44], [1, 0.42]]),
   bot: suave([[0, 0.43], [0.02, 0.34], [0.05, 0.248], [0.10, 0.172], [0.18, 0.136], [0.30, 0.131], [0.62, 0.131], [0.70, 0.150], [0.80, 0.215], [0.90, 0.30], [0.96, 0.37], [1, 0.42]]),
-  hw: suave([[0, 0.12], [0.03, 0.48], [0.06, 0.64], [0.10, 0.78], [0.15, 0.90], [0.20, 0.96], [0.27, 0.99], [0.36, 1.0], [0.45, 0.98], [0.60, 0.91], [0.68, 0.86], [0.75, 0.80], [0.85, 0.60], [0.90, 0.42], [0.95, 0.30], [1, 0.18]]),
+  hw: suave([[0, 0.12], [0.03, 0.48], [0.06, 0.64], [0.10, 0.78], [0.15, 0.90], [0.20, 0.96], [0.27, 0.99], [0.36, 1.0], [0.45, 0.98], [0.60, 0.91], [0.68, 0.86], [0.75, 0.80], [0.85, 0.64], [0.90, 0.52], [0.95, 0.42], [1, 0.33]]),
   // La cúpula, entre u = 0,19 y 0,99 del original: una lágrima alta y estrecha con el pico sobre el piloto.
-  cupTop: suave([[0.19, 0.66], [0.22, 0.74], [0.25, 0.80], [0.30, 0.86], [0.35, 0.92], [0.40, 0.97], [0.42, 1.0], [0.46, 1.0], [0.50, 0.955], [0.55, 0.91], [0.62, 0.82], [0.71, 0.71], [0.79, 0.60], [0.87, 0.51], [0.96, 0.45], [1, 0.42]]),
-  cupHw: suave([[0.19, 0.28], [0.25, 0.37], [0.30, 0.42], [0.45, 0.48], [0.60, 0.45], [0.75, 0.33], [0.90, 0.15], [0.97, 0.03], [1, 0.0]]),
+  // Ronda 3: parabrisas más vertical (≈47°) y envolvente, corona alta hasta
+  // pasada la mitad del coche (el codo de la bajada en u ≈ 0,58), cola en
+  // labio ancho (0,33 del semiancho) y no en punta.
+  cupTop: suave([[0.19, 0.66], [0.22, 0.78], [0.26, 0.86], [0.30, 0.92], [0.35, 0.97], [0.40, 0.99], [0.46, 1.0], [0.52, 0.985], [0.58, 0.955], [0.65, 0.88], [0.69, 0.82], [0.78, 0.69], [0.87, 0.59], [0.93, 0.52], [1, 0.43]]),
+  cupHw: suave([[0.19, 0.40], [0.25, 0.44], [0.30, 0.46], [0.45, 0.48], [0.60, 0.45], [0.75, 0.33], [0.90, 0.15], [0.97, 0.03], [1, 0.0]]),
   cupX0: 0.19, cupX1: 0.99, cupW: 0.48,
   // Dónde está el ancho máximo de la sección, en fracción de la altura de la carrocería (0,5 = a media altura).
   ecuador: 0.40,
@@ -383,7 +386,9 @@ export function crearModeloA1(P: Parametros) {
   ];
   const torretas = { yTow, zTF, zTR };
   // Pasos de rueda: media caña oscura sobre cada rueda, que tapa el interior visto por el arco.
-  const pasosRueda = ruedas.map(r => ({ x: r.x, y: r.r, z: r.z, R: r.r + TRAVEL_A1 + 0.035, largo: r.w + 0.10 }));
+  // Media caña de ±55° alrededor de la vertical, y poco más ancha que el
+  // neumático: así no asoma por fuera de la piel donde la cola se estrecha.
+  const pasosRueda = ruedas.map(r => ({ x: r.x, y: r.r, z: r.z, R: r.r + TRAVEL_A1 + 0.03, largo: r.w + 0.06, arco: 110 }));
 
   return {
     tipo: 'a1' as const,

@@ -105,8 +105,10 @@ def paso_rueda(p):
     L = p["largo"] * M
     cil = cq.Solid.makeCylinder(p["R"] * M, L, c - cq.Vector(0, L / 2, 0), eje)
     interior = cq.Solid.makeCylinder((p["R"] - 0.002) * M, L + 2, c - cq.Vector(0, L / 2 + 1, 0), eje)
-    mitad = cq.Solid.makeBox(2 * p["R"] * M + 2, L + 4, p["R"] * M + 1, c - cq.Vector(p["R"] * M + 1, L / 2 + 2, p["R"] * M + 1))
-    return cil.cut(interior).cut(mitad)
+    # Solo el arco de arriba (±arco/2 alrededor de la vertical): se quita lo que queda por debajo de una cuña.
+    arco = math.radians(p.get("arco", 180)) / 2
+    corte = cq.Workplane("XZ").polyline([(0, 0), (3 * p["R"] * M * math.sin(arco), 3 * p["R"] * M * math.cos(arco)), (3 * p["R"] * M, -3 * p["R"] * M), (-3 * p["R"] * M, -3 * p["R"] * M), (-3 * p["R"] * M * math.sin(arco), 3 * p["R"] * M * math.cos(arco))]).close().extrude(L + 4).translate((c.x, c.y + (L + 4) / 2, c.z)).val()
+    return cil.cut(interior).cut(corte)
 
 
 def asiento(a):
