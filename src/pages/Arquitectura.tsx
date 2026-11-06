@@ -16,13 +16,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Download, Eye, FileCode2, Layers, Map as MapaIcono, Menu, Ruler, Share2, SlidersHorizontal, Upload, X, ZoomIn, RotateCcw, HelpCircle, Image as ImagenIcono } from 'lucide-react';
+import { Box, Clapperboard, Download, Eye, FileCode2, Layers, Map as MapaIcono, Menu, Ruler, Share2, SlidersHorizontal, Upload, X, ZoomIn, RotateCcw, HelpCircle, Image as ImagenIcono } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { Deslizador } from '../components/ui/Deslizador';
 import { cn } from '../utils/cn';
 import { Escena, type Captura, type Modo, type Objetivo } from '../components/arquitectura/Escena';
 import { construirMundo, type Foco, type Edificio } from '../components/arquitectura/geometria';
 import { GRUPOS, GRUPO_DE_TIPO, POR_DEFECTO, cargarParametros, guardarParametros, enlaceCompartible, type Parametros, type ClaveNumerica } from '../components/arquitectura/parametros';
+import { ESCALAS_TODAS, FUNCIONES, funcionDe, filaDe, nombreFuncion, personasEscala } from '../components/arquitectura/servicios';
+import { SISTEMA } from '../components/arquitectura/paleta';
 import { dxfPlanta, dxfAlzado, svgPlanta, csvDimensiones, descargar } from '../components/arquitectura/exportar';
 
 type Nivel = 'ciudad' | 'pueblo' | 'comunidad' | 'familia' | 'nido';
@@ -52,6 +54,8 @@ export default function Arquitectura() {
   const [panelAbierto, setPanelAbierto] = useState(() => typeof window === 'undefined' || window.innerWidth >= 900);
   const [mPorPx, setMPorPx] = useState(1);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [ventana, setVentana] = useState(false);     // the building pop-up
+  const [animar, setAnimar] = useState(false);       // loads Animacion.tsx the first time
   const capturaRef = useRef<Captura | null>(null);
 
   // Debounce: rebuilding the whole city takes ~0.3 s, so sliders feel smooth.
@@ -72,8 +76,9 @@ export default function Arquitectura() {
 
   const sel: Edificio | null = seleccion != null ? mundo.edificios[seleccion] ?? null : null;
   const onPick = useCallback((id: number) => {
-    if (id < 0) { setSeleccion(null); return; }
+    if (id < 0) { setSeleccion(null); setVentana(false); return; }
     setSeleccion(id);
+    setVentana(true);
     const e = mundo.edificios[id];
     if (!e) return;
     const m = e.ambito.match(/^p(\d+)(?:\/c(\d+))?(?:\/f(\d+))?(?:\/n(\d+))?/);
@@ -213,7 +218,7 @@ export default function Arquitectura() {
                 <div className="mt-2 space-y-2">
                   {md.equipamientos.map(e => (
                     <div key={e.escala + e.codigo} className="border-b border-slate-800 pb-2 text-[11px]">
-                      <div className="flex justify-between gap-2"><span className="font-bold text-slate-200">{e.codigo} · {e.nombre} <span className="font-normal text-slate-500">({e.escala})</span></span><span className="font-mono text-emerald-300">{num(e.superficie)} m²</span></div>
+                      <div className="flex justify-between gap-2"><span className="font-bold text-slate-200">{e.nombre} <span className="font-normal text-slate-500">({e.escala})</span></span><span className="font-mono text-emerald-300">{num(e.superficie)} m²</span></div>
                       <div className="text-slate-400">{e.dimensiones} · {e.funcion} · ×{num(e.cantidad)}</div>
                     </div>
                   ))}
@@ -235,7 +240,7 @@ export default function Arquitectura() {
               </label>
               <p className="text-[11px] text-slate-500">Para cambiar de pueblo, comunidad, familia o nido: pulsa un edificio en el 3D y el foco se mueve allí.</p>
               <label className="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" className="accent-emerald-500" checked={conArboles} onChange={e => setConArboles(e.target.checked)} /> Incluir árboles {ambitoPlano === 'ciudad' && <span className="text-amber-400">(archivo grande)</span>}</label>
-              <label className="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" className="accent-emerald-500" checked={conTextos} onChange={e => setConTextos(e.target.checked)} /> Incluir textos y códigos</label>
+              <label className="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" className="accent-emerald-500" checked={conTextos} onChange={e => setConTextos(e.target.checked)} /> Incluir textos</label>
               <div className="grid gap-2">
                 <Button onClick={() => exportar('planta')}><MapaIcono size={14} className="mr-2" /> Planta · DXF</Button>
                 <Button onClick={() => exportar('alzado')}><Layers size={14} className="mr-2" /> Alzado frontal · DXF</Button>
@@ -254,11 +259,13 @@ export default function Arquitectura() {
 
           {pestana === 'ayuda' && (
             <div className="space-y-3 text-xs leading-relaxed text-slate-300">
-              <p><b className="text-slate-100">La misma regla en todas las escalas.</b> Cada unidad es un círculo. La vía circular de la escala superior la cruza a 0,2·R por encima del centro: arriba queda el escaparate productivo y común (agricultura, mercado, energía), abajo la vida (las familias, las comunidades o los pueblos). En el centro, agua y el centro social con sus 8 anexos.</p>
+              <p><b className="text-slate-100">La misma regla en todas las escalas.</b> Cada unidad es un círculo: arriba queda el escaparate productivo y común (agricultura, mercado, energía), abajo la vida (las familias, las comunidades o los pueblos). En el pueblo y la ciudad, la vía circular de la escala superior pasa a 0,2·R por encima del centro, y en el centro están el agua y el centro social con sus 8 anexos.</p>
+              <p><b className="text-slate-100">La comunidad.</b> En el centro, el bosque comestible con su agua. Justo al norte, el centro comunitario con sus 8 anexos. La carretera del pueblo ya no la cruza por el medio: hace una curva y pasa por arriba, con una rotonda que lleva al centro comunitario y al centro del pueblo y obliga a frenar. La energía y las naves quedan al otro lado de la carretera.</p>
+              <p><b className="text-slate-100">Animar.</b> El botón «Animar» pone en movimiento a la gente, las bicis, los velomóviles y los coches de la comunidad enfocada. Esa parte solo se descarga la primera vez que lo pulsas.</p>
               <p><b className="text-slate-100">Vías.</b> Desde lo habitado hacia fuera: peatonal (adoquín), carril bici (rojo) y vehículos (asfalto).</p>
               <p><b className="text-slate-100">Moverse.</b> Arrastra para girar, rueda o pellizco para acercarte, botón derecho o dos dedos para desplazar. Los botones de arriba te llevan a cada escala.</p>
               <p><b className="text-slate-100">Vistas.</b> Perspectiva (libre), Cenital (planta, sin perspectiva) y Frontal (alzado, sin perspectiva). La barra de escala de abajo da los metros reales.</p>
-              <p><b className="text-slate-100">Editar.</b> Pulsa un edificio: verás sus medidas y sus deslizadores. Todos los cambios rehacen el 3D, las cotas y los planos.</p>
+              <p><b className="text-slate-100">Editar.</b> Pulsa un edificio: se abre una ventana con su escala y los servicios que da en cada escala, del nido a la ciudad. Con «Editar medidas» ves sus medidas y sus deslizadores. Todos los cambios rehacen el 3D, las cotas y los planos.</p>
               <p className="text-slate-500">Las superficies de los edificios son la propuesta de la lámina de diseño; son orientativas para empezar el proyecto con un estudio de arquitectura.</p>
             </div>
           )}
@@ -270,7 +277,7 @@ export default function Arquitectura() {
 
       {/* ------------------------------------------------ 3D */}
       <main className="relative h-full flex-1">
-        <Escena mundo={mundo} modo={modo} objetivo={objetivo} seleccion={seleccion} onPick={onPick} onEscala={setMPorPx} capturaRef={capturaRef} />
+        <Escena mundo={mundo} modo={modo} objetivo={objetivo} seleccion={seleccion} onPick={onPick} onEscala={setMPorPx} capturaRef={capturaRef} animar={animar} />
 
         <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-wrap items-start gap-2 p-3">
           {!panelAbierto && (
@@ -292,7 +299,21 @@ export default function Arquitectura() {
               </Button>
             ))}
           </div>
+          <div className="pointer-events-auto flex gap-1 rounded-xl bg-slate-900/85 p-1 backdrop-blur">
+            <Button variant="ghost" onClick={() => { setAnimar(a => !a); if (!animar && nivel !== 'comunidad' && nivel !== 'familia') ir('comunidad'); }}
+              aria-pressed={animar}
+              className={cn('px-3 py-1.5 text-[10px]', animar ? 'bg-amber-500 text-white hover:bg-amber-500' : 'text-slate-200 hover:bg-slate-800')}>
+              <Clapperboard size={12} className="mr-1" />{animar ? 'Parar' : 'Animar'}
+            </Button>
+          </div>
         </div>
+        {animar && <p className="pointer-events-none absolute left-1/2 top-16 -translate-x-1/2 rounded-full bg-slate-900/80 px-3 py-1 text-[10px] text-slate-300">Gente, bicis, velomóviles y coches en {nombreNivel('comunidad')}</p>}
+        {sel && ventana && (
+          <VentanaEdificio e={sel} p={p}
+            onCerrar={() => setVentana(false)}
+            onAcercar={() => setObjetivo({ cx: sel.x, cy: sel.y, radio: Math.max(sel.ancho, sel.fondo) * 2.2 + 8, nonce: Date.now() })}
+            onEditar={() => { setVentana(false); setPestana('editar'); setPanelAbierto(true); }} />
+        )}
 
         <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-slate-900/85 px-3 py-2 text-[10px] text-slate-200 backdrop-blur">
           <div className="h-2 border-x-2 border-b-2 border-slate-100" style={{ width: Math.max(20, Math.min(240, barra.px)) }} />
@@ -326,7 +347,7 @@ function TarjetaSeleccion({ e, p, fijar, onAcercar, onCerrar }: { e: Edificio; p
     <section className="rounded-xl border border-emerald-700 bg-emerald-950/40 p-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">{e.codigo} · {e.escala}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">{nombreFuncion(e)} · escala {e.escala.toLowerCase()}</p>
           <h2 className="text-sm font-bold">{e.nombre}</h2>
         </div>
         <Button variant="ghost" className="px-2 text-slate-300 hover:bg-slate-800" onClick={onCerrar} aria-label="Quitar selección"><X size={14} /></Button>
@@ -360,6 +381,48 @@ function Leyenda() {
     <div className="absolute bottom-3 right-3 max-w-[220px] rounded-lg bg-slate-900/85 p-2 text-[10px] text-slate-200 backdrop-blur">
       <Button variant="ghost" className="w-full justify-between px-2 py-1 text-[10px] text-slate-200 hover:bg-slate-800" onClick={() => setAbierta(a => !a)}>Leyenda <span>{abierta ? '−' : '+'}</span></Button>
       {abierta && <ul className="mt-1 space-y-1 px-1">{filas.map(f => <li key={f.t} className="flex items-center gap-2"><span className={cn('inline-block h-3 w-3 rounded-sm', f.c)} />{f.t}</li>)}</ul>}
+    </div>
+  );
+}
+
+/** Pop-up of a building: the scale it serves, what it offers there, and the same
+ *  function at the other four scales (nest → city). */
+function VentanaEdificio({ e, p, onCerrar, onAcercar, onEditar }: { e: Edificio; p: Parametros; onCerrar: () => void; onAcercar: () => void; onEditar: () => void }) {
+  const clave = funcionDe(e);
+  const fila = filaDe(clave, p);
+  const gente = personasEscala(p);
+  const f = FUNCIONES[clave];
+  const color = f.sistema ? SISTEMA[f.sistema]?.color : undefined;
+  return (
+    <div role="dialog" aria-label={`${f.nombre} · escala ${e.escala}`}
+      className="absolute bottom-16 left-1/2 z-30 w-[min(440px,calc(100vw-24px))] -translate-x-1/2 rounded-2xl border border-slate-700 bg-slate-900/95 p-4 text-slate-100 shadow-2xl backdrop-blur">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {color && <span className="inline-block h-4 w-4 rounded" style={{ background: color }} />}
+          <div>
+            <h2 className="text-base font-bold leading-tight">{f.nombre}</h2>
+            <p className="text-[11px] text-slate-400">{e.nombre}</p>
+          </div>
+        </div>
+        <Button variant="ghost" className="px-2 text-slate-300 hover:bg-slate-800" onClick={onCerrar} aria-label="Cerrar"><X size={15} /></Button>
+      </div>
+      <div className="mt-3 rounded-xl bg-emerald-950/60 p-3">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Actúa a escala de {e.escala.toLowerCase()} · {gente[e.escala as keyof typeof gente] ?? ''}</p>
+        <p className="mt-1 text-sm">{fila[e.escala as keyof typeof fila] ?? e.funcion}</p>
+      </div>
+      <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">{f.nombre} en las cinco escalas</p>
+      <ol className="mt-1 space-y-1">
+        {ESCALAS_TODAS.map((esc, i) => (
+          <li key={esc} className={cn('flex gap-2 rounded-lg px-2 py-1 text-[11px]', esc === e.escala ? 'bg-slate-800 text-white' : 'text-slate-400')}>
+            <span className={cn('w-20 shrink-0 font-bold', esc === e.escala ? 'text-emerald-300' : 'text-slate-300')}>{i + 1}. {esc}</span>
+            <span>{fila[esc]}</span>
+          </li>
+        ))}
+      </ol>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <Button variant="outline" className="border-slate-700 text-slate-200 hover:bg-slate-800" onClick={onAcercar}><ZoomIn size={13} className="mr-2" /> Acercar</Button>
+        <Button variant="outline" className="border-slate-700 text-slate-200 hover:bg-slate-800" onClick={onEditar}><SlidersHorizontal size={13} className="mr-2" /> Editar medidas</Button>
+      </div>
     </div>
   );
 }

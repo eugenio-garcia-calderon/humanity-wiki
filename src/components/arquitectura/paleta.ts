@@ -7,6 +7,7 @@
 export const SUELO: Record<string, string> = {
   campo: '#cfd8b8',
   cesped: '#5f9b4c',
+  isleta: '#6fae55',
   suelo: '#8fbf63',
   agricultura: '#3f7f3a',
   parque: '#6aa84f',

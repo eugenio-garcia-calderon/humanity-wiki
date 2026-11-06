@@ -33,6 +33,7 @@ export interface Parametros {
   inicioPetalo: number;      // fraction of R where the petal starts
   finPetalo: number;         // fraction of R where it ends
   tamGota: number;           // scale of the water drop / family plaza
+  redondezPetalo: number;    // 0 = water drop (pointed at the top) … 1 = round
   diamCentroFamiliar: number;
   radioBosqueFamiliar: number;
   // --- community
@@ -41,7 +42,9 @@ export interface Parametros {
   radioPlazaComunidad: number;
   diamCentroComunidad: number;    // CS1
   escalaAnexosComunidad: number;  // multiplier for S1, E1…
-  radioBosqueComunidad: number;   // fraction of R
+  radioBosqueComunidad: number;   // fraction of R (the food forest in the centre)
+  alturaCarretera: number;        // fraction of R where the village road crosses, above the centre
+  radioRotonda: number;           // roundabout where the community meets the village road (m)
   // --- lanes (shared by every scale)
   anchoPeatonal: number;
   anchoBici: number;
@@ -75,9 +78,10 @@ export const POR_DEFECTO: Parametros = {
   arbolesPorNido: 27,
   copaArbol: 1.4,
   anchoPetalo: 0.85,
-  inicioPetalo: 0.21,
+  inicioPetalo: 0.28,
   finPetalo: 0.98,
   tamGota: 1,
+  redondezPetalo: 0.35,
   diamCentroFamiliar: 12,
   radioBosqueFamiliar: 11,
   radioComunidad: 260,
@@ -85,7 +89,9 @@ export const POR_DEFECTO: Parametros = {
   radioPlazaComunidad: 30,
   diamCentroComunidad: 24,
   escalaAnexosComunidad: 1,
-  radioBosqueComunidad: 0.24,
+  radioBosqueComunidad: 0.2,
+  alturaCarretera: 0.62,
+  radioRotonda: 18,
   anchoPeatonal: 3,
   anchoBici: 2.5,
   anchoCalzada: 6.5,
@@ -145,6 +151,7 @@ export const GRUPOS: Grupo[] = [
       { clave: 'anchoPetalo', etiqueta: 'Anchura del pétalo', min: 0.5, max: 1.1, paso: 0.01 },
       { clave: 'inicioPetalo', etiqueta: 'Inicio del pétalo (× R)', min: 0.15, max: 0.4, paso: 0.01 },
       { clave: 'finPetalo', etiqueta: 'Final del pétalo (× R)', min: 0.8, max: 1, paso: 0.01 },
+      { clave: 'redondezPetalo', etiqueta: 'Forma del pétalo (gota ↔ redondo)', min: 0, max: 1, paso: 0.01 },
       { clave: 'tamGota', etiqueta: 'Tamaño de la gota', min: 0.6, max: 1.4, paso: 0.01 },
       { clave: 'diamCentroFamiliar', etiqueta: 'Ø centro social familiar', min: 6, max: 24, paso: 0.5, unidad: 'm' },
       { clave: 'radioBosqueFamiliar', etiqueta: 'Radio bosque comestible familiar', min: 5, max: 20, paso: 0.5, unidad: 'm' },
@@ -155,9 +162,11 @@ export const GRUPOS: Grupo[] = [
       { clave: 'radioComunidad', etiqueta: 'Radio de la comunidad (R)', min: 100, max: 400, paso: 5, unidad: 'm' },
       { clave: 'desplazamientoDivisoria', etiqueta: 'Divisoria sobre el centro (× R)', min: 0.05, max: 0.4, paso: 0.01 },
       { clave: 'radioPlazaComunidad', etiqueta: 'Radio de la plaza central', min: 25, max: 70, paso: 1, unidad: 'm' },
-      { clave: 'diamCentroComunidad', etiqueta: 'Ø centro social CS1', min: 12, max: 40, paso: 1, unidad: 'm' },
-      { clave: 'escalaAnexosComunidad', etiqueta: 'Tamaño anexos (S1, E1…)', min: 0.5, max: 1.6, paso: 0.05, unidad: '×' },
-      { clave: 'radioBosqueComunidad', etiqueta: 'Bosque comestible (× R)', min: 0.12, max: 0.32, paso: 0.01 },
+      { clave: 'diamCentroComunidad', etiqueta: 'Ø centro comunitario', min: 12, max: 40, paso: 1, unidad: 'm' },
+      { clave: 'escalaAnexosComunidad', etiqueta: 'Tamaño de los anexos de la comunidad', min: 0.5, max: 1.6, paso: 0.05, unidad: '×' },
+      { clave: 'radioBosqueComunidad', etiqueta: 'Bosque comestible central (× R)', min: 0.1, max: 0.3, paso: 0.01 },
+      { clave: 'alturaCarretera', etiqueta: 'Carretera del pueblo: altura de paso (× R)', min: 0.45, max: 0.85, paso: 0.01 },
+      { clave: 'radioRotonda', etiqueta: 'Radio de la rotonda', min: 10, max: 30, paso: 0.5, unidad: 'm' },
     ],
   },
   {
@@ -171,16 +180,16 @@ export const GRUPOS: Grupo[] = [
     id: 'pueblo', titulo: 'Pueblo', items: [
       { clave: 'separacionComunidades', etiqueta: 'Separación entre comunidades', min: 0, max: 200, paso: 5, unidad: 'm' },
       { clave: 'margenPueblo', etiqueta: 'Margen exterior', min: 20, max: 300, paso: 5, unidad: 'm' },
-      { clave: 'diamCentroPueblo', etiqueta: 'Ø centro social CS2', min: 24, max: 90, paso: 1, unidad: 'm' },
-      { clave: 'escalaAnexosPueblo', etiqueta: 'Tamaño anexos (S2, E2…)', min: 0.5, max: 1.6, paso: 0.05, unidad: '×' },
+      { clave: 'diamCentroPueblo', etiqueta: 'Ø centro del pueblo', min: 24, max: 90, paso: 1, unidad: 'm' },
+      { clave: 'escalaAnexosPueblo', etiqueta: 'Tamaño de los anexos del pueblo', min: 0.5, max: 1.6, paso: 0.05, unidad: '×' },
     ],
   },
   {
     id: 'ciudad', titulo: 'Ciudad', items: [
       { clave: 'separacionPueblos', etiqueta: 'Separación entre pueblos', min: 0, max: 1000, paso: 10, unidad: 'm' },
       { clave: 'margenCiudad', etiqueta: 'Margen exterior', min: 50, max: 1500, paso: 10, unidad: 'm' },
-      { clave: 'diamCentroCiudad', etiqueta: 'Ø centro social CS3', min: 48, max: 180, paso: 2, unidad: 'm' },
-      { clave: 'escalaAnexosCiudad', etiqueta: 'Tamaño anexos (S3, E3…)', min: 0.5, max: 1.6, paso: 0.05, unidad: '×' },
+      { clave: 'diamCentroCiudad', etiqueta: 'Ø centro de la ciudad', min: 48, max: 180, paso: 2, unidad: 'm' },
+      { clave: 'escalaAnexosCiudad', etiqueta: 'Tamaño de los anexos de la ciudad', min: 0.5, max: 1.6, paso: 0.05, unidad: '×' },
     ],
   },
 ];

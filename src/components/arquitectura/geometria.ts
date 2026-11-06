@@ -14,6 +14,9 @@
 //     centre — above (towards the parent) is the productive/common cap, below
 //     are the children, laid on the arc between the two crossing points;
 //   · the centre holds water and the social centre with its eight annexes;
+//   · EXCEPT in the community (2026-11-05, Eugenio): there the food forest takes the
+//     centre, the hub moves north, and the village road bends up over the top through
+//     a roundabout instead of crossing at 0.2·R (see `carreteraComunidad`);
 //   · lanes always go pedestrian → bike → vehicles from the inhabited side out.
 //
 // Every element carries an `ambito` path ("p5/c5/f3/n1") so a plan can be
@@ -49,6 +52,8 @@ export interface Panel { x: number; y: number; rot: number; ancho: number; fondo
 export interface Vehiculo { tipo: 'coche' | 'bici' | 'aeronave' | 'tren' | 'bus'; x: number; y: number; rot: number; ambito: string }
 export interface Etiqueta { x: number; y: number; alto: number; texto: string; tam: number; ambito: string; color?: string }
 export interface Cota { x1: number; y1: number; x2: number; y2: number; texto: string; ambito: string }
+/** A lane centre line for the animation: vehicles, bikes and people follow these. */
+export interface Ruta { capa: 'calzada' | 'bici' | 'peatonal'; pts: number[]; ambito: string; cerrada: boolean }
 export interface Unidad { ambito: string; tipo: 'ciudad' | 'pueblo' | 'comunidad' | 'familia' | 'nido'; nombre: string; cx: number; cy: number; up: number; radio: number }
 
 export interface Foco { p: number; c: number; f: number; n: number }
@@ -64,6 +69,7 @@ export interface Mundo {
   vehiculos: Vehiculo[];
   etiquetas: Etiqueta[];
   cotas: Cota[];
+  rutas: Ruta[];
   unidades: Map<string, Unidad>;
   medidas: Medidas;
   foco: Foco;
@@ -111,9 +117,19 @@ function rayoDivisoria(th: number, d: number, rd: number): number {
   return c * s - Math.sqrt(disc);
 }
 
-function hwPetalo(t: number, wm: number): number {
-  if (t < 0.62) return wm * Math.pow(Math.sin(Math.PI / 2 * t / 0.62), 0.9);
-  return wm * Math.sqrt(Math.max(0, 1 - ((t - 0.62) / 0.38) ** 2));
+/** Half-width of a petal at t (0 = inner tip, 1 = outer end). `k` is its roundness:
+ *  0 = a water drop pointed towards the centre, 1 = almost an ellipse. 0.35 is the
+ *  shape of Eugenio's sheets (peak at 62 % of the length). */
+function hwPetalo(t: number, wm: number, k = 0.35): number {
+  const tp = 0.68 - 0.18 * k;
+  const e = Math.max(0.12, 1.25 - k);
+  if (t < tp) {
+    const gota = Math.pow(Math.sin(Math.PI / 2 * t / tp), e);
+    const elipse = Math.sqrt(Math.max(0, 1 - ((tp - t) / tp) ** 2));
+    const m = Math.max(0, k - 0.6) / 0.4;           // the last stretch blends into a true ellipse
+    return wm * (gota * (1 - m) + elipse * m);
+  }
+  return wm * Math.sqrt(Math.max(0, 1 - ((t - tp) / (1 - tp)) ** 2));
 }
 function gotaMedio(r: number, mid: number, L: number, W: number): number {
   const c = (mid - r) / (L / 2);
@@ -175,6 +191,7 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
   const vehiculos: Vehiculo[] = [];
   const etiquetas: Etiqueta[] = [];
   const cotas: Cota[] = [];
+  const rutas: Ruta[] = [];
   const unidades = new Map<string, Unidad>();
   const largo = { calzada: 0, bici: 0, peatonal: 0 };
   let arbolesTotales = 0;
@@ -254,11 +271,27 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       anillo(fr, capa, r, r + w, th0, th1, ambito); r += w;
     }
   };
+  const ruta = (capa: Ruta['capa'], pts: XY[], ambito: string, cerrada = false) => {
+    if (!enDetalle(ambito) || pts.length < 2) return;
+    const f: number[] = []; pts.forEach(q => f.push(q[0], q[1]));
+    rutas.push({ capa, pts: f, ambito, cerrada });
+  };
+  /** a→b shifted `off` sideways (positive = left of the direction of travel). */
+  const desplazada = (a: XY, b: XY, off: number): XY[] => {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L, ny = dx / L;
+    return [[a[0] + nx * off, a[1] + ny * off], [b[0] + nx * off, b[1] + ny * off]];
+  };
   /** A straight corridor (road in the middle, bike one side, pedestrian the other). */
   const corredor = (a: XY, b: XY, ambito: string) => {
     tira('calzada', a, b, p.anchoCalzada, ambito);
     tira('bici', a, b, p.anchoBici, ambito, p.anchoCalzada / 2 + p.anchoBici / 2);
     tira('peatonal', a, b, p.anchoPeatonal, ambito, -(p.anchoCalzada / 2 + p.anchoPeatonal / 2));
+    // right-hand traffic: one lane each way
+    ruta('calzada', desplazada(a, b, -p.anchoCalzada / 4), ambito);
+    ruta('calzada', desplazada(b, a, -p.anchoCalzada / 4), ambito);
+    ruta('bici', desplazada(a, b, p.anchoCalzada / 2 + p.anchoBici / 2), ambito);
+    ruta('peatonal', desplazada(a, b, -(p.anchoCalzada / 2 + p.anchoPeatonal / 2)), ambito);
   };
   /** Polygon of the common cap between local angles th0..th1 (above the divider). */
   const zonaCasquete = (fr: Marco, R: number, d: number, rd: number, th0: number, th1: number, capa: string, ambito: string) => {
@@ -307,7 +340,7 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
     const [func, cod] = SOCIAL[nivel];
     const pl = nivel === 3 ? 2 : 1;
     edificio({ tipo: `centroSocial${nivel}`, codigo: cod, nombre: `Centro social ${cod}`, funcion: func, forma: 'cilindro', ...xy(fr.w(0, 0)), ancho: diam, fondo: diam, alto: 4.5 * pl + diam * 0.08, plantas: pl, rot: 0, techo: 'cono', color: 'muroSocial', ambito, escala: ESCALAS[nivel], superficie: Math.PI * Rcs * Rcs * pl });
-    if (rotular) etiqueta(fr.w(0, 0), cod, Math.max(6, diam * 0.35), ambito, 4.5 * pl + diam * 0.3, '#c4622d');
+    if (rotular) etiqueta(fr.w(0, 0), ['', 'Centro comunitario', 'Centro del pueblo', 'Centro de la ciudad'][nivel], Math.max(6, diam * 0.3), ambito, 4.5 * pl + diam * 0.3, '#c4622d');
     SISTEMAS.forEach((k, j) => {
       const th = Math.PI / 2 - (j + 0.5) * TAU / SISTEMAS.length;
       const [w0, d0, pls, funcion] = ANEXOS[k].n[nivel - 1];
@@ -318,7 +351,7 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
         ? `${ANEXOS[k].nombre} · grado ${['primario', 'secundario', 'terciario'][nivel - 1]}`
         : `${ANEXOS[k].nombre} · ${['comunidad', 'pueblo', 'ciudad'][nivel - 1]}`;
       edificio({ tipo: `anexo${nivel}`, sistema: k, codigo, nombre, funcion, forma: 'caja', ...xy(c), ancho: w, fondo: d, alto: 4.5 * pls, plantas: pls, rot: fr.ang(th) - Math.PI / 2, techo: 'plano', color: k, ambito, escala: ESCALAS[nivel], superficie: w0 * d0 * escalaAn * escalaAn * pls });
-      if (rotular) etiqueta(c, codigo, Math.max(4, Math.max(w, d) * 0.45), ambito, 4.5 * pls + 3);
+      if (rotular) etiqueta(c, ANEXOS[k].nombre, Math.max(4, Math.max(w, d) * 0.4), ambito, 4.5 * pls + 3);
       // the coloured links to the children responsible for this system
       if (responsables && posHijo) for (const u of responsables[k]) tira(`enlace-${k}`, fr.pol(rAnillo + d / 2, th), posHijo(u), nivel === 1 ? 0.45 : Math.max(1, diam * 0.03), ambito);
     });
@@ -329,12 +362,34 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
   const R = p.radioComunidad;
   const rcE = R + LT + 2;
   const anguloHijos = (n: number, a: number) => (k: number) => a - (k + 0.5) * (Math.PI + 2 * a) / n;
+  /** Radius of the paved square around a social centre and its ring of annexes. */
+  const radioPlaza = (nivel: 1 | 2 | 3, diam: number, escalaAn: number, minPlaza = 0) => {
+    let maxLado = 0;
+    SISTEMAS.forEach(k => { const [w, d] = ANEXOS[k].n[nivel - 1]; maxLado = Math.max(maxLado, Math.hypot(w, d) * escalaAn / 2); });
+    return Math.max(minPlaza, diam / 2 + 3 + 2 * maxLado + 3);
+  };
+  // community layout, the same for all of them (local frame, +y towards the village)
+  const rBosC = Math.min(p.radioBosqueComunidad * R, 0.45 * R);
+  const rPlazaH = radioPlaza(1, p.diamCentroComunidad, p.escalaAnexosComunidad, p.radioPlazaComunidad);
+  const yH = rBosC + 8 + rPlazaH;                                   // hub centre, north of the forest
+  const ro = Math.max(p.radioRotonda, p.anchoCalzada + 5);          // roundabout, outer edge of its road
+  const yRc = Math.max(p.alturaCarretera * R, yH + rPlazaH + ro + 10);  // roundabout centre = road centre line
+  const yR = yRc - (LT / 2 - p.anchoCalzada / 2);                   // centre of the whole lane band
+  const Xb = R + LT + 2 + Math.min(8, p.separacionComunidades / 2);   // where the bend rejoins the ring (never past the neighbour's)
   const aprox = anguloDivisoria(1, desp, 6);            // span used for sizing only
   const DVa = (Math.PI + 2 * aprox) / nC;
   const plazaPueblo = (() => { let m = 0; SISTEMAS.forEach(k => { const [w, d] = ANEXOS[k].n[1]; m = Math.max(m, Math.hypot(w, d) * p.escalaAnexosPueblo / 2); }); return p.diamCentroPueblo / 2 + 6 + 2 * m + 6; })();
   const plazaCiudad = (() => { let m = 0; SISTEMAS.forEach(k => { const [w, d] = ANEXOS[k].n[2]; m = Math.max(m, Math.hypot(w, d) * p.escalaAnexosCiudad / 2); }); return p.diamCentroCiudad / 2 + 6 + 2 * m + 6; })();
   let anilloP = (2 * rcE + p.separacionComunidades) / (2 * Math.sin(DVa / 2));
-  anilloP = Math.max(anilloP, plazaPueblo + LT + rcE + 60);
+  anilloP = Math.max(anilloP, plazaPueblo + LT + rcE + 60, plazaPueblo + 2 * LT + (yRc - desp * R) + ro + 40, 1.6 * Xb);
+  const LC = (() => {
+    const d = desp * R, rd = anilloP;
+    const anilloY = (x: number) => d + rd - Math.sqrt(Math.max(0, rd * rd - x * x));
+    const roadY = (x: number) => anilloY(x) + (Math.abs(x) < Xb ? (yR - d) * Math.cos(Math.PI * x / (2 * Xb)) ** 2 : 0);
+    let lo = 0, hi = R;                                              // where the road's north edge leaves the circle
+    for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (roadY(m) + LT / 2 < Math.sqrt(R * R - m * m)) lo = m; else hi = m; }
+    return { rBos: rBosC, yH, rPlazaH, yRc, yR, ro, X: Xb, xe: lo, roadY, anilloY };
+  })();
   const RV = anilloP + desp * R + rcE + p.margenPueblo;
   const DPa = (Math.PI + 2 * aprox) / nP;
   let anilloC = (2 * RV + p.separacionPueblos) / (2 * Math.sin(DPa / 2));
@@ -398,8 +453,18 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
     const rPlazaP = centroSocial(pueblo, 2, p.diamCentroPueblo, p.escalaAnexosPueblo, ambP, repC.responsables, (u) => pueblo.pol(anilloP - LT, thC(u)));
     const fueraP = carriles(pueblo, rPlazaP, true, 0, TAU, ambP);
     corredor(pueblo.w(0, fueraP), pueblo.w(0, desp * RV - LT / 2), ambP);
-    viaAnillo(pueblo, anilloP, aP + 0.01, -Math.PI - aP - 0.01, ambP);
-    etiqueta(pueblo.w(0, -RV * 1.2), `P${pad(j + 1)}`, RV * 0.12, ambP);
+    {
+      // the ring is interrupted where each community bends it over its top
+      const dl = Math.asin(Math.min(1, LC.X / anilloP));
+      let desde = aP + 0.01;
+      for (let k = 0; k < nC; k++) {
+        const hasta = thC(k) + dl;
+        if (hasta < desde) viaAnillo(pueblo, anilloP, desde, hasta, ambP);
+        desde = thC(k) - dl;
+      }
+      if (-Math.PI - aP - 0.01 < desde) viaAnillo(pueblo, anilloP, desde, -Math.PI - aP - 0.01, ambP);
+    }
+    etiqueta(pueblo.w(0, -RV * 1.2), `Pueblo ${j + 1}`, RV * 0.1, ambP);
     if (j === foco.p) {
       cota(pueblo.w(-RV, -RV - 40), pueblo.w(RV, -RV - 40), `Ø pueblo ${fmt(2 * RV)}`, ambP);
       etiqueta(pueblo.w(0, 0.7 * RV), '▲ ESCAPARATE · PRODUCTIVO', RV * 0.04, ambP);
@@ -415,9 +480,9 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       const det = enDetalle(ambC);
       const foc = j === foco.p && k === foco.c;
       unidades.set(ambC, { ambito: ambC, tipo: 'comunidad', nombre: `Comunidad C${pad(k + 1)} · P${pad(j + 1)}`, cx: cC[0], cy: cC[1], up: upC, radio: R });
-      corredor(pueblo.pol(fueraP, th), pueblo.pol(anilloP - LT / 2, th), ambP);
+      corredor(pueblo.pol(fueraP, th), pueblo.pol(anilloP + desp * R - LC.yRc - LC.ro - p.anchoBici - p.anchoPeatonal + 1, th), ambP);
       comunidad(fr, ambC, det, foc, j * 100 + k);
-      etiqueta(fr.w(0, -R * 1.3), `C${pad(k + 1)}`, R * 0.14, ambC);
+      etiqueta(fr.w(0, -R * 1.3), `Comunidad ${k + 1}`, R * 0.11, ambC);
     }
   }
 
@@ -479,58 +544,145 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
     }
   }
 
+  // ---------------------------------------------------------------- the village road over a community
+  /** The village ring, bent up over the top of a community (C1 bump, it rejoins the
+   *  ring tangentially at ±X), with the roundabout at its highest point. Lanes keep the
+   *  ring's order: road on the north (village) side, then bike, then pedestrian. */
+  function carreteraComunidad(fr: Marco, amb: string) {
+    const { roadY, yRc, ro, X } = LC;
+    const wc = p.anchoCalzada, wb = p.anchoBici, wp = p.anchoPeatonal;
+    const top = LT / 2, cCal = top - wc / 2;
+    const muestra = (x0: number, x1: number, n = 24) => {
+      const out: { c: XY; n: XY }[] = [];
+      for (let i = 0; i <= n; i++) {
+        const x = x0 + (x1 - x0) * i / n, y = roadY(x);
+        const dy = (roadY(x + 0.5) - roadY(x - 0.5));
+        const L = Math.hypot(1, dy);
+        out.push({ c: [x, y], n: [-dy / L, 1 / L] });
+      }
+      return out;
+    };
+    const en = (q: { c: XY; n: XY }, o: number): XY => fr.w(q.c[0] + q.n[0] * o, q.c[1] + q.n[1] * o);
+    const radioObjetivo: Record<string, number> = { calzada: ro - wc / 2, bici: ro + wb / 2, peatonal: ro + wb + wp / 2 };
+    const bandas: [Ruta['capa'], number, number][] = [['calzada', top - wc, top], ['bici', top - wc - wb, top - wc], ['peatonal', -top, -top + wp]];
+    const frR = new Marco(...fr.w(0, yRc), fr.up);
+    for (const [capa, o1, o2] of bandas) {
+      const rel = (o1 + o2) / 2 - cCal;
+      const e = Math.sqrt(Math.max(1, radioObjetivo[capa] ** 2 - rel * rel));
+      for (const [x0, x1] of [[-X, -e], [e, X]]) {
+        const m = muestra(x0, x1);
+        poly(capa, [...m.map(q => en(q, o2)), ...m.reverse().map(q => en(q, o1))], amb);
+        const L = (X - e) / 1000;
+        if (capa === 'calzada') largo.calzada += L; else if (capa === 'bici') largo.bici += L; else largo.peatonal += L;
+      }
+      // lane centre lines for the animation: eastbound passes the roundabout by the south,
+      // westbound by the north (anticlockwise, right-hand traffic)
+      const rm = radioObjetivo[capa];
+      const arco = (th0: number, th1: number) => { const o: XY[] = []; for (let i = 0; i <= 16; i++) o.push(frR.pol(rm, th0 + (th1 - th0) * i / 16)); return o; };
+      const oE = capa === 'calzada' ? cCal - wc / 4 : (o1 + o2) / 2;
+      const oW = capa === 'calzada' ? cCal + wc / 4 : (o1 + o2) / 2;
+      ruta(capa, [...muestra(-X, -e, 16).map(q => en(q, oE)), ...arco(Math.PI, TAU), ...muestra(e, X, 16).map(q => en(q, oE))], amb);
+      ruta(capa, [...muestra(X, e, 16).map(q => en(q, oW)), ...arco(0, Math.PI), ...muestra(-e, -X, 16).map(q => en(q, oW))], amb);
+    }
+    // the roundabout: road ring, bike ring, pedestrian ring, planted island
+    anillo(frR, 'calzada', ro - wc, ro, 0, TAU, amb);
+    anillo(frR, 'bici', ro, ro + wb, 0, TAU, amb);
+    anillo(frR, 'peatonal', ro + wb, ro + wb + wp, 0, TAU, amb);
+    disco('isleta', frR.w(0, 0), ro - wc, amb);
+    const ri = ro - wc;
+    if (ri > 3) {
+      arbol(frR.w(0, 0), Math.min(3, ri * 0.4), 7, 0, amb, enDetalle(amb));
+      for (let i = 0; i < 6; i++) arbol(frR.pol(ri * 0.65, i * TAU / 6), Math.min(1.2, ri * 0.15), 2.5, 5, amb, enDetalle(amb));
+    }
+    { const o: XY[] = []; for (let i = 0; i <= 48; i++) o.push(frR.pol(ro - wc / 2, i * TAU / 48)); ruta('calzada', o, amb, true); }
+  }
+
   // ---------------------------------------------------------------- one community
+  // Layout (2026-11-05, Eugenio): the big food forest with its water sits in the very
+  // centre; the social centre and its annexes move north, between the forest and the
+  // village road; the road no longer cuts across at 0.2·R but bends up and crosses the
+  // community near the top, through a roundabout that also leads down to the hub and
+  // up to the village centre. Energy and production sit beyond the road.
   function comunidad(fr: Marco, amb: string, det: boolean, foc: boolean, semilla: number) {
     const d = desp * R;
     const rd = anilloP;
+    const { rBos, yH, rPlazaH, yRc, ro, X, xe } = LC;
+    const roadY = LC.roadY;
     disco('cesped', fr.w(0, 0), R, amb);
     const a = anguloDivisoria(R, d, rd);
     const span = Math.PI + 2 * a;
     const D = span / nF;
     const bis = (f: number) => a - (f + 0.5) * D;
-    zonaCasquete(fr, R, d, rd, a, (63 * Math.PI) / 180, 'produccion', amb);
-    zonaCasquete(fr, R, d, rd, (63 * Math.PI) / 180, (117 * Math.PI) / 180, 'parque', amb);
-    zonaCasquete(fr, R, d, rd, (117 * Math.PI) / 180, Math.PI - a, 'agricultura', amb);
+    // --- zones beyond the road: agriculture (west), park + market (centre), energy (east)
+    const zona = (x0: number, x1: number, capa: string) => {
+      const n = 30, top: XY[] = [], bot: XY[] = [];
+      for (let i = 0; i <= n; i++) {
+        const x = x0 + (x1 - x0) * i / n;
+        const yt = Math.sqrt(Math.max(0, R * R - x * x)), yb = Math.min(yt, roadY(x) + LT / 2 + 0.5);
+        top.push(fr.w(x, yt)); bot.push(fr.w(x, yb));
+      }
+      poly(capa, [...top, ...bot.reverse()], amb);
+    };
+    zona(-xe, -0.13 * R, 'agricultura');
+    zona(-0.13 * R, 0.13 * R, 'parque');
+    zona(0.13 * R, xe, 'produccion');
     // outer lanes: pedestrian, bike, road (from the families outwards)
     carriles(fr, R, true, 0, TAU, amb);
-    // --- the common cap
-    const rBos = p.radioBosqueComunidad * R;
-    const cBos = fr.pol(0.66 * R, (138 * Math.PI) / 180);
-    bosqueComestible(cBos, rBos, amb, semilla * 13 + 1);
-    bosqueComestible(fr.pol(0.53 * R, (106 * Math.PI) / 180), 0.09 * R, amb, semilla * 13 + 2);
-    const r = rng(semilla * 31 + 5);
-    for (let i = 0; i < 60; i++) {
-      const th = ((68 + r() * 44) * Math.PI) / 180;
-      const rmin = rayoDivisoria(th, d, rd) + LT;
-      if (Math.abs(Math.cos(th)) * R < 14) continue;
-      arbol(fr.pol(rmin + r() * (R - 8 - rmin), th), 1.8 + r() * 1.5, 5 + r() * 4, Math.floor(r() * 7), amb, det);
+    // --- the village road, bent over the top of the community, and its roundabout
+    carreteraComunidad(fr, amb);
+    // --- the food forest, in the centre
+    bosqueComestible(fr.w(0, 0), rBos, amb, semilla * 13 + 1);
+    // orchards in the agriculture strip beyond the road
+    for (const fx of [-0.36, -0.6]) {
+      const x = fx * R, yb = roadY(x) + LT / 2, yt = Math.sqrt(R * R - x * x);
+      const rr = Math.min(0.075 * R, (yt - yb) / 2 - 5);
+      if (rr > 6) bosqueComestible(fr.w(x, (yb + yt) / 2), rr, amb, semilla * 13 + 2 + Math.round(-fx * 10));
     }
+    // park trees on the lawn between the forest, the hub, the petals and the road
+    const r = rng(semilla * 31 + 5);
+    for (let i = 0, puestos = 0; i < 400 && puestos < 70; i++) {
+      const x = (r() * 2 - 1) * R, y = r() * R;
+      const rr = Math.hypot(x, y);
+      if (rr > R - 8 || rr < rBos + 4) continue;
+      if (y < d + rd - Math.sqrt(rd * rd - x * x) + 6) continue;        // below the old divider: petals
+      if (y > roadY(x) - LT / 2 - 4) continue;                           // the road
+      if (Math.hypot(x, y - yH) < rPlazaH + 18) continue;               // the hub and its car park
+      if (Math.abs(x) < 7) continue;                                     // the corridor
+      arbol(fr.w(x, y), 1.8 + r() * 1.5, 5 + r() * 4, Math.floor(r() * 7), amb, det);
+      puestos++;
+    }
+    // the market faces the outside, at the top edge
     for (let i = 0; i < 6; i++) {
       const th = ((78 + i * 4.8) * Math.PI) / 180;
-      if (Math.abs(th - Math.PI / 2) < 0.05) continue;
+      if (Math.abs(th - Math.PI / 2) < 0.07) continue;
       const c = fr.pol(0.9 * R, th);
       edificio({ tipo: 'escaparate', codigo: 'EC-S', nombre: 'Escaparate · mercado', funcion: 'Lo que produce la comunidad, abierto al exterior', forma: 'caja', ...xy(c), ancho: 6, fondo: 5, alto: 3.2, plantas: 1, rot: fr.ang(th) - Math.PI / 2, techo: 'plano', color: 'escaparate', ambito: amb, escala: 'Comunidad', superficie: 30 });
     }
-    // energy + workshop zone: solar tables and two sheds
+    // energy + workshop beyond the road: two sheds by the road, solar tables behind
+    const naves: XY[] = [];
+    for (const fx of [0.36, 0.52]) {
+      const x = fx * R, y = roadY(x) + LT / 2 + 12;
+      if (Math.hypot(x, y + 10) > R - 8) continue;
+      const ang = Math.atan2(roadY(x + 1) - roadY(x - 1), 2);
+      naves.push([x, y]);
+      edificio({ tipo: 'fabrica', codigo: 'EC-T', nombre: 'Nave de producción', funcion: 'Fabricación comunitaria · almacén de la producción', forma: 'caja', ...xy(fr.w(x, y)), ancho: 26, fondo: 14, alto: 7, plantas: 1, rot: fr.ang(ang), techo: 'plano', color: 'fabrica', ambito: amb, escala: 'Comunidad', superficie: 364 });
+    }
     let n = 0;
-    for (let ly = d + LT + 8; ly < R && n < 90; ly += 6) {
-      for (let lx = 30; lx < R && n < 90; lx += 5.2) {
-        const th = Math.atan2(ly, lx), rr = Math.hypot(lx, ly);
-        if (th > (58 * Math.PI) / 180 || th < a + 0.05 || rr > R - 10 || rr < rayoDivisoria(th, d, rd) + LT + 6) continue;
-        if (rr < 0.62 * R && th > (35 * Math.PI) / 180) continue;
+    for (let ly = d; ly < R && n < 90; ly += 6) {
+      for (let lx = 0.16 * R; lx < R && n < 90; lx += 5.2) {
+        if (Math.hypot(lx, ly) > R - 10 || ly < roadY(lx) + LT / 2 + 8) continue;
+        if (naves.some(([x, y]) => Math.abs(lx - x) < 18 && Math.abs(ly - y) < 12)) continue;
         panelesTotales++;
         if (det) paneles.push({ ...xy(fr.w(lx, ly)), rot: fr.ang(Math.PI / 2) - Math.PI / 2, ancho: 4.6, fondo: 2.3, ambito: amb });
         n++;
       }
     }
-    for (let i = 0; i < 2; i++) {
-      const c = fr.pol(0.47 * R + i * 24, (44 * Math.PI) / 180);
-      edificio({ tipo: 'fabrica', codigo: 'EC-T', nombre: 'Nave de producción', funcion: 'Fabricación comunitaria · almacén de la producción', forma: 'caja', ...xy(c), ancho: 26, fondo: 14, alto: 7, plantas: 1, rot: fr.ang((44 * Math.PI) / 180) - Math.PI / 2, techo: 'plano', color: 'fabrica', ambito: amb, escala: 'Comunidad', superficie: 364 });
-    }
-    // corridor from the hub up to the dividing road (and on to the village centre)
+    // --- the hub, north of the forest: social centre + 8 annexes, a pedestrian ring,
+    // a corridor up to the roundabout and a car park for the shared cars
     const { responsables, sistemasDe } = repartir(nF);
-    const r0 = p.inicioPetalo * R, r1 = p.finPetalo * R, dR = r1 - r0;
-    const rw = r0 + 0.62 * dR;
+    const r0 = Math.max(p.inicioPetalo * R, rBos + 12), r1 = Math.max(r0 + 40, p.finPetalo * R), dR = r1 - r0;
+    const kP = p.redondezPetalo;
+    const rw = r0 + (0.68 - 0.18 * kP) * dR;
     const Wm = p.anchoPetalo * rw * Math.sin(D / 2);
     const DM = rw, DL = 0.349 * dR * p.tamGota, DW = 0.535 * Wm * p.tamGota;
     const posNS = (f: number) => {
@@ -538,14 +690,17 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       const rr = r0 + 0.12 * dR;
       return fr.w(rr * u, rr * v);
     };
-    const rPlaza = centroSocial(fr, 1, p.diamCentroComunidad, p.escalaAnexosComunidad, amb, responsables, posNS, p.radioPlazaComunidad);
-    const fueraHub = carriles(fr, rPlaza, false, 0, TAU, amb);
-    if (fueraHub < d - LT / 2) corredor(fr.w(0, fueraHub), fr.w(0, d - LT / 2), amb);
-    // shared cars next to the mobility annex (slot of MV)
+    const frH = new Marco(...fr.w(0, yH), fr.up);
+    centroSocial(frH, 1, p.diamCentroComunidad, p.escalaAnexosComunidad, amb, responsables, posNS, p.radioPlazaComunidad);
+    anillo(frH, 'peatonal', rPlazaH, rPlazaH + p.anchoPeatonal, 0, TAU, amb);
+    tira('camino', fr.w(0, rBos - 2), fr.w(0, yH - rPlazaH + 1), 3, amb);
+    if (yRc - ro > yH + rPlazaH) corredor(fr.w(0, yRc - ro + 1), fr.w(0, yH + rPlazaH), amb);
     {
-      const j = SISTEMAS.indexOf('MV');
-      const th = Math.PI / 2 - (j + 0.5) * TAU / SISTEMAS.length;
-      for (let i = 0; i < 8; i++) vehiculos.push({ tipo: 'coche', ...xy(fr.pol(fueraHub + 6, th - 0.22 + i * 0.055)), rot: fr.ang(th), ambito: amb });
+      const xP = rPlazaH + p.anchoPeatonal + 9;
+      const p0 = frH.w(xP, -12), p1 = frH.w(xP, 14);
+      tira('calzada', p0, p1, 12, amb);
+      tira('calzada', frH.w(xP - 6, 10), frH.w(Math.max(6, p.anchoCalzada), yRc - yH - ro), 4, amb);
+      for (let i = 0; i < 8; i++) vehiculos.push({ tipo: 'coche', ...xy(frH.w(xP + (i % 2 ? 3 : -3), -9 + Math.floor(i / 2) * 6)), rot: fr.ang(i % 2 ? Math.PI : 0), ambito: amb });
     }
     // --- the families (petals)
     // generational paths first (they run under the drops and nest gardens)
@@ -555,14 +710,14 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       const Ff = (rr: number, o: number): XY => { const u = Math.cos(bis(f)), v = Math.sin(bis(f)); return fr.w(rr * u - o * v, rr * v + o * u); };
       const pts: XY[] = [];
       const N = det ? 60 : 24;
-      for (let i = 0; i <= N; i++) { const rr = r0 + dR * i / N; pts.push(Ff(rr, hwPetalo(i / N, Wm))); }
-      for (let i = N; i >= 0; i--) { const rr = r0 + dR * i / N; pts.push(Ff(rr, -hwPetalo(i / N, Wm))); }
+      for (let i = 0; i <= N; i++) { const rr = r0 + dR * i / N; pts.push(Ff(rr, hwPetalo(i / N, Wm, kP))); }
+      for (let i = N; i >= 0; i--) { const rr = r0 + dR * i / N; pts.push(Ff(rr, -hwPetalo(i / N, Wm, kP))); }
       poly('suelo', pts, `${amb}/f${f}`);
     }
     radiosNido.forEach((rn, i) => {
       const rp = rn - (p.radioFrutales + 1.5);
       anillo(fr, 'camino', rp - 2, rp + 2, a, -Math.PI - a, amb);
-      if (foc) etiqueta(fr.pol(rp, a + 0.02), `G${i + 1}${i === 0 ? '/G4' : ''}`, Math.max(5, R * 0.025), amb, 1);
+      if (foc) etiqueta(fr.pol(rp, a + 0.02), `Generación ${i + 1}${i === 0 ? ' (y 4ª)' : ''}`, Math.max(5, R * 0.025), amb, 1);
     });
     for (let f = 0; f < nF; f++) {
       const ambF = `${amb}/f${f}`;
@@ -574,8 +729,8 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       const sis = sistemasDe[f];
       {
         const N = det ? 40 : 10, borde: XY[] = [];
-        for (let i = 0; i <= N; i++) borde.push(Ff(r0 + dR * i / N, hwPetalo(i / N, Wm) - 1));
-        for (let i = N; i >= 0; i--) borde.push(Ff(r0 + dR * i / N, -hwPetalo(i / N, Wm) + 1));
+        for (let i = 0; i <= N; i++) borde.push(Ff(r0 + dR * i / N, hwPetalo(i / N, Wm, kP) - 1));
+        for (let i = N; i >= 0; i--) borde.push(Ff(r0 + dR * i / N, -hwPetalo(i / N, Wm, kP) + 1));
         const tramo = Math.ceil(borde.length / Math.max(1, sis.length));
         sis.forEach((k, i) => {
           const seg = borde.slice(i * tramo, Math.min(borde.length, (i + 1) * tramo + 1));
@@ -587,6 +742,10 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       tira('camino', Ff(DM + DL / 2 - 1, 0), Ff(r1 + 8, 0), 3, ambF, -1.5);
       tira('bici', Ff(r0 - 8, 0), Ff(DM - DL / 2 + 1, 0), 1.8, ambF, 1);
       tira('bici', Ff(DM + DL / 2 - 1, 0), Ff(r1 + 8, 0), 1.8, ambF, 1);
+      ruta('bici', [Ff(r0 - 8, 1), Ff(DM - DL / 2 + 1, 1)], ambF);
+      ruta('bici', [Ff(DM + DL / 2 - 1, 1), Ff(r1 + 8, 1)], ambF);
+      ruta('peatonal', [Ff(r0 - 8, -1.5), Ff(DM - DL / 2 + 1, -1.5)], ambF);
+      ruta('peatonal', [Ff(DM + DL / 2 - 1, -1.5), Ff(r1 + 8, -1.5)], ambF);
       // the drop: white open space with the family social centre and its food forest
       {
         const N = 72, g: XY[] = [];
@@ -605,8 +764,8 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       edificio({ tipo: 'centroFamiliar', codigo: 'CF', nombre: 'Centro social familiar', funcion: SOCIAL[0][0], forma: 'cilindro', ...xy(cf), ancho: p.diamCentroFamiliar, fondo: p.diamCentroFamiliar, alto: 4.2, plantas: 1, rot: 0, techo: 'cono', color: 'muroSocial', ambito: ambF, escala: 'Familia', superficie: Math.PI * Rcf * Rcf });
       // system nodes (NS) of this family at the top of the petal, facing the hub
       sis.forEach((k, i) => {
-        const w = (0.62 * hwPetalo(0.12, Wm) * 2) / sis.length;
-        const o = -0.62 * hwPetalo(0.12, Wm) + (i + 0.5) * w;
+        const w = (0.62 * hwPetalo(0.12, Wm, kP) * 2) / sis.length;
+        const o = -0.62 * hwPetalo(0.12, Wm, kP) + (i + 0.5) * w;
         edificio({ tipo: 'sistemaFamiliar', sistema: k, codigo: `NS-${k}`, nombre: `Nodo de ${ANEXOS[k].nombre.toLowerCase()} de la familia`, funcion: `Esta familia atiende el sistema de ${ANEXOS[k].nombre.toLowerCase()} de la comunidad (con otra familia: redundancia)`, forma: 'caja', ...xy(Ff(r0 + 0.12 * dR, o)), ancho: Math.max(3, w - 1.2), fondo: 7, alto: 4, plantas: 1, rot: fr.ang(th) - Math.PI / 2, techo: 'plano', color: k, ambito: ambF, escala: 'Familia', superficie: Math.max(3, w - 1.2) * 7 });
       });
       // bikes at the top and bottom of the petal
@@ -621,7 +780,7 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
       let ni = 0;
       radiosNido.forEach((rn, gi) => {
         const t = (rn - r0) / dR;
-        const hw = hwPetalo(t, Wm);
+        const hw = hwPetalo(t, Wm, kP);
         const o = Math.min(hw - p.radioFrutales * 0.4, Math.max(0.6 * hw, gotaMedio(rn, DM, DL, DW) + p.radioFrutales + p.copaArbol + 1));
         for (let sgn = -1; sgn <= 1; sgn += 2) {
           const ambN = `${ambF}/n${ni}`;
@@ -632,14 +791,14 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
           for (let q = 0; q < nA; q++) arbol(new Marco(c[0], c[1], Math.PI / 2).pol(p.radioFrutales, q * TAU / Math.max(1, nA)), p.copaArbol, 3.5 + ((q * 7) % 5) * 0.4, q % 3 === 0 ? 7 + ((q / 3) % 3) : (q % 7), ambN, det);
           const ap = 1.5 * Math.sqrt(3) * p.ladoNido * p.ladoNido;
           edificio({ tipo: 'nido', codigo: `N${ni + 1}`, nombre: `Nido hexagonal · generación ${gi + 1}${gi === 0 ? ' (= 4ª)' : ''}`, funcion: `N1 vivienda (salón · cocina · baño · dormitorio)${p.plantasNido >= 2 ? ' · N2 taller / estudio' : ''}${p.plantasNido >= 3 ? ' · N3 opcional' : ''} · 1–2 personas · ${Math.round(p.arbolesPorNido)} frutales`, forma: 'hex', ...xy(c), ancho: p.ladoNido, fondo: p.ladoNido, alto: p.alturaPlanta * p.plantasNido, plantas: p.plantasNido, rot: fr.ang(th), techo: 'nido', color: 'muroNido', ambito: ambN, escala: 'Nido', superficie: ap * p.plantasNido });
-          if (foc && f === foco.f) etiqueta(c, `N${ni + 1}`, 3, ambN, p.alturaPlanta * p.plantasNido + 2);
+          if (foc && f === foco.f) etiqueta(c, 'Vivienda', 3, ambN, p.alturaPlanta * p.plantasNido + 2);
           ni++;
         }
       });
       if (foc) {
-        etiqueta(Ff(r1 + 18, 0), `F${pad(f + 1)}`, Math.max(8, R * 0.04), ambF, 2);
+        etiqueta(Ff(r1 + 18, 0), `Familia ${f + 1}`, Math.max(8, R * 0.04), ambF, 2);
         if (f === foco.f) {
-          etiqueta(cf, 'CF', 3, ambF, 7, '#c4622d');
+          etiqueta(cf, 'Centro familiar', 3, ambF, 7, '#c4622d');
           etiqueta(Ff(rBF, 0), 'BOSQUE COMESTIBLE + AGUA', 3, ambF, 9, '#2e7d32');
           cota(Ff(r0, Wm + 12), Ff(r1, Wm + 12), `pétalo ${fmt(dR)}`, ambF);
         }
@@ -648,23 +807,26 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
     if (foc) {
       cota(fr.w(-R, -R - 30), fr.w(R, -R - 30), `Ø comunidad ${fmt(2 * R)}`, amb);
       cota(fr.w(R + 40, 0), fr.w(R + 40, d), `divisoria ${fmt(d)} (${desp.toFixed(2).replace('.', ',')}·R)`, amb);
-      etiqueta(cBos, 'AGRICULTURA · BOSQUE COMESTIBLE', R * 0.035, amb, 14, '#2e7d32');
-      etiqueta(fr.pol(0.72 * R, (40 * Math.PI) / 180), 'ENERGÍA · PRODUCCIÓN', R * 0.035, amb, 6, '#24477a');
-      etiqueta(fr.pol(0.78 * R, Math.PI / 2), 'ESCAPARATE · MERCADO', R * 0.032, amb, 6, '#e08a2e');
+      cota(fr.w(-R - 40, 0), fr.w(-R - 40, yRc), `paso de la carretera ${fmt(yRc)}`, amb);
+      etiqueta(fr.w(0, -rBos * 0.55), 'BOSQUE COMESTIBLE + AGUA', R * 0.03, amb, 14, '#2e7d32');
+      etiqueta(fr.w(0.42 * R, roadY(0.42 * R) + LT + 0.16 * R), 'ENERGÍA · PRODUCCIÓN', R * 0.032, amb, 6, '#24477a');
+      etiqueta(fr.w(-0.48 * R, roadY(-0.48 * R) + LT + 0.16 * R), 'AGRICULTURA', R * 0.032, amb, 6, '#2e7d32');
+      etiqueta(fr.pol(0.8 * R, Math.PI / 2), 'ESCAPARATE · MERCADO', R * 0.03, amb, 6, '#e08a2e');
+      etiqueta(fr.w(ro + 20, yRc + ro + 6), 'Rotonda', R * 0.022, amb, 2);
       etiqueta(fr.w(0, -0.55 * R), '▼ REPRODUCTIVO · VIDA', R * 0.03, amb, 1);
-      etiqueta(fr.w(-R * 1.1, d + 6), '◄ COMUNIDAD VECINA', R * 0.028, amb, 1);
-      etiqueta(fr.w(R * 1.1, d + 6), 'COMUNIDAD VECINA ►', R * 0.028, amb, 1);
+      etiqueta(fr.w(-R * 1.1, roadY(-R * 1.1) + 14), '◄ COMUNIDAD VECINA', R * 0.028, amb, 1);
+      etiqueta(fr.w(R * 1.1, roadY(R * 1.1) + 14), 'COMUNIDAD VECINA ►', R * 0.028, amb, 1);
     }
   }
 
   // ---------------------------------------------------------------- measures
   const nidosCiudad = nidosFam * nF * nC * nP;
   const pob = nidosCiudad * p.personasPorNido;
-  const areaPetalo = (() => { let s = 0; const N = 100; for (let i = 0; i < N; i++) s += 2 * hwPetalo((i + 0.5) / N, 1) / N; return s; })();
-  const r0 = p.inicioPetalo * R, r1 = p.finPetalo * R, dR = r1 - r0;
+  const areaPetalo = (() => { let s = 0; const N = 100; for (let i = 0; i < N; i++) s += 2 * hwPetalo((i + 0.5) / N, 1, p.redondezPetalo) / N; return s; })();
+  const r0 = Math.max(p.inicioPetalo * R, rBosC + 12), r1 = Math.max(r0 + 40, p.finPetalo * R), dR = r1 - r0;
   const aCom = anguloDivisoria(R, desp * R, anilloP);
   const Dang = (Math.PI + 2 * aCom) / nF;
-  const rw = r0 + 0.62 * dR;
+  const rw = r0 + (0.68 - 0.18 * p.redondezPetalo) * dR;
   const Wm = p.anchoPetalo * rw * Math.sin(Dang / 2);
   const ap = 1.5 * Math.sqrt(3) * p.ladoNido * p.ladoNido;
   const equip: Medidas['equipamientos'] = [];
@@ -699,7 +861,7 @@ export function construirMundo(p: Parametros, focoIn: Partial<Foco> = {}): Mundo
     equipamientos: equip,
   };
 
-  return { superficies, anillos, discos, edificios, arboles: new Float32Array(arb), arbolesAmbito, paneles, vehiculos, etiquetas, cotas, unidades, medidas, foco };
+  return { superficies, anillos, discos, edificios, arboles: new Float32Array(arb), arbolesAmbito, paneles, vehiculos, etiquetas, cotas, rutas, unidades, medidas, foco };
 }
 
 function xy(c: XY) { return { x: c[0], y: c[1] }; }

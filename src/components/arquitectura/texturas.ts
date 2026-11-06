@@ -32,6 +32,7 @@ const PINTORES: Record<string, Pintor> = {
   plaza: (c, n, b) => losas(c, n, b, 4),
   gota: (c, n, b) => losas(c, n, b, 3),
   cesped: (c, n, b) => ruido(c, n, b, 0.16, 7000, 3, 11),
+  isleta: (c, n, b) => ruido(c, n, b, 0.18, 5000, 2, 67),
   suelo: (c, n, b) => ruido(c, n, b, 0.14, 6000, 3, 13),
   parque: (c, n, b) => ruido(c, n, b, 0.16, 6000, 3, 17),
   huerto: (c, n, b) => ruido(c, n, b, 0.2, 6000, 2.5, 19),
@@ -46,7 +47,7 @@ const PINTORES: Record<string, Pintor> = {
 };
 /** Metres covered by one copy of each texture. */
 export const TAM: Record<string, number> = {
-  calzada: 8, bici: 6, peatonal: 3, camino: 3, plaza: 6, gota: 5, cesped: 24, suelo: 24, parque: 24, huerto: 10,
+  calzada: 8, isleta: 8, bici: 6, peatonal: 3, camino: 3, plaza: 6, gota: 5, cesped: 24, suelo: 24, parque: 24, huerto: 10,
   bosque: 20, agricultura: 14, produccion: 10, bancalA: 6, bancalB: 6, bancalC: 6, bancalD: 6, senda: 4, agua: 18, via: 8,
 };
 
