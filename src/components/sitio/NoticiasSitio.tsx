@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Newspaper, Play, ArrowUpRight, ChevronDown } from 'lucide-react';
-import { miniatura } from '../../utils/miniatura';
+import { Newspaper, ArrowUpRight, ChevronDown } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { PortadaNoticia } from './TarjetaNoticia';
 
 // ============================================================================
 // EN LOS MEDIOS (2026-11-06, Eugenio en luzhumanidad.com)
@@ -16,40 +16,14 @@ import { cn } from '../../utils/cn';
 
 type Noticia = {
   titulo: string; url: string; medio: string; fecha: string | null; fechaTexto: string | null;
-  imagen: string | null; video: boolean; proyectos: Array<{ titulo: string; url: string }>;
+  imagen: string | null; logo?: string | null; video: boolean; proyectos: Array<{ titulo: string; url: string }>;
 };
 
-const TONOS = [
-  'from-amber-400 to-orange-500', 'from-sky-500 to-indigo-600', 'from-emerald-500 to-teal-600',
-  'from-rose-500 to-pink-600', 'from-violet-500 to-purple-600', 'from-slate-600 to-slate-800',
-];
-const tono = (t: string) => TONOS[[...t].reduce((n, c) => n + c.charCodeAt(0), 0) % TONOS.length];
 const POR_VEZ = 9;
 
+// La portada de cada noticia, con el logo y el nombre del medio encima (`TarjetaNoticia.tsx`, 2026-11-06).
 function Portada({ n, grande }: { n: Noticia; grande?: boolean }) {
-  const src = n.imagen ? (n.imagen.startsWith('/uploads/') ? miniatura(n.imagen, grande ? 800 : 400) : n.imagen) : null;
-  return (
-    <div className={cn('relative w-full overflow-hidden bg-slate-100', grande ? 'aspect-[16/9] lg:aspect-auto lg:h-full lg:min-h-[340px]' : 'aspect-[16/9]')}>
-      {src ? (
-        <img src={src} alt={n.titulo} loading="lazy" decoding="async"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
-      ) : (
-        <div className={cn('absolute inset-0 grid place-items-center bg-gradient-to-br p-6 text-center', tono(n.medio))}>
-          <span className="text-xl font-black leading-tight text-white/95 drop-shadow-sm">{n.medio}</span>
-        </div>
-      )}
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-      <span className="absolute left-3 top-3 max-w-[75%] truncate rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-slate-800 shadow-sm">{n.medio}</span>
-      {n.video && (
-        <span className="absolute inset-0 grid place-items-center">
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-white/90 text-slate-900 shadow-lg transition-transform group-hover:scale-110">
-            <Play className="ml-0.5 h-5 w-5 fill-current" />
-          </span>
-        </span>
-      )}
-      {n.fechaTexto && <span className="absolute bottom-3 left-3 text-xs font-bold text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">{n.fechaTexto}</span>}
-    </div>
-  );
+  return <PortadaNoticia n={n} grande={grande} clase={grande ? 'aspect-[16/9] lg:aspect-auto lg:h-full lg:min-h-[340px]' : 'aspect-[16/9]'} />;
 }
 
 function Proyectos({ n }: { n: Noticia }) {

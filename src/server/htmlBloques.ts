@@ -29,6 +29,7 @@
 import { sql } from 'drizzle-orm';
 import { formatear } from '../components/tablas/Celda';
 import { miniatura } from '../utils/miniatura';
+import { noticiaDeBloque } from '../utils/noticias';
 
 /** Lo que hace falta saber, ya preguntado a la base de datos, para escribir
  *  los bloques sin ir y volver por cada uno. */
@@ -315,7 +316,11 @@ function bloqueEnHtml(b: any, ctx: ContextoHtml, hijos: (lista: any[]) => string
         const x = todos[k];
         const marca = x.tipo === 'tarea' ? (x.hecho ? '☑ ' : '☐ ') : '';
         const sub = Array.isArray(x.bloques) && x.bloques.length ? hijos(x.bloques) : '';
-        html += `<li>${marca}${enLinea(x.texto || '', ctx)}${sub}</li>`;
+        // Una noticia de «En los medios» lleva su portada (2026-11-06): la imagen también se indexa.
+        const n = x.estilo === 'noticia' ? noticiaDeBloque(x) : null;
+        const src = n?.imagen ? hrefSeguro(n.imagen) : null;
+        const portada = n && src ? `<img src="${esc(miniatura(src, 400))}" alt="${esc(`${n.medio}: ${n.titulo}`)}" loading="lazy"> ` : '';
+        html += `<li>${portada}${marca}${enLinea(x.texto || '', ctx)}${sub}</li>`;
       }
       return `<${etiqueta}>${html}</${etiqueta}>`;
     }
