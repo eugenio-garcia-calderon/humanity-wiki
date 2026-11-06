@@ -112,6 +112,9 @@ export type Pie = {
    *  guarda: lo calcula el servidor al servir la página (`seoEscaparate.ts`), así sale ya
    *  escrito en el HTML para los buscadores. */
   mapaProyectos?: Array<{ titulo: string; entradas: Array<{ titulo: string; url: string }> }>;
+  /** Los perfiles en redes, con su icono en el pie sencillo (2026-11-06, Eugenio: «el Instagram,
+   *  el YouTube y el LinkedIn, conéctalos»). */
+  redes?: Array<{ red: string; url: string }>;
 };
 
 export type Sitio = {

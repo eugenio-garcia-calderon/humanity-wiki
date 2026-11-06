@@ -335,6 +335,19 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
         className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80', Array.isArray(p.mapaProyectos) && p.mapaProyectos.length > 0 && 'border-t')}>
         {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
         {c.email && <a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 min-h-11 hover:underline break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a>}
+        {Array.isArray(p.redes) && p.redes.length > 0 && (
+          <span className="inline-flex items-center gap-1">
+            {p.redes.map(r => {
+              const Icono = ({ instagram: Instagram, youtube: Youtube, linkedin: Linkedin, facebook: Facebook, x: Twitter, twitter: Twitter } as Record<string, any>)[r.red.toLowerCase()] || Mail;
+              return (
+                <a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer me" aria-label={r.red} title={r.red}
+                  className="grid h-11 w-11 place-items-center rounded-full hover:opacity-100 hover:bg-white/10">
+                  <Icono className="h-[18px] w-[18px]" />
+                </a>
+              );
+            })}
+          </span>
+        )}
       </div>
     </footer>
   );
