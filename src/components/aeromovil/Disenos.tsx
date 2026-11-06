@@ -40,7 +40,18 @@ export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _
  */
 export const deDiseno = (d: Partial<Parametros>): Parametros => {
   const base = d.disposicion === 'cuatro' ? PARAMETROS_A1 : d.disposicion === 'rombo' ? PARAMETROS_GOTA : PARAMETROS_GOTA;
-  return { ...base, ...d, disposicion: d.disposicion ?? 'rombo', comp: 0 };
+  // Un valor guardado solo vale si es del mismo tipo que el de por defecto.
+  // El 2026-11-06 `parabrisas` pasó de ser un texto ('plano') a un número, y
+  // un diseño guardado con el texto dejaba la página en blanco (NaN en toda
+  // la geometría). Lo que no cuadra se ignora y se usa el de por defecto.
+  const limpio: Partial<Parametros> = {};
+  for (const [k, v] of Object.entries(d)) {
+    const ref = (base as unknown as Record<string, unknown>)[k];
+    if (ref === undefined) { (limpio as Record<string, unknown>)[k] = v; continue; }
+    if (typeof ref === 'number') { if (typeof v === 'number' && Number.isFinite(v)) (limpio as Record<string, unknown>)[k] = v; continue; }
+    if (typeof ref === typeof v) (limpio as Record<string, unknown>)[k] = v;
+  }
+  return { ...base, ...limpio, disposicion: d.disposicion ?? 'rombo', comp: 0 };
 };
 
 export type DisenoAbierto = { id: number; nombre: string; base: string };
