@@ -6,14 +6,14 @@
 //                                 coste, proveedores y alternativas
 // Los datos están en `componentes.ts`. Elegir una alternativa cambia el diseño
 // (sus parámetros) y se guarda con él.
-import { Fragment, useMemo } from 'react';
-import { ArrowLeft, Box, Check, ExternalLink, Feather, PiggyBank, RotateCcw, Scale } from 'lucide-react';
+import { Fragment, useMemo, useState } from 'react';
+import { ArrowLeft, Box, Check, ExternalLink, Feather, Pencil, PiggyBank, RotateCcw, Scale } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { CAPAS, type CapaId } from './Visor3D';
 import { areas, calcular, crearModelo } from './geometria';
 import type { Modelo, Parametros, Resultados } from './geometria';
-import { COMPONENTES, GRUPOS, alternativaElegida, componentePorId, elegirAlternativa, fichaComponente, totalesComponentes, type Alternativa, type Componente } from './componentes';
+import { COMPONENTES, GRUPOS, alternativaElegida, componentePorId, elegirAlternativa, escribirPieza, fichaComponente, totalesComponentes, type Alternativa, type Componente } from './componentes';
 
 const eur = (v: number) => `${Math.round(v).toLocaleString('es-ES')} €`;
 const kg = (v: number) => `${v.toLocaleString('es-ES', { minimumFractionDigits: v < 10 ? 1 : 0, maximumFractionDigits: v < 10 ? 1 : 0 })} kg`;
@@ -75,8 +75,8 @@ function Lista({ P, res, modelo, alNavegar }: Pick<Props, 'P' | 'res' | 'modelo'
                     <Button variant="ghost" onClick={() => alNavegar(`/aeromovil/componentes/${c.id}`)}
                       className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-4 rounded-none px-4 py-2.5 text-left font-normal normal-case tracking-normal hover:bg-slate-50">
                       <span className="min-w-0">
-                        <span className="block text-sm font-medium text-slate-900">{c.nombre}{f.unidades > 1 && <span className="ml-1.5 font-mono text-xs text-slate-400">× {f.unidades}</span>}</span>
-                        <span className="block truncate text-xs text-slate-500">{f.alternativa ? <span className="text-teal-800">Alternativa elegida: {f.alternativa.nombre}</span> : c.caracteristicas.slice(0, 2).map(([k, v]) => `${k}: ${v}`).join(' · ')}</span>
+                        <span className="block text-sm font-medium text-slate-900">{f.nombre}{f.unidades > 1 && <span className="ml-1.5 font-mono text-xs text-slate-400">× {f.unidades}</span>}{f.manual && <span className="ml-1.5 rounded bg-amber-50 px-1 text-[10px] font-semibold uppercase tracking-wider text-amber-800">a mano</span>}</span>
+                        <span className="block truncate text-xs text-slate-500">{f.manual?.proveedor ? `Proveedor: ${f.manual.proveedor}` : f.alternativa ? <span className="text-teal-800">Alternativa elegida: {f.alternativa.nombre}</span> : c.caracteristicas.slice(0, 2).map(([k, v]) => `${k}: ${v}`).join(' · ')}</span>
                       </span>
                       <span className="font-mono text-xs tabular-nums text-slate-700">{kg(f.masa)}</span>
                       <span className="w-20 text-right font-mono text-xs tabular-nums text-slate-700">{eur(f.coste)}</span>
@@ -111,7 +111,7 @@ function Ficha({ c, P, res, modelo, alCambiar, alNavegar, alVerEn3D }: { c: Comp
       </nav>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">{c.nombre}</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">{f.nombre}{f.manual?.nombre && <span className="ml-2 align-middle text-sm font-normal text-slate-500">({c.nombre})</span>}</h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-700">{c.que}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -135,9 +135,9 @@ function Ficha({ c, P, res, modelo, alCambiar, alNavegar, alVerEn3D }: { c: Comp
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Características de la pieza de serie</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">{f.manual?.caracteristicas?.length ? 'Características (escritas a mano)' : 'Características de la pieza de serie'}</h3>
           <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-x-4 gap-y-1.5 text-sm">
-            {c.caracteristicas.map(([k, v]) => <Fragment key={k}><dt className="text-slate-500">{k}</dt><dd className="text-slate-900">{v}</dd></Fragment>)}
+            {(f.manual?.caracteristicas?.length ? f.manual.caracteristicas : c.caracteristicas).map(([k, v], i) => <Fragment key={`${k}-${i}`}><dt className="text-slate-500">{k}</dt><dd className="text-slate-900">{v}</dd></Fragment>)}
             <dt className="text-slate-500">Capa del 3D</dt><dd className="text-slate-900">{capa}</dd>
             {c.deslizador && <><dt className="text-slate-500">Su peso lo fija</dt><dd className="text-slate-900">el deslizador «{c.deslizador}» de «Peso del vehículo», en el diseño 3D</dd></>}
           </dl>
@@ -145,6 +145,12 @@ function Ficha({ c, P, res, modelo, alCambiar, alNavegar, alVerEn3D }: { c: Comp
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Proveedores</h3>
           <ul className="mt-3 flex flex-col gap-2.5 text-sm">
+            {f.manual?.proveedor && (
+              <li className="flex flex-col rounded-lg bg-amber-50 px-2.5 py-1.5">
+                {f.manual.url ? <a href={f.manual.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-teal-800 underline-offset-2 hover:underline">{f.manual.proveedor}<ExternalLink className="h-3 w-3" /></a> : <span className="font-medium text-slate-900">{f.manual.proveedor}</span>}
+                <span className="text-xs text-amber-800">Escrito a mano en esta ficha{f.manual.coste !== undefined ? ` · ${eur(f.manual.coste)}` : ''}</span>
+              </li>
+            )}
             {c.proveedores.map(p => (
               <li key={p.nombre} className="flex flex-col">
                 {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-teal-800 underline-offset-2 hover:underline">{p.nombre}<ExternalLink className="h-3 w-3" /></a> : <span className="font-medium text-slate-900">{p.nombre}</span>}
@@ -154,6 +160,8 @@ function Ficha({ c, P, res, modelo, alCambiar, alNavegar, alVerEn3D }: { c: Comp
           </ul>
         </section>
       </div>
+
+      <FormularioPieza c={c} P={P} res={res} modelo={modelo} alCambiar={alCambiar} />
 
       <section>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Alternativas sin perder funcionalidad</h3>
@@ -192,6 +200,52 @@ function Ficha({ c, P, res, modelo, alCambiar, alNavegar, alVerEn3D }: { c: Comp
         )}
       </section>
     </div>
+  );
+}
+
+/** Escribir a mano la pieza real: nombre, proveedor, precio, peso y características. Se guarda con el diseño. */
+function FormularioPieza({ c, P, res, modelo, alCambiar }: { c: Componente } & Pick<Props, 'P' | 'res' | 'modelo' | 'alCambiar'>) {
+  const manual = P.piezas?.[c.id];
+  const [abierto, setAbierto] = useState(false);
+  const [nombre, setNombre] = useState(manual?.nombre ?? '');
+  const [proveedor, setProveedor] = useState(manual?.proveedor ?? '');
+  const [url, setUrl] = useState(manual?.url ?? '');
+  const [coste, setCoste] = useState(manual?.coste !== undefined ? String(manual.coste) : '');
+  const [masa, setMasa] = useState(manual?.masa !== undefined ? String(manual.masa) : '');
+  const [carac, setCarac] = useState((manual?.caracteristicas ?? []).map(([k, v]) => `${k}: ${v}`).join('\n'));
+  const num = (t: string) => { const v = Number(t.replace(',', '.')); return t.trim() !== '' && Number.isFinite(v) && v >= 0 ? v : undefined; };
+  const guardar = () => {
+    const caracteristicas = carac.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const i = l.indexOf(':'); return (i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : [l, '']) as [string, string]; });
+    const datos = { nombre: nombre.trim() || undefined, proveedor: proveedor.trim() || undefined, url: /^https?:\/\//.test(url.trim()) ? url.trim() : undefined, coste: num(coste), masa: num(masa), caracteristicas: caracteristicas.length ? caracteristicas : undefined };
+    const vacio = Object.values(datos).every(v => v === undefined);
+    alCambiar(escribirPieza(c, P, res, modelo, vacio ? null : datos)); setAbierto(false);
+  };
+  const borrar = () => { alCambiar(escribirPieza(c, P, res, modelo, null)); setNombre(''); setProveedor(''); setUrl(''); setCoste(''); setMasa(''); setCarac(''); setAbierto(false); };
+  const campo = 'w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-teal-700 focus:outline-none';
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">La pieza real, escrita a mano</h3>
+        {!abierto && <Button variant="outline" onClick={() => setAbierto(true)} className="text-xs normal-case tracking-normal"><Pencil className="mr-1.5 h-3.5 w-3.5" />{manual ? 'Editar' : 'Añadir datos'}</Button>}
+      </div>
+      {!abierto && <p className="mt-1 text-sm text-slate-600">{manual ? 'Esta ficha lleva datos tuyos (precio, proveedor, peso o características). Se guardan con el diseño y mandan sobre la estimación.' : 'Cuando tengas un presupuesto o la pieza elegida, escribe aquí su nombre, proveedor, precio, peso y características: el peso entra en el 3D y en el total, y el precio sustituye a la estimación.'}</p>}
+      {abierto && (
+        <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={e => { e.preventDefault(); guardar(); }}>
+          <label className="flex flex-col gap-1 text-xs text-slate-600">Nombre de la pieza<input className={campo} value={nombre} onChange={e => setNombre(e.target.value)} placeholder={c.nombre} /></label>
+          <label className="flex flex-col gap-1 text-xs text-slate-600">Proveedor<input className={campo} value={proveedor} onChange={e => setProveedor(e.target.value)} placeholder="Marca o tienda" /></label>
+          <label className="flex flex-col gap-1 text-xs text-slate-600">Enlace del proveedor<input className={campo} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://…" inputMode="url" /></label>
+          <label className="flex flex-col gap-1 text-xs text-slate-600">Precio total, sin IVA (€){typeof c.unidades === 'number' && c.unidades > 1 ? ` · las ${c.unidades} unidades` : ''}<input className={campo} value={coste} onChange={e => setCoste(e.target.value)} placeholder="p. ej. 1450" inputMode="decimal" /></label>
+          <label className="flex flex-col gap-1 text-xs text-slate-600">Peso por unidad (kg)<input className={campo} value={masa} onChange={e => setMasa(e.target.value)} placeholder="p. ej. 12,5" inputMode="decimal" /></label>
+          <label className="flex flex-col gap-1 text-xs text-slate-600 md:col-span-2">Características físicas, una por línea («Potencia: 15 kW»)<textarea className={cn(campo, 'min-h-24 font-mono text-xs')} value={carac} onChange={e => setCarac(e.target.value)} placeholder={c.caracteristicas.slice(0, 3).map(([k, v]) => `${k}: ${v}`).join('\n')} /></label>
+          <div className="flex flex-wrap gap-2 md:col-span-2">
+            <Button type="submit" variant="primary" className="text-xs normal-case tracking-normal"><Check className="mr-1.5 h-3.5 w-3.5" />Guardar en el diseño</Button>
+            <Button type="button" variant="outline" onClick={() => setAbierto(false)} className="text-xs normal-case tracking-normal">Cancelar</Button>
+            {manual && <Button type="button" variant="ghost" onClick={borrar} className="text-xs normal-case tracking-normal text-red-700"><RotateCcw className="mr-1.5 h-3.5 w-3.5" />Quitar lo escrito a mano</Button>}
+          </div>
+          {c.parametroMasa === undefined && !['cargador', 'cableado', 'puertas', 'maleteros', 'luces'].includes(c.id) && <p className="text-xs text-slate-500 md:col-span-2">El peso de esta pieza sale del modelo; lo que escribas aquí no lo cambia.</p>}
+        </form>
+      )}
+    </section>
   );
 }
 

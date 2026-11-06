@@ -367,16 +367,17 @@ function ocupante(g: THREE.Object3D, M: Mats, m: Modelo, lat: number, piloto: bo
   capsula(g, en(lo(-0.02), lat), en(lo(0.10), lat), 0.12, M.pantalon, 1.35, 0.85);
   capsula(g, en(lo(0.12), lat), en(lo(0.30), lat), 0.12, ropa, 1.25, 0.8);
   capsula(g, en(lo(0.30), lat), en(lo(0.47), lat), 0.135, ropa, 1.35, 0.8);
-  // Cuello y cabeza (un poco más alta que ancha), con pelo
-  capsula(g, en(lo(0.52), lat), en(lo(0.60), lat), 0.045, M.skin);
+  // Cuello y cabeza (un poco más alta que ancha), con pelo; la cabeza va más recta que el tronco si el modelo lo dice (`dh`)
+  const dh = o.dh ?? d;
+  capsula(g, en(lo(0.50), lat), [o.C[0] - dh[0] * 0.08, o.C[1] - dh[1] * 0.08, lat], 0.045, M.skin);
   const cab = new THREE.Mesh(new THREE.SphereGeometry(0.098, 28, 20), M.skin);
-  cab.position.set(o.C[0], o.C[1], lat); cab.scale.set(1.05, 1.12, 0.88); cab.rotation.z = -Math.atan2(d[0], d[1]); cab.castShadow = true; g.add(cab);
+  cab.position.set(o.C[0], o.C[1], lat); cab.scale.set(1.05, 1.12, 0.88); cab.rotation.z = -Math.atan2(dh[0], dh[1]); cab.castShadow = true; g.add(cab);
   const pelo = new THREE.Mesh(new THREE.SphereGeometry(0.102, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), M.pelo);
   pelo.position.copy(cab.position); pelo.scale.copy(cab.scale); pelo.rotation.z = cab.rotation.z;
   pelo.position.x += atras[0] * 0.008; pelo.position.y += atras[1] * 0.008; g.add(pelo);
   for (const s of [-1, 1]) {
     // Pierna: muslo y pantorrilla, rodilla ya calculada en el plano; pie según dónde apoya
-    const zc = lat + s * 0.09, zp = lat + s * (piloto ? 0.11 : 0.10);
+    const zc = lat + s * (o.anchoPiernas?.[0] ?? 0.09), zp = lat + s * (o.anchoPiernas?.[1] ?? (piloto ? 0.11 : 0.10));
     const cad = en(o.H, zc), rod = en(o.K, (zc + zp) / 2), tob = en(o.F, zp);
     capsula(g, cad, rod, 0.068, M.pantalon);
     capsula(g, rod, tob, 0.052, M.pantalon);
