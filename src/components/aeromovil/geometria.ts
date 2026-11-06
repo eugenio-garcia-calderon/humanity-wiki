@@ -145,6 +145,8 @@ export interface Tubo {
   pared: number;    // espesor (m); 0 = macizo o comprado
   material: string;
   comprado?: boolean;
+  /** Tubo curvado: puntos de paso de `a` a `b` (incluidos). Sin él, recto. */
+  curva?: P3[];
 }
 
 /** Zona de la piel en coordenadas (u, θ): u a lo largo, θ alrededor (π/2 = arriba). */
@@ -165,7 +167,7 @@ export function crearModelo(P: Parametros) {
   const dY = P.clear - BAJOS_BASE, ys = YS + dY, hip = HIP_Y + dY;
   // El pedalier no sube con el suelo: su sitio lo marca la horquilla (subirlo
   // mete los pedales en la corona). Solo se levanta si la viga lo alcanza.
-  const BB: [number, number] = [Math.min(-0.40, xPil + 0.90), Math.max(0.48, ys + 0.10)];
+  const BB: [number, number] = [Math.min(-0.43, xPil + 0.90), Math.max(0.48, ys + 0.10)];
   const PIV: [number, number] = [xR + 0.68, ys + 0.03];
   const A2C = rF + 0.06 + TRAVEL_F + 0.07;
   // Eje de dirección, hacia arriba. 2026-11-05, Eugenio: «que se pueda
@@ -228,46 +230,98 @@ export function crearModelo(P: Parametros) {
   const crown: [number, number] = [AX[0] * A2C, rF + AX[1] * A2C];
   const htb: [number, number] = [crown[0] + AX[0] * 0.02, crown[1] + AX[1] * 0.02];
   const htt: [number, number] = [crown[0] + AX[0] * 0.16, crown[1] + AX[1] * 0.16];
-  const sf = BB[0] - 0.02, sr = PIV[0] - 0.06;
-  // El manillar: el mástil va delante del asiento, entre las rodillas; los
-  // puños quedan 40 cm por delante del hombro y a la altura del esternón.
+  // ── El cuadro, al estilo de las reclinadas de batalla larga (2026-11-05,
+  // Eugenio, con fotos de una Tour Easy: «el pedal está en la unión de dos
+  // barras… una barra que conecta la barra superior y la inferior… la barra
+  // superior curva, para que no le dé en los huevos al piloto en caso de
+  // frenada… y que no tengas que levantar la pierna para montarte»).
+  //   · Tubo bajo: de la dirección al pedalier, en cuello de cisne para que la
+  //     rueda delantera no lo toque con la horquilla hundida.
+  //   · Viga inferior: del pedalier baja hasta la viga central, justo delante
+  //     del asiento del piloto (punto M).
+  //   · Barra superior curva: sale de lo alto de la dirección, baja entre las
+  //     piernas por debajo de la entrepierna y se junta con la viga en M: el
+  //     triángulo de delante se cierra donde el piloto se sienta.
+  //   · Barra de unión: entre la barra superior y la inferior.
+  // El asiento del piloto apoya directamente en la viga: no sube nada.
+  const M: [number, number] = [xPil + 0.32, ys];
+  /** Espesor de la base del asiento: lo que cabe entre la viga y el apoyo de la cadera. */
+  const grosorBase = () => Math.max(0.012, Math.min(0.04, (hip - 0.10) - (ys + P.spineD / 2000) - 0.003));
+  /** Un punto del respaldo: `t` a lo largo del tronco, `o` hacia atrás. */
+  const respaldoEn = (piloto: boolean, t: number, o: number): [number, number] => {
+    const R = (piloto ? P.recPil : P.recPas) * Math.PI / 180, hx = piloto ? xPil : xPas;
+    return [hx - Math.sin(R) * t - Math.cos(R) * o, hip + Math.cos(R) * t - Math.sin(R) * o];
+  };
+  const sf = M[0], sr = PIV[0] - 0.06;
+  const bez = (p: [number, number][], t: number): [number, number] => {
+    const u = 1 - t, w = p.length === 3 ? [u * u, 2 * u * t, t * t] : [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t];
+    return [w.reduce((a, k, i) => a + k * p[i][0], 0), w.reduce((a, k, i) => a + k * p[i][1], 0)];
+  };
+  const ctrlBajo: [number, number][] = [htb, [BB[0] - 0.11, htb[1] - 0.14], [BB[0], BB[1]]];
+  const ctrlSup: [number, number][] = [htt, [htt[0] - 0.20, htt[1] - 0.20], [M[0] + 0.30, M[1] + 0.16], M];
+  const curvaBajo = [0, 0.25, 0.5, 0.75, 1].map(t => bez(ctrlBajo, t));
+  const curvaSup = [0, 0.2, 0.4, 0.6, 0.8, 1].map(t => bez(ctrlSup, t));
+  const uSup = bez(ctrlSup, 0.6), uInf: [number, number] = [BB[0] + (M[0] - BB[0]) * 0.4, BB[1] + (M[1] - BB[1]) * 0.4];
   // Reclinado de cada fila (2026-11-05, Eugenio: «permite ajustar el
   // reclinamiento del asiento tanto del piloto como de los pasajeros»).
   const recDe = (piloto: boolean) => (piloto ? P.recPil : P.recPas) * Math.PI / 180;
   const hombroPil: [number, number] = [xPil - Math.sin(recDe(true)) * 0.5, hip + Math.cos(recDe(true)) * 0.5];
+  // Las manos: 40 cm por delante del hombro y a la altura del esternón.
   const puno: [number, number] = [hombroPil[0] + 0.40, hombroPil[1] - 0.09];
-  const mastil = { x: xPil + 0.46, top: puno[1] - 0.06, anchoPunos: 0.20 };
+  // ── Manillar chopper, directo a la horquilla (2026-11-05, Eugenio: «una
+  // barra que sale de la horquilla, donde el manillar está en modo chopper;
+  // ahí es donde también tienes el sistema de frenos»). La potencia sale del
+  // tubo de la horquilla hacia atrás y el manillar vuelve hasta las manos por
+  // fuera de las rodillas. Gira con la rueda: ya no hay mástil ni bieleta.
+  const anchoPunos = 0.22;
+  const potencia: [number, number] = [htt[0] + AX[0] * 0.035, htt[1] + AX[1] * 0.035];
+  const abrazadera: [number, number] = [potencia[0] - 0.07, potencia[1] - 0.03];
+  const manillar = (s: number): P3[] => [
+    [abrazadera[0], abrazadera[1], 0],
+    [abrazadera[0] - 0.06, abrazadera[1] - 0.01, s * 0.12],
+    [abrazadera[0] + (puno[0] - abrazadera[0]) * 0.55, abrazadera[1] + (puno[1] - abrazadera[1]) * 0.4, s * (anchoPunos + 0.08)],
+    [puno[0] + 0.10, puno[1] + 0.015, s * anchoPunos],
+    [puno[0] - 0.06, puno[1] - 0.01, s * anchoPunos],
+  ];
   const xCruceta = xPas - 0.08;   // travesaño de los asientos traseros y anclaje del amortiguador
+  /** Gira un punto `a` radianes alrededor del eje de dirección (pasa por la corona). */
+  const girarDireccion = (q: P3, a: number): P3 => {
+    const v = [q[0] - crown[0], q[1] - crown[1], q[2]], k = [AX[0], AX[1], 0];
+    const kv = k[0] * v[0] + k[1] * v[1], c = Math.cos(a), sn = Math.sin(a);
+    const cr = [k[1] * v[2], -k[0] * v[2], k[0] * v[1] - k[1] * v[0]];
+    return [crown[0] + v[0] * c + cr[0] * sn + k[0] * kv * (1 - c), crown[1] + v[1] * c + cr[1] * sn + k[1] * kv * (1 - c), v[2] * c + cr[2] * sn];
+  };
+  const de2 = (q: [number, number], z = 0): P3 => [q[0], q[1], z];
 
   /** El chasis fabricable, tubo a tubo (lo que dibujan el visor y el plano). */
   const tubosChasis = (): Tubo[] => {
     const AL = 'Al 6061-T6';
     const t: Tubo[] = [
       { nombre: 'Viga central', grupo: 'Chasis', a: [sf, ys, 0], b: [sr, ys, 0], d: P.spineD / 1000, pared: P.spineT / 1000, material: AL },
-      { nombre: 'Tubo de dirección', grupo: 'Chasis', a: [htb[0], htb[1], 0], b: [htt[0], htt[1], 0], d: 0.05, pared: 0.003, material: AL },
-      { nombre: 'Tubo diagonal', grupo: 'Chasis', a: [htb[0], htb[1], 0], b: [sf + 0.03, ys, 0], d: 0.045, pared: 0.002, material: AL },
-      { nombre: 'Soporte del pedalier', grupo: 'Chasis', a: [sf, ys, 0], b: [BB[0], BB[1], 0], d: 0.04, pared: 0.002, material: AL },
-      { nombre: 'Tirante pedalier-dirección', grupo: 'Chasis', a: [BB[0], BB[1], 0], b: [htt[0], htt[1], 0], d: 0.035, pared: 0.002, material: AL },
+      { nombre: 'Tubo de dirección', grupo: 'Chasis', a: de2(htb), b: de2(htt), d: 0.05, pared: 0.003, material: AL },
+      { nombre: 'Tubo bajo (cuello de cisne)', grupo: 'Chasis', a: de2(htb), b: de2(BB), d: 0.045, pared: 0.002, material: AL, curva: curvaBajo.map(q => de2(q)) },
+      { nombre: 'Viga inferior (pedalier a viga)', grupo: 'Chasis', a: de2(BB), b: de2(M), d: 0.045, pared: 0.002, material: AL },
+      { nombre: 'Barra superior curva', grupo: 'Chasis', a: de2(htt), b: de2(M), d: 0.04, pared: 0.002, material: AL, curva: curvaSup.map(q => de2(q)) },
+      { nombre: 'Barra de unión', grupo: 'Chasis', a: de2(uSup), b: de2(uInf), d: 0.03, pared: 0.002, material: AL },
+      { nombre: 'Caja del pedalier', grupo: 'Chasis', a: [BB[0], BB[1], -0.034], b: [BB[0], BB[1], 0.034], d: 0.045, pared: 0.004, material: AL },
       { nombre: 'Travesaño asientos traseros', grupo: 'Chasis', a: [xCruceta, ys, -0.33], b: [xCruceta, ys, 0.33], d: 0.035, pared: 0.002, material: AL },
-      { nombre: 'Soporte asiento piloto', grupo: 'Chasis', a: [xPil + 0.10, ys, 0], b: [xPil + 0.10, hip - 0.11, 0], d: 0.03, pared: 0.002, material: AL },
-      { nombre: 'Soporte asiento trasero izq.', grupo: 'Chasis', a: [xCruceta, ys, SEAT_GAP], b: [xCruceta, hip - 0.09, SEAT_GAP], d: 0.025, pared: 0.002, material: AL },
-      { nombre: 'Soporte asiento trasero der.', grupo: 'Chasis', a: [xCruceta, ys, -SEAT_GAP], b: [xCruceta, hip - 0.09, -SEAT_GAP], d: 0.025, pared: 0.002, material: AL },
+      { nombre: 'Tirante del respaldo del piloto', grupo: 'Chasis', a: [xPil - 0.10, ys, 0], b: de2(respaldoEn(true, 0.36, 0.145)), d: 0.025, pared: 0.002, material: AL },
+      { nombre: 'Soporte asiento trasero izq.', grupo: 'Chasis', a: [xCruceta, ys, SEAT_GAP], b: [xCruceta, hip - 0.10 - grosorBase(), SEAT_GAP], d: 0.025, pared: 0.002, material: AL },
+      { nombre: 'Soporte asiento trasero der.', grupo: 'Chasis', a: [xCruceta, ys, -SEAT_GAP], b: [xCruceta, hip - 0.10 - grosorBase(), -SEAT_GAP], d: 0.025, pared: 0.002, material: AL },
       { nombre: 'Poste del basculante', grupo: 'Chasis', a: [xL, ys, 0], b: [xL, ys + ARM_UP + 0.04, 0], d: 0.04, pared: 0.003, material: AL },
-      // Dirección indirecta sobre el asiento (2026-11-05, Eugenio: «que el
-      // manillar sea más realista… posición de las manos»). Un mástil entre
-      // las rodillas del piloto lleva el manillar a la altura del pecho, con
-      // los puños donde caen las manos con los codos doblados; una bieleta
-      // transmite el giro del mástil a la horquilla.
-      { nombre: 'Mástil del manillar', grupo: 'Chasis', a: [mastil.x, ys + P.spineD / 2000, 0], b: [mastil.x, mastil.top, 0], d: 0.035, pared: 0.002, material: AL },
-      { nombre: 'Tirante del mástil', grupo: 'Chasis', a: [mastil.x, 0.42 + dY, 0], b: [mastil.x - 0.26, ys + P.spineD / 2000 - 0.005, 0], d: 0.025, pared: 0.002, material: AL },
-      { nombre: 'Potencia del manillar', grupo: 'Dirección', a: [mastil.x, mastil.top, 0], b: [mastil.x - 0.07, mastil.top + 0.03, 0], d: 0.032, pared: 0, material: 'Comprado (potencia MTB 70 mm)', comprado: true },
-      { nombre: 'Manillar, barra central', grupo: 'Dirección', a: [mastil.x - 0.07, mastil.top + 0.03, -mastil.anchoPunos], b: [mastil.x - 0.07, mastil.top + 0.03, mastil.anchoPunos], d: 0.0222, pared: 0.0018, material: AL },
-      { nombre: 'Manillar, puño izq.', grupo: 'Dirección', a: [mastil.x - 0.07, mastil.top + 0.03, mastil.anchoPunos], b: [puno[0] - 0.05, puno[1] - 0.005, mastil.anchoPunos], d: 0.0222, pared: 0.0018, material: AL },
-      { nombre: 'Manillar, puño der.', grupo: 'Dirección', a: [mastil.x - 0.07, mastil.top + 0.03, -mastil.anchoPunos], b: [puno[0] - 0.05, puno[1] - 0.005, -mastil.anchoPunos], d: 0.0222, pared: 0.0018, material: AL },
-      { nombre: 'Bieleta de dirección', grupo: 'Dirección', a: [mastil.x, 0.50 + dY, 0.075], b: [htb[0] - 0.02, htb[1] - 0.02, 0.085], d: 0.012, pared: 0, material: 'Varilla M8 con rótulas', comprado: true },
-      { nombre: 'Brazo de mando del mástil', grupo: 'Dirección', a: [mastil.x, 0.50 + dY, 0], b: [mastil.x, 0.50 + dY, 0.075], d: 0.02, pared: 0, material: 'Pletina 6061 8 mm' },
-      { nombre: 'Brazo de mando de la horquilla', grupo: 'Dirección', a: [htb[0], htb[1] - 0.02, 0], b: [htb[0] - 0.02, htb[1] - 0.02, 0.085], d: 0.02, pared: 0, material: 'Pletina 6061 8 mm' },
+      { nombre: 'Potencia del manillar', grupo: 'Dirección', a: de2(potencia), b: de2(abrazadera), d: 0.032, pared: 0, material: 'Comprado (potencia MTB 70 mm)', comprado: true },
     ];
+    for (const s of [1, -1]) {
+      const lado = s > 0 ? 'izq.' : 'der.', c = manillar(s);
+      t.push({ nombre: `Manillar chopper, mitad ${lado}`, grupo: 'Dirección', a: c[0], b: c[c.length - 1], d: 0.0222, pared: 0.0018, material: AL + ' curvado', curva: c });
+      // Maneta y bomba de freno hidráulico junto al puño; la izquierda frena delante.
+      t.push({ nombre: `Bomba de freno ${lado}`, grupo: 'Dirección', a: [puno[0] + 0.07, puno[1] + 0.01, s * (anchoPunos - 0.03)], b: [puno[0] + 0.07, puno[1] - 0.03, s * (anchoPunos + 0.02)], d: 0.024, pared: 0, material: 'Comprado (freno de disco hidráulico)', comprado: true });
+      t.push({ nombre: `Maneta de freno ${lado}`, grupo: 'Dirección', a: [puno[0] + 0.07, puno[1] - 0.03, s * (anchoPunos + 0.03)], b: [puno[0] - 0.06, puno[1] - 0.045, s * (anchoPunos + 0.035)], d: 0.012, pared: 0, material: 'Comprado (freno de disco hidráulico)', comprado: true });
+      t.push({ nombre: `Latiguillo de freno ${lado}`, grupo: 'Dirección', a: [puno[0] + 0.07, puno[1] - 0.01, s * anchoPunos], b: s > 0 ? [crown[0], crown[1], 0.09] : [xR + 0.2, rR + 0.05, -0.08], d: 0.005, pared: 0, material: 'Comprado (latiguillo)', comprado: true,
+        curva: s > 0
+          ? [[puno[0] + 0.07, puno[1] - 0.01, s * anchoPunos], c[2], [abrazadera[0], abrazadera[1] - 0.02, 0.04], [htb[0] + 0.02, htb[1], 0.06], [crown[0], crown[1], 0.09]]
+          : [[puno[0] + 0.07, puno[1] - 0.01, s * anchoPunos], c[2], [abrazadera[0] - 0.02, abrazadera[1] - 0.04, -0.03], [uSup[0], uSup[1], -0.025], [M[0], M[1] + 0.03, -0.03], [xL + 0.1, ys + 0.03, -0.03], [xR + 0.2, rR + 0.05, -0.08]] });
+    }
     for (const s of [-1, 1]) {
       t.push({ nombre: `Basculante trasero, brazo ${s > 0 ? 'izq.' : 'der.'}`, grupo: 'Suspensión', a: [PIV[0], PIV[1], s * 0.075], b: [xR, rR, s * 0.075], d: 0.032, pared: 0.002, material: AL });
     }
@@ -300,28 +354,28 @@ export function crearModelo(P: Parametros) {
     // Manos: el piloto en los puños del manillar; los pasajeros sobre los muslos.
     const K = ikKnee(H, F, 0.45, 0.47);
     const mano: [number, number] = piloto ? [puno[0], puno[1]] : [H[0] + (K[0] - H[0]) * 0.62, H[1] + (K[1] - H[1]) * 0.62 + 0.07];
-    const anchoMano = piloto ? mastil.anchoPunos : 0.13;
+    const anchoMano = piloto ? anchoPunos : 0.13;
     return { H, S, C, K, F, d, hx, mano, anchoMano };
   };
-  /** Contorno lateral de la carcasa de un asiento (superficie y cara inferior). */
-  const perfilAsiento = (piloto: boolean) => {
-    const hx = piloto ? xPil : xPas;
-    const REC = recDe(piloto);
-    const d = [-Math.sin(REC), Math.cos(REC)], pb = [-Math.cos(REC), -Math.sin(REC)];
-    const top: [number, number][] = [[hx + 0.40, hip - 0.04], [hx + 0.22, hip - 0.085], [hx + 0.02, hip - 0.10]];
-    for (const t of [0.12, 0.32, 0.52, 0.66]) top.push([hx + d[0] * t + pb[0] * 0.11, hip + d[1] * t + pb[1] * 0.11]);
-    const u = top[top.length - 1];
-    top.push([u[0] + 0.06, u[1] + 0.05]);
-    const th = 0.012;
-    const nrm = (i: number) => {
-      const a = top[Math.max(i - 1, 0)], b = top[Math.min(i + 1, top.length - 1)];
-      const tx = b[0] - a[0], ty = b[1] - a[1], L = Math.hypot(tx, ty);
-      return [ty / L, -tx / L];
-    };
-    const bot = top.map((q, i) => [q[0] + nrm(i)[0] * th, q[1] + nrm(i)[1] * th] as [number, number]);
-    return top.concat(bot.reverse());
+  // ── Asiento ligero de base y respaldo, con reposacabezas (2026-11-05,
+  // Eugenio: «este asiento me gusta porque es más ligero, pero le falta un
+  // reposacabezas»). Base acolchada sobre una bandeja, respaldo alto sobre un
+  // marco de tubo y cabecero detrás de la cabeza. Las tres plazas iguales.
+  // La base del piloto apoya en la viga central: su espesor es el hueco que
+  // queda entre la viga y la cadera, para no subir al piloto ni un milímetro.
+  const asientoPiezas = (piloto: boolean) => {
+    const hx = piloto ? xPil : xPas, REC = recDe(piloto), g = grosorBase();
+    const d: [number, number] = [-Math.sin(REC), Math.cos(REC)], pb: [number, number] = [-Math.cos(REC), -Math.sin(REC)];
+    const en = (t: number, o: number): [number, number] => [hx + d[0] * t + pb[0] * o, hip + d[1] * t + pb[1] * o];
+    const arriba: [number, number][] = [[hx + 0.34, hip - 0.055], [hx + 0.22, hip - 0.085], [hx + 0.06, hip - 0.10], [hx - 0.05, hip - 0.10]];
+    const base = arriba.concat(arriba.map(q => [q[0], q[1] - g] as [number, number]).reverse());
+    const panel = (t0: number, t1: number, o0: number, o1: number) => [en(t0, o0), en(t1, o0), en(t1, o1), en(t0, o1)];
+    const respaldo = panel(0.06, 0.58, 0.105, 0.135);
+    const cabecero = panel(0.63, 0.77, 0.105, 0.145);
+    // Marco: dos tubos por detrás del respaldo, de la bandeja al cabecero.
+    const marco: [number, number][] = [[hx - 0.04, hip - 0.10 - g], en(0.10, 0.142), en(0.58, 0.142), en(0.70, 0.15)];
+    return { base, respaldo, cabecero, marco, anchoCabecero: piloto ? 0.24 : 0.22 };
   };
-
   // ── La piel: cristal delante y a los lados, paneles solares arriba ───────
   // Eugenio: «la parte de arriba tiene que estar llena de paneles solares…
   // no todo transparente, que si no haría efecto invernadero. Inspírate en el
@@ -329,7 +383,7 @@ export function crearModelo(P: Parametros) {
   // piloto; ventanillas a los lados de las dos filas; el resto del techo y la
   // cubierta trasera, paneles.
   const cabezaPil = occPts(true).C[0], cabezaPas = occPts(false).C[0];
-  const uParabrisas0 = uDeX(BB[0] + 0.10);
+  const uParabrisas0 = uDeX(BB[0] + 0.13);
   const uParabrisas1 = uDeX(cabezaPil + 0.22);
   const uVentanas1 = uDeX(cabezaPas - 0.05);
   const uSolar1 = Math.min(0.95, uDeX(xR - rR * 0.3));
@@ -371,13 +425,36 @@ export function crearModelo(P: Parametros) {
   }
 
   return {
-    P, dY, ys, hip, AX, avance, recDe, mastil, puno, rF, rR, rL, xn, xt, xR, xL, xPil, xPas, BB, Lf, Hb, PIV, A2C, ARM_A, crown, htt, sf, sr, xCruceta,
-    frame, sec, gap, uDeX, occPts, perfilAsiento, tubosChasis, zonasPiel, puertas,
+    P, dY, ys, hip, AX, avance, recDe, puno, anchoPunos, manillar, potencia, abrazadera, M, rF, rR, rL, xn, xt, xR, xL, xPil, xPas, BB, Lf, Hb, PIV, A2C, ARM_A, crown, htt, sf, sr, xCruceta,
+    frame, sec, gap, uDeX, occPts, asientoPiezas, grosorBase, tubosChasis, zonasPiel, puertas, rodilla: (h: [number, number], f: [number, number]) => ikKnee(h, f, 0.45, 0.47), girarDireccion,
   };
 }
 export type Modelo = ReturnType<typeof crearModelo>;
 
-export const largoTubo = (t: Tubo) => Math.hypot(t.b[0] - t.a[0], t.b[1] - t.a[1], t.b[2] - t.a[2]);
+/** Los tramos rectos de un tubo: uno si es recto; la curva muestreada si está curvado. */
+export function tramosTubo(t: Tubo, n = 24): [P3, P3][] {
+  if (!t.curva) return [[t.a, t.b]];
+  const q = muestrearCurva(t.curva, n), o: [P3, P3][] = [];
+  for (let i = 0; i < q.length - 1; i++) o.push([q[i], q[i + 1]]);
+  return o;
+}
+/** Catmull-Rom centrípeta por los puntos de paso (la misma curva que dibuja el visor). */
+export function muestrearCurva(pts: P3[], n = 24): P3[] {
+  if (pts.length < 3) return pts;
+  const o: P3[] = [];
+  const P = [pts[0], ...pts, pts[pts.length - 1]];
+  for (let i = 1; i < P.length - 2; i++) {
+    const [p0, p1, p2, p3] = [P[i - 1], P[i], P[i + 1], P[i + 2]];
+    const k = Math.max(2, Math.round(n / (pts.length - 1)));
+    for (let j = 0; j < k; j++) {
+      const t = j / k, t2 = t * t, t3 = t2 * t;
+      o.push([0, 1, 2].map(c => 0.5 * ((2 * p1[c]) + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2 + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3)) as P3);
+    }
+  }
+  o.push(pts[pts.length - 1]);
+  return o;
+}
+export const largoTubo = (t: Tubo) => tramosTubo(t).reduce((L, [a, b]) => L + Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), 0);
 
 /** Contorno de una sección (cuaderna) en su plano: [z, y] en metros. */
 export function contornoSeccion(m: Modelo, u: number, n = 96): [number, number][] {
@@ -513,10 +590,34 @@ export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
   ch.push({ nombre: 'Respaldo trasero a la rueda trasera', holgura: Math.hypot(of.H[0] - 0.10 - m.xR, of.H[1] - m.rR) - m.rR - TRAVEL_R * 0.5, minimo: 0.02 });
   // Rodillas de atrás contra el respaldo del piloto, a la altura de la rodilla.
   const REC = P.recPil * Math.PI / 180;
-  const tR = Math.max(0, (of.K[1] - (m.hip - 0.11 * Math.sin(REC))) / Math.cos(REC));
-  const xRespaldo = m.xPil - 0.11 * Math.cos(REC) - Math.sin(REC) * tR;
+  // La cara de atrás del respaldo es su marco de tubo, a 15 cm del eje del tronco.
+  const tR = Math.max(0, (of.K[1] - (m.hip - 0.151 * Math.sin(REC))) / Math.cos(REC));
+  const xRespaldo = m.xPil - 0.151 * Math.cos(REC) - Math.sin(REC) * tR;
   ch.push({ nombre: 'Rodillas traseras al respaldo del piloto', holgura: (xRespaldo - 0.02) - (of.K[0] + 0.07), minimo: 0.03 });
 
+
+  // ── El cuadro nuevo y el manillar chopper ─────────────────────────────────
+  // Rueda delantera hundida contra el tubo bajo (en cuello de cisne).
+  const ejeHundido: [number, number] = [m.AX[0] * TRAVEL_F, m.rF + m.AX[1] * TRAVEL_F];
+  const bajo3 = m.tubosChasis().find(t => t.nombre.startsWith('Tubo bajo'))!;
+  const dMinTubo = (t: Tubo, q: [number, number]) => Math.min(...tramosTubo(t).map(([a, b]) => dSeg(q, [a[0], a[1]], [b[0], b[1]])));
+  ch.push({ nombre: 'Rueda delantera hundida al tubo bajo', holgura: dMinTubo(bajo3, ejeHundido) - m.rF - bajo3.d / 2, minimo: 0.015 });
+  // Rodillas del piloto contra el manillar, en toda la vuelta del pedal.
+  const barra = [1, -1].flatMap(s => muestrearCurva(m.manillar(s), 40));
+  let rodBarra = 9;
+  for (let k = 0; k < 24; k++) {
+    const a = 2 * Math.PI * k / 24, pie: [number, number] = [m.BB[0] + 0.165 * Math.cos(a), m.BB[1] + 0.165 * Math.sin(a)];
+    const K = m.rodilla(m.occPts(true).H, pie);
+    for (const s of [1, -1]) for (const q of barra) rodBarra = Math.min(rodBarra, Math.hypot(q[0] - K[0], q[1] - K[1], q[2] - s * 0.10) - 0.075 - 0.011);
+  }
+  ch.push({ nombre: 'Rodillas al manillar (vuelta entera del pedal)', holgura: rodBarra, minimo: 0.02 });
+  // Manillar dentro del carenado, recto y girado 15° a cada lado.
+  let barraCar = 9;
+  for (const g of [-15, 0, 15]) for (const q of barra) {
+    const r = m.girarDireccion(q, g * Math.PI / 180);
+    barraCar = Math.min(barraCar, m.gap(r[0], r[1], r[2]) - 0.011);
+  }
+  ch.push({ nombre: 'Manillar dentro del carenado (girado 15°)', holgura: barraCar, minimo: 0.02 });
   return {
     A, FR, Cd, CdA, vol, Paero, Proll, Pw, WhKm, pedWhKm, autonomia, vmax: vmax * 3.6, masas, mVeh, mTot, rangoMasa,
     Mmax, tension, seguridad, cargaRueda, solarPico, solarDia, kmSol, areas: ar, comprobaciones: ch,
