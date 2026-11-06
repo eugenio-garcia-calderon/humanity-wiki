@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import {
-  ARM_UP, CELULA, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, enZona,
+  ARM_UP, CELULA, SEAT_GAP, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type Piel,
 } from './geometria';
 import type { Referencia } from './referencias';
@@ -207,13 +207,30 @@ function rueda(g: THREE.Object3D, M: Mats, x: number, y: number, z: number, r: n
   w.add(new THREE.LineSegments(lg, M.spoke));
 }
 
+/** Asiento ligero: base acolchada, respaldo alto, cabecero y el marco de tubo detrás. */
 function asiento(g: THREE.Object3D, M: Mats, m: Modelo, piloto: boolean, lat: number, w: number) {
-  const pts = m.perfilAsiento(piloto);
-  const sh = new THREE.Shape(); sh.moveTo(pts[0][0], pts[0][1]);
-  pts.slice(1).forEach(p => sh.lineTo(p[0], p[1])); sh.closePath();
-  const geo = new THREE.ExtrudeGeometry(sh, { depth: w - 0.02, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.004, bevelSegments: 2, curveSegments: 4 });
-  geo.translate(0, 0, -(w - 0.02) / 2 + lat);
-  const mesh = new THREE.Mesh(geo, M.seat); mesh.castShadow = true; g.add(mesh);
+  const a = m.asientoPiezas(piloto);
+  const pieza = (pts: [number, number][], ancho: number, mat: THREE.Material) => {
+    const sh = new THREE.Shape(); sh.moveTo(pts[0][0], pts[0][1]);
+    pts.slice(1).forEach(p => sh.lineTo(p[0], p[1])); sh.closePath();
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: ancho, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.006, bevelSegments: 3, curveSegments: 4 });
+    geo.translate(0, 0, -ancho / 2 + lat);
+    const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true; g.add(mesh);
+  };
+  pieza(a.base, w - 0.10, M.seat);
+  pieza(a.respaldo, w - 0.10, M.seat);
+  pieza(a.cabecero, a.anchoCabecero - 0.02, M.seat);
+  for (const s of [-1, 1]) {
+    const z = lat + s * (w / 2 - 0.09);
+    for (let i = 0; i < a.marco.length - 1; i++) tube(g, [a.marco[i][0], a.marco[i][1], z], [a.marco[i + 1][0], a.marco[i + 1][1], z], 0.018, M.alu);
+  }
+}
+
+/** Un tubo curvado por sus puntos de paso (la misma curva que mide `largoTubo`). */
+function tuboCurvo(g: THREE.Object3D, pts: V3[], d: number, mat: THREE.Material) {
+  const c = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)), false, 'catmullrom', 0.5);
+  const mesh = new THREE.Mesh(new THREE.TubeGeometry(c, 48, d / 2, 12, false), mat); mesh.castShadow = true; g.add(mesh);
+  for (const p of [pts[0], pts[pts.length - 1]]) sphere(g, p, d / 2, mat);
 }
 
 /** Cápsula de `a` a `b` con radio `r`, ensanchada de lado (`ancho`) y aplanada de fondo (`fondo`). */
@@ -385,7 +402,10 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
   accesorios(G.carenado, M, m);
 
   const tubos = m.tubosChasis();
-  for (const t of tubos) if (t.grupo !== 'Suspensión') tube(G.chasis, t.a, t.b, t.d, t.grupo === 'Dirección' ? M.black : M.alu);
+  for (const t of tubos) if (t.grupo !== 'Suspensión') {
+    const mat = t.grupo === 'Dirección' ? (t.comprado ? M.black : M.alu) : M.alu;
+    if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, t.d < 0.01 ? M.black : mat); else tube(G.chasis, t.a, t.b, t.d, mat);
+  }
   // Uniones soldadas: donde el extremo de un tubo toca a otro, un cordón
   // (esfera algo mayor que el tubo) en vez de dos cilindros que se cruzan.
   const soldables = tubos.filter(t => t.grupo === 'Chasis');
@@ -395,7 +415,7 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
     return Math.hypot(w[0] - tt * v[0], w[1] - tt * v[1], w[2] - tt * v[2]);
   };
   for (const t of soldables) for (const p of [t.a, t.b]) {
-    const toca = soldables.some(o => o !== t && dSeg(p, o.a, o.b) < o.d / 2 + t.d / 2 + 0.004);
+    const toca = soldables.some(o => o !== t && tramosTubo(o).some(([a, b]) => dSeg(p, a, b) < o.d / 2 + t.d / 2 + 0.004));
     if (toca) sphere(G.chasis, p, t.d / 2 * 1.18, M.soldadura);
   }
   asiento(G.asientos, M, m, true, 0, 0.42);
