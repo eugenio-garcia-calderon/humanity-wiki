@@ -52,14 +52,16 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       <style>{'html { overflow-x: clip; }'}</style>
       <span aria-hidden className="hidden sm:block" />
-      <Link to="/" className="flex min-w-0 items-center justify-center gap-2.5" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
+      {/* La marca, un 20 % más grande, y el eslogan en minúsculas del mismo ancho que el nombre
+          (2026-11-06, Eugenio): la columna la marca el nombre y el eslogan se reparte a lo ancho. */}
+      <Link to="/" className="flex min-w-0 items-center justify-center gap-3" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 112)} alt="" className="h-[38px] w-[38px] shrink-0 rounded-lg object-contain" />
-          : <span className="text-[1.6rem] leading-none">{icono}</span>)}
+          ? <img src={miniatura(icono, 112)} alt="" className="h-[46px] w-[46px] shrink-0 rounded-lg object-contain" />
+          : <span className="text-[1.9rem] leading-none">{icono}</span>)}
         {raiz && (
-          <span className="flex min-w-0 flex-col leading-none">
-            <span className="whitespace-nowrap text-[1.4rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
-            {c.subtitulo && <span className="mt-1 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{c.subtitulo}</span>}
+          <span className="inline-grid min-w-0 leading-none">
+            <span className="whitespace-nowrap text-[1.68rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
+            {c.subtitulo && <span data-eslogan className="mt-1 w-0 min-w-full whitespace-nowrap text-[11.5px] font-semibold text-slate-500 [text-align-last:justify] [text-align:justify]">{c.subtitulo}</span>}
           </span>
         )}
       </Link>
