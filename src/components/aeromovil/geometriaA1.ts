@@ -114,15 +114,29 @@ export function crearModeloA1(P: Parametros) {
   const yCuerpo = (yn: number) => P.clear + (yn - SZ.fondo) / (SZ.deck - SZ.fondo) * Hb;
   const yCupula = (yn: number) => deckY + (yn - SZ.deck) / (1 - SZ.deck) * (P.H - deckY);
   // Morro y cola: 0,5 es la forma de las fotos; menos afila, más redondea.
-  const kMorro = 1.45 - 0.9 * P.morroA1, kCola = 1.45 - 0.9 * P.colaA1;
+  const kMorro = 1, kCola = 1.45 - 0.9 * P.colaA1;   // el morro ya no afila la planta: `morroA1` es ahora la redondez de la punta (ver frame)
   const hwN = (u: number) => {
     let h = SZ.hw(u);
     if (u < 0.36) h = Math.pow(h, 1 + (kMorro - 1) * (1 - u / 0.36));
     else if (u > 0.45) h = Math.pow(h, 1 + (kCola - 1) * (u - 0.45) / 0.55);
     return h;
   };
+  // Morro redondeado (2026-11-06, Eugenio: «como el del Aptera, que se pueda
+  // modificar pero que por defecto esté redondeado; ahora hay una punta
+  // afilada»). En los primeros centímetros la sección crece como un cuarto de
+  // círculo (alto y ancho a la vez) en vez de en cuña; `morroA1` dice cuánto:
+  // 0 = la cuña de las fotos del SZEmission, 1 = romo como una esfera.
+  const uRedondo = 0.04 + 0.10 * P.morroA1;
+  const frameCrudo = (u: number) => ({ top: yCuerpo(SZ.top(u)), bot: yCuerpo(SZ.bot(u)), hw: Math.max(0.004, P.W / 2 * hwN(u)) });
   const frame = (u: number): Seccion => {
-    const top = yCuerpo(SZ.top(u)), bot = yCuerpo(SZ.bot(u)), hw = Math.max(0.004, P.W / 2 * hwN(u));
+    let { top, bot, hw } = frameCrudo(u);
+    if (u < uRedondo && P.morroA1 > 0) {
+      const R = frameCrudo(uRedondo), t = u / uRedondo, circ = Math.sqrt(1 - (1 - t) * (1 - t));
+      const mid = (top + bot) / 2, mitadR = (R.top - R.bot) / 2;
+      const kAlto = (1 - P.morroA1) * ((top - bot) / 2 / Math.max(1e-4, mitadR)) + P.morroA1 * circ;
+      const kAncho = (1 - P.morroA1) * (hw / R.hw) + P.morroA1 * circ;
+      top = mid + mitadR * kAlto; bot = mid - mitadR * kAlto; hw = Math.max(0.004, R.hw * kAncho);
+    }
     return { s: hw / (P.W / 2), x: xDeU(u), zc: bot + (top - bot) * SZ.ecuador, top, bot, hw };
   };
   const sec = (f: Seccion, th: number, off = 0): P3 => {
