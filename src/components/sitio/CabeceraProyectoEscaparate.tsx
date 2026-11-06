@@ -56,22 +56,23 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
   const principal = estado?.label === 'Desarrollo principal actual' || estado?.label === 'Foco principal';
 
   return (
-    <header data-cabecera-proyecto className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+    <header data-cabecera-proyecto className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
       <div className="min-w-0">
         {/* La portada, grande, con el título y las propiedades encima. */}
-        {/* Más baja que antes (2026-11-06, Eugenio: «haz un poco más pequeña la portada para que
-            haya hueco para la nota de prensa»): 21:9 en pantalla ancha. */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 lg:aspect-[21/9]">
+        {/* Una franja baja (2026-11-06, Eugenio: «las portadas siguen siendo muy grandes; en cuanto
+            pinchas, más pequeñito»): 16:9 en el móvil, 3:1 en tableta y 4:1 en pantalla ancha
+            (unos 220 px de alto), para que la nota de prensa empiece en la primera pantalla. */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 sm:aspect-[3/1] lg:aspect-[4/1]">
           {cfg.portada && (
             <img src={miniatura(cfg.portada, 800)} alt={typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? `${pagina.titulo}: ${cfg.subtitulo.trim()}` : pagina.titulo} fetchPriority="high" decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
               style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
           )}
-          <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 p-5 sm:p-7">
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-2 p-4 sm:p-5">
             <div className="min-w-0 max-w-3xl">
-              <h1 className="text-3xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-4xl">{pagina.titulo}</h1>
-              {typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-2 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] sm:text-base">{cfg.subtitulo.trim()}</p>}
+              <h1 className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-3xl">{pagina.titulo}</h1>
+              {typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-1 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">{cfg.subtitulo.trim()}</p>}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {ano && <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">{principal ? `Desde ${ano}` : ano}</span>}
