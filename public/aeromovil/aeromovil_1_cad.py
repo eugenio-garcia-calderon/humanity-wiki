@@ -98,19 +98,6 @@ def rueda(r):
     return cq.Compound.makeCompound(partes)
 
 
-def paso_rueda(p):
-    """Media caña sobre la rueda (el paso de rueda), eje lateral."""
-    c = V([p["x"], p["y"], p["z"]])
-    eje = cq.Vector(0, 1, 0)
-    L = p["largo"] * M
-    cil = cq.Solid.makeCylinder(p["R"] * M, L, c - cq.Vector(0, L / 2, 0), eje)
-    interior = cq.Solid.makeCylinder((p["R"] - 0.002) * M, L + 2, c - cq.Vector(0, L / 2 + 1, 0), eje)
-    # Solo el arco de arriba (±arco/2 alrededor de la vertical): se quita lo que queda por debajo de una cuña.
-    arco = math.radians(p.get("arco", 180)) / 2
-    corte = cq.Workplane("XZ").polyline([(0, 0), (3 * p["R"] * M * math.sin(arco), 3 * p["R"] * M * math.cos(arco)), (3 * p["R"] * M, -3 * p["R"] * M), (-3 * p["R"] * M, -3 * p["R"] * M), (-3 * p["R"] * M * math.sin(arco), 3 * p["R"] * M * math.cos(arco))]).close().extrude(L + 4).translate((c.x, c.y + (L + 4) / 2, c.z)).val()
-    return cil.cut(interior).cut(corte)
-
-
 def asiento(a):
     """Base, respaldo y cabecero como placas de 30 mm; el marco, en tubo."""
     lat, ancho = a["lat"], a["ancho"]
@@ -170,8 +157,6 @@ def construir(D):
         capa = p["capa"]
         grosor = esp["carroceria"] if p["piel"] in ("carroceria", "bajos") else esp["cristal"] if p["piel"] == "cristal" else esp["solar"]
         capas[capa][nombre(capa, p["nombre"])] = parche(p["rejilla"], grosor)
-    for p in D.get("pasosRueda", []):
-        capas["Carroceria"][nombre("Carroceria", "Paso de rueda")] = paso_rueda(p)
     for t in D["tubos"]:
         capa = GRUPO_A_CAPA.get(t["grupo"], "Chasis")
         capas[capa][nombre(capa, t["nombre"])] = tubo(t)

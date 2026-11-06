@@ -129,15 +129,20 @@ export function crearModeloA1(P: Parametros) {
   // afilada»). En los primeros centímetros la sección crece como un cuarto de
   // círculo (alto y ancho a la vez) en vez de en cuña; `morroA1` dice cuánto:
   // 0 = la cuña de las fotos del SZEmission, 1 = romo como una esfera.
-  const uRedondo = 0.04 + 0.10 * P.morroA1;
+  // `posMorro` (2026-11-06, Eugenio: «recolocar la pieza del morro adelante o
+  // atrás para un mejor encaje») mueve hacia atrás la línea donde la punta
+  // redondeada se funde con el resto; y el fundido es ahora tangente: el peso
+  // del círculo se apaga con pendiente cero en esa línea, así no queda arista.
+  const uRedondo = Math.max(0.02, 0.04 + 0.10 * P.morroA1 + P.posMorro);
   const frameCrudo = (u: number) => ({ top: yCuerpo(SZ.top(u)), bot: yCuerpo(SZ.bot(u)), hw: Math.max(0.004, P.W / 2 * hwN(u)) });
   const frame = (u: number): Seccion => {
     let { top, bot, hw } = frameCrudo(u);
     if (u < uRedondo && P.morroA1 > 0) {
       const R = frameCrudo(uRedondo), t = u / uRedondo, circ = Math.sqrt(1 - (1 - t) * (1 - t));
+      const peso = P.morroA1 * (1 - t) * (1 - t) * (1 + 2 * t);   // morroA1 en la punta, 0 (y plano) en la unión
       const mid = (top + bot) / 2, mitadR = (R.top - R.bot) / 2;
-      const kAlto = (1 - P.morroA1) * ((top - bot) / 2 / Math.max(1e-4, mitadR)) + P.morroA1 * circ;
-      const kAncho = (1 - P.morroA1) * (hw / R.hw) + P.morroA1 * circ;
+      const kAlto = (1 - peso) * ((top - bot) / 2 / Math.max(1e-4, mitadR)) + peso * circ;
+      const kAncho = (1 - peso) * (hw / R.hw) + peso * circ;
       top = mid + mitadR * kAlto; bot = mid - mitadR * kAlto; hw = Math.max(0.004, R.hw * kAncho);
     }
     return { s: hw / (P.W / 2), x: xDeU(u), zc: bot + (top - bot) * SZ.ecuador, top, bot, hw };
@@ -533,7 +538,6 @@ export function crearModeloA1(P: Parametros) {
   // Pasos de rueda: media caña oscura sobre cada rueda, que tapa el interior visto por el arco.
   // Media caña de ±55° alrededor de la vertical, y poco más ancha que el
   // neumático: así no asoma por fuera de la piel donde la cola se estrecha.
-  const pasosRueda = ruedas.map(r => ({ x: r.x, y: r.r, z: r.z, R: r.r + TRAVEL_A1 + 0.03, largo: r.w + 0.06, arco: 110 }));
 
   return {
     tipo: 'a1' as const,
@@ -541,7 +545,7 @@ export function crearModeloA1(P: Parametros) {
     frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, uBase, uVentA, uVent1, thVentana, thPilar, thTrasera, thBase, thAlfeizar,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
-    baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, pasosRueda,
+    baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY,
     xD, yDash, xH, yHoop, ySill, zSill, zR, xF0, xR0,
     nF, nR,
   };
