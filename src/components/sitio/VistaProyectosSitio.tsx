@@ -47,9 +47,9 @@ type Tabla = {
 // El orden de los estados (2026-11-06, Eugenio: «el proyecto futuro súbelo arriba, cerca del
 // desarrollo principal actual»). Los nombres viejos siguen valiendo por si vuelven.
 const PESO_ESTADO: Record<string, number> = {
-  'Desarrollo principal actual': 0, 'Foco principal': 0,
+  'Estado inicial': 0, 'Desarrollo principal actual': 0, 'Foco principal': 0,
   'Proyecto futuro': 1, 'Desarrollo futuro': 1,
-  'En desarrollo': 2, 'En seguimiento': 2, 'Activo': 2,
+  'En curso': 2, 'En desarrollo': 2, 'En seguimiento': 2, 'Activo': 2,
   'Completado': 3, 'Ideación': 5,
 };
 const FOCO = new Set(['Desarrollo principal actual', 'Foco principal']);
@@ -257,12 +257,18 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                     <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
                   )}
                   <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-                  {/* Arriba, el año (a la izquierda) y el estado (a la derecha). */}
-                  {modelo.fecha(f) && (
-                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
-                      {principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)}
-                    </span>
-                  )}
+                  {/* Arriba, el año y el área (a la izquierda; 2026-11-06, Eugenio: «añade el área de
+                      cada proyecto como una propiedad flotante en la imagen») y el estado (a la derecha). */}
+                  <div className="absolute left-3 top-3 flex max-w-[60%] flex-wrap gap-1.5">
+                    {modelo.fecha(f) && (
+                      <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
+                        {principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)}
+                      </span>
+                    )}
+                    {sus.slice(0, 2).map(a => (
+                      <span key={a} className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">{a}</span>
+                    ))}
+                  </div>
                   {estado && (
                     <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
                       <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
