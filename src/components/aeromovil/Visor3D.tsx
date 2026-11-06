@@ -633,7 +633,18 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
       // techo es fijo, así que la línea no sube al centro); en la carrocería,
       // delante, detrás y por abajo, cerrando el panel lateral.
       for (const p of m.puertas.filter(q => q.tipo === 'puerta' && q.superficie === 'cupula' && (s > 0 ? q.id === 'izq' : q.id === 'der'))) {
-        for (const u of [p.u0, p.u1]) { const corte: V3[] = []; for (let k = 0; k <= 10; k++) corte.push(sobreC(u, th(Math.max(m.thBase(u) + 0.005, m.thAlfeizar(u) - 0.04) + (m.thVentana - Math.max(m.thBase(u) + 0.005, m.thAlfeizar(u) - 0.04)) * k / 10), -0.0025)); tira(corte, 0.0035, M.goma); }
+        // Contorno de la puerta en la cúpula: montante (delante), canto redondeado de arriba y arco de seguridad (detrás)
+        const corte: V3[] = [];
+        for (let k = 0; k <= 40; k++) { const u = p.u0 + (p.u1 - p.u0) * k / 40; corte.push(sobreC(u, th(m.thPuertaArriba(u)), -0.0025)); }
+        tira(corte, 0.0035, M.goma);
+        for (const u of [p.u0 + 0.002, p.u1 - 0.002]) { const v: V3[] = []; for (let k = 0; k <= 8; k++) v.push(sobreC(u, th(m.thPuertaAbajo(u) + (m.thPuertaArriba(u) - m.thPuertaAbajo(u)) * k / 8), -0.0025)); tira(v, 0.0035, M.goma); }
+        // Bisagras: un herraje en cada barra (montante del parabrisas y arco de seguridad), con su bulón en la línea del canto del techo
+        for (const u of [m.uW1 + m.gomaU + 0.012, m.uArco - 0.012]) {
+          const c = sobreC(u, th(m.thVentana), -0.012), a = sobreC(u - 0.012, th(m.thVentana), -0.012), b = sobreC(u + 0.012, th(m.thVentana), -0.012);
+          const eje = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize();
+          const bulon = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.075, 12), M.tuerca); bulon.position.set(...c); bulon.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), eje); g.add(bulon);
+          const herraje = cajaRedonda(g, [c[0], c[1] - 0.014, c[2] - s * 0.006], [0.06, 0.028, 0.024], M.black, 0.006); herraje.quaternion.copy(bulon.quaternion); herraje.rotateX(Math.PI / 2);
+        }
       }
       for (const p of m.puertas.filter(q => q.tipo === 'puerta' && q.superficie === 'cuerpo' && (s > 0 ? q.id === 'izq' : q.id === 'der'))) {
         const [ta, tb] = s > 0 ? [p.t0, p.t1] : [p.t1, p.t0];   // ta = arriba (junto a la cúpula), tb = abajo
@@ -651,8 +662,10 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
   const pts: V3[] = [];
   for (let k = 0; k <= 10; k++) pts.push(sobreC(uL + 0.004 * k, (0.37 + 0.28 * k / 10) * Math.PI, 0.010));
   tira(pts, 0.005, M.black); sphere(g, piv, 0.012, M.black);
-  // Toma de carga: tapa cuadrada en el lado izquierdo de la cola
-  box(g, sobre(0.80, 0.09 * Math.PI, 0.003), [0.10, 0.08, 0.004], M.black);
+  // Toma de carga: tapa cuadrada en el lado izquierdo del morro, junto al cargador
+  box(g, sobre(0.12, 0.12 * Math.PI, 0.003), [0.10, 0.08, 0.004], M.black);
+  // Suelo plano del maletero: una tapa ligera sobre motor, inversor y amortiguadores, con alfombra oscura
+  { const f = m.sueloMaletero; const tapa = cajaRedonda(g, [(f.x0 + f.x1) / 2, f.y - 0.006, 0], [f.x0 - f.x1, 0.012, 2 * f.hz], M.seat, 0.006); tapa.userData.componente = 'maleteros'; tapa.receiveShadow = true; }
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
@@ -662,7 +675,7 @@ function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
     const x = c.getContext('2d')!;
     x.fillStyle = 'rgba(255,255,255,0.92)'; x.strokeStyle = '#0e5e6b'; x.lineWidth = 4;
     x.beginPath(); x.roundRect(4, 14, 504, 100, 20); x.fill(); x.stroke();
-    x.fillStyle = '#0b3d45'; x.font = '600 58px "IBM Plex Mono", ui-monospace, monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = '#0b3d45'; x.font = `600 ${texto.length > 15 ? 40 : 58}px "IBM Plex Mono", ui-monospace, monospace`; x.textAlign = 'center'; x.textBaseline = 'middle';
     x.fillText(texto, 256, 66);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true }));
