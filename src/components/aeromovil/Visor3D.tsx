@@ -123,22 +123,13 @@ function texturaAsfalto() {
   return t;
 }
 
-/** Alfa radial: opaco en el centro, transparente en el borde del círculo del suelo. */
-function texturaDesvanecer() {
-  const c = document.createElement('canvas'); c.width = c.height = 256;
-  const g = c.getContext('2d')!, grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-  grad.addColorStop(0, '#fff'); grad.addColorStop(0.45, '#fff'); grad.addColorStop(1, '#000');
-  g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
-  return new THREE.CanvasTexture(c);
-}
-
 function materiales() {
   const grano = texturaRuido(256, 128, 70, 3, 40), rodadura = texturaRodadura(), relieveSolar = texturaSolar();
   return {
     // Pintura perlada: base blanca con grano metálico fino bajo un barniz brillante.
-    body: new THREE.MeshPhysicalMaterial({ color: 0xe3e6e9, metalness: 0.45, roughness: 0.42, roughnessMap: grano, metalnessMap: grano, bumpMap: grano, bumpScale: 0.0006, clearcoat: 1, clearcoatRoughness: 0.06, sheen: 0.2, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
-    glass: new THREE.MeshPhysicalMaterial({ color: 0x14212c, metalness: 0.1, roughness: 0.03, clearcoat: 1, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }),
-    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0015, metalness: 0.35, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.06, side: THREE.DoubleSide }),
+    body: new THREE.MeshPhysicalMaterial({ color: 0xf4f5f6, metalness: 0.12, roughness: 0.38, roughnessMap: grano, bumpMap: grano, bumpScale: 0.0004, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.1, sheen: 0.15, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
+    glass: new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
+    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0012, metalness: 0.3, roughness: 0.24, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3, side: THREE.DoubleSide }),
     bajos: new THREE.MeshPhysicalMaterial({ color: 0x1a1c1f, metalness: 0.2, roughness: 0.6, roughnessMap: grano, clearcoat: 0.35, side: THREE.DoubleSide }),
     techoInterior: new THREE.MeshStandardMaterial({ color: 0xcfd3d8, roughness: 0.9, metalness: 0, side: THREE.FrontSide }),
     cableHV: new THREE.MeshStandardMaterial({ color: 0xe8701a, metalness: 0.1, roughness: 0.6 }),
@@ -668,14 +659,9 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
 
 /** Lo fijo del Aeromóvil 1: volante, reposapiés, motor, reductora, inversor, cargador, baterías y cables. */
 function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
-  // Pasos de rueda: una media caña oscura sobre cada rueda, parte de la
-  // carrocería. Tapa el interior que se veía por el arco (la piel no tiene
-  // espesor) y es lo que un coche de verdad lleva ahí.
-  for (const p of m.pasosRueda) {
-    const arco = p.arco * Math.PI / 180;
-    const caña = new THREE.Mesh(new THREE.CylinderGeometry(p.R, p.R, p.largo, 40, 1, true, Math.PI - arco / 2, arco), M.bajos);
-    caña.position.set(p.x, p.y, p.z); caña.rotation.x = Math.PI / 2; caña.receiveShadow = true; caña.userData.componente = 'carroceria'; G.carenado.add(caña);
-  }
+  // Sin pasos de rueda (2026-11-06, Eugenio: «quita los guardabarros de las
+  // ruedas»): la carrocería cubre la rueda y por el hueco del fondo solo se
+  // ve el chasis.
   // Salpicadero: una tabla oscura sobre el arco del salpicadero, bajo la base del parabrisas, con la pantalla.
   { const tabla = cajaRedonda(G.direccion, [m.xD + 0.02, m.yDash - 0.02, 0], [0.30, 0.04, 0.72], M.black, 0.012); tabla.userData.componente = 'varios';
     const pantalla = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.09, 0.16), M.glass); pantalla.position.set(m.xD - 0.10, m.yDash + 0.045, 0); pantalla.rotation.z = -0.3; pantalla.userData.componente = 'varios'; G.direccion.add(pantalla); }
@@ -897,7 +883,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const cv = lienzo.current!;
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.98;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.localClippingEnabled = true;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 100);
@@ -906,29 +892,47 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const target = new THREE.Vector3(-1.5, 0.55, 0);
     camera.position.set(...VISTAS.iso); controls.target.copy(target);
 
-    const pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene();
-    const sg = new THREE.SphereGeometry(10, 32, 16), col: number[] = [], pa = sg.attributes.position;
-    for (let i = 0; i < pa.count; i++) { const y = pa.getY(i) / 10, v = y > 0 ? 0.55 + 0.45 * y : 0.16; col.push(v, v * 1.01, v * 1.04); }
-    sg.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-    es.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
-    const foco = (w: number, h: number, p: V3, r: V3) => {
-      const q = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 4, 4), side: THREE.DoubleSide }));
-      q.position.set(...p); q.rotation.set(...r); es.add(q);
+    // Cielo de exterior a media tarde (2026-11-06, Eugenio: «que el modelo 3D
+    // tenga por defecto el aspecto realista del render»): la misma bóveda sirve
+    // de fondo y de mapa de reflejos, así la pintura y el cristal reflejan un
+    // cielo con sol y un suelo oscuro, no un estudio gris.
+    const cielo = (conSol: boolean) => {
+      const sg = new THREE.SphereGeometry(60, 48, 24), col: number[] = [], pa = sg.attributes.position;
+      const cen = new THREE.Color(0x4f86c8), hor = new THREE.Color(0xf3dcc3), bajo = new THREE.Color(0x5e6166), c = new THREE.Color();
+      for (let i = 0; i < pa.count; i++) {
+        const y = pa.getY(i) / 60;
+        if (y >= 0) c.copy(hor).lerp(cen, Math.pow(y, 0.55)); else c.copy(hor).lerp(bajo, Math.min(1, -y * 6));
+        col.push(c.r, c.g, c.b);
+      }
+      sg.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+      const g = new THREE.Group();
+      g.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false })));
+      if (conSol) {
+        // El sol, en la misma dirección que la luz direccional, y un halo: es lo que dibuja el brillo alargado en la pintura.
+        const dir = new THREE.Vector3(3.5, 7, 4.5).normalize();
+        const sol = new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(18, 16, 13), fog: false }));
+        sol.position.copy(dir).multiplyScalar(50); g.add(sol);
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(7, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.5, 1.3), transparent: true, opacity: 0.5, fog: false }));
+        halo.position.copy(dir).multiplyScalar(52); g.add(halo);
+      }
+      return g;
     };
-    foco(8, 2, [0, 8, 0], [Math.PI / 2, 0, 0]); foco(6, 1.2, [0, 3, -8], [0, 0, 0]); foco(6, 1.2, [8, 3, 0], [0, Math.PI / 2, 0]);
-    scene.environment = pm.fromScene(es, 0.03).texture;
+    const pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene(); es.add(cielo(true));
+    scene.environment = pm.fromScene(es, 0.02).texture;
+    const fondo = cielo(false); fondo.position.set(-1.5, 0, 0); scene.add(fondo);
+    scene.fog = new THREE.Fog(0xf3dcc3, 16, 60);
 
     // Luz de exterior: cielo + sol cálido con sombra suave, y un contraluz frío que dibuja el canto de la cúpula.
-    scene.add(new THREE.HemisphereLight(0xdfe9f5, 0x6f6a62, 1.1));
-    const sol = new THREE.DirectionalLight(0xfff1dc, 4.2); sol.position.set(3.5, 7, 4.5); sol.castShadow = true;
+    scene.add(new THREE.HemisphereLight(0xcfe0f5, 0x5a5751, 0.8));
+    const sol = new THREE.DirectionalLight(0xffe9cf, 4.6); sol.position.set(3.5, 7, 4.5); sol.castShadow = true;
     sol.shadow.mapSize.set(2048, 2048);
     Object.assign(sol.shadow.camera, { left: -5, right: 5, top: 4, bottom: -4, near: 1, far: 20 });
     sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.01; scene.add(sol);
     const contraluz = new THREE.DirectionalLight(0xc9dcff, 1.2); contraluz.position.set(-6, 3, -5); scene.add(contraluz);
     // Suelo: asfalto claro con grano, que se funde con el fondo a lo lejos, y la sombra encima.
     // (el suelo recibe la sombra del coche; se desvanece hacia el borde con un alfa radial)
-    const suelo = new THREE.Mesh(new THREE.CircleGeometry(14, 64), new THREE.MeshStandardMaterial({ color: 0x8e9398, map: texturaAsfalto(), alphaMap: texturaDesvanecer(), roughness: 0.95, metalness: 0, transparent: true, depthWrite: false }));
-    suelo.rotation.x = -Math.PI / 2; suelo.position.set(-1.5, 0, 0); suelo.receiveShadow = true; suelo.renderOrder = -2; scene.add(suelo);
+    const suelo = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x6f7073, map: texturaAsfalto(), roughness: 0.9, metalness: 0.05, envMapIntensity: 0.35 }));
+    suelo.rotation.x = -Math.PI / 2; suelo.position.set(-1.5, 0, 0); suelo.receiveShadow = true; scene.add(suelo);
 
     const M = materiales();
     const coche = new THREE.Group(); scene.add(coche);

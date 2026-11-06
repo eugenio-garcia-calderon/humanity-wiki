@@ -72,6 +72,7 @@ export interface Parametros {
   neumF: Neumatico; // neumáticos delanteros
   neumR: Neumatico; // neumáticos traseros
   morroA1: number;  // redondez del morro (0 en cuña como el SZEmission · 0,7 redondeado como el Aptera · 1 romo)
+  posMorro: number; // dónde acaba la pieza redondeada del morro, en fracción del largo (0 = donde dice morroA1; + más atrás)
   colaA1: number;   // forma de la cola (0 afilada · 0,5 como el SZEmission · 1 llena)
   deck: number;     // altura de la cubierta (fracción del alto total)
   cupX0: number;    // dónde empieza la cúpula (fracción del largo desde el morro)
@@ -170,7 +171,7 @@ export const RANGOS_MASA = {
 const A1_COMUN = {
   // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
   plazas: 2 as const, altPil: 0.14, altPas: 0.12, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
-  morroA1: 0.7, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, techo: 1.9, parabrisas: 0.21,
+  morroA1: 0.7, posMorro: 0, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, techo: 1.9, parabrisas: 0.21,
   kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
 };
 /** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */

@@ -145,7 +145,6 @@ export function datosCAD(m: Modelo) {
     medidas: { L: m.Lf, W: P.W, H: P.H, B: P.B, clear: P.clear },
     espesores: { carroceria: P.espCarenado / 1000, cristal: P.espCristal / 1000, solar: 0.003 },
     parches, tubos, ruedas, asientos, ocupantes, cajas, cilindros, toros, cuadernas,
-    pasosRueda: m.tipo === 'a1' ? m.pasosRueda : [],
   };
 }
 
