@@ -44,10 +44,25 @@ export const NEUMATICOS = {
 } as const;
 export type Neumatico = keyof typeof NEUMATICOS;
 
+export interface PiezaManual {
+  nombre?: string; proveedor?: string; url?: string;
+  /** Coste total (€) de todas las unidades. */
+  coste?: number;
+  /** Masa (kg) por unidad. */
+  masa?: number;
+  caracteristicas?: [string, string][];
+}
+/** Masa por defecto (kg) de las piezas del Aeromóvil 1 que no tienen deslizador: van dentro de «Varios». */
+export const MASAS_FIJAS_A1: Record<string, number> = { cargador: 6, cableado: 5, puertas: 4, maleteros: 2, luces: 2 };
+/** Masa de una de esas piezas: la escrita a mano en su ficha, o la de por defecto. */
+export const masaFija = (P: Parametros, id: string) => P.piezas?.[id]?.masa ?? MASAS_FIJAS_A1[id] ?? 0;
+
 export interface Parametros {
   disposicion: Disposicion;
   /** Alternativa elegida por componente (ver `componentes.ts`); sin entrada = la de serie. */
   variantes?: Record<string, string>;
+  /** Datos escritos a mano en la ficha de un componente (nombre, proveedor, precio, peso, características); se guardan con el diseño. */
+  piezas?: Record<string, PiezaManual>;
   // ── Aeromóvil 1 (disposición 'cuatro') ────────────────────────────────────
   plazas: 1 | 2;    // monoplaza (como el SZEmission) o tándem 1+1 (como el Twizy)
   L: number;        // largo total de la carrocería (m)
@@ -77,6 +92,8 @@ export interface Parametros {
   track: number;    // ancho del eje lateral: centro a centro de las laterales (m)
   xPil: number;     // asiento del piloto: distancia de la cadera al eje delantero (m)
   xPas: number;     // asientos traseros: distancia de la cadera al eje delantero (m)
+  altPil: number;   // Aeromóvil 1: altura del asiento del piloto sobre la batería (m)
+  altPas: number;   // Aeromóvil 1: altura del asiento del pasajero sobre la batería (m)
   recPil: number;   // reclinado del respaldo del piloto (° desde la vertical)
   recPas: number;   // reclinado de los respaldos traseros (° desde la vertical)
   overF: number;    // hueco del morro: del borde de la rueda delantera a la punta del carenado (m)
@@ -151,8 +168,8 @@ export const RANGOS_MASA = {
 // de 24″ el tubo de dirección se sale del morro: las comprobaciones lo avisan.
 const A1_COMUN = {
   // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
-  plazas: 1 as const, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
-  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, techo: 1.6,
+  plazas: 2 as const, altPil: 0.14, altPas: 0.12, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
+  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55, techo: 1.9,
   kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
 };
 /** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */
@@ -174,7 +191,7 @@ export const PARAMETROS_GOTA: Parametros = {
  */
 export const PARAMETROS_A1: Parametros = {
   ...PARAMETROS_GOTA, disposicion: 'cuatro',
-  B: 1.75, W: 1.63, H: 1.34, clear: 0.175, xPil: 0.55, xPas: 1.40, recPil: 35, recPas: 35, nU: 3.3, nL: 4.0, puerta: 'gaviota',
+  B: 1.75, W: 1.63, H: 1.34, clear: 0.175, xPil: 0.55, xPas: 1.27, recPil: 35, recPas: 45, nU: 3.3, nL: 4.0, puerta: 'gaviota',
   spineD: 40, spineT: 2.0, comp: 0, mOcc: 80, pedal: 0, speed: 100, sol: 4.5,
   matChasis: 'al6061', extraChasis: 6, mRueda: 8, mSuspension: 26, mMotor: 16, mGenerador: 0, mBateria: 0,
   mAsiento: 7, matCarenado: 'carbono', espCarenado: 1.8, espCristal: 4.0, mSolarM2: 2.2, mVarios: 25,
@@ -253,7 +270,13 @@ export interface Superficie {
 }
 export interface Rueda { nombre: string; x: number; z: number; r: number; w: number }
 export interface Asiento { piloto: boolean; lat: number; ancho: number }
-export interface PuntosOcupante { H: [number, number]; S: [number, number]; C: [number, number]; K: [number, number]; F: [number, number]; d: [number, number]; hx: number; mano: [number, number]; anchoMano: number }
+export interface PuntosOcupante {
+  H: [number, number]; S: [number, number]; C: [number, number]; K: [number, number]; F: [number, number]; d: [number, number]; hx: number; mano: [number, number]; anchoMano: number;
+  /** Dirección de la cabeza (cuello), si no es la del tronco: más vertical, como en un velomóvil. */
+  dh?: [number, number];
+  /** Separación lateral de rodillas y pies (m); sin ella, las de siempre. Un pasajero en tándem lleva las piernas a los lados del asiento de delante. */
+  anchoPiernas?: [number, number];
+}
 export interface PiezasAsiento { base: [number, number][]; respaldo: [number, number][]; cabecero: [number, number][]; marco: [number, number][]; anchoCabecero: number }
 /** Lo que los dos vehículos tienen en común: lo que usan el visor, los planos y la comparación. */
 export interface ModeloBase {
@@ -469,7 +492,7 @@ export function crearModeloGota(P: Parametros) {
     return [h[0] + l1 * Math.cos(b + a), h[1] + l1 * Math.sin(b + a)];
   };
   /** Puntos del maniquí: cadera, hombro, cabeza, rodilla y pie. */
-  const occPts = (piloto: boolean) => {
+  const occPts = (piloto: boolean): PuntosOcupante => {
     const hx = piloto ? xPil : xPas;
     const REC = recDe(piloto);
     const d: [number, number] = [-Math.sin(REC), Math.cos(REC)];

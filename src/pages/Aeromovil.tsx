@@ -60,7 +60,7 @@ const PUERTAS: { k: Puerta; n: string; d: string }[] = [
   { k: 'aptera', n: 'Laterales tipo Aptera', d: 'Una puerta por lado con bisagra delante, que sube y se abre hacia fuera. Ocupa poco espacio al lado.' },
 ];
 const PUERTAS_A1: { k: Puerta; n: string; d: string }[] = [
-  { k: 'gaviota', n: 'Alas de gaviota', d: 'Media cúpula y el panel lateral suben juntos, con bisagra en la línea central del techo. Es lo que lleva el SZEmission.' },
+  { k: 'gaviota', n: 'Alas de gaviota (Aptera)', d: 'La ventanilla con su costado y el panel lateral suben juntos, con bisagra en el canto del techo. El techo se queda en su sitio.' },
   { k: 'cabina', n: 'Cúpula basculante', d: 'La cúpula entera bascula hacia delante; se entra por encima del estribo, como en un ultraligero.' },
   { k: 'aptera', n: 'Laterales tipo Aptera', d: 'Panel lateral y media cúpula con bisagra delante, inclinada: la puerta sube al abrirse y ocupa poco al lado.' },
 ];
@@ -177,11 +177,13 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar }: {
         </div>
         <Deslizador id="a1-xPil" etiqueta="Piloto: cadera al eje delantero" valor={P.xPil} min={0.10} max={1.30} paso={0.01} mostrar={m2(P.xPil)} alCambiar={v => set('xPil', v)} />
         <Deslizador id="a1-recPil" etiqueta="Reclinado del piloto" valor={P.recPil} min={15} max={60} paso={1} mostrar={`${P.recPil}°`} alCambiar={v => set('recPil', v)} />
+        <Deslizador id="a1-altPil" etiqueta="Altura del asiento del piloto" valor={P.altPil} min={0.06} max={0.30} paso={0.005} mostrar={`${fmt(P.altPil * 100, 1)} cm sobre la batería`} alCambiar={v => set('altPil', v)} />
         {P.plazas === 2 && <>
-          <Deslizador id="a1-xPas" etiqueta="Pasajero: cadera al eje delantero" valor={P.xPas} min={P.xPil + 0.70} max={P.xPil + 1.20} paso={0.01} mostrar={m2(P.xPas)} alCambiar={v => set('xPas', v)} />
-          <Deslizador id="a1-recPas" etiqueta="Reclinado del pasajero" valor={P.recPas} min={15} max={60} paso={1} mostrar={`${P.recPas}°`} alCambiar={v => set('recPas', v)} />
+          <Deslizador id="a1-xPas" etiqueta="Pasajero: cadera al eje delantero" valor={P.xPas} min={P.xPil + 0.60} max={P.xPil + 1.20} paso={0.01} mostrar={m2(P.xPas)} alCambiar={v => set('xPas', v)} />
+          <Deslizador id="a1-recPas" etiqueta="Reclinado del pasajero" valor={P.recPas} min={15} max={65} paso={1} mostrar={`${P.recPas}°`} alCambiar={v => set('recPas', v)} />
+          <Deslizador id="a1-altPas" etiqueta="Altura del asiento del pasajero" valor={P.altPas} min={0.06} max={0.30} paso={0.005} mostrar={`${fmt(P.altPas * 100, 1)} cm sobre la batería`} alCambiar={v => set('altPas', v)} />
         </>}
-        <p className="text-xs text-slate-500">Sin pedales: los pies van en un reposapiés y las manos en un volante pequeño. El asiento apoya sobre el módulo de batería.</p>
+        <p className="text-xs text-slate-500">Sin pedales: los pies van en un reposapiés y las manos en un volante pequeño. Los asientos apoyan sobre los módulos de batería (9 cm, pegados al suelo del chasis); el pasajero va tumbado tipo Fórmula 1 con las piernas a los lados del asiento del piloto. Respaldo curvo y reposacabezas casi vertical: la cabeza va recta aunque el tronco vaya tumbado. La altura del vehículo sobre el suelo es «Altura de los bajos», en «Tamaño y ruedas».</p>
       </Bloque>
 
       <Bloque titulo="Puertas y maleteros">

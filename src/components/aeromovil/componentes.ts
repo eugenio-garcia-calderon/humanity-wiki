@@ -16,7 +16,7 @@
 // prototipo, en euros sin IVA, a partir de catálogos públicos (los enlaces de
 // cada proveedor). Antes de comprar: pedir presupuesto.
 import type { CapaId } from './Visor3D';
-import { PARAMETROS_A1, largoTubo, type Modelo, type Parametros, type Resultados } from './geometria';
+import { PARAMETROS_A1, MASAS_FIJAS_A1, largoTubo, masaFija, type Modelo, type Parametros, type PiezaManual, type Resultados } from './geometria';
 
 export type GrupoComponente = 'Propulsión' | 'Energía' | 'Rodaje' | 'Suspensión y dirección' | 'Estructura y carrocería' | 'Habitáculo y equipo';
 
@@ -113,7 +113,7 @@ export const COMPONENTES: Componente[] = [
     id: 'cargador', corto: 'Cargador', nombre: 'Cargador a bordo y convertidor 12 V', grupo: 'Propulsión', capa: 'motor',
     que: 'El cargador carga la batería desde un enchufe normal (3,3 kW, tipo 2 o schuko). El convertidor DC-DC alimenta a 12 V luces, pantalla y bombas desde la batería grande. Van en la cola, al lado de la toma de carga.',
     caracteristicas: [['Cargador', '3,3 kW, 230 V monofásico, tipo 2'], ['Carga 0–100 %', '≈ 9 h a 3,3 kW'], ['Convertidor', '12 V · 500 W'], ['Masa', '6 kg']],
-    unidades: 1, masaKg: () => 6, costeEur: () => 650,
+    unidades: 1, masaKg: P => masaFija(P, 'cargador'), costeEur: () => 650,
     proveedores: [
       { nombre: 'TC Charger / Elcon', url: 'https://www.tccharger.com/', nota: 'Cargadores de 1,8–6,6 kW con CAN' },
       { nombre: 'Delta-Q', url: 'https://delta-q.com/', nota: 'Estancos, para exteriores' },
@@ -156,7 +156,7 @@ export const COMPONENTES: Componente[] = [
     id: 'cableado', corto: 'Cableado HV', nombre: 'Cableado de alta tensión y protecciones', grupo: 'Energía', capa: 'baterias',
     que: 'Los cables naranja de la batería al inversor, el cargador y el convertidor; contactores, fusible principal, resistencia de precarga, toma de carga y el circuito de interbloqueo que corta la tensión al abrir la caja. Sin esto el vehículo no es seguro ni legal.',
     caracteristicas: [['Cable', '35 mm² naranja, apantallado'], ['Contactores', '2 (positivo y negativo) + precarga'], ['Fusible', '250 A'], ['Toma de carga', 'tipo 2, con tapa en el costado izquierdo'], ['Masa', '5 kg']],
-    unidades: 1, masaKg: () => 5, costeEur: () => 600,
+    unidades: 1, masaKg: P => masaFija(P, 'cableado'), costeEur: () => 600,
     proveedores: [
       { nombre: 'EV West / Electric Motorsport (kits)', url: 'https://www.electricmotorsport.com/' },
       { nombre: 'Amphenol / TE (conectores de alta tensión)', url: 'https://www.te.com/' },
@@ -271,7 +271,7 @@ export const COMPONENTES: Componente[] = [
     id: 'puertas', corto: 'Puertas', nombre: 'Puertas: bisagras, resortes y cierres', grupo: 'Estructura y carrocería', capa: 'carenado',
     que: 'Cada puerta de ala de gaviota es media cúpula con su panel lateral, colgada de dos bisagras en la línea central del techo. Dos resortes de gas la sostienen abierta y un cierre eléctrico la retiene. Juntas de goma alrededor.',
     caracteristicas: [['Bisagras', '2 por puerta, acero inoxidable, en el arco del techo'], ['Resortes de gas', '2 por puerta, 300 N'], ['Cierre', 'eléctrico con apertura de emergencia manual'], ['Juntas', 'perfil de EPDM en todo el contorno'], ['Masa', '4 kg en total']],
-    unidades: 2, masaKg: () => 4, costeEur: () => 380,
+    unidades: 2, masaKg: P => masaFija(P, 'puertas'), costeEur: () => 380,
     proveedores: [
       { nombre: 'Resortes de gas (Stabilus, Suspa)', url: 'https://www.stabilus.com/' },
       { nombre: 'Cierres y bisagras (Southco)', url: 'https://www.southco.com/' },
@@ -284,7 +284,7 @@ export const COMPONENTES: Componente[] = [
     id: 'maleteros', corto: 'Maleteros', nombre: 'Tapas de los maleteros', grupo: 'Estructura y carrocería', capa: 'carenado',
     que: 'La tapa del capó (maletero delantero, bisagra atrás) y la cola de la cúpula (maletero trasero, bisagra delante). Cada una con un resorte de gas y un cierre.',
     caracteristicas: [['Delantera', 'capó, abre hacia delante y arriba 55°'], ['Trasera', 'cola de la cúpula, abre 50°'], ['Volumen', 'calculado en «Puertas y maleteros»'], ['Masa', '2 kg de herrajes']],
-    unidades: 2, masaKg: () => 2, costeEur: () => 150,
+    unidades: 2, masaKg: P => masaFija(P, 'maleteros'), costeEur: () => 150,
     proveedores: [{ nombre: 'Stabilus / Southco', url: 'https://www.southco.com/' }],
     alternativas: [],
   },
@@ -292,7 +292,7 @@ export const COMPONENTES: Componente[] = [
     id: 'luces', corto: 'Luces', nombre: 'Luces y retrovisores', grupo: 'Estructura y carrocería', capa: 'carenado',
     que: 'Faros LED en tira sobre los pómulos del morro, pilotos e intermitentes en la cola, tercera luz de freno en la cúpula y dos retrovisores pequeños en la base del parabrisas. Homologables como cuadriciclo (L7e).',
     caracteristicas: [['Faros', '2 tiras LED cruce/carretera, 2 × 12 W'], ['Pilotos', 'LED rojo con freno, intermitentes ámbar'], ['Retrovisores', '2 pods en la base del parabrisas'], ['Masa', '2 kg']],
-    unidades: 1, masaKg: () => 2, costeEur: () => 320,
+    unidades: 1, masaKg: P => masaFija(P, 'luces'), costeEur: () => 320,
     proveedores: [{ nombre: 'Hella / Lazer (LED homologados)', url: 'https://www.hella.com/' }, { nombre: 'Retrovisores de moto (Rizoma, Puig)', url: 'https://www.puig.tv/' }],
     alternativas: [
       { id: 'camaras', nombre: 'Cámaras en vez de retrovisores', ahorra: 'peso', descripcion: 'Dos cámaras en el hombro y una pantalla: menos resistencia aerodinámica y 1 kg menos. Necesita homologación aparte.', masaKg: 1.4, costeEur: 420, proveedor: { nombre: 'Kits de cámara de retrovisión', nota: 'automoción' }, aplicar: {} },
@@ -314,7 +314,7 @@ export const COMPONENTES: Componente[] = [
     id: 'varios', corto: 'Equipo', nombre: 'Equipo: pantalla, cinturón, extintor, cableado 12 V', grupo: 'Habitáculo y equipo', capa: 'ocupantes',
     que: 'Lo que no es una pieza grande: pantalla e instrumentación, cinturón, extintor, bombas del circuito de refrigeración, ventilación de la cúpula, cableado de 12 V, claxon y pequeños herrajes.',
     caracteristicas: [['Pantalla', '7″ con CAN: velocidad, batería, consumo'], ['Refrigeración', 'bomba de 12 V y radiador pequeño en la cola'], ['Ventilación', 'ventilador en el salpicadero'], ['Masa', 'lo que falta hasta «Varios» en el peso']],
-    unidades: 1, masaKg: P => Math.max(0, P.mVarios - 6 - 5 - 4 - 2 - 2), costeEur: () => 600, parametroMasa: 'mVarios', deslizador: 'Varios: cables, cargador, luces, cierres',
+    unidades: 1, masaKg: P => Math.max(0, P.mVarios - Object.values(MASAS_FIJAS_A1).reduce((a, b) => a + b, 0)), costeEur: () => 600, parametroMasa: 'mVarios', deslizador: 'Varios: cables, cargador, luces, cierres',
     proveedores: [{ nombre: 'AEM / Haltech (pantallas CAN)', url: 'https://www.aemelectronics.com/' }, { nombre: 'Cinturones y extintor (Sparco)', url: 'https://www.sparco.com/' }],
     alternativas: [],
   },
@@ -327,15 +327,54 @@ export const componentePorId = (id: string) => COMPONENTES.find(c => c.id === id
 /** La alternativa elegida para un componente, si la hay. */
 export const alternativaElegida = (c: Componente, P: Parametros) => c.alternativas.find(a => a.id === P.variantes?.[c.id]);
 
-/** Masa y coste de un componente con la alternativa elegida (o de serie). */
+/** Lo escrito a mano en la ficha de este componente, si hay algo. */
+export const piezaManual = (c: Componente, P: Parametros): PiezaManual | undefined => P.piezas?.[c.id];
+
+/** Masa y coste de un componente con la alternativa elegida (o de serie) y lo escrito a mano. */
 export function fichaComponente(c: Componente, P: Parametros, res: Resultados, m: Modelo) {
   const n = typeof c.unidades === 'function' ? c.unidades(P) : c.unidades;
-  const alt = alternativaElegida(c, P);
-  // La masa siempre sale del modelo (ya lleva aplicados los parámetros de la alternativa);
-  // el coste, del catálogo: el de la alternativa cubre todas las unidades.
+  const alt = alternativaElegida(c, P), manual = piezaManual(c, P);
+  // La masa siempre sale del modelo (ya lleva aplicados los parámetros de la alternativa y el peso escrito a mano);
+  // el coste, del catálogo o de la ficha: el escrito a mano y el de la alternativa cubren todas las unidades.
   const masa = c.masaKg(P, res, m);
-  const coste = alt ? alt.costeEur : c.costeEur(P, res, m);
-  return { unidades: n, masa, coste, alternativa: alt };
+  const coste = manual?.coste ?? (alt ? alt.costeEur : c.costeEur(P, res, m));
+  return { unidades: n, masa, coste, alternativa: alt, manual, nombre: manual?.nombre || c.nombre };
+}
+
+/**
+ * Convierte un peso por unidad escrito a mano en el parámetro del diseño que
+ * lo fija, para que el 3D, las comprobaciones y el peso total lo usen. Las
+ * piezas sin deslizador (cargador, cableado, puertas, maleteros, luces)
+ * guardan el peso en la ficha y «Varios» lo recoge.
+ */
+export function aplicarMasaManual(c: Componente, P: Parametros, res: Resultados, m: Modelo, masaUnidad: number | undefined): Partial<Parametros> {
+  if (masaUnidad === undefined || !(masaUnidad > 0)) return {};
+  const actual = c.masaKg(P, res, m), n = typeof c.unidades === 'function' ? c.unidades(P) : c.unidades;
+  switch (c.id) {
+    case 'motor': return { mMotor: masaUnidad };
+    case 'inversor': return { mInversor: masaUnidad };
+    case 'transmision': return { mReductora: Math.max(1, masaUnidad - 4) };
+    case 'bateria': return { whKg: Math.max(40, Math.min(400, P.kWh * 1000 / masaUnidad)) };
+    case 'ruedas': return { mRueda: masaUnidad };
+    case 'frenos': return { mFrenos: masaUnidad };
+    case 'direccion': return { mDireccion: masaUnidad };
+    case 'asientos': return { mAsiento: masaUnidad };
+    case 'suspension': return { mSuspension: Math.max(1, P.mSuspension + (masaUnidad * n - actual)) };
+    case 'chasis': return { extraChasis: Math.max(0, P.extraChasis + (masaUnidad - actual)) };
+    case 'carroceria': return actual > 0 ? { espCarenado: Math.max(0.3, Math.min(6, P.espCarenado * masaUnidad / actual)) } : {};
+    case 'cupula': return actual > 0 ? { espCristal: Math.max(1, Math.min(8, P.espCristal * masaUnidad / actual)) } : {};
+    case 'solar': return actual > 0 ? { mSolarM2: Math.max(0.3, Math.min(6, P.mSolarM2 * masaUnidad / actual)) } : {};
+    case 'varios': return { mVarios: Math.max(0, masaUnidad + Object.values(MASAS_FIJAS_A1).reduce((a, b) => a + b, 0)) };
+    default: return {};   // cargador, cableado, puertas, maleteros, luces: lo lee `masaFija`
+  }
+}
+
+/** El diseño con la ficha de este componente escrita a mano (o borrada con `null`). */
+export function escribirPieza(c: Componente, P: Parametros, res: Resultados, m: Modelo, datos: PiezaManual | null): Parametros {
+  const piezas = { ...(P.piezas ?? {}) };
+  if (datos) piezas[c.id] = datos; else delete piezas[c.id];
+  const cambios = datos ? aplicarMasaManual(c, P, res, m, datos.masa) : {};
+  return { ...P, ...cambios, piezas: Object.keys(piezas).length ? piezas : undefined };
 }
 
 /** Totales del vehículo con lo elegido. */

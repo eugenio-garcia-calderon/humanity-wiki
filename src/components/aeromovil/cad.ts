@@ -102,12 +102,13 @@ export function datosCAD(m: Modelo) {
   const ocupantes = m.asientos.map(a => {
     const o = m.occPts(a.piloto), lat = a.lat, d = o.d;
     const lo = (t: number): P3 => [o.H[0] + d[0] * t, o.H[1] + d[1] * t, lat];
+    const dh = o.dh ?? d, zr = o.anchoPiernas?.[0] ?? 0.09, zp = o.anchoPiernas?.[1] ?? 0.11;
     const seg: { a: P3; b: P3; r: number }[] = [
-      { a: lo(-0.02), b: lo(0.10), r: 0.12 }, { a: lo(0.12), b: lo(0.30), r: 0.12 }, { a: lo(0.30), b: lo(0.47), r: 0.13 }, { a: lo(0.52), b: lo(0.60), r: 0.045 },
+      { a: lo(-0.02), b: lo(0.10), r: 0.12 }, { a: lo(0.12), b: lo(0.30), r: 0.12 }, { a: lo(0.30), b: lo(0.47), r: 0.13 }, { a: lo(0.50), b: [o.C[0] - dh[0] * 0.08, o.C[1] - dh[1] * 0.08, lat], r: 0.045 },
     ];
     for (const s of [-1, 1]) {
-      seg.push({ a: [o.H[0], o.H[1], lat + s * 0.09], b: [o.K[0], o.K[1], lat + s * 0.10], r: 0.068 });
-      seg.push({ a: [o.K[0], o.K[1], lat + s * 0.10], b: [o.F[0], o.F[1], lat + s * 0.11], r: 0.052 });
+      seg.push({ a: [o.H[0], o.H[1], lat + s * zr], b: [o.K[0], o.K[1], lat + s * (zr + zp) / 2], r: 0.068 });
+      seg.push({ a: [o.K[0], o.K[1], lat + s * (zr + zp) / 2], b: [o.F[0], o.F[1], lat + s * zp], r: 0.052 });
       const hom: P3 = [o.H[0] + d[0] * 0.46, o.H[1] + d[1] * 0.46, lat + s * 0.19], mano: P3 = [o.mano[0], o.mano[1], lat + s * o.anchoMano];
       const codo: P3 = [(hom[0] + mano[0]) / 2, (hom[1] + mano[1]) / 2 - 0.08, (hom[2] + mano[2]) / 2 + s * 0.05];
       seg.push({ a: hom, b: codo, r: 0.046 }, { a: codo, b: mano, r: 0.038 });

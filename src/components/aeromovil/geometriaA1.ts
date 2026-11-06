@@ -23,7 +23,7 @@
 // Mismos ejes que el Aeromóvil Gota: x hacia delante con el eje delantero en
 // x = 0, y hacia arriba, z lateral (+ izquierda). Metros.
 import {
-  MATERIALES_CARENADO, MATERIALES_CHASIS, NEUMATICOS, RENDIMIENTO_SOLAR, BAJOS_BASE, contornoSeccion, largoTubo,
+  MATERIALES_CARENADO, MATERIALES_CHASIS, MASAS_FIJAS_A1, NEUMATICOS, RENDIMIENTO_SOLAR, BAJOS_BASE, contornoSeccion, largoTubo, masaFija,
   type Asiento, type Comprobacion, type Parametros, type P3, type PiezasAsiento, type PuertaDef, type PuntosOcupante, type Resultados, type Rueda,
   type Seccion, type Superficie, type Tubo, type ZonaPiel,
 } from './geometria';
@@ -94,8 +94,9 @@ const rotarPunto = (p: P3, a: P3, b: P3, ang: number): P3 => {
   return [a[0] + v[0] * c + cr[0] * s + k[0] * kv * (1 - c), a[1] + v[1] * c + cr[1] * s + k[1] * kv * (1 - c), a[2] + v[2] * c + cr[2] * s + k[2] * kv * (1 - c)];
 };
 /** El signo del ángulo que hace que `prueba` suba al abrirse. */
+// (se decide con un giro pequeño: con más de 90° las dos direcciones acaban más arriba y el signo salía mal)
 const abrirHaciaArriba = (bisagra: [P3, P3], prueba: P3, grados: number) =>
-  rotarPunto(prueba, bisagra[0], bisagra[1], grados * Math.PI / 180)[1] >= prueba[1] ? grados : -grados;
+  rotarPunto(prueba, bisagra[0], bisagra[1], 20 * Math.PI / 180)[1] >= prueba[1] ? grados : -grados;
 
 export function crearModeloA1(P: Parametros) {
   const L = P.L, xn = P.fMorro * L, xt = xn - L, Lf = L;
@@ -214,18 +215,25 @@ export function crearModeloA1(P: Parametros) {
   };
   const gap = (x: number, y: number, z: number) => Math.max(gapCuerpo(x, y, z), gapCupula(x, y, z));
 
-  // ── Batería: un módulo bajo el asiento y el resto detrás (o bajo el pasajero) ──
+  // ── Batería: módulos finos y anchos pegados al suelo del chasis (2026-11-06,
+  // Eugenio: «la batería demasiado gorda: más finita y pegada al chasis»):
+  // uno bajo el piloto, otro bajo el pasajero (o detrás del piloto si va
+  // solo) y, si aún falta, un tercero en la cola. Cada uno de 9 cm como mucho.
   const volBat = P.kWh * 1000 / P.whL / 1000;             // m³
-  const bat1 = { x0: xPil - 0.38, x1: xPil + 0.42, hz: 0.40, t: 0 };
-  bat1.t = Math.min(0.16, volBat / ((bat1.x1 - bat1.x0) * 2 * bat1.hz));
-  const resto = Math.max(0, volBat - (bat1.x1 - bat1.x0) * 2 * bat1.hz * bat1.t);
-  const bat2 = P.plazas === 2
-    ? { x0: xPas - 0.38, x1: xPas + 0.42, hz: 0.40, t: 0 }
-    : { x0: xPil - 1.05, x1: xPil - 0.46, hz: 0.33, t: 0 };
-  bat2.t = resto / ((bat2.x1 - bat2.x0) * 2 * bat2.hz);
-  const baterias = [bat1, bat2].filter(b => b.t > 0.005).map((b, i) => ({ nombre: i === 0 ? 'Módulo bajo el asiento' : (P.plazas === 2 ? 'Módulo bajo el pasajero' : 'Módulo trasero'), x0: b.x0, x1: b.x1, y0: yFloor + 0.005, y1: yFloor + 0.005 + b.t, hz: b.hz }));
-  const hip = yFloor + bat1.t + 0.16;
-  const hipPas = yFloor + (P.plazas === 2 ? bat2.t : 0) + 0.16;
+  const T_MOD = 0.09;
+  const modulos: { nombre: string; x0: number; x1: number; hz: number; t: number }[] = [
+    { nombre: 'Módulo bajo el piloto', x0: xPil - 0.46, x1: xPil + 0.56, hz: 0.42, t: 0 },
+    P.plazas === 2 ? { nombre: 'Módulo bajo el pasajero', x0: xPas - 0.42, x1: xPas + 0.52, hz: 0.40, t: 0 } : { nombre: 'Módulo trasero', x0: xPil - 1.10, x1: xPil - 0.50, hz: 0.36, t: 0 },
+    { nombre: 'Módulo de la cola', x0: (P.plazas === 2 ? xPas : xPil) - 1.05, x1: (P.plazas === 2 ? xPas : xPil) - 0.46, hz: 0.30, t: 0 },
+  ];
+  let queda = volBat;
+  for (const b of modulos) { const cap = (b.x1 - b.x0) * 2 * b.hz; b.t = Math.min(T_MOD, queda / cap); queda = Math.max(0, queda - cap * b.t); }
+  if (queda > 1e-6) modulos[modulos.length - 1].t += queda / ((modulos[2].x1 - modulos[2].x0) * 2 * modulos[2].hz);   // lo que no cabe, en la cola, más gordo
+  const bat1 = modulos[0], bat2 = modulos[1];
+  const baterias = modulos.filter(b => b.t > 0.005).map(b => ({ nombre: b.nombre, x0: b.x0, x1: b.x1, y0: yFloor + 0.005, y1: yFloor + 0.005 + b.t, hz: b.hz }));
+  // Altura de las caderas: suelo + módulo + asiento (deslizadores «Altura del asiento»).
+  const hip = yFloor + bat1.t + P.altPil;
+  const hipPas = yFloor + (P.plazas === 2 ? bat2.t : 0) + P.altPas;
   const grosorBase = () => 0.03;
 
   // ── Piloto (y pasajero): reclinados, pies en el reposapiés, manos en el volante ──
@@ -237,23 +245,40 @@ export function crearModeloA1(P: Parametros) {
   };
   const volante = { c: [xPil + 0.44, hip + 0.34] as [number, number], r: 0.15, inclinacion: 35 * Math.PI / 180 };
   const reposapies: [number, number] = [xPil + 0.86, yFloor + 0.16];
+  // Ocupantes: tronco reclinado pero cabeza recta (el cuello endereza el
+  // reclinado hasta dejar la cabeza a un tercio del ángulo), como en un
+  // velomóvil. El pasajero va tumbado tipo Fórmula 1, con las piernas
+  // estiradas a los lados del asiento del piloto (2026-11-06, Eugenio).
   const occPts = (piloto: boolean): PuntosOcupante => {
     const hx = piloto ? xPil : xPas, hy = piloto ? hip : hipPas, REC = recDe(piloto);
     const d: [number, number] = [-Math.sin(REC), Math.cos(REC)];
-    const H: [number, number] = [hx, hy], S: [number, number] = [hx + d[0] * 0.5, hy + d[1] * 0.5], C: [number, number] = [hx + d[0] * 0.7, hy + d[1] * 0.7];
-    const F: [number, number] = piloto ? reposapies : [hx + 0.62, yFloor + 0.08];
+    const RECH = REC * 0.35, dh: [number, number] = [-Math.sin(RECH), Math.cos(RECH)];
+    const H: [number, number] = [hx, hy], S: [number, number] = [hx + d[0] * 0.5, hy + d[1] * 0.5];
+    const C: [number, number] = [S[0] + dh[0] * 0.2, S[1] + dh[1] * 0.2];
+    const F: [number, number] = piloto ? reposapies : [hx + 0.96, yFloor + 0.13];
     const K = ikKnee(H, F, 0.45, 0.47);
-    const mano: [number, number] = piloto ? [volante.c[0] - Math.sin(volante.inclinacion) * 0.10, volante.c[1] + Math.cos(volante.inclinacion) * 0.10] : [H[0] + (K[0] - H[0]) * 0.62, H[1] + (K[1] - H[1]) * 0.62 + 0.07];
-    return { H, S, C, K, F, d, hx, mano, anchoMano: piloto ? 0.13 : 0.13 };
+    const mano: [number, number] = piloto ? [volante.c[0] - Math.sin(volante.inclinacion) * 0.10, volante.c[1] + Math.cos(volante.inclinacion) * 0.10] : [H[0] + 0.30, H[1] + 0.02];
+    return { H, S, C, K, F, d, dh, hx, mano, anchoMano: piloto ? 0.13 : 0.16, anchoPiernas: piloto ? [0.095, 0.10] : [0.20, 0.27] };
   };
+  // Asiento de velomóvil: base acolchada, respaldo curvo (que se ahueca en
+  // los riñones y abraza los hombros) y reposacabezas casi vertical, para
+  // que la cabeza vaya recta aunque el tronco vaya tumbado.
   const asientoPiezas = (piloto: boolean): PiezasAsiento => {
     const hx = piloto ? xPil : xPas, hy = piloto ? hip : hipPas, REC = recDe(piloto), g = grosorBase();
     const d: [number, number] = [-Math.sin(REC), Math.cos(REC)], pb: [number, number] = [-Math.cos(REC), -Math.sin(REC)];
     const en = (t: number, o: number): [number, number] => [hx + d[0] * t + pb[0] * o, hy + d[1] * t + pb[1] * o];
     const arriba: [number, number][] = [[hx + 0.36, hy - 0.05], [hx + 0.22, hy - 0.085], [hx + 0.06, hy - 0.10], [hx - 0.06, hy - 0.10]];
     const base = arriba.concat(arriba.map(q => [q[0], q[1] - g] as [number, number]).reverse());
-    const panel = (t0: number, t1: number, o0: number, o1: number) => [en(t0, o0), en(t1, o0), en(t1, o1), en(t0, o1)];
-    return { base, respaldo: panel(0.06, 0.58, 0.105, 0.14), cabecero: panel(0.63, 0.78, 0.105, 0.15), marco: [[hx - 0.05, hy - 0.10 - g], en(0.10, 0.145), en(0.58, 0.145), en(0.70, 0.153)], anchoCabecero: 0.26 };
+    // Respaldo: la cara delantera sigue una curva (lumbar hacia delante, hombros hacia atrás), 3,5 cm de espesor.
+    const curva = (t: number) => 0.105 - 0.03 * Math.sin(Math.PI * (t - 0.06) / 0.52) + 0.02 * Math.max(0, (t - 0.40) / 0.18);
+    const frente: [number, number][] = [], dorso: [number, number][] = [];
+    for (let k = 0; k <= 8; k++) { const t = 0.06 + 0.52 * k / 8; frente.push(en(t, curva(t))); dorso.push(en(t, curva(t) + 0.035)); }
+    const respaldo = frente.concat(dorso.reverse());
+    // Reposacabezas: su propio plano, a un tercio del reclinado (la cabeza recta), apoyado en el marco.
+    const RH = REC * 0.35, dH: [number, number] = [-Math.sin(RH), Math.cos(RH)], pH: [number, number] = [-Math.cos(RH), -Math.sin(RH)];
+    const topR = en(0.60, 0.12), enH = (t: number, o: number): [number, number] => [topR[0] + dH[0] * t + pH[0] * o, topR[1] + dH[1] * t + pH[1] * o];
+    const cabecero: [number, number][] = [enH(0.02, -0.02), enH(0.18, -0.02), enH(0.18, 0.025), enH(0.02, 0.025)];
+    return { base, respaldo, cabecero, marco: [[hx - 0.05, hy - 0.10 - g], en(0.10, 0.145), en(0.58, 0.150), enH(0.17, 0.03)], anchoCabecero: 0.26 };
   };
   const asientos: Asiento[] = P.plazas === 2 ? [{ piloto: true, lat: 0, ancho: 0.50 }, { piloto: false, lat: 0, ancho: 0.50 }] : [{ piloto: true, lat: 0, ancho: 0.50 }];
   const ultimaCabeza = occPts(P.plazas === 2 ? false : true).C[0];
@@ -379,7 +404,7 @@ export function crearModeloA1(P: Parametros) {
   // borde de abajo de la ventanilla es la línea donde la cúpula sale de la
   // carrocería (`thBase`): así la barra de abajo va recta sobre el hombro y no
   // sigue el serpenteo de la base hundida (2026-11-06, Eugenio).
-  const uVentA = Math.min(uC1 - 0.30, uDeX(xH) + 0.00), uVent1 = uVentA + 0.06;
+  const uVentA = Math.min(uC1 - 0.30, Math.min(uDeX(xH - 0.02), Math.max(uDeX(xD + 0.02), uC0 + 0.08) + 0.385) + 0.005), uVent1 = uVentA + 0.06;   // = borde trasero de la puerta (uD1, que se define más abajo)
   const thTrasera = (u: number) => Math.min(thVentana, Math.max(0, thVentana * (uVent1 - u) / (uVent1 - uVentA)));
   const thVent = (u: number) => Math.min(u < uW1 ? thPilar(u) : thVentana, u > uVentA ? thTrasera(u) : thVentana);
   /** θ (lado izquierdo) donde la cúpula cruza la piel de la carrocería en la estación u; 0 si no la cruza. */
@@ -406,17 +431,23 @@ export function crearModeloA1(P: Parametros) {
   // ── Puertas y maleteros ──────────────────────────────────────────────────
   const puertas: PuertaDef[] = [];
   // La puerta empieza detrás del parabrisas (que es fijo, ~30 cm de cúpula) y acaba en el arco principal.
-  const uD0 = Math.max(uDeX(xD + 0.02), uC0 + 0.08), uD1 = uDeX(xH - 0.02);
+  // La puerta llega hasta el arco principal, pero no más de 1,4 m: con pasajero el arco queda muy atrás.
+  const uD0 = Math.max(uDeX(xD + 0.02), uC0 + 0.08), uD1 = Math.min(uDeX(xH - 0.02), uD0 + 0.385);
   const uDC0 = Math.max(uC0 + 0.015, uD0), uDC1 = Math.min(uCabina1 - 0.01, uD1);
   const lineaCentro = (ua: number, ub: number): [P3, P3] => [secC(frameC(ua), Math.PI / 2), secC(frameC(ub), Math.PI / 2)];
   if (P.puerta === 'gaviota') {
-    // Alas de gaviota: media cúpula + panel lateral, con bisagra en la línea central del techo.
+    // Alas de gaviota como las del Aptera (2026-11-06, Eugenio: «conserva el
+    // techo, que se abran solo la parte lateral, el techo no es parte de la
+    // puerta»): la puerta es la ventanilla con su costado de cúpula y el panel
+    // lateral de la carrocería; la bisagra va en el canto del techo (la línea
+    // donde el costado se vuelve techo), inclinada como ese canto.
     for (const s of [1, -1]) {
       const id = s > 0 ? 'izq' : 'der', nombre = `Puerta ${s > 0 ? 'izquierda' : 'derecha'}`;
-      const bis = lineaCentro(uDC0, uDC1);
+      const th = (t: number) => (s > 0 ? t : Math.PI - t);
+      const bis: [P3, P3] = [secC(frameC(uDC0), th(thVentana)), secC(frameC(uDC1), th(thVentana))];
       const fB = frame((uD0 + uD1) / 2), prueba = sec(fB, s > 0 ? 0.08 * Math.PI : 0.92 * Math.PI);
-      const ang = abrirHaciaArriba(bis, prueba, 68);
-      puertas.push({ id, nombre, tipo: 'puerta', superficie: 'cupula', u0: uDC0, u1: uDC1, t0: s > 0 ? 0 : 0.5 * Math.PI, t1: s > 0 ? 0.5 * Math.PI : Math.PI, bisagra: bis, angulo: ang });
+      const ang = abrirHaciaArriba(bis, prueba, 105);
+      puertas.push({ id, nombre, tipo: 'puerta', superficie: 'cupula', u0: uDC0, u1: uDC1, t0: s > 0 ? 0 : Math.PI - thVentana, t1: s > 0 ? thVentana : Math.PI, bisagra: bis, angulo: ang });
       puertas.push({ id, nombre, tipo: 'puerta', superficie: 'cuerpo', u0: uD0, u1: uD1, t0: s > 0 ? 0.04 * Math.PI : 0.66 * Math.PI, t1: s > 0 ? 0.34 * Math.PI : 0.96 * Math.PI, bisagra: bis, angulo: ang });
     }
   } else if (P.puerta === 'cabina') {
@@ -512,7 +543,8 @@ export function estimarMasasA1(m: ModeloA1, ar: { carroceria: number; cristal: n
     'Carrocería': ar.carroceria * P.espCarenado * MATERIALES_CARENADO[P.matCarenado].kgm2mm,
     'Cúpula': ar.cristal * P.espCristal * 1.2,
     'Paneles solares': ar.solar * P.mSolarM2,
-    Varios: P.mVarios,
+    // «Varios» lleva el cargador, el cableado, las puertas, los maleteros y las luces; si alguno tiene su peso escrito en la ficha, se ajusta.
+    Varios: P.mVarios + Object.keys(MASAS_FIJAS_A1).reduce((s, id) => s + masaFija(P, id) - MASAS_FIJAS_A1[id], 0),
   } as Record<string, number>;
 }
 
