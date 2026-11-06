@@ -1,9 +1,13 @@
 // ============================================================================
-// AEROMÓVIL GOTA (2026-11-05, Eugenio)
+// AEROMÓVIL (2026-11-05, Eugenio)
 // ============================================================================
-// Vehículo de pedaleo asistido para tres (piloto delante, dos pasajeros
-// detrás), con cuatro ruedas de bici en rombo (las laterales basculan en las
-// curvas), carenado en gota con paneles solares y transmisión sin cadena.
+// Dos vehículos en la misma página (ver `geometria.ts`):
+//   · Aeromóvil 1 (por defecto desde el 2026-11-06): eléctrico de cuatro
+//     ruedas con carrocería baja y cúpula, a partir del SZEmission un 30 %
+//     mayor y con ruedas, frenos y suspensión de la clase del Twizy.
+//   · Aeromóvil Gota: pedaleo asistido para tres (piloto delante, dos
+//     pasajeros detrás), rombo basculante, carenado en gota. Es lo que abren
+//     los diseños guardados antes del 2026-11-06.
 //
 // PÁGINA PROPIA, fuera del Layout: su menú es el del Aeromóvil, no el de Wiki
 // Creator. Cinco vistas, cada una con su dirección:
@@ -12,31 +16,37 @@
 //   /aeromovil/plan       plan de desarrollo por etapas
 //   /aeromovil/planos     láminas y DXF de fabricación del carenado y el chasis
 //   /aeromovil/exportar   STEP por capas, STL y parámetros para regenerar el STEP
+//   /aeromovil/componentes[/:id]  (solo Aeromóvil 1) ficha de cada pieza: peso,
+//                         coste, proveedor y alternativas
 //
 // Todo el cálculo vive en `src/components/aeromovil/geometria.ts`, que es la
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bike, Box, ClipboardList, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw } from 'lucide-react';
+import { Bike, Box, ClipboardList, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
 import {
-  PARAMETROS_POR_DEFECTO, DIAMETRO_RUEDA, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
-  type MaterialCarenado, type MaterialChasis, type Parametros, type Puerta, type Pulgadas,
+  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
+  type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
+import { RANGOS_MASA_A1 } from '../components/aeromovil/geometriaA1';
 import { MenuDisenos, aDiseno, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
 import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
+import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 
-const CLAVE = 'aeromovil.parametros.v4';
+// v5 (2026-11-06): el diseño por defecto pasa a ser el Aeromóvil 1; lo guardado como v4 era del Gota y se queda en su clave.
+const CLAVE = 'aeromovil.parametros.v5';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 const m2 = (v: number) => `${fmt(v)} m`;
 
-type Seccion = 'diseno' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'componentes' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
+  { k: 'componentes', n: 'Componentes', ruta: '/aeromovil/componentes', icono: Wrench },
   { k: 'otros', n: 'Otros velomóviles', ruta: '/aeromovil/otros', icono: Bike },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
@@ -49,15 +59,24 @@ const PUERTAS: { k: Puerta; n: string; d: string }[] = [
   { k: 'gaviota', n: 'Alas de gaviota', d: 'Dos puertas con bisagra en el centro del techo, una por lado. Se entra de pie y sin pasar por encima del morro.' },
   { k: 'aptera', n: 'Laterales tipo Aptera', d: 'Una puerta por lado con bisagra delante, que sube y se abre hacia fuera. Ocupa poco espacio al lado.' },
 ];
+const PUERTAS_A1: { k: Puerta; n: string; d: string }[] = [
+  { k: 'gaviota', n: 'Alas de gaviota', d: 'Media cúpula y el panel lateral suben juntos, con bisagra en la línea central del techo. Es lo que lleva el SZEmission.' },
+  { k: 'cabina', n: 'Cúpula basculante', d: 'La cúpula entera bascula hacia delante; se entra por encima del estribo, como en un ultraligero.' },
+  { k: 'aptera', n: 'Laterales tipo Aptera', d: 'Panel lateral y media cúpula con bisagra delante, inclinada: la puerta sube al abrirse y ocupa poco al lado.' },
+];
+const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
+  { k: 'cuatro', n: 'Aeromóvil 1', d: 'Eléctrico de cuatro ruedas, carrocería baja con cúpula (SZEmission ×1,3), clase Twizy.' },
+  { k: 'rombo', n: 'Aeromóvil Gota', d: 'Velomóvil tándem 1+2 de pedaleo asistido, rombo basculante, carenado en gota.' },
+];
 
-function Logo() {
+function Logo({ nombre }: { nombre: string }) {
   return (
     <span className="flex items-center gap-2.5">
       <svg viewBox="0 0 40 20" className="h-6 w-12 text-teal-700" aria-hidden>
         <path d="M2 12 C 6 3, 24 1, 38 9 C 30 15, 12 17, 2 12 Z" fill="currentColor" opacity=".18" stroke="currentColor" strokeWidth="1.4" />
         <circle cx="9" cy="16" r="2.4" fill="currentColor" /><circle cx="31" cy="15" r="2.4" fill="currentColor" />
       </svg>
-      <span className="text-lg font-semibold tracking-tight text-slate-900">Aeromóvil Gota</span>
+      <span className="text-lg font-semibold tracking-tight text-slate-900">{nombre}</span>
     </span>
   );
 }
@@ -100,9 +119,178 @@ function Selector<T extends string>({ id, etiqueta, valor, opciones, alCambiar }
 function cargarParametros(): Parametros {
   try {
     const g = JSON.parse(localStorage.getItem(CLAVE) || 'null');
-    if (g && typeof g === 'object') return { ...PARAMETROS_POR_DEFECTO, ...g };
+    if (g && typeof g === 'object') return deDiseno(g);
   } catch { /* sin almacenamiento o dato roto: los de por defecto */ }
   return PARAMETROS_POR_DEFECTO;
+}
+
+/** Los deslizadores y las cifras del Aeromóvil 1. */
+function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar }: {
+  P: Parametros; Pa: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: Modelo;
+  neumaticos: { k: Neumatico; n: string }[]; malas: number; alNavegar: (ruta: string) => void;
+}) {
+  const a1 = res.a1!;
+  const cm = (v: number) => `${Math.round(v * 100)} cm`;
+  const h = (v: number) => (v >= 10 ? `${Math.round(v)} h` : `${fmt(v, 1)} h`);
+  return (
+    <>
+      <Bloque titulo="Componentes" nota="ficha de cada pieza">
+        <BotonesComponentes P={P} res={res} modelo={modelo} alNavegar={alNavegar} />
+      </Bloque>
+
+      <Bloque titulo="Tamaño y ruedas" nota="clase Twizy">
+        <Deslizador id="a1-L" etiqueta="Largo total" valor={P.L} min={2.6} max={4.4} paso={0.01} mostrar={m2(P.L)} alCambiar={v => set('L', v)} />
+        <Deslizador id="a1-B" etiqueta="Batalla: eje delantero a trasero" valor={P.B} min={1.3} max={Math.min(2.6, P.L - 0.9)} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
+        <Deslizador id="a1-fm" etiqueta="Voladizo del morro" valor={P.fMorro} min={0.15} max={0.40} paso={0.005} mostrar={`${Math.round(P.fMorro * 100)} % del largo · ${m2(P.fMorro * P.L)}`} alCambiar={v => set('fMorro', v)} />
+        <Deslizador id="a1-vF" etiqueta="Vía delantera" valor={P.viaF} min={0.9} max={1.5} paso={0.01} mostrar={m2(P.viaF)} alCambiar={v => set('viaF', v)} />
+        <Deslizador id="a1-vR" etiqueta="Vía trasera" valor={P.viaR} min={0.8} max={1.5} paso={0.01} mostrar={m2(P.viaR)} alCambiar={v => set('viaR', v)} />
+        <Deslizador id="a1-cl" etiqueta="Altura de los bajos" valor={P.clear} min={0.10} max={0.30} paso={0.005} mostrar={`${fmt(P.clear * 100, 1)} cm al suelo`} alCambiar={v => set('clear', v)} />
+        <p className="-mt-2 text-xs text-slate-500">Sube y baja todo el interior: suelo, batería, asiento y piloto. El Twizy lleva 12 cm.</p>
+        <Selector id="a1-nF" etiqueta="Neumáticos delanteros" valor={P.neumF} opciones={neumaticos} alCambiar={v => set('neumF', v)} />
+        <Selector id="a1-nR" etiqueta="Neumáticos traseros" valor={P.neumR} opciones={neumaticos} alCambiar={v => set('neumR', v)} />
+        <Selector id="a1-sd" etiqueta="Largueros Ø" valor={String(P.spineD)} opciones={['32', '40', '50', '60'].map(k => ({ k, n: `${k} mm` }))} alCambiar={v => set('spineD', Number(v))} />
+        <Selector id="a1-st" etiqueta="Pared de los largueros" valor={String(P.spineT)} opciones={['1.5', '2', '2.5', '3'].map(k => ({ k, n: `${k.replace('.', ',')} mm` }))} alCambiar={v => set('spineT', Number(v))} />
+      </Bloque>
+
+      <Bloque titulo="Carrocería y cúpula" nota={`${m2(Pa.W)} × ${m2(Pa.H)}`}>
+        <Deslizador id="a1-W" etiqueta="Ancho máximo" valor={P.W} min={1.2} max={2.0} paso={0.01} mostrar={m2(P.W)} alCambiar={v => set('W', v)} />
+        <Deslizador id="a1-H" etiqueta="Alto total (techo de la cúpula)" valor={P.H} min={1.0} max={1.7} paso={0.01} mostrar={m2(P.H)} alCambiar={v => set('H', v)} />
+        <Deslizador id="a1-deck" etiqueta="Altura de la cubierta" valor={P.deck} min={0.55} max={0.85} paso={0.005} mostrar={m2(P.deck * P.H)} alCambiar={v => set('deck', v)} />
+        <p className="-mt-2 text-xs text-slate-500">La cubierta es el techo de la carrocería baja; de ahí para arriba es cúpula de cristal.</p>
+        <Deslizador id="a1-mo" etiqueta="Forma del morro" valor={P.morroA1} min={0} max={1} paso={0.05} mostrar={P.morroA1 < 0.35 ? 'afilado' : P.morroA1 > 0.65 ? 'romo' : 'como el SZEmission'} alCambiar={v => set('morroA1', v)} />
+        <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
+        <Deslizador id="a1-c0" etiqueta="Cúpula: dónde empieza" valor={P.cupX0} min={0.08} max={0.35} paso={0.005} mostrar={`${m2(P.cupX0 * P.L)} del morro`} alCambiar={v => set('cupX0', v)} />
+        <Deslizador id="a1-c1" etiqueta="Cúpula: dónde acaba" valor={P.cupX1} min={0.70} max={0.995} paso={0.005} mostrar={`${m2((1 - P.cupX1) * P.L)} de la cola`} alCambiar={v => set('cupX1', v)} />
+        <Deslizador id="a1-cw" etiqueta="Anchura de la cúpula" valor={P.cupW} min={0.35} max={0.75} paso={0.01} mostrar={m2(P.cupW * P.W)} alCambiar={v => set('cupW', v)} />
+        <Deslizador id="a1-nU" etiqueta="Sección superior de la carrocería" valor={P.nU} min={2.0} max={3.4} paso={0.1} mostrar={P.nU < 2.3 ? 'elíptica' : P.nU > 2.9 ? 'cuadrada' : 'redondeada'} alCambiar={v => set('nU', v)} />
+        <Deslizador id="a1-nL" etiqueta="Fondo" valor={P.nL} min={2.0} max={5.0} paso={0.1} mostrar={P.nL < 2.6 ? 'redondo' : P.nL > 3.6 ? 'plano' : 'semiplano'} alCambiar={v => set('nL', v)} />
+      </Bloque>
+
+      <Bloque titulo="Plazas y asientos">
+        <div className="flex gap-1.5" role="radiogroup" aria-label="Plazas">
+          {([[1, 'Monoplaza'], [2, 'Tándem 1+1']] as [1 | 2, string][]).map(([k, n]) => (
+            <Button key={k} variant="outline" role="radio" aria-checked={P.plazas === k} onClick={() => set('plazas', k)}
+              className={cn('flex-1 px-3 py-1.5 text-xs normal-case tracking-normal', P.plazas === k && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
+          ))}
+        </div>
+        <Deslizador id="a1-xPil" etiqueta="Piloto: cadera al eje delantero" valor={P.xPil} min={0.10} max={1.30} paso={0.01} mostrar={m2(P.xPil)} alCambiar={v => set('xPil', v)} />
+        <Deslizador id="a1-recPil" etiqueta="Reclinado del piloto" valor={P.recPil} min={15} max={60} paso={1} mostrar={`${P.recPil}°`} alCambiar={v => set('recPil', v)} />
+        {P.plazas === 2 && <>
+          <Deslizador id="a1-xPas" etiqueta="Pasajero: cadera al eje delantero" valor={P.xPas} min={P.xPil + 0.70} max={P.xPil + 1.20} paso={0.01} mostrar={m2(P.xPas)} alCambiar={v => set('xPas', v)} />
+          <Deslizador id="a1-recPas" etiqueta="Reclinado del pasajero" valor={P.recPas} min={15} max={60} paso={1} mostrar={`${P.recPas}°`} alCambiar={v => set('recPas', v)} />
+        </>}
+        <p className="text-xs text-slate-500">Sin pedales: los pies van en un reposapiés y las manos en un volante pequeño. El asiento apoya sobre el módulo de batería.</p>
+      </Bloque>
+
+      <Bloque titulo="Puertas y maleteros">
+        <div className="flex flex-col gap-1.5" role="radiogroup" aria-label="Tipo de puerta">
+          {PUERTAS_A1.map(o => (
+            <Button key={o.k} variant="outline" role="radio" aria-checked={P.puerta === o.k} onClick={() => set('puerta', o.k)}
+              className={cn('flex-col items-start gap-0.5 px-3 py-2 text-left normal-case tracking-normal', P.puerta === o.k && 'border-teal-700 bg-teal-50 ring-1 ring-teal-700')}>
+              <span className="text-sm font-semibold text-slate-900">{o.n}</span>
+              <span className="text-xs font-normal text-slate-600">{o.d}</span>
+            </Button>
+          ))}
+        </div>
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-[13px]">
+          <dt className="text-slate-600">Maletero delantero (bajo el capó)</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(a1.maleteroF)} L</dd>
+          <dt className="text-slate-600">Maletero trasero (bajo la cola de la cúpula)</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(a1.maleteroT)} L</dd>
+        </dl>
+        <p className="text-xs text-slate-500">El capó y la cola de la cúpula se abren con «Abrir maleteros». Los paneles solares van en la cúpula, sobre el maletero trasero (el capó sube a 35° mirando al frente y es donde van los faros).</p>
+      </Bloque>
+
+      <Bloque titulo="Motor y batería" nota={`${a1.bateriaKg.toFixed(0)} kg · ${a1.bateriaL.toFixed(0)} L`}>
+        <Deslizador id="a1-kn" etiqueta="Potencia nominal" valor={P.kWNom} min={4} max={40} paso={0.5} mostrar={`${fmt(P.kWNom, 1)} kW`} alCambiar={v => set('kWNom', v)} />
+        <Deslizador id="a1-kp" etiqueta="Potencia máxima" valor={P.kWPico} min={P.kWNom} max={80} paso={0.5} mostrar={`${fmt(P.kWPico, 1)} kW`} alCambiar={v => set('kWPico', v)} />
+        <Deslizador id="a1-kwh" etiqueta="Batería" valor={P.kWh} min={5} max={45} paso={0.5} mostrar={`${fmt(P.kWh, 1)} kWh`} alCambiar={v => set('kWh', v)} />
+        <Deslizador id="a1-wkg" etiqueta="Densidad del paquete (masa)" valor={P.whKg} min={100} max={220} paso={5} mostrar={`${P.whKg} Wh/kg`} alCambiar={v => set('whKg', v)} />
+        <Deslizador id="a1-wl" etiqueta="Densidad del paquete (volumen)" valor={P.whL} min={120} max={320} paso={5} mostrar={`${P.whL} Wh/L`} alCambiar={v => set('whL', v)} />
+        <p className="-mt-2 text-xs text-slate-500">Celdas NMC en paquete: 150-180 Wh/kg y 200-250 Wh/L. LFP: 110-130 Wh/kg. El Twizy lleva 6,1 kWh en 98 kg (62 Wh/kg).</p>
+        <Deslizador id="a1-v" etiqueta="Velocidad de cálculo" valor={P.speed} min={30} max={160} paso={5} mostrar={`${P.speed} km/h`} alCambiar={v => set('speed', v)} />
+        <Deslizador id="a1-mo" etiqueta="Masa por ocupante" valor={P.mOcc} min={50} max={110} paso={1} mostrar={`${P.mOcc} kg`} alCambiar={v => set('mOcc', v)} />
+        <Deslizador id="a1-sol" etiqueta="Sol al día (horas pico)" valor={P.sol} min={1.5} max={7} paso={0.1} mostrar={`${fmt(P.sol, 1)} h`} alCambiar={v => set('sol', v)} />
+        <Deslizador id="a1-comp" etiqueta="Compresión de la suspensión" valor={P.comp} min={0} max={1} paso={0.05} mostrar={`${Math.round(P.comp * 100)} %`} alCambiar={v => set('comp', v)} />
+      </Bloque>
+
+      <Bloque titulo="Comprobaciones" nota={malas ? `${malas} por revisar` : 'todo cabe'}>
+        <ul className="flex flex-col gap-1.5">
+          {res.comprobaciones.map(c => {
+            const cl = c.holgura < 0 ? 'border-red-300 bg-red-50 text-red-700' : c.holgura < c.minimo ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-700';
+            const esRatio = c.nombre.startsWith('Velocidad') || c.nombre.startsWith('Carga por');
+            return (
+              <li key={c.nombre} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-[13px]">
+                <span className={cn('rounded-full border px-1.5 text-[10px] font-bold uppercase', cl)}>{c.holgura < 0 ? (esRatio ? 'no' : 'roza') : c.holgura < c.minimo ? 'justo' : 'ok'}</span>
+                <span className="text-slate-700">{c.nombre}</span>
+                <span className="font-mono text-xs tabular-nums">{esRatio ? (c.holgura >= 0 ? '+' : '−') + fmt(Math.abs(c.holgura) * 100, 0) : `${c.holgura < 0 ? '−' : ''}${fmt(Math.abs(c.holgura) * 100, 1)} cm`}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </Bloque>
+
+      <Bloque titulo="Rendimiento" nota="estimación">
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-[13px]">
+          {([
+            ['Área frontal', `${fmt(res.A)} m²`], ['Cd estimado', fmt(res.Cd, 3)], ['CdA', `${fmt(res.CdA, 3)} m²`],
+            ['Consumo a 100 km/h', `${fmt(a1.WhKm100 / 10, 1)} kWh/100 km`], [`Consumo a ${P.speed} km/h`, `${fmt(res.WhKm / 10, 1)} kWh/100 km`],
+            [`Potencia a ${P.speed} km/h`, `${fmt(res.Pw / 1000, 1)} kW`],
+            ['Autonomía a 100 km/h', `${Math.round(a1.autonomia100)} km`], [`Autonomía a ${P.speed} km/h`, `${Math.round(res.autonomia)} km`],
+            [`Velocidad sostenida (${P.kWNom} kW)`, `${Math.round(a1.vmaxNominal)} km/h`], [`Velocidad punta (${P.kWPico} kW)`, `${Math.round(a1.vmaxPico)} km/h`],
+            ['0 → 50 km/h', a1.acel50 > 60 ? 'no llega' : `${fmt(a1.acel50, 1)} s`], ['0 → 100 km/h', a1.acel100 > 60 ? 'no llega' : `${fmt(a1.acel100, 1)} s`],
+            ['Pendiente a 100 km/h sostenida', `${fmt(a1.pendiente100, 1)} %`],
+            ['Carga 0-100 %', a1.cargaHoras.map(c => `${c.kW} kW: ${h(c.h)}`).join(' · ')],
+            ['Paneles solares', `${fmt(res.areas.solar)} m² · ${Math.round(res.solarPico)} W pico`],
+            ['Energía solar al día', `${fmt(res.solarDia / 1000)} kWh · ${Math.round(res.kmSol)} km`],
+          ] as [string, string][]).map(([a, b]) => (<Fragment key={a}><dt className="text-slate-600">{a}</dt><dd className="text-right font-mono text-xs tabular-nums">{b}</dd></Fragment>))}
+        </dl>
+        <p className="text-xs text-slate-500">Rodadura 0,009, rendimiento eléctrico 88 %, 250 W de equipos, batería usable al 92 %. El Cd es orientativo: valídalo con CFD antes del molde.</p>
+      </Bloque>
+
+      <Bloque titulo="Peso del vehículo" nota={`${Math.round(res.mVeh)} kg`}>
+        <div>
+          <div className="relative h-2.5 rounded-full bg-gradient-to-r from-emerald-200 via-amber-200 to-red-200">
+            <span className="absolute top-1/2 h-4 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded bg-slate-900"
+              style={{ left: `${Math.max(0, Math.min(100, (res.mVeh - res.rangoMasa[0]) / (res.rangoMasa[1] - res.rangoMasa[0]) * 100))}%` }} />
+          </div>
+          <div className="mt-1 flex justify-between font-mono text-[11px] tabular-nums text-slate-500">
+            <span>{Math.round(res.rangoMasa[0])} kg todo ligero</span><span>{Math.round(res.rangoMasa[1])} kg todo pesado</span>
+          </div>
+        </div>
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 text-[13px]">
+          {Object.entries(res.masas).map(([k, v]) => (<Fragment key={k}><dt className="text-slate-600">{k}</dt><dd className="text-right font-mono text-xs tabular-nums">{fmt(v, 1)} kg</dd></Fragment>))}
+          <dt className="font-semibold text-slate-800">Con {P.plazas === 2 ? 'dos ocupantes' : 'el piloto'}</dt><dd className="text-right font-mono text-xs font-semibold tabular-nums">{Math.round(res.mTot)} kg</dd>
+        </dl>
+        <Selector id="a1-matC" etiqueta="Material del chasis" valor={P.matChasis} opciones={(Object.keys(MATERIALES_CHASIS) as MaterialChasis[]).map(k => ({ k, n: MATERIALES_CHASIS[k].n }))} alCambiar={v => set('matChasis', v)} />
+        <Deslizador id="a1-xC" etiqueta="Uniones, chapas y tornillería" valor={P.extraChasis} min={RANGOS_MASA_A1.extraChasis[0]} max={RANGOS_MASA_A1.extraChasis[1]} paso={0.5} mostrar={`${fmt(P.extraChasis, 1)} kg`} alCambiar={v => set('extraChasis', v)} />
+        <Deslizador id="a1-mR" etiqueta="Una rueda con neumático" valor={P.mRueda} min={RANGOS_MASA_A1.mRueda[0]} max={RANGOS_MASA_A1.mRueda[1]} paso={0.1} mostrar={`${fmt(P.mRueda, 1)} kg`} alCambiar={v => set('mRueda', v)} />
+        <Deslizador id="a1-mS" etiqueta="Cuatro McPherson con manguetas" valor={P.mSuspension} min={RANGOS_MASA_A1.mSuspension[0]} max={RANGOS_MASA_A1.mSuspension[1]} paso={0.5} mostrar={`${fmt(P.mSuspension, 1)} kg`} alCambiar={v => set('mSuspension', v)} />
+        <Deslizador id="a1-mF" etiqueta="Un freno de disco con pinza" valor={P.mFrenos} min={RANGOS_MASA_A1.mFrenos[0]} max={RANGOS_MASA_A1.mFrenos[1]} paso={0.1} mostrar={`${fmt(P.mFrenos, 1)} kg`} alCambiar={v => set('mFrenos', v)} />
+        <Deslizador id="a1-mM" etiqueta="Motor" valor={P.mMotor} min={RANGOS_MASA_A1.mMotor[0]} max={RANGOS_MASA_A1.mMotor[1]} paso={0.5} mostrar={`${fmt(P.mMotor, 1)} kg`} alCambiar={v => set('mMotor', v)} />
+        <Deslizador id="a1-mI" etiqueta="Inversor" valor={P.mInversor} min={RANGOS_MASA_A1.mInversor[0]} max={RANGOS_MASA_A1.mInversor[1]} paso={0.5} mostrar={`${fmt(P.mInversor, 1)} kg`} alCambiar={v => set('mInversor', v)} />
+        <Deslizador id="a1-mRe" etiqueta="Reductora con diferencial" valor={P.mReductora} min={RANGOS_MASA_A1.mReductora[0]} max={RANGOS_MASA_A1.mReductora[1]} paso={0.5} mostrar={`${fmt(P.mReductora, 1)} kg`} alCambiar={v => set('mReductora', v)} />
+        <Deslizador id="a1-mD" etiqueta="Dirección completa" valor={P.mDireccion} min={RANGOS_MASA_A1.mDireccion[0]} max={RANGOS_MASA_A1.mDireccion[1]} paso={0.5} mostrar={`${fmt(P.mDireccion, 1)} kg`} alCambiar={v => set('mDireccion', v)} />
+        <Deslizador id="a1-mA" etiqueta="Un asiento" valor={P.mAsiento} min={RANGOS_MASA_A1.mAsiento[0]} max={RANGOS_MASA_A1.mAsiento[1]} paso={0.5} mostrar={`${fmt(P.mAsiento, 1)} kg`} alCambiar={v => set('mAsiento', v)} />
+        <Selector id="a1-matK" etiqueta="Material de la carrocería" valor={P.matCarenado} opciones={(Object.keys(MATERIALES_CARENADO) as MaterialCarenado[]).map(k => ({ k, n: MATERIALES_CARENADO[k].n }))} alCambiar={v => set('matCarenado', v)} />
+        <Deslizador id="a1-eK" etiqueta="Espesor de la carrocería" valor={P.espCarenado} min={RANGOS_MASA_A1.espCarenado[0]} max={RANGOS_MASA_A1.espCarenado[1]} paso={0.1} mostrar={`${fmt(P.espCarenado, 1)} mm`} alCambiar={v => set('espCarenado', v)} />
+        <Deslizador id="a1-eV" etiqueta="Espesor de la cúpula (policarbonato)" valor={P.espCristal} min={RANGOS_MASA_A1.espCristal[0]} max={RANGOS_MASA_A1.espCristal[1]} paso={0.5} mostrar={`${fmt(P.espCristal, 1)} mm`} alCambiar={v => set('espCristal', v)} />
+        <Deslizador id="a1-mP" etiqueta="Paneles solares por m²" valor={P.mSolarM2} min={RANGOS_MASA_A1.mSolarM2[0]} max={RANGOS_MASA_A1.mSolarM2[1]} paso={0.1} mostrar={`${fmt(P.mSolarM2, 1)} kg/m²`} alCambiar={v => set('mSolarM2', v)} />
+        <Deslizador id="a1-mV" etiqueta="Varios: cables, cargador, luces, cierres" valor={P.mVarios} min={RANGOS_MASA_A1.mVarios[0]} max={RANGOS_MASA_A1.mVarios[1]} paso={1} mostrar={`${fmt(P.mVarios, 0)} kg`} alCambiar={v => set('mVarios', v)} />
+        <p className="text-xs text-slate-500">El chasis y los brazos se calculan tubo a tubo con su material; la batería, por su densidad; carrocería, cúpula y paneles, con su superficie real. El Twizy pesa 474 kg con 6,1 kWh.</p>
+      </Bloque>
+
+      <Bloque titulo="Estructura" nota="estimación">
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-[13px]">
+          {([
+            ['Momento máx. en los largueros', `${Math.round(res.Mmax)} N·m`], ['Tensión dinámica (×2,5)', `${Math.round(res.tension)} MPa`],
+            ['Coeficiente de seguridad', fmt(res.seguridad, 2)], ['Carga máx. por rueda', `${Math.round(res.cargaRueda)} kg`],
+          ] as [string, string][]).map(([a, b]) => (<Fragment key={a}><dt className="text-slate-600">{a}</dt><dd className={cn('text-right font-mono text-xs tabular-nums',
+            a === 'Coeficiente de seguridad' && (res.seguridad < 1.3 ? 'text-red-700' : res.seguridad < 1.8 ? 'text-amber-700' : 'text-emerald-700'),
+            a === 'Carga máx. por rueda' && (res.cargaRueda > 290 ? 'text-red-700' : res.cargaRueda > 240 ? 'text-amber-700' : 'text-emerald-700'))}>{b}</dd></Fragment>))}
+        </dl>
+        <p className="text-xs text-slate-500">Dos largueros de {MATERIALES_CHASIS[P.matChasis].n.toLowerCase()} (límite usable {MATERIALES_CHASIS[P.matChasis].limite} MPa) entre ejes, con el piloto y la batería encima; el resto del entramado no se cuenta. Un neumático 125/80 R13 (índice 65) admite 290 kg.</p>
+      </Bloque>
+    </>
+  );
 }
 
 export default function Aeromovil() {
@@ -139,7 +327,11 @@ export default function Aeromovil() {
   const Pa = useMemo(() => ajustarCarenado(P), [P]);
   const modelo = useMemo(() => crearModelo(Pa), [Pa]);
   const res = useMemo(() => calcular(modelo, areas(modelo)), [modelo]);
-  const porDefecto = JSON.stringify(ajustarCarenado(PARAMETROS_POR_DEFECTO)) === JSON.stringify({ ...Pa, comp: 0, tiltMax: 20, mOcc: 80, pedal: 100, speed: 25, sol: 4.5 });
+  const esA1 = modelo.tipo === 'a1';
+  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota';
+  const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
+  // Cambiar de vehículo carga su juego de medidas: los dos no comparten deslizadores.
+  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'cuatro' ? PARAMETROS_A1 : PARAMETROS_GOTA); setActual(null); } };
 
   const [visibles, setVisibles] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>);
   const [rayosX, setRayosX] = useState(false);
@@ -147,6 +339,7 @@ export default function Aeromovil() {
   const [curva, setCurva] = useState(false);
   const [verCotas, setVerCotas] = useState(true);
   const [abierta, setAbierta] = useState(false);
+  const [maleteros, setMaleteros] = useState(false);
   const [vista, setVista] = useState<Vista>('iso');
   const visor = useRef<VisorHandle | null>(null);
   // Otro velomóvil en el visor: solo, o junto al nuestro para comparar.
@@ -165,22 +358,25 @@ export default function Aeromovil() {
   useEffect(() => { cargarDueno().then(setDueno).catch(() => setDueno(null)); }, []);
   const abiertas = tareas?.filter(t => t.estado === 'pendiente' || t.estado === 'en_curso').length;
 
-  useEffect(() => { document.title = 'Aeromóvil Gota · humanity.wiki'; }, []);
+  useEffect(() => { document.title = `${nombreVehiculo} · humanity.wiki`; }, [nombreVehiculo]);
 
   const ruedas = (Object.keys(DIAMETRO_RUEDA) as Pulgadas[]).map(k => ({ k, n: `${k}″ (${Math.round(DIAMETRO_RUEDA[k] * 1000)} mm)` }));
+  const neumaticos = (Object.keys(NEUMATICOS) as Neumatico[]).map(k => ({ k, n: NEUMATICOS[k].n }));
   const malas = res.comprobaciones.filter(c => c.holgura < c.minimo).length;
+  const capas = CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
+  const a1 = res.a1;
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5">
-          <Logo />
+          <Logo nombre={nombreVehiculo} />
           {dueno?.nombre && <span className="-ml-3 text-xs text-slate-500">de {dueno.nombre}</span>}
           <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); }}
             alGuardado={alGuardado} />
           <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
-            {SECCIONES.map(s => {
+            {SECCIONES.filter(s => s.k !== 'componentes' || esA1).map(s => {
               const Icono = s.icono, activa = seccion === s.k;
               return (
                 <Button key={s.k} variant="ghost" aria-current={activa ? 'page' : undefined} onClick={() => navegar(s.ruta)}
@@ -200,8 +396,8 @@ export default function Aeromovil() {
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <section className="relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50 lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]" aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} vista={vista}
-            referencia={referencia} modoRef={modoRef} alinear={alinear} />
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} vista={vista}
+            referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {referencia && modoRef !== 'no' && (
             <div className="absolute right-3 top-3 z-10 flex max-w-[min(92%,560px)] flex-col gap-2 rounded-xl border border-teal-200 bg-white/95 p-2.5 shadow-sm backdrop-blur">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -224,21 +420,24 @@ export default function Aeromovil() {
                   </div>
                   <details className="text-xs">
                     <summary className="cursor-pointer text-teal-700">Tabla de medidas</summary>
-                    <div className="mt-1 max-h-56 overflow-y-auto"><TablaComparacion propia={fichaPropia(modelo, res)} otra={fichaComparable(referencia)} nombre={referencia.nombre} /></div>
+                    <div className="mt-1 max-h-56 overflow-y-auto"><TablaComparacion propia={fichaPropia(modelo, res)} otra={fichaComparable(referencia)} nombre={referencia.nombre} nuestro={nombreVehiculo} /></div>
                   </details>
                 </>
               )}
             </div>
           )}
-          <div className="pointer-events-none absolute left-3 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">Tándem 1+2 · rombo basculante · pedaleo asistido</div>
+          <div className="pointer-events-none absolute left-3 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">
+            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
+            {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
+          </div>
           <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-1.5">
             <div className="flex overflow-hidden rounded-lg border border-slate-200 bg-white" role="group" aria-label="Vistas">
-              {([['iso', '3/4'], ['side', 'Lateral'], ['top', 'Planta'], ['front', 'Frontal']] as [Vista, string][]).map(([k, n]) => (
+              {([['iso', '3/4'], ['side', 'Lateral'], ['top', 'Planta'], ['front', 'Frontal'], ['back', 'Trasera']] as [Vista, string][]).map(([k, n]) => (
                 <Button key={k} variant="ghost" aria-pressed={vista === k} onClick={() => setVista(k)}
                   className={cn('rounded-none px-3 py-1.5 text-xs normal-case tracking-normal', vista === k && 'bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
               ))}
             </div>
-            {([['Cotas', verCotas, setVerCotas], ['Rayos X', rayosX, setRayosX], ['Corte', corte, setCorte], ['Simular curva', curva, setCurva]] as [string, boolean, (v: boolean) => void][]).map(([n, v, f]) => (
+            {([['Cotas', verCotas, setVerCotas], ['Rayos X', rayosX, setRayosX], ['Corte', corte, setCorte], [esA1 ? 'Girar ruedas' : 'Simular curva', curva, setCurva]] as [string, boolean, (v: boolean) => void][]).map(([n, v, f]) => (
               <Button key={n} variant="outline" aria-pressed={v} onClick={() => f(!v)}
                 className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
             ))}
@@ -246,13 +445,30 @@ export default function Aeromovil() {
               className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', abierta && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
               <DoorOpen className="mr-1 h-3.5 w-3.5" />{abierta ? 'Cerrar' : 'Abrir'} {Pa.puerta === 'cabina' ? 'cúpula' : 'puertas'}
             </Button>
+            {esA1 && (
+              <Button variant="outline" aria-pressed={maleteros} onClick={() => setMaleteros(!maleteros)}
+                className={cn('bg-white px-3 py-1.5 text-xs normal-case tracking-normal', maleteros && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+                <Package className="mr-1 h-3.5 w-3.5" />{maleteros ? 'Cerrar' : 'Abrir'} maleteros
+              </Button>
+            )}
           </div>
         </section>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
+          <Bloque titulo="Vehículo">
+            <div className="flex flex-col gap-1.5" role="radiogroup" aria-label="Tipo de vehículo">
+              {VEHICULOS.map(o => (
+                <Button key={o.k} variant="outline" role="radio" aria-checked={P.disposicion === o.k} onClick={() => cambiarVehiculo(o.k)}
+                  className={cn('flex-col items-start gap-0.5 px-3 py-2 text-left normal-case tracking-normal', P.disposicion === o.k && 'border-teal-700 bg-teal-50 ring-1 ring-teal-700')}>
+                  <span className="text-sm font-semibold text-slate-900">{o.n}</span>
+                  <span className="text-xs font-normal text-slate-600">{o.d}</span>
+                </Button>
+              ))}
+            </div>
+          </Bloque>
           <Bloque titulo="Capas" nota="clic para ocultar">
             <div className="grid grid-cols-2 gap-1.5">
-              {CAPAS.map(c => (
+              {capas.map(c => (
                 <Button key={c.k} variant="outline" aria-pressed={visibles[c.k]} onClick={() => setVisibles(v => ({ ...v, [c.k]: !v[c.k] }))}
                   className={cn('justify-start gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !visibles[c.k] && 'border-dashed text-slate-400')}>
                   <span className={cn('h-3 w-3 shrink-0 rounded-sm', visibles[c.k] ? c.color : 'bg-transparent ring-1 ring-slate-300')} />{c.n}
@@ -261,6 +477,7 @@ export default function Aeromovil() {
             </div>
           </Bloque>
 
+          {esA1 ? <LadoA1 P={P} Pa={Pa} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} /> : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
             <Deslizador id="am-xL" etiqueta="Eje lateral desde la rueda delantera" valor={P.xLm} min={1.1} max={Math.min(2.3, P.B - 0.8)} paso={0.01} mostrar={m2(P.xLm)} alCambiar={v => set('xLm', v)} />
@@ -399,6 +616,7 @@ export default function Aeromovil() {
             <p className="text-xs text-slate-500">Viga de {MATERIALES_CHASIS[P.matChasis].n.toLowerCase()} (límite usable {MATERIALES_CHASIS[P.matChasis].limite} MPa){P.matChasis === 'al6061' ? ', con tratamiento T6 tras soldar' : ''}; una rueda de bici aguanta unos 100 kg.</p>
           </Bloque>
 
+          </>)}
           <Bloque titulo="¿Algo que mejorar?">
             <FormularioMejora alEnviar={() => { recargar(); }} />
             <p className="text-xs text-slate-500">Se añade a <a className="text-teal-700 underline" href="/aeromovil/tareas" onClick={e => { e.preventDefault(); navegar('/aeromovil/tareas'); }}>Tareas</a> como pendiente.</p>
@@ -410,6 +628,10 @@ export default function Aeromovil() {
         </aside>
       </main>
 
+      {seccion === 'componentes' && (esA1
+        ? <VistaComponentes P={P} res={res} modelo={modelo} id={ruta.split('/')[3]} alCambiar={setP} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }}
+            alVerEn3D={capa => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setRayosX(!['carenado', 'cristales', 'solar'].includes(capa)); setVista('iso'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); }} />
+        : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Las fichas de componentes son del Aeromóvil 1. Elige ese vehículo en «Diseño 3D» para verlas.</p>)}
       {seccion === 'otros' && <VistaOtros modelo={modelo} resultados={res} puedeDecidir={!!dueno?.puedeDecidir} alVer={r => verRef(r, 'sola')} alComparar={r => verRef(r, 'comparar')} />}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}

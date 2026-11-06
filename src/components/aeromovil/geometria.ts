@@ -16,10 +16,59 @@
 // eligen: se calculan para dejar exactamente `holgura` sobre las cabezas y
 // junto a los hombros, y para que las laterales no rocen al inclinarse.
 
+import { calcularA1, crearModeloA1, estimarMasasA1, type ModeloA1 } from './geometriaA1';
+export type { ModeloA1 };
+
 export type Pulgadas = '16' | '20' | '24' | '26' | '28';
 export type Puerta = 'cabina' | 'gaviota' | 'aptera';
+/**
+ * Dos vehículos conviven aquí (2026-11-06):
+ *   'rombo'  el Aeromóvil Gota: tándem 1+2, rueda delante y detrás y dos
+ *            laterales basculantes, pedaleo asistido. Los diseños guardados
+ *            hasta hoy son de este tipo.
+ *   'cuatro' el Aeromóvil 1: eléctrico puro, cuatro ruedas de coche
+ *            (clase Twizy), carrocería baja con cúpula aparte (SZEmission
+ *            un 30 % mayor), puertas, maleteros, motor de 15/32 kW y
+ *            batería de 27 kWh. Es el diseño por defecto. Su geometría vive
+ *            en `geometriaA1.ts`.
+ */
+export type Disposicion = 'rombo' | 'cuatro';
+/** Neumáticos de coche pequeño: diámetro exterior y anchura (m). Los del Twizy son los dos primeros. */
+export const NEUMATICOS = {
+  '125/80R13': { n: '125/80 R13 (Twizy delante)', d: 0.530, w: 0.125 },
+  '145/80R13': { n: '145/80 R13 (Twizy detrás)', d: 0.562, w: 0.145 },
+  '155/70R13': { n: '155/70 R13', d: 0.547, w: 0.155 },
+  '145/80R14': { n: '145/80 R14', d: 0.588, w: 0.145 },
+  '165/65R14': { n: '165/65 R14', d: 0.570, w: 0.165 },
+  '175/65R15': { n: '175/65 R15', d: 0.609, w: 0.175 },
+} as const;
+export type Neumatico = keyof typeof NEUMATICOS;
 
 export interface Parametros {
+  disposicion: Disposicion;
+  /** Alternativa elegida por componente (ver `componentes.ts`); sin entrada = la de serie. */
+  variantes?: Record<string, string>;
+  // ── Aeromóvil 1 (disposición 'cuatro') ────────────────────────────────────
+  plazas: 1 | 2;    // monoplaza (como el SZEmission) o tándem 1+1 (como el Twizy)
+  L: number;        // largo total de la carrocería (m)
+  fMorro: number;   // del morro al eje delantero, en fracción del largo
+  viaF: number;     // vía delantera (m, centro a centro)
+  viaR: number;     // vía trasera (m)
+  neumF: Neumatico; // neumáticos delanteros
+  neumR: Neumatico; // neumáticos traseros
+  morroA1: number;  // forma del morro (0 afilado · 0,5 como el SZEmission · 1 romo)
+  colaA1: number;   // forma de la cola (0 afilada · 0,5 como el SZEmission · 1 llena)
+  deck: number;     // altura de la cubierta (fracción del alto total)
+  cupX0: number;    // dónde empieza la cúpula (fracción del largo desde el morro)
+  cupX1: number;    // dónde acaba
+  cupW: number;     // anchura de la cúpula (fracción del ancho)
+  kWNom: number;    // potencia nominal del motor (kW)
+  kWPico: number;   // potencia máxima (kW)
+  kWh: number;      // batería (kWh)
+  whKg: number;     // densidad del paquete (Wh/kg)
+  whL: number;      // densidad del paquete (Wh/L)
+  mInversor: number; mReductora: number; mFrenos: number; mDireccion: number;
+  // ── Aeromóvil Gota (disposición 'rombo') y comunes ───────────────────────
   B: number;        // batalla: eje delantero a eje trasero (m)
   wF: Pulgadas;     // ruedas delantera y trasera
   wL: Pulgadas;     // ruedas laterales basculantes
@@ -99,7 +148,15 @@ export const RANGOS_MASA = {
 // reclinado no existían aún: morro elíptico (0), respaldos a 28° y horquilla a
 // 25°, como entonces. Con la horquilla más adelantada (menos grados) y ruedas
 // de 24″ el tubo de dirección se sale del morro: las comprobaciones lo avisan.
-export const PARAMETROS_POR_DEFECTO: Parametros = {
+const A1_COMUN = {
+  // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
+  plazas: 1 as const, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
+  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.48,
+  kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
+};
+/** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */
+export const PARAMETROS_GOTA: Parametros = {
+  disposicion: 'rombo', ...A1_COMUN,
   B: 2.60, wF: '24', wL: '20', xLm: 1.22, track: 1.05, xPil: 1.12, xPas: 1.92, recPil: 28, recPas: 28, horquilla: 25,
   overF: 0.40, tail: 0.39, tailRound: 0.75, morro: 0, auto: false, holgura: 0.05, W: 1.29, H: 1.28,
   pmax: 0.60, full: 1.2, tipH: 0.70, nU: 2.6, nL: 4.5, clear: 0.21, puerta: 'cabina',
@@ -107,6 +164,21 @@ export const PARAMETROS_POR_DEFECTO: Parametros = {
   matChasis: 'al6061', extraChasis: 2.2, mRueda: 1.9, mSuspension: 4.2, mMotor: 3.6, mGenerador: 2.1, mBateria: 2.9,
   mAsiento: 1.8, matCarenado: 'carbonoLino', espCarenado: 1.0, espCristal: 3.0, mSolarM2: 2.2, mVarios: 8,
 };
+/**
+ * El Aeromóvil 1 (2026-11-06, Eugenio): el SZEmission un 30 % más grande
+ * (3,64 × 1,63 × 1,34 m), sin pedales, con batalla y vías de la clase del
+ * Twizy (1,69 m; 1,25/1,10 m), neumáticos 125/80 R13 y 145/80 R13, motor de
+ * 15 kW nominales y 32 kW de pico, batería de 27 kWh, puertas de gaviota,
+ * maletero delante y detrás, paneles solares en la carrocería.
+ */
+export const PARAMETROS_A1: Parametros = {
+  ...PARAMETROS_GOTA, disposicion: 'cuatro',
+  B: 1.75, W: 1.63, H: 1.34, clear: 0.175, xPil: 0.55, xPas: 1.40, recPil: 35, recPas: 35, nU: 3.3, nL: 4.0, puerta: 'gaviota',
+  spineD: 40, spineT: 2.0, comp: 0, mOcc: 80, pedal: 0, speed: 100, sol: 4.5,
+  matChasis: 'al6061', extraChasis: 6, mRueda: 8, mSuspension: 26, mMotor: 16, mGenerador: 0, mBateria: 0,
+  mAsiento: 7, matCarenado: 'carbono', espCarenado: 1.8, espCristal: 4.0, mSolarM2: 2.2, mVarios: 25,
+};
+export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;
 
 export const DIAMETRO_RUEDA: Record<Pulgadas, number> = { '16': 0.405, '20': 0.508, '24': 0.61, '26': 0.66, '28': 0.70 };
 export const TIRE_W = 0.055;
@@ -139,7 +211,7 @@ export type P3 = [number, number, number];
 
 export interface Tubo {
   nombre: string;
-  grupo: 'Chasis' | 'Suspensión' | 'Dirección';
+  grupo: 'Chasis' | 'Suspensión' | 'Dirección' | 'Transmisión';
   a: P3; b: P3;
   d: number;        // diámetro exterior (m)
   pared: number;    // espesor (m); 0 = macizo o comprado
@@ -150,13 +222,67 @@ export interface Tubo {
 }
 
 /** Zona de la piel en coordenadas (u, θ): u a lo largo, θ alrededor (π/2 = arriba). */
-export interface Zona { u0: number; u1: number; t0: number; t1: number }
-export type Piel = 'carroceria' | 'cristal' | 'solar';
+export interface Zona {
+  u0: number; u1: number; t0: number; t1: number;
+  /** la elipse inscrita en el rectángulo, no el rectángulo entero */
+  elipse?: boolean;
+  /** el rango de θ varía a lo largo (p. ej. una banda cuyo borde sube hacia las puntas); sustituye a t0/t1 */
+  tDe?: (u: number) => [number, number];
+}
+/** 'bajos' es carrocería pintada de negro; 'hueco' es piel que no existe (los pasos de rueda). */
+export type Piel = 'carroceria' | 'cristal' | 'solar' | 'bajos' | 'hueco';
 export interface ZonaPiel extends Zona { piel: Piel; nombre: string }
 export interface ZonaPuerta extends Zona { id: string; nombre: string }
+/** Un trozo de piel que se abre: puerta o tapa de maletero, en la carrocería o en la cúpula. */
+export interface PuertaDef extends ZonaPuerta { bisagra: [P3, P3]; angulo: number; tipo: 'puerta' | 'maletero'; superficie: 'cuerpo' | 'cupula' }
+/**
+ * Una superficie de piel: la carrocería (sección cerrada, θ de 0 a 2π) o la
+ * cúpula del Aeromóvil 1 (media sección, θ de 0 a π, apoyada en la cubierta).
+ * El visor, las áreas y los planos recorren `superficies` sin saber cuál es.
+ */
+export interface Superficie {
+  id: 'cuerpo' | 'cupula';
+  frame: (u: number) => Seccion;
+  sec: (f: Seccion, th: number, off?: number) => P3;
+  tMax: number;
+  u0: number; u1: number;
+  zonas: ZonaPiel[];
+  puertas: PuertaDef[];
+  pielBase: Piel;
+}
+export interface Rueda { nombre: string; x: number; z: number; r: number; w: number }
+export interface Asiento { piloto: boolean; lat: number; ancho: number }
+export interface PuntosOcupante { H: [number, number]; S: [number, number]; C: [number, number]; K: [number, number]; F: [number, number]; d: [number, number]; hx: number; mano: [number, number]; anchoMano: number }
+export interface PiezasAsiento { base: [number, number][]; respaldo: [number, number][]; cabecero: [number, number][]; marco: [number, number][]; anchoCabecero: number }
+/** Lo que los dos vehículos tienen en común: lo que usan el visor, los planos y la comparación. */
+export interface ModeloBase {
+  tipo: 'gota' | 'a1';
+  P: Parametros;
+  xn: number; xt: number; Lf: number; Hb: number; rF: number; rR: number; xR: number; ys: number; hip: number; dY: number;
+  frame: (u: number) => Seccion;
+  sec: (f: Seccion, th: number, off?: number) => P3;
+  gap: (x: number, y: number, z: number) => number;
+  uDeX: (x: number) => number;
+  superficies: Superficie[];
+  zonasPiel: ZonaPiel[];
+  puertas: PuertaDef[];
+  tubosChasis: () => Tubo[];
+  occPts: (piloto: boolean) => PuntosOcupante;
+  asientoPiezas: (piloto: boolean) => PiezasAsiento;
+  grosorBase: () => number;
+  recDe: (piloto: boolean) => number;
+  asientos: Asiento[];
+  ruedas: Rueda[];
+  via: { del: number; tras: number };
+}
 
 /** Todo lo que sale de los parámetros: medidas derivadas y funciones de forma. */
-export function crearModelo(P: Parametros) {
+export function crearModelo(P: Parametros): Modelo {
+  return P.disposicion === 'cuatro' ? crearModeloA1(P) : crearModeloGota(P);
+}
+
+/** El Aeromóvil Gota (rombo basculante, tándem 1+2, pedaleo asistido). */
+export function crearModeloGota(P: Parametros) {
   const rF = DIAMETRO_RUEDA[P.wF] / 2, rL = DIAMETRO_RUEDA[P.wL] / 2, rR = rF;
   const xn = rF + P.overF, xR = -P.B, xt = xR - rR - P.tail, Lf = xn - xt;
   const xL = -P.xLm, Hb = P.H - P.clear;
@@ -396,21 +522,22 @@ export function crearModelo(P: Parametros) {
 
   // ── Las puertas: qué trozo de piel se abre y alrededor de qué eje ────────
   const uPuerta0 = uDeX(xPil + 0.45), uPuerta1 = uDeX(cabezaPas - 0.12);
-  const puertas: (ZonaPuerta & { bisagra: [P3, P3]; angulo: number })[] = [];
+  const puertas: PuertaDef[] = [];
+  const pz = { tipo: 'puerta' as const, superficie: 'cuerpo' as const };
   if (P.puerta === 'cabina') {
     // Cúpula de ultraligero: parabrisas, ventanillas y techo de una pieza,
     // con bisagra delante; bascula hacia arriba y hacia delante.
     const f0 = frame(uParabrisas0);
     const yB = sec(f0, 0.13 * Math.PI)[1];
-    puertas.push({ id: 'cupula', nombre: 'Cúpula basculante', u0: uParabrisas0, u1: uPuerta1, t0: 0.13 * Math.PI, t1: 0.87 * Math.PI,
+    puertas.push({ ...pz, id: 'cupula', nombre: 'Cúpula basculante', u0: uParabrisas0, u1: uPuerta1, t0: 0.13 * Math.PI, t1: 0.87 * Math.PI,
       bisagra: [[f0.x, yB, -1], [f0.x, yB, 1]], angulo: -58 });
   } else if (P.puerta === 'gaviota') {
     // Alas de gaviota: una puerta por lado, bisagra en el centro del techo.
     const fA = frame(uPuerta0), fB = frame(uPuerta1);
     const yA = sec(fA, Math.PI / 2)[1], yC = sec(fB, Math.PI / 2)[1];
-    puertas.push({ id: 'izq', nombre: 'Puerta izquierda', u0: uPuerta0, u1: uPuerta1, t0: 0.02 * Math.PI, t1: 0.5 * Math.PI,
+    puertas.push({ ...pz, id: 'izq', nombre: 'Puerta izquierda', u0: uPuerta0, u1: uPuerta1, t0: 0.02 * Math.PI, t1: 0.5 * Math.PI,
       bisagra: [[fB.x, yC, 0], [fA.x, yA, 0]], angulo: -75 });
-    puertas.push({ id: 'der', nombre: 'Puerta derecha', u0: uPuerta0, u1: uPuerta1, t0: 0.5 * Math.PI, t1: 0.98 * Math.PI,
+    puertas.push({ ...pz, id: 'der', nombre: 'Puerta derecha', u0: uPuerta0, u1: uPuerta1, t0: 0.5 * Math.PI, t1: 0.98 * Math.PI,
       bisagra: [[fA.x, yA, 0], [fB.x, yC, 0]], angulo: -75 });
   } else {
     // Tipo Aptera: puertas laterales con bisagra delante, que suben y se
@@ -418,18 +545,27 @@ export function crearModelo(P: Parametros) {
     const fA = frame(uPuerta0);
     for (const s of [1, -1]) {
       const pA = sec(fA, s > 0 ? 0.10 * Math.PI : 0.90 * Math.PI), pB = sec(fA, s > 0 ? 0.40 * Math.PI : 0.60 * Math.PI);
-      puertas.push({ id: s > 0 ? 'izq' : 'der', nombre: `Puerta ${s > 0 ? 'izquierda' : 'derecha'}`, u0: uPuerta0, u1: uPuerta1,
+      puertas.push({ ...pz, id: s > 0 ? 'izq' : 'der', nombre: `Puerta ${s > 0 ? 'izquierda' : 'derecha'}`, u0: uPuerta0, u1: uPuerta1,
         t0: s > 0 ? -0.06 * Math.PI : 0.62 * Math.PI, t1: s > 0 ? 0.38 * Math.PI : 1.06 * Math.PI,
         bisagra: s > 0 ? [pA, pB] : [pB, pA], angulo: 62 });
     }
   }
 
+  const superficies: Superficie[] = [{ id: 'cuerpo', frame, sec, tMax: 2 * Math.PI, u0: 0, u1: 1, zonas: zonasPiel, puertas, pielBase: 'carroceria' }];
+  const asientos: Asiento[] = [{ piloto: true, lat: 0, ancho: 0.42 }, { piloto: false, lat: SEAT_GAP, ancho: 0.44 }, { piloto: false, lat: -SEAT_GAP, ancho: 0.44 }];
+  const ruedas: Rueda[] = [
+    { nombre: 'Rueda delantera', x: 0, z: 0, r: rF, w: TIRE_W }, { nombre: 'Rueda trasera', x: xR, z: 0, r: rR, w: TIRE_W },
+    { nombre: 'Rueda lateral izq.', x: xL, z: P.track / 2, r: rL, w: TIRE_W }, { nombre: 'Rueda lateral der.', x: xL, z: -P.track / 2, r: rL, w: TIRE_W },
+  ];
   return {
+    tipo: 'gota' as const,
     P, dY, ys, hip, AX, avance, recDe, puno, anchoPunos, manillar, potencia, abrazadera, M, rF, rR, rL, xn, xt, xR, xL, xPil, xPas, BB, Lf, Hb, PIV, A2C, ARM_A, crown, htt, sf, sr, xCruceta,
-    frame, sec, gap, uDeX, occPts, asientoPiezas, grosorBase, tubosChasis, zonasPiel, puertas, rodilla: (h: [number, number], f: [number, number]) => ikKnee(h, f, 0.45, 0.47), girarDireccion,
+    frame, sec, gap, uDeX, occPts, asientoPiezas, grosorBase, tubosChasis, zonasPiel, puertas, superficies, asientos, ruedas, via: { del: P.track, tras: P.track },
+    rodilla: (h: [number, number], f: [number, number]) => ikKnee(h, f, 0.45, 0.47), girarDireccion,
   };
 }
-export type Modelo = ReturnType<typeof crearModelo>;
+export type ModeloGota = ReturnType<typeof crearModeloGota>;
+export type Modelo = ModeloGota | ModeloA1;
 
 /** Los tramos rectos de un tubo: uno si es recto; la curva muestreada si está curvado. */
 export function tramosTubo(t: Tubo, n = 24): [P3, P3][] {
@@ -465,7 +601,7 @@ export function contornoSeccion(m: Modelo, u: number, n = 96): [number, number][
 }
 
 /** Holgura mínima sobre las cabezas y junto a los hombros (lo que ajusta `auto`). */
-function holguras(m: Modelo) {
+function holguras(m: ModeloGota) {
   let techo = 9;
   for (const pil of [true, false]) { const o = m.occPts(pil); techo = Math.min(techo, m.frame(m.uDeX(o.C[0])).top - (o.C[1] + 0.11)); }
   const o = m.occPts(false);
@@ -479,16 +615,16 @@ function holguras(m: Modelo) {
 
 /** Con `auto`, calcula el ancho y el alto que dejan exactamente la holgura pedida. */
 export function ajustarCarenado(P: Parametros): Parametros {
-  if (!P.auto) return P;
+  if (!P.auto || P.disposicion === 'cuatro') return P;
   const biseccion = (f: (v: number) => number, lo: number, hi: number) => {
     for (let i = 0; i < 28; i++) { const mid = (lo + hi) / 2; if (f(mid) < 0) lo = mid; else hi = mid; }
     return hi;
   };
   let Q = { ...P };
   for (let ronda = 0; ronda < 3; ronda++) {
-    const H = biseccion(h => holguras(crearModelo({ ...Q, H: h })).techo - P.holgura, 0.9, 2.2);
+    const H = biseccion(h => holguras(crearModeloGota({ ...Q, H: h })).techo - P.holgura, 0.9, 2.2);
     Q = { ...Q, H: Math.round(H * 1000) / 1000 };
-    const W = biseccion(w => { const g = holguras(crearModelo({ ...Q, W: w })); return Math.min(g.hombro - P.holgura, g.lateral - 0.01); }, 0.9, 2.4);
+    const W = biseccion(w => { const g = holguras(crearModeloGota({ ...Q, W: w })); return Math.min(g.hombro - P.holgura, g.lateral - 0.01); }, 0.9, 2.4);
     Q = { ...Q, W: Math.round(W * 1000) / 1000 };
   }
   return Q;
@@ -497,7 +633,10 @@ export function ajustarCarenado(P: Parametros): Parametros {
 export interface Comprobacion { nombre: string; holgura: number; minimo: number }
 
 /** Áreas, resistencia, energía, estructura y holguras. Todo estimación. */
-export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
+export function calcular(m: Modelo, ar: ReturnType<typeof areas>): Resultados {
+  return m.tipo === 'a1' ? calcularA1(m, ar) : calcularGota(m, ar);
+}
+export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
   const P = m.P;
   let A = 0, vol = 0;
   const N = 100;
@@ -623,10 +762,16 @@ export function calcular(m: Modelo, ar: ReturnType<typeof areas>) {
     Mmax, tension, seguridad, cargaRueda, solarPico, solarDia, kmSol, areas: ar, comprobaciones: ch,
   };
 }
-export type Resultados = ReturnType<typeof calcular>;
+/** Lo que vale para los dos vehículos, más lo propio del Aeromóvil 1 en `a1`. */
+export type Resultados = ReturnType<typeof calcularGota> & { a1?: ResultadosA1 };
+export interface ResultadosA1 {
+  WhKm100: number; autonomia100: number; vmaxNominal: number; vmaxPico: number; acel50: number; acel100: number; pendiente100: number;
+  cargaHoras: { kW: number; h: number }[]; maleteroF: number; maleteroT: number; kmSolDia: number; bateriaL: number; bateriaKg: number;
+}
 
 /** Masa de cada parte (kg), a partir de los tubos del modelo y los deslizadores de masa. */
-export function estimarMasas(m: Modelo, ar: { carroceria: number; cristal: number; solar: number }, P: Parametros) {
+export function estimarMasas(m: Modelo, ar: { carroceria: number; cristal: number; solar: number }, P: Parametros): Record<string, number> {
+  if (m.tipo === 'a1') return estimarMasasA1(m, ar, P);
   const mat = MATERIALES_CHASIS[P.matChasis];
   let tubos = 0, tubosSusp = 0;
   for (const t of m.tubosChasis()) {
@@ -662,24 +807,32 @@ export function parametrosCAD(P: Parametros) {
 export function enZona(z: Zona, u: number, th: number) {
   if (u < z.u0 || u > z.u1) return false;
   const T = 2 * Math.PI;
-  const a = ((th - z.t0) % T + T) % T, w = z.t1 - z.t0;
-  return a <= w;
+  const [t0, t1] = z.tDe ? z.tDe(u) : [z.t0, z.t1];
+  const a = ((th - t0) % T + T) % T, w = t1 - t0;
+  if (a > w) return false;
+  if (!z.elipse) return true;
+  const du = (u - (z.u0 + z.u1) / 2) / ((z.u1 - z.u0) / 2), dt = (a - w / 2) / (w / 2);
+  return du * du + dt * dt <= 1;
 }
 
-/** Área de piel (m²) de carrocería, cristal y paneles, integrando la malla. */
+/** Área de piel (m²) de carrocería, cristal y paneles, integrando la malla de cada superficie. */
 export function areas(m: Modelo) {
   const nu = 120, nv = 96, out = { carroceria: 0, cristal: 0, solar: 0 };
-  const pt = (u: number, th: number) => m.sec(m.frame(u), th);
-  for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) {
-    const u0 = 0.001 + 0.998 * i / nu, u1 = 0.001 + 0.998 * (i + 1) / nu, t0 = 2 * Math.PI * j / nv, t1 = 2 * Math.PI * (j + 1) / nv;
-    const a = pt(u0, t0), b = pt(u1, t0), c = pt(u0, t1), d = pt(u1, t1);
-    const tri = (p: P3, q: P3, r: P3) => {
-      const ux = q[0] - p[0], uy = q[1] - p[1], uz = q[2] - p[2], vx = r[0] - p[0], vy = r[1] - p[1], vz = r[2] - p[2];
-      return Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 2;
-    };
-    const s = tri(a, b, c) + tri(b, d, c);
-    const zona = m.zonasPiel.find(z => enZona(z, (u0 + u1) / 2, (t0 + t1) / 2));
-    out[zona ? zona.piel === 'cristal' ? 'cristal' : 'solar' : 'carroceria'] += s;
+  const tri = (p: P3, q: P3, r: P3) => {
+    const ux = q[0] - p[0], uy = q[1] - p[1], uz = q[2] - p[2], vx = r[0] - p[0], vy = r[1] - p[1], vz = r[2] - p[2];
+    return Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 2;
+  };
+  for (const S of m.superficies) {
+    const pt = (u: number, th: number) => S.sec(S.frame(u), th);
+    const du = S.u1 - S.u0;
+    for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) {
+      const u0 = S.u0 + du * (0.001 + 0.998 * i / nu), u1 = S.u0 + du * (0.001 + 0.998 * (i + 1) / nu), t0 = S.tMax * j / nv, t1 = S.tMax * (j + 1) / nv;
+      const a = pt(u0, t0), b = pt(u1, t0), c = pt(u0, t1), d = pt(u1, t1);
+      const s = tri(a, b, c) + tri(b, d, c);
+      const zona = S.zonas.find(z => enZona(z, (u0 + u1) / 2, (t0 + t1) / 2));
+      const piel = zona ? zona.piel : S.pielBase;
+      if (piel !== 'hueco') out[piel === 'cristal' ? 'cristal' : piel === 'solar' ? 'solar' : 'carroceria'] += s;
+    }
   }
   return out;
 }

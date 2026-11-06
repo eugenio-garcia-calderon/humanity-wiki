@@ -325,6 +325,10 @@ export default function App() {
                   Eugenio). Su menú es el del Aeromóvil (diseño 3D, tareas,
                   plan, planos, exportar a CAD); no se ve Humanity.Wiki. */}
               <Route path="aeromovil/*" element={<Aeromovil />} />
+              {/* La ficha de un componente tiene tres tramos y, sin esta línea,
+                  `:arroba/:categoria/:ficha` (más abajo) gana a `aeromovil/*`
+                  y enseña «Esta página no está aquí» (2026-11-06). */}
+              <Route path="aeromovil/componentes/:id" element={<Aeromovil />} />
               {/* Arquitectura: el mundo 3D editable de la Comunidad Circular Humana
                   (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
                   cuenta y fuera del Layout, como el calendario. */}

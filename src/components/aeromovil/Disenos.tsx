@@ -23,7 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, CloudOff, FilePlus2, FolderOpen, Link2, Loader2, Save, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
-import { PARAMETROS_POR_DEFECTO, type Parametros } from './geometria';
+import { PARAMETROS_A1, PARAMETROS_GOTA, type Parametros } from './geometria';
 
 export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; updated_at: string }
 
@@ -33,7 +33,15 @@ const guardarClave = (id: number, clave: string) => { try { localStorage.setItem
 
 /** Solo los parámetros que sirven para el diseño; los de la vista (compresión) no viajan. */
 export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _c, ...resto } = P; return resto; };
-export const deDiseno = (d: Partial<Parametros>): Parametros => ({ ...PARAMETROS_POR_DEFECTO, ...d, comp: 0 });
+/**
+ * Un diseño guardado sin `disposicion` es de antes del 2026-11-06: del
+ * Aeromóvil Gota, con las medidas por defecto de entonces. Desde entonces el
+ * diseño por defecto es el Aeromóvil 1 y cada diseño dice de cuál es.
+ */
+export const deDiseno = (d: Partial<Parametros>): Parametros => {
+  const base = d.disposicion === 'cuatro' ? PARAMETROS_A1 : d.disposicion === 'rombo' ? PARAMETROS_GOTA : PARAMETROS_GOTA;
+  return { ...base, ...d, disposicion: d.disposicion ?? 'rombo', comp: 0 };
+};
 
 export type DisenoAbierto = { id: number; nombre: string; base: string };
 export type EstadoGuardado =
