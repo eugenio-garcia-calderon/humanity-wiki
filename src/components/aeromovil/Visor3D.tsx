@@ -75,14 +75,14 @@ const rot = (p: [number, number], c: [number, number], a: number): [number, numb
   return [c[0] + dx * cs - dy * sn, c[1] + dx * sn + dy * cs];
 };
 
+/** Una célula monocristalina de 125 mm: azul muy oscuro, junta fina y poco más clara, esquinas achaflanadas, dos barras colectoras tenues. */
 function texturaSolar() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d')!;
-  g.fillStyle = '#0d1630'; g.fillRect(0, 0, 128, 128);
-  g.strokeStyle = '#5b6b8c'; g.lineWidth = 3; g.strokeRect(1.5, 1.5, 125, 125);
-  g.strokeStyle = '#2a3a5e'; g.lineWidth = 1;
-  for (let i = 1; i < 6; i++) { g.beginPath(); g.moveTo(i * 128 / 6, 4); g.lineTo(i * 128 / 6, 124); g.stroke(); }
-  g.strokeStyle = '#8a97b0'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(4, 42); g.lineTo(124, 42); g.moveTo(4, 86); g.lineTo(124, 86); g.stroke();
+  g.fillStyle = '#2b3350'; g.fillRect(0, 0, 128, 128);                 // la junta (un poco más clara que la célula)
+  g.fillStyle = '#0b1230';
+  g.beginPath(); g.moveTo(8, 2); g.lineTo(120, 2); g.lineTo(126, 8); g.lineTo(126, 120); g.lineTo(120, 126); g.lineTo(8, 126); g.lineTo(2, 120); g.lineTo(2, 8); g.closePath(); g.fill();
+  g.strokeStyle = '#1e2a4a'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
   return t;
 }
@@ -93,6 +93,7 @@ function materiales() {
     glass: new THREE.MeshPhysicalMaterial({ color: 0x14212c, metalness: 0.1, roughness: 0.03, clearcoat: 1, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }),
     solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: texturaSolar(), metalness: 0.35, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, side: THREE.DoubleSide }),
     bajos: new THREE.MeshPhysicalMaterial({ color: 0x1a1c1f, metalness: 0.2, roughness: 0.55, clearcoat: 0.4, side: THREE.DoubleSide }),
+    techoInterior: new THREE.MeshStandardMaterial({ color: 0xcfd3d8, roughness: 0.9, metalness: 0, side: THREE.FrontSide }),
     cableHV: new THREE.MeshStandardMaterial({ color: 0xe8701a, metalness: 0.1, roughness: 0.6 }),
     muelle: new THREE.MeshStandardMaterial({ color: 0xc0392b, metalness: 0.5, roughness: 0.4 }),
     llanta: new THREE.MeshPhysicalMaterial({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8 }),
@@ -206,17 +207,16 @@ function construirSuperficie(S: Superficie) {
     const n: V3 = [dt[1] * du[2] - dt[2] * du[1], dt[2] * du[0] - dt[0] * du[2], dt[0] * du[1] - dt[1] * du[0]];
     const L = Math.hypot(...n) || 1; return [n[0] / L, n[1] / L, n[2] / L];
   }));
-  // Coordenadas de textura: a lo largo, x; alrededor, la distancia recorrida
-  // sobre la sección desde θ = 0. Así las células solares siguen la piel
-  // también en los costados de la cúpula, donde z apenas cambia.
-  const arco: number[][] = pos.map(fila => { const o = [0]; for (let j = 1; j < fila.length; j++) o.push(o[j - 1] + Math.hypot(fila[j][0] - fila[j - 1][0], fila[j][1] - fila[j - 1][1], fila[j][2] - fila[j - 1][2])); return o; });
+  // Coordenadas de textura: proyección en planta (x, z), así las células
+  // solares se ven rectangulares desde arriba; los costados casi verticales
+  // no llevan células (son flanco negro o ventanilla).
   type Cubo = { p: number[]; n: number[]; uv: number[]; i: number[]; mapa: Map<number, number> };
   const cubos = new Map<string, Cubo>();
   const meter = (c: Cubo, i: number, j: number) => {
     const k = i * nv + j; let v = c.mapa.get(k);
     if (v === undefined) {
       v = c.p.length / 3; c.mapa.set(k, v);
-      const q = pos[i][j]; c.p.push(...q); c.n.push(...nor[i][j]); c.uv.push(q[0] / CELULA, arco[i][j] / CELULA);
+      const q = pos[i][j]; c.p.push(...q); c.n.push(...nor[i][j]); c.uv.push(q[0] / CELULA, q[2] / CELULA);
     }
     return v;
   };
@@ -417,31 +417,36 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
     tira([0, 0.5, 1].map(k => sobre(0.93 + 0.04 * k, (s > 0 ? 0.26 - 0.10 * k : 0.74 + 0.10 * k) * Math.PI, 0.002)), 0.007, M.piloto);
     tira([0, 1].map(k => sobre(0.955 + 0.025 * k, (s > 0 ? 0.10 : 0.90) * Math.PI, 0.002)), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
   }
-  // Marcos de la cabina: el arco de arriba del parabrisas, los dos montantes
-  // inclinados (de la esquina de abajo del parabrisas al techo, como en el
-  // XL1 y el Aptera) y el contorno de cada ventanilla.
+  // Marcos de la cabina, a ras del cristal (tubos hundidos casi del todo):
+  // el arco de arriba del parabrisas, los dos montantes inclinados (XL1,
+  // Aptera), el contorno de cada ventanilla con el borde trasero inclinado
+  // como un pilar B, y la línea de corte de cada puerta de gaviota.
   {
-    const r = 0.011, arriba: V3[] = [];
-    for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1, (m.thVentana / Math.PI + (1 - 2 * m.thVentana / Math.PI) * k / 16) * Math.PI, 0.006));
-    tira(arriba, r, M.black);
+    const R = 0.016, hund = -0.012, r2 = 0.011, hund2 = -0.008, arriba: V3[] = [];
+    for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1, (m.thVentana / Math.PI + (1 - 2 * m.thVentana / Math.PI) * k / 16) * Math.PI, hund));
+    tira(arriba, R, M.black);
     for (const s of [1, -1]) {
       const th = (t: number) => (s > 0 ? t : Math.PI - t);
-      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 - m.uBase) * k / 12; pilar.push(sobreC(u, th(m.thPilar(u)), 0.006)); }
-      tira(pilar, r, M.black);
-      const techo: V3[] = []; for (let k = 0; k <= 14; k++) techo.push(sobreC(m.uW1 + (m.uVent1 - m.uW1) * k / 14, th(m.thVentana), 0.005));
-      tira(techo, 0.007, M.black);
-      const trasera: V3[] = []; for (let k = 0; k <= 8; k++) trasera.push(sobreC(m.uVent1, th(m.thVentana * k / 8), 0.005));
-      tira(trasera, 0.007, M.black);
-      const abajo: V3[] = []; for (let k = 0; k <= 14; k++) abajo.push(sobreC(m.uBase + (m.uVent1 - m.uBase) * k / 14, th(0.012 * Math.PI), 0.005));
-      tira(abajo, 0.007, M.black);
+      const pilar: V3[] = []; for (let k = 0; k <= 12; k++) { const u = m.uBase + (m.uW1 - m.uBase) * k / 12; pilar.push(sobreC(u, th(m.thPilar(u)), hund)); }
+      tira(pilar, R, M.black);
+      const techo: V3[] = []; for (let k = 0; k <= 14; k++) techo.push(sobreC(m.uW1 + (m.uVentA - m.uW1) * k / 14, th(m.thVentana), hund2));
+      tira(techo, r2, M.black);
+      const trasera: V3[] = []; for (let k = 0; k <= 10; k++) { const u = m.uVentA + (m.uVent1 - m.uVentA) * k / 10; trasera.push(sobreC(u, th(m.thTrasera(u)), hund2)); }
+      tira(trasera, r2, M.black);
+      const abajo: V3[] = []; for (let k = 0; k <= 14; k++) abajo.push(sobreC(m.uBase + (m.uVent1 - m.uBase) * k / 14, th(0.012 * Math.PI), hund2));
+      tira(abajo, r2, M.black);
+      // Corte de la puerta: por delante y por detrás, de la base al centro del techo
+      for (const p of m.puertas.filter(q => q.tipo === 'puerta' && q.superficie === 'cupula' && (s > 0 ? q.id === 'izq' : q.id === 'der'))) {
+        for (const u of [p.u0, p.u1]) { const corte: V3[] = []; for (let k = 0; k <= 12; k++) corte.push(sobreC(u, th(0.5 * Math.PI * k / 12), -0.003)); tira(corte, 0.004, M.black); }
+      }
     }
   }
+  // Aleta de la cámara trasera sobre el techo, a dos tercios de la cola (no un cubo en lo alto).
+  { const base = sobreC(m.uC0 + 0.56, Math.PI / 2, 0.002), punta = sobreC(m.uC0 + 0.60, Math.PI / 2, 0.045); tube(g, base, punta, 0.012, M.black); sphere(g, punta, 0.016, M.black); }
+  // Tercera luz de freno en el borde de fuga del techo
+  { const luz: V3[] = []; for (let k = 0; k <= 10; k++) luz.push(sobreC(m.uC1 - 0.03, (0.40 + 0.20 * k / 10) * Math.PI, 0.004)); tira(luz, 0.007, M.piloto); }
   // Barra de luz trasera a lo ancho del labio de cola, como en el XL1, que une los dos pilotos.
   { const barra: V3[] = []; for (let k = 0; k <= 20; k++) barra.push(sobre(0.962, (0.20 + 0.60 * k / 20) * Math.PI, 0.003)); tira(barra, 0.006, M.piloto); }
-  // Sin retrovisores: el SZEmission lleva una cámara en el techo de la cúpula.
-  box(g, sobreC(m.uC0 + 0.30, Math.PI / 2, 0.012), [0.05, 0.03, 0.04], M.black);
-  // Tercera luz de freno en lo alto de la cola de la cúpula
-  box(g, sobreC(m.uC1 - 0.14, Math.PI / 2, 0.004), [0.02, 0.012, 0.18], M.piloto);
   // Limpiaparabrisas tumbado en la base del parabrisas
   const uL = m.uC0 + 0.012, piv = sobreC(uL, 0.36 * Math.PI, 0.010);
   const pts: V3[] = [];
@@ -536,6 +541,16 @@ function muelle(g: THREE.Object3D, a: V3, b: V3, r: number, vueltas: number, mat
   const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), n * 2, 0.009, 8, false), mat); mesh.castShadow = true; g.add(mesh);
 }
 
+/** La misma malla desplazada `d` metros a lo largo de sus normales, con las caras vueltas (para un forro interior). */
+function desplazar(geo: THREE.BufferGeometry, d: number) {
+  const g = geo.clone(), p = g.getAttribute('position') as THREE.BufferAttribute, n = g.getAttribute('normal') as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) p.setXYZ(i, p.getX(i) + n.getX(i) * d, p.getY(i) + n.getY(i) * d, p.getZ(i) + n.getZ(i) * d);
+  const idx = g.getIndex(); if (idx) { const a = idx.array as Uint32Array | Uint16Array; for (let i = 0; i < a.length; i += 3) { const t = a[i + 1]; a[i + 1] = a[i + 2]; a[i + 2] = t; } idx.needsUpdate = true; }
+  for (let i = 0; i < n.count; i++) n.setXYZ(i, -n.getX(i), -n.getY(i), -n.getZ(i));
+  p.needsUpdate = true; n.needsUpdate = true;
+  return g;
+}
+
 /** Marca todas las mallas de un grupo con el componente al que pertenecen (para el clic). */
 function etiquetar(g: THREE.Object3D, componente: string) {
   g.traverse((o: any) => { if (o.isMesh && !o.userData.componente) o.userData.componente = componente; });
@@ -553,13 +568,16 @@ function construirFijo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
     mesh.castShadow = pieza.piel !== 'cristal'; mesh.receiveShadow = true;
     mesh.userData.componente = pieza.puerta === 'fijo' ? compDe[pieza.piel] : (pieza.puerta.startsWith('maletero') ? 'maleteros' : 'puertas');
     const capa = G[capaDe[pieza.piel]];
-    if (pieza.puerta === 'fijo') { capa.add(mesh); continue; }
+    // Techo interior: bajo el panel solar de la cúpula, una piel lisa y clara 4 mm por dentro, para no ver células desde el habitáculo.
+    const forro = S.id === 'cupula' && pieza.piel === 'solar' ? new THREE.Mesh(desplazar(pieza.geo, -0.004), M.techoInterior) : null;
+    if (forro) { forro.userData.componente = mesh.userData.componente; forro.receiveShadow = true; }
+    if (pieza.puerta === 'fijo') { capa.add(mesh); if (forro) capa.add(forro); continue; }
     // Cada trozo de puerta o tapa cuelga de un pivote en su bisagra
     const def = S.puertas.find(p => p.id === pieza.puerta)!;
     const piv = new THREE.Group(); piv.position.set(...def.bisagra[0]);
     piv.userData = { eje: new THREE.Vector3(...def.bisagra[1]).sub(new THREE.Vector3(...def.bisagra[0])).normalize(), angulo: def.angulo * Math.PI / 180, tipo: def.tipo };
     mesh.position.set(-def.bisagra[0][0], -def.bisagra[0][1], -def.bisagra[0][2]);
-    piv.add(mesh); capa.add(piv);
+    piv.add(mesh); if (forro) { forro.position.copy(mesh.position); piv.add(forro); } capa.add(piv);
     if (!puertasG.has(pieza.puerta)) puertasG.set(pieza.puerta, []);
     puertasG.get(pieza.puerta)!.push(piv);
   }

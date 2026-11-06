@@ -151,7 +151,7 @@ export const RANGOS_MASA = {
 const A1_COMUN = {
   // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
   plazas: 1 as const, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
-  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.48,
+  morroA1: 0.5, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.55,
   kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
 };
 /** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */
@@ -200,7 +200,7 @@ export const BAJOS_BASE = 0.13;
 /** Desplazamiento de la horquilla (offset). El modelo lleva las barras sobre el eje de dirección (corona sin desplazamiento): así el avance sale positivo también con la horquilla poco inclinada. */
 export const OFFSET_HORQUILLA = 0;
 /** Una célula solar de 6 pulgadas: el tamaño del cuadriculado de los paneles. */
-export const CELULA = 0.1565;
+export const CELULA = 0.125;   // célula de 125 mm (2026-11-06; antes 156,5)
 /** Rendimiento de los paneles (células de silicio monocristalino flexibles). */
 export const RENDIMIENTO_SOLAR = 0.21;
 
