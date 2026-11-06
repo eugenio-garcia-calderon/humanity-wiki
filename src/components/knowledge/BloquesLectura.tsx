@@ -271,12 +271,17 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
   // LA ENTRADILLA (2026-11-06, Eugenio: «como una nota de prensa: titular, subtitular…»): un
   // párrafo con `estilo: 'entradilla'` se lee más grande, justo debajo del titular.
   const entradilla = b.tipo === 'parrafo' && b.estilo === 'entradilla';
+  // UNA CIFRA (2026-11-06): `estilo: 'cifra'`, el número grande de los datos clave («3.890 km»).
+  const cifra = b.tipo === 'parrafo' && b.estilo === 'cifra';
+  // LOS TÍTULOS SON ENCABEZADOS DE VERDAD (2026-11-06, SEO): h2/h3/h4 como en el HTML del
+  // servidor (`htmlBloques.ts`), no un div con letra grande. El h1 es el título de la página.
+  const Etiqueta = (b.tipo === 'titulo1' ? 'h2' : b.tipo === 'titulo2' ? 'h3' : b.tipo === 'titulo3' ? 'h4' : 'div') as 'div';
   const texto = (extra?: string) => (
-    <div id={esTitulo && b.id ? String(b.id) : undefined}
-         className={cn(entradilla ? 'text-lg sm:text-xl leading-snug font-medium text-slate-600' : CLASES_TEXTO[b.tipo] || CLASES_TEXTO.parrafo, esTitulo && 'scroll-mt-20', extra)}
+    <Etiqueta id={esTitulo && b.id ? String(b.id) : undefined}
+         className={cn(entradilla ? 'text-lg sm:text-xl leading-snug font-medium text-slate-600' : cifra ? 'text-3xl sm:text-4xl font-black leading-none tracking-tight text-slate-900' : CLASES_TEXTO[b.tipo] || CLASES_TEXTO.parrafo, esTitulo && 'scroll-mt-20', extra)}
          style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
       <TextoEnriquecido texto={b.texto || ''} />
-    </div>
+    </Etiqueta>
   );
 
   // UN TÍTULO PLEGABLE (2026-10-05): el título de siempre, con su flecha, y
