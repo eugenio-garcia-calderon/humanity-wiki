@@ -1,4 +1,5 @@
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { SubpaginasEnTarjetas } from '../sitio/SeccionesSitio';
 import { enFilas, AIRE_BASE_DATOS, esPlegable, todosLosBloques, esBloqueDatos } from '../../utils/bloques';
 import { LecturaBloqueDatos } from '../bloquesDatos/registro';
@@ -12,7 +13,7 @@ import PdfEmbebido from './PdfEmbebido';
 const Formula = lazy(() => import('./Formula'));
 import BloquePizarra from './BloquePizarra';
 import EntityComments from './EntityComments';
-import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
+import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Rejilla from '../tablas/Rejilla';
 import ProductoPublico from './ProductoPublico';
@@ -22,6 +23,8 @@ import { ImagenVista } from './ImagenBloque';
 import { useSitio } from '../sitio/ContextoSitio';
 import { CargaEnOrden } from './CargaEnOrden';
 import { BdContribuible } from '../sitio/Contribuir';
+import { useEscaparate } from '../sitio/escaparate';
+import { miniatura } from '../../utils/miniatura';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -87,6 +90,84 @@ export function marcaLista(tipo: string, n: number, nivel: number): string {
  *  `BloquesLectura` dentro, que sólo ve a sus hermanos. */
 const Raiz = createContext<{ todos: any[]; paginaId?: string } | null>(null);
 const Hondura = createContext(0);
+/** Dentro de una franja, unas columnas, un desplegable o un aviso: ahí no se flota ni se estrecha nada. */
+const Anidado = createContext(false);
+
+// ── EL ESCAPARATE SE LEE COMO UNA NOTA DE PRENSA (2026-11-06) ────────────────
+// Eugenio: «las imágenes son demasiado grandes, ocupan toda la pantalla; hazlas más pequeñas,
+// al lado de otras». En un escaparate (`sitio.escaparate`) el texto va en una columna de
+// lectura (max-w-3xl), las imágenes de un mismo `grupo` son una fila de miniaturas que se
+// amplían al pulsarlas, una imagen suelta se pone pequeña al lado del texto y el vídeo es
+// mediano. Fuera del escaparate todo se pinta como siempre.
+const TEXTO_ESCAPARATE = new Set(['parrafo', 'lista', 'numerada', 'tarea', 'titulo1', 'titulo2', 'titulo3', 'cita', 'codigo', 'desplegable', 'aviso', 'tabla', 'subpagina', 'boton', 'marcador']);
+/** Las clases del envoltorio de un bloque suelto en un escaparate. */
+function anchoEscaparate(b: any): string {
+  if (b?.tipo === 'imagen' && !b.grupo) return 'md:float-right md:clear-right md:ml-8 md:mb-4 md:w-[34%] md:max-w-sm';
+  if (b?.tipo === 'medio') return 'clear-both max-w-3xl';
+  if (b?.tipo === 'titulo1') return 'clear-both max-w-3xl';
+  if (TEXTO_ESCAPARATE.has(b?.tipo)) return 'max-w-3xl';
+  return 'clear-both';
+}
+const esVideo = (b: any) => b?.tipo === 'medio' && (b.medio === 'youtube' || b.medio === 'vimeo');
+/** Escaparate: las imágenes sueltas seguidas forman una fila, como si llevaran el mismo `grupo`, y
+ *  los vídeos seguidos van de dos en dos. Una imagen sola (sin vecinas) se queda suelta. */
+function juntarSueltas(filas: any[][]): any[][] {
+  const out: any[][] = [];
+  const clase = (f: any[]) => f.length !== 1 ? null : f[0]?.tipo === 'imagen' && !f[0].grupo ? 'imagen' : esVideo(f[0]) ? 'video' : null;
+  let anterior: string | null = null;
+  for (const f of filas) {
+    const c = clase(f);
+    if (c && c === anterior) out[out.length - 1].push(f[0]);
+    else out.push([...f]);
+    anterior = c;
+  }
+  return out;
+}
+/** Una fila de imágenes en un escaparate: miniaturas, de dos a cuatro por fila. */
+const FILA_ESCAPARATE = (n: number) => n <= 2 ? 'grid-cols-2 max-w-2xl' : n === 3 ? 'grid-cols-2 sm:grid-cols-3 max-w-4xl' : 'grid-cols-2 sm:grid-cols-4';
+
+/** Una imagen que se amplía al pulsarla (escaparate). Esc, un clic o la ✕ la cierran. */
+function ImagenConLupa({ b, children }: { b: any; children: ReactNode }) {
+  const [abierta, setAbierta] = useState(false);
+  useEffect(() => {
+    if (!abierta) return;
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierta(false); };
+    window.addEventListener('keydown', tecla);
+    const antes = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', tecla); document.body.style.overflow = antes; };
+  }, [abierta]);
+  const alt = b.alt || b.pie || '';
+  return (
+    <>
+      <button type="button" onClick={() => setAbierta(true)} aria-label={alt ? `Ampliar: ${alt}` : 'Ampliar la imagen'}
+        className="block w-full cursor-zoom-in rounded-xl text-left transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
+        {children}
+      </button>
+      {abierta && typeof document !== 'undefined' && createPortal(
+        <div role="dialog" aria-modal="true" aria-label={alt || 'Imagen'} onClick={() => setAbierta(false)}
+          className="fixed inset-0 z-[100] flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-black/85 p-4 sm:p-10">
+          <img src={miniatura(b.url, 1600)} alt={alt} className="max-h-[82vh] max-w-full rounded-lg object-contain shadow-2xl" />
+          {b.pie && <p className="max-w-3xl text-center text-sm leading-snug text-white/85">{b.pie}</p>}
+          <button type="button" aria-label="Cerrar" onClick={() => setAbierta(false)}
+            className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white hover:bg-white/30">
+            <X className="h-5 w-5" />
+          </button>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+/** El id de un vídeo de YouTube o Vimeo: el guardado, o el que dice su dirección. */
+const ID_YOUTUBE = /(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{6,})/;
+export function idDelVideo(b: any): string | null {
+  if (b?.medioId) return String(b.medioId);
+  const url = String(b?.url || '');
+  const m = b?.medio === 'vimeo' ? /vimeo\.com\/(?:video\/)?(\d+)/.exec(url) : ID_YOUTUBE.exec(url);
+  return m ? m[1] : null;
+}
 
 /*
  * ══ CADA BLOQUE SE PUEDE COMENTAR (2026-08-25, fase 5 de «todo son páginas»)
@@ -190,6 +271,10 @@ function Subpagina({ id, tituloGuardado }: { id: string; tituloGuardado?: string
 const PINTAN_SUS_HIJOS = new Set(['desplegable', 'aviso', 'franja', 'columnas', 'boton', 'sincronizado']);
 
 function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentable?: string; nivel: number }) {
+  const escaparate = useEscaparate();
+  const anidado = useContext(Anidado);
+  /** Columna de lectura y cosas pequeñas: sólo en un escaparate y en lo de primer nivel. */
+  const nota = escaparate && !anidado && nivel === 0;
   // UN ENLACE A UN BLOQUE (`#b-…`, 2026-09-30). El navegador salta al ancla
   // al cargar, pero aquí los bloques llegan después: se salta a mano y se
   // resalta un momento para que se vea a qué apuntaba el enlace.
@@ -208,8 +293,9 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
     return nivel > 0 ? null : <p className="text-sm text-slate-400">Esta página todavía no tiene contenido.</p>;
   }
 
-  const uno = (b: any) => {
+  const uno = (b: any, enFila = false) => {
     const i = bloques.indexOf(b);
+    const envoltorio = nota && !enFila ? anchoEscaparate(b) : undefined;
     // LOS HIJOS DE UN BLOQUE (2026-10-05), debajo y con sangría, como en el
     // editor. Los desplegables y los títulos plegables los llevan dentro de
     // su caja; el resto, aquí.
@@ -240,16 +326,27 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
     // sirve de nada y al pulsarlo da error»). Una galería no es un texto que
     // se discuta: cada tarjeta es una página, y ésa ya tiene los suyos.
     return comentable && b?.id && b.tipo !== 'basedatos'
-      ? <ConComentarios key={b.id} paginaId={comentable} bloqueId={String(b.id)}>{caja}</ConComentarios>
-      : <div key={b?.id || i}>{caja}</div>;
+      ? <div key={b.id} className={envoltorio}><ConComentarios paginaId={comentable} bloqueId={String(b.id)}>{caja}</ConComentarios></div>
+      : <div key={b?.id || i} className={envoltorio}>{caja}</div>;
   };
 
   return (
-    <div className="space-y-2.5">
-      {enFilas(bloques).map((fila, k) => fila.length === 1 ? uno(fila[0]) : (
+    // `flow-root`: la imagen que flota al lado del texto no se sale por debajo de la página.
+    <div className={cn('space-y-2.5', nota && 'flow-root')}>
+      {(nota ? juntarSueltas(enFilas(bloques)) : enFilas(bloques)).map((fila, k) => fila.length === 1 ? uno(fila[0]) : nota && fila.every((b: any) => b?.tipo === 'imagen') ? (
+        // Escaparate: una fila de miniaturas (2 a 4), que se amplían al pulsarlas.
+        <div key={`fila-${fila[0].grupo || fila[0].id}-${k}`} className={cn('clear-both grid gap-3 sm:gap-4 [&_figure_img]:aspect-[4/3] [&_figure_img]:object-cover', FILA_ESCAPARATE(fila.length))}>
+          {fila.map((b: any) => <div key={`col-${b.id}`} className="min-w-0">{uno(b, true)}</div>)}
+        </div>
+      ) : nota && fila.every(esVideo) ? (
+        // Escaparate: dos vídeos seguidos, uno al lado del otro.
+        <div key={`videos-${fila[0].id}-${k}`} className="clear-both grid gap-4 sm:grid-cols-2">
+          {fila.map((b: any) => <div key={`col-${b.id}`} className="min-w-0">{uno(b, true)}</div>)}
+        </div>
+      ) : (
         // Columnas en pantalla ancha; una debajo de otra en un teléfono.
         <div key={`fila-${fila[0].grupo}-${k}`} className="flex flex-col sm:flex-row gap-2.5 sm:gap-10">
-          {fila.map((b: any) => <div key={`col-${b.id}`} className="sm:flex-1 min-w-0">{uno(b)}</div>)}
+          {fila.map((b: any) => <div key={`col-${b.id}`} className="sm:flex-1 min-w-0">{uno(b, true)}</div>)}
         </div>
       ))}
     </div>
@@ -259,6 +356,7 @@ function ListaBloques({ bloques, comentable, nivel }: { bloques: any[]; comentab
 function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; bloques: any[]; nivel?: number }) {
   const raiz = useContext(Raiz);
   const sitio = useSitio();
+  const escaparate = useEscaparate();
   if (!b || typeof b !== 'object') return null;
 
   // LOS TÍTULOS LLEVAN ANCLA. Sin ella, el índice enlaza a `#algo` que no
@@ -316,10 +414,10 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       return <hr className="border-slate-200 my-2" />;
 
     case 'desplegable':
-      return <Desplegable b={b} nivel={nivel} />;
+      return <Anidado.Provider value><Desplegable b={b} nivel={nivel} /></Anidado.Provider>;
 
     case 'aviso':
-      return <Aviso b={b} />;
+      return <Anidado.Provider value><Aviso b={b} /></Anidado.Provider>;
 
     // UN BLOQUE SINCRONIZADO (2026-10-06): su contenido, a la misma altura
     // que el resto, como si estuviera escrito aquí. La copia que lleva la
@@ -383,11 +481,12 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
 
     case 'imagen':
       if (!b.url) return null;
-      // Con su tamaño y su recorte (2026-10-06, ver `ImagenBloque.tsx`).
+      // Con su tamaño y su recorte (2026-10-06, ver `ImagenBloque.tsx`). En un escaparate,
+      // pequeña y con lupa (ver `anchoEscaparate`).
       return (
         <figure>
-          <ImagenVista b={b} />
-          {b.pie && <figcaption className={cn('text-xs text-slate-400 mt-1', (b.anchoImagen || b.recorte || b.relacion) && 'text-center')}>{b.pie}</figcaption>}
+          {escaparate ? <ImagenConLupa b={b}><ImagenVista b={b} /></ImagenConLupa> : <ImagenVista b={b} />}
+          {b.pie && <figcaption className={cn('text-xs text-slate-400 mt-1', escaparate ? 'leading-snug' : (b.anchoImagen || b.recorte || b.relacion) && 'text-center')}>{b.pie}</figcaption>}
         </figure>
       );
 
@@ -403,6 +502,11 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
         );
       }
       if (b.medio === 'youtube' || b.medio === 'vimeo') {
+        // EL ID, SIEMPRE (2026-11-06): cuatro vídeos de luzhumanidad.com se veían negros y daban
+        // error al darle al play porque su bloque traía la dirección y no `medioId`
+        // («/embed/undefined»). Si falta, se saca de la dirección.
+        const id = idDelVideo(b);
+        if (!id) return b.url ? <a href={b.url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-emerald-700 underline">{b.pie || 'Ver el vídeo'}</a> : null;
         const src = b.medio === 'youtube'
         // YOUTUBE SIN COOKIES (2026-08-22). `youtube-nocookie.com` es el mismo
         // reproductor sin la cookie de seguimiento: existe exactamente para
@@ -411,12 +515,14 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
         // desde antes— y aquí no se había aplicado: cuatro sitios, dos criterios.
         // Importa además para la ficha de las tiendas, donde hay que DECLARAR con qué
         // terceros se comparte y para qué.
-          ? `https://www.youtube-nocookie.com/embed/${b.medioId}`
-          : `https://player.vimeo.com/video/${b.medioId}`;
+          ? `https://www.youtube-nocookie.com/embed/${id}`
+          : `https://player.vimeo.com/video/${id}`;
         return (
           <figure>
             <div className="aspect-video rounded-xl overflow-hidden bg-black">
-              <iframe src={src} title={b.pie || 'Vídeo'} className="w-full h-full"
+              {/* Con el origen como referencia: sin ella YouTube no reproduce (error 153). */}
+              <iframe src={src} title={b.pie || 'Vídeo'} className="w-full h-full" loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
                       allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen />
             </div>
@@ -514,10 +620,10 @@ function Bloque({ b, indice, bloques, nivel = 0 }: { b: any; indice: number; blo
       return <RejillaProductos b={b} />;
 
     case 'columnas':
-      return <Columnas b={b} Dentro={BloquesLectura} />;
+      return <Anidado.Provider value><Columnas b={b} Dentro={BloquesLectura} /></Anidado.Provider>;
 
     case 'franja':
-      return <Franja b={b} Dentro={BloquesLectura} />;
+      return <Anidado.Provider value><Franja b={b} Dentro={BloquesLectura} /></Anidado.Provider>;
 
     case 'producto':
       // Ficha de verdad: foto, precio y disponibilidad. Ver `ProductoPublico`
