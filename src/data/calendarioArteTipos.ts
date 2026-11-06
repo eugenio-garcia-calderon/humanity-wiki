@@ -21,9 +21,18 @@ export interface ContenidoMes {
   ilustracion_idea: string;
   /** `/uploads/...` o https. Vacío = todavía sin ilustración. */
   imagen?: string;
-  /** Diseño 2 (2026-11-05): otra ilustración del mismo tema para comparar.
-   *  La que se imprime sigue siendo `imagen`; esta solo se ve al cambiar. */
+  /** Los diseños de la casa (2026-11-05), en orden: Diseño 1, 2, 3… Vienen del
+   *  código, nunca se guardan: los que pide alguien con «Crear nuevo diseño»
+   *  viven en `calendario_arte_disenos` y se añaden detrás al cargar.
+   *  La que se imprime sigue siendo `imagen`. */
+  disenos?: string[];
+  /** Antes del Diseño 3 era el único alternativo. Se conserva por si quedó
+   *  guardado en algún mes; ya no se escribe. */
   alternativa?: string;
+  /** El diseño favorito (2026-11-05, Eugenio: «que el usuario seleccione, no
+   *  el que se va a imprimir, sino cuál es el favorito, con una estrella»).
+   *  Es el que se ve al abrir la página. Sin elegir = el Diseño 2. */
+  favorito?: string;
   /** Encuadre de la ilustración dentro de su media hoja, en %. */
   imagen_x?: number;
   imagen_y?: number;

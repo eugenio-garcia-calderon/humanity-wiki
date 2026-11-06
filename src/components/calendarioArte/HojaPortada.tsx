@@ -20,7 +20,7 @@ import { CodigoQR } from './CodigoQR';
  *  (900 px, de sobra para 67 mm impresos a 300 ppp). Si alguien subió otra
  *  ilustración, se usa esa tal cual: la portada enseña lo que tiene el mes. */
 export function miniaturaDe(url?: string): string | undefined {
-  const m = url?.match(/^\/calendario-arte\/ilustraciones\/(mes-\d{2}(?:-b)?)\.jpg$/);
+  const m = url?.match(/^\/calendario-arte\/ilustraciones\/(mes-\d{2}(?:-[a-z])?)\.jpg$/);
   return m ? `/calendario-arte/miniaturas/${m[1]}.jpg` : url;
 }
 
@@ -32,6 +32,9 @@ interface Props {
   portada: PortadaCalendario;
   editando: boolean;
   alCambiar: (cambio: Partial<PortadaCalendario>) => void;
+  /** En pantalla, la ilustración que se está mirando de cada mes (el favorito
+   *  por defecto). Al imprimir no se pasa y sale la que se imprime. */
+  imagenes?: Record<number, string | undefined>;
   /** En pantalla, pinchar un tema lleva a su mes. Al imprimir no se pasa. */
   alAbrirMes?: (mes: number) => void;
 }
@@ -39,7 +42,7 @@ interface Props {
 /** Alto de la portada: una sola página A4 apaisada. */
 export const ALTO_PORTADA_MM = 210;
 
-export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAbrirMes }: Props) {
+export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAbrirMes, imagenes }: Props) {
   return (
     <div className="ca-hoja relative overflow-hidden bg-white text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_PORTADA_MM}mm` }}>
       <div className="ca-mitad flex flex-col overflow-hidden" style={{ height: `${ALTO_PORTADA_MM}mm`, padding: '11mm 11mm 7mm' }}>
@@ -79,7 +82,7 @@ export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAb
         <div className="grid min-h-0 flex-1 grid-cols-6" style={{ gap: '3mm', marginTop: '6mm', gridTemplateRows: 'repeat(2, minmax(0, 1fr))' }}>
           {meses.map(m => {
             const a = ACENTOS[(m.mes - 1) % 12];
-            const img = miniaturaDe(m.imagen);
+            const img = miniaturaDe(imagenes?.[m.mes] ?? m.imagen);
             const Caja: any = alAbrirMes ? 'button' : 'div';
             return (
               <Caja
