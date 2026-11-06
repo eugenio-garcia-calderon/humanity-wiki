@@ -67,7 +67,10 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
           )}
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 p-5 sm:p-7">
-            <h1 className="min-w-0 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white drop-shadow sm:text-5xl">{pagina.titulo}</h1>
+            <div className="min-w-0 max-w-3xl">
+              <h1 className="text-3xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-5xl">{pagina.titulo}</h1>
+              {typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-2 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] sm:text-base">{cfg.subtitulo.trim()}</p>}
+            </div>
             <div className="flex shrink-0 items-center gap-2">
               {ano && <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">{principal ? `Desde ${ano}` : ano}</span>}
               {estado && (
