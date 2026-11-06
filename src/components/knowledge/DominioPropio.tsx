@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle, RefreshCw, X, ShieldCheck } from 'lucide-react';
+import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle, RefreshCw, X, ShieldCheck, CornerUpRight } from 'lucide-react';
 
 // ============================================================================
 // PONER TU PROPIO DOMINIO EN UNA PÁGINA — como en Notion (2026-08-22)
@@ -20,6 +20,8 @@ import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle, RefreshCw, X, Shiel
 type Dominio = {
   id: string; dominio: string; estado: string; ultimo_error: string | null;
   pagina_id: string | null; pagina_titulo: string | null; activo_desde: string | null;
+  /** Si lo tiene, el dominio no sirve la página: manda cada visita aquí (301). */
+  redirigir_a?: string | null;
 };
 
 export default function DominioPropio({ paginaId }: { paginaId: string }) {
@@ -127,7 +129,9 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
                  className="block font-mono text-xs text-slate-800 truncate hover:underline">
                 {d.dominio}
               </a>
-              <Estado d={d} />
+              {d.redirigir_a
+                ? <span className="mt-0.5 flex items-center gap-1 text-[11px] font-bold text-sky-700"><CornerUpRight className="h-3 w-3" /> Redirige a {d.redirigir_a.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+                : <Estado d={d} />}
             </span>
             <button onClick={() => retirar(d)} aria-label="Quitar este dominio"
               className="w-11 h-11 shrink-0 grid place-items-center rounded-xl hover:bg-slate-100">
@@ -141,7 +145,8 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
               While the domain is not active, the button lives BELOW the DNS
               instructions instead (2026-10-23): it is the last step, so it
               goes last. */}
-          {d.estado === 'activo' && (
+          <Redireccion d={d} alGuardar={cargar} />
+          {d.estado === 'activo' && !d.redirigir_a && (
             <>
               <button onClick={() => comprobar(d)} disabled={comprobando === d.id}
                 className="mt-2 w-full h-10 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200
@@ -236,6 +241,60 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
           Tienes {otros.length} {otros.length === 1 ? 'dominio' : 'dominios'} más apuntando a otras páginas.
         </p>
       )}
+    </div>
+  );
+}
+
+/** REDIRIGIR A OTRA WEB (2026-11-06, Eugenio: «redirigir lighthumanity.org a luzhumanidad.com
+ *  desde la configuración»). El dominio ya apunta aquí (su DNS no se toca): solo cambia lo
+ *  que contesta. Cualquier visita, con o sin www, acaba en la portada de la otra web. */
+function Redireccion({ d, alGuardar }: { d: Dominio; alGuardar: () => void }) {
+  const [abierto, setAbierto] = useState(false);
+  const [destino, setDestino] = useState(d.redirigir_a || '');
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function guardar(valor: string | null) {
+    setGuardando(true); setError(null);
+    try {
+      const r = await fetch(`/api/dominios/${d.id}`, {
+        method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ redirigir_a: valor }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) setError(j.error || 'No se ha podido guardar.');
+      else { setAbierto(false); if (!valor) setDestino(''); alGuardar(); }
+    } catch { setError('No hay conexión con el servidor.'); }
+    setGuardando(false);
+  }
+  if (d.redirigir_a && !abierto) return (
+    <div className="mt-2 flex gap-2">
+      <button onClick={() => setAbierto(true)} className="h-9 flex-1 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">Cambiar la redirección</button>
+      <button onClick={() => guardar(null)} disabled={guardando} className="h-9 flex-1 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+        {guardando ? '…' : 'Quitar la redirección'}
+      </button>
+    </div>
+  );
+  if (!abierto) return (
+    <button onClick={() => setAbierto(true)} className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+      <CornerUpRight className="h-3.5 w-3.5" /> Redirigir a otra web
+    </button>
+  );
+  return (
+    <div className="mt-2 rounded-xl border border-sky-200 bg-sky-50 p-2.5">
+      <p className="text-[11px] leading-relaxed text-sky-900">
+        Quien abra <b>{d.dominio}</b> (con o sin www) irá directamente a esta dirección. No hace falta cambiar el DNS.
+      </p>
+      <div className="mt-2 flex gap-2">
+        <input value={destino} onChange={e => setDestino(e.target.value)} placeholder="https://luzhumanidad.com"
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); guardar(destino); } }}
+          className="h-10 min-w-0 flex-1 rounded-xl border border-sky-200 bg-white px-3 text-base focus:border-sky-400 focus:outline-none sm:text-sm" />
+        <button onClick={() => guardar(destino)} disabled={guardando || !destino.trim()}
+          className="h-10 shrink-0 rounded-xl bg-slate-900 px-3 text-xs font-bold text-white disabled:opacity-50">{guardando ? '…' : 'Guardar'}</button>
+        <button onClick={() => { setAbierto(false); setError(null); }} aria-label="Cancelar" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl hover:bg-sky-100">
+          <X className="h-4 w-4 text-sky-900" />
+        </button>
+      </div>
+      {error && <p className="mt-1.5 text-[11px] font-bold text-rose-600">{error}</p>}
     </div>
   );
 }

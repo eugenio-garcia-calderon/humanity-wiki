@@ -128,10 +128,52 @@ function ipPublica(): string {
   return nuestrasIps()[0];
 }
 
+// ── UN DOMINIO QUE REDIRIGE (2026-11-06, Eugenio) ─────────────────────────
+// «Redirigir lighthumanity.org a luzhumanidad.com desde la configuración.» Un
+// dominio con `redirigir_a` no sirve su página: cualquier visita (con o sin
+// `www.`, a cualquier camino) recibe un 301 a esa dirección. A la portada, no
+// al mismo camino: la web vieja y la nueva no comparten direcciones, y llevar
+// `/pages/algo` a una página que no existe sería peor que llevar al inicio.
+// En memoria (se recarga cada minuto y al guardarlo): va delante de cada
+// petición y no puede costar una consulta.
+const redirecciones = new Map<string, string>();
+async function recargarRedirecciones(db: any) {
+  const r = await db.execute(sql`
+    SELECT dominio, redirigir_a FROM dominios_paginas
+    WHERE redirigir_a IS NOT NULL AND estado IN ('pendiente', 'activo')
+  `);
+  redirecciones.clear();
+  for (const f of r.rows as any[]) redirecciones.set(String(f.dominio), String(f.redirigir_a));
+}
+
+/** Una dirección a la que se puede redirigir: http(s), con dominio, y que no sea el mismo. */
+export function destinoRedireccion(entrada: unknown, dominio?: string): string | null {
+  if (typeof entrada !== 'string') return null;
+  let u: URL;
+  try { u = new URL(/^https?:\/\//i.test(entrada.trim()) ? entrada.trim() : `https://${entrada.trim()}`); } catch { return null; }
+  if (!/^https?:$/.test(u.protocol) || !normalizarDominio(u.hostname)) return null;
+  if (dominio && normalizarDominio(u.hostname) === dominio) return null;
+  return u.toString();
+}
+
 export function registerDominiosRoutes(app: Express, db: any) {
   const recargar = () => recargarSubdominios(db).catch(e => console.error('[dominios] subdominios:', e.message));
   recargar();
   setInterval(recargar, 60_000).unref?.();
+  const recargarRed = () => recargarRedirecciones(db).catch(e => console.error('[dominios] redirecciones:', e.message));
+  recargarRed();
+  setInterval(recargarRed, 60_000).unref?.();
+
+  // Delante de todo: si el anfitrión es un dominio que redirige, 301 y nada más.
+  // Caddy pregunta por el certificado por otra puerta, así que esto no le estorba.
+  app.use((req: Request, res: Response, next) => {
+    if (!redirecciones.size || req.path.startsWith('/.well-known/')) return next();
+    const host = normalizarDominio(String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].replace(/:\d+$/, ''));
+    const destino = host ? redirecciones.get(host) : undefined;
+    if (!destino) return next();
+    res.set('Cache-Control', 'public, max-age=3600');
+    return res.redirect(301, destino);
+  });
   /**
    * ¿PUEDO EMITIR UN CERTIFICADO PARA ESTE DOMINIO? — lo pregunta Caddy.
    *
@@ -207,7 +249,7 @@ export function registerDominiosRoutes(app: Express, db: any) {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const r = await db.execute(sql`
-        SELECT d.id, d.dominio, d.pagina_id, d.estado, d.ultimo_error,
+        SELECT d.id, d.dominio, d.pagina_id, d.estado, d.ultimo_error, d.redirigir_a,
                d.activo_desde, d.created_at, w.title AS pagina_titulo
         FROM dominios_paginas d
         LEFT JOIN knowledge_windows w ON w.id = d.pagina_id
@@ -449,6 +491,20 @@ export function registerDominiosRoutes(app: Express, db: any) {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const retirar = req.body?.retirar === true;
+      // REDIRIGIR A OTRA WEB (2026-11-06): `redirigir_a` con una dirección la pone,
+      // `null` o vacío la quita. Solo eso: no toca a qué página apunta.
+      if (req.body && 'redirigir_a' in req.body && !retirar) {
+        const f = (await db.execute(sql`SELECT dominio FROM dominios_paginas WHERE id = ${String(req.params.id)} AND propietario_user_id = ${req.user.id}`)).rows[0] as any;
+        if (!f) return res.status(404).json({ error: 'Ese dominio no es tuyo o no existe.' });
+        const crudo = req.body.redirigir_a;
+        const destino = crudo == null || String(crudo).trim() === '' ? null : destinoRedireccion(crudo, f.dominio);
+        if (crudo != null && String(crudo).trim() !== '' && !destino) {
+          return res.status(400).json({ error: 'Escribe una dirección web válida, distinta de este mismo dominio (por ejemplo https://luzhumanidad.com).' });
+        }
+        await db.execute(sql`UPDATE dominios_paginas SET redirigir_a = ${destino}, updated_at = now() WHERE id = ${String(req.params.id)}`);
+        await recargarRedirecciones(db);
+        return res.json({ dominio: f.dominio, redirigir_a: destino });
+      }
       // Igual que al reclamarlo: `pagina_id` sigue valiendo y significa
       // `{tipo:'pagina'}`. `undefined` es «no lo toques» y `null` es
       // «apúntalo al espacio entero» — confundirlos desconectaba un dominio
