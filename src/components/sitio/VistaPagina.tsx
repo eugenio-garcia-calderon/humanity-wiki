@@ -25,6 +25,7 @@ const VistaSociedadSitio = lazy(() => import('./VistaSociedadSitio'));
 const VistaFlujoSitio = lazy(() => import('./VistaFlujoSitio'));
 const VistaProyectosSitio = lazy(() => import('./VistaProyectosSitio'));
 import BotonOpinion from './BotonOpinion';
+import { EscaparateContexto } from './escaparate';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -114,6 +115,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
     { clave: 'grupo', titulo: contexto.grupo.nombre, href: contexto.grupo.camino },
   ] : null;
   const esRaiz = !!pagina.sitio?.raizId && pagina.sitio.raizId === pagina.id;
+  const escaparate = pagina.sitio?.config?.escaparate === true;
 
   // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
   // —el servidor también los pinta—, así que aquí se cogen los que van a
@@ -224,11 +226,14 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       {!termo && !sinCabecera && <div>
       {/* LA RUTA POR RELACIONES (2026-10-26, Eugenio: «Sistemas de la Humanidad › Movilidad › el objetivo ›
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
-      {conBarra && !esRaiz && !pagina.virtual && !perfil
+      {/* En el escaparate (`sitio.escaparate`, 2026-11-06, Eugenio: «en la ruta pone Inicio, Donar,
+          José Luis Pasamontes: eso está fatal, quítalo») no hay ruta. */}
+      {escaparate ? null : conBarra && !esRaiz && !pagina.virtual && !perfil
         ? <RutaRelaciones paginaId={pagina.id} sinRuta={migasEl} />
         : migasEl}
       </div>}
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
+      <EscaparateContexto.Provider value={escaparate}>
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
         {((conBarra && esRaiz) || sinCabecera) && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
@@ -261,15 +266,16 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {cfg.pestanasTitulos && !pagina.virtual
           ? <PestanasTitulos bloques={bloques} paginaId={pagina.id} lado={cfg.pestanasTitulos === 'lado'} />
           : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
-        {!pagina.virtual && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
+        {!pagina.virtual && !escaparate && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
       </article>
       </main>
+      </EscaparateContexto.Provider>
       </div>
       {!mapa && pie}
       {/* ¿QUÉ MEJORARÍAS? (2026-10-28, `BotonOpinion.tsx`): el botón de opinión, abajo y centrado, en todas las páginas
           de un sitio; y un hueco al final para que no tape lo último del pie. */}
-      {pagina.sitio && <><div aria-hidden className="h-20" /><BotonOpinion /></>}
+      {pagina.sitio && !escaparate && <><div aria-hidden className="h-20" /><BotonOpinion /></>}
     </MarcoLectura>
     </div>
   );

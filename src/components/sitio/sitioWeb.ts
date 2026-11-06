@@ -105,6 +105,9 @@ export type Pie = {
   mapaWeb: boolean;
   /** Enseñar el correo, el teléfono y la dirección (siguen usándose en los textos legales). */
   mostrarContacto: boolean;
+  /** Una sola línea: los textos legales y el correo (2026-11-06, Eugenio en luzhumanidad.com:
+   *  «quita el footer; deja solo los avisos legales, la política de privacidad y un correo»). */
+  sencillo?: boolean;
 };
 
 export type Sitio = {
