@@ -132,18 +132,47 @@ export function crearModeloA1(P: Parametros) {
   const uC0 = P.cupX0, uC1 = P.cupX1;
   const uMedido = (u: number) => SZ.cupX0 + (u - uC0) / (uC1 - uC0) * (SZ.cupX1 - SZ.cupX0);
   const hundido = 0.06 * Hb / 0.56;           // cuánto se hunde la base en la carrocería
+  // Parabrisas plano (2026-11-06, Eugenio, con fotos del VW XL1 y del
+  // Aptera): «que sea plano el parabrisas como el XL1 pero más estrecho, ya
+  // que solo tiene que albergar al piloto… inspírate en el parabrisas del
+  // Aptera en cuanto a la curva que tiene». Entre la base del parabrisas (uC0)
+  // y su borde de arriba (uW1) la cúpula: (1) sube casi en línea recta, con
+  // la leve curva convexa del Aptera, en vez de abombarse; (2) su sección es
+  // un trapecio de esquinas redondeadas (exponente alto + caída hacia dentro),
+  // o sea un cristal casi plano de lado a lado; (3) es un 20 % más estrecha.
+  // Detrás de los hombros del piloto vuelve a ser la cúpula de siempre.
+  const plano = P.parabrisas === 'plano';
+  const uW1 = Math.min(uC1 - 0.1, uC0 + 0.17);                // borde de arriba del parabrisas
+  const pesoPlano = (u: number) => {
+    if (!plano || u < uC0) return 0;
+    if (u <= uW1) return 1;
+    const t = Math.min(1, (u - uW1) / 0.10); return 1 - t * t * (3 - 2 * t);
+  };
   const frameC = (u: number): Seccion => {
     const um = uMedido(u), deck = yCuerpo(SZ.top(u)), base = deck - hundido;
     // La cola de la cúpula se cierra en punta en los últimos 2 cm: así no queda un borde abierto.
     const cierre = Math.min(1, Math.max(0, (uC1 - u) / 0.006));
-    const top = Math.max(deck + 0.004, base + (yCupula(SZ.cupTop(um)) - base) * cierre);
-    const hw = Math.max(0.004, SZ.cupHw(um) * (SZ.W / 2) * (P.W / SZ.W) * (P.cupW / SZ.cupW) * cierre);
+    let top = Math.max(deck + 0.004, base + (yCupula(SZ.cupTop(um)) - base) * cierre);
+    let hw = Math.max(0.004, SZ.cupHw(um) * (SZ.W / 2) * (P.W / SZ.W) * (P.cupW / SZ.cupW) * cierre);
+    const w = pesoPlano(u);
+    if (w > 0) {
+      if (u <= uW1) {
+        // De perfil: casi recto de la base al borde de arriba, con la panza suave del Aptera.
+        const deck0 = yCuerpo(SZ.top(uC0)), topW = yCupula(SZ.cupTop(uMedido(uW1))), t = (u - uC0) / (uW1 - uC0);
+        top = Math.max(deck + 0.004, deck0 + (topW - deck0) * (1 - Math.pow(1 - t, 1.25)));
+      }
+      hw *= 1 - 0.20 * w;
+    }
     return { s: 1, x: xDeU(u), zc: base, top, bot: base, hw };
   };
-  const NC = 2.2;
+  // Exponente de la sección y cuánto caen hacia dentro los costados (0 = verticales).
+  const ncDe = (u: number) => 2.2 + 2.6 * pesoPlano(u);
+  const caidaDe = (u: number) => 0.28 * pesoPlano(u);
+  const uDeXC = (x: number) => (xn - x) / L;
   const secC = (f: Seccion, th: number, off = 0): P3 => {
-    const c = Math.cos(th), sn = Math.max(0, Math.sin(th));
-    return [f.x, f.zc + (f.top - f.zc + off) * Math.pow(sn, 2 / NC), (f.hw + off) * spow(c, 2 / NC)];
+    const u = uDeXC(f.x), NC = ncDe(u), k = caidaDe(u);
+    const c = Math.cos(th), sn = Math.max(0, Math.sin(th)), yn = Math.pow(sn, 2 / NC);
+    return [f.x, f.zc + (f.top - f.zc + off) * yn, (f.hw + off) * (1 - k * yn) * spow(c, 2 / NC)];
   };
   /** Holgura radial (m) de un punto a la piel: la carrocería o, por encima de la cubierta, la cúpula. */
   const gapCuerpo = (x: number, y: number, z: number) => {
@@ -159,7 +188,8 @@ export function crearModeloA1(P: Parametros) {
     if (u <= uC0 + 0.002 || u >= uC1 - 0.002) return -1;
     const f = frameC(u), ay = f.top - f.zc;
     if (y < f.zc || ay < 0.01) return -1;
-    const v = Math.pow(Math.abs(z) / f.hw, NC) + Math.pow((y - f.zc) / ay, NC);
+    const NC = ncDe(u), yn = Math.min(1, (y - f.zc) / ay), hwY = f.hw * (1 - caidaDe(u) * yn);
+    const v = Math.pow(Math.abs(z) / hwY, NC) + Math.pow(yn, NC);
     return Math.hypot(z, y - f.zc) * (1 / Math.pow(v, 1 / NC) - 1);
   };
   const gap = (x: number, y: number, z: number) => Math.max(gapCuerpo(x, y, z), gapCupula(x, y, z));
@@ -393,7 +423,7 @@ export function crearModeloA1(P: Parametros) {
   return {
     tipo: 'a1' as const,
     P, dY, ys, hip, hipPas, xn, xt, xR, Lf, Hb, rF, rR, xPil, xPas, deckY, yFloor, uC0, uC1, uCabina1, hundido,
-    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU,
+    frame, sec, frameC, secC, gap, gapCuerpo, gapCupula, uDeX, xDeU, uW1, plano,
     occPts, asientoPiezas, grosorBase, recDe, asientos, ruedas, via: { del: P.viaF, tras: P.viaR },
     tubosChasis, zonasPiel, puertas, superficies,
     baterias, motor, reductora, inversor, cargador, volante, reposapies, cremallera, torretas, arcoY, pasosRueda,
