@@ -140,7 +140,7 @@ export const COMPONENTES: Componente[] = [
   },
   {
     id: 'solar', corto: 'Paneles solares', nombre: 'Paneles solares', grupo: 'Energía', capa: 'solar',
-    que: 'Células de silicio sobre la cúpula, encima del maletero trasero, laminadas en una película flexible que sigue la curva. Cargan la batería al sol: unos kilómetros al día, y mantienen la batería sana si el vehículo se queda parado semanas.',
+    que: 'Células de silicio laminadas en una película flexible que sigue la curva, sobre todo el techo de la cúpula (plano sobre la cabina y bajando hasta la cola, como el Aptera) y sobre el lomo a los lados. Cargan la batería al sol: unos kilómetros al día, y mantienen la batería sana si el vehículo se queda parado semanas.',
     caracteristicas: [['Células', 'monocristalinas de contacto posterior (SunPower Maxeon), 22 %'], ['Laminado', 'ETFE flexible, se pega a la cúpula'], ['Potencia', '≈ 200 W por m²'], ['Masa', '2,2 kg por m²'], ['Regulador', 'MPPT de 100 V a la batería de tracción']],
     unidades: 1, masaKg: (_P, res) => res.masas['Paneles solares'] ?? 0, costeEur: (_P, res) => res.areas.solar * 200 * 2 + 120, parametroMasa: 'mSolarM2', deslizador: 'Paneles solares por m²',
     proveedores: [
@@ -255,9 +255,9 @@ export const COMPONENTES: Componente[] = [
     ],
   },
   {
-    id: 'cupula', corto: 'Cúpula', nombre: 'Cúpula y parabrisas', grupo: 'Estructura y carrocería', capa: 'cristales',
-    que: 'Policarbonato termoformado sobre un molde: el parabrisas fijo, las dos mitades que son las puertas y la tapa del maletero trasero. Lleva tratamiento duro contra rayas y filtro UV; detrás del piloto va tintada.',
-    caracteristicas: [['Material', 'policarbonato 4 mm, capa dura antirrayas'], ['Piezas', 'parabrisas + 2 puertas + tapa trasera'], ['Transparencia', 'parabrisas sin tintar; resto al 35 %'], ['Superficie', 'calculada en «Rendimiento»'], ['Limpiaparabrisas', 'uno, eléctrico, en la base']],
+    id: 'cupula', corto: 'Cristales', nombre: 'Parabrisas y ventanillas', grupo: 'Estructura y carrocería', capa: 'cristales',
+    que: 'Los cristales de la cabina: el parabrisas plano y estrecho (como el del VW XL1, con la curva suave del Aptera) y una ventanilla en cada puerta, en policarbonato termoformado con tratamiento duro contra rayas y filtro UV. El resto de la cúpula no es cristal: es carrocería con paneles solares encima, con los montantes inclinados y los marcos de las ventanillas.',
+    caracteristicas: [['Material', 'policarbonato 4 mm, capa dura antirrayas'], ['Piezas', 'parabrisas + 2 ventanillas (en las puertas)'], ['Montantes', 'inclinados, de la base del parabrisas al techo'], ['Superficie', 'calculada en «Rendimiento»'], ['Limpiaparabrisas', 'uno, eléctrico, en la base']],
     unidades: 1, masaKg: (_P, res) => res.masas['Cúpula'] ?? 0, costeEur: (P, res) => Math.round(res.areas.cristal * (P.espCristal >= 4 ? 55 : 45) + 1200), parametroMasa: 'espCristal', deslizador: 'Espesor de la cúpula',
     proveedores: [
       { nombre: 'Policarbonato Lexan Margard (SABIC) en plancha', url: 'https://www.sabic.com/', nota: '≈ 55 €/m² en 4 mm' },
