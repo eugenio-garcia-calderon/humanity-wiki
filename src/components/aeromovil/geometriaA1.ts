@@ -134,17 +134,21 @@ export function crearModeloA1(P: Parametros) {
   // atrás para un mejor encaje») mueve hacia atrás la línea donde la punta
   // redondeada se funde con el resto; y el fundido es ahora tangente: el peso
   // del círculo se apaga con pendiente cero en esa línea, así no queda arista.
-  const uRedondo = Math.max(0.02, 0.04 + 0.10 * P.morroA1 + P.posMorro);
+  // Morro en gota de agua (2026-11-07, Eugenio: «una curva en forma de gota
+  // homogénea»): de la punta a la sección máxima, el alto y el ancho crecen
+  // como un cuarto de superelipse (vertical en la punta, horizontal donde
+  // empalma), sin bulbo ni escalón: una sola curva convexa. `morroA1` es el
+  // exponente (0 = ojival, 0,7 = elipse llena, 1 = roma) y `posMorro` mueve
+  // dónde acaba el morro y empieza la carrocería de las fotos del SZEmission.
+  const uMorro = Math.min(0.5, Math.max(0.20, 0.32 + P.posMorro));
+  const kMorroN = 1.6 + 1.4 * P.morroA1;
   const frameCrudo = (u: number) => ({ top: yCuerpo(SZ.top(u)), bot: yCuerpo(SZ.bot(u)), hw: Math.max(0.004, P.W / 2 * hwN(u)) });
   const frame = (u: number): Seccion => {
     let { top, bot, hw } = frameCrudo(u);
-    if (u < uRedondo) {
-      const R = frameCrudo(uRedondo), t = u / uRedondo, circ = Math.sqrt(1 - (1 - t) * (1 - t));
-      const peso = (1 - t) * (1 - t) * (1 + 2 * t);   // 1 en la punta (siempre una semiesfera: nunca una punta afilada, 2026-11-06), 0 y plano en la unión
-      const mid = (top + bot) / 2, mitadR = (R.top - R.bot) / 2;
-      const kAlto = (1 - peso) * ((top - bot) / 2 / Math.max(1e-4, mitadR)) + peso * circ;
-      const kAncho = (1 - peso) * (hw / R.hw) + peso * circ;
-      top = mid + mitadR * kAlto; bot = mid - mitadR * kAlto; hw = Math.max(0.004, R.hw * kAncho);
+    if (u < uMorro) {
+      const R = frameCrudo(uMorro), s = u / uMorro, e = Math.pow(1 - Math.pow(1 - s, kMorroN), 1 / kMorroN);
+      const yTip = yCuerpo(SZ.top(0));   // la punta, a la altura del labio del SZEmission
+      top = yTip + (R.top - yTip) * e; bot = yTip - (yTip - R.bot) * e; hw = Math.max(0.004, R.hw * e);
     }
     return { s: hw / (P.W / 2), x: xDeU(u), zc: bot + (top - bot) * SZ.ecuador, top, bot, hw };
   };
@@ -538,7 +542,7 @@ export function crearModeloA1(P: Parametros) {
     cacheHueco.set(k, r); return r;
   };
   // La punta en azul marino como el Aptera (2026-11-06, Eugenio): hasta donde acaba la pieza redondeada.
-  const uNariz = Math.min(0.09, uRedondo);
+  const uNariz = 0.09;
   const zonasCuerpo: ZonaPiel[] = [
     { nombre: 'Pieza del morro', piel: 'morro', u0: 0, u1: uNariz, t0: 0, t1: 2 * Math.PI },
     ...huecos,

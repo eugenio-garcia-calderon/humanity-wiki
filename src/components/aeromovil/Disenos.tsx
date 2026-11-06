@@ -202,7 +202,6 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
     const url = `${location.origin}/aeromovil?diseno=${d.id}`;
     try { await navigator.clipboard.writeText(url); setAviso('Enlace copiado.'); } catch { setAviso(url); }
   };
-  const claves = leerClaves();
 
   return (
     <div ref={caja} className="relative">
@@ -218,7 +217,8 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
       </Button>
       {abierto && (
         <div role="menu" className="absolute left-0 top-full z-40 mt-1 w-[min(92vw,380px)] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-          <div className="flex flex-wrap gap-1.5 border-b border-slate-100 p-1 pb-2">
+          {!puedeDecidir && <p className="border-b border-slate-100 px-2 py-1.5 text-[11px] text-amber-800">Solo el dueño del Aeromóvil, con su sesión iniciada, guarda o cambia diseños (desde el 2026-11-07). Aquí se pueden abrir y mirar.</p>}
+          {puedeDecidir && <div className="flex flex-wrap gap-1.5 border-b border-slate-100 p-1 pb-2">
             <Button variant="outline" disabled={ocupado} onClick={guardarCambios} className="px-2.5 py-1.5 text-xs normal-case tracking-normal">
               <Save className="mr-1 h-3.5 w-3.5" />{actual ? 'Guardar cambios' : 'Guardar'}
             </Button>
@@ -228,7 +228,7 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
             <Button variant="ghost" disabled={ocupado} onClick={() => { alNuevo(); setAbierto(false); }} className="px-2.5 py-1.5 text-xs normal-case tracking-normal">
               Empezar uno nuevo
             </Button>
-          </div>
+          </div>}
           {modoNuevo && (
             <form className="flex gap-1.5 border-b border-slate-100 p-1 py-2" onSubmit={e => { e.preventDefault(); guardarNuevo(); }}>
               <label htmlFor="am-dis-nombre" className="sr-only">Nombre del diseño</label>
@@ -252,7 +252,6 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
           <ul className="max-h-[50vh] overflow-y-auto py-1">
             {lista?.map(d => {
               const esActual = actual?.id === d.id;
-              const mio = puedeDecidir || !!claves[d.id];
               return (
                 <li key={d.id} className={cn('group flex items-center gap-1 rounded-lg px-1', esActual && 'bg-teal-50')}>
                   <Button variant="ghost" role="menuitem" onClick={() => { alCargar(d); setAbierto(false); }}
@@ -266,14 +265,14 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
                       className={cn('px-1.5 py-1.5', d.por_defecto ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500')}><Star className={cn('h-3.5 w-3.5', d.por_defecto && 'fill-current')} /></Button>
                   )}
                   <Button variant="ghost" aria-label={`Copiar enlace de ${d.nombre}`} onClick={() => copiarEnlace(d)} className="px-1.5 py-1.5 text-slate-500"><Link2 className="h-3.5 w-3.5" /></Button>
-                  {(d.origen !== 'equipo' ? mio : puedeDecidir) && (
+                  {puedeDecidir && (
                     <Button variant="ghost" aria-label={`Quitar ${d.nombre}`} onClick={() => quitar(d)} className="px-1.5 py-1.5 text-slate-500 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
                   )}
                 </li>
               );
             })}
           </ul>
-          <p className="border-t border-slate-100 px-2 pt-2 text-[11px] text-slate-500">Los diseños son de todos. Solo quien creó uno (desde este navegador o con su cuenta) o el dueño del Aeromóvil puede cambiarlo o quitarlo; los diseños base solo los quita el dueño, que también elige con la estrella cuál es el diseño por defecto.</p>
+          <p className="border-t border-slate-100 px-2 pt-2 text-[11px] text-slate-500">Los diseños se pueden abrir y mirar; cambiarlos, guardarlos o quitarlos solo puede el dueño del Aeromóvil con su sesión, que también elige con la estrella cuál es el diseño por defecto.</p>
         </div>
       )}
     </div>

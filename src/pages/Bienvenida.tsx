@@ -78,7 +78,7 @@ const HERRAMIENTAS: Herramienta[] = [
 
 type Creacion = { id: string; titulo: string; resumen: string | null; imagen: string | null; url: string; Icono?: any };
 const CREACIONES_FIJAS: Creacion[] = [
-  { id: 'aeromovil', titulo: 'Aeromóvil Gota', resumen: 'El vehículo volador de la casa: diseño 3D, plan y planos.', imagen: null, url: '/aeromovil', Icono: Plane },
+  // El Aeromóvil ya no se enlaza desde aquí (2026-11-07, Eugenio): el editor está dentro del proyecto Aeromóvil.
   { id: 'calendario-arte', titulo: 'Calendario de Arte', resumen: 'Un calendario que se diseña entre todos, mes a mes.', imagen: null, url: '/calendario-arte', Icono: Palette },
 ];
 
