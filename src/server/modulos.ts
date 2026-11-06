@@ -443,7 +443,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'expertos', montar: (app, db) => registrarExpertos(app, db) },
   // EL ÚLTIMO A PROPÓSITO: su ampliación de la página tiene que pasar después de la
   // ficha de producto y de las valoraciones, que en un escaparate no aplican.
-  { nombre: 'seoEscaparate', montar: () => registrarSeoEscaparate(), nota: 'SEO de un sitio escaparate (luzhumanidad.com): títulos, descripciones, datos estructurados, sitemap y mapa del pie (2026-11-06).' },
+  { nombre: 'seoEscaparate', montar: (app, db) => registrarSeoEscaparate(app, db), nota: 'SEO de un sitio escaparate (luzhumanidad.com): títulos, descripciones, datos estructurados, sitemap y mapa del pie (2026-11-06).' },
 ];
 
 /**

@@ -28,6 +28,7 @@
 // Todo sale de los datos que la página enseña (lo marcado que no se ve es lo
 // que Google castiga). Las direcciones van relativas: `sitios.ts` las completa
 // con el dominio canónico.
+import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarAmpliacion } from './ampliarPagina';
 import { slugDe } from '../components/sitio/sitioWeb';
@@ -45,7 +46,13 @@ type Proyecto = {
   ano: string | null; estado: string | null; areas: string[]; equipo: string[]; cambio: number; peso: number; orden: number;
 };
 type Persona = { pagina: string; fila: string; titulo: string; url: string; foto: string | null; cambio: number; proyectos: string[] };
+/** Una noticia que cita un proyecto (un enlace de las listas «En los medios» de su página). */
+export type Noticia = {
+  titulo: string; url: string; medio: string; fecha: string | null; fechaTexto: string | null;
+  imagen: string | null; video: boolean; proyectos: Array<{ titulo: string; url: string }>;
+};
 type Modelo = {
+  noticias: Noticia[];
   proyectos: Proyecto[];
   personas: Persona[];
   ocultas: Set<string>;
@@ -76,6 +83,21 @@ const recorta = (t: string, n: number) => {
   return corte.slice(0, Math.max(corte.lastIndexOf(' '), n - 20)).replace(/[\s,.;:–-]+$/, '') + '…';
 };
 
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+/** La fecha escrita junto al enlace («24/03/2021», «06/2018», «2021-03-24», «2019»). */
+function fechaDe(t: string): { iso: string; texto: string } | null {
+  let m = /\b(\d{2})\/(\d{2})\/(\d{4})\b/.exec(t);
+  if (m) return { iso: `${m[3]}-${m[2]}-${m[1]}`, texto: `${Number(m[1])} ${MESES[Number(m[2]) - 1] || ''} ${m[3]}` };
+  m = /\b(\d{4})-(\d{2})-(\d{2})\b/.exec(t);
+  if (m) return { iso: `${m[1]}-${m[2]}-${m[3]}`, texto: `${Number(m[3])} ${MESES[Number(m[2]) - 1] || ''} ${m[1]}` };
+  m = /\b(\d{2})\/(\d{4})\b/.exec(t);
+  if (m) return { iso: `${m[2]}-${m[1]}`, texto: `${MESES[Number(m[1]) - 1] || ''} ${m[2]}` };
+  m = /\b(\d{4})-(\d{2})\b/.exec(t);
+  if (m) return { iso: `${m[1]}-${m[2]}`, texto: `${MESES[Number(m[2]) - 1] || ''} ${m[1]}` };
+  m = /\b(20\d{2}|19\d{2})\b/.exec(t);
+  return m ? { iso: m[1], texto: m[1] } : null;
+}
+
 async function construir(db: any, cfg: any): Promise<Modelo> {
   const tProy = String(cfg.proyectos || ''), tPers = String(cfg.personas || ''), tSist = String(cfg.sistemas || '');
   const cols = (await db.execute(sql`
@@ -90,7 +112,7 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
 
   const filas = (await db.execute(sql`
     SELECT f.id, f.pagina_id, f.valores, f.oculta, f.orden, k.title, k.slug,
-           k.config->>'subtitulo' AS sub, k.config->>'portada' AS portada,
+           k.config->>'subtitulo' AS sub, k.config->>'portada' AS portada, k.config->'bloques' AS bloques,
            GREATEST(k.updated_at, f.updated_at) AS cambio
     FROM bd_filas f JOIN knowledge_windows k ON k.id = f.pagina_id
     WHERE f.tabla_id = ${tProy} AND f.deleted_at IS NULL AND f.archived_at IS NULL
@@ -161,8 +183,37 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
     .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'es'))
     .map(([titulo, ps]) => ({ titulo, entradas: ps.map(p => ({ titulo: p.titulo, url: p.url })) }));
 
+  // LAS NOTICIAS (2026-11-06, Eugenio: «debajo de las personas, una compilación de todas las
+  // noticias, muy visual, con portada y titulares de cada proyecto»). Salen de las listas de
+  // enlaces de cada proyecto, con la portada que se guardó en el bloque (`imagen`).
+  const porUrl = new Map<string, Noticia>();
+  const bloquesDe = new Map<string, any[]>(filas.map(f => [String(f.pagina_id), Array.isArray(f.bloques) ? f.bloques : []]));
+  for (const p of proyectos) {
+    for (const b of bloquesDe.get(p.pagina) || []) {
+      if (b?.tipo !== 'lista' || typeof b.texto !== 'string') continue;
+      const m = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/.exec(b.texto);
+      if (!m) continue;
+      const ya = porUrl.get(m[2]);
+      if (ya) { if (!ya.proyectos.some(x => x.url === p.url)) ya.proyectos.push({ titulo: p.titulo, url: p.url }); continue; }
+      const resto = b.texto.replace(m[0], ' ');
+      const f = fechaDe(resto);
+      const yt = /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{6,})/.exec(m[2]);
+      let host = '';
+      try { host = new URL(m[2]).hostname.replace(/^www\./, ''); } catch { /* sin dominio */ }
+      porUrl.set(m[2], {
+        titulo: m[1].replace(/\*\*/g, '').trim(), url: m[2],
+        medio: ((/\*\*([^*]+)\*\*/.exec(resto) || [])[1] || host).replace(/\s*\(.*\)\s*$/, '').trim(),
+        fecha: f?.iso || null, fechaTexto: f?.texto || null,
+        imagen: typeof b.imagen === 'string' ? b.imagen : yt ? `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg` : null,
+        video: !!yt || /vimeo\.com|youtube\.com|youtu\.be/.test(m[2]),
+        proyectos: [{ titulo: p.titulo, url: p.url }],
+      });
+    }
+  }
+  const noticias = [...porUrl.values()].sort((x, y) => (y.fecha || '').localeCompare(x.fecha || '') || (y.imagen ? 1 : 0) - (x.imagen ? 1 : 0));
+
   return {
-    proyectos, personas, ocultas, secciones,
+    noticias, proyectos, personas, ocultas, secciones,
     porPagina: new Map(proyectos.map(p => [p.pagina, p])),
     personaDe: new Map(personas.map(p => [p.pagina, p])),
   };
@@ -231,7 +282,17 @@ function referencias(bloques: any, out: Array<{ nombre: string; url: string }> =
   return out;
 }
 
-export function registrarSeoEscaparate() {
+export function registrarSeoEscaparate(app?: Express, db?: any) {
+  // Las noticias de un escaparate, para la sección de la portada (pública: son enlaces que ya
+  // salen en las páginas de los proyectos).
+  if (app && db) app.get('/api/sitio/noticias/:raiz', async (req: Request, res: Response) => {
+    try {
+      const cfg = await configEscaparate(db, String(req.params.raiz));
+      if (!cfg) return res.status(404).json({ error: 'No es un escaparate.' });
+      const m = await modeloEscaparate(db, String(req.params.raiz), cfg);
+      res.set('Cache-Control', 'public, max-age=300').json({ noticias: m.noticias });
+    } catch (e: any) { console.error('noticias:', e); res.status(500).json({ error: e.message }); }
+  });
   registrarAmpliacion(async (db, req, pagina) => {
     if (!pagina || pagina.muro) return;
     const sitio = pagina.sitio;
