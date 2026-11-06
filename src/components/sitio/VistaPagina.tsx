@@ -26,6 +26,7 @@ const VistaFlujoSitio = lazy(() => import('./VistaFlujoSitio'));
 const VistaProyectosSitio = lazy(() => import('./VistaProyectosSitio'));
 import BotonOpinion from './BotonOpinion';
 import { EscaparateContexto } from './escaparate';
+const CabeceraProyectoEscaparate = lazy(() => import('./CabeceraProyectoEscaparate'));
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -116,6 +117,10 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   ] : null;
   const esRaiz = !!pagina.sitio?.raizId && pagina.sitio.raizId === pagina.id;
   const escaparate = pagina.sitio?.config?.escaparate === true;
+  // Un proyecto del escaparate (una fila de `sitio.proyectos`): su cabecera propia, con la portada
+  // grande y todo lo relacionado alrededor, en vez de la cabecera, seguir y las pestañas.
+  const proyectoEscaparate = escaparate && !esRaiz && !pagina.virtual && !!pagina.fila
+    && pagina.fila.tabla_id === pagina.sitio?.config?.proyectos;
 
   // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
   // —el servidor también los pinta—, así que aquí se cogen los que van a
@@ -240,6 +245,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {(conBarra && esRaiz) || sinCabecera ? null : termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : perfil ? <LecturaBloqueDatos bloque={perfil} paginaId={pagina.id} />
+          : proyectoEscaparate ? <Suspense fallback={<div className="mb-10 aspect-[16/9] w-full animate-pulse rounded-2xl bg-slate-100" />}><CabeceraProyectoEscaparate pagina={pagina} /></Suspense>
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
         {cfg.tiempoLectura === true && (() => {
@@ -255,11 +261,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {/* Con el termómetro de cabecera, las pestañas de la red van justo debajo,
             en la primera pantalla (2026-10-25: «que se vea que hay muchas opciones
             donde pinchar sin bajar»); seguir y compartir, después. */}
-        {!pagina.virtual && !esRaiz && !termo && !perfil && !sinCabecera && <AccionesPagina paginaId={pagina.id} />}
+        {!pagina.virtual && !esRaiz && !termo && !perfil && !sinCabecera && !proyectoEscaparate && <AccionesPagina paginaId={pagina.id} />}
         {/* Las páginas hijas en galería (2026-10-23, `PaginasHijas.tsx`). */}
         {!pagina.virtual && !termo && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
-        {!pagina.virtual && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
+        {!pagina.virtual && !proyectoEscaparate && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
         {termo && <GaleriaHijasLectura config={(pagina as any).config} titulo={`Páginas dentro de ${pagina.titulo || 'esta página'}`} />}
         {termo && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
         {/* Los títulos 2 como pestañas (`PestanasTitulos.tsx`), si la página lo pide. */}
