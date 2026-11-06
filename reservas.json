@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "drizzle/0174_aeromovil_diseno_por_defecto.sql",
-      "motivo": "diseño por defecto (Eugenio 2026-11-06)",
-      "desde": "2026-11-06T22:26:42.291Z"
-    }
-  ]
+  "reservas": []
 }
