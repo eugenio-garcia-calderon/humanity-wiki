@@ -32,11 +32,12 @@ import {
   type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import { RANGOS_MASA_A1 } from '../components/aeromovil/geometriaA1';
-import { MenuDisenos, aDiseno, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
+import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
 import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
+import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
 
 // v5 (2026-11-06): el diseño por defecto pasa a ser el Aeromóvil 1; lo guardado como v4 era del Gota y se queda en su clave.
 const CLAVE = 'aeromovil.parametros.v5';
@@ -91,6 +92,35 @@ function Deslizador({ id, etiqueta, valor, min, max, paso, mostrar, alCambiar, d
       <input id={id} type="range" min={min} max={max} step={paso} value={valor} disabled={desactivado}
         onChange={e => alCambiar(Number(e.target.value))} className="col-span-2 mt-1 w-full accent-teal-700" />
     </div>
+  );
+}
+
+/** Plano del garaje visto desde arriba: nuestro coche en el centro y los otros alrededor; se arrastran con el ratón o el dedo. */
+function MapaGaraje({ garaje, largo, ancho, morro, alMover, alGirar }: { garaje: { id: string; visible: boolean; x: number; z: number; giro: number }[]; largo: number; ancho: number; morro: number; alMover: (id: string, x: number, z: number) => void; alGirar: (id: string) => void }) {
+  const ref = useRef<SVGSVGElement>(null);
+  const R = 7;   // metros a cada lado del centro
+  const esc = (v: number) => (v / R) * 50;  // → unidades SVG (viewBox de -50 a 50)
+  const arrastre = useRef<{ id: string; dx: number; dz: number } | null>(null);
+  const aMetros = (e: React.PointerEvent) => {
+    const r = ref.current!.getBoundingClientRect();
+    return { x: ((e.clientY - r.top) / r.height - 0.5) * -2 * R, z: ((e.clientX - r.left) / r.width - 0.5) * -2 * R };   // arriba = delante (+x), izquierda del coche (+z) = izquierda del plano
+  };
+  const coches = garaje.filter(g => g.visible);
+  return (
+    <svg ref={ref} viewBox="-50 -50 100 100" className="aspect-square w-full touch-none rounded-lg border border-slate-200 bg-slate-50" aria-label="Plano del garaje"
+      onPointerMove={e => { const a = arrastre.current; if (!a) return; const p = aMetros(e); alMover(a.id, p.x - a.dx, p.z - a.dz); }}
+      onPointerUp={e => { if (arrastre.current) { (e.target as Element).releasePointerCapture?.(e.pointerId); arrastre.current = null; } }}>
+      {[-5, 0, 5].map(k => <g key={k}><line x1={esc(k)} y1={-50} x2={esc(k)} y2={50} stroke="#e2e8f0" strokeWidth={0.4} /><line x1={-50} y1={esc(k)} x2={50} y2={esc(k)} stroke="#e2e8f0" strokeWidth={0.4} /></g>)}
+      <rect x={esc(-ancho / 2)} y={esc(-morro)} width={esc(ancho)} height={esc(largo)} rx={3} fill="#0f766e" opacity={0.85} />
+      <text x={0} y={esc(largo / 2 - morro) + 2} textAnchor="middle" fontSize={4} fill="#fff">A1</text>
+      {coches.map(c => { const v = VEHICULOS_GARAJE.find(x => x.id === c.id)!; const vert = Math.abs(Math.sin(c.giro)) < 0.5; const w = vert ? v.ancho : v.largo, h = vert ? v.largo : v.ancho;
+        const cx = -c.z, cy = -(c.x - (vert ? v.largo / 2 - (v.largo - v.batalla) / 2 : 0));   // el eje delantero va a (largo − batalla)/2 del morro
+        return (
+        <g key={c.id} className="cursor-grab" onPointerDown={e => { const p = aMetros(e); arrastre.current = { id: c.id, dx: p.x - c.x, dz: p.z - c.z }; (e.target as Element).setPointerCapture?.(e.pointerId); }} onDoubleClick={() => alGirar(c.id)}>
+          <rect x={esc(cx - w / 2)} y={esc(cy - h / 2)} width={esc(w)} height={esc(h)} rx={2.5} fill="#f59e0b" opacity={0.8} />
+          <text x={esc(cx)} y={esc(cy) + 1.5} textAnchor="middle" fontSize={3.4} fill="#1e293b">{v.nombre.split(' ')[0]}</text>
+        </g>); })}
+    </svg>
   );
 }
 
@@ -160,6 +190,15 @@ function LadoA1({ P, Pa, set, res, modelo, neumaticos, malas, alNavegar }: {
         <Deslizador id="a1-mo" etiqueta="Redondez del morro" valor={P.morroA1} min={0.2} max={1} paso={0.05} mostrar={`${fmt((0.04 + 0.10 * P.morroA1 + P.posMorro) * P.L * 100, 0)} cm de punta redonda · ${P.morroA1 > 0.85 ? 'romo' : 'Aptera'}`} alCambiar={v => set('morroA1', v)} />
         <Deslizador id="a1-pm" etiqueta="Alcance de la pieza del morro" valor={P.posMorro} min={-0.03} max={0.15} paso={0.01} mostrar={`${P.posMorro >= 0 ? '+' : ''}${(P.posMorro * P.L * 100).toFixed(0)} cm`} alCambiar={v => set('posMorro', v)} />
         <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+          <div><div className="text-sm font-medium text-slate-800">Opción Jaguar</div><div className="text-xs text-slate-500">la carrocería envuelve las ruedas con un abombamiento redondo, como el D-Type</div></div>
+          <Button variant="outline" aria-pressed={P.jaguar} onClick={() => set('jaguar', !P.jaguar)} className={cn('shrink-0 px-3 py-1.5 text-xs normal-case tracking-normal', P.jaguar && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{P.jaguar ? 'Activada' : 'Activar'}</Button>
+        </div>
+        {P.jaguar && (<>
+          <Deslizador id="a1-jh" etiqueta="Jaguar: cuánto sobresale" valor={P.jagAlto} min={0.01} max={0.15} paso={0.005} mostrar={`${fmt(P.jagAlto * 100, 1)} cm sobre la rueda`} alCambiar={v => set('jagAlto', v)} />
+          <Deslizador id="a1-jl" etiqueta="Jaguar: largo del abombamiento" valor={P.jagLargo} min={0.6} max={2.0} paso={0.05} mostrar={m2(P.jagLargo)} alCambiar={v => set('jagLargo', v)} />
+          <Deslizador id="a1-ja" etiqueta="Jaguar: alcance en vertical" valor={P.jagAncho} min={0.12} max={0.5} paso={0.01} mostrar={P.jagAncho < 0.2 ? 'solo la cintura' : P.jagAncho > 0.4 ? 'hasta el hombro' : 'cintura y flanco'} alCambiar={v => set('jagAncho', v)} />
+        </>)}
         <p className="-mt-2 text-xs text-slate-500">Parabrisas plano (como el VW XL1) con montantes inclinados, una ventanilla a cada lado y el panel solar en la parte plana del techo, que baja en una sola curva hasta la cola (como el Aptera).</p>
         <Deslizador id="a1-parab" etiqueta="Inclinación del parabrisas" valor={P.parabrisas} min={0.12} max={0.32} paso={0.005} mostrar={`${m2(P.parabrisas * P.L)} de largo · ${P.parabrisas < 0.17 ? 'empinado' : P.parabrisas > 0.26 ? 'muy tumbado' : 'tumbado'}`} alCambiar={v => set('parabrisas', v)} />
         <Deslizador id="a1-techo" etiqueta="Caída del techo" valor={P.techo} min={1} max={3} paso={0.05} mostrar={P.techo < 1.25 ? 'recta desde el pico' : P.techo > 2.2 ? 'alto hasta el final' : 'curva suave (Aptera)'} alCambiar={v => set('techo', v)} />
@@ -327,6 +366,14 @@ export default function Aeromovil() {
   }, []);
   const alGuardado = useCallback((d: Diseno) => setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) }), []);
   const guardadoWeb = useAutoguardado(P, actual, alGuardado);
+  // Quien llega por primera vez (sin nada guardado en este navegador) abre el
+  // diseño por defecto de la web, si hay uno (2026-11-06, Eugenio).
+  useEffect(() => {
+    let hayAlgo = false; try { hayAlgo = !!localStorage.getItem(CLAVE) || !!localStorage.getItem('aeromovil.diseno'); } catch { /* sin almacenamiento */ }
+    if (hayAlgo || new URLSearchParams(loc.search).get('diseno')) return;
+    cargarDisenoPorDefecto().then(d => { if (d) abrirDiseno(d); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // `?diseno=ID` abre ese diseño (es el enlace que se comparte desde el menú).
   useEffect(() => {
     const id = Number(new URLSearchParams(loc.search).get('diseno'));
@@ -369,10 +416,21 @@ export default function Aeromovil() {
   const [rayosX, setRayosX] = useState(false);
   const [corte, setCorte] = useState(false);
   const [curva, setCurva] = useState(false);
-  const [verCotas, setVerCotas] = useState(true);
+  const [verCotas, setVerCotas] = useState(false);   // apagadas al cargar (2026-11-06, Eugenio)
   const [abierta, setAbierta] = useState(false);
   const [maleteros, setMaleteros] = useState(false);
   const [sinPasajero, setSinPasajero] = useState(false);
+  // El garaje: qué vehículos se ven y dónde están (eje delantero en el suelo, m). Se recuerda en este navegador.
+  type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number };
+  const [garaje, setGaraje] = useState<PlazaGaraje[]>(() => {
+    const base = VEHICULOS_GARAJE.map((v, i) => ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
+    try { const g = JSON.parse(localStorage.getItem('aeromovil_garaje') || 'null'); if (Array.isArray(g)) return base.map(b => ({ ...b, ...(g.find((x: any) => x?.id === b.id) || {}) })); } catch { /* sin memoria */ }
+    return base;
+  });
+  useEffect(() => { try { localStorage.setItem('aeromovil_garaje', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
+  // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
+  const soloGaraje = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
+  const garajeVisor = useMemo(() => soloGaraje ? [{ id: soloGaraje, x: 0, z: 0, giro: 0 }] : garaje.filter(v => v.visible).map(v => ({ id: v.id, x: v.x, z: v.z, giro: v.giro })), [garaje, soloGaraje]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -408,7 +466,7 @@ export default function Aeromovil() {
           <Logo nombre={nombreVehiculo} />
           {dueno?.nombre && <span className="-ml-3 text-xs text-slate-500">de {dueno.nombre}</span>}
           <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
-            alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); }}
+            alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
             {SECCIONES.filter(s => s.k !== 'componentes' || esA1).map(s => {
@@ -431,7 +489,7 @@ export default function Aeromovil() {
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <section className="relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50 lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]" aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {referencia && modoRef !== 'no' && (
             <div className="absolute right-3 top-3 z-10 flex max-w-[min(92%,560px)] flex-col gap-2 rounded-xl border border-teal-200 bg-white/95 p-2.5 shadow-sm backdrop-blur">
@@ -539,6 +597,18 @@ export default function Aeromovil() {
                 </Button>
               ))}
             </div>
+          </Bloque>
+
+          <Bloque titulo="Garaje" nota="otros vehículos al lado">
+            <div className="flex flex-col gap-1.5">
+              {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
+                <Button key={v.id} variant="outline" aria-pressed={pl.visible} onClick={() => setGaraje(g => g.map(x => x.id === v.id ? { ...x, visible: !x.visible } : x))}
+                  className={cn('justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !pl.visible && 'border-dashed text-slate-400')}>
+                  <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
+                </Button>); })}
+            </div>
+            {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={P.L} ancho={P.W} morro={modelo.xn} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
+            <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el plano para acercarlo o apartarlo; doble clic lo gira un cuarto de vuelta. Los modelos los va haciendo un bot, uno a uno.</p>
           </Bloque>
 
           {esA1 ? <LadoA1 P={P} Pa={Pa} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} /> : (<>

@@ -22,6 +22,7 @@ import {
 } from './geometria';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
+import { vehiculoGaraje } from './garaje';
 
 /** Las capas. `solo` limita una capa a un vehículo: la dirección y la transmisión son del Aeromóvil 1. */
 export const CAPAS = [
@@ -60,6 +61,10 @@ interface Props {
   maleteros?: boolean;
   /** Sin el pasajero ni su asiento, y con las cotas del espacio trasero que queda (Aeromóvil 1). */
   sinPasajero?: boolean;
+  /** Otros vehículos aparcados alrededor (el garaje): id del catálogo, posición del eje delantero en el suelo y giro. */
+  garaje?: { id: string; x: number; z: number; giro?: number }[];
+  /** Solo el garaje, sin nuestro coche (para mirar un modelo del garaje a solas). */
+  soloGaraje?: boolean;
   vista: Vista;
   /** Al pinchar en una pieza: su componente (para ir a su página). */
   alPinchar?: (componente: string) => void;
@@ -1070,7 +1075,7 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
@@ -1136,6 +1141,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     for (const c of CAPAS) { G[c.k] = new THREE.Group(); G[c.k].name = c.n; coche.add(G[c.k]); }
     const grupoCotas = new THREE.Group(); grupoCotas.visible = false; scene.add(grupoCotas);
     const grupoRef = new THREE.Group(); grupoRef.visible = false; scene.add(grupoRef);
+    const grupoGaraje = new THREE.Group(); scene.add(grupoGaraje);
     const puertasG = new Map<string, THREE.Group[]>();
 
     const resize = () => {
@@ -1147,7 +1153,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let ultimo = performance.now(), tc = 0, acc = 0, raf = 0;
     const st = {
-      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, puertasG, tween: null as any,
+      renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, grupoGaraje, puertasG, tween: null as any,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
     };
@@ -1236,6 +1242,24 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     g.visible = true;
     st.coche.visible = modoRef !== 'sola';
   }, [referencia, modoRef, alinear, modelo]);
+  // El garaje: cada vehículo se construye una vez por cambio de lista (los
+  // modelos son pesados) y se coloca con su eje delantero en (x, z).
+  const claveGaraje = garaje.map(v => v.id).join('|');
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    const g: THREE.Group = st.grupoGaraje; vaciar(g);
+    for (const v of garaje) {
+      const def = vehiculoGaraje(v.id); if (!def) continue;
+      const obj = def.construir(); obj.name = v.id; obj.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      g.add(obj);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveGaraje]);
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+  }, [garaje]);
+  useEffect(() => { const st = estado.current; if (!st) return; st.coche.visible = !soloGaraje && !(referencia && modoRef === 'sola'); st.grupoCotas.visible = !soloGaraje && verCotas && modoRef !== 'sola'; }, [soloGaraje, referencia, modoRef, verCotas]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaMalObjetivo = maleteros ? 1 : 0; }, [maleteros]);
 

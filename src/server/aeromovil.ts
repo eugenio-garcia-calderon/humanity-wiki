@@ -179,14 +179,14 @@ export function registerAeromovilRoutes(app: Express, db: any) {
   // Eugenio: «guardar configuraciones y tener varios diseños… que estén en el
   // menú». Crear: cualquiera. Cambiar o quitar: el dueño, un administrador o
   // quien lo creó (con la clave que se le dio al crearlo, guardada en su navegador).
-  const COLS_DISENO = sql`id, nombre, parametros, autor, origen, created_at, updated_at`;
+  const COLS_DISENO = sql`id, nombre, parametros, autor, origen, por_defecto, created_at, updated_at`;
   const parametrosValidos = (v: unknown) => !!v && typeof v === 'object' && !Array.isArray(v) && JSON.stringify(v).length <= MAX_PARAMETROS;
   const nombreValido = (v: unknown) => String(v ?? '').trim().slice(0, 80);
 
   /** GET /api/aeromovil/disenos — los diseños vivos, el más reciente primero. */
   app.get('/api/aeromovil/disenos', async (_req: Request, res: Response) => {
     try {
-      const r = await db.execute(sql`SELECT ${COLS_DISENO} FROM aeromovil_disenos WHERE archived_at IS NULL ORDER BY (origen = 'equipo') DESC, updated_at DESC LIMIT 200`);
+      const r = await db.execute(sql`SELECT ${COLS_DISENO} FROM aeromovil_disenos WHERE archived_at IS NULL ORDER BY por_defecto DESC, (origen = 'equipo') DESC, updated_at DESC LIMIT 200`);
       res.set('Cache-Control', 'no-store');
       res.json(r.rows);
     } catch (e: any) {
@@ -256,7 +256,27 @@ export function registerAeromovilRoutes(app: Express, db: any) {
     }
   });
 
-  /** DELETE /api/aeromovil/disenos/:id — se archiva, no se borra. Body { clave? }. */
+  /**
+   * POST /api/aeromovil/disenos/:id/por-defecto — lo deja como diseño por
+   * defecto (solo uno; el dueño o un admin). Es el que abre quien llega por
+   * primera vez y el que carga «Empezar uno nuevo» (2026-11-06, Eugenio).
+   */
+  app.post('/api/aeromovil/disenos/:id/por-defecto', async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'Diseño no válido.' });
+      if (!puedeDecidir(req, await dueno(db))) return res.status(403).json({ error: 'Solo el dueño del Aeromóvil puede elegir el diseño por defecto.' });
+      const r = await db.execute(sql`SELECT id FROM aeromovil_disenos WHERE id = ${id} AND archived_at IS NULL`);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese diseño no existe.' });
+      await db.execute(sql`UPDATE aeromovil_disenos SET por_defecto = (id = ${id}) WHERE por_defecto OR id = ${id}`);
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('aeromovil diseno por defecto:', e);
+      res.status(500).json({ error: 'No se ha podido cambiar el diseño por defecto.' });
+    }
+  });
+
+  /** DELETE /api/aeromovil/disenos/:id — se archiva, no se borra. Body { clave? }. Los diseños base también, si lo pide el dueño (2026-11-06). */
   app.delete('/api/aeromovil/disenos/:id', async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.id);

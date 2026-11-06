@@ -20,12 +20,17 @@
 // no tienen historial). Y un diseño sin guardar nunca se crea solo: cada
 // visitante que juega con los deslizadores llenaría la lista de todos.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, CloudOff, FilePlus2, FolderOpen, Link2, Loader2, Save, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, CloudOff, FilePlus2, FolderOpen, Link2, Loader2, Save, Star, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { PARAMETROS_A1, PARAMETROS_GOTA, type Parametros } from './geometria';
 
-export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; updated_at: string }
+export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; por_defecto?: boolean; updated_at: string }
+
+/** El diseño por defecto guardado en la web (el que abre quien llega por primera vez), o null si no hay. */
+export async function cargarDisenoPorDefecto(): Promise<Diseno | null> {
+  try { const r = await fetch('/api/aeromovil/disenos', { credentials: 'include' }); if (!r.ok) return null; const l: Diseno[] = await r.json(); return l.find(d => d.por_defecto) ?? null; } catch { return null; }
+}
 
 const CLAVES = 'aeromovil.claves';
 export const leerClaves = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(CLAVES) || '{}') || {}; } catch { return {}; } };
@@ -188,6 +193,11 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
     try { await llamar(`/api/aeromovil/disenos/${d.id}`, 'DELETE', { clave: leerClaves()[d.id] }); setAviso(`«${d.nombre}» quitado.`); cargar(); }
     catch (e: any) { setAviso(e.message); } finally { setOcupado(false); }
   };
+  const ponerPorDefecto = async (d: Diseno) => {
+    setOcupado(true); setAviso(null);
+    try { await llamar(`/api/aeromovil/disenos/${d.id}/por-defecto`, 'POST', {}); setAviso(`«${d.nombre}» es ahora el diseño por defecto: el que abre quien llega por primera vez y el que carga «Empezar uno nuevo».`); cargar(); }
+    catch (e: any) { setAviso(e.message); } finally { setOcupado(false); }
+  };
   const copiarEnlace = async (d: Diseno) => {
     const url = `${location.origin}/aeromovil?diseno=${d.id}`;
     try { await navigator.clipboard.writeText(url); setAviso('Enlace copiado.'); } catch { setAviso(url); }
@@ -249,17 +259,21 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
                     className="min-w-0 flex-1 justify-start gap-2 px-2 py-1.5 text-left text-sm font-medium normal-case tracking-normal text-slate-800">
                     {esActual ? <Check className="h-3.5 w-3.5 shrink-0 text-teal-700" /> : <span className="w-3.5 shrink-0" />}
                     <span className="min-w-0 flex-1 truncate">{d.nombre}</span>
-                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
+                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
                   </Button>
+                  {puedeDecidir && (
+                    <Button variant="ghost" aria-label={d.por_defecto ? `${d.nombre} es el diseño por defecto` : `Poner ${d.nombre} por defecto`} aria-pressed={!!d.por_defecto} disabled={!!d.por_defecto || ocupado} onClick={() => ponerPorDefecto(d)}
+                      className={cn('px-1.5 py-1.5', d.por_defecto ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500')}><Star className={cn('h-3.5 w-3.5', d.por_defecto && 'fill-current')} /></Button>
+                  )}
                   <Button variant="ghost" aria-label={`Copiar enlace de ${d.nombre}`} onClick={() => copiarEnlace(d)} className="px-1.5 py-1.5 text-slate-500"><Link2 className="h-3.5 w-3.5" /></Button>
-                  {mio && d.origen !== 'equipo' && (
+                  {(d.origen !== 'equipo' ? mio : puedeDecidir) && (
                     <Button variant="ghost" aria-label={`Quitar ${d.nombre}`} onClick={() => quitar(d)} className="px-1.5 py-1.5 text-slate-500 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
                   )}
                 </li>
               );
             })}
           </ul>
-          <p className="border-t border-slate-100 px-2 pt-2 text-[11px] text-slate-500">Los diseños son de todos. Solo quien creó uno (desde este navegador o con su cuenta) o el dueño del Aeromóvil puede cambiarlo o quitarlo.</p>
+          <p className="border-t border-slate-100 px-2 pt-2 text-[11px] text-slate-500">Los diseños son de todos. Solo quien creó uno (desde este navegador o con su cuenta) o el dueño del Aeromóvil puede cambiarlo o quitarlo; los diseños base solo los quita el dueño, que también elige con la estrella cuál es el diseño por defecto.</p>
         </div>
       )}
     </div>

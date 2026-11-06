@@ -85,6 +85,11 @@ export interface Parametros {
   pedDist: number;  // pedales/reposapiés: más lejos (+) o más cerca (−) del piloto (m)
   pedAlt: number;   // pedales/reposapiés: más altos (+) o más bajos (−) (m)
   altBat: number;   // batería: altura sobre el suelo del chasis (m; negativo = baja hacia la panza)
+  // «Opción Jaguar» (2026-11-06, Eugenio, con el D-Type): la carrocería envuelve cada rueda con un abombamiento redondo, sin perder la aerodinámica.
+  jaguar: boolean;  // activada o no
+  jagAlto: number;  // cuánto sobresale el abombamiento sobre la rueda (m)
+  jagLargo: number; // largo del abombamiento a lo largo del coche (m)
+  jagAncho: number; // cuánto abarca en vertical, en fracción de media vuelta (0,3 = de la cintura al hombro)
   techo: number;    // caída del techo del pico a la cola: 1 = recta, más = se mantiene alto y cae al final (Aptera ≈ 1,6)
   parabrisas: number; // largo del parabrisas en fracción del largo (de su base a su borde de arriba): corto = empinado, largo = tumbado
   kWNom: number;    // potencia nominal del motor (kW)
@@ -177,8 +182,15 @@ export const RANGOS_MASA = {
 // de 24″ el tubo de dirección se sale del morro: las comprobaciones lo avisan.
 const A1_COMUN = {
   // Ejes, cubierta y cúpula: lo que midió el bot evaluador en las fotos del SZEmission (rondas 1 y 2, 2026-11-06).
-  plazas: 2 as const, altPil: 0.14, altPas: 0.12, L: 3.64, fMorro: 0.21, viaF: 1.10, viaR: 0.96, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
-  morroA1: 0.7, posMorro: 0, colaA1: 0.5, deck: 0.63, cupX0: 0.19, cupX1: 0.99, cupW: 0.58, techoW: 0.78, inicioSolar: 0.04, volAlt: 0, volDist: 0, pedDist: 0, pedAlt: 0, altBat: 0, techo: 1.9, parabrisas: 0.21,
+  // Por defecto, la configuración que Eugenio fijó el 2026-11-06 a las 23:08
+  // («utiliza esta configuración como modelo base por defecto»): 3,94 m de
+  // largo, batalla 2,05, vías 1,22/1,00, bajos a 19 cm, 1,55 × 1,11 m, cubierta
+  // a 0,69 m, parabrisas de 1,00 m desde 0,75 m del morro, cabina 0,81 m de
+  // base y 0,63 m de techo, piloto a 0,62 m reclinado 39°, pasajero a 1,31 m
+  // reclinado 30°, volante 12 cm más cerca, pedales 3 cm más cerca y 8 cm más bajos.
+  plazas: 2 as const, altPil: 0.06, altPas: 0.06, L: 3.94, fMorro: 0.22, viaF: 1.22, viaR: 1.00, neumF: '125/80R13' as Neumatico, neumR: '145/80R13' as Neumatico,
+  morroA1: 0.2, posMorro: -0.02, colaA1: 0.5, deck: 0.622, cupX0: 0.19, cupX1: 0.995, cupW: 0.523, techoW: 0.78, inicioSolar: 0, volAlt: 0, volDist: -0.12, pedDist: -0.03, pedAlt: -0.08, altBat: 0, techo: 1.9, parabrisas: 0.254,
+  jaguar: false, jagAlto: 0.06, jagLargo: 1.10, jagAncho: 0.30,
   kWNom: 15, kWPico: 32, kWh: 27, whKg: 165, whL: 200, mInversor: 6, mReductora: 11, mFrenos: 2.8, mDireccion: 7,
 };
 /** El Aeromóvil Gota: los que Eugenio fijó el 2026-11-05 (ver arriba). Es lo que abre un diseño guardado sin `disposicion`. */
@@ -200,7 +212,7 @@ export const PARAMETROS_GOTA: Parametros = {
  */
 export const PARAMETROS_A1: Parametros = {
   ...PARAMETROS_GOTA, disposicion: 'cuatro',
-  B: 1.75, W: 1.63, H: 1.34, clear: 0.175, xPil: 0.55, xPas: 1.27, recPil: 35, recPas: 45, nU: 3.3, nL: 4.0, puerta: 'gaviota',
+  B: 2.05, W: 1.55, H: 1.11, clear: 0.19, xPil: 0.62, xPas: 1.31, recPil: 39, recPas: 30, nU: 3.3, nL: 4.0, puerta: 'gaviota',
   spineD: 40, spineT: 2.0, comp: 0, mOcc: 80, pedal: 0, speed: 100, sol: 4.5,
   matChasis: 'al6061', extraChasis: 6, mRueda: 8, mSuspension: 26, mMotor: 16, mGenerador: 0, mBateria: 0,
   mAsiento: 7, matCarenado: 'carbono', espCarenado: 1.8, espCristal: 4.0, mSolarM2: 2.2, mVarios: 25,
