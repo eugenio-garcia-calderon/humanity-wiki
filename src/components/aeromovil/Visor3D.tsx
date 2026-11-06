@@ -174,7 +174,7 @@ function construirSuperficie(S: Superficie) {
   if (banda) {
     for (let k = 0; k <= 20; k++) { const [a, b] = banda.tDe!(banda.u0 + (banda.u1 - banda.u0) * k / 20); medL += a / 21; medR += b / 21; }
     ts.push(medL, medR);
-    for (let k = 1; k < 40; k++) { const u = banda.u0 + (banda.u1 - banda.u0) * k / 40; if (enRango(u)) us.push(u); }
+    for (let k = 1; k < 90; k++) { const u = banda.u0 + (banda.u1 - banda.u0) * k / 90; if (enRango(u)) us.push(u); }
   }
   const U = unicos(us), TH = unicos(ts.map(t => (t >= T - 1e-6 ? T : t)));
   if (TH[TH.length - 1] < T) TH.push(T);
@@ -184,8 +184,9 @@ function construirSuperficie(S: Superficie) {
   const real = (i: number, t: number) => {
     if (!banda || jL < 1 || jR <= jL || jR >= nv - 1) return t;
     const u = U[i]; if (u < banda.u0 || u > banda.u1) return t;
-    const [a, b] = banda.tDe!(u), pts: [number, number][] = [[0, 0], [TH[jL], a], [TH[jR], b], [T, T]];
-    for (let k = 0; k < 3; k++) if (t <= pts[k + 1][0]) { const [x0, y0] = pts[k], [x1, y1] = pts[k + 1]; return x1 > x0 ? y0 + (y1 - y0) * (t - x0) / (x1 - x0) : y1; }
+    // Solo se deforma la mitad de abajo (de π a 2π): la de arriba, con las puertas y los paneles, se queda como está.
+    const [a, b] = banda.tDe!(u), pts: [number, number][] = [[0, 0], [Math.PI, Math.PI], [TH[jL], a], [TH[jR], b], [T, T]];
+    for (let k = 0; k < 4; k++) if (t <= pts[k + 1][0]) { const [x0, y0] = pts[k], [x1, y1] = pts[k + 1]; return x1 > x0 ? y0 + (y1 - y0) * (t - x0) / (x1 - x0) : y1; }
     return t;
   };
   const pos: V3[][] = U.map((u, i) => { const f = S.frame(u); return TH.map(t => S.sec(f, real(i, t))); });
@@ -574,7 +575,8 @@ function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
   // carrocería. Tapa el interior que se veía por el arco (la piel no tiene
   // espesor) y es lo que un coche de verdad lleva ahí.
   for (const p of m.pasosRueda) {
-    const caña = new THREE.Mesh(new THREE.CylinderGeometry(p.R, p.R, p.largo, 40, 1, true, Math.PI / 2, Math.PI), M.bajos);
+    const arco = p.arco * Math.PI / 180;
+    const caña = new THREE.Mesh(new THREE.CylinderGeometry(p.R, p.R, p.largo, 40, 1, true, Math.PI - arco / 2, arco), M.bajos);
     caña.position.set(p.x, p.y, p.z); caña.rotation.x = Math.PI / 2; caña.receiveShadow = true; caña.userData.componente = 'carroceria'; G.carenado.add(caña);
   }
   // Volante: aro inclinado, tres radios y el centro; la columna ya está en los tubos de Dirección.
