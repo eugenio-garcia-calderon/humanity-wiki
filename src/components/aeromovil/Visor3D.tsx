@@ -408,6 +408,17 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
     tira([0, 0.5, 1].map(k => sobre(0.93 + 0.04 * k, (s > 0 ? 0.26 - 0.10 * k : 0.74 + 0.10 * k) * Math.PI, 0.002)), 0.007, M.piloto);
     tira([0, 1].map(k => sobre(0.955 + 0.025 * k, (s > 0 ? 0.10 : 0.90) * Math.PI, 0.002)), 0.005, s > 0 ? M.intermitenteI : M.intermitenteD);
   }
+  // Parabrisas plano: un marco oscuro fino en su borde de arriba (en arco,
+  // como el del Aptera) y en los dos montantes, para que se lea como una luna
+  // aparte del resto de la cúpula.
+  if (m.plano) {
+    const arriba: V3[] = []; for (let k = 0; k <= 16; k++) arriba.push(sobreC(m.uW1, (0.06 + 0.88 * k / 16) * Math.PI, 0.006));
+    tira(arriba, 0.010, M.black);
+    for (const th of [0.06 * Math.PI, 0.94 * Math.PI]) {
+      const montante: V3[] = []; for (let k = 0; k <= 10; k++) montante.push(sobreC(m.uC0 + 0.004 + (m.uW1 - m.uC0 - 0.004) * k / 10, th, 0.006));
+      tira(montante, 0.010, M.black);
+    }
+  }
   // Sin retrovisores: el SZEmission lleva una cámara en el techo de la cúpula.
   box(g, sobreC(m.uC0 + 0.30, Math.PI / 2, 0.012), [0.05, 0.03, 0.04], M.black);
   // Tercera luz de freno en lo alto de la cola de la cúpula
