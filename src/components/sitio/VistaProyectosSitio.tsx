@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutGrid, Pencil, Plus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useSitio } from './ContextoSitio';
 import { raizDe } from './CabeceraSitio';
 import { miniatura } from '../../utils/miniatura';
+const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
 // LA VISTA «PROYECTOS» — EL LABORATORIO (2026-11-05, la reestructuración)
@@ -317,6 +318,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           </ul>
         </section>
       )}
+
+      {/* EN LOS MEDIOS (2026-11-06): todas las noticias de los proyectos, debajo de las personas. */}
+      <Suspense fallback={null}><NoticiasSitio raizId={raizId} /></Suspense>
     </div>
   );
 }
