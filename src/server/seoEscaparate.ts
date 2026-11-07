@@ -37,6 +37,7 @@ import path from 'path';
 import { bloquesNoticia, noticiaDeBloque, dominioDelMedio } from '../utils/noticias';
 import { uploadsDir, rutaLocalDeUpload } from './uploads';
 import { videosJsonLd, videosDeBloques, datosVideo } from './videosEscaparate';
+import { madresValidas } from './permisos';
 
 // LOS LOGOS DE LOS MEDIOS (2026-11-06, Eugenio: «destacando el medio con los logos de esos
 // periódicos»). Uno por dominio en /uploads/2026/11/logos/<dominio>.png (los baja y revisa
@@ -361,16 +362,39 @@ export async function configEscaparate(db: any, raizId: string): Promise<any | n
   return cfg;
 }
 
-/** Las direcciones del sitemap de un escaparate: la portada, los proyectos y las personas visibles. */
+/** LAS PÁGINAS DEL PIE (2026-11-07): las que enlaza la línea de páginas del pie (`pie.enlaces` que
+ *  van a una página: «Colabora», «Sala de prensa», «Quiénes somos»), si están publicadas, se dejan
+ *  indexar, tienen su nombre corto y cuelgan de la portada (si no, su dirección no se abriría en el
+ *  dominio). Para el sitemap, por su dirección corta. */
+export async function paginasDelPie(db: any, raiz: any): Promise<Array<{ id: string; url: string; cambio: number; img: string | null }>> {
+  const enlaces = Array.isArray(raiz?.config?.sitio?.pie?.enlaces) ? raiz.config.sitio.pie.enlaces : [];
+  const ids = [...new Set(enlaces.filter((e: any) => e?.destino?.tipo === 'pagina' && idDePagina(e.destino.id)).map((e: any) => String(e.destino.id)))] as string[];
+  if (!ids.length) return [];
+  const r = await db.execute(sql`
+    SELECT k.id, k.slug, k.updated_at, k.config->>'imagenCompartir' AS img FROM knowledge_windows k
+    WHERE k.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND k.kind = 'pagina' AND k.publico = true AND k.indexable = true
+      AND k.deleted_at IS NULL AND k.archived_at IS NULL AND k.slug ~ '^[a-z0-9-]+$' AND k.id <> ${raiz.id}
+      AND EXISTS (SELECT 1 FROM (${madresValidas(sql`k.id`)}) madre WHERE madre.id = ${raiz.id})
+  `);
+  const porId = new Map((r.rows as any[]).map(x => [String(x.id), x]));
+  return ids.map(id => porId.get(id)).filter(Boolean).map((x: any) => ({
+    id: String(x.id), url: `/${x.slug}`, cambio: new Date(x.updated_at).getTime(), img: typeof x.img === 'string' && /^\/uploads\//.test(x.img) ? x.img : null,
+  }));
+}
+
+/** Las direcciones del sitemap de un escaparate: la portada, los proyectos, las personas visibles y las páginas del pie. */
 export async function urlsEscaparate(db: any, host: string, raiz: any): Promise<Array<{ loc: string; mod: string; t: number; img: string | null }>> {
   const m = await modeloEscaparate(db, raiz.id, raiz.config.sitio);
   const fecha = (t: number) => new Date(t).toISOString().slice(0, 10);
   const abs = (u: string | null) => !u ? null : /^https?:\/\//.test(u) ? u : `https://${host}${u.startsWith('/') ? '' : '/'}${u}`;
   const ultimo = Math.max(new Date(raiz.updated_at).getTime(), ...m.proyectos.map(p => p.cambio), 0);
+  const delPie = await paginasDelPie(db, raiz).catch(e => { console.error('sitemap: páginas del pie', e); return []; });
   return [
     { loc: `https://${host}/`, mod: fecha(ultimo), t: ultimo, img: abs(raiz.config?.imagenCompartir || raiz.config?.portada || m.proyectos[0]?.portada || null) },
     ...m.proyectos.map(p => ({ loc: `https://${host}${p.url}`, mod: fecha(p.cambio), t: p.cambio, img: abs(p.portada) })),
     ...m.personas.map(p => ({ loc: `https://${host}${p.url}`, mod: fecha(p.cambio), t: p.cambio, img: abs(p.foto) })),
+    // Sus secciones cambian con los proyectos (las cifras, las notas, los medios): la fecha es la más reciente de las dos.
+    ...delPie.map(p => ({ loc: `https://${host}${p.url}`, mod: fecha(Math.max(p.cambio, ultimo)), t: Math.max(p.cambio, ultimo), img: abs(p.img) })),
   ];
 }
 
