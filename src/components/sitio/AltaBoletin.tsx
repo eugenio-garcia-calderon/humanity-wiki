@@ -32,7 +32,8 @@ const TEXTOS: Record<Resultado, { titulo: string; texto: (email: string | null, 
   fallo: { bien: false, titulo: 'Casi está', texto: () => 'Hemos guardado tu suscripción, pero ahora mismo no hemos podido enviarte el correo para confirmarla. Inténtalo de nuevo dentro de un rato.' },
   error: { bien: false, titulo: 'No ha podido ser', texto: () => 'No hemos podido apuntarte. Revisa tu correo y vuelve a intentarlo.' },
   rapido: { bien: false, titulo: 'Un momento', texto: () => 'Has ido muy rápido. Espera un segundo y vuelve a intentarlo.' },
-  espera: { bien: false, titulo: 'Un momento', texto: () => 'Has hecho varios intentos seguidos. Prueba dentro de un rato.' },
+  // Sin atribuirle nada: detrás de su conexión puede haber un aula entera (revisión del 2026-11-07).
+  espera: { bien: false, titulo: 'Un momento', texto: () => 'Ahora llegan muchos envíos desde tu conexión. Prueba dentro de unos minutos.' },
 };
 
 /** `#boletin-confirmar=…` o `#boletin-baja=…` o `#boletin-resultado=…`, si lo hay. */
@@ -47,7 +48,35 @@ function leerAncla(): { clase: 'confirmar' | 'baja'; token: string } | { clase: 
 /** Quita el `#…` de la dirección sin mover la página ni dejar rastro en el historial. */
 const limpiarAncla = () => window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
 
-export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true }: {
+/**
+ * Centra `el` y lo mantiene centrado MIENTRAS LA PÁGINA SE SIGUE COLOCANDO
+ * (revisión del 2026-11-07). Quien envió el alta antes de que arrancara el
+ * JavaScript vuelve a la página con el resultado detrás de `#`; al leerlo, la
+ * portada todavía está pidiendo sus proyectos, y al llegar empujan el pie hacia
+ * abajo: un solo `scrollIntoView` lo dejaba fuera de la pantalla (medido:
+ * `scrollY = 0` al terminar, a 1280 y a 390). Se vuelve a centrar cada vez que
+ * la página cambia de alto, hasta que lleva 1,5 s quieta (10 s como mucho) o
+ * hasta que quien lee mueve la página: lo que haga él manda.
+ */
+function mantenerALaVista(el: HTMLElement) {
+  const centrar = () => el.scrollIntoView({ block: 'center' });
+  centrar();
+  if (typeof ResizeObserver === 'undefined') return;
+  const EVENTOS = ['wheel', 'touchstart', 'keydown', 'mousedown'] as const;
+  let calma = 0;
+  const ro = new ResizeObserver(() => { centrar(); window.clearTimeout(calma); calma = window.setTimeout(parar, 1500); });
+  const tope = window.setTimeout(parar, 10_000);
+  function parar() {
+    ro.disconnect();
+    window.clearTimeout(calma);
+    window.clearTimeout(tope);
+    for (const e of EVENTOS) window.removeEventListener(e, parar);
+  }
+  ro.observe(document.body);
+  for (const e of EVENTOS) window.addEventListener(e, parar, { passive: true });
+}
+
+export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true, colorLinea }: {
   /** La raíz del sitio. Sin ella (la vista previa del editor), el formulario se ve pero no envía. */
   raizId: string | null;
   /** El nombre del sitio, «Luz & Humanidad». */
@@ -56,6 +85,8 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
   responsable: string;
   /** Sobre un pie oscuro (por defecto) o claro. */
   oscuro?: boolean;
+  /** El color de la línea que la separa del resto del pie: el mismo que el de la barra legal. */
+  colorLinea?: string;
 }) {
   const [email, setEmail] = useState('');
   const [acepta, setAcepta] = useState(false);
@@ -82,14 +113,15 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
       if (a.clase === 'resultado') {
         setResultado({ r: a.resultado, email: null });
         limpiarAncla();
-        refSeccion.current?.scrollIntoView({ block: 'center' });
+        if (refSeccion.current) mantenerALaVista(refSeccion.current);
       } else setDialogo(a);
     };
     mirar();
     window.addEventListener('hashchange', mirar);
     return () => window.removeEventListener('hashchange', mirar);
   }, []);
-  useEffect(() => { if (resultado) refResultado.current?.focus(); }, [resultado]);
+  // `preventScroll`: quien mueve la página es `mantenerALaVista` (o nadie, si ya se ve).
+  useEffect(() => { if (resultado) refResultado.current?.focus({ preventScroll: true }); }, [resultado]);
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
@@ -118,18 +150,35 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
     } finally { setEnviando(false); }
   };
 
-  const otraVez = () => { setResultado(null); setTimeout(() => refEmail.current?.focus(), 0); };
+  // TRAS UN ALTA, EL FORMULARIO VUELVE VACÍO (revisión del 2026-11-07). La siguiente
+  // puede ser otra persona —un móvil que se pasan en una charla—, y no debe encontrar
+  // el correo de la anterior ni la casilla ya marcada: el consentimiento tiene que ser
+  // un gesto suyo. Tras un error, «Volver a intentarlo» conserva lo escrito.
+  const otraVez = () => {
+    if (resultado && TEXTOS[resultado.r].bien) { setEmail(''); setAcepta(false); }
+    setErrores({});
+    setResultado(null);
+    montado.current = Date.now();
+    setTimeout(() => refEmail.current?.focus(), 0);
+  };
 
   // Los colores del pie los elige quien publica: la franja se lee sobre uno oscuro y sobre uno claro.
+  // El anillo de la píldora sólo con el foco EN EL CORREO (`has-[input:focus-visible]`): con el
+  // foco en «Suscribirme» se encendían dos, el de la píldora y el del botón.
   const t = oscuro
-    ? { titulo: 'text-white', texto: 'text-slate-300', suave: 'text-slate-400', marca: 'text-amber-300', caja: 'bg-white/[0.07] ring-white/20 focus-within:ring-amber-300', input: 'text-white placeholder:text-slate-400', error: 'text-rose-300', enlace: 'text-white decoration-amber-300/70 hover:decoration-amber-300', borde: 'border-white/10', foco: 'focus-visible:ring-offset-slate-900' }
-    : { titulo: 'text-slate-900', texto: 'text-slate-600', suave: 'text-slate-500', marca: 'text-amber-700', caja: 'bg-white ring-slate-300 focus-within:ring-slate-900', input: 'text-slate-900 placeholder:text-slate-500', error: 'text-rose-700', enlace: 'text-slate-900 decoration-amber-500 hover:decoration-slate-900', borde: 'border-slate-200', foco: 'focus-visible:ring-offset-white' };
+    ? { titulo: 'text-white', texto: 'text-slate-300', suave: 'text-slate-400', marca: 'text-amber-300', caja: 'bg-white/[0.07] ring-white/20 has-[input:focus-visible]:ring-amber-300', input: 'text-white placeholder:text-slate-400', error: 'text-rose-300', enlace: 'text-white decoration-amber-300/70 hover:decoration-amber-300', borde: 'border-white/10', foco: 'focus-visible:ring-offset-slate-900' }
+    : { titulo: 'text-slate-900', texto: 'text-slate-600', suave: 'text-slate-500', marca: 'text-amber-700', caja: 'bg-white ring-slate-300 has-[input:focus-visible]:ring-slate-900', input: 'text-slate-900 placeholder:text-slate-500', error: 'text-rose-700', enlace: 'text-slate-900 decoration-amber-500 hover:decoration-slate-900', borde: 'border-slate-200', foco: 'focus-visible:ring-offset-white' };
+  // El foco de la franja es ámbar, y no el contorno esmeralda del resto del sitio (`index.css`):
+  // sobre el azul marino del pie, el esmeralda se queda en 3,2:1. Cada control con este anillo
+  // lleva `data-sin-contorno` para que no salgan los dos.
   const anillo = cn('outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2', t.foco);
   const info = TEXTOS[resultado?.r || 'guardado'];
 
   return (
-    <section ref={refSeccion} aria-labelledby="boletin-titulo" data-boletin className={cn('border-b', t.borde)}>
-      <div className="mx-auto grid max-w-[calc(576px+50vw)] gap-6 px-5 py-9 @2xl:px-8 @2xl:py-12 @4xl:grid-cols-[minmax(0,1fr)_minmax(0,29rem)] @4xl:items-center @4xl:gap-14">
+    <section ref={refSeccion} aria-labelledby="boletin-titulo" data-boletin>
+      {/* La línea de abajo va DENTRO del contenedor, como la de la barra legal del pie: las dos miden lo mismo. */}
+      <div style={colorLinea ? { borderColor: colorLinea } : undefined}
+        className={cn('mx-auto grid max-w-[calc(576px+50vw)] gap-6 border-b px-5 py-9 @2xl:px-8 @2xl:py-12 @4xl:grid-cols-[minmax(0,1fr)_minmax(0,29rem)] @4xl:items-center @4xl:gap-14', !colorLinea && t.borde)}>
         <div className="min-w-0">
           <p className={cn('inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em]', t.marca)}>
             <Mail className="h-3.5 w-3.5" aria-hidden /> Boletín
@@ -145,7 +194,7 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
 
         <div className="min-w-0">
           {resultado ? (
-            <div ref={refResultado} tabIndex={-1} role="status" className="outline-none">
+            <div ref={refResultado} tabIndex={-1} role="status" data-sin-contorno className="outline-none">
               <p className={cn('flex items-center gap-2 text-lg font-black', t.titulo)}>
                 {info.bien
                   ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" aria-hidden />
@@ -153,21 +202,23 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
                 {info.titulo}
               </p>
               <p className={cn('mt-1.5 text-[15px] leading-relaxed', t.texto)}>{resultado.mensaje && !info.bien ? resultado.mensaje : info.texto(resultado.email, nombre)}</p>
-              <button type="button" onClick={otraVez} className={cn('mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-bold underline decoration-2 underline-offset-4', t.enlace, anillo)}>
+              <button type="button" onClick={otraVez} data-sin-contorno className={cn('mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-bold underline decoration-2 underline-offset-4', t.enlace, anillo)}>
                 {info.bien ? 'Apuntar otro correo' : 'Volver a intentarlo'}
               </button>
             </div>
           ) : (
             <form method="post" action={raizId ? `/api/sitio/${encodeURIComponent(raizId)}/boletin` : undefined} onSubmit={enviar} noValidate={vivo}
               aria-busy={enviando || undefined} aria-label="Suscribirme al boletín">
-              <div className={cn('flex items-center gap-1.5 rounded-full p-1.5 ring-1 transition-shadow', t.caja, errores.email && 'ring-2 ring-rose-400 focus-within:ring-rose-400')}>
+              <div className={cn('flex items-center gap-1.5 rounded-full p-1.5 ring-1 transition-shadow', t.caja, errores.email && 'ring-2 ring-rose-400 has-[input:focus-visible]:ring-rose-400')}>
                 <label htmlFor="boletin-correo" className="sr-only">Tu correo electrónico</label>
                 <input ref={refEmail} id="boletin-correo" type="email" name="email" required autoComplete="email" inputMode="email" spellCheck={false}
                   placeholder="tu@correo.com" value={email} onChange={e => { setEmail(e.target.value); if (errores.email) setErrores(x => ({ ...x, email: undefined })); }}
                   aria-invalid={errores.email ? true : undefined} aria-describedby={errores.email ? 'boletin-error-correo' : undefined}
                   disabled={!raizId} data-sin-contorno
                   className={cn('h-11 min-w-0 flex-1 bg-transparent pl-4 text-base outline-none', t.input)} />
-                <button type="submit" disabled={!raizId || enviando} data-sin-contorno
+                {/* Mientras envía, `aria-disabled` y no `disabled`: un botón desactivado suelta el foco y
+                    quien usa el teclado o un lector de pantalla se queda en ninguna parte. */}
+                <button type="submit" disabled={!raizId} aria-disabled={enviando || undefined} data-sin-contorno
                   className={cn('inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-amber-400 px-5 text-[15px] font-black text-slate-900 transition-colors hover:bg-amber-300',
                     enviando ? 'cursor-wait' : !raizId && 'cursor-not-allowed opacity-60', anillo)}>
                   {enviando ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
@@ -184,7 +235,7 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
                 {/* El texto es `TEXTO_CASILLA` (`formularios.ts`), el que se guarda como aceptado; aquí, con el enlace. */}
                 <label htmlFor="boletin-acepto" className={cn('cursor-pointer text-sm leading-6', t.texto)}>
                   He leído y acepto la{' '}
-                  <a href="#privacidad" className={cn('font-semibold underline decoration-2 underline-offset-2', t.enlace)}>política de privacidad</a>
+                  <a href="#privacidad" data-sin-contorno className={cn('rounded-sm font-semibold underline decoration-2 underline-offset-2', t.enlace, anillo)}>política de privacidad</a>
                 </label>
               </div>
               {errores.consentimiento && <p id="boletin-error-acepto" className={cn('mt-1 pl-9 text-sm font-semibold', t.error)}>{errores.consentimiento}</p>}
@@ -204,19 +255,28 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
   );
 }
 
-/** Confirmar el alta o darse de baja, desde el enlace del correo. Pregunta antes de hacer nada. */
+/** Confirmar el alta o darse de baja, desde el enlace del correo. Pregunta antes de hacer nada.
+ *
+ *  EL FOCO NO SE PIERDE (revisión del 2026-11-07). Medido: al pulsar «Confirmar
+ *  suscripción», el foco caía a <body> y ahí se quedaba, y quien usa un lector de
+ *  pantalla no oía «¡Suscripción confirmada!». Ahora: mientras envía, el botón
+ *  sigue enfocable (`aria-disabled`); al acabar, el foco va al título, que lo
+ *  anuncia, y el texto de debajo se lee solo (`aria-live`). */
 function DialogoBoletin({ clase, token, raizId, nombre, onCerrar }: {
   clase: 'confirmar' | 'baja'; token: string; raizId: string; nombre: string; onCerrar: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const refTitulo = useRef<HTMLHeadingElement>(null);
   const [estado, setEstado] = useState<'pregunta' | 'enviando' | 'hecho' | 'error'>('pregunta');
   const [aviso, setAviso] = useState('');
   useEffect(() => {
     const d = ref.current;
     if (d && !d.open) { try { d.showModal(); } catch { d.setAttribute('open', ''); } }
   }, []);
+  useEffect(() => { if (estado === 'hecho' || estado === 'error') refTitulo.current?.focus(); }, [estado]);
 
   const hacer = async () => {
+    if (estado === 'enviando') return;
     setEstado('enviando');
     try {
       const r = await fetch(`/api/sitio/${encodeURIComponent(raizId)}/boletin/${clase}`, {
@@ -248,13 +308,16 @@ function DialogoBoletin({ clase, token, raizId, nombre, onCerrar }: {
           estado === 'hecho' ? 'bg-emerald-100 text-emerald-700' : estado === 'error' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800')}>
           <Icono className="h-6 w-6" aria-hidden />
         </span>
-        <h2 id="boletin-dialogo-titulo" className="mt-4 text-xl font-black tracking-tight text-slate-900">{titulo}</h2>
-        <p id="boletin-dialogo-texto" className="mt-2 text-base leading-relaxed text-slate-600">{texto}</p>
+        {/* Enfocable SÓLO con el resultado: al abrirse, el diálogo da el foco al primer elemento
+            enfocable, y tiene que ser el botón de confirmar o de darse de baja, no el título. */}
+        <h2 id="boletin-dialogo-titulo" ref={refTitulo} tabIndex={estado === 'hecho' || estado === 'error' ? -1 : undefined} data-sin-contorno
+          className="mt-4 text-xl font-black tracking-tight text-slate-900 outline-none">{titulo}</h2>
+        <p id="boletin-dialogo-texto" aria-live="polite" className="mt-2 text-base leading-relaxed text-slate-600">{texto}</p>
         <div className="mt-6 flex flex-wrap items-center gap-2">
           {estado === 'pregunta' || estado === 'enviando' ? (
             <>
-              <button type="button" onClick={hacer} disabled={estado === 'enviando'} autoFocus
-                className={cn('inline-flex h-11 items-center gap-2 rounded-full px-5 text-[15px] font-black transition-colors disabled:opacity-70',
+              <button type="button" onClick={hacer} aria-disabled={estado === 'enviando' || undefined} autoFocus
+                className={cn('inline-flex h-11 items-center gap-2 rounded-full px-5 text-[15px] font-black transition-colors aria-disabled:cursor-wait aria-disabled:opacity-70',
                   baja ? 'bg-slate-900 text-white hover:bg-slate-700' : 'bg-amber-400 text-slate-900 hover:bg-amber-300')}>
                 {estado === 'enviando' && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                 {baja ? 'Darme de baja' : 'Confirmar suscripción'}
@@ -264,7 +327,7 @@ function DialogoBoletin({ clase, token, raizId, nombre, onCerrar }: {
               </button>
             </>
           ) : (
-            <button type="button" onClick={cerrar} autoFocus className="inline-flex h-11 items-center rounded-full bg-slate-900 px-5 text-[15px] font-black text-white hover:bg-slate-700">
+            <button type="button" onClick={cerrar} className="inline-flex h-11 items-center rounded-full bg-slate-900 px-5 text-[15px] font-black text-white hover:bg-slate-700">
               Cerrar
             </button>
           )}

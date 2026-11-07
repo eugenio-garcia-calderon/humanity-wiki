@@ -314,9 +314,11 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   const legales = (Object.keys(NOMBRES_LEGALES) as DocLegal[]).filter(d => p.legales[d]);
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
   // EL BOLETÍN DEL ESCAPARATE (2026-11-07, `AltaBoletin.tsx`): la primera franja del pie. En la
-  // vista previa del editor (sin raíz) se ve igual, pero no envía.
+  // vista previa del editor (sin raíz) se ve igual, pero no envía. Su línea, del color de la
+  // de la barra legal.
   const boletin = s.escaparate
-    ? <AltaBoletin raizId={rutas.raizId || null} nombre={nombre || s.titular.nombre || ''} responsable={responsableDe(s, nombre)} oscuro={textoSobre(p.fondo) === '#ffffff'} />
+    ? <AltaBoletin raizId={rutas.raizId || null} nombre={nombre || s.titular.nombre || ''} responsable={responsableDe(s, nombre)}
+        oscuro={textoSobre(p.fondo) === '#ffffff'} colorLinea={/^#[0-9a-f]{6}$/i.test(p.texto || '') ? `${p.texto}26` : undefined} />
     : null;
   if (p.sencillo) return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">

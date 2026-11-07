@@ -63,13 +63,29 @@ const parrafos = (v: unknown) => String(v ?? '')
 const marcada = (v: unknown) => v === true || v === 'on' || v === 'true' || v === '1';
 
 /** La primera capa de información de protección de datos (art. 13 del RGPD),
- *  como recomienda la AEPD: quién, para qué, con qué base y qué derechos, junto
- *  al formulario. El resto, en la política de privacidad del sitio. */
+ *  como recomienda la AEPD: quién, para qué, con qué base, a quién llega y qué
+ *  derechos hay, junto al formulario. El resto, en la política de privacidad.
+ *
+ *  DESTINATARIOS (2026-11-07, revisión): la fórmula de la AEPD («no se ceden
+ *  datos a terceros, salvo obligación legal») y, porque la guía de la AEPD pide
+ *  decir en esta capa si hay transferencias fuera de la UE, que las hay: la
+ *  plataforma desde la que se leen los mensajes va detrás de Cloudflare (EE. UU.,
+ *  adherida al Marco de Privacidad de Datos UE-EE. UU.). El detalle, en
+ *  `textoLegal('privacidad')` (`sitioWeb.ts`). Si eso cambia, cambia aquí. */
 export function capaBasica(finalidad: 'mensaje' | 'boletin', responsable: string): string {
   const para = finalidad === 'mensaje' ? 'responder a tu mensaje y organizar tu colaboración' : 'enviarte el boletín';
   return `Responsable: ${responsable}. Finalidad: ${para}. Legitimación: tu consentimiento. `
-    + 'Destinatarios: nadie, salvo obligación legal. Derechos: acceso, rectificación, supresión y los demás que explica la política de privacidad.';
+    // «EE. UU.» con un espacio que no se parte: en el teléfono quedaba «EE.» al final de una línea y «UU.» en la otra.
+    + 'Destinatarios: no se ceden datos a terceros, salvo obligación legal; un proveedor técnico puede tratarlos en EE. UU. con garantías adecuadas. '
+    + 'Derechos: acceso, rectificación, supresión y los demás que explica la política de privacidad.';
 }
+
+/** Los días que se guarda un alta en el boletín que nadie confirma, contados
+ *  desde el último correo de confirmación que salió (2026-11-07, revisión: «las
+ *  altas que nunca se confirman se guardan para siempre»). Lo cumple la pasada
+ *  diaria de `formulariosSitio.ts` y lo dicen la política de privacidad y el
+ *  propio correo. Sin correo configurado no sale ninguno, y el alta espera. */
+export const PLAZO_CONFIRMAR_DIAS = 30;
 
 /** El texto que se guarda como consentimiento: la casilla y la información que
  *  la acompañaba, exactamente como se leían. */
@@ -141,3 +157,13 @@ export const ANCLA_BAJA = 'boletin-baja';
 /** La vuelta del formulario sin JavaScript (ver `formulariosSitio.ts`). */
 export const ANCLA_RESULTADO = 'boletin-resultado';
 export const TESTIGO = /^[A-Za-z0-9_-]{32,64}$/;
+
+/** Un enlace `mailto:` que no se puede torcer (2026-11-07, revisión). La
+ *  expresión EMAIL admite `?`, `#`, `%` y `&` en la parte de antes de la `@`
+ *  (son legales), y sin codificar `a?cc=x%40otro.com&b=@ejemplo.org` añadía una
+ *  copia a otra persona al pulsar «Responder». Cada parte va codificada. */
+export function enlaceCorreo(email: string, asunto?: string): string {
+  const i = email.lastIndexOf('@');
+  const para = i > 0 ? `${encodeURIComponent(email.slice(0, i))}@${encodeURIComponent(email.slice(i + 1))}` : encodeURIComponent(email);
+  return `mailto:${para}${asunto ? `?subject=${encodeURIComponent(asunto)}` : ''}`;
+}

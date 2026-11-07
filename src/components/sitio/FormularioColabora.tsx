@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { HandHeart, HandCoins, Building2, Newspaper, MessageCircle, Send, Loader2, Check, AlertCircle, ChevronDown } from 'lucide-react';
+import { HandHeart, HandCoins, Building2, Newspaper, MessageCircle, Send, Loader2, Check, AlertCircle, ChevronDown, RotateCw } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, type Errores, type Motivo } from './formularios';
 
@@ -24,8 +24,19 @@ import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, type Errore
 //   · `proyecto`: el proyecto elegido de entrada (su nombre corto, `aeromovil`). Sin
 //     él, se toma de la dirección: `/colabora?proyecto=aeromovil`.
 //   · `motivo`: lo mismo para «¿Cómo quieres colaborar?» (`?motivo=voluntariado`).
-// Pide al servidor la lista de proyectos (`GET /api/sitio/:raiz/formulario`) al
-// montarse, así que puede ir en cualquier página del sitio sin pasarle nada más.
+// Pide al servidor la lista de proyectos y quién responde de los datos
+// (`GET /api/sitio/:raiz/formulario`) al montarse, así que puede ir en cualquier
+// página del sitio sin pasarle nada más.
+//
+// SÓLO CON JAVASCRIPT, y a propósito (revisión del 2026-11-07). La información
+// de protección de datos que se lee junto a la casilla es la que el servidor
+// guarda como consentimiento (`textoConsentimiento`), y sale de esa misma
+// llamada: hasta tenerla no se pinta ni se deja enviar, y si falla se dice y se
+// ofrece reintentar. Así lo leído y lo guardado no pueden ser distintos. Por eso
+// tampoco hay envío sin JavaScript (el del boletín sí lo tiene: su texto lo pinta
+// el servidor dentro del HTML). Si un día este formulario se pinta en el
+// servidor, necesitará lo mismo que el boletín (`deFormulario` y `contestar` en
+// `formulariosSitio.ts`).
 
 type Seccion = { area: string; proyectos: Array<{ slug: string; titulo: string }> };
 
@@ -50,22 +61,32 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
   const [enviando, setEnviando] = useState(false);
   const [hecho, setHecho] = useState<{ nombre: string; email: string } | null>(null);
   const [info, setInfo] = useState<{ responsable: string; secciones: Seccion[] } | null>(null);
+  const [carga, setCarga] = useState<'cargando' | 'lista' | 'fallo'>('cargando');
+  const [intento, setIntento] = useState(0);
   const [cerrado, setCerrado] = useState(false);
   const montado = useRef(Date.now());
   const refForm = useRef<HTMLFormElement>(null);
   const refGracias = useRef<HTMLHeadingElement>(null);
+  const refMensaje = useRef<HTMLTextAreaElement>(null);
+  const refReintentar = useRef<HTMLButtonElement>(null);
+  const enfocarMensaje = useRef(false);
 
   useEffect(() => {
     let vivo = true;
+    setCarga('cargando');
     fetch(`/api/sitio/${encodeURIComponent(raizId)}/formulario`)
       .then(async r => {
         if (!vivo) return;
         if (r.status === 404) { setCerrado(true); return; }
-        const j = r.ok ? await r.json() : null;
-        if (vivo && j) setInfo({ responsable: j.responsable, secciones: Array.isArray(j.secciones) ? j.secciones : [] });
-      }).catch(() => {});
+        const j = r.ok ? await r.json().catch(() => null) : null;
+        if (!vivo) return;
+        if (j && typeof j.responsable === 'string' && j.responsable.trim()) {
+          setInfo({ responsable: j.responsable, secciones: Array.isArray(j.secciones) ? j.secciones : [] });
+          setCarga('lista');
+        } else setCarga('fallo');
+      }).catch(() => { if (vivo) setCarga('fallo'); });
     return () => { vivo = false; };
-  }, [raizId]);
+  }, [raizId, intento]);
 
   // Lo que venga elegido de entrada: por las props o por la dirección (`?proyecto=…&motivo=…`).
   useEffect(() => {
@@ -79,7 +100,12 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
     }));
   }, [proyectoDado, motivoDado]);
 
-  useEffect(() => { if (hecho) refGracias.current?.focus(); }, [hecho]);
+  // El foco nunca se queda en ninguna parte: al dar las gracias, en el título; al
+  // volver para «Enviar otro mensaje», en el campo del mensaje (revisión del 2026-11-07).
+  useEffect(() => {
+    if (hecho) refGracias.current?.focus();
+    else if (enfocarMensaje.current) { enfocarMensaje.current = false; refMensaje.current?.focus(); }
+  }, [hecho]);
 
   const proyectos = info?.secciones.flatMap(s => s.proyectos) || [];
   // Un `?proyecto=` que no está en la lista (ya no se ve, o mal escrito) no se queda elegido a escondidas.
@@ -94,6 +120,12 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
     if (enviando) return;
+    // Sin la información de protección de datos a la vista no se envía (ver la cabecera).
+    if (!info) {
+      if (carga === 'cargando') setAviso('Un momento: estamos terminando de cargar el formulario.');
+      else refReintentar.current?.focus();
+      return;
+    }
     const entrada = { ...datos, proyecto: proyectoValido ? datos.proyecto : '' };
     const v = validarMensaje(entrada, info ? proyectos.map(p => p.slug) : null);
     if ('errores' in v) {
@@ -132,8 +164,10 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
   };
 
   const otro = () => {
+    enfocarMensaje.current = true;
     setHecho(null);
-    // Otro mensaje de la misma persona: se quedan su nombre, su correo, la forma de colaborar y el proyecto.
+    // Otro mensaje de la misma persona: se quedan su nombre, su correo, la forma de colaborar y el
+    // proyecto. La casilla, no: el consentimiento se da cada vez.
     setDatos(d => ({ ...INICIAL, motivo: d.motivo, nombre: d.nombre, email: d.email, proyecto: d.proyecto }));
     montado.current = Date.now();
   };
@@ -171,7 +205,7 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/25">
             <Check className="h-7 w-7" strokeWidth={3} aria-hidden />
           </span>
-          <h3 ref={refGracias} tabIndex={-1} className="mt-5 text-2xl font-black tracking-tight text-slate-900 outline-none">¡Gracias, {hecho.nombre}!</h3>
+          <h3 ref={refGracias} tabIndex={-1} data-sin-contorno className="mt-5 text-2xl font-black tracking-tight text-slate-900 outline-none">¡Gracias, {hecho.nombre}!</h3>
           <p className="mx-auto mt-2 max-w-md text-base leading-relaxed text-slate-600">
             Hemos recibido tu mensaje y te contestaremos en <strong className="font-bold text-slate-900 wrap-anywhere">{hecho.email}</strong>.
           </p>
@@ -181,9 +215,22 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
           </button>
         </div>
       ) : (
-        <form ref={refForm} method="post" action={`/api/sitio/${encodeURIComponent(raizId)}/mensaje`} onSubmit={enviar} noValidate aria-busy={enviando || undefined}
+        // `method="post"` y sin `action`: el envío lo hace `enviar` (ver la cabecera). Si alguna
+        // vez saliera sin JavaScript, lo escrito iría en el cuerpo, nunca en la dirección.
+        <form ref={refForm} method="post" onSubmit={enviar} noValidate aria-busy={enviando || undefined}
           className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          {aviso && (
+          {carga === 'fallo' ? (
+            <div role="alert" className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
+              <span className="flex min-w-0 flex-1 items-start gap-2.5">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                No hemos podido cargar el formulario. Revisa tu conexión y vuelve a intentarlo: lo que escribas no se pierde.
+              </span>
+              <button ref={refReintentar} type="button" onClick={() => { setAviso(null); setIntento(n => n + 1); }}
+                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-bold text-rose-800 ring-1 ring-rose-200 transition-colors hover:bg-rose-100">
+                <RotateCw className="h-4 w-4" aria-hidden /> Reintentar
+              </button>
+            </div>
+          ) : aviso && (
             <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {aviso}
             </div>
@@ -198,9 +245,11 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
                   <label key={m.id} className="relative">
                     <input type="radio" name="motivo" value={m.id} checked={datos.motivo === m.id} onChange={() => poner('motivo', m.id)}
                       aria-invalid={errores.motivo ? true : undefined} data-sin-contorno className="peer sr-only" />
+                    {/* El foco, con el contorno de todo el sitio (`index.css`): el anillo ámbar de antes
+                        se quedaba en 1,5:1 sobre una ficha blanca sin elegir. */}
                     <span className={cn('inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-full border px-3.5 text-[15px] font-bold transition-colors select-none',
                       'peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white',
-                      'peer-focus-visible:ring-4 peer-focus-visible:ring-amber-300',
+                      'peer-focus-visible:outline-solid peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-emerald-700',
                       errores.motivo ? 'border-rose-400 text-slate-700' : 'border-slate-300 text-slate-700 hover:border-slate-500')}>
                       <I className="h-4 w-4" aria-hidden /> {m.texto}
                     </span>
@@ -254,7 +303,7 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
                 {datos.mensaje.length.toLocaleString('es-ES')} / {LIMITES.mensajeMax.toLocaleString('es-ES')}
               </span>
             </div>
-            <textarea id={`${id}-mensaje`} name="mensaje" rows={6} value={datos.mensaje} onChange={e => poner('mensaje', e.target.value)} maxLength={LIMITES.mensajeMax}
+            <textarea ref={refMensaje} id={`${id}-mensaje`} name="mensaje" rows={6} value={datos.mensaje} onChange={e => poner('mensaje', e.target.value)} maxLength={LIMITES.mensajeMax}
               placeholder="Cuéntanos quién eres, qué te gustaría hacer y cómo podemos ponernos en contacto."
               aria-invalid={errores.mensaje ? true : undefined} aria-describedby={describe('mensaje')}
               className={cn(campo('mensaje'), 'min-h-[9.5rem] resize-y py-3 leading-relaxed')} />
@@ -272,8 +321,18 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
               </label>
             </div>
             {error('consentimiento')}
-            <p id={`${id}-capa`} className="mt-2 pl-8 text-xs leading-relaxed text-slate-500">
-              {capaBasica('mensaje', info?.responsable || 'el titular de esta web')}
+            {/* La información básica, la MISMA que el servidor guardará como aceptada. Hasta tenerla, su
+                esqueleto: ese mismo texto, transparente y sobre gris, así que ocupa las mismas líneas que
+                el que va a llegar y nada se mueve al llegar. Ni se lee ni se puede copiar. */}
+            <p id={`${id}-capa`} aria-busy={!info && carga === 'cargando' ? true : undefined} className="mt-2 pl-8 text-xs leading-relaxed text-slate-500">
+              {info ? capaBasica('mensaje', info.responsable) : (
+                <>
+                  <span className="sr-only">{carga === 'cargando' ? 'Cargando la información sobre tus datos.' : 'No se ha podido cargar la información sobre tus datos.'}</span>
+                  <span aria-hidden className={cn('select-none rounded bg-slate-200 text-transparent box-decoration-clone', carga === 'cargando' && 'motion-safe:animate-pulse')}>
+                    {capaBasica('mensaje', 'Asociación del titular de la web')}
+                  </span>
+                </>
+              )}
             </p>
           </div>
 
@@ -283,8 +342,11 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
           </div>
 
           <div className="mt-7 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-            <button type="submit" disabled={enviando}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-slate-900 px-7 text-base font-black text-white shadow-sm transition-colors hover:bg-slate-700 disabled:cursor-wait disabled:opacity-80">
+            {/* `aria-disabled` y no `disabled` (revisión del 2026-11-07): tras un 429 o sin conexión,
+                el botón desactivado soltaba el foco y quien usa el teclado se quedaba en <body>. */}
+            <button type="submit" aria-disabled={enviando || !info || undefined}
+              className={cn('inline-flex h-12 items-center justify-center gap-2 rounded-full bg-slate-900 px-7 text-base font-black text-white shadow-sm transition-colors hover:bg-slate-700',
+                'aria-disabled:opacity-80 aria-disabled:hover:bg-slate-900', enviando || carga === 'cargando' ? 'aria-disabled:cursor-wait' : 'aria-disabled:cursor-not-allowed')}>
               {enviando ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
               {enviando ? 'Enviando…' : 'Enviar mensaje'}
             </button>

@@ -2,13 +2,13 @@ import express from 'express';
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import crypto from 'node:crypto';
+import net from 'node:net';
 import { configEscaparate, modeloEscaparate } from './seoEscaparate';
 import { rolEnPagina, capacidades, quienDe } from './permisos';
 import { hayCorreo, enviarCorreo, remitenteConNombre } from './correo';
-import { ipDe } from './limites/index';
 import {
   validarMensaje, validarAlta, textoConsentimiento, responsableDe, textoMotivo,
-  CAMPO_TRAMPA, TIEMPO_MINIMO_MS, TESTIGO, ANCLA_CONFIRMAR, ANCLA_BAJA, ANCLA_RESULTADO,
+  CAMPO_TRAMPA, TIEMPO_MINIMO_MS, TESTIGO, ANCLA_CONFIRMAR, ANCLA_BAJA, ANCLA_RESULTADO, PLAZO_CONFIRMAR_DIAS,
 } from '../components/sitio/formularios';
 
 // ============================================================================
@@ -33,7 +33,9 @@ import {
 //     DELETE /api/sitio/:raiz/formularios/mensajes/:id          borra sus datos personales (derecho de supresión)
 //     DELETE /api/sitio/:raiz/formularios/suscriptores/:id      da de baja y borra la dirección
 //     POST   /api/sitio/:raiz/formularios/confirmaciones        manda el correo de confirmar a los pendientes que no lo recibieron
-//     GET    /api/sitio/:raiz/formularios/mensajes.csv | suscriptores.csv
+//     GET    /api/sitio/:raiz/formularios/mensajes.csv
+//     GET    /api/sitio/:raiz/formularios/suscriptores.csv   sólo los confirmados (?todos=1: también los pendientes)
+//   Y una pasada al día que borra las altas sin confirmar `PLAZO_CONFIRMAR_DIAS` después del correo.
 //
 // DÓNDE SE GUARDA: en dos tablas propias (migración 0175) y no en dos bases de
 // datos de la plataforma. El porqué está en la cabecera de esa migración: la
@@ -42,9 +44,10 @@ import {
 // CONTRA LOS PROGRAMAS QUE RELLENAN FORMULARIOS, cuatro cosas y ninguna molesta
 // a una persona: el campo trampa (se finge que ha ido bien y no se guarda nada),
 // un tiempo mínimo de rellenado, un freno por IP EN MEMORIA y sin guardar la IP
-// (la clave es una huella con una sal que cambia en cada arranque), y que el
-// envío venga de la propia web (`Origin`). El boletín, además, pide confirmar
-// por correo: sin eso cualquiera podría apuntar la dirección de otro.
+// (la clave es una huella con una sal que cambia en cada arranque; la IP sale de
+// `ipVisitante`, que no se fía de lo que escriba quien llama), y que el envío
+// venga de la propia web (`Origin`). El boletín, además, pide confirmar por
+// correo: sin eso cualquiera podría apuntar la dirección de otro.
 //
 // CORREO. Hoy no hay proveedor (`RESEND_API_KEY` vacía en producción): los
 // mensajes se guardan y las altas quedan «pendientes de confirmar», y la
@@ -137,6 +140,58 @@ export function sitioForm(raiz: string, titulo: string, cfg: any): SitioForm {
   return { raiz, titulo, config: cfg, nombre, responsable: responsableDe(cfg, nombre), contacto };
 }
 
+// ── Quién envía: su IP, sin fiarse de lo que escriba ───────────────────────
+//
+// 2026-11-07, revisión: «el límite por IP se puede saltar en luzhumanidad.com».
+// `ipDe()` (`limites/`) toma primero `CF-Connecting-IP`, y esa cabecera sólo es
+// de fiar si la petición ha pasado por Cloudflare. humanity.wiki va detrás de
+// Cloudflare, pero los dominios propios llegan directos a Caddy (bloque `:443`
+// del Caddyfile), y ahí la escribe quien llama: 45 envíos cambiándola no
+// recibían ni un 429. Tampoco basta con mirar el dominio: la IP del servidor es
+// pública (es la de luzhumanidad.com), y una petición directa a ella con
+// `Host: humanity.wiki` traería la cabecera que quisiera.
+//
+// Lo que no se puede falsificar es QUIÉN SE CONECTÓ A CADDY. Caddy escribe
+// `X-Forwarded-For`: sin `trusted_proxies` (hoy) tira lo que trajera la petición
+// y pone esa conexión; con ellos, la añade al final. El ÚLTIMO valor es siempre
+// la conexión. Si es de Cloudflare (sus rangos publicados), quien visita es quien
+// Cloudflare pone en `CF-Connecting-IP`; si no, es la propia conexión. El puerto
+// de `app` no está publicado (docker-compose.prod.yml): todo pasa por Caddy.
+//
+// Los rangos, de https://www.cloudflare.com/ips-v4 y /ips-v6 (leídos el
+// 2026-11-07). Si Cloudflare añadiera uno, lo peor que pasa es que las visitas
+// que entren por él cuenten como de la misma conexión: más freno, nunca menos.
+const CLOUDFLARE = (() => {
+  const l = new net.BlockList();
+  const poner = (rangos: string[], tipo: 'ipv4' | 'ipv6') => {
+    for (const r of rangos) { const [ip, bits] = r.split('/'); l.addSubnet(ip, Number(bits), tipo); }
+  };
+  poner(['173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22', '141.101.64.0/18', '108.162.192.0/18',
+    '190.93.240.0/20', '188.114.96.0/20', '197.234.240.0/22', '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/13',
+    '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22'], 'ipv4');
+  poner(['2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32', '2405:8100::/32', '2a06:98c0::/29', '2c0f:f248::/32'], 'ipv6');
+  return l;
+})();
+
+/** Una IP tal como llega en una cabecera: sin espacios, sin corchetes y sin el `::ffff:` de una IPv4 vista como IPv6. */
+const limpiarIp = (v: string) => v.trim().replace(/^\[|\]$/g, '').replace(/^::ffff:(?=\d{1,3}(\.\d{1,3}){3}$)/i, '');
+
+export function esDeCloudflare(ip: string): boolean {
+  const v = net.isIP(ip);
+  return v === 4 ? CLOUDFLARE.check(ip, 'ipv4') : v === 6 ? CLOUDFLARE.check(ip, 'ipv6') : false;
+}
+
+/** La IP de quien envía el formulario (ver arriba). */
+export function ipVisitante(req: Request): string {
+  const cadena = String(req.headers['x-forwarded-for'] || '').split(',').map(limpiarIp).filter(Boolean);
+  const conexion = cadena[cadena.length - 1] || limpiarIp(String(req.socket?.remoteAddress || '')) || 'desconocida';
+  if (esDeCloudflare(conexion)) {
+    const cf = limpiarIp(String(req.headers['cf-connecting-ip'] || ''));
+    if (net.isIP(cf)) return cf;
+  }
+  return conexion;
+}
+
 // ── El freno, en memoria y sin guardar ninguna IP ───────────────────────────
 
 /** Una sal por arranque: la misma IP da la misma huella mientras el proceso
@@ -216,11 +271,12 @@ function correoHtml(o: { marca: string; titulo: string; parrafos: string[]; boto
 /** El correo de confirmar el alta. */
 export function correoConfirmacion(s: SitioForm, email: string, enlaces: ReturnType<typeof enlacesDe>) {
   const asunto = `Confirma tu suscripción al boletín de ${s.nombre}`;
+  const sinConfirmar = `Si no has sido tú, no hagas nada: sin confirmar no te enviaremos ningún boletín, y en ${PLAZO_CONFIRMAR_DIAS} días borraremos esta dirección.`;
   const texto = [
     'Hola:',
     `Alguien —esperamos que tú— ha pedido recibir el boletín de ${s.nombre} en esta dirección (${email}).`,
     `Para confirmarlo, abre este enlace:\n${enlaces.confirmar}`,
-    'Si no has sido tú, no hagas nada: sin confirmar no te enviaremos ningún boletín.',
+    sinConfirmar,
     `Para darte de baja y borrar tu dirección en cualquier momento:\n${enlaces.baja}`,
     `${s.responsable} · ${s.nombre}`,
   ].join('\n\n');
@@ -232,7 +288,7 @@ export function correoConfirmacion(s: SitioForm, email: string, enlaces: ReturnT
     ],
     boton: { texto: 'Confirmar suscripción', url: enlaces.confirmar! },
     pie: [
-      'Si no has sido tú, no hagas nada: sin confirmar no te enviaremos ningún boletín.',
+      sinConfirmar,
       `<a href="${esc(enlaces.baja)}" style="color:#64748b">Darme de baja y borrar mi dirección</a>`,
       `${esc(s.responsable)} · ${esc(s.nombre)}`,
     ],
@@ -315,16 +371,54 @@ const ESTADOS_MENSAJE = new Set(['nuevo', 'leido', 'respondido', 'archivado']);
 /** Como mucho un correo cada diez minutos a la misma dirección, aunque lo pidan cien veces. */
 const ENTRE_CORREOS_MS = 10 * 60_000;
 
+/** Lo que lee quien ha tocado el freno de su conexión. No le atribuye nada: detrás
+ *  de la misma IP puede haber un aula entera o los clientes de una operadora móvil. */
+const textoFrenoIp = (segundos: number) => segundos > 30 * 60
+  ? 'Ahora llegan muchos envíos desde tu conexión. Prueba más tarde.'
+  : 'Ahora llegan muchos envíos desde tu conexión. Prueba dentro de unos minutos.';
+
+/**
+ * LAS ALTAS QUE NADIE CONFIRMA (2026-11-07, revisión: «se guardan para siempre»).
+ * Se borran `PLAZO_CONFIRMAR_DIAS` días después del último correo de confirmar que
+ * salió: la fila entera, porque nunca fue una suscripción y no hay nada que contar.
+ * Las que nunca recibieron ese correo (hoy, sin proveedor, todas) esperan a que se
+ * pueda mandar: el plazo empieza con el correo. Lo dicen la política y el correo.
+ */
+export async function borrarSinConfirmar(db: any): Promise<number> {
+  const r = await db.execute(sql`
+    DELETE FROM sitio_suscriptores
+    WHERE estado = 'pendiente' AND correo_enviado_at IS NOT NULL
+      AND correo_enviado_at < now() - make_interval(days => ${PLAZO_CONFIRMAR_DIAS})
+    RETURNING id
+  `);
+  return r.rows.length;
+}
+
 export function registrarFormulariosSitio(app: Express, db: any, cambios: Partial<Dependencias> = {}) {
   const d: Dependencias = { ...dependenciasPorDefecto(db), ...cambios };
 
-  const peticiones = new Freno(40, 10 * 60_000);       // todo lo que llega, por IP
-  const mensajes10 = new Freno(5, 10 * 60_000);        // mensajes guardados, por IP
+  // LOS FRENOS (revisión del 2026-11-07). Los de cada IP son holgados a propósito:
+  // en una charla de «Divulgación en Colegios» treinta personas comparten la wifi,
+  // y detrás del CGNAT de una operadora móvil, miles. Lo que de verdad para un
+  // ataque es el tope de cada sitio, y en el boletín, un correo cada diez minutos
+  // como mucho a la misma dirección.
+  const peticiones = new Freno(150, 10 * 60_000);      // todo lo que llega, por IP
+  const mensajes10 = new Freno(10, 10 * 60_000);       // mensajes guardados, por IP
   const mensajesDia = new Freno(20, 24 * 3_600_000);
-  const altas10 = new Freno(6, 10 * 60_000);           // altas, por IP
+  const altas10 = new Freno(40, 10 * 60_000);          // altas, por IP
   const mensajesSitio = new Freno(120, 3_600_000);     // por sitio: un ataque desde muchas IP no llena el buzón
   const altasSitio = new Freno(300, 3_600_000);
-  const enlaces = new Freno(30, 10 * 60_000);          // confirmar y baja, por IP
+  const enlaces = new Freno(30, 10 * 60_000);          // confirmar y baja desde la web, por IP
+  // La baja en un clic (RFC 8058) no la pide quien lee: la pide su proveedor de
+  // correo (Gmail, Yahoo…) desde unas pocas IP para miles de personas. El día que
+  // salga un boletín, un tope de 30 perdería bajas. El testigo de 256 bits ya hace
+  // de llave; esto sólo pone un techo a la carga.
+  const bajasDirectas = new Freno(1000, 10 * 60_000);
+
+  // Una pasada al día por las altas sin confirmar (la primera, a los diez minutos de arrancar).
+  const pasada = () => { borrarSinConfirmar(db).catch((e: any) => console.error('formularios: altas sin confirmar', e?.message || e)); };
+  setTimeout(pasada, 10 * 60_000).unref?.();
+  setInterval(pasada, 24 * 3_600_000).unref?.();
 
   // El alta del pie también funciona sin JavaScript (un formulario de los de siempre).
   const deFormulario = express.urlencoded({ extended: false, limit: '20kb' });
@@ -332,12 +426,14 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
   /** Lo que se le contesta a quien envía: JSON, o vuelta a la página si era un formulario sin JavaScript. */
   const contestar = (req: Request, res: Response, codigo: number, cuerpo: any, resultado?: string) => {
     if (req.is('application/x-www-form-urlencoded')) {
-      // Sólo a una página de la misma web; si no, a la portada.
+      // Sólo a una página de la misma web; si no, a la portada. Y con UNA barra
+      // delante: `//luz-para-kenia` (que también pinta la página) volvería como
+      // `Location: //luz-para-kenia#…`, que el navegador lee como otro dominio.
       let vuelta = '/';
       try {
         const r = new URL(String(req.headers.referer || ''));
         const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase();
-        if (r.host.toLowerCase() === host) vuelta = r.pathname;
+        if (r.host.toLowerCase() === host) vuelta = r.pathname.replace(/^\/+/, '/');
       } catch { /* sin referer válido: la portada */ }
       return res.redirect(303, `${vuelta}#${ANCLA_RESULTADO}=${resultado || (codigo < 300 ? 'guardado' : 'error')}`);
     }
@@ -372,9 +468,9 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
     try {
       const s = await sitioPublico(req, res);
       if (!s) return;
-      const ip = huellaIp(ipDe(req));
+      const ip = huellaIp(ipVisitante(req));
       const espera = peticiones.pasar(ip);
-      if (espera) return frenado(req, res, espera, 'Has hecho muchos intentos seguidos. Prueba dentro de un rato.');
+      if (espera) return frenado(req, res, espera, textoFrenoIp(espera));
       const b = req.body || {};
 
       // El campo trampa: se contesta que ha ido bien, sin pistas, y no se guarda nada.
@@ -391,7 +487,7 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
       if ('errores' in v) return res.status(400).json({ error: 'Revisa los campos marcados.', campos: v.errores });
 
       let e = mensajes10.pasar(ip) || mensajesDia.pasar(ip);
-      if (e) return frenado(req, res, e, 'Has enviado varios mensajes seguidos. Prueba dentro de un rato.');
+      if (e) return frenado(req, res, e, textoFrenoIp(e));
       e = mensajesSitio.pasar(s.raiz);
       if (e) return frenado(req, res, e, 'Ahora mismo estamos recibiendo muchos mensajes. Prueba dentro de un rato.');
 
@@ -422,9 +518,9 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
     try {
       const s = await sitioPublico(req, res);
       if (!s) return;
-      const ip = huellaIp(ipDe(req));
+      const ip = huellaIp(ipVisitante(req));
       const espera = peticiones.pasar(ip);
-      if (espera) return frenado(req, res, espera, 'Has hecho muchos intentos seguidos. Prueba dentro de un rato.');
+      if (espera) return frenado(req, res, espera, textoFrenoIp(espera));
       const b = req.body || {};
       if (String(b[CAMPO_TRAMPA] ?? '').trim()) { altas10.pasar(ip); return contestar(req, res, 200, { ok: true, resultado: 'guardado' }, 'guardado'); }
       const tiempo = tiempoDe(b);
@@ -434,7 +530,7 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
       if ('errores' in v) return contestar(req, res, 400, { error: v.errores.email || v.errores.consentimiento, campos: v.errores });
 
       let e = altas10.pasar(ip);
-      if (e) return frenado(req, res, e, 'Has hecho varias altas seguidas. Prueba dentro de un rato.');
+      if (e) return frenado(req, res, e, textoFrenoIp(e));
       e = altasSitio.pasar(s.raiz);
       if (e) return frenado(req, res, e, 'Ahora mismo estamos recibiendo muchas altas. Prueba dentro de un rato.');
 
@@ -506,8 +602,8 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
   app.post('/api/sitio/:raiz/boletin/confirmar', async (req: Request, res: Response) => {
     try {
       res.set('Cache-Control', 'no-store');
-      const espera = enlaces.pasar(huellaIp(ipDe(req)));
-      if (espera) return frenado(req, res, espera, 'Has hecho muchos intentos seguidos. Prueba dentro de un rato.');
+      const espera = enlaces.pasar(huellaIp(ipVisitante(req)));
+      if (espera) return frenado(req, res, espera, textoFrenoIp(espera));
       const token = String(req.body?.token || '');
       if (!TESTIGO.test(token)) return res.status(400).json({ error: 'Este enlace no es válido.' });
       const r = (await db.execute(sql`
@@ -528,11 +624,13 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
 
   // La baja en un clic (RFC 8058) llega con el testigo en `?t=` y un cuerpo
   // `List-Unsubscribe=One-Click` que no hace falta leer. Desde la web, en `token`.
+  // Cada una con su freno (ver `bajasDirectas`).
   app.post('/api/sitio/:raiz/boletin/baja', deFormulario, async (req: Request, res: Response) => {
     try {
       res.set('Cache-Control', 'no-store');
-      const espera = enlaces.pasar(huellaIp(ipDe(req)));
-      if (espera) return frenado(req, res, espera, 'Has hecho muchos intentos seguidos. Prueba dentro de un rato.');
+      const directa = typeof req.query.t === 'string' && req.query.t !== '';
+      const espera = (directa ? bajasDirectas : enlaces).pasar(huellaIp(ipVisitante(req)));
+      if (espera) return frenado(req, res, espera, textoFrenoIp(espera));
       const token = String(req.query.t || req.body?.token || '');
       if (!TESTIGO.test(token)) return res.status(400).json({ error: 'Este enlace no es válido.' });
       if (!(await darDeBaja(String(req.params.raiz), token))) {
@@ -689,15 +787,23 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
     } catch (e: any) { console.error('formularios: csv', e); res.status(500).json({ error: 'No se ha podido exportar.' }); }
   });
 
+  // SÓLO LOS CONFIRMADOS, salvo que se pida lo contrario (`?todos=1`) (2026-11-07,
+  // revisión). Este fichero es el que se lleva a una herramienta de envío, y la
+  // política promete no escribir a quien no ha confirmado: con los pendientes
+  // dentro, el primer boletín saldría justo hacia ellos.
   app.get('/api/sitio/:raiz/formularios/suscriptores.csv', async (req: Request, res: Response) => {
     try {
       const raiz = await gestiona(req, res);
       if (!raiz) return;
+      const todos = req.query.todos === '1';
       const r = (await db.execute(sql`
         SELECT email, estado, ${fecha('created_at')} AS alta, ${fecha('confirmado_at')} AS confirmacion
-        FROM sitio_suscriptores WHERE raiz_id = ${raiz} AND estado <> 'baja' ORDER BY created_at
+        FROM sitio_suscriptores
+        WHERE raiz_id = ${raiz} AND ${todos ? sql`estado <> 'baja'` : sql`estado = 'confirmado'`}
+        ORDER BY created_at
       `)).rows as any[];
-      csv(res, `boletin-${raiz}.csv`, [['correo', 'estado', 'alta', 'confirmacion'], ...r.map(f => [f.email, f.estado, f.alta, f.confirmacion])]);
+      csv(res, todos ? `boletin-${raiz}.csv` : `boletin-confirmados-${raiz}.csv`,
+        [['correo', 'estado', 'alta', 'confirmacion'], ...r.map(f => [f.email, f.estado, f.alta, f.confirmacion])]);
     } catch (e: any) { console.error('formularios: csv', e); res.status(500).json({ error: 'No se ha podido exportar.' }); }
   });
 }

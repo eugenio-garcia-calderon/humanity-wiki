@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Search, Download, Inbox, Mail, MailCheck, Send, Archive, Trash2, Check,
   CircleDot, Reply, Clock, Info, UserMinus, ChevronDown,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { MOTIVOS, textoMotivo } from '../components/sitio/formularios';
+import { MOTIVOS, textoMotivo, enlaceCorreo, PLAZO_CONFIRMAR_DIAS } from '../components/sitio/formularios';
 
 // ============================================================================
 // LOS MENSAJES Y EL BOLETÍN DE UN SITIO (2026-11-07)
@@ -55,6 +55,7 @@ export default function FormulariosSitio() {
   const [fallo, setFallo] = useState<string | null>(null);
   const [pestana, setPestana] = useState<'mensajes' | 'boletin'>('mensajes');
   const [aviso, setAviso] = useState<{ texto: string; error?: boolean } | null>(null);
+  const refPestanas = useRef<HTMLDivElement>(null);
 
   const cargar = () => pedir(base).then(async r => {
     const j = await json(r);
@@ -76,6 +77,20 @@ export default function FormulariosSitio() {
   if (!p) return <div className="grid min-h-[50vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin text-slate-300" /></div>;
 
   const c = p.cifras;
+  // LAS PESTAÑAS, COMO PESTAÑAS (revisión del 2026-11-07): `role="tab"` pedía también
+  // `aria-controls`, su `tabpanel` y moverse con las flechas (patrón de la WAI-ARIA):
+  // Tab entra en la pestaña elegida y las flechas, Inicio y Fin cambian de una a otra.
+  const PESTANAS = ['mensajes', 'boletin'] as const;
+  const teclaPestana = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const i = PESTANAS.indexOf(pestana);
+    const j = e.key === 'ArrowRight' ? (i + 1) % PESTANAS.length
+      : e.key === 'ArrowLeft' ? (i - 1 + PESTANAS.length) % PESTANAS.length
+      : e.key === 'Home' ? 0 : e.key === 'End' ? PESTANAS.length - 1 : -1;
+    if (j < 0) return;
+    e.preventDefault();
+    setPestana(PESTANAS[j]);
+    refPestanas.current?.querySelector<HTMLButtonElement>(`#pestana-${PESTANAS[j]}`)?.focus();
+  };
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
       <Link to={`/paginas/${id}`} className="inline-flex h-9 items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800">
@@ -104,17 +119,18 @@ export default function FormulariosSitio() {
 
       {aviso && <p role="status" className={cn('mt-4 rounded-xl px-3 py-2 text-sm font-bold', aviso.error ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-800')}>{aviso.texto}</p>}
 
-      <div className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-200" role="tablist">
+      <div ref={refPestanas} className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-200" role="tablist" aria-label="Mensajes y boletín">
         {([['mensajes', 'Mensajes', Inbox, c.mensajes_nuevos], ['boletin', 'Boletín', Mail, c.confirmados + c.pendientes]] as const).map(([k, t, Ic, n]) => (
-          <button key={k} role="tab" aria-selected={pestana === k} onClick={() => setPestana(k)}
+          <button key={k} id={`pestana-${k}`} role="tab" aria-selected={pestana === k} aria-controls={`panel-${k}`} tabIndex={pestana === k ? 0 : -1}
+            onClick={() => setPestana(k)} onKeyDown={teclaPestana}
             className={cn('-mb-px flex h-11 shrink-0 items-center gap-1.5 border-b-2 px-3 text-sm font-bold transition-colors',
               pestana === k ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800')}>
-            <Ic className="h-4 w-4" /> {t}
+            <Ic className="h-4 w-4" aria-hidden /> {t}
             {n > 0 && <span className={cn('rounded-full px-1.5 text-[11px]', k === 'mensajes' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600')}>{n}</span>}
           </button>
         ))}
       </div>
-      <div className="mt-4">
+      <div className="mt-4" id={`panel-${pestana}`} role="tabpanel" aria-labelledby={`pestana-${pestana}`}>
         {pestana === 'mensajes'
           ? <PestanaMensajes panel={p} base={base} accion={accion} />
           : <PestanaBoletin panel={p} base={base} accion={accion} />}
@@ -195,7 +211,8 @@ function TarjetaMensaje({ m, base, accion, sitio }: { m: Mensaje; base: string; 
   const borrado = !!m.datos_borrados_at;
   const largo = (m.mensaje || '').length > 420;
   const estado = (e: string, ok: string) => accion(pedir(`${base}/mensajes/${m.id}`, 'PUT', { estado: e }), ok);
-  const responder = m.email ? `mailto:${m.email}?subject=${encodeURIComponent(`Tu mensaje a ${sitio}`)}` : null;
+  // Codificado (`enlaceCorreo`): la dirección la escribió alguien de fuera.
+  const responder = m.email ? enlaceCorreo(m.email, `Tu mensaje a ${sitio}`) : null;
   const boton = 'inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-colors';
   return (
     <li className={cn('rounded-2xl border bg-white p-4 sm:p-5', m.estado === 'nuevo' ? 'border-amber-200 shadow-sm' : 'border-slate-200')}>
@@ -207,7 +224,7 @@ function TarjetaMensaje({ m, base, accion, sitio }: { m: Mensaje; base: string; 
             <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">{textoMotivo(m.motivo)}</span>
             {m.proyecto_titulo && <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-bold text-white">{m.proyecto_titulo}</span>}
           </p>
-          {!borrado && <p className="mt-1 truncate text-sm text-slate-500"><a href={`mailto:${m.email}`} className="hover:underline">{m.email}</a></p>}
+          {!borrado && m.email && <p className="mt-1 truncate text-sm text-slate-500"><a href={enlaceCorreo(m.email)} className="hover:underline">{m.email}</a></p>}
         </div>
         <p className="shrink-0 text-xs text-slate-500" title={m.aviso_enviado_at ? `Aviso por correo: ${fecha(m.aviso_enviado_at)}` : undefined}>{fecha(m.created_at)}</p>
       </div>
@@ -282,34 +299,40 @@ function PestanaBoletin({ panel, base, accion }: { panel: Panel; base: string; a
             {enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Pedir confirmación a {c.sin_correo}
           </button>
         )}
+        {/* Sólo los confirmados (el servidor los filtra): es el fichero que se lleva a una herramienta de envío. */}
         <a href={`${base}/suscriptores.csv`} className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-200 px-3 text-sm font-bold text-slate-600 hover:bg-slate-50">
-          <Download className="h-4 w-4" /> CSV
+          <Download className="h-4 w-4" aria-hidden /> Confirmados (CSV)
         </a>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">Cuando mandes un boletín, envíalo solo a los <strong>confirmados</strong> y con un enlace para darse de baja: es lo que promete la política de privacidad de la web.</p>
+      <p className="mt-2 text-xs leading-relaxed text-slate-500">Cuando mandes un boletín, envíalo solo a los <strong>confirmados</strong> y con un enlace para darse de baja: es lo que promete la política de privacidad de la web. Las altas sin confirmar se borran solas {PLAZO_CONFIRMAR_DIAS} días después del correo de confirmación.</p>
 
       <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {lista.length === 0
           ? <p className="p-8 text-center text-sm text-slate-500">{panel.suscriptores.length ? 'Nadie con ese filtro.' : 'Todavía no se ha apuntado nadie. El alta está en el pie de todas las páginas de la web.'}</p>
           : lista.map(s => (
-            <div key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-slate-100 px-4 py-3 last:border-0">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-sm font-black uppercase text-slate-500">{s.email.charAt(0)}</span>
-              <div className="min-w-[180px] flex-1">
-                <p className="truncate text-sm font-bold text-slate-800">{s.email}</p>
-                <p className="text-xs text-slate-500">
+            // El estado junto a la dirección y la baja siempre a la derecha: en el teléfono, la fila
+            // se partía y el botón de baja caía solo a una línea de abajo.
+            <div key={s.id} className="flex items-start gap-3 border-b border-slate-100 px-4 py-3 last:border-0">
+              <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-sm font-black uppercase text-slate-500">{s.email.charAt(0)}</span>
+              <div className="min-w-0 flex-1">
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="min-w-0 max-w-full truncate text-sm font-bold text-slate-800">{s.email}</span>
+                  <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold', s.estado === 'confirmado' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800')}>
+                    {s.estado === 'confirmado' ? 'Confirmado' : 'Pendiente'}
+                  </span>
+                </p>
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
                   Alta: {fecha(s.created_at)}
+                  {s.origen ? ` desde ${s.origen === '/' ? 'la portada' : s.origen}` : ''}
                   {s.estado === 'confirmado' ? ` · Confirmó: ${fecha(s.confirmado_at)}` : s.correo_enviado_at ? ` · Enlace enviado: ${fecha(s.correo_enviado_at)}` : ' · Sin correo de confirmación todavía'}
                 </p>
               </div>
-              <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', s.estado === 'confirmado' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800')}>
-                {s.estado === 'confirmado' ? 'Confirmado' : 'Pendiente'}
-              </span>
               <button onClick={() => {
                 if (!window.confirm(`¿Dar de baja a ${s.email}? Se borra su dirección y no se puede deshacer.`)) return;
                 accion(pedir(`${base}/suscriptores/${s.id}`, 'DELETE'), 'Baja hecha: su dirección se ha borrado.');
               }} aria-label={`Dar de baja a ${s.email}`} title="Dar de baja y borrar la dirección"
-                className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600">
-                <UserMinus className="h-4 w-4" />
+                className="-mr-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600">
+                <UserMinus className="h-4 w-4" aria-hidden />
               </button>
             </div>
           ))}
