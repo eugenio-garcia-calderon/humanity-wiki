@@ -563,11 +563,12 @@ export default function Aeromovil() {
   // El garaje: qué vehículos se ven y dónde están (eje delantero en el suelo, m). Se recuerda en este navegador.
   type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number };
   const [garaje, setGaraje] = useState<PlazaGaraje[]>(() => {
-    const base = VEHICULOS_GARAJE.map((v, i) => ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
-    try { const g = JSON.parse(localStorage.getItem('aeromovil_garaje') || 'null'); if (Array.isArray(g)) return base.map(b => ({ ...b, ...(g.find((x: any) => x?.id === b.id) || {}) })); } catch { /* sin memoria */ }
+    // El Twizy, visible por defecto a 3 m al lado (2026-11-07, Eugenio); la clave v2 hace que también lo vea quien ya tenía el garaje guardado.
+    const base = VEHICULOS_GARAJE.map((v, i) => v.id === 'twizy' ? { id: v.id, visible: true, x: 0, z: 3, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
+    try { const g = JSON.parse(localStorage.getItem('aeromovil_garaje_v2') || 'null'); if (Array.isArray(g)) return base.map(b => ({ ...b, ...(g.find((x: any) => x?.id === b.id) || {}) })); } catch { /* sin memoria */ }
     return base;
   });
-  useEffect(() => { try { localStorage.setItem('aeromovil_garaje', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
+  useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v2', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
   // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
   const soloGaraje = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
   const garajeVisor = useMemo(() => soloGaraje ? [{ id: soloGaraje, x: 0, z: 0, giro: 0 }] : garaje.filter(v => v.visible).map(v => ({ id: v.id, x: v.x, z: v.z, giro: v.giro })), [garaje, soloGaraje]);
