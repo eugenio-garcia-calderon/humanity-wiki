@@ -8,7 +8,8 @@ import type { VehiculoGaraje } from './tipos';
  * por encima de todo. El color es fijo por coche para que la leyenda no cambie.
  */
 export const COLOR_SUPERPUESTO: Record<string, number> = {
-  twizy: 0xf59e0b, aptera: 0x0ea5e9, xl1: 0xa855f7, tesla3: 0xef4444, caterham7: 0x22c55e, jaguarD: 0x14b8a6,
+  twizy: 0xf59e0b, aptera: 0x0ea5e9, xl1: 0xa855f7, xl1concept: 0xec4899, l1: 0x84cc16, unlitro: 0xf97316,
+  tesla3: 0xef4444, caterham7: 0x22c55e, jaguarD: 0x14b8a6,
 };
 export const colorSuperpuesto = (id: string) => COLOR_SUPERPUESTO[id] ?? 0x64748b;
 export const colorCss = (id: string) => `#${colorSuperpuesto(id).toString(16).padStart(6, '0')}`;

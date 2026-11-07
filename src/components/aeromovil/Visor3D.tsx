@@ -82,6 +82,8 @@ interface Props {
   vista: Vista;
   /** Al pinchar en una pieza: su componente (para ir a su página). */
   alPinchar?: (componente: string) => void;
+  /** Al soltar un coche del garaje arrastrado en el 3D: su nueva posición (eje delantero en el suelo). Sin ella no se arrastra. */
+  alMoverGaraje?: (id: string, x: number, z: number) => void;
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
@@ -1136,8 +1138,9 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cdTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cdTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
+  const moverGaraje = useRef(alMoverGaraje); moverGaraje.current = alMoverGaraje;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
 
@@ -1260,6 +1263,38 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (hit) pinchar.current((hit.object as any).userData.componente);
     };
     cv.addEventListener('pointerdown', alBajar); cv.addEventListener('pointerup', alSoltar);
+    // Arrastrar un coche del garaje (2026-11-07, Eugenio: «mover los vehículos pulsando sobre ellos y
+    // arrastrándolos»). Se escucha en captura para quitarle el gesto a la cámara antes de que empiece a girar.
+    const suelo0 = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pSuelo = new THREE.Vector3(), cajaTmp = new THREE.Box3();
+    let arrastre: { obj: THREE.Object3D; dx: number; dz: number; id: number } | null = null;
+    const rayoDesde = (e: PointerEvent) => { const r = cv.getBoundingClientRect(); ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ptr, camera); };
+    const empezarArrastre = (e: PointerEvent) => {
+      if (!moverGaraje.current || e.button !== 0 || !grupoGaraje.children.length) return;
+      rayoDesde(e);
+      // Primero la caja de cada coche (barato) y solo después sus triángulos.
+      const candidatos = grupoGaraje.children.filter(c => ray.ray.intersectsBox(cajaTmp.setFromObject(c)));
+      const hit = candidatos.length ? ray.intersectObjects(candidatos, true).find(h => (h.object as any).isMesh && h.object.visible) : undefined;
+      if (!hit) return;
+      let obj: THREE.Object3D = hit.object; while (obj.parent && obj.parent !== grupoGaraje) obj = obj.parent;
+      if (obj.parent !== grupoGaraje || !ray.ray.intersectPlane(suelo0, pSuelo)) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      arrastre = { obj, dx: obj.position.x - pSuelo.x, dz: obj.position.z - pSuelo.z, id: e.pointerId };
+      controls.enabled = false; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing';
+    };
+    const moverArrastre = (e: PointerEvent) => {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      rayoDesde(e);
+      if (ray.ray.intersectPlane(suelo0, pSuelo)) arrastre.obj.position.set(pSuelo.x + arrastre.dx, 0, pSuelo.z + arrastre.dz);
+    };
+    const soltarArrastre = (e: PointerEvent) => {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      const { obj } = arrastre; arrastre = null;
+      controls.enabled = true; cv.style.cursor = ''; try { cv.releasePointerCapture(e.pointerId); } catch { /* ya suelto */ }
+      const r5 = (v: number) => Math.round(v * 20) / 20; // a 5 cm
+      moverGaraje.current?.(obj.name, r5(obj.position.x), r5(obj.position.z));
+    };
+    cv.addEventListener('pointerdown', empezarArrastre, { capture: true });
+    cv.addEventListener('pointermove', moverArrastre); cv.addEventListener('pointerup', soltarArrastre); cv.addEventListener('pointercancel', soltarArrastre);
     const bucle = (ahora: number) => {
       const dt = Math.min(0.05, (ahora - ultimo) / 1000); ultimo = ahora;
       if (st.tween) {
@@ -1293,6 +1328,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); controls.dispose(); st.tunel?.liberar();
       cv.removeEventListener('pointerdown', alBajar); cv.removeEventListener('pointerup', alSoltar);
+      cv.removeEventListener('pointerdown', empezarArrastre, { capture: true });
+      cv.removeEventListener('pointermove', moverArrastre); cv.removeEventListener('pointerup', soltarArrastre); cv.removeEventListener('pointercancel', soltarArrastre);
       scene.traverse((o: any) => { o.geometry?.dispose?.(); });
       M.solar.map?.dispose();
       Object.values(M).forEach(m => m.dispose()); pm.dispose(); composer.dispose(); renderer.dispose();

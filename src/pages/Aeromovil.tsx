@@ -572,7 +572,8 @@ export default function Aeromovil() {
     // El Twizy, visible por defecto a 3 m al lado (2026-11-07, Eugenio); la clave v2 hace que también lo vea quien ya tenía el garaje guardado.
     // El Aptera, al otro lado a 3 m (2026-11-07, «ponlo en el garaje junto a los otros dos»). Quien ya tenía el
     // garaje guardado también lo ve: su lista guardada no lo trae y se queda con este valor.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 } };
+    // Los tres prototipos de VW (2026-11-07, «los tres»): el XL1 Concept frente al de producción, y los dos tándem más allá.
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, xl1concept: { z: -6 }, l1: { z: 8.6 }, unlitro: { z: -8.6 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
@@ -691,13 +692,14 @@ export default function Aeromovil() {
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <div className="min-w-0">
         <section className={cn('relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')} aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cdTunel={cdTunel} superponer={!!superponer && !soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cdTunel={cdTunel} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {superponer && !soloGaraje && (
-            <TarjetaSuperponer alineacion={superponer} alCambiar={setSuperponer} alCerrar={() => setSuperponer(null)} className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
+            <TarjetaSuperponer alineacion={superponer} alCambiar={setSuperponer} alAlternar={id => setGaraje(g => g.map(x => x.id === id ? { ...x, visible: !x.visible } : x))} alCerrar={() => setSuperponer(null)} className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
               filas={[
                 { id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', color: '#1e3a5f', largo: P.L, ancho: P.W, alto: P.H, batalla: P.B },
-                ...garajeVisor.flatMap(v => { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); return d ? [{ id: d.id, nombre: d.nombre, color: colorCss(d.id), largo: d.largo, ancho: d.ancho, alto: d.alto, batalla: d.batalla }] : []; }),
+                // Todos los coches con silueta, visibles o no: pinchando en el nombre se ponen o se quitan.
+                ...VEHICULOS_GARAJE.filter(d => d.envolvente).map(d => ({ id: d.id, nombre: d.nombre, color: colorCss(d.id), largo: d.largo, ancho: d.ancho, alto: d.alto, batalla: d.batalla, visible: !!garaje.find(g => g.id === d.id)?.visible })),
               ]} />
           )}
           {verConsumo && !tunel && !superponer && (
@@ -872,7 +874,7 @@ export default function Aeromovil() {
                 </Button>); })}
             </div>
             {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={P.L} ancho={P.W} morro={modelo.xn} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
-            <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el plano para acercarlo o apartarlo; doble clic lo gira un cuarto de vuelta. Los modelos los va haciendo un bot, uno a uno.</p>
+            <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
           </Bloque>}
 
           {dueno && !dueno.puedeDecidir && (
