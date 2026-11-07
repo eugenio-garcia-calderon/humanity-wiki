@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import {
   HandHeart, HandCoins, Building2, Newspaper, ArrowRight, Mail, Download, History, MapPin, FileText,
   Instagram, Youtube, Linkedin, Facebook, Twitter, Globe, Scale, ChevronDown, Landmark, Play,
@@ -11,7 +11,7 @@ import { EVENTO_ELEGIR_MOTIVO, enlaceCorreo } from './formularios';
 import { enumerar } from './portadaEscaparate';
 import { SolDeFondo } from './CabeceraPaginaEscaparate';
 import {
-  formasDe, enlaceDeForma, enlaceMotivo, documentosDe, pesoDe, rutaDelSitio,
+  formasDe, enlaceDeForma, enlaceMotivo, documentosDe, pesoDe, rutaDelSitio, excluidasDe, formatoDe,
   type DatosSeccion, type SeccionEscaparate, type Red, type MedioNoticia,
 } from './reglasPaginasEscaparate';
 
@@ -42,6 +42,12 @@ const dir = (u: unknown): string => (typeof u === 'string' && /^(https?:\/\/|\/(
 /** Una imagen de la propia web (o, si acaso, `https`): nunca un `data:` ni otra cosa. */
 const imagen = (u: unknown): string | null => (typeof u === 'string' && /^(\/uploads\/(?!privado\/)|https:\/\/)[^\s"<>]*$/i.test(u) ? u : null);
 const LEGALES = new Set(['aviso-legal', 'privacidad', 'cookies']);
+/** Un texto que quien edita pone en el bloque (`datos.titulo`, `datos.texto`), si lo puso. */
+const propio = (v: unknown, n: number): string | null => (typeof v === 'string' && v.trim() ? v.trim().slice(0, n) : null);
+/** EL TÍTULO DE UNA PARTE DEL KIT DE PRENSA («Logotipo», «Fotos de los proyectos»), dentro de su sección
+ *  (revisión del 2026-11-07): eran bloques sueltos y, con la sección vacía, el título se quedaba solo.
+ *  `data-subtitulo`: la página le quita el margen de arriba cuando va justo debajo de un título. */
+const SUBTITULO = 'mt-10 text-xl font-black tracking-tight text-slate-900 sm:mt-12';
 
 const ICONO_RED: Record<string, typeof Instagram> = {
   instagram: Instagram, youtube: Youtube, linkedin: Linkedin, facebook: Facebook, x: Twitter, twitter: Twitter,
@@ -81,14 +87,19 @@ const ICONO_FORMA = { voluntariado: HandHeart, donacion: HandCoins, empresa: Bui
 
 /** Una tarjeta elige su motivo en el formulario de la misma página, baja hasta él y deja allí el
  *  foco. Sin formulario en la página (o con la tecla de abrir en otra pestaña), el enlace hace lo
- *  suyo: lleva a `?motivo=…#formulario`, que el formulario también entiende. */
+ *  suyo: lleva a `…?motivo=…#formulario` de la página de colaborar, que el formulario también entiende. */
 function elegirEnFormulario(motivo: string) {
   return (e: MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const caja = document.querySelector<HTMLElement>('[data-ancla="formulario"]');
     if (!caja) return;
     e.preventDefault();
-    window.history.replaceState(window.history.state, '', `${window.location.pathname}${enlaceMotivo(motivo)}`);
+    // La dirección dice el motivo elegido (se puede compartir) y conserva lo demás: el proyecto
+    // de `?proyecto=aeromovil` sigue elegido (revisión del 2026-11-07: se perdía).
+    const u = new URL(window.location.href);
+    u.searchParams.set('motivo', motivo);
+    u.hash = 'formulario';
+    window.history.replaceState(window.history.state, '', `${u.pathname}${u.search}${u.hash}`);
     window.dispatchEvent(new CustomEvent(EVENTO_ELEGIR_MOTIVO, { detail: { motivo } }));
     const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     caja.scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' });
@@ -97,8 +108,17 @@ function elegirEnFormulario(motivo: string) {
   };
 }
 
-function Formas({ datos }: { datos: any }) {
+function Formas({ d, datos }: { d: DatosSeccion['formas'] | null | undefined; datos: any }) {
+  // Al formulario de la página de colaborar del sitio (`sitio.colabora`): desde ella, el clic se
+  // queda en la misma página (`elegirEnFormulario`); desde otra, lleva allí. Sin ella, a la misma.
+  // Sin `data-interno`: `VistaPagina` coge esos enlaces al capturar el clic, ANTES que el de la
+  // tarjeta, y navegaba a la misma página sin elegir el motivo (y perdía `?proyecto=`).
+  const colabora = rutaDelSitio(d?.colabora);
   return (
+    <>
+    {/* El título de la lista para quien navega por títulos: sin él, de la cabecera (h1) se saltaba
+        a las tarjetas (h3). */}
+    <h2 className="sr-only">Formas de colaborar</h2>
     <ul className="grid list-none gap-4 p-0 sm:grid-cols-2 lg:gap-5">
       {formasDe(datos).map(f => {
         const I = ICONO_FORMA[f.motivo];
@@ -117,7 +137,7 @@ function Formas({ datos }: { datos: any }) {
               {fuera && f.enlace && (
                 <a href={fuera} data-interno="" className={LLENO}>{f.enlace.texto} <ArrowRight className="h-4 w-4" aria-hidden /></a>
               )}
-              <a href={enlaceMotivo(f.motivo)} onClick={elegirEnFormulario(f.motivo)} className={fuera ? ENLACE : LLENO}>
+              <a href={`${colabora || ''}${enlaceMotivo(f.motivo)}`} onClick={elegirEnFormulario(f.motivo)} className={fuera ? ENLACE : LLENO}>
                 {f.accion}{!fuera && <ArrowRight className="h-4 w-4" aria-hidden />}
               </a>
             </div>
@@ -125,11 +145,14 @@ function Formas({ datos }: { datos: any }) {
         );
       })}
     </ul>
+    </>
   );
 }
 
 /** El formulario «Quiero colaborar» y, al lado, el correo y las redes. En el servidor, el hueco del
- *  formulario con su alto (el formulario es solo de navegador, ver `FormularioColabora`). */
+ *  formulario con su alto (el formulario es solo de navegador, ver `FormularioColabora`). El alto,
+ *  medido con el formulario de verdad (revisión del 2026-11-07; antes era menor y lo de debajo
+ *  saltaba al arrancar): 1.217 px a 360, 1.165 a 390, 925 a 640, 886 a 768, 906 a 1.024 y 834 a 1.280. */
 function Formulario({ d, raiz, servidor }: { d: DatosSeccion['formulario']; raiz: string | null; servidor?: boolean }) {
   // Quien llega a `…#formulario` desde otra página del sitio (sin recargar) baja hasta aquí.
   useEffect(() => {
@@ -141,7 +164,7 @@ function Formulario({ d, raiz, servidor }: { d: DatosSeccion['formulario']; raiz
     <div id="formulario" data-ancla="formulario" className="grid scroll-mt-36 gap-10 sm:scroll-mt-24 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-12">
       <div className="min-w-0">
         {servidor || !raiz
-          ? <div aria-hidden className="min-h-[46rem] rounded-3xl border border-slate-200 bg-white shadow-sm sm:min-h-[41rem]" />
+          ? <div aria-hidden className="min-h-[73rem] rounded-3xl border border-slate-200 bg-white shadow-sm sm:min-h-[57rem] lg:min-h-[56rem] xl:min-h-[52rem]" />
           : <FormularioColabora raizId={raiz} titulo={null} className="mx-0 max-w-none" />}
       </div>
       <aside aria-label="Otras formas de escribirnos" className="space-y-7 lg:pt-1">
@@ -211,6 +234,10 @@ const NOTAS_DE_ENTRADA = 8;
 
 function Notas({ d }: { d: DatosSeccion['notas'] }) {
   const [todas, setTodas] = useState(false);
+  // Al abrir las demás, el foco va a la primera nueva (revisión del 2026-11-07): el botón desaparece
+  // y el foco se quedaba en la página, así que el siguiente Tab saltaba las notas recién abiertas.
+  const primeraNueva = useRef<HTMLAnchorElement>(null);
+  useEffect(() => { if (todas) primeraNueva.current?.focus(); }, [todas]);
   if (!d.notas.length) return null;
   return (
     <div>
@@ -237,7 +264,8 @@ function Notas({ d }: { d: DatosSeccion['notas'] }) {
                 )}
               </p>
               <h3 className="mt-1.5 text-[1.05rem] font-black leading-snug tracking-tight text-slate-900 sm:text-xl">
-                <a href={dir(n.url)} data-interno="" className="decoration-2 underline-offset-4 after:absolute after:inset-0 group-hover:underline">{n.titular || n.titulo}</a>
+                <a href={dir(n.url)} data-interno="" ref={i === NOTAS_DE_ENTRADA ? primeraNueva : undefined}
+                  className="decoration-2 underline-offset-4 after:absolute after:inset-0 group-hover:underline">{n.titular || n.titulo}</a>
               </h3>
               {n.entradilla && <p className="mt-1.5 hidden text-[15px] leading-snug text-slate-600 sm:block"><span className="line-clamp-2">{n.entradilla}</span></p>}
             </div>
@@ -262,7 +290,9 @@ const medioCorto = (m: string) => m.split(' · ')[0].trim();
  *  el nombre del medio (`PortadaNoticia`), el titular y los proyectos de los que habla. En el móvil,
  *  una fila: la portada pequeña a la izquierda y el medio, la fecha y el titular al lado (con
  *  tarjetas enteras, «En los medios» medía 25.000 px de alto en un teléfono). */
-function TarjetaMedio({ n: original }: { n: MedioNoticia }) {
+function TarjetaMedio({ n: original, enfocar }: { n: MedioNoticia; enfocar?: boolean }) {
+  const enlace = useRef<HTMLAnchorElement>(null);
+  useEffect(() => { if (enfocar) enlace.current?.focus(); }, [enfocar]);
   const n = { ...original, url: dir(original.url), imagen: imagen(original.imagen), logo: imagen(original.logo) };
   const mini = n.imagen ? miniatura(n.imagen, 120) : null;
   return (
@@ -286,7 +316,7 @@ function TarjetaMedio({ n: original }: { n: MedioNoticia }) {
           <span className="truncate">{medioCorto(n.medio)}{n.fechaTexto ? ` · ${n.fechaTexto}` : ''}</span>
         </p>
         <h4 className="mt-1 line-clamp-3 text-[15px] font-bold leading-snug text-slate-900 group-hover:underline sm:mt-0">
-          <a href={n.url} target="_blank" rel="noopener noreferrer" className="after:absolute after:inset-0">
+          <a ref={enlace} href={n.url} target="_blank" rel="noopener noreferrer" className="after:absolute after:inset-0">
             {n.titulo}<span className="sr-only"> ({n.medio}; se abre en otra pestaña)</span>
           </a>
         </h4>
@@ -309,6 +339,8 @@ const MEDIOS_POR_ANO = 6;
 
 function Medios({ d }: { d: DatosSeccion['medios'] }) {
   const [abiertos, setAbiertos] = useState<string[]>([]);
+  // El año que se acaba de abrir: el foco va a su primera tarjeta nueva (como en las notas).
+  const [recien, setRecien] = useState<string | null>(null);
   if (!d.noticias.length) return null;
   // Por años, del más reciente al más antiguo; las que no dicen su fecha, al final.
   const grupos = new Map<string, MedioNoticia[]>();
@@ -348,10 +380,10 @@ function Medios({ d }: { d: DatosSeccion['medios'] }) {
                   para quien lo lee sin mirar, pero sin cargar 170 tarjetas con su portada. */}
               {items.map((n, i) => !abierto && i >= MEDIOS_POR_ANO
                 ? <li key={n.url} className="hidden"><a href={dir(n.url)}>{n.titulo} ({n.medio})</a></li>
-                : <li key={n.url}><TarjetaMedio n={n} /></li>)}
+                : <li key={n.url}><TarjetaMedio n={n} enfocar={recien === a && i === MEDIOS_POR_ANO} /></li>)}
             </ul>
             {items.length > MEDIOS_POR_ANO && !abierto && (
-              <button type="button" onClick={() => setAbiertos(x => [...x, a])} className={cn(BORDE, 'mt-5')}>
+              <button type="button" onClick={() => { setAbiertos(x => [...x, a]); setRecien(a); }} className={cn(BORDE, 'mt-5')}>
                 {a === 'sin-fecha' ? `Ver las ${items.length} sin fecha` : `Ver las ${items.length} de ${a}`} <ChevronDown className="h-4 w-4" aria-hidden />
               </button>
             )}
@@ -362,10 +394,12 @@ function Medios({ d }: { d: DatosSeccion['medios'] }) {
   );
 }
 
-function Marca({ d }: { d: DatosSeccion['marca'] }) {
+function Marca({ d, datos }: { d: DatosSeccion['marca']; datos: any }) {
   if (!d.logos.length) return null;
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div>
+    <h3 data-subtitulo="" className={SUBTITULO}>{propio(datos?.titulo, 80) || 'Logotipo'}</h3>
+    <div className="mt-4 grid gap-5 lg:grid-cols-2">
       <ul className="grid list-none gap-4 p-0">
         {d.logos.map(l => (
           <li key={l.url} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -379,9 +413,9 @@ function Marca({ d }: { d: DatosSeccion['marca'] }) {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-5 py-4">
               <p className="min-w-0 leading-snug">
-                <span className="block text-base font-black text-slate-900">Logotipo</span>
+                <span className="block text-base font-black text-slate-900">{l.formato}</span>
                 <span className="block text-[13px] font-semibold text-slate-500">
-                  {[l.formato, l.ancho && l.alto ? `${l.ancho} × ${l.alto} px` : null, pesoDe(l.bytes)].filter(Boolean).join(' · ')}
+                  {[l.ancho && l.alto ? `${l.ancho} × ${l.alto} px` : null, pesoDe(l.bytes)].filter(Boolean).join(' · ')}
                 </span>
               </p>
               <a href={dir(l.url)} download={l.descarga} className={BORDE}><Download className="h-4 w-4" aria-hidden /> Descargar<span className="sr-only"> el logotipo ({l.formato})</span></a>
@@ -400,15 +434,25 @@ function Marca({ d }: { d: DatosSeccion['marca'] }) {
         )}
       </div>
     </div>
+    </div>
   );
 }
 
-function Fotos({ d }: { d: DatosSeccion['fotos'] }) {
-  if (!d.fotos.length) return null;
+function Fotos({ d, datos }: { d: DatosSeccion['fotos']; datos: any }) {
+  // Las que quitó quien edita (`datos.excluir`). En la página ya llegan quitadas (el servidor pone otra
+  // en su lugar); esto es para la vista previa del editor, que pide la sección sin el bloque.
+  const fuera = excluidasDe(datos);
+  const fotos = d.fotos.filter(f => !fuera.has(f.url));
+  if (!fotos.length) return null;
+  const quien = d.organizacion || 'la organización';
   return (
     <div>
-      <ul className="grid list-none grid-cols-2 gap-x-4 gap-y-7 p-0 sm:grid-cols-3 lg:grid-cols-4">
-        {d.fotos.map(f => (
+      <h3 data-subtitulo="" className={SUBTITULO}>{propio(datos?.titulo, 80) || 'Fotos de los proyectos'}</h3>
+      <p className="mt-1.5 max-w-3xl text-[15px] leading-relaxed text-slate-700">
+        {propio(datos?.texto, 400) || `Una selección de fotos de los proyectos, con crédito de ${quien}.`}
+      </p>
+      <ul className="mt-5 grid list-none grid-cols-2 gap-x-4 gap-y-7 p-0 sm:grid-cols-3 lg:grid-cols-4">
+        {fotos.map(f => (
           <li key={f.url} className="min-w-0">
             <figure>
               <div className="overflow-hidden rounded-xl bg-slate-100">
@@ -417,11 +461,13 @@ function Fotos({ d }: { d: DatosSeccion['fotos'] }) {
               <figcaption className="mt-2.5 text-[13px] leading-snug">
                 <span className="block font-bold text-slate-900">{f.etiqueta}: {f.credito}</span>
                 <a href={dir(f.proyecto.url)} data-interno="" className="block text-slate-600 underline-offset-2 hover:underline">{f.proyecto.titulo}</a>
+                {/* En el enlace, solo «Descargar»; el formato y la medida, en su línea (a 390 px se partían al lado). */}
                 <a href={dir(f.url)} download={f.descarga} className="mt-1 inline-flex min-h-9 items-center gap-1.5 font-bold text-emerald-800 hover:underline">
-                  <Download className="h-3.5 w-3.5 shrink-0" aria-hidden /> Descargar
-                  <span className="font-semibold text-slate-500">{[f.url.split('.').pop()?.toUpperCase().replace('JPEG', 'JPG'), f.ancho && f.alto ? `${f.ancho} × ${f.alto}` : null].filter(Boolean).join(' · ')}</span>
-                  <span className="sr-only">: {f.alt}</span>
+                  <Download className="h-3.5 w-3.5 shrink-0" aria-hidden /> Descargar<span className="sr-only">: {f.alt}</span>
                 </a>
+                <span className="block text-[12px] font-semibold text-slate-500">
+                  {[formatoDe(f.url), f.ancho && f.alto ? `${f.ancho} × ${f.alto} px` : null].filter(Boolean).join(' · ')}
+                </span>
               </figcaption>
             </figure>
           </li>
@@ -437,12 +483,14 @@ function Fotos({ d }: { d: DatosSeccion['fotos'] }) {
 function Organizacion({ d }: { d: DatosSeccion['organizacion'] }) {
   const filas: Array<[string, ReactNode]> = [];
   if (d.nombreLegal) filas.push(['Nombre legal', d.nombreLegal]);
-  if (d.nombres.length) filas.push(['También nos conocen como', d.nombres.join(' · ')]);
+  // Cada nombre entero: a 390 px «Luz de / Humanidad» se partía por la mitad.
+  if (d.nombres.length) filas.push(['También nos conocen como', <>{d.nombres.map((n, i) => (
+    <Fragment key={n}>{i > 0 && ' '}<span className="whitespace-nowrap">{n}{i < d.nombres.length - 1 ? ' ·' : ''}</span></Fragment>
+  ))}</>]);
   if (d.fundador) filas.push(['Fundador', d.fundador.url
     ? <a href={dir(d.fundador.url)} data-interno="" className="underline decoration-slate-300 decoration-2 underline-offset-4 hover:decoration-slate-900">{d.fundador.nombre}</a>
     : d.fundador.nombre]);
   if (d.sede) filas.push(['Sede', d.sede]);
-  if (d.email) filas.push(['Contacto', <a href={enlaceCorreo(d.email)} className="underline decoration-slate-300 decoration-2 underline-offset-4 hover:decoration-slate-900"><Correo email={d.email} /></a>]);
   if (!filas.length && !d.redes.length) return null;
   return (
     <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-6 sm:p-8">
@@ -634,14 +682,14 @@ export default function SeccionEscaparateVista({ seccion, datos, d, raiz, servid
 }) {
   const cuerpo = (() => {
     switch (seccion) {
-      case 'formas': return <Formas datos={datos} />;
+      case 'formas': return <Formas d={d} datos={datos} />;
       case 'formulario': return <Formulario d={d} raiz={raiz} servidor={servidor} />;
       case 'contacto': return <Contacto d={d} />;
       case 'cifras': return <Cifras d={d} />;
       case 'notas': return <Notas d={d} />;
       case 'medios': return <Medios d={d} />;
-      case 'marca': return <Marca d={d} />;
-      case 'fotos': return <Fotos d={d} />;
+      case 'marca': return <Marca d={d} datos={datos} />;
+      case 'fotos': return <Fotos d={d} datos={datos} />;
       case 'organizacion': return <Organizacion d={d} />;
       case 'areas': return <Areas d={d} />;
       case 'equipo': return <Equipo d={d} />;

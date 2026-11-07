@@ -122,10 +122,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // grande y todo lo relacionado alrededor, en vez de la cabecera, seguir y las pestañas.
   const proyectoEscaparate = escaparate && !esRaiz && !pagina.virtual && !!pagina.fila
     && pagina.fila.tabla_id === pagina.sitio?.config?.proyectos;
-  // LAS PÁGINAS PROPIAS DEL ESCAPARATE (2026-11-07: Colabora, Sala de prensa, Quiénes somos): ni la
-  // portada, ni un proyecto, ni una persona, ni la de donar (sin cabecera). Su cabecera es la del
-  // escaparate (`CabeceraPaginaEscaparate`) y no llevan seguir, compartir, la red ni comentarios:
-  // en el escaparate no hay cuentas (Eugenio, 2026-11-06).
+  // LAS PÁGINAS PROPIAS DEL ESCAPARATE (2026-11-07: Colabora, Sala de prensa, Quiénes somos): las que
+  // llevan alguna sección automática (el bloque `escaparate`) y no son la fila visible de una tabla.
+  // Su cabecera es la del escaparate (`CabeceraPaginaEscaparate`) y no llevan seguir, compartir, la
+  // red ni comentarios: en el escaparate no hay cuentas (Eugenio, 2026-11-06). Las demás páginas del
+  // sitio (Proyectos, Personas, Mejoras y sus filas) siguen como estaban.
   const paginaEscaparate = esPaginaEscaparate(pagina);
 
   // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
@@ -281,7 +282,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
           ? <PestanasTitulos bloques={bloques} paginaId={pagina.id} lado={cfg.pestanasTitulos === 'lado'} />
           : paginaEscaparate
             // Más aire antes de cada título de sección (el `titulo1` del editor): se lee por partes, como la portada.
-            ? <div className="[&_[data-tipo=titulo1]]:mt-14 sm:[&_[data-tipo=titulo1]]:mt-20 [&>div>div:first-child>[data-tipo=titulo1]]:mt-0 [&>div>div:first-child>[data-tipo=titulo1]>*]:mt-0"><BloquesLectura bloques={bloques} paginaId={pagina.id} /></div>
+            // El subtítulo de una sección («Logotipo», «Fotos de los proyectos») justo debajo de uno de esos
+            // títulos va pegado a él; detrás de otra sección conserva su aire (`data-subtitulo`).
+            ? <div className="[&_[data-tipo=titulo1]]:mt-14 sm:[&_[data-tipo=titulo1]]:mt-20 [&>div>div:first-child>[data-tipo=titulo1]]:mt-0 [&>div>div:first-child>[data-tipo=titulo1]>*]:mt-0 [&_div:has(>[data-tipo=titulo1])+div_[data-subtitulo]]:mt-0"><BloquesLectura bloques={bloques} paginaId={pagina.id} /></div>
             : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
         {!pagina.virtual && !escaparate && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && !paginaEscaparate && <EnlazanAqui paginaId={pagina.id} />}

@@ -137,6 +137,12 @@ export const enlaceMotivo = (motivo: string, ancla = 'formulario') => `?motivo=$
 // Solo fotos con su crédito escrito en el pie («… Foto: archivo de Light Humanity») y
 // solo las de la propia organización: una foto de agencia o de un periódico está en la
 // web con su crédito, pero no es nuestra para ofrecerla a la prensa.
+//
+// Revisión del 2026-11-07: tampoco una foto en la que se ve a menores (el kit invita a
+// descargarla y publicarla: el pie de Luz del Amazonas habla de un niño y el de Divulgación
+// en Colegios, de alumnas), ni una compartida con otra entidad («Light Humanity / Solar
+// Crowd», la imagen con la que Solar Crowd cuenta su historia). La que no encaje por otra
+// razón (un cartel con un lema encima) la quita quien edita, en `datos.excluir` del bloque.
 
 /** El crédito de una imagen: lo que va tras «Foto:» o «Imagen:» al final de su pie. Una
  *  «Captura:» (de una pantalla) no es una foto: no cuenta. */
@@ -149,15 +155,24 @@ export function creditoDe(pie: unknown): string | null {
   return c && c.length <= 120 ? c : null;
 }
 
-/** ¿Es una foto de la propia organización? Solo si el crédito EMPIEZA por su nombre (o por
- *  «archivo de» su nombre): «Light Humanity», «archivo de Light Humanity», «Light Humanity /
- *  Solar Crowd». Una foto de agencia o de un socio que la cita detrás («EFE / Light Humanity»,
- *  «Tierra Grata / Light Humanity») no es nuestra para dársela a la prensa. */
+/** ¿Es una foto de la propia organización? Solo si el crédito ENTERO es su nombre (o «archivo
+ *  de» su nombre): «Light Humanity», «archivo de Light Humanity». Una foto compartida con otra
+ *  entidad o de un socio («Light Humanity / Solar Crowd», «EFE / Light Humanity») no es solo
+ *  nuestra para dársela a la prensa. */
 export function creditoPropio(credito: string, nombres: string[]): boolean {
   const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
-  const primero = plano(credito.split(/\s*[\/,(;]\s*/)[0] || '').replace(/^archivo de (la |el )?/, '');
-  return !!primero && nombres.map(n => plano(String(n || ''))).filter(n => n.length >= 6).includes(primero);
+  const todo = plano(credito).replace(/^archivo de (la |el )?/, '');
+  return !!todo && nombres.map(n => plano(String(n || ''))).filter(n => n.length >= 6).includes(todo);
 }
+
+/** ¿Habla de menores el texto de una foto (su texto alternativo o su pie)? Entonces no va en el
+ *  kit de prensa: niños, niñas, menores, alumnos, escolares, bebés, adolescentes, colegios… */
+export const mencionaMenores = (texto: unknown): boolean => typeof texto === 'string'
+  && /(^|[^\p{L}])(niñ[oa]s?|menores?|alumn[oa]s?|escolares|beb[eé]s?|adolescentes?|chic[oa]s?|colegios?|infantil(es)?)(?=$|[^\p{L}])/iu.test(texto);
+
+/** Las fotos que quien edita quitó del kit (`datos.excluir`: sus direcciones). */
+export const excluidasDe = (datos: any): Set<string> => new Set(
+  (Array.isArray(datos?.excluir) ? datos.excluir : []).filter((u: unknown): u is string => typeof u === 'string').slice(0, 200));
 
 /** Lo que va delante del crédito en su línea: «Foto», «Imagen»… */
 export function etiquetaCredito(pie: unknown): string {
@@ -196,17 +211,18 @@ export type MedioNoticia = {
   imagen: string | null; logo: string | null; video: boolean; proyectos: Array<{ titulo: string; url: string }>;
 };
 export type DatosSeccion = {
-  formas: Record<string, never>;
+  /** La página de colaborar del sitio: las tarjetas llevan a su formulario si están en otra página. */
+  formas: { colabora: string | null };
   formulario: { email: string | null; redes: Red[] };
   contacto: { email: string | null; colabora: string | null; redes: Red[] };
   cifras: { cifras: Array<{ valor: string; texto: string }> };
   notas: { notas: NotaPrensa[] };
   medios: { noticias: MedioNoticia[]; medios: number };
   marca: { logos: LogoSitio[]; marca: string; organizacion: string; email: string | null };
-  fotos: { fotos: FotoSitio[] };
+  fotos: { fotos: FotoSitio[]; organizacion: string };
   organizacion: {
     nombreLegal: string | null; nombres: string[]; fundador: { nombre: string; url: string | null } | null;
-    sede: string | null; email: string | null; redes: Red[];
+    sede: string | null; redes: Red[];
   };
   areas: { areas: AreaSitio[] };
   equipo: { personas: PersonaSitio[] };

@@ -17,6 +17,8 @@
 //      la página (el editor) los da `GET /api/sitio/escaparate/:raiz/:seccion`.
 //   3. LO QUE DICE EL `<head>`: título y descripción propios, `ContactPage`,
 //      `AboutPage` o `CollectionPage` (por las secciones que lleva) y sus migas.
+//      El idioma, el nombre del sitio y la imagen al compartir con su medida los
+//      pone `seoEscaparate.ts` («cualquier otra página del sitio»), que va antes.
 //      El sitemap las lleva por su dirección corta (`urlsEscaparate`).
 //
 // Todo es público: es lo mismo que ya enseñan la portada y las páginas de los
@@ -36,12 +38,14 @@ import { anosDe, paisesDe, numero } from '../components/sitio/portadaEscaparate'
 import { slugDe, completarSitio, NOMBRES_LEGALES, type DocLegal } from '../components/sitio/sitioWeb';
 import {
   seccionDe, seccionesDe, tipoDePagina, creditoDe, creditoPropio, etiquetaCredito, pieSinCredito, ciudadDe,
-  formatoDe, rutaDelSitio, redesDe, textoLlano, SECCIONES_ESCAPARATE,
+  formatoDe, rutaDelSitio, redesDe, textoLlano, mencionaMenores, excluidasDe, SECCIONES_ESCAPARATE,
   type SeccionEscaparate, type DatosSeccion, type FotoSitio, type LogoSitio, type NotaPrensa,
 } from '../components/sitio/reglasPaginasEscaparate';
 
 const VIDA_MS = 2 * 60_000;
-/** Cuántas fotos lleva el kit de prensa, y cuántas de cada proyecto como mucho. */
+/** Cuántas fotos lleva el kit de prensa, y cuántas de cada proyecto como mucho. Se preparan las
+ *  de reserva (`FOTOS_POR_PROYECTO` de cada uno): si quien edita quita alguna (`datos.excluir`),
+ *  entra la siguiente. */
 const FOTOS_MAX = 16;
 const FOTOS_POR_PROYECTO = 2;
 
@@ -63,14 +67,19 @@ const correoDe = (cfg: any): string | null => {
 type Base = { raiz: string; cfg: any; marca: string; lema: string | null; icono: string | null; imagen: string | null };
 
 const bases = new Map<string, { t: number; p: Promise<Base | null> }>();
-/** El escaparate de esa raíz (publicada), con lo que hace falta de su portada. Dos minutos en memoria. */
-export function baseDe(db: any, raiz: string): Promise<Base | null> {
+/** El escaparate de esa raíz (publicada), con lo que hace falta de su portada. Dos minutos en memoria.
+ *  Solo se guardan los escaparates de verdad (revisión del 2026-11-07): un id inventado en la ruta
+ *  pública de las secciones se queda en la memoria de `configEscaparate`, que tiene tope, y aquí no
+ *  deja nada (antes, cada uno ocupaba un hueco durante dos minutos). */
+export async function baseDe(db: any, raiz: string): Promise<Base | null> {
+  if (!idDePagina(raiz)) return null;
   const c = bases.get(raiz);
   if (c && Date.now() - c.t < VIDA_MS) return c.p;
+  const cfg = await configEscaparate(db, raiz);
+  if (!cfg) return null;
+  const ya = bases.get(raiz);
+  if (ya && Date.now() - ya.t < VIDA_MS) return ya.p;
   const p = (async (): Promise<Base | null> => {
-    if (!idDePagina(raiz)) return null;
-    const cfg = await configEscaparate(db, raiz);
-    if (!cfg) return null;
     const r = (await db.execute(sql`
       SELECT title, config->>'icono' AS icono, config->>'subtitulo' AS lema, config->>'imagenCompartir' AS imagen
       FROM knowledge_windows WHERE id = ${raiz} AND publico = true AND deleted_at IS NULL AND archived_at IS NULL
@@ -84,7 +93,8 @@ export function baseDe(db: any, raiz: string): Promise<Base | null> {
   })();
   if (bases.size >= 64) for (const [k, v] of bases) if (Date.now() - v.t >= VIDA_MS) bases.delete(k);
   bases.set(raiz, { t: Date.now(), p });
-  p.catch(() => bases.delete(raiz));
+  // Una raíz que no está publicada (o un fallo) no se queda guardada.
+  p.then(b => { if (!b && bases.get(raiz)?.p === p) bases.delete(raiz); }, () => { if (bases.get(raiz)?.p === p) bases.delete(raiz); });
   return p;
 }
 
@@ -96,6 +106,7 @@ type Extras = {
   personas: Array<{ pagina: string; cargo: string | null }>;
   areas: Map<string, { descripcion: string | null; imagen: string | null }>;
   titulares: Map<string, { titular: string | null; entradilla: string | null }>;
+  /** Las fotos que pueden ir en el kit, en su orden (sin nombre de descarga: se pone al elegirlas). */
   fotos: FotoSitio[];
   logos: LogoSitio[];
 };
@@ -204,12 +215,13 @@ async function construirExtras(db: any, base: Base): Promise<Extras> {
   }
 
   // LAS FOTOS DEL KIT DE PRENSA: solo fotos («Foto:» en su pie) de la propia organización (su crédito
-  // empieza por su nombre, `creditoPropio`), de la web, de buen tamaño (lado mayor ≥ 1.000 px) y sin repetir. Las
-  // primeras de cada proyecto (las que eligió quien escribió la página), apaisadas antes, y de
-  // proyecto en proyecto: primero una de cada uno, luego la segunda, hasta `FOTOS_MAX`.
+  // es su nombre, `creditoPropio`), de la web, de buen tamaño (lado mayor ≥ 1.000 px), sin repetir y
+  // sin menores (`mencionaMenores`, en su texto alternativo o en su pie). Las primeras de cada
+  // proyecto (las que eligió quien escribió la página), apaisadas antes, y de proyecto en proyecto:
+  // primero una de cada uno, luego la segunda. `datosSeccion` quita las excluidas y se queda con
+  // `FOTOS_MAX`.
   const nombres = [cfg.seo?.organizacion, cfg.titular?.nombre, ...(Array.isArray(cfg.seo?.otrosNombres) ? cfg.seo.otrosNombres : []), base.marca]
     .filter((x): x is string => typeof x === 'string' && !!x.trim());
-  const marcaSlug = slugDe(cfg.seo?.organizacion || base.marca || 'foto') || 'foto';
   const vistas = new Set<string>();
   const porProyecto: FotoSitio[][] = [];
   for (const p of m.proyectos) {
@@ -220,6 +232,8 @@ async function construirExtras(db: any, base: Base): Promise<Extras> {
       const credito = creditoDe(b.pie);
       // Fotos de verdad: ni una «Imagen:» (un 3D, un fotograma, un cartel de campaña) ni una «Captura:».
       if (!credito || !creditoPropio(credito, nombres) || !/^Foto/.test(etiquetaCredito(b.pie))) continue;
+      // Una foto con menores no se ofrece para publicar (revisión del 2026-11-07).
+      if (mencionaMenores(`${b.alt || ''} ${b.pie || ''}`)) continue;
       const [w, h] = Array.isArray(b.natural) ? b.natural.map(Number) : [0, 0];
       if (!w || !h || Math.max(w, h) < 1000 || Math.min(w, h) < 600) continue;
       vistas.add(url);
@@ -234,18 +248,25 @@ async function construirExtras(db: any, base: Base): Promise<Extras> {
     if (suyas.length) porProyecto.push(suyas.slice(0, FOTOS_POR_PROYECTO));
   }
   const fotos: FotoSitio[] = [];
-  for (let vuelta = 0; vuelta < FOTOS_POR_PROYECTO && fotos.length < FOTOS_MAX; vuelta++) {
-    for (const lista of porProyecto) if (lista[vuelta] && fotos.length < FOTOS_MAX) fotos.push(lista[vuelta]);
-  }
-  const cuenta = new Map<string, number>();
-  for (const f of fotos) {
-    const s = slugDe(f.proyecto.titulo) || 'proyecto';
-    const n = (cuenta.get(s) || 0) + 1;
-    cuenta.set(s, n);
-    f.descarga = `${marcaSlug}-${s}-${n}.${formatoDe(f.url).toLowerCase() || 'jpg'}`;
+  for (let vuelta = 0; vuelta < FOTOS_POR_PROYECTO; vuelta++) {
+    for (const lista of porProyecto) if (lista[vuelta]) fotos.push(lista[vuelta]);
   }
 
   return { personas, areas, titulares, fotos, logos: await logosDe(base) };
+}
+
+/** Las fotos del kit: las candidatas sin las que quitó quien edita, hasta `FOTOS_MAX`, cada una con
+ *  el nombre con el que se descarga («light-humanity-luz-del-amazonas-1.jpg»). Copias: las de la
+ *  memoria no se tocan. */
+export function fotosDelKit(candidatas: FotoSitio[], fuera: Set<string>, marca: string): FotoSitio[] {
+  const marcaSlug = slugDe(marca || 'foto') || 'foto';
+  const cuenta = new Map<string, number>();
+  return candidatas.filter(f => !fuera.has(f.url)).slice(0, FOTOS_MAX).map(f => {
+    const s = slugDe(f.proyecto.titulo) || 'proyecto';
+    const n = (cuenta.get(s) || 0) + 1;
+    cuenta.set(s, n);
+    return { ...f, descarga: `${marcaSlug}-${s}-${n}.${formatoDe(f.url).toLowerCase() || 'jpg'}` };
+  });
 }
 
 // ── LOS DATOS DE CADA SECCIÓN ────────────────────────────────────────────────
@@ -261,13 +282,17 @@ async function rutaColabora(db: any, cfg: any): Promise<string | null> {
   return r?.slug && /^[a-z0-9-]+$/.test(r.slug) ? `/${r.slug}` : null;
 }
 
-export async function datosSeccion<S extends SeccionEscaparate>(db: any, base: Base, seccion: S): Promise<DatosSeccion[S]> {
+/** Los datos de una sección. `bloque` es el `datos` del bloque que la pinta (las fotos que quitó
+ *  quien edita, `excluir`); sin él (el editor, la ruta pública), los de una sección sin cambios. */
+export async function datosSeccion<S extends SeccionEscaparate>(db: any, base: Base, seccion: S, bloque?: any): Promise<DatosSeccion[S]> {
   const cfg = base.cfg;
   const email = correoDe(cfg);
   const redes = redesDe(cfg.pie);
+  const organizacion = linea(cfg.seo?.organizacion, 120) || base.marca;
   const out = await (async (): Promise<any> => {
     switch (seccion) {
-      case 'formas': return {};
+      // Las tarjetas llevan al formulario de la página de colaborar (si el bloque está en otra página).
+      case 'formas': return { colabora: await rutaColabora(db, cfg) };
       case 'formulario': return { email, redes };
       case 'contacto': return { email, colabora: await rutaColabora(db, cfg), redes };
       case 'llamada': return { colabora: await rutaColabora(db, cfg) };
@@ -303,21 +328,25 @@ export async function datosSeccion<S extends SeccionEscaparate>(db: any, base: B
       }
       case 'marca': {
         const x = await extrasDe(db, base);
-        return { logos: x.logos, marca: base.marca, organizacion: linea(cfg.seo?.organizacion, 120) || base.marca, email };
+        return { logos: x.logos, marca: base.marca, organizacion, email };
       }
-      case 'fotos': return { fotos: (await extrasDe(db, base)).fotos };
+      case 'fotos': return { fotos: fotosDelKit((await extrasDe(db, base)).fotos, excluidasDe(bloque), organizacion), organizacion };
       case 'organizacion': {
         const m = await modeloEscaparate(db, base.raiz, cfg);
         const titular = cfg.titular || {}, seo = cfg.seo || {};
         const legal = linea(titular.nombre, 160);
-        const nombres = [seo.organizacion, ...(Array.isArray(seo.otrosNombres) ? seo.otrosNombres : [])]
-          .map(n => linea(n, 120)).filter((n): n is string => !!n && n !== legal && n !== base.lema && n !== base.marca)
-          .filter((n, i, a) => a.indexOf(n) === i);
+        // «También nos conocen como»: solo los otros nombres, sin el principal (el que firma toda la
+        // página), el legal (va en su fila), el de la web ni su lema (revisión del 2026-11-07).
+        const nombres = (Array.isArray(seo.otrosNombres) ? seo.otrosNombres : [])
+          .map((n: unknown) => linea(n, 120))
+          .filter((n: string | null): n is string => !!n && n !== legal && n !== base.lema && n !== base.marca && n !== linea(seo.organizacion, 120))
+          .filter((n: string, i: number, a: string[]) => a.indexOf(n) === i);
         const fundador = linea(seo.fundador, 160);
+        // El correo no va aquí: está en «Transparencia» y en el pie de todas las páginas.
         return {
           nombreLegal: legal, nombres,
           fundador: fundador ? { nombre: fundador, url: m.personas.find(p => p.titulo === fundador)?.url || null } : null,
-          sede: ciudadDe(titular.domicilio), email, redes,
+          sede: ciudadDe(titular.domicilio), redes,
         };
       }
       case 'areas': {
@@ -404,11 +433,14 @@ export function registrarPaginasEscaparate(app: Express, db: any) {
     const conSitio = { ...base, cfg };
     const pendientes: Promise<void>[] = [];
     cadaSeccion(pagina.config?.bloques, (b, s) => {
-      pendientes.push(datosSeccion(db, conSitio, s).then(d => { if (d) b.datos = { ...(b.datos || {}), precargado: d }; }));
+      pendientes.push(datosSeccion(db, conSitio, s, b.datos).then(d => { if (d) b.datos = { ...(b.datos || {}), precargado: d }; }));
     });
     await Promise.all(pendientes);
 
     // 2. El `<head>`: solo en el HTML del servidor, y nunca el de la portada (es de `seoEscaparate.ts`).
+    //    El idioma, el nombre del sitio, `twitter:site` y la imagen al compartir (con su medida y su
+    //    texto alternativo) ya los ha puesto `seoEscaparate.ts` (rama «cualquier otra página del
+    //    sitio»): aquí no se repiten (cada `meta` se escribe tal cual, y saldrían dos veces).
     if (req || pagina.id === sitio.raizId) return;
     const marca = base.marca || 'Inicio';
     const titulo = String(pagina.titulo || '').trim() || 'Sin título';
@@ -431,7 +463,8 @@ export function registrarPaginasEscaparate(app: Express, db: any) {
       isPartOf: { '@type': 'WebSite', '@id': '/#web', name: marca, url: '{{inicio}}' },
     };
     if (tipo === 'AboutPage') {
-      // Quiénes somos: la organización entera, con su equipo.
+      // Quiénes somos: la organización entera. Sin `member` (revisión del 2026-11-07): la tabla de
+      // personas es quien participa en los proyectos, no la lista de socios de la asociación.
       const m = await modeloEscaparate(db, base.raiz, cfg);
       const fundador = linea(seo.fundador, 160);
       pag.mainEntity = {
@@ -443,7 +476,6 @@ export function registrarPaginasEscaparate(app: Express, db: any) {
         ...(titular.domicilio ? { address: { '@type': 'PostalAddress', streetAddress: titular.domicilio, addressCountry: 'ES' } } : {}),
         ...(fundador ? { founder: { '@type': 'Person', name: fundador, ...(m.personas.find(p => p.titulo === fundador) ? { url: m.personas.find(p => p.titulo === fundador)!.url } : {}) } } : {}),
         ...(perfiles.length ? { sameAs: perfiles } : {}),
-        ...(m.personas.length ? { member: m.personas.map(p => ({ '@type': 'Person', name: p.titulo, url: p.url })) } : {}),
       };
     } else if (tipo === 'ContactPage') {
       pag.mainEntity = { ...org, ...(email ? { email, contactPoint: { '@type': 'ContactPoint', contactType: 'general', email, availableLanguage: 'es' } } : {}) };
@@ -458,20 +490,14 @@ export function registrarPaginasEscaparate(app: Express, db: any) {
         };
       }
     } else pag.about = org;
+    // Los vídeos de la página (`VideoObject`, de `seoEscaparate.ts`) se quedan; lo demás es esto.
+    const previos: any[] = Array.isArray(meta.jsonLd) ? meta.jsonLd : meta.jsonLd ? [meta.jsonLd] : [];
     meta.jsonLd = [pag, {
       '@context': 'https://schema.org', '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: marca, item: '{{inicio}}' },
         { '@type': 'ListItem', position: 2, name: titulo, item: '{{canonica}}' },
       ],
-    }];
-    // Las de siempre (las verificaciones de Search Console y Bing, `seoSitio.ts`) se quedan.
-    const conImagen = !!(pagina.config?.imagenCompartir || pagina.config?.portada);
-    meta.metas = [
-      ...(meta.metas || []),
-      { property: 'og:locale', content: 'es_ES' },
-      { property: 'og:site_name', content: marca },
-      ...(conImagen ? [{ property: 'og:image:alt', content: `${titulo} · ${marca}` }, { name: 'twitter:image:alt', content: `${titulo} · ${marca}` }] : []),
-    ];
+    }, ...previos.filter(j => j?.['@type'] === 'VideoObject')];
   });
 }

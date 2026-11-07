@@ -51,8 +51,10 @@ export default function Editor(props: PropsEditor) {
           )}
         </div>
       )}
-      {/* Cómo se verá: sin poder pulsar nada (sus enlaces son los del sitio publicado). */}
-      <div className="pointer-events-none mt-4 select-none">
+      {/* Cómo se verá, sin poder usarla: `inert` la saca también del teclado y de los lectores de
+          pantalla (revisión del 2026-11-07: con el tabulador se entraba en sus enlaces y en el
+          formulario de verdad, que se podía enviar desde el editor). */}
+      <div inert className="mt-4 select-none [&_[data-subtitulo]]:mt-0">
         <Lectura {...props} />
       </div>
     </div>
