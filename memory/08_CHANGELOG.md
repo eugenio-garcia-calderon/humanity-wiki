@@ -10403,3 +10403,19 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - `explicaciones/` (tipos, registro y dos ficheros que escriben dos bots: forma y mecánica). En el lateral, el nombre de cada parámetro es ahora un botón que abre debajo el cuadro: qué es, por qué importa, ventajas y desventajas de más alto y de más bajo, referencias de coches reales y comprobaciones que se resienten. Hasta que entre el contenido, el cuadro lo dice. Deslizadores con algo más de aire (texto 13 px, barra normal).
   - Tipos de departamento ampliados: `objetivos`, `opcionesCompra`, `datosDeOferta`, `preguntasBusqueda`. En «Motor»: los objetivos de compra de Eugenio para fabricar en serie (20–25 kW continuos, 30–35 kW pico, motor 12–20 kg, inversor 2–4 kg, 700–1.200 €, OEM repetible), las tres opciones que encontró (Vector EV, EV Evolution, Mobimax) más el kit ME1616 + Sevcon del bot, la lista de datos a pedir en cada oferta y sus tres preguntas abiertas (tensión, producción, precio máximo).
   - Panel: pestaña «Piezas» (las fichas de componentes del departamento con unidades, peso y coste) y «Compras»: objetivos en tarjetas, tabla de opciones con cada celda en verde/ámbar/gris según cumpla, barra de cada valor sobre la franja objetivo, orden por columna, casilla «en juego», preguntas con radio y botón «Pedir búsqueda a Claude», que deja en Tareas (área del departamento) un encargo completo —objetivos, opciones en juego, respuestas, qué pedir, dónde añadir lo nuevo— para la sesión de Claude Code; el texto se puede copiar para pegarlo en un chat.
+- Escaparate: «quiero colaborar» y boletín, con su panel (PR #897, 2026-11-07, Eugenio: «con alta calidad, no quiero nada cutre»).
+  - Servidor `formulariosSitio.ts` y migración 0175 (`sitio_mensajes`, `sitio_suscriptores`). Son tablas propias y no bases de datos de la plataforma, porque `GET /api/data/:entity/:id/history` responde sin sesión con la copia de cualquier fila editada. Rutas públicas `POST /api/sitio/:raiz/mensaje`, `/boletin`, `/boletin/confirmar` y `/boletin/baja` (baja en un clic), solo en raíces escaparate publicadas.
+  - Protección contra robots: campo trampa, tiempo mínimo, comprobación de `Origin`, límites por sitio y por IP. La IP no se guarda: es una huella con sal en memoria. `ipVisitante` solo se fía de `CF-Connecting-IP` cuando la conexión llega desde los rangos de Cloudflare.
+  - RGPD:
+    - La casilla sale sin marcar.
+    - Se guardan el texto aceptado y la fecha.
+    - El boletín pide doble confirmación: el testigo va detrás de `#` y solo se guarda su huella SHA-256.
+    - Las altas sin confirmar se borran a los 30 días del correo.
+    - Hay «Borrar sus datos».
+    - La plantilla de la política de privacidad del escaparate (`sitioWeb.ts`) se alimenta de `config.sitio`.
+  - Sin proveedor de correo (producción hoy) todo se guarda; las altas quedan «pendientes de confirmar» y ninguna pantalla dice que haya salido un correo.
+  - Pantallas:
+    - `AltaBoletin`, una franja al principio del pie, que funciona también sin JavaScript.
+    - `FormularioColabora`, reutilizable, con `?proyecto=` y `?motivo=`.
+    - El panel `/paginas/:id/formularios`, con la tarjeta en «Compartir», filtros y CSV protegido contra fórmulas.
+  - De paso, `completarSitio` ya no borra `escaparate`, `seo` ni `proyectos` al editar el pie.
