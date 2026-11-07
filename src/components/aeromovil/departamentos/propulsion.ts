@@ -261,5 +261,58 @@ export const DEPARTAMENTO: Departamento = {
     { titulo: 'Laboratorio de motores eléctricos de Applus IDIADA', url: 'https://www.applusidiada.com/dam/PDFServices/IDIADA/GLOBAL/laboratorio-de-motores-eléctricos-_es.pdf', nota: 'Medida de potencia nominal y de pico con certificación R85, mapas de eficiencia, ensayos térmicos y de vibración.' },
     { titulo: 'INSIA · laboratorios (UPM)', url: 'https://insia-upm.es/en/?p=217', nota: 'Campus Sur UPM, Madrid; bancos de motores, instrumentación y pista.' },
   ],
-  revisado: { fecha: '2026-11-06', por: 'bot de producto y compras (búsquedas web del 2026-11-06; precios sin IVA salvo que se diga)' },
+  // ── Búsqueda de grupo motopropulsor OEM para fabricar en serie (2026-11-07,
+  // Eugenio: «ya no buscamos una pieza para una transformación particular, sino
+  // un grupo motopropulsor nuevo que pueda comprarse repetidamente… fabricantes
+  // OEM de China y Europa que suministren motor, inversor, documentación y
+  // precios por volumen»). Los objetivos son de compra, no prestaciones
+  // verificadas de nadie; las opciones son las tres que Eugenio encontró, tal
+  // cual las publican sus webs (nov. 2026).
+  objetivos: [
+    { campo: 'potCont', nombre: 'Potencia continua', min: 20, max: 25, unidad: 'kW', nota: 'La ley L7e limita la nominal continua a 15 kW: por encima hay que homologar en otra categoría o recortar por software (lo decide Homologación).' },
+    { campo: 'potPico', nombre: 'Potencia máxima', min: 30, max: 35, unidad: 'kW' },
+    { campo: 'pesoMotor', nombre: 'Peso del motor', min: 12, max: 20, unidad: 'kg' },
+    { campo: 'pesoInversor', nombre: 'Peso del inversor', min: 2, max: 4, unidad: 'kg' },
+    { campo: 'pesoConjunto', nombre: 'Peso del conjunto', min: 14, max: 24, unidad: 'kg' },
+    { campo: 'precio', nombre: 'Precio objetivo', min: 700, max: 1200, unidad: '€', nota: 'Motor + inversor, nuevo, por unidad en serie corta.' },
+    { campo: 'tension', nombre: 'Tensión', texto: '72–115 V', nota: 'Pregunta abierta: ¿se mantiene la del Twizy (58 V) o se cambia la batería?' },
+    { campo: 'estado', nombre: 'Estado', texto: 'nuevo' },
+    { campo: 'suministro', nombre: 'Suministro', texto: 'OEM, repetible', nota: 'Un proveedor estable, no un motor barato que luego no se pueda volver a conseguir.' },
+  ],
+  opcionesCompra: [
+    { nombre: 'Sistema integrado PMSM 30 kW (motor + inversor + reductor)', fabricante: 'Vector EV', pais: 'China', web: 'https://vector-ev.com/pages/products', tipo: 'OEM', estado: 'candidato',
+      valores: { potCont: 15, potPico: 30, pesoMotor: null, pesoInversor: null, pesoConjunto: null, tension: '115 V', estado: 'nuevo', suministro: 'OEM' }, precio: undefined, precioNota: 'no publica precio ni peso: pedir cotización',
+      fuente: 'Catálogo técnico de Vector EV (vector-ev.com/pages/products), leído por Eugenio el 2026-11-07', verificado: false,
+      nota: 'Versiones de 5, 10 y 30 kW; refrigeración por aire o líquido; IP67; eficiencia máxima declarada 95 %; configuración para fabricantes (OEM). La de 30 kW declara hasta 400 N·m en rueda; Ø 20 cm × 25,6 cm, refrigeración natural. Se queda corta en continua (15 kW) pero las dimensiones encajan.' },
+    { nombre: 'EV Motor AC 15/30 kW 96 V con inversor', fabricante: 'EV Evolution', pais: 'UE', web: 'https://ev-evolution.eu/product/ev-motor-ac-15-27kw-96v/', tipo: 'kit', estado: 'por pedir oferta',
+      valores: { potCont: 15, potPico: 30, pesoMotor: 26, pesoInversor: null, pesoConjunto: null, tension: '96/108 V', estado: 'nuevo (bajo pedido)', suministro: 'kit europeo' }, precio: 3000, precioNota: 'precio público con inversor incluido',
+      fuente: 'ev-evolution.eu, ficha del producto, 2026-11-07', verificado: false,
+      nota: 'Listo para integrar, pero pesa 26 kg (objetivo 12–20) y cuesta 3.000 € (objetivo 700–1.200).' },
+    { nombre: 'Grupo de tracción de la plataforma de moto 25 kW (programa OEM)', fabricante: 'Mobimax', pais: 'China', web: 'https://www.mobimaxbike.com', tipo: 'OEM', estado: 'por pedir oferta',
+      valores: { potCont: null, potPico: 25, pesoMotor: null, pesoInversor: null, pesoConjunto: null, tension: '84 V', estado: 'nuevo', suministro: 'OEM (por confirmar)' }, precio: undefined, precioNota: 'no publican peso ni precio del motor por separado',
+      fuente: 'Ficha de la moto E Ride Pro SR 72 V 25 kW (highvoltagepev.com) y web de Mobimax, 2026-11-07', verificado: false,
+      nota: 'Lo interesante no es la moto (88 kg completa, batería de 84 V), sino preguntar por el suministro OEM del grupo de tracción.' },
+    { nombre: 'Motenergy ME1616 + Sevcon Gen4 G8055 (kit emparejado)', fabricante: 'Motenergy / BorgWarner', pais: 'EE. UU. / RU', web: 'https://www.thunderstruck-ev.com', tipo: 'kit', estado: 'candidato',
+      valores: { potCont: 20, potPico: 32, pesoMotor: 22, pesoInversor: 3.5, pesoConjunto: 25.5, tension: '96 V', estado: 'nuevo', suministro: 'distribuidor, no OEM' }, precio: 2200, precioNota: '≈ 1.170 $ motor + 1.200 $ inversor (Thunderstruck, nov. 2026), sin reductora',
+      fuente: 'Fichas de Electric Motorsport / Thunderstruck EV (ver referencias de arriba)', verificado: true,
+      nota: 'La recomendación del bot para el prototipo 1: documentado y con curvas públicas, pero pesa 22–25 kg y no es un suministro OEM en volumen.' },
+  ],
+  datosDeOferta: [
+    'Precio para 1, 10, 50 y 100 unidades (motor, inversor y reductor por separado y en conjunto)',
+    'Peso real del motor y del inversor, por separado',
+    'Potencia continua y de pico, con la duración de la de pico y la temperatura ambiente del ensayo',
+    'Curvas de par y potencia frente a régimen, y mapa de eficiencia',
+    'Tensión de trabajo (mínima, nominal, máxima) y corriente máxima de batería',
+    'Refrigeración (aire o líquido) y caudal/temperatura si es líquido',
+    'Homologaciones y documentación para automoción (R85 potencia, R10 compatibilidad electromagnética, ISO 26262 si la hay)',
+    'Garantía, trazabilidad (número de serie), disponibilidad de recambios y años de suministro comprometidos',
+    'Plazo de entrega, mínimo de pedido, condiciones de pago e Incoterm',
+    'Protocolo de comunicación del inversor (CAN) y documentación para integrarlo con el BMS y el pedal',
+  ],
+  preguntasBusqueda: [
+    { pregunta: '¿Aceptarías cambiar la tensión de la batería?', opciones: ['Quiero mantener la tensión original del Twizy', 'Puedo cambiar batería y tensión', 'Preferiblemente 72–96 V'] },
+    { pregunta: '¿Qué producción estimas?', opciones: ['1–5 unidades al año', '10–20 unidades al año', '50–100 unidades al año', 'Más de 100 unidades al año'] },
+    { pregunta: 'Precio máximo por motor e inversor', opciones: ['Hasta 1.200 €', 'Hasta 1.500 €', 'Hasta 2.000 €'] },
+  ],
+  revisado: { fecha: '2026-11-07', por: 'bot de producto y compras (2026-11-06) + objetivos y opciones OEM de Eugenio (2026-11-07)' },
 };

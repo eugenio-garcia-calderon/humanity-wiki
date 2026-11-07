@@ -54,6 +54,20 @@ export interface Mensaje {
 }
 export interface Referencia { titulo: string; url: string; nota: string }
 
+/** Un objetivo de compra: qué buscamos en una pieza y entre qué valores («Potencia continua: 20–25 kW»). */
+export interface Objetivo { campo: string; nombre: string; min?: number; max?: number; unidad?: string; texto?: string; nota?: string }
+/** Una opción de compra real (un producto o un proveedor OEM), con sus valores en los mismos `campo` que los objetivos para poder compararlos. */
+export interface OpcionCompra {
+  nombre: string; fabricante: string; pais: string; web?: string;
+  tipo: 'OEM' | 'kit' | 'recambio' | 'desguace' | 'a medida';
+  valores: Record<string, number | string | null>;   // por `campo` de los objetivos; null = no publicado
+  precio?: number; precioNota?: string;               // € por unidad, y en qué condiciones
+  estado: 'por pedir oferta' | 'oferta pedida' | 'con oferta' | 'descartado' | 'candidato';
+  fuente: string; verificado: boolean; nota?: string;
+}
+/** Una pregunta que la búsqueda de proveedores necesita que responda Eugenio antes de seguir. */
+export interface PreguntaBusqueda { pregunta: string; opciones: string[]; respuesta?: string }
+
 export interface Departamento {
   id: IdDepartamento;
   nombre: string;                  // «Carrocería y aerodinámica»
@@ -69,6 +83,12 @@ export interface Departamento {
   partners: Partner[];
   mensajes: Mensaje[];
   referencias: Referencia[];
+  /** Objetivos de compra, opciones comparadas y preguntas abiertas de la búsqueda de proveedores (2026-11-07, Eugenio, para el motor primero). */
+  objetivos?: Objetivo[];
+  opcionesCompra?: OpcionCompra[];
+  preguntasBusqueda?: PreguntaBusqueda[];
+  /** Qué pedir en cada oferta (precio por 1/10/50/100, pesos, curvas…). */
+  datosDeOferta?: string[];
   /** Fecha y autor de la última revisión del contenido, para saber cuánto fiarse. */
   revisado: { fecha: string; por: string };
 }

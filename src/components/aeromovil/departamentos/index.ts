@@ -11,7 +11,7 @@ import { DEPARTAMENTO as luces } from './luces';
 import { DEPARTAMENTO as fabricacion } from './fabricacion';
 import { DEPARTAMENTO as homologacion } from './homologacion';
 
-export type { Departamento, IdDepartamento, Tarea, Decision, Partner, Mensaje, Referencia, Opcion } from './tipos';
+export type { Departamento, IdDepartamento, Tarea, Decision, Partner, Mensaje, Referencia, Opcion, Objetivo, OpcionCompra, PreguntaBusqueda } from './tipos';
 /** Los departamentos, en el orden de las pestañas del lateral. */
 export const DEPARTAMENTOS: Departamento[] = [proyecto, carroceria, chasis, rodaje, propulsion, energia, interior, accesos, luces, fabricacion, homologacion];
 export const departamento = (id: IdDepartamento) => DEPARTAMENTOS.find(d => d.id === id)!;
